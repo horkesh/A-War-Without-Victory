@@ -79,6 +79,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'army-hq-aftermath-record'; turn: number }
   | { kind: 'counter-offer'; counterOfferId: string }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
+  | { kind: 'decision-room'; lens: PresidentialDecisionRoomLensId; cardId?: string | null }
   | { kind: 'enclave-dashboard' }
   | { kind: 'inbox' }
   | { kind: 'chronicle' }
@@ -95,6 +96,7 @@ export interface PresidentialDecisionRoomCard {
   actionLabel: string;
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
   /** Optional War-Direction directive this card can ISSUE inline (additive). */
   directive?: PresidentialDecisionRoomDirective;
   sortKey: number;
@@ -401,11 +403,18 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
 }
 
 function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
-  const requests = state.pendingParamilitaryRequests ?? [];
+  const playerFaction = state.player_faction ?? null;
+  if (!playerFaction) return;
+
+  const requests = (state.pendingParamilitaryRequests ?? [])
+    .filter((request) => request.faction === playerFaction);
   if (requests.length === 0) return;
 
   const surface = getDecisionSurface('paramilitary_request');
   const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
+  const deploymentRequestEvidenceKey = requests.length === 1
+    ? 'decisionRoom.card.paramilitary.evidence.deploymentRequest'
+    : 'decisionRoom.card.paramilitary.evidence.deploymentRequests';
   cards.push({
     id: 'paramilitary:pending',
     category: 'decision',
@@ -416,7 +425,7 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     sourceLabel: t('decisionRoom.card.paramilitary.sourceLabel'),
     actionLabel: surface.actionLabel,
     evidence: [
-      t('decisionRoom.card.paramilitary.evidence.deploymentRequests', { count: requests.length }),
+      t(deploymentRequestEvidenceKey, { count: requests.length }),
       t('decisionRoom.card.paramilitary.evidence.estimatedStrength', { strength: totalStrength }),
       t('decisionRoom.card.paramilitary.evidence.warCrimesRisk'),
     ],
@@ -561,7 +570,12 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       sourceLabel: t('decisionRoom.card.opportunity.sourceLabel'),
       actionLabel: t('decisionRoom.action.reviewDossier'),
       evidence,
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'opportunity',
+        cardId: `opportunity:${opportunity.proposal_id}`,
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
       ...(directive ? { directive } : {}),
       urgencySort: expires,
       sourceSort: opportunity.proposal_id,
@@ -769,7 +783,7 @@ function addProposalReviewDirectiveCards(state: LoadedGameState, cards: Candidat
 
   const reviews = [...(state.pendingProposalReviews ?? [])].sort((a, b) =>
     strictCompare(a.id, b.id),
-  );
+  ).filter((review) => review.faction === playerFaction);
 
   for (const review of reviews) {
     cards.push({
@@ -1292,6 +1306,7 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
       actionLabel: card.actionLabel,
       evidence: card.evidence,
       navigationTarget: card.navigationTarget,
+      ...(card.sourceHandoffTarget ? { sourceHandoffTarget: card.sourceHandoffTarget } : {}),
       ...(card.directive ? { directive: card.directive } : {}),
       sortKey: index,
     }));
@@ -1417,6 +1432,13 @@ function describeSourceHandoffTarget(
       actionLabel: t('decisionRoom.action.reviewCounter'),
     };
   }
+  if (target.kind === 'decision-room') {
+    return {
+      id: `decision-room-${target.lens}`,
+      label: t('decisionRoom.title'),
+      actionLabel: t('decisionRoom.action.review'),
+    };
+  }
   if (target.kind === 'inbox') {
     return {
       id: 'presidential-inbox',
@@ -1447,7 +1469,8 @@ export function buildPresidentialDecisionRoomSourceHandoffs(
   const groups = new Map<string, SourceHandoffAccumulator>();
 
   for (const card of cards) {
-    const descriptor = describeSourceHandoffTarget(card.navigationTarget);
+    const handoffTarget = card.sourceHandoffTarget ?? card.navigationTarget;
+    const descriptor = describeSourceHandoffTarget(handoffTarget);
     if (!descriptor) continue;
 
     const existing = groups.get(descriptor.id);
@@ -1458,7 +1481,7 @@ export function buildPresidentialDecisionRoomSourceHandoffs(
 
     groups.set(descriptor.id, {
       ...descriptor,
-      navigationTarget: card.navigationTarget,
+      navigationTarget: handoffTarget,
       topSortKey: card.sortKey,
       cards: [card],
     });

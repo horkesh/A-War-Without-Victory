@@ -245,7 +245,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(view.cards.find((card) => card.id === 'opportunity:opp_alpha')).toMatchObject({
       sourceOwner: 'Operation opportunity dossiers',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'decision-room', lens: 'opportunity', cardId: 'opportunity:opp_alpha' },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     });
     expect(view.cards.find((card) => card.id === 'turn:24:hard-turn')).toMatchObject({
       sourceOwner: 'Turn Aftermath records',
@@ -382,7 +383,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(byId.opportunity).toMatchObject({
       count: 2,
       topCardId: 'opportunity:opp_alpha',
-      navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      navigationTarget: { kind: 'decision-room', lens: 'opportunity', cardId: 'opportunity:opp_alpha' },
     });
     expect(byId.turn).toMatchObject({
       topCardId: 'turn:24:hard-turn',
@@ -609,7 +610,7 @@ describe('buildPresidentialDecisionRoomView', () => {
         },
         playerDecisionSummary: makePlayerDecisionSummary(),
         pendingParamilitaryRequests: [
-          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+          { faction: 'RBiH', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
         ],
         operationalSitrep: makeSitrep(),
         latestTurnSummary: makeSummary({
@@ -632,6 +633,43 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni SITREP');
     expect(cardsById['chronicle:review-memory'].title).toBe('Pamćenje Hronike ažurirano');
     expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
+  });
+
+  it('filters pending paramilitary requests to the player faction', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        pendingParamilitaryRequests: [
+          { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+          { faction: 'RBiH', strength: 150, target_osid: 'op:sarajevo:stari_grad', estimated_civilian_risk: 12, mode: 'rear_pocket' },
+        ],
+      }),
+    });
+
+    const card = view.cards.find((entry) => entry.id === 'paramilitary:pending');
+    expect(card).toBeDefined();
+    expect(card?.evidence).toContain('1 deployment request');
+    expect(card?.evidence).toContain('estimated strength 150');
+    expect(card?.evidence.join('\n')).not.toContain('600');
+  });
+
+  it('opens operation opportunity cards on the Decision Room opportunity lens', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        operationOpportunityProposals: [makeOpportunity({ proposal_id: 'opp_alpha' })],
+      }),
+    });
+
+    const card = view.cards.find((entry) => entry.id === 'opportunity:opp_alpha');
+    expect(card).toMatchObject({
+      category: 'opportunity',
+      actionLabel: 'Review Dossier',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'opportunity',
+        cardId: 'opportunity:opp_alpha',
+      },
+    });
   });
 
   it('builds the full presidential product loop as handoffs to existing owners', () => {

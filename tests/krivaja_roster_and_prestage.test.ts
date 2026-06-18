@@ -343,6 +343,18 @@ describe('LANE-2026-05-02-KRIVAJA T6: checkTriggeredOperations invokes prestage'
             await import('../src/sim/combat/triggered_operations.js');
 
         const state = buildSyntheticState(170);
+        state.military.fired_event_ids = [
+            ...(state.military.fired_event_ids ?? []),
+            'srebrenica_falls_1995',
+        ];
+        state.military.event_fire_counts = {
+            ...(state.military.event_fire_counts ?? {}),
+            srebrenica_falls_1995: 1,
+        };
+        state.military.event_last_fired_turn = {
+            ...(state.military.event_last_fired_turn ?? {}),
+            srebrenica_falls_1995: 170,
+        };
 
         // Ensure all five Krivaja-95 objectives are RBiH-controlled so the
         // hasEnemyObjective check inside checkTriggeredOperations passes.

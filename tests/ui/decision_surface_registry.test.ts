@@ -69,6 +69,17 @@ describe('decision surface registry', () => {
     });
   });
 
+  it('routes operation opportunity action to the presidential Decision Room while keeping Army HQ as the source handoff', () => {
+    expect(getDecisionSurface('operation_opportunity')).toMatchObject({
+      ownerShell: 'desk',
+      resolverSurface: 'operation_opportunity_dossier',
+      opensAs: 'shell_panel',
+      inboxAction: 'decision_room',
+      actionLabel: 'Open Decision Room',
+      sourceLabel: 'Army HQ',
+    });
+  });
+
   it('exposes no raw resolver labels or implementation ids in player copy', () => {
     for (const surface of Object.values(DECISION_SURFACE_REGISTRY)) {
       expect(surface.playerLabel).not.toMatch(/_/);

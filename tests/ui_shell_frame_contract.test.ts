@@ -100,5 +100,17 @@ describe('tactical shell frame contract', () => {
 
     expect(advanceTurnModal).toContain('openPresidentialDecisionRoomNavigationTarget(item.navigationTarget)');
     expect(app).toContain('openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState())');
+
+    const reviewPrioritiesStart = app.indexOf('const reviewPreAdvancePriorities =');
+    const reviewItemStart = app.indexOf('const reviewPreAdvanceItem =', reviewPrioritiesStart);
+    const reviewPrioritiesBody = app.slice(reviewPrioritiesStart, reviewItemStart);
+    const decisionRoomRouterStart = app.indexOf('const openWarroomDecisionRoomFromField =');
+    const reviewPrioritiesRouter = app.slice(decisionRoomRouterStart, reviewPrioritiesStart);
+    expect(decisionRoomRouterStart).toBeGreaterThan(-1);
+    expect(reviewPrioritiesStart).toBeGreaterThan(-1);
+    expect(reviewItemStart).toBeGreaterThan(reviewPrioritiesStart);
+    expect(reviewPrioritiesRouter).toContain('setWarroomDecisionRoomOpen(true)');
+    expect(reviewPrioritiesBody).toContain("openWarroomDecisionRoomFromField('all')");
+    expect(reviewPrioritiesBody).not.toContain('openArmyHQTab(');
   });
 });

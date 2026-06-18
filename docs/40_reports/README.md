@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Decision Room routing closeout** | [implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md](implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md) - Pre-advance review, `1 REVIEW`, and operation opportunities now open Warroom Decision Room routes; player-faction filtering is shared; Krivaja/Stupcanica stale unit fixtures are receipt-aware. |
 | **Latest Srebrenica/Zepa receipt gate** | [implemented/20260618_SREBRENICA_EVENT_RECEIPT_OPERATION_GATE.md](implemented/20260618_SREBRENICA_EVENT_RECEIPT_OPERATION_GATE.md) - Krivaja/Stupcanica operation-context rows now require event-owned Srebrenica/Zepa fall receipts first, with timeline/player-copy corrections and active docs synced. |
 | **Latest P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates and sanitize non-diagnostic event/dossier internals; toolbar load errors route through player-facing error copy. |
 | **Latest first-hour shell and dev-map hardening** | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) - `dev:map`/map build no longer depend on a missing root Vite shim, Warroom handoffs use shared cleanup, the route label is `Army HQ`, and foundational decision future branches are hidden until explicit reveal. |

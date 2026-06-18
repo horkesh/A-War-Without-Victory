@@ -1,5 +1,6 @@
 import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
 import { useGameStore } from '../store/gameStore';
+import { requestDecisionRoomLens } from './decisionRoomLensRequest';
 import {
   openArmyHQAftermathRecord,
   openArmyHQBriefingForCorps,
@@ -27,6 +28,10 @@ export function openPresidentialDecisionRoomNavigationTarget(
   }
   if (target.kind === 'counter-offer') {
     return false;
+  }
+  if (target.kind === 'decision-room') {
+    requestDecisionRoomLens(target.lens, null, target.cardId ?? null);
+    return true;
   }
   if (target.kind === 'inbox') {
     state.setCodexOpen(false);

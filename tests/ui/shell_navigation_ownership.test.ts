@@ -138,6 +138,16 @@ describe('field toolbar navigation ownership', () => {
     });
   });
 
+  it('routes the pending-review toolbar badge through the Decision Room owner', () => {
+    const onReviewPriorities = vi.fn();
+
+    renderToolbar({ pendingReviews: 1, onReviewPriorities });
+    fireEvent.click(screen.getByRole('button', { name: '1 REVIEW' }));
+
+    expect(onReviewPriorities).toHaveBeenCalledOnce();
+    expect(useGameStore.getState().armyHQOpen).toBe(false);
+  });
+
   it('mounts tactical map chrome only while the game shell owns the screen', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 

@@ -22,6 +22,7 @@ type Listener = () => void;
 export interface DecisionRoomLensRequest {
   lens: PresidentialDecisionRoomLensId;
   commandCategoryId: PresidentialCommandCategoryId | null;
+  cardId?: string | null;
 }
 
 let requestedFocus: DecisionRoomLensRequest | null = null;
@@ -39,8 +40,9 @@ function emit(): void {
 export function requestDecisionRoomLens(
   lens: PresidentialDecisionRoomLensId,
   commandCategoryId: PresidentialCommandCategoryId | null = null,
+  cardId: string | null = null,
 ): void {
-  requestedFocus = { lens, commandCategoryId };
+  requestedFocus = { lens, commandCategoryId, cardId };
   emit();
 }
 
