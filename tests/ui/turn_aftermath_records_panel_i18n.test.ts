@@ -87,4 +87,27 @@ describe('TurnAftermathRecordsPanel localization', () => {
         expect(screen.getAllByText('Arhiva').length).toBeGreaterThan(0);
         expect(screen.queryByText('Campaign pulse')).toBeNull();
     });
+
+    it('renders latest desk item types as player-facing labels instead of raw ids', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: {
+                ...makeState(),
+                pendingEventDecisions: [{
+                    event_id: 'evt_latest',
+                    event_title: 'Critical decision',
+                    turn_fired: 12,
+                    faction: 'RBiH',
+                    response_options: [{ id: 'yes', label: 'Yes', effects: [] }],
+                }],
+            } as LoadedGameState,
+            osidDisplayNames: {},
+        });
+
+        const { container } = render(createElement(TurnAftermathRecordsPanel));
+
+        expect(screen.getByText('Presidential decision')).toBeTruthy();
+        expect(container.textContent).not.toMatch(/\bevent decision\b/i);
+        expect(container.textContent).not.toContain('event_decision');
+    });
 });

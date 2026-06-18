@@ -8,7 +8,6 @@ import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult } from '../../../sim/endgame/endgame_comparison.js';
 import { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
-import { toTitleCase } from '../utils/formatters';
 import { t, useLocale } from '../i18n';
 export { formatHistoricalDivergenceNote } from '../data/historicalDivergenceNotes.js';
 
@@ -54,6 +53,43 @@ function formatExitClass(exitClass: string | undefined): string {
         t3_authorized_no_offensive: t('warCost.exit.defensiveCommitment'),
     };
     return labels[exitClass ?? ''] ?? t('warCost.exit.pendingOutcome');
+}
+
+function formatOpportunityResponse(response: string): string {
+    const labels: Record<string, string> = {
+        approve: t('warCost.response.approve'),
+        delay: t('warCost.response.delay'),
+        redirect: t('warCost.response.redirect'),
+        under_resource: t('warCost.response.underResource'),
+        decline: t('warCost.response.decline'),
+        expire: t('warCost.response.expire'),
+    };
+    return labels[response] ?? t('warCost.response.reviewed');
+}
+
+function formatFindingSeverity(severity: string): string {
+    const labels: Record<string, string> = {
+        record: t('warCost.findingSeverity.record'),
+        grave: t('warCost.findingSeverity.grave'),
+        rupture: t('warCost.findingSeverity.rupture'),
+    };
+    return labels[severity] ?? t('warCost.findingSeverity.record');
+}
+
+function formatFindingFaction(faction: string | undefined): string | null {
+    if (!faction) return null;
+    const labels: Record<string, string> = {
+        RBiH: t('warCost.findingFaction.RBiH'),
+        RS: t('warCost.findingFaction.RS'),
+        HRHB: t('warCost.findingFaction.HRHB'),
+    };
+    return labels[faction] ?? getPlayerSafeMilitaryFactionName(faction);
+}
+
+function formatFindingBadge(finding: { faction?: string; severity: string }): string {
+    const severity = formatFindingSeverity(finding.severity);
+    const faction = formatFindingFaction(finding.faction);
+    return faction ? `${faction} / ${severity}` : severity;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -130,7 +166,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                         {entry.display_name}
                                     </span>
                                     <span className="ml-2 uppercase text-[8px] tracking-wider text-text-secondary/80">
-                                        {getPlayerSafeMilitaryFactionName(entry.faction)} / {toTitleCase(entry.response)}
+                                        {getPlayerSafeMilitaryFactionName(entry.faction)} / {formatOpportunityResponse(entry.response)}
                                     </span>
                                 </div>
                                 <div className="shrink-0 text-right tabular-nums">
@@ -166,7 +202,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                                         {finding.title}
                                     </span>
                                     <span className="shrink-0 uppercase text-[8px] tracking-wider text-text-secondary/80">
-                                        {finding.faction ? `${finding.faction} / ` : ''}{finding.severity}
+                                        {formatFindingBadge(finding)}
                                     </span>
                                 </div>
                                 <div>{finding.text}</div>

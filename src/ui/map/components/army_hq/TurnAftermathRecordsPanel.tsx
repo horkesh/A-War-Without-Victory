@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
+import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
 import { useGameStore } from '../../store/gameStore';
 import { t, type MessageKey } from '../../i18n';
 
@@ -50,6 +51,12 @@ function signalClass(severity: TurnAftermathView['signals'][number]['severity'])
 
 function enumLabel(prefix: string, value: string): string {
     return t(`${prefix}.${value}` as MessageKey);
+}
+
+function actionTypeLabel(type: TurnAftermathView['nextActions']['topItems'][number]['type']): string {
+    const surface = getDecisionSurfaceForInboxType(type);
+    if (surface?.familyId === 'event_decision') return t('records.actionType.eventDecision');
+    return surface?.playerLabel ?? t('records.actionType.reviewItem');
 }
 
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
@@ -147,7 +154,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
                             <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadDeskItem')}</div>
                             <div className="truncate text-[11px] font-semibold text-text-primary">{firstAction.title}</div>
-                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{firstAction.type.replace(/_/g, ' ')}</div>
+                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{actionTypeLabel(firstAction.type)}</div>
                         </div>
                     )}
                 </div>
