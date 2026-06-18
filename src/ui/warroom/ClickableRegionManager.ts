@@ -577,7 +577,7 @@ export class ClickableRegionManager {
 
     private openMagazineModal(gameState: unknown): void {
         if (this.tacticalShellHandoffHandler) {
-            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aar' });
+            this.tacticalShellHandoffHandler({ kind: 'army-hq', tab: 'records', recordsSubTab: 'aftermath' });
             return;
         }
         if (!this.modalManager) {

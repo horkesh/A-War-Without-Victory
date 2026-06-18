@@ -25,6 +25,7 @@ interface OperationsSectionProps {
     commandStrain?: number;
     /** Player-facing label for commandStrain. */
     commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
+    defaultOpen?: boolean;
 }
 
 /**
@@ -118,6 +119,20 @@ const GRADE_FACTOR_LABELS: Record<string, string> = {
     duration_efficiency: 'Duration efficiency',
     momentum: 'Momentum',
 };
+
+function isUnsafeRawLabel(value: string | null | undefined): boolean {
+    if (!value) return false;
+    return /(?:^cmd_|_t\d+\b|[a-z]{2,}_[a-z0-9_]+|[:|])/.test(value);
+}
+
+function safeFallbackLabel(value: string | null | undefined, fallback: string): string {
+    if (!value || isUnsafeRawLabel(value)) return fallback;
+    return toTitleCase(value);
+}
+
+function safeOperationDisplayName(op: OperationView): string {
+    return isUnsafeRawLabel(op.display_name) ? t('operationsSection.staffOperation') : op.display_name;
+}
 
 function ReadinessBar({ label, value }: { label: string; value: number }) {
     const pct = Math.round(Math.max(0, Math.min(100, value * 100)));
@@ -328,7 +343,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     <div className="flex flex-wrap gap-x-6 gap-y-2">
                         <div className="flex items-center gap-2">
                             <span className="text-text-secondary/60 uppercase">{t('operationsSection.phase')}</span>
-                            <span className="font-bold text-accent-gold">{PREP_LABEL_KEYS[op.preparation_sub_phase] ? t(PREP_LABEL_KEYS[op.preparation_sub_phase]) : op.preparation_sub_phase.toUpperCase()}</span>
+                            <span className="font-bold text-accent-gold">{PREP_LABEL_KEYS[op.preparation_sub_phase] ? t(PREP_LABEL_KEYS[op.preparation_sub_phase]) : t('operationsSection.prep.unreported')}</span>
                         </div>
                         {op.preparation_turns_elapsed != null && (
                             <div className="flex items-center gap-2">
@@ -344,7 +359,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             <span className="text-text-secondary/60 uppercase">{t('operationsSection.assessment')}</span>
                             <span className={`font-bold px-2 py-0.5 border ${op.commander_assessment === 'launch' ? 'text-emerald-400 border-panel-border' :
                                     op.commander_assessment === 'abort' ? 'text-red-500 border-red-500/30' : 'text-amber-500 border-amber-500/30'
-                                }`}>{COMMANDER_ASSESSMENT_LABELS[op.commander_assessment] ?? toTitleCase(op.commander_assessment)}</span>
+                                }`}>{COMMANDER_ASSESSMENT_LABELS[op.commander_assessment] ?? t('operationsSection.assessmentUnreported')}</span>
                             {op.postponement_count != null && op.postponement_count > 0 && (
                                 <span className="text-red-500/60 ml-2 animate-pulse">(! {op.postponement_count} DELAYS)</span>
                             )}
@@ -404,9 +419,9 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         {axes.map((axis) => (
                             <div key={axis.axis_id} className="px-3 py-2 border border-panel-border/50 bg-panel-card rounded-md">
                                 <div className="flex items-center justify-between mb-2">
-                                    <span className="font-bold text-text-primary uppercase tracking-wider">{axis.name}</span>
+                                    <span className="font-bold text-text-primary uppercase tracking-wider">{safeFallbackLabel(axis.name, t('operationsSection.axisUnreported'))}</span>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border border-current bg-current/5 ${AXIS_STATUS_COLOR[axis.status] ?? 'text-text-secondary/60'}`}>
-                                        {AXIS_STATUS_LABELS[axis.status] ?? toTitleCase(axis.status)}
+                                        {AXIS_STATUS_LABELS[axis.status] ?? t('operationsSection.statusUnreported')}
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary text-[10px] uppercase">
@@ -460,7 +475,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {/* Recovery info */}
             {op.phase === 'recovery' && op.recovery_reason && (
                 <div className="text-blue-400 font-bold italic tracking-widest uppercase border border-blue-400/20 bg-blue-400/5 p-3">
-                    {t('operationsSection.recoveryModeReason', { reason: RECOVERY_REASON_LABELS[op.recovery_reason] ?? toTitleCase(op.recovery_reason) })}
+                    {t('operationsSection.recoveryModeReason', { reason: RECOVERY_REASON_LABELS[op.recovery_reason] ?? t('operationsSection.recoveryUnreported') })}
                 </div>
             )}
 
@@ -474,7 +489,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             <div className="flex items-center gap-3">
                                 <StarRating stars={completedAAR.grade.stars} verdict={completedAAR.grade.verdict} />
                                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${OUTCOME_COLOR[completedAAR.outcome] ?? 'text-text-secondary'} border-current/30 bg-current/5`}>
-                                    {OUTCOME_LABEL_KEY[completedAAR.outcome] ? t(OUTCOME_LABEL_KEY[completedAAR.outcome]) : completedAAR.outcome}
+                                    {OUTCOME_LABEL_KEY[completedAAR.outcome] ? t(OUTCOME_LABEL_KEY[completedAAR.outcome]) : t('operationsSection.outcome.unreported')}
                                 </span>
                             </div>
                         </div>
@@ -490,7 +505,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex flex-wrap gap-2 px-1">
                             {Object.entries(completedAAR.grade.factors).map(([key, val]) => (
                                 <span key={key} className="text-[8px] text-text-secondary/40 font-mono uppercase border border-panel-border/30 px-1.5 py-0.5 rounded">
-                                    {GRADE_FACTOR_LABELS[key] ?? toTitleCase(key)}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : String(val)}</span>
+                                    {GRADE_FACTOR_LABELS[key] ?? t('operationsSection.factor.other')}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : String(val)}</span>
                                 </span>
                             ))}
                         </div>
@@ -524,7 +539,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     );
 }
 
-export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy' }: OperationsSectionProps) {
+export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy', defaultOpen = false }: OperationsSectionProps) {
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
@@ -535,7 +550,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
     // here anymore.
 
     return (
-        <CollapsibleSection sectionKey={`ops-${corpsId}`} title={t('operationsSection.title')} count={operations.length}>
+        <CollapsibleSection sectionKey={`ops-${corpsId}`} title={t('operationsSection.title')} count={operations.length} defaultOpen={defaultOpen}>
             {operations.length === 0 ? (
                 <EmptyState
                     message={t('operationsSection.empty')}
@@ -591,7 +606,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                             )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
-                                                {op.display_name}
+                                                {safeOperationDisplayName(op)}
                                             </span>
                                         </div>
                                         <div className="flex items-center gap-2">

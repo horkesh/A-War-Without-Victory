@@ -1217,7 +1217,7 @@ function App() {
       return;
     }
     if (surface === 'intelligence') {
-      openArmyHQRecordsSubTab(useGameStore.getState(), 'aar');
+      openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
       leaveWarroomForGame();
       return;
     }
@@ -1565,7 +1565,7 @@ function App() {
             pressureWarning={loadedGameState?.pressureWarning ?? false}
             onOpenDesk={openWarroomDeskFromField}
             onOpenSummary={() => openSummary()}
-            onOpenRecords={() => openArmyHQRecords('aar')}
+            onOpenRecords={() => openArmyHQRecords('aftermath')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
             onOpenCodex={() => openCodex(useGameStore.getState())}
             onReviewPriorities={reviewPreAdvancePriorities}

@@ -86,7 +86,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(drillIn).toContain("if (surface === 'staff')");
         expect(drillIn).toContain("openArmyHQTab(useGameStore.getState(), 'personnel')");
         expect(drillIn).toContain("if (surface === 'intelligence')");
-        expect(drillIn).toContain("openArmyHQRecordsSubTab(useGameStore.getState(), 'aar')");
+        expect(drillIn).toContain("openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath')");
         expect(drillIn).toContain("openArmyHQTab(useGameStore.getState(), 'summary')");
         expect(drillIn).not.toContain("surface === 'diplomacy'");
         expect(drillIn).not.toContain("surface === 'chronicle'");

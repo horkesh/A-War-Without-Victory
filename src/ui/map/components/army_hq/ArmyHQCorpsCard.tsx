@@ -358,6 +358,8 @@ export function ArmyHQCorpsCard({
 
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">
+                <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} defaultOpen={sectors.length > 0} />
+                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} defaultOpen={operations.length > 0} />
                 {/* Command Relationship — consolidated surface (strain + friction + stabilize) */}
                 <CommandRelationshipSection
                     corpsId={corps.id}
@@ -376,8 +378,6 @@ export function ArmyHQCorpsCard({
                 {/* Corps Situation Assessment — Commander Explanation Surfaces Wave 1 */}
                 <CorpsSituationSection assessment={corps.situationAssessment} />
                 <CommanderSection corps={corps} gameState={gameState} operations={operations} />
-                <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} />
-                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} />
                 <OrbatSection corpsId={corps.id} brigades={brigades} />
                 <CombatRecordSection corpsId={corps.id} corps={corps} />
             </div>

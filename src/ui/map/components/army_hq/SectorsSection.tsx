@@ -2,7 +2,7 @@
  * Sectors section for expanded corps card.
  * Warroom dark palette.
  */
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CorpsFrontSectorView, FormationView } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { useGameStore } from '../../store/gameStore';
@@ -10,6 +10,7 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, toTitleCase } from '../../utils/formatters';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
+import { getPlayerFacingSectorName } from '../../../shared/playerFacingLabels';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale } from '../../i18n';
@@ -19,6 +20,7 @@ interface SectorsSectionProps {
     corpsId: string;
     sectors: CorpsFrontSectorView[];
     factionBattles: TurnBattle[];
+    defaultOpen?: boolean;
 }
 
 function IntelBar({ value, label }: { value: number; label: string }) {
@@ -91,7 +93,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                     <div className="space-y-1.5">
                         {frontIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation', { id })}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
                             const cohesion = Math.round(b.cohesion ?? 0);
                             const isDisrupted = (b.disrupted_turns ?? 0) > 0;
                             return (
@@ -124,7 +126,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                     <div className="space-y-1.5">
                         {reserveIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation', { id })}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
                             return (
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
@@ -173,8 +175,40 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
     );
 }
 
-export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSectionProps) {
-    const [expandedId, setExpandedId] = useState<string | null>(null);
+function compareText(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function isUnsafeRawLabel(value: string | null | undefined): boolean {
+    if (!value) return false;
+    return /(?:[a-z]{2,}_[a-z0-9_]+|[:|])/.test(value);
+}
+
+function safeSectorLabel(sectorId: string, sectors: CorpsFrontSectorView[]): string {
+    const label = getPlayerFacingSectorName(sectorId, sectors, t('sectorsSection.assignedSector'));
+    return isUnsafeRawLabel(label) ? t('sectorsSection.assignedSector') : label;
+}
+
+function pickDefaultSectorId(sectors: CorpsFrontSectorView[], factionBattles: TurnBattle[], sectorOsidSets: Map<string, Set<string>>): string | null {
+    if (sectors.length === 0) return null;
+    const battleCounts = new Map<string, number>();
+    for (const sector of sectors) {
+        const sectorOsids = sectorOsidSets.get(sector.sector_id) ?? new Set<string>();
+        battleCounts.set(sector.sector_id, factionBattles.filter((battle) => sectorOsids.has(battle.osid)).length);
+    }
+    return [...sectors].sort((a, b) => {
+        if (Number(a.offensive_signs) !== Number(b.offensive_signs)) return Number(b.offensive_signs) - Number(a.offensive_signs);
+        const aBattles = battleCounts.get(a.sector_id) ?? 0;
+        const bBattles = battleCounts.get(b.sector_id) ?? 0;
+        if (aBattles !== bBattles) return bBattles - aBattles;
+        if (a.threat_ratio !== b.threat_ratio) return b.threat_ratio - a.threat_ratio;
+        if (a.density !== b.density) return a.density - b.density;
+        return compareText(a.sector_id, b.sector_id);
+    })[0]?.sector_id ?? null;
+}
+
+export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen = false }: SectorsSectionProps) {
+    const [expandedId, setExpandedId] = useState<string | null | undefined>(undefined);
     const formations = useGameStore((s) => s.loadedGameState?.formations ?? []);
     const formationMap = useMemo(() => {
         const m = new Map<string, FormationView>();
@@ -193,9 +227,19 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
         }
         return map;
     }, [sectors]);
+    const defaultExpandedId = useMemo(
+        () => pickDefaultSectorId(sectors, factionBattles, sectorOsidSets),
+        [factionBattles, sectors, sectorOsidSets],
+    );
+    const effectiveExpandedId = expandedId === undefined ? defaultExpandedId : expandedId;
+
+    useEffect(() => {
+        if (expandedId == null) return;
+        if (!sectors.some((sector) => sector.sector_id === expandedId)) setExpandedId(undefined);
+    }, [expandedId, sectors]);
 
     return (
-        <CollapsibleSection sectionKey={`sec-${corpsId}`} title={t('sectorsSection.title')} count={sectors.length}>
+        <CollapsibleSection sectionKey={`sec-${corpsId}`} title={t('sectorsSection.title')} count={sectors.length} defaultOpen={defaultOpen}>
             {sectors.length === 0 ? (
                 <EmptyState
                     message={t('sectorsSection.empty')}
@@ -208,7 +252,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                         const sectorOsids = sectorOsidSets.get(sector.sector_id) ?? new Set<string>();
                         const battleCount = factionBattles.filter((b) => sectorOsids.has(b.osid)).length;
                         const hasBattle = battleCount > 0;
-                        const isExpanded = expandedId === sector.sector_id;
+                        const isExpanded = effectiveExpandedId === sector.sector_id;
 
                         return (
                             <div key={sector.sector_id} className="border border-panel-border/50 bg-panel-card rounded-md">
@@ -224,7 +268,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles }: SectorsSect
                                             </span>
                                             <span className="text-[12px] font-bold text-text-primary uppercase font-mono truncate"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
-                                                {sector.display_name}
+                                                {safeSectorLabel(sector.sector_id, sectors)}
                                             </span>
                                             {hasBattle && (
                                                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-sm bg-red-900/40 text-red-400 border border-red-500/30 animate-pulse">

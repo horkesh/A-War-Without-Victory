@@ -1,4 +1,5 @@
 import type { ArmyHQRecordsSubTab, ArmyHQTab } from '../../shared/shellHandoff';
+import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { CommandBriefingItemView, LoadedGameState } from './types';
 import {
   buildTurnAftermathCampaignCost,
@@ -80,6 +81,7 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'counter-offer'; counterOfferId: string }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
   | { kind: 'decision-room'; lens: PresidentialDecisionRoomLensId; cardId?: string | null }
+  | { kind: 'field'; target: FieldInspectionTarget }
   | { kind: 'enclave-dashboard' }
   | { kind: 'inbox' }
   | { kind: 'chronicle' }
@@ -1390,6 +1392,7 @@ function armyHqRecordsLabel(recordsSubTab: ArmyHQRecordsSubTab): string {
   if (recordsSubTab === 'aftermath') return t('decisionRoom.source.armyHqRecords');
   if (recordsSubTab === 'aar') return t('decisionRoom.source.armyHqAarRecords');
   if (recordsSubTab === 'ops') return t('decisionRoom.source.armyHqOperationsRecords');
+  if (recordsSubTab === 'decisions') return t('decisionRoom.source.armyHqDecisionRecords');
   return t('decisionRoom.source.armyHqOpportunityRecords');
 }
 

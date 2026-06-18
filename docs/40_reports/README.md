@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Army HQ first-paint/drilldown polish** | [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ now opens with a compact corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to the Aftermath archive, field inspections use an atomic Tactical Map route, and raw-copy fallback guards cover sector/operation/formation details. |
 | **Latest Command Briefing route contract** | [implemented/20260618_COMMAND_BRIEFING_ROUTE_CONTRACTS.md](implemented/20260618_COMMAND_BRIEFING_ROUTE_CONTRACTS.md) - Command briefing action chips now carry real owner routes, shell helper handoffs, SitRep labels, and humanized enclave titles. |
 | **Latest Personnel vacancy read-model sync** | [implemented/20260618_PERSONNEL_VACANCY_READMODEL_SYNC.md](implemented/20260618_PERSONNEL_VACANCY_READMODEL_SYNC.md) - Army HQ Personnel command-vacancy counts now share the opening commander display resolver, avoiding false turn-0 vacancy alerts for read-model and synthetic command displays. |
 | **Latest Decision Room routing closeout** | [implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md](implemented/20260618_DECISION_ROOM_ROUTING_AND_FIXTURE_SYNC.md) - Pre-advance review, `1 REVIEW`, and operation opportunities now open Warroom Decision Room routes; player-faction filtering is shared; Krivaja/Stupcanica stale unit fixtures are receipt-aware. |

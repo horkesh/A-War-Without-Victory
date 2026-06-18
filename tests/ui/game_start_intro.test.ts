@@ -101,4 +101,14 @@ describe('PeaceWarTransition identity block (game-start intro — step 2)', () =
         render(createElement(PeaceWarTransition, { onDismiss: vi.fn(), state: playerState(null) }));
         expect(screen.queryByText('WHO YOU ARE')).toBeNull();
     });
+
+    it('keeps the outside-click backdrop dismissible without exposing a covered named control', () => {
+        const onDismiss = vi.fn();
+        render(createElement(PeaceWarTransition, { onDismiss, state: playerState('RBiH') }));
+
+        expect(screen.queryByRole('button', { name: 'Close WAR BEGINS' })).toBeNull();
+        fireEvent.click(screen.getByTestId('glass-panel-backdrop'));
+
+        expect(onDismiss).toHaveBeenCalledTimes(1);
+    });
 });

@@ -9,6 +9,7 @@
  * These helpers handle handoffs from Tactical Map into Army HQ tabs.
  */
 import type { ArmyHQRecordsSubTab, ArmyHQTab, ShellHandoffCommand } from '../../shared/shellHandoff';
+import type { FieldInspectionTarget } from './fieldInspectionTarget';
 
 export interface ShellNavigationState {
   loadedGameState?: { player_faction?: string | null } | null;
@@ -37,6 +38,8 @@ export interface ShellNavigationState {
   setSelectedArmyHqId?: (id: string | null) => void;
   setSelectedOperationKey?: (key: string | null) => void;
   setSelectedOrbatCorpsId?: (id: string | null) => void;
+  /** Optional: atomic tactical-field drilldown action owned by gameStore. */
+  inspectOnFieldTarget?: (target: FieldInspectionTarget) => void;
 }
 
 function getPlayerFaction(state: ShellNavigationState): string | null {
@@ -125,6 +128,14 @@ export function openArmyHQBriefingForCorps(state: ShellNavigationState, corpsId:
   state.setArmyHQOpen(true);
   state.setArmyHQTab('briefing');
   state.setArmyHQExpandedCorpsId(corpsId);
+  return true;
+}
+
+export function inspectOnField(state: ShellNavigationState, target: FieldInspectionTarget): boolean {
+  if (!state.inspectOnFieldTarget) return false;
+  closeReferenceOverlays(state);
+  clearFocusedRecords(state);
+  state.inspectOnFieldTarget(target);
   return true;
 }
 

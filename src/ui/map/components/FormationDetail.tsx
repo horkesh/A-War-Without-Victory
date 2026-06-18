@@ -19,6 +19,7 @@ import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../share
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { inspectOnField } from '../utils/shellNavigation';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -52,6 +53,48 @@ function formatHistoryMomentDate(turn: number): string {
   return turnToDateString(turn);
 }
 
+const NARRATIVE_ARC_LABELS: Record<string, string> = {
+  veteran: 'Veteran',
+  bloodied: 'Bloodied',
+  risen: 'Risen',
+  shattered: 'Shattered',
+  garrison: 'Garrison',
+};
+
+const ENGAGEMENT_ROLE_LABELS: Record<string, string> = {
+  attacker: 'attacker',
+  defender: 'defender',
+};
+
+function formatNarrativeArcLabel(arc: string): string {
+  return NARRATIVE_ARC_LABELS[arc] ?? t('formationDetail.campaignHistory');
+}
+
+function formatEngagementRole(role: string): string {
+  return ENGAGEMENT_ROLE_LABELS[role] ?? t('formationDetail.participant');
+}
+
+function sanitizeHistoryMoment(description: string, osidDisplayNames: Record<string, string> | null): string {
+  return description
+    .replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))
+    .replace(/\b[a-z]{2,}_[a-z0-9_]*\b/gi, t('formationDetail.staffRecord'));
+}
+
+function isUnsafeRawLabel(value: string | null | undefined): boolean {
+  if (!value) return false;
+  return /(?:[a-z]{2,}_[a-z0-9_]+|[:|])/.test(value);
+}
+
+function safeCorpsLabel(corpsId: string, formations: FormationView[]): string {
+  const label = getPlayerFacingCorpsName(corpsId, formations, t('formationDetail.assignedCommand'));
+  return isUnsafeRawLabel(label) ? t('formationDetail.assignedCommand') : label;
+}
+
+function safeSectorLabel(sectorId: string, sectors: Array<{ sector_id?: string | null; display_name?: string | null }>): string {
+  const label = getPlayerFacingSectorName(sectorId, sectors, t('formationDetail.assignedSector'));
+  return isUnsafeRawLabel(label) ? t('formationDetail.assignedSector') : label;
+}
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -66,7 +109,6 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
-  const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
@@ -209,29 +251,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 <button
                   type="button"
                   onClick={() => {
-                    if (isArmyHq) {
-                      useGameStore.setState({
-                        selectedArmyId: null,
-                        selectedArmyHqId: parent.id,
-                        selectedCorpsId: null,
-                        selectedFormationId: null,
-                        selectedOperationKey: null,
-                        selectedOsid: null,
-                        selectedCorpsFrontSectorId: null,
-                        selectedOrbatCorpsId: null,
-                      });
-                    } else {
-                      useGameStore.setState({
-                        selectedArmyId: null,
-                        selectedArmyHqId: null,
-                        selectedCorpsId: parent.id,
-                        selectedFormationId: null,
-                        selectedOperationKey: null,
-                        selectedOsid: null,
-                        selectedCorpsFrontSectorId: null,
-                        selectedOrbatCorpsId: null,
-                      });
-                    }
+                    inspectOnField(useGameStore.getState(), isArmyHq
+                      ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id }
+                      : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id });
                   }}
                   className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-blue/10 transition-colors group"
                 >
@@ -239,7 +261,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <span className="text-accent-blue/60 uppercase font-bold tracking-tighter">
                       {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
                     </span>
-                    <span className="text-accent-blue font-bold uppercase group-hover:underline">{parent.name}</span>
+                    <span className="text-accent-blue font-bold uppercase group-hover:underline">
+                      {isArmyHq ? t('formationDetail.assignedCommand') : safeCorpsLabel(parent.id, loadedGameState.formations)}
+                    </span>
                   </div>
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-blue/40 group-hover:bg-accent-blue transition-colors" />
                 </button>
@@ -252,13 +276,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 return (
                   <button
                     type="button"
-                    onClick={() => useGameStore.setState({
-                      selectedArmyId,
-                      selectedCorpsId: null,
-                      selectedCorpsFrontSectorId: currentSector.sector_id,
-                      selectedFormationId,
-                      selectedOperationKey: null,
-                      selectedOsid: null,
+                    onClick={() => inspectOnField(useGameStore.getState(), {
+                      kind: 'field-formation-in-sector',
+                      formationId: selectedFormationId,
+                      sectorId: currentSector.sector_id,
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
                     title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}
@@ -266,7 +287,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <div className="flex items-center gap-2">
                       <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
-                        {currentSector.display_name}
+                        {safeSectorLabel(currentSector.sector_id, sectors)}
                       </span>
                       {sectorOverrideId && (
                         <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[9px] uppercase rounded border border-accent-gold/30 font-bold">
@@ -574,7 +595,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   : formation.narrativeArc === 'garrison' ? 'text-accent-blue border-accent-blue/30 bg-accent-blue/10'
                   : 'text-text-primary border-panel-border bg-black/20'
                 }`}>
-                  {formation.narrativeArc}
+                  {formatNarrativeArcLabel(formation.narrativeArc)}
                 </span>
               </div>
             )}
@@ -682,7 +703,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
                           <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
-                          <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: engagement.role })} </span>
+                          <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
                           <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
                           {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}
                         </div>
@@ -710,7 +731,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     : formation.narrativeArc === 'garrison' ? 'text-accent-blue border-accent-blue/30 bg-accent-blue/10'
                     : 'text-text-primary border-panel-border bg-black/20'
                   }`}>
-                    {formation.narrativeArc}
+                    {formatNarrativeArcLabel(formation.narrativeArc)}
                   </span>
                 </div>
                 {formation.warNarrative && (
@@ -727,7 +748,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       .map((m, i) => (
                       <div key={i} className="text-[11px] text-text-secondary break-words">
                         <span className="text-text-primary">{formatHistoryMomentDate(m.turn)}:</span>{' '}
-                        {m.description.replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))}
+                        {sanitizeHistoryMoment(m.description, osidDisplayNames)}
                       </div>
                     ))}
                   </div>
@@ -873,7 +894,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold truncate">{sector.display_name}</span>
+                          <span className="font-semibold truncate">{safeSectorLabel(sector.sector_id, sameSectorList)}</span>
                           <div className="flex items-center gap-1.5 shrink-0 ml-2">
                             {isCurrentOverride && (
                               <span className="text-[9px] bg-accent-gold/20 text-accent-gold px-1 rounded border border-accent-gold/30 font-bold uppercase">{t('formationDetail.override')}</span>
