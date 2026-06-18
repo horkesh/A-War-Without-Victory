@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-16 (player-polish hardening; first-hour choreography, player-journey gate, player-safe supply/enclave truth, and command-copy raw-id cleanup)
+**Updated:** 2026-06-18 (first-hour shell hardening, event/inbox calendar copy, player-safe event dossier boundaries, and queued Army HQ drilldown polish)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,8 @@
 
 | Need | Go to |
 |------|--------|
+| **P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates instead of raw turn copy, source/dossier internals are hidden outside diagnostics, and toolbar load errors use player-facing copy. |
+| **First-hour shell and dev-map hardening** | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) - Root map scripts call the map workspace Vite entrypoint directly, Warroom/game shell handoffs clear competing overlays, Warroom staff is labeled `Army HQ`, and future decision branches require explicit reveal. |
 | **Stale-truth/process hardening** | [implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md](implemented/20260616_STALE_TRUTH_AND_PROCESS_HARDENING.md) - Sarajevo siege UI now requires current control freshness, consequence records use authored names or neutral fallbacks, and the supporting CI/docs process fixes are recorded. |
 | **UI copy raw-ID fallback closure** | [implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md](implemented/20260616_UI_COPY_RAW_ID_FALLBACKS.md) - Command planning, Chief of Staff prose, Warroom hotspot titles, and autonomy proposal values now keep raw ids internal and render neutral/player-safe copy. |
 | **Comment sweep: Verdict/refugee hardening** | [implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md](implemented/20260616_COMMENT_SWEEP_VERDICT_REFUGEE.md) - Verdict snapshot tests count exact faction-tab outcome badges, and refugee surge beats compare against the actual prior week. |
@@ -135,6 +137,8 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-18 | **P1 raw-copy calendar boundary:** event decisions and inbox event cards now use calendar dates and non-diagnostic event/dossier internals stay out of player-facing copy; live browser verified the `What Is Bosnia?` modal. | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) |
+| 2026-06-18 | **First-hour shell/dev-map hardening:** root map scripts, Warroom shell cleanup, Army HQ route labeling, and decision future-branch progressive disclosure were hardened. | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) |
 | 2026-06-16 | **Selection/raw-ID polish:** standalone brigade selection now clears stale corps/army/HQ context, parent drilldowns route to the right owner IDs, and objective target surfaces use player-safe ordinal labels instead of visible raw OSIDs. | [implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md](implemented/20260616_SELECTION_AND_RAW_ID_POLISH.md) |
 | 2026-06-16 | **Player-safe enclave/supply truth:** player campaigns now scope enclave resilience, enclave map overlays, and supply summaries to the loaded player faction; the Supply legend now describes known-friendly classes instead of stale surplus thresholds. | [implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md](implemented/20260616_PLAYER_SAFE_ENCLAVE_SUPPLY_TRUTH.md) |
 | 2026-06-16 | **Player-journey hardening:** first-hour choreography now gates foundational decisions behind the war-start briefing and President's Desk opening brief; `qa:player-journeys` covers first-run, onboarding, replay, map truth, inbox routing, selection, and Army HQ readiness regressions. | [../plans/2026-06-16-pyrrhic-ui-and-soul-systems-execution-plan.md](../plans/2026-06-16-pyrrhic-ui-and-soul-systems-execution-plan.md) |

@@ -116,7 +116,7 @@ export function deriveInboxItems(
                 type: 'event_decision',
                 severity: 'blocking',
                 title: evt.event_title ?? 'Decision Required',
-                subtitle: `An event requires your response (turn ${evt.turn_fired}).`,
+                subtitle: `A presidential decision requires your response as of ${turnToDateString(evt.turn_fired)}.`,
                 action: eventSurface.inboxAction,
                 priority: 10,
             });

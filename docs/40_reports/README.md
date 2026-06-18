@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest P1 raw-copy calendar boundary** | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) - Event decisions and inbox rows now render calendar dates and sanitize non-diagnostic event/dossier internals; toolbar load errors route through player-facing error copy. |
 | **Latest first-hour shell and dev-map hardening** | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) - `dev:map`/map build no longer depend on a missing root Vite shim, Warroom handoffs use shared cleanup, the route label is `Army HQ`, and foundational decision future branches are hidden until explicit reveal. |
 | **Latest event and campaign-cost raw-copy closure** | [implemented/20260618_EVENT_AND_CAMPAIGN_COST_RAW_COPY_CLOSURE.md](implemented/20260618_EVENT_AND_CAMPAIGN_COST_RAW_COPY_CLOSURE.md) - Event decision previews/future-consequence copy and War Cost/Army HQ campaign-cost surfaces now keep effect, response, severity, OSID, and inbox-type internals out of player copy. |
 | **Latest Records and sitrep player-safe labels** | [implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md](implemented/20260618_RECORDS_SITREP_PLAYER_SAFE_LABELS.md) - Army HQ Records reserve reasons and operational sitrep operation/front labels now render player-safe copy instead of raw enums, phase strings, turn IDs, or ad hoc OSID-derived labels. |

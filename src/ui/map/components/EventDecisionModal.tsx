@@ -27,6 +27,7 @@ import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
+import { turnToDateString } from '../utils/formatters';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -247,6 +248,25 @@ function playerSafeFutureText(text: string, showDiagnostics: boolean): string {
 
 function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
     return playerSafeFutureText(text, showDiagnostics);
+}
+
+const PLAYER_SAFE_DOSSIER_TERMS: Array<[RegExp, string]> = [
+    [/\brbih_state_identity\b/g, 'state identity posture'],
+    [/\bretain_minorities\b/g, 'civic minority-protection line'],
+    [/\bmandatory_purge\b/g, 'hardline expulsion line'],
+    [/\bcsq_[a-z0-9_]+\b/g, 'later consequence branch'],
+    [/\b[\w./-]+\.json\b/gi, 'source dossier'],
+    [/\bsource_note\b/g, 'source note'],
+];
+
+function playerSafeDossierText(text: string, showDiagnostics: boolean): string {
+    if (showDiagnostics) return text;
+    let safe = text.replace(/`([^`]+)`/g, '$1');
+    for (const [pattern, replacement] of PLAYER_SAFE_DOSSIER_TERMS) {
+        safe = safe.replace(pattern, replacement);
+    }
+    safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
+    return safe.replace(/\s+/g, ' ').trim();
 }
 
 function FutureConsequenceCard({
@@ -471,7 +491,7 @@ function DecisionContextSection({
     const sourceTier = eventDef?.source_tier;
     const ancestors = state ? getCausalAncestors(decision.event_id, state) : [];
     const rawDossier = eventDef?.source_note ?? eventDef?.historical_source ?? null;
-    const dossierExcerpt = rawDossier ? truncateSourceDossier(rawDossier) : null;
+    const dossierExcerpt = rawDossier ? truncateSourceDossier(playerSafeDossierText(rawDossier, diagMode)) : null;
     // Resolve ancestry event_ids to catalog titles (humanized id as fallback)
     // so the dev diagnostic shows readable names rather than raw slugs.
     const ancestorLabels = ancestors.map(
@@ -539,6 +559,8 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
     const assessmentLabel = deriveAssessmentLabel(decision.category, advisor);
     const diagMode = useGameStore((s) => s.diagMode);
+    const decisionDate = turnToDateString(decision.turn_fired);
+    const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
 
     return (
         <Modal
@@ -557,7 +579,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                         Decision Required
                     </span>
                     <span className={`text-[10px] font-mono ${factionColor}`}>
-                        {getPlayerSafePoliticalFactionName(decision.faction)} · Turn {decision.turn_fired}
+                        {getPlayerSafePoliticalFactionName(decision.faction)} · {decisionDate}
                     </span>
                 </div>
 
@@ -580,7 +602,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                     {assessmentLabel}
                                 </div>
                                 <p className="text-[12px] leading-relaxed text-text-secondary">
-                                    {decision.staff_assessment}
+                                    {playerSafeDossierText(decision.staff_assessment, diagMode)}
                                 </p>
                             </div>
                         )}
@@ -591,7 +613,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                 </div>
                                 <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
                                     {decision.trigger_evidence.map((evidence) => (
-                                        <li key={evidence}>{evidence}</li>
+                                        <li key={evidence}>{playerSafeDossierText(evidence, diagMode)}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -607,15 +629,15 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                                 <span className="text-text-primary">{category}</span>
                             </div>
                             <div>
-                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Faction / Turn</span>
+                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Faction / Date</span>
                                 <span className="text-text-primary">
-                                    {getPlayerSafePoliticalFactionName(decision.faction)} / Turn {decision.turn_fired}
+                                    {getPlayerSafePoliticalFactionName(decision.faction)} / {decisionDate}
                                 </span>
                             </div>
-                            {sourceNote && (
+                            {safeSourceNote && (
                                 <div>
                                     <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Source note</span>
-                                    <span className="text-text-primary">{sourceNote}</span>
+                                    <span className="text-text-primary">{safeSourceNote}</span>
                                 </div>
                             )}
                         </div>
@@ -649,7 +671,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             key={option.id}
                             option={option}
                             decision={decision}
-                            sourceNote={sourceNote}
+                            sourceNote={safeSourceNote}
                             showDiagnostics={diagMode}
                             onChoose={() => onRespond(decision.event_id, option.id)}
                         />
