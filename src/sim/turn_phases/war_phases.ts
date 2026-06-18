@@ -1268,8 +1268,9 @@ export const warPhases: NamedPhase[] = [
             // written when the flag is ON → flag-off keeps state (and the hashed
             // final_save.json) byte-identical. The 1995-pivot release empties the
             // eastern-enclave entries before the historical fall window, so the
-            // scripted *_falls_1995 events + Krivaja-95/Stupčanica-95 ops still
-            // flip Srebrenica/Žepa to RS and the genocide rupture still records.
+            // event-owned *_falls_1995 receipts still flip Srebrenica/Žepa to RS
+            // and the genocide rupture still records. Krivaja-95/Stupčanica-95
+            // remain chronology/AAR context, not the fall-delivery calibration path.
             if (isVrsContainPostureEnabled()) {
                 const containedRs = computeContainedOsidsForFaction(context.state, 'RS', osidReach);
                 if (containedRs.length > 0) {

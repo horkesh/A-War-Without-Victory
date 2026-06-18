@@ -29,6 +29,20 @@ function sentenceToken(value: string | undefined): string {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
+function playerSafeDossierText(value: string): string {
+  return value
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\brbih_state_identity\b/g, 'state identity posture')
+    .replace(/\bretain_minorities\b/g, 'civic minority-protection line')
+    .replace(/\bmandatory_purge\b/g, 'hardline expulsion line')
+    .replace(/\bcsq_[a-z0-9_]+\b/g, 'later consequence branch')
+    .replace(/\b[\w./-]+\.json\b/gi, 'source dossier')
+    .replace(/\bsource_note\b/g, 'source note')
+    .replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase())
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function describeEffect(effect: EventEffect): string | null {
   switch (effect.kind) {
     case 'narrative': return null;
@@ -142,10 +156,11 @@ describe('production modal-ready event catalog rendering', () => {
       expect(screen.getByRole('dialog', { name: eventTitle(event) }), row.id).toBeTruthy();
       expect(screen.getByText('Situation'), row.id).toBeTruthy();
       expect(screen.getByText(event.narrative ?? event.situation!), row.id).toBeTruthy();
-      expect(screen.getByText(sourceNote!), row.id).toBeTruthy();
-      expect(screen.getByText(event.staff_assessment!), row.id).toBeTruthy();
+      expect(screen.getByText('Source note'), row.id).toBeTruthy();
+      expect(screen.getByText(playerSafeDossierText(sourceNote!)), row.id).toBeTruthy();
+      expect(screen.getByText(playerSafeDossierText(event.staff_assessment!)), row.id).toBeTruthy();
       for (const evidence of event.trigger_evidence ?? []) {
-        expect(screen.getByText(evidence), row.id).toBeTruthy();
+        expect(screen.getByText(playerSafeDossierText(evidence)), row.id).toBeTruthy();
       }
       if (usesStaffRecommendation) {
         expect(screen.getAllByText('Staff recommendation'), row.id).toHaveLength(1);

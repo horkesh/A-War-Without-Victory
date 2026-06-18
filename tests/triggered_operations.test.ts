@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
-import { checkTriggeredOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
     CorpsCommandState,
@@ -97,6 +97,8 @@ function makeState(turn: number): GameState {
             front_segments: {},
             front_posture: {},
             front_pressure: {},
+            event_flags: {},
+            fired_event_ids: [],
         } as any,
         political: {
             political_controllers: politicalControllers,
@@ -306,11 +308,38 @@ describe('checkTriggeredOperations', () => {
     });
 
     it('persists non-blocking validation warnings in watched-operation traces', async () => {
-        // TG activation (commit 0b681ffe, flags default-ON): with ENABLE_TG_ARMY_HQ_OPS on,
-        // Krivaja-95 (army_hq_op_id set) is OWNED by the inject-army-hq-operations war-phase step
-        // and SKIPPED by the legacy checkTriggeredOperations path, so it emits no Krivaja-95
-        // watched-operation warning row here. This test verifies the LEGACY triggered path's
-        // non-blocking-warning persistence, so force the AHQ flag OFF to exercise that path.
+        const state = makeState(10);
+        state.military.formations!['rs_1st_kotor_varo_light_infantry']!.status = 'inactive';
+        state.military.formations!['rs_1st_kotor_varo_light_infantry']!.personnel = 0;
+
+        checkTriggeredOperations(state);
+
+        const warningRow = state.military.watched_operations?.find((row: any) =>
+            row.operation_name === 'Operation Kotor Varos'
+            && row.blocker_code === 'brigade_ineligible'
+        );
+        assert.deepEqual(warningRow, {
+            operation_id: '',
+            operation_name: 'Operation Kotor Varos',
+            canonical_window: '10',
+            catalog_status: 'present',
+            eligibility_status: 'unknown',
+            launch_status: 'unknown',
+            delivery_status: 'unknown',
+            blocker_code: 'brigade_ineligible',
+            typed_blocker: 'brigade_ineligible',
+            turn: 10,
+        });
+    });
+
+    it('does not inject Krivaja or Stupcanica before event-owned fall receipts', async () => {
+        const ahqState = makeState(170);
+        ahqState.military.triggered_operations_accepted = {
+            'Operation Cerska-Kamenica': 40,
+        };
+        assert.ok(!injectArmyHqOperations(ahqState).includes('Operation Krivaja-95'));
+        assert.equal(ahqState.military.corps_command!['vrs_drina']!.active_operations.length, 0);
+
         vi.resetModules();
         vi.doMock('../src/sim/combat/tactical_group_config.js', async () => {
             const actual = await vi.importActual<typeof import('../src/sim/combat/tactical_group_config.js')>(
@@ -321,34 +350,23 @@ describe('checkTriggeredOperations', () => {
         const { checkTriggeredOperations: checkTriggeredOperationsLegacy } =
             await import('../src/sim/combat/triggered_operations.js');
 
-        const state = makeState(170);
-        state.military.triggered_operations_accepted = {
+        const legacyKrivaja = makeState(170);
+        legacyKrivaja.military.triggered_operations_accepted = {
             'Operation Cerska-Kamenica': 40,
         };
-        state.military.formations!['rs_skelani_battalion']!.status = 'inactive';
-        state.military.formations!['rs_skelani_battalion']!.personnel = 0;
+        assert.ok(!checkTriggeredOperationsLegacy(legacyKrivaja).includes('Operation Krivaja-95'));
+        assert.equal(legacyKrivaja.military.corps_command!['vrs_drina']!.active_operations.length, 0);
 
-        checkTriggeredOperationsLegacy(state);
+        const legacyStupcanica = makeState(172);
+        legacyStupcanica.military.triggered_operations_accepted = {
+            'Operation Cerska-Kamenica': 40,
+            'Operation Krivaja-95': 170,
+        };
+        assert.ok(!checkTriggeredOperationsLegacy(legacyStupcanica).includes('Operation Stupčanica-95'));
+        assert.equal(legacyStupcanica.military.corps_command!['vrs_drina']!.active_operations.length, 0);
 
         vi.resetModules();
         vi.doUnmock('../src/sim/combat/tactical_group_config.js');
-
-        const warningRow = state.military.watched_operations?.find((row: any) =>
-            row.operation_name === 'Operation Krivaja-95'
-            && row.blocker_code === 'brigade_ineligible'
-        );
-        assert.deepEqual(warningRow, {
-            operation_id: '',
-            operation_name: 'Operation Krivaja-95',
-            canonical_window: '170-178',
-            catalog_status: 'present',
-            eligibility_status: 'unknown',
-            launch_status: 'unknown',
-            delivery_status: 'unknown',
-            blocker_code: 'brigade_ineligible',
-            typed_blocker: 'brigade_ineligible',
-            turn: 170,
-        });
     });
 
     it('persists typed build-failure detail when no triggered axis can be built', () => {

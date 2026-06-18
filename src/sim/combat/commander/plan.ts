@@ -1358,9 +1358,9 @@ function createOpportunityPlan(
     // bot would have generated. It is NOT an OSID blacklist override and NOT
     // `avoided_osids_by_faction` (banned) — it filters target generation. The
     // 1995-pivot release empties the eastern-enclave set before the historical
-    // fall window, so Krivaja-95 (which injects objectives directly and bypasses
-    // this path anyway) + the scripted *_falls_1995 events still flip control and
-    // the genocide rupture still records.
+    // fall window, so event-owned *_falls_1995 receipts can still flip Srebrenica
+    // and Zepa control and the genocide rupture can still record. Krivaja-95 and
+    // Stupcanica-95 are chronology/AAR context rows and do not deliver the fall.
     // DEFAULT-OFF PURITY: only honor the contained set when THIS faction's contain
     // flag is enabled. A save written with a contain flag ON serializes
     // `last_contained_osids_by_faction`; if the flag is then OFF on resume, the
@@ -1886,4 +1886,3 @@ function computeViabilityScore(
 
     return Math.max(0, Math.min(1, score));
 }
-

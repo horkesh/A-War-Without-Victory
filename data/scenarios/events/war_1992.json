@@ -34,7 +34,7 @@
         "id": "all_six",
         "branch_tag": "rs_all_six",
         "label": "Adopt all six goals",
-        "description": "Full offensive doctrine. All axes active. The Drina valley will be cleared. Sarajevo will be divided. Your commander's warning is noted and disregarded.",
+        "description": "Full offensive doctrine. All axes active. The Drina valley becomes a declared military objective. Sarajevo will be divided. Your commander's warning is noted and disregarded.",
         "effects": [
           {
             "kind": "morale_change",

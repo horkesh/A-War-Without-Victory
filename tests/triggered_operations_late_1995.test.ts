@@ -8,8 +8,8 @@
  * catalog (LANE B Phase 3, 2026-05-01); see
  * tests/operation_opportunities_5th_corps_sana.test.ts for its coverage.
  * Krivaja-95 / Stupčanica-95 are sensitive-history T4 candidates — they
- * remain calendar-triggered until the SENSITIVE_HISTORY_DESIGN_GATE.md §6
- * sign-off chain authors a T4 opportunity replacement.
+ * require event-owned fall receipts before the operation trigger can fire.
+ * Srebrenica/Zepa fall control remains event-owned.
  *
  * Contract for the remaining two:
  *   1. Each op exists with the correct faction / primary_corps / turn gate.
@@ -42,12 +42,10 @@ const PAINTED_APR_1995 = JSON.parse(
 const oct1995Map = (PAINTED_OCT_1995.by_settlement_id ?? PAINTED_OCT_1995) as Record<string, string>;
 const apr1995Map = (PAINTED_APR_1995.by_settlement_id ?? PAINTED_APR_1995) as Record<string, string>;
 
-function trivialState(turn: number): GameState {
-    // Minimal state for trigger-only tests. Triggers in this packet are pure
-    // turn comparisons, so we do not need a full game state to invoke them.
+function trivialState(turn: number, firedEventIds: string[] = []): GameState {
     return {
         meta: { turn } as unknown,
-        military: { corps_command: {}, formations: {} },
+        military: { corps_command: {}, formations: {}, fired_event_ids: firedEventIds },
         political: { political_controllers: {} },
     } as unknown as GameState;
 }
@@ -88,8 +86,9 @@ describe('late-1995 triggered operations — catalog', () => {
         // Trigger gate: w >= 170 (LANE-NIGHTSHIFT-KRIVAJA-95-T168-FLOOR-FIX
         // 2026-05-06: bumped 168→170 to enforce §6 canonical floor; sign-off
         // precedent b03333af / bc44ddec).
-        assert.equal(def!.trigger(trivialState(169), 169), false);
-        assert.equal(def!.trigger(trivialState(170), 170), true);
+        assert.equal(def!.trigger(trivialState(169, ['srebrenica_falls_1995']), 169), false);
+        assert.equal(def!.trigger(trivialState(170), 170), false);
+        assert.equal(def!.trigger(trivialState(170, ['srebrenica_falls_1995']), 170), true);
     });
 
     it('Operation Stupčanica-95 has the expected faction/corps/turn-gate/single-axis shape', () => {
@@ -103,8 +102,9 @@ describe('late-1995 triggered operations — catalog', () => {
         assert.equal(def!.axes[0]!.objectives.length, 1);
         assert.equal(def!.axes[0]!.objectives[0], 'op:rogatica:zepa_2');
         // Trigger gate: w >= 172 (after Krivaja-95 completion)
-        assert.equal(def!.trigger(trivialState(171), 171), false);
-        assert.equal(def!.trigger(trivialState(172), 172), true);
+        assert.equal(def!.trigger(trivialState(171, ['zepa_falls_1995']), 171), false);
+        assert.equal(def!.trigger(trivialState(172), 172), false);
+        assert.equal(def!.trigger(trivialState(172, ['zepa_falls_1995']), 172), true);
     });
 
     it('Operation Mistral 2 has migrated out of triggered operations', () => {
@@ -131,14 +131,17 @@ describe('late-1995 triggered operations — turn gates protect early-war runs',
         }
     });
 
-    it('all late-1995 op turn gates are >= 168 (Krivaja-95 earliest)', () => {
+    it('all late-1995 op turn gates are receipt-owned and >= 168', () => {
         for (const name of NEW_OP_NAMES) {
             const def = _TRIGGERED_OPS.find((d) => d.name === name);
             assert.ok(def, name);
-            // Sweep from 168 upward and find the first turn where trigger flips true.
+            const receipt = name.includes('Krivaja') ? 'srebrenica_falls_1995' : 'zepa_falls_1995';
+            for (let t = 168; t <= 200; t++) {
+                assert.equal(def!.trigger(trivialState(t), t), false, `${name} must not trigger without ${receipt}`);
+            }
             let firstTrue = -1;
             for (let t = 168; t <= 200; t++) {
-                if (def!.trigger(trivialState(t), t)) {
+                if (def!.trigger(trivialState(t, [receipt]), t)) {
                     firstTrue = t;
                     break;
                 }
