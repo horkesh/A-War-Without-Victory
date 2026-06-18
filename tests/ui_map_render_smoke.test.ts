@@ -435,4 +435,49 @@ describe('Tactical map render smoke', () => {
     expect(briefing?.items[0]?.target).toEqual({ type: 'corps', corpsId: 'arbih_1st_corps' });
     expect(briefing?.items[1]?.target).toEqual({ type: 'enclaves', enclaveId: 'gorazde' });
   });
+
+  it('canonical command briefing view maps target kind routes and labels', () => {
+    const briefing = toCommandBriefingView({
+      turn: 12,
+      faction: 'RBiH',
+      headline: '3 items for your review.',
+      criticalCount: 1,
+      warningCount: 1,
+      items: [
+        {
+          id: 'log-supply',
+          section: 'logistics',
+          severity: 'critical',
+          title: 'Supply lines critically exposed',
+          detail: '1 critical.',
+          actionLabel: 'Review Supply',
+          target: { kind: 'summary', summaryFocus: 'support', label: 'Supply ledger' },
+        },
+        {
+          id: 'dip-peace-plan',
+          section: 'diplomatic',
+          severity: 'critical',
+          title: 'Peace plan requires response',
+          detail: 'A peace plan has been proposed.',
+          actionLabel: 'Review Plan',
+          target: { kind: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+        },
+        {
+          id: 'cmd-officer-events',
+          section: 'command',
+          severity: 'warning',
+          title: '1 officer event pending',
+          detail: 'Officer events require your attention.',
+          actionLabel: 'Review Officers',
+          target: { kind: 'officer_events', officerFocus: 'personnel', label: 'Personnel' },
+        },
+      ],
+    });
+
+    expect(briefing?.items.map(item => item.target.type)).toEqual(['summary', 'peace_plan', 'officer_events']);
+    expect(briefing?.items[0]?.target.summaryFocus).toBe('support');
+    expect(briefing?.items[1]?.target.peacePlanId).toBe('vance_owen');
+    expect(briefing?.items[2]?.target.officerFocus).toBe('personnel');
+    expect(briefing?.items.map(item => item.actionChipLabel)).toEqual(['Supply ledger', 'Peace plan', 'Personnel']);
+  });
 });

@@ -515,13 +515,16 @@ export type CommandBriefingSeverity = 'critical' | 'warning' | 'info';
 export type SummaryFocusSection = 'overview' | 'ivp' | 'convoys' | 'casualties' | 'support' | 'opsec' | 'capital';
 
 export interface CommandBriefingTargetView {
-    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events' | 'none';
+    type: 'summary' | 'enclaves' | 'operation' | 'sector' | 'settlement' | 'corps' | 'officer_events' | 'peace_plan' | 'none';
     summaryFocus?: SummaryFocusSection;
     operationKey?: string;
     sectorId?: string;
     osid?: string;
     enclaveId?: string;
     corpsId?: string;
+    peacePlanId?: string;
+    officerFocus?: 'interpretations' | 'personnel';
+    label?: string;
 }
 
 export interface CommandBriefingItemView {
@@ -532,6 +535,7 @@ export interface CommandBriefingItemView {
     title: string;
     detail: string;
     actionLabel?: string;
+    actionChipLabel?: string;
     corpsId?: string;
     target: CommandBriefingTargetView;
 }

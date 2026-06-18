@@ -2482,7 +2482,7 @@ function validateCommandBriefing(value: unknown, errors: string[]): void {
             if (!isRecord(item.target)) {
                 errors.push(`${path}.target must be an object when present`);
             } else {
-                for (const key of ['kind', 'osid', 'corpsId', 'enclaveId']) {
+                for (const key of ['kind', 'osid', 'corpsId', 'enclaveId', 'label', 'summaryFocus', 'operationKey', 'sectorId', 'peacePlanId', 'officerFocus']) {
                     if (key in item.target && item.target[key] !== undefined && typeof item.target[key] !== 'string') {
                         errors.push(`${path}.target.${key} must be a string when present`);
                     }

@@ -30,6 +30,12 @@ export interface BriefingItem {
         osid?: string;
         corpsId?: string;
         enclaveId?: string;
+        label?: string;
+        summaryFocus?: string;
+        operationKey?: string;
+        sectorId?: string;
+        peacePlanId?: string;
+        officerFocus?: string;
     };
 }
 
@@ -103,6 +109,14 @@ function normalizeCorridorState(value: string | undefined): CorridorStateLevel |
 
 function formatCount(count: number, singular: string, plural = `${singular}s`): string {
     return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function formatIdLabel(id: string): string {
+    return id
+        .split(/[_:-]+/)
+        .filter(Boolean)
+        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(' ');
 }
 
 /**
@@ -274,7 +288,7 @@ registerBriefingCollector('logistics', (state, faction) => {
         title,
         detail: `${supplyParts.join(', ')}; ${corridorParts.join(', ')}.`,
         actionLabel: 'Review Supply',
-        target: { kind: 'summary' },
+        target: { kind: 'summary', summaryFocus: 'support', label: 'Supply ledger' },
     }];
 });
 
@@ -292,6 +306,11 @@ registerBriefingCollector('diplomatic', (state, faction) => {
             title: 'Peace plan requires response',
             detail: `A peace plan has been proposed. Your response is required.`,
             actionLabel: 'Review Plan',
+            target: {
+                kind: 'peace_plan',
+                peacePlanId: String((neg.pending_peace_plan as { plan_id?: string; planId?: string }).plan_id ?? (neg.pending_peace_plan as { planId?: string }).planId ?? 'pending'),
+                label: 'Peace plan',
+            },
         });
     }
 
@@ -336,9 +355,9 @@ registerBriefingCollector('humanitarian', (state, faction) => {
                     id: `hum-enclave-${enclaveId}`,
                     section: 'humanitarian',
                     severity: e.isolation_turns >= 16 ? 'critical' : 'warning',
-                    title: `${enclaveId} under prolonged siege`,
+                    title: `${formatIdLabel(enclaveId)} under prolonged siege`,
                     detail: `Isolated for ${e.isolation_turns} turns. Resilience: ${Math.round(e.resilience)}.`,
-                    target: { enclaveId },
+                    target: { kind: 'enclaves', enclaveId, label: formatIdLabel(enclaveId) },
                 });
             }
         }
@@ -387,6 +406,7 @@ registerBriefingCollector('command', (state, faction) => {
                     ? 'One or more officers have refused orders. Review required.'
                     : 'Officers have modified or pushed back on orders.',
                 actionLabel: 'Review Interpretations',
+                target: { kind: 'officer_events', officerFocus: 'interpretations', label: 'Officer interpretations' },
             });
         }
 
@@ -400,6 +420,7 @@ registerBriefingCollector('command', (state, faction) => {
                 title: `${personnelEvents.length} officer event${personnelEvents.length > 1 ? 's' : ''} pending`,
                 detail: 'Officer replacement or succession events require your attention.',
                 actionLabel: 'Review Officers',
+                target: { kind: 'officer_events', officerFocus: 'personnel', label: 'Personnel' },
             });
         }
     }

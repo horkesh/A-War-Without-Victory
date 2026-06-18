@@ -38,6 +38,7 @@ function makeItem(overrides: Partial<BriefingItem> = {}): BriefingItem {
         title: overrides.title ?? 'Brief item',
         detail: overrides.detail ?? 'detail copy',
         actionLabel: overrides.actionLabel ?? 'Review',
+        actionChipLabel: overrides.actionChipLabel,
         target: overrides.target ?? { type: 'corps', corpsId: 'rs_1k_corps' },
         corpsId: overrides.corpsId ?? 'rs_1k_corps',
     } as BriefingItem;
@@ -95,5 +96,21 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
         expect(details).toBeTruthy();
         expect((details as HTMLDetailsElement).hasAttribute('open')).toBe(false);
         expect(container.textContent).toContain('No alerts');
+    });
+
+    it('renders normalized action chip labels instead of static target type labels', () => {
+        const items: BriefingItem[] = [
+            makeItem({
+                id: 'supply',
+                title: 'Supply lines critically exposed',
+                target: { type: 'summary', summaryFocus: 'support' },
+                actionChipLabel: 'Supply ledger',
+            }),
+        ];
+
+        const { container } = render(createElement(SituationBriefing, { items, onNavigate: () => undefined }));
+
+        expect(container.textContent).toContain('Supply ledger');
+        expect(container.textContent).not.toContain('-> CORPS');
     });
 });
