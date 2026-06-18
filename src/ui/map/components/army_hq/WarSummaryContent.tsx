@@ -28,6 +28,10 @@ function enumLabel(prefix: string, value: string): string {
     return t(`${prefix}.${value}` as MessageKey);
 }
 
+function campaignCostSeverityLabel(severity: string): string {
+    return enumLabel('turnAftermath.severity', severity);
+}
+
 interface WarSummaryContentProps {
     focusSection?: SummaryFocusSection;
 }
@@ -162,7 +166,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     <div className="space-y-1 text-[12px]" data-testid="war-summary-campaign-cost">
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.severity')}</span>
-                                            <span className="text-text-primary uppercase tabular-nums">{campaignCost.severity}</span>
+                                            <span className="text-text-primary uppercase tabular-nums">{campaignCostSeverityLabel(campaignCost.severity)}</span>
                                         </div>
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.friendlyCasualties')}</span>

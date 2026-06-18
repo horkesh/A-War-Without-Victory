@@ -300,7 +300,7 @@ describe('buildTurnAftermathView', () => {
     });
 
     expect(view?.dateLabel).toBe('29 jun 1992');
-    expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 OSID-a.');
+    expect(view?.headline).toBe('Neto teritorijalni dobitak: +2 položaja.');
     expect(view?.narrativeLine).toBe('Sedmica završava osvojenim prostorom, ali knjiga troška još određuje cijenu napredovanja.');
     expect(view?.cost.reasons).toEqual(['12 prijateljskih gubitaka', '1 formacija uništena', '80 raseljenih']);
     expect(view?.judgment).toEqual({
@@ -443,6 +443,8 @@ describe('buildTurnAftermathView', () => {
       averageFriendlyMilitaryCasualties: 160 / 3,
       casualtyExchangeRatio: 50 / 160,
     });
+    expect(cost.briefing).toBe('3 recorded turns: 160 friendly casualties, 5200 displaced, +2 net territorial change, 0.31 opposing casualties per friendly casualty.');
+    expect(cost.briefing).not.toContain('OSID');
     expect(cost.windowLabel).toContain(' - ');
     expect(cost.topDrivers).toEqual([
       '5200 displaced',
@@ -513,7 +515,8 @@ describe('buildTurnAftermathView', () => {
 
     expect(pulse.briefing).toBe('Arhivski prozor je miran: nema većih pomjeranja ili troškova u vidljivim zapisima.');
     expect(cost.headline).toBe('Cijena kampanje je kritična.');
-    expect(cost.briefing).toBe('3 zabilježena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 neto OSID-a, 0.31 protivničkih gubitaka po prijateljskom gubitku.');
+    expect(cost.briefing).toBe('3 zabilježena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 teritorijalni saldo, 0.31 protivničkih gubitaka po prijateljskom gubitku.');
+    expect(cost.briefing).not.toContain('OSID');
     expect(cost.topDrivers).toEqual([
       '5200 raseljenih',
       '2 vlastite formacije uništene',

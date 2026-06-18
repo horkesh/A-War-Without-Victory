@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 /**
  * Proof tests for Cluster D WarCostSummary formatting helpers.
  *
@@ -9,16 +11,22 @@
  * Tests pure formatting functions only — no React rendering.
  */
 
+import { cleanup, render } from '@testing-library/react';
+import { createElement } from 'react';
 import { afterEach, describe, it, expect } from 'vitest';
 import {
     formatDurationDelta,
     formatCasualtyRatio,
     formatHistoricalDivergenceNote,
     formatTerritoryDivergence,
+    WarCostSummary,
 } from '../../src/ui/map/components/WarCostSummary';
 import { setLocale } from '../../src/ui/map/i18n';
+import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
+import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
 
 afterEach(() => {
+    cleanup();
     setLocale('en');
 });
 
@@ -119,5 +127,65 @@ describe('formatHistoricalDivergenceNote', () => {
             .toBe('RS je kontrolisao 47.5% teritorije naspram historijskih 49%.');
         expect(formatHistoricalDivergenceNote('Total military casualties were 72% of historical levels'))
             .toBe('Ukupni vojni gubici bili su 72% historijskog nivoa.');
+    });
+});
+
+describe('WarCostSummary player-facing labels', () => {
+    it('keeps opportunity responses and finding badges player-safe while raw ids remain internal', () => {
+        const costLedger: CostLedger = {
+            war_duration_weeks: 40,
+            entries: [],
+            rupture_consequences: [],
+            total_military_killed: 0,
+            total_civilian_killed: 0,
+            operation_opportunities: {
+                total_decisions: 1,
+                approved: 1,
+                declined: 0,
+                expired: 0,
+                completed: 1,
+                successes: 0,
+                failures: 0,
+                by_faction: {},
+                entries: [{
+                    proposal_id: 'proposal_1',
+                    opportunity_id: 'opportunity_1',
+                    display_name: 'Eastern corridor',
+                    faction: 'RS',
+                    response: 'under_resource',
+                    response_turn: 12,
+                    exit_class: 'failed',
+                    total_attacks: 1,
+                    objectives_targeted: 1,
+                    objectives_captured: 0,
+                }],
+            },
+            findings: [{
+                id: 'finding_1',
+                category: 'rupture',
+                severity: 'rupture',
+                faction: 'RS',
+                title: 'Srebrenica genocide',
+                text: 'Locked condemnation finding.',
+                sources: ['Sensitive History Design Gate'],
+            }],
+        };
+        const comparison: ComparisonResult = {
+            duration_delta_weeks: 0,
+            territory_divergence: {},
+            casualty_ratio: 1,
+            displacement_ratio: 1,
+            rupture_divergence: [],
+            divergence_notes: [],
+        };
+
+        const { container } = render(createElement(WarCostSummary, { costLedger, comparison }));
+        const text = container.textContent ?? '';
+
+        expect(text).toContain('Under-resourced approval');
+        expect(text).toContain('Serb command / Locked condemnation');
+        expect(text).not.toContain('under_resource');
+        expect(text).not.toContain('RS / rupture');
+        expect(text).not.toMatch(/\b(grave|record|rupture)\b/);
     });
 });

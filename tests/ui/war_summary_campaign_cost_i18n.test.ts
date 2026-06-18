@@ -89,9 +89,12 @@ describe('War Summary campaign cost localization', () => {
         expect(screen.getByText('Neprijateljsko raseljavanje nije ovdje razbijeno kao tačni ukupni brojevi po frakciji u igračevom sigurnom prikazu.')).toBeTruthy();
         expect(screen.getByText('Cijena kampanje')).toBeTruthy();
         expect(within(campaignCost).getByText('Težina')).toBeTruthy();
+        expect(within(campaignCost).getByText('kritičan')).toBeTruthy();
         expect(within(campaignCost).getByText('Prijateljski gubici')).toBeTruthy();
         expect(within(campaignCost).getByText('Raseljeni')).toBeTruthy();
-        expect(within(campaignCost).getByText('Neto OSID-i')).toBeTruthy();
+        expect(within(campaignCost).getByText('Teritorijalni saldo')).toBeTruthy();
+        expect(campaignCost.textContent).not.toContain('critical');
+        expect(campaignCost.textContent).not.toContain('Neto OSID');
         expect(screen.queryByText('Campaign Cost')).toBeNull();
         expect(screen.queryByText('Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.')).toBeNull();
     });
