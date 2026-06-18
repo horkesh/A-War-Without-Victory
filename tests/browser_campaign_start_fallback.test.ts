@@ -134,7 +134,7 @@ describe('browser new-campaign fallback', () => {
     const filed = parsed.firedEvents?.find((event) => event.id === 'rs_strategic_goals');
     expect(filed).toMatchObject({
       isDecision: true,
-      title: 'Rs Strategic Goals',
+      title: 'The Assembly Speaks',
       narrative: 'Presidential response filed in the campaign record.',
     });
   });

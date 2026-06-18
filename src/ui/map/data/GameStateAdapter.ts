@@ -73,6 +73,11 @@ import {
     deriveFactionSupplyConditionFromOsidReport,
 } from '../../../sim/combat/supply_condition.js';
 import { PEACE_PLANS } from '../../../sim/negotiation/peace_plan_data.js';
+import war1992Events from '../../../../data/scenarios/events/war_1992.json';
+import war1993Events from '../../../../data/scenarios/events/war_1993.json';
+import war1994Events from '../../../../data/scenarios/events/war_1994.json';
+import war1995Events from '../../../../data/scenarios/events/war_1995.json';
+import war1992HrhbSummerEvents from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -2886,6 +2891,51 @@ function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameStat
     };
 }
 
+interface StaticEventDisplayDefinition {
+    id?: unknown;
+    title?: unknown;
+    response_options?: ReadonlyArray<{ id?: unknown; label?: unknown }>;
+}
+
+interface StaticEventDisplayInfo {
+    title: string | null;
+    responseLabels: ReadonlyMap<string, string>;
+}
+
+const STATIC_EVENT_DISPLAY_CATALOG = buildStaticEventDisplayCatalog([
+    war1992Events,
+    war1992HrhbSummerEvents,
+    war1993Events,
+    war1994Events,
+    war1995Events,
+]);
+
+function buildStaticEventDisplayCatalog(catalogs: ReadonlyArray<unknown>): ReadonlyMap<string, StaticEventDisplayInfo> {
+    const out = new Map<string, StaticEventDisplayInfo>();
+    for (const catalog of catalogs) {
+        if (!Array.isArray(catalog)) continue;
+        for (const row of catalog as StaticEventDisplayDefinition[]) {
+            const id = typeof row?.id === 'string' ? row.id.trim() : '';
+            if (!id || out.has(id)) continue;
+            const responseLabels = new Map<string, string>();
+            for (const option of row.response_options ?? []) {
+                const optionId = typeof option?.id === 'string' ? option.id.trim() : '';
+                const label = typeof option?.label === 'string' ? option.label.trim() : '';
+                if (optionId && label) responseLabels.set(optionId, label);
+            }
+            out.set(id, {
+                title: typeof row?.title === 'string' && row.title.trim() ? row.title.trim() : null,
+                responseLabels,
+            });
+        }
+    }
+    return out;
+}
+
+function getStaticEventDisplayInfo(eventId: string): StaticEventDisplayInfo | null {
+    return STATIC_EVENT_DISPLAY_CATALOG.get(eventId) ?? null;
+}
+
 function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
     const firedIds = state.military?.fired_event_ids as string[] | undefined;
     const decisionLog = (state.military?.event_decision_log ?? []) as Array<{
@@ -2938,14 +2988,15 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
     for (const id of orderedIds) {
         const info = eventInfo.get(id);
         const decision = decisionInfo.get(id);
+        const staticInfo = getStaticEventDisplayInfo(id);
         const turn = decision?.turn ?? info?.turn ?? 0;
         const response = decision
-            ? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
+            ? staticInfo?.responseLabels.get(decision.responseId) ?? getPlayerSafeDisplayLabel(decision.responseId, 'response recorded')
             : null;
         entries.push({
             id,
             turn,
-            title: getPlayerSafeDecisionTitle(info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
+            title: getPlayerSafeDecisionTitle(staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
             narrative: decision ? 'Presidential response filed in the campaign record.' : '',
             category: decision ? 'political' : 'military',
             effects: decision && response ? [{ kind: 'decision', description: `Response recorded: ${response}.` }] : [],
