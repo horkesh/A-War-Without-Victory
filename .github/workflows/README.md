@@ -52,7 +52,9 @@ The browser gates are intentionally inside the already-required `full-suite` job
 new first-hour or live-surface regressions block relevant PRs immediately instead of
 depending on a separate branch-protection update. The job installs Puppeteer's
 Chrome binary explicitly before those gates because GitHub-hosted runners do not
-populate `/home/runner/.cache/puppeteer` from `npm install` alone.
+populate `/home/runner/.cache/puppeteer` from `npm install` alone. The
+`full-suite` checkout uses `lfs: true` because the browser map path must load real
+PMTiles assets, not Git LFS pointer files.
 
 Path sets (a changed file matching ANY entry => heavy steps run):
 

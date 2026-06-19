@@ -71,7 +71,13 @@ export default defineConfig({
               const match = rangeHeader.match(/bytes=(\d+)-(\d*)/);
               if (match) {
                 const start = parseInt(match[1], 10);
-                const end = match[2] ? parseInt(match[2], 10) : stat.size - 1;
+                const requestedEnd = match[2] ? parseInt(match[2], 10) : stat.size - 1;
+                if (start >= stat.size) {
+                  res.writeHead(416, { 'Content-Range': `bytes */${stat.size}` });
+                  res.end();
+                  return;
+                }
+                const end = Math.min(requestedEnd, stat.size - 1);
                 const chunkSize = end - start + 1;
                 res.writeHead(206, {
                   'Content-Range': `bytes ${start}-${end}/${stat.size}`,

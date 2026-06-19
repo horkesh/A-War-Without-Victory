@@ -120,6 +120,10 @@ describe('browser QA CI wiring contract', () => {
   it('runs first-hour and live-surface browser gates in the required full-suite job', () => {
     const workflow = read('.github/workflows/full-suite-and-fingerprint.yml');
 
+    const fullSuiteJobStart = workflow.indexOf('  full-suite:');
+    const structuralFingerprintStart = workflow.indexOf('  structural-fingerprint:');
+    const fullSuiteJob = workflow.slice(fullSuiteJobStart, structuralFingerprintStart);
+    expect(fullSuiteJob).toContain('lfs: true');
     expect(workflow).toContain('name: First-hour browser gate');
     expect(workflow).toContain('run: npm run qa:first-hour:browser');
     expect(workflow).toContain('name: Live surface browser gate');
