@@ -11,8 +11,7 @@ interface GhostPathProperties {
 }
 
 /**
- * Builds Ghost Paths (dashed lines) for units with staged sector assignments or multi-step movement.
- * Currently optimized for the new Sector Assignment paradigm.
+ * Builds Ghost Paths (dashed lines) for units with staged sector assignments.
  */
 export function buildGhostPathsGeoJSON(
     state: LoadedGameState,
@@ -33,7 +32,7 @@ export function buildGhostPathsGeoJSON(
     const relevantOrders = stagedOrders.filter(o => o.formationId === selectedFormationId);
 
     for (const order of relevantOrders) {
-        if (order.type !== 'sector' && order.type !== 'move') continue;
+        if (order.type !== 'sector') continue;
         if (!order.targetOsid) continue;
 
         const formation = formationById.get(order.formationId);

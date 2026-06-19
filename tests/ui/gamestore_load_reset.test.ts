@@ -305,7 +305,7 @@ describe('gameStore replay inspection - read-only map frame swap', () => {
                 }
                 : null,
             selectedOsid: 'op:stale:selection',
-            stagedOrders: [{ id: 'staged_0', type: 'move', formationId: 'brig_1', targetOsid: 'op:test:target' }],
+            stagedOrders: [{ id: 'staged_0', type: 'sector', formationId: 'brig_1', targetOsid: 'sector:test' }],
         }));
 
         const finalState = useGameStore.getState().loadedGameState;

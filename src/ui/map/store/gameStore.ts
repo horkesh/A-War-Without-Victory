@@ -43,7 +43,7 @@ export type MapMode = 'political' | 'ethnic' | 'supply' | 'casualties' | 'morale
 /** Single staged order for the current turn (Phase C5). */
 export interface StagedOrder {
   id: string;
-  type: 'attack' | 'move' | 'posture' | 'sector';
+  type: 'attack' | 'posture' | 'sector';
   formationId: string;
   targetOsid?: string;
   postureName?: string;
@@ -139,9 +139,9 @@ export interface GameStore {
   setMunicipalityBordersVisible: (v: boolean) => void;
   setGhostMapVisible: (v: boolean) => void;
 
-  /** Phase C4: When 'attack'/'move'/'sector', next OSID click opens AttackConfirmation or stages move/sector assignment. */
-  orderModeForFormation: 'attack' | 'move' | 'sector' | null;
-  setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => void;
+  /** Phase C4: When 'attack'/'sector', next OSID click opens AttackConfirmation or stages sector assignment. */
+  orderModeForFormation: 'attack' | 'sector' | null;
+  setOrderModeForFormation: (mode: 'attack' | 'sector' | null) => void;
 
   /** Phase C4: When set, show AttackConfirmation modal; cleared on Confirm or Cancel. */
   pendingAttackConfirmation: { attackerFormationId: string; targetOsid: string } | null;
@@ -431,7 +431,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setGhostMapVisible: (v) => set({ ghostMapVisible: v }),
 
   orderModeForFormation: null,
-  setOrderModeForFormation: (mode: 'attack' | 'move' | 'sector' | null) => set({ orderModeForFormation: mode }),
+  setOrderModeForFormation: (mode: 'attack' | 'sector' | null) => set({ orderModeForFormation: mode }),
 
   pendingAttackConfirmation: null,
   setPendingAttackConfirmation: (v) => set({ pendingAttackConfirmation: v }),

@@ -41,12 +41,12 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `stage-posture-order` (invoke)
   - Payload: `{ brigadeId: string, posture: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`. The 3D operational warmap Selection panel and mode toolbar call this via DesktopBridge `stagePostureOrder()`.
+  - Behavior: compatibility-era channel. Pushes or replaces entry in `state.brigade_posture_orders` for the brigade, reserializes, sends state via `game-state-updated`. This is not a current player-facing direct-command affordance in the React tactical map; president-facing posture intent should route through the current Army HQ/corps/sector command surfaces.
 
 - `stage-move-order` (invoke)
   - Payload: `{ brigadeId: string, targetMunicipalityId: string }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: sets `state.brigade_mun_orders[brigadeId] = [targetMunicipalityId]`, reserializes, sends state via `game-state-updated`.
+  - Behavior: compatibility-era channel. Sets `state.brigade_mun_orders[brigadeId] = [targetMunicipalityId]`, reserializes, sends state via `game-state-updated`. As of 2026-06-19, the live React tactical map does not expose direct brigade `move` mode or OSID-click staging for this channel; movement intent is player-facing through Army HQ/corps-operation/sector systems and validated movement channels.
 
 - `stage-deploy-order` (invoke)
   - Payload: `{ brigadeId: string }`

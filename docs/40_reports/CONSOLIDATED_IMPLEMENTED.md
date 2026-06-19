@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest direct brigade move affordance retirement:** [implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md](implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md) - The live tactical map no longer exposes compatibility-era direct brigade move mode or OSID-click staging of `brigade_mun_orders`; player-facing map clicks remain attack confirmation and sector assignment only.
+
 **Latest first-hour faction modal gate parity:** [implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md](implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md) - RBiH, RS, and HRHB new-campaign starts all reset to `WAR HAS STARTED`, proceed through identity briefing and foundational decisions, and lock top-level toolbar routes while the required decision modal owns focus.
 
 **Latest commander read-model surface parity:** [implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md](implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md) - ORBAT, Corps Detail, and Formation Detail now share the opening commander read-model, showing display-only turn-0 command labels without seating officers in sim state.

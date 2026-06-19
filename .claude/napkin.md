@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**DIRECT BRIGADE MOVE AFFORDANCE RETIRED (2026-06-19).** The live React tactical map must not expose direct `move` mode or OSID-click staging of `brigade_mun_orders`; compatibility IPC is not player-facing command authority. Do instead: keep map-click order ownership to attack confirmation and brigade-to-sector assignment unless a new engine-consuming, president-through-generals design explicitly reopens movement UI.
+
 **COMMANDER READ-MODEL SURFACE PARITY (2026-06-18).** Opening commander labels are display-only UI read-model truth, not officer seating. ORBAT, Corps Detail, Formation Detail, Army HQ, and OOB should all use `resolveCorpsCommanderDisplay(...)` / `CommanderDisplayPanel` style rendering for Drina/ARBiH 3rd/ARBiH 4th opening command and synthetic JNA command staff. Do not set `assigned_corps_id` at turn 0 to fix a display vacancy without a dedicated 188w/canon lane.
 
 **SREBRENICA/ZEPA CURRENT RULE (2026-06-18).** Srebrenica/Zepa fall receipts are event-owned (`srebrenica_falls_1995` / `zepa_falls_1995` `control_change` effects). Do not tune Krivaja-95/Stupcanica-95 operation delivery, donor reach, defender-power gates, recovery windows, or movement exceptions merely to make the falls happen. Rupture observes the event-created Srebrenica control state plus enclave/turn predicates; Krivaja/Stupcanica are chronology/AAR context only.

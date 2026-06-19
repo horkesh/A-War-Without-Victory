@@ -52,7 +52,7 @@ describe('Pause Escape shortcuts', () => {
             hoveredOsids: ['op:sarajevo:sarajevo_1'],
             tooltipTarget: { type: 'osid', id: 'op:sarajevo:sarajevo_1' },
             tooltipPosition: { x: 10, y: 20 },
-            orderModeForFormation: 'move',
+            orderModeForFormation: 'sector',
             pendingAttackConfirmation: { attackerFormationId: 'brigade_1', targetOsid: 'op:pale:pale_1' },
             operationTargetOsids: ['op:pale:pale_1'],
             pauseMenuOpen: false,

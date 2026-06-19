@@ -26,7 +26,7 @@ src/ui/map/
 ├── desktop/                       Electron IPC bridge (Phase 4)
 │   ├── useIPC.ts                  React hook wrapping window.awwv; stable useMemo([]); safe no-ops in browser
 │   ├── types.ts                   RecruitmentCatalogBrigade, StartNewCampaignPayload
-│   ├── orderActions.ts            advanceTurnAndSync(), stageMoveOrderFromOsid(), stagePostureOrderAction()
+│   ├── orderActions.ts            advanceTurnAndSync(), stagePostureOrderAction(), stageAssignBrigadeToSectorAction()
 │   └── campaignRecruitmentActions.ts  startCampaignFromSidePicker(), fetchRecruitmentCatalog(), applyRecruitmentAndSync()
 │
 ├── map/

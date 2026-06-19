@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): retire dead direct brigade move affordance
+
+**Type:** UI/read-model route ownership and dead-control removal.
+
+**Fix:** Removed the live tactical-map path that entered direct brigade `move` mode and staged top-level `brigade_mun_orders` from OSID clicks. `MapContainer` now keeps click-order handling to active attack confirmation and brigade-to-sector assignment, the obsolete move-preview layer is gone, and `gameStore.orderModeForFormation` no longer admits `move`. Deleted the stale `stageMoveOrderFromOsid(...)` helper while preserving non-player-facing IPC compatibility documentation.
+
+**Verification:** Red/green `tests/ui/direct_brigade_move_affordance_retired.test.ts`; focused pack passed 23/23 across direct-move retirement, Escape selection clearing, and game-store load/reset. Report: `docs/40_reports/implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md`.
+
+**Scope/determinism:** UI/store route cleanup and tests/docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## [2026-06-19] fix(ui): harden first-hour faction modal gates
 
 **Type:** UI/read-model route ownership and first-hour player-flow hardening.

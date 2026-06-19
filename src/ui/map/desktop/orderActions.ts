@@ -84,23 +84,6 @@ interface PostureOrderDeps {
 }
 
 /**
- * Stages a move order via IPC when the player clicks a destination OSID in move mode.
- * Uses the OSID directly as the brigade movement destination.
- */
-export async function stageMoveOrderFromOsid(
-    { ipc, addStagedOrder, setLoadError }: PostureOrderDeps,
-    brigadeId: string,
-    targetOsid: string,
-): Promise<void> {
-    const result = await ipc.stageMoveOrder(brigadeId, targetOsid);
-    if (!result.ok) {
-        setLoadError(result.error ?? 'Move order failed.');
-        return;
-    }
-    addStagedOrder({ type: 'move', formationId: brigadeId, targetOsid });
-}
-
-/**
  * Stages a posture order via IPC and adds it to the local order queue.
  */
 export async function stagePostureOrderAction(

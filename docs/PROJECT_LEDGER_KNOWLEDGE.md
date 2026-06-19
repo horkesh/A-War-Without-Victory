@@ -1,3 +1,7 @@
+## 2026-06-19 - Compatibility IPC must not leak dead direct-command UI
+
+**Direct brigade move mode is retired from the live tactical map:** Desktop IPC and old save fields may retain compatibility-era brigade move/posture channels, but the current player command contract is president-through-generals: Army HQ opportunities, corps operations, sector assignment, and validated movement/order channels own movement intent. Durable rule: do not expose a clickable map `move` mode or stage `brigade_mun_orders` from live OSID clicks unless the engine consumes that path through the current command model and the player-facing order ownership docs are updated. Applied in `[2026-06-19] fix(ui): retire dead direct brigade move affordance`; report `docs/40_reports/implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md`.
+
 ## 2026-06-19 - First-hour modals need all-faction parity and hard focus ownership
 
 **War-start intro state is campaign-scoped, not component-scoped:** The React first-hour overlay stays mounted across in-session new-campaign starts, so a local `splash`/`briefing` step can leak from one faction start into the next. Durable rule: key the intro step by the active campaign handoff (`phase`, `player_faction`, turn/date/label) so every fresh faction start returns to `WAR HAS STARTED` before the identity briefing. Applied in `[2026-06-19] fix(ui): harden first-hour faction modal gates`; report `docs/40_reports/implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md`.

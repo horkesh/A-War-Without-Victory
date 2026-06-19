@@ -52,7 +52,7 @@ import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { useIPC } from '../desktop/useIPC';
-import { stageMoveOrderFromOsid, stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
+import { stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
 import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
@@ -302,7 +302,6 @@ const SECTOR_EDGE_HIT_POS_LAYER_ID = 'sector-edge-hit-pos';
 const SECTOR_EDGE_HIT_NEG_LAYER_ID = 'sector-edge-hit-neg';
 const FRONT_EDGES_HIGHLIGHT_POS_LAYER_ID = 'front-edges-highlight-pos';
 const FRONT_EDGES_HIGHLIGHT_NEG_LAYER_ID = 'front-edges-highlight-neg';
-const MOVE_PREVIEW_LAYER_ID = 'move-preview-fill';
 const SECTOR_FILL_LAYER_ID = 'sector-fill';
 const SECTOR_EDGE_GLOW_POS_LAYER_ID = 'sector-edge-glow-pos';
 const SECTOR_EDGE_GLOW_NEG_LAYER_ID = 'sector-edge-glow-neg';
@@ -964,14 +963,6 @@ export function MapContainer() {
         onOsidClick: (osid) => {
           if (orderModeForFormation === 'attack' && selectedFormationId) {
             setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
-            setOrderModeForFormation(null);
-          } else if (orderModeForFormation === 'move' && selectedFormationId) {
-            void stageMoveOrderFromOsid(
-              { ipc, addStagedOrder: useGameStore.getState().addStagedOrder, setLoadError },
-              selectedFormationId,
-              osid
-            );
-            setOrderModeForFormation(null);
             setOrderModeForFormation(null);
           } else if (orderModeForFormation === 'sector' && selectedFormationId) {
             const sectorId = osidToSector.get(osid);
@@ -2429,76 +2420,6 @@ export function MapContainer() {
       map.setPaintProperty(BRIGADE_AOR_NEG_LAYER_ID, 'line-opacity', 0);
     }
   }, [mapReady, selectedFormationId, selectedCorpsId, selectedCorpsFrontSectorId, loadedGameState]);
-
-  // Movement preview: highlight same-faction-controlled OSIDs when move mode is active.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!mapReady || !map) return;
-
-    const ensureMoveLayer = () => {
-      if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
-      if (!safeHasLayer(map, MOVE_PREVIEW_LAYER_ID)) {
-        // Terrain-cost coloring: green (easy) → amber (moderate) → red (difficult)
-        // Uses terrain_friction_index from osidPropertiesMap, stored as feature property 'friction'
-        map.addLayer(
-          {
-            id: MOVE_PREVIEW_LAYER_ID,
-            type: 'fill',
-            source: 'osid-control',
-            filter: ['==', ['get', 'osid'], '__none__'],
-            paint: {
-              'fill-color': [
-                'interpolate', ['linear'],
-                ['coalesce', ['get', 'friction'], 0.15],
-                0.0, 'rgba(80, 200, 100, 0.25)',   // Flat: green
-                0.15, 'rgba(120, 200, 80, 0.20)',   // Forest: light green
-                0.30, 'rgba(210, 180, 60, 0.25)',   // Hilly: amber
-                0.50, 'rgba(210, 100, 50, 0.30)',   // Mountain: red-orange
-                0.80, 'rgba(180, 50, 40, 0.35)',    // Extreme: red
-              ],
-              'fill-outline-color': 'rgba(100, 200, 120, 0.40)',
-            },
-          },
-          OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID
-        );
-      }
-      return true;
-    };
-
-    const applyMovePreview = () => {
-      if (!ensureMoveLayer()) return false;
-
-      if (orderModeForFormation !== 'move' || !selectedFormationId || !loadedGameState) {
-        // Clear: hide move preview
-        try {
-          map.setFilter(MOVE_PREVIEW_LAYER_ID, ['==', ['get', 'osid'], '__none__'] as maplibregl.FilterSpecification);
-        } catch (e) {
-          console.warn('[MapContainer] move preview clear failed:', e);
-        }
-        return true;
-      }
-
-      // Find formation's faction, highlight all same-faction OSIDs
-      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
-      if (!formation) return true;
-
-      const faction = formation.faction;
-      try {
-        map.setFilter(MOVE_PREVIEW_LAYER_ID,
-          ['==', ['get', 'controller'], faction] as maplibregl.FilterSpecification
-        );
-      } catch (e) {
-        console.warn('[MapContainer] move preview filter failed:', e);
-      }
-      return true;
-    };
-
-    if (applyMovePreview()) return;
-    const poll = setInterval(() => {
-      if (applyMovePreview()) clearInterval(poll);
-    }, 250);
-    return () => clearInterval(poll);
-  }, [mapReady, orderModeForFormation, selectedFormationId, loadedGameState]);
 
   // Ethnic map mode: add osid-ethnic source and fill layer when we have base + osidPropertiesMap.
   // Defer buildEthnicGeoJSON to rAF so it doesn't block when loadedGameState is set.
