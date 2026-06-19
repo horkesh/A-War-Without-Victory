@@ -20952,6 +20952,12 @@ Repaired the Baseline Regression fast-suite fallout from the docs/raw-copy follo
 
 Verification: focused Chronicle/Verdict/endgame pack passed 4 files / 75 tests; `npm.cmd run typecheck -- --pretty false` passed; `npm.cmd run qa:player-journeys` passed 11 files / 107 tests; `npm.cmd run qa:live-surface:browser` passed with strict-port cleanup; `git diff --check` passed. GitHub rerun required after merge because the prior Baseline Regression failure was exactly these stale expectations.
 
+## 2026-06-19 - Active planning doc drift closeout
+
+Closed the process-QA doc drift found after the docs/raw-copy follow-up. The 2026-06-16 Pyrrhic UI/soul-systems execution plan now points readers to the current residual queue instead of listing closed mobile/DeckGL/#170/cache work as active, and `COMMAND_BOARD.md` no longer describes Decision Room convergence, force-launch cost, Free War #97, or Free War #330 as open/in flight after their merge lineage. The current live residuals are Vitezovi identity/modeling, broader live-browser surface sweeps, actionable Codex/GitHub comments, fresh-proof-only raw-copy follow-up, and the narrowed #170 items.
+
+Verification: docs-only diff review, stale-string grep, `git diff --check`; no code, canon, FORAWWV, simulation behavior, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Srebrenica/Zepa remain event-owned receipts, not Krivaja/Stupcanica scripted-operation calibration targets.
+
 ## 2026-06-19 - Docs status and raw-copy follow-up
 
 Closed the post-merge follow-up from the Pyrrhic docs/GitHub/UI sweeps. COMMAND_BOARD now marks PR #329 as closed stale NO-GO instead of open/mergeable, issue #170 same-axis concentration is recorded as calibration-held after the failed 188w `matched_osids` floor, and the 2026-06-16 execution plan carries a supersession note so agents do not restart closed DeckGL/#170/raw-copy work from stale wording. Follow-up UI copy paths now render neutral/date-based labels in Corps Front, Operation History, Chronicle generation, Humanitarian Ledger, Army HQ field visits, Game Over, Verdict, and legacy Warroom labels; stale CI expectations were updated for the date-based war-start/endgame/aftermath copy.
