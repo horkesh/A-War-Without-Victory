@@ -10,6 +10,7 @@ import type {
     PlayerKnowledgeConfidence,
 } from '../data/types';
 import { t, type MessageKey } from '../i18n';
+import { turnToDateString } from '../utils/formatters';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 const CONFIDENCE_BAND_KEY: Record<PatronConfidenceView['band'], MessageKey> = {
@@ -54,12 +55,12 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                             ? t('patronRelations.defianceCutMulti', {
                                 count: cuts.count,
                                 pct: Math.round(cuts.latestCutFraction * 100),
-                                turn: cuts.latestTurn,
+                                date: turnToDateString(cuts.latestTurn),
                                 support: Math.round(cuts.latestSupportAfter * 100),
                             })
                             : t('patronRelations.defianceCutSingle', {
                                 pct: Math.round(cuts.latestCutFraction * 100),
-                                turn: cuts.latestTurn,
+                                date: turnToDateString(cuts.latestTurn),
                                 support: Math.round(cuts.latestSupportAfter * 100),
                             })}
                     </p>
@@ -71,7 +72,7 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                             <ul className="mt-1 space-y-1">
                                 {cuts.entries.map((entry, index) => (
                                     <li key={`${entry.turn}:${entry.cutFraction}:${entry.supportAfter}:${index}`} className="flex items-center justify-between gap-2 text-[10px] font-mono uppercase tracking-[0.08em] text-red-100/90">
-                                        <span>{t('patronRelations.defianceReceiptTurn', { turn: entry.turn })}</span>
+                                        <span>{t('patronRelations.defianceReceiptTurn', { date: turnToDateString(entry.turn) })}</span>
                                         <span>{t('patronRelations.defianceReceiptImpact', {
                                             pct: Math.round(entry.cutFraction * 100),
                                             support: Math.round(entry.supportAfter * 100),
@@ -169,8 +170,8 @@ function PressureRow({ reason }: { reason: DiplomacyPressureReasonView }) {
 function TimelineRow({ entry }: { entry: DiplomacyTimelineEntryView }) {
     return (
         <li className="flex gap-3 border-b border-white/8 py-2 last:border-b-0">
-            <div className="w-14 shrink-0 text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-amber-300">
-                {entry.turn != null ? `T${entry.turn}` : confidenceLabel(entry.confidence)}
+            <div className="w-24 shrink-0 text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-amber-300">
+                {entry.turn != null ? turnToDateString(entry.turn) : confidenceLabel(entry.confidence)}
             </div>
             <div className="min-w-0">
                 <div className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-text-primary">

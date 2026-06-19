@@ -1,3 +1,9 @@
+## 2026-06-19 - Patron Relations and Diplomacy timing copy
+
+**Patron Relations defiance receipts are consequence records, not turn chips:** Patron confidence/defiance rows preserve raw turns for ordering, but player-facing Patron Relations copy should render the date of the consequence. Durable rule: pass `turnToDateString(...)` dates into defiance summary/receipt i18n and keep `T{turn}`, `P{turn}`, `turn {n}`, and `potez {n}` out of normal Diplomacy copy. Applied in `[2026-06-19] Patron Relations defiance receipt calendar copy`; report `docs/40_reports/implemented/20260619_PATRON_RELATIONS_DATE_COPY.md`.
+
+**Raw-copy sweeps need explicit next-file queues:** The latest Pyrrhic explorer sweep found remaining player-facing timing/provenance leaks in President Desk, Army HQ attention, Turn Aftermath, Decision History, operation briefing, Operations panel, Replay, Territory chart, Verdict/share, shared enum fallbacks, and possibly legacy PeaceStatus. Durable rule: when a raw-copy lane closes, record the next file/test targets in COMMAND_BOARD so the next wave does not rediscover the same class from scratch.
+
 ## 2026-06-19 - Codex timing copy uses calendar dates outside diagnostics
 
 **Codex timing labels should not show raw weeks in normal play:** Codex unlock gates, Dilemma Spine branch timing, and Distance from History rows preserve raw turn numbers internally, but normal Codex copy should render calendar dates. Durable rule: use `turnToDateString(...)` for Codex timing outside explicit diagnostic sections; keep raw event/source/family metadata only behind `diagMode`. Applied in `[2026-06-19] Codex panel player-copy calendar cleanup`; report `docs/40_reports/implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md`.

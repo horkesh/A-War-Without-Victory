@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**PATRON RELATIONS DATE COPY (2026-06-19).** Patron Relations defiance consequences and Diplomacy timeline markers are player records, not debug turn chips. Do instead: pass `turnToDateString(...)` into defiance summary/receipt i18n and timeline labels; guard against `T{turn}`, `P{turn}`, `turn {n}`, and `potez {n}` in `DiplomacyPanel` tests.
+
 **MULTI-SURFACE TIMING/PROVENANCE COPY (2026-06-19).** Player-facing timing/provenance copy should not expose raw turn/week shorthand, `T{turn}`, mechanism enums, battle outcome ids, or event ids. Do instead: use `turnToDateString(...)`, authored label maps, or neutral fallback copy in President's Desk receipts, Decision Room cards/report fallbacks, Army HQ operation/opportunity/friction copy, Chronicle Wrapped/Spine, and settlement timelines. Srebrenica/Zepa remain event-owned receipts, not Krivaja/Stupcanica operation-delivery targets.
 
 **COST LEDGER EARLY-PEACE COPY (2026-06-19).** Cost Ledger findings feed Codex/player verdict prose, so raw peace-plan ids and raw week labels are not acceptable there. Do instead: resolve `early_peace_implemented` through the peace-plan catalog, render acceptance timing as a calendar date, and sanitize legacy `peace plan <id> at week N` text at the Codex display boundary.

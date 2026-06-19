@@ -5,6 +5,8 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiplomacyView } from '../../src/ui/map/data/types.js';
 import { DiplomacyPanel } from '../../src/ui/map/components/DiplomacyPanel.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
     return {
@@ -75,7 +77,10 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
 }
 
 describe('DiplomacyPanel', () => {
-    afterEach(() => cleanup());
+    afterEach(() => {
+        cleanup();
+        setLocale('en');
+    });
 
     it('renders the reframed Patron Relations packet with the patron promoted', () => {
         render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
@@ -118,12 +123,50 @@ describe('DiplomacyPanel', () => {
         expect(screen.getByText('Patron confidence')).toBeTruthy();
         expect(screen.getByText(/38 \/ 100 \(Low\)/)).toBeTruthy();
         // Sober, factual defiance line — never celebratory.
-        expect(screen.getByText(/2 defiance cuts on record\. Most recent cost 30% of materiel \(turn 44\); support fell to 50%\./)).toBeTruthy();
+        expect(screen.getByText(`2 defiance cuts on record. Most recent cost 30% of materiel (${turnToDateString(44)}); support fell to 50%.`)).toBeTruthy();
         expect(screen.getByText('Material consequence records')).toBeTruthy();
-        expect(screen.getByText('T44')).toBeTruthy();
+        expect(screen.getByText(turnToDateString(44))).toBeTruthy();
         expect(screen.getByText('-30% / support 50%')).toBeTruthy();
-        expect(screen.getByText('T31')).toBeTruthy();
+        expect(screen.getByText(turnToDateString(31))).toBeTruthy();
         expect(screen.getByText('-15% / support 70%')).toBeTruthy();
+
+        const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).not.toMatch(/\bT(?:31|44)\b/);
+        expect(panelText).not.toMatch(/\bP(?:31|44)\b/);
+        expect(panelText).not.toMatch(/\bturn 44\b/i);
+    });
+
+    it('renders negotiation timeline timing as calendar copy', () => {
+        render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
+
+        const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).toContain(turnToDateString(40));
+        expect(panelText).not.toContain('T40');
+    });
+
+    it('renders BCS defiance receipt timing as a calendar date without raw P tokens', () => {
+        setLocale('bcs');
+        render(createElement(DiplomacyPanel, {
+            view: makeView({
+                patronConfidence: { value: 38, band: 'low' },
+                patronDefianceCuts: {
+                    count: 1,
+                    latestCutFraction: 0.15,
+                    latestTurn: 31,
+                    latestSupportAfter: 0.7,
+                    entries: [
+                        { turn: 31, cutFraction: 0.15, supportAfter: 0.7 },
+                    ],
+                },
+            }),
+            onClose: vi.fn(),
+        }));
+
+        const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).toContain(turnToDateString(31));
+        expect(panelText).not.toContain('P31');
+        expect(panelText).not.toContain('T31');
+        expect(panelText).not.toMatch(/\bpotez\s+31\b/i);
     });
 
     it('omits the gauge when no patron-confidence or defiance data is present', () => {

@@ -20992,6 +20992,12 @@ Focused red/green verification: `node node_modules\vitest\vitest.mjs run tests\s
 
 Determinism/scope: UI/read-model copy, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-19 - Patron Relations defiance receipt calendar copy
+
+Closed the Patron Relations defiance receipt timing leak. The defiance summary and material consequence receipt rows now render the existing calendar date via `turnToDateString(...)` instead of raw `turn {n}`, `T{n}`, or BCS `P{n}` / `potez {n}` timing copy. BCS keeps the concise date-only receipt label. The adjacent negotiation timeline row in the same Diplomacy panel also now renders calendar dates instead of `T{turn}`.
+
+Focused red/green verification: `node node_modules\vitest\vitest.mjs run tests\ui\diplomacy_panel.test.ts` first failed on the intended raw-token/date assertions, then passed 6/6 after the fix. Additional verification: `npm.cmd run typecheck -- --pretty false` passed, and `git diff --check` passed. Determinism/scope: UI/read-model copy, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-19 - Multi-surface timing and provenance copy polish
 
 Integrated the Pyrrhic specialist wave for the remaining P1 timing/provenance copy leaks across Desk, Decision Room, Army HQ, Chronicle Wrapped/Spine, and settlement timelines. President's Desk consequence rows now render receipt timing as calendar dates; Decision Room hard-turn source labels and latest-turn report fallback headlines use calendar dates; Army HQ operation execution/AAR/friction/cooldown/opportunity-dossier copy no longer exposes raw `W`, `Wk`, `S`, or `turn` labels; Chronicle Wrapped/Spine no longer exposes raw `Week`, `Turn`, or `T{turn}` timing; and settlement timeline provenance uses authored control/battle labels or neutral fallbacks instead of enum/id-derived text. Srebrenica/Zepa fall ownership remains event-owned by `srebrenica_falls_1995` / `zepa_falls_1995` `control_change` receipts.

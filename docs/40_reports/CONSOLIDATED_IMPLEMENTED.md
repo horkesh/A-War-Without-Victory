@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Patron Relations date copy:** [implemented/20260619_PATRON_RELATIONS_DATE_COPY.md](implemented/20260619_PATRON_RELATIONS_DATE_COPY.md) - Patron Relations defiance summaries, material consequence receipt rows, and Diplomacy negotiation timeline markers now render calendar dates instead of raw `turn`, `T`, or BCS `P` timing copy.
+
 **Latest multi-surface timing/provenance copy polish:** [implemented/20260619_MULTI_SURFACE_TIMING_COPY_POLISH.md](implemented/20260619_MULTI_SURFACE_TIMING_COPY_POLISH.md) - President's Desk, Decision Room, Army HQ, Chronicle Wrapped/Spine, and settlement timeline provenance now render timing/provenance through calendar/authored/neutral copy instead of raw turns, week shorthands, or enum/id fallbacks.
 
 **Latest Cost Ledger early-peace copy:** [implemented/20260619_COST_LEDGER_EARLY_PEACE_COPY.md](implemented/20260619_COST_LEDGER_EARLY_PEACE_COPY.md) - Accepted early-peace Cost Ledger findings and Codex dynamic essays now render peace-plan names and calendar dates instead of raw plan ids and `week` labels.
