@@ -13,4 +13,13 @@ describe('playerFacingErrorCopy', () => {
       'This command channel is not available in the current build.',
     );
   });
+
+  it('redacts raw decision identifier errors before they reach menus or overlays', () => {
+    expect(playerFacingErrorCopy('Missing event_id for response_id opt_a')).toBe(
+      'The requested action could not be completed.',
+    );
+    expect(playerFacingErrorCopy('response_id_not_found')).toBe(
+      'The requested action could not be completed.',
+    );
+  });
 });

@@ -20,5 +20,15 @@ describe('player journey QA gate contract', () => {
     expect(script).toContain('tests/ui/gui_audit_dead_controls.test.ts');
     expect(script).toContain('tests/ui/inbox_items.test.ts');
     expect(script).toContain('tests/ui_presidential_toolbar_summary_click.test.ts');
+    expect(script).toContain('tests/ui/panel_rail_ownership.test.ts');
+    expect(script).toContain('tests/ui_map_panel_rail.test.ts');
+    expect(script).toContain('tests/ui/settlement_supply_status.test.ts');
+    expect(script).toContain('tests/ui/settlement_timeline_i18n.test.ts');
+    expect(script).toContain('tests/ui/shell_navigation_ownership.test.ts');
+    expect(script).toContain('tests/ui_shell_navigation.test.ts');
+    expect(script).toContain('tests/ui/president_desk_shell.test.ts');
+    expect(script).toContain('tests/ui/presidential_decision_room.test.ts');
+    expect(script).toContain('tests/ui/oob_operations_panel.test.ts');
+    expect(script).toContain('tests/ui/commander_read_model_surfaces.test.ts');
   });
 });

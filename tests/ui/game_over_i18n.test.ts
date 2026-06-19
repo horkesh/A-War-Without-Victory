@@ -60,10 +60,11 @@ describe('GameOverModal localization', () => {
         expect(screen.getByRole('dialog', { name: 'Stalemate' })).toBeTruthy();
         expect(screen.getByText('Stalemate')).toBeTruthy();
         expect(screen.getByText('Final Standings')).toBeTruthy();
-        expect(screen.getByText('1 OSIDs controlled')).toBeTruthy();
+        expect(screen.getByText('1 settlement controlled')).toBeTruthy();
         expect(screen.getAllByText('1 active brigades')).toHaveLength(2);
         expect(screen.getByText('Campaign lasted 65 weeks (1 years, 13 weeks)')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
+        expect(document.body.textContent ?? '').not.toMatch(/\bOSID\b/i);
     });
 
     it('renders BCS game-over copy when BCS is selected', () => {

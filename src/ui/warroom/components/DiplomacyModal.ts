@@ -365,11 +365,11 @@ export class DiplomacyModal {
 
         return this.createSection('CEASEFIRE TRACKER', `
             ${statusLabel}
-            ${conditionRow('C1', 'War duration \u2265 20 turns', c1Met ? 'met' : 'unmet', c1Detail)}
+            ${conditionRow('C1', 'War has dragged on', c1Met ? 'met' : 'unmet', c1Detail)}
             ${conditionRow('C2', `${this.factionPoliticalLabels.HRHB} exhaustion > 35`, c2Status, c2Detail)}
             ${conditionRow('C3', `${viewer === 'RBiH' ? 'Own' : this.factionPoliticalLabels.RBiH} exhaustion > 30`, c3Status, c3Detail)}
-            ${conditionRow('C4', 'Stalemate \u2265 4 turns', c4Met ? 'met' : 'unmet', c4Detail)}
-            ${conditionRow('C5', 'IVP momentum > 40%', c5Met ? 'met' : 'unmet', c5Detail)}
+            ${conditionRow('C4', 'Frontline stalemate persists', c4Met ? 'met' : 'unmet', c4Detail)}
+            ${conditionRow('C5', 'Negotiations have enough pressure', c5Met ? 'met' : 'unmet', c5Detail)}
             ${conditionRow('C6', `${this.factionPoliticalLabels.HRHB} patron constraint > 45%`, c6Status, c6Detail)}
         `);
     }
@@ -444,7 +444,7 @@ export class DiplomacyModal {
             ${statusLabel}
             ${conditionRow('W1', 'Ceasefire active', w1Status, w1Detail)}
             ${conditionRow('W2', 'Ceasefire \u2265 4 turns', w2Status, w2Detail)}
-            ${conditionRow('W3', 'IVP momentum > 50%', w3Met ? 'met' : 'unmet', w3Detail)}
+            ${conditionRow('W3', 'Negotiations have decisive pressure', w3Met ? 'met' : 'unmet', w3Detail)}
             ${conditionRow('W4', `${this.factionPoliticalLabels.HRHB} patron constraint > 55%`, w4Status, w4Detail)}
             ${conditionRow('W5', `${this.factionPoliticalLabels.RS} territory > 40%`, w5Met ? 'met' : 'unmet', w5Detail)}
             ${conditionRow('W6', 'Combined exhaustion > 55', w6Status, w6Detail)}

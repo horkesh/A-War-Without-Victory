@@ -45,7 +45,7 @@ import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.j
 import { deserializeState } from '../../state/serialize.js';
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
 import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
-import { getPlayerFaction } from './components/warroom_utils.js';
+import { getPlayerFaction, turnToWeekString } from './components/warroom_utils.js';
 import { DiplomacyModal } from './components/DiplomacyModal.js';
 import { IvpBreakdownModal } from './components/IvpBreakdownModal.js';
 import { FactionOverviewPanel } from './components/FactionOverviewPanel.js';
@@ -397,8 +397,8 @@ export class ClickableRegionManager {
         dialog.innerHTML = `
             <h2>ADVANCE TURN?</h2>
             <div class="wr-dialog-body">
-                <div class="wr-dialog-row"><span class="wr-label">Current</span><span class="wr-value">Turn ${currentTurn}</span></div>
-                <div class="wr-dialog-row"><span class="wr-label">Next</span><span class="wr-value">Turn ${nextTurn}</span></div>
+                <div class="wr-dialog-row"><span class="wr-label">Current</span><span class="wr-value">${turnToWeekString(currentTurn)}</span></div>
+                <div class="wr-dialog-row"><span class="wr-label">Next</span><span class="wr-value">${turnToWeekString(nextTurn)}</span></div>
                 ${stagedInfo}
                 ${thisWeekPreview}
             </div>

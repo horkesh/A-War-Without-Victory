@@ -7,10 +7,11 @@ import { SidePickerOverlay } from '../../src/ui/map/components/SidePickerOverlay
 
 const noop = vi.fn();
 
-function renderSidePicker() {
+function renderSidePicker(errorMessage?: string) {
     render(createElement(SidePickerOverlay, {
         isOpen: true,
         starting: false,
+        errorMessage,
         onClose: noop,
         onSelectFaction: noop,
     }));
@@ -50,5 +51,12 @@ describe('SidePickerOverlay localization', () => {
         expect(screen.getByRole('button', { name: /Nastavi zadnje pokretanje/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
         expect(screen.getAllByText(/^Snage /).length).toBeGreaterThan(0);
+    });
+
+    it('sanitizes raw startup errors before rendering them', () => {
+        renderSidePicker('response_id_not_found');
+
+        expect(screen.getByText('The requested action could not be completed.')).toBeTruthy();
+        expect(screen.queryByText(/response_id/i)).toBeNull();
     });
 });

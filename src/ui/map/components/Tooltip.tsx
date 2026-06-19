@@ -37,7 +37,7 @@ const OUTCOME_COLOR: Record<string, string> = {
 };
 const INTEL_FRICTION_LABEL: Record<string, string> = {
   stale_intel: 'Stale intel',
-  defender_opsec: 'Defender OPSEC',
+  defender_opsec: 'Defender concealment',
 };
 function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   osid: string;
@@ -323,7 +323,7 @@ function DefensePreviewContent({
       </div>
       <div className="text-[10px] text-text-secondary mt-0.5">
         {info.physicalCount > 0
-          ? <span><span className="text-text-primary">{info.physicalCount}</span> at OSID</span>
+          ? <span><span className="text-text-primary">{info.physicalCount}</span> at this position</span>
           : <span className="text-amber-400">{t('tooltip.noBrigadesAtOsid')}</span>
         }
         {info.reactiveCount > 0 && (

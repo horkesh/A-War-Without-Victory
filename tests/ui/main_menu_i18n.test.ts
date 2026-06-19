@@ -7,9 +7,10 @@ import { MainMenu } from '../../src/ui/map/components/MainMenu';
 
 const noop = vi.fn();
 
-function renderMainMenu(hasSave = true) {
+function renderMainMenu(hasSave = true, errorMessage?: string) {
     render(createElement(MainMenu, {
         hasSave,
+        errorMessage,
         onNewGame: noop,
         onContinue: noop,
         onLoadGame: noop,
@@ -63,5 +64,12 @@ describe('MainMenu localization', () => {
         renderMainMenu(false);
 
         expect(screen.queryByRole('button', { name: 'Nastavi' })).toBeNull();
+    });
+
+    it('sanitizes raw startup errors before rendering them', () => {
+        renderMainMenu(true, 'Missing event_id for response_id opt_a');
+
+        expect(screen.getByText('The requested action could not be completed.')).toBeTruthy();
+        expect(screen.queryByText(/event_id|response_id/i)).toBeNull();
     });
 });

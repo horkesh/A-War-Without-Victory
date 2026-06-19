@@ -471,7 +471,11 @@ describe('warroom player visibility', () => {
 
     expect(source).not.toContain('Settlement ID');
     expect(source).not.toContain('Municipality ID');
+    expect(source).not.toContain('[PHASE II]');
+    expect(source).not.toContain('Modify Garrison');
     expect(source).toContain('Administrative Region');
+    expect(source).toContain('Garrison Intelligence');
+    expect(source).toContain('Garrison orders are handled through Army HQ.');
   });
 
   it('settlement info panel uses human-readable faction labels instead of raw faction shorthand', () => {
@@ -500,6 +504,24 @@ describe('warroom player visibility', () => {
     expect(source).not.toContain('Joint Pressure Bonus vs RS');
     expect(source).not.toContain("conditionRow('W5', 'RS territory > 40%'");
     expect(source).not.toContain("conditionRow('C2', 'HRHB exhaustion > 35'");
+    expect(source).not.toContain('War duration \\u2265 20 turns');
+    expect(source).not.toContain('Stalemate \\u2265 4 turns');
+    expect(source).not.toContain('IVP momentum > 40%');
+    expect(source).not.toContain('IVP momentum > 50%');
+    expect(source).toContain('War has dragged on');
+    expect(source).toContain('Negotiations have enough pressure');
+  });
+
+  it('warroom diplomatic briefing copy avoids raw IVP and turn labels', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/components/IvpBreakdownModal.ts'),
+      'utf8',
+    );
+
+    expect(source).not.toContain('Composite IVP');
+    expect(source).not.toContain('Last major IVP shift: turn');
+    expect(source).toContain('International pressure');
+    expect(source).toContain('Last major diplomatic shift');
   });
 
   it('warroom live faction header uses the military-facing label instead of raw faction id', () => {

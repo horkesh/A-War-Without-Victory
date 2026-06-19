@@ -37,7 +37,7 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
             'estimated strength {totalStrength}',
             'Deny All',
             'Allow All',
-            "'Desktop IPC not available for paramilitary review.'",
+            "'This action requires the desktop command shell.'",
             "'Failed to resolve paramilitary requests.'",
             "'Submit Decisions'",
             "'Submitting...'",
@@ -88,7 +88,7 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');
-        expect(en['paramilitaryReview.error.ipcUnavailable']).toBe('Desktop IPC not available for paramilitary review.');
+        expect(en['paramilitaryReview.error.ipcUnavailable']).toBe('This action requires the desktop command shell.');
         expect(en['paramilitaryReview.error.resolveFailed']).toBe('Failed to resolve paramilitary requests.');
     });
 });

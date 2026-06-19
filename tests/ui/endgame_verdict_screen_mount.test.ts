@@ -257,6 +257,7 @@ describe('VerdictScreen mount — fallback', () => {
         storeState = { loadedGameState: endgame({ gameVerdict: undefined }) };
         const h = render();
         expect(h).toContain('Final Standings'); expect(h).toContain('Stalemate');
+        expect(h).not.toMatch(/\bOSID\b/i);
     });
 });
 

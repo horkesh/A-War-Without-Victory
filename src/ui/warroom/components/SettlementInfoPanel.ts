@@ -378,7 +378,7 @@ export class SettlementInfoPanel {
                 </div>
             </div>
             <div class="settlement-info-section">
-                <div class="settlement-info-section-header">Recent Timeline [PHASE II]</div>
+                <div class="settlement-info-section-header">Recent Timeline</div>
                 <div class="settlement-info-section-body">
                     <div class="settlement-info-placeholder italic text-muted">No recent authority changes recorded.</div>
                 </div>
@@ -389,7 +389,7 @@ export class SettlementInfoPanel {
     private renderIntelTab(container: HTMLElement, data: any): void {
         container.innerHTML = `
             <div class="settlement-info-section">
-                <div class="settlement-info-section-header">Garrison Intel [PHASE II]</div>
+                <div class="settlement-info-section-header">Garrison Intelligence</div>
                 <div class="settlement-info-section-body">
                     <div class="settlement-info-placeholder">No active units reported in immediate vicinity.</div>
                 </div>
@@ -397,7 +397,7 @@ export class SettlementInfoPanel {
             <div class="settlement-info-section">
                 <div class="settlement-info-section-header">Local Directives</div>
                 <div class="settlement-info-section-body">
-                    <button class="settlement-info-order-btn" type="button" disabled title="Available in War phase">Modify Garrison</button>
+                    <div class="settlement-info-placeholder">Garrison orders are handled through Army HQ.</div>
                 </div>
             </div>
         `;

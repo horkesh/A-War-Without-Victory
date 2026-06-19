@@ -14,7 +14,7 @@ import { FACTION_COLORS } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t, useLocale, type MessageKey } from '../i18n';
+import { t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 
 const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
@@ -32,10 +32,17 @@ function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string 
     return labelKeys ? { title: t(labelKeys.title), subtitle: t(labelKeys.subtitle) } : { title: t('gameOver.outcome.unreported.title'), subtitle: '' };
 }
 
+function formatSettlementsControlled(count: number, locale: Locale): string {
+    if (locale === 'bcs') {
+        return t('gameOver.osidsControlled', { count });
+    }
+    return t(count === 1 ? 'gameOver.osidControlled.one' : 'gameOver.osidControlled.many', { count });
+}
+
 export function GameOverModal() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const ipc = useIPC();
-    useLocale();
+    const [locale] = useLocale();
 
     if (!loadedGameState?.gameOver) return null;
     const isOpen = true;
@@ -106,7 +113,7 @@ export function GameOverModal() {
                                     <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
                                 <div className="flex gap-4 text-[10px] text-text-secondary">
-                                    <span>{t('gameOver.osidsControlled', { count: osids })}</span>
+                                    <span>{formatSettlementsControlled(osids, locale)}</span>
                                     <span>{t('gameOver.activeBrigades', { count: brigades })}</span>
                                 </div>
                                 <div className="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">

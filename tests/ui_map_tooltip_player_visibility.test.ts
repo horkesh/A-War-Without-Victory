@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { FormationView, LoadedGameState } from '../src/ui/map/data/types.js';
 import {
   buildPlayerSafeFormationTooltipModel,
@@ -161,5 +162,15 @@ describe('player-safe tooltip models', () => {
     expect(model.sectorName).toBe('Tuzla Front');
     expect(model.ownFormationLabels).toEqual(['2nd Tuzla Brigade (defend)']);
     expect(model.enemyContactSummary).toBe('1 enemy contact observed');
+  });
+
+  it('keeps tooltip player copy free of OSID and OPSEC jargon', () => {
+    const tooltipSource = readFileSync('src/ui/map/components/Tooltip.tsx', 'utf8');
+    const englishMessages = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
+    const playerCopy = `${tooltipSource}\n${englishMessages}`;
+
+    expect(playerCopy).not.toContain('Defender OPSEC');
+    expect(playerCopy).not.toContain('at OSID');
+    expect(playerCopy).not.toContain('No brigades at OSID');
   });
 });

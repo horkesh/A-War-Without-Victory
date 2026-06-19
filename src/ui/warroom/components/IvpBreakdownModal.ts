@@ -62,7 +62,7 @@ export class IvpBreakdownModal {
 
         const compositeRow = document.createElement('div');
         compositeRow.className = 'fo-stat-row';
-        compositeRow.innerHTML = `<span class="fo-stat-label">Composite IVP</span><span class="fo-stat-value">${pct(composite)}</span>`;
+        compositeRow.innerHTML = `<span class="fo-stat-label">International pressure</span><span class="fo-stat-value">${pct(composite)}</span>`;
         modal.appendChild(compositeRow);
 
         const section = document.createElement('div');
@@ -125,7 +125,7 @@ export class IvpBreakdownModal {
         if (ivpSnap.lastMajorShift != null) {
             const shift = document.createElement('div');
             shift.style.cssText = 'margin-top:8px;font-size:11px;color:#555570;';
-            shift.textContent = `Last major IVP shift: turn ${ivpSnap.lastMajorShift}.`;
+            shift.textContent = `Last major diplomatic shift: ${turnToWeekString(ivpSnap.lastMajorShift)}.`;
             modal.appendChild(shift);
         }
 

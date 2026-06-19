@@ -10,6 +10,9 @@ export function playerFacingErrorCopy(raw: string | null | undefined): string {
   if (!trimmed) return 'The requested action could not be completed.';
   const mapped = ERROR_COPY[trimmed];
   if (mapped) return mapped;
+  if (/\b(?:event_id|response_id)\b/i.test(trimmed)) {
+    return 'The requested action could not be completed.';
+  }
   if (/^[a-z0-9]+(?:_[a-z0-9]+)+$/.test(trimmed)) {
     return 'The requested action could not be completed.';
   }
