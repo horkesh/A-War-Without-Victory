@@ -92,13 +92,13 @@ describe('formatCondemnationFlag', () => {
         expect(result).toBe('Condemned for systematic atrocities against civilian population');
     });
 
-    it('falls back to humanized flag name for unknown flags', () => {
+    it('falls back to neutral wording for unknown flags', () => {
         const result = formatCondemnationFlag('unknown_flag_name');
-        expect(result).toBe('unknown flag name');
+        expect(result).toBe('Additional condemnation record');
     });
 
-    it('humanizes multi-word unknown flags correctly', () => {
+    it('does not expose multi-word unknown flags as raw copy', () => {
         const result = formatCondemnationFlag('ethnic_cleansing_campaign');
-        expect(result).toBe('ethnic cleansing campaign');
+        expect(result).toBe('Additional condemnation record');
     });
 });
