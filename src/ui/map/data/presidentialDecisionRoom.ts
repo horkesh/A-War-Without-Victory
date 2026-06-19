@@ -10,6 +10,7 @@ import {
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 import { t, type MessageKey } from '../i18n';
+import { turnToDateString } from '../utils/formatters';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import {
   STOP_OP_COST,
@@ -551,7 +552,12 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
       ? t('decisionRoom.card.opportunity.evidence.optionalAxes', { green: opportunity.optional_axes_green ?? 0, total: opportunity.optional_axes_total })
       : null;
     const evidence = [
-      opportunity.expires_turn != null ? t('decisionRoom.card.opportunity.evidence.expires', { turn: opportunity.expires_turn }) : t('decisionRoom.card.opportunity.evidence.liveDossier'),
+      opportunity.expires_turn != null
+        ? t('decisionRoom.card.opportunity.evidence.expires', {
+          turn: opportunity.expires_turn,
+          dateLabel: turnToDateString(opportunity.expires_turn),
+        })
+        : t('decisionRoom.card.opportunity.evidence.liveDossier'),
       required,
       optional,
     ].filter((entry): entry is string => Boolean(entry));

@@ -1,3 +1,9 @@
+## 2026-06-19 - Deadline and security copy should translate command intent, not expose shorthand
+
+**Decision Room opportunity expiry is a staff deadline, not a raw turn token:** Operation-opportunity proposals preserve `expires_turn` internally for ordering and urgency, but player evidence should render a calendar deadline such as `Review by 21 Sep 1992`. Durable rule: use `turnToDateString(...)` at Decision Room evidence boundaries and keep raw `T` labels out of normal player copy. Applied in `[2026-06-19] fix(ui): polish Decision Room and Corps Front security copy`; report `docs/40_reports/implemented/20260619_DECISION_ROOM_CORPS_FRONT_COPY_POLISH.md`.
+
+**Corps Front security controls should describe the order, not the acronym:** `opsec_active` remains the internal field, but player-facing Corps Front chrome should say `Operational security`, `Tighten sector security`, and `Relax sector security`. Durable rule: keep `OPSEC` as implementation terminology or native-reviewed localization only; English live controls should describe the actual sector-security command and be pinned by label-discipline tests.
+
 ## 2026-06-19 - Turn Aftermath desk items use decision-surface labels
 
 **Inbox item types are joins, not modal copy:** Turn Aftermath receives `nextActions.topItems[].type` as an internal inbox type, but the Command Desk list is player-facing. Durable rule: render top-action type labels through `getDecisionSurfaceForInboxType(...)` and `records.actionType.*`, with `Review item` as fallback; do not use `item.type.replace(/_/g, ' ')` in player copy. Applied in `[2026-06-19] fix(ui): label Turn Aftermath desk item types`; report `docs/40_reports/implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md`.

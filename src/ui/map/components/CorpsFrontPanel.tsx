@@ -267,7 +267,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           </span>
           {sector.opsec_active && (
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-500/50 text-amber-400">
-              OPSEC
+              {t('corpsFront.opsec')}
             </span>
           )}
         </div>

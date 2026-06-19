@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Decision Room and Corps Front copy polish** | [implemented/20260619_DECISION_ROOM_CORPS_FRONT_COPY_POLISH.md](implemented/20260619_DECISION_ROOM_CORPS_FRONT_COPY_POLISH.md) - Decision Room opportunity cards now show calendar review deadlines instead of raw `T` turns, and Corps Front English security controls use player-facing sector-security copy instead of `OPSEC` shorthand. |
 | **Latest Turn Aftermath desk item label polish** | [implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md](implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md) - Turn Aftermath now labels pending desk item types through the shared decision-surface registry instead of raw inbox type strings. |
 | **Latest Situation and War Summary copy polish** | [implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md](implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md) - First-hour reachable Situation / War Summary English copy now uses staff-facing pressure/security/report language instead of visible `IVP`, formulas, thresholds, or `OPSEC` telemetry. |
 | **Latest direct brigade move affordance retirement** | [implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md](implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md) - The live tactical map no longer exposes compatibility-era direct brigade move mode or OSID-click staging of `brigade_mun_orders`; player-facing map clicks remain attack confirmation and sector assignment only. |

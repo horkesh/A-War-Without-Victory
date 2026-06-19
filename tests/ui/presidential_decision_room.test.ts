@@ -8,6 +8,7 @@ import type { LoadedGameState, OperationOpportunityProposalView, PlayerDecisionS
 import type { OperationalSitrepView } from '../../src/ui/shared/operational_sitrep_views.js';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeSummary(overrides: Partial<TurnSummary> = {}): TurnSummary {
   return {
@@ -727,6 +728,20 @@ describe('buildPresidentialDecisionRoomView', () => {
         cardId: 'opportunity:opp_alpha',
       },
     });
+  });
+
+  it('dates operation opportunity review windows with calendar copy instead of raw turns', () => {
+    const expiresTurn = 24;
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        operationOpportunityProposals: [makeOpportunity({ proposal_id: 'opp_alpha', expires_turn: expiresTurn })],
+      }),
+    });
+
+    const card = view.cards.find((entry) => entry.id === 'opportunity:opp_alpha');
+
+    expect(card?.evidence).toContain(`Review by ${turnToDateString(expiresTurn)}`);
+    expect(card?.evidence.join('\n')).not.toMatch(/\bExpires\s+T\d+\b/);
   });
 
   it('builds the full presidential product loop as handoffs to existing owners', () => {

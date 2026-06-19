@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**DECISION ROOM / CORPS FRONT COPY (2026-06-19).** Operation-opportunity `expires_turn` is an internal deadline/order key, not player copy; Decision Room should render `Review by ${turnToDateString(...)}`. Corps Front `opsec_active` is internal state; English UI should say `Operational security`, `Tighten sector security`, and `Relax sector security`, not visible `OPSEC`.
+
 **TURN AFTERMATH DESK ITEM LABELS (2026-06-19).** Turn Aftermath top action `type` values are internal inbox joins, not player copy. Do instead: use `getDecisionSurfaceForInboxType(...)` + `records.actionType.*` with `Review item` fallback; never render `item.type.replace(/_/g, ' ')` in the post-turn modal.
 
 **SITUATION COPY STAFF LANGUAGE (2026-06-19).** First-hour Situation/War Summary EN copy should not expose `IVP`, `Composite IVP`, formulas, thresholds, `OPSEC`, or `SITREP` telemetry. Do instead: use staff-facing language such as International Pressure, Operational Security, Situation Report, qualitative pressure bands, and driver strength labels; leave BCS changes for owner/native review.

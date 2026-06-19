@@ -3,9 +3,11 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
 import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
+import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
@@ -190,5 +192,17 @@ describe('GUI audit label discipline', () => {
     expect(screen.getByText('Operational Security')).toBeTruthy();
     expect(screen.getByText('Security screen active')).toBeTruthy();
     expect(securityContainer.textContent).not.toMatch(/\bOPSEC\b|\bSITREP\b/);
+  });
+
+  it('keeps Corps Front security controls free of OPSEC shorthand', () => {
+    expect(enMessages['corpsFront.opsec']).toBe('Operational security');
+    expect(enMessages['corpsFront.enableOpsec']).toBe('Tighten sector security');
+    expect(enMessages['corpsFront.disableOpsec']).toBe('Relax sector security');
+    expect(enMessages['corpsFront.opsecEnabled']).toBe('Sector security tightened.');
+    expect(enMessages['corpsFront.opsecDisabled']).toBe('Sector security relaxed.');
+    expect(enMessages['corpsFront.opsecToggleFailed']).toBe('Failed to update sector security');
+
+    const panelSource = readFileSync('src/ui/map/components/CorpsFrontPanel.tsx', 'utf8');
+    expect(panelSource).not.toMatch(/>[\s\r\n]*OPSEC[\s\r\n]*</);
   });
 });
