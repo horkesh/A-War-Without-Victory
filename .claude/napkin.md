@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**OPERATION HISTORY DATE/FALLBACK COPY (2026-06-19).** Operation History is a player AAR surface, not a debug timeline. Do instead: render completed ranges, active starts, and weekly rows with `turnToDateString(...)`, and map unknown grade/notable-event ids to neutral copy instead of leaking underscores.
+
 **DECISION RECEIPT DATE COPY (2026-06-19).** Decision consequence receipt `turn` values are ordering/internal join data, not player copy. Do instead: render Army HQ Records and Chronicle receipt timing with `turnToDateString(...)`; avoid `Latest Turn`, `Turn {n}`, `Potez {n}`, or `at week {n}` in normal receipt surfaces.
 
 **LIVE SURFACE BROWSER GATE (2026-06-19).** `qa:first-hour:browser` proves the opening path, but not every major command surface. Do instead: after Desk/War Map/Army HQ/Records/Chronicle/Codex or toolbar/shell changes, run `npm run qa:live-surface:browser`; it must prove first-hour RBiH flow, major-surface reachability, shell exclusivity, raw-token absence, console health, and strict-port cleanup.

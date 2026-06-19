@@ -1,3 +1,7 @@
+## 2026-06-19 - Operation History timing and fallback copy
+
+**Operation History is an AAR surface, not a debug timeline:** Completed-operation ranges, active-operation starts, and weekly operation rows preserve raw turns internally for ordering, but visible AAR copy should use calendar dates. Durable rule: render Operation History timing with `turnToDateString(...)`, and map unknown grade factors/notable events to neutral player copy instead of leaking underscore identifiers. Applied in `[2026-06-19] Operation History player-copy cleanup`; report `docs/40_reports/implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md`.
+
 ## 2026-06-19 - Decision receipt timing uses calendar dates
 
 **Receipt timing should be dates, not engine weeks:** Decision consequence ledgers preserve turn numbers for ordering and joins, but Army HQ Records and Chronicle receipt copy should describe when the president acted in calendar terms. Durable rule: render receipt timing with `turnToDateString(...)` at player-facing Records/Chronicle boundaries; do not show `Latest Turn`, `Turn {n}`, `Potez {n}`, or `at week {n}` in normal receipt copy. Applied in `[2026-06-19] fix(ui): render decision receipt timing as dates`; report `docs/40_reports/implemented/20260619_DECISION_RECEIPT_DATE_COPY.md`.

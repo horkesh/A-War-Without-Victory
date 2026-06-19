@@ -16,6 +16,7 @@ import {
     getPlayerSafeOperationName,
     getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
+import { turnToDateString } from '../utils/formatters';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t } from '../i18n';
 
@@ -61,6 +62,21 @@ const NOTABLE_EVENT_LABEL: Record<string, string> = {
     heavy_losses: 'Heavy Losses',
 };
 
+const GRADE_FACTOR_LABEL: Record<string, string> = {
+    objective_completion: 'Objective progress',
+    objective_pct: 'Objective progress',
+    exchange_ratio: 'Exchange ratio',
+    attack_tempo: 'Attack tempo',
+    tempo: 'Tempo',
+    preservation: 'Force preservation',
+};
+
+const COMMANDER_ASSESSMENT_LABEL: Record<string, string> = {
+    launch: 'Recommends launch',
+    postpone: 'Urges delay',
+    abort: 'Advises abort',
+};
+
 const CAPTURE_PROVENANCE_LABEL: Record<string, string | null> = {
     no_objectives_held: null,
     logged_capture: null,
@@ -77,6 +93,24 @@ function getOperationDisplayName(
     const displayName = operationDisplayName?.trim();
     if (displayName) return displayName;
     return getPlayerSafeOperationName(operationName, corpsId, 'Operation');
+}
+
+function formatOperationDateRange(startTurn: number, endTurn: number): string {
+    const start = turnToDateString(startTurn);
+    const end = turnToDateString(endTurn);
+    return start === end ? start : `${start} - ${end}`;
+}
+
+function formatGradeFactorLabel(key: string): string {
+    return GRADE_FACTOR_LABEL[key] ?? 'Operational factor';
+}
+
+function formatNotableEventLabel(event: string): string {
+    return NOTABLE_EVENT_LABEL[event] ?? 'Notable development';
+}
+
+function formatCommanderAssessmentLabel(assessment: string | null | undefined): string {
+    return assessment ? COMMANDER_ASSESSMENT_LABEL[assessment] ?? 'Recommendation unavailable' : 'Recommendation unavailable';
 }
 
 const CAPTURE_PROVENANCE_SUMMARY: Record<string, string> = {
@@ -283,6 +317,7 @@ function CompletedOpCard({
         ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
         : '0/0';
     const captureProvenanceNotice = CAPTURE_PROVENANCE_LABEL[op.capture_provenance ?? 'no_objectives_held'];
+    const dateRange = formatOperationDateRange(op.started_turn, op.ended_turn);
 
     useEffect(() => {
         if (focused) setExpanded(true);
@@ -313,7 +348,7 @@ function CompletedOpCard({
                             </div>
                         )}
                         <div className="text-[9px] text-text-muted">
-                            {t('operationHistory.completedMeta', { corps: corpsName, start: op.started_turn, end: op.ended_turn, duration: op.duration_turns, objectives: objRate })}
+                            {t('operationHistory.completedMeta', { corps: corpsName, range: dateRange, duration: op.duration_turns, objectives: objRate })}
                         </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
@@ -371,7 +406,7 @@ function CompletedOpCard({
                     <div className="text-[9px] text-text-muted flex gap-3 flex-wrap">
                         {Object.entries(op.grade.factors).map(([key, val]) => (
                             <span key={key}>
-                                {key.replace(/_/g, ' ')}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : val}</span>
+                                {formatGradeFactorLabel(key)}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : val}</span>
                             </span>
                         ))}
                     </div>
@@ -382,7 +417,7 @@ function CompletedOpCard({
                             <span className="uppercase font-bold text-text-secondary">{t('operationHistory.commandRecord')} </span>
                             {op.force_launched ? (
                                 <>
-                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch ?? 'unknown'}</span>
+                                    Commander assessment: <span className="font-semibold text-text-primary">{formatCommanderAssessmentLabel(op.commander_assessment_at_launch)}</span>
                                     {' — '}
                                     <span className="text-amber-400 font-bold">{t('operationHistory.directIntervention')}</span>
                                     {op.ca_cost_at_launch != null && (
@@ -391,13 +426,13 @@ function CompletedOpCard({
                                 </>
                             ) : op.commander_assessment_at_launch === 'postpone' || op.commander_assessment_at_launch === 'abort' ? (
                                 <>
-                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
+                                    Commander assessment: <span className="font-semibold text-text-primary">{formatCommanderAssessmentLabel(op.commander_assessment_at_launch)}</span>
                                     {' — '}
                                     <span className="text-amber-500/80 font-semibold">{t('operationHistory.approvedAgainstRecommendation')}</span>
                                 </>
                             ) : (
                                 <>
-                                    Commander recommended <span className="font-semibold text-text-primary capitalize">{op.commander_assessment_at_launch}</span>
+                                    Commander assessment: <span className="font-semibold text-text-primary">{formatCommanderAssessmentLabel(op.commander_assessment_at_launch)}</span>
                                     {' — '}
                                     <span className="text-green-400 font-semibold">{t('operationHistory.approved')}</span>
                                 </>
@@ -512,7 +547,7 @@ function CompletedOpCard({
                                     }
                                     return (
                                         <div key={i} className="text-[9px] flex items-start gap-1.5">
-                                            <span className="text-text-muted tabular-nums shrink-0 w-7">W{entry.turn}</span>
+                                            <span className="text-text-muted tabular-nums shrink-0 w-20">{turnToDateString(entry.turn)}</span>
                                             <span className={`shrink-0 ${PHASE_COLOR[entry.phase] ?? 'text-text-muted'}`}>{entry.phase[0].toUpperCase()}</span>
                                             <div className="flex-1 min-w-0">
                                                 {entry.attacks_this_turn > 0 && (
@@ -528,7 +563,7 @@ function CompletedOpCard({
                                                 )}
                                                 {hasNotable && entry.notable_events.map((evt, j) => (
                                                     <span key={j} className="text-accent-gold ml-1">
-                                                        {NOTABLE_EVENT_LABEL[evt] ?? evt}
+                                                        {formatNotableEventLabel(evt)}
                                                     </span>
                                                 ))}
                                             </div>
@@ -560,7 +595,7 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                         <div className="text-[9px] text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>
                     )}
                     <div className="text-[9px] text-text-muted">
-                        {t('operationHistory.activeMeta', { corps: corpsName, start: op.started_turn, brigades: op.participating_brigades.length })}
+                        {t('operationHistory.activeMeta', { corps: corpsName, start: turnToDateString(op.started_turn), brigades: op.participating_brigades.length })}
                     </div>
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">

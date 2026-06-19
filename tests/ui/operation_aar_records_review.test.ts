@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import { RecordsContent } from '../../src/ui/map/components/army_hq/RecordsContent.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeLoadedState(): LoadedGameState {
@@ -165,6 +166,87 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.queryByText(/probe_arbih_1st_corps_t12/i)).toBeNull();
         expect(screen.queryByText(/_t12/i)).toBeNull();
         expect(screen.queryByText(/operation_name/i)).toBeNull();
+    });
+
+    it('renders completed-operation timing as calendar copy instead of raw week labels', () => {
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain(`${turnToDateString(12)} - ${turnToDateString(15)}`);
+        expect(copy).toContain(turnToDateString(13));
+        expect(copy).not.toMatch(/\bW12-W15\b/);
+        expect(copy).not.toMatch(/\bW13\b/);
+    });
+
+    it('renders active-operation start timing as calendar copy instead of Since W labels', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                activeOperations: [
+                    {
+                        corps_id: 'rs_1st_krajina',
+                        operation_name: 'probe_rs_1st_krajina_t12',
+                        operation_display_name: 'Probe - 1st Krajina',
+                        faction: 'RS',
+                        type: 'sector_attack',
+                        phase: 'execution',
+                        started_turn: 12,
+                        participating_brigades: ['rs_bde_1', 'rs_bde_2'],
+                        commander_name: 'Field Commander',
+                        objectives_count: 3,
+                        objectives_captured: 1,
+                        attacks: 2,
+                        weekly_log_length: 1,
+                    },
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain(`Since ${turnToDateString(12)}`);
+        expect(copy).not.toMatch(/Since W12/);
+        expect(copy).not.toMatch(/probe_rs_1st_krajina_t12/i);
+    });
+
+    it('uses player-safe labels and neutral fallback copy for grade factors and notable events', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        grade: {
+                            stars: 3,
+                            verdict: 'Costly partial',
+                            factors: { objective_pct: 67, support_gap_raw: -12 },
+                        },
+                        weekly_log: [
+                            {
+                                ...makeLoadedState().operationHistory![0].weekly_log[0],
+                                notable_events: ['supply_crisis'],
+                            },
+                        ],
+                    },
+                ],
+            },
+        });
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('Objective progress:');
+        expect(copy).toContain('Operational factor:');
+        expect(copy).toContain('Notable development');
+        expect(copy).not.toMatch(/objective pct/i);
+        expect(copy).not.toMatch(/support gap raw/i);
+        expect(copy).not.toMatch(/supply_crisis/i);
     });
 
     it('shows per-axis objective status labels from existing AAR axis summaries', () => {
