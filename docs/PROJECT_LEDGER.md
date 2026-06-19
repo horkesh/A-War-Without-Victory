@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): render decision receipt timing as dates
+
+**Type:** UI/read-model player-copy polish.
+
+**Fix:** Decision Consequence Records now renders receipt timing through `turnToDateString(...)`: the summary metric is `Latest Filing` with a calendar date, and individual receipt cards show `Family / {date}` instead of `Family / Turn {n}`. Chronicle confirmed consequence receipts now say the originating presidential decision happened on the calendar date instead of `at week {n}`. The existing BCS label was moved away from raw turn copy, but no broad native-language LQA is claimed.
+
+**Verification:** Red focused regression first failed on the intended raw-copy defects (`Latest Turn`, `Turn 8` / `Turn 44`, and `at week 8`). Green verification then passed: `npx.cmd vitest run tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_decision_ledger.test.ts` 11/11; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 107/107; `npm.cmd run qa:first-hour:browser` with port 3237 cleanup; `npm.cmd run qa:live-surface:browser` with port 3239 cleanup; `git diff --check`. Report: `docs/40_reports/implemented/20260619_DECISION_RECEIPT_DATE_COPY.md`.
+
+**Scope/determinism:** UI/read-model copy, existing i18n label text, tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-19] test(ui): add live surface browser sweep and retire SITREP command copy
 
 **Type:** UI/read-model player-copy polish and live browser QA gate.

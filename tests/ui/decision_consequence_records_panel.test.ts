@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -61,7 +62,11 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByRole('region', { name: 'Decision consequence records' })).toBeTruthy();
     expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
     expect(screen.getByText('Decision recorded')).toBeTruthy();
-    expect(screen.getByText(/Event decision \/ Turn 8/)).toBeTruthy();
+    expect(screen.getByText(`Event decision / ${turnToDateString(8)}`)).toBeTruthy();
+    const latestFilingMetric = screen.getByText('Latest Filing').closest('div')?.parentElement;
+    expect(latestFilingMetric?.textContent).toContain(turnToDateString(8));
+    expect(screen.queryByText('Latest Turn')).toBeNull();
+    expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();
     expect(screen.getByText('Chronicle Route')).toBeTruthy();
     expect(screen.getByText('Filed to Chronicle')).toBeTruthy();
   });
@@ -109,7 +114,8 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByText('Patron defiance supply cut')).toBeTruthy();
     expect(screen.getByText('Material support reduced')).toBeTruthy();
     expect(screen.getByText('Serbia cut 35% of material support for VRS; support after cut 45%.')).toBeTruthy();
-    expect(screen.getByText(/Patron relations \/ Turn 44/)).toBeTruthy();
+    expect(screen.getByText(`Patron relations / ${turnToDateString(44)}`)).toBeTruthy();
+    expect(screen.queryByText(/Patron relations \/ Turn 44/)).toBeNull();
     expect(screen.getByText('Filed to Records')).toBeTruthy();
     expect(screen.getByText('Review in Records')).toBeTruthy();
   });
@@ -191,7 +197,8 @@ describe('DecisionConsequenceRecordsPanel', () => {
       expect(screen.getByRole('region', { name: 'Zapisi posljedica odluka' })).toBeTruthy();
       expect(screen.getByText('Posljedice odluka')).toBeTruthy();
       expect(screen.getByText('Put Hronike')).toBeTruthy();
-      expect(screen.getAllByText(/Odluka događaja \/ Potez 8/).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(`Odluka događaja / ${turnToDateString(8)}`).length).toBeGreaterThan(0);
+      expect(screen.queryByText(/Odluka događaja \/ Potez 8/)).toBeNull();
       expect(screen.getByText('Arhivirano u: Hronika')).toBeTruthy();
       expect(screen.getByRole('button', { name: 'Otvori Hroniku' })).toBeTruthy();
       expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();

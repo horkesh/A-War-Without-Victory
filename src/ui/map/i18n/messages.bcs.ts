@@ -2912,7 +2912,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionConsequences.filed': 'Arhivirano',
     'decisionConsequences.recordsRoute': 'Put zapisa',
     'decisionConsequences.chronicleRoute': 'Put Hronike',
-    'decisionConsequences.latestTurn': 'Najnoviji potez',
+    'decisionConsequences.latestTurn': 'Najnovije arhiviranje',
     'decisionConsequences.families': 'Porodice',
     'decisionConsequences.empty': 'Jos nema arhiviranih posljedica predsjedničkih odluka.',
     'decisionConsequences.route.records': 'Zapisi',

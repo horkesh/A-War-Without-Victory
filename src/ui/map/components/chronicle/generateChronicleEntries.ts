@@ -40,6 +40,7 @@ import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js'
 import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
+import { turnToDateString } from '../../utils/formatters.js';
 
 import {
     getPlayerSafeDisplayLabel,
@@ -375,7 +376,7 @@ function buildConsequenceReceiptEntries(
             type: 'consequence',
             headline: false,
             title: `Consequence realized: ${receipt.predictedLabel}`,
-            detail: `Your decision "${receipt.decisionOptionLabel}" at week ${receipt.decisionTurn} brought this about, as the dossier warned.`,
+            detail: `Your decision "${receipt.decisionOptionLabel}" on ${turnToDateString(receipt.decisionTurn)} brought this about, as the dossier warned.`,
             metadata: {
                 decisionRecordId: `event:${receipt.decisionEventId}`,
             },

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest decision receipt date copy:** [implemented/20260619_DECISION_RECEIPT_DATE_COPY.md](implemented/20260619_DECISION_RECEIPT_DATE_COPY.md) - Decision Consequence Records and Chronicle confirmed consequence receipts now render receipt timing as calendar dates instead of `Latest Turn`, `Turn {n}`, or `at week {n}` player copy.
+
 **Latest live surface browser sweep and command copy:** [implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md](implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md) - `qa:live-surface:browser` now browser-verifies first-hour Desk, War Map, Army HQ, Records, Chronicle, and Codex surfaces while guarding shell stacking, console errors, port cleanup, and raw technical tokens; Decision Room / Warroom command copy now says `Situation` / `Operational Situation Report` instead of `SITREP`.
 
 **Latest forced-operation receipt recommendation copy:** [implemented/20260619_FORCED_OP_RECEIPT_RECOMMENDATION_COPY.md](implemented/20260619_FORCED_OP_RECEIPT_RECOMMENDATION_COPY.md) - Turn Aftermath forced-operation receipts now use the stored `postpone`/`abort` commander assessment instead of always saying the commander recommended abort.

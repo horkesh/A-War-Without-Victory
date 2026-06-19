@@ -7,6 +7,7 @@ import {
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
+import { turnToDateString } from '../../utils/formatters';
 import { openChronicle } from '../../utils/shellNavigation';
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
@@ -76,7 +77,9 @@ export function DecisionConsequenceRecordsPanel() {
         </div>
         <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
           <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.latestTurn')}</div>
-          <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{summary.latestTurn ?? '-'}</div>
+          <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">
+            {summary.latestTurn != null ? turnToDateString(summary.latestTurn) : '-'}
+          </div>
         </div>
         <div className="min-w-0 rounded border border-panel-border/60 bg-black/20 px-2 py-2">
           <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.families')}</div>
@@ -113,7 +116,7 @@ export function DecisionConsequenceRecordsPanel() {
                   <div className="min-w-0">
                     <div className="truncate text-[13px] font-bold text-text-primary">{record.title}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-text-muted">
-                      {familyLabel(record)} / {t('decisionConsequences.turn', { turn: record.turn })}
+                      {`${familyLabel(record)} / ${turnToDateString(record.turn)}`}
                     </div>
                   </div>
                   <div className="shrink-0 rounded border border-accent-gold/35 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">

@@ -1,3 +1,7 @@
+## 2026-06-19 - Decision receipt timing uses calendar dates
+
+**Receipt timing should be dates, not engine weeks:** Decision consequence ledgers preserve turn numbers for ordering and joins, but Army HQ Records and Chronicle receipt copy should describe when the president acted in calendar terms. Durable rule: render receipt timing with `turnToDateString(...)` at player-facing Records/Chronicle boundaries; do not show `Latest Turn`, `Turn {n}`, `Potez {n}`, or `at week {n}` in normal receipt copy. Applied in `[2026-06-19] fix(ui): render decision receipt timing as dates`; report `docs/40_reports/implemented/20260619_DECISION_RECEIPT_DATE_COPY.md`.
+
 ## 2026-06-19 - Live surface browser sweep guards command surfaces
 
 **Live browser sweeps should assert surfaces, not just startup:** The first-hour path can pass while Army HQ, Records, Chronicle, or Codex still expose stale command copy or shell stacking. Durable rule: run `npm run qa:live-surface:browser` after command-surface, Records, Chronicle, Codex, or top-toolbar changes; it must prove first-hour RBiH start plus Desk/War Map/Army HQ/Records/Chronicle/Codex reachability, raw-token absence, console health, shell exclusivity, and strict-port cleanup. Applied in `[2026-06-19] test(ui): add live surface browser sweep and retire SITREP command copy`; report `docs/40_reports/implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md`.

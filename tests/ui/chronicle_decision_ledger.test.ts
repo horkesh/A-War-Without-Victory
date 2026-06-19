@@ -1,6 +1,37 @@
 import { describe, expect, it } from 'vitest';
 
 import { generateChronicleEntries } from '../../src/ui/map/components/chronicle/generateChronicleEntries.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
+import type { EventDefinition } from '../../src/sim/events/event_types.js';
+
+function buildDecisionEventDef(): EventDefinition {
+  return {
+    id: 'cabinet_crisis',
+    title: 'Cabinet crisis response',
+    trigger: { turn_min: 1, phase: 'war' },
+    effect: { kind: 'narrative', text: 'noop' },
+    family: 'test_family',
+    source_tier: 'icty_icj_un',
+    response_options: [
+      {
+        id: 'hold_line',
+        label: 'Hold the policy line',
+        effects: [],
+        enables_events_runtime: ['cabinet_aftershock'],
+        future_consequences: [
+          {
+            id: 'cabinet_aftershock_warning',
+            label: 'Cabinet aftershock',
+            timing: 'future',
+            certainty: 'likely',
+            opens_events: ['cabinet_aftershock'],
+            explanation: 'The dossier warned the cabinet would answer later.',
+          },
+        ],
+      },
+    ],
+  } as unknown as EventDefinition;
+}
 
 describe('Chronicle decision ledger integration', () => {
   it('adds filed presidential decision consequences as Chronicle entries', () => {
@@ -149,5 +180,47 @@ describe('Chronicle decision ledger integration', () => {
       id: 'decision-ledger-patron-defiance:RS:44:0.35:0.45',
       title: 'Patron defiance supply cut',
     });
+  });
+
+  it('renders consequence receipt decision dates as calendar copy', () => {
+    const decisionTurn = 8;
+    const firedTurn = 12;
+    const entries = generateChronicleEntries({
+      turn: firedTurn,
+      player_faction: 'RBiH',
+      turnSummaries: [{ turn: firedTurn, battles: [], events_fired: [], displacement_total: 0 }],
+      rawGameState: {
+        military: {
+          fired_event_ids: ['cabinet_crisis', 'cabinet_aftershock'],
+          closed_event_ids: [],
+          event_decision_log: [{
+            event_id: 'cabinet_crisis',
+            response_id: 'hold_line',
+            decision_source: 'player',
+            faction: 'RBiH',
+            turn: decisionTurn,
+          }],
+          event_causality_log: [{
+            turn: firedTurn,
+            from_event: 'cabinet_crisis',
+            to_event: 'cabinet_aftershock',
+            to_flag: null,
+            kind: 'enables',
+            source_response_id: 'hold_line',
+          }],
+          event_last_fired_turn: {
+            cabinet_crisis: decisionTurn,
+            cabinet_aftershock: firedTurn,
+          },
+        },
+      },
+    }, new Map<string, EventDefinition>([
+      ['cabinet_crisis', buildDecisionEventDef()],
+      ['cabinet_aftershock', { id: 'cabinet_aftershock', title: 'Cabinet aftershock' } as EventDefinition],
+    ]));
+
+    const receipt = entries.find((entry) => entry.id === 'consequence-receipt-cabinet_crisis::hold_line::cabinet_aftershock');
+    expect(receipt?.detail).toContain(`on ${turnToDateString(decisionTurn)}`);
+    expect(receipt?.detail).not.toContain(`at week ${decisionTurn}`);
   });
 });

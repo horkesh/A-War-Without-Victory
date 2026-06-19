@@ -3229,7 +3229,7 @@ export const enMessages = {
     'decisionConsequences.filed': 'Filed',
     'decisionConsequences.recordsRoute': 'Records Route',
     'decisionConsequences.chronicleRoute': 'Chronicle Route',
-    'decisionConsequences.latestTurn': 'Latest Turn',
+    'decisionConsequences.latestTurn': 'Latest Filing',
     'decisionConsequences.families': 'Families',
     'decisionConsequences.empty': 'No presidential decision consequences have been filed yet.',
     'decisionConsequences.route.records': 'Records',
