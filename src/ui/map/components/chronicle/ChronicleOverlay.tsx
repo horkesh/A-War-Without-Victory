@@ -8,7 +8,13 @@ import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { openArmyHQAftermathRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
-import { buildChronicleCampaignRecap, buildChronicleChapters } from '../../data/chronicleChapters.js';
+import {
+    buildChronicleCampaignRecap,
+    buildChronicleChapters,
+    chronicleTypeLabel,
+    formatChronicleBoundaryKind,
+    formatChronicleChapterDateRange,
+} from '../../data/chronicleChapters.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import type { ChronicleChapter } from '../../data/chronicleChapters.js';
@@ -169,11 +175,11 @@ function ChronicleChapterView({
                                 {chapter.title}
                             </h2>
                             <p className="mt-1 text-[11px] font-mono text-stone-400">
-                                {chapter.summary} | {t('chronicle.turnRange', { start: chapter.startTurn, end: chapter.endTurn })}
+                                {chapter.summary} | {formatChronicleChapterDateRange(chapter)}
                             </p>
                         </div>
                         <div className="shrink-0 text-right text-[9px] font-mono uppercase text-stone-500">
-                            {chapter.boundaryKind.replace(/_/g, ' ')}
+                            {formatChronicleBoundaryKind(chapter.boundaryKind)}
                         </div>
                     </div>
 
@@ -185,7 +191,7 @@ function ChronicleChapterView({
                             >
                                 <div className="flex items-center justify-between gap-2">
                                     <span className="text-[8px] font-mono uppercase text-stone-500">
-                                        {t('chronicle.turnLabel', { turn: ref.turn })} | {ref.type}
+                                        {turnToFullDate(ref.turn)} | {chronicleTypeLabel(ref.type)}
                                     </span>
                                     {ref.headline && (
                                         <span className="text-[8px] font-mono uppercase text-amber-300">{t('chronicle.headline')}</span>

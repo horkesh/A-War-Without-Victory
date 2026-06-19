@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**CHRONICLE CHAPTER COPY (2026-06-19).** Chronicle chapter mode is player narrative/AAR copy, not a diagnostic index. Do instead: render chapter ranges and entry timing with `turnToDateString(...)`, map boundary kinds and doctrine stances to authored labels, and keep raw turn ranges / `Turn N` / underscore enums out of normal chapter cards.
+
 **CODEX TIMING COPY (2026-06-19).** Normal Codex copy should not expose raw week labels. Do instead: render unlock hints, Dilemma Spine decision timing, and Distance from History rows with `turnToDateString(...)`; keep raw event/source/family metadata only behind explicit diagnostic mode.
 
 **CODEX DYNAMIC ESSAY COPY (2026-06-19).** Dynamic Codex essay interpolation is player prose, not a diagnostic dump. Do instead: render milestone rows/status/delta/summary tokens and Cost Ledger annotation turns through calendar/player-facing helpers; sanitize upstream `week N` summaries at the resolver boundary.

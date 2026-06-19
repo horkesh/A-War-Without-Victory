@@ -1,7 +1,7 @@
 import type { ChronicleEntry } from '../components/chronicle/generateChronicleEntries.js';
 import { turnToDateString } from '../utils/formatters.js';
 
-type ChronicleBoundaryKind = 'standing_order' | 'doctrine_phase' | 'month';
+export type ChronicleBoundaryKind = 'standing_order' | 'doctrine_phase' | 'month';
 
 interface TimelineWindow {
     kind: ChronicleBoundaryKind;
@@ -72,6 +72,38 @@ function turnToMonthLabel(turn: number): string {
     return turnToDateString(turn);
 }
 
+export function formatChronicleTurnDateRange(startTurn: number, endTurn: number): string {
+    const start = turnToDateString(startTurn);
+    const end = turnToDateString(endTurn);
+    return start === end ? start : `${start} - ${end}`;
+}
+
+export function formatChronicleChapterDateRange(chapter: Pick<ChronicleChapter, 'startTurn' | 'endTurn'>): string {
+    return formatChronicleTurnDateRange(chapter.startTurn, chapter.endTurn);
+}
+
+export function formatChronicleBoundaryKind(kind: ChronicleBoundaryKind): string {
+    const labels: Record<ChronicleBoundaryKind, string> = {
+        standing_order: 'Campaign order',
+        doctrine_phase: 'Doctrine posture',
+        month: 'Calendar month',
+    };
+    return labels[kind];
+}
+
+function formatDoctrineStanceLabel(stance: unknown): string {
+    const labels: Record<string, string> = {
+        defensive: 'Defensive posture',
+        general_defensive: 'Defensive posture',
+        balanced: 'Balanced posture',
+        offensive: 'Offensive posture',
+        general_offensive: 'Offensive posture',
+        reorganize: 'Reorganization posture',
+        campaign: 'Campaign posture',
+    };
+    return labels[String(stance ?? 'campaign')] ?? 'Campaign posture';
+}
+
 function stableEntryBaseId(entry: ChronicleEntry): string {
     if (entry.id) return entry.id;
     const raw = [
@@ -131,7 +163,7 @@ function doctrineWindows(timeline: any, playerFaction: string): TimelineWindow[]
         .filter(phase => typeof phase?.start_week === 'number' && typeof phase?.end_week === 'number')
         .map((phase, index) => ({
             kind: 'doctrine_phase' as const,
-            title: `Doctrine Phase ${index + 1}: ${String(phase.default_corps_stance ?? 'campaign').replace(/_/g, ' ')}`,
+            title: `Doctrine Phase ${index + 1}: ${formatDoctrineStanceLabel(phase.default_corps_stance)}`,
             startTurn: phase.start_week,
             endTurn: phase.end_week,
         }))
@@ -190,9 +222,10 @@ function uniqueMonthLabelsByTurn(entries: ChronicleEntry[]): string[] {
         .map(([label]) => label);
 }
 
-function chronicleTypeLabel(type: ChronicleEntry['type']): string {
+export function chronicleTypeLabel(type: ChronicleEntry['type']): string {
     const labels: Partial<Record<ChronicleEntry['type'], string>> = {
         combat: 'combat',
+        consequence: 'consequence',
         cost: 'cost',
         diplomatic: 'diplomacy',
         humanitarian: 'humanitarian pressure',

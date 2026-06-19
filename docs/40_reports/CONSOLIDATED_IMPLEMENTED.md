@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Chronicle chapter calendar copy:** [implemented/20260619_CHRONICLE_CHAPTER_CALENDAR_COPY.md](implemented/20260619_CHRONICLE_CHAPTER_CALENDAR_COPY.md) - Chronicle chapter mode now renders chapter ranges, entry timing, boundary labels, and doctrine fallback titles as player-facing calendar/copy instead of raw turn or underscore-derived enum copy.
+
 **Latest Codex dynamic essay calendar copy:** [implemented/20260619_CODEX_DYNAMIC_ESSAY_CALENDAR_COPY.md](implemented/20260619_CODEX_DYNAMIC_ESSAY_CALENDAR_COPY.md) - Dynamic Codex essay milestone and Cost Ledger annotation tokens now render calendar dates plus player-facing status/delta labels instead of raw `W` week/status copy.
 
 **Latest same-axis concentration NO-GO:** [implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md](implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md) - The helper contract is pinned, but the blanket same-axis attack-eligibility arithmetic fix is rejected after focused/40w proof was followed by an 188w engine-health floor failure (`matched_osids` 637/712 vs 658).

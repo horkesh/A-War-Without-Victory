@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildChronicleCampaignRecap, buildChronicleChapters } from '../../src/ui/map/data/chronicleChapters.js';
+import {
+    buildChronicleCampaignRecap,
+    buildChronicleChapters,
+    formatChronicleBoundaryKind,
+    formatChronicleChapterDateRange,
+    formatChronicleTurnDateRange,
+} from '../../src/ui/map/data/chronicleChapters.js';
 import type { ChronicleEntry } from '../../src/ui/map/components/chronicle/generateChronicleEntries.js';
 
 function entry(turn: number, title: string, overrides: Partial<ChronicleEntry> = {}): ChronicleEntry {
@@ -100,6 +106,46 @@ describe('buildChronicleChapters', () => {
 
         expect(chapters.map(chapter => chapter.boundaryKind)).toEqual(['month', 'month']);
         expect(chapters.map(chapter => chapter.monthLabels[0])).toEqual(['Apr 1992', 'May 1992']);
+    });
+
+    it('uses player-facing doctrine chapter titles when standing orders are absent', () => {
+        const chapters = buildChronicleChapters(
+            [
+                entry(2, 'Opening directive'),
+            ],
+            {
+                player_faction: 'RS',
+                military: {
+                    war_timeline: {
+                        standing_orders: {},
+                        doctrine_phases: {
+                            RS: [
+                                { start_week: 0, end_week: 12, default_corps_stance: 'general_offensive' },
+                            ],
+                        },
+                    },
+                },
+            },
+        );
+
+        expect(chapters[0].title).toBe('Doctrine Phase 1: Offensive posture');
+        expect(chapters[0].title).not.toContain('general_offensive');
+        expect(chapters[0].title).not.toContain('general offensive');
+    });
+
+    it('formats chapter timing and boundary kind without raw turn or enum copy', () => {
+        const chapters = buildChronicleChapters(
+            [
+                entry(0, 'Opening note'),
+                entry(2, 'Second note'),
+            ],
+            { player_faction: 'RBiH', military: { war_timeline: timeline } },
+        );
+
+        expect(formatChronicleTurnDateRange(0, 0)).toBe('6 Apr 1992');
+        expect(formatChronicleChapterDateRange(chapters[0])).toBe('6 Apr 1992 - 20 Apr 1992');
+        expect(formatChronicleBoundaryKind(chapters[0].boundaryKind)).toBe('Campaign order');
+        expect(formatChronicleBoundaryKind('doctrine_phase')).toBe('Doctrine posture');
     });
 
     it('adds month sublabels inside long campaign chapters', () => {
