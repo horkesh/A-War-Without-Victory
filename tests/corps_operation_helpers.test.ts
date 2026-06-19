@@ -10,6 +10,7 @@ import {
     hasActiveOperation,
     getPrimaryOperation,
     removeOperation,
+    countAxisConcentrationSupport,
 } from '../src/sim/combat/corps_operation_helpers.js';
 import { makeFormation, makeSector } from './test_factories.js';
 
@@ -261,5 +262,52 @@ describe('derivePrimarySectorForBrigades', () => {
         expect(
             derivePrimarySectorForBrigades(sectors, 'test_corps', ['b1', 'b2']),
         ).toBe('sector:corps:a');
+    });
+});
+
+describe('countAxisConcentrationSupport', () => {
+    it('counts same-axis supporters while excluding the current attacker', () => {
+        const state = {
+            military: {
+                formations: {
+                    attacker: makeFormation({
+                        id: 'attacker',
+                        faction: 'RS',
+                        location_osid: 'op:test:approach',
+                    }),
+                    direct_supporter: makeFormation({
+                        id: 'direct_supporter',
+                        faction: 'RS',
+                        location_osid: 'op:test:approach',
+                    }),
+                    distant_supporter: makeFormation({
+                        id: 'distant_supporter',
+                        faction: 'RS',
+                        location_osid: 'op:test:staging',
+                    }),
+                    inactive_supporter: makeFormation({
+                        id: 'inactive_supporter',
+                        faction: 'RS',
+                        status: 'inactive',
+                        location_osid: 'op:test:approach',
+                    }),
+                },
+            },
+        } as any;
+        const adjacency = new Map<string, readonly string[]>([
+            ['op:test:objective', ['op:test:approach']],
+            ['op:test:approach', ['op:test:objective', 'op:test:staging']],
+            ['op:test:staging', ['op:test:approach']],
+        ]);
+
+        expect(
+            countAxisConcentrationSupport(
+                state,
+                ['distant_supporter' as any, 'attacker' as any, 'direct_supporter' as any, 'inactive_supporter' as any],
+                new Set(['attacker' as any]),
+                adjacency,
+                'op:test:objective',
+            ),
+        ).toBe(1);
     });
 });

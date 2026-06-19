@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest same-axis concentration NO-GO** | [implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md](implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md) - Same-axis concentration helper behavior is pinned by tests, but the blanket attack-eligibility arithmetic fix is rejected after a 188w engine-health floor failure (`matched_osids` 637/712 vs 658). |
 | **Latest Codex panel calendar copy** | [implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md](implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md) - Normal Codex lock hints, Dilemma Spine branch timing, and Distance from History rows now render calendar dates instead of raw week labels while diagnostic unlock metadata stays gated. |
 | **Latest Operation History player-copy cleanup** | [implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md](implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md) - Army HQ Operation History now renders date ranges and weekly rows as calendar dates, labels commander assessments, and hides raw grade/notable-event fallback identifiers behind player-safe copy. |
 | **Latest decision receipt date copy** | [implemented/20260619_DECISION_RECEIPT_DATE_COPY.md](implemented/20260619_DECISION_RECEIPT_DATE_COPY.md) - Decision Consequence Records and Chronicle confirmed consequence receipts now render receipt timing as calendar dates instead of `Latest Turn`, `Turn {n}`, or `at week {n}` player copy. |

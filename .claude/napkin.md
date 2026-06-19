@@ -1294,6 +1294,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: `npm run dev:map`. Legacy map_hoi.html / tactical_map.html are archived.
 
 ## Calibration
+1. **[2026-06-19] Same-axis concentration blanket fix is NO-GO**
+   Do instead: keep production behavior reverted and retain only helper-contract coverage; any future same-axis eligibility work needs a design/calibration lane with 188w proof because the blanket arithmetic fix passed focused/40w checks but failed `matched_osids` 637/712 vs 658.
 1. **[2026-05-22] COHA expiry must clear combat suppression**
    Do instead: Treat `coha_active` as the live combat-suppression flag and `coha_expired` as history/evidence only; `coha_expires_1995` must set `coha_active: false` or late-war accepted operations never reach OSID combat.
 1. **[2026-05-22] Operation under-delivery needs target-level order trace before tuning**
