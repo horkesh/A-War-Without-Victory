@@ -467,7 +467,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex items-center gap-2">{t('operationsSection.stalling')} <span className="text-red-500 font-bold">{op.consecutive_failures_on_current} / 3</span></div>
                     )}
                     {op.phase_started_turn != null && (
-                        <div className="flex items-center gap-2">{t('operationsSection.deployedSince')} <span className="text-text-primary font-bold">{t('operationsSection.weekShort', { week: op.phase_started_turn })}</span></div>
+                        <div className="flex items-center gap-2">{t('operationsSection.deployedSince')} <span className="text-text-primary font-bold">{turnToDateString(op.phase_started_turn)}</span></div>
                     )}
                 </div>
             )}
@@ -494,7 +494,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             </div>
                         </div>
                         <div className="text-right text-[9px] text-text-secondary/50 font-mono tabular-nums">
-                            <div>{t('operationsSection.weekRange', { start: completedAAR.started_turn, end: completedAAR.ended_turn })}</div>
+                            <div>{turnToDateString(completedAAR.started_turn)} - {turnToDateString(completedAAR.ended_turn)}</div>
                             <div>{t('operationsSection.aarDurationAttacks', { duration: completedAAR.duration_turns, attacks: completedAAR.total_attacks })}</div>
                             <div>{t('operationsSection.aarObjectivesTaken', { captured: completedAAR.objectives_captured.length, targeted: completedAAR.objectives_targeted.length })}</div>
                         </div>

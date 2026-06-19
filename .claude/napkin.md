@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**MULTI-SURFACE TIMING/PROVENANCE COPY (2026-06-19).** Player-facing timing/provenance copy should not expose raw turn/week shorthand, `T{turn}`, mechanism enums, battle outcome ids, or event ids. Do instead: use `turnToDateString(...)`, authored label maps, or neutral fallback copy in President's Desk receipts, Decision Room cards/report fallbacks, Army HQ operation/opportunity/friction copy, Chronicle Wrapped/Spine, and settlement timelines. Srebrenica/Zepa remain event-owned receipts, not Krivaja/Stupcanica operation-delivery targets.
+
 **COST LEDGER EARLY-PEACE COPY (2026-06-19).** Cost Ledger findings feed Codex/player verdict prose, so raw peace-plan ids and raw week labels are not acceptable there. Do instead: resolve `early_peace_implemented` through the peace-plan catalog, render acceptance timing as a calendar date, and sanitize legacy `peace plan <id> at week N` text at the Codex display boundary.
 
 **CHRONICLE CHAPTER COPY (2026-06-19).** Chronicle chapter mode is player narrative/AAR copy, not a diagnostic index. Do instead: render chapter ranges and entry timing with `turnToDateString(...)`, map boundary kinds and doctrine stances to authored labels, and keep raw turn ranges / `Turn N` / underscore enums out of normal chapter cards.

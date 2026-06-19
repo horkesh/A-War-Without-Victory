@@ -97,7 +97,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
                   <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{record.outcome}</div>
                 </div>
                 <div className="mt-1 truncate text-[9px] text-text-secondary">
-                  {familyLabel(record)} / {t('decisionConsequences.turn', { turn: record.turn })} / {record.detail}
+                  {familyLabel(record)} / {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} / {record.detail}
                 </div>
                 <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">
                   {record.recordTarget === 'chronicle'

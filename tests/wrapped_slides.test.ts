@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { generateWrappedSlides, WrappedSlide } from '../src/ui/map/components/chronicle/generateWrappedSlides.js';
+import { turnToDateString } from '../src/ui/map/utils/formatters.js';
 
 function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
     return {
@@ -124,6 +125,25 @@ describe('generateWrappedSlides', () => {
             expect(slide.data?.bloodiestTurn).toBe(12);
             expect(slide.data?.bloodiestCasualties).toBe(750);
             expect(slide.heroValue).toBe('750');
+        });
+
+        it('uses calendar date copy instead of raw Week or Turn labels', () => {
+            const state = makeMinimalState({
+                turnSummaries: [
+                    makeTurnSummary(12, {
+                        battles: [
+                            { attacker_casualties: 300, defender_casualties: 200 },
+                        ],
+                    }),
+                ],
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'bloodiest_week')!;
+            const visibleCopy = [slide.subtitle, slide.detail].filter(Boolean).join(' ');
+
+            expect(visibleCopy).toContain(turnToDateString(12));
+            expect(visibleCopy).not.toMatch(/\bWeek\s+12\b/);
+            expect(visibleCopy).not.toMatch(/\bTurn\s+12\b/);
+            expect(slide.data?.bloodiestTurn).toBe(12);
         });
 
         it('handles no battles gracefully', () => {

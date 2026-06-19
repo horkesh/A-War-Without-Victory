@@ -110,6 +110,7 @@ export const ChronicleRibbonScrubber = React.memo(function ChronicleRibbonScrubb
             <div className="flex-1 flex h-3 rounded-sm overflow-hidden">
                 {Array.from({ length: totalTurns }, (_, i) => {
                     const turn = minTurn + i;
+                    const dateLabel = turnToDateString(turn);
                     if (snapshots.has(turn)) lastSnap = snapshots.get(turn)!;
                     // Dominant faction color for this tick
                     let maxPct = 0;
@@ -125,8 +126,8 @@ export const ChronicleRibbonScrubber = React.memo(function ChronicleRibbonScrubb
                                 className="flex-1 cursor-pointer hover:opacity-100 transition-opacity border-0 p-0"
                                 style={{ backgroundColor: color, opacity: 0.5 }}
                                 onClick={() => onClickTurn(turn)}
-                                aria-label={`Jump to ${turnToDateString(turn)} (Week ${turn})`}
-                                title={`${turnToDateString(turn)} (Week ${turn})`}
+                                aria-label={`Jump to ${dateLabel}`}
+                                title={dateLabel}
                             />
                     );
                 })}

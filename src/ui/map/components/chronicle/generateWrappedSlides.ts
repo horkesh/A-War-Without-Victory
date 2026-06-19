@@ -6,6 +6,7 @@ import {
     getEventChainSummary,
 } from '../../../../sim/events/causality_query.js';
 import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText.js';
+import { turnToDateString } from '../../utils/formatters.js';
 
 export interface WrappedSlide {
     id: string;
@@ -148,10 +149,10 @@ export function generateWrappedSlides(
     slides.push({
         id: 'bloodiest_week',
         title: 'Bloodiest Week',
-        subtitle: bloodiestCasualties > 0 ? `Week ${bloodiestTurn} saw the worst fighting` : 'No battles recorded',
+        subtitle: bloodiestCasualties > 0 ? `${turnToDateString(bloodiestTurn)} saw the worst fighting` : 'No battles recorded',
         heroValue: bloodiestCasualties > 0 ? String(bloodiestCasualties) : '0',
         heroLabel: 'casualties in one week',
-        detail: bloodiestTurn > 0 ? `Turn ${bloodiestTurn}` : undefined,
+        detail: bloodiestTurn > 0 ? `Fighting peaked on ${turnToDateString(bloodiestTurn)}` : undefined,
         data: { bloodiestTurn, bloodiestCasualties },
     });
 
@@ -405,7 +406,7 @@ export function generateCausalitySlides(
             const title = resolveEventDisplayTitle(def, d.event_id);
             const chosenOption = resolveResponseDisplayLabel(def, d.chosen_option, 'Chosen response');
             const historicalDefault = resolveResponseDisplayLabel(def, d.historical_default, 'Historical response');
-            return `T${d.turn} ${title}: ${chosenOption} (history: ${historicalDefault})`;
+            return `${turnToDateString(d.turn)} ${title}: ${chosenOption} (history: ${historicalDefault})`;
         });
         slides.push({
             id: 'your_divergences',
@@ -445,7 +446,7 @@ export function generateCausalitySlides(
                     ? `${totalReshaped} events fired in your causal chain`
                     : 'The causal substrate persisted your choices',
             heroValue: String(summary.max_depth),
-            heroLabel: summary.max_depth === 1 ? 'turn of chain depth' : 'turns of chain depth',
+            heroLabel: summary.max_depth === 1 ? 'link in causal chain' : 'links in causal chain',
             detail: `${summary.foundational_count} foundational | ${summary.downstream_fired_count} downstream | ${summary.closed_count} closed`,
             bullets: [
                 `Foundational events fired: ${summary.foundational_count}`,

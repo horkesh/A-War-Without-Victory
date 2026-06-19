@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PresidentDeskShell } from '../../src/ui/map/components/presidential_desk/PresidentDeskShell.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   return {
@@ -120,8 +121,8 @@ describe('PresidentDeskShell', () => {
     expect(container.textContent).not.toMatch(/\bA:\d/);
   });
 
-  it('surfaces recent decision consequences on the desk', () => {
-    renderDesk({
+  it('surfaces recent decision consequences on the desk with calendar dates', () => {
+    const { container } = renderDesk({
       state: makeState({
         firedEvents: [
           {
@@ -143,6 +144,8 @@ describe('PresidentDeskShell', () => {
     expect(screen.getByText('Decision recorded')).toBeTruthy();
     expect(screen.getByText('Open Chronicle')).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Cabinet crisis response consequence' }).getAttribute('src')).toContain('consequence_public_pressure');
+    expect(container.textContent).toContain(turnToDateString(8));
+    expect(container.textContent).not.toContain('Turn 8');
   });
 
   it('matches Advance Clearance blocking truth for counter-offer reviews', () => {

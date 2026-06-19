@@ -1244,7 +1244,7 @@ function addHardTurnCards(
       title: t('decisionRoom.card.hardTurn.title', { dateLabel: record.dateLabel }),
       explanation: record.cost.reasons.slice(0, 3).join(' / '),
       sourceOwner: t('decisionRoom.card.hardTurn.sourceOwner'),
-      sourceLabel: t('decisionRoom.card.hardTurn.sourceLabel', { turn: record.turn }),
+      sourceLabel: t('decisionRoom.card.hardTurn.sourceLabel', { dateLabel: record.dateLabel }),
       actionLabel: t('decisionRoom.action.openTurnRecord'),
       evidence: [
         t('decisionRoom.card.hardTurn.evidence.net', { net: formatSigned(record.territory.friendlyNet) }),
@@ -1775,7 +1775,7 @@ function buildReportLoopStep(
   return {
     id: 'report',
     label: t('decisionRoom.loop.report'),
-    headline: turnCards[0]?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { turn: latestTurn }) : t('decisionRoom.loop.noTurnRecordsYet')),
+    headline: turnCards[0]?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { dateLabel: turnToDateString(latestTurn) }) : t('decisionRoom.loop.noTurnRecordsYet')),
     summary: recordCount > 0
       ? summaryCount(recordCount, urgentCount, 'decisionRoom.noun.recordedTurn.many')
       : summaryCount(0, 0, 'decisionRoom.noun.record.many'),

@@ -210,4 +210,134 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(text).toContain('Command - Drina Corps');
         expect(text).not.toMatch(/cmd_|_t45|operation_name|op:/i);
     });
+
+    it('renders authored control-event mechanism labels without exposing raw enum tokens', () => {
+        const osid = 'op:test:test_1';
+        const events = callTimeline(osid, {
+            controlEvents: [
+                { turn: 8, settlementId: osid, from: 'RBiH', to: 'RS', mechanism: 'event' },
+                { turn: 9, settlementId: osid, from: 'RS', to: 'RBiH', mechanism: 'scripted_control_change' },
+            ],
+        });
+
+        const details = events.filter(e => e.type === 'control_flip').map(e => e.detail);
+        expect(details).toContain('historical control event');
+        expect(details).not.toContain('scripted control change');
+        expect(details).not.toContain('scripted_control_change');
+    });
+
+    it('renders authored battle outcome labels and uses a neutral fallback for unknown outcomes', () => {
+        const osid = 'op:test:test_1';
+        const events = buildSettlementTimeline(
+            osid,
+            null,
+            [],
+            [],
+            [],
+            [
+                {
+                    turn: 1,
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'victory',
+                    attacker_casualties: 8,
+                    defender_casualties: 18,
+                    territory_flipped: true,
+                },
+                {
+                    turn: 4,
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'decisive_victory',
+                    attacker_casualties: 10,
+                    defender_casualties: 30,
+                    territory_flipped: true,
+                },
+                {
+                    turn: 6,
+                    attacker_faction: 'HRHB',
+                    defender_faction: 'RS',
+                    outcome: 'costly_victory',
+                    attacker_casualties: 45,
+                    defender_casualties: 38,
+                    territory_flipped: true,
+                },
+                {
+                    turn: 7,
+                    attacker_faction: 'RS',
+                    defender_faction: 'HRHB',
+                    outcome: 'stalemate',
+                    attacker_casualties: 20,
+                    defender_casualties: 18,
+                    territory_flipped: false,
+                },
+                {
+                    turn: 8,
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'HRHB',
+                    outcome: 'repulsed',
+                    attacker_casualties: 36,
+                    defender_casualties: 12,
+                    territory_flipped: false,
+                },
+                {
+                    turn: 9,
+                    attacker_faction: 'HRHB',
+                    defender_faction: 'RBiH',
+                    outcome: 'catastrophic',
+                    attacker_casualties: 70,
+                    defender_casualties: 10,
+                    territory_flipped: false,
+                },
+                {
+                    turn: 5,
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'RS',
+                    outcome: 'unexpected_result_token',
+                    attacker_casualties: 20,
+                    defender_casualties: 15,
+                    territory_flipped: false,
+                },
+            ],
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        const titles = events.filter(e => e.type === 'battle').map(e => e.title);
+        expect(titles.some(title => title.includes('decisive victory'))).toBe(true);
+        expect(titles.some(title => title.includes('victory'))).toBe(true);
+        expect(titles.some(title => title.includes('costly victory'))).toBe(true);
+        expect(titles.some(title => title.includes('stalemate'))).toBe(true);
+        expect(titles.some(title => title.includes('attack repulsed'))).toBe(true);
+        expect(titles.some(title => title.includes('catastrophic defeat'))).toBe(true);
+        expect(titles.some(title => title.includes('outcome recorded'))).toBe(true);
+        expect(titles.some(title => title.includes('decisive_victory'))).toBe(false);
+        expect(titles.some(title => title.includes('costly_victory'))).toBe(false);
+        expect(titles.some(title => title.includes('unexpected result token'))).toBe(false);
+    });
+
+    it('uses neutral historical-event fallback copy when event text is missing', () => {
+        const events = buildSettlementTimeline(
+            'op:test:test_1',
+            null,
+            [],
+            [],
+            [],
+            [],
+            [],
+            [],
+            [{ turn: 10, id: 'srebrenica_falls_1995', text: '' }],
+            null,
+            null,
+        );
+
+        expect(events).toHaveLength(1);
+        expect(events[0].type).toBe('historical_event');
+        expect(events[0].title).toBe('Historical event recorded');
+        expect(events[0].title).not.toContain('srebrenica');
+        expect(events[0].title).not.toContain('_');
+    });
 });

@@ -101,9 +101,42 @@ interface BattleRecord {
     territory_flipped: boolean;
 }
 
+const CONTROL_MECHANISM_LABELS: Record<string, string> = {
+    combat: 'combat action',
+    event: 'historical control event',
+    control_change: 'historical control event',
+    event_control_change: 'historical control event',
+    initial_control: 'initial control',
+    inferred_from_displacement: 'inferred from displacement',
+    displacement: 'displacement aftermath',
+    paramilitary: 'paramilitary action',
+    rear_pocket_consolidation: 'rear-area consolidation',
+    null_claim: 'unopposed control claim',
+    jna_phantom_capture: 'JNA handoff',
+};
+
+/** Control-event mechanism display name. */
+function controlMechanismLabel(mechanism: string): string | undefined {
+    const normalized = mechanism.trim();
+    if (!normalized || normalized === 'unknown') return undefined;
+    return CONTROL_MECHANISM_LABELS[normalized];
+}
+
+const BATTLE_OUTCOME_LABELS: Record<string, string> = {
+    decisive_victory: 'decisive victory',
+    victory: 'victory',
+    costly_victory: 'costly victory',
+    attacker_victory: 'attacker victory',
+    defender_victory: 'defender victory',
+    stalemate: 'stalemate',
+    repulsed: 'attack repulsed',
+    catastrophic: 'catastrophic defeat',
+    withdrawal: 'withdrawal',
+};
+
 /** Outcome display name. */
 function outcomeName(o: string): string {
-    return o.replace(/_/g, ' ');
+    return BATTLE_OUTCOME_LABELS[o.trim()] ?? 'outcome recorded';
 }
 
 function operationDisplayName(op: OperationHistoryEntry): string {
@@ -147,7 +180,7 @@ export function buildSettlementTimeline(
             type: 'control_flip',
             faction: ce.to ?? undefined,
             title: `${ce.to ? factionName(ce.to) : 'Unknown'} took control`,
-            detail: ce.mechanism !== 'unknown' ? ce.mechanism.replace(/_/g, ' ') : undefined,
+            detail: controlMechanismLabel(ce.mechanism),
         });
     }
     // 2. Infer control flips from displacement events — when `caused_by` faction
@@ -225,7 +258,7 @@ export function buildSettlementTimeline(
         events.push({
             turn: e.turn,
             type: 'historical_event',
-            title: e.text || e.id.replace(/_/g, ' '),
+            title: e.text.trim() || 'Historical event recorded',
         });
     }
 

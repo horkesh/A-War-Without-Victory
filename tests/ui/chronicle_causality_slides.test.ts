@@ -29,6 +29,7 @@ import {
     generateWrappedSlides,
     type WrappedSlide,
 } from '../../src/ui/map/components/chronicle/generateWrappedSlides.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { CausalityLogEntry } from '../../src/state/game_state.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 
@@ -235,11 +236,49 @@ describe('generateWrappedSlides — causality slide F2 (your_divergences)', () =
         expect(f2).toBeDefined();
         expect(f2!.heroValue).toBe('2');
         expect(f2!.bullets).toHaveLength(2);
-        // Sorted by turn ascending — vance_owen_signing (T8) first
+        // Sorted by turn ascending: vance_owen_signing first.
         expect(f2!.bullets![0]).toContain('Vance-Owen plan');
         expect(f2!.bullets![0]).toContain('Accept');
         expect(f2!.bullets![0]).toContain('Reject');
         expect(f2!.bullets![1]).toContain('Washington Agreement');
+    });
+
+    it('uses calendar date copy instead of raw T-turn labels in divergence bullets', () => {
+        const catalog = buildCatalog([
+            eventDef('vance_owen_signing', {
+                title: 'Vance-Owen plan',
+                historical_default_response_id: 'reject',
+                response_options: [
+                    { id: 'accept', label: 'Accept', effects: [] } as any,
+                    { id: 'reject', label: 'Reject', effects: [] } as any,
+                ],
+            }),
+        ]);
+        const state = buildMinimalState({
+            player_faction: 'RBiH',
+            military: {
+                fired_event_ids: [],
+                enabled_event_ids: [],
+                closed_event_ids: [],
+                event_causality_log: [],
+                event_decision_log: [
+                    {
+                        event_id: 'vance_owen_signing',
+                        response_id: 'accept',
+                        decision_source: 'player',
+                        faction: 'RBiH',
+                        turn: 8,
+                    },
+                ],
+                event_last_fired_turn: {},
+            },
+        });
+
+        const slides = generateWrappedSlides(state, catalog);
+        const bullet = slides.find((s) => s.id === 'your_divergences')!.bullets![0];
+
+        expect(bullet).toContain(turnToDateString(8));
+        expect(bullet).not.toMatch(/\bT8\b/);
     });
 
     it('uses player-safe labels for divergence bullets while preserving raw ids in data', () => {
@@ -290,7 +329,7 @@ describe('generateWrappedSlides — causality slide F2 (your_divergences)', () =
         expect(bullet).not.toContain('push_forward_anyway');
         expect(bullet).not.toContain('historical_default');
         expect(bullet).not.toContain('Evt Internal Policy Crisis');
-        expect(bullet).toContain('T12 Internal Policy Crisis');
+        expect(bullet).toContain(`${turnToDateString(12)} Internal Policy Crisis`);
         expect(bullet).toContain('Internal Policy Crisis');
         expect(bullet).toContain('Push Forward Anyway');
         expect(bullet).toContain('Historical Default');
@@ -349,6 +388,7 @@ describe('generateWrappedSlides — causality slide F3 (causal_chain_summary)', 
         expect(f3).toBeDefined();
         // max_depth = 3 (foundational_a → downstream_b → downstream_c)
         expect(f3!.heroValue).toBe('3');
+        expect(f3!.heroLabel).toBe('links in causal chain');
         // 1 foundational + 2 downstream = 3 events fired in chain
         expect(f3!.subtitle).toContain('3 events fired');
         expect(f3!.detail).toContain('1 foundational');
@@ -359,6 +399,42 @@ describe('generateWrappedSlides — causality slide F3 (causal_chain_summary)', 
         expect(f3!.data?.downstream_fired_count).toBe(2);
         expect(f3!.data?.closed_count).toBe(1);
         expect(f3!.data?.max_depth).toBe(3);
+    });
+
+    it('labels causal-chain depth as links, not turns', () => {
+        const catalog = buildCatalog([
+            eventDef('foundational_a'),
+            eventDef('downstream_b'),
+        ]);
+        const state = buildMinimalState({
+            player_faction: 'RBiH',
+            military: {
+                fired_event_ids: ['foundational_a', 'downstream_b'],
+                enabled_event_ids: ['downstream_b'],
+                closed_event_ids: [],
+                event_causality_log: [
+                    {
+                        turn: 1,
+                        from_event: 'foundational_a',
+                        to_event: 'downstream_b',
+                        to_flag: null,
+                        kind: 'enables',
+                        source_response_id: 'opt1',
+                    } as any,
+                ],
+                event_decision_log: [],
+                event_last_fired_turn: {
+                    foundational_a: 1,
+                    downstream_b: 2,
+                },
+            },
+        });
+
+        const slides = generateWrappedSlides(state, catalog);
+        const f3 = slides.find((s) => s.id === 'causal_chain_summary')!;
+
+        expect(f3.heroLabel).toBe('links in causal chain');
+        expect(f3.heroLabel).not.toContain('turn');
     });
 
     it('does NOT append causal_chain_summary slide when no causality signal', () => {

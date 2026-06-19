@@ -744,6 +744,36 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.evidence.join('\n')).not.toMatch(/\bExpires\s+T\d+\b/);
   });
 
+  it('dates hard-turn source labels with calendar copy instead of raw turns', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 24,
+          territory_net: { RBiH: -1 },
+          displacement_total: 1600,
+        }),
+      }),
+    });
+
+    const card = view.cards.find((entry) => entry.id === 'turn:24:hard-turn');
+    expect(card?.title).toContain(turnToDateString(24));
+    expect(card?.sourceLabel).toBe(turnToDateString(24));
+    expect(card?.sourceLabel).not.toBe('Turn 24');
+  });
+
+  it('dates report-loop fallback headlines with calendar copy instead of raw turns', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        latestTurnSummary: makeSummary({ turn: 24 }),
+        turnSummaries: [makeSummary({ turn: 24 })],
+      }),
+    });
+
+    const report = view.loopSteps.find((step) => step.id === 'report');
+    expect(report?.headline).toBe(`Latest turn record: ${turnToDateString(24)}`);
+    expect(report?.headline).not.toContain('T24');
+  });
+
   it('builds the full presidential product loop as handoffs to existing owners', () => {
     const state = makeState({
       presidentialReviewQueue: {

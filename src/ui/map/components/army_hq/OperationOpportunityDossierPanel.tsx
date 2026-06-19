@@ -4,6 +4,7 @@ import type { BackTheOfficerView } from '../../data/backTheOfficer';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { t } from '../../i18n';
+import { turnToDateString } from '../../utils/formatters';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
 type OpportunityResolveOptions = { redirectVariantId?: string };
@@ -132,7 +133,7 @@ function DossierCard({
                         </span>
                         {proposal.expires_turn != null && (
                             <span className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-text-secondary">
-                                {t('opportunity.expiresWeek', { week: proposal.expires_turn })}
+                                {t('opportunity.reviewByDate', { date: turnToDateString(proposal.expires_turn) })}
                             </span>
                         )}
                     </div>

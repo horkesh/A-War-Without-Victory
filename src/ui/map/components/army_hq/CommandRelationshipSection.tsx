@@ -33,6 +33,7 @@ import { isExhaustionContributingToStrain } from '../../data/command_strain';
 import type { CorpsDelegationSummary } from '../../data/command_strain';
 import type { FrictionEventView } from '../../data/types';
 import { t } from '../../i18n';
+import { turnToDateString } from '../../utils/formatters';
 
 const COMPROMISED_THRESHOLD = 6;
 
@@ -111,6 +112,10 @@ export function CommandRelationshipSection({
     const labelText = isCompromised ? t('commandRelationship.compromised') : commandStrain > 0 ? t('commandRelationship.strained') : t('commandRelationship.healthy');
 
     const hasCooldown = typeof stabilizationCooldownUntil === 'number' && currentTurn < stabilizationCooldownUntil;
+    const cooldownDate =
+        hasCooldown && typeof stabilizationCooldownUntil === 'number'
+            ? turnToDateString(stabilizationCooldownUntil)
+            : '';
     const costLabel = stabilizationCostCA != null && stabilizationCostCA > 0
         ? ` [−${stabilizationCostCA} CA]`
         : '';
@@ -240,7 +245,7 @@ export function CommandRelationshipSection({
                                         {event.typeLabel}
                                     </span>
                                     <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
-                                        {t('commandRelationship.week', { turn: event.turn })}
+                                        {t('commandRelationship.reportedDate', { date: turnToDateString(event.turn) })}
                                     </span>
                                 </div>
                                 <button
@@ -270,7 +275,7 @@ export function CommandRelationshipSection({
                             }`}
                             title={
                                 hasCooldown
-                                    ? t('commandRelationship.cooldownTitle', { turn: stabilizationCooldownUntil ?? '' })
+                                    ? t('commandRelationship.cooldownTitle', { date: cooldownDate })
                                     : t('commandRelationship.stabilizeTitle', { cost: stabilizationCostCA ?? 0 })
                             }
                         >
@@ -278,7 +283,7 @@ export function CommandRelationshipSection({
                         </button>
                         {hasCooldown && (
                             <p className="text-[9px] text-text-secondary/50 italic px-1">
-                                {t('commandRelationship.cooldown', { turn: stabilizationCooldownUntil ?? '' })}
+                                {t('commandRelationship.cooldown', { date: cooldownDate })}
                             </p>
                         )}
                     </div>
