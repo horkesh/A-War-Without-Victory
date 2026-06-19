@@ -287,7 +287,7 @@ describe('VerdictScreen interaction — faction tab switching', () => {
         expect(screen.getByText('Razlika')).toBeDefined();
         expect(screen.getByText('Status')).toBeDefined();
         expect(screen.getAllByText('Trajanje rata').length).toBeGreaterThanOrEqual(2);
-        expect(screen.getByText('S188')).toBeDefined();
+        expect(screen.getByText('13 nov 1995')).toBeDefined();
         expect(screen.getByText('6s kasno')).toBeDefined();
         expect(screen.getByText('Kasno')).toBeDefined();
         expect(screen.getByText('Kampanja je završila 6 sedmica kasnije od historijske reference.')).toBeDefined();

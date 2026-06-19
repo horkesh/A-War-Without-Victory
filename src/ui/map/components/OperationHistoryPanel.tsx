@@ -210,7 +210,7 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
 }
 
 function formatOutcome(value: string): string {
-    const label = OUTCOME_LABEL[value] ?? value.replace(/_/g, ' ');
+    const label = OUTCOME_LABEL[value] ?? t('operationHistory.outcomeUnreported');
     return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
@@ -354,7 +354,7 @@ function CompletedOpCard({
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
                         <StarRating stars={op.grade.stars} verdict={op.grade.verdict} />
                         <span className={`text-[10px] font-mono ${OUTCOME_COLOR[op.outcome] ?? 'text-text-secondary'}`}>
-                            {OUTCOME_LABEL[op.outcome] ?? op.outcome}
+                            {OUTCOME_LABEL[op.outcome] ?? t('operationHistory.outcomeUnreported')}
                         </span>
                         {op.recovery_reason && RECOVERY_REASON_BADGE[op.recovery_reason] && (
                             <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase ${RECOVERY_REASON_BADGE[op.recovery_reason].className}`}>

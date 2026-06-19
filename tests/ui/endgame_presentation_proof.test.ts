@@ -235,9 +235,9 @@ describe('condemnation wording — restraint', () => {
         expect(text).toContain('civilian');
     });
 
-    it('unknown flags produce humanized fallback, not raw strings', () => {
+    it('unknown flags produce neutral fallback, not raw strings', () => {
         const text = formatCondemnationFlag('some_future_flag');
-        expect(text).toBe('some future flag');
+        expect(text).toBe('Additional condemnation record');
         expect(text).not.toContain('_');
     });
 });

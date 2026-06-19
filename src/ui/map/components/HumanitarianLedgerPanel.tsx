@@ -15,6 +15,7 @@ import { useMemo } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { t } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
+import { turnToDateString } from '../utils/formatters';
 
 interface HumanitarianLedgerPanelProps {
   state: LoadedGameState;
@@ -173,7 +174,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
                         key={p.turn}
                         className="flex-1 bg-amber-400/50 rounded-t"
                         style={{ height: `${heightPct}%` }}
-                        title={`${t('humanitarianLedger.label.week', { turn: p.turn })}: ${fmt(p.refugeesCreated)}`}
+                        title={`${turnToDateString(p.turn)}: ${fmt(p.refugeesCreated)}`}
                       />
                     );
                   })}

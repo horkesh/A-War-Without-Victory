@@ -23,6 +23,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { CollapsibleSection } from './CollapsibleSection';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
+import { turnToDateString } from '../../utils/formatters';
 import { FRONT_VISIT_COST } from '../../utils/commandAuthority';
 import { t } from '../../i18n';
 
@@ -131,7 +132,7 @@ export function FrontVisitSection() {
                     )}
                     {avail.onCooldown && avail.cooldownUntil != null && (
                         <span className="text-amber-400/80">
-                            {t('frontVisit.cooldown', { turn: avail.cooldownUntil })}
+                            {t('frontVisit.cooldown', { date: turnToDateString(avail.cooldownUntil) })}
                         </span>
                     )}
                     {avail.reachableBranchIds.length === 0 && avail.firesLeft > 0 && !avail.onCooldown && (

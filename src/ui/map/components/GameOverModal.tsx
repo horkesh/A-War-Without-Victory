@@ -29,7 +29,7 @@ const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageK
 function getOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
     if (!outcome) return { title: t('gameOver.title'), subtitle: '' };
     const labelKeys = OUTCOME_LABEL_KEYS[outcome];
-    return labelKeys ? { title: t(labelKeys.title), subtitle: t(labelKeys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
+    return labelKeys ? { title: t(labelKeys.title), subtitle: t(labelKeys.subtitle) } : { title: t('gameOver.outcome.unreported.title'), subtitle: '' };
 }
 
 export function GameOverModal() {

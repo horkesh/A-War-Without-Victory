@@ -688,7 +688,7 @@ async function main(): Promise<void> {
             }
         } else {
             controlData = { by_settlement_id: { ...(baselineControl.by_settlement_id ?? {}) }, control_status_by_settlement_id: { ...(baselineControl.control_status_by_settlement_id ?? {}) } };
-            if (turnDisplay) turnDisplay.textContent = 'Turn 0 — Sep 1991';
+            if (turnDisplay) turnDisplay.textContent = 'Sep 1991';
         }
         statusEl.textContent = '';
         statusEl.classList.remove('error');
@@ -776,9 +776,8 @@ async function main(): Promise<void> {
                     }
                     const meta = asRecord(state.meta);
                     if (turnDisplay && meta && typeof meta === 'object') {
-                        const turn = typeof meta.turn === 'number' ? meta.turn : 0;
                         const phase = typeof meta.phase === 'string' ? meta.phase : '';
-                        turnDisplay.textContent = phase ? `Turn ${turn} — ${phase}` : `Turn ${turn}`;
+                        turnDisplay.textContent = phase ? phase : 'Loaded campaign';
                     }
                     const military = asRecord(state.military);
                     const rawFormations = asRecord(military?.formations);
@@ -808,7 +807,7 @@ async function main(): Promise<void> {
         });
     }
 
-    turnDisplay.textContent = 'Turn 0 — Sep 1991';
+    turnDisplay.textContent = 'Sep 1991';
 
     window.addEventListener('resize', resize);
     resize();

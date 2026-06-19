@@ -78,7 +78,7 @@ export function formatCondemnationFlag(flag: string): string {
         civilian_atrocities: 'verdict.condemnation.civilianAtrocities',
     };
     const key = labels[flag];
-    return key ? t(key) : flag.replace(/_/g, ' ');
+    return key ? t(key) : t('verdict.condemnation.unreported');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1002,7 +1002,7 @@ const FALLBACK_OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle:
 function fallbackOutcomeDisplay(outcome?: string): { title: string; subtitle: string } {
     if (!outcome) return { title: t('gameOver.fallback.title'), subtitle: '' };
     const keys = FALLBACK_OUTCOME_LABEL_KEYS[outcome];
-    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: outcome.replace(/_/g, ' '), subtitle: '' };
+    return keys ? { title: t(keys.title), subtitle: t(keys.subtitle) } : { title: t('gameOver.outcome.unreported.title'), subtitle: '' };
 }
 
 function formatFallbackOsidsControlled(count: number): string {

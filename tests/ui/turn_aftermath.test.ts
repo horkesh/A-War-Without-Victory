@@ -599,7 +599,7 @@ describe('buildTurnAftermathView', () => {
     ]);
     expect(view?.signals[1]).toMatchObject({
       label: 'Corridor reopened around Bihac.',
-      detail: 'Siege Broken / Izacic (Bihac)',
+        detail: 'Notable event / Izacic (Bihac)',
       severity: 'notable',
     });
     expect(view?.signals[5]).toMatchObject({

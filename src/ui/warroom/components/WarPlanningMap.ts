@@ -552,7 +552,7 @@ export class WarPlanningMap {
         if (!el) return;
         const turn = this.gameState?.meta?.turn ?? 0;
         const date = formatWarPlanningTurnDate(turn);
-        el.textContent = `W${turn} — ${date}`;
+        el.textContent = date;
     }
 
     private updateSettlementPanel(): void {

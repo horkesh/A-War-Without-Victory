@@ -59,12 +59,28 @@ const COST_THEATER_CASUALTY_THRESHOLD = 150;
 const COST_DISPLACEMENT_THRESHOLD = 1000;
 
 function formatOutcome(outcome: string): string {
-    return outcome.replace(/_/g, ' ');
+    switch (outcome) {
+        case 'attacker_victory':
+        case 'victory':
+        case 'success':
+            return 'Attacker advance';
+        case 'defender_victory':
+        case 'failed':
+        case 'failure':
+            return 'Defender held';
+        case 'draw':
+        case 'stalemate':
+            return 'Indecisive action';
+        case 'partial':
+            return 'Partial result';
+        default:
+            return 'Result unreported';
+    }
 }
 
 function formatOperationOutcome(outcome: string): string {
     const formatted = formatOutcome(outcome);
-    return formatted ? `${formatted[0].toUpperCase()}${formatted.slice(1)}` : 'Unknown';
+    return formatted ? `${formatted[0].toUpperCase()}${formatted.slice(1)}` : 'Result unreported';
 }
 
 function isDiplomaticEvent(id: string): boolean {

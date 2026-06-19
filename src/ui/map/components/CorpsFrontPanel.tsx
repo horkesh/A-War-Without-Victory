@@ -13,7 +13,7 @@ import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
-import { formatPosture, toTitleCase } from '../utils/formatters';
+import { formatPosture, toTitleCase, turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 
 /** Strength class badge with color coding. */
@@ -236,6 +236,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const sectorStanceLabel = stanceLabel(currentSectorStance);
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
+  const metadataDate = loadedGameState.metadata?.date?.trim();
+  const displayDate = metadataDate && metadataDate !== 'UNKNOWN'
+    ? metadataDate
+    : turnToDateString(loadedGameState.turn);
 
   const issueLogisticsPriority = async (priority: number) => {
     const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
@@ -306,13 +310,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
               </span>
             </div>
             <div className="flex flex-col items-end text-[9px] text-neutral-500">
-              <div className="uppercase"><span className="font-bold">{t('corpsFront.date')}:</span> {loadedGameState.metadata?.date ?? t('corpsFront.unknown')}</div>
-              <div className="uppercase"><span className="font-bold">{t('corpsFront.turn')}:</span> {loadedGameState.metadata?.turn ?? t('corpsFront.unknown')}</div>
+              <div className="uppercase"><span className="font-bold">{t('corpsFront.date')}:</span> {displayDate}</div>
+              <div className="uppercase"><span className="font-bold">{t('corpsFront.turn')}:</span> {turnToDateString(loadedGameState.turn)}</div>
             </div>
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">{t('corpsFront.faction')}:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
-            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance === 'unknown' ? t('corpsFront.unknown') : formatPosture(corpsStance)}</div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance === 'unknown' ? t('corpsFront.unreported') : formatPosture(corpsStance)}</div>
             <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
             <div>
               <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
