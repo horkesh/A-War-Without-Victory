@@ -112,6 +112,8 @@ interface PresidentialToolbarProps {
     } | null;
     /** Whether any event has readiness > 50% of threshold. */
     pressureWarning: boolean;
+    /** True while a hard modal owns presidential focus; top-level shell routes stay inert. */
+    modalLocked?: boolean;
     onOpenDesk?: () => void;
     onOpenSummary?: () => void;
     onOpenRecords?: () => void;
@@ -124,6 +126,7 @@ export function PresidentialToolbar({
     pendingReviews,
     reserveAttention,
     pressureWarning,
+    modalLocked = false,
     onOpenDesk,
     onOpenRecords,
     onOpenCodex,
@@ -164,8 +167,10 @@ export function PresidentialToolbar({
         : !ipc.isAvailable
             ? t('toolbar.advance.requiresDesktop')
             : t('toolbar.advance.title');
+    const shellRouteDisabled = modalLocked || !loadedGameState;
 
     const handleAdvanceTurn = useCallback(async () => {
+        if (modalLocked) return;
         if (advanceBlocked) {
             setAdvanceTurnPending(true);
             return;
@@ -183,7 +188,7 @@ export function PresidentialToolbar({
         } finally {
             setAdvancing(false);
         }
-    }, [advanceBlocked, setAdvanceTurnPending, ipc, advancing, loadSave, clearStagedOrders, setLoadError]);
+    }, [advanceBlocked, setAdvanceTurnPending, ipc, advancing, loadSave, clearStagedOrders, setLoadError, modalLocked]);
 
     const clearFieldPanels = useCallback(() => {
         const gs = useGameStore.getState();
@@ -203,6 +208,7 @@ export function PresidentialToolbar({
     }, []);
 
     const handleOpenDesk = useCallback(() => {
+        if (modalLocked) return;
         clearFieldPanels();
         if (embedded) {
             window.parent.postMessage({ type: 'awwv-back-to-hq' }, '*');
@@ -213,13 +219,15 @@ export function PresidentialToolbar({
             return;
         }
         void ipc.focusWarroom();
-    }, [clearFieldPanels, embedded, ipc, onOpenDesk]);
+    }, [clearFieldPanels, embedded, ipc, modalLocked, onOpenDesk]);
 
     const handleOpenMap = useCallback(() => {
+        if (modalLocked) return;
         clearFieldPanels();
-    }, [clearFieldPanels]);
+    }, [clearFieldPanels, modalLocked]);
 
     const handleOpenHQ = useCallback(() => {
+        if (modalLocked) return;
         if (!playerFaction) return;
         clearFieldPanels();
         // NOTE: This is a reopen-with-last-tab dispatch, not a navigation to a
@@ -228,9 +236,10 @@ export function PresidentialToolbar({
         // sequence here. Treat this pair as the canonical "reopen HQ" idiom.
         setSelectedArmyId(playerFaction);
         setArmyHQOpen(true);
-    }, [clearFieldPanels, playerFaction, setSelectedArmyId, setArmyHQOpen]);
+    }, [clearFieldPanels, modalLocked, playerFaction, setSelectedArmyId, setArmyHQOpen]);
 
     const handleOpenArmyReserve = useCallback(() => {
+        if (modalLocked) return;
         if (!playerFaction || !loadedGameState) return;
         clearFieldPanels();
         const armyReserveFormation = loadedGameState.formations.find((formation) =>
@@ -239,30 +248,34 @@ export function PresidentialToolbar({
         if (!armyReserveFormation) return;
         setArmyHQOpen(false);
         setSelectedArmyHqId(armyReserveFormation.id);
-    }, [clearFieldPanels, loadedGameState, playerFaction, setArmyHQOpen, setSelectedArmyHqId]);
+    }, [clearFieldPanels, loadedGameState, modalLocked, playerFaction, setArmyHQOpen, setSelectedArmyHqId]);
 
     const handleOpenRecords = useCallback(() => {
+        if (modalLocked) return;
         clearFieldPanels();
         onOpenRecords?.();
-    }, [clearFieldPanels, onOpenRecords]);
+    }, [clearFieldPanels, modalLocked, onOpenRecords]);
 
     const handleOpenChronicle = useCallback(() => {
+        if (modalLocked) return;
         clearFieldPanels();
         openChronicle(useGameStore.getState());
-    }, [clearFieldPanels]);
+    }, [clearFieldPanels, modalLocked]);
 
     const handleOpenCodex = useCallback(() => {
+        if (modalLocked) return;
         clearFieldPanels();
         onOpenCodex?.();
-    }, [clearFieldPanels, onOpenCodex]);
+    }, [clearFieldPanels, modalLocked, onOpenCodex]);
 
     const handleReviewPriorities = useCallback(() => {
+        if (modalLocked) return;
         if (onReviewPriorities) {
             onReviewPriorities();
             return;
         }
         handleOpenHQ();
-    }, [handleOpenHQ, onReviewPriorities]);
+    }, [handleOpenHQ, modalLocked, onReviewPriorities]);
 
     const hasAlerts = pendingReviews > 0 || pressureWarning || (reserveAttention?.pendingCount ?? 0) > 0;
 
@@ -313,7 +326,8 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenDesk}
-                        className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] transition-colors ${
+                        disabled={modalLocked}
+                        className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                             showWarroomReturn
                                 ? 'text-amber-400 hover:text-amber-300'
                                 : 'text-text-secondary hover:text-amber-400'
@@ -325,7 +339,7 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenMap}
-                        disabled={!loadedGameState}
+                        disabled={shellRouteDisabled}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title="Clear field selections"
                     >
@@ -334,7 +348,7 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenHQ}
-                        disabled={!loadedGameState}
+                        disabled={shellRouteDisabled}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.visitArmyHq')}
                     >
@@ -355,8 +369,9 @@ export function PresidentialToolbar({
                     {devMode && (
                         <button
                             type="button"
+                            disabled={modalLocked}
                             onClick={() => setDevDrawerOpen((open) => !open)}
-                            className="px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/60"
+                            className="px-1.5 py-0.5 text-[8px] font-mono uppercase tracking-[0.3em] bg-amber-900/40 text-amber-500 border border-amber-500/30 rounded-full hover:bg-amber-900/60 disabled:opacity-30 disabled:cursor-not-allowed"
                             aria-pressed={devDrawerOpen}
                         >
                             {t('presidentialToolbar.dev')}
@@ -372,7 +387,7 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenRecords}
-                        disabled={!loadedGameState}
+                        disabled={shellRouteDisabled}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.openRecordsTitle')}
                     >
@@ -381,7 +396,7 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenChronicle}
-                        disabled={!loadedGameState}
+                        disabled={shellRouteDisabled}
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.chronicleTitle')}
                     >
@@ -390,7 +405,7 @@ export function PresidentialToolbar({
                     <button
                         type="button"
                         onClick={handleOpenCodex}
-                        disabled={!loadedGameState}
+                        disabled={shellRouteDisabled}
                         data-coachmark-id="codex"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.historicalReference')}
@@ -431,7 +446,8 @@ export function PresidentialToolbar({
                     {pendingReviews > 0 && (
                         <button
                             onClick={handleReviewPriorities}
-                            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors"
+                            disabled={modalLocked}
+                            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-red-900/30 text-red-400 border border-red-500/30 rounded animate-pulse hover:bg-red-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                             title={t('presidentialToolbar.openAttentionQueue')}
                         >
                             <span className="w-2 h-2 rounded-full bg-red-500" />
@@ -442,7 +458,8 @@ export function PresidentialToolbar({
                     {reserveAttention && reserveAttention.pendingCount > 0 && reserveSignal && (
                         <button
                             onClick={handleOpenArmyReserve}
-                            className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide border rounded transition-colors ${
+                            disabled={modalLocked}
+                            className={`flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide border rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                                 reserveSignal.tone === 'critical'
                                     ? 'bg-amber-900/30 text-amber-400 border-amber-500/30 hover:bg-amber-900/50'
                                     : 'bg-sky-900/30 text-sky-300 border-sky-400/30 hover:bg-sky-900/50'
@@ -458,7 +475,8 @@ export function PresidentialToolbar({
                     {pressureWarning && (
                         <button
                             onClick={handleOpenHQ}
-                            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors"
+                            disabled={modalLocked}
+                            className="flex items-center gap-1.5 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-wide bg-amber-900/30 text-amber-400 border border-amber-500/30 rounded hover:bg-amber-900/50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                             <span className="w-2 h-2 rounded-full bg-amber-500" />
                             {t('presidentialToolbar.tensionsRising')}
@@ -474,7 +492,7 @@ export function PresidentialToolbar({
                     <button
                         data-tutorial-step="advance-turn-button"
                         onClick={handleAdvanceTurn}
-                        disabled={advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
+                        disabled={modalLocked || advancing || !loadedGameState || (!advanceBlocked && !ipc.isAvailable)}
                         title={advanceGateTitle}
                         aria-label={advanceBlocked ? advanceGateTitle : undefined}
                         className={`px-5 py-1.5 text-[11px] font-mono font-bold uppercase tracking-[0.15em] border rounded transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 ${
@@ -491,6 +509,7 @@ export function PresidentialToolbar({
             {/* Army Crest — floating on top of toolbar, extends below */}
             <button
                 onClick={handleOpenHQ}
+                disabled={shellRouteDisabled}
                 className="fixed top-0.5 left-1/2 -translate-x-1/2 group flex flex-col items-center pointer-events-auto"
                 style={{ zIndex: Z.SHELL_FLOATING }}
                 aria-label={t('presidentialToolbar.armyHqLabel', { army: armyName ?? t('presidentialToolbar.army') })}

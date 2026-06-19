@@ -2,13 +2,14 @@
 
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 
 import {
   COACHMARKS,
   getCoachmarkStorageKey,
 } from '../../src/ui/map/components/CoachmarkLayer.js';
+import { PeaceWarTransitionOverlay } from '../../src/ui/map/components/PeaceWarTransitionOverlay.js';
 import { PresidentialInbox } from '../../src/ui/map/components/PresidentialInbox.js';
 import { shouldShowOnboarding } from '../../src/ui/map/components/onboarding/OnboardingOverlay.js';
 import {
@@ -119,6 +120,37 @@ describe('Track D onboarding consolidation', () => {
     const block = source.slice(start, end);
     expect(block).toContain('useGameStore.getState().setPeaceWarTransitionSeen(false)');
     expect(block.indexOf('setPeaceWarTransitionSeen(false)')).toBeLessThan(block.indexOf("setAppScreen('game')"));
+  });
+
+  it('resets the two-step war-start intro when a new faction campaign is loaded before briefing dismiss', () => {
+    vi.useFakeTimers();
+    try {
+      useGameStore.setState({
+        loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: 'RBiH' }),
+        peaceWarTransitionSeen: false,
+      });
+
+      render(createElement(PeaceWarTransitionOverlay));
+
+      expect(screen.getByRole('dialog', { name: 'WAR HAS STARTED' })).toBeTruthy();
+      fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }));
+      act(() => {
+        vi.advanceTimersByTime(800);
+      });
+      expect(screen.getByRole('dialog', { name: 'WAR BEGINS' })).toBeTruthy();
+
+      act(() => {
+        useGameStore.setState({
+          loadedGameState: minimalState({ phase: 'war', turn: 0, player_faction: 'RS' }),
+          peaceWarTransitionSeen: false,
+        });
+      });
+
+      expect(screen.getByRole('dialog', { name: 'WAR HAS STARTED' })).toBeTruthy();
+      expect(screen.queryByRole('dialog', { name: 'WAR BEGINS' })).toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('honors the Warroom fresh-campaign intro query flag', () => {

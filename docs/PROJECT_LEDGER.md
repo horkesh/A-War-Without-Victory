@@ -1,4 +1,12 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): harden first-hour faction modal gates
+
+**Type:** UI/read-model route ownership and first-hour player-flow hardening.
+
+**Fix:** Extracted `PeaceWarTransitionOverlay` and keyed its local intro step to the active campaign handoff so a fresh faction start cannot inherit a prior faction's `WAR BEGINS` state and skip `WAR HAS STARTED`. Added `modalLocked` to `PresidentialToolbar` and pass it from `App` while `EventDecisionModal` is active, disabling and handler-guarding top-level shell routes, alert badges, crest, and advance turn while a required foundational decision owns focus.
+
+**Verification:** Red/green focused UI regression (`tests/ui/shell_navigation_ownership.test.ts`, `tests/ui/onboarding_track_d_consolidation.test.ts`) now passes 24/24; `npm run typecheck -- --pretty false` passed; `npm run qa:first-hour:browser` passed; a targeted live browser probe verified RBiH, RS, and HRHB each show `WAR HAS STARTED`, `WAR BEGINS` identity, an opening foundational `Decision Required` modal, and locked toolbar routes. Report: `docs/40_reports/implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md`.
+
 ## [2026-06-19] docs/canon: packet Vitezovi OOB identity decision and sync Srebrenica comment
 
 **Type:** Documentation/canon hygiene and source-comment correction.

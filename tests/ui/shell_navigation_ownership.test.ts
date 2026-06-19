@@ -148,6 +148,38 @@ describe('field toolbar navigation ownership', () => {
     expect(useGameStore.getState().armyHQOpen).toBe(false);
   });
 
+  it('locks top-level shell routes while a required decision modal owns focus', () => {
+    const onOpenDesk = vi.fn();
+    const onOpenRecords = vi.fn();
+    const onOpenCodex = vi.fn();
+    const onReviewPriorities = vi.fn();
+    useGameStore.setState({ armyHQOpen: false, chronicleOpen: false, codexOpen: false });
+
+    renderToolbar({
+      modalLocked: true,
+      pendingReviews: 1,
+      pressureWarning: true,
+      onOpenDesk,
+      onOpenRecords,
+      onOpenCodex,
+      onReviewPriorities,
+    });
+
+    for (const name of ['DESK', 'WAR MAP', 'ARMY HQ', 'RECORDS', 'CHRONICLE', 'CODEX', '1 REVIEW', 'TENSIONS RISING']) {
+      const button = screen.getByRole('button', { name });
+      expect(button).toHaveProperty('disabled', true);
+      fireEvent.click(button);
+    }
+
+    expect(onOpenDesk).not.toHaveBeenCalled();
+    expect(onOpenRecords).not.toHaveBeenCalled();
+    expect(onOpenCodex).not.toHaveBeenCalled();
+    expect(onReviewPriorities).not.toHaveBeenCalled();
+    expect(useGameStore.getState().armyHQOpen).toBe(false);
+    expect(useGameStore.getState().chronicleOpen).toBe(false);
+    expect(useGameStore.getState().codexOpen).toBe(false);
+  });
+
   it('mounts tactical map chrome only while the game shell owns the screen', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 

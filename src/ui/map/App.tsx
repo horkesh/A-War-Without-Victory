@@ -51,8 +51,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { CreditsScreen } from './components/CreditsScreen';
 import { MapModeLegend } from './components/MapModeLegend';
 import { PeaceStatusPanel } from './components/PeaceStatusPanel';
-import { PeaceWarTransition } from './components/PeaceWarTransition';
-import { WarHasBegunSplash } from './components/WarHasBegunSplash';
+import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverlay';
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
@@ -314,37 +313,6 @@ function OnboardingOverlayWrapper() {
       onPreviewTutorialStateChange={commitBrowserPreviewTutorialState}
     />
   );
-}
-
-function PeaceWarTransitionOverlay() {
-  const state = useGameStore((s) => s.loadedGameState);
-  const seen = useGameStore((s) => s.peaceWarTransitionSeen);
-  const setSeen = useGameStore((s) => s.setPeaceWarTransitionSeen);
-
-  // Two-step game-start intro, driven by local component state and gated by the
-  // single shared `peaceWarTransitionSeen` flag (no new save flag / migration):
-  //   'splash'   → step 1: the "WAR HAS STARTED" blood-red splash
-  //   'briefing' → step 2: the PeaceWarTransition faction briefing + identity
-  const [step, setStep] = useState<'splash' | 'briefing'>('splash');
-
-  const shouldShow = state != null && shouldShowPeaceWarTransition(state, seen);
-
-  // Reset to the splash step whenever the gate stops showing the overlay. The
-  // component stays mounted for the whole session, so without this a second
-  // in-session peace→war handoff (player dismisses, starts another peace-phase
-  // game) would re-open at 'briefing' and skip the splash. The once-per-handoff
-  // gate (`peaceWarTransitionSeen`) is unchanged.
-  useEffect(() => {
-    if (!shouldShow) setStep('splash');
-  }, [shouldShow]);
-
-  if (!shouldShow) return null;
-
-  if (step === 'splash') {
-    return <WarHasBegunSplash onDismiss={() => setStep('briefing')} />;
-  }
-
-  return <PeaceWarTransition state={state} onDismiss={() => setSeen(true)} />;
 }
 
 type NativeWarroomOverlaySurface = Extract<WarroomOverlaySurface, 'intelligence' | 'staff' | 'faction'>;
@@ -1582,6 +1550,7 @@ function App() {
               }
               : null}
             pressureWarning={loadedGameState?.pressureWarning ?? false}
+            modalLocked={activeEventDecisionId !== null}
             onOpenDesk={openWarroomDeskFromField}
             onOpenSummary={() => openSummary()}
             onOpenRecords={() => openArmyHQRecords('aftermath')}
