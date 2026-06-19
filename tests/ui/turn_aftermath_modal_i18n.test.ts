@@ -7,6 +7,9 @@ import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathMod
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
 import type { ForcedOpReceipt } from '../../src/ui/map/data/forcedOpReceipts.js';
+import type { ConsequenceReceipt } from '../../src/ui/map/data/consequenceReceipts.js';
+import type { OfficerResentmentReceipt } from '../../src/ui/map/data/officerResentmentReceipts.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeView(): TurnAftermathView {
     return {
@@ -162,5 +165,99 @@ describe('TurnAftermathModal localization', () => {
 
         expect(screen.getByText(/he recommended waiting/i)).toBeTruthy();
         expect(container.textContent).not.toMatch(/recommended abort/i);
+    });
+
+    it('renders consequence and officer resentment timing as calendar dates', () => {
+        const consequences: ConsequenceReceipt[] = [{
+            id: 'receipt-one',
+            decisionEventId: 'decision-one',
+            decisionTitle: 'Aid corridor',
+            decisionOptionLabel: 'Open the corridor',
+            decisionTurn: 5,
+            predictedEventId: 'predicted-one',
+            predictedLabel: 'The corridor is tested',
+            predictedExplanation: '',
+            status: 'confirmed',
+            firedTurn: 12,
+            turnsElapsed: 7,
+        }];
+        const officerResentment: OfficerResentmentReceipt[] = [{
+            id: 'officer-one',
+            officerName: 'Gen. Example',
+            corpsId: 'arbih_1st_corps',
+            overrideTurn: 12,
+            overrideCount: 0,
+            newlyCowed: true,
+            cowedUntilTurn: 20,
+        }];
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view: makeView(),
+            consequences,
+            officerResentment,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain(`Open the corridor" on ${turnToDateString(5)}`);
+        expect(copy).toContain(`until ${turnToDateString(20)}`);
+        expect(copy).not.toMatch(/\bat week\s+\d+\b|\buntil week\s+\d+\b/i);
+    });
+
+    it('uses neutral copy for unknown notable-territory significance values', () => {
+        const view = makeView();
+        view.territory.notable[0] = {
+            ...view.territory.notable[0],
+            significance: 'internal_debug_marker',
+        };
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Notable change');
+        expect(copy).not.toContain('internal debug marker');
+        expect(copy).not.toContain('internal_debug_marker');
+    });
+
+    it('uses neutral copy for raw strategic signal detail fallbacks', () => {
+        const view = makeView();
+        view.signals = [{
+            id: 'signal-one',
+            kind: 'event',
+            label: 'Staff report',
+            detail: 'internal_debug_marker',
+            severity: 'notable',
+        }];
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Notable event');
+        expect(copy).not.toContain('internal debug marker');
+        expect(copy).not.toContain('internal_debug_marker');
     });
 });

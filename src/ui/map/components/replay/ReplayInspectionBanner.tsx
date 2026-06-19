@@ -1,5 +1,6 @@
 import { Z } from '../../../shared/zIndex.js';
 import { useGameStore } from '../../store/gameStore.js';
+import { turnToDateString } from '../../utils/formatters.js';
 
 export function ReplayInspectionBanner(): JSX.Element | null {
     const inspection = useGameStore((s) => s.replayInspection);
@@ -7,12 +8,8 @@ export function ReplayInspectionBanner(): JSX.Element | null {
 
     if (!inspection) return null;
 
-    const label = inspection.date
-        ? `Turn ${inspection.turn} - ${inspection.date}`
-        : `Turn ${inspection.turn}`;
-    const finalLabel = inspection.finalDate
-        ? `Final ${inspection.finalTurn} - ${inspection.finalDate}`
-        : `Final ${inspection.finalTurn}`;
+    const label = inspection.date ?? turnToDateString(inspection.turn);
+    const finalLabel = `Final ${inspection.finalDate ?? turnToDateString(inspection.finalTurn)}`;
 
     return (
         <div

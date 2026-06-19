@@ -175,6 +175,13 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('Corps Commander');
   });
 
+  it('renders operation phase age as duration copy instead of raw turn labels', () => {
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('6 weeks in phase');
+    expect(container.textContent).not.toContain('Turn 6');
+  });
+
   it('renders player-safe operation display names without the raw operation slug on OOB cards', () => {
     const { container } = render(createElement(OOBSidebar));
 

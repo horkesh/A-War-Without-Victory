@@ -96,7 +96,9 @@ describe('decision family modals', () => {
     expect(screen.getByRole('dialog', { name: 'Personnel matter' })).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Personnel Office' }).getAttribute('src')).toContain('decision_header_personnel');
     expect(screen.getByText('Gen. Staff Officer')).toBeTruthy();
+    expect(screen.getByText('Command objection')).toBeTruthy();
     expect(container.textContent).not.toMatch(/\bC:\d|\bA:\d|pending_required_decisions/);
+    expect(container.textContent).not.toMatch(/order pushback|order_pushback|replacement suggested|replacement_suggested/i);
   });
 
   it('requires intelligence briefs to be opened and acknowledged as a readable brief', () => {

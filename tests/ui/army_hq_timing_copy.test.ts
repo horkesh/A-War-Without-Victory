@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CommandRelationshipSection } from '../../src/ui/map/components/army_hq/CommandRelationshipSection';
 import { OperationOpportunityDossierPanel } from '../../src/ui/map/components/army_hq/OperationOpportunityDossierPanel';
 import { OperationsSection } from '../../src/ui/map/components/army_hq/OperationsSection';
+import { PresidentialAttentionPanel } from '../../src/ui/map/components/army_hq/PresidentialAttentionPanel';
 import type { LoadedGameState, OperationOpportunityProposalView, OperationView } from '../../src/ui/map/data/types';
 import { setLocale } from '../../src/ui/map/i18n';
 import { turnToDateString } from '../../src/ui/map/utils/formatters';
@@ -185,5 +186,27 @@ describe('Army HQ timing copy', () => {
     expect(copy).toContain(`Review by ${turnToDateString(24)}`);
     expect(copy).not.toContain('Expires w24');
     expect(copy).not.toMatch(/\bIstice\s+s24\b/);
+  });
+
+  it('renders pending presidential decision timing as a calendar date', () => {
+    render(React.createElement(PresidentialAttentionPanel, {
+      gameState: makeGameState({
+        pendingEventDecisions: [
+          {
+            event_id: 'evt_cabinet_crisis',
+            event_title: 'Cabinet crisis',
+            faction: 'RBiH',
+            turn_fired: 14,
+            response_options: [{ id: 'hold_line', label: 'Hold the line', effects: [] }],
+          },
+        ],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain(turnToDateString(14));
+    expect(copy).not.toContain('Pending since week 14');
+    expect(copy).not.toMatch(/\bweek 14\b/i);
   });
 });

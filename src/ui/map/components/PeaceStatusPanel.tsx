@@ -12,6 +12,7 @@ import {
     getPlayerSafeMilitaryFactionName,
     getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
+import { turnToDateString } from '../utils/formatters';
 import { t } from '../i18n';
 
 function ProgressBar({ value, max, color, label }: { value: number; max: number; color: string; label: string }) {
@@ -57,6 +58,24 @@ function getDeclarationPressureStatus(value: number, declared: boolean): string 
     return t('peace.quiet');
 }
 
+function peaceEventTypeLabel(type: string): string {
+    switch (type) {
+        case 'investment':
+        case 'staged_investment':
+            return t('peace.event.investment');
+        case 'referendum':
+        case 'referendum_result':
+            return t('peace.event.referendum');
+        case 'declaration':
+        case 'declaration_pressure':
+            return t('peace.event.declaration');
+        case 'alliance_shift':
+            return t('peace.event.alliance');
+        default:
+            return t('peace.event.politicalDevelopment');
+    }
+}
+
 export function PeaceStatusPanel() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const loadSave = useGameStore((s) => s.loadSave);
@@ -81,7 +100,7 @@ export function PeaceStatusPanel() {
     if (!loadedGameState) return null;
 
     const { peaceFactions, peaceAllianceValue, peaceReferendum, peaceEvents, turn } = loadedGameState;
-    const date = loadedGameState.metadata?.date;
+    const date = loadedGameState.metadata?.date ?? turnToDateString(turn ?? 0);
     if (!peaceFactions) return null;
 
     const playerFaction = loadedGameState.player_faction;
@@ -96,19 +115,19 @@ export function PeaceStatusPanel() {
                 <div className="px-4 py-3 border-b border-panel-border bg-panel-card/50">
                     <div className="text-[9px] font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">{t('peace.preWarPhase')}</div>
                     <div className="text-sm font-bold text-text-primary uppercase tracking-wide">
-                        {date ?? `Turn ${turn}`}
+                        {date}
                     </div>
                     {peaceReferendum && !peaceReferendum.held && peaceReferendum.deadline_turn != null && (
                         <div className="text-[10px] text-amber-400 mt-1">
-                            Referendum deadline: Turn {peaceReferendum.deadline_turn}
-                            {turn != null && <span className="text-text-secondary"> ({peaceReferendum.deadline_turn - turn} turns)</span>}
+                            {t('peace.referendumDeadline', { date: turnToDateString(peaceReferendum.deadline_turn) })}
+                            {turn != null && <span className="text-text-secondary"> ({t('peace.turnsRemaining', { count: peaceReferendum.deadline_turn - turn })})</span>}
                         </div>
                     )}
                     {peaceReferendum?.held && peaceReferendum.war_start_turn != null && (
                         <div className="text-[10px] text-red-400 font-bold mt-1">
-                            WAR BEGINS: Turn {peaceReferendum.war_start_turn}
+                            {t('peace.warBegins', { date: turnToDateString(peaceReferendum.war_start_turn) })}
                             {turn != null && peaceReferendum.war_start_turn > turn && (
-                                <span className="text-text-secondary"> ({peaceReferendum.war_start_turn - turn} turns)</span>
+                                <span className="text-text-secondary"> ({t('peace.turnsRemaining', { count: peaceReferendum.war_start_turn - turn })})</span>
                             )}
                         </div>
                     )}
@@ -170,7 +189,7 @@ export function PeaceStatusPanel() {
                             <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">{t('peace.eventsThisTurn')}</div>
                             {peaceEvents.map((e, i) => (
                                 <div key={i} className="text-[10px] text-text-primary bg-black/20 px-2 py-1 rounded">
-                                    <span className="font-semibold text-accent-gold">{e.type.replace(/_/g, ' ')}</span>
+                                    <span className="font-semibold text-accent-gold">{peaceEventTypeLabel(e.type)}</span>
                                     {e.faction && <span className="text-text-secondary ml-1">({getPlayerSafeMilitaryFactionName(e.faction)})</span>}
                                 </div>
                             ))}
@@ -182,7 +201,7 @@ export function PeaceStatusPanel() {
                         {hasInvestments && (
                             <div className="text-[9px] text-amber-400 mb-2 flex items-center gap-1">
                                 <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-400" />
-                                Staged investments pending
+                                {t('peace.investmentsPending')}
                             </div>
                         )}
                         <button

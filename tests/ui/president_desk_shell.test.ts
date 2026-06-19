@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PresidentDeskShell } from '../../src/ui/map/components/presidential_desk/PresidentDeskShell.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { t } from '../../src/ui/map/i18n/index.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -119,6 +120,17 @@ describe('PresidentDeskShell', () => {
     expect(container.textContent).not.toMatch(/pending_required_decisions/);
     expect(container.textContent).not.toMatch(/\bC:\d/);
     expect(container.textContent).not.toMatch(/\bA:\d/);
+  });
+
+  it('renders the strategic situation timing as a calendar date without raw turn copy', () => {
+    const dateLabel = turnToDateString(12);
+    const { container } = renderDesk({
+      state: makeState({ turn: 12 }),
+    });
+
+    expect(t('desk.situation.dateTurn', { date: dateLabel, turn: 12 })).toBe(dateLabel);
+    expect(container.textContent).toContain(dateLabel);
+    expect(container.textContent).not.toMatch(/\b(?:turn|potez)\s*12\b/i);
   });
 
   it('surfaces recent decision consequences on the desk with calendar dates', () => {

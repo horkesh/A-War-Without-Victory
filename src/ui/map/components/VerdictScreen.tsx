@@ -39,6 +39,7 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
+import { turnToDateString } from '../utils/formatters.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -179,7 +180,7 @@ function formatMilestoneStatus(status: MilestoneComparisonStatus): string {
 function formatWeekLabel(week: number | null): string {
     return week === null
         ? t('verdict.milestone.notRecorded')
-        : t('verdict.milestone.weekLabel', { week });
+        : t('verdict.milestone.weekLabel', { date: turnToDateString(week) });
 }
 
 function formatDeltaLabel(deltaWeeks: number | null): string {
@@ -339,7 +340,7 @@ export function VerdictScreen() {
 
     const verdict = loadedGameState.gameVerdict;
     const turn = loadedGameState.turn ?? 0;
-    const date = loadedGameState.metadata?.date ?? `Turn ${turn}`;
+    const date = loadedGameState.metadata?.date ?? turnToDateString(turn);
     const years = Math.floor(turn / 52);
     const weeks = turn % 52;
 

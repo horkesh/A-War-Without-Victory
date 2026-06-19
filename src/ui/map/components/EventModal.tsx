@@ -205,7 +205,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                 >
                     <div className="flex items-center gap-1.5">
                         <Icon name={cat.icon} size={12} color={cat.color} />
-                        {cat.labelKey === 'event.category.unknown' ? event.category.toUpperCase() : t(cat.labelKey)}
+                        {t(cat.labelKey)}
                     </div>
                 </div>
 

@@ -193,6 +193,65 @@ function humanizeToken(value: string | undefined): string | undefined {
     .join(' ');
 }
 
+function notableEventKindLabel(kind: string | undefined): string {
+  switch (kind) {
+    case 'truce_broken':
+      return t('turnAftermath.signal.detail.truceBroken');
+    case 'siege_formed':
+      return t('turnAftermath.signal.detail.siegeFormed');
+    case 'territory_shift':
+      return t('turnAftermath.signal.detail.territoryShift');
+    case 'operation_completed':
+      return t('turnAftermath.signal.detail.operationCompleted');
+    default:
+      return t('turnAftermath.signal.detail.notableEvent');
+  }
+}
+
+function decorationLabel(decoration: string | undefined): string {
+  switch (decoration) {
+    case 'order_of_hero':
+      return t('turnAftermath.signal.detail.decorationHero');
+    case 'citation':
+    case 'unit_citation':
+      return t('turnAftermath.signal.detail.decorationCitation');
+    default:
+      return t('turnAftermath.signal.detail.decoration');
+  }
+}
+
+function arcLabel(arc: string | undefined): string {
+  switch (arc) {
+    case 'recruiting':
+      return t('turnAftermath.signal.detail.arcRecruiting');
+    case 'green':
+      return t('turnAftermath.signal.detail.arcGreen');
+    case 'blooded':
+      return t('turnAftermath.signal.detail.arcBlooded');
+    case 'veteran':
+      return t('turnAftermath.signal.detail.arcVeteran');
+    case 'exhausted':
+      return t('turnAftermath.signal.detail.arcExhausted');
+    default:
+      return t('turnAftermath.signal.detail.arcChanged');
+  }
+}
+
+function supplyStateLabel(state: string | undefined): string {
+  switch (state) {
+    case 'secure':
+      return t('turnAftermath.signal.detail.supplySecure');
+    case 'strained':
+      return t('turnAftermath.signal.detail.supplyStrained');
+    case 'critical':
+      return t('turnAftermath.signal.detail.supplyCritical');
+    case 'isolated':
+      return t('turnAftermath.signal.detail.supplyIsolated');
+    default:
+      return t('turnAftermath.signal.detail.supplyChanged');
+  }
+}
+
 function getPlayerFaction(input: TurnAftermathBuildInput): string | null {
   return input.nextState?.player_faction ?? input.lastTurnReport?.player_faction ?? null;
 }
@@ -365,7 +424,7 @@ function buildStrategicSignals(
   }
 
   summary.notable_events.forEach((event, index) => {
-    const kindLabel = humanizeToken(event.kind) ?? t('turnAftermath.signal.detail.notableEvent');
+    const kindLabel = notableEventKindLabel(event.kind);
     const osidLabel = event.osid ? getOsidDisplayName(event.osid, osidNameMap) : null;
     const urgentKinds = new Set(['truce_broken', 'siege_formed']);
     signals.push({
@@ -382,14 +441,14 @@ function buildStrategicSignals(
       id: `decoration:${award.formation_id}:${award.decoration}`,
       kind: 'decoration',
       label: t('turnAftermath.signal.label.decorated', { formation: award.formation_name }),
-      detail: humanizeToken(String(award.decoration)) ?? t('turnAftermath.signal.detail.decoration'),
+      detail: decorationLabel(String(award.decoration)),
       severity: 'notable',
     });
   }
 
   for (const arc of summary.arc_transitions) {
-    const from = humanizeToken(String(arc.from_arc)) ?? String(arc.from_arc);
-    const to = humanizeToken(String(arc.to_arc)) ?? String(arc.to_arc);
+    const from = arcLabel(String(arc.from_arc));
+    const to = arcLabel(String(arc.to_arc));
     signals.push({
       id: `arc:${arc.formation_id}:${arc.from_arc}:${arc.to_arc}`,
       kind: 'arc',
@@ -406,7 +465,7 @@ function buildStrategicSignals(
       id: `supply:${transition.osid}:${transition.from}:${transition.to}:${index}`,
       kind: 'supply',
       label: t('turnAftermath.signal.label.supplyChanged', { label }),
-      detail: `${humanizeToken(transition.from) ?? transition.from} -> ${humanizeToken(transition.to) ?? transition.to}`,
+      detail: `${supplyStateLabel(transition.from)} -> ${supplyStateLabel(transition.to)}`,
       severity: toState.includes('critical') || toState.includes('strained') ? 'urgent' : 'routine',
     });
   });

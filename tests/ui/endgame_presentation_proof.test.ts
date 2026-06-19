@@ -31,6 +31,7 @@ import {
     formatCasualtyRatio,
     formatTerritoryDivergence,
 } from '../../src/ui/map/components/WarCostSummary';
+import { turnToDateString } from '../../src/ui/map/utils/formatters';
 import type { GameVerdict, FactionVerdict } from '../../src/state/negotiation_types';
 import type { CostLedger } from '../../src/sim/endgame/cost_ledger';
 import type { ComparisonResult } from '../../src/sim/endgame/endgame_comparison';
@@ -332,12 +333,13 @@ describe('milestone comparison rows — deterministic contract', () => {
         expect(rows.map(row => row.id)).toEqual(['washington', 'dayton']);
         expect(rows[0]).toMatchObject({
             label: 'Washington Agreement',
-            historicalWeekLabel: 'W101',
-            playerWeekLabel: 'W93',
+            historicalWeekLabel: turnToDateString(101),
+            playerWeekLabel: turnToDateString(93),
             deltaLabel: '8w early',
             statusLabel: 'Early',
         });
         expect(rows[1].deltaLabel).toBe('6w late');
+        expect(rows.map(row => `${row.historicalWeekLabel} ${row.playerWeekLabel}`).join(' ')).not.toMatch(/\bW\d+\b/);
     });
 
     it('falls back to a duration milestone when no explicit milestones exist', () => {
@@ -357,11 +359,12 @@ describe('milestone comparison rows — deterministic contract', () => {
         expect(rows[0]).toMatchObject({
             id: 'war_duration',
             label: 'War Duration',
-            historicalWeekLabel: 'W182',
-            playerWeekLabel: 'W170',
+            historicalWeekLabel: turnToDateString(182),
+            playerWeekLabel: turnToDateString(170),
             deltaLabel: '12w early',
             statusLabel: 'Early',
         });
+        expect(`${rows[0].historicalWeekLabel} ${rows[0].playerWeekLabel}`).not.toMatch(/\bW\d+\b/);
     });
 
     it('formats absent player milestones without inventing a player week', () => {

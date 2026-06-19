@@ -187,6 +187,30 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
+  it('advance clearance labels hard blocker families without enum-derived copy', () => {
+    setLoadedState(makeState({
+      pendingParamilitaryRequests: [
+        { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+      ],
+      pendingEventDecisions: [
+        {
+          event_id: 'evt_identity',
+          event_title: 'Identity question',
+          faction: 'RS',
+          turn_fired: 40,
+          response_options: [{ id: 'answer', label: 'Answer', effects: [] }],
+        },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true, osidDisplayNames: { bratunac_1: 'Bratunac' } });
+
+    const { container } = render(createElement(AdvanceTurnModal, { onResolveBlocker: vi.fn() }));
+
+    expect(screen.getByText('Event decision')).toBeTruthy();
+    expect(screen.getAllByText('Paramilitary authorization').length).toBeGreaterThan(0);
+    expect(container.textContent).not.toMatch(/event_decision|paramilitary request|paramilitary_request/i);
+  });
+
   it('Warroom status dock localizes priority chrome in BCS mode without duplicating Advance', () => {
     setLocale('bcs');
     setLoadedState(makeState());
@@ -248,7 +272,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('ZAPISI')).toBeTruthy();
     expect(screen.getByText('HRONIKA')).toBeTruthy();
     expect(screen.getByText('KODEKS')).toBeTruthy();
-    expect(screen.getByText(/Sedmica 40/)).toBeTruthy();
+    expect(screen.getByText(/11 jan 1993/)).toBeTruthy();
     expect(screen.getByText(/SLJEDEĆI POTEZ/)).toBeTruthy();
     expect(screen.getByRole('group', { name: 'Komandni autoritet: 4/8' })).toBeTruthy();
     expect(screen.getByTitle('Kampanjska hronika')).toBeTruthy();

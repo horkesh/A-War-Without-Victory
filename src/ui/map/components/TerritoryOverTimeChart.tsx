@@ -13,6 +13,7 @@
  */
 import React, { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
+import { turnToDateString } from '../utils/formatters';
 import { FACTION_HEX_COLORS } from '../utils/theme';
 
 interface TerritoryDataPoint {
@@ -20,6 +21,12 @@ interface TerritoryDataPoint {
   RS: number;
   RBiH: number;
   HRHB: number;
+}
+
+function formatTerritoryChartTickLabel(turn: number): string {
+  const label = turnToDateString(turn);
+  const parts = label.split(' ');
+  return parts.length === 3 ? `${parts[1]} ${parts[2]}` : label;
 }
 
 export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart() {
@@ -86,7 +93,7 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
     const step = Math.max(1, Math.ceil(turnRange / 8));
     const labels: Array<{ x: number; label: string }> = [];
     for (let turn = minTurn; turn <= maxTurn; turn += step) {
-      labels.push({ x: xScale(turn), label: `T${turn}` });
+      labels.push({ x: xScale(turn), label: formatTerritoryChartTickLabel(turn) });
     }
 
     return { paths: result, xLabels: labels };

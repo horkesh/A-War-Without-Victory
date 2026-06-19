@@ -10,6 +10,7 @@ type PresidentialBlockerType = Extract<
 export interface PresidentialBlocker {
   id: string;
   type: PresidentialBlockerType;
+  typeLabel: string;
   severity: InboxItem['severity'];
   title: string;
   summary: string;
@@ -49,6 +50,7 @@ export function derivePresidentialBlockers(
       return {
         id: item.id,
         type: item.type,
+        typeLabel: surface?.playerLabel ?? 'Required decision',
         severity: item.severity,
         title: item.title,
         summary: blockerSummary(item),

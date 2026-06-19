@@ -105,11 +105,12 @@ describe('buildVerdictShareSummary', () => {
         expect(first).toBe([
             'A War Without Victory - Verdict',
             'Outcome: RBiH - Pyrrhic Success (Grade C, Pyrrhic Score 49.0)',
-            'War ended: Dayton reckoning, week 188',
+            'War ended: Dayton reckoning, 1995-10-01',
             'Cost Ledger: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.',
             'Historical comparison: War lasted 12 weeks shorter than the historical 188 weeks',
             'Faction outcomes: RBiH Pyrrhic Success; RS Failure; HRHB Negotiated Escape',
         ].join('\n'));
+        expect(first).not.toMatch(/\bweek\s+\d+\b/i);
     });
 
     it('falls back deterministically when optional inputs are missing', () => {
@@ -135,10 +136,11 @@ describe('buildVerdictShareSummary', () => {
 
         expect(text).toContain('A War Without Victory - Presuda');
         expect(text).toContain('Ishod: RBiH - Pirov uspjeh (Ocjena C, Pirov rezultat 49.0)');
-        expect(text).toContain('Rat završen: Dayton reckoning, sedmica 188');
+        expect(text).toContain('Rat završen: Dayton reckoning, 1995-10-01');
         expect(text).toContain('Knjiga cijene: Civilian displacement record - The negotiation capital record attributes 1,950,000 refugees created to the war path.');
         expect(text).not.toContain('Historijsko poređenje: War lasted 12 weeks shorter than the historical 188 weeks');
         expect(text).toContain('Historijsko poređenje: Rat je trajao 12 sedmica kraće od historijskih 188 sedmica.');
         expect(text).toContain('Ishodi frakcija: RBiH Pirov uspjeh; RS Neuspjeh; HRHB Pregovarački izlaz');
+        expect(text).not.toMatch(/\bsedmica\s+\d+\b/i);
     });
 });

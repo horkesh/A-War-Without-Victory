@@ -23,14 +23,14 @@ export function formatCampaignWeekLabel(turn: number | null | undefined): string
 }
 
 /**
- * Humanizes a turn label (e.g., "T32" or "Turn 32") by prepending the calendar date.
+ * Humanizes a turn label (e.g., "Turn 32") by replacing the raw counter with the calendar date.
  */
 export function formatTurnLabel(label: string): string {
     const match = label.match(/Turn\s+(\d+)/i);
     if (!match) return label;
     const turn = parseInt(match[1], 10);
     const dateStr = turnToDateString(turn);
-    return label.replace(match[0], `${dateStr} \u00B7 ${formatCampaignWeekLabel(turn)}`);
+    return label.replace(match[0], dateStr);
 }
 
 /**

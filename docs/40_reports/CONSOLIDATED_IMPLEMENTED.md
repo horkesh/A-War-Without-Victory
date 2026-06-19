@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest raw-copy wave 2 timing/fallback copy:** [implemented/20260619_RAW_COPY_WAVE_2_TIMING_COPY.md](implemented/20260619_RAW_COPY_WAVE_2_TIMING_COPY.md) - President's Desk, Army HQ, Turn Aftermath, Decision History, Operations, Replay, Territory chart, Verdict/share, Peace Status, Advance Turn, Officer Matter, Army CO pushback, Desk decision cards, Peace Plan, Game Over, AAR/tooltip/sector battle fallbacks, and loaded-state labels now render calendar dates, semantic command-cycle wording, and neutral fallback labels instead of raw timing or enum/id strings.
+
 **Latest Patron Relations date copy:** [implemented/20260619_PATRON_RELATIONS_DATE_COPY.md](implemented/20260619_PATRON_RELATIONS_DATE_COPY.md) - Patron Relations defiance summaries, material consequence receipt rows, and Diplomacy negotiation timeline markers now render calendar dates instead of raw `turn`, `T`, or BCS `P` timing copy.
 
 **Latest multi-surface timing/provenance copy polish:** [implemented/20260619_MULTI_SURFACE_TIMING_COPY_POLISH.md](implemented/20260619_MULTI_SURFACE_TIMING_COPY_POLISH.md) - President's Desk, Decision Room, Army HQ, Chronicle Wrapped/Spine, and settlement timeline provenance now render timing/provenance through calendar/authored/neutral copy instead of raw turns, week shorthands, or enum/id fallbacks.

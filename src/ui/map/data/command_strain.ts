@@ -611,11 +611,11 @@ export function deriveReadinessTrend(
         timelineFraction = Math.min(1, turnsElapsed / maxTurns);
         const remaining = Math.max(0, maxTurns - turnsElapsed);
         if (remaining <= 1 && assessment !== 'launch') {
-            timelineLabel = `Final turn of preparation — decision forced next turn`;
+            timelineLabel = `Preparation complete - decision forced next cycle`;
         } else if (timelineFraction >= 0.75 && assessment !== 'launch') {
-            timelineLabel = `Turn ${turnsElapsed} of ${maxTurns} in preparation — time running short`;
+            timelineLabel = `Preparation step ${turnsElapsed} of ${maxTurns} - time running short`;
         } else if (turnsElapsed > 0) {
-            timelineLabel = `Turn ${turnsElapsed} of ${maxTurns} in preparation`;
+            timelineLabel = `Preparation step ${turnsElapsed} of ${maxTurns}`;
         }
     }
 

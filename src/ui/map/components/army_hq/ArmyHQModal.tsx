@@ -24,7 +24,7 @@ import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
-import { formatCampaignWeekLabel, turnToDateString } from '../../utils/formatters';
+import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
 import { WarSummaryContent } from './WarSummaryContent';
@@ -333,7 +333,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                 {t('armyHq.strategicSituation')}
                             </div>
                             <div className="text-[12px] font-bold text-text-primary tabular-nums">
-                                {formatCampaignWeekLabel(state.turn)} {`— ${turnToDateString(state.turn ?? 0)}`}
+                                {turnToDateString(state.turn ?? 0)}
                             </div>
                         </div>
                     </div>
@@ -429,7 +429,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                 {t('armyHq.strategicSituation')}
                             </div>
                             <div className="text-[12px] font-bold text-text-primary tabular-nums">
-                                {formatCampaignWeekLabel(state.turn)} {`\u2014 ${turnToDateString(state.turn ?? 0)}`}
+                                {turnToDateString(state.turn ?? 0)}
                             </div>
                         </div>
                         <button

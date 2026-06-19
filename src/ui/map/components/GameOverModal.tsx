@@ -15,6 +15,7 @@ import { useIPC } from '../desktop/useIPC';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, useLocale, type MessageKey } from '../i18n';
+import { turnToDateString } from '../utils/formatters';
 
 const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
     victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
@@ -41,7 +42,7 @@ export function GameOverModal() {
 
     const { title, subtitle } = getOutcomeDisplay(loadedGameState.gameOutcome);
     const turn = loadedGameState.turn ?? 0;
-    const date = loadedGameState.metadata?.date ?? t('operationsPanel.turnCount', { turn });
+    const date = loadedGameState.metadata?.date ?? turnToDateString(turn);
 
     // Gather territory stats from controlBySettlement.
     const controllers = loadedGameState.controlBySettlement ?? {};

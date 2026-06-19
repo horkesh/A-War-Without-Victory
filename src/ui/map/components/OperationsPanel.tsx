@@ -40,6 +40,38 @@ function getOperationHealthSummary(operation: OperationView): { label: string; c
   return { label: t('operationsPanel.health.stable'), className: 'text-green-300' };
 }
 
+function getOperationOutcomeThresholdLabel(outcome: string): string {
+  switch (outcome) {
+    case 'decisive_victory':
+      return t('aar.outcome.decisive');
+    case 'victory':
+      return t('aar.outcome.victory');
+    case 'costly_victory':
+      return t('aar.outcome.costly');
+    case 'stalemate':
+      return t('aar.outcome.stalemate');
+    case 'repulsed':
+      return t('aar.outcome.repulsed');
+    case 'catastrophic':
+      return t('aar.outcome.collapse');
+    default:
+      return t('operationsPanel.minimumOutcomeFallback');
+  }
+}
+
+function getOperationTempoLabel(tempo: string): string {
+  switch (tempo) {
+    case 'all_out':
+      return t('operationsPanel.allOut');
+    case 'methodical':
+      return t('operationsPanel.tempo.methodical');
+    case 'normal':
+      return t('operationsPanel.tempo.normal');
+    default:
+      return t('operationsPanel.tempo.unreported');
+  }
+}
+
 function getOperationCommander(operation: OperationView, state: LoadedGameState): NamedOfficerView | null {
   const commanderId = operation.commander_officer_id;
   if (!commanderId) return null;
@@ -320,7 +352,7 @@ export function OperationsPanel() {
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1 text-[9px]">
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
-                        {t('operationsPanel.turnCount', { turn: opPhaseTurn })}
+                        {t('operationsPanel.phaseAge', { count: opPhaseTurn })}
                       </span>
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
                         {t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
@@ -359,7 +391,7 @@ export function OperationsPanel() {
                         key={phase}
                         className={`px-1.5 py-0.5 rounded border text-[10px] uppercase tracking-wide font-semibold ${tone} ${active ? 'ring-1 ring-accent-gold/60' : 'opacity-80'}`}
                       >
-                        {toTitleCase(phase)}
+                        {getPlayerSafeOperationPhaseLabel(phase)}
                       </span>
                     );
                   })}
@@ -374,7 +406,7 @@ export function OperationsPanel() {
                   <div>
                     <span className="text-text-secondary">{t('operationsPanel.phase')} </span>
                     <span className="text-text-primary">
-                      {toTitleCase(selectedOperation.phase)}{phaseTurnCount != null ? ` - ${t('operationsPanel.turnCount', { turn: phaseTurnCount })}` : ''}
+                      {getPlayerSafeOperationPhaseLabel(selectedOperation.phase)}{phaseTurnCount != null ? ` - ${t('operationsPanel.phaseAge', { count: phaseTurnCount })}` : ''}
                     </span>
                   </div>
                   <div>
@@ -427,14 +459,14 @@ export function OperationsPanel() {
                         selectedOperation.tempo === 'methodical' ? 'bg-blue-700/60 text-blue-200' :
                         'bg-neutral-600/60 text-neutral-300'
                       }`}>
-                        {selectedOperation.tempo === 'all_out' ? t('operationsPanel.allOut') : toTitleCase(selectedOperation.tempo)}
+                        {getOperationTempoLabel(selectedOperation.tempo)}
                       </span>
                     </div>
                   )}
                   {selectedOperation.min_attack_outcome && (
                     <div>
                       <span className="text-text-secondary">{t('operationsPanel.minimum')} </span>
-                      <span className="text-text-primary">{toTitleCase(selectedOperation.min_attack_outcome)}</span>
+                      <span className="text-text-primary">{getOperationOutcomeThresholdLabel(selectedOperation.min_attack_outcome)}</span>
                     </div>
                   )}
                   {(selectedOperation.postponement_count ?? 0) > 0 && (

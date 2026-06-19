@@ -99,8 +99,8 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                     <div className="mt-1 text-[11px] leading-5 text-text-primary/80">{view.narrativeLine}</div>
                 </div>
                 <div className="shrink-0 text-right">
-                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.turn')}</div>
-                    <div className="text-[13px] font-bold tabular-nums text-text-primary">{view.turn}</div>
+                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.filing')}</div>
+                    <div className="text-[13px] font-bold tabular-nums text-text-primary">{view.dateLabel}</div>
                 </div>
             </div>
 

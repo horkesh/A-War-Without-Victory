@@ -18,6 +18,20 @@ function stripOfficerPrefix(itemId: string): string {
   return itemId.startsWith('officer:') ? itemId.slice('officer:'.length) : itemId;
 }
 
+function officerEventTypeLabel(type: string): string {
+  switch (type) {
+    case 'order_pushback':
+    case 'army_directive_pushback':
+      return t('decisionModal.officer.type.commandObjection');
+    case 'replacement_suggested':
+      return t('decisionModal.officer.type.replacementSuggested');
+    case 'army_co_proposes_op':
+      return t('decisionModal.officer.type.autonomousOperation');
+    default:
+      return t('decisionModal.officer.type.personnelMatter');
+  }
+}
+
 export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: OfficerMatterModalProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
@@ -58,7 +72,7 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
       {event && (
         <div className="space-y-2 px-5 py-4 text-[12px]">
           <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
-          <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted">{event.type.replace(/_/g, ' ')}</div>
+          <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted">{officerEventTypeLabel(event.type)}</div>
           {event.reason && <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{event.reason}</div>}
         </div>
       )}

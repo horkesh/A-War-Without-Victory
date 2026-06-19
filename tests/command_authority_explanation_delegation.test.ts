@@ -337,7 +337,8 @@ describe('Wave 10: Command Relationship Standing', () => {
         it('timeline fraction computed from turnsElapsed / maxTurns', () => {
             const result = deriveReadinessTrend('postpone', 0, 3, 5);
             expect(result.timelineFraction).toBeCloseTo(0.6);
-            expect(result.timelineLabel).toContain('Turn 3 of 5');
+            expect(result.timelineLabel).toContain('Preparation step 3 of 5');
+            expect(result.timelineLabel).not.toContain('Turn 3');
         });
 
         it('timeline urgency warning when >= 75% elapsed', () => {
@@ -350,7 +351,8 @@ describe('Wave 10: Command Relationship Standing', () => {
         it('final turn warning when remaining <= 1', () => {
             const result = deriveReadinessTrend('postpone', 1, 5, 5);
             expect(result.timelineFraction).toBe(1);
-            expect(result.timelineLabel).toContain('Final turn');
+            expect(result.timelineLabel).toContain('Preparation complete');
+            expect(result.timelineLabel).not.toContain('Final turn');
         });
 
         it('no timeline when turnsElapsed/maxTurns not provided', () => {

@@ -3,7 +3,10 @@
 import { createElement } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { ReplayInspectionBanner } from '../../src/ui/map/components/replay/ReplayInspectionBanner';
 import { ReplayScrubber } from '../../src/ui/map/components/replay/ReplayScrubber';
+import { useGameStore } from '../../src/ui/map/store/gameStore';
+import { turnToDateString } from '../../src/ui/map/utils/formatters';
 import type { ReplaySaveManifest } from '../../src/sim/replay/replay_manifest';
 
 function makeManifest(): ReplaySaveManifest {
@@ -43,8 +46,34 @@ function renderScrubber(): void {
     render(createElement(ReplayScrubber, { saveManifest: makeManifest() }));
 }
 
+function makeUndatedManifest(): ReplaySaveManifest {
+    return {
+        schema_version: 1,
+        frame_count: 2,
+        frames: [
+            {
+                turn: 4,
+                date: '',
+                activeFormations: 10,
+                totalCasualties: 100,
+                totalDisplaced: 1_000,
+                controlByFaction: [],
+            },
+            {
+                turn: 8,
+                date: '',
+                activeFormations: 11,
+                totalCasualties: 200,
+                totalDisplaced: 2_000,
+                controlByFaction: [],
+            },
+        ],
+    };
+}
+
 afterEach(() => {
     cleanup();
+    useGameStore.setState({ replayInspection: null, replayInspectionReturnState: null });
     vi.useRealTimers();
 });
 
@@ -58,6 +87,16 @@ describe('ReplayScrubber autoplay controls', () => {
         expect(screen.getByRole('button', { name: 'Previous replay turn' }).getAttribute('data-awwv-replay-step')).toBe('prev');
         expect(screen.getByRole('button', { name: 'Next replay turn' }).getAttribute('data-awwv-replay-step')).toBe('next');
         expect(screen.getByText('1 / 3')).toBeTruthy();
+        expect(surface.textContent).not.toMatch(/\b\d+\s*ms\s*\/\s*turn\b/i);
+    });
+
+    it('renders calendar labels instead of raw turn labels when sparse replay dates are absent', () => {
+        render(createElement(ReplayScrubber, { saveManifest: makeUndatedManifest() }));
+
+        const surfaceText = screen.getByTestId('replay-scrubber').textContent ?? '';
+        expect(surfaceText).toContain(turnToDateString(4));
+        expect(surfaceText).toContain(turnToDateString(8));
+        expect(surfaceText).not.toMatch(/\bTurn\s+\d+\b/);
     });
 
     it('renders sparse manifest control totals with player-safe labels', () => {
@@ -109,5 +148,27 @@ describe('ReplayScrubber autoplay controls', () => {
 
         expect(screen.getByText('3 / 3')).toBeTruthy();
         expect(screen.getByTestId('replay-scrubber').getAttribute('data-awwv-replay-playback-status')).toBe('paused');
+    });
+});
+
+describe('ReplayInspectionBanner timing labels', () => {
+    it('renders calendar labels instead of raw turn fallbacks when replay inspection dates are absent', () => {
+        useGameStore.setState({
+            replayInspection: {
+                frameIndex: 0,
+                turn: 12,
+                date: null,
+                finalTurn: 20,
+                finalDate: null,
+            },
+        });
+
+        const { container } = render(createElement(ReplayInspectionBanner));
+        const text = container.textContent ?? '';
+
+        expect(text).toContain(turnToDateString(12));
+        expect(text).toContain(turnToDateString(20));
+        expect(text).not.toMatch(/\bTurn\s+\d+\b/);
+        expect(text).not.toMatch(/\bFinal\s+\d+\b/);
     });
 });

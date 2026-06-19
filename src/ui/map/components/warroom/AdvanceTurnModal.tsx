@@ -147,7 +147,7 @@ function BlockerRow({
               Required
             </span>
             <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
-              {blocker.type.replace(/_/g, ' ')}
+              {blocker.typeLabel}
             </span>
           </div>
           <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{blocker.title}</div>

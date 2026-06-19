@@ -3,6 +3,7 @@ import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { getArmyReserveAttentionSummary } from '../../utils/armyReserveSeverity';
+import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
 import { OperationOpportunityDossierPanel } from './OperationOpportunityDossierPanel';
@@ -181,7 +182,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                             <div className="flex items-center justify-between gap-2">
                                 <div>
                                     <div className="text-[11px] font-bold text-text-primary">{decision.event_title}</div>
-                                    <div className="text-[10px] text-text-secondary">{t('attention.pendingSinceWeek', { week: decision.turn_fired })}</div>
+                                    <div className="text-[10px] text-text-secondary">{t('attention.pendingSinceWeek', { date: turnToDateString(decision.turn_fired) })}</div>
                                 </div>
                                 <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border border-red-500/35 bg-red-500/10 text-red-400">
                                     {t('attention.decisionRequired')}

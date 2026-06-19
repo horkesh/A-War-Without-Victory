@@ -88,6 +88,9 @@ describe('ArmyCoPushbackPanel', () => {
         expect(warning.textContent).toContain('Mladic');
         expect(warning.textContent).toContain('RS');
         expect(warning.textContent).toContain('Stubbornness 5');
+        expect(warning.textContent).toContain('command authority');
+        expect(warning.textContent).toContain('Review pause');
+        expect(warning.textContent).not.toMatch(/political_capital|Cooldown\s+\d+t|t30/i);
     });
 
     it('T3 — renders army CO pushback for a trace with PARTIAL/REFUSED rationale', () => {
@@ -126,6 +129,7 @@ describe('ArmyCoPushbackPanel', () => {
         expect(row.textContent).toContain('Mladic');
         expect(row.textContent).toContain('PRESS_OFFENSIVE');
         expect(row.textContent).toContain('pushes back');
+        expect(row.textContent).not.toMatch(/\bTurn\s+30\b/);
     });
 
     it('T4 — renders override history badge when recent_overrides.length >= 3', () => {
@@ -155,6 +159,7 @@ describe('ArmyCoPushbackPanel', () => {
         const reliefBadge = getByTestId('army-co-pushback-relief-karadzic');
         expect(reliefBadge).toBeTruthy();
         expect(reliefBadge.textContent).toContain('At relief threshold');
+        expect(getByTestId('army-co-pushback-override-karadzic').textContent).not.toMatch(/last\s+12t/i);
     });
 
     it('T5 — section ordering: warnings first, then objections, then override history', () => {
@@ -332,7 +337,8 @@ describe('ArmyCoPushbackPanel', () => {
         );
         const warning = getByTestId('army-co-pushback-warning-mladic');
         expect(warning).toBeTruthy();
-        expect(warning.textContent).toContain('proposal turn');
+        expect(warning.textContent).toContain('proposal date');
+        expect(warning.textContent).not.toMatch(/proposal turn|t30/i);
     });
 
     it('T10 — emits army_directive_pushback events as objections when no decision-trace exists for that faction', () => {

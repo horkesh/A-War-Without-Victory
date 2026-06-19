@@ -23,7 +23,7 @@ export interface DecisionCardProps {
 }
 
 function familyLabel(item: InboxItem): string {
-  return getDecisionSurfaceForInboxType(item.type)?.playerLabel ?? item.type.replace(/_/g, ' ');
+  return getDecisionSurfaceForInboxType(item.type)?.playerLabel ?? t('desk.card.familyFallback');
 }
 
 function actionLabel(item: InboxItem): string {

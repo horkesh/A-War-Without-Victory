@@ -8,7 +8,7 @@ import type { TurnBattle } from '../../../../state/turn_summary';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel, toTitleCase } from '../../utils/formatters';
+import { formatPersonnel } from '../../utils/formatters';
 import {
     getPlayerSafeSectorStanceLabel,
     getPlayerSafeSectorStrengthLabel,
@@ -17,7 +17,7 @@ import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { getPlayerFacingSectorName } from '../../../shared/playerFacingLabels';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
-import { t, useLocale } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface SectorsSectionProps {
@@ -25,6 +25,20 @@ interface SectorsSectionProps {
     sectors: CorpsFrontSectorView[];
     factionBattles: TurnBattle[];
     defaultOpen?: boolean;
+}
+
+const SECTOR_BATTLE_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
+    decisive_victory: 'aar.outcome.decisive',
+    victory: 'aar.outcome.victory',
+    costly_victory: 'aar.outcome.costly',
+    stalemate: 'aar.outcome.stalemate',
+    repulsed: 'aar.outcome.repulsed',
+    catastrophic: 'aar.outcome.collapse',
+};
+
+function sectorBattleOutcomeLabel(outcome: string): string {
+    const key = SECTOR_BATTLE_OUTCOME_LABEL_KEYS[outcome];
+    return key ? t(key) : t('aar.outcome.recorded');
 }
 
 function IntelBar({ value, label }: { value: number; label: string }) {
@@ -160,7 +174,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                             <div key={i} className="flex items-center gap-3">
                                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded border leading-none shrink-0"
                                     style={{ color: OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0') + '40' }}>
-                                    {toTitleCase(battle.outcome)}
+                                    {sectorBattleOutcomeLabel(battle.outcome)}
                                 </span>
                                 <span className="text-text-secondary truncate flex-1">
                                     {getOsidDisplayName(battle.osid, osidDisplayNames)}

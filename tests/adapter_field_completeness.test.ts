@@ -32,7 +32,8 @@ describe.skipIf(!hasSave)('GameStateAdapter field completeness', () => {
     it('extracts turn, phase, label', () => {
         expect(parsed.turn).toBeGreaterThanOrEqual(0);
         expect(parsed.phase).toBe('war');
-        expect(parsed.label).toContain('Turn');
+        expect(parsed.label).toMatch(/\d{1,2}\s+\w+\s+\d{4}\s+\(war\)/);
+        expect(parsed.label).not.toContain('Turn');
     });
 
     // ── Formations ───────────────────────────────────────────────────

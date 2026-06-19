@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): close raw-copy wave 2 timing and fallback leaks
+
+**Type:** UI/read-model player-copy polish.
+
+**Fix:** Closed the queued second raw-copy wave across President's Desk, Army HQ presidential attention, Turn Aftermath receipts/signals, Decision History, command-authority readiness copy, Operations panel phase-age labels, Replay scrubber/inspection, Territory chart ticks, Verdict/share timing, Peace Status, Advance Turn blocker family labels, Officer Matter type labels, Army CO pushback copy, and Desk decision-card fallback families. The same branch also closed follow-up specialist findings in Army HQ headers, ORBAT recent engagements, Peace Plan proposal timing, Turn Aftermath Records filing metrics, loaded-state labels, Game Over fallback dates, AAR/sector/tooltip battle fallbacks, operation phase/outcome/tempo labels, unknown Event Modal category copy, and the war-start identity modal title placeholder. Player-facing timing now uses calendar dates or semantic command-cycle wording on these surfaces, and unknown types fall back to neutral labels instead of raw enum/id strings.
+
+**Verification:** Focused raw-copy pack passed 6 files / 105 tests; expanded endgame/replay pack passed 13 files / 216 tests; residual enum/fallback pack passed 6 files / 31 tests; combined wave pack passed 18 files / 242 tests. Final combined focused pack passed 23 files / 275 tests with 2 skipped. `npm.cmd run qa:player-journeys` passed 11 files / 107 tests. `npm.cmd run typecheck -- --pretty false` passed before and after the follow-up residuals. `npm.cmd run qa:live-surface:browser` passed with port 3239 cleanup. `git diff --check` passed. Report: `docs/40_reports/implemented/20260619_RAW_COPY_WAVE_2_TIMING_COPY.md`.
+
+**Scope/determinism:** UI/read-model copy, i18n strings, focused tests, live browser QA, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-19] fix(ui): render decision receipt timing as dates
 
 **Type:** UI/read-model player-copy polish.

@@ -39,6 +39,7 @@ import {
     AUTONOMOUS_LAUNCH_COOLDOWN_TURNS,
     ARMY_OVERRIDE_POLITICAL_CAPITAL_COST,
 } from '../../sim/combat/army_order_interpretation';
+import { turnToDateString } from '../map/utils/formatters';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -300,6 +301,10 @@ function selectOverrideHistory(props: ArmyCoPushbackPanelProps): OverrideHistory
     return rows;
 }
 
+function commandCycleLabel(count: number): string {
+    return count === 1 ? '1 command cycle' : `${count} command cycles`;
+}
+
 // ─── Component ───────────────────────────────────────────────────────────────
 
 /**
@@ -354,12 +359,12 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 </div>
                                 <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-red-600">
                                     Stubbornness {w.stubbornness} / threshold {STUBBORNNESS_AUTONOMOUS_THRESHOLD}
-                                    {' · '}Override cost: {ARMY_OVERRIDE_POLITICAL_CAPITAL_COST} political_capital
-                                    {' · '}Cooldown {AUTONOMOUS_LAUNCH_COOLDOWN_TURNS}t
+                                    {' · '}Override cost: {ARMY_OVERRIDE_POLITICAL_CAPITAL_COST} command authority
+                                    {' · '}Review pause {commandCycleLabel(AUTONOMOUS_LAUNCH_COOLDOWN_TURNS)}
                                 </div>
                                 {typeof w.sourceTurn === 'number' && (
                                     <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-neutral-500">
-                                        Source: {w.source === 'pending_event' ? 'proposal turn' : 'last launch'} t{w.sourceTurn}
+                                        Source: {w.source === 'pending_event' ? 'proposal date' : 'last launch'} {turnToDateString(w.sourceTurn)}
                                     </div>
                                 )}
                             </li>
@@ -393,7 +398,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                     {o.rationale}
                                 </div>
                                 <div className="mt-0.5 text-[9px] uppercase tracking-[0.1em] text-amber-600">
-                                    Turn {o.turn}
+                                    {turnToDateString(o.turn)}
                                 </div>
                             </li>
                         ))}
@@ -423,7 +428,7 @@ export function ArmyCoPushbackPanel(props: ArmyCoPushbackPanelProps): JSX.Elemen
                                 </span>
                                 <span className="flex items-center gap-1.5">
                                     <span className="text-[10px] tabular-nums text-neutral-600">
-                                        {row.count} / last {OVERRIDE_HISTORY_WINDOW}t
+                                        {row.count} / last {commandCycleLabel(OVERRIDE_HISTORY_WINDOW)}
                                     </span>
                                     {row.atReliefThreshold && (
                                         <span

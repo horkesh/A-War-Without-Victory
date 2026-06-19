@@ -157,7 +157,7 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         expect(opsSource).not.toContain("t('operationsSection.requestOp.placeholder')");
     });
 
-    it('humanizes battle/engagement outcome chips in Sectors/Orbat sections', () => {
+    it('maps battle/engagement outcome chips in Sectors/Orbat sections', () => {
         const sectorsSource = readFileSync(
             new URL('../src/ui/map/components/army_hq/SectorsSection.tsx', import.meta.url),
             'utf8',
@@ -166,9 +166,11 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
             new URL('../src/ui/map/components/army_hq/OrbatSection.tsx', import.meta.url),
             'utf8',
         );
-        expect(sectorsSource).toContain('toTitleCase(battle.outcome)');
+        expect(sectorsSource).toContain('sectorBattleOutcomeLabel(battle.outcome)');
+        expect(sectorsSource).not.toContain('toTitleCase(battle.outcome)');
         expect(sectorsSource).not.toContain("battle.outcome.replace(/_/g, ' ')");
-        expect(orbatSource).toContain('toTitleCase(e.outcome)');
+        expect(orbatSource).toContain('engagementOutcomeLabel(e.outcome)');
+        expect(orbatSource).not.toContain('toTitleCase(e.outcome)');
         expect(orbatSource).not.toContain("e.outcome.replace(/_/g, ' ')");
     });
 });

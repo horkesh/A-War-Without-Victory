@@ -7,11 +7,11 @@ import type { FormationView } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
-import { formatPersonnel, toTitleCase } from '../../utils/formatters';
+import { formatPersonnel, turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
-import { t, useLocale } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface OrbatSectionProps {
@@ -25,6 +25,20 @@ const STATUS_COLOR: Record<string, string> = {
     forming: 'text-amber-500',
     reserve: 'text-blue-400',
 };
+
+const ENGAGEMENT_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
+    decisive_victory: 'aar.outcome.decisive',
+    victory: 'aar.outcome.victory',
+    costly_victory: 'aar.outcome.costly',
+    stalemate: 'aar.outcome.stalemate',
+    repulsed: 'aar.outcome.repulsed',
+    catastrophic: 'aar.outcome.collapse',
+};
+
+function engagementOutcomeLabel(outcome: string): string {
+    const key = ENGAGEMENT_OUTCOME_LABEL_KEYS[outcome];
+    return key ? t(key) : t('aar.outcome.recorded');
+}
 
 /** Inline bar — fraction 0..1, fixed width. */
 function MiniBar({ value, max, color, width = 60 }: { value: number; max: number; color: string; width?: number }) {
@@ -185,7 +199,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                     <div className="space-y-1">
                         {engagements.slice(0, 5).map((e, i) => (
                             <div key={i} className="flex items-center gap-2 text-[10px]">
-                                <span className="text-text-secondary/50 w-6 shrink-0">W{e.turn}</span>
+                                <span className="text-text-secondary/50 w-16 shrink-0">{turnToDateString(e.turn)}</span>
                                 <span
                                     className="text-text-secondary/40 truncate w-20 shrink-0"
                                     title={getOsidDisplayName(e.osid, osidDisplayNames)}
@@ -194,7 +208,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                                 </span>
                                 <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border leading-none`}
                                     style={{ color: OUTCOME_COLORS[e.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[e.outcome] ?? '#d4c5a0') + '40' }}>
-                                    {toTitleCase(e.outcome)}
+                                    {engagementOutcomeLabel(e.outcome)}
                                 </span>
                                 <span className="text-text-secondary/60 w-6 shrink-0">{e.role === 'attacker' ? t('orbat.attackerShort') : t('orbat.defenderShort')}</span>
                                 <span className="text-red-500 font-bold">-{e.casualties_taken}</span>

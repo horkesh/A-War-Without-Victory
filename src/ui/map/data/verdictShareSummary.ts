@@ -9,6 +9,7 @@ import {
 } from './verdictScene.js';
 import { formatHistoricalDivergenceNote } from './historicalDivergenceNotes.js';
 import { t } from '../i18n';
+import { turnToDateString } from '../utils/formatters.js';
 
 export interface VerdictShareSummaryInput extends VerdictSceneInput {
     verdict?: GameVerdict;
@@ -31,7 +32,8 @@ function formatOutcomeLine(input: VerdictShareSummaryInput): string {
 
 function formatWarEndLine(verdict: GameVerdict | undefined): string {
     if (!verdict) return t('verdict.share.warEndedMissing');
-    return t('verdict.share.warEndedLine', { outcome: verdict.outcome_label, week: verdict.duration_weeks });
+    const date = verdict.date?.trim() || turnToDateString(verdict.turn ?? verdict.duration_weeks);
+    return t('verdict.share.warEndedLine', { outcome: verdict.outcome_label, date });
 }
 
 function formatCostLine(input: VerdictShareSummaryInput): string {

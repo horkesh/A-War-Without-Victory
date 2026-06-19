@@ -3,7 +3,7 @@
  *
  * Full-screen overlay that lists every player decision recorded in the
  * causality substrate (via `getPlayerDecisionHistory`). Each row shows:
- *   - Turn number
+ *   - Calendar date
  *   - Event id + family lookup from `eventCatalog`
  *   - Chosen option id
  *   - Was-divergence badge (comparison vs `historical_default_response_id`)
@@ -40,6 +40,7 @@ import {
 } from '../data/consequenceReceipts.js';
 import { Z } from '../../shared/zIndex.js';
 import { useGameStore } from '../store/gameStore.js';
+import { turnToDateString } from '../utils/formatters.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 
 export interface DecisionHistoryOverlayProps {
@@ -191,7 +192,7 @@ function DecisionRow({
                     data-testid="decision-history-turn"
                     className="text-[10px] font-mono text-neutral-400 tabular-nums w-12 shrink-0"
                 >
-                    T{decision.turn}
+                    {turnToDateString(decision.turn)}
                 </span>
                 <span className="flex-1 min-w-0">
                     <span

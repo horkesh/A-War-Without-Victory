@@ -48,7 +48,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   if (!battle) {
     return <div className="text-[11px] text-text-secondary">Battle at {getPlayerSafeSettlementName(osid, 'this position')}</div>;
   }
-  const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? battle.outcome;
+  const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? 'Engagement recorded';
   const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? '#aaa';
   const locationName = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, 'this position');
   return (
@@ -78,7 +78,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       )}
       {battle.execution_friction && (
         <div className="mt-1 text-[9px] text-amber-300">
-          {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? label).join(' / ')}
+          {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? 'Command friction').join(' / ')}
           {battle.execution_friction.attacker_confidence_band
             ? ` (${battle.execution_friction.attacker_confidence_band} confidence)`
             : ''}

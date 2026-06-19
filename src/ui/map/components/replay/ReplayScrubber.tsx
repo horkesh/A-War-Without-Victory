@@ -19,6 +19,7 @@ import { buildReplayFrameSummary } from '../../../../sim/replay/replay_frame_sum
 import { replayPlayer } from '../../../../sim/replay/replay_player.js';
 import { replaySummaryPlayer } from '../../../../sim/replay/replay_summary_player.js';
 import { t } from '../../i18n';
+import { turnToDateString } from '../../utils/formatters';
 import { FACTION_MILITARY_LABELS } from '../../utils/theme';
 
 export interface ReplayScrubberProps {
@@ -35,6 +36,10 @@ function formatControlFactionTotal(faction: string, osids: number): string {
     const label = FACTION_MILITARY_LABELS[faction] ?? faction;
     const noun = osids === 1 ? 'settlement' : 'settlements';
     return `${label} ${osids} ${noun}`;
+}
+
+function replayDateLabel(turn: number, date: string | null | undefined): string {
+    return date?.trim() || turnToDateString(turn);
 }
 
 /**
@@ -145,6 +150,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
         manifestFrame?.summary.date
         ?? (current as { metadata?: { date?: string } } | null)?.metadata?.date
         ?? null;
+    const currentDateLabel = replayDateLabel(currentTurn, currentDate);
     const summary = manifestFrame?.summary ?? buildReplayFrameSummary(current);
 
     return (
@@ -162,13 +168,8 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
 
             <div className="flex items-center gap-3 mb-2">
                 <span className="text-[10px] text-text-secondary tabular-nums">
-                    Turn {currentTurn}
+                    {currentDateLabel}
                 </span>
-                {currentDate && (
-                    <span className="text-[10px] text-text-primary font-mono">
-                        {currentDate}
-                    </span>
-                )}
                 {current && onInspectFrame && (
                     <button
                         type="button"
@@ -229,7 +230,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                     {t('replay.next')}
                 </button>
                 <span className="ml-auto normal-case tracking-normal text-text-secondary/50">
-                    {REPLAY_AUTOPLAY_INTERVAL_MS} ms / turn
+                    {t('replay.autoplayCadence')}
                 </span>
             </div>
 
@@ -240,7 +241,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                     className="px-2 py-0.5 rounded hover:bg-white/5 transition-colors"
                     data-awwv-replay-jump="first"
                 >
-                    {metadata.firstTurnDate ?? `Turn ${metadata.firstTurn ?? 0}`}
+                    {replayDateLabel(metadata.firstTurn ?? 0, metadata.firstTurnDate)}
                 </button>
                 <button
                     type="button"
@@ -248,7 +249,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                     className="px-2 py-0.5 rounded hover:bg-white/5 transition-colors"
                     data-awwv-replay-jump="last"
                 >
-                    {metadata.lastTurnDate ?? `Turn ${metadata.lastTurn ?? turnCount - 1}`}
+                    {replayDateLabel(metadata.lastTurn ?? turnCount - 1, metadata.lastTurnDate)}
                 </button>
             </div>
 

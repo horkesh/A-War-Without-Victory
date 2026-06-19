@@ -19,6 +19,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { DecisionHistoryOverlay } from '../../src/ui/map/components/DecisionHistoryOverlay.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 afterEach(() => cleanup());
 
@@ -242,7 +243,7 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(order).toEqual(['evt_early', 'evt_mid', 'evt_late']);
     });
 
-    it('row content surfaces resolved title, option prose, and turn without player-facing family taxonomy', () => {
+    it('row content surfaces resolved title, option prose, and date without player-facing family taxonomy', () => {
         const catalog = new Map<string, EventDefinition>([
             ['evt_z', buildEventDef('evt_z', { family: 'rbih_civic', title: 'The Sarajevo siege tightens' })],
         ]);
@@ -262,7 +263,9 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         // Option prose resolved from catalog (label 'Option B'), not raw 'opt_b'.
         expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Option B');
         expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBe('opt_b');
-        expect(screen.getByTestId('decision-history-turn').textContent).toBe('T17');
+        const copy = row.textContent ?? '';
+        expect(screen.getByTestId('decision-history-turn').textContent).toBe(turnToDateString(17));
+        expect(copy).not.toMatch(/\bT17\b|\bTurn 17\b|\bweek 17\b/i);
     });
 
     it('filters out non-player decisions from the rendered list', () => {

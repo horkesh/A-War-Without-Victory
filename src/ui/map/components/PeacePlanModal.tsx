@@ -26,6 +26,7 @@ import { playCue } from '../audio/audio_engine';
 import { t } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { resolvePeacePlanStill } from '../data/peacePlanArt';
+import { turnToDateString } from '../utils/formatters';
 
 const INSTITUTIONAL_LABELS: Record<string, string> = {
     cantonization: 'Ethnic Cantonization',
@@ -149,7 +150,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     </h2>
                     <div className="text-[11px] text-[#6a5a40] mt-1"
                          style={{ fontFamily: 'Courier New, monospace' }}>
-                        Proposed: Week {plan.turnOffered}
+                        Proposed: {turnToDateString(plan.turnOffered)}
                     </div>
                 </div>
 

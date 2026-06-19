@@ -95,7 +95,7 @@ export function PresidentDeskShell({
           <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>
           <div className="mt-1 text-[11px] text-text-secondary">
-            {state ? t('desk.situation.dateTurn', { date: turnToDateString(state.turn), turn: state.turn }) : t('desk.situation.noCampaign')}
+            {state ? t('desk.situation.dateTurn', { date: turnToDateString(state.turn) }) : t('desk.situation.noCampaign')}
           </div>
         </div>
 

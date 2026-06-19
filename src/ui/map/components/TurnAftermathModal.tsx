@@ -13,6 +13,7 @@ import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry'
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
+import { turnToDateString } from '../utils/formatters';
 
 interface TurnAftermathModalProps {
   isOpen: boolean;
@@ -79,6 +80,13 @@ function signalTone(severity: TurnAftermathView['signals'][number]['severity']):
   return 'border-white/10 text-text-secondary bg-white/[0.03]';
 }
 
+function signalDetailCopy(detail: string): string {
+  if (/[a-z]+_[a-z0-9_]+/.test(detail) || /\binternal\b/i.test(detail)) {
+    return t('turnAftermath.signal.detail.notableEvent');
+  }
+  return detail;
+}
+
 function enumLabel(prefix: string, value: string): string {
   return t(`${prefix}.${value}` as MessageKey);
 }
@@ -87,6 +95,25 @@ function actionTypeLabel(type: TurnAftermathTopAction['type']): string {
   const surface = getDecisionSurfaceForInboxType(type);
   if (!surface) return t('records.actionType.reviewItem');
   return t(`records.actionType.${surface.familyId}` as MessageKey);
+}
+
+function territorySignificanceLabel(significance: string): string {
+  switch (significance) {
+    case 'corridor':
+      return t('turnAftermath.significance.corridor');
+    case 'strategic':
+    case 'strategic_center':
+      return t('turnAftermath.significance.strategic');
+    case 'urban':
+    case 'urban_center':
+      return t('turnAftermath.significance.urban');
+    case 'enclave':
+      return t('turnAftermath.significance.enclave');
+    case 'humanitarian':
+      return t('turnAftermath.significance.humanitarian');
+    default:
+      return t('turnAftermath.significance.notable');
+  }
 }
 
 function forcedOpRecommendationLabel(assessment: ForcedOpReceipt['assessmentAtLaunch']): string {
@@ -178,7 +205,7 @@ export function TurnAftermathModal({
                   <div key={`${flip.osid}:${flip.from ?? 'none'}:${flip.to ?? 'none'}`} className="flex items-center justify-between gap-3 px-3 py-2">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-text-primary">{flip.label}</div>
-                      <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-text-secondary">{flip.significance.replace(/_/g, ' ')}</div>
+                      <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-text-secondary">{territorySignificanceLabel(flip.significance)}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[10px] font-mono uppercase ${flip.direction === 'gain' ? 'border-emerald-400/30 text-emerald-300' : flip.direction === 'loss' ? 'border-red-400/30 text-red-300' : 'border-white/10 text-text-secondary'}`}>
                       {enumLabel('turnAftermath.direction', flip.direction)}
@@ -208,7 +235,7 @@ export function TurnAftermathModal({
                     >
                       {t('turnAftermath.consequenceWarned', {
                         decision: receipt.decisionOptionLabel,
-                        turn: receipt.decisionTurn,
+                        date: turnToDateString(receipt.decisionTurn),
                         consequence: receipt.predictedLabel,
                       })}
                       {receipt.predictedExplanation && (
@@ -281,7 +308,7 @@ export function TurnAftermathModal({
                         {receipt.newlyCowed && receipt.cowedUntilTurn !== null
                           ? t('officerResentment.cowed', {
                               officer: receipt.officerName,
-                              turn: receipt.cowedUntilTurn,
+                              date: turnToDateString(receipt.cowedUntilTurn),
                             })
                           : t('officerResentment.resents', {
                               officer: receipt.officerName,
@@ -304,7 +331,7 @@ export function TurnAftermathModal({
                 ) : signalPreview.map((signal) => (
                   <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
                     <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signalDetailCopy(signal.detail)}</div>
                   </div>
                 ))}
               </div>

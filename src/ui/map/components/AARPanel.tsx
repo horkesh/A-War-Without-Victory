@@ -171,7 +171,7 @@ function BattleRow({
     formationNameById: Map<string, string>;
 }) {
     const label = getOsidDisplayName(battle.osid, osidDisplayNames);
-    const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : battle.outcome;
+    const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
     const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-text-secondary';
     const countLabel = battle.was_concentrated ? `${battle.all_attacker_ids.length}×` : null;
     const primaryAttackerLabel = getPlayerSafeBrigadeName(formationNameById.get(battle.primary_attacker_id));

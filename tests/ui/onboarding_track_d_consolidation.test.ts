@@ -137,7 +137,7 @@ describe('Track D onboarding consolidation', () => {
       act(() => {
         vi.advanceTimersByTime(800);
       });
-      expect(screen.getByRole('dialog', { name: 'WAR BEGINS' })).toBeTruthy();
+      expect(screen.getByRole('dialog', { name: /War begins: 6 Apr 1992/i })).toBeTruthy();
 
       act(() => {
         useGameStore.setState({
@@ -147,7 +147,7 @@ describe('Track D onboarding consolidation', () => {
       });
 
       expect(screen.getByRole('dialog', { name: 'WAR HAS STARTED' })).toBeTruthy();
-      expect(screen.queryByRole('dialog', { name: 'WAR BEGINS' })).toBeNull();
+      expect(screen.queryByRole('dialog', { name: /War begins:/i })).toBeNull();
     } finally {
       vi.useRealTimers();
     }

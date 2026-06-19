@@ -44,6 +44,7 @@ import {
     getPlayerSafeOfficerName,
     getPlayerSafeOperationName,
 } from '../utils/playerSafeText.js';
+import { turnToDateString } from '../utils/formatters.js';
 import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
@@ -609,7 +610,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     const turn = turnVal;
     const phase = typeof meta.phase === 'string' ? meta.phase : 'unknown';
     const metadataDate = typeof meta.date === 'string' && meta.date.length > 0 ? meta.date : 'UNKNOWN';
-    const label = `Turn ${turn} (${phase})`;
+    const labelDate = metadataDate !== 'UNKNOWN' ? metadataDate : turnToDateString(turn);
+    const label = `${labelDate} (${phase})`;
     const gameState = state as GameState;
 
     const rawMovementState = state.military.brigade_movement_state as Record<string, { status?: string; stance?: string }> | undefined;
