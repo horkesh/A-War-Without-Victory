@@ -2610,7 +2610,7 @@
                     "insert_after_paragraph": 5,
                     "condition": "GAME_OVER AND MILESTONE:dayton_accords",
                     "variant": "note",
-                    "content": "{milestone_dayton_accords_summary}\n\nDelta from historical baseline: {milestone_dayton_accords_delta_weeks} weeks.",
+                    "content": "{milestone_dayton_accords_summary}\n\nTiming against historical baseline: {milestone_dayton_accords_delta_weeks}.",
                     "localizations": {
                         "bcs": {
                             "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"
@@ -3250,7 +3250,7 @@
                     "insert_after_paragraph": 4,
                     "condition": "GAME_OVER AND MILESTONE:dayton_accords",
                     "variant": "divergence",
-                    "content": "{milestone_dayton_accords_summary}\n\nDelta from historical baseline: {milestone_dayton_accords_delta_weeks} weeks.",
+                    "content": "{milestone_dayton_accords_summary}\n\nTiming against historical baseline: {milestone_dayton_accords_delta_weeks}.",
                     "localizations": {
                         "bcs": {
                             "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"
@@ -3985,7 +3985,7 @@
                     "insert_after_paragraph": 4,
                     "condition": "GAME_OVER AND MILESTONE:dayton_accords",
                     "variant": "note",
-                    "content": "{milestone_dayton_accords_summary}\n\nDelta from historical baseline: {milestone_dayton_accords_delta_weeks} weeks.",
+                    "content": "{milestone_dayton_accords_summary}\n\nTiming against historical baseline: {milestone_dayton_accords_delta_weeks}.",
                     "localizations": {
                         "bcs": {
                             "content": "Dodatna napomena povezuje ovaj zapis s vidljivim ishodima vase kampanje. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {milestone_dayton_accords_summary} {milestone_dayton_accords_delta_weeks}"

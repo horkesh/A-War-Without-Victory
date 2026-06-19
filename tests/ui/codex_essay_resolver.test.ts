@@ -446,8 +446,8 @@ describe('codexEssayResolver — template interpolation tokens', () => {
                 },
             ],
         })).toEqual([
-            'Srebrenica Genocide: historical W171; player not recorded; status absent. Srebrenica Genocide did not occur in this run.',
-            'Dayton Accords: historical W182; player W188; delta +6w; status late. Dayton Accords occurred at player week 188 against historical week 182.',
+            'Srebrenica Genocide: historical 17 Jul 1995; player not recorded; status Absent. Srebrenica Genocide did not occur in this run.',
+            'Dayton Accords: historical 2 Oct 1995; player 13 Nov 1995; timing 6 weeks later; status Late. Dayton Accords occurred at player date 13 Nov 1995 against historical date 2 Oct 1995.',
         ]);
     });
 
@@ -462,7 +462,7 @@ describe('codexEssayResolver — template interpolation tokens', () => {
                 status: 'late',
                 summary: 'Dayton Accords occurred at player week 188 against historical week 182.',
             }],
-        })).toEqual(['late / +6 / Dayton Accords occurred at player week 188 against historical week 182.']);
+        })).toEqual(['Late / 6 weeks later / Dayton Accords occurred at player date 13 Nov 1995 against historical date 2 Oct 1995.']);
     });
 });
 
@@ -686,9 +686,10 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
 
         const text = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text).join('\n');
         expect(text).toContain('War-crimes record [VRS]: The ledger records 14 war-crime events.');
-        expect(text).toContain('Accelerated Safe Areas 1993 [VRS, W70]: Safe-area diplomacy accelerated.');
+        expect(text).toContain('Accelerated Safe Areas 1993 [VRS, 9 Aug 1993]: Safe-area diplomacy accelerated.');
         expect(text).toContain('Srebrenica Genocide 1995');
         expect(text).not.toMatch(/\[(RS|RBiH|HRHB)\]/);
+        expect(text).not.toMatch(/\bW\d+\b/);
         expect(text).not.toContain('accelerated_safe_areas_1993');
         expect(text).not.toContain('srebrenica_genocide_1995');
     });
@@ -765,9 +766,9 @@ describe('codexEssayResolver - cost-ledger annotation atoms and tokens', () => {
 
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
-            'Early NATO Threshold 1994 [VRS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
-            'Early NATO Threshold 1994 [VRS, W100]: NATO intervention threshold lowered; VRS operational freedom constrained.',
-            'Bihac Refugee Crisis 1994 [ARBiH, W124]: A massive refugee wave floods RBiH-held central Bosnia.',
+            'Early NATO Threshold 1994 [VRS, 7 Mar 1994]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'Early NATO Threshold 1994 [VRS, 7 Mar 1994]: NATO intervention threshold lowered; VRS operational freedom constrained.',
+            'Bihac Refugee Crisis 1994 [ARBiH, 22 Aug 1994]: A massive refugee wave floods RBiH-held central Bosnia.',
         ]);
     });
 });

@@ -440,7 +440,8 @@ describe('v0.9.1 vocab - humanitarian/diplomatic findings breadth wave', () => {
 
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
         expect(dyn.some(p => p.text.includes('Dayton Accords arrived 8 weeks earlier'))).toBe(true);
-        expect(dyn.some(p => p.text.includes('-8'))).toBe(true);
+        expect(dyn.some(p => p.text.includes('8 weeks earlier'))).toBe(true);
+        expect(dyn.map(p => p.text).join('\n')).not.toMatch(/\bW\d+\b|historical W|player W|status (late|absent|early)/);
     });
 });
 
@@ -795,8 +796,11 @@ describe('v0.9.1 vocab — milestone comparison in Codex essays', () => {
         };
         const resolved = resolveCodexEssay(daytonEssay, ctx);
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('Dayton Accords: historical W182; player W188; delta +6w; status late.'))).toBe(true);
-        expect(dyn.some(p => p.text.includes('Srebrenica Genocide: historical W171; player not recorded; status absent.'))).toBe(true);
+        const text = dyn.map(p => p.text).join('\n');
+        expect(text).toContain('Dayton Accords: historical 2 Oct 1995; player 13 Nov 1995; timing 6 weeks later; status Late.');
+        expect(text).toContain('Srebrenica Genocide: historical 17 Jul 1995; player not recorded; status Absent.');
+        expect(text).not.toMatch(/\bW\d+\b/);
+        expect(text).not.toMatch(/historical W|player W|status (late|absent|early)/);
     });
 });
 
@@ -931,7 +935,7 @@ describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
         expect(resolveCodexEssay(jnaEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(owenStoltenbergEssay, ctx).paragraphs.some(p => p.text.includes('Early negotiated settlement'))).toBe(true);
         expect(resolveCodexEssay(bosnianAssemblyEssay, ctx).paragraphs.some(p => p.text.includes('116 weeks shorter'))).toBe(true);
-        expect(resolveCodexEssay(contactGroupEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 190'))).toBe(true);
+        expect(resolveCodexEssay(contactGroupEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 27 Nov 1995'))).toBe(true);
         expect(resolveCodexEssay(bihacCrisisEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
 
         const longerCtx = {
@@ -1063,14 +1067,14 @@ describe('v0.9.1 vocab - late intervention and final offensive breadth wave', ()
             historicalComparison: comparison,
         };
 
-        expect(resolveCodexEssay(natoEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
+        expect(resolveCodexEssay(natoEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 20 Nov 1995'))).toBe(true);
         expect(resolveCodexEssay(hostageEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(gorazdeEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
         expect(resolveCodexEssay(mistralEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
         expect(resolveCodexEssay(sanaEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
         expect(resolveCodexEssay(summerEssay, ctx).paragraphs.some(p => p.text.includes('HRHB war-crimes record [HVO]'))).toBe(true);
-        expect(resolveCodexEssay(haltEssay, ctx).paragraphs.some(p => p.text.includes('Delta from historical baseline: +7 weeks'))).toBe(true);
-        expect(resolveCodexEssay(washingtonEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 189'))).toBe(true);
+        expect(resolveCodexEssay(haltEssay, ctx).paragraphs.some(p => p.text.includes('Timing against historical baseline: 7 weeks later'))).toBe(true);
+        expect(resolveCodexEssay(washingtonEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 20 Nov 1995'))).toBe(true);
     });
 });
 
@@ -1200,9 +1204,9 @@ describe('v0.9.1 vocab - UN mandate and sanctions breadth wave', () => {
         expect(resolveCodexEssay(tribunalEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
         expect(resolveCodexEssay(srebrenicaSafeAreaEssay, ctx).paragraphs.some(p => p.variant === 'ghost' && p.text.includes('Srebrenica Genocide did not occur in this run'))).toBe(true);
         expect(resolveCodexEssay(forceAuthorityEssay, ctx).paragraphs.some(p => p.text.includes('Civilian displacement record'))).toBe(true);
-        expect(resolveCodexEssay(noFlyEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
+        expect(resolveCodexEssay(noFlyEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 6 Nov 1995'))).toBe(true);
         expect(resolveCodexEssay(sharpGuardEssay, ctx).paragraphs.some(p => p.text.includes('Human cost record'))).toBe(true);
-        expect(resolveCodexEssay(strikeThreatEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player week 187'))).toBe(true);
+        expect(resolveCodexEssay(strikeThreatEssay, ctx).paragraphs.some(p => p.text.includes('Dayton Accords occurred at player date 6 Nov 1995'))).toBe(true);
         expect(resolveCodexEssay(sanctionsEssay, ctx).paragraphs.some(p => p.text.includes('RS war-crimes record [VRS]'))).toBe(true);
     });
 });
@@ -1306,11 +1310,20 @@ describe('v0.9.1 vocab - consequence reader annotation follow-through', () => {
             },
         };
 
-        expect(resolveCodexEssay(campsEssay, { ...baseCtx, firedEventIds: new Set(['concentration_camps_revealed_1992']) }).paragraphs.some(p => p.text.includes('Accelerated Camps Discovery 1992 [VRS, W8]'))).toBe(true);
-        expect(resolveCodexEssay(tribunalEssay, { ...baseCtx, firedEventIds: new Set(['un_resolution_808_tribunal_1993']) }).paragraphs.some(p => p.text.includes('Early War Crimes Tribunal 1993 [VRS, W36]'))).toBe(true);
-        expect(resolveCodexEssay(safeAreasEssay, { ...baseCtx, firedEventIds: new Set(['un_safe_areas_declared_1993']) }).paragraphs.some(p => p.text.includes('Accelerated Safe Areas 1993 [ARBiH, W42]'))).toBe(true);
-        expect(resolveCodexEssay(strikeThreatEssay, { ...baseCtx, firedEventIds: new Set(['nato_air_strike_threat_1993']) }).paragraphs.some(p => p.text.includes('Early NATO Threshold 1994 [VRS, W90]'))).toBe(true);
-        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('Bihac Pocket Collapse 1994 [ARBiH, W130]'))).toBe(true);
-        expect(resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs.some(p => p.text.includes('Bihac Refugee Crisis 1994 [ARBiH, W132]'))).toBe(true);
+        const rendered = [
+            ...resolveCodexEssay(campsEssay, { ...baseCtx, firedEventIds: new Set(['concentration_camps_revealed_1992']) }).paragraphs,
+            ...resolveCodexEssay(tribunalEssay, { ...baseCtx, firedEventIds: new Set(['un_resolution_808_tribunal_1993']) }).paragraphs,
+            ...resolveCodexEssay(safeAreasEssay, { ...baseCtx, firedEventIds: new Set(['un_safe_areas_declared_1993']) }).paragraphs,
+            ...resolveCodexEssay(strikeThreatEssay, { ...baseCtx, firedEventIds: new Set(['nato_air_strike_threat_1993']) }).paragraphs,
+            ...resolveCodexEssay(bihacEssay, { ...baseCtx, firedEventIds: new Set(['bihac_crisis_1994']) }).paragraphs,
+        ].map(p => p.text).join('\n');
+
+        expect(rendered).toContain('Accelerated Camps Discovery 1992 [VRS, 1 Jun 1992]');
+        expect(rendered).toContain('Early War Crimes Tribunal 1993 [VRS, 14 Dec 1992]');
+        expect(rendered).toContain('Accelerated Safe Areas 1993 [ARBiH, 25 Jan 1993]');
+        expect(rendered).toContain('Early NATO Threshold 1994 [VRS, 27 Dec 1993]');
+        expect(rendered).toContain('Bihac Pocket Collapse 1994 [ARBiH, 3 Oct 1994]');
+        expect(rendered).toContain('Bihac Refugee Crisis 1994 [ARBiH, 17 Oct 1994]');
+        expect(rendered).not.toMatch(/\bW\d+\b/);
     });
 });

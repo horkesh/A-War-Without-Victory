@@ -3,6 +3,7 @@ import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../
 import { strictCompare } from '../../../../state/validateGameState.js';
 import type { Locale } from '../../i18n';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
+import { turnToDateString } from '../../utils/formatters.js';
 
 export interface DynamicSection {
     id?: string;
@@ -515,7 +516,7 @@ function formatCostFinding(finding: CostLedgerFinding): string {
 function formatCostAnnotation(annotation: CostLedgerAnnotation): string {
     const details = [
         formatCostLedgerFaction(annotation.faction),
-        typeof annotation.turn === 'number' ? `W${annotation.turn}` : undefined,
+        typeof annotation.turn === 'number' ? turnToDateString(annotation.turn) : undefined,
     ].filter((detail): detail is string => Boolean(detail));
     const suffix = details.length > 0 ? ` [${details.join(', ')}]` : '';
     const text = annotation.text && annotation.text.trim().length > 0 ? `: ${annotation.text.trim()}` : '';
@@ -550,13 +551,40 @@ function formatCostFindingsByCategory(
  *  undefined when the token is not recognized — caller leaves the literal
  *  `{token}` in place so missing tokens are visible in content review. */
 function formatMilestoneDelta(deltaWeeks: number | null): string {
-    return deltaWeeks === null ? '' : `${signed(deltaWeeks)}w`;
+    if (deltaWeeks === null) return '';
+    if (deltaWeeks === 0) return 'on the historical date';
+    const magnitude = Math.abs(deltaWeeks);
+    const unit = magnitude === 1 ? 'week' : 'weeks';
+    const direction = deltaWeeks < 0 ? 'earlier' : 'later';
+    return `${magnitude} ${unit} ${direction}`;
+}
+
+function formatMilestoneStatus(status: string | undefined): string {
+    switch (status) {
+        case 'early': return 'Early';
+        case 'late': return 'Late';
+        case 'on_time': return 'On time';
+        case 'absent': return 'Absent';
+        default: return humanizeDynamicIdentifier(status);
+    }
+}
+
+function formatMilestoneDate(turn: number | null): string {
+    return turn === null ? 'not recorded' : turnToDateString(turn);
+}
+
+function sanitizeMilestoneSummary(summary: string): string {
+    return summary
+        .replace(/\bplayer\s+week\s+(\d+)\b/gi, (_match, turn) => `player date ${turnToDateString(Number(turn))}`)
+        .replace(/\bhistorical\s+week\s+(\d+)\b/gi, (_match, turn) => `historical date ${turnToDateString(Number(turn))}`)
+        .replace(/\bweek\s+(\d+)\b/gi, (_match, turn) => turnToDateString(Number(turn)))
+        .replace(/\bW(\d+)\b/g, (_match, turn) => turnToDateString(Number(turn)));
 }
 
 function formatMilestoneRow(row: MilestoneRow): string {
-    const player = row.player_week === null ? 'not recorded' : `W${row.player_week}`;
-    const delta = row.delta_weeks === null ? '' : `; delta ${formatMilestoneDelta(row.delta_weeks)}`;
-    return `${row.label}: historical W${row.historical_week}; player ${player}${delta}; status ${row.status}. ${row.summary}`;
+    const player = formatMilestoneDate(row.player_week);
+    const delta = row.delta_weeks === null ? '' : `; timing ${formatMilestoneDelta(row.delta_weeks)}`;
+    return `${row.label}: historical ${turnToDateString(row.historical_week)}; player ${player}${delta}; status ${formatMilestoneStatus(row.status)}. ${sanitizeMilestoneSummary(row.summary)}`;
 }
 
 function milestoneTokenValue(token: string, context: CodexRenderContext): string | undefined {
@@ -575,9 +603,14 @@ function milestoneTokenValue(token: string, context: CodexRenderContext): string
         const milestone = findMilestone(context, id);
         if (!milestone) return '';
         if (field === 'delta_weeks') {
-            return milestone.delta_weeks === null ? '' : signed(milestone.delta_weeks);
+            return formatMilestoneDelta(milestone.delta_weeks);
         }
-        return String(milestone[field]);
+        if (field === 'status') {
+            return formatMilestoneStatus(milestone.status);
+        }
+        if (field === 'summary') {
+            return sanitizeMilestoneSummary(milestone.summary);
+        }
     }
 
     return undefined;
