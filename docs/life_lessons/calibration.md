@@ -352,6 +352,24 @@
 - **Right approach**: For any sim-touching change, diff `run_summary.historical_fit.osid_pair_match.matched_osids` against the blessed baseline. Anchors + §6 are necessary, not sufficient.
 - **Do instead**: This is exactly why `tools/engine_health_gate.cjs` treats `matched_osids` as a hard floor and why the CI gate (#424) runs at 188w (the 40w structural-fingerprint + anchors would have green-lit the −39, since it's a late-war t≥175 phenomenon). Run the gate, or at minimum the matched_osids diff, before declaring any sim change safe.
 
+### [Calibration] Byte-identical hash when territory should move means the lever is inert (2026-06-11)
+- **Context**: PR #417 captured a `planning_duration` 5→3 calibration run that returned the same final-state hash as the floor, despite the lever being expected to move territory. The durable lesson is the rejection signal: when the full run is byte-identical, the lever did not reach the artifact path that matters.
+- **Wrong approach**: Running another scenario or analyzing calibration percentage after a byte-identical result from a territory-moving hypothesis. Hash equality has already answered the first question: nothing changed.
+- **Right approach**: Treat byte-identical output as an immediate INERT/NO-GO verdict, then inspect why the field was unread or overridden before choosing a new lever.
+- **Do instead**: For any calibration lever expected to affect control, compare the final-state hash against the floor before interpreting match rates. If identical, stop and trace the code path; do not spend another 188w slot on the same hypothesis.
+
+### [Operations] `planning_duration` is inert for event-trigger-bound, staging-gated ops (2026-06-11)
+- **Context**: The June 11 Sana/Ključ investigation found that trimming `planning_duration` cannot shift an operation whose launch is owned by an event trigger and then constrained by staging. Op Sana fires from the Storm trigger path; the planning clock is not the launch gate.
+- **Wrong approach**: Treating `planning_duration` as a generic launch-timing lever for triggered operations. It only matters when the planning-clock path is the actual gate.
+- **Right approach**: Before changing `planning_duration`, verify that the operation is not event-trigger-bound and that staging/force-readiness gates will not dominate. For triggered operations, timing lives in the event predicate and the staging adjacency/assembly path.
+- **Do instead**: To shift a triggered operation's timing, inspect the event `turn_min`/trigger predicate and the staging OSIDs. Do not expect `planning_duration` to matter when the trigger or staging gate owns the launch.
+
+### [Operations] `getCurrentLaunchObjectives()` advances one objective per axis per turn (2026-06-11)
+- **Context**: PR #417's 506th-brigade/Ključ investigation found a structural depth cap: `getCurrentLaunchObjectives()` emits one current objective per axis per turn, regardless of brigade count. A single long axis can leave the final tail outside the scenario window even when combat power is sufficient.
+- **Wrong approach**: Adding brigades to a single deep axis to make it advance through multiple objectives per turn. More brigades can improve combat odds, but they do not increase the number of current objectives emitted for that axis.
+- **Right approach**: If a deep tail needs to land within the run horizon, split the chain into parallel axes at a mid-chain OSID that has adjacency to the tail head. Each axis advances independently.
+- **Do instead**: When an operation captures nearly all objectives but misses the final tail by time, audit the axis geometry and split depth, rather than lowering `planning_duration` or adding more brigades to the same axis.
+
 ### [Calibration] Golden manifest ≠ 40w structural fingerprint — event-content that fires in-window must verify with `test:baselines` (2026-06-14)
 - **Context**: The HRHB Jul–Sep 1992 events (#436, fire turns 13–24) passed `ci:structural-fingerprint:check` (`78af6fc7` byte-identical) AND an independent reviewer GO — both checked ONLY the 40w structural fingerprint. The fingerprint runs 40 turns and hashes control-counts/anchors/benchmarks, EXCLUDING the political dimension store + `event_flags` + `cost_ledger_annotations`. The events write those observer fields + log to the weekly report, so the 52w GOLDEN manifest `final_save`+`run_summary`+`weekly_report` moved → "Event System CI" (`run_baseline_regression.ts`) went RED, blocking the merge.
 - **Wrong approach**: Treating a byte-identical 40w structural fingerprint as proof of calibration-inertness for an event-content lane. The fingerprint and the golden manifest cover DIFFERENT state surfaces and DIFFERENT horizons.

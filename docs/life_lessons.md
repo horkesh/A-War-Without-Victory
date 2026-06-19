@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 271 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 278 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
@@ -74,6 +74,24 @@
 
 ### [Tooling] A delegated sub-check that fails on TOLERATED-baseline conditions must be ratcheted (count), not binary — and an unparseable failure must hard-fail — see `docs/life_lessons/process.md`
 - `engine_health_gate.cjs` delegates state-integrity to `validate_run_consistency.cjs`, which exits non-zero (3 failures) even on the BLESSED 658 baseline (known-tolerated sector-floor/undefended-subseg conditions). Binary delegation would red the baseline → useless. Fix: parse + RATCHET the failure COUNT (baseline 3 → ceiling 6) so only NEW failures fail the gate. Corollary (Codex P2, #425): if the delegated tool exits non-zero WITHOUT a parseable count (crash/truncation), recording a tolerable default (`1`) is a false-green — treat an unparseable non-zero result as a HARD failure. Rule: when one gate wraps another that's noisy-on-baseline, ratchet its quantitative output and hard-fail on unparseable error; never reduce a wrapped failure to a tolerable constant.
+
+### [Process] Worktree scenario/test agents can die silently at npm install — see `docs/life_lessons/process.md`
+- Fresh isolated worktrees are not self-contained CI. If an agent will run npm/Vitest/Vite/scenario tooling, use the main checkout or provision dependencies first; 0-byte output after the expected window is a failed dispatch.
+
+### [Process] Empty `.bin` shims require direct package entrypoints — see `docs/life_lessons/process.md`
+- Do not depend on `node_modules/.bin` shim luck in this Windows repo environment. Prefer checked-in npm scripts or direct package entrypoints such as `node node_modules/tsx/dist/cli.mjs` and `node node_modules/vitest/vitest.mjs run`.
+
+### [Process] Verify agent liveness before waiting on 0-byte output — see `docs/life_lessons/process.md`
+- Set an expected first-output window per agent type. If the expected log/artifact remains 0 bytes, re-dispatch or take over instead of treating silence as a long-running computation.
+
+### [Calibration] Byte-identical hash from a territory-moving hypothesis means INERT/NO-GO — see `docs/life_lessons/calibration.md`
+- If a calibration lever expected to move control returns the same final-state hash as the floor, stop and trace the code path. Do not interpret match percentages or spend another 188w slot on the same lever.
+
+### [Operations] `planning_duration` is inert for event-trigger-bound, staging-gated ops — see `docs/life_lessons/calibration.md`
+- Triggered operations launch from their event predicates and staging/assembly gates. To shift timing, inspect `turn_min`/trigger predicates and staging adjacency; do not expect `planning_duration` to move an event-owned op.
+
+### [Operations] One current objective per axis per turn creates a depth cap — see `docs/life_lessons/calibration.md`
+- `getCurrentLaunchObjectives()` advances each axis one objective per turn regardless of brigade count. Deep tails need parallel axes from a valid mid-chain adjacency, not more brigades on the same long axis.
 
 ## New Lessons (2026-05-26)
 
@@ -572,12 +590,12 @@
 
 | File | Topics | Lessons | Load when... |
 |------|--------|---------|-------------|
-| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 60 | Running calibration scenarios, tuning parameters, OOB changes |
+| [calibration.md](life_lessons/calibration.md) | Calibration, OOB, Bot AI | 64 | Running calibration scenarios, tuning parameters, OOB changes |
 | [combat.md](life_lessons/combat.md) | Combat, Brigade Distribution, March System | 6 | Combat resolution, brigade movement, march/distribution system |
 | [architecture.md](life_lessons/architecture.md) | Architecture, Engine, Scaling, Defaults, Data Integrity | 77 | Changing engine structure, state, pipeline, adding systems |
 | [data_pipeline.md](life_lessons/data_pipeline.md) | Data, Pipeline, Geometry | 13 | Modifying derived data, running data scripts, geometry work |
 | [ui_map.md](life_lessons/ui_map.md) | UI, GUI, MapLibre, Rendering, React | 14 | Frontend, map, tactical overlay, modal work |
-| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 76 | General development process (skim at session start) |
+| [process.md](life_lessons/process.md) | Process, Planning, QA, Quality, Night Shift, Debugging | 79 | General development process (skim at session start) |
 | [sectors.md](life_lessons/sectors.md) | Sectors, Design | 16 | Sector system, front lines, territory assignment, sub-segments |
 | [platform.md](life_lessons/platform.md) | Platform, Tooling | 7 | Build issues, platform-specific bugs, tooling |
 | [events.md](life_lessons/events.md) | Events | 2 | Event system, flag gates, triggers |

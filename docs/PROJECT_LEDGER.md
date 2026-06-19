@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] docs/canon: packet Vitezovi OOB identity decision and sync Srebrenica comment
+
+**Type:** Documentation/canon hygiene and source-comment correction.
+
+**Fix:** Removed the remaining active source comment that still framed Srebrenica/Zepa fall safety as being driven by scripted events plus Krivaja-95/Stupcanica-95 triggered operations. The comment now matches the accepted event-owned model: `srebrenica_falls_1995` / `zepa_falls_1995` own the fall receipts, while Krivaja/Stupcanica remain chronology/AAR context. Added `docs/40_reports/proposals/20260619_VITEZOVI_IDENTITY_MODELING_DECISION.md` to capture the historically conflated `hrhb_vitezovi_brigade_vitez` row and its three decision paths before any OOB mutation.
+
+**Verification:** `npx.cmd vitest run tests/contain_posture_release_laneV.test.ts` passed 12/12. `git diff --check` passed. Grep over `src`/`tests` found no remaining live-code claim that Krivaja/Stupcanica deliver the Srebrenica/Zepa falls. A first attempt with `npm.cmd test -- tests/contain_posture_release_laneV.test.ts` failed before running tests because the repo wrapper rejects direct file arguments.
+
+**Scope/determinism:** Source comment and docs/proposal only; no runtime behavior, simulation logic, scenario data, OOB data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
 ## [2026-06-19] test(ui): sync BCS campaign-week toolbar expectation
 
 **Type:** CI follow-up and UI copy test-contract sync.
@@ -20,6 +32,18 @@
 **Verification:** Focused shell/lens pack passed 3 files / 20 tests.
 
 **Scope/determinism:** Test/docs only; no runtime behavior, simulation logic, scenario data, save schema, serialization, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
+
+---
+
+## [2026-06-19] docs(process): salvage current life lessons from PR #417
+
+**Type:** Process/calibration documentation salvage from stale draft PR.
+
+**Fix:** Ported the durable missing June 11 lessons from draft/conflicting PR #417 onto current `main` without merging the PR or carrying stale count edits. `docs/life_lessons/process.md` now records the worktree npm-install death mode, direct package entrypoint rule for empty `.bin` shims, and 0-byte agent liveness check. `docs/life_lessons/calibration.md` now records byte-identical inert-lever rejection, event-trigger-bound `planning_duration` inertness, and the one-objective-per-axis depth cap. The life-lessons index counts were updated by mechanical topic-heading readback.
+
+**Verification:** Docs-only readback/grep and `git diff --check` passed in the salvage worker; integrated branch verification reran before merge. No stale PR #417 branch state was merged.
+
+**Scope/determinism:** Docs only; no FORAWWV, command-board behavior, code, canon, simulation behavior, scenario data, save schema, generated artifacts, calibration floor, golden baselines, randomness, timestamps, persisted output ordering, or packaged installer artifact changed.
 
 ---
 

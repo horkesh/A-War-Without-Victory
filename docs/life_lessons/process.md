@@ -403,6 +403,21 @@
 - **Right approach**: Create a file ownership table before dispatch. No two agents touch the same file. Each agent runs tsc after edits.
 - **Do instead**: Before parallel dispatch: (1) list all files, (2) assign each to exactly one agent, (3) verify no overlaps, (4) add "run tsc after edits" to every prompt.
 
+### [Process] Worktree-isolated scenario/test agents can die silently at npm install (2026-06-11)
+- **Context**: PR #417 recorded three scenario/audit agents dispatched into fresh isolated worktrees that died during `npm install`/Puppeteer setup with 0 output bytes and no useful error trail. The durable failure mode is not "worktrees are bad"; it is that fresh worktrees are not self-contained CI environments.
+- **Right approach**: Run scenario, test, and build agents in the main checkout when they need the existing dependency tree. Use isolated worktrees for code generation or pure artifact-reading/docs analysis, and junction/copy dependencies deliberately before expecting a worktree to run npm.
+- **Do instead**: Before dispatching any agent that will run `npm`, `npx`, Vite, Vitest, or scenario tooling, check whether it is in a fresh worktree. If yes, either redirect to the main checkout or provision dependencies first. Treat "0 bytes written after the expected window" as a failed dispatch, not a long-running job.
+
+### [Process] Empty `.bin` shims require direct package entrypoints (2026-06-11)
+- **Context**: PR #417 captured a Windows environment where `node_modules/.bin/tsx`, `node_modules/.bin/vitest`, and adjacent shims were empty or unreliable. Later root-script fixes confirmed the same class: a bare shim can disappear or resolve incorrectly even when the package itself is installed.
+- **Right approach**: Prefer checked-in `npm run ...` scripts when they are known to call a stable entrypoint. For ad hoc commands, invoke package entrypoints directly, e.g. `node node_modules/tsx/dist/cli.mjs <script>` or `node node_modules/vitest/vitest.mjs run ...`.
+- **Do instead**: Do not write agent prompts or local docs that depend on `.bin` shim luck. If a command must bypass npm scripts, use the package's real JS entrypoint and record the exact command in the prompt.
+
+### [Process] Verify agent liveness before waiting on 0-byte output (2026-06-11)
+- **Context**: PR #417 recorded an orchestrator waiting across turns for a dispatched audit agent that had already died: the worktree existed, but the expected output artifact stayed at 0 bytes. This repeated the broader "agent success claims are not proof" pattern with a time/liveness dimension.
+- **Right approach**: Set an expected first-output window for each agent class and check the artifact, log, or transcript size at that point. Scenario runs may be long, but analysis/docs agents should produce nonzero output quickly.
+- **Do instead**: If an agent's expected artifact is still 0 bytes after the expected window, stop waiting and re-dispatch or take over. Prefer a main-checkout, artifact-reading analyst for run-output interpretation so recovery does not repeat the same npm/worktree failure.
+
 ### [Process] Worktree builders stall mid-investigation — build small precise specs directly; salvage stalls via patch-extraction (2026-06-12) — NEW
 - **Context**: 4–5 dispatched worktree builders stalled mid-task in one day (EH-4 Fix B, C3 freeze, SRK fix builders). Two modes: auto-removed-unchanged (stalled during reading → no commit → nothing to salvage) and dirty-uncommitted (edited but stalled before `git commit` → work is in the worktree, salvageable).
 - **Right approach**: For a SMALL, precisely-specified change (≤ ~15 LOC + 1 test, with the full diff/spec already in hand), the orchestrator builds it DIRECTLY — dispatch overhead + stall risk exceeds the value of implementer/reviewer separation (CI + Codex are the reviewers). When a builder stalls dirty, salvage via patch-extraction: `git -C <worktree> diff > /tmp/x.patch`, then `git checkout -b fix/... && git apply /tmp/x.patch` in the MAIN checkout — never run git ops inside the worktree.

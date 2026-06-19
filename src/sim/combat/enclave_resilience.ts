@@ -715,11 +715,11 @@ export function isEnclaveContainmentReleased(
  * (commander/plan.ts) drops these OSIDs from organic opportunity candidates.
  *
  * §6 SAFETY: because the release fires at the latest by t160 (the event-window
- * floor) and the historical fall is driven at t160–190 by the scripted events
- * AND the Krivaja-95/Stupčanica-95 triggered ops (which inject objectives
- * directly, bypassing organic targeting entirely), this set is EMPTY for the
- * eastern enclaves throughout the fall window — the historical fall and the
- * `srebrenica_genocide_1995` rupture proceed exactly as without the posture.
+ * floor) and the historical fall is owned by the `srebrenica_falls_1995` /
+ * `zepa_falls_1995` event receipts, this set is EMPTY for the eastern enclaves
+ * throughout the fall window. Krivaja-95/Stupčanica-95 triggered operations are
+ * chronology/AAR context only and must not become fallback fall-delivery
+ * mechanics if the event receipt path misses.
  *
  * Deterministic: sorted iteration (enclave id, then OSID); set membership only.
  *
