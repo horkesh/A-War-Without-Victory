@@ -5,6 +5,7 @@ import {
     type CodexRenderContext,
     type EssayEntry,
 } from '../../src/ui/map/components/codex/codexEssayResolver.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 function context(overrides: Partial<CodexRenderContext> = {}): CodexRenderContext {
     return {
@@ -545,9 +546,11 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
             'Human cost record: The ledger records 46,000 military killed and 38,000 civilian killed.',
             'Srebrenica genocide [VRS]: The ledger records the Srebrenica genocide.',
             'HRHB war-crimes record [HVO]: HRHB capital records contain 4 war-crime events.',
-            'Early negotiated settlement: The ledger records acceptance of peace plan vance_owen at week 50.',
+            `Early negotiated settlement: The ledger records acceptance of Vance-Owen Peace Plan on ${turnToDateString(50)}.`,
             'Sources: ICJ Bosnia v. Serbia (2007); ICTY Krstic IT-98-33-T; RDC Sarajevo, Bosnian Book of the Dead (2007); Sensitive History Design Gate §4; Victory Conditions and Pyrrhic Scoring section 1',
         ]);
+        expect(dynamic.join('\n')).not.toContain('peace plan vance_owen');
+        expect(dynamic.join('\n')).not.toContain('week 50');
     });
 
     it('renders category-filtered Cost Ledger finding tokens', () => {
@@ -594,8 +597,10 @@ describe('codexEssayResolver — cost-ledger finding atoms and tokens', () => {
 
         const dynamic = resolved.paragraphs.filter(p => p.kind === 'dynamic').map(p => p.text);
         expect(dynamic).toEqual([
-            'Early negotiated settlement: The ledger records acceptance of peace plan vance_owen at week 50.',
+            `Early negotiated settlement: The ledger records acceptance of Vance-Owen Peace Plan on ${turnToDateString(50)}.`,
         ]);
+        expect(dynamic.join('\n')).not.toContain('peace plan vance_owen');
+        expect(dynamic.join('\n')).not.toContain('week 50');
     });
 
     it('renders faction-filtered war-crimes Cost Ledger finding tokens', () => {

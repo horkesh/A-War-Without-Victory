@@ -16,6 +16,7 @@ import type {
     OperationOpportunityState,
 } from '../combat/operation_opportunities.js';
 import { computeFactionVerdict } from '../negotiation/scoring.js';
+import { getPeacePlanById } from '../negotiation/peace_plan_data.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const CANONICAL_FACTIONS: readonly string[] = ['HRHB', 'RBiH', 'RS'] as const;
@@ -281,6 +282,46 @@ function plural(value: number, singular: string, pluralForm = `${singular}s`): s
     return value === 1 ? singular : pluralForm;
 }
 
+const COST_LEDGER_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
+const COMMON_YEAR_MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
+
+function isLeapYear(year: number): boolean {
+    return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+}
+
+function daysInMonth(year: number, monthIndex: number): number {
+    if (monthIndex === 1 && isLeapYear(year)) return 29;
+    return COMMON_YEAR_MONTH_DAYS[monthIndex] ?? 31;
+}
+
+function formatCostLedgerTurnDate(turn: number): string {
+    let remainingDays = Math.trunc(Math.max(0, turn)) * 7;
+    let year = 1992;
+    let monthIndex = 3;
+    let day = 6;
+
+    while (remainingDays > 0) {
+        const remainingInMonth = daysInMonth(year, monthIndex) - day;
+        if (remainingDays <= remainingInMonth) {
+            day += remainingDays;
+            break;
+        }
+        remainingDays -= remainingInMonth + 1;
+        day = 1;
+        monthIndex += 1;
+        if (monthIndex >= 12) {
+            monthIndex = 0;
+            year += 1;
+        }
+    }
+
+    return `${day} ${COST_LEDGER_MONTHS[monthIndex]} ${year}`;
+}
+
+function formatPeacePlanLabel(planId: string): string {
+    return getPeacePlanById(planId)?.name ?? 'a negotiated peace plan';
+}
+
 function buildProsecutorialFindings(
     entries: readonly CostLedgerEntry[],
     ruptures: readonly { id: string; perpetrator_faction: string; description: string }[],
@@ -314,7 +355,7 @@ function buildProsecutorialFindings(
             severity: 'record',
             title: 'Early negotiated settlement',
             text:
-                `The ledger records acceptance of peace plan ${earlyPeaceId} at week ${state.meta?.turn ?? 0}. ` +
+                `The ledger records acceptance of ${formatPeacePlanLabel(earlyPeaceId)} on ${formatCostLedgerTurnDate(state.meta?.turn ?? 0)}. ` +
                 'This is a termination fact, not proof that political or civilian costs vanished.',
             sources: [COST_LEDGER_SOURCES.victoryScoring, COST_LEDGER_SOURCES.sensitiveHistoryGate],
         });

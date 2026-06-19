@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COST LEDGER EARLY-PEACE COPY (2026-06-19).** Cost Ledger findings feed Codex/player verdict prose, so raw peace-plan ids and raw week labels are not acceptable there. Do instead: resolve `early_peace_implemented` through the peace-plan catalog, render acceptance timing as a calendar date, and sanitize legacy `peace plan <id> at week N` text at the Codex display boundary.
+
 **CHRONICLE CHAPTER COPY (2026-06-19).** Chronicle chapter mode is player narrative/AAR copy, not a diagnostic index. Do instead: render chapter ranges and entry timing with `turnToDateString(...)`, map boundary kinds and doctrine stances to authored labels, and keep raw turn ranges / `Turn N` / underscore enums out of normal chapter cards.
 
 **CODEX TIMING COPY (2026-06-19).** Normal Codex copy should not expose raw week labels. Do instead: render unlock hints, Dilemma Spine decision timing, and Distance from History rows with `turnToDateString(...)`; keep raw event/source/family metadata only behind explicit diagnostic mode.

@@ -22,9 +22,11 @@
 
 import { describe, it, expect } from 'vitest';
 import { resolvePeacePlan } from '../src/sim/negotiation/peace_plans.js';
+import { getPeacePlanById } from '../src/sim/negotiation/peace_plan_data.js';
 import { buildCostLedger } from '../src/sim/endgame/cost_ledger.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type { GameState } from '../src/state/game_state.js';
+import { turnToDateString } from '../src/ui/map/utils/formatters.js';
 
 function emptyCapital() {
     return {
@@ -123,8 +125,10 @@ describe('LANE-D1 war_ended_early producer', () => {
         expect(finding).toBeTruthy();
         expect(finding?.category).toBe('duration');
         expect(finding?.severity).toBe('record');
-        expect(finding?.text).toContain('vance_owen');
-        expect(finding?.text).toContain('week 50');
+        expect(finding?.text).toContain(getPeacePlanById(planId)?.name);
+        expect(finding?.text).toContain(turnToDateString(50));
+        expect(finding?.text).not.toContain(planId);
+        expect(finding?.text).not.toContain('week 50');
         expect(finding?.text).toContain('not proof that political or civilian costs vanished');
     });
 

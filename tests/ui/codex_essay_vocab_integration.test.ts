@@ -15,6 +15,7 @@ import {
     type CodexRenderContext,
     type EssayEntry,
 } from '../../src/ui/map/components/codex/codexEssayResolver.js';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
 interface EssayIndex {
     essays: EssayEntry[];
@@ -648,7 +649,7 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
                 category: 'duration',
                 severity: 'record',
                 title: 'Early negotiated settlement',
-                text: 'The ledger records acceptance of peace plan vance_owen at week 50.',
+                text: `The ledger records acceptance of Vance-Owen Peace Plan on ${turnToDateString(50)}.`,
                 sources: ['Victory Conditions and Pyrrhic Scoring section 1'],
             },
         ],
@@ -712,7 +713,10 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         };
         const resolved = resolveCodexEssay(vanceOwenEssay, ctx);
         const dyn = resolved.paragraphs.filter(p => p.kind === 'dynamic' && p.variant === 'divergence');
-        expect(dyn.some(p => p.text.includes('Early negotiated settlement: The ledger records acceptance of peace plan vance_owen at week 50.'))).toBe(true);
+        const text = dyn.map(p => p.text).join('\n');
+        expect(text).toContain(`Early negotiated settlement: The ledger records acceptance of Vance-Owen Peace Plan on ${turnToDateString(50)}.`);
+        expect(text).not.toContain('peace plan vance_owen');
+        expect(text).not.toContain('week 50');
     });
 });
 
@@ -860,7 +864,7 @@ describe('v0.9.1 vocab - diplomatic and siege continuity breadth wave', () => {
                 category: 'duration',
                 severity: 'record',
                 title: 'Early negotiated settlement',
-                text: 'The ledger records acceptance of peace plan owen_stoltenberg at week 72.',
+                text: `The ledger records acceptance of Owen-Stoltenberg Plan on ${turnToDateString(72)}.`,
                 sources: ['Victory Conditions and Pyrrhic Scoring section 1'],
             },
         ],

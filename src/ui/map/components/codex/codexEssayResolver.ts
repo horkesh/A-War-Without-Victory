@@ -1,5 +1,6 @@
 import type { ComparisonResult } from '../../../../sim/endgame/endgame_comparison.js';
 import type { CostLedger, CostLedgerAnnotation, CostLedgerFinding } from '../../../../sim/endgame/cost_ledger.js';
+import { getPeacePlanById } from '../../../../sim/negotiation/peace_plan_data.js';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import type { Locale } from '../../i18n';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
@@ -507,10 +508,24 @@ function humanizeDynamicIdentifier(value: string | undefined): string {
         .join(' ');
 }
 
+function formatPeacePlanLabel(planId: string): string {
+    return getPeacePlanById(planId)?.name ?? 'a negotiated peace plan';
+}
+
+function sanitizeCostFindingText(text: string): string {
+    return text
+        .replace(
+            /\bpeace plan\s+([a-z0-9_:-]+)\s+at\s+week\s+(\d+)\b/gi,
+            (_match, planId, turn) => `${formatPeacePlanLabel(String(planId))} on ${turnToDateString(Number(turn))}`,
+        )
+        .replace(/\bweek\s+(\d+)\b/gi, (_match, turn) => turnToDateString(Number(turn)))
+        .replace(/\bW(\d+)\b/g, (_match, turn) => turnToDateString(Number(turn)));
+}
+
 function formatCostFinding(finding: CostLedgerFinding): string {
     const factionLabel = formatCostLedgerFaction(finding.faction);
     const faction = factionLabel ? ` [${factionLabel}]` : '';
-    return `${finding.title}${faction}: ${finding.text}`;
+    return `${finding.title}${faction}: ${sanitizeCostFindingText(finding.text)}`;
 }
 
 function formatCostAnnotation(annotation: CostLedgerAnnotation): string {

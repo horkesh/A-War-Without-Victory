@@ -3111,3 +3111,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-19 - Chronicle chapter calendar boundary
 
 **Chronicle chapter mode is player narrative copy, not a turn/debug index:** chapter headers and entry metadata must render calendar dates and authored labels, not raw turn ranges, `Turn {n}` rows, boundary-kind enums, or doctrine stance ids. Durable rule: new Chronicle chapter grouping or fallback copy should go through `formatChronicleChapterDateRange(...)`, `formatChronicleBoundaryKind(...)`, and type/stance label helpers before display; raw identifiers belong only in explicit diagnostics. Applied in `[2026-06-19] fix(ui): render Chronicle chapter metadata as dates and labels`; report `docs/40_reports/implemented/20260619_CHRONICLE_CHAPTER_CALENDAR_COPY.md`.
+
+## 2026-06-19 - Cost Ledger early-peace copy boundary
+
+**Cost Ledger findings are verdict/Codex prose, not audit ids:** accepted early-peace findings may be serialized in endgame/codex packets, so they must resolve peace-plan ids to plan names and render acceptance timing as dates before display. Durable rule: `early_peace_implemented` can remain an internal flag id, but `costLedger.findings[].text` and Codex tokens must not expose `peace plan <id> at week N`; sanitize legacy text at the display boundary when reading older packets. Applied in `[2026-06-19] fix(ui): clean Cost Ledger early-peace finding copy`; report `docs/40_reports/implemented/20260619_COST_LEDGER_EARLY_PEACE_COPY.md`.

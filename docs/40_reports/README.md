@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Cost Ledger early-peace copy** | [implemented/20260619_COST_LEDGER_EARLY_PEACE_COPY.md](implemented/20260619_COST_LEDGER_EARLY_PEACE_COPY.md) - Accepted early-peace Cost Ledger findings and Codex dynamic essays now render peace-plan names and calendar dates instead of raw plan ids and `week` labels. |
 | **Latest Chronicle chapter calendar copy** | [implemented/20260619_CHRONICLE_CHAPTER_CALENDAR_COPY.md](implemented/20260619_CHRONICLE_CHAPTER_CALENDAR_COPY.md) - Chronicle chapter mode now renders chapter ranges, entry timing, boundary labels, and doctrine fallback titles as player-facing calendar/copy instead of raw turns or underscore-derived enums. |
 | **Latest Codex dynamic essay calendar copy** | [implemented/20260619_CODEX_DYNAMIC_ESSAY_CALENDAR_COPY.md](implemented/20260619_CODEX_DYNAMIC_ESSAY_CALENDAR_COPY.md) - Dynamic Codex essay tokens now render milestone and Cost Ledger timing as calendar dates with player-facing status/delta labels instead of raw `W` week/status copy. |
 | **Latest same-axis concentration NO-GO** | [implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md](implemented/20260619_SAME_AXIS_CONCENTRATION_NO_GO.md) - Same-axis concentration helper behavior is pinned by tests, but the blanket attack-eligibility arithmetic fix is rejected after a 188w engine-health floor failure (`matched_osids` 637/712 vs 658). |
