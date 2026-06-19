@@ -52,6 +52,7 @@ export function SidePickerOverlay({
             <button
               key={faction}
               type="button"
+              data-testid={`side-picker-faction-${faction}`}
               disabled={starting}
               onClick={() => onSelectFaction(faction)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-primary disabled:opacity-50 group transition-all"

@@ -191,6 +191,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
   return (
     <div
+      data-testid="formation-detail-panel"
       className={`panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden ${prestigeRingClass}`}
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
@@ -224,7 +225,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         </div>
       </div>
 
-      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} />
+      <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} idPrefix="formation-detail" />
 
       <div className="p-3 flex-1 space-y-2.5 overflow-auto min-h-0 min-w-0 relative">
         {/* Faction crest watermark */}
@@ -585,9 +586,15 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {formation.location_osid && (
               <div className="text-xs min-w-0">
                 <span className="text-text-secondary">{t('formationDetail.location')} </span>
-                <span className="text-text-primary break-all">
+                <button
+                  type="button"
+                  data-testid="formation-location-link"
+                  data-osid={formation.location_osid}
+                  onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: formation.location_osid! })}
+                  className="text-left text-text-primary break-all underline decoration-dotted underline-offset-2 hover:text-interactive"
+                >
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}
-                </span>
+                </button>
               </div>
             )}
 

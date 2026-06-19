@@ -293,6 +293,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                     <button
                         type="button"
                         onClick={onClose}
+                        data-testid="codex-close"
                         className="text-neutral-500 hover:text-neutral-300 transition-colors text-[11px] px-2 py-0.5"
                     >
                         ESC

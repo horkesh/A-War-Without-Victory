@@ -198,11 +198,14 @@ The opportunity layer therefore does not change painted-target tooling; it chang
 
 This section governs how the opportunity layer interacts with `SENSITIVE_HISTORY_DESIGN_GATE.md`. Nothing here re-opens or weakens that gate; it only specifies the opportunity-layer carve-out.
 
+**Supersession 2026-06-19:** The 2026-06-18 owner directive supersedes any reading of this section that treats Krivaja-95 or Stupcanica-95 as the fall-delivery path for Srebrenica or Zepa. The canonical fall/control receipts are `srebrenica_falls_1995` and `zepa_falls_1995` in the sensitive-history event system. Krivaja/Stupcanica opportunity or AAR content may exist only as chronology, military-context, or post-receipt operational context unless a future Section 6-reviewed design explicitly changes that boundary.
+
 ### 9.1 What is allowed (Ring 1 territorial)
 
 - Krivaja-95 and Stupčanica-95 may exist as T4 opportunity proposals targeting the canonical Srebrenica / Žepa enclave OSIDs.
 - Goražde pressure (Zvezda 94) may exist as a defensive-crisis (T3) opportunity for VRS, with the corresponding RBiH counter / NATO-ultimatum response surfaced through the existing event system.
 - Approving such an opportunity authorizes the **military territorial operation** — capture or attempted capture of OSIDs, brigade staging, attack resolution. This is exactly what the existing `enclave_resilience.ts` and combat systems already model.
+- Current Srebrenica/Zepa carve-out: approval of a Krivaja/Stupcanica-context opportunity must not suppress, replace, or create the sensitive-history fall receipt. Those fall receipts remain event-owned, and any operation-context row must be gated behind the matching `*_falls_1995` receipt unless a future Section 6-reviewed design explicitly changes the boundary.
 
 ### 9.2 What is refused (Ring 3)
 

@@ -533,6 +533,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
+                          data-testid="corps-front-brigade-row"
+                          data-formation-id={f.id}
+                          data-location-osid={f.location_osid ?? undefined}
                           aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({
@@ -570,6 +573,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
+                          data-testid="corps-front-brigade-row"
+                          data-formation-id={f.id}
+                          data-location-osid={f.location_osid ?? undefined}
                           aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => useGameStore.setState({

@@ -88,6 +88,7 @@ export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }:
           type="button"
           onClick={onClose}
           aria-label="Close command surface"
+          data-testid="command-card-strip-close"
           className="shrink-0 rounded border border-panel-border bg-black/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           Close

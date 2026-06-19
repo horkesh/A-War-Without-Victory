@@ -340,6 +340,181 @@ async function clickSelectorIfVisible(page, selector) {
   }, selector);
 }
 
+async function waitForVisibleSelector(page, selector, timeout = 30000) {
+  await page.waitForFunction(
+    (targetSelector) => {
+      const target = document.querySelector(targetSelector);
+      if (!(target instanceof HTMLElement)) return false;
+      const rect = target.getBoundingClientRect();
+      const style = window.getComputedStyle(target);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    },
+    { timeout },
+    selector,
+  );
+}
+
+async function clickVisibleSelector(page, selector, timeout = 30000) {
+  await waitForVisibleSelector(page, selector, timeout);
+  await page.click(selector);
+}
+
+async function activateVisibleControl(page, selector, timeout = 30000) {
+  await waitForVisibleSelector(page, selector, timeout);
+  const activated = await page.evaluate((targetSelector) => {
+    const target = document.querySelector(targetSelector);
+    if (!(target instanceof HTMLElement)) return false;
+    if (target instanceof HTMLButtonElement && target.disabled) return false;
+    target.scrollIntoView({ block: 'center', inline: 'nearest' });
+    target.click();
+    return true;
+  }, selector);
+  if (!activated) throw new Error(`Visible control could not be activated: ${selector}`);
+}
+
+async function clickFirstVisibleSelector(page, selector, description = selector) {
+  await page.waitForFunction(
+    (targetSelector) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      return Array.from(document.querySelectorAll(targetSelector)).some(isVisible);
+    },
+    { timeout: 30000 },
+    selector,
+  );
+  const clicked = await page.evaluate((targetSelector) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
+    if (!(target instanceof HTMLElement)) return false;
+    target.click();
+    return true;
+  }, selector);
+  if (!clicked) throw new Error(`No visible ${description} matched selector "${selector}"`);
+}
+
+async function visibleSelectorCount(page, selector) {
+  return page.evaluate((targetSelector) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    return Array.from(document.querySelectorAll(targetSelector)).filter(isVisible).length;
+  }, selector);
+}
+
+async function clickVisibleSelectorAt(page, selector, index, description = selector) {
+  const clicked = await page.evaluate((targetSelector, targetIndex) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).filter(isVisible)[targetIndex];
+    if (!(target instanceof HTMLElement)) return false;
+    target.click();
+    return true;
+  }, selector, index);
+  if (!clicked) throw new Error(`No visible ${description} matched selector "${selector}" at index ${index}`);
+}
+
+async function ensureExpanded(page, selector) {
+  await waitForVisibleSelector(page, selector);
+  const expanded = await page.$eval(selector, (el) => el.getAttribute('aria-expanded') === 'true');
+  if (!expanded) await activateVisibleControl(page, selector);
+  await page.waitForFunction(
+    (targetSelector) => document.querySelector(targetSelector)?.getAttribute('aria-expanded') === 'true',
+    { timeout: 15000 },
+    selector,
+  );
+}
+
+async function clickFirstSectorWithVisibleFormation(page, summary) {
+  const sectorSelector = '[data-testid="oob-sector-row"][data-sector-id]';
+  await page.waitForFunction(
+    (targetSelector) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      return Array.from(document.querySelectorAll(targetSelector)).some(isVisible);
+    },
+    { timeout: 30000 },
+    sectorSelector,
+  );
+
+  const sectorCount = await visibleSelectorCount(page, sectorSelector);
+  for (let index = 0; index < sectorCount; index += 1) {
+    await clickVisibleSelectorAt(page, sectorSelector, index, 'OOB sector button');
+    const selected = await page.waitForFunction(
+      (targetSelector, targetIndex) => {
+        const isVisible = (el) => {
+          if (!(el instanceof HTMLElement)) return false;
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return rect.width > 0
+            && rect.height > 0
+            && style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number(style.opacity || '1') > 0;
+        };
+        const target = Array.from(document.querySelectorAll(targetSelector)).filter(isVisible)[targetIndex];
+        return target instanceof HTMLElement && target.getAttribute('data-selected') === 'true';
+      },
+      { timeout: 5000 },
+      sectorSelector,
+      index,
+    ).then(() => true, () => false);
+    if (!selected) continue;
+    await waitForVisibleSelector(page, '#sector-intel-tab-overview');
+    await activateVisibleControl(page, '#sector-intel-tab-forces');
+    await waitForVisibleSelector(page, '#sector-intel-panel-forces');
+    if (await visibleSelectorCount(page, '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]') > 0) {
+      summary.evidence.ownerJourneySectorIndex = index;
+      return;
+    }
+  }
+
+  throw new Error(`No visible Corps Front brigade rows with settlement locations found after inspecting ${sectorCount} OOB sectors`);
+}
+
 async function closePauseMenuIfPresent(page) {
   const text = await visibleText(page);
   if (!/\bPAUSED\b/i.test(text)) return;
@@ -391,10 +566,49 @@ async function resetToWarMap(page) {
   await page.keyboard.press('Escape');
   await delay(250);
   await closePauseMenuIfPresent(page);
+  await clickSelectorIfVisible(page, '[data-testid="warroom-decision-room-close"]');
+  await clickSelectorIfVisible(page, '[data-testid="command-card-strip-close"]');
+  await clickSelectorIfVisible(page, '[data-testid="codex-close"]');
   await clickSelectorIfVisible(page, '[data-testid="desk-close-overlay"]');
-  await clickFirstMatchingText(page, ['FIELD', 'War Map']).catch(() => {});
+  await activateVisibleControl(page, '[data-testid="toolbar-route-war-map"]').catch(() => {
+    return clickFirstMatchingText(page, ['FIELD', 'War Map']).catch(() => {});
+  });
   await closePauseMenuIfPresent(page);
   await waitForTacticalMap(page);
+  await page.waitForFunction(() => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const textOf = (el) => (el?.textContent ?? '').replace(/\s+/g, ' ').trim();
+    const hasVisibleText = (selector, pattern) => Array.from(document.querySelectorAll(selector))
+      .some((el) => isVisible(el) && pattern.test(textOf(el)));
+    const visibleDialogs = Array.from(document.querySelectorAll('[role="dialog"], [aria-modal="true"]'))
+      .filter(isVisible)
+      .map((el) => ({
+        label: [
+          el.getAttribute('aria-label'),
+          el.getAttribute('aria-labelledby')
+            ? document.getElementById(el.getAttribute('aria-labelledby'))?.textContent
+            : '',
+        ].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim(),
+        text: textOf(el),
+      }));
+    const desk = isVisible(document.querySelector('[data-testid="desk-close-overlay"]'))
+      || hasVisibleText('section[aria-label], aside, h2', /President's Desk|Strategic Situation/);
+    const armyHqDialog = visibleDialogs.find((dialog) => /Army HQ|Army Headquarters/i.test(dialog.label));
+    const chronicle = hasVisibleText('h1', /^War Chronicle$/i);
+    const codex = isVisible(document.querySelector('[data-testid="codex-panel"]'));
+    const commandStrip = isVisible(document.querySelector('[data-testid="command-card-strip"]'));
+    const decisionRoom = isVisible(document.querySelector('[data-testid="warroom-decision-room-host"]'));
+    return !desk && !armyHqDialog && !chronicle && !codex && !commandStrip && !decisionRoom;
+  }, { timeout: 15000 });
 }
 
 async function captureEvidence(page, summary, id) {
@@ -554,6 +768,63 @@ async function runSurfaceSweep(page, summary) {
   }
 }
 
+async function runOwnerJourneyDrilldown(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
+  await clickVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
+  await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
+  await clickVisibleSelector(page, '[data-testid="command-card-cat_war_direction"]');
+  await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
+  await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await captureEvidence(page, summary, 'owner_journey_decision_room');
+
+  await resetToWarMap(page);
+  await waitForVisibleSelector(page, 'main[aria-label^="Tactical map"]');
+  await ensureExpanded(page, '[data-testid="oob-section-sectors-toggle"]');
+  await clickFirstSectorWithVisibleFormation(page, summary);
+  await waitForVisibleSelector(page, '#sector-intel-tab-overview');
+  await activateVisibleControl(page, '#sector-intel-tab-overview');
+  await waitForVisibleSelector(page, '#sector-intel-panel-overview');
+  await captureEvidence(page, summary, 'owner_journey_sector_overview');
+
+  await activateVisibleControl(page, '#sector-intel-tab-logistics');
+  await waitForVisibleSelector(page, '#sector-intel-panel-logistics');
+  await activateVisibleControl(page, '#sector-intel-tab-ops');
+  await waitForVisibleSelector(page, '#sector-intel-panel-ops');
+  await activateVisibleControl(page, '#sector-intel-tab-forces');
+  await waitForVisibleSelector(page, '#sector-intel-panel-forces');
+  await clickFirstVisibleSelector(page, '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]', 'Corps Front brigade row with a settlement location');
+  await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
+  await activateVisibleControl(page, '#formation-detail-tab-record');
+  await waitForVisibleSelector(page, '#formation-detail-tab-record[aria-selected="true"]');
+  await activateVisibleControl(page, '#formation-detail-tab-orders');
+  await waitForVisibleSelector(page, '#formation-detail-tab-orders[aria-selected="true"]');
+  await captureEvidence(page, summary, 'owner_journey_formation_detail');
+
+  await activateVisibleControl(page, '#formation-detail-tab-overview');
+  await waitForVisibleSelector(page, '#formation-detail-tab-overview[aria-selected="true"]');
+  await waitForVisibleSelector(page, '[data-testid="formation-location-link"][data-osid]');
+  await activateVisibleControl(page, '[data-testid="formation-location-link"][data-osid]');
+  await waitForVisibleSelector(page, '#settlement-tab-overview');
+  await activateVisibleControl(page, '#settlement-tab-municipality');
+  await activateVisibleControl(page, '#settlement-tab-timeline');
+  await captureEvidence(page, summary, 'owner_journey_settlement_detail');
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
+  await waitForVisibleSelector(page, '#army-hq-tab-records');
+  for (const subTab of ['aftermath', 'aar', 'ops', 'decisions', 'opportunities']) {
+    await activateVisibleControl(page, `[data-testid="records-subtab-${subTab}"]`);
+    await waitForVisibleSelector(page, `[data-testid="records-subtab-${subTab}"][data-selected="true"]`);
+  }
+  await captureEvidence(page, summary, 'owner_journey_records_tabs');
+
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Owner Journey Drilldown', text);
+  summary.evidence.ownerJourneyDrilldown = true;
+}
+
 async function run() {
   ensureDir(OUT_DIR);
   ensureDir(SCREENSHOT_DIR);
@@ -566,6 +837,7 @@ async function run() {
       surfaceSweep: {},
       armyHqReachable: false,
       recordsReachable: false,
+      ownerJourneyDrilldown: false,
       serverPortCleanupVerified: false,
     },
     consoleMessages: [],
@@ -605,6 +877,7 @@ async function run() {
 
       await runFoundationalFlow(page, summary);
       await runSurfaceSweep(page, summary);
+      await runOwnerJourneyDrilldown(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
     } finally {

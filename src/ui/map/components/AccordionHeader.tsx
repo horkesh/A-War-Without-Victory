@@ -4,6 +4,7 @@ export interface AccordionHeaderProps {
     count?: number;
     expanded: boolean;
     onToggle: () => void;
+    testId?: string;
 }
 
 export function AccordionHeader({
@@ -11,10 +12,13 @@ export function AccordionHeader({
     count,
     expanded,
     onToggle,
+    testId,
 }: AccordionHeaderProps) {
     return (
         <button
             type="button"
+            data-testid={testId}
+            aria-expanded={expanded}
             onClick={onToggle}
             className="w-full flex items-center justify-between px-2.5 py-1.5 bg-panel-card border-b border-panel-border text-left hover:bg-panel-hover transition-colors shrink-0"
         >

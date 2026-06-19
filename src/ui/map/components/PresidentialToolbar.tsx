@@ -327,6 +327,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenDesk}
                         disabled={modalLocked}
+                        data-testid="toolbar-route-desk"
                         className={`px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
                             showWarroomReturn
                                 ? 'text-amber-400 hover:text-amber-300'
@@ -340,6 +341,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenMap}
                         disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-war-map"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title="Clear field selections"
                     >
@@ -349,6 +351,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenHQ}
                         disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-army-hq"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.visitArmyHq')}
                     >
@@ -388,6 +391,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenRecords}
                         disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-records"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.openRecordsTitle')}
                     >
@@ -397,6 +401,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenChronicle}
                         disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-chronicle"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.chronicleTitle')}
                     >
@@ -406,6 +411,7 @@ export function PresidentialToolbar({
                         type="button"
                         onClick={handleOpenCodex}
                         disabled={shellRouteDisabled}
+                        data-testid="toolbar-route-codex"
                         data-coachmark-id="codex"
                         className="px-2 py-1 text-[9px] font-mono font-bold uppercase tracking-[0.15em] text-text-secondary hover:text-amber-400 transition-colors disabled:opacity-30"
                         title={t('presidentialToolbar.historicalReference')}

@@ -579,6 +579,7 @@ export function OOBSidebar() {
             count={totalSectors > 0 ? totalSectors : undefined}
             expanded={expandedSections.sectors}
             onToggle={() => toggleSection('sectors')}
+            testId="oob-section-sectors-toggle"
           />
           {expandedSections.sectors && (
             <div className="p-2.5 space-y-1.5 text-[11px]">
@@ -598,7 +599,9 @@ export function OOBSidebar() {
                           <button
                             key={sector.sector_id}
                             type="button"
+                            data-testid="oob-sector-row"
                             data-sector-id={sector.sector_id}
+                            data-selected={selectedCorpsFrontSectorId === sector.sector_id ? 'true' : 'false'}
                             onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
                             className={`w-full flex items-center gap-1.5 px-2 py-1 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
                               ? 'border-accent-gold bg-panel-active'

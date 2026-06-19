@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] test(ui): add owner-journey browser drilldown gate
+
+**Type:** UI/test-readiness and live browser QA gate.
+
+**Fix:** Expanded `qa:live-surface:browser` from top-level shell reachability into an owner-journey drilldown: Desk -> Command Surface -> Decision Room, OOB sector selection -> Corps Front sector tabs, brigade row -> Formation Detail tabs, formation location -> Settlement Detail tabs, and Records archive subtabs. Added stable selector hooks for toolbar routes, close controls, OOB sector rows, Corps Front brigade rows with settlement locations, Formation Detail/location, and Records subtabs. Updated the Command Board, Master Roadmap, and late-war opportunity design to record the closed tactical drilldown proof and keep inbox action routing plus browser CI wiring as active residuals. Also reinforced that Srebrenica/Zepa fall receipts are event-owned, not Krivaja/Stupcanica operation-delivery calibration targets.
+
+**Verification:** `npm.cmd run qa:live-surface:browser` passed with 16 screenshots, `ownerJourneyDrilldown: true`, `ownerJourneySectorIndex: 0`, and port 3239 cleanup verified. Focused UI contract pack passed 2 files / 11 tests. `npm.cmd run typecheck -- --pretty false` passed. `git diff --check` passed with only the existing CRLF normalization warning for `AccordionHeader.tsx`. Report: `docs/40_reports/implemented/20260619_OWNER_JOURNEY_BROWSER_GATE.md`.
+
+**Scope/determinism:** UI hooks, live browser QA tooling, focused static contract tests, and docs only; no simulation logic, scenario data, save schema, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-19] fix(ui): close raw-copy wave 2 timing and fallback leaks
 
 **Type:** UI/read-model player-copy polish.

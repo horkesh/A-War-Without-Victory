@@ -87,6 +87,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                         <button
                             key={faction}
                             type="button"
+                            data-testid={`main-menu-faction-${faction}`}
                             disabled={starting}
                             onClick={() => onNewGame(faction)}
                             className="min-h-[132px] rounded border border-[#c4a35a]/25 bg-[#15130f]/75 px-4 py-4 text-left transition-all hover:border-[#c4a35a]/55 hover:bg-[#201b13]/85 disabled:opacity-50"
