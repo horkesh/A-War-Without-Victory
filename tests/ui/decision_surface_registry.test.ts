@@ -70,6 +70,9 @@ describe('decision surface registry', () => {
   });
 
   it('routes operation opportunity action to the presidential Decision Room while keeping Army HQ as the source handoff', () => {
+    expect(PLAYER_DECISION_FAMILIES.find((family) => family.id === 'operation_opportunity')).toMatchObject({
+      ownerSurface: 'decision_room',
+    });
     expect(getDecisionSurface('operation_opportunity')).toMatchObject({
       ownerShell: 'desk',
       resolverSurface: 'operation_opportunity_dossier',

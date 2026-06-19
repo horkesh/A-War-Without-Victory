@@ -7,6 +7,7 @@ This directory contains the GitHub Actions workflow definitions for A War Withou
 | Workflow | File | Trigger | Purpose |
 |---|---|---|---|
 | Typecheck | `typecheck.yml` | PR to `main` | Fast standalone `tsc --noEmit` gate (cheap signal on PRs that touch types only). |
+| Full Suite + Structural Fingerprint | `full-suite-and-fingerprint.yml` | push to `main`, PR to `main` | Required full-suite gate: complete `test:vitest`, then `qa:first-hour:browser` and `qa:live-surface:browser` on relevant code-contract changes; separate structural fingerprint job compares the fresh 40w platform-stable fingerprint. |
 | Baseline Regression | `baseline-regression.yml` | push to `main`, PR to `main` | Multi-job broad gate: typecheck, focused scenario anchor tests, `test:vitest:fast` (137 fast suites, includes the event-system tests via auto-discovery), `test:vitest:scenario`. The `test`/`scenarios` heavy steps are path-filtered (CODE set) and `scenario-anchors`/`scenarios` (SIM set) via the always-report shim — see "Always-report path-filter shim" below. |
 | Desktop Release Guard | `desktop-release-guard.yml` | push to `main`, PR to `main` | Builds + smoke-tests the Linux AppImage and Windows NSIS desktop packages; uploads the artifacts on every run. The packaging/probe heavy steps are path-filtered (DESKTOP set) via the always-report shim — see below. |
 | Release | `release.yml` | (see file) | Tagged-release publication pipeline. |
@@ -37,6 +38,8 @@ for `pull_request` (not `pull_request_target`) workflows.
 | Job | Required? | `PATH_SET` | Heavy steps gated |
 |---|---|---|---|
 | `test` (Baseline Regression) | yes | `code` | `npm install` + `test:vitest:fast` |
+| `full-suite` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm install` + startup snapshot rebuild + `test:vitest` + `qa:first-hour:browser` + `qa:live-surface:browser` |
+| `structural-fingerprint` (Full Suite + Structural Fingerprint) | yes | full-suite set | `npm install` + startup snapshot rebuild + fresh 40w structural-fingerprint compare |
 | `scenario-anchors` (Baseline Regression) | yes | `sim` | `npm install` + `test:vitest:scenario:anchors` |
 | `scenarios` (Baseline Regression) | no | `sim` | `npm install` + `test:vitest:scenario` |
 | `desktop-release-check` (Desktop Release Guard) | no | `desktop` | Linux AppImage package + smoke |
@@ -45,6 +48,9 @@ for `pull_request` (not `pull_request_target`) workflows.
 `typecheck` is intentionally left ALWAYS-RUN (fast, broad type signal) and is the
 `needs:` parent that keeps the gated Baseline jobs reporting. `full-suite` and
 `structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.
+The browser gates are intentionally inside the already-required `full-suite` job so
+new first-hour or live-surface regressions block relevant PRs immediately instead of
+depending on a separate branch-protection update.
 
 Path sets (a changed file matching ANY entry => heavy steps run):
 

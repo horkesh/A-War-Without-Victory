@@ -119,7 +119,7 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         id: 'operation_opportunity',
         statePath: 'meta.pending_proposal_reviews + military.operation_opportunities',
         inboxType: 'operation_opportunity',
-        ownerSurface: 'army_hq_opportunity',
+        ownerSurface: 'decision_room',
         resolver: 'resolve-operation-opportunity',
         gatePolicy: 'advisory',
     },

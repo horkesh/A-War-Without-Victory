@@ -1387,14 +1387,6 @@ function App() {
       const eventId = itemId.startsWith('event:') ? itemId.slice('event:'.length) : itemId;
       setActiveEventDecisionId(eventId);
     }
-    if (action === 'army_hq_opportunity') {
-      openArmyHQTab(gs, 'briefing');
-      leaveWarroomForGame();
-    }
-    if (action === 'army_hq_briefing') {
-      openArmyHQTab(gs, 'briefing');
-      leaveWarroomForGame();
-    }
     if (action === 'decision_room') {
       if (itemId.startsWith('opportunity:')) {
         openWarroomDecisionRoomFromField('opportunity', itemId);
@@ -1980,7 +1972,7 @@ function App() {
                   Close
                 </button>
               </div>
-              <PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />
+              <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />
             </div>
           )}
           {warroomOverlaySurface && (

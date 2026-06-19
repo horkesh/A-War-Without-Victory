@@ -126,6 +126,19 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
     });
 
+    it('routes Warroom-hosted Decision Room non-local targets through the visible shell handoff path', () => {
+        const app = read('src/ui/map/App.tsx');
+        const hostStart = app.indexOf('{warroomDecisionRoomOpen && (');
+        const hostEnd = app.indexOf('\n        </div>', hostStart);
+
+        expect(hostStart).toBeGreaterThanOrEqual(0);
+        expect(hostEnd).toBeGreaterThan(hostStart);
+
+        const host = app.slice(hostStart, hostEnd);
+        expect(host).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
+        expect(host).not.toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
+    });
+
     it('keeps Desk-local Command Surface mutually exclusive with the Desk overlay', () => {
         const app = read('src/ui/map/App.tsx');
         const openCommandStripStart = app.indexOf('const openCommandStrip =');

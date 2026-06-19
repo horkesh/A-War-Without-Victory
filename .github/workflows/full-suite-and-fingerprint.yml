@@ -88,6 +88,14 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest
 
+      - name: First-hour browser gate
+        if: steps.changes.outputs.relevant == 'true'
+        run: npm run qa:first-hour:browser
+
+      - name: Live surface browser gate
+        if: steps.changes.outputs.relevant == 'true'
+        run: npm run qa:live-surface:browser
+
       - name: No relevant changes — full suite skipped (green-fast)
         if: steps.changes.outputs.relevant != 'true'
         run: echo "No src/tools/tests/scenario/calibration/scripts/config changes — full vitest suite skipped. Job reports success so branch protection stays unblocked."

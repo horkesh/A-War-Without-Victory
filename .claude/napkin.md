@@ -20,6 +20,10 @@
 
 **LIVE SURFACE BROWSER GATE (2026-06-19).** `qa:first-hour:browser` proves the opening path, but not every major command surface or drilldown. Do instead: after Desk/War Map/Army HQ/Records/Chronicle/Codex, toolbar/shell, OOB, Corps Front, formation, settlement, or Records-tab changes, run `npm run qa:live-surface:browser`; it must prove first-hour RBiH flow, major-surface reachability, owner drilldown through Decision Room -> sector -> formation -> settlement -> Records subtabs, shell exclusivity, raw-token absence, console health, and strict-port cleanup.
 
+**BROWSER GATES ARE CI-BLOCKING (2026-06-19).** The required `full-suite` GitHub Actions job now runs `qa:first-hour:browser` and `qa:live-surface:browser` after full Vitest on relevant code-contract changes. Do instead: treat local browser gate failures as merge blockers; do not reclassify first-hour/live-surface defects as manual-only unless the workflow itself proves unrelated infrastructure failure.
+
+**INBOX AND BRIEFING ROUTE OWNERSHIP (2026-06-19).** Operation opportunities are presidential Decision Room items with Army HQ as source evidence, not Army HQ briefing actions. Command briefing operation/sector/settlement chips must route to tactical field inspection from Decision Room and Army HQ recap. Do instead: use `decision_room`/`field` navigation targets for those cases; keep only reserve/personnel as Army HQ staff handoffs.
+
 **FORCED-OP AFTERMATH COPY (2026-06-19).** `ForcedOpReceipt.assessmentAtLaunch` is the source of truth for the commander's no-go recommendation. Do instead: render `postpone` as recommended waiting and `abort` as recommended abort; never hardcode forced-operation aftermath copy to abort.
 
 **DECISION ROOM / CORPS FRONT COPY (2026-06-19).** Operation-opportunity `expires_turn` is an internal deadline/order key, not player copy; Decision Room should render `Review by ${turnToDateString(...)}`. Corps Front `opsec_active` is internal state; English UI should say `Operational security`, `Tighten sector security`, and `Relax sector security`, not visible `OPSEC`.

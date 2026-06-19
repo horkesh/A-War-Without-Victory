@@ -220,6 +220,55 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(first.cards.map((card) => card.id)).toContain('briefing:briefing:zeta');
   });
 
+  it('routes briefing operation, sector, and settlement cards to tactical field inspection targets', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Field command priorities.',
+        criticalCount: 1,
+        pendingCount: 3,
+        items: [
+          {
+            id: 'briefing:operation',
+            kind: 'command',
+            severity: 'critical',
+            title: 'Operation window',
+            detail: 'Inspect the operation in the field view.',
+            target: { type: 'operation', operationKey: 'arbih_3rd_corps|op_alpha' },
+          },
+          {
+            id: 'briefing:sector',
+            kind: 'command',
+            severity: 'warning',
+            title: 'Sector pressure',
+            detail: 'Inspect the sector in the field view.',
+            target: { type: 'sector', sectorId: 'sector_tuzla' },
+            corpsId: 'arbih_3rd_corps',
+          },
+          {
+            id: 'briefing:settlement',
+            kind: 'field_reports',
+            severity: 'info',
+            title: 'Settlement report',
+            detail: 'Inspect the settlement in the field view.',
+            target: { type: 'settlement', osid: 'tuzla_1' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.find((card) => card.id === 'briefing:briefing:operation')).toMatchObject({
+      navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: 'arbih_3rd_corps|op_alpha' } },
+    });
+    expect(view.cards.find((card) => card.id === 'briefing:briefing:sector')).toMatchObject({
+      navigationTarget: { kind: 'field', target: { kind: 'field-sector', sectorId: 'sector_tuzla' } },
+    });
+    expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')).toMatchObject({
+      navigationTarget: { kind: 'field', target: { kind: 'field-settlement', osid: 'tuzla_1' } },
+    });
+  });
+
   it('routes cards to existing owners instead of duplicating inbox, records, cost, or Chronicle data', () => {
     const state = makeState({
       presidentialReviewQueue: {

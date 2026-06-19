@@ -23,15 +23,19 @@ describe('presidential toolbar summary action', () => {
     expect(source).not.toContain('FirstTurnOrientationCard');
   });
 
-  it('routes informational inbox situation cards and desk actions into the Presidential Desk', () => {
+  it('routes informational inbox situation cards and desk actions into the Presidential Desk without legacy Army HQ briefing actions', () => {
     const source = readFileSync('src/ui/map/App.tsx', 'utf8');
     const inbox = readFileSync('src/ui/map/components/PresidentialInbox.tsx', 'utf8');
+    const inboxItems = readFileSync('src/ui/map/data/inboxItems.ts', 'utf8');
     const registry = readFileSync('src/ui/map/data/decisionSurfaceRegistry.ts', 'utf8');
 
-    expect(source).toContain("if (action === 'army_hq_briefing')");
+    expect(source).not.toContain("if (action === 'army_hq_briefing')");
+    expect(source).not.toContain("if (action === 'army_hq_opportunity')");
     expect(source).toContain("if (action === 'decision_room')");
     expect(source).toContain('setWarroomDeskOpen(true)');
     expect(source).toContain('setWarroomDecisionRoomOpen(false)');
+    expect(inboxItems).not.toContain("'army_hq_briefing'");
+    expect(inboxItems).not.toContain("'army_hq_opportunity'");
     expect(inbox).toContain('onClick={() => onAction(item.action, item.id)}');
     expect(inbox).toContain("onAction('decision_room', 'opening-brief:desk')");
     expect(inbox).toContain("onAction('decision_room', 'empty:desk')");

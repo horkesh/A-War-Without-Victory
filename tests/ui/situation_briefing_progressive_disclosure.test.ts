@@ -17,9 +17,9 @@
  *
  * Plan: docs/plans/2026-05-18-autonomous-ui-product-lane-bank.md UI-4.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render } from '@testing-library/react';
 import {
     SituationBriefing,
     type BriefingItem,
@@ -112,5 +112,38 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
 
         expect(container.textContent).toContain('Supply ledger');
         expect(container.textContent).not.toContain('-> CORPS');
+    });
+
+    it('emits operation, sector, and settlement field targets when action chips are clicked', () => {
+        const items: BriefingItem[] = [
+            makeItem({
+                id: 'op',
+                title: 'Operation window',
+                target: { type: 'operation', operationKey: 'arbih_3rd_corps|op_alpha' },
+                actionChipLabel: 'Inspect operation',
+            }),
+            makeItem({
+                id: 'sector',
+                title: 'Sector pressure',
+                target: { type: 'sector', sectorId: 'sector_tuzla' },
+                actionChipLabel: 'Inspect sector',
+            }),
+            makeItem({
+                id: 'settlement',
+                title: 'Settlement report',
+                target: { type: 'settlement', osid: 'tuzla_1' },
+                actionChipLabel: 'Inspect settlement',
+            }),
+        ];
+        const onNavigate = vi.fn();
+
+        const { getByText } = render(createElement(SituationBriefing, { items, onNavigate }));
+        fireEvent.click(getByText('Inspect operation'));
+        fireEvent.click(getByText('Inspect sector'));
+        fireEvent.click(getByText('Inspect settlement'));
+
+        expect(onNavigate).toHaveBeenNthCalledWith(1, { type: 'operation', operationKey: 'arbih_3rd_corps|op_alpha' });
+        expect(onNavigate).toHaveBeenNthCalledWith(2, { type: 'sector', sectorId: 'sector_tuzla' });
+        expect(onNavigate).toHaveBeenNthCalledWith(3, { type: 'settlement', osid: 'tuzla_1' });
     });
 });

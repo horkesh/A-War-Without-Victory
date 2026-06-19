@@ -341,16 +341,34 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
     };
   }
   if (item.target.type === 'operation') {
-    const corpsId = item.target.operationKey?.split('|')[0] ?? item.corpsId ?? null;
+    if (item.target.operationKey) {
+      return {
+        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectCorps'),
+        navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: item.target.operationKey } },
+      };
+    }
+    const corpsId = item.corpsId ?? null;
     return {
       actionLabel: t('decisionRoom.action.inspectCorps'),
       navigationTarget: { kind: 'army-hq-corps-briefing', corpsId },
     };
   }
-  if (item.target.type === 'sector' && item.corpsId) {
+  if (item.target.type === 'sector') {
+    if (item.target.sectorId) {
+      return {
+        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectCorps'),
+        navigationTarget: { kind: 'field', target: { kind: 'field-sector', sectorId: item.target.sectorId } },
+      };
+    }
     return {
       actionLabel: t('decisionRoom.action.inspectCorps'),
-      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: item.corpsId },
+      navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: item.corpsId ?? null },
+    };
+  }
+  if (item.target.type === 'settlement' && item.target.osid) {
+    return {
+      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
+      navigationTarget: { kind: 'field', target: { kind: 'field-settlement', osid: item.target.osid } },
     };
   }
   if (item.target.type === 'summary') {

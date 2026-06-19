@@ -253,20 +253,26 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                 onDecisionRoomNavigateTarget?.({ kind: 'inbox' });
                 break;
             case 'settlement':
+                if (target.osid) {
+                    onDecisionRoomNavigateTarget?.({ kind: 'field', target: { kind: 'field-settlement', osid: target.osid } });
+                }
+                break;
             case 'none':
                 break;
             case 'sector': {
-                const sector = data?.sectors.find((entry) => entry.sector_id === target.sectorId);
-                if (sector) navigateToCorps(sector.corps_id);
+                if (target.sectorId) {
+                    onDecisionRoomNavigateTarget?.({ kind: 'field', target: { kind: 'field-sector', sectorId: target.sectorId } });
+                }
                 break;
             }
             case 'operation': {
-                const corpsId = target.operationKey?.split('|')[0];
-                if (corpsId) navigateToCorps(corpsId);
+                if (target.operationKey) {
+                    onDecisionRoomNavigateTarget?.({ kind: 'field', target: { kind: 'field-operation', operationKey: target.operationKey } });
+                }
                 break;
             }
         }
-    }, [data, navigateToCorps]);
+    }, [navigateToCorps, onDecisionRoomNavigateTarget]);
 
     const handleOpenArmyReserve = useCallback(() => {
         if (!data) return;

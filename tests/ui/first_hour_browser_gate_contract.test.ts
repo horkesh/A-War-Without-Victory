@@ -115,3 +115,27 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain("data-selected={subTab === id ? 'true' : 'false'}");
   });
 });
+
+describe('browser QA CI wiring contract', () => {
+  it('runs first-hour and live-surface browser gates in the required full-suite job', () => {
+    const workflow = read('.github/workflows/full-suite-and-fingerprint.yml');
+
+    expect(workflow).toContain('name: First-hour browser gate');
+    expect(workflow).toContain('run: npm run qa:first-hour:browser');
+    expect(workflow).toContain('name: Live surface browser gate');
+    expect(workflow).toContain('run: npm run qa:live-surface:browser');
+
+    const fullSuiteStart = workflow.indexOf('name: Full vitest suite');
+    const firstHourStart = workflow.indexOf('name: First-hour browser gate');
+    const liveSurfaceStart = workflow.indexOf('name: Live surface browser gate');
+    const skippedStart = workflow.indexOf('name: No relevant changes');
+    expect(firstHourStart).toBeGreaterThan(fullSuiteStart);
+    expect(liveSurfaceStart).toBeGreaterThan(firstHourStart);
+    expect(skippedStart).toBeGreaterThan(liveSurfaceStart);
+
+    const firstHourBlock = workflow.slice(firstHourStart, liveSurfaceStart);
+    const liveSurfaceBlock = workflow.slice(liveSurfaceStart, skippedStart);
+    expect(firstHourBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
+    expect(liveSurfaceBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
+  });
+});
