@@ -2156,6 +2156,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'situation.emptySupport': 'Nema lokalne naredbe podrške za ovaj potez.',
     'situation.operationalPosture': 'Operativni položaj',
     'situation.opsecActive': 'OPSEC aktivan',
+    'situation.pressureCurrent': 'Trenutni pritisak: {band} ({score})',
+    'situation.pressureThresholds': 'Diplomatski pritisak raste kada opsade, raseljavanje i pregovaračko opterećenje postanu vidljivi.',
     'situation.pressureIntel': 'Pritisak {summary} · Obavještajno {confidence}%',
     'situation.offensiveSigns': ' · Uočeni ofanzivni znači',
     'situation.emptyOpsec': 'Nijedan sektor trenutno ne provodi OPSEC.',

@@ -6,6 +6,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
+import type { ForcedOpReceipt } from '../../src/ui/map/data/forcedOpReceipts.js';
 
 function makeView(): TurnAftermathView {
     return {
@@ -130,5 +131,36 @@ describe('TurnAftermathModal localization', () => {
 
         expect(screen.getByText('Humanitarian convoy')).toBeTruthy();
         expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
+    });
+
+    it('uses the stored commander recommendation in forced-operation receipts', () => {
+        const forcedOps: ForcedOpReceipt[] = [{
+            id: 'forced-op-one',
+            opName: 'Operation River Crossing',
+            corpsId: 'arbih_1st_corps',
+            commanderName: 'Gen. Example',
+            assessmentAtLaunch: 'postpone',
+            outcome: 'failure',
+            grade: 1,
+            casualtiesSuffered: 80,
+            casualtiesInflicted: 20,
+            objectivesCaptured: 0,
+            endedTurn: 12,
+        }];
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view: makeView(),
+            forcedOps,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        expect(screen.getByText(/he recommended waiting/i)).toBeTruthy();
+        expect(container.textContent).not.toMatch(/recommended abort/i);
     });
 });

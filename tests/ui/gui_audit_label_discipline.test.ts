@@ -205,4 +205,18 @@ describe('GUI audit label discipline', () => {
     const panelSource = readFileSync('src/ui/map/components/CorpsFrontPanel.tsx', 'utf8');
     expect(panelSource).not.toMatch(/>[\s\r\n]*OPSEC[\s\r\n]*</);
   });
+
+  it('keeps normal command-surface English copy free of SITREP shorthand', () => {
+    const commandSurfaceKeys = [
+      'decisionRoom.category.operational',
+      'decisionRoom.card.supply.explanation.critical',
+      'decisionRoom.card.supply.explanation.warning',
+      'decisionRoom.card.sitrep.title',
+      'warroom.status.category.operational',
+    ] as const;
+
+    for (const key of commandSurfaceKeys) {
+      expect(enMessages[key]).not.toMatch(/\bSITREP\b/);
+    }
+  });
 });

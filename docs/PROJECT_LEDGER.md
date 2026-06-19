@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] test(ui): add live surface browser sweep and retire SITREP command copy
+
+**Type:** UI/read-model player-copy polish and live browser QA gate.
+
+**Fix:** Added `qa:live-surface:browser`, a strict-port Puppeteer/Vite sweep that proves the RBiH first-hour flow and visits Desk, War Map, Army HQ, Records, Chronicle, and Codex while rejecting console/page errors, shell stacking, raw technical tokens, and uncleared Vite port listeners. The first live run failed on visible `Operational SITREP`, so Decision Room and Warroom status English copy now renders `Situation` / `Operational Situation Report` instead. The Codex panel now exposes a stable `data-testid="codex-panel"` marker so the sweep distinguishes the actual Codex shell from Records' Codex handoff card. BCS pressure-copy parity keys were added to keep `tests/ui_i18n.test.ts` green; no broader native-language polish was attempted.
+
+**Verification:** `tests/ui_i18n.test.ts` passed 12/12 after the BCS parity fix. Red/green `tests/ui/gui_audit_label_discipline.test.ts` caught and then cleared the `SITREP` shorthand. Focused Decision Room/Warroom copy pack passed 44/44. Browser-gate/Codex marker pack passed 24/24. `npm.cmd run qa:live-surface:browser` passed and verified port 3239 cleanup. Report: `docs/40_reports/implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md`.
+
+**Scope/determinism:** UI copy/read-model, tests, docs, and browser QA tooling only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-19] fix(ui): label Turn Aftermath desk item types
 
 **Type:** UI/read-model player-copy polish.
@@ -20909,3 +20921,9 @@ Verification: docs-only review plus `git diff --check`; no code, canon, FORAWWV,
 Closed the next P0 player-copy leak from the Pyrrhic sweep. Decision Room operation-opportunity cards now render `expires_turn` as calendar review evidence (`Review by {date}`) instead of raw `Expires T{turn}` copy. Corps Front English security chrome now says `Operational security`, `Tighten sector security`, `Relax sector security`, and sector-security staged-result messages instead of visible `OPSEC` shorthand. BCS remains unchanged pending owner/native-language review.
 
 Focused red/green regressions now pin Decision Room calendar deadlines and Corps Front label discipline. Verification: `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui/gui_audit_label_discipline.test.ts` passed 39/39; `npm.cmd run typecheck` passed; `npm.cmd run qa:player-journeys` passed 107/107; `npm.cmd run qa:first-hour:browser` passed with strict-port cleanup; `npm.cmd run desktop:map:build` passed with existing Vite warnings; `git diff --check` passed. Determinism/scope: UI/read-model copy and tests/docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-19 - Forced-operation receipt recommendation copy
+
+Closed the Codex review residue where Turn Aftermath forced-operation receipts always said the commander recommended abort. The modal now derives the phrase from `ForcedOpReceipt.assessmentAtLaunch`: `postpone` renders as recommended waiting, `abort` renders as recommended abort, and legacy/missing snapshots render neutral command-record wording.
+
+Focused red/green regression: `npx.cmd vitest run tests/ui/turn_aftermath_modal_i18n.test.ts` failed before the fix and passed after. Focused pack: `npx.cmd vitest run tests/ui/turn_aftermath_modal_i18n.test.ts tests/ui/forced_op_receipts.test.ts` passed 10/10. Determinism/scope: UI/read-model copy and tests/docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.

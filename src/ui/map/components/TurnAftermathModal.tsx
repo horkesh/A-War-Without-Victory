@@ -89,6 +89,12 @@ function actionTypeLabel(type: TurnAftermathTopAction['type']): string {
   return t(`records.actionType.${surface.familyId}` as MessageKey);
 }
 
+function forcedOpRecommendationLabel(assessment: ForcedOpReceipt['assessmentAtLaunch']): string {
+  if (assessment === 'postpone') return 'he recommended waiting';
+  if (assessment === 'abort') return 'he recommended abort';
+  return 'the command record carried no no-go recommendation';
+}
+
 function memoryToneClasses(tone: TurnAftermathView['judgment']['memoryTone']): string {
   if (tone === 'cost') return 'border-red-400/35 text-red-300 bg-red-950/25';
   if (tone === 'signal') return 'border-amber-400/35 text-amber-300 bg-amber-950/20';
@@ -235,6 +241,7 @@ export function TurnAftermathModal({
                       {t('turnAftermath.forcedOpForced', {
                         op: receipt.opName,
                         commander: receipt.commanderName,
+                        recommendation: forcedOpRecommendationLabel(receipt.assessmentAtLaunch),
                       })}
                       <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
                         {t('turnAftermath.forcedOpOutcome', {

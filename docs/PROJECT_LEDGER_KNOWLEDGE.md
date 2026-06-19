@@ -1,3 +1,13 @@
+## 2026-06-19 - Live surface browser sweep guards command surfaces
+
+**Live browser sweeps should assert surfaces, not just startup:** The first-hour path can pass while Army HQ, Records, Chronicle, or Codex still expose stale command copy or shell stacking. Durable rule: run `npm run qa:live-surface:browser` after command-surface, Records, Chronicle, Codex, or top-toolbar changes; it must prove first-hour RBiH start plus Desk/War Map/Army HQ/Records/Chronicle/Codex reachability, raw-token absence, console health, shell exclusivity, and strict-port cleanup. Applied in `[2026-06-19] test(ui): add live surface browser sweep and retire SITREP command copy`; report `docs/40_reports/implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md`.
+
+**Shell detectors need surface-owned markers, not generic text:** Records can legitimately contain a Codex handoff card, so a global text search for `Codex` is not proof the Codex shell is open. Durable rule: browser QA should detect shells through stable surface-owned markers such as `data-testid="codex-panel"` or dialog semantics, not repeated navigation/card text.
+
+## 2026-06-19 - Forced-operation receipts must use the stored no-go assessment
+
+**Force-op aftermath copy is an accountability receipt, not a generic warning:** `ForcedOpReceipt.assessmentAtLaunch` already carries the commander no-go snapshot. Durable rule: Turn Aftermath must render `postpone` as waiting and `abort` as abort; do not hardcode abort in the receipt copy when the engine stored a postponement recommendation. Applied in `[2026-06-19] fix(ui): use stored forced-op recommendation copy`; report `docs/40_reports/implemented/20260619_FORCED_OP_RECEIPT_RECOMMENDATION_COPY.md`.
+
 ## 2026-06-19 - Deadline and security copy should translate command intent, not expose shorthand
 
 **Decision Room opportunity expiry is a staff deadline, not a raw turn token:** Operation-opportunity proposals preserve `expires_turn` internally for ordering and urgency, but player evidence should render a calendar deadline such as `Review by 21 Sep 1992`. Durable rule: use `turnToDateString(...)` at Decision Room evidence boundaries and keep raw `T` labels out of normal player copy. Applied in `[2026-06-19] fix(ui): polish Decision Room and Corps Front security copy`; report `docs/40_reports/implemented/20260619_DECISION_ROOM_CORPS_FRONT_COPY_POLISH.md`.

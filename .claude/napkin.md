@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**LIVE SURFACE BROWSER GATE (2026-06-19).** `qa:first-hour:browser` proves the opening path, but not every major command surface. Do instead: after Desk/War Map/Army HQ/Records/Chronicle/Codex or toolbar/shell changes, run `npm run qa:live-surface:browser`; it must prove first-hour RBiH flow, major-surface reachability, shell exclusivity, raw-token absence, console health, and strict-port cleanup.
+
+**FORCED-OP AFTERMATH COPY (2026-06-19).** `ForcedOpReceipt.assessmentAtLaunch` is the source of truth for the commander's no-go recommendation. Do instead: render `postpone` as recommended waiting and `abort` as recommended abort; never hardcode forced-operation aftermath copy to abort.
+
 **DECISION ROOM / CORPS FRONT COPY (2026-06-19).** Operation-opportunity `expires_turn` is an internal deadline/order key, not player copy; Decision Room should render `Review by ${turnToDateString(...)}`. Corps Front `opsec_active` is internal state; English UI should say `Operational security`, `Tighten sector security`, and `Relax sector security`, not visible `OPSEC`.
 
 **TURN AFTERMATH DESK ITEM LABELS (2026-06-19).** Turn Aftermath top action `type` values are internal inbox joins, not player copy. Do instead: use `getDecisionSurfaceForInboxType(...)` + `records.actionType.*` with `Review item` fallback; never render `item.type.replace(/_/g, ' ')` in the post-turn modal.
