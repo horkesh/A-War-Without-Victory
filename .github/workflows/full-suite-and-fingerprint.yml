@@ -88,6 +88,10 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         run: npm run test:vitest
 
+      - name: Install Puppeteer Chrome for browser gates
+        if: steps.changes.outputs.relevant == 'true'
+        run: npx puppeteer browsers install chrome
+
       - name: First-hour browser gate
         if: steps.changes.outputs.relevant == 'true'
         run: npm run qa:first-hour:browser

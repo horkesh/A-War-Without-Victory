@@ -124,17 +124,23 @@ describe('browser QA CI wiring contract', () => {
     expect(workflow).toContain('run: npm run qa:first-hour:browser');
     expect(workflow).toContain('name: Live surface browser gate');
     expect(workflow).toContain('run: npm run qa:live-surface:browser');
+    expect(workflow).toContain('name: Install Puppeteer Chrome for browser gates');
+    expect(workflow).toContain('run: npx puppeteer browsers install chrome');
 
     const fullSuiteStart = workflow.indexOf('name: Full vitest suite');
+    const chromeInstallStart = workflow.indexOf('name: Install Puppeteer Chrome for browser gates');
     const firstHourStart = workflow.indexOf('name: First-hour browser gate');
     const liveSurfaceStart = workflow.indexOf('name: Live surface browser gate');
     const skippedStart = workflow.indexOf('name: No relevant changes');
-    expect(firstHourStart).toBeGreaterThan(fullSuiteStart);
+    expect(chromeInstallStart).toBeGreaterThan(fullSuiteStart);
+    expect(firstHourStart).toBeGreaterThan(chromeInstallStart);
     expect(liveSurfaceStart).toBeGreaterThan(firstHourStart);
     expect(skippedStart).toBeGreaterThan(liveSurfaceStart);
 
+    const chromeInstallBlock = workflow.slice(chromeInstallStart, firstHourStart);
     const firstHourBlock = workflow.slice(firstHourStart, liveSurfaceStart);
     const liveSurfaceBlock = workflow.slice(liveSurfaceStart, skippedStart);
+    expect(chromeInstallBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
     expect(firstHourBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
     expect(liveSurfaceBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
   });

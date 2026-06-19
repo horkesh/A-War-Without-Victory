@@ -50,7 +50,9 @@ for `pull_request` (not `pull_request_target`) workflows.
 `structural-fingerprint` use the sibling `detect-full-suite-changes.sh` shim.
 The browser gates are intentionally inside the already-required `full-suite` job so
 new first-hour or live-surface regressions block relevant PRs immediately instead of
-depending on a separate branch-protection update.
+depending on a separate branch-protection update. The job installs Puppeteer's
+Chrome binary explicitly before those gates because GitHub-hosted runners do not
+populate `/home/runner/.cache/puppeteer` from `npm install` alone.
 
 Path sets (a changed file matching ANY entry => heavy steps run):
 
