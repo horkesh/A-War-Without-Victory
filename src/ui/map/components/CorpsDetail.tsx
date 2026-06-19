@@ -23,7 +23,7 @@ import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
-import { formatPosture, toTitleCase } from '../utils/formatters';
+import { formatPosture } from '../utils/formatters';
 import { t } from '../i18n';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
@@ -365,10 +365,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <div className="min-w-0">
                     <div className="text-text-primary text-[11px] font-medium truncate">{s.display_name}</div>
                     <div className="text-text-secondary text-[10px] tabular-nums">
-                      {s.assigned_brigade_ids.length} front
-                      {s.reserve_brigade_ids.length > 0 && ` + ${s.reserve_brigade_ids.length} reserve`}
+                      {t('oob.sectorLineCount', { count: s.assigned_brigade_ids.length.toString() })}
+                      {s.reserve_brigade_ids.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: s.reserve_brigade_ids.length.toString() })}`}
                       {' · ~'}{s.length_edges} km
-                      {' · '}{sectorPers.toLocaleString()} men
+                      {' · '}{t('corpsDetail.personnelCount', { count: sectorPers.toLocaleString() })}
                     </div>
                   </div>
                   <div className="shrink-0 ml-2 text-right">
@@ -377,11 +377,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <span className="text-text-primary">{sectorEff.totalEffectiveness.toLocaleString()}</span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
-                      Density: {s.density.toFixed(2)}
+                      {t('oob.sectorCoverage.label')}: {s.density <= 0 ? t('oob.sectorCoverage.uncovered') : s.density < 0.12 ? t('oob.sectorCoverage.thin') : s.density < 0.28 ? t('oob.sectorCoverage.held') : t('oob.sectorCoverage.dense')}
                     </div>
                     {s.sector_stance && (
                       <div className="text-[9px] uppercase text-text-secondary opacity-70">
-                        {toTitleCase(s.sector_stance)}
+                        {formatPosture(s.sector_stance)}
                         {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
                       </div>
                     )}

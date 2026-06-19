@@ -665,14 +665,14 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <div className="text-[11px] text-text-secondary min-w-0">
                 <span>{t('formationDetail.lastRepulsedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_repulsed_from.osid, osidDisplayNames)}</span>
-                <span> {t('formationDetail.weekParen', { week: formation.last_repulsed_from.turn.toString() })}</span>
+                <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_repulsed_from.turn) })}</span>
               </div>
             )}
             {formation.last_retreat_from && (
               <div className="text-[11px] text-text-secondary min-w-0">
                 <span>{t('formationDetail.retreatedFrom')} </span>
                 <span className="font-mono text-text-primary break-all">{getOsidDisplayName(formation.last_retreat_from.osid, osidDisplayNames)}</span>
-                <span> {t('formationDetail.weekParen', { week: formation.last_retreat_from.turn.toString() })}</span>
+                <span> {t('formationDetail.dateParen', { date: turnToDateString(formation.last_retreat_from.turn) })}</span>
               </div>
             )}
 

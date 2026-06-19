@@ -85,8 +85,12 @@ const STANCE_LABEL_KEYS: Record<SectorStanceType, MessageKey> = {
   active_defense: 'corpsFront.stance.activeDefense', screening: 'corpsFront.stance.screening',
 };
 const PREP_SUB_PHASES = ['intel_gathering', 'force_staging', 'supply_check', 'assessment', 'ready'] as const;
-const PREP_LABELS: Record<string, string> = {
-  intel_gathering: 'INTEL', force_staging: 'STAGING', supply_check: 'SUPPLY', assessment: 'ASSESS', ready: 'READY',
+const PREP_LABEL_KEYS: Record<string, MessageKey> = {
+  intel_gathering: 'corpsFront.prep.intelGathering',
+  force_staging: 'corpsFront.prep.forceStaging',
+  supply_check: 'corpsFront.prep.supplyCheck',
+  assessment: 'corpsFront.prep.assessment',
+  ready: 'corpsFront.prep.ready',
 };
 
 /** Player-facing phrasing for a commander's launch recommendation (raw enum: launch/postpone/abort). */
@@ -101,6 +105,11 @@ function stanceLabel(stance: SectorStanceType): string {
   return t(STANCE_LABEL_KEYS[stance]);
 }
 
+function prepLabel(subPhase: string): string {
+  const key = PREP_LABEL_KEYS[subPhase];
+  return key ? t(key) : toTitleCase(subPhase);
+}
+
 function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed: number; maxTurns: number }) {
   const idx = PREP_SUB_PHASES.indexOf(subPhase as typeof PREP_SUB_PHASES[number]);
   const timeProgress = maxTurns > 0 ? Math.min(1, turnsElapsed / maxTurns) : 0;
@@ -111,13 +120,13 @@ function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase
           <div
             key={phase}
             className={`h-1.5 flex-1 rounded-sm ${i <= idx ? (phase === 'ready' ? 'bg-green-500' : 'bg-amber-500') : 'bg-neutral-200'}`}
-            title={PREP_LABELS[phase]}
+            title={prepLabel(phase)}
           />
         ))}
       </div>
       <div className="flex justify-between text-[8px] text-neutral-500">
-        <span className="uppercase font-bold">{PREP_LABELS[subPhase] ?? subPhase}</span>
-        <span>{turnsElapsed}/{maxTurns}t ({Math.round(timeProgress * 100)}%)</span>
+        <span className="uppercase font-bold">{prepLabel(subPhase)}</span>
+        <span>{t('corpsFront.prep.cycle', { elapsed: turnsElapsed.toString(), max: maxTurns.toString(), pct: Math.round(timeProgress * 100).toString() })}</span>
       </div>
     </div>
   );

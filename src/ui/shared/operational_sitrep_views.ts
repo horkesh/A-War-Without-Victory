@@ -126,7 +126,8 @@ function operationSummary(operation: WarDataSnapshot['ownCorpsOps'][number]['ope
 
 function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
     if (view.front.exposedCount > 0) {
-        return `${view.front.exposedCount} exposed front ${pluralize(view.front.exposedCount, 'sector')} require immediate attention.`;
+        const verb = view.front.exposedCount === 1 ? 'needs' : 'need';
+        return `${view.front.exposedCount} thinly held front ${pluralize(view.front.exposedCount, 'contact')} ${verb} staff review.`;
     }
     if (view.readiness.encircledCount > 0) {
         return `${view.readiness.encircledCount} brigade${view.readiness.encircledCount === 1 ? '' : 's'} are encircled.`;
@@ -214,10 +215,11 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
     const alerts: OperationalSitrepAlertView[] = [];
     if (frontEdges.some((edge) => edge.tier === 'exposed')) {
         const exposedCount = frontEdges.filter((edge) => edge.tier === 'exposed').length;
+        const verb = exposedCount === 1 ? 'needs' : 'need';
         alerts.push({
             id: 'front-exposed',
             severity: 'critical',
-            text: `${exposedCount} exposed front ${pluralize(exposedCount, 'sector')} require attention.`,
+            text: `${exposedCount} thinly held front ${pluralize(exposedCount, 'contact')} ${verb} staff review.`,
         });
     }
     if (snapshot.brigadeMovement.encircled.length > 0) {

@@ -24,6 +24,13 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
+function sectorCoverageLabel(density: number): string {
+  if (density <= 0) return t('oob.sectorCoverage.uncovered');
+  if (density < 0.12) return t('oob.sectorCoverage.thin');
+  if (density < 0.28) return t('oob.sectorCoverage.held');
+  return t('oob.sectorCoverage.dense');
+}
+
 function groupFormationsByCorps(formations: FormationView[]): Map<string, FormationView[]> {
   const byCorps = new Map<string, FormationView[]>();
   for (const f of formations) {
@@ -622,10 +629,10 @@ export function OOBSidebar() {
                                 )}
                               </div>
                               <div className="text-text-secondary text-[10px] tabular-nums">
-                                {sector.assigned_brigade_ids.length} assigned
-                                {sector.reserve_brigade_ids.length > 0 && ` + ${sector.reserve_brigade_ids.length} reserve`}
+                                {t('oob.sectorLineCount', { count: sector.assigned_brigade_ids.length.toString() })}
+                                {sector.reserve_brigade_ids.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sector.reserve_brigade_ids.length.toString() })}`}
                                 {' \u00B7 ~'}{sector.length_edges} km
-                                {' \u00B7 Density: '}{sector.density.toFixed(2)}
+                                {' \u00B7 '}{sectorCoverageLabel(sector.density)}
                               </div>
                             </div>
                           </button>

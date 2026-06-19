@@ -27486,6 +27486,29 @@
           "mun:bileca"
         ]
       },
+      "vrs_main_staff": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": null,
+        "cohesion": 60,
+        "created_turn": 0,
+        "faction": "RS",
+        "force_label": "VRS",
+        "id": "vrs_main_staff",
+        "kind": "army_hq",
+        "morale": 60,
+        "name": "Main Staff VRS",
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "personnel": 0,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "mun:han_pijesak"
+        ]
+      },
       "vrs_sarajevo_romanija": {
         "activation_gated": false,
         "activation_turn": null,

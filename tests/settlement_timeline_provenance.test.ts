@@ -211,6 +211,42 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(text).not.toMatch(/cmd_|_t45|operation_name|op:/i);
     });
 
+    it('does not let operation history claim event-owned Srebrenica and Zepa fall receipts', () => {
+        for (const osid of ['op:srebrenica:srebrenica_2', 'op:rogatica:zepa_2']) {
+            const events = buildSettlementTimeline(
+                osid,
+                null,
+                [],
+                [],
+                [
+                    {
+                        operation_name: 'late_1995_context',
+                        operation_display_name: 'Late 1995 enclave operation',
+                        corps_id: 'vrs_drinacorps',
+                        faction: 'RS',
+                        started_turn: 170,
+                        ended_turn: 171,
+                        outcome: 'success',
+                        objectives_targeted: [osid],
+                        objectives_captured: [osid],
+                    } as any,
+                ],
+                [],
+                [],
+                [],
+                [],
+                null,
+                null,
+            );
+
+            const resolved = events.filter(e => e.type === 'operation_resolved');
+            expect(resolved).toHaveLength(1);
+            expect(resolved[0].title).toContain('operation context recorded');
+            expect(resolved[0].title).not.toContain('objective captured');
+            expect(resolved[0].detail).toBe('Control change is owned by the historical event receipt.');
+        }
+    });
+
     it('renders authored control-event mechanism labels without exposing raw enum tokens', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {

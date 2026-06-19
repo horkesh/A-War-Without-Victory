@@ -41,6 +41,10 @@ function isOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficer
     return !['kia', 'killed', 'captured', 'retired'].includes(officerStatusFor(state, officer));
 }
 
+function isActiveOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficerView): boolean {
+    return officerStatusFor(state, officer) === 'active' && isOfficerAvailableForTurn(state, officer);
+}
+
 function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number {
     const tierA = POOL_TIER_ORDER[a.pool_tier ?? ''] ?? 99;
     const tierB = POOL_TIER_ORDER[b.pool_tier ?? ''] ?? 99;
@@ -144,11 +148,10 @@ export function getFormationCommander(
     }
 
     if (formation.kind === 'army_hq') {
-        const stateById = loadedGameState.namedOfficerStateById;
         return loadedGameState.namedOfficerData?.find(
             o => o.faction === formation.faction
                 && o.rank === 'army_commander'
-                && (stateById?.[o.id]?.status === 'active' || (!stateById?.[o.id] && o.status === 'active'))
+                && isActiveOfficerAvailableForTurn(loadedGameState, o)
         ) || null;
     }
 
@@ -162,11 +165,10 @@ export function getFactionArmyCommander(
     faction: string,
     loadedGameState: LoadedGameState
 ) {
-    const stateById = loadedGameState.namedOfficerStateById;
     return loadedGameState.namedOfficerData?.find(
         o => o.faction === faction
             && o.rank === 'army_commander'
-            && (stateById?.[o.id]?.status === 'active' || (!stateById?.[o.id] && o.status === 'active'))
+            && isActiveOfficerAvailableForTurn(loadedGameState, o)
     ) || null;
 }
 

@@ -145,6 +145,11 @@ function operationDisplayName(op: OperationHistoryEntry): string {
     return getPlayerSafeOperationName(op.operation_name, op.corps_id, 'Operation');
 }
 
+const EVENT_OWNED_FALL_OSIDS = new Set([
+    'op:srebrenica:srebrenica_2',
+    'op:rogatica:zepa_2',
+]);
+
 export function buildSettlementTimeline(
     osid: string,
     munId: string | null,
@@ -352,7 +357,16 @@ export function buildSettlementTimeline(
                 detail: `${factionName(op.faction)} targeting this area`,
             });
         }
-        if (captured) {
+        if (captured && EVENT_OWNED_FALL_OSIDS.has(osid)) {
+            events.push({
+                turn: op.ended_turn,
+                type: 'operation_resolved',
+                faction: op.faction,
+                title: `${opName} — operation context recorded`,
+                detail: 'Control change is owned by the historical event receipt.',
+                outcome: op.outcome,
+            });
+        } else if (captured) {
             events.push({
                 turn: op.ended_turn,
                 type: 'operation_resolved',

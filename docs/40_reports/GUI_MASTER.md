@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-18 (first-hour shell hardening, Records/Chronicle opening decision filing, event/inbox calendar copy, player-safe event dossier boundaries, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-20 (AAA polish wave 3 command-surface copy, startup OOB parent truth, Srebrenica/Zepa event-owned timeline provenance, first-hour shell hardening, Records/Chronicle opening decision filing, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **AAA polish wave 3 command-surface and startup OOB truth** | [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) - Army HQ/OOB/settlement drilldowns now use dates, qualitative coverage, i18n local-support copy, and player-safe phase labels; `vrs_main_staff` is materialized as an opening `army_hq` formation; Srebrenica/Zepa operation-history rows cannot claim event-owned fall receipts. |
 | **Commander read-model surface parity** | [implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md](implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md) - ORBAT, Corps Detail, and Formation Detail now show display-only opening command labels when turn-0 corps commanders are intentionally not seated in sim state. |
 | **First-hour shell/Records/Chronicle polish** | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) - Browser-fallback foundational decisions file into Records and Chronicle during opening week, shell chrome renders `Opening week`, Records/Chronicle badges use readable separators, decision-modal shell ownership is guarded, and Army HQ/raw fallback copy uses player-safe labels. |
 | **Army HQ first-paint/drilldown polish** | [implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md](implemented/20260618_ARMY_HQ_FIRST_PAINT_DRILLDOWN_POLISH.md) - Army HQ opens with a corps Command Access strip, corps drilldowns surface sectors/operations first, Records defaults to the campaign archive, and field inspections use an atomic Tactical Map route. |
@@ -140,6 +141,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-20 | **AAA polish wave 3 command-surface and startup OOB truth:** audited Army HQ/OOB/settlement command surfaces now use dates, qualitative coverage, i18n local-support copy, and player-safe phase labels; opening VRS Main Staff is materialized as an `army_hq` formation; Srebrenica/Zepa operation-history rows cannot claim event-owned fall receipts. | [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) |
 | 2026-06-18 | **First-hour shell/Records/Chronicle polish:** browser-fallback foundational decisions now file immediately into Records and Chronicle, first-hour shell chrome renders `Opening week`, count badges use readable separators, and decision-modal shell ownership is guarded. | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) |
 | 2026-06-18 | **P1 raw-copy calendar boundary:** event decisions and inbox event cards now use calendar dates and non-diagnostic event/dossier internals stay out of player-facing copy; live browser verified the `What Is Bosnia?` modal. | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) |
 | 2026-06-18 | **First-hour shell/dev-map hardening:** root map scripts, Warroom shell cleanup, Army HQ route labeling, and decision future-branch progressive disclosure were hardened. | [implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md](implemented/20260618_FIRST_HOUR_SHELL_AND_DEV_MAP_HARDENING.md) |

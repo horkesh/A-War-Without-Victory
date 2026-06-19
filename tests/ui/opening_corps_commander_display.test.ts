@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { LoadedGameState, NamedOfficerView } from '../../src/ui/map/data/types.js';
-import { resolveCorpsCommanderDisplay } from '../../src/ui/map/utils/officerUtils.js';
+import { getFactionArmyCommander, resolveCorpsCommanderDisplay } from '../../src/ui/map/utils/officerUtils.js';
 
 function officer(overrides: Partial<NamedOfficerView> & { id: string; name: string }): NamedOfficerView {
     return {
@@ -53,6 +53,60 @@ function state(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 }
 
 describe('opening corps commander display', () => {
+    it('does not show future army commanders before their availability turn', () => {
+        const gameState = state({
+            turn: 0,
+            namedOfficerData: [
+                officer({
+                    id: 'arbih_halilovic',
+                    name: 'Sefer Halilovic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'active',
+                    available_from_turn: 0,
+                    available_until_turn: 60,
+                }),
+                officer({
+                    id: 'arbih_delic',
+                    name: 'Rasim Delic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'active',
+                    available_from_turn: 60,
+                }),
+            ],
+        });
+
+        expect(getFactionArmyCommander('RBiH', gameState)?.name).toBe('Sefer Halilovic');
+    });
+
+    it('moves to the successor army commander on his availability turn', () => {
+        const gameState = state({
+            turn: 60,
+            namedOfficerData: [
+                officer({
+                    id: 'arbih_halilovic',
+                    name: 'Sefer Halilovic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'active',
+                    available_from_turn: 0,
+                    available_until_turn: 60,
+                }),
+                officer({
+                    id: 'arbih_delic',
+                    name: 'Rasim Delic',
+                    faction: 'RBiH',
+                    rank: 'army_commander',
+                    status: 'active',
+                    available_from_turn: 60,
+                }),
+            ],
+        });
+
+        expect(getFactionArmyCommander('RBiH', gameState)?.name).toBe('Rasim Delic');
+    });
+
     it('prefers the real active corps commander over any opening fallback', () => {
         const gameState = state({
             namedOfficerData: [

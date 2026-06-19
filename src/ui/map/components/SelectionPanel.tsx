@@ -10,7 +10,7 @@ import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
-import { useLocale } from '../i18n';
+import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 import {
@@ -68,7 +68,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
   const supportType = playerFaction ? getMunicipalitySupportTypeForFaction(playerFaction) : null;
-  const supportLabel = playerFaction ? getMunicipalitySupportLabel(playerFaction) : 'Local support';
+  const supportLabel = playerFaction ? getMunicipalitySupportLabel(playerFaction) : t('selection.localSupport');
   const canStageSupport = Boolean(ipc.isAvailable && playerFaction && selectedMunId && supportType);
   const formationsForDetail = formations.map((f) => ({
     id: f.id,
@@ -218,7 +218,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
       munId: selectedMunId,
       type: supportType,
     });
-    setSupportMessage(result.ok ? 'Local support staged for next turn resolution.' : (result.error ?? 'Failed to stage local support.'));
+    setSupportMessage(result.ok ? t('selection.localSupportStaged') : (result.error ?? t('selection.localSupportFailed')));
   };
 
   return (
@@ -236,7 +236,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
             />
           )}
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
-            Settlement Info
+            {t('selection.settlementInfo')}
           </span>
         </div>
         <button
@@ -285,10 +285,15 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
         {playerFaction && selectedMunId && (
           <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">
             <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
-              Local Support
+              {t('selection.localSupport')}
             </div>
             <div className="text-xs text-text-secondary">
-              {activeSupport?.label ?? 'Local support'} target: {activeSupport ? getPlayerSafeMunicipalityName(activeSupport.mun_id) : 'none staged'}
+              {activeSupport
+                ? t('selection.localSupportTarget', {
+                  label: activeSupport.label,
+                  target: getPlayerSafeMunicipalityName(activeSupport.mun_id),
+                })
+                : t('selection.noLocalSupportStaged')}
             </div>
             <button
               type="button"
@@ -296,10 +301,10 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
               disabled={!canStageSupport}
               className="px-3 py-1 text-[10px] font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50"
             >
-              Stage {supportLabel}
+              {t('selection.stageSupport', { label: supportLabel })}
             </button>
             <div className="text-[11px] text-text-secondary">
-              Target municipality: {getPlayerSafeMunicipalityName(selectedMunId)}
+              {t('selection.targetMunicipality', { municipality: getPlayerSafeMunicipalityName(selectedMunId) })}
             </div>
             {supportMessage && <div className="text-[11px] text-text-secondary">{supportMessage}</div>}
           </div>

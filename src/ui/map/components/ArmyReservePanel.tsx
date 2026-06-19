@@ -24,6 +24,7 @@ import { EmptyState } from './EmptyState';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
+import { turnToDateString } from '../utils/formatters';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -49,6 +50,22 @@ function reserveReasonLabel(reason: string): string {
 function recallReasonLabel(reason: string): string {
     const key = RECALL_LABEL_KEYS[reason];
     return key ? t(key) : reason;
+}
+
+function deployedDurationLabel(turns: number): string {
+    return t(turns === 1 ? 'armyReserve.deployedOneWeek' : 'armyReserve.deployedWeeks', { count: turns.toString() });
+}
+
+function travelDurationLabel(travelHops: number): string {
+    if (travelHops <= 1) return t('armyReserve.travelLessThanWeek');
+    const weeks = Math.ceil(travelHops / 2);
+    return t(weeks === 1 ? 'armyReserve.travelOneWeek' : 'armyReserve.travelWeeks', { count: weeks.toString() });
+}
+
+function episodeDateRange(startTurn: number, endTurn: number | null | undefined): string {
+    const start = turnToDateString(startTurn);
+    if (endTurn == null) return t('armyReserve.episodeFromDate', { start });
+    return t('armyReserve.episodeDateRange', { start, end: turnToDateString(endTurn) });
 }
 
 interface ArmyReservePanelProps {
@@ -202,7 +219,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         {ls.on_loan && (
                                             <div className="flex items-center justify-between pt-0.5">
                                                 <span className="text-text-secondary">
-                                                    → {getCorpsName(ls.loaned_to_corps!)} ({ls.turns_deployed}w)
+                                                    → {getCorpsName(ls.loaned_to_corps!)} ({deployedDurationLabel(ls.turns_deployed)})
                                                 </span>
                                                 <button
                                                     type="button"
@@ -248,7 +265,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <div className="flex items-center justify-between gap-2">
                                             <span className="text-text-primary truncate">{getLocalizedFormationName(brigade, locale)}</span>
                                             <span className="text-[10px] text-text-secondary shrink-0">
-                                                {ls.turns_deployed}w
+                                                {deployedDurationLabel(ls.turns_deployed)}
                                             </span>
                                         </div>
                                         <div className="text-[10px] text-text-secondary truncate">
@@ -312,7 +329,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 {severityCopy.label}
                                             </span>
                                             <span className="text-[10px] text-text-secondary">
-                                                {t('armyReserve.travelWeeks', { weeks: req.travel_hops <= 1 ? '<1' : Math.ceil(req.travel_hops / 2) })}
+                                                {travelDurationLabel(req.travel_hops)}
                                             </span>
                                         </div>
                                     </div>
@@ -451,8 +468,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                                 {' '} - {reserveReasonLabel(ep.reason)}
                                                             </span>
                                                             <span className="shrink-0 tabular-nums">
-                                                                w{ep.loan_start_turn}
-                                                                {ep.loan_end_turn != null ? `–${ep.loan_end_turn}` : '+'}
+                                                                {episodeDateRange(ep.loan_start_turn, ep.loan_end_turn)}
                                                                 {ep.recall_reason ? ` (${recallReasonLabel(ep.recall_reason)})` : ''}
                                                             </span>
                                                         </div>

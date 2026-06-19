@@ -206,6 +206,33 @@ describe('GUI audit label discipline', () => {
     expect(panelSource).not.toMatch(/>[\s\r\n]*OPSEC[\s\r\n]*</);
   });
 
+  it('keeps Army HQ and map drilldowns free of raw week and density debug copy', () => {
+    const formationDetailSource = readFileSync('src/ui/map/components/FormationDetail.tsx', 'utf8');
+    const armyReserveSource = readFileSync('src/ui/map/components/ArmyReservePanel.tsx', 'utf8');
+    const corpsFrontSource = readFileSync('src/ui/map/components/CorpsFrontPanel.tsx', 'utf8');
+    const oobSource = readFileSync('src/ui/map/components/OOBSidebar.tsx', 'utf8');
+    const corpsDetailSource = readFileSync('src/ui/map/components/CorpsDetail.tsx', 'utf8');
+    const corpsCardSource = readFileSync('src/ui/map/components/CorpsCard.tsx', 'utf8');
+
+    expect(formationDetailSource).toContain('formationDetail.dateParen');
+    expect(formationDetailSource).not.toContain('formationDetail.weekParen');
+    expect(armyReserveSource).not.toMatch(/turns_deployed\}w|w\{ep\.loan_start_turn|travelWeeks', \{ weeks:/);
+    expect(corpsFrontSource).not.toMatch(/'INTEL'|'STAGING'|'SUPPLY'|'ASSESS'|'READY'|\/\{maxTurns\}t/);
+    expect(enMessages['corpsFront.frontReserveBrigades']).not.toMatch(/Front|Reserve|\//);
+    expect(oobSource).not.toMatch(/\} assigned|Density:/);
+    expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men/);
+    expect(corpsCardSource).toContain('getPlayerSafeOperationPhaseLabel(activeOperationPhase)');
+  });
+
+  it('keeps settlement support panel copy on i18n keys', () => {
+    const selectionSource = readFileSync('src/ui/map/components/SelectionPanel.tsx', 'utf8');
+
+    expect(selectionSource).toContain("t('selection.settlementInfo')");
+    expect(selectionSource).toContain("t('selection.localSupport')");
+    expect(selectionSource).toContain("t('selection.noLocalSupportStaged')");
+    expect(selectionSource).not.toMatch(/Settlement Info|Local support staged|Failed to stage local support|none staged/);
+  });
+
   it('keeps normal command-surface English copy free of SITREP shorthand', () => {
     const commandSurfaceKeys = [
       'decisionRoom.category.operational',

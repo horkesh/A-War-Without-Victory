@@ -3,7 +3,7 @@ import type { FormationView } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
 import { Icon, type IconName } from './icons/Icon';
 import { FlipCard } from './army_hq/FlipCard';
-import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeOperationPhaseLabel } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
 
@@ -278,7 +278,7 @@ export function CorpsCard({
               <div className="text-[11px]">
                 <span className="text-red-400 font-bold uppercase">{activeOperationName}</span>
                 {activeOperationPhase && (
-                  <span className="text-text-secondary ml-1.5">({activeOperationPhase})</span>
+                  <span className="text-text-secondary ml-1.5">({getPlayerSafeOperationPhaseLabel(activeOperationPhase)})</span>
                 )}
               </div>
             </div>

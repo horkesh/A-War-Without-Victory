@@ -176,6 +176,18 @@ test('baked April 1992 startup has no false turn-0 combat control history', asyn
     }
 }, 120_000);
 
+test('baked April 1992 startup active formations resolve their command parents', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const missingParents = Object.values(state.military.formations)
+        .filter((formation) => formation.status === 'active' && formation.corps_id)
+        .filter((formation) => !state.military.formations[formation.corps_id!])
+        .map((formation) => `${formation.id}->${formation.corps_id}`)
+        .sort();
+
+    assert.deepStrictEqual(missingParents, []);
+    assert.strictEqual(state.military.formations.vrs_main_staff?.kind, 'army_hq');
+}, 120_000);
+
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {
     resetSrkStranglePostureGate();
     const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;
