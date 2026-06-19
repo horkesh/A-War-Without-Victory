@@ -232,7 +232,7 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(openCommandCategoryBody).not.toContain("openArmyHQTab(useGameStore.getState(), 'briefing')");
         expect(openCommandCategoryBody).not.toContain("setAppScreen('game')");
         expect(appSource).toContain('data-testid="warroom-decision-room-host"');
-        expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
+        expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
     });
 
     it('routes Warroom Diplomacy and Chronicle directly to their mature player-facing panels', () => {
