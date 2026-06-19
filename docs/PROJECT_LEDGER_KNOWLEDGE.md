@@ -1,3 +1,7 @@
+## 2026-06-19 - Situation surfaces should speak like staff, not telemetry
+
+**First-hour Situation/War Summary copy must hide telemetry labels:** `IVP`, `Composite IVP`, formula rows, threshold tables, `OPSEC`, and `SITREP` can exist as internal keys, but first-hour player-facing Situation and War Summary copy should render `International Pressure`, `Operational Security`, `Situation Report`, qualitative pressure bands, and staff explanations. Durable rule: when a Situation surface exposes raw acronyms/math, fix it at the UI/read-model boundary and pin with render tests. Applied in `[2026-06-19] fix(ui): polish Situation and War Summary technical copy`; report `docs/40_reports/implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md`.
+
 ## 2026-06-19 - Compatibility IPC must not leak dead direct-command UI
 
 **Direct brigade move mode is retired from the live tactical map:** Desktop IPC and old save fields may retain compatibility-era brigade move/posture channels, but the current player command contract is president-through-generals: Army HQ opportunities, corps operations, sector assignment, and validated movement/order channels own movement intent. Durable rule: do not expose a clickable map `move` mode or stage `brigade_mun_orders` from live OSID clicks unless the engine consumes that path through the current command model and the player-facing order ownership docs are updated. Applied in `[2026-06-19] fix(ui): retire dead direct brigade move affordance`; report `docs/40_reports/implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md`.

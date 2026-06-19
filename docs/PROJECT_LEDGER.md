@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): polish Situation and War Summary technical copy
+
+**Type:** UI/read-model copy polish.
+
+**Fix:** Situation / War Summary English copy now uses staff-facing labels for the first-hour reachable pressure and operational-security lanes. `International Pressure` replaces visible `IVP`, current pressure renders as a qualitative staff line instead of `Composite IVP`, component rows show driver strength instead of raw formula math, threshold telemetry is replaced with plain explanatory copy, and `Operational Security` / `Security screen active` replaces visible `OPSEC` copy. The pressure score fallback now treats missing pressure components as zero instead of producing `NaN`.
+
+**Verification:** Red/green `tests/ui/gui_audit_label_discipline.test.ts`; focused pack passed 6/6 across label discipline and War Summary OPSEC reconciliation. Report: `docs/40_reports/implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md`.
+
+**Scope/determinism:** UI copy/read-model and tests/docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## [2026-06-19] fix(ui): retire dead direct brigade move affordance
 
 **Type:** UI/read-model route ownership and dead-control removal.

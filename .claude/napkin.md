@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**SITUATION COPY STAFF LANGUAGE (2026-06-19).** First-hour Situation/War Summary EN copy should not expose `IVP`, `Composite IVP`, formulas, thresholds, `OPSEC`, or `SITREP` telemetry. Do instead: use staff-facing language such as International Pressure, Operational Security, Situation Report, qualitative pressure bands, and driver strength labels; leave BCS changes for owner/native review.
+
 **DIRECT BRIGADE MOVE AFFORDANCE RETIRED (2026-06-19).** The live React tactical map must not expose direct `move` mode or OSID-click staging of `brigade_mun_orders`; compatibility IPC is not player-facing command authority. Do instead: keep map-click order ownership to attack confirmation and brigade-to-sector assignment unless a new engine-consuming, president-through-generals design explicitly reopens movement UI.
 
 **COMMANDER READ-MODEL SURFACE PARITY (2026-06-18).** Opening commander labels are display-only UI read-model truth, not officer seating. ORBAT, Corps Detail, Formation Detail, Army HQ, and OOB should all use `resolveCorpsCommanderDisplay(...)` / `CommanderDisplayPanel` style rendering for Drina/ARBiH 3rd/ARBiH 4th opening command and synthetic JNA command staff. Do not set `assigned_corps_id` at turn 0 to fix a display vacancy without a dedicated 188w/canon lane.

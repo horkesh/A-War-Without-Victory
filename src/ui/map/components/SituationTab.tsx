@@ -1,5 +1,5 @@
 /**
- * Situation tab — strategic / casualty / IVP / convoy / OPSEC overview.
+ * Situation tab — strategic / casualty / pressure / convoy / security overview.
  *
  * A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C — verified clean of clickable-div
  * anti-pattern: every interactive element here is a real <button>. The lane
@@ -24,9 +24,6 @@ import {
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { getOsidDisplayName, humanizeOsid } from '../utils/osidDisplayName';
 import {
-    DRINA_BLOCKADE_THRESHOLD,
-    INTERNATIONAL_SANCTIONS_THRESHOLD,
-    NATO_INTERVENTION_THRESHOLD,
     getIvpComponentContributions,
     formatIvpConsequenceLabel,
     ivpComponentLabel,
@@ -109,8 +106,28 @@ function computeIvpScore(state: LoadedGameState): number {
   if (typeof ivp.composite_ivp === 'number') {
     return Math.max(0, Math.min(100, ivp.composite_ivp * 100));
   }
-  const raw = ivp.atrocity_visibility + ivp.enclave_humanitarian_pressure + ivp.sarajevo_siege_visibility;
+  const raw =
+    (ivp.atrocity_visibility ?? 0) +
+    (ivp.enclave_humanitarian_pressure ?? 0) +
+    (ivp.sarajevo_siege_visibility ?? 0) +
+    (ivp.negotiation_momentum ?? 0);
   return Math.max(0, Math.min(100, raw * 20));
+}
+
+function pressureBand(score: number): string {
+  if (score >= 80) return 'extreme';
+  if (score >= 60) return 'severe';
+  if (score >= 35) return 'elevated';
+  if (score > 0) return 'limited';
+  return 'quiet';
+}
+
+function pressureDriverLabel(raw: number): string {
+  if (raw >= 0.75) return 'dominant';
+  if (raw >= 0.5) return 'strong';
+  if (raw >= 0.25) return 'visible';
+  if (raw > 0) return 'minor';
+  return 'quiet';
 }
 
 function legacySitrepTokenForOsid(osid: string): string {
@@ -305,20 +322,16 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-accent-gold/80" style={{ width: `${ivpScore}%` }} />
         </div>
-        <div className="text-text-secondary">{t('situation.compositeIvp', { score: ivpScore.toFixed(0) })}</div>
+        <div className="text-text-secondary">{t('situation.pressureCurrent', { band: pressureBand(ivpScore), score: ivpScore.toFixed(0) })}</div>
         <div className="text-text-secondary text-[10px] space-y-0.5">
           {getIvpComponentContributions(state.internationalVisibilityPressure).map((row) => (
-            <div key={row.key} className="flex justify-between gap-2 tabular-nums">
+            <div key={row.key} className="flex justify-between gap-2">
               <span>{ivpComponentLabel(row.key)}</span>
-              <span>
-                {Math.round(row.raw * 100)}% × {Math.round(row.weight * 100)}% → +{Math.round(row.contribution * 100)}%
-              </span>
+              <span className="text-right">{pressureDriverLabel(row.raw)}</span>
             </div>
           ))}
         </div>
-        <div className="text-text-secondary text-[10px]">
-          Thresholds: {Math.round(DRINA_BLOCKADE_THRESHOLD * 100)}% Drina · {Math.round(INTERNATIONAL_SANCTIONS_THRESHOLD * 100)}% sanctions · {Math.round(NATO_INTERVENTION_THRESHOLD * 100)}% NATO threat
-        </div>
+        <div className="text-text-secondary text-[10px]">{t('situation.pressureThresholds')}</div>
         <div className="text-text-secondary">
           {t('situation.consequences')}{' '}
           {state.ivpConsequencesActive?.length

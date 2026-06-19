@@ -147,4 +147,48 @@ describe('GUI audit label discipline', () => {
     expect(screen.getByText('Reserve-Crisis Authorization')).toBeTruthy();
     expect(container.textContent).not.toMatch(/\bT3\b/);
   });
+
+  it('renders Situation pressure and security copy without telemetry labels', () => {
+    const state = makeState({
+      internationalVisibilityPressure: {
+        sarajevo_siege_visibility: 0.6,
+        enclave_humanitarian_pressure: 0.4,
+        atrocity_visibility: 0.2,
+        negotiation_momentum: 0.5,
+        composite_ivp: 0.43,
+        last_major_shift: 0,
+      },
+      ivpConsequencesActive: ['international_sanctions'],
+      corpsFrontSectors: [
+        {
+          sector_id: 'sector:arbih:1',
+          corps_id: 'arbih_1st_corps',
+          faction: 'RBiH',
+          display_name: 'Sarajevo front',
+          assigned_brigade_ids: [],
+          reserve_brigade_ids: [],
+          length_edges: 4,
+          density: 0.2,
+          threat_ratio: 1.3,
+          intel_confidence: 0.65,
+          offensive_signs: true,
+          opsec_active: true,
+        },
+      ] as unknown as LoadedGameState['corpsFrontSectors'],
+    });
+
+    const { container: pressureContainer } = render(createElement(SituationTab, { state, focusSection: 'ivp' }));
+
+    expect(screen.getByText('International Pressure')).toBeTruthy();
+    expect(screen.getByText(/Current pressure:/)).toBeTruthy();
+    expect(pressureContainer.textContent).not.toMatch(/\bIVP\b|Composite|Thresholds|×|raw/i);
+
+    cleanup();
+
+    const { container: securityContainer } = render(createElement(SituationTab, { state, focusSection: 'opsec' }));
+
+    expect(screen.getByText('Operational Security')).toBeTruthy();
+    expect(screen.getByText('Security screen active')).toBeTruthy();
+    expect(securityContainer.textContent).not.toMatch(/\bOPSEC\b|\bSITREP\b/);
+  });
 });
