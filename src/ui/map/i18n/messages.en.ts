@@ -2202,7 +2202,7 @@ export const enMessages = {
     'codex.tier.ahistorical': 'Your War Only',
     'codex.unlocksAfterEvent': 'Unlocks after: {event}',
     'codex.unlocksAfterEssay': 'Unlocks after another entry',
-    'codex.unlocksAfterTurn': 'Unlocks from week {turn}',
+    'codex.unlocksAfterTurn': 'Unlocks from {date}',
     'warSummary.noState': 'No game state loaded',
     'warSummary.tab.overview': 'Overview',
     'warSummary.tab.ivp': 'Pressure',

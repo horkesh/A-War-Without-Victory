@@ -20,6 +20,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
 import { setLocale } from '../../src/ui/map/i18n';
+import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
 
@@ -39,6 +40,21 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
             subscribe: () => () => {},
         },
     ),
+}));
+
+vi.mock('../../data/scenarios/essays/essay_index.json', () => ({
+    default: [
+        {
+            id: 'essay_unlock_turn_gate',
+            event_id: 'codex_unlock_test_event',
+            title: 'Turn-gated essay',
+            year: 1992,
+            category: 'political',
+            content: 'Hidden until the turn gate opens.',
+            tier: 0,
+            unlock_turn_min: 12,
+        },
+    ],
 }));
 
 // @ts-expect-error TS1378: top-level await is supported by vitest runtime.
@@ -304,5 +320,99 @@ describe('CodexPanel Unlock State (Phase H Packet 5)', () => {
         expect(unknownRow).toBeTruthy();
         expect(unknownRow!.textContent).toContain('[family=unknown]');
         expect(unknownRow!.textContent).toContain('[source=unknown]');
+    });
+
+    it('renders unlock turn hints as player-facing dates instead of raw week labels', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [
+                    {
+                        id: 'codex_unlock_test_event',
+                        turn: 1,
+                        title: 'Codex Unlock Test Event',
+                        narrative: '',
+                        category: 'political',
+                        effects: [],
+                        isDecision: false,
+                    },
+                ],
+                turn: 4,
+            },
+            devMode: false,
+            diagMode: false,
+        };
+
+        renderPanel();
+
+        const hint = screen.getByTestId('codex-unlock-hint');
+        expect(hint.textContent).toContain(turnToDateString(12));
+        expect(hint.textContent).not.toMatch(/week\s+12/i);
+        expect(hint.textContent).not.toContain('W12');
+    });
+
+    it('renders dilemma decision timing as a player-facing date instead of a raw W label', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [],
+                turn: 40,
+                dilemmaSpine: [
+                    {
+                        dilemmaId: 'vance_owen_plan',
+                        title: 'The Vance-Owen Peace Plan',
+                        essayId: null,
+                        sensitive: false,
+                        faced: true,
+                        chosenResponseId: 'accept',
+                        chosenBranchLabel: 'Accept the Vance-Owen Plan',
+                        decisionTurn: 39,
+                    },
+                ],
+            },
+            devMode: false,
+            diagMode: false,
+        };
+
+        renderPanel();
+
+        const branch = screen.getByTestId('codex-dilemma-branch');
+        expect(branch.textContent).toContain(turnToDateString(39));
+        expect(branch.textContent).not.toContain('(W39)');
+    });
+
+    it('renders distance-from-history row timing as a player-facing date instead of a raw W label', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [],
+                turn: 40,
+                distanceFromHistory: {
+                    totalDecided: 1,
+                    matchedHistory: 0,
+                    diverged: 1,
+                    divergencePct: 100,
+                    playerDiverged: 1,
+                    divergences: [
+                        {
+                            eventId: 'vance_owen_plan_1993',
+                            title: 'The Vance-Owen Peace Plan',
+                            chosen: 'Reject the Vance-Owen Plan',
+                            historical: 'Accept the Vance-Owen Plan',
+                            chosenResponseId: 'reject',
+                            historicalResponseId: 'accept',
+                            turn: 39,
+                            faction: 'RBiH',
+                            source: 'player',
+                        },
+                    ],
+                },
+            },
+            devMode: false,
+            diagMode: false,
+        };
+
+        renderPanel();
+
+        const row = screen.getByTestId('codex-distance-from-history-row');
+        expect(row.textContent).toContain(turnToDateString(39));
+        expect(row.textContent).not.toMatch(/\bW39\b/);
     });
 });

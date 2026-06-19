@@ -1,3 +1,7 @@
+## 2026-06-19 - Codex timing copy uses calendar dates outside diagnostics
+
+**Codex timing labels should not show raw weeks in normal play:** Codex unlock gates, Dilemma Spine branch timing, and Distance from History rows preserve raw turn numbers internally, but normal Codex copy should render calendar dates. Durable rule: use `turnToDateString(...)` for Codex timing outside explicit diagnostic sections; keep raw event/source/family metadata only behind `diagMode`. Applied in `[2026-06-19] Codex panel player-copy calendar cleanup`; report `docs/40_reports/implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md`.
+
 ## 2026-06-19 - Operation History timing and fallback copy
 
 **Operation History is an AAR surface, not a debug timeline:** Completed-operation ranges, active-operation starts, and weekly operation rows preserve raw turns internally for ordering, but visible AAR copy should use calendar dates. Durable rule: render Operation History timing with `turnToDateString(...)`, and map unknown grade factors/notable events to neutral player copy instead of leaking underscore identifiers. Applied in `[2026-06-19] Operation History player-copy cleanup`; report `docs/40_reports/implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md`.

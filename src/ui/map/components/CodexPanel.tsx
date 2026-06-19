@@ -28,6 +28,7 @@ import { Z } from '../../shared/zIndex.js';
 import type { EventDefinition } from '../../../sim/events/event_types.js';
 import type { GameState } from '../../../state/game_state.js';
 import { getEventChainSummary } from '../../../sim/events/causality_query.js';
+import { turnToDateString } from '../utils/formatters.js';
 
 const YEARS = [1992, 1993, 1994, 1995] as const;
 
@@ -80,7 +81,7 @@ function lockHint(lockReason: CodexLockReason | null): string | null {
     switch (lockReason.kind) {
         case 'event': return t('codex.unlocksAfterEvent', { event: lockReason.detail ?? '' });
         case 'essay': return t('codex.unlocksAfterEssay');
-        case 'turn': return t('codex.unlocksAfterTurn', { turn: lockReason.turn ?? 0 });
+        case 'turn': return t('codex.unlocksAfterTurn', { date: turnToDateString(lockReason.turn ?? 0) });
         case 'event_fire':
         default: return null;
     }
@@ -345,7 +346,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                 >
                                                     Chose: {dilemma.chosenBranchLabel}
                                                     {dilemma.decisionTurn !== null && (
-                                                        <span className="text-neutral-600"> (W{dilemma.decisionTurn})</span>
+                                                        <span className="text-neutral-600"> ({turnToDateString(dilemma.decisionTurn)})</span>
                                                     )}
                                                 </div>
                                             )}
@@ -422,7 +423,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                         data-source={d.source}
                                         className="flex items-start gap-2 text-[9px] leading-snug"
                                     >
-                                        <span className="text-neutral-600 shrink-0">W{d.turn}</span>
+                                        <span className="text-neutral-600 shrink-0">{turnToDateString(d.turn)}</span>
                                         <div className="flex-1 min-w-0">
                                             <span className="text-neutral-200">{d.title}</span>
                                             <span className="text-neutral-500">

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**CODEX TIMING COPY (2026-06-19).** Normal Codex copy should not expose raw week labels. Do instead: render unlock hints, Dilemma Spine decision timing, and Distance from History rows with `turnToDateString(...)`; keep raw event/source/family metadata only behind explicit diagnostic mode.
+
 **OPERATION HISTORY DATE/FALLBACK COPY (2026-06-19).** Operation History is a player AAR surface, not a debug timeline. Do instead: render completed ranges, active starts, and weekly rows with `turnToDateString(...)`, and map unknown grade/notable-event ids to neutral copy instead of leaking underscores.
 
 **DECISION RECEIPT DATE COPY (2026-06-19).** Decision consequence receipt `turn` values are ordering/internal join data, not player copy. Do instead: render Army HQ Records and Chronicle receipt timing with `turnToDateString(...)`; avoid `Latest Turn`, `Turn {n}`, `Potez {n}`, or `at week {n}` in normal receipt surfaces.

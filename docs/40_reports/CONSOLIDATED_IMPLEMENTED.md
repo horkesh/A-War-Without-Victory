@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Codex panel calendar copy:** [implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md](implemented/20260619_CODEX_PANEL_CALENDAR_COPY.md) - Normal Codex lock hints, Dilemma Spine branch timing, and Distance from History rows now render calendar dates instead of raw week labels while diagnostic unlock metadata stays gated.
+
 **Latest Operation History player-copy cleanup:** [implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md](implemented/20260619_OPERATION_HISTORY_PLAYER_COPY_CLEANUP.md) - Army HQ Operation History now renders date ranges and weekly rows as calendar dates, labels commander assessments, and hides raw grade/notable-event fallback identifiers behind player-safe copy.
 
 **Latest decision receipt date copy:** [implemented/20260619_DECISION_RECEIPT_DATE_COPY.md](implemented/20260619_DECISION_RECEIPT_DATE_COPY.md) - Decision Consequence Records and Chronicle confirmed consequence receipts now render receipt timing as calendar dates instead of `Latest Turn`, `Turn {n}`, or `at week {n}` player copy.

@@ -2079,7 +2079,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'codex.tier.ahistorical': 'Samo vaš rat',
     'codex.unlocksAfterEvent': 'Otključava se nakon: {event}',
     'codex.unlocksAfterEssay': 'Otključava se nakon drugog zapisa',
-    'codex.unlocksAfterTurn': 'Otključava se od sedmice {turn}',
+    'codex.unlocksAfterTurn': 'Otključava se od {date}',
     'warSummary.noState': 'Stanje igre nije učitano',
     'warSummary.tab.overview': 'Pregled',
     'warSummary.tab.ivp': 'IVP',
