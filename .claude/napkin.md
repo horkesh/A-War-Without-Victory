@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**TURN AFTERMATH DESK ITEM LABELS (2026-06-19).** Turn Aftermath top action `type` values are internal inbox joins, not player copy. Do instead: use `getDecisionSurfaceForInboxType(...)` + `records.actionType.*` with `Review item` fallback; never render `item.type.replace(/_/g, ' ')` in the post-turn modal.
+
 **SITUATION COPY STAFF LANGUAGE (2026-06-19).** First-hour Situation/War Summary EN copy should not expose `IVP`, `Composite IVP`, formulas, thresholds, `OPSEC`, or `SITREP` telemetry. Do instead: use staff-facing language such as International Pressure, Operational Security, Situation Report, qualitative pressure bands, and driver strength labels; leave BCS changes for owner/native review.
 
 **DIRECT BRIGADE MOVE AFFORDANCE RETIRED (2026-06-19).** The live React tactical map must not expose direct `move` mode or OSID-click staging of `brigade_mun_orders`; compatibility IPC is not player-facing command authority. Do instead: keep map-click order ownership to attack confirmation and brigade-to-sector assignment unless a new engine-consuming, president-through-generals design explicitly reopens movement UI.

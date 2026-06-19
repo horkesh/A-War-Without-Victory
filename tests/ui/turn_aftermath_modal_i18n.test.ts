@@ -102,4 +102,33 @@ describe('TurnAftermathModal localization', () => {
         expect(screen.getByRole('button', { name: 'Pregledaj inbox' })).toBeTruthy();
         expect(screen.queryByText('Turn Aftermath')).toBeNull();
     });
+
+    it('labels top desk item types with player-facing registry copy', () => {
+        const view = makeView();
+        view.nextActions = {
+            ...view.nextActions,
+            actionableCount: 1,
+            topItems: [{
+                id: 'convoy:one',
+                type: 'convoy_decision',
+                severity: 'urgent',
+                title: 'Convoy to Srebrenica',
+                action: 'convoy_decision_modal',
+            }],
+        };
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        expect(screen.getByText('Humanitarian convoy')).toBeTruthy();
+        expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
+    });
 });

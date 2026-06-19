@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Turn Aftermath desk item label polish** | [implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md](implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md) - Turn Aftermath now labels pending desk item types through the shared decision-surface registry instead of raw inbox type strings. |
 | **Latest Situation and War Summary copy polish** | [implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md](implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md) - First-hour reachable Situation / War Summary English copy now uses staff-facing pressure/security/report language instead of visible `IVP`, formulas, thresholds, or `OPSEC` telemetry. |
 | **Latest direct brigade move affordance retirement** | [implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md](implemented/20260619_DIRECT_BRIGADE_MOVE_AFFORDANCE_RETIREMENT.md) - The live tactical map no longer exposes compatibility-era direct brigade move mode or OSID-click staging of `brigade_mun_orders`; player-facing map clicks remain attack confirmation and sector assignment only. |
 | **Latest first-hour faction modal gate parity** | [implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md](implemented/20260619_FIRST_HOUR_FACTION_MODAL_GATE_PARITY.md) - RBiH/RS/HRHB new-campaign starts now all reset to `WAR HAS STARTED`, then identity briefing, then foundational decision; required decision modals lock top-level toolbar routes until answered. |

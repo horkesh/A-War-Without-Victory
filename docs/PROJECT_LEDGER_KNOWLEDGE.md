@@ -1,3 +1,7 @@
+## 2026-06-19 - Turn Aftermath desk items use decision-surface labels
+
+**Inbox item types are joins, not modal copy:** Turn Aftermath receives `nextActions.topItems[].type` as an internal inbox type, but the Command Desk list is player-facing. Durable rule: render top-action type labels through `getDecisionSurfaceForInboxType(...)` and `records.actionType.*`, with `Review item` as fallback; do not use `item.type.replace(/_/g, ' ')` in player copy. Applied in `[2026-06-19] fix(ui): label Turn Aftermath desk item types`; report `docs/40_reports/implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md`.
+
 ## 2026-06-19 - Situation surfaces should speak like staff, not telemetry
 
 **First-hour Situation/War Summary copy must hide telemetry labels:** `IVP`, `Composite IVP`, formula rows, threshold tables, `OPSEC`, and `SITREP` can exist as internal keys, but first-hour player-facing Situation and War Summary copy should render `International Pressure`, `Operational Security`, `Situation Report`, qualitative pressure bands, and staff explanations. Durable rule: when a Situation surface exposes raw acronyms/math, fix it at the UI/read-model boundary and pin with render tests. Applied in `[2026-06-19] fix(ui): polish Situation and War Summary technical copy`; report `docs/40_reports/implemented/20260619_SITUATION_WAR_SUMMARY_COPY_POLISH.md`.

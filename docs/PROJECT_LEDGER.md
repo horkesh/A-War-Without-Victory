@@ -1,4 +1,14 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-19] fix(ui): label Turn Aftermath desk item types
+
+**Type:** UI/read-model player-copy polish.
+
+**Fix:** Turn Aftermath's Command Desk section now labels pending desk item types through the shared decision-surface registry instead of rendering raw inbox type values with underscores replaced by spaces. Registered families now match Records/Inbox copy such as `Humanitarian convoy`; unknown types fall back to `Review item`.
+
+**Verification:** Red/green `tests/ui/turn_aftermath_modal_i18n.test.ts`; focused Turn Aftermath pack passed 3 files / 19 tests; TypeScript passed. Report: `docs/40_reports/implemented/20260619_TURN_AFTERMATH_DESK_ITEM_LABEL_POLISH.md`.
+
+**Scope/determinism:** UI copy/read-model and tests/docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## [2026-06-19] fix(ui): polish Situation and War Summary technical copy
 
 **Type:** UI/read-model copy polish.

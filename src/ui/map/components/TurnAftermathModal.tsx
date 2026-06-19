@@ -9,6 +9,7 @@ import type { TurnAftermathTopAction, TurnAftermathView } from '../data/turnAfte
 import type { ConsequenceReceipt } from '../data/consequenceReceipts';
 import type { ForcedOpReceipt } from '../data/forcedOpReceipts';
 import type { OfficerResentmentReceipt } from '../data/officerResentmentReceipts';
+import { getDecisionSurfaceForInboxType } from '../data/decisionSurfaceRegistry';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
@@ -80,6 +81,12 @@ function signalTone(severity: TurnAftermathView['signals'][number]['severity']):
 
 function enumLabel(prefix: string, value: string): string {
   return t(`${prefix}.${value}` as MessageKey);
+}
+
+function actionTypeLabel(type: TurnAftermathTopAction['type']): string {
+  const surface = getDecisionSurfaceForInboxType(type);
+  if (!surface) return t('records.actionType.reviewItem');
+  return t(`records.actionType.${surface.familyId}` as MessageKey);
 }
 
 function memoryToneClasses(tone: TurnAftermathView['judgment']['memoryTone']): string {
@@ -353,7 +360,7 @@ export function TurnAftermathModal({
                 ) : view.nextActions.topItems.map((item) => (
                   <div key={item.id} className={`px-3 py-2 ${actionTone(item)}`}>
                     <div className="truncate text-sm font-semibold">{item.title}</div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{item.type.replace(/_/g, ' ')}</div>
+                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{actionTypeLabel(item.type)}</div>
                   </div>
                 ))}
               </div>
