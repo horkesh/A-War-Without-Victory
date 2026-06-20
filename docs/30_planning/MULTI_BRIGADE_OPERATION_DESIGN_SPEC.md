@@ -25,7 +25,7 @@ These combine to produce operations that feel like a single blob moving along a 
 
 **P1: One brigade advances, others hold.** Only the MAIN (spearhead) brigade physically enters the captured OSID. Support brigades remain on their approach OSIDs, providing combat power from adjacent positions. This models the real pattern: a lead element pushes through while flanking units fix the enemy and provide fire support.
 
-**P2: Broad front, not stacking.** Brigades spread across multiple friendly OSIDs that border the target. This creates converging fire from multiple directions — the historical norm for planned operations in Bosnia (e.g., VRS operations around Srebrenica used multiple axes of approach into each objective).
+**P2: Broad front, not stacking.** Brigades spread across multiple friendly OSIDs that border the target. This creates converging fire from multiple directions — the historical norm for planned operations in Bosnia. Sensitive-history enclave examples such as Srebrenica/Žepa are force-composition context only; their in-game fall receipts are event-owned.
 
 **P3: Repositioning is a real cost.** After a capture, the bot must reposition support brigades to new positions adjacent to the NEXT objective before committing to the next attack. This takes time (turns). Operations that advance too fast outrun their support — a core tension in the Bosnian War where road networks constrained maneuver.
 

@@ -46,7 +46,7 @@
 - **NO new GameState field, NO save-migration.** Trend is computed at read time from `turnSummaries` already present in `LoadedGameState`. No persisted state added.
 - **NO calibration / hash-affecting change.** Engine untouched → 40w/188w byte-identical by construction; no baseline refresh.
 - **NO new owner duplication.** Supply read-model owner is `playerSupplyVisibility.ts`; warroom docket owner is `warroomPriorityDocket.ts`; decision-room owner is `presidentialDecisionRoom.ts`. This lane extends the supply owner and *consumes* it from the others — it does not fork a second supply projection.
-- **NO `FORAWWV.md` edit.** Any canon-wording desire is flagged for manual review only.
+- **NO ungated `FORAWWV.md` edit.** Any canon-wording desire is routed through Pyrrhic-panel sign-off.
 
 ---
 

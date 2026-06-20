@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest docs process/canon terminology cleanup:** [implemented/20260620_DOCS_PROCESS_CANON_TERMINOLOGY_CLEANUP.md](implemented/20260620_DOCS_PROCESS_CANON_TERMINOLOGY_CLEANUP.md) - Active process docs now use Pyrrhic-panel sign-off language, and Srebrenica/Žepa fall-control wording is event-receipt owned.
+
 **Latest Formation Detail movement/engagement copy:** [implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md](implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md) - Formation Detail movement status and recent-engagement outcomes now use explicit player-facing labels and neutral fallback copy.
 
 **Latest historical-event fallback copy:** [implemented/20260620_HISTORICAL_EVENT_FALLBACK_COPY.md](implemented/20260620_HISTORICAL_EVENT_FALLBACK_COPY.md) - Adapter and settlement timeline historical-event rows now use localized neutral fallback copy instead of raw event ids when text is missing or unsafe.

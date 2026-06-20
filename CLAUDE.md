@@ -34,7 +34,7 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
 - **One change per calibration run**: Change ONE thing, run scenario, compare, sign off. Never bundle.
 - **GameState is single source of truth**: `src/state/game_state.ts`.
 - **Ops-only attacks**: Brigades NEVER attack independently. All attacks flow through CorpsOperation.
-- **Canon edits (incl. `docs/10_canon/FORAWWV.md`) require Pyrrhic-panel sign-off** — convene the appropriate panel (for §6: Historian + scenario-tester/calibration + Engine/systems + Red-team); a unanimous GO is the signature; a BLOCK or split verdict surfaces to the owner. Implementer ≠ reviewer. Bright lines (§6 atrocity-is-never-rewarded) and the canon hierarchy remain invariant.
+- **Canon edits (incl. `docs/10_canon/FORAWWV.md`) require Pyrrhic-panel sign-off** — convene the appropriate panel (for §6: Historian + scenario-tester/calibration + Engine/systems + Red-team); a unanimous GO is the signature; a BLOCK, split verdict, or bright-line uncertainty escalates to the owner. Implementer ≠ reviewer. Bright lines (§6 atrocity-is-never-rewarded) and the canon hierarchy remain invariant.
 
 ## Shell & Platform
 
@@ -65,4 +65,4 @@ Smoke-test triad after every change: `tsc --noEmit` + `vitest run` + `desktop:ma
 
 - Append behavioral/output changes to `docs/PROJECT_LEDGER.md`.
 - Thematic knowledge to `docs/PROJECT_LEDGER_KNOWLEDGE.md`.
-- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (convene the appropriate panel; unanimous GO = signature; BLOCK or split surfaces to the owner; implementer ≠ reviewer).
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (convene the appropriate panel; unanimous GO = signature; BLOCK, split verdict, or bright-line uncertainty escalates to the owner; implementer ≠ reviewer).

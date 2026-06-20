@@ -257,8 +257,8 @@ The VRS organized into **6 corps** based on former JNA corps structures:
 - **Drina Valley Offensive (Apr-Dec 1992):** Captured Zvornik, Vlasenica, Bratunac, Višegrad, Foča
 - **Srebrenica-Cerska (Jan-Mar 1993):** Captured Cerska, pressured Srebrenica
 - **Gorazde Offensive (Apr 1994):** Failed to capture, NATO airstrikes
-- **Operation Krivaja 95 (July 1995):** Captured Srebrenica safe area
-- **Zepa Operation (July 1995):** Captured Zepa safe area
+- **Operation Krivaja 95 (July 1995):** Historically associated with the fall of the Srebrenica safe area; in-game control change is owned by `srebrenica_falls_1995`
+- **Zepa Operation (July 1995):** Historically associated with Žepa's fall; in-game control change is owned by `zepa_falls_1995`
 
 ### Major Brigades:
 

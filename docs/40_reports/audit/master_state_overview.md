@@ -34,7 +34,7 @@
 | 9 | Single canonical scenario runner | CODE_CANON.md, REPO_MAP.md | src/scenario/scenario_runner.ts | No shadow entrypoints; grep for runScenario( usage |
 | 10 | Canon doc set v0.4 vs code assumptions | CANON.md, Engine_Invariants_v0_4_0, Phase_Specifications_v0_4_0 | All state/sim modules | Doc-only review; no mechanics invented |
 
-**docs/10_canon/FORAWWV.md may require an addendum** if audit reveals systemic design insights (e.g. entrypoint multiplicity or determinism gap root cause). Do NOT edit FORAWWV automatically.
+**docs/10_canon/FORAWWV.md may require an addendum** if audit reveals systemic design insights (e.g. entrypoint multiplicity or determinism gap root cause). Apply only after Pyrrhic-panel sign-off.
 
 ---
 

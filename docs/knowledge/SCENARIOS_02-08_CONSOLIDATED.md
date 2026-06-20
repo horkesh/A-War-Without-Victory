@@ -439,7 +439,7 @@
 **Date:** July 11, 1995  
 **Context:** VRS captures UN safe area, Srebrenica genocide
 
-### Operation Krivaja 95 (VRS Drina Corps):
+### Srebrenica Fall Receipt and Krivaja-95 Context:
 
 **Timeline:**
 - **July 6, 1995:** VRS offensive begins
@@ -535,7 +535,7 @@
 6. Goražde holds
 7. Operation Storm (Croatia) imminent (August 1-5)
 
-**Game assertions (testable):** `srebrenica` → RS (captured); `gorazde` → RBiH (still holding).
+**Game assertions (testable):** `srebrenica_falls_1995` fired and applied the RS control receipt for Srebrenica; `gorazde` → RBiH (still holding). Operation rows are chronology/AAR context only.
 
 ---
 

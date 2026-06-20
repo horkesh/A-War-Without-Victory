@@ -96,7 +96,7 @@ The MC bucket (106k @144k) is dominated by (a) the 0.04 MIA fraction on the infl
 
 ### 3.4 What is territory-COUPLED (will move the floor — expected/approved)
 
-- `BASE_ATTRITION_RATE` — **strongly coupled** (it thins brigade strength → who holds OSIDs at 188w). This is THE n553 cascade risk. Moving the floor here is **expected and owner-approved**.
+- `BASE_ATTRITION_RATE` — **strongly coupled** (it thins brigade strength → who holds OSIDs at 188w). This is THE n553 cascade risk. Moving the floor here is **expected and panel-approved**.
 - `BOMBARDMENT_EXPOSURE_RATE` / `RATIO_SCALE` — coupled (ARBiH brigade strength).
 - Battle-path mults (`MAX_BOMBARDMENT_CAS_MULT`, base loss rates) — coupled via outcome/strength.
 - MIA / surrender-cascade split, KIA/WIA fractions — **NOT coupled** (reporting-only).

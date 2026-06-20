@@ -600,8 +600,8 @@ Examples:
 [TURN 23] Operation Drina — Axis East: 260th Brigade designated as
            new spearhead (was support).
 
-[TURN 25] Operation Drina — Axis West: Objective zepa_2 already under
-           friendly control. Advancing to next target (rastosnica_2).
+[TURN 25] Operation Drina — Axis West: Objective rastosnica_2 already under
+           friendly control. Advancing to next target (vitinica_2).
 
 [TURN 27] Operation Drina — Axis East completed: 2/3 objectives captured.
 
