@@ -16,6 +16,7 @@ import {
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
+import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
@@ -79,7 +80,6 @@ export function OOBSidebar() {
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedFormationId = useGameStore((s) => s.selectedFormationId);
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
-  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const setSelectedCorpsId = useGameStore((s) => s.setSelectedCorpsId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
@@ -632,7 +632,11 @@ export function OOBSidebar() {
                             data-testid="oob-sector-row"
                             data-sector-id={sector.sector_id}
                             data-selected={selectedCorpsFrontSectorId === sector.sector_id ? 'true' : 'false'}
-                            onClick={() => setSelectedCorpsFrontSectorId(sector.sector_id)}
+                            onClick={() => inspectOnField(useGameStore.getState(), {
+                              kind: 'field-sector-in-corps',
+                              sectorId: sector.sector_id,
+                              corpsId: sector.corps_id,
+                            })}
                             className={`w-full flex items-center gap-1.5 px-2 py-1 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
                               ? 'border-accent-gold bg-panel-active'
                               : 'border-panel-border bg-panel-card hover:bg-panel-hover'

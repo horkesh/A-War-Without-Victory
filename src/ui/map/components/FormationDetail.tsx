@@ -596,7 +596,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   type="button"
                   data-testid="formation-location-link"
                   data-osid={formation.location_osid}
-                  onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: formation.location_osid! })}
+                  onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId: formation.id, osid: formation.location_osid! })}
                   className="text-left text-text-primary break-all underline decoration-dotted underline-offset-2 hover:text-interactive"
                 >
                   {getOsidDisplayName(formation.location_osid, osidDisplayNames)}

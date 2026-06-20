@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): preserve compound field drilldowns
+
+**Type:** UI/store route-state polish.
+
+**Fix:** Settlement formation rows, Formation Detail location links, and OOB sector rows now use explicit compound field-inspection targets so related settlement/formation and corps/sector context survives the drilldown. `qa:player-journeys` now includes `tests/ui/gamestore_field_inspection.test.ts` so the compound route contract is part of the player-polish gate.
+
+**Verification:** Red proof first failed because the new compound targets left context unset and OOB sector rows exposed no preserved corps context. Green proof passed: `npm.cmd exec -- vitest run tests/ui/gamestore_field_inspection.test.ts tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (7/7); focused route pack passed 15/15; `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (25 files / 221 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`, temp evidence deleted); `git diff --check`. Report: `docs/40_reports/implemented/20260620_COMPOUND_FIELD_DRILLDOWNS.md`.
+
+**Scope/determinism:** UI/store route-state/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): preserve OrbatPanel brigade context
 
 **Type:** UI/store route-state polish.

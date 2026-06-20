@@ -75,4 +75,34 @@ describe('gameStore field inspection routes', () => {
       selectedOperationKey: null,
     });
   });
+
+  it('preserves formation plus settlement context atomically', () => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-formation-at-settlement',
+      formationId: 'brigade_alpha',
+      osid: 'sarajevo_1',
+    });
+
+    expect(useGameStore.getState()).toMatchObject({
+      isOperationsPanelOpen: false,
+      selectedFormationId: 'brigade_alpha',
+      selectedOsid: 'sarajevo_1',
+      selectedOperationKey: null,
+    });
+  });
+
+  it('preserves corps plus sector context atomically', () => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-sector-in-corps',
+      sectorId: 'sector_alpha',
+      corpsId: 'corps_alpha',
+    });
+
+    expect(useGameStore.getState()).toMatchObject({
+      isOperationsPanelOpen: false,
+      selectedCorpsFrontSectorId: 'sector_alpha',
+      selectedCorpsId: 'corps_alpha',
+      selectedOperationKey: null,
+    });
+  });
 });

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COMPOUND FIELD DRILLDOWNS (2026-06-20).** Field drilldowns must not use bare targets when the source surface knows related context. Do instead: route settlement formation and Formation Detail location links through `field-formation-at-settlement`, and OOB sector rows through `field-sector-in-corps`; pin with `tests/ui/gamestore_field_inspection.test.ts` and `tests/ui/oob_drilldown_routing.test.ts`.
+
 **CORPS DETAIL BRIGADE DRILLDOWN (2026-06-20).** Corps Detail brigade clicks must not clear the selected corps and leave the player in a bare formation route. Do instead: route combat-summary and ORBAT brigade clicks through `inspectOnField(..., { kind: 'field-formation-in-corps', formationId, corpsId })` and pin rail ownership with `tests/ui/command_drilldown_routing.test.ts`.
 
 **SETTLEMENT STATUS LABEL I18N (2026-06-20).** Selected-settlement overview must not print raw `statusBySettlement` ids such as `CONTESTED`. Do instead: render through `getPlayerSafeSettlementStatusLabel(...)` in `src/ui/map/utils/settlementStatusLabels.ts`, keep known ids explicit (`CONSOLIDATED`, `CONTESTED`, `HIGHLY_CONTESTED`), and fall back to neutral status-pending copy.

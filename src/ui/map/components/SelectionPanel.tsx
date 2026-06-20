@@ -268,7 +268,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           brigadeCountByFaction={Object.keys(brigadeCountByFaction).length > 0 ? brigadeCountByFaction : undefined}
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
-          onFormationClick={(formationId) => inspectOnField(useGameStore.getState(), { kind: 'field-formation', formationId })}
+          onFormationClick={(formationId) => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId, osid: selectedOsid })}
           onSectorClick={(sectorId) => inspectOnField(useGameStore.getState(), { kind: 'field-sector', sectorId, osid: selectedOsid })}
           onOperationClick={(operationKey) => inspectOnField(useGameStore.getState(), { kind: 'field-operation', operationKey })}
           currentEthnic={currentEthnic ?? undefined}

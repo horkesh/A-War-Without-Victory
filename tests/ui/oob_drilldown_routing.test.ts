@@ -58,7 +58,19 @@ function makeState(): LoadedGameState {
     latestTurnSummary: null,
     turnSummaries: [],
     player_faction: 'RS',
-    corpsFrontSectors: [],
+    corpsFrontSectors: [
+      {
+        sector_id: 'sector_vrs_main_staff_north',
+        display_name: 'Northern Line',
+        faction: 'RS',
+        corps_id: 'vrs_main_staff',
+        assigned_brigade_ids: ['vrs_guard_bde'],
+        reserve_brigade_ids: [],
+        length_edges: 2,
+        density: 0.2,
+        combat_strength_class: 'adequate',
+      },
+    ],
   } as unknown as LoadedGameState;
 }
 
@@ -88,5 +100,17 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedCorpsId).toBeNull();
     expect(store.selectedFormationId).toBe('vrs_guard_bde');
     expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
+  });
+
+  it('routes sector rows with their corps context preserved', () => {
+    render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    fireEvent.click(screen.getByTestId('oob-sector-row'));
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsId).toBe('vrs_main_staff');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
+    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
 });

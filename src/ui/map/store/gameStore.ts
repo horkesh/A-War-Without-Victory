@@ -567,8 +567,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
       return;
     }
+    if (target.kind === 'field-sector-in-corps') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedCorpsFrontSectorId: target.sectorId,
+        selectedCorpsId: target.corpsId,
+      });
+      return;
+    }
     if (target.kind === 'field-formation') {
       set({ ...base, isOperationsPanelOpen: false, selectedFormationId: target.formationId });
+      return;
+    }
+    if (target.kind === 'field-formation-at-settlement') {
+      set({
+        ...base,
+        isOperationsPanelOpen: false,
+        selectedFormationId: target.formationId,
+        selectedOsid: target.osid,
+      });
       return;
     }
     if (target.kind === 'field-formation-in-sector') {
