@@ -158,6 +158,7 @@ export class NewspaperModal {
         const report = getLastTurnReport();
         const succession = report?.details?.officer_succession;
         if (!succession) return [];
+        const reportDate = turnToDateString(report?.turn ?? this.gameState.meta.turn);
 
         const snap = extractWarData(this.gameState, playerFaction);
         const nameById = new Map<string, string>(Object.entries(snap.officerNamesById));
@@ -174,17 +175,17 @@ export class NewspaperModal {
         for (const r of sortedReplacements) {
             const name = nameById.get(r.new_officer) ?? getPlayerSafeOfficerName(null);
             const corps = corpsName(r.corps_id);
-            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} assigned to ${corps}.`);
+            lines.push(`On ${reportDate}, ${name} was assigned to ${corps}.`);
         }
         const casualties = succession.casualties ?? [];
         for (const id of [...casualties].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
             const name = nameById.get(id) ?? getPlayerSafeOfficerName(null);
-            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} killed in action.`);
+            lines.push(`On ${reportDate}, ${name} was killed in action.`);
         }
         const departures = succession.departures ?? [];
         for (const id of [...departures].sort((a, b) => a < b ? -1 : a > b ? 1 : 0)) {
             const name = nameById.get(id) ?? getPlayerSafeOfficerName(null);
-            lines.push(`[Turn ${report?.turn ?? '?'}] ${name} retired.`);
+            lines.push(`On ${reportDate}, ${name} retired.`);
         }
         return lines;
     }

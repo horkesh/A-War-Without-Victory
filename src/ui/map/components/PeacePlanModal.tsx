@@ -23,7 +23,7 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { playCue } from '../audio/audio_engine';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { resolvePeacePlanStill } from '../data/peacePlanArt';
 import { turnToDateString } from '../utils/formatters';
@@ -37,9 +37,9 @@ const INSTITUTIONAL_LABELS: Record<string, string> = {
     '10_provinces': '10 Decentralized Provinces',
 };
 
-const PEACE_RESPONSE_LABELS: Record<string, string> = {
-    accepted: 'Accepted',
-    rejected: 'Rejected',
+const PEACE_RESPONSE_LABEL_KEYS: Record<string, MessageKey> = {
+    accepted: 'peacePlan.response.accepted',
+    rejected: 'peacePlan.response.rejected',
 };
 
 const FACTION_ORDER = ['RBiH', 'RS', 'HRHB'] as const;
@@ -59,6 +59,14 @@ function normalizePercent(value: number): number {
 function formatPercent(value: number): string {
     if (Number.isInteger(value)) return String(value);
     return value.toFixed(1).replace(/\.0$/, '');
+}
+
+function formatInstitutionalModel(model: string): string {
+    return INSTITUTIONAL_LABELS[model] ?? t('peacePlan.institutionalModel.unknown');
+}
+
+function formatPeaceResponse(response: string): string {
+    return t(PEACE_RESPONSE_LABEL_KEYS[response] ?? 'peacePlan.response.unknown');
 }
 
 interface PeacePlanModalProps {
@@ -150,7 +158,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     </h2>
                     <div className="text-[11px] text-[#6a5a40] mt-1"
                          style={{ fontFamily: 'Courier New, monospace' }}>
-                        Proposed: {turnToDateString(plan.turnOffered)}
+                        {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
                     </div>
                 </div>
 
@@ -211,14 +219,14 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                     </div>
                     <div className="text-[11px] text-[#6a5a40] mt-2">
                         <span className="font-bold text-[#2a2016]">{t('peace.institutionalModel')}</span>{' '}
-                        {INSTITUTIONAL_LABELS[plan.institutionalModel] ?? plan.institutionalModel.replace(/_/g, ' ')}
+                        {formatInstitutionalModel(plan.institutionalModel)}
                     </div>
                 </div>
 
                 {/* Bot Responses */}
                 <div className="px-8 py-4 border-b border-[#c8b898]/40">
                     <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
-                        Other Faction Responses
+                        {t('peacePlan.otherFactionResponses')}
                     </div>
                     <div className="space-y-1.5" data-testid="peace-plan-other-responses">
                         {otherFactionResponses.map(([faction, response]) => (
@@ -229,7 +237,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                                         ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'
                                         : 'text-[#8a2a2a] bg-[#e8d0d0] border-[#8a2a2a]/30'
                                 }`}>
-                                    {PEACE_RESPONSE_LABELS[response] ?? response}
+                                    {formatPeaceResponse(response)}
                                 </span>
                             </div>
                         ))}
@@ -239,7 +247,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                 {/* Commander's Decision */}
                 <div className="px-8 py-5">
                     <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-3 text-center">
-                        Commander's Decision Required
+                        {t('peacePlan.decisionRequired')}
                     </div>
                     <div className="flex gap-4 justify-center">
                         <button
@@ -248,7 +256,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             className="px-6 py-2.5 rounded border-2 border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#b8d8b8] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
-                            Accept Plan
+                            {t('peacePlan.acceptPlan')}
                         </button>
                         <button
                             type="button"
@@ -256,7 +264,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             className="px-6 py-2.5 rounded border-2 border-[#6a5a40]/35 bg-[#d8ceb8] text-[#4a3a24] font-bold text-[13px] uppercase tracking-wider hover:bg-[#c8b898] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
-                            Review Later
+                            {t('peacePlan.reviewLater')}
                         </button>
                         <button
                             type="button"
@@ -264,7 +272,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             className="px-6 py-2.5 rounded border-2 border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#6a1a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#d8b8b8] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
-                            Reject Plan
+                            {t('peacePlan.rejectPlan')}
                         </button>
                     </div>
                 </div>

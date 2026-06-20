@@ -17,18 +17,29 @@ import type { NamedOfficerView } from '../data/types';
 import { GlassPanel } from './GlassPanel';
 import { OfficerProfile } from './OfficerProfile';
 import { formatTenure } from '../utils/officerCharacter';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 
 export interface OfficerDossierPanelProps {
     officer: NamedOfficerView;
     onClose: () => void;
 }
 
+const OFFICER_STATUS_KEY: Record<string, MessageKey> = {
+    active: 'officerDossier.status.active',
+    reserve: 'officerDossier.status.reserve',
+    retired: 'officerDossier.status.retired',
+    killed: 'officerDossier.status.killed',
+    captured: 'officerDossier.status.captured',
+};
+
+function officerStatusLabel(status: string): string {
+    return t(OFFICER_STATUS_KEY[status] ?? 'officerDossier.status.unknown');
+}
+
 function corpsDisplayName(corpsId: string | null): string {
     if (!corpsId) return '';
-    return corpsId
-        .replace(/_/g, ' ')
-        .replace(/\b\w/g, (c) => c.toUpperCase());
+    return getPlayerSafeCorpsName(corpsId, corpsId, t('officerDossier.assignedCorpsUnknown'));
 }
 
 export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelProps) {
@@ -48,7 +59,7 @@ export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelPro
                     </div>
                     <div className="flex items-center gap-2 text-[9px]">
                         <span className="text-text-secondary w-[62px] shrink-0">{t('officerDossier.statusLabel')}</span>
-                        <span className="font-mono text-text-primary uppercase tracking-wide">{officer.status}</span>
+                        <span className="font-mono text-text-primary tracking-wide">{officerStatusLabel(officer.status)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-[9px]">
                         <span className="text-text-secondary w-[62px] shrink-0">{t('officerDossier.assignedCorps')}</span>

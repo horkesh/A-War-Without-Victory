@@ -230,6 +230,18 @@ describe('OfficerDossierPanel renders read-only dossier', () => {
         expect(html).toContain('The Una offensive');
     });
 
+    it('renders command status and assigned corps with player-safe labels', () => {
+        const html = renderToStaticMarkup(
+            React.createElement(OfficerDossierPanel, { officer: OFFICER_WITH_RECORD, onClose: () => {} }),
+        );
+
+        expect(html).toContain('Active');
+        expect(html).toContain('1st Corps');
+        expect(html).not.toContain('active');
+        expect(html).not.toContain('arbih_1st_corps');
+        expect(html).not.toContain('Arbih 1st Corps');
+    });
+
     it('renders gracefully for a zero-state officer (no ops, no war crimes, no bio)', () => {
         const html = renderToStaticMarkup(
             React.createElement(OfficerDossierPanel, { officer: OFFICER_ZERO_STATE, onClose: () => {} }),

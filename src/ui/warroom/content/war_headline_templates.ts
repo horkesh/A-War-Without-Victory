@@ -12,6 +12,7 @@
 
 import type { FactionId } from '../../../state/game_state.js';
 import type { TurnEvent } from '../data/turn_event_generator.js';
+import { turnToDateString } from '../components/warroom_utils.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -323,9 +324,10 @@ export function pickBestWarHeadline(
  * Used for quiet turns with no significant events.
  */
 export function fallbackWarHeadline(turn: number, playerFaction: FactionId): WarHeadline {
+    const dateLabel = turnToDateString(turn);
     return {
         headline: 'FRONT LINES HOLD \u2014 WAR OF ATTRITION CONTINUES',
-        subhead: `Week ${turn}: No major changes reported along the front`,
+        subhead: `No major changes reported along the front as of ${dateLabel}`,
         body: `The general military situation remains largely unchanged this week. `
             + `Sporadic exchanges of fire continue along established positions but no significant `
             + `territorial shifts have occurred. Both sides are consolidating and resupplying.`,

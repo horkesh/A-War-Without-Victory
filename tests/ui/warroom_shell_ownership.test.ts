@@ -156,7 +156,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*if \(appScreen !== 'game'\) return;/);
         expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*gs\.setArmyHQOpen\(false\);[\s\S]*gs\.setChronicleOpen\(false\);[\s\S]*gs\.setCodexOpen\(false\);[\s\S]*gs\.setIsOperationsPanelOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(true\);[\s\S]*\};/);
         expect(app).not.toContain('setIsDecisionHistoryOpen((prev) => {');
-        expect(app).toContain('}, [appScreen, isDecisionHistoryOpen]);');
+        expect(app).toContain('}, [appScreen, activeEventDecisionId, isDecisionHistoryOpen]);');
     });
 
     it('returns aftermath inbox handoffs to the visible game-shell inbox', () => {

@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { PeacePlanModal } from '../../src/ui/map/components/PeacePlanModal.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 type PendingPeacePlan = NonNullable<LoadedGameState['pendingPeacePlan']>;
 
@@ -71,6 +72,7 @@ describe('PeacePlanModal', () => {
 
     afterEach(() => {
         cleanup();
+        setLocale('en');
         delete (window as unknown as { awwv?: unknown }).awwv;
         useGameStore.setState({ loadedGameState: null, loadError: null });
     });
@@ -149,5 +151,38 @@ describe('PeacePlanModal', () => {
         await waitFor(() => {
             expect(resolvePeacePlan).toHaveBeenCalledWith('vance_owen', 'rejected');
         });
+    });
+
+    it('localizes BCS modal chrome and hides unknown ids behind neutral copy', () => {
+        setLocale('bcs');
+        installIpc();
+
+        render(createElement(PeacePlanModal, {
+            plan: makeVanceOwenPlan({
+                turnOffered: 0,
+                institutionalModel: 'federal_union_model',
+                botResponses: {
+                    RBiH: 'accepted',
+                    RS: 'rejected',
+                    HRHB: 'conditional_accept' as never,
+                },
+            }),
+            onDismiss: vi.fn(),
+        }));
+
+        const modalText = document.body.textContent ?? '';
+        expect(modalText).toContain('Predlozeno: 6 apr 1992');
+        expect(screen.getByText('Odgovori drugih strana')).toBeTruthy();
+        expect(screen.getByText('Potrebna odluka komandanta')).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Prihvati plan' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Pregledaj kasnije' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Odbij plan' })).toBeTruthy();
+        expect(modalText).toContain('Neodreden institucionalni model');
+        expect(modalText).toContain('Odgovor nije naveden');
+        expect(modalText).not.toContain('federal_union_model');
+        expect(modalText).not.toContain('conditional_accept');
+        expect(modalText).not.toContain('Other Faction Responses');
+        expect(modalText).not.toContain("Commander's Decision Required");
+        expect(modalText).not.toContain('Accept Plan');
     });
 });

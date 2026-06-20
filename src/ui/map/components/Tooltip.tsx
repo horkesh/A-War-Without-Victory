@@ -21,7 +21,7 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSettlementName,
 } from '../utils/playerSafeText';
-import { t, useLocale } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const TOOLTIP_DELAY_MS = 300;
@@ -35,9 +35,15 @@ const OUTCOME_COLOR: Record<string, string> = {
   decisive_victory: '#56d364', victory: '#56d364', costly_victory: '#e8a838',
   stalemate: '#aaa', repulsed: '#f47068', catastrophic: '#f44',
 };
-const INTEL_FRICTION_LABEL: Record<string, string> = {
-  stale_intel: 'Stale intel',
-  defender_opsec: 'Defender concealment',
+const INTEL_FRICTION_LABEL_KEY: Record<string, MessageKey> = {
+  stale_intel: 'aar.friction.staleIntel',
+  defender_opsec: 'aar.friction.defenderOpsec',
+  ambush_risk: 'aar.friction.ambushRisk',
+};
+const CONFIDENCE_BAND_LABEL_KEY: Record<string, MessageKey> = {
+  low: 'aar.confidence.low',
+  medium: 'aar.confidence.medium',
+  high: 'aar.confidence.high',
 };
 function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   osid: string;
@@ -78,9 +84,11 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       )}
       {battle.execution_friction && (
         <div className="mt-1 text-[9px] text-amber-300">
-          {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL[label] ?? 'Command friction').join(' / ')}
+          {battle.execution_friction.labels.map((label) => t(INTEL_FRICTION_LABEL_KEY[label] ?? 'aar.friction.commandFriction')).join(' / ')}
           {battle.execution_friction.attacker_confidence_band
-            ? ` (${battle.execution_friction.attacker_confidence_band} confidence)`
+            ? ` (${t('aar.confidenceBand', {
+              band: t(CONFIDENCE_BAND_LABEL_KEY[battle.execution_friction.attacker_confidence_band] ?? 'aar.confidence.uncertain'),
+            })})`
             : ''}
         </div>
       )}

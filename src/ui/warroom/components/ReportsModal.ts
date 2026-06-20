@@ -160,6 +160,7 @@ export class ReportsModal {
      */
     private generateReportBody(factionId: FactionId, reportTurn: number): string {
         const intel = this.gatherMunicipalityIntel(factionId);
+        const reportDate = turnToDateString(reportTurn);
 
         if (intel.length === 0) {
             return `CURRENT SITUATION:\n\n` +
@@ -171,7 +172,7 @@ export class ReportsModal {
         }
 
         const lines: string[] = [];
-        lines.push(`SITUATION REPORT - WEEK ${reportTurn}`);
+        lines.push(`SITUATION REPORT - ${reportDate.toUpperCase()}`);
         lines.push(`MUNICIPALITIES WITH PRESENCE: ${intel.length}`);
         lines.push('');
         lines.push('--------------------------------------------------');
@@ -226,7 +227,7 @@ export class ReportsModal {
             from: headers.from,
             to: headers.to,
             date: turnToDateString(reportTurn),
-            subject: `Situation Report - Week ${reportTurn}`,
+            subject: `Situation Report - ${turnToDateString(reportTurn)}`,
             body,
             signature: headers.signature,
             classification: 'RESTRICTED'
@@ -437,7 +438,7 @@ export class ReportsModal {
                 <span class="report-field-label">DATE:</span> ${turnToDateString(reportTurn)}
             </div>
             <div class="report-field">
-                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${identity.commandBriefLabel} - Operational Intelligence Brief - Week ${reportTurn}
+                <span class="report-field-label text-accent-gold">SUBJECT:</span> ${identity.commandBriefLabel} - Operational Intelligence Brief - ${turnToDateString(reportTurn)}
             </div>
         `;
         report.appendChild(header);

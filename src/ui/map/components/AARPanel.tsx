@@ -53,6 +53,12 @@ const OUTCOME_COLOR: Record<string, string> = {
 const INTEL_FRICTION_LABEL_KEY: Record<string, MessageKey> = {
     stale_intel: 'aar.friction.staleIntel',
     defender_opsec: 'aar.friction.defenderOpsec',
+    ambush_risk: 'aar.friction.ambushRisk',
+};
+const CONFIDENCE_BAND_LABEL_KEY: Record<string, MessageKey> = {
+    low: 'aar.confidence.low',
+    medium: 'aar.confidence.medium',
+    high: 'aar.confidence.high',
 };
 
 // --- Notable event labels ---
@@ -199,9 +205,11 @@ function BattleRow({
             )}
             {battle.execution_friction && (
                 <div className="text-[9px] text-amber-300 mt-0.5 ml-6">
-                    {battle.execution_friction.labels.map((label) => INTEL_FRICTION_LABEL_KEY[label] ? t(INTEL_FRICTION_LABEL_KEY[label]) : label).join(' / ')}
+                    {battle.execution_friction.labels.map((label) => t(INTEL_FRICTION_LABEL_KEY[label] ?? 'aar.friction.commandFriction')).join(' / ')}
                     {battle.execution_friction.attacker_confidence_band
-                        ? ` (${t('aar.confidenceBand', { band: battle.execution_friction.attacker_confidence_band })})`
+                        ? ` (${t('aar.confidenceBand', {
+                            band: t(CONFIDENCE_BAND_LABEL_KEY[battle.execution_friction.attacker_confidence_band] ?? 'aar.confidence.uncertain'),
+                        })})`
                         : ''}
                 </div>
             )}

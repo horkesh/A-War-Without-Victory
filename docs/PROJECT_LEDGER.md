@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): close raw-copy wave 5 scout leaks
+
+**Type:** UI/read-model player-copy polish.
+
+**Fix:** Legacy Warroom quiet newspaper/report/succession copy now uses calendar-date prose instead of `Week {n}` / `[Turn N]`, and Warroom IVP wrapper buttons now say `Review international pressure` / `Diplomatic press briefing`. Peace Plan modal chrome and fallback labels now use i18n, officer dossiers render localized status plus player-safe corps names, and AAR/tooltip friction/confidence labels map enums such as `ambush_risk` and `low` to localized player copy.
+
+**Verification:** `npm.cmd exec -- vitest run tests/warroom_player_visibility.test.ts tests/ui/peace_plan_modal.test.ts tests/ui/officer_dossier.test.ts tests/ui/aar_tooltip_friction_labels.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` (52/52); `npm.cmd exec -- vitest run tests/ui_chronicle_operation_aar_link.test.ts tests/ui/warroom_shell_ownership.test.ts --pool=forks --reporter=dot` (21/21) to repair the stale latest-main fast-suite expectations; `npm.cmd run qa:player-journeys` (206/206); `npm.cmd run qa:live-surface:browser` passed on clean rerun after an initial port-3239 collision; `npm.cmd run typecheck`; `git diff --check` (no whitespace errors; existing CRLF normalization warning for `src/ui/warroom/content/war_headline_templates.ts`). Report: `docs/40_reports/implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md`.
+
+**Scope/determinism:** UI/read-model copy, i18n strings, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label combat-record ground counters clearly
 
 **Type:** UI/read-model copy polish.

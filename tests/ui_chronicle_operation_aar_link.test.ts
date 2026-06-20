@@ -82,7 +82,7 @@ describe('Chronicle completed-operation AAR visibility', () => {
       type: 'military',
       headline: true,
       title: 'Operation Iron Corridor concluded',
-      detail: 'Partial result | 2/3 objectives | 6 attacks | 82 suffered / 97 inflicted | 3 stars',
+      detail: 'Partial result | 2/3 objectives held at close | 6 attacks | 82 suffered / 97 inflicted | 3 stars',
       metadata: {
         operationAarId: 'rs-op-1',
         operationName: 'Operation Iron Corridor',

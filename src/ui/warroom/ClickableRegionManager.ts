@@ -611,7 +611,7 @@ export class ClickableRegionManager {
             footer.style.cssText = 'margin-top:12px;padding-top:10px;border-top:1px dashed #666;text-align:center;';
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.textContent = `Review IVP (${Math.round(composite * 100)}%)`;
+            btn.textContent = `Review international pressure (${Math.round(composite * 100)}%)`;
             btn.style.cssText = 'padding:6px 12px;font-size:11px;cursor:pointer;background:#eee;color:#111;border:1px solid #333;border-radius:4px;';
             btn.addEventListener('click', () => this.showIvpBreakdown(state));
             footer.appendChild(btn);
@@ -622,7 +622,7 @@ export class ClickableRegionManager {
         this.modalManager.showModal(briefingRoot);
     }
 
-    /** Opens IVP Diplomatic Press Briefing modal (warroom). */
+    /** Opens diplomatic pressure briefing modal (warroom). */
     private showIvpBreakdown(state: GameState): void {
         this.modalManager?.showModal(new IvpBreakdownModal(state).render());
     }
@@ -661,9 +661,9 @@ export class ClickableRegionManager {
         footer.style.cssText = 'margin-top:16px;padding-top:12px;border-top:1px solid #333;text-align:center;';
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.textContent = 'Diplomatic press briefing (IVP breakdown)';
+        btn.textContent = 'Diplomatic press briefing';
         btn.style.cssText = 'padding:8px 14px;font-size:12px;cursor:pointer;background:#1a1a2e;color:#d8d8e0;border:1px solid #444;border-radius:4px;';
-        btn.setAttribute('aria-label', 'Open international visibility pressure breakdown');
+        btn.setAttribute('aria-label', 'Open international pressure briefing');
         btn.addEventListener('click', () => this.showIvpBreakdown(state));
         footer.appendChild(btn);
         wrapper.appendChild(footer);

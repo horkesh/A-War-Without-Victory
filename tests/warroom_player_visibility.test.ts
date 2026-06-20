@@ -4,9 +4,13 @@ import { resolve } from 'node:path';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 import { ReportsModal } from '../src/ui/warroom/components/ReportsModal.js';
+import { NewspaperModal } from '../src/ui/warroom/components/NewspaperModal.js';
 import { MagazineModal } from '../src/ui/warroom/components/MagazineModal.js';
 import { CommandBriefingModal } from '../src/ui/warroom/components/CommandBriefingModal.js';
 import { FactionOverviewPanel } from '../src/ui/warroom/components/FactionOverviewPanel.js';
+import { fallbackWarHeadline } from '../src/ui/warroom/content/war_headline_templates.js';
+import { setLastTurnReport } from '../src/ui/warroom/data/warroom_state.js';
+import { turnToDateString } from '../src/ui/warroom/components/warroom_utils.js';
 import type { GameState } from '../src/state/game_state.js';
 
 describe('warroom player visibility', () => {
@@ -522,6 +526,130 @@ describe('warroom player visibility', () => {
     expect(source).not.toContain('Last major IVP shift: turn');
     expect(source).toContain('International pressure');
     expect(source).toContain('Last major diplomatic shift');
+  });
+
+  it('warroom newspaper quiet fallback uses calendar date copy', () => {
+    const turn = 33;
+    const headline = fallbackWarHeadline(turn, 'RBiH');
+
+    expect(headline.subhead).toContain(turnToDateString(turn));
+    expect(headline.subhead).toContain('No major changes reported along the front');
+    expect(headline.subhead).not.toMatch(/\bWeek \d+\b|\bTurn \d+\b/);
+  });
+
+  it('warroom newspaper officer succession uses date prose instead of turn prefixes', () => {
+    const state = {
+      meta: { turn: 34, phase: 'war', player_faction: 'RBiH' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {
+          arbih_3rd_corps: { faction: 'RBiH', kind: 'corps', status: 'active', name: 'arbih_3rd_corps', personnel: 0 },
+        },
+        named_officer_data: [
+          { id: 'new_officer', name: 'Safet Hadzic' },
+          { id: 'fallen_officer', name: 'Fallen Officer' },
+          { id: 'retired_officer', name: 'Retired Officer' },
+        ],
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0.2 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as unknown as GameState;
+
+    setLastTurnReport({
+      turn: 33,
+      details: {
+        officer_succession: {
+          replacements: [{ corps_id: 'arbih_3rd_corps', old_officer: 'old_officer', new_officer: 'new_officer' }],
+          casualties: ['fallen_officer'],
+          departures: ['retired_officer'],
+        },
+      },
+    });
+    const panel = new NewspaperModal(state).render();
+    setLastTurnReport(null);
+
+    const text = panel.textContent ?? '';
+    expect(text).toContain(`On ${turnToDateString(33)}, Safet Hadzic was assigned to 3rd Corps.`);
+    expect(text).toContain(`On ${turnToDateString(33)}, Fallen Officer was killed in action.`);
+    expect(text).toContain(`On ${turnToDateString(33)}, Retired Officer retired.`);
+    expect(text).not.toMatch(/\[Turn \d+\]|\bTurn \d+\b/);
+  });
+
+  it('warroom report subjects and headers use calendar dates instead of week counters', () => {
+    const state = {
+      meta: { turn: 9, phase: 'peace', player_faction: 'RBiH' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        municipalities: {
+          sarajevo: {
+            stability_score: 55,
+            organizational_penetration: { sda_penetration: 40, police_loyalty: 'loyal' },
+          },
+        },
+        political_controllers: { sarajevo: 'RBiH' },
+        war_exhaustion: { RBiH: 0.1 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {},
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as unknown as GameState;
+
+    const text = new ReportsModal(state).render().textContent ?? '';
+    expect(text).toContain(`Situation Report - ${turnToDateString(8)}`);
+    expect(text).toContain(`SITUATION REPORT - ${turnToDateString(8).toUpperCase()}`);
+    expect(text).not.toMatch(/\bWeek \d+\b|\bWEEK \d+\b|\bTurn \d+\b/);
+  });
+
+  it('warroom live wrapper buttons use international pressure copy instead of IVP labels', () => {
+    const source = readFileSync(
+      resolve('src/ui/warroom/ClickableRegionManager.ts'),
+      'utf8',
+    );
+
+    expect(source).toContain('Review international pressure');
+    expect(source).toContain('Diplomatic press briefing');
+    expect(source).not.toContain('Review IVP');
+    expect(source).not.toContain('IVP breakdown');
   });
 
   it('warroom live faction header uses the military-facing label instead of raw faction id', () => {

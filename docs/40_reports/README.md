@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest raw-copy wave 5 scout fixes** | [implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md](implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md) - Legacy Warroom date/IVP wrapper copy, Peace Plan modal chrome/fallbacks, officer dossier status/corps labels, and AAR/tooltip friction/confidence labels now use player-facing localized copy. |
 | **Latest combat-record ground-copy discipline** | [implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md](implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md) - Army HQ corps combat records and shared formation summaries now label combat-history territory counters as ground won/lost rather than `cap / lost` shorthand. |
 | **Latest AAR final-held provenance copy** | [implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md](implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md) - Army HQ AARs, forced-op receipts, settlement timelines, Chronicle, Opportunity Ledger, and officer dossiers now distinguish logged captures from final-held objectives while preserving Srebrenica/Zepa event-owned receipts. |
 | **Latest all-faction first-hour browser gate** | [implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md](implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md) - `qa:first-hour:browser` now proves RBiH/RS/HRHB war-start splash, identity brief, foundational decision, Desk blocking, and required-decision shell/hotkey lock; also repairs the latest BCS i18n CI failure and same-faction New Game opening-brief reset. |
