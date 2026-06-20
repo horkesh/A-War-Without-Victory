@@ -400,7 +400,8 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(opportunityItems[0].severity).toBe('normal');
         expect(opportunityItems[0].action).toBe('decision_room');
         expect(opportunityItems[0].title).toBe('Operation Sana');
-        expect(opportunityItems[0].subtitle).toBe('staff recommendation: approve');
+        expect(opportunityItems[0].subtitle).toBe('Staff recommends authorization.');
+        expect(opportunityItems[0].subtitle).not.toContain('approve');
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
     });
 

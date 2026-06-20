@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): polish inbox opportunity recommendation copy
+
+**Type:** UI/read-model copy polish.
+
+**Fix:** Presidential Inbox operation-opportunity cards now map known `proposed_value` recommendations to player-facing staff copy instead of preserving raw description text such as `staff recommendation: approve`. Approval recommendations now surface as `Staff recommends authorization.` while unknown values retain the existing fallback detail.
+
+**Verification:** Red focused inbox test first failed on `staff recommendation: approve`. Green proof: `npm.cmd exec -- vitest run tests/ui/inbox_items.test.ts tests/ui/ui_copy_raw_id_fallbacks.test.ts --pool=forks --reporter=dot` passed 38/38, and `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260620_INBOX_OPPORTUNITY_RECOMMENDATION_COPY.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] docs(process): normalize panel sign-off and sensitive-history wording
 
 **Type:** Docs/process and canon-terminology cleanup.
@@ -21447,6 +21459,12 @@ Verification: focused ops modal `npm.cmd exec -- vitest run tests/ui/ops_plannin
 
 Determinism/scope: UI/read-model display, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-20 - Operation History weekly row copy polish
+
+Closed the Operation History weekly-row shorthand leak found by the Pyrrhic UI scout. Completed-operation weekly rows now render localized, player-facing phase/status, attack, casualty, objective-held, and notable-development copy instead of phase initials, `atk`/`ATK`, `OBJ`, signed casualty shorthand, or raw notable-event ids. The nearby Army HQ corps Operations AAR weekly drilldown now uses the same scoped operation-history row vocabulary.
+
+Verification: focused red proof first failed on `E`, `2 atk`, `2 ATK`, `OBJ`, `+13e`, and `supply_crisis` weekly-row copy. Focused green `node node_modules\vitest\vitest.mjs run tests/ui/operation_aar_records_review.test.ts tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` passed 24/24. Determinism/scope: UI/read-model copy, i18n templates, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-20 - Army ops drilldown and BCS copy polish
 
 Closed the next Pyrrhic UI scout slice. Army HQ Operations planning details now render preparation timing and postponements as localized player copy instead of `T+{n}` / `DELAYS` telemetry. OperationsPanel allocated brigade buttons now route through corps-preserving field inspection, closing the bare-formation selection path that dropped operation/corps context. Targeted BCS Game Over, Verdict, tactical tooltip, and directive ambiguity copy now use player-facing `polozaj`, `naselje/naselja`, and `navedeni ciljevi` wording instead of raw `OSID` terminology.
@@ -21470,3 +21488,19 @@ Extended the turn-0 territory provenance guard to the remaining player-facing su
 Verification: focused red proof first failed on the AAR turn-0 territory row, bottom-strip up arrow, and Wrapped `earlyGains` including setup territory. Focused green `npm.cmd exec -- vitest run tests/ui/operation_aar_records_review.test.ts tests/ui/bottom_status_strip_labels.test.ts tests/wrapped_slides.test.ts --pool=forks --reporter=dot` passed 42/42 after the fix. Report: `docs/40_reports/implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md`.
 
 Determinism/scope: UI/read-model display, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-20 - Ops BrigadeCard i18n polish
+
+Closed the Pauli BrigadeCard localization finding in the ops planning modal. BrigadeCard unit-type badges, card tooltips, march labels, locale-specific personnel formatting, BrigadeTray full-assembly copy, assigned-brigade summary copy, and empty-tray copy now render through the existing map i18n catalogs in EN and BCS instead of hard-coded English fragments.
+
+Verification: focused red proof first failed in `tests/ui/ops_brigade_card_i18n.test.ts` on raw English tooltip/tray copy and locale drift, then passed 2/2 after the fix. Focused pack `node node_modules/vitest/vitest.mjs run tests/ui/ops_brigade_card_i18n.test.ts tests/ui/ops_modal_auto_propose.test.ts tests/ui/brigade_row_supply_labels.test.ts --pool=forks --reporter=dot` passed 13/13. I18n parity pack `node node_modules/vitest/vitest.mjs run tests/ui_i18n.test.ts tests/ui/ops_brigade_card_i18n.test.ts --pool=forks --reporter=dot` passed 15/15. `npm.cmd run typecheck` was attempted but is currently blocked by an unrelated `tests/ui/chronicle_focus_routing.test.ts` `LoadedGameState` fixture mismatch.
+
+Determinism/scope: UI copy, locale formatting, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-20 - Records to Chronicle exact decision focus
+
+Closed the Pauli Records -> Chronicle precision finding. Chronicle-filed decision consequence rows in Army HQ Records now route through an exact decision-record Chronicle helper instead of the broad Chronicle opener. The store carries `focusedChronicleDecisionRecordId`, broad Chronicle opens clear stale focus, and Chronicle resolves the id against entry `metadata.decisionRecordId`, switches to entry view, selects/scrolls the matching turn, and marks/focuses the exact dossier entry even when the same turn has multiple entries.
+
+Verification: focused red proof first failed on missing `focusedChronicleDecisionRecordId` and absent focused Chronicle entry, then passed with `node .\node_modules\vitest\vitest.mjs run tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_focus_routing.test.ts --pool=forks --reporter=dot` (6/6). Adjacent routing/source-contract pack `node .\node_modules\vitest\vitest.mjs run tests/ui/records_button_behavior.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` passed 21/21. `npm.cmd run typecheck` passed.
+
+Determinism/scope: UI route/focus state, Chronicle display focus, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.

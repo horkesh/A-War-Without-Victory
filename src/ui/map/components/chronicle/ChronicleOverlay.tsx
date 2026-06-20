@@ -230,6 +230,7 @@ function ChronicleChapterView({
 export function ChronicleOverlay() {
     const open = useGameStore(s => s.chronicleOpen);
     const setOpen = useGameStore(s => s.setChronicleOpen);
+    const focusedChronicleDecisionRecordId = useGameStore(s => s.focusedChronicleDecisionRecordId);
     const state = useGameStore(s => s.loadedGameState);
 
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -258,6 +259,13 @@ export function ChronicleOverlay() {
     const allEntries = useMemo(() =>
         state ? generateChronicleEntries(state, eventCatalogFull) : [],
         [state, eventCatalogFull]
+    );
+
+    const focusedChronicleEntry = useMemo(
+        () => focusedChronicleDecisionRecordId
+            ? allEntries.find(entry => entry.metadata?.decisionRecordId === focusedChronicleDecisionRecordId) ?? null
+            : null,
+        [allEntries, focusedChronicleDecisionRecordId],
     );
 
     const entryCounts = useMemo(() => countChronicleEntriesByFilter(allEntries), [allEntries]);
@@ -407,6 +415,29 @@ export function ChronicleOverlay() {
         }
         el.scrollTo({ left: offset, behavior: 'smooth' });
     }, [minTurn, turnWidths]);
+
+    useEffect(() => {
+        if (!open || !focusedChronicleEntry) return;
+        setViewMode('entries');
+        setActiveFilter('all');
+        setSelectedTurn(focusedChronicleEntry.turn);
+        setExpandedWeeks(prev => {
+            if (prev.has(focusedChronicleEntry.turn)) return prev;
+            const next = new Set(prev);
+            next.add(focusedChronicleEntry.turn);
+            return next;
+        });
+        requestAnimationFrame(() => scrollToTurn(focusedChronicleEntry.turn));
+    }, [focusedChronicleEntry, open, scrollToTurn]);
+
+    useEffect(() => {
+        if (!open || !focusedChronicleDecisionRecordId || typeof document === 'undefined') return;
+        const el = document.querySelector<HTMLElement>(
+            `[data-focused-chronicle-decision-record-id="${focusedChronicleDecisionRecordId}"]`,
+        );
+        el?.scrollIntoView?.({ block: 'center' });
+        el?.focus();
+    }, [filteredEntries.length, focusedChronicleDecisionRecordId, open, selectedTurn]);
 
     const handleOpenTurnRecord = useCallback((turn: number) => {
         openArmyHQAftermathRecord(useGameStore.getState(), turn);
@@ -692,14 +723,27 @@ export function ChronicleOverlay() {
                                 {t('chronicle.selectTurnHelp')}
                             </div>
                         ) : (
-                            (turnGroups.get(selectedTurn) ?? []).map((entry, i) => (
+                            (turnGroups.get(selectedTurn) ?? []).map((entry, i) => {
+                                const isFocusedDecisionEntry = Boolean(
+                                    focusedChronicleDecisionRecordId
+                                    && entry.metadata?.decisionRecordId === focusedChronicleDecisionRecordId,
+                                );
+                                return (
                                 <div
                                     key={`${selectedTurn}-${entry.type}-${i}`}
-                                    className="border border-panel-border/30 rounded p-2 bg-black/15"
+                                    tabIndex={isFocusedDecisionEntry ? -1 : undefined}
+                                    className={[
+                                        'border rounded p-2 bg-black/15',
+                                        isFocusedDecisionEntry
+                                            ? 'border-amber-300/70 shadow-[0_0_0_1px_rgba(251,191,36,0.22)]'
+                                            : 'border-panel-border/30',
+                                    ].join(' ')}
                                     data-testid="chronicle-dossier-entry"
                                     data-turn={entry.turn}
                                     data-entry-type={entry.type}
                                     data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
+                                    data-decision-record-id={entry.metadata?.decisionRecordId ?? undefined}
+                                    data-focused-chronicle-decision-record-id={isFocusedDecisionEntry ? entry.metadata?.decisionRecordId : undefined}
                                 >
                                     <ChronicleCard entry={entry} />
                                     <button
@@ -715,7 +759,8 @@ export function ChronicleOverlay() {
                                         {actionLabelForEntry(entry)}
                                     </button>
                                 </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 </aside>

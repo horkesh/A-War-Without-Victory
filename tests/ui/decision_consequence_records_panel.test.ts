@@ -71,7 +71,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.getByText('Filed to Chronicle')).toBeTruthy();
   });
 
-  it('opens Chronicle from Chronicle-filed decision records', () => {
+  it('opens Chronicle focused to the exact Chronicle-filed decision record', () => {
     useGameStore.setState({
       loadedGameState: makeState({
         firedEvents: [
@@ -92,7 +92,11 @@ describe('DecisionConsequenceRecordsPanel', () => {
 
     expect(useGameStore.getState().chronicleOpen).toBe(false);
     fireEvent.click(screen.getByRole('button', { name: 'Open Chronicle' }));
-    expect(useGameStore.getState().chronicleOpen).toBe(true);
+    expect(useGameStore.getState()).toMatchObject({
+      armyHQOpen: false,
+      chronicleOpen: true,
+      focusedChronicleDecisionRecordId: 'event:cabinet-crisis',
+    });
   });
 
   it('renders patron defiance material receipts as Records-filed consequences', () => {

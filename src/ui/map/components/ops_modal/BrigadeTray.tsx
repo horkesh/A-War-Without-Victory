@@ -7,6 +7,7 @@ import type { OpsPlanState } from './types';
 import { BrigadeCard } from './BrigadeCard';
 import { PlanParameters } from './PlanParameters';
 import type { ProposedBrigade } from './autoPropose';
+import { t, useLocale } from '../../i18n';
 
 interface BrigadeTrayProps {
     plan: OpsPlanState;
@@ -17,6 +18,7 @@ interface BrigadeTrayProps {
 }
 
 export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, factionColor }: BrigadeTrayProps) {
+    const [locale] = useLocale();
     const activeAxis = plan.axes.find((a) => a.id === plan.activeAxisId) ?? plan.axes[0];
     const brigadeIdList = activeAxis?.brigadeIds ?? [];
     const assignedIds = useMemo(() => new Set(brigadeIdList), [brigadeIdList]);
@@ -65,6 +67,7 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
         }
         return max;
     }, [activeAxis, proposedMap]);
+    const assignedCount = activeAxis?.brigadeIds.length ?? 0;
 
     return (
         <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-auto">
@@ -79,15 +82,15 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                 {activeAxis && activeAxis.brigadeIds.length > 0 && (
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary">
-                            Full assembly:
+                            {t('opsModal.fullAssembly', undefined, locale)}
                         </span>
                         <span className={`text-[10px] font-bold ${
                             maxMarch <= 1 ? 'text-green-400' : maxMarch <= 3 ? 'text-amber-400' : 'text-red-400'
                         }`}>
-                            {maxMarch} turn{maxMarch !== 1 ? 's' : ''}
+                            {t(maxMarch === 1 ? 'opsModal.march.turn.one' : 'opsModal.march.turn.many', { count: maxMarch }, locale)}
                         </span>
                         <span className="text-[8px] text-text-secondary">
-                            ({activeAxis.brigadeIds.length} brigade{activeAxis.brigadeIds.length !== 1 ? 's' : ''} assigned)
+                            {t(assignedCount === 1 ? 'opsModal.assignedSummary.one' : 'opsModal.assignedSummary.many', { count: assignedCount }, locale)}
                         </span>
                     </div>
                 )}
@@ -110,7 +113,7 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                     })}
                     {sortedBrigades.length === 0 && (
                         <div className="text-[10px] text-text-secondary/50 italic py-8 text-center w-full">
-                            No brigades available for this corps
+                            {t('opsModal.noBrigadesForCorps', undefined, locale)}
                         </div>
                     )}
                 </div>

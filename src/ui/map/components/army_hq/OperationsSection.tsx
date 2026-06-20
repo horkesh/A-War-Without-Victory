@@ -93,6 +93,12 @@ const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
     manual_termination: 'operationsSection.outcome.manualTermination',
 };
 
+const WEEKLY_PHASE_LABEL_KEY: Record<string, MessageKey> = {
+    planning: 'operationHistory.weekly.phase.planning',
+    execution: 'operationHistory.weekly.phase.execution',
+    recovery: 'operationHistory.weekly.phase.recovery',
+};
+
 /** Player-facing phrasing for a commander's launch recommendation (raw enum). */
 const COMMANDER_ASSESSMENT_LABELS: Record<string, string> = {
     launch: 'Recommends launch', postpone: 'Urges delay', abort: 'Advises abort',
@@ -132,6 +138,31 @@ function safeFallbackLabel(value: string | null | undefined, fallback: string): 
 
 function safeOperationDisplayName(op: OperationView): string {
     return isUnsafeRawLabel(op.display_name) ? t('operationsSection.staffOperation') : op.display_name;
+}
+
+function formatWeeklyPhaseLabel(phase: string | null | undefined): string {
+    const key = (phase ?? '').trim().toLowerCase();
+    return WEEKLY_PHASE_LABEL_KEY[key] ? t(WEEKLY_PHASE_LABEL_KEY[key]) : t('operationHistory.weekly.phase.pending');
+}
+
+function formatWeeklyAttackCount(count: number): string {
+    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: count.toLocaleString() });
+}
+
+function formatWeeklyCasualties(count: number): string {
+    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: count.toLocaleString() });
+}
+
+function formatWeeklyInflicted(count: number): string {
+    return t(count === 1 ? 'operationHistory.weekly.inflicted.one' : 'operationHistory.weekly.inflicted.many', { count: count.toLocaleString() });
+}
+
+function formatWeeklyHeldObjectives(objectives: string[]): string {
+    return t('operationHistory.weekly.heldAtClose', { objectives: objectives.join(', ') });
+}
+
+function formatWeeklyNotableEvent(event: string): string {
+    return isUnsafeRawLabel(event) ? t('operationHistory.weekly.notableFallback') : safeFallbackLabel(event, t('operationHistory.weekly.notableFallback'));
 }
 
 function ReadinessBar({ label, value }: { label: string; value: number }) {
@@ -251,23 +282,24 @@ function WeeklyLogTimeline({ log, resolveObjectiveLabel }: { log: CompletedOp['w
                     const inf = entry.casualties_inflicted.killed + entry.casualties_inflicted.wounded;
                     const hasCaptures = entry.objectives_captured_this_turn.length > 0;
                     const hasEvents = entry.notable_events.length > 0;
+                    const heldObjectiveNames = entry.objectives_captured_this_turn.map(resolveObjectiveLabel);
                     return (
                         <div key={i} className={`flex items-start gap-2 px-2 py-0.5 text-[9px] font-mono tabular-nums ${hasCaptures ? 'bg-emerald-500/5 border-l-2 border-emerald-400/40' : 'border-l-2 border-panel-border/20'}`}>
                             <span className="text-text-secondary/60 w-16 shrink-0">{turnToDateString(entry.turn).split(' ').slice(1, 3).join(' ')}</span>
-                            <span className="text-text-secondary/40 w-16 shrink-0 uppercase">{getPlayerSafeOperationPhaseLabel(entry.phase)}</span>
+                            <span className="text-text-secondary/40 w-24 shrink-0 uppercase">{formatWeeklyPhaseLabel(entry.phase)}</span>
                             {entry.attacks_this_turn > 0 && (
-                                <span className="text-red-500/80">{entry.attacks_this_turn} ATK</span>
+                                <span className="text-red-500/80">{formatWeeklyAttackCount(entry.attacks_this_turn)}</span>
                             )}
-                            {cas > 0 && <span className="text-red-500/60">-{cas}</span>}
-                            {inf > 0 && <span className="text-emerald-400/60">+{inf}e</span>}
+                            {cas > 0 && <span className="text-red-500/60">{formatWeeklyCasualties(cas)}</span>}
+                            {inf > 0 && <span className="text-emerald-400/60">{formatWeeklyInflicted(inf)}</span>}
                             {hasCaptures && (
                                 <span className="text-emerald-400 font-bold">
-                                    OBJ {entry.objectives_captured_this_turn.map(resolveObjectiveLabel).join(', ')}
+                                    {formatWeeklyHeldObjectives(heldObjectiveNames)}
                                 </span>
                             )}
                             {hasEvents && (
                                 <span className="text-accent-gold/70 truncate flex-1">
-                                    {entry.notable_events[0]}
+                                    {formatWeeklyNotableEvent(entry.notable_events[0])}
                                 </span>
                             )}
                         </div>

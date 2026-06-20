@@ -8,7 +8,7 @@ import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets'
 import { t, type MessageKey } from '../../i18n';
 import { useGameStore } from '../../store/gameStore';
 import { turnToDateString } from '../../utils/formatters';
-import { openChronicle } from '../../utils/shellNavigation';
+import { openChronicleDecisionRecord } from '../../utils/shellNavigation';
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
   'event-decision': 'decisionConsequences.family.eventDecision',
@@ -141,7 +141,7 @@ export function DecisionConsequenceRecordsPanel() {
                       type="button"
                       data-testid="decision-consequence-open-chronicle"
                       data-record-id={record.id}
-                      onClick={() => openChronicle(useGameStore.getState())}
+                      onClick={() => openChronicleDecisionRecord(useGameStore.getState(), record.id)}
                       className="rounded border border-panel-border bg-black/20 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                     >
                       {t('decisionConsequences.openChronicle')}
