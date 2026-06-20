@@ -6,6 +6,7 @@ import type { PredictionResult } from './usePrediction';
 import { FACTION_ARMY_HEADERS } from './types';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { t } from '../../i18n';
+import { formatPlanningPredictedOutcome, formatPlanningRecommendation } from './planningAssessmentLabels';
 
 interface NarrativeTabProps {
     prediction: PredictionResult;
@@ -40,6 +41,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
     const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const sections = prediction.commanderAssessment?.sections ?? [];
     const forceBalance = getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio);
+    const predictedOutcomeLabel = formatPlanningPredictedOutcome(prediction.overall.predictedOutcome);
+    const recommendedActionLabel = formatPlanningRecommendation(prediction.overall.recommendedAction);
 
     return (
         <div className="relative" style={{ fontFamily: "'Courier New', monospace" }}>
@@ -70,9 +73,9 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.intelConfidence')}</span>
                     <span className="font-bold text-[#1a1610]">{Math.round(prediction.overall.intelConfidence * 100)}%</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.predicted')}</span>
-                    <span className="font-bold text-[#1a1610]">{prediction.overall.predictedOutcome}</span>
+                    <span className="font-bold text-[#1a1610]">{predictedOutcomeLabel}</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.recommendation')}</span>
-                    <span className="font-bold text-[#1a1610]">{prediction.overall.recommendedAction}</span>
+                    <span className="font-bold text-[#1a1610]">{recommendedActionLabel}</span>
                 </div>
             </div>
 
@@ -109,7 +112,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.ownLine', {
                                 casualties: prediction.overall.estimatedCasualties.toLocaleString(),
-                                outcome: prediction.overall.predictedOutcome,
+                                outcome: predictedOutcomeLabel,
                             })}
                         </div>
                     </div>
@@ -118,7 +121,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                             {t('opsPlanning.narrative.assessmentTitle')}
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
-                            {t('opsPlanning.narrative.assessmentLine', { action: prediction.overall.recommendedAction })}
+                            {t('opsPlanning.narrative.assessmentLine', { action: recommendedActionLabel })}
                         </div>
                     </div>
                 </div>

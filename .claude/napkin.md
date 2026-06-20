@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**OPS PLANNING PREDICTION LABELS (2026-06-20).** G2 snapshot and Narrative briefing are player-facing prose, not enum displays. Do instead: map prediction outcomes and recommendations through localized labels and neutral fallbacks; keep `costly_victory`, `postpone`, `abort`, and unknown ids out of normal G2/Narrative copy.
+
 **ARMY OPS COMMAND LABEL COPY (2026-06-20).** Expanded Army HQ Operations detail is a command surface, not a compact telemetry table. Do instead: spell out commander stats, readiness labels, ORBAT columns, disruption status, casualty breakdowns, commander rank labels, and AAR duration/objective rows; keep `COMP`, `AGGR`, `DEF`, `OPS`, `INTEL`, `COHESN`, `OBJ`, `MOM`, `PERS`, `COH`, `MOR`, `STS`, `CMDR`, `KIA`, `WIA`, and `{count}W` out of normal operation detail.
 
 **ACTIVE OP / COMBAT SUMMARY COPY (2026-06-20).** Operation and combat summaries are command reports, not compact telemetry. Do instead: spell out active-operation objective/attack/brigade progress, combat role/record/brigade/arc labels, and settlement casualty roles; keep `Obj`, `atk`, `bdes`, `att / def`, `W/L/D`, `active / total`, and raw arc ids out of normal player copy.

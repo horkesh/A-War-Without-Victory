@@ -472,6 +472,49 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('Territory')).toBeNull();
     });
 
+    it('renders G2 prediction values as player-facing English labels', () => {
+        useGameStore.setState({ loadedGameState: makeState() });
+
+        const { container } = render(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: makePrediction({ predictedOutcome: 'costly_victory', recommendedAction: 'postpone' }),
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Costly');
+        expect(copy).toContain('Recommends Postpone');
+        expect(copy).not.toContain('costly_victory');
+        expect(copy).not.toContain('postpone');
+    });
+
+    it('renders G2 prediction values as player-facing BCS labels', () => {
+        setLocale('bcs');
+        useGameStore.setState({ loadedGameState: makeState() });
+
+        const { container } = render(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: makePrediction({ predictedOutcome: 'costly_victory', recommendedAction: 'abort' }),
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Skupo');
+        expect(copy).toMatch(/Preporuka: otka/i);
+        expect(copy).not.toContain('costly_victory');
+        expect(copy).not.toContain('abort');
+    });
+
     it('uses opening commander display in G2 assessment and OPORD when the corps commander is not seated', () => {
         useGameStore.setState({
             loadedGameState: makeOpeningCommanderState(),
