@@ -140,7 +140,11 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] text-text-secondary/50">{t('orbat.campaignLosses')}</span>
                         <span className="text-red-500 font-bold">
-                            {b.campaignKia ?? 0} KIA / {b.campaignWia ?? 0} WIA / {b.campaignMia ?? 0} MIA
+                            {t('orbat.campaignLossBreakdown', {
+                                killed: b.campaignKia ?? 0,
+                                wounded: b.campaignWia ?? 0,
+                                missing: b.campaignMia ?? 0,
+                            })}
                         </span>
                     </div>
                 )}

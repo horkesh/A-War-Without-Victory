@@ -1,6 +1,6 @@
 /**
  * Combat Record section for expanded corps card.
- * Shows battles fought, W/L/D, casualties, and ground won/lost.
+ * Shows battles fought, record breakdown, casualties, and ground won/lost.
  */
 import type { FormationView } from '../../data/types';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -31,12 +31,12 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                     </div>
                     <div className="flex justify-between">
                         <span className="text-text-secondary">{t('combatRecord.record')}</span>
-                        <span>
-                            <span className="text-green-700 font-bold">{cs.victories}W</span>
-                            {' / '}
-                            <span className="text-red-700 font-bold">{cs.defeats}L</span>
-                            {' / '}
-                            <span className="text-text-secondary">{cs.stalemates}D</span>
+                        <span className="text-text-primary font-bold">
+                            {t('combatRecord.recordBreakdown', {
+                                wins: cs.victories,
+                                losses: cs.defeats,
+                                stalemates: cs.stalemates,
+                            })}
                         </span>
                     </div>
                     <div className="flex justify-between">
@@ -57,10 +57,11 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                     </div>
                     <div className="flex justify-between">
                         <span className="text-text-secondary">{t('combatRecord.groundWonLost')}</span>
-                        <span>
-                            <span className="text-green-700">+{cs.total_osids_captured}</span>
-                            {' / '}
-                            <span className="text-red-700">-{cs.total_osids_lost}</span>
+                        <span className="text-text-primary font-bold">
+                            {t('combatRecord.groundWonLostCount', {
+                                won: cs.total_osids_captured,
+                                lost: cs.total_osids_lost,
+                            })}
                         </span>
                     </div>
                 </div>

@@ -187,8 +187,8 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
             )}
 
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
-                <span>{t('sectorsSection.frontage', { km: sector.length_edges })}</span>
-                <span>{t('sectorsSection.bdePerKm', { value: sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '-' })}</span>
+                <span>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
+                <span>{t('sectorsSection.bdePerFrontSegment', { value: sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '-' })}</span>
                 <span>{t('sectorsSection.troopDensity', { value: sector.density.toFixed(2) })}</span>
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
             </div>
@@ -301,7 +301,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                             {t('sectorsSection.summaryLine', {
                                                 front: sector.assigned_brigade_ids.length,
                                                 reserveSegment: sector.reserve_brigade_ids.length > 0 ? t('sectorsSection.reserveSegment', { count: sector.reserve_brigade_ids.length }) : '',
-                                                km: sector.length_edges,
+                                                segments: sector.length_edges,
                                                 density: sector.density.toFixed(2),
                                             })}
                                         </div>

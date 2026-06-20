@@ -1,17 +1,20 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, render, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
 import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
+import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
+import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
+import { SectorsSection } from '../../src/ui/map/components/army_hq/SectorsSection.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
-import type { FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { CorpsFrontSectorView, FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -235,8 +238,181 @@ describe('GUI audit label discipline', () => {
     }));
 
     expect(corpsContainer.textContent).toMatch(/Ground Won\/Lost/i);
-    expect(corpsContainer.textContent).toMatch(/\+3 \/ -1/);
+    expect(corpsContainer.textContent).toMatch(/Wins: 2 \/ Losses: 1 \/ Stalemates: 1/i);
+    expect(corpsContainer.textContent).toMatch(/3 won \/ 1 lost/i);
+    expect(corpsContainer.textContent).not.toMatch(/\b\d+W\b|\b\d+L\b|\b\d+D\b|\+\d+\s*\/\s*-\d+/);
     expect(corpsContainer.textContent).not.toMatch(/\bcap\b|captured/i);
+  });
+
+  it('keeps Army HQ corps cards free of stance and count shorthand', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      cohesion: 75,
+      fatigue: 5,
+      corpsStance: 'defensive',
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      createdTurn: 0,
+      corps_id: 'arbih_1st_corps',
+    } as unknown as FormationView;
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:0',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      display_name: 'Sarajevo front',
+      edge_ids: [],
+      assigned_brigade_ids: ['arbih_101_brigade'],
+      reserve_brigade_ids: [],
+      length_edges: 4,
+      sub_segment_count: 0,
+      defensive_power: 1200,
+      density: 0.25,
+      threat_ratio: 1.1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+      sub_segments: [],
+    } as unknown as CorpsFrontSectorView;
+    const gameState = makeState({
+      formations: [corps, brigade],
+      corpsFrontSectors: [sector],
+    });
+
+    const { container: frontContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [brigade],
+      sectors: [sector],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(frontContainer.textContent).toContain('DEFENSIVE');
+    expect(frontContainer.textContent).toContain('1 brigades');
+    expect(frontContainer.textContent).toContain('1 sectors');
+    expect(frontContainer.textContent).not.toMatch(/\bOFF\b|\bDEF\b|\bBAL\b|\bREORG\b|\bBRG\b|\bSEC\b/);
+    cleanup();
+
+    const { container: backContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [brigade],
+      sectors: [sector],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: true,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(backContainer.textContent).toContain('personnel');
+    expect(backContainer.textContent).toContain('brigades');
+    expect(backContainer.textContent).toContain('sectors');
+    expect(backContainer.textContent).not.toMatch(/\bPers\b|\bBrg\b|\bSec\b/);
+  });
+
+  it('spells out Army HQ ORBAT campaign losses', () => {
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      posture: 'defend',
+      createdTurn: 0,
+      campaignKia: 12,
+      campaignWia: 34,
+      campaignMia: 5,
+    } as unknown as FormationView;
+
+    useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
+    const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
+
+    fireEvent.click(screen.getByRole('button', { name: /101st Brigade/i }));
+
+    expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
+    expect(container.textContent).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+  });
+
+  it('renders Army HQ sector length as front segments instead of kilometers', () => {
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      createdTurn: 0,
+      location_osid: 'op:sarajevo:dobrinja_1',
+    } as unknown as FormationView;
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:0',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      display_name: 'Sarajevo front',
+      edge_ids: ['edge-1', 'edge-2', 'edge-3', 'edge-4'],
+      assigned_brigade_ids: [brigade.id],
+      reserve_brigade_ids: [],
+      length_edges: 4,
+      sub_segment_count: 1,
+      defensive_power: 1200,
+      density: 0.25,
+      threat_ratio: 1.1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+      combat_strength_class: 'adequate',
+      sub_segments: [{ sub_segment_id: 's1', friendly_osids: ['op:sarajevo:dobrinja_1'], enemy_osids: [] }],
+    } as unknown as CorpsFrontSectorView;
+
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [brigade] }),
+      armyHQExpandedSections: { 'sec-arbih_1st_corps': true },
+      osidDisplayNames: { 'op:sarajevo:dobrinja_1': 'Dobrinja' },
+    });
+
+    const { container } = render(createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    expect(container.textContent).toMatch(/1 on line \/\/4 front segments \/\/ density 0\.25/i);
+    expect(container.textContent).toMatch(/Front segments: 4/i);
+    expect(container.textContent).toMatch(/Brigades per front segment: 0\.25/i);
+    expect(container.textContent).not.toMatch(/\bKM\b|per km|FRONTAGE/i);
   });
 
   it('renders Situation pressure and security copy without telemetry labels', () => {
