@@ -1,3 +1,7 @@
+## 2026-06-20 - Ops commander availability reasons are player copy
+
+**Unavailable officer reasons must not expose staff shorthand or ids:** Operations commander selection preserves officer status, assignment, and command ids internally, but the player-facing modal should explain why an officer cannot be selected. Durable rule: map killed/KIA, captured, retired, Army HQ, enclave-locked, assigned-operation, and other-command cases through localized copy; treat both `kia` and `killed` as unavailable; name the other command when known; and do not render `KIA`, `ARMY HQ`, `ASSIGNED TO OP`, `CORPS CMDR`, `ACTING CMDR`, or raw operation ids in normal commander-selection copy. Applied in `[2026-06-20] fix(ui): label ops commander unavailable reasons`; report `docs/40_reports/implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md`.
+
 ## 2026-06-19 - Docs status rows are operational truth, not historical decoration
 
 **Closed PRs and calibration-held lanes must be rewritten at the active board level:** Leaving a standing row that says a PR is open/mergeable or an execution plan that names a rejected lane as active causes agents to restart dead work. Durable rule: when a calibration lane is rejected or a stale PR is closed, update COMMAND_BOARD and any active execution-plan headers in the same phase as the code/test fix; historical roadmap paragraphs can remain, but active dispatch surfaces must say NO-GO/closed. Applied in `[2026-06-19] Docs status and raw-copy follow-up`; report `docs/40_reports/implemented/20260619_DOC_STATUS_AND_RAW_COPY_FOLLOWUP.md`.

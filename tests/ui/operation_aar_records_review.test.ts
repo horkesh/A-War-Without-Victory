@@ -150,7 +150,7 @@ describe('Army HQ Records operation AAR review', () => {
         const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
         const bcs = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
 
-        expect(en).toContain("'operationsSection.aarObjectivesTaken': '{captured} / {targeted} OBJ HELD AT CLOSE'");
+        expect(en).toContain("'operationsSection.aarObjectivesTaken': '{captured} / {targeted} held at close'");
         expect(en).not.toContain('OBJ TAKEN');
         expect(bcs).not.toContain('CILJEVA UZETO');
     });

@@ -3,7 +3,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { FormationView, LoadedGameState, NamedOfficerView } from '../../src/ui/map/data/types.js';
 import type { OpsPlanState } from '../../src/ui/map/components/ops_modal/types.js';
 import { CommanderPhase } from '../../src/ui/map/components/ops_modal/CommanderPhase.js';
 import { PlanPhase } from '../../src/ui/map/components/ops_modal/PlanPhase.js';
@@ -140,6 +140,43 @@ function makePrediction(overrides: Partial<PredictionResult['overall']> = {}): P
             ...overrides,
         },
         perAxis: [],
+    };
+}
+
+function makeOfficer(overrides: Partial<NamedOfficerView> = {}): NamedOfficerView {
+    return {
+        id: 'officer_test',
+        name: 'Test Officer',
+        rank: 'major',
+        faction: 'RS',
+        status: 'active',
+        competence: 0.5,
+        aggressiveness: 0.5,
+        defensive_skill: 0.5,
+        political_reliability: 0.5,
+        origin: 'test',
+        assigned_corps_id: null,
+        acting_commander: false,
+        turns_in_command: 0,
+        battles: 0,
+        victories: 0,
+        ...overrides,
+    };
+}
+
+function makeCorps(overrides: Partial<FormationView> = {}): FormationView {
+    return {
+        id: 'rs_drina_corps',
+        name: 'Drina Corps',
+        kind: 'corps',
+        faction: 'RS',
+        status: 'active',
+        readiness: 'ready',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        ...overrides,
     };
 }
 
@@ -418,6 +455,97 @@ describe('ops planning target discovery', () => {
         expect(screen.getAllByText('Vrijeme pripreme:').length).toBeGreaterThan(0);
         expect(screen.getByText('2 operacije komandovao')).toBeTruthy();
         expect(screen.queryByText('Select Operations Commander')).toBeNull();
+    });
+
+    it('renders CommanderPhase unavailable reasons without raw staff shorthand', () => {
+        const state = makeState();
+        useGameStore.setState({
+            loadedGameState: {
+                ...state,
+                formations: [
+                    ...state.formations,
+                    makeCorps(),
+                ],
+                namedOfficerData: [
+                    makeOfficer({
+                        id: 'officer_fallen',
+                        name: 'Fallen Officer',
+                        status: 'killed',
+                    }),
+                    makeOfficer({
+                        id: 'officer_army',
+                        name: 'Army Staff Officer',
+                        rank: 'army_commander',
+                    }),
+                    makeOfficer({
+                        id: 'officer_operation',
+                        name: 'Assigned Officer',
+                        rank: 'colonel',
+                        assigned_operation: 'raw_operation_id',
+                    }),
+                    makeOfficer({
+                        id: 'officer_corps',
+                        name: 'Other Corps Officer',
+                        rank: 'colonel',
+                        assigned_corps_id: 'rs_drina_corps',
+                        acting_commander: false,
+                    }),
+                    makeOfficer({
+                        id: 'officer_acting',
+                        name: 'Acting Other Officer',
+                        rank: 'colonel',
+                        assigned_corps_id: 'rs_drina_corps',
+                        acting_commander: true,
+                    }),
+                ],
+            },
+            opsPlanningCorpsId: 'rs_1st_krajina',
+        });
+
+        const { container } = render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
+
+        const copy = container.textContent ?? '';
+        const titles = Array.from(container.querySelectorAll('[title]'))
+            .map((node) => node.getAttribute('title') ?? '')
+            .join(' ');
+        const allCopy = `${copy} ${titles}`;
+        expect(allCopy).toContain('Fallen in service');
+        expect(allCopy).toContain('Assigned to army headquarters');
+        expect(allCopy).toContain('Assigned to another operation');
+        expect(allCopy).toContain('Commanding Drina Corps');
+        expect(allCopy).toContain('Acting commander for Drina Corps');
+        expect(allCopy).not.toMatch(/\bKIA\b|\bARMY HQ\b|\bASSIGNED TO OP\b|\bCORPS CMDR\b|\bACTING CMDR\b|raw_operation_id/);
+    });
+
+    it('localizes CommanderPhase unavailable reasons in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeState();
+        useGameStore.setState({
+            loadedGameState: {
+                ...state,
+                namedOfficerData: [
+                    makeOfficer({
+                        id: 'officer_fallen',
+                        name: 'Pali Oficir',
+                        status: 'killed',
+                    }),
+                    makeOfficer({
+                        id: 'officer_operation',
+                        name: 'Dodijeljeni Oficir',
+                        rank: 'colonel',
+                        assigned_operation: 'raw_operation_id',
+                    }),
+                ],
+            },
+            opsPlanningCorpsId: 'rs_1st_krajina',
+        });
+
+        const { container } = render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
+
+        const allCopy = container.textContent ?? '';
+        expect(allCopy).toContain('Pao u sluzbi');
+        expect(allCopy).toContain('Dodijeljen drugoj operaciji');
+        expect(allCopy).not.toMatch(/\bKIA\b|\bASSIGNED TO OP\b|raw_operation_id/);
     });
 
     it('localizes OPORD body prose in BCS mode', () => {

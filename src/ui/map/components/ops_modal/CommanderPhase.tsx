@@ -28,15 +28,24 @@ interface CommanderPhaseProps {
 function getAvailabilityStatus(
     officer: NamedOfficerView,
     targetCorpsId: string,
+    corpsNameById: Map<string, string>,
 ): { available: boolean; reason?: string } {
-    if (officer.status === 'kia') return { available: false, reason: 'KIA' };
-    if (officer.status === 'captured') return { available: false, reason: 'CAPTURED' };
-    if (officer.status === 'retired') return { available: false, reason: 'RETIRED' };
-    if (officer.rank === 'army_commander') return { available: false, reason: 'ARMY HQ' };
-    if (officer.enclave_lock) return { available: false, reason: `ENCLAVE LOCKED` };
-    if (officer.assigned_operation) return { available: false, reason: 'ASSIGNED TO OP' };
+    if (officer.status === 'kia' || officer.status === 'killed') {
+        return { available: false, reason: t('opsPlanning.commander.reason.fallen') };
+    }
+    if (officer.status === 'captured') return { available: false, reason: t('opsPlanning.commander.reason.captured') };
+    if (officer.status === 'retired') return { available: false, reason: t('opsPlanning.commander.reason.retired') };
+    if (officer.rank === 'army_commander') return { available: false, reason: t('opsPlanning.commander.reason.armyHq') };
+    if (officer.enclave_lock) return { available: false, reason: t('opsPlanning.commander.reason.enclaveLocked') };
+    if (officer.assigned_operation) return { available: false, reason: t('opsPlanning.commander.reason.assignedOperation') };
     if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId) {
-        return { available: false, reason: officer.acting_commander ? 'ACTING CMDR (OTHER CORPS)' : 'CORPS CMDR' };
+        const corps = corpsNameById.get(officer.assigned_corps_id) ?? t('opsPlanning.commander.reason.anotherCommand');
+        return {
+            available: false,
+            reason: officer.acting_commander
+                ? t('opsPlanning.commander.reason.actingCommanderOtherCorps', { corps })
+                : t('opsPlanning.commander.reason.assignedCorps', { corps }),
+        };
     }
     return { available: true };
 }
@@ -77,6 +86,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
         const name = corpsFormation
             ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
+        const corpsNameById = new Map(
+            loadedGameState.formations
+                .filter((f) => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq')
+                .map((f) => [f.id, formatCorpsDisplayName(f.name, f.id)]),
+        );
 
         const subordinates = loadedGameState.formations.filter(
             (f) => f.corps_id === corpsId && f.kind === 'brigade' && f.status === 'active'
@@ -95,11 +109,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
         const unavail: Array<{ officer: NamedOfficerView; reason: string }> = [];
 
         for (const off of factionOfficers) {
-            const status = getAvailabilityStatus(off, corpsId);
+            const status = getAvailabilityStatus(off, corpsId, corpsNameById);
             if (status.available) {
                 avail.push({ officer: off, fit: getRegionalFit(off, corpsId) });
             } else {
-                unavail.push({ officer: off, reason: status.reason ?? '' });
+                unavail.push({ officer: off, reason: status.reason ?? t('opsPlanning.commander.reason.unknown') });
             }
         }
 

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label ops commander unavailable reasons
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Operations commander selection now maps unavailable-officer reasons through localized player copy instead of raw staff shorthand. `killed` officers are treated as fallen/unavailable alongside existing `kia` officers, assigned-operation ids are hidden behind generic assignment copy, and other-corps conflicts name the command instead of rendering `CORPS CMDR` / `ACTING CMDR` codes. The stale baseline AAR final-held expectation was also synced to the current `held at close` copy so CI no longer expects removed `OBJ` shorthand.
+
+**Verification:** Red focused proof first failed on missing `Fallen in service` / `Pao u sluzbi` copy and exposed raw `KIA`, `ASSIGNED TO OP`, and `raw_operation_id` output. Green proof: `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts --pool=forks --reporter=dot` passed 22/22; `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 35/35; `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui_i18n.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` passed 52/52; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 232/232; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish active operation and combat summary copy
 
 **Type:** UI/read-model i18n copy polish.
