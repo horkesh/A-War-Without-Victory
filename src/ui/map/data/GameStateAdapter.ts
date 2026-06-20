@@ -59,7 +59,7 @@ import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
-import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
+import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
 import { summarizePlayerDecisions } from '../../../state/player_decision_manifest.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
@@ -1053,6 +1053,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 const projections = projectStrainDecay(fv.id, state as GameState, 5);
                 fv.projectedStrainNextTurn = projections.length > 1 ? projections[1].projectedStrain : strain;
                 fv.recoveryForecast = deriveRecoveryForecast(projections);
+                fv.recoveryForecastToken = deriveRecoveryForecastToken(projections);
 
                 // ── Corps Situation Assessment (Commander Explanation Surfaces Wave 1) ──
                 const cmdState = cc?.commander_state as {

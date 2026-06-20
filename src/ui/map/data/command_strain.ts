@@ -15,6 +15,19 @@
 import type { GameState } from '../../../state/game_state.js';
 import type { FrictionEvent } from '../../../sim/combat/warlord_friction.js';
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
+import type { MessageKey } from '../i18n';
+
+type CommandCopyParams = Record<string, string | number>;
+
+export interface CommandCopyToken {
+    key: MessageKey;
+    params?: CommandCopyParams;
+    fallback: string;
+}
+
+function copyToken(key: MessageKey, fallback: string, params?: CommandCopyParams): CommandCopyToken {
+    return params ? { key, params, fallback } : { key, fallback };
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -178,6 +191,8 @@ export interface DragFactor {
     isPrimary: boolean;
     /** Compact player-facing label line (no period at end) */
     label: string;
+    /** Localized render token for player-facing UI; label remains fallback/test compatibility. */
+    labelToken?: CommandCopyToken;
 }
 
 /**
@@ -204,8 +219,10 @@ export interface OrderInterpretation {
     category: OrderInterpretationCategory;
     /** null when severity === 'normal' (silence = healthy). */
     cautionNotice: string | null;
+    cautionNoticeToken?: CommandCopyToken | null;
     /** Compact badge label. null when category === 'normal'. */
     categoryLabel: string | null;
+    categoryLabelKey?: MessageKey | null;
     /** 'direct_intervention' when player would be overriding a reluctant commander. */
     interventionStrength: 'ordinary_approval' | 'direct_intervention';
     /** Ordered drag factors (primary first). Empty array when category === 'normal'. */
@@ -288,6 +305,19 @@ export function deriveOrderInterpretation(
     }
 
     // ── Drag factors (ordered, primary first) ─────────────────────────────────
+    const cautionNoticeToken: CommandCopyToken | null =
+        category === 'strain_shaped'
+            ? severity === 'alarm'
+                ? copyToken('commandStrain.order.notice.strainAlarm', cautionNotice ?? '')
+                : copyToken('commandStrain.order.notice.strainCaution', cautionNotice ?? '')
+            : category === 'feasibility_constrained'
+                ? copyToken('commandStrain.order.notice.feasibility', cautionNotice ?? '')
+                : category === 'tempo_resistant'
+                    ? copyToken('commandStrain.order.notice.tempo', cautionNotice ?? '')
+                    : category === 'caution_driven'
+                        ? copyToken('commandStrain.order.notice.caution', cautionNotice ?? '')
+                        : null;
+
     const dragFactors: DragFactor[] = [];
 
     switch (category) {
@@ -301,11 +331,15 @@ export function deriveOrderInterpretation(
                 strainIntensity === 'severe' ? 'Command strain — severe (institutional damage)'
                 : strainIntensity === 'moderate' ? 'Command strain — moderate (prior interventions)'
                 : 'Command strain — mild (recent intervention)';
-            dragFactors.push({ source: 'command_strain', intensity: strainIntensity, isPrimary: true, label: strainLabel });
+            const strainLabelKey =
+                strainIntensity === 'severe' ? 'commandStrain.order.drag.strain.severe'
+                : strainIntensity === 'moderate' ? 'commandStrain.order.drag.strain.moderate'
+                : 'commandStrain.order.drag.strain.mild';
+            dragFactors.push({ source: 'command_strain', intensity: strainIntensity, isPrimary: true, label: strainLabel, labelToken: copyToken(strainLabelKey, strainLabel) });
 
             // Secondary: professional caution if commander is reluctant
             if (commanderAssessment === 'postpone' || commanderAssessment === 'abort') {
-                dragFactors.push({ source: 'professional_caution', intensity: 'mild', isPrimary: false, label: 'Commander also recommends waiting' });
+                dragFactors.push({ source: 'professional_caution', intensity: 'mild', isPrimary: false, label: 'Commander also recommends waiting', labelToken: copyToken('commandStrain.order.drag.commanderWaiting', 'Commander also recommends waiting') });
             }
             break;
         }
@@ -318,7 +352,12 @@ export function deriveOrderInterpretation(
                 : commanderAssessment === 'abort'
                     ? 'Professional judgment — recommends abort'
                     : 'Professional judgment — recommends waiting';
-            dragFactors.push({ source: 'professional_caution', intensity: cautionIntensity, isPrimary: true, label: cautionLabel });
+            const cautionToken = count > 0
+                ? copyToken('commandStrain.order.drag.priorDelays', cautionLabel, { count, plural: count > 1 ? 's' : '' })
+                : commanderAssessment === 'abort'
+                    ? copyToken('commandStrain.order.drag.recommendsAbort', cautionLabel)
+                    : copyToken('commandStrain.order.drag.recommendsWaiting', cautionLabel);
+            dragFactors.push({ source: 'professional_caution', intensity: cautionIntensity, isPrimary: true, label: cautionLabel, labelToken: cautionToken });
             break;
         }
         case 'feasibility_constrained': {
@@ -339,13 +378,25 @@ export function deriveOrderInterpretation(
     }
 
     // ── Category label (compact badge) ────────────────────────────────────
+    for (const factor of dragFactors) {
+        if (factor.labelToken) continue;
+        if (factor.source === 'hard_constraint') {
+            factor.labelToken = copyToken('commandStrain.order.drag.hardLimit', factor.label);
+        } else if (factor.source === 'timing_gap') {
+            factor.labelToken = copyToken('commandStrain.order.drag.timingGap', factor.label);
+        } else if (factor.source === 'command_strain') {
+            factor.labelToken = copyToken('commandStrain.order.drag.strainAlsoPresent', factor.label);
+        }
+    }
+
     let categoryLabel: string | null;
+    let categoryLabelKey: MessageKey | null;
     switch (category) {
-        case 'strain_shaped':         categoryLabel = 'STRAIN-SHAPED'; break;
-        case 'feasibility_constrained': categoryLabel = 'FEASIBILITY'; break;
-        case 'tempo_resistant':       categoryLabel = 'TEMPO'; break;
-        case 'caution_driven':        categoryLabel = 'CAUTION-DRIVEN'; break;
-        default:                      categoryLabel = null;
+        case 'strain_shaped':         categoryLabel = 'STRAIN-SHAPED'; categoryLabelKey = 'commandStrain.order.category.strainShaped'; break;
+        case 'feasibility_constrained': categoryLabel = 'FEASIBILITY'; categoryLabelKey = 'commandStrain.order.category.feasibility'; break;
+        case 'tempo_resistant':       categoryLabel = 'TEMPO'; categoryLabelKey = 'commandStrain.order.category.tempo'; break;
+        case 'caution_driven':        categoryLabel = 'CAUTION-DRIVEN'; categoryLabelKey = 'commandStrain.order.category.cautionDriven'; break;
+        default:                      categoryLabel = null; categoryLabelKey = null;
     }
 
     // ── Intervention strength ──────────────────────────────────────────────
@@ -354,7 +405,7 @@ export function deriveOrderInterpretation(
             ? 'direct_intervention'
             : 'ordinary_approval';
 
-    return { severity, category, cautionNotice, categoryLabel, interventionStrength, dragFactors };
+    return { severity, category, cautionNotice, cautionNoticeToken, categoryLabel, categoryLabelKey, interventionStrength, dragFactors };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -399,6 +450,7 @@ export interface StanceInterpretation {
     severity: 'normal' | 'caution' | 'constrained';
     /** null when severity === 'normal' (silence = healthy). */
     notice: string | null;
+    noticeToken?: CommandCopyToken | null;
     /** true when the stance is blocked by command state (compromised + offensive). */
     isBlocked: boolean;
 }
@@ -425,6 +477,7 @@ export function deriveStanceInterpretation(
         return {
             severity: 'constrained',
             notice: 'Offensive posture is unavailable. Command cohesion is compromised — restore the command relationship first.',
+            noticeToken: copyToken('commandStrain.stance.offensiveUnavailable', 'Offensive posture is unavailable. Command cohesion is compromised - restore the command relationship first.'),
             isBlocked: true,
         };
     }
@@ -433,6 +486,7 @@ export function deriveStanceInterpretation(
         return {
             severity: 'caution',
             notice: 'Requesting aggressive posture while command relationship is strained. This stance is available but operations proceed at elevated institutional friction.',
+            noticeToken: copyToken('commandStrain.stance.offensiveCaution', 'Requesting aggressive posture while command relationship is strained. This stance is available but operations proceed at elevated institutional friction.'),
             isBlocked: false,
         };
     }
@@ -524,6 +578,12 @@ export function projectStrainDecay(
 export function deriveRecoveryForecast(
     projections: Array<{ turn: number; projectedStrain: number }>,
 ): string | null {
+    return deriveRecoveryForecastToken(projections)?.fallback ?? null;
+}
+
+export function deriveRecoveryForecastToken(
+    projections: Array<{ turn: number; projectedStrain: number }>,
+): CommandCopyToken | null {
     if (projections.length === 0) return null;
     const currentStrain = projections[0].projectedStrain;
     if (currentStrain === 0) return null; // silence=healthy
@@ -532,16 +592,24 @@ export function deriveRecoveryForecast(
     const recoveryEntry = projections.find(p => p.projectedStrain === 0);
     if (recoveryEntry) {
         const turnsUntilRecovery = recoveryEntry.turn - projections[0].turn;
-        return `Strain resolving in ${turnsUntilRecovery} turn${turnsUntilRecovery !== 1 ? 's' : ''}`;
+        return copyToken(
+            'commandStrain.recovery.resolving',
+            `Strain resolving in ${turnsUntilRecovery} turn${turnsUntilRecovery !== 1 ? 's' : ''}`,
+            { turns: turnsUntilRecovery, plural: turnsUntilRecovery !== 1 ? 's' : '' },
+        );
     }
 
     // Still has strain at projection horizon
     const nextTurnStrain = projections.length > 1 ? projections[1].projectedStrain : currentStrain;
     const nextLabel = getCommandStrainLabel(nextTurnStrain);
     if (nextTurnStrain < currentStrain) {
-        return `Recovery: strain drops to ${nextTurnStrain} (${nextLabel}) next turn`;
+        return copyToken(
+            'commandStrain.recovery.dropping',
+            `Recovery: strain drops to ${nextTurnStrain} (${nextLabel}) next turn`,
+            { strain: nextTurnStrain, label: nextLabel },
+        );
     }
-    return `Strain persisting at ${currentStrain}`;
+    return copyToken('commandStrain.recovery.persisting', `Strain persisting at ${currentStrain}`, { strain: currentStrain });
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -700,6 +768,7 @@ export type PrimaryConstraint =
 export interface CorpsSituationAssessment {
     /** Overall posture summary — one-line explanation. Null = healthy (silence). */
     postureSummary: string | null;
+    postureSummaryToken?: CommandCopyToken | null;
     /** Active military constraints. Empty = no constraints. */
     militaryFactors: string[];
     /** Active institutional constraints from Army HQ. Empty = none. */
@@ -713,6 +782,7 @@ export interface CorpsSituationAssessment {
      * One sentence naming THE main factor. Null = healthy (silence).
      */
     dominantReason: string | null;
+    dominantReasonToken?: CommandCopyToken | null;
     /**
      * Wave 2: Classification of the primary constraint type.
      * 'none' = healthy. Used for UI badge coloring and decision routing.
@@ -724,6 +794,7 @@ export interface CorpsSituationAssessment {
      * Grounded in real state — no fake forecasting or advisory theater.
      */
     reliefPath: string | null;
+    reliefPathToken?: CommandCopyToken | null;
 }
 
 /**
@@ -911,6 +982,15 @@ export function deriveCorpsSituationAssessment(
         }
     }
 
+    const postureSummaryToken: CommandCopyToken | null =
+        postureSummary === 'Corps exhaustion limiting operational tempo'
+            ? copyToken('commandStrain.situation.posture.exhaustionTempo', postureSummary)
+            : postureSummary === 'Forces available but threat conditions demand caution'
+                ? copyToken('commandStrain.situation.posture.threatCaution', postureSummary)
+                : postureSummary === null
+                    ? null
+                    : copyToken('commandStrain.situation.posture.recorded', postureSummary);
+
     // ── Wave 2+3: Dominant reason + primary constraint + relief path ────────
     // Priority order (highest = most urgent): siege > threat > defensive_duty > force_condition > institutional > plan > none
     const { dominantReason, primaryConstraint, reliefPath } = classifyPrimaryConstraint(
@@ -921,6 +1001,7 @@ export function deriveCorpsSituationAssessment(
 
     return {
         postureSummary,
+        postureSummaryToken,
         militaryFactors,
         institutionalFactors,
         planExplanation,
@@ -1284,6 +1365,7 @@ export interface DelegationContext {
     path: DelegationPath;
     /** Player-facing label. null = silence (healthy normal delegation). */
     label: string | null;
+    labelToken?: CommandCopyToken | null;
     /** Who currently bears the decision burden. null = silence (commander, default). */
     decisionBearer: 'commander' | 'presidency' | null;
 }
@@ -1317,6 +1399,7 @@ export function deriveDelegationContext(
         return {
             path: 'strained_delegation',
             label: 'Commander recommends launch within delegated authority — command relationship is strained',
+            labelToken: copyToken('commandStrain.delegation.strained', 'Commander recommends launch within delegated authority - command relationship is strained'),
             decisionBearer: 'commander',
         };
     }
@@ -1326,6 +1409,9 @@ export function deriveDelegationContext(
     return {
         path: 'presidential_direction',
         label: `Commander recommends ${verb} — decision authority rests with the Presidency`,
+        labelToken: commanderAssessment === 'abort'
+            ? copyToken('commandStrain.delegation.presidentialAbort', `Commander recommends ${verb} - decision authority rests with the Presidency`)
+            : copyToken('commandStrain.delegation.presidentialPostpone', `Commander recommends ${verb} - decision authority rests with the Presidency`),
         decisionBearer: 'presidency',
     };
 }

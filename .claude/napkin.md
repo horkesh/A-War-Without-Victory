@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COMMAND-STRAIN COPY TOKEN BOUNDARY (2026-06-21).** Command-strain derivations feed rendered Army HQ and Operation Briefing surfaces. Do instead: return `CommandCopyToken` metadata beside fallback strings and have renderers call `t(token.key, token.params)`; pin BCS against English leaks like `STRAIN-SHAPED`, `Offensive posture is unavailable`, `Strain resolving in`, and `Commander recommends abort`.
+
 **LIVE PROOF FIXTURE STATE (2026-06-20).** Live browser gates must not fail on optional absent fixture state unless they create it first. Do instead: prove always-present hooks directly, and record explicit `skipped:no-visible-*` evidence for optional rows such as first-hour Records AAR battles while component tests pin the hook.
 
 **ARMY RESERVE COPY BOUNDARY (2026-06-20).** Reserve requests can carry diagnostic `description`, `why_needed`, `how_to_use`, purpose, and reason payloads. Do instead: render Army Reserve panels/modals through `armyReserve.*` i18n keys with neutral unknown fallbacks; keep raw reserve prose/ids internal.
