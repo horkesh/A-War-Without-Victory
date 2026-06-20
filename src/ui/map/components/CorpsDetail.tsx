@@ -24,6 +24,7 @@ import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
+import { inspectOnField } from '../utils/shellNavigation';
 import { t } from '../i18n';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
@@ -39,7 +40,6 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
-  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setOpsPlanningContext = useGameStore((s) => s.setOpsPlanningContext);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
@@ -141,6 +141,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     } else {
       setLoadError(t('corpsDetail.opsPlanningRequiresSector'));
     }
+  };
+
+  const inspectFormationInCorps = (formationId: string) => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-formation-in-corps',
+      formationId,
+      corpsId: selectedCorpsId,
+    });
   };
 
   return (
@@ -299,7 +307,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 <CombatSummaryPanel
                   summary={corpsFormation.combatSummary}
                   formations={loadedGameState.formations}
-                  onSelectFormation={setSelectedFormationId}
+                  onSelectFormation={inspectFormationInCorps}
                 />
               </div>
             )}
@@ -318,7 +326,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <BrigadeRow
                     key={f.id}
                     formation={f}
-                    onClick={() => setSelectedFormationId(f.id)}
+                    onClick={() => inspectFormationInCorps(f.id)}
                     onHoverChange={(hovered, e) => {
                       setHoveredOsids(hovered ? (f.aorSettlementIds ?? (f.location_osid ? [f.location_osid] : [])) : []);
                       setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(f.id) ?? null) : null);

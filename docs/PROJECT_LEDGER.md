@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): preserve Corps Detail brigade context
+
+**Type:** UI/store route-state polish.
+
+**Fix:** Corps Detail brigade clicks now use the shared `inspectOnField(...)` route with a `field-formation-in-corps` target, preserving the selected corps while focusing the brigade. Combat summary and ORBAT brigade drilldowns now keep the corps rail context instead of clearing it into a bare formation route.
+
+**Verification:** Red proof first failed because a Corps Detail ORBAT brigade click cleared `selectedCorpsId`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/command_drilldown_routing.test.ts --pool=forks --reporter=dot` (1/1); `npm.cmd exec -- vitest run tests/ui/command_drilldown_routing.test.ts tests/ui/gamestore_field_inspection.test.ts tests/ui/panel_rail_ownership.test.ts tests/ui_map_panel_rail.test.ts --pool=forks --reporter=dot` (12/12); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (23 files / 213 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`, temp evidence deleted). Report: `docs/40_reports/implemented/20260620_CORPSDETAIL_BRIGADE_DRILLDOWN.md`.
+
+**Scope/determinism:** UI/store route-state, focused tests, player-journey coverage, live browser QA, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): localize local-support labels
 
 **Type:** UI/read-model i18n and adapter-boundary polish.
