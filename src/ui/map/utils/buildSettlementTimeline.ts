@@ -86,11 +86,11 @@ function ethnicLabel(key: string): string {
 }
 
 /** Faction display name. */
-function factionName(f: string): string {
+function factionName(f: string | null | undefined): string {
     if (f === 'RS') return 'VRS';
     if (f === 'RBiH') return 'ARBiH';
     if (f === 'HRHB') return 'HVO';
-    return f;
+    return t('settlementTimeline.faction.unknown');
 }
 
 interface BattleRecord {
@@ -103,25 +103,26 @@ interface BattleRecord {
     territory_flipped: boolean;
 }
 
-const CONTROL_MECHANISM_LABELS: Record<string, string> = {
-    combat: 'combat action',
-    event: 'historical control event',
-    control_change: 'historical control event',
-    event_control_change: 'historical control event',
-    initial_control: 'initial control',
-    inferred_from_displacement: 'inferred from displacement',
-    displacement: 'displacement aftermath',
-    paramilitary: 'paramilitary action',
-    rear_pocket_consolidation: 'rear-area consolidation',
-    null_claim: 'unopposed control claim',
-    jna_phantom_capture: 'JNA handoff',
+const CONTROL_MECHANISM_LABEL_KEYS: Record<string, MessageKey> = {
+    combat: 'settlementTimeline.control.mechanism.combat',
+    event: 'settlementTimeline.control.mechanism.historical',
+    control_change: 'settlementTimeline.control.mechanism.historical',
+    event_control_change: 'settlementTimeline.control.mechanism.historical',
+    initial_control: 'settlementTimeline.control.mechanism.initial',
+    inferred_from_displacement: 'settlementTimeline.control.mechanism.displacementInferred',
+    displacement: 'settlementTimeline.control.mechanism.displacement',
+    paramilitary: 'settlementTimeline.control.mechanism.paramilitary',
+    rear_pocket_consolidation: 'settlementTimeline.control.mechanism.rearPocket',
+    null_claim: 'settlementTimeline.control.mechanism.unopposed',
+    jna_phantom_capture: 'settlementTimeline.control.mechanism.jnaHandoff',
 };
 
 /** Control-event mechanism display name. */
 function controlMechanismLabel(mechanism: string): string | undefined {
     const normalized = mechanism.trim();
     if (!normalized || normalized === 'unknown') return undefined;
-    return CONTROL_MECHANISM_LABELS[normalized];
+    const key = CONTROL_MECHANISM_LABEL_KEYS[normalized];
+    return key ? t(key) : undefined;
 }
 
 function isInitialControlEvent(event: ControlEvent): boolean {
@@ -134,21 +135,22 @@ function isInitialControlEvent(event: ControlEvent): boolean {
     );
 }
 
-const BATTLE_OUTCOME_LABELS: Record<string, string> = {
-    decisive_victory: 'decisive victory',
-    victory: 'victory',
-    costly_victory: 'costly victory',
-    attacker_victory: 'attacker victory',
-    defender_victory: 'defender victory',
-    stalemate: 'stalemate',
-    repulsed: 'attack repulsed',
-    catastrophic: 'catastrophic defeat',
-    withdrawal: 'withdrawal',
+const BATTLE_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
+    decisive_victory: 'settlementTimeline.battle.outcome.decisiveVictory',
+    victory: 'settlementTimeline.battle.outcome.victory',
+    costly_victory: 'settlementTimeline.battle.outcome.costlyVictory',
+    attacker_victory: 'settlementTimeline.battle.outcome.attackerVictory',
+    defender_victory: 'settlementTimeline.battle.outcome.defenderVictory',
+    stalemate: 'settlementTimeline.battle.outcome.stalemate',
+    repulsed: 'settlementTimeline.battle.outcome.repulsed',
+    catastrophic: 'settlementTimeline.battle.outcome.catastrophic',
+    withdrawal: 'settlementTimeline.battle.outcome.withdrawal',
 };
 
 /** Outcome display name. */
 function outcomeName(o: string): string {
-    return BATTLE_OUTCOME_LABELS[o.trim()] ?? 'outcome recorded';
+    const key = BATTLE_OUTCOME_LABEL_KEYS[o.trim()];
+    return key ? t(key) : t('settlementTimeline.battle.outcome.recorded');
 }
 
 function operationDisplayName(op: OperationHistoryEntry): string {
@@ -193,8 +195,8 @@ export function buildSettlementTimeline(
             turn: 0,
             type: 'control_flip',
             faction: startController,
-            title: `Controlled by ${factionName(startController)} at scenario start`,
-            detail: 'initial control',
+            title: t('settlementTimeline.control.scenarioStart', { faction: factionName(startController) }),
+            detail: t('settlementTimeline.control.mechanism.initial'),
         });
     }
 
@@ -209,9 +211,9 @@ export function buildSettlementTimeline(
             type: 'control_flip',
             faction: ce.to ?? undefined,
             title: initialControl
-                ? `Controlled by ${ce.to ? factionName(ce.to) : 'Unknown'} at scenario start`
-                : `${ce.to ? factionName(ce.to) : 'Unknown'} took control`,
-            detail: initialControl ? 'initial control' : controlMechanismLabel(ce.mechanism),
+                ? t('settlementTimeline.control.scenarioStart', { faction: factionName(ce.to) })
+                : t('settlementTimeline.control.changed', { faction: factionName(ce.to) }),
+            detail: initialControl ? t('settlementTimeline.control.mechanism.initial') : controlMechanismLabel(ce.mechanism),
         });
     }
     // 2. Infer control flips from displacement events — when `caused_by` faction
@@ -239,8 +241,8 @@ export function buildSettlementTimeline(
                         turn: de.turn,
                         type: 'control_flip',
                         faction: de.caused_by,
-                        title: `${factionName(de.caused_by)} took control`,
-                        detail: 'inferred from displacement',
+                        title: t('settlementTimeline.control.changed', { faction: factionName(de.caused_by) }),
+                        detail: t('settlementTimeline.control.mechanism.displacementInferred'),
                     });
                     controlFlipTurns.add(de.turn);
                 }
@@ -255,8 +257,12 @@ export function buildSettlementTimeline(
             turn: b.turn,
             type: 'battle',
             faction: b.attacker_faction,
-            title: `Battle — ${outcomeName(b.outcome)}`,
-            detail: `${factionName(b.attacker_faction)} attacked ${factionName(b.defender_faction)}${b.territory_flipped ? ' · territory captured' : ''}`,
+            title: t('settlementTimeline.battle.title', { outcome: outcomeName(b.outcome) }),
+            detail: t('settlementTimeline.battle.detail', {
+                attacker: factionName(b.attacker_faction),
+                defender: factionName(b.defender_faction),
+                captureSuffix: b.territory_flipped ? t('settlementTimeline.battle.captureSuffix') : '',
+            }),
             casualties: { attacker: b.attacker_casualties, defender: b.defender_casualties },
             outcome: b.outcome,
         });
@@ -267,7 +273,12 @@ export function buildSettlementTimeline(
         events.push({
             turn: m.turn,
             type: m.type === 'arrived' ? 'brigade_arrived' : 'brigade_departed',
-            title: `${m.formation_name} ${m.type === 'arrived' ? 'stationed' : 'departed'}`,
+            title: t(
+                m.type === 'arrived'
+                    ? 'settlementTimeline.movement.arrived'
+                    : 'settlementTimeline.movement.departed',
+                { brigade: m.formation_name },
+            ),
             brigadeName: m.formation_name,
         });
     }

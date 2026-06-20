@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**TOOLTIP PLAYER COPY (2026-06-20).** Formation/front tooltips are normal play surfaces, not staff shorthand overlays. Do instead: map posture, order, density, pressure, readiness, defense preview, and contact copy through `tooltip.*` labels; keep raw posture ids, `AoR`, `THIN/DENSE`, `Active Def.`, and `reactive` out of normal tooltip copy.
+
+**SETTLEMENT TIMELINE CONTROL/BATTLE/MOVEMENT COPY (2026-06-20).** Timeline control, battle, and brigade movement rows are localized player records, not English string assembly. Do instead: route start-control, control-change, mechanism, battle title/detail/outcome, capture suffix, and movement arrived/departed copy through `settlementTimeline.*` i18n keys; unknown factions/outcomes should use neutral fallback copy instead of raw ids.
+
 **EVENT / ORDER / RESERVE LABEL COPY (2026-06-20).** Event effects, staged orders, and reserve requests are player command copy, not enum displays. Do instead: map known effect kinds, staged order types/targets, posture names, and reserve purpose/reason ids through localized/player-safe labels; unknowns should become neutral recorded-effect/request copy, not raw ids.
 
 **ECONOMY / RECRUITMENT LABEL COPY (2026-06-20).** Production and recruitment modal fields are command surfaces, not raw type/resource dumps. Do instead: map facility types, resource labels, faction names, and equipment classes through localized/player-safe labels; keep raw equipment ids only as internal `onApply` payloads.

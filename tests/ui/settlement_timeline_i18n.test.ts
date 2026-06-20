@@ -97,4 +97,76 @@ describe('SettlementTimeline localization', () => {
     expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('srebrenica');
     expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('_');
   });
+
+  it('localizes control battle and movement rows in BCS mode without English timeline fragments', () => {
+    setLocale('bcs');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [],
+      [{ turn: 2, settlementId: 'op:test:test_1', from: 'RBiH', to: 'RS', mechanism: 'combat' }],
+      [],
+      [{
+        turn: 3,
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        outcome: 'costly_victory',
+        attacker_casualties: 12,
+        defender_casualties: 8,
+        territory_flipped: true,
+      }],
+      [
+        { turn: 4, formation_id: 'bde_1', formation_name: '1. brigada', type: 'arrived' },
+        { turn: 5, formation_id: 'bde_1', formation_name: '1. brigada', type: 'departed' },
+      ],
+      [],
+      [],
+      null,
+      'RBiH',
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+
+    expect(container.textContent).toContain('Pod kontrolom ARBiH na pocetku scenarija');
+    expect(container.textContent).toContain('VRS preuzima kontrolu');
+    expect(container.textContent).toContain('Borba - skupa pobjeda');
+    expect(container.textContent).toContain('VRS napada ARBiH - teritorija zauzeta');
+    expect(container.textContent).toContain('1. brigada rasporedjena u naselju');
+    expect(container.textContent).toContain('1. brigada napustila naselje');
+    expect(container.textContent).not.toMatch(/Controlled by|scenario start|took control|Battle|attacked|territory captured|stationed|departed/);
+  });
+
+  it('uses player-safe English fallback copy for unknown control and battle ids', () => {
+    setLocale('en');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [],
+      [{ turn: 2, settlementId: 'op:test:test_1', from: 'RBiH', to: 'raw_unknown_force', mechanism: 'raw_mechanism_id' }],
+      [],
+      [{
+        turn: 3,
+        attacker_faction: 'raw_attacker_force',
+        defender_faction: 'RBiH',
+        outcome: 'raw_battle_outcome',
+        attacker_casualties: 0,
+        defender_casualties: 0,
+        territory_flipped: false,
+      }],
+      [],
+      [],
+      [],
+      null,
+      null,
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+
+    expect(container.textContent).toContain('Unknown force took control');
+    expect(container.textContent).toContain('Battle - outcome recorded');
+    expect(container.textContent).toContain('Unknown force attacked ARBiH');
+    expect(container.textContent).not.toMatch(/raw_unknown_force|raw_mechanism_id|raw_attacker_force|raw_battle_outcome/);
+  });
 });

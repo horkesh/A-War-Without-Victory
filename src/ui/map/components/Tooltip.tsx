@@ -97,7 +97,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   );
 }
 
-/** §7.2 Formation: name, corps, personnel, cohesion bar, posture, AoR summary, order */
+/** §7.2 Formation: name, corps, personnel, cohesion bar, posture, area summary, order */
 function FormationTooltipContent({
   formationId,
   formations,
@@ -153,11 +153,11 @@ function FormationTooltipContent({
         </div>
       )}
       {model.showHomeMunicipality && (
-        <div className="text-[10px] text-green-400 mb-1">⌂ Home municipality</div>
+        <div className="text-[10px] text-green-400 mb-1">⌂ {t('tooltip.homeMunicipality')}</div>
       )}
       {model.personnel != null && (
         <div className="text-[11px] text-text-secondary mb-1">
-          Personnel: {model.personnel.toLocaleString()}
+          {t('tooltip.personnel', { count: model.personnel.toLocaleString() })}
         </div>
       )}
       <div className="flex items-center gap-2 text-[11px] mb-1">
@@ -173,26 +173,38 @@ function FormationTooltipContent({
         <span className="tabular-nums">{Math.round(cohesion)}</span>
       </div>
       {model.posture && (
-        <div className="text-[11px] text-text-secondary mb-1">Posture: {model.posture}</div>
+        <div className="text-[11px] text-text-secondary mb-1">
+          <span>{t('tooltip.currentPosture')}</span>{' '}
+          <span className="text-text-primary">{model.posture}</span>
+        </div>
       )}
       {model.aorSummary && (
-        <div className="text-[11px] text-text-secondary mb-1">AoR: {model.aorSummary}</div>
+        <div className="text-[11px] text-text-secondary mb-1">
+          <span>{t('tooltip.areaOfResponsibility')}</span>{' '}
+          <span className="text-text-primary">{model.aorSummary}</span>
+        </div>
       )}
       {model.orderLine && (
         <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
-          Order: {model.orderLine}
+          <span>{t('tooltip.currentOrder')}</span>{' '}
+          <span className="text-text-primary">{model.orderLine}</span>
         </div>
       )}
-      {model.statusLine && <div className="text-[11px] text-text-secondary mt-0.5">Status: {model.statusLine}</div>}
+      {model.statusLine && (
+        <div className="text-[11px] text-text-secondary mt-0.5">
+          <span>{t('tooltip.readiness')}</span>{' '}
+          <span className="text-text-primary">{model.statusLine}</span>
+        </div>
+      )}
     </div>
   );
 }
 
-/** Density label + color class */
-function densityBadge(density: number): { label: string; color: string } {
-  if (density < 0.5) return { label: 'THIN', color: 'text-red-400' };
-  if (density > 1.0) return { label: 'DENSE', color: 'text-green-400' };
-  return { label: 'Normal', color: 'text-amber-300' };
+/** Density color class */
+function densityColorClass(density: number): string {
+  if (density < 0.5) return 'text-red-400';
+  if (density > 1.0) return 'text-green-400';
+  return 'text-amber-300';
 }
 
 /** §7.3 Front edge: factions, sector, density, threat, pressure, formations each side */
@@ -235,19 +247,28 @@ function FrontTooltipContent({
       </div>
       {model.sectorName && (
         <div className="text-[11px] text-text-secondary mb-1.5">
-          Sector: {model.sectorName}
+          <span>{t('tooltip.sector')}</span>{' '}
+          <span className="text-text-primary">{model.sectorName}</span>
         </div>
       )}
-      <div className="text-[11px] text-text-secondary mb-1">Persistence: {persistenceLine}</div>
-      <div className="text-[11px] text-text-secondary mb-1">Pressure: {model.pressureLine}</div>
+      <div className="text-[11px] text-text-secondary mb-1">
+        <span>{t('tooltip.frontExtent')}</span>{' '}
+        <span className="text-text-primary">{persistenceLine}</span>
+      </div>
+      <div className="text-[11px] text-text-secondary mb-1">
+        <span>{t('tooltip.pressure')}</span>{' '}
+        <span className="text-text-primary">{model.pressureLine}</span>
+      </div>
       {model.densityValue != null && model.densityLabel && (
         <div className="text-[11px] text-text-secondary mb-1">
-          Density: <span className={densityBadge(model.densityValue).color}>{model.densityValue.toFixed(2)} ({model.densityLabel})</span>
+          <span>{t('tooltip.density')}</span>{' '}
+          <span className={densityColorClass(model.densityValue)}>{model.densityValue.toFixed(2)} ({model.densityLabel})</span>
         </div>
       )}
       {model.threatSummary && (
         <div className="text-[11px] text-text-secondary mb-2">
-          Threat: <span className="text-amber-300 uppercase">{model.threatSummary}</span>
+          <span>{t('tooltip.threat')}</span>{' '}
+          <span className="text-amber-300 uppercase">{model.threatSummary}</span>
         </div>
       )}
       {model.ownFormationLabels.length > 0 && (
@@ -318,24 +339,28 @@ function DefensePreviewContent({
 
   if (!info) return null;
 
-  const STANCE_LABEL: Record<string, string> = {
-    fortify: 'Fortify', defend: 'Defend', elastic: 'Elastic',
-    active_defense: 'Active Def.', screening: 'Screening',
+  const STANCE_LABEL_KEY: Record<string, MessageKey> = {
+    fortify: 'tooltip.stance.fortify',
+    defend: 'tooltip.stance.defend',
+    elastic: 'tooltip.stance.elastic',
+    active_defense: 'tooltip.stance.activeDefense',
+    screening: 'tooltip.stance.screening',
   };
+  const stanceLabel = t(STANCE_LABEL_KEY[info.stance] ?? 'tooltip.stance.review');
 
   return (
     <div className="mt-2 pt-2 border-t border-panel-border/40">
       <div className="text-[9px] text-text-muted uppercase tracking-wide mb-1">{t('tooltip.defensePreview')}</div>
       <div className="text-[10px] text-text-secondary flex gap-2">
-        <span>{t('tooltip.sectorStance')} <span className="text-text-primary">{STANCE_LABEL[info.stance] ?? info.stance}</span></span>
+        <span>{t('tooltip.sectorStance')} <span className="text-text-primary">{stanceLabel}</span></span>
       </div>
       <div className="text-[10px] text-text-secondary mt-0.5">
         {info.physicalCount > 0
-          ? <span><span className="text-text-primary">{info.physicalCount}</span> at this position</span>
+          ? <span>{t('tooltip.brigadesAtPosition', { count: info.physicalCount })}</span>
           : <span className="text-amber-400">{t('tooltip.noBrigadesAtOsid')}</span>
         }
         {info.reactiveCount > 0 && (
-          <span className="ml-2"><span className="text-text-primary">{info.reactiveCount}</span> reactive</span>
+          <span className="ml-2">{t('tooltip.respondingBrigades', { count: info.reactiveCount })}</span>
         )}
       </div>
       {info.brigades.length > 0 && (
@@ -348,7 +373,7 @@ function DefensePreviewContent({
             </div>
           ))}
           {info.brigades.length > 5 && (
-            <div className="text-[9px] text-text-muted">+{info.brigades.length - 5} more</div>
+            <div className="text-[9px] text-text-muted">{t('tooltip.moreBrigades', { count: info.brigades.length - 5 })}</div>
           )}
         </div>
       )}
