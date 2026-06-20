@@ -39,7 +39,7 @@ If `npm.cmd test` still fails, continue Batch 36 only. Do not bury merge-gate fa
 Stop and hand control back to Codex/user if any of these occur:
 
 - A sensitive-history operation newly delivers a capture/outcome not previously accepted.
-- A task requires Open Design Questions ratification, FORAWWV manual review, clean-VM proof, store/marketing publication, or playtest testimony.
+- A task requires Open Design Questions ratification, FORAWWV Pyrrhic-panel sign-off, clean-VM proof, store/marketing publication, or playtest testimony.
 - A lane would author sensitive real-person biographies or sensitive event prose without historian sign-off.
 - A 40w or consistency hash changes outside a lane whose purpose is explicitly to change scenario output.
 - The implementation requires relaxing canon, hidden-truth constraints, deterministic ordering, or player-knowledge boundaries.
@@ -614,7 +614,7 @@ These are higher-conflict and should wait until the first safe Phase 3 slice is 
 - External playtest testimony
 - Store/marketing publication
 - Trailer/press outreach
-- FORAWWV manual review
+- FORAWWV Pyrrhic-panel sign-off
 - Open Design Questions ratification
 
 **Allowed autonomous scope:**
@@ -682,4 +682,3 @@ For each completed batch, report:
 - docs/ledger updates
 - commit hash if committed, or explicit "not committed"
 - remaining blockers and next recommended batch
-

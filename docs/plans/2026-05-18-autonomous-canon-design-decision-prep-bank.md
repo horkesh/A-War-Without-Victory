@@ -41,9 +41,9 @@
 - path/reference scan for all packet links
 - `git diff --check`
 
-## CDP-2 - FORAWWV Manual Review Packet
+## CDP-2 - FORAWWV Panel Sign-Off Packet
 
-**Objective:** Produce a review packet of proposed manual questions/edits without touching the manual.
+**Objective:** Produce a panel sign-off packet of proposed canon questions/edits without touching the manual.
 
 **Tasks:**
 

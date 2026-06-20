@@ -48,7 +48,7 @@ The casualty-model lanes, **ADR-0007 Phase C**, and **E-B1 (corps-coherence deca
 
 ## Phase 5 — Blocked / §6 / parked (do NOT pick up)
 - **#170 same-axis concentration** — *causes* the boljanic_2 flip; only viable paired with an RS Doboj-garrison OOB bump (2-change, panel-approved).
-- **Krivaja** — §6 Pyrrhic-panel sign-off (historian + game-designer; the atrocity-is-never-rewarded bright line surfaces to the owner; must NOT suppress the historical Srebrenica fall).
+- **Krivaja** — §6 Pyrrhic-panel sign-off (historian + game-designer; BLOCK, split verdict, or bright-line uncertainty escalates to the owner; must NOT suppress the historical Srebrenica fall).
 - **Ključ, Mistral SW-belt** — parked (multi-change redesign).
 
 ## Gate discipline (every Phase-2/3/4 lane)

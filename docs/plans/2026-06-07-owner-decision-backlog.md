@@ -96,9 +96,9 @@ risk = primary downside if mishandled.
   enclaves until an emergent 1995-pivot release). Safe by construction: it REMOVES aggression and
   grants no reward. **CRITICAL risk:** the release must reliably fire so Srebrenica / Žepa still
   fall and the genocide rupture is recorded — suppressing the fall would be a WORSE §6 failure than
-  not building this. Requires Pyrrhic §6-panel sign-off (unanimous GO; the atrocity-is-never-rewarded bright line surfaces to the owner). Fallback if approval is withheld: a
+  not building this. Requires Pyrrhic §6-panel sign-off (unanimous GO; BLOCK, split verdict, or bright-line uncertainty escalates to the owner). Fallback if approval is withheld: a
   documented ceiling (no engine change).
-- **Flags:** §6 YES (Pyrrhic §6-panel sign-off; bright line surfaces to owner) · canon none · calibration yes (changes enclave
+- **Flags:** §6 YES (Pyrrhic §6-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to owner) · canon none · calibration yes (changes enclave
   timing) · effort medium · risk HIGH (a stuck release suppresses the historical fall).
 - **Build-lane:** Faction-AI posture lane, under the §6 chain.
 - **Status:** **§6-GATED — needs user approval; documented-ceiling fallback.**
@@ -172,7 +172,7 @@ risk = primary downside if mishandled.
     ACCEPTED — orchestrator is applying these to FORAWWV directly.
 - **Recommendation:** Ratify the above; no new decision needed beyond letting the Dayton research
   complete.
-- **Flags:** §6 none · canon yes (FORAWWV — orchestrator-applied, owner-authorized only) ·
+- **Flags:** §6 none · canon yes (FORAWWV — orchestrator-applied, panel-authorized only) ·
   calibration none · effort varies · risk low.
 - **Build-lane:** Canon decision-prep bank / orchestrator FORAWWV lane.
 - **Status:** **MOSTLY RULED — Dayton research open; Bucket-A promotions accepted.**

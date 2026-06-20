@@ -418,7 +418,7 @@ This document proposes **eight historically accurate scenarios** for the "A War 
   - Srebrenica town falls July 11
   - ~8,000 Bosniak men and boys killed (genocide)
   - UNPROFOR Dutch battalion failed to protect
-  - Operation Krivaja 95
+  - Operation Krivaja 95 chronology/AAR context; fall receipt is `srebrenica_falls_1995`
 
 - **Zepa Safe Area:**
   - Falls to VRS late July 1995
@@ -454,7 +454,7 @@ This document proposes **eight historically accurate scenarios** for the "A War 
 5. Operation Krivaja 95 (VRS operation name)
 6. International outrage, NATO response
 
-**Game assertions (testable):** `srebrenica` → RS (captured); `gorazde` → RBiH (still holding). Zepa (not in 110 mun1990 registry as separate id) falls to RS late July.
+**Game assertions (testable):** `srebrenica_falls_1995` applies the RS control receipt for Srebrenica; `gorazde` → RBiH (still holding). `zepa_falls_1995` applies the Žepa control receipt; operation rows are chronology/AAR context only.
 
 ---
 

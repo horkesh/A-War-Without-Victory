@@ -120,7 +120,7 @@ The two faction-pairs share the trigger predicate (`isEnclaveContainable`) and t
 | Rupture coupling | **YES** — `srebrenica_genocide_1995` (Krstić/Karadžić/Mladić/ICJ 2007) | **None** — Ahmići/Stupni Do are Ring-2, explicitly NOT ruptures (gate §2 roster) |
 | OVERRUN consequence | Fall routes to existing rupture → `genocide_condemnation` → `failure`. Player is proximate author; DEEPENS the condemnation record (the player authored what history's perpetrators did) — never sanitizes it. | Displacement + standing/patron hit + authored-choice record; atrocity-event content (Ring-2). No genocide rupture. |
 | CONTAIN release | 1995-pivot flag/collapse/exhaustion — **MUST fire so Srebrenica still falls + records on the historical path.** Goražde historically did NOT fall (UNPROFOR / April-1994 NATO ultimatum) → CONTAIN there has no forced release. | `washington_signed` ceasefire freeze → pocket stays HVO-held (matches painted Oct-1995). |
-| Canon tier | Sensitive-History gate Ring-1; **§6 Pyrrhic-panel "no reward for atrocity" sign-off (bright line surfaces to the owner)** | Ordinary atrocity-event sensitivity; lighter (but still §6-touching) sign-off |
+| Canon tier | Sensitive-History gate Ring-1; **§6 Pyrrhic-panel "no reward for atrocity" sign-off (BLOCK, split verdict, or bright-line uncertainty escalates to the owner)** | Ordinary atrocity-event sensitivity; lighter (but still §6-touching) sign-off |
 | Failure mode if mis-built | **Genocide erased from the record, or rewarded** (unacceptable) | Calibration/atrocity-framing miss (recoverable) |
 
 **The two hard constraints on the eastern case (restated for emphasis):**
@@ -136,7 +136,7 @@ The two faction-pairs share the trigger predicate (`isEnclaveContainable`) and t
 - The existing dimension channels for patron-confidence / international-standing hits (the same the paramilitary-policy and atrocity events use).
 - `war_crimes_events`, `displacement.ts`, `consequenceReceipts` for the authored-choice record.
 
-**Minimal new state (build-time, for owner ratification):** a per-enclave authorship marker so the decision is idempotent (one authorship per enclave per run) and the Authored-Choices ledger / ghost-entry register can read it — e.g. `state.political.enclave_decisions: Record<enclaveId, { authored_turn: number; choice: 'overrun' | 'contain'; player_faction: FactionId }>`. This is a *record of what the player authored*, NOT a new condemnation surface and NOT tradeable at Dayton (gate Ring-3 #3 — no negotiable condemnation). It must be modeled deterministically (sorted iteration, no wall-clock) and round-tripped through `save_migration` like other political state. **Whether this field is acceptable, or whether the authorship can be derived from existing `consequenceReceipts` + rupture records without a new field, is an OPEN QUESTION for owner ratification (§11).**
+**Minimal new state (build-time, for Pyrrhic §6-panel ratification):** a per-enclave authorship marker so the decision is idempotent (one authorship per enclave per run) and the Authored-Choices ledger / ghost-entry register can read it — e.g. `state.political.enclave_decisions: Record<enclaveId, { authored_turn: number; choice: 'overrun' | 'contain'; player_faction: FactionId }>`. This is a *record of what the player authored*, NOT a new condemnation surface and NOT tradeable at Dayton (gate Ring-3 #3 — no negotiable condemnation). It must be modeled deterministically (sorted iteration, no wall-clock) and round-tripped through `save_migration` like other political state. **Whether this field is acceptable, or whether the authorship can be derived from existing `consequenceReceipts` + rupture records without a new field, is an OPEN QUESTION for panel ratification (§11).**
 
 ---
 
@@ -178,37 +178,37 @@ All asymmetry reads existing data (disposition, Diplomacy bands, patron state). 
 If/when ratified, build in the contain-design discipline (one change per run, §6-eastern last):
 
 - **Lane 0 — surface + ARBiH-HVO path (lighter §6).** Wire the Decision Room card + the `contain`/`overrun` directives for the RBiH-vs-HVO case only. Washington-freeze release. Light gate.
-- **Lane 1 — VRS-eastern path (FULL §6).** Add the eastern card with the rupture-coupling, the 1995-pivot mandatory release, and the regression test (§4a). Full §6 gate + Pyrrhic §6-panel sign-off (the atrocity-is-never-rewarded bright line surfaces to the owner).
+- **Lane 1 — VRS-eastern path (FULL §6).** Add the eastern card with the rupture-coupling, the 1995-pivot mandatory release, and the regression test (§4a). Full §6 gate + Pyrrhic §6-panel sign-off; a BLOCK, split verdict, or bright-line uncertainty escalates to the owner.
 - **Determinism + calibration:** the OVERRUN/CONTAIN *mechanism* changes sim output (it's a real decision), so each lane is a calibration run (40w + 188w, dual-horizon — the false-green-on-188w lesson, memory `feedback_188w_validate_combat_changes_before_merge`). The player-facing card itself is byte-identical to headless/bot runs (bots never see it). Whether the bot retains the existing assault behaviour or also adopts a default-CONTAIN is an OPEN QUESTION (§11).
 - **Build-time decision:** new directive levers on the existing union vs a dedicated decision-surface in `decisionSurfaceRegistry` — UI-architecture call for `/ui-ux-developer` at build time.
 
 ---
 
-## 10. ⚠️ OWNER + §6 SIGN-OFF REQUIRED before build
+## 10. ⚠️ PYRRHIC §6-PANEL SIGN-OFF REQUIRED before build
 
-This feature touches: enclave mechanics, a rupture's satisfiability, the player-authorized atrocity surface, and the verdict. Per gate §6, the required sign-off (NON-DELEGABLE for the eastern case) is:
+This feature touches: enclave mechanics, a rupture's satisfiability, the player-authorized atrocity surface, and the verdict. Per gate §6, the required sign-off is a unanimous Pyrrhic §6-panel GO; a BLOCK, split verdict, or bright-line uncertainty escalates to the owner:
 
 | Aspect | Required sign-off |
 |---|---|
-| New player-facing atrocity-authorization surface | **User approval — NOT delegable** (gate §6 last row: "any change that could produce a reward-for-atrocity effect") |
-| Eastern (Srebrenica) rupture-coupling + release | `/historian` (ICTY/ICJ/BB-cited) + `/war-or-game` + `/game-designer` + **user approval** |
+| New player-facing atrocity-authorization surface | **Pyrrhic §6-panel unanimous GO** (gate §6 last row: "any change that could produce a reward-for-atrocity effect"); split/BLOCK escalates |
+| Eastern (Srebrenica) rupture-coupling + release | `/historian` (ICTY/ICJ/BB-cited) + `/war-or-game` + `/game-designer` + canon/process QA panel GO |
 | Enclave-mechanics change (Srebrenica/Žepa specifically) | `/gameplay-programmer` + `/historian` |
-| Decision-surface UI + Conscience category | `/game-designer` + `/ui-ux-developer` + user review before implementation |
+| Decision-surface UI + Conscience category | `/game-designer` + `/ui-ux-developer` + panel review before implementation |
 | Verdict / no-invert guarantee | `/game-designer` (verify no Ring-3 surface created by accident) |
 | Cost Ledger / card wording | `/narrative-designer` + `/historian` (§4 register) |
-| New `enclave_decisions` state field (if added) | `/historian` + `/game-designer` + user approval (treated as new condemnation-adjacent surface) |
+| New `enclave_decisions` state field (if added) | `/historian` + `/game-designer` + Pyrrhic §6-panel GO (treated as new condemnation-adjacent surface) |
 
-**Escalation (gate §6):** any dispute escalates to the user. When in doubt, the answer is "no, not yet, bring it to the user." This doc is a DESIGN-DRAFT; it authorizes NO code.
+**Escalation (gate §6):** any BLOCK, split verdict, or bright-line uncertainty escalates to the owner. When in doubt, the answer is "no, not yet, convene the panel." This doc is a DESIGN-DRAFT; it authorizes NO code.
 
 ---
 
-## 11. Open questions for owner ratification
+## 11. Open questions for panel ratification
 
 1. **New state field vs derived.** Does `state.political.enclave_decisions` get added (idempotency + ledger read), or must authorship be derived from existing `consequenceReceipts` + rupture records to avoid a new condemnation-adjacent field? (§6)
 2. **Bot default after shelving Lanes V/A.** With the bot-only contain lanes shelved, do AI factions keep the *current* assault behaviour (which is calibration-flat at the 30/30 floor), or does the shelving also remove the diagnostic-only predicate's intended future bot use? Confirm the floor stays `d311eeac` byte-identical for headless/bot runs. (§9)
-3. **CONTAIN-eastern release semantics.** Is "CONTAIN delays but the 1995-pivot release still forces the historical fall" the owner's intended player experience — i.e. the player-as-RS *cannot* permanently save Srebrenica via CONTAIN, only via a genuinely divergent military hold that never satisfies the rupture condition? (§5 constraint 2)
+3. **CONTAIN-eastern release semantics.** Is "CONTAIN delays but the 1995-pivot release still forces the historical fall" the panel-approved player experience — i.e. the player-as-RS *cannot* permanently save Srebrenica via CONTAIN, only via a genuinely divergent military hold that never satisfies the rupture condition? (§5 constraint 2)
 4. **Goražde / Sarajevo / Bihać / Teočak.** The predicate is faction-agnostic over all 9 enclaves. For RS besieging Goražde (historically held), CONTAIN has no forced release. Should OVERRUN even be *offered* for enclaves history never saw fall (Goražde/Bihać), or should the card surface only for the documented-fall pockets? (Risk: offering OVERRUN-Goražde invites an ahistorical atrocity the record has no rupture for — recorded by ghost-entry, but is that the intent?) (§1, §5)
-5. **Does OVERRUN ever surface for the *defender's* enclaves?** Confirmed NO by the predicate (enclave.faction ≠ player_faction) — but worth explicit owner confirmation that the player never gets an "abandon my own enclave" inverse card here. (§1)
+5. **Does OVERRUN ever surface for the *defender's* enclaves?** Confirmed NO by the predicate (enclave.faction ≠ player_faction) — but worth explicit panel confirmation that the player never gets an "abandon my own enclave" inverse card here. (§1)
 6. **Directive lever vs dedicated decision-surface** — UI architecture (build-time, §9).
 
 ---

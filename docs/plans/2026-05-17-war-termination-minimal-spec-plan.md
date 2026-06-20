@@ -59,7 +59,7 @@ Touch only if review requires (each is a stop-gate, see §Stop Gates):
 - `docs/PROJECT_LEDGER.md` — docs-only entry at the end (no behavioral change).
 
 **Pyrrhic-panel sign-off required to edit:**
-- `docs/10_canon/FORAWWV.md` (flag any conflict for manual review).
+- `docs/10_canon/FORAWWV.md` (route any conflict through Pyrrhic-panel sign-off).
 - `docs/10_canon/VICTORY_AND_PYRRHIC_SCORING.md`, `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`, Engine Invariants, Phase Specs, Systems Manual, Rulebook — this spec **binds to** them; amendments are out of scope.
 
 ---
@@ -322,7 +322,7 @@ Touch only if review requires (each is a stop-gate, see §Stop Gates):
   - `docs/plans/MASTER_ROADMAP.md` — under v0.9.x design-debt: "War termination minimal spec canonized — see `docs/10_canon/WAR_TERMINATION_SPEC.md`. Engine wiring deferred to follow-on plan."
   - `docs/PROJECT_LEDGER.md` — docs-only entry: spec canonized, no behavioral change, follow-on engine plan tracked separately.
 - **Cross-reference (read-only):** `docs/40_reports/CONSOLIDATED_BACKLOG.md` §9 / §11 items remain open until the follow-on engine plan ships; this plan closes only the spec deliverable.
-- **Do not touch:** `docs/10_canon/FORAWWV.md` (flag any conflict for manual review).
+- **Panel-gated:** `docs/10_canon/FORAWWV.md` (route any conflict through Pyrrhic-panel sign-off).
 
 Determinism statement: this is a docs-only lane. Scenario hashes must remain byte-identical (no code or data changes). If any hash drifts, the lane has overreached — stop and investigate.
 
@@ -334,7 +334,7 @@ Determinism statement: this is a docs-only lane. Scenario hashes must remain byt
 - **Stop after Task 3** if the spec drift versus `war_termination.ts` reveals a fifth terminal path or unanticipated branch. Surface as engine-spec drift backlog; do not retroactively rationalize.
 - **Stop after Task 6** if a reviewer proposes new scoring mechanics, new dimensions, new outcome classes, or new condemnation flags. Those changes have their own sign-off paths and are out of scope.
 - **Stop after Task 7** if the sensitive-history audit surfaces any Ring-3 risk. Either revise the spec to eliminate the risk, or escalate to the user per `SENSITIVE_HISTORY_DESIGN_GATE.md` §6.
-- **Stop before user sign-off** if any of the four expert sign-offs is missing or conditional.
+- **Stop before panel sign-off** if any of the four expert sign-offs is missing or conditional.
 - **Stop if `canon:check` fails** after the spec is placed. Do not bypass canon checks.
 - **Stop if any edit lands outside the four target files** (the spec, the advisory pack, the one-line roadmap entry, the one-line ledger entry). This is a docs-only plan; broader edits indicate scope creep.
 - **`FORAWWV.md` edits require Pyrrhic-panel sign-off.** Per project rule, route any diff through the appropriate panel.
@@ -350,4 +350,4 @@ The following are tracked as follow-on work, not part of this plan:
 3. **VerdictScreen / Cinematic Verdict UI** — already owned by `docs/plans/2026-04-06-v091-dynamic-essay-endgame-comparison-plan.md` and informed by `docs/plans/2026-05-17-endgame-188w-verification-plan.md`.
 4. **New rupture predicates** beyond `srebrenica_genocide_1995` — requires the full `SENSITIVE_HISTORY_DESIGN_GATE.md` §2 sign-off path.
 5. **Amendments to `VICTORY_AND_PYRRHIC_SCORING.md` or `SENSITIVE_HISTORY_DESIGN_GATE.md`** — own sign-off paths; this spec binds to them, it does not edit them.
-6. **`FORAWWV.md` updates** — manual review only.
+6. **`FORAWWV.md` updates** — Pyrrhic-panel sign-off required.

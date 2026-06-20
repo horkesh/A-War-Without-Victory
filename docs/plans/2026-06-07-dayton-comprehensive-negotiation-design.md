@@ -95,7 +95,7 @@ Reuse the existing capital→cost→bot/patron→verdict spine. Three extensions
 4. **D4 — UI:** `DaytonNegotiationModal.tsx` → 5-dim structured layout (autonomy dial → competency grid → constitutional choices → return/justice → live IEBL/dysfunction readout) + multi-round panel. *narrative-designer: the verdict must narrate the authored dysfunction in player-legible prose.*
 5. **D5 — canon propagation:** `VICTORY_AND_PYRRHIC_SCORING.md` (dysfunction term), Systems Manual (Dayton mechanic), `WAR_TERMINATION_SPEC.md`. **FORAWWV.md edits require Pyrrhic-panel sign-off** — route through the appropriate panel.
 
-### E. Owner sign-off required before build
+### E. Pyrrhic-panel sign-off required before build
 1. Pick Option 1/2/3 (recommend 2).
 2. Approve `entity_autonomy` as the master dial + `peace_dysfunction_index` feeding the verdict (changes how endgames *grade* — design-defining, though baseline-safe).
 3. Confirm the anti-power-fantasy stance (costs bind; no "win" stop; condemnation flags non-tradeable).

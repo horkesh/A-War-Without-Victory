@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] docs(process): normalize panel sign-off and sensitive-history wording
+
+**Type:** Docs/process and canon-terminology cleanup.
+
+**Fix:** Active process pointers, planning lanes, role guidance, and board/roadmap rows now use Pyrrhic-panel sign-off language instead of stale owner/manual-review wording. Srebrenica/Žepa fall-control wording now consistently identifies `srebrenica_falls_1995` / `zepa_falls_1995` as event-owned receipts, with Krivaja-95/Stupčanica-95 framed as chronology/AAR/operation-health context only.
+
+**Verification:** Stale-language `rg` scans and `git diff --check`. Report: `docs/40_reports/implemented/20260620_DOCS_PROCESS_CANON_TERMINOLOGY_CLEANUP.md`.
+
+**Scope/determinism:** Docs/process only; no simulation logic, UI code, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, package artifacts, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish Formation Detail movement and engagement copy
 
 **Type:** UI/read-model i18n copy polish.

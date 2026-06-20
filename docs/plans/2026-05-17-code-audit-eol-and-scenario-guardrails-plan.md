@@ -75,4 +75,4 @@ Make the local Windows checkout stop producing phantom TypeScript/HMR failures f
 
 - Ledger entry in `docs/PROJECT_LEDGER.md`.
 - Knowledge entry in `docs/PROJECT_LEDGER_KNOWLEDGE.md` if the mixed-EOL root cause or scenario-escape-hatch policy changes.
-- If canon wording changes are needed, queue or explicitly edit relevant canon under a separate canon-review step; do not touch `FORAWWV.md`.
+- If canon wording changes are needed, queue or explicitly edit relevant canon under a separate canon-review step; `FORAWWV.md` edits require Pyrrhic-panel sign-off.

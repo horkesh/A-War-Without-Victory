@@ -43,7 +43,7 @@ Search these locations for references to the changed items:
 - For mechanic changes: update descriptions that explain how the mechanic works
 - For schema changes: update field lists, type descriptions
 - Add "(renamed from old/path)" only in reference guides where readers might search old names
-- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (unanimous GO = signature; BLOCK or split surfaces to the owner)
+- Edits to `docs/10_canon/FORAWWV.md` require Pyrrhic-panel sign-off (unanimous GO = signature; BLOCK, split verdict, or bright-line uncertainty escalates to the owner)
 
 ### 5. Verify
 - Run `npx tsc --noEmit` if any `.ts` files were touched

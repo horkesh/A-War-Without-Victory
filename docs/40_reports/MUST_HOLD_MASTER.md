@@ -120,7 +120,7 @@ Runs B and E are zero-delta structural additions and can be committed without a 
 | Bihać | Isolated enclave | 5th Corps + 250k civilians with no fallback |
 | Goražde | Enclave | Largest eastern enclave; only Drina enclave with southern approach |
 | Srebrenica | Enclave | 40–80k civilians; VRS Directive 4 confirms intent |
-| Žepa | Enclave (secondary) | Srebrenica-linked; fall together |
+| Žepa | Enclave (secondary) | Separate event-owned fall receipt, historically sequenced after Srebrenica; do not couple as one operation/fall mechanic |
 | Zenica | City | 3rd Corps HQ; central corridor anchor; industrial base |
 | Travnik | City | 3rd Corps HQ and operational anchor — NOT a supply corridor (corrected) |
 | Gornji Vakuf | Supply hinge | Cuts Tomislavgrad→Mostar axis; Phase B HVO–ARBiH flashpoint Oct 1992 |
