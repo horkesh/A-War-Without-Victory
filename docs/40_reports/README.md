@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Army ops drilldown / BCS copy polish** | [implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md](implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md) - Army HQ operations planning copy is player-facing, OperationsPanel brigade drilldowns preserve corps context, and targeted BCS copy no longer exposes `OSID`. |
 | **Latest turn-0 provenance surface guards** | [implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md](implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md) - Records AAR, tactical bottom status, and Chronicle Wrapped now suppress turn-0 setup territory as post-start gains/losses. |
 | **Latest ops modal commander / turn-0 territory guards** | [implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md](implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md) - Ops planning now uses opening commander read-model display, and turn-0 territory summaries no longer imply post-start ground taken. |
 | **Latest Warroom docket status copy** | [implemented/20260620_WARROOM_DOCKET_STATUS_COPY.md](implemented/20260620_WARROOM_DOCKET_STATUS_COPY.md) - Warroom priority docket badges now render localized player-facing status labels instead of internal pre-advance status ids. |

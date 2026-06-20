@@ -130,4 +130,17 @@ describe('UI localization substrate', () => {
             expect(bcsCopy).not.toMatch(pattern);
         }
     });
+
+    it('keeps targeted player-facing BCS copy free of raw OSID terminology', () => {
+        const targetedCopy = [
+            t('tooltip.noBrigadesAtOsid', undefined, 'bcs'),
+            t('gameOver.osidsControlled', { count: 2 }, 'bcs'),
+            t('gameOver.osidControlled.one', { count: 1 }, 'bcs'),
+            t('gameOver.osidControlled.many', { count: 2 }, 'bcs'),
+            t('directive.targetInput.ambiguousBody', { matches: 'Brcko, Brcko polje' }, 'bcs'),
+        ].join('\n');
+
+        expect(targetedCopy).not.toMatch(/\bOSID\b/i);
+        expect(targetedCopy).toMatch(/polozaj|naselj|navedeni ciljevi/);
+    });
 });

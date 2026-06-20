@@ -19,7 +19,7 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
-import { openArmyHQBriefingForCorps } from '../utils/shellNavigation';
+import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { t } from '../i18n';
 
 function compareOperations(a: OperationView, b: OperationView): number {
@@ -89,7 +89,6 @@ export function OperationsPanel() {
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const panToOsid = useGameStore((s) => s.panToOsid);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
-  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const setSelectedArmyId = useGameStore((s) => s.setSelectedArmyId);
   const setArmyHQOpen = useGameStore((s) => s.setArmyHQOpen);
   const setArmyHQTab = useGameStore((s) => s.setArmyHQTab);
@@ -501,8 +500,11 @@ export function OperationsPanel() {
                           <button
                             key={bId}
                             onClick={() => {
-                              setSelectedOperationKey(null);
-                              setSelectedFormationId(bId);
+                              inspectOnField(useGameStore.getState(), {
+                                kind: 'field-formation-in-corps',
+                                corpsId: selectedOperation.corps_id,
+                                formationId: bId,
+                              });
                             }}
                             className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
                           >

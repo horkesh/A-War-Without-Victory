@@ -346,10 +346,11 @@ describe('VerdictScreen route — endgame reachability', () => {
 
         expect(screen.getByText('Pat pozicija')).toBeDefined();
         expect(screen.getByText('Konačni poredak')).toBeDefined();
-        expect(screen.getByText('1 OSID pod kontrolom')).toBeDefined();
+        expect(screen.getByText('1 naselje pod kontrolom')).toBeDefined();
         expect(screen.getByText('Kampanja je trajala 188 sedmica (3 godina, 32 sedmica)')).toBeDefined();
         expect(screen.getByRole('button', { name: 'Pogledaj svoj rat' })).toBeDefined();
         expect(screen.getByRole('button', { name: 'Nova igra' })).toBeDefined();
+        expect(document.body.textContent ?? '').not.toMatch(/\bOSID\b/i);
     });
 
     it('renders verdict path when verdict present and gameOver true', () => {
