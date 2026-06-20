@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**HISTORICAL EVENT FALLBACK COPY (2026-06-20).** Event ids are metadata, not timeline prose. Do instead: use `settlementTimeline.historicalEvent.fallback` when adapter/timeline historical event text is missing, id-identical, or raw-token-like; keep raw ids only in event metadata and pin with `tests/ui/settlement_timeline_i18n.test.ts`.
+
 **BRIGADEROW SUPPLY LABEL I18N (2026-06-20).** BrigadeRow supply state is derived UI state, not player copy. Do instead: map `supplied`/`strained`/`cutoff` through `brigadeRow.supply.*` i18n keys, use the resolved label for both tooltip and supply-dot aria label, and keep `tests/ui/brigade_row_supply_labels.test.ts` inside `qa:player-journeys`.
 
 **COMPOUND FIELD DRILLDOWNS (2026-06-20).** Field drilldowns must not use bare targets when the source surface knows related context. Do instead: route settlement formation and Formation Detail location links through `field-formation-at-settlement`, and OOB sector rows through `field-sector-in-corps`; pin with `tests/ui/gamestore_field_inspection.test.ts` and `tests/ui/oob_drilldown_routing.test.ts`.
