@@ -7,8 +7,9 @@ import type {
 import { getPlayerFacingFaction, filterPlayerVisibleMapFormations } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
-import type { Locale } from '../i18n';
+import { t, type Locale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 
 export interface PlayerSafeFormationTooltipModel {
   classification: 'own' | 'enemy_contact';
@@ -34,10 +35,32 @@ export interface PlayerSafeFrontTooltipModel {
   enemyContactSummary: string | null;
 }
 
-function getDensityLabel(density: number): string {
-  if (density < 0.5) return 'THIN';
-  if (density > 1.0) return 'DENSE';
-  return 'Normal';
+const FORMATION_POSTURE_LABEL_KEY: Record<string, MessageKey> = {
+  hold: 'tooltip.posture.hold',
+  defend: 'tooltip.posture.defend',
+  defend_at_all_costs: 'tooltip.posture.defendAtAllCosts',
+  elastic_defense: 'tooltip.posture.elasticDefense',
+  counterattack: 'tooltip.posture.counterattack',
+  dig_in: 'tooltip.posture.digIn',
+  attack: 'tooltip.posture.attack',
+  assault: 'tooltip.posture.assault',
+  fortify: 'tooltip.posture.fortify',
+  offensive: 'tooltip.posture.attack',
+  reserve: 'tooltip.posture.reserve',
+  rest: 'tooltip.posture.rest',
+  retreat: 'tooltip.posture.retreat',
+};
+
+function getFormationPostureLabel(posture: string | null | undefined, locale: Locale): string | null {
+  const key = (posture ?? '').trim().toLowerCase();
+  if (!key) return null;
+  return t(FORMATION_POSTURE_LABEL_KEY[key] ?? 'tooltip.posture.pending', undefined, locale);
+}
+
+function getDensityLabel(density: number, locale: Locale): string {
+  if (density < 0.5) return t('tooltip.density.lightlyHeld', undefined, locale);
+  if (density > 1.0) return t('tooltip.density.reinforced', undefined, locale);
+  return t('tooltip.density.normal', undefined, locale);
 }
 
 function isOwnFormation(formation: Pick<FormationView, 'faction'>, playerFaction: string | null): boolean {
@@ -71,10 +94,11 @@ export function buildPlayerSafeFormationTooltipModel(args: {
   locale?: Locale;
 }): PlayerSafeFormationTooltipModel {
   const formation = args.formations?.find((entry) => entry.id === args.formationId);
+  const locale = args.locale ?? 'en';
   if (!formation) {
     return {
       classification: 'enemy_contact',
-      title: 'Unknown contact',
+      title: t('tooltip.unknownFormation', undefined, locale),
       subtitle: null,
       personnel: null,
       cohesion: null,
@@ -89,14 +113,14 @@ export function buildPlayerSafeFormationTooltipModel(args: {
   if (!isOwnFormation(formation, args.playerFaction)) {
     return {
       classification: 'enemy_contact',
-      title: 'Enemy contact',
+      title: t('tooltip.enemyContactTitle', undefined, locale),
       subtitle: formation.location_osid ? (getOsidDisplayName(formation.location_osid, args.osidDisplayNames) ?? null) : null,
       personnel: null,
       cohesion: null,
       posture: null,
       aorSummary: null,
       orderLine: null,
-      statusLine: 'Observed unit',
+      statusLine: t('tooltip.status.observedUnit', undefined, locale),
       showHomeMunicipality: false,
     };
   }
@@ -104,9 +128,14 @@ export function buildPlayerSafeFormationTooltipModel(args: {
   const corps = args.formations?.find((entry) => entry.id === formation.corps_id);
   const aorIds = formation.aorSettlementIds ?? [];
   const attack = args.attackOrders?.find((entry) => entry.brigadeId === formation.id);
+  const attackTarget = attack
+    ? (getOsidDisplayName(attack.targetSettlementId, args.osidDisplayNames) || t('tooltip.positionFallback', undefined, locale))
+    : t('tooltip.positionFallback', undefined, locale);
   const orderLine = attack
-    ? `→ Attack ${getOsidDisplayName(attack.targetSettlementId, args.osidDisplayNames)}`
-    : '—';
+    ? t('tooltip.order.attack', {
+      target: attackTarget,
+    }, locale)
+    : t('tooltip.order.none', undefined, locale);
   const munFrom = (osid: string | undefined) => osid?.split(':')[1];
   const showHomeMunicipality = Boolean(
     formation.home_osid
@@ -116,14 +145,14 @@ export function buildPlayerSafeFormationTooltipModel(args: {
 
   return {
     classification: 'own',
-    title: getLocalizedFormationName(formation, args.locale ?? 'en'),
+    title: getLocalizedFormationName(formation, locale),
     subtitle: corps?.name ?? null,
     personnel: formation.personnel ?? null,
     cohesion: formation.cohesion ?? null,
-    posture: formation.posture ?? null,
-    aorSummary: `${aorIds.length} settlements`,
+    posture: getFormationPostureLabel(formation.posture, locale),
+    aorSummary: t(aorIds.length === 1 ? 'tooltip.aorSettlement.one' : 'tooltip.aorSettlement.many', { count: aorIds.length }, locale),
     orderLine,
-    statusLine: 'Active',
+    statusLine: t('tooltip.status.active', undefined, locale),
     showHomeMunicipality,
   };
 }
@@ -139,14 +168,15 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   locale?: Locale;
 }): PlayerSafeFrontTooltipModel {
   const edge = args.frontEdgesOsid?.find((entry) => entry.edge_id === args.edgeId);
-  const sideA = edge?.side_a ?? '?';
-  const sideB = edge?.side_b ?? '?';
+  const locale = args.locale ?? 'en';
+  const sideA = getPlayerSafeMilitaryFactionName(edge?.side_a, '?');
+  const sideB = getPlayerSafeMilitaryFactionName(edge?.side_b, '?');
   const pressure = args.frontPressureByEdge?.[args.edgeId];
   const pressureValue = pressure?.value ?? 0;
   const pressureLine =
-    pressureValue > 0 ? `+${pressureValue.toFixed(1)} (${sideA} advantage)` :
-      pressureValue < 0 ? `${pressureValue.toFixed(1)} (${sideB} advantage)` :
-        'Balanced';
+    pressureValue > 0 ? t('tooltip.pressure.advantage', { value: `+${pressureValue.toFixed(1)}`, side: sideA }, locale) :
+      pressureValue < 0 ? t('tooltip.pressure.advantage', { value: pressureValue.toFixed(1), side: sideB }, locale) :
+        t('tooltip.pressure.balanced', undefined, locale);
 
   const sector = args.corpsFrontSectors?.find((entry) => entry.edge_ids.includes(args.edgeId));
   const visibleFormations = filterPlayerVisibleMapFormations({
@@ -159,16 +189,21 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   ));
   const ownFormations = formationsOnEdge.filter((formation) => isOwnFormation(formation, args.playerFaction));
   const enemyContacts = formationsOnEdge.filter((formation) => !isOwnFormation(formation, args.playerFaction));
-  const ownFormationLabels = ownFormations.map((formation) => `${getLocalizedFormationName(formation, args.locale ?? 'en')} (${formation.posture ?? '—'})`);
+  const ownFormationLabels = ownFormations.map((formation) => {
+    const posture = getFormationPostureLabel(formation.posture, locale);
+    return posture ? `${getLocalizedFormationName(formation, locale)} - ${posture}` : getLocalizedFormationName(formation, locale);
+  });
 
   return {
-    title: `Front: ${sideA} — ${sideB}`,
+    title: t('tooltip.frontTitle', { sideA, sideB }, locale),
     sectorName: sector?.faction === args.playerFaction ? sector.display_name : null,
     pressureLine,
     densityValue: sector?.faction === args.playerFaction ? sector.density : null,
-    densityLabel: sector?.faction === args.playerFaction ? getDensityLabel(sector.density) : null,
+    densityLabel: sector?.faction === args.playerFaction ? getDensityLabel(sector.density, locale) : null,
     threatSummary: sector?.faction === args.playerFaction ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : null,
     ownFormationLabels,
-    enemyContactSummary: enemyContacts.length > 0 ? `${enemyContacts.length} enemy contact${enemyContacts.length === 1 ? '' : 's'} observed` : null,
+    enemyContactSummary: enemyContacts.length > 0
+      ? t(enemyContacts.length === 1 ? 'tooltip.enemyContact.one' : 'tooltip.enemyContact.many', { count: enemyContacts.length }, locale)
+      : null,
   };
 }

@@ -2,6 +2,10 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest settlement timeline control/battle copy:** [implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md](implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md) - Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through localized player copy.
+
+**Latest tooltip player-copy polish:** [implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md](implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md) - Formation/front tooltips now render localized posture, order, density, readiness, and defense-preview copy instead of raw ids and compact shorthand.
+
 **Latest reserve request modal label copy:** [implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md](implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md) - Reserve request modals now render localized purpose/reason labels instead of raw `offensive_support` / `defensive_gap` ids.
 
 **Latest Order Queue label copy:** [implemented/20260620_ORDER_QUEUE_LABEL_COPY.md](implemented/20260620_ORDER_QUEUE_LABEL_COPY.md) - Staged orders now render localized order types, posture/target labels, and queue chrome instead of raw `attack` / `posture` / `sector` ids.

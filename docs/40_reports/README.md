@@ -511,6 +511,8 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md](implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md) - Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through localized player copy.
+- [implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md](implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md) - Formation/front tooltips now render localized posture, order, density, readiness, and defense-preview copy instead of raw ids and compact shorthand.
 - [implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md](implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md) - Reserve request modals now render localized purpose/reason labels instead of raw reserve request ids.
 - [implemented/20260620_ORDER_QUEUE_LABEL_COPY.md](implemented/20260620_ORDER_QUEUE_LABEL_COPY.md) - Staged orders now render localized order types, posture/target labels, and queue chrome instead of raw order ids.
 - [implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md](implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md) - Event acknowledgement effects now render known effect labels and neutral unknown-effect copy instead of raw effect ids.

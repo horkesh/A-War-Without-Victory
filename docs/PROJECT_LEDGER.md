@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): polish tooltip and settlement timeline copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Formation/front tooltip models now map posture, order, density, pressure, readiness, defense-preview, and contact copy through localized player-facing labels instead of raw posture ids or compact staff shorthand. Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through `settlementTimeline.*` i18n keys with neutral fallbacks for unknown factions/outcomes.
+
+**Verification:** Red proofs first failed on `2nd Tuzla Brigade (defend)` and BCS-mode settlement timeline English fragments. Green focused proof: `npm.cmd exec -- vitest run tests/ui_map_tooltip_player_visibility.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/settlement_timeline_provenance.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 41/41; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `AWWV_LIVE_SURFACE_BROWSER_PORT=3241 npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Reports: `docs/40_reports/implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md`, `docs/40_reports/implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label event, order, and reserve copy
 
 **Type:** UI/read-model i18n copy polish.

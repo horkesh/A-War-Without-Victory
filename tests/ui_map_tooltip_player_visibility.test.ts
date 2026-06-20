@@ -59,8 +59,9 @@ describe('player-safe tooltip models', () => {
     expect(own.title).toBe('2nd Tuzla Brigade');
     expect(own.subtitle).toBe('2nd Corps');
     expect(own.personnel).toBe(1800);
-    expect(own.posture).toBe('defend');
+    expect(own.posture).toBe('Defending');
     expect(own.orderLine).toContain('Doboj');
+    expect(own.orderLine).not.toContain('->');
 
     expect(enemy.classification).toBe('enemy_contact');
     expect(enemy.title).toBe('Enemy contact');
@@ -160,17 +161,58 @@ describe('player-safe tooltip models', () => {
     });
 
     expect(model.sectorName).toBe('Tuzla Front');
-    expect(model.ownFormationLabels).toEqual(['2nd Tuzla Brigade (defend)']);
+    expect(model.densityLabel).toBe('Reinforced');
+    expect(model.ownFormationLabels).toEqual(['2nd Tuzla Brigade - Defending']);
     expect(model.enemyContactSummary).toBe('1 enemy contact observed');
   });
 
-  it('keeps tooltip player copy free of OSID and OPSEC jargon', () => {
+  it('localizes formation posture labels in tooltip models', () => {
+    const formations = [
+      {
+        id: 'own_bde',
+        name: '2nd Tuzla Brigade',
+        faction: 'RBiH',
+        corps_id: 'arbih_2nd_corps',
+        personnel: 1800,
+        cohesion: 77,
+        posture: 'defend',
+        aorSettlementIds: ['op:tuzla'],
+        location_osid: 'op:tuzla',
+      },
+    ] as Array<any>;
+
+    const model = buildPlayerSafeFormationTooltipModel({
+      formationId: 'own_bde',
+      formations,
+      attackOrders: [],
+      osidDisplayNames: null,
+      playerFaction: 'RBiH',
+      locale: 'bcs',
+    });
+
+    expect(model.posture).toBe('Odbrana');
+    expect(model.posture).not.toBe('defend');
+  });
+
+  it('keeps tooltip player copy free of OSID, OPSEC jargon, raw posture, and shorthand chrome', () => {
     const tooltipSource = readFileSync('src/ui/map/components/Tooltip.tsx', 'utf8');
     const englishMessages = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
-    const playerCopy = `${tooltipSource}\n${englishMessages}`;
+    const tooltipMessages = englishMessages
+      .split(/\r?\n/)
+      .filter((line) => line.includes("'tooltip."))
+      .join('\n');
+    const playerCopy = `${tooltipSource}\n${tooltipMessages}`;
 
     expect(playerCopy).not.toContain('Defender OPSEC');
     expect(playerCopy).not.toContain('at OSID');
     expect(playerCopy).not.toContain('No brigades at OSID');
+    expect(playerCopy).not.toContain('Posture:');
+    expect(playerCopy).not.toContain('AoR:');
+    expect(playerCopy).not.toContain('Order:');
+    expect(playerCopy).not.toContain('Status:');
+    expect(playerCopy).not.toContain('THIN');
+    expect(playerCopy).not.toContain('DENSE');
+    expect(playerCopy).not.toContain('Active Def.');
+    expect(playerCopy).not.toMatch(/>\s*reactive\s*</i);
   });
 });
