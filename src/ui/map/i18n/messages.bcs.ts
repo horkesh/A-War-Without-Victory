@@ -2296,6 +2296,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'settlementTimeline.supply.level.strained': 'opterecena',
     'settlementTimeline.supply.level.critical': 'kriticna',
     'settlementTimeline.supply.level.unknown': 'neprocijenjena',
+    'settlementTimeline.historicalEvent.fallback': 'Historijski događaj zabilježen',
     'toolbar.warroom': 'WARROOM',
     'toolbar.returnWarroomTitle': 'Povratak na predsjednički sto',
     'toolbar.chronicle': 'HRONIKA',

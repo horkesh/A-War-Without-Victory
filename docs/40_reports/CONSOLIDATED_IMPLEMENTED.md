@@ -4,6 +4,8 @@
 
 **Latest Formation Detail movement/engagement copy:** [implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md](implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md) - Formation Detail movement status and recent-engagement outcomes now use explicit player-facing labels and neutral fallback copy.
 
+**Latest historical-event fallback copy:** [implemented/20260620_HISTORICAL_EVENT_FALLBACK_COPY.md](implemented/20260620_HISTORICAL_EVENT_FALLBACK_COPY.md) - Adapter and settlement timeline historical-event rows now use localized neutral fallback copy instead of raw event ids when text is missing or unsafe.
+
 **Latest BrigadeRow supply label i18n:** [implemented/20260620_BRIGADEROW_SUPPLY_LABEL_I18N.md](implemented/20260620_BRIGADEROW_SUPPLY_LABEL_I18N.md) - BrigadeRow supply tooltips and dot accessibility labels now render localized player copy instead of raw `STRAINED`/`CUTOFF`/lowercase state ids.
 
 **Latest compound field drilldowns:** [implemented/20260620_COMPOUND_FIELD_DRILLDOWNS.md](implemented/20260620_COMPOUND_FIELD_DRILLDOWNS.md) - Settlement formation, Formation Detail location, and OOB sector clicks now preserve their related field context.

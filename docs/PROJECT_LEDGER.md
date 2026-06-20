@@ -11,6 +11,18 @@
 
 ---
 
+## [2026-06-20] fix(ui): neutralize historical-event fallback copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Adapter historical-event rows now use localized neutral fallback copy when event text is missing, repeats the raw id, or looks like an internal token. Settlement timeline rendering repeats the guard at the display boundary, preserving event ids as metadata while preventing raw ids such as `srebrenica_falls_1995` from becoming player copy.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 2 files / 17 tests; `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260620_HISTORICAL_EVENT_FALLBACK_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): localize BrigadeRow supply labels
 
 **Type:** UI/read-model i18n copy polish.

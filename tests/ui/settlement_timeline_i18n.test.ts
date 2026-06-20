@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
+import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import {
   formatSettlementTimelineTurnDate,
@@ -74,5 +75,25 @@ describe('SettlementTimeline localization', () => {
 
     expect(container.textContent).toContain('Snabdijevanje');
     expect(container.textContent).not.toMatch(/\bSupply\b|adequate|strained|critical/);
+  });
+
+  it('uses localized neutral copy for adapter historical events with missing text', () => {
+    setLocale('bcs');
+
+    const parsed = parseGameState({
+      meta: { turn: 10, phase: 'war' },
+      military: { formations: {} },
+      political: { political_controllers: {} },
+      turn_summaries: [{
+        turn: 10,
+        events_fired: [{ id: 'srebrenica_falls_1995' }],
+      }],
+    } as any);
+
+    expect(parsed.historicalEventsByTurn).toHaveLength(1);
+    expect(parsed.historicalEventsByTurn[0]?.id).toBe('srebrenica_falls_1995');
+    expect(parsed.historicalEventsByTurn[0]?.text).toBe('Historijski događaj zabilježen');
+    expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('srebrenica');
+    expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('_');
   });
 });

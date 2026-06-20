@@ -2432,6 +2432,7 @@ export const enMessages = {
     'settlementTimeline.supply.level.strained': 'strained',
     'settlementTimeline.supply.level.critical': 'critical',
     'settlementTimeline.supply.level.unknown': 'unassessed',
+    'settlementTimeline.historicalEvent.fallback': 'Historical event recorded',
     'toolbar.warroom': 'WARROOM',
     'toolbar.returnWarroomTitle': "Return to president's desk",
     'toolbar.chronicle': 'CHRONICLE',

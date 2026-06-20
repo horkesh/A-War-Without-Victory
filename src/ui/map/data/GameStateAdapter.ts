@@ -43,7 +43,9 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafeOfficerName,
     getPlayerSafeOperationName,
+    looksLikeRawPlayerFacingToken,
 } from '../utils/playerSafeText.js';
+import { t } from '../i18n/index.js';
 import { turnToDateString } from '../utils/formatters.js';
 import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
@@ -2538,10 +2540,15 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
         if (!Array.isArray(summary.events_fired)) continue;
         for (const e of summary.events_fired) {
             const rawId = String(e.id ?? '');
+            const rawText = typeof e.text === 'string' ? e.text.trim() : '';
+            const fallback = t('settlementTimeline.historicalEvent.fallback');
+            const text = rawText && rawText !== rawId && !looksLikeRawPlayerFacingToken(rawText)
+                ? getPlayerSafeDisplayLabel(rawText, fallback)
+                : fallback;
             result.push({
                 turn,
                 id: rawId,
-                text: getPlayerSafeDisplayLabel(String(e.text ?? rawId), 'Historical event'),
+                text,
             });
         }
     }

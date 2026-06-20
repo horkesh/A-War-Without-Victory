@@ -14,7 +14,7 @@
  */
 
 import { t, type MessageKey } from '../i18n/index.js';
-import { getPlayerSafeOperationName } from './playerSafeText.js';
+import { getPlayerSafeOperationName, looksLikeRawPlayerFacingToken } from './playerSafeText.js';
 
 export type TimelineEventType =
     | 'control_flip'
@@ -286,10 +286,13 @@ export function buildSettlementTimeline(
 
     // --- Historical events ---
     for (const e of historicalEvents) {
+        const text = e.text.trim();
         events.push({
             turn: e.turn,
             type: 'historical_event',
-            title: e.text.trim() || 'Historical event recorded',
+            title: text && text !== e.id && !looksLikeRawPlayerFacingToken(text)
+                ? text
+                : t('settlementTimeline.historicalEvent.fallback'),
         });
     }
 
