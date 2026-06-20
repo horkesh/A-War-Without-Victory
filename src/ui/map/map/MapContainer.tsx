@@ -187,11 +187,13 @@ import {
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
 import { pickNearestFormationAtPoint, resolveDeckFormationClickTarget } from './clickSelectionPriority';
+import { resolveMapFormationInspectionTarget, resolveMapSectorInspectionTarget } from './mapSelectionRouting';
 import {
   deckLayerRenderInputsChanged,
   shouldRunPulseAnimation,
   type DeckLayerRenderInputs,
 } from './renderChurnGuards';
+import { inspectOnField } from '../utils/shellNavigation';
 
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 // Bounds widened both west and east so the camera can recenter on Bihać
@@ -210,8 +212,14 @@ type MapSourceSpecification = SourceSpecification | CanvasSourceSpecification;
 type TacticalDeckPickObject = { properties?: Record<string, unknown> };
 type TacticalDeckPickingInfo = PickingInfo<TacticalDeckPickObject>;
 
-function selectFormationFromMap(formationId: string) {
-  useGameStore.getState().setSelectedFormationId(formationId);
+function inspectFormationFromMap(formationId: string, properties?: Record<string, unknown> | null) {
+  const store = useGameStore.getState();
+  inspectOnField(store, resolveMapFormationInspectionTarget(formationId, properties, store.loadedGameState));
+}
+
+function inspectSectorFromMap(sectorId: string, properties?: Record<string, unknown> | null) {
+  const store = useGameStore.getState();
+  inspectOnField(store, resolveMapSectorInspectionTarget(sectorId, store.loadedGameState, properties));
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
@@ -430,8 +438,6 @@ export function MapContainer() {
   const [interactionBindingRevision, setInteractionBindingRevision] = useState(0);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedOsidInSector = useGameStore((s) => s.setSelectedOsidInSector);
-  const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
-  const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
   const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
@@ -607,7 +613,7 @@ export function MapContainer() {
         {
           id: 'view', label: 'View Unit', icon: '\u{1F441}', action: () => {
             const id = properties?.id as string;
-            if (id) useGameStore.getState().setSelectedFormationId(id);
+            if (id) inspectFormationFromMap(id, properties);
           }
         },
         {
@@ -629,7 +635,7 @@ export function MapContainer() {
             const osid = properties?.osid as string;
             const sectorId = osidToSector.get(osid ?? '');
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
-              useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+              inspectSectorFromMap(sectorId);
             }
           }
         },
@@ -639,7 +645,7 @@ export function MapContainer() {
           id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
             const sectorId = properties?.sector_id as string;
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
-              useGameStore.getState().setSelectedCorpsFrontSectorId(sectorId);
+              inspectSectorFromMap(sectorId, properties);
             }
           }
         },
@@ -826,7 +832,7 @@ export function MapContainer() {
             if (findPlayerFacingSectorById(store.loadedGameState, clickTarget.sectorId)) {
               store.setExpandedStackOsid(null);
               sectorSelectedFromMapRef.current = true;
-              store.setSelectedCorpsFrontSectorId(clickTarget.sectorId);
+              inspectSectorFromMap(clickTarget.sectorId, frontFeature?.properties);
             }
             return;
           }
@@ -841,7 +847,7 @@ export function MapContainer() {
 
           const props = info?.object?.properties ?? formationFallback?.properties;
           if (!props) return;
-          selectFormationFromMap(clickTarget.formationId);
+          inspectFormationFromMap(clickTarget.formationId, props);
           // Use pre-computed stack_count from GeoJSON feature properties
           const osid = props.location_osid as string | undefined;
           const stackCount = typeof props.stack_count === 'number' ? props.stack_count : 1;
@@ -990,7 +996,7 @@ export function MapContainer() {
           }
         },
         onFormationClick: (id, props, point) => {
-          selectFormationFromMap(id);
+          inspectFormationFromMap(id, props);
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
@@ -1015,7 +1021,7 @@ export function MapContainer() {
           const sectorId = props.sector_id as string | undefined;
           if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
             sectorSelectedFromMapRef.current = true;
-            setSelectedCorpsFrontSectorId(sectorId);
+            inspectSectorFromMap(sectorId, props);
           }
         },
         onOsidHover: (osid, point) => {
@@ -1092,7 +1098,7 @@ export function MapContainer() {
       cancelled = true;
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setSelectedFormationId, setSelectedCorpsFrontSectorId, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -3393,7 +3399,7 @@ export function MapContainer() {
             setOverlayAnchor(null);
           }}
           onSelect={(id) => {
-            setSelectedFormationId(id);
+            inspectFormationFromMap(id);
             setExpandedStackOsid(null);
             setOverlayAnchor(null);
           }}

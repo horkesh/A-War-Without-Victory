@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**DIRECT MAP SELECTION CONTEXT (2026-06-20).** Direct tactical-map clicks must preserve parent command context. Do instead: route map sector/front, formation marker, counter, context-menu, and stack clicks through `inspectOnField(...)` with `field-sector-in-corps`, `field-formation-in-sector`, `field-formation-in-corps`, or settlement fallback; avoid bare map-click selection setters that clear corps/sector context.
+
 **PEACE / DECISION ROOM LABEL COPY (2026-06-20).** PeaceStatusPanel and Decision Room cards are player command copy, not generic enum/title-case surfaces. Do instead: map peace chrome through `peace.*`, reserve reasons through `armyReserve.reason.*`, briefing kinds through `decisionRoom.briefingKind.*`, and proposal domains through `decisionRoom.proposalDomain.*`; keep `sector_threat`, `field_reports`, and `ops` out of normal copy.
 
 **TOOLTIP PLAYER COPY (2026-06-20).** Formation/front tooltips are normal play surfaces, not staff shorthand overlays. Do instead: map posture, order, density, pressure, readiness, defense preview, and contact copy through `tooltip.*` labels; keep raw posture ids, `AoR`, `THIN/DENSE`, `Active Def.`, and `reactive` out of normal tooltip copy.

@@ -158,11 +158,13 @@ describe('OOB and operations panel operation labels', () => {
     expect(source).not.toContain('>{op.operation_name}</span>');
   });
 
-  it('routes standalone map and reserve-HQ selection through normalized cleanup setters', () => {
+  it('routes standalone map and reserve-HQ selection through normalized context setters', () => {
     const mapSource = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
     const oobSource = readFileSync('src/ui/map/components/OOBSidebar.tsx', 'utf8');
 
-    expect(mapSource).toContain('useGameStore.getState().setSelectedFormationId(formationId)');
+    expect(mapSource).toContain('inspectFormationFromMap(id, props)');
+    expect(mapSource).toContain('resolveMapFormationInspectionTarget(formationId, properties, store.loadedGameState)');
+    expect(mapSource).not.toContain('useGameStore.getState().setSelectedFormationId(formationId)');
     expect(oobSource).toContain('const setSelectedArmyHqId = useGameStore((s) => s.setSelectedArmyHqId)');
     expect(oobSource).toContain('onClick={() => setSelectedArmyHqId(hqId)}');
     expect(oobSource).not.toContain('useGameStore.setState({ selectedArmyHqId: hqId');
