@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**TURN-0 PROVENANCE MUST BE GLOBAL (2026-06-20).** Every player summary surface that reads `latestTurnSummary.territory_net`, `turnSummaries[*].territory_net`, or `notable_flips` must apply `shouldNarrateTerritorySummary(...)`. Covered surfaces now include Generals Digest, Chief of Staff, Turn Aftermath, Records AAR, BottomStatusStrip, and Chronicle Wrapped.
+
 **OPS MODAL COMMANDER DISPLAY (2026-06-20).** Ops planning surfaces are command read-model surfaces too. Do instead: use `resolveCorpsCommanderDisplay(...)` in G2 and OPORD headers when no explicit operation commander is seated; do not assign turn-0 officers to make display copy work.
 
 **TURN-0 TERRITORY SUMMARY GUARD (2026-06-20).** `latestTurnSummary.turn === 0` territory data is scenario-start provenance, not post-start ground movement. Do instead: gate player-facing `territory_net` / `notable_flips` narration through `shouldNarrateTerritorySummary(...)` in digest, briefing, aftermath, and future summary surfaces.

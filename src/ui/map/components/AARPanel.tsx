@@ -16,6 +16,7 @@ import {
 import { EmptyState } from './EmptyState';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 import { getDecorationName } from '../utils/decorationUtils';
 
 // --- Faction colors ---
@@ -308,6 +309,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     if (!isOpen || !loadedGameState) return null;
 
     const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
+    const narrateTerritory = shouldNarrateTerritorySummary(summary);
     const formationNameById = new Map(
         (loadedGameState.formations ?? []).map((formation) => [formation.id, getLocalizedFormationName(formation, locale)] as const),
     );
@@ -336,7 +338,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                             )}
 
                             {/* Territory */}
-                            {Object.keys(summary.territory_net).length > 0 && (
+                            {narrateTerritory && Object.keys(summary.territory_net).length > 0 && (
                                 <Section title={t('aar.section.territory')}>
                                     <div className="mb-1.5">
                                         <TerritoryNet net={summary.territory_net} />

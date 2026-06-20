@@ -21446,3 +21446,11 @@ Generals Digest, Chief of Staff briefing, and Turn Aftermath now share a turn-0 
 Verification: focused ops modal `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts --pool=forks --reporter=dot` passed 18/18. Expanded commander/turn-0 pack `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui/opening_corps_commander_display.test.ts tests/ui/commander_read_model_surfaces.test.ts tests/generals_digest_chronicle.test.ts tests/ui/chief_of_staff_briefing_i18n.test.ts tests/ui/turn_aftermath.test.ts --pool=forks --reporter=dot` passed 79/79. `npm.cmd run typecheck` passed. `git diff --check` passed.
 
 Determinism/scope: UI/read-model display, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-20 - Turn-0 provenance surface guards
+
+Extended the turn-0 territory provenance guard to the remaining player-facing surfaces identified by the Pyrrhic UI scout. Records AAR now suppresses turn-0 territory rows and flip lists, the tactical bottom status strip no longer renders opening-week territory trend arrows from scenario-start `territory_net`, and Chronicle Wrapped skips turn-0 territory data when calculating early shifts and peak/total territory gains. Current control percentages and non-territory early-battle counts remain intact.
+
+Verification: focused red proof first failed on the AAR turn-0 territory row, bottom-strip up arrow, and Wrapped `earlyGains` including setup territory. Focused green `npm.cmd exec -- vitest run tests/ui/operation_aar_records_review.test.ts tests/ui/bottom_status_strip_labels.test.ts tests/wrapped_slides.test.ts --pool=forks --reporter=dot` passed 42/42 after the fix. Report: `docs/40_reports/implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md`.
+
+Determinism/scope: UI/read-model display, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.

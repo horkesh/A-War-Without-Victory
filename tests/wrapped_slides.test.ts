@@ -306,6 +306,34 @@ describe('generateWrappedSlides', () => {
             expect(slide.detail).toContain('positions');
             expect(slide.detail).not.toContain('OSIDs');
         });
+
+        it('ignores turn-0 territory provenance when counting early and peak gains', () => {
+            const state = makeMinimalState({
+                player_faction: 'RBiH',
+                turnSummaries: [
+                    makeTurnSummary(0, {
+                        territory_net: { RBiH: 20, RS: -20 },
+                        notable_flips: [
+                            { osid: 'op:sarajevo:centar', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'municipality_seat' },
+                        ],
+                    }),
+                    makeTurnSummary(1, { territory_net: { RBiH: 2 } }),
+                    makeTurnSummary(2, { territory_net: { RBiH: -1 } }),
+                ],
+            });
+
+            const opening = generateWrappedSlides(state).find(s => s.id === 'the_opening')!;
+            const built = generateWrappedSlides(state).find(s => s.id === 'what_you_built')!;
+
+            expect(opening.data?.earlyGains).toBe(2);
+            expect(opening.data?.earlyLosses).toBe(1);
+            expect(opening.detail).toBe('Territory shifts: +2 / -1 positions');
+            expect(built.data?.peakTerritory).toBe(2);
+            expect(built.data?.totalGained).toBe(2);
+            expect(built.detail).toContain('Peak territory gain: +2 positions');
+            expect(JSON.stringify(opening.data)).not.toContain('20');
+            expect(JSON.stringify(built.data)).not.toContain('20');
+        });
     });
 
     it('keeps wrapped vocabulary player-safe', () => {

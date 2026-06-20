@@ -7,6 +7,7 @@ import {
 } from '../../../../sim/events/causality_query.js';
 import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText.js';
 import { turnToDateString } from '../../utils/formatters.js';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 
 export interface WrappedSlide {
     id: string;
@@ -115,6 +116,7 @@ export function generateWrappedSlides(
     let earlyGains = 0;
     let earlyLosses = 0;
     for (const s of earlyTurns) {
+        if (!shouldNarrateTerritorySummary(s)) continue;
         const net = s?.territory_net ?? {};
         const factionNet = net[playerFaction] ?? 0;
         if (factionNet > 0) earlyGains += factionNet;
@@ -187,6 +189,7 @@ export function generateWrappedSlides(
     let totalGained = 0;
     let runningTerritory = 0;
     for (const s of turnSummaries) {
+        if (!shouldNarrateTerritorySummary(s)) continue;
         const net = s?.territory_net ?? {};
         const factionNet = net[playerFaction] ?? 0;
         if (factionNet > 0) totalGained += factionNet;
