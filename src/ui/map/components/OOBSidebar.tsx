@@ -111,7 +111,7 @@ export function OOBSidebar() {
     const map = new Map<string, FormationView>();
     if (!loadedGameState?.formations) return map;
     for (const formation of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
-      if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+      if (formation.kind === 'corps' || formation.kind === 'corps_asset' || formation.kind === 'army_hq') {
         map.set(formation.id, formation);
       }
     }
@@ -278,7 +278,7 @@ export function OOBSidebar() {
           />
           {expandedSections.army && (
             <div className="p-2 space-y-2">
-              {!armyByFaction || armyByFaction.size === 0 ? (
+              {!armyByFaction || (armyByFaction.size === 0 && reserveByFaction.size === 0) ? (
                 <div className="text-xs text-text-secondary italic">{t('oob.noFormations')}</div>
               ) : (
                 FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f))).map((faction, factionIndex) => {
@@ -286,13 +286,14 @@ export function OOBSidebar() {
                   const reserves = reserveByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
                   const byCorps = groupFormationsByCorps(formations);
+                  const reserveByCorps = groupFormationsByCorps(reserves);
                   // Separate army HQ groups from real corps — HQ units render first with distinct styling
                   const armyHqIds = new Set(
                     loadedGameState.formations
                       .filter(f => f.faction === faction && f.kind === 'army_hq')
                       .map(f => f.id)
                   );
-                  const hqEntries = Array.from(byCorps.entries()).filter(([id]) => armyHqIds.has(id));
+                  const hqEntries = Array.from(reserveByCorps.entries()).filter(([id]) => armyHqIds.has(id));
                   const corpsEntries = Array.from(byCorps.entries())
                     .filter(([id]) => !armyHqIds.has(id))
                     .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
@@ -386,26 +387,48 @@ export function OOBSidebar() {
                           {/* HQ Reserve Units — rendered above corps with distinct styling */}
                           {hqEntries.map(([hqId, hqBrigades]) => {
                             const hqFormation = corpsFormationById.get(hqId);
-                            const hqName = hqFormation?.name ?? 'Main Staff';
+                            const hqName = hqFormation ? getLocalizedFormationName(hqFormation, locale) : 'Main Staff';
                             return (
-                              <button
+                              <div
                                 key={hqId}
-                                type="button"
-                                className="w-full text-left ml-2 px-2 py-1.5 rounded border border-accent-gold/20 bg-accent-gold/5 hover:bg-accent-gold/10 transition-colors"
-                                onClick={() => setSelectedArmyHqId(hqId)}
+                                className="w-full text-left ml-2 px-2 py-1.5 rounded border border-accent-gold/20 bg-accent-gold/5"
                               >
-                                <div className="flex items-center justify-between">
+                                <button
+                                  type="button"
+                                  className="flex w-full items-center justify-between text-left hover:text-amber-200 transition-colors"
+                                  onClick={() => setSelectedArmyHqId(hqId)}
+                                >
                                   <div className="flex items-center gap-2 min-w-0">
                                     <span className="text-[9px] text-accent-gold font-bold uppercase tracking-wider">{t('oob.reserveHq', { name: hqName })}</span>
                                   </div>
                                   <span className="text-[10px] text-text-secondary tabular-nums shrink-0">{t('oob.unitCount', { count: hqBrigades.length })}</span>
-                                </div>
+                                </button>
                                 <div className="mt-0.5 flex flex-wrap gap-1">
                                   {hqBrigades.map(b => (
-                                    <span key={b.id} className="text-[9px] text-accent-gold/70 truncate">{getLocalizedFormationName(b, locale)}</span>
+                                    <button
+                                      key={b.id}
+                                      type="button"
+                                      className="text-[9px] text-accent-gold/70 truncate hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
+                                      onClick={() => {
+                                        useGameStore.setState({
+                                          selectedOsid: null,
+                                          selectedFormationId: b.id,
+                                          selectedCorpsFrontSectorId: null,
+                                          selectedCorpsId: null,
+                                          selectedArmyId: null,
+                                          selectedArmyHqId: hqId,
+                                          selectedOperationKey: null,
+                                          selectedOrbatCorpsId: null,
+                                          isOperationsPanelOpen: false,
+                                          operationTargetOsids: [],
+                                        });
+                                      }}
+                                    >
+                                      {getLocalizedFormationName(b, locale)}
+                                    </button>
                                   ))}
                                 </div>
-                              </button>
+                              </div>
                             );
                           })}
                           {corpsEntries.map(([corpsId, brigades]) => {

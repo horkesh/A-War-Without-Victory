@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest OOB HQ reserve drilldown:** [implemented/20260620_OOB_HQ_RESERVE_DRILLDOWN.md](implemented/20260620_OOB_HQ_RESERVE_DRILLDOWN.md) - The OOB sidebar now renders HQ-assigned reserve brigades under their actual Army HQ and routes individual brigade labels to Army HQ formation drilldown.
+
 **Latest Personnel HQ brigade drilldown:** [implemented/20260620_PERSONNEL_HQ_BRIGADE_DRILLDOWN.md](implemented/20260620_PERSONNEL_HQ_BRIGADE_DRILLDOWN.md) - Army HQ Personnel now renders HQ-assigned brigades/officers and routes HQ brigade clicks to the correct Army HQ formation drilldown.
 
 **Latest Formation Detail HQ/effectiveness copy:** [implemented/20260620_FORMATION_DETAIL_HQ_EFFECTIVENESS_COPY.md](implemented/20260620_FORMATION_DETAIL_HQ_EFFECTIVENESS_COPY.md) - Formation Detail now shows actual Army HQ parent names and maps effectiveness worst-factor keys to player-facing copy.

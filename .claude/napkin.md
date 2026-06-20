@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**OOB HQ RESERVE DRILLDOWN (2026-06-20).** OOB HQ reserve rows must not be built from corps-grouped formations after reserve ids are filtered out. Do instead: group `reserveByFaction` by HQ/corps id for HQ reserve cards, include `army_hq` in command-name lookup, and route HQ brigade label clicks with one Army HQ + formation selection update.
+
 **PERSONNEL HQ BRIGADE DRILLDOWN (2026-06-20).** Army HQ Personnel must not treat `army_hq` parents as invisible non-corps rows. Do instead: include HQ commands in Personnel ORBAT/name lookup, keep corps counts/vacancies scoped to corps/corps assets, and set HQ parent + formation focus in one store update because sequenced selection setters clear competing context.
 
 **FORMATION DETAIL HQ / EFFECTIVENESS COPY (2026-06-20).** Formation Detail must not show generic HQ parents or raw effectiveness keys. Do instead: render actual HQ formation names for `army_hq` parents and map modifier ids like `homeDistance` to player copy such as `Distance from home`.

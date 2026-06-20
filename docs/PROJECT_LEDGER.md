@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): route OOB HQ reserve brigades
+
+**Type:** UI/read-model command-surface polish.
+
+**Fix:** OOB now builds HQ reserve rows from reserve brigade groupings instead of the corps army grouping that had already filtered reserve ids out. Army HQ formations participate in the command-name lookup, and individual HQ reserve brigade labels now route through an atomic Army HQ + formation selection.
+
+**Verification:** Red proof first failed because `Reserve HQ / Main Staff VRS` was absent. Green proof passed: `npm.cmd exec -- vitest run tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (1/1); `npm.cmd exec -- vitest run tests/ui/oob_drilldown_routing.test.ts tests/ui/oob_operations_panel.test.ts tests/ui_map_panel_rail.test.ts tests/ui/panel_rail_ownership.test.ts --pool=forks --reporter=dot` (15/15); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (22 files / 211 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`); `git diff --check`. Report: `docs/40_reports/implemented/20260620_OOB_HQ_RESERVE_DRILLDOWN.md`.
+
+**Scope/determinism:** UI/read-model route polish, focused tests, QA gate coverage, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): route Personnel HQ brigades and officers
 
 **Type:** UI/read-model command-surface polish.
