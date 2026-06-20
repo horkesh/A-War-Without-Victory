@@ -89,6 +89,21 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(controlFlips[0].detail).toBe('initial control');
     });
 
+    it('dedupes matching scenario-start snapshot and persisted turn-0 control', () => {
+        const osid = 'op:test:test_1';
+        const events = callTimeline(osid, {
+            startController: 'RBiH',
+            controlEvents: [
+                { turn: 0, settlementId: osid, from: null, to: 'RBiH', mechanism: 'initial_control' },
+            ],
+        });
+
+        const controlFlips = events.filter(e => e.type === 'control_flip');
+        expect(controlFlips).toHaveLength(1);
+        expect(controlFlips[0].title).toBe('Controlled by ARBiH at scenario start');
+        expect(controlFlips[0].detail).toBe('initial control');
+    });
+
     it('suppresses displacement-inferred takeover when matching startController', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {
@@ -295,6 +310,40 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(resolved?.title).toContain('Local Push');
         expect(resolved?.title).toContain('objective held at operation close');
         expect(resolved?.title).not.toContain('objective captured');
+    });
+
+    it('renders exact clean final-held operation title copy without mojibake markers', () => {
+        const osid = 'op:test:held_without_logged_capture';
+        const events = buildSettlementTimeline(
+            osid,
+            null,
+            [],
+            [],
+            [
+                {
+                    operation_name: 'local_push',
+                    operation_display_name: 'Local Push',
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    started_turn: 12,
+                    ended_turn: 15,
+                    outcome: 'partial',
+                    objectives_targeted: [osid],
+                    objectives_captured: [osid],
+                    objectives_logged_captured: [],
+                } as any,
+            ],
+            [],
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        const resolved = events.find(e => e.type === 'operation_resolved');
+        expect(resolved?.title).toBe('Local Push - objective held at operation close');
+        expect(resolved?.title).not.toMatch(/â|Ã/);
     });
 
     it('renders authored control-event mechanism labels without exposing raw enum tokens', () => {

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**SETTLEMENT TIMELINE COPY / TURN-0 PROVENANCE (2026-06-20).** Timeline rows should not carry mojibake or duplicate scenario-start control. Do instead: use ASCII-safe final-held operation copy and dedupe turn-0 `initial_control` rows that match the start controller.
+
 **FORMATION DETAIL PARITY (2026-06-20).** Formation Detail and ORBAT must not diverge on player labels or no-op orders. Do instead: use shared player-safe narrative labels, render decoration names instead of raw decoration types, and keep automatic current-sector rows disabled/no-op.
 
 **ARMY HQ RECORDS FOCUS RESET (2026-06-20).** Army HQ close paths must not preserve focused archive ids. Do instead: keep `setArmyHQOpen(false)` clearing `focusedAftermathTurn`, `focusedOperationHistoryId`, and `focusedDecisionConsequenceId` together; pin with stale-state reset tests.

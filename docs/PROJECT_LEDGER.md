@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): clean settlement timeline copy and turn-0 provenance
+
+**Type:** UI/read-model settlement timeline polish.
+
+**Fix:** Settlement timeline final-held operation rows now use ASCII-safe copy instead of a broken mojibake dash, and matching scenario-start snapshot control plus persisted turn-0 `initial_control` collapse to one scenario-start control row.
+
+**Verification:** Red proof from the worker branch failed on `Local Push â€” objective held at operation close` and duplicate turn-0 control rows. Green proof passed: `npx.cmd vitest run tests/settlement_timeline_provenance.test.ts --reporter=dot` (16/16); `npm.cmd run typecheck`; `git diff --check`. Report: `docs/40_reports/implemented/20260620_SETTLEMENT_TIMELINE_COPY_PROVENANCE.md`.
+
+**Scope/determinism:** UI/read-model timeline copy/provenance, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): align Formation Detail and ORBAT player-safe labels
 
 **Type:** UI/read-model command-surface polish.

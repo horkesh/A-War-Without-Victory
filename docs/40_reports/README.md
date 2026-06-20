@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest settlement timeline copy/provenance** | [implemented/20260620_SETTLEMENT_TIMELINE_COPY_PROVENANCE.md](implemented/20260620_SETTLEMENT_TIMELINE_COPY_PROVENANCE.md) - Settlement timelines now use clean final-held operation copy and dedupe matching turn-0 scenario-start control rows. |
 | **Latest Formation Detail parity** | [implemented/20260620_FORMATION_DETAIL_PARITY.md](implemented/20260620_FORMATION_DETAIL_PARITY.md) - Formation Detail now uses shared player-safe narrative labels, current-sector Orders rows no-op, and ORBAT decoration chips render faction decoration names. |
 | **Latest Army HQ aftermath focus reset** | [implemented/20260620_ARMY_HQ_AFTERMATH_FOCUS_RESET.md](implemented/20260620_ARMY_HQ_AFTERMATH_FOCUS_RESET.md) - Closing Army HQ now clears focused aftermath, operation-history, and decision-consequence Records targets together. |
 | **Latest OOB sector frontage copy** | [implemented/20260620_OOB_SECTOR_FRONTAGE_COPY.md](implemented/20260620_OOB_SECTOR_FRONTAGE_COPY.md) - OOB sector rows now label `length_edges` as localized front segments instead of misleading approximate kilometers. |

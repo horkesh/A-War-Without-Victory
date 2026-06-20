@@ -192,6 +192,7 @@ export function buildSettlementTimeline(
     for (const ce of controlEvents) {
         if (ce.settlementId !== osid) continue;
         const initialControl = isInitialControlEvent(ce);
+        if (initialControl && startController && ce.to === startController) continue;
         events.push({
             turn: ce.turn,
             type: 'control_flip',
@@ -394,7 +395,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${opName} â€” objective held at operation close`,
+                title: `${opName} - objective held at operation close`,
                 outcome: op.outcome,
             });
         } else if (targeted && op.ended_turn > 0) {
