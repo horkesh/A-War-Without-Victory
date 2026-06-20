@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**ECONOMY / RECRUITMENT LABEL COPY (2026-06-20).** Production and recruitment modal fields are command surfaces, not raw type/resource dumps. Do instead: map facility types, resource labels, faction names, and equipment classes through localized/player-safe labels; keep raw equipment ids only as internal `onApply` payloads.
+
+**VERDICT PEACE-PLAN LABEL COPY (2026-06-20).** Endgame faction reports are player copy, not join/debug output. Do instead: resolve accepted/rejected peace-plan ids through `peace_plan_data` names and use neutral player-safe fallbacks; keep `vance_owen`, `contact_group`, and future underscore ids out of normal verdict copy.
+
 **OPS PLANNING PREDICTION LABELS (2026-06-20).** G2 snapshot and Narrative briefing are player-facing prose, not enum displays. Do instead: map prediction outcomes and recommendations through localized labels and neutral fallbacks; keep `costly_victory`, `postpone`, `abort`, and unknown ids out of normal G2/Narrative copy.
 
 **OPS COMMANDER UNAVAILABLE REASON COPY (2026-06-20).** Commander availability chips are player explanations, not debug status codes. Do instead: localize killed/KIA, captured, retired, Army HQ, enclave lock, assigned-operation, and other-command reasons; treat `killed` as unavailable; keep `KIA`, `ASSIGNED TO OP`, `CORPS CMDR`, `ACTING CMDR`, and raw operation ids out of normal commander-selection copy.

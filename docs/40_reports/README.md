@@ -511,6 +511,9 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md](implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md) - Recruitment options now render readable resource, faction, and equipment labels while preserving raw equipment ids only for the backend command payload.
+- [implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md](implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md) - Economy production-facility rows now render localized facility-type labels instead of raw facility type ids.
+- [implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md](implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md) - Faction verdict reports now render peace-plan catalog names instead of raw accepted/rejected plan ids.
 - [implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md](implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md) - First-hour Situation/toolbar/Inbox/sector copy and Operation History axis labels now avoid raw staff telemetry and misleading final-held-as-captured language.
 - [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Shell navigation exclusivity plus the 2026-06-17 App-level follow-up: Records/Codex/Chronicle/Army HQ/Decision History/Warroom/Inbox/Wrapped handoffs now clear competing shells, and Codex/Decision History Escape do not open Pause behind the top surface.
 - [implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md](implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md) - Receipt route browser proof: live loaded-save smoke verifies Desk Records-filed patron consequences route to Decision Consequences, AAR counts split from Operation History, and patron Chronicle duplicates stay suppressed by focused generator tests.

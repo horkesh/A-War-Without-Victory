@@ -19,6 +19,7 @@ import type { FactionVerdict, DimensionGrade } from '../../../state/negotiation_
 import { WarCostSummary } from './WarCostSummary';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
+import { getPeacePlanById } from '../../../sim/negotiation/peace_plan_data.js';
 // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: read-only consumption of ghost-entry
 // path-not-taken records for the Codex tab. Builder is pure/deterministic
 // and refuses §6 sensitive-history flags via its own Ring guard.
@@ -824,10 +825,10 @@ export function FactionReport({
                                 <StatRow label={t('verdict.report.stat.enclavesLost')} value={cap.enclaves_lost.map(titleCase).join(', ')} />
                             )}
                             {cap.peace_plans_accepted.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansAccepted')} value={cap.peace_plans_accepted.map(formatPeacePlanName).join(', ')} />
                             )}
                             {cap.peace_plans_rejected.length > 0 && (
-                                <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.join(', ')} />
+                                <StatRow label={t('verdict.report.stat.plansRejected')} value={cap.peace_plans_rejected.map(formatPeacePlanName).join(', ')} />
                             )}
                             {cap.war_crimes_events > 0 && (
                                 <StatRow label={t('verdict.report.stat.warCrimesEvents')} value={String(cap.war_crimes_events)} />
@@ -984,6 +985,10 @@ function StatRow({ label, value }: { label: string; value: string }) {
 
 function titleCase(s: string): string {
     return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function formatPeacePlanName(planId: string): string {
+    return getPeacePlanById(planId)?.name ?? getPlayerSafeDisplayLabel(planId, 'Peace plan');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

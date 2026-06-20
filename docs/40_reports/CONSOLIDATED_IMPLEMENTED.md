@@ -2,6 +2,12 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest recruitment modal label copy:** [implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md](implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md) - Recruitment options now render readable resource, faction, and equipment labels while preserving raw equipment ids only for backend command payloads.
+
+**Latest economy facility-type label copy:** [implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md](implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md) - Economy production-facility rows now render localized facility-type labels instead of raw `heavy_equipment`, `small_arms`, or `ammunition` ids.
+
+**Latest verdict peace-plan label copy:** [implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md](implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md) - Faction verdict reports now render peace-plan catalog names instead of raw `vance_owen` / `contact_group` ids.
+
 **Latest ops planning prediction labels:** [implemented/20260620_OPS_PLANNING_PREDICTION_LABELS.md](implemented/20260620_OPS_PLANNING_PREDICTION_LABELS.md) - G2 assessment and Narrative briefing now render prediction/recommendation labels instead of raw `costly_victory`, `postpone`, or `abort` ids.
 
 **Latest ops commander unavailable reason copy:** [implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md](implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md) - Operations commander selection now renders localized unavailable-officer reasons instead of raw staff shorthand and keeps killed officers out of the selectable pool.

@@ -19,9 +19,21 @@ import { strictCompare } from '../../../state/validateGameState';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
+const FACILITY_TYPE_LABEL_KEYS = {
+    ammunition: 'economy.facilityType.ammunition',
+    heavy_equipment: 'economy.facilityType.heavyEquipment',
+    small_arms: 'economy.facilityType.smallArms',
+} as const;
+
 interface EconomyPanelProps {
     state: LoadedGameState;
     onClose: () => void;
+}
+
+function getPlayerSafeFacilityTypeLabel(type: string | null | undefined): string {
+    const key = (type ?? '').trim().toLowerCase();
+    const labelKey = FACILITY_TYPE_LABEL_KEYS[key as keyof typeof FACILITY_TYPE_LABEL_KEYS];
+    return labelKey ? t(labelKey) : t('economy.facilityType.unknown');
 }
 
 function ConditionBar({ value, max = 1 }: { value: number; max?: number }) {
@@ -146,7 +158,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1 mt-0.5">
-                                        <span className="text-text-secondary w-[32px] shrink-0">{f.type}</span>
+                                        <span className="text-text-secondary w-[72px] shrink-0 truncate">{getPlayerSafeFacilityTypeLabel(f.type)}</span>
                                         <ConditionBar value={f.condition} />
                                         <span className="text-text-secondary tabular-nums w-[28px] text-right">
                                             {Math.round(f.condition * 100)}%

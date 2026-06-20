@@ -1,4 +1,28 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label economy facility and recruitment copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Economy production-facility rows now render localized facility-type labels (`Heavy equipment`, `Small arms`, `Ammunition`) instead of raw `heavy_equipment`, `small_arms`, or `ammunition` ids. Recruitment brigade options now render readable faction/resource/equipment labels, replacing `cap`, `man`, raw faction abbreviations, and raw equipment ids in normal modal copy while preserving the raw selected equipment class for `onApply`.
+
+**Verification:** Green focused proof: `npm.cmd exec -- vitest run tests/ui/endgame_verdict_screen_mount.test.ts tests/ui/command_surface_repurpose_panels.test.ts tests/ui/recruitment_modal_player_copy.test.ts --pool=forks --reporter=dot` passed 51/51. Broader gates passed: `npm.cmd run typecheck`; `npm.cmd exec -- vitest run tests/ui_i18n.test.ts tests/ui/accessibility_form_labels.test.ts --pool=forks --reporter=dot` passed 14/14; `git diff --check`; `npm.cmd run qa:player-journeys` passed 232/232; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Reports: `docs/40_reports/implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md`, `docs/40_reports/implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
+## [2026-06-20] fix(ui): render verdict peace-plan names
+
+**Type:** UI/read-model copy polish.
+
+**Fix:** Faction verdict reports now resolve accepted/rejected peace-plan ids through the peace-plan catalog before rendering statistics, with a neutral player-safe fallback for unknown future ids. This keeps `vance_owen` and `contact_group` out of the player-facing endgame report.
+
+**Verification:** Red focused proof first failed because the Faction Report rendered `vance_owen, contact_group`. Green proof: `npm.cmd exec -- vitest run tests/ui/endgame_verdict_screen_mount.test.ts --pool=forks --reporter=dot` passed 46/46; integrated focused proof passed 51/51 across Verdict/Economy/Recruitment. Broader gates passed: `npm.cmd run typecheck`; `npm.cmd exec -- vitest run tests/ui_i18n.test.ts tests/ui/accessibility_form_labels.test.ts --pool=forks --reporter=dot` passed 14/14; `git diff --check`; `npm.cmd run qa:player-journeys` passed 232/232; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] test(ui): expand live-surface raw-token guards
 
 **Type:** Browser QA/test-tool hardening.
