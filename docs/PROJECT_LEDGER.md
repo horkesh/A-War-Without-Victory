@@ -21455,6 +21455,14 @@ Verification: focused red proof first failed on `T+2 / 4`, `(! 2 DELAYS)`, and a
 
 Determinism/scope: UI route/read-model behavior, i18n copy, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-20 - Opportunity dossier copy polish
+
+Closed the Army HQ operation-opportunity dossier raw-enum leak found by the latest Pyrrhic scout. Proposal status, staff recommendation, prerequisite-axis states, and force-quality trait bands now render through explicit localized labels instead of generic underscore humanization or raw `approve` / `eligible_pending_review` / `not_applicable` values. BCS dossiers now use localized recommendation, axis, and quality-band labels instead of mixed English/raw copy.
+
+Verification: focused red proof first failed on `Recommend approve`, BCS `Preporuka approve`, and mixed `Not Applicable` / `Adequate` labels. Focused green `npm.cmd exec -- vitest run tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` passed 6/6. `npm.cmd run typecheck` passed. `git diff --check` passed. Report: `docs/40_reports/implemented/20260620_OPPORTUNITY_DOSSIER_COPY_POLISH.md`.
+
+Determinism/scope: UI/read-model copy, i18n, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-20 - Turn-0 provenance surface guards
 
 Extended the turn-0 territory provenance guard to the remaining player-facing surfaces identified by the Pyrrhic UI scout. Records AAR now suppresses turn-0 territory rows and flip lists, the tactical bottom status strip no longer renders opening-week territory trend arrows from scenario-start `territory_net`, and Chronicle Wrapped skips turn-0 territory data when calculating early shifts and peak/total territory gains. Current control percentages and non-territory early-battle counts remain intact.
