@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army HQ copy and front-segment polish:** [implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md](implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md) - Army HQ combat records, corps cards, ORBAT campaign losses, and sector length rows now spell out player-facing copy and render front segments instead of kilometers.
+
 **Latest field drilldown context polish:** [implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md](implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md) - Personnel, settlement, battle-marker, settlement-sector, and embedded AAR drilldowns now route through shared field inspection instead of hidden/bare selection setters.
 
 **Latest direct map selection context routing:** [implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md](implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md) - Direct tactical-map sector/front and formation/counter/stack clicks now preserve corps/sector context through the shared field-inspection contract instead of opening orphaned panels.

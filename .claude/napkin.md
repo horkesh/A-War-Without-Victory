@@ -2,6 +2,8 @@
 
 **SECONDARY FIELD DRILLDOWN CONTEXT (2026-06-20).** Army HQ, Records, settlement, battle, and AAR links must not use bare selection setters that can hide tactical selections behind shells. Do instead: route Personnel ORBAT, settlement sector, battle-marker, map settlement, and AAR formation links through `inspectOnField(...)` with the richest available `FieldInspectionTarget`.
 
+**ARMY HQ COPY AND FRONT SEGMENTS (2026-06-20).** Army HQ combat records, corps cards, ORBAT losses, and sector lengths are player command surfaces. Do instead: use full localized stance/count/loss/record labels and render `length_edges` as front segments, never kilometers or compact `W/L/D`, `BRG`, `SEC`, `KIA/WIA/MIA` copy.
+
 **DIRECT MAP SELECTION CONTEXT (2026-06-20).** Direct tactical-map clicks must preserve parent command context. Do instead: route map sector/front, formation marker, counter, context-menu, and stack clicks through `inspectOnField(...)` with `field-sector-in-corps`, `field-formation-in-sector`, `field-formation-in-corps`, or settlement fallback; avoid bare map-click selection setters that clear corps/sector context.
 
 **PEACE / DECISION ROOM LABEL COPY (2026-06-20).** PeaceStatusPanel and Decision Room cards are player command copy, not generic enum/title-case surfaces. Do instead: map peace chrome through `peace.*`, reserve reasons through `armyReserve.reason.*`, briefing kinds through `decisionRoom.briefingKind.*`, and proposal domains through `decisionRoom.proposalDomain.*`; keep `sector_threat`, `field_reports`, and `ops` out of normal copy.

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): spell out Army HQ copy and frontage
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Army HQ corps combat records now render shared explicit record and ground-won/lost copy instead of `W/L/D` and signed shorthand. Corps cards use localized stance labels and full brigade/sector/personnel words. ORBAT campaign losses spell out killed, wounded, and missing/captured. Army HQ sector rows now display `length_edges` as front segments rather than kilometers.
+
+**Verification:** focused GUI audit passed 13/13; `npm.cmd exec -- tsc --noEmit --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was removed afterward. Report: `docs/40_reports/implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): preserve secondary field drilldown context
 
 **Type:** UI/store route polish.

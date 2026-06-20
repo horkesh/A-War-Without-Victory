@@ -1,3 +1,7 @@
+## 2026-06-20 - Army HQ copy uses full command language
+
+**Army HQ command cards and front sectors should not use compact staff shorthand:** Combat records, corps status cards, ORBAT campaign losses, and sector summary rows preserve compact numeric fields internally, but visible copy should be explicit. Durable rule: render combat records through `combatRecord.recordBreakdown` and `combatRecord.groundWonLostCount`, corps-card stance/counts through localized full labels, ORBAT campaign losses through killed/wounded/missing copy, and `length_edges` as front segments rather than kilometers. Applied in `[2026-06-20] fix(ui): spell out Army HQ copy and frontage`; report `docs/40_reports/implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md`.
+
 ## 2026-06-20 - Secondary field drilldowns must use the same atomic route
 
 **Army HQ, Records, settlement, battle, and AAR links can hide selections if they bypass field inspection:** Bare `setSelectedFormationId(...)`, `setSelectedOsid(...)`, or hand-built store state from secondary drilldown surfaces can leave Army HQ/Records open while selecting a tactical entity behind it, or can drop sector/corps context. Durable rule: use `inspectOnField(...)` and a compound `FieldInspectionTarget` whenever the source surface knows settlement, sector, corps, Army HQ, or battle OSID context. Applied in `[2026-06-20] fix(ui): preserve secondary field drilldown context`; report `docs/40_reports/implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md`.

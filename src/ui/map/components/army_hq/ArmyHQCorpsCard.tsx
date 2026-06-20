@@ -19,7 +19,7 @@ import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
 import { deriveCorpsDelegationSummary } from '../../data/command_strain';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 
 import type { ReadinessGrade } from './ForceReadiness';
 
@@ -46,8 +46,11 @@ const GRADE_COLORS: Record<string, string> = {
     A: 'text-emerald-400', B: 'text-accent-gold', C: 'text-amber-500', D: 'text-red-500', F: 'text-red-600',
 };
 
-const STANCE_LABELS: Record<string, string> = {
-    offensive: 'OFF', defensive: 'DEF', balanced: 'BAL', reorganize: 'REORG',
+const STANCE_LABEL_KEYS: Record<string, MessageKey> = {
+    offensive: 'armyHqCorps.stance.offensive',
+    defensive: 'armyHqCorps.stance.defensive',
+    balanced: 'armyHqCorps.stance.balanced',
+    reorganize: 'armyHqCorps.stance.reorganize',
 };
 const STANCE_COLORS: Record<string, string> = {
     offensive: 'text-red-500 border-red-500/30 bg-red-500/5',
@@ -131,6 +134,7 @@ export function ArmyHQCorpsCard({
     const noCommander = !data.commanderDisplay;
     const displayCommanderName = data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
+    const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.balanced');
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
 
     // Compressed: single line when another card is flipped
@@ -178,7 +182,7 @@ export function ArmyHQCorpsCard({
 
             {/* Status Stamp */}
             <div className={`absolute top-4 right-4 text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} z-10 font-mono`}>
-                {STANCE_LABELS[data.stance] ?? data.stance}
+                {stanceLabel}
             </div>
 
             <div className="px-4 py-4 flex-1 flex flex-col">
