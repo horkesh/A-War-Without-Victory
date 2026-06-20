@@ -47,13 +47,13 @@ export function computeReadinessGrade(
 }
 
 function getRecommendation(grade: ReadinessGrade, hasThreat: boolean, hasActiveOp: boolean): string {
-    if (grade === 'INEFFECTIVE') return 'REORGANIZE immediately';
-    if (grade === 'DEGRADED' && !hasThreat) return 'REORGANIZE for 2 turns';
-    if (grade === 'DEGRADED' && hasThreat) return 'REINFORCE — threat detected';
-    if (hasThreat) return 'REINFORCE front sectors';
-    if (hasActiveOp) return 'HOLD — operation in progress';
+    if (grade === 'INEFFECTIVE') return 'Reorganize immediately';
+    if (grade === 'DEGRADED' && !hasThreat) return 'Reorganize for 2 turns';
+    if (grade === 'DEGRADED' && hasThreat) return 'Reinforce: threat detected';
+    if (hasThreat) return 'Reinforce front sectors';
+    if (hasActiveOp) return 'Hold: operation in progress';
     if (grade === 'STRAINED') return 'Reduce operations tempo';
-    return 'HOLD';
+    return 'Hold';
 }
 
 export function generateForceReadiness(
@@ -188,7 +188,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                 )}
                                 {item.activeOpName && (
                                     <span className="text-red-400">
-                                        Op {item.activeOpName}{item.activeOpBrigadeCount ? ` (${item.activeOpBrigadeCount} brg)` : ''}
+                                        Op {item.activeOpName}{item.activeOpBrigadeCount ? ` (${item.activeOpBrigadeCount} brigades)` : ''}
                                     </span>
                                 )}
                             </div>

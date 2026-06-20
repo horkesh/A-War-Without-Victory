@@ -12,6 +12,7 @@ import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatR
 import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { SectorsSection } from '../../src/ui/map/components/army_hq/SectorsSection.js';
+import { bcsMessages } from '../../src/ui/map/i18n/messages.bcs.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { CorpsFrontSectorView, FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -459,6 +460,20 @@ describe('GUI audit label discipline', () => {
     expect(securityContainer.textContent).not.toMatch(/\bOPSEC\b|\bSITREP\b/);
   });
 
+  it('spells out Situation casualty rows without KIA/WIA/MIA shorthand', () => {
+    const state = makeState({
+      player_faction: 'RBiH',
+      casualtyLedger: {
+        RBiH: { killed: 12, wounded: 34, missing_captured: 5 },
+      },
+    } as Partial<LoadedGameState>);
+
+    const { container } = render(createElement(SituationTab, { state, focusSection: 'casualties' }));
+
+    expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
+    expect(container.textContent).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+  });
+
   it('keeps Corps Front security controls free of OPSEC shorthand', () => {
     expect(enMessages['corpsFront.opsec']).toBe('Operational security');
     expect(enMessages['corpsFront.enableOpsec']).toBe('Tighten sector security');
@@ -490,10 +505,44 @@ describe('GUI audit label discipline', () => {
     expect(enMessages['corpsFront.pax']).not.toMatch(/\bPAX\b/);
     expect(enMessages['situation.frontsLine']).not.toMatch(/Front contacts|thinly held:\s*\{/);
     expect(enMessages['situation.allianceGauge']).not.toMatch(/Gauge/);
+    expect(enMessages['situation.casualtyBreakdown']).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+    expect(enMessages['operationsSection.exchangeNoFriendlyLosses']).not.toMatch(/\bINF\b/);
+    expect(enMessages['operationHistory.casualtyLine']).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+    expect(enMessages['operationHistory.exchangeNoFriendlyLosses']).not.toMatch(/\bINF\b/);
+    expect(enMessages['operationsPanel.bdeCount']).not.toMatch(/\bbde\b/i);
+    expect(enMessages['personnel.brigadeSummary']).not.toMatch(/\bbrg\b/i);
+    expect(enMessages['operationsSection.directInterventionButton']).not.toMatch(/\bAUTH\b/);
+    expect(enMessages['operationsSection.prep.intelGathering']).not.toMatch(/\bINTEL\b/);
+    expect(enMessages['orbat.intelNarrative']).not.toMatch(/\bINTEL\b/);
+    expect(enMessages['formationDetail.kia']).not.toMatch(/\bKIA\b/);
+    expect(enMessages['formationDetail.wia']).not.toMatch(/\bWIA\b/);
+    expect(enMessages['formationDetail.miaPow']).not.toMatch(/\bMIA\b|\bPOW\b/);
+    expect(enMessages['warSummary.label.kia']).not.toMatch(/\bKIA\b/);
+    expect(enMessages['warSummary.label.wia']).not.toMatch(/\bWIA\b/);
+    expect(enMessages['sectorsSection.intel']).not.toMatch(/\bINTEL\b/);
+    expect(enMessages['sectorsSection.defPerEdge']).not.toMatch(/DEF\/EDGE/);
+    expect(enMessages['sectorsSection.morShort']).not.toMatch(/\bMOR\b/);
+    expect(enMessages['sectorsSection.fatShort']).not.toMatch(/\bFAT\b/);
+    expect(enMessages['sectorsSection.persShort']).not.toMatch(/\bPERS\b/);
+    expect(enMessages['sectorsSection.personnelLosses']).not.toMatch(/\bPERS\b/);
+    expect(bcsMessages['situation.operationalSitrep']).not.toMatch(/\bSITREP\b/);
+    expect(bcsMessages['decisionRoom.category.operational']).not.toMatch(/\bSITREP\b/);
+    expect(bcsMessages['warroom.status.category.operational']).not.toMatch(/\bSITREP\b/);
+    expect(bcsMessages['corpsFront.opsec']).not.toMatch(/\bOPSEC\b/);
+    expect(bcsMessages['situation.opsecActive']).not.toMatch(/\bOPSEC\b/);
+    expect(bcsMessages['presidentialToolbar.auth']).not.toMatch(/\bAUTH\b/);
+    expect(bcsMessages['operationsSection.directInterventionButton']).not.toMatch(/\bAUT\b/);
+    expect(bcsMessages['operationsPanel.bdeCount']).not.toMatch(/brig\./i);
+    expect(bcsMessages['personnel.brigadeSummary']).not.toMatch(/brig\./i);
+    expect(bcsMessages['operationsSection.prep.intelGathering']).not.toMatch(/OBAVJ\./i);
+    expect(bcsMessages['formationDetail.kia']).not.toMatch(/\bKIA\b/);
+    expect(bcsMessages['formationDetail.wia']).not.toMatch(/\bWIA\b/);
+    expect(bcsMessages['formationDetail.miaPow']).not.toMatch(/\bMIA\b|\bPOW\b/);
     expect(presidentialCategoriesSource).not.toMatch(/front sitrep/i);
     expect(liveSurfaceBrowserSweepSource).toMatch(/label:\s*'PAX'/);
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
-    expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men/);
+    expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);
+    expect(corpsFrontSource).not.toMatch(/`~\$\{sector\.length_edges\} km`/);
     expect(corpsCardSource).toContain('getPlayerSafeOperationPhaseLabel(activeOperationPhase)');
   });
 

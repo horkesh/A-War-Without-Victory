@@ -223,11 +223,12 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
     const totalSuffered = suffered.killed + suffered.wounded;
     const totalInflicted = inflicted.killed + inflicted.wounded;
     const ratio = totalSuffered > 0 ? (totalInflicted / totalSuffered) : (totalInflicted > 0 ? Infinity : 0);
-    const ratioStr = ratio === Infinity ? 'INF' : ratio.toFixed(2);
     const color = ratio >= 2.0 ? 'text-green-400' : ratio >= 1.0 ? 'text-amber-400' : 'text-red-400';
     return (
         <span className={`text-[10px] font-mono ${color}`}>
-            {t('operationHistory.exchange', { ratio: ratioStr })}
+            {ratio === Infinity
+                ? t('operationHistory.exchangeNoFriendlyLosses')
+                : t('operationHistory.exchange', { ratio: ratio.toFixed(2) })}
         </span>
     );
 }

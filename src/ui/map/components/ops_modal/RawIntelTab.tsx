@@ -140,11 +140,11 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                 </div>
             )}
 
-            {/* Intel warning */}
+            {/* Intelligence warning */}
             {overall.intelConfidence < 0.4 && (
                 <div className="bg-red-900/20 border border-red-400/20 rounded-lg p-3">
                     <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
-                        \u26A0 INTEL INSUFFICIENT
+                        \u26A0 INTELLIGENCE INSUFFICIENT
                     </div>
                     <div className="text-[9px] text-red-400/70 mt-1">
                         Recommend reconnaissance in force before commitment.

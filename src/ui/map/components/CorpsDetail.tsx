@@ -375,7 +375,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="text-text-secondary text-[10px] tabular-nums">
                       {t('oob.sectorLineCount', { count: s.assigned_brigade_ids.length.toString() })}
                       {s.reserve_brigade_ids.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: s.reserve_brigade_ids.length.toString() })}`}
-                      {' · ~'}{s.length_edges} km
+                      {' · '}{t('oob.sectorFrontSegments', { count: s.length_edges.toString() })}
                       {' · '}{t('corpsDetail.personnelCount', { count: sectorPers.toLocaleString() })}
                     </div>
                   </div>
