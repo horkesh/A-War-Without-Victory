@@ -31,6 +31,7 @@ const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     defensive_gap: 'armyReserve.reason.defensiveGap',
     exploitation: 'armyReserve.reason.exploitation',
     enclave_relief: 'armyReserve.reason.enclaveRelief',
+    sector_threat: 'armyReserve.reason.sectorThreat',
 };
 
 const RECALL_LABEL_KEYS: Record<string, MessageKey> = {
@@ -44,12 +45,12 @@ const RECALL_LABEL_KEYS: Record<string, MessageKey> = {
 
 function reserveReasonLabel(reason: string): string {
     const key = REASON_LABEL_KEYS[reason];
-    return key ? t(key) : reason;
+    return t(key ?? 'armyReserve.reason.unknown');
 }
 
 function recallReasonLabel(reason: string): string {
     const key = RECALL_LABEL_KEYS[reason];
-    return key ? t(key) : reason;
+    return t(key ?? 'armyReserve.recall.unknown');
 }
 
 function deployedDurationLabel(turns: number): string {
@@ -305,7 +306,6 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
                                             <div className="text-text-primary font-semibold">{getCorpsName(req.corps_id)}</div>
-                                            <div className="text-text-secondary text-[10px]">{req.description}</div>
                                             <div className="text-[10px] text-text-secondary mt-1">
                                                 {severityCopy.detail}
                                             </div>
@@ -381,17 +381,6 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             }</span>
                                         </div>
                                     )}
-                                    {req.why_needed && (
-                                        <div className="text-[10px] text-text-secondary">
-                                            <span className="text-text-primary font-semibold">{t('armyReserve.corpsWhy')}:</span> {req.why_needed}
-                                        </div>
-                                    )}
-                                    {req.how_to_use && (
-                                        <div className="text-[10px] text-text-secondary">
-                                            <span className="text-text-primary font-semibold">{t('armyReserve.corpsHow')}:</span> {req.how_to_use}
-                                        </div>
-                                    )}
-
                                     {/* Priority bar */}
                                     <div className="h-1 bg-black/30 rounded-full overflow-hidden">
                                         <div

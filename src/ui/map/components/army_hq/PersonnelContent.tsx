@@ -183,6 +183,10 @@ export function PersonnelContent() {
                                         <button
                                             key={b.id}
                                             type="button"
+                                            data-testid="personnel-orbat-brigade-link"
+                                            data-command-id={command.id}
+                                            data-command-kind={command.kind}
+                                            data-formation-id={b.id}
                                             className="flex w-full items-center justify-between text-[10px] py-0.5 text-left hover:text-amber-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
                                             onClick={() => {
                                                 inspectOnField(useGameStore.getState(), command.kind === 'army_hq'

@@ -237,7 +237,13 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('HQ Officer');
     expect(container.textContent).toContain('Corps commander - Main Staff VRS');
 
-    fireEvent.click(screen.getByRole('button', { name: /Guard Brigade/i }));
+    const hqBrigadeLink = screen.getByRole('button', { name: /Guard Brigade/i });
+    expect(hqBrigadeLink.getAttribute('data-testid')).toBe('personnel-orbat-brigade-link');
+    expect(hqBrigadeLink.getAttribute('data-command-id')).toBe('vrs_main_staff');
+    expect(hqBrigadeLink.getAttribute('data-command-kind')).toBe('army_hq');
+    expect(hqBrigadeLink.getAttribute('data-formation-id')).toBe('vrs_guard_bde');
+
+    fireEvent.click(hqBrigadeLink);
 
     const store = useGameStore.getState();
     expect(store.selectedArmyHqId).toBe('vrs_main_staff');

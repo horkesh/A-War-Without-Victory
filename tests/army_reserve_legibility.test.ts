@@ -29,7 +29,7 @@ describe('Army reserve cause legibility', () => {
     ).toEqual({
       label: 'Why This Is Critical',
       summary: 'A corps is reporting a thin defensive sector that needs immediate reinforcement.',
-      detail: 'Corps arbih_1st_corps requests elite reinforcement due to critical defensive weakness.',
+      detail: 'Current reserve pressure has exceeded routine army reserve handling.',
       tone: 'critical',
     });
   });
@@ -45,9 +45,23 @@ describe('Army reserve cause legibility', () => {
     ).toEqual({
       label: 'Why This Needs Review',
       summary: 'An active offensive needs elite reinforcement to sustain its main effort.',
-      detail: 'Op "Neretva" is building toward execution and wants elite support.',
+      detail: 'Current reserve pressure has exceeded routine army reserve handling.',
       tone: 'routine',
     });
+  });
+
+  it('does not echo raw request description or corps-authored prose in player-facing cause copy', () => {
+    const copy = getArmyReserveRequestCauseCopy({
+      priority: 60,
+      reason: 'reserve_reason_x7',
+      purpose: 'defensive',
+      why_needed: 'why_needed_internal_payload',
+      description: 'description_internal_payload',
+    });
+
+    expect(copy.summary).toBe('A corps is reporting urgent reserve pressure on the line.');
+    expect(copy.detail).toBe('Current reserve pressure has exceeded routine army reserve handling.');
+    expect(`${copy.label} ${copy.summary} ${copy.detail}`).not.toMatch(/reserve_reason_x7|why_needed_internal_payload|description_internal_payload/i);
   });
 
   it('frames critical toolbar reserve pressure around the lead cause instead of color alone', () => {
@@ -115,6 +129,9 @@ describe('Army reserve cause legibility', () => {
     expect(attentionSource).toContain('getArmyReserveAttentionSummary');
     expect(reservePanelSource).toContain('getArmyReserveRequestCauseCopy');
     expect(reservePanelSource).toContain('getArmyReserveRequestProvenanceCopy');
+    expect(reservePanelSource).not.toContain('{req.description}');
+    expect(reservePanelSource).not.toContain('{req.why_needed}');
+    expect(reservePanelSource).not.toContain('{req.how_to_use}');
     expect(adapterSource).toContain('leadCriticalReason: leadCriticalRequest?.reason');
     expect(adapterSource).toContain('leadCriticalProvenanceDriver: leadCriticalRequest?.provenance_driver');
   });

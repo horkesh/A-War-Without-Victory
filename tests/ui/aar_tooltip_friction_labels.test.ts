@@ -111,7 +111,15 @@ describe('AAR and tooltip friction labels', () => {
 
     render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
 
-    screen.getByRole('button', { name: '2nd Tuzla Brigade' }).click();
+    const battleRow = document.querySelector('[data-testid="aar-battle-row"][data-osid="op:tuzla:center"]');
+    expect(battleRow).toBeTruthy();
+    const attackerLink = screen.getByRole('button', { name: '2nd Tuzla Brigade' });
+    expect(attackerLink.getAttribute('data-testid')).toBe('aar-formation-link');
+    expect(attackerLink.getAttribute('data-role')).toBe('attacker');
+    expect(attackerLink.getAttribute('data-formation-id')).toBe('bde_attacker');
+    expect(attackerLink.getAttribute('data-osid')).toBe('op:tuzla:center');
+
+    attackerLink.click();
 
     const store = useGameStore.getState();
     expect(store.armyHQOpen).toBe(false);

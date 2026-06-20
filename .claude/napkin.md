@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**LIVE PROOF FIXTURE STATE (2026-06-20).** Live browser gates must not fail on optional absent fixture state unless they create it first. Do instead: prove always-present hooks directly, and record explicit `skipped:no-visible-*` evidence for optional rows such as first-hour Records AAR battles while component tests pin the hook.
+
+**ARMY RESERVE COPY BOUNDARY (2026-06-20).** Reserve requests can carry diagnostic `description`, `why_needed`, `how_to_use`, purpose, and reason payloads. Do instead: render Army Reserve panels/modals through `armyReserve.*` i18n keys with neutral unknown fallbacks; keep raw reserve prose/ids internal.
+
 **BCS COMMAND-COPY PARITY (2026-06-20).** BCS is not allowed to lag behind English polish. Do instead: when removing shorthand from player command surfaces, check matching BCS keys for English `Level 3`, `override`, `Command Relationship`, `OPS`, and compact labels like `Snabd.`, `obavj.`, `Kom.`, `{tanks}T`, `{artillery}A`; pin targeted keys in `gui_audit_label_discipline`.
 
 **COMMAND-SURFACE SHORTHAND BOUNDARY (2026-06-20).** Normal command surfaces are player copy, not staff telemetry. Do instead: spell out casualties, no-friendly-loss exchange ratios, front segments, personnel/brigade counts, command authority, operation security, and operational reports through EN/BCS i18n; keep `INF`, `KIA/WIA/MIA`, `INTEL`, `DEF/EDGE`, `MOR`, `FAT`, `PERS`, `brg`, `bde`, `AUTH/AUT`, `OPSEC`, and `SITREP` out of non-diagnostic UI.

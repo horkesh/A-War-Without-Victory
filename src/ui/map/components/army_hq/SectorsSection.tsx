@@ -187,7 +187,7 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
             )}
 
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
-                <span>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
+                <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
                 <span>{t('sectorsSection.bdePerFrontSegment', { value: sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '-' })}</span>
                 <span>{t('sectorsSection.troopDensity', { value: sector.density.toFixed(2) })}</span>
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
@@ -276,7 +276,12 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const isExpanded = effectiveExpandedId === sector.sector_id;
 
                         return (
-                            <div key={sector.sector_id} className="border border-panel-border/50 bg-panel-card rounded-md">
+                            <div
+                                key={sector.sector_id}
+                                data-testid="army-hq-sector-row"
+                                data-sector-id={sector.sector_id}
+                                className="border border-panel-border/50 bg-panel-card rounded-md"
+                            >
                                 <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'}`}>
                                     <button
                                         type="button"

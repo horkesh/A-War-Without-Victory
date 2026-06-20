@@ -864,6 +864,44 @@ async function runArmyHqInternalDrilldown(page, summary) {
   summary.evidence.armyHqInternalActiveShellSurfaces = active;
 }
 
+async function runArmyHqPersonnelBrigadeLiveProof(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-army-hq"]');
+  await assertSingleShellSurface(page, 'Army HQ');
+  await activateVisibleControl(page, '#army-hq-tab-personnel');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-personnel');
+  await waitForVisibleSelector(page, '[data-testid="personnel-orbat-brigade-link"][data-command-id][data-command-kind][data-formation-id]');
+  await clickFirstVisibleSelector(
+    page,
+    '[data-testid="personnel-orbat-brigade-link"][data-command-id][data-command-kind][data-formation-id]',
+    'Army HQ Personnel ORBAT brigade link',
+  );
+  await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
+  await captureEvidence(page, summary, 'army_hq_personnel_brigade_live_proof');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Army HQ Personnel Brigade Live Proof', text);
+  summary.evidence.armyHqPersonnelBrigadeLiveProof = true;
+}
+
+async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-army-hq"]');
+  await assertSingleShellSurface(page, 'Army HQ');
+  await activateVisibleControl(page, '#army-hq-tab-briefing');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
+  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-frontage"][data-front-segments]');
+  await captureEvidence(page, summary, 'army_hq_sector_front_segment_live_proof');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Army HQ Sector Front Segment Live Proof', text);
+  summary.evidence.armyHqSectorFrontSegmentLiveProof = true;
+}
+
 async function runOwnerJourneyDrilldown(page, summary) {
   await resetToWarMap(page);
 
@@ -919,6 +957,37 @@ async function runOwnerJourneyDrilldown(page, summary) {
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Owner Journey Drilldown', text);
   summary.evidence.ownerJourneyDrilldown = true;
+}
+
+async function runRecordsAarFormationLinkLiveProof(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
+  await waitForVisibleSelector(page, '[data-testid="records-content"]');
+  await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
+  await activateVisibleControl(page, '[data-testid="records-subtab-aar"]');
+  await waitForVisibleSelector(page, '[data-testid="records-subtab-aar"][data-selected="true"]');
+  await delay(500);
+  if (await visibleSelectorCount(page, '[data-testid="aar-battle-row"][data-osid]') === 0) {
+    await captureEvidence(page, summary, 'records_aar_formation_link_skipped_no_battle_rows');
+    summary.evidence.recordsAarFormationLinkLiveProof = 'skipped:no-visible-aar-battle-row';
+    return;
+  }
+  if (await visibleSelectorCount(page, '[data-testid="aar-formation-link"][data-formation-id][data-osid]') === 0) {
+    await captureEvidence(page, summary, 'records_aar_formation_link_skipped_no_formation_links');
+    summary.evidence.recordsAarFormationLinkLiveProof = 'skipped:no-visible-aar-formation-link';
+    return;
+  }
+  await clickFirstVisibleSelector(
+    page,
+    '[data-testid="aar-formation-link"][data-formation-id][data-osid]',
+    'Records AAR formation link',
+  );
+  await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
+  await captureEvidence(page, summary, 'records_aar_formation_link_live_proof');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Records AAR Formation Link Live Proof', text);
+  summary.evidence.recordsAarFormationLinkLiveProof = true;
 }
 
 async function runArchiveInboxDrilldown(page, summary) {
@@ -1026,7 +1095,10 @@ async function run() {
       armyHqReachable: false,
       recordsReachable: false,
       armyHqInternalDrilldown: false,
+      armyHqPersonnelBrigadeLiveProof: false,
+      armyHqSectorFrontSegmentLiveProof: false,
       ownerJourneyDrilldown: false,
+      recordsAarFormationLinkLiveProof: false,
       archiveChronicleToRecordsDrilldown: false,
       archiveRecordsDecisionToChronicleDrilldown: false,
       presidentialInboxVisible: false,
@@ -1074,7 +1146,10 @@ async function run() {
     await runFoundationalFlow(page, summary);
     await runSurfaceSweep(page, summary);
     await runArmyHqInternalDrilldown(page, summary);
+    await runArmyHqPersonnelBrigadeLiveProof(page, summary);
+    await runArmyHqSectorFrontSegmentLiveProof(page, summary);
     await runOwnerJourneyDrilldown(page, summary);
+    await runRecordsAarFormationLinkLiveProof(page, summary);
     await runArchiveInboxDrilldown(page, summary);
     await runCodexInternalDrilldown(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);

@@ -1,11 +1,12 @@
 export type ArmyReserveSeverityBand = 'critical' | 'routine';
 
 import { formatPlayerFacingZoneLabel } from '../../../utils/player_facing_zone_label.js';
+import { t, type MessageKey } from '../i18n';
 import { getPlayerSafeOperationName } from './playerSafeText.js';
 
 interface ArmyReserveCauseSource {
     reason?: string;
-    purpose?: 'offensive' | 'defensive';
+    purpose?: string;
     why_needed?: string;
     description?: string;
 }
@@ -24,55 +25,68 @@ interface ArmyReserveProvenanceSource {
     operation_objective_capture_count?: number;
 }
 
+const CAUSE_SUMMARY_KEYS: Record<string, MessageKey> = {
+    offensive_support: 'armyReserve.cause.offensiveSupport',
+    defensive_gap: 'armyReserve.cause.defensiveGap',
+    exploitation: 'armyReserve.cause.exploitation',
+    enclave_relief: 'armyReserve.cause.enclaveRelief',
+};
+
+const PROVENANCE_SUMMARY_KEYS: Record<string, MessageKey> = {
+    commander_request: 'armyReserve.provenance.commanderRequest',
+    active_operation: 'armyReserve.provenance.activeOperation',
+    captured_objectives: 'armyReserve.provenance.capturedObjectives',
+    sector_threat: 'armyReserve.provenance.sectorThreat',
+};
+
+const COMMANDER_PRIORITY_KEYS: Record<string, MessageKey> = {
+    critical: 'armyReserve.commanderPriority.critical',
+    high: 'armyReserve.commanderPriority.high',
+    medium: 'armyReserve.commanderPriority.medium',
+    low: 'armyReserve.commanderPriority.low',
+};
+
 function getArmyReserveCauseSummary(source: ArmyReserveCauseSource): string {
-    switch (source.reason) {
-        case 'offensive_support':
-            return 'An active offensive needs elite reinforcement to sustain its main effort.';
-        case 'defensive_gap':
-            return 'A corps is reporting a thin defensive sector that needs immediate reinforcement.';
-        case 'exploitation':
-            return 'A local breakthrough needs rapid reinforcement before the enemy can close it.';
-        case 'enclave_relief':
-            return 'An enclave relief effort needs reinforcement to keep or open a corridor.';
-        default:
-            return source.purpose === 'offensive'
-                ? 'An active operation is asking for reserve support before momentum is lost.'
-                : 'A corps is reporting urgent reserve pressure on the line.';
-    }
+    const reasonKey = source.reason ? CAUSE_SUMMARY_KEYS[source.reason] : undefined;
+    if (reasonKey) return t(reasonKey);
+    return source.purpose === 'offensive'
+        ? t('armyReserve.cause.offensiveFallback')
+        : t('armyReserve.cause.defensiveFallback');
 }
 
-function getArmyReserveCauseDetail(source: ArmyReserveCauseSource): string {
-    return source.why_needed ?? source.description ?? 'Current reserve pressure has exceeded routine army reserve handling.';
+function getArmyReserveCauseDetail(_source: ArmyReserveCauseSource): string {
+    return t('armyReserve.cause.detailFallback');
 }
 
 function getArmyReserveProvenanceSummary(source: ArmyReserveProvenanceSource): string {
-    switch (source.provenance_driver) {
-        case 'commander_request':
-            return 'This request was produced by an explicit corps commander reinforcement escalation.';
-        case 'active_operation':
-            return 'This request was produced by an active operation that is asking Army HQ for reserve support.';
-        case 'captured_objectives':
-            return 'This request was produced by recent gains that opened an exploitation opportunity.';
-        case 'sector_threat':
-            return 'This request was produced by Army HQ threat assessment on a thin sector-front line.';
-        default:
-            return 'This request was produced by current army reserve pressure.';
-    }
+    const key = source.provenance_driver ? PROVENANCE_SUMMARY_KEYS[source.provenance_driver] : undefined;
+    return key ? t(key) : t('armyReserve.provenance.fallback');
 }
 
 function getArmyReserveProvenanceDetail(source: ArmyReserveProvenanceSource): string {
     if (source.provenance_driver === 'commander_request') {
-        const priorityLabel = source.commander_request_priority ?? 'unspecified';
+        const priorityLabel = source.commander_request_priority
+            ? t(COMMANDER_PRIORITY_KEYS[source.commander_request_priority] ?? 'armyReserve.commanderPriority.unspecified')
+            : t('armyReserve.commanderPriority.unspecified');
         const brigadesLabel = typeof source.commander_request_brigades_needed === 'number'
-            ? `${source.commander_request_brigades_needed} brigade${source.commander_request_brigades_needed === 1 ? '' : 's'}`
-            : 'reinforcement';
+            ? t(
+                source.commander_request_brigades_needed === 1
+                    ? 'armyReserve.provenance.oneBrigade'
+                    : 'armyReserve.provenance.manyBrigades',
+                { count: source.commander_request_brigades_needed },
+            )
+            : t('armyReserve.provenance.reinforcement');
         const zoneLabel = source.commander_focus_zone_id
             ? formatPlayerFacingZoneLabel(source.commander_focus_zone_id)
-            : 'the lead sector';
-        return `Commander signal: ${priorityLabel} priority for ${brigadesLabel} in ${zoneLabel}.`;
+            : t('armyReserve.provenance.leadSector');
+        return t('armyReserve.provenance.commanderSignal', {
+            priority: priorityLabel,
+            brigades: brigadesLabel,
+            zone: zoneLabel,
+        });
     }
 
-    return 'Derived from the current reserve-generation pressure owned by Army HQ and corps command state.';
+    return t('armyReserve.provenance.derived');
 }
 
 function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): string | null {
@@ -84,7 +98,10 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && typeof source.operation_momentum === 'number'
         && Number.isFinite(source.operation_momentum)
     ) {
-        return `Operation "${operationName}" is already in execution with momentum ${source.operation_momentum >= 0 ? '+' : ''}${source.operation_momentum.toFixed(1)}, so reserve support is needed now.`;
+        return t('armyReserve.evidence.operationExecution', {
+            operation: operationName,
+            momentum: `${source.operation_momentum >= 0 ? '+' : ''}${source.operation_momentum.toFixed(1)}`,
+        });
     }
 
     if (
@@ -93,7 +110,10 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && source.operation_phase === 'planning'
         && typeof source.operation_preparation_sub_phase === 'string'
     ) {
-        return `Operation "${operationName}" is in ${source.operation_preparation_sub_phase} preparation, so reserve support is being staged before execution begins.`;
+        return t('armyReserve.evidence.operationPlanning', {
+            operation: operationName,
+            phase: source.operation_preparation_sub_phase,
+        });
     }
 
     if (
@@ -103,7 +123,12 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && typeof source.operation_objective_capture_count === 'number'
         && Number.isFinite(source.operation_objective_capture_count)
     ) {
-        return `Operation "${operationName}" captured ${source.operation_objective_capture_count} objective${source.operation_objective_capture_count === 1 ? '' : 's'} in execution, opening an exploitation window that needs reserve support now.`;
+        return t(
+            source.operation_objective_capture_count === 1
+                ? 'armyReserve.evidence.capturedObjectiveOne'
+                : 'armyReserve.evidence.capturedObjectiveMany',
+            { operation: operationName, count: source.operation_objective_capture_count },
+        );
     }
 
     if (
@@ -111,7 +136,15 @@ function getArmyReserveEvidenceSummary(source: ArmyReserveProvenanceSource): str
         && typeof source.sector_threat_ratio === 'number'
         && typeof source.sector_assigned_brigade_count === 'number'
     ) {
-        return `Threat ratio ${source.sector_threat_ratio.toFixed(1)} with ${source.sector_assigned_brigade_count} brigade${source.sector_assigned_brigade_count === 1 ? '' : 's'} on the line triggered this reserve request.`;
+        return t(
+            source.sector_assigned_brigade_count === 1
+                ? 'armyReserve.evidence.sectorThreatOne'
+                : 'armyReserve.evidence.sectorThreatMany',
+            {
+                ratio: source.sector_threat_ratio.toFixed(1),
+                count: source.sector_assigned_brigade_count,
+            },
+        );
     }
 
     return null;
@@ -125,7 +158,7 @@ function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): stri
         && typeof source.operation_momentum === 'number'
         && Number.isFinite(source.operation_momentum)
     ) {
-        return 'Army HQ is reinforcing a live offensive before the current push loses tempo.';
+        return t('armyReserve.evidence.detail.operationExecution');
     }
 
     if (
@@ -134,7 +167,7 @@ function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): stri
         && source.operation_phase === 'planning'
         && typeof source.operation_preparation_sub_phase === 'string'
     ) {
-        return 'Army HQ wants elite support in place before the operation commits to execution.';
+        return t('armyReserve.evidence.detail.operationPlanning');
     }
 
     if (
@@ -144,7 +177,7 @@ function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): stri
         && typeof source.operation_objective_capture_count === 'number'
         && Number.isFinite(source.operation_objective_capture_count)
     ) {
-        return 'Army HQ is reinforcing recent gains before the enemy can re-form around the breach.';
+        return t('armyReserve.evidence.detail.capturedObjectives');
     }
 
     if (
@@ -152,7 +185,7 @@ function getArmyReserveEvidenceDetail(source: ArmyReserveProvenanceSource): stri
         && typeof source.sector_threat_ratio === 'number'
         && typeof source.sector_assigned_brigade_count === 'number'
     ) {
-        return 'Army HQ flagged this sector as too threatened for its current frontage.';
+        return t('armyReserve.evidence.detail.sectorThreat');
     }
 
     return null;
@@ -195,7 +228,7 @@ export function getArmyReserveToolbarSignal({
     leadCriticalOperationPreparationSubPhase?: string;
     leadCriticalOperationMomentum?: number;
     leadCriticalOperationObjectiveCaptureCount?: number;
-    leadCriticalPurpose?: 'offensive' | 'defensive';
+    leadCriticalPurpose?: string;
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
 }): {
@@ -238,14 +271,28 @@ export function getArmyReserveToolbarSignal({
         });
         return {
             label: `${criticalCount} ${criticalCount === 1 ? 'CRITICAL RESERVE REQUEST' : 'CRITICAL RESERVE REQUESTS'}`,
-            title: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention. Lead cause: ${leadCause} Lead driver: ${leadDriver}${leadEvidence ? ` Lead signal: ${leadEvidence}` : ''} ${pendingCount} reserve request${pendingCount === 1 ? ' is' : 's are'} pending in total.`,
+            title: t('armyReserve.toolbar.criticalTitle', {
+                criticalCount,
+                requestWord: criticalCount === 1 ? 'request' : 'requests',
+                needWord: criticalCount === 1 ? 'needs' : 'need',
+                leadCause,
+                leadDriver,
+                leadEvidence: leadEvidence ? ` ${t('armyReserve.toolbar.leadSignal', { leadEvidence })}` : '',
+                pendingCount,
+                pendingVerb: pendingCount === 1 ? 'is' : 'are',
+                pendingWord: pendingCount === 1 ? 'request' : 'requests',
+            }),
             tone: 'critical',
         };
     }
 
     return {
         label: `${pendingCount} ${pendingCount === 1 ? 'RESERVE REQUEST' : 'RESERVE REQUESTS'}`,
-        title: `${pendingCount} reserve request${pendingCount === 1 ? ' awaits' : 's await'} army reserve review.`,
+        title: t('armyReserve.toolbar.routineTitle', {
+            count: pendingCount,
+            requestWord: pendingCount === 1 ? 'request' : 'requests',
+            awaitWord: pendingCount === 1 ? 'awaits' : 'await',
+        }),
         tone: 'routine',
     };
 }
@@ -283,7 +330,7 @@ export function getArmyReserveAttentionSummary({
     leadCriticalOperationPreparationSubPhase?: string;
     leadCriticalOperationMomentum?: number;
     leadCriticalOperationObjectiveCaptureCount?: number;
-    leadCriticalPurpose?: 'offensive' | 'defensive';
+    leadCriticalPurpose?: string;
     leadCriticalWhyNeeded?: string;
     leadCriticalDescription?: string;
 }): {
@@ -326,14 +373,18 @@ export function getArmyReserveAttentionSummary({
         });
         return {
             heading: `${criticalCount} critical reserve request${criticalCount === 1 ? '' : 's'} need${criticalCount === 1 ? 's' : ''} immediate army attention.`,
-            detail: `Lead cause: ${leadCause} Lead driver: ${leadDriver}${leadEvidence ? ` Lead signal: ${leadEvidence}` : ''} Reserve requests are army-level reserve management, not presidential review. Routine requests remain in the Army Reserve desk.`,
+            detail: t('armyReserve.attention.criticalDetail', {
+                leadCause,
+                leadDriver,
+                leadEvidence: leadEvidence ? ` ${t('armyReserve.toolbar.leadSignal', { leadEvidence })}` : '',
+            }),
             tone: 'critical',
         };
     }
 
     return {
         heading: `${pendingCount} reserve request${pendingCount === 1 ? '' : 's'} await${pendingCount === 1 ? 's' : ''} army reserve review.`,
-        detail: 'Reserve requests are army-level reserve management, not presidential review. Handle them in the Army Reserve desk.',
+        detail: t('armyReserve.attention.routineDetail'),
         tone: 'routine',
     };
 }
@@ -345,15 +396,15 @@ export function getArmyReserveRequestSeverityCopy(priority: number): {
 } {
     if (classifyArmyReserveSeverity(priority) === 'critical') {
         return {
-            label: 'Immediate Army Need',
-            detail: 'Handle this reserve request before routine reserve reviews if you can support it.',
+            label: t('armyReserve.requestSeverity.critical.label'),
+            detail: t('armyReserve.requestSeverity.critical.detail'),
             tone: 'critical',
         };
     }
 
     return {
-        label: 'Reserve Review',
-        detail: 'This request can stay in the reserve desk queue unless higher-pressure needs emerge.',
+        label: t('armyReserve.requestSeverity.routine.label'),
+        detail: t('armyReserve.requestSeverity.routine.detail'),
         tone: 'routine',
     };
 }
@@ -367,7 +418,7 @@ export function getArmyReserveRequestCauseCopy({
 }: {
     priority: number;
     reason?: string;
-    purpose?: 'offensive' | 'defensive';
+    purpose?: string;
     why_needed?: string;
     description?: string;
 }): {
@@ -378,7 +429,7 @@ export function getArmyReserveRequestCauseCopy({
 } {
     const tone = classifyArmyReserveSeverity(priority);
     return {
-        label: tone === 'critical' ? 'Why This Is Critical' : 'Why This Needs Review',
+        label: tone === 'critical' ? t('armyReserve.cause.labelCritical') : t('armyReserve.cause.labelRoutine'),
         summary: getArmyReserveCauseSummary({ reason, purpose, why_needed, description }),
         detail: getArmyReserveCauseDetail({ reason, purpose, why_needed, description }),
         tone,
@@ -396,7 +447,7 @@ export function getArmyReserveRequestProvenanceCopy({
     detail: string;
 } {
     return {
-        label: 'What Produced This Request',
+        label: t('armyReserve.provenance.label'),
         summary: getArmyReserveProvenanceSummary({
             provenance_driver,
             commander_request_priority,
@@ -424,7 +475,7 @@ export function getArmyReserveRequestEvidenceCopy(
     if (!summary || !detail) return null;
 
     return {
-        label: 'What Signal Triggered This',
+        label: t('armyReserve.evidence.label'),
         summary,
         detail,
     };

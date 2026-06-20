@@ -152,6 +152,10 @@ function DefenderBreakdown({ contributions, onSelectFormation, osid, formationNa
                             {onSelectFormation ? (
                                 <button
                                     type="button"
+                                    data-testid="aar-formation-link"
+                                    data-role="defender-contribution"
+                                    data-formation-id={c.brigade_id}
+                                    data-osid={osid ?? undefined}
                                     className="hover:text-interactive transition-colors truncate"
                                     onClick={() => onSelectFormation(c.brigade_id, osid)}
                                 >
@@ -192,7 +196,11 @@ function BattleRow({
         : null;
 
     return (
-        <div className="text-[11px] py-1 border-b border-panel-border/30 last:border-0">
+        <div
+            data-testid="aar-battle-row"
+            data-osid={battle.osid}
+            className="text-[11px] py-1 border-b border-panel-border/30 last:border-0"
+        >
             <div className="flex justify-between items-start">
                 <div className="flex items-center gap-1.5 min-w-0">
                     <FactionTag faction={battle.attacker_faction} />
@@ -223,6 +231,10 @@ function BattleRow({
                 <div className="text-[9px] text-text-muted mt-0.5 ml-6 flex gap-2">
                     <button
                         type="button"
+                        data-testid="aar-formation-link"
+                        data-role="attacker"
+                        data-formation-id={battle.primary_attacker_id}
+                        data-osid={battle.osid}
                         className="hover:text-interactive transition-colors"
                         onClick={() => onSelectFormation(battle.primary_attacker_id, battle.osid)}
                     >
@@ -233,6 +245,10 @@ function BattleRow({
                             <span>{t('aar.vs')}</span>
                             <button
                                 type="button"
+                                data-testid="aar-formation-link"
+                                data-role="defender"
+                                data-formation-id={battle.primary_defender_id}
+                                data-osid={battle.osid}
                                 className="hover:text-interactive transition-colors"
                                 onClick={() => onSelectFormation(battle.primary_defender_id!, battle.osid)}
                             >
