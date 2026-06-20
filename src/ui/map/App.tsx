@@ -114,6 +114,74 @@ declare global {
 
 type PendingEventDecisionView = NonNullable<LoadedGameState['pendingEventDecisions']>[number];
 
+type AcknowledgementEventEffect = {
+  kind: string;
+  text?: string;
+  faction?: string;
+  delta?: number;
+  duration_turns?: number;
+  war_crimes_delta?: number;
+  osids?: string[];
+  pool_multiplier?: number;
+  multiplier?: number;
+  mode?: string;
+  value?: number;
+};
+
+function formatSignedEventDelta(delta: number | undefined): string {
+  if (typeof delta !== 'number' || !Number.isFinite(delta)) return '';
+  return ` ${delta > 0 ? '+' : ''}${delta}`;
+}
+
+function formatEventDuration(turns: number | undefined): string {
+  return typeof turns === 'number' && Number.isFinite(turns) && turns > 0
+    ? ` for ${turns} turns`
+    : '';
+}
+
+export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEffect): string {
+  if (effect.text) return effect.text;
+  const faction = effect.faction ? getPlayerSafeMilitaryFactionName(effect.faction) : null;
+  const factionPrefix = faction ? `${faction} ` : '';
+  const delta = formatSignedEventDelta(effect.delta);
+  const duration = formatEventDuration(effect.duration_turns);
+
+  switch (effect.kind) {
+    case 'morale_change':
+      return `${factionPrefix}morale${delta}`;
+    case 'supply_delta':
+      return `${factionPrefix}supply${delta}`;
+    case 'cohesion_change':
+      return `${factionPrefix}cohesion${delta}`;
+    case 'humanitarian_impact':
+      return `${factionPrefix}humanitarian impact${formatSignedEventDelta(effect.war_crimes_delta)}`;
+    case 'patron_pressure':
+      return `${factionPrefix}patron pressure${delta}`;
+    case 'alliance_change':
+      return `Army of RBiH / HVO alliance${delta}`;
+    case 'negotiation_capital':
+      return `${factionPrefix}negotiating position${delta}`;
+    case 'equipment_grant':
+      return `${factionPrefix}equipment support recorded`;
+    case 'aggression_modifier':
+      return `${factionPrefix}operational aggression${delta}${duration}`;
+    case 'control_change': {
+      const count = effect.osids?.length ?? 0;
+      return count > 0
+        ? `${factionPrefix}territorial control changes in ${count} area${count === 1 ? '' : 's'}`
+        : `${factionPrefix}territorial control changes recorded`;
+    }
+    case 'guerrilla_threat':
+      return `${factionPrefix}rear-area threat recorded${duration}`;
+    case 'offensive_ops_suppression':
+      return `${factionPrefix}offensive operations suppressed${duration}`;
+    case 'alliance_lock':
+      return `Alliance constraint recorded${duration}`;
+    default:
+      return `${factionPrefix}campaign effect recorded`;
+  }
+}
+
 function comparePendingEventDecisionPriority(a: PendingEventDecisionView, b: PendingEventDecisionView): number {
   const aRequired = a.requires_player_response === true ? 0 : 1;
   const bRequired = b.requires_player_response === true ? 0 : 1;
@@ -733,7 +801,7 @@ function App() {
           category: def?.category ?? e.category ?? 'military',
           effects: def?.effects?.map(eff => ({
             kind: eff.kind,
-            description: eff.text ?? (eff.faction ? `${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind} ${(eff.delta ?? 0) > 0 ? '+' : ''}${eff.delta ?? ''}` : eff.kind),
+            description: formatAcknowledgementEventEffect(eff),
           })) ?? e.effects,
           isDecision: false,
           image: def?.image,

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label event, order, and reserve copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Event acknowledgement effect enrichment now formats known effects such as `aggression_modifier` as player-facing operational copy and collapses unknown effect ids to neutral campaign-effect copy. The staged Order Queue now renders localized order types, posture labels, target fallbacks, title, and remove action instead of raw `attack`, `posture`, `sector`, or hard-coded queue copy. Reserve request modals now map offensive/defensive purpose and reserve reasons such as `defensive_gap` / `offensive_support` through player-safe labels.
+
+**Verification:** Green focused proof: `npm.cmd exec -- vitest run tests/ui/event_modal_effect_filter.test.ts tests/ui/event_modal_effect_labels.test.ts tests/ui/order_queue_player_copy.test.ts tests/ui/decision_family_modals.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 22/22; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 232/232; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Reports: `docs/40_reports/implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md`, `docs/40_reports/implemented/20260620_ORDER_QUEUE_LABEL_COPY.md`, `docs/40_reports/implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label economy facility and recruitment copy
 
 **Type:** UI/read-model i18n copy polish.

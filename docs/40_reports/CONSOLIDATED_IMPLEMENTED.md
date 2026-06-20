@@ -2,6 +2,12 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest reserve request modal label copy:** [implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md](implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md) - Reserve request modals now render localized purpose/reason labels instead of raw `offensive_support` / `defensive_gap` ids.
+
+**Latest Order Queue label copy:** [implemented/20260620_ORDER_QUEUE_LABEL_COPY.md](implemented/20260620_ORDER_QUEUE_LABEL_COPY.md) - Staged orders now render localized order types, posture/target labels, and queue chrome instead of raw `attack` / `posture` / `sector` ids.
+
+**Latest event acknowledgement effect label copy:** [implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md](implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md) - Event acknowledgement effects now render known effect labels and neutral unknown-effect copy instead of raw effect ids such as `aggression_modifier`.
+
 **Latest recruitment modal label copy:** [implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md](implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md) - Recruitment options now render readable resource, faction, and equipment labels while preserving raw equipment ids only for backend command payloads.
 
 **Latest economy facility-type label copy:** [implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md](implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md) - Economy production-facility rows now render localized facility-type labels instead of raw `heavy_equipment`, `small_arms`, or `ammunition` ids.

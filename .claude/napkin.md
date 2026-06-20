@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**EVENT / ORDER / RESERVE LABEL COPY (2026-06-20).** Event effects, staged orders, and reserve requests are player command copy, not enum displays. Do instead: map known effect kinds, staged order types/targets, posture names, and reserve purpose/reason ids through localized/player-safe labels; unknowns should become neutral recorded-effect/request copy, not raw ids.
+
 **ECONOMY / RECRUITMENT LABEL COPY (2026-06-20).** Production and recruitment modal fields are command surfaces, not raw type/resource dumps. Do instead: map facility types, resource labels, faction names, and equipment classes through localized/player-safe labels; keep raw equipment ids only as internal `onApply` payloads.
 
 **VERDICT PEACE-PLAN LABEL COPY (2026-06-20).** Endgame faction reports are player copy, not join/debug output. Do instead: resolve accepted/rejected peace-plan ids through `peace_plan_data` names and use neutral player-safe fallbacks; keep `vance_owen`, `contact_group`, and future underscore ids out of normal verdict copy.

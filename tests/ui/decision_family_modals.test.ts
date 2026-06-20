@@ -38,10 +38,10 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 afterEach(() => cleanup());
 
 describe('decision family modals', () => {
-  it('surfaces reserve requests as a presidential modal with an explicit pool handoff', () => {
+  it('surfaces reserve requests as a presidential modal with localized purpose copy and an explicit pool handoff', () => {
     const onOpenReservePanel = vi.fn();
 
-    render(React.createElement(ReserveRequestModal, {
+    const { container, rerender } = render(React.createElement(ReserveRequestModal, {
       requestId: 'reserve:req-1',
       state: makeState({
         formations: [{ id: 'drina_corps', name: 'Drina Corps' }] as LoadedGameState['formations'],
@@ -49,11 +49,12 @@ describe('decision family modals', () => {
           request_id: 'req-1',
           corps_id: 'drina_corps',
           faction: 'RS',
-          reason: 'offensive',
+          reason: 'offensive_support',
+          purpose: 'offensive',
           priority: 80,
           severityBand: 'critical',
           travel_hops: 2,
-          description: 'Drina Corps requests reinforcement for offensive.',
+          description: 'Drina Corps requests reinforcement for the active line.',
           suggested_brigade_id: null,
           turn_requested: 1,
         }],
@@ -65,10 +66,37 @@ describe('decision family modals', () => {
     expect(screen.getByRole('dialog', { name: 'Reserve request' })).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Army HQ Request' }).getAttribute('src')).toContain('decision_header_military_staff');
     expect(screen.getByText(/Drina Corps is asking for a reserve commitment/)).toBeTruthy();
+    expect(screen.getByText('Offensive')).toBeTruthy();
+    expect(container.textContent).not.toContain('offensive_support');
+    expect(screen.queryByText('offensive')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Open reserve pool' }));
 
     expect(onOpenReservePanel).toHaveBeenCalledOnce();
+
+    rerender(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-2',
+      state: makeState({
+        formations: [{ id: 'drina_corps', name: 'Drina Corps' }] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-2',
+          corps_id: 'drina_corps',
+          faction: 'RS',
+          reason: 'defensive_gap',
+          priority: 70,
+          severityBand: 'routine',
+          travel_hops: 1,
+          description: 'Drina Corps requests reinforcement for an exposed sector.',
+          suggested_brigade_id: null,
+          turn_requested: 1,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenReservePanel,
+    }));
+
+    expect(screen.getByText('Defensive Gap')).toBeTruthy();
+    expect(container.textContent).not.toContain('defensive_gap');
   });
 
   it('surfaces officer matters without raw commander stat notation', () => {
