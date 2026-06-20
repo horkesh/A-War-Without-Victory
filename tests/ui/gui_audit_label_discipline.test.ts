@@ -6,9 +6,11 @@ import { createElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
 import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
+import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
+import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
-import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -178,6 +180,51 @@ describe('GUI audit label discipline', () => {
 
     expect(container.textContent).toMatch(/2\/3 held at close/i);
     expect(container.textContent).not.toMatch(/2\/3 objectives/i);
+  });
+
+  it('keeps combat records explicit about ground won and lost without capture shorthand', () => {
+    const combatSummary = {
+      battles_fought: 4,
+      battles_as_attacker: 3,
+      battles_as_defender: 1,
+      victories: 2,
+      defeats: 1,
+      stalemates: 1,
+      win_rate: 0.5,
+      total_casualties_taken: 120,
+      total_casualties_inflicted: 180,
+      casualty_exchange_ratio: 1.5,
+      total_osids_captured: 3,
+      total_osids_lost: 1,
+      brigade_count: 4,
+      active_brigade_count: 3,
+      peak_aggregate_personnel: 6000,
+      nadir_aggregate_personnel: 5200,
+      current_personnel: 5500,
+      arc_distribution: {},
+      most_victories_brigade_id: null,
+      most_casualties_brigade_id: null,
+    };
+
+    const { container: summaryContainer } = render(createElement(CombatSummaryPanel, {
+      summary: combatSummary,
+    }));
+
+    expect(summaryContainer.textContent).toMatch(/3 won \/ 1 lost/i);
+    expect(summaryContainer.textContent).not.toMatch(/\bcap\b|captured/i);
+
+    cleanup();
+
+    useGameStore.setState({ armyHQExpandedSections: { 'combat-arbih_1st_corps': true } });
+
+    const { container: corpsContainer } = render(createElement(CombatRecordSection, {
+      corpsId: 'arbih_1st_corps',
+      corps: { combatSummary } as FormationView,
+    }));
+
+    expect(corpsContainer.textContent).toMatch(/Ground Won\/Lost/i);
+    expect(corpsContainer.textContent).toMatch(/\+3 \/ -1/);
+    expect(corpsContainer.textContent).not.toMatch(/\bcap\b|captured/i);
   });
 
   it('renders Situation pressure and security copy without telemetry labels', () => {

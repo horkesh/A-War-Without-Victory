@@ -1,6 +1,6 @@
 /**
  * Combat Record section for expanded corps card.
- * Shows battles fought, W/L/D, casualties, territory changes.
+ * Shows battles fought, W/L/D, casualties, and ground won/lost.
  */
 import type { FormationView } from '../../data/types';
 import { CollapsibleSection } from './CollapsibleSection';
@@ -56,7 +56,7 @@ export function CombatRecordSection({ corpsId, corps }: CombatRecordSectionProps
                         <span className="text-text-primary">{cs.casualty_exchange_ratio.toFixed(2)}:1</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-text-secondary">{t('combatRecord.positions')}</span>
+                        <span className="text-text-secondary">{t('combatRecord.groundWonLost')}</span>
                         <span>
                             <span className="text-green-700">+{cs.total_osids_captured}</span>
                             {' / '}

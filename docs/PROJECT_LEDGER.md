@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label combat-record ground counters clearly
+
+**Type:** UI/read-model copy polish.
+
+**Fix:** Army HQ corps combat records and the shared combat-summary panel now label territorial combat-history counters as `Ground Won/Lost` and render the detail as `{won} won / {lost} lost` through i18n instead of player-facing `cap / lost` shorthand. This keeps true combat-history ground gains distinct from the final-held AAR objective provenance copy closed earlier today.
+
+**Verification:** Red proof first failed on the stale `3 cap / 1 lost` copy in `tests/ui/gui_audit_label_discipline.test.ts`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` (10/10). Report: `docs/40_reports/implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md`.
+
+**Scope/determinism:** UI/read-model copy, i18n keys, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-19] test(ui): add owner-journey browser drilldown gate
 
 **Type:** UI/test-readiness and live browser QA gate.

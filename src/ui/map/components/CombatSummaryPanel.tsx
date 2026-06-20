@@ -83,11 +83,14 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
             {/* Territory */}
             <div className="mt-1.5">
                 <div className="flex justify-between">
-                    <span className="text-text-secondary">{t('aar.section.territory')}</span>
+                    <span className="text-text-secondary">{t('combatRecord.groundWonLost')}</span>
                     <span className={`tabular-nums ${territoryNet > 0 ? 'text-green-400' : territoryNet < 0 ? 'text-red-400' : 'text-text-primary'}`}>
                         {territorySign}{territoryNet}
                         <span className="text-text-secondary ml-1">
-                            ({summary.total_osids_captured} cap / {summary.total_osids_lost} lost)
+                            ({t('combatRecord.groundWonLostCount', {
+                                won: summary.total_osids_captured,
+                                lost: summary.total_osids_lost,
+                            })})
                         </span>
                     </span>
                 </div>

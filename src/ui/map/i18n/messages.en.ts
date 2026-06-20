@@ -1056,6 +1056,8 @@ export const enMessages = {
     'combatRecord.casualtiesInflicted': 'Casualties Inflicted',
     'combatRecord.exchangeRatio': 'Exchange Ratio',
     'combatRecord.positions': 'Positions',
+    'combatRecord.groundWonLost': 'Ground Won/Lost',
+    'combatRecord.groundWonLostCount': '{won} won / {lost} lost',
     'combatRecord.menLost': 'Men lost',
     'combatRecord.peakPersonnel': 'Peak Personnel',
     'combatRecord.arcs': 'Arcs:',

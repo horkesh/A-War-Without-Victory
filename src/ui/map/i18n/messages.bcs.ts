@@ -1023,6 +1023,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'combatRecord.casualtiesInflicted': 'Naneseni gubici',
     'combatRecord.exchangeRatio': 'Omjer razmjene',
     'combatRecord.positions': 'Položaji',
+    'combatRecord.groundWonLost': 'Teren dobijen/izgubljen',
+    'combatRecord.groundWonLostCount': '{won} dobijeno / {lost} izgubljeno',
     'combatRecord.menLost': 'Izgubljeno ljudi',
     'combatRecord.peakPersonnel': 'Vrsno ljudstvo',
     'combatRecord.arcs': 'Lukovi:',
