@@ -3213,3 +3213,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-20 - BCS command-copy parity boundary
 
 **BCS command surfaces need the same no-shorthand standard as English:** localized keys must not retain English `Level 3`, `override`, `Command Relationship`, `OPS`, or compact BCS staff abbreviations such as `Snabd.`, `obavj.`, `Kom.`, `{tanks}T`, and `{artillery}A` in normal player copy. Durable rule: when cleaning English command surfaces, audit matching BCS keys in the same pass and pin targeted keys in `gui_audit_label_discipline`. Applied in `[2026-06-20] BCS command copy residuals`; report `docs/40_reports/implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md`.
+
+## 2026-06-21 - Army HQ readiness label boundary
+
+**Readiness grades are internal ids until they cross the Army HQ display boundary:** `COMBAT READY`, `DEGRADED`, and sibling readiness grades feed multiple surfaces: Force Readiness, corps cards, and the Command Access strip. Durable rule: render grades through the shared readiness-grade i18n helper everywhere they appear, and treat command-access chips as part of the same readiness boundary. Manual BCS browser proof is useful because the command-access strip can leak raw grades even when the main corps card is fixed. Applied in `[2026-06-21] Army HQ readiness / threat copy boundary`; report `docs/40_reports/implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md`.

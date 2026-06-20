@@ -21,7 +21,7 @@ import { FlipCard } from './FlipCard';
 import { deriveCorpsDelegationSummary } from '../../data/command_strain';
 import { t, type MessageKey } from '../../i18n';
 
-import type { ReadinessGrade } from './ForceReadiness';
+import { readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
 
 interface ArmyHQCorpsCardProps {
     corps: FormationView;
@@ -211,7 +211,7 @@ export function ArmyHQCorpsCard({
                         <>
                             <div className="w-1 h-3 border-l border-panel-border" />
                             <span className={`font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : 'text-red-400'}`}>
-                                {readinessGrade}
+                                {readinessGradeLabel(readinessGrade)}
                             </span>
                         </>
                     )}
@@ -219,7 +219,10 @@ export function ArmyHQCorpsCard({
 
                 {readinessGrade && (
                     <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary/80 font-mono">
-                        fatigue {Math.round(data.avgFatigue)} / cohesion {Math.round(data.avgCohesion)}
+                        {t('armyHqCorps.readinessVitals', {
+                            fatigue: Math.round(data.avgFatigue),
+                            cohesion: Math.round(data.avgCohesion),
+                        })}
                     </div>
                 )}
 

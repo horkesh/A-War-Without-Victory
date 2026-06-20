@@ -15,7 +15,7 @@ import { shouldShowWarroomReturn, isEmbeddedTacticalMap } from '../../utils/warr
 import { getFactionArmyCommander } from '../../utils/officerUtils';
 import { OfficerProfile } from '../OfficerProfile';
 import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
-import { generateForceReadiness } from './ForceReadiness';
+import { generateForceReadiness, readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
 import { generateThreatAssessment } from './generateThreatAssessment';
 import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
 import { PresidentialDecisionRoomPanel } from './PresidentialDecisionRoomPanel';
@@ -89,7 +89,7 @@ function CommandAccessStrip({
     corpsFormations: FormationView[];
     sectorsByCorps: Map<string, CorpsFrontSectorView[]>;
     opsByCorps: Map<string, OperationView[]>;
-    readinessByCorps: Map<string, { grade?: string; hasThreat?: boolean }>;
+    readinessByCorps: Map<string, { grade?: ReadinessGrade; hasThreat?: boolean }>;
     onSelect: (corpsId: string) => void;
 }) {
     if (corpsFormations.length === 0) return null;
@@ -121,7 +121,7 @@ function CommandAccessStrip({
                                     {getPlayerSafeCorpsName(corps.name, corps.id)}
                                 </span>
                                 <span className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold text-accent-gold">
-                                    {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ?? '--' })}
+                                    {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ? readinessGradeLabel(readiness.grade) : '--' })}
                                 </span>
                             </div>
                             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] uppercase tracking-[0.12em] text-text-secondary">
