@@ -95,6 +95,19 @@ function safeSectorLabel(sectorId: string, sectors: Array<{ sector_id?: string |
   return isUnsafeRawLabel(label) ? t('formationDetail.assignedSector') : label;
 }
 
+const EFFECTIVENESS_MODIFIER_LABELS: Record<string, string> = {
+  fatigue: 'Fatigue',
+  officer: 'Officer cadre',
+  homeDistance: 'Distance from home',
+  morale: 'Morale',
+  disruption: 'Disruption',
+  supply: 'Supply',
+};
+
+function formatEffectivenessModifierLabel(key: string): string {
+  return EFFECTIVENESS_MODIFIER_LABELS[key] ?? t('formationDetail.staffRecord');
+}
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -263,7 +276,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       {isArmyHq ? t('formationDetail.subordinatedTo') : t('formationDetail.corps')}
                     </span>
                     <span className="text-accent-blue font-bold uppercase group-hover:underline">
-                      {isArmyHq ? t('formationDetail.assignedCommand') : safeCorpsLabel(parent.id, loadedGameState.formations)}
+                      {isArmyHq ? getLocalizedFormationName(parent, locale) : safeCorpsLabel(parent.id, loadedGameState.formations)}
                     </span>
                   </div>
                   <div className="w-1.5 h-1.5 rounded-full bg-accent-blue/40 group-hover:bg-accent-blue transition-colors" />
@@ -514,7 +527,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 const mods = eff.modifiers;
                 const worst = Object.entries(mods).reduce((a, b) => b[1] < a[1] ? b : a);
                 const worstLabel = worst[1] < 0.85
-                  ? ` (${worst[0]} ${Math.round(worst[1] * 100)}%)`
+                  ? ` (${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%)`
                   : '';
                 return (
                   <>

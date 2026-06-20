@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): show Formation Detail HQ and effectiveness copy safely
+
+**Type:** UI/read-model command-surface polish.
+
+**Fix:** Formation Detail now renders the actual Army HQ parent formation name for HQ-assigned brigades and maps effectiveness worst-factor keys to player-facing labels such as `Distance from home` instead of raw implementation keys like `homeDistance`.
+
+**Verification:** Red proof first failed with visible `Assigned command` and `homeDistance 70%`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/formation_detail_parity.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` (18/18); `npm.cmd run typecheck`. Report: `docs/40_reports/implemented/20260620_FORMATION_DETAIL_HQ_EFFECTIVENESS_COPY.md`.
+
+**Scope/determinism:** UI/read-model copy, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): clean settlement timeline copy and turn-0 provenance
 
 **Type:** UI/read-model settlement timeline polish.

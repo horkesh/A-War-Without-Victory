@@ -27,6 +27,18 @@ function makeFormationDetailState(): LoadedGameState {
         tags: [],
       },
       {
+        id: 'rbih_general_staff',
+        faction: 'RBiH',
+        name: 'General Staff ARBiH',
+        kind: 'army_hq',
+        readiness: 'ready',
+        cohesion: 75,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+      },
+      {
         id: 'rbih_heroic_brigade',
         faction: 'RBiH',
         name: 'Heroic Brigade',
@@ -42,6 +54,22 @@ function makeFormationDetailState(): LoadedGameState {
         personnel: 1400,
         posture: 'defend',
         warNarrative: 'The brigade has been tested in hard fighting.',
+      },
+      {
+        id: 'rbih_hq_guard_brigade',
+        faction: 'RBiH',
+        name: 'HQ Guard Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 64,
+        fatigue: 3,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_general_staff',
+        homeDistanceMult: 0.7,
+        personnel: 1200,
+        posture: 'defend',
       },
     ],
     militiaPools: [],
@@ -139,5 +167,25 @@ describe('Formation Detail parity display', () => {
     fireEvent.click(screen.getByRole('button', { name: /Northern line/i }));
 
     expect(assignBrigadeToSector).not.toHaveBeenCalled();
+  });
+
+  it('uses the actual HQ parent name for army-HQ assigned brigades', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_hq_guard_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('General Staff ARBiH');
+    expect(copy).not.toContain('Assigned command');
+  });
+
+  it('uses player-facing effectiveness modifier labels', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_hq_guard_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Distance from home 70%');
+    expect(copy).not.toContain('homeDistance');
   });
 });

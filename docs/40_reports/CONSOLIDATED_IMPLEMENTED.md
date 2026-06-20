@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Formation Detail HQ/effectiveness copy:** [implemented/20260620_FORMATION_DETAIL_HQ_EFFECTIVENESS_COPY.md](implemented/20260620_FORMATION_DETAIL_HQ_EFFECTIVENESS_COPY.md) - Formation Detail now shows actual Army HQ parent names and maps effectiveness worst-factor keys to player-facing copy.
+
 **Latest settlement timeline copy/provenance:** [implemented/20260620_SETTLEMENT_TIMELINE_COPY_PROVENANCE.md](implemented/20260620_SETTLEMENT_TIMELINE_COPY_PROVENANCE.md) - Settlement timelines now use clean final-held operation copy and dedupe matching turn-0 scenario-start control rows.
 
 **Latest Formation Detail parity:** [implemented/20260620_FORMATION_DETAIL_PARITY.md](implemented/20260620_FORMATION_DETAIL_PARITY.md) - Formation Detail now uses shared player-safe narrative labels, current-sector Orders rows no-op, and ORBAT decoration chips render faction decoration names.
