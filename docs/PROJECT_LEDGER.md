@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): polish Formation Detail movement and engagement copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Formation Detail movement states now use explicit localized labels (`Preparing to move`, `In transit`, `Deploying into position`) instead of generic title-cased enum display. Recent engagement outcomes now use known combat outcome labels or neutral `Engagement recorded` fallback copy instead of title-casing unknown outcome ids. `qa:player-journeys` now includes `tests/ui/formation_detail_parity.test.ts`.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/formation_detail_parity.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 2 files / 20 tests; `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): localize BrigadeRow supply labels
 
 **Type:** UI/read-model i18n copy polish.

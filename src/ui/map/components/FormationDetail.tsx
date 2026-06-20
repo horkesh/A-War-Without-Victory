@@ -5,7 +5,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { assignBrigadeToSectorOverrideAction } from '../desktop/orderActions';
 import { getPanelRailStyle } from './panelRail';
-import { turnToDateString, formatCombatOutcome } from '../utils/formatters';
+import { turnToDateString } from '../utils/formatters';
 import { getArmyCrest } from '../utils/factionAssets';
 import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { OfficerProfile } from './OfficerProfile';
@@ -21,11 +21,10 @@ import {
   getPlayerSafeFormationPostureLabel,
   getPlayerSafeFormationReadinessLabel,
   getPlayerSafeFormationNarrativeArcLabel,
-  getPlayerSafeDisplayLabel,
   getPlayerSafeMunicipalityName,
   getPlayerSafeSectorStanceLabel,
 } from '../utils/playerSafeText';
-import { t, useLocale } from '../i18n';
+import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 
@@ -66,8 +65,34 @@ const ENGAGEMENT_ROLE_LABELS: Record<string, string> = {
   defender: 'defender',
 };
 
+const MOVEMENT_STATUS_LABEL_KEYS: Record<NonNullable<FormationView['movementStatus']>, MessageKey> = {
+  deployed: 'formationDetail.movementStatus.deployed',
+  packing: 'formationDetail.movementStatus.packing',
+  in_transit: 'formationDetail.movementStatus.inTransit',
+  unpacking: 'formationDetail.movementStatus.unpacking',
+};
+
+const ENGAGEMENT_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
+  decisive_victory: 'aar.outcome.decisive',
+  victory: 'aar.outcome.victory',
+  costly_victory: 'aar.outcome.costly',
+  stalemate: 'aar.outcome.stalemate',
+  repulsed: 'aar.outcome.repulsed',
+  catastrophic: 'aar.outcome.collapse',
+};
+
 function formatNarrativeArcLabel(arc: string): string {
   return getPlayerSafeFormationNarrativeArcLabel(arc, t('formationDetail.campaignHistory'));
+}
+
+function formatMovementStatusLabel(status: FormationView['movementStatus']): string {
+  const key = status ? MOVEMENT_STATUS_LABEL_KEYS[status] : null;
+  return key ? t(key) : t('formationDetail.movement');
+}
+
+function formatEngagementOutcomeLabel(outcome: string): string {
+  const key = ENGAGEMENT_OUTCOME_LABEL_KEYS[outcome];
+  return key ? t(key) : t('aar.outcome.recorded');
 }
 
 function formatEngagementRole(role: string): string {
@@ -581,7 +606,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     ? 'bg-accent-blue/20 text-accent-blue border-accent-blue/40'
                     : 'bg-[#d4a055]/20 text-[#d4a055] border-[#d4a055]/40'
                 }`}>
-                  {getPlayerSafeDisplayLabel(formation.movementStatus, t('formationDetail.movement'))}
+                  {formatMovementStatusLabel(formation.movementStatus)}
                 </span>
                 {formation.movementStance && (
                   <span className="text-text-secondary lowercase italic">({getPlayerSafeSectorStanceLabel(formation.movementStance)} march)</span>
@@ -732,7 +757,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         .map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
-                          <span className="text-text-primary">{formatCombatOutcome(engagement.outcome)}</span>
+                          <span className="text-text-primary">{formatEngagementOutcomeLabel(engagement.outcome)}</span>
                           <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
                           <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>
                           {engagement.territory_flipped && <span className="text-accent-gold ml-1">⚑</span>}

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**FORMATION DETAIL MOVEMENT/ENGAGEMENT COPY (2026-06-20).** Movement and recent-engagement ids are internal read-model fields. Do instead: map `movementStatus` through `formationDetail.movementStatus.*`, map known engagement outcomes through combat outcome labels, and use `aar.outcome.recorded` for unknown outcomes; pin with `tests/ui/formation_detail_parity.test.ts` in `qa:player-journeys`.
+
 **BRIGADEROW SUPPLY LABEL I18N (2026-06-20).** BrigadeRow supply state is derived UI state, not player copy. Do instead: map `supplied`/`strained`/`cutoff` through `brigadeRow.supply.*` i18n keys, use the resolved label for both tooltip and supply-dot aria label, and keep `tests/ui/brigade_row_supply_labels.test.ts` inside `qa:player-journeys`.
 
 **COMPOUND FIELD DRILLDOWNS (2026-06-20).** Field drilldowns must not use bare targets when the source surface knows related context. Do instead: route settlement formation and Formation Detail location links through `field-formation-at-settlement`, and OOB sector rows through `field-sector-in-corps`; pin with `tests/ui/gamestore_field_inspection.test.ts` and `tests/ui/oob_drilldown_routing.test.ts`.

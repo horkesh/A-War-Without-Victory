@@ -71,6 +71,58 @@ function makeFormationDetailState(): LoadedGameState {
         personnel: 1200,
         posture: 'defend',
       },
+      {
+        id: 'rbih_moving_brigade',
+        faction: 'RBiH',
+        name: 'Moving Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 62,
+        fatigue: 4,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        movementStatus: 'packing',
+        movementStance: 'hold',
+        personnel: 1000,
+        posture: 'defend',
+      },
+      {
+        id: 'rbih_record_brigade',
+        faction: 'RBiH',
+        name: 'Record Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 66,
+        fatigue: 2,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        personnel: 1100,
+        posture: 'defend',
+        recent_engagements: [
+          {
+            turn: 6,
+            osid: 'op:test_sector:known',
+            role: 'attacker',
+            outcome: 'decisive_victory',
+            casualties_taken: 10,
+            casualties_inflicted: 20,
+            territory_flipped: true,
+          },
+          {
+            turn: 7,
+            osid: 'op:test_sector:unknown',
+            role: 'defender',
+            outcome: 'probe_failed_badly',
+            casualties_taken: 5,
+            casualties_inflicted: 8,
+            territory_flipped: false,
+          },
+        ],
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -187,5 +239,42 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('Distance from home 70%');
     expect(copy).not.toContain('homeDistance');
+  });
+
+  it.each([
+    ['packing', 'Preparing to move'],
+    ['in_transit', 'In transit'],
+    ['unpacking', 'Deploying into position'],
+  ] as const)('uses explicit player-facing movement copy for %s', (movementStatus, label) => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_moving_brigade'
+      ? { ...formation, movementStatus }
+      : formation);
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedFormationId: 'rbih_moving_brigade',
+    });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain(label);
+    expect(copy).not.toContain('Packing');
+    expect(copy).not.toContain('In Transit');
+    expect(copy).not.toContain('Unpacking');
+  });
+
+  it('uses shared combat labels and neutral fallback copy for recent engagement outcomes', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_record_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Decisive');
+    expect(copy).toContain('Engagement recorded');
+    expect(copy).not.toContain('Decisive Victory');
+    expect(copy).not.toContain('Probe Failed Badly');
+    expect(copy).not.toContain('probe_failed_badly');
   });
 });
