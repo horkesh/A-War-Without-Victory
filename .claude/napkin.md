@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**FIRST-HOUR FORCE BRIEFING COPY (2026-06-21).** The game-start identity modal has localized identity rows and separate force briefing cards. Do instead: keep force names/descriptions behind `intro.forceBriefing.*` keys and render through `t(...)`; live-check BCS because a localized identity block can still sit beside English force-description paragraphs.
+
 **ARMY HQ READINESS LABEL BOUNDARY (2026-06-21).** Readiness grades feed Force Readiness, corps cards, and the Command Access strip. Do instead: render `COMBAT READY` / `DEGRADED` / sibling grades through the shared readiness-grade i18n helper at every display edge; live-check BCS because command-access chips can leak raw grades after cards are fixed.
 
 **COMMAND-STRAIN COPY TOKEN BOUNDARY (2026-06-21).** Command-strain derivations feed rendered Army HQ and Operation Briefing surfaces. Do instead: return `CommandCopyToken` metadata beside fallback strings and have renderers call `t(token.key, token.params)`; pin BCS against English leaks like `STRAIN-SHAPED`, `Offensive posture is unavailable`, `Strain resolving in`, and `Commander recommends abort`.

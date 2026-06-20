@@ -1,3 +1,7 @@
+## 2026-06-21 - First-hour force briefing copy boundary
+
+**Game-start force cards are localized UI copy, not component constants:** `PeaceWarTransition` has two text families: the authored player identity block and the three force briefing cards. Durable rule: keep force names/descriptions behind `intro.forceBriefing.*` i18n keys and render through `t(...)`; do not place English paragraphs in `FACTION_BRIEFINGS`. Applied in `[2026-06-21] BCS First-Hour Force Briefing Copy`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md`.
+
 ## 2026-06-20 - Live proofs must distinguish absent fixture state from broken hooks
 
 **Browser QA should prove reachable controls without inventing data assumptions:** First-hour live fixtures can legitimately have no visible AAR battle rows, while Army HQ Personnel and sector metadata are present. Durable rule: when a live-browser proof depends on optional fixture state, record an explicit `skipped:no-visible-*` evidence value unless the tool first creates that state; keep unit/component tests pinning the hook itself. Applied in `[2026-06-20] Live drilldown hooks and Army Reserve copy polish`; report `docs/40_reports/implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md`.

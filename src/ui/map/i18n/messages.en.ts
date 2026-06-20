@@ -1877,6 +1877,15 @@ export const enMessages = {
     'intro.identity.identityLabel': 'Identity',
     'intro.identity.situationLabel': 'Situation',
     'intro.identity.escapeLabel': 'What you cannot escape',
+    'intro.forceBriefing.RBiH.name': 'ARBiH',
+    'intro.forceBriefing.RBiH.body':
+        'The Army of the Republic of Bosnia and Herzegovina musters from territorial defense units, police, and volunteers. Poorly armed but defending homeland, its early survival depends on holding urban centers and buying time for organization.',
+    'intro.forceBriefing.RS.name': 'VRS',
+    'intro.forceBriefing.RS.body':
+        'The Army of Republika Srpska inherits JNA equipment, officers, and doctrine. Professional and heavily armed, the VRS holds a decisive early advantage but faces long-term attrition as reserves thin.',
+    'intro.forceBriefing.HRHB.name': 'HVO',
+    'intro.forceBriefing.HRHB.body':
+        'The Croatian Defence Council organizes around western Herzegovina and central Bosnia enclaves. Capable but geographically fragmented, the HVO walks a tightrope between alliance with ARBiH and its own territorial ambitions.',
     'intro.identity.RBiH.identity':
         'You are the President of the Presidency of the Republic of Bosnia and Herzegovina, recognized by the world on 6 April and besieged the same day. You preside over a multi-ethnic state that half its own citizens have taken up arms to dismantle.',
     'intro.identity.RBiH.situation':

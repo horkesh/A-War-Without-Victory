@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize first-hour force briefing copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** The game-start `PeaceWarTransition` force briefing cards now render force names and descriptions through `intro.forceBriefing.*` EN/BCS keys instead of component-local hardcoded English paragraphs. This closes the live BCS first-hour leak where the identity block was localized but the RBiH/VRS/HVO force-description paragraphs remained English.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/game_start_intro.test.ts --pool=forks --reporter=dot` initially failed on the BCS force briefing. Green proof passed 10/10. `npm.cmd exec -- vitest run tests/ui/game_start_intro.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 23/23. `npm.cmd exec -- tsc --noEmit --pretty false` passed. Live BCS browser proof showed all three localized force paragraphs, no targeted English force-briefing leaks, and no console errors; temporary dev-server logs were removed. Report: `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize command-strain render boundary
 
 **Type:** UI/read-model i18n copy polish.

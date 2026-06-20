@@ -88,6 +88,16 @@ describe('PeaceWarTransition identity block (game-start intro — step 2)', () =
         expect(screen.getByText('What you cannot escape')).toBeTruthy();
     });
 
+    it('renders localized faction force briefings in BCS', () => {
+        setLocale('bcs');
+        render(createElement(PeaceWarTransition, { onDismiss: vi.fn(), state: playerState('RBiH') }));
+
+        expect(screen.getByText(/Vojska Republike Bosne i Hercegovine/)).toBeTruthy();
+        expect(screen.queryByText(/musters from territorial defense units/i)).toBeNull();
+        expect(screen.queryByText(/inherits JNA equipment/i)).toBeNull();
+        expect(screen.queryByText(/Croatian Defence Council organizes/i)).toBeNull();
+    });
+
     it('renders the RS Assembly / genocide-warning copy for the RS player', () => {
         render(createElement(PeaceWarTransition, { onDismiss: vi.fn(), state: playerState('RS') }));
         expect(screen.getByText(/six strategic goals for the Serb people of Bosnia/)).toBeTruthy();

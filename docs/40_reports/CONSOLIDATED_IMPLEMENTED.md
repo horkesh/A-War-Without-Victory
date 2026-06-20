@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS first-hour force briefing copy:** [implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md](implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md) - The game-start force briefing cards now render through EN/BCS i18n keys instead of hardcoded English paragraphs in `PeaceWarTransition`.
+
 **Latest Army HQ readiness / threat copy boundary:** [implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md](implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md) - Army HQ readiness grades, readiness details, recommendations, threat-section chrome, and command-access readiness chips now render through EN/BCS i18n instead of leaking raw English grade/copy strings.
 
 **Latest command-strain localization boundary:** [implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md](implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md) - Command interpretation, stance, recovery, and delegation copy now carry renderable i18n tokens so BCS command-strain surfaces do not fall back to English strings.
