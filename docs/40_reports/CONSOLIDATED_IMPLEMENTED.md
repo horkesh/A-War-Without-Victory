@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army ops drilldown / BCS copy polish:** [implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md](implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md) - Army HQ operations planning copy no longer exposes `T+` / `DELAYS`, OperationsPanel allocated brigade drilldowns preserve corps context, and targeted BCS player copy no longer exposes raw `OSID` terminology.
+
 **Latest turn-0 provenance surface guards:** [implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md](implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md) - Records AAR, tactical bottom status, and Chronicle Wrapped now suppress turn-0 scenario-start territory as post-start gains/losses.
 
 **Latest ops modal commander / turn-0 territory guards:** [implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md](implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md) - Ops planning G2/OPORD surfaces now use the opening commander read model, and turn-0 territory summaries cannot narrate scenario-start control as post-start ground taken.

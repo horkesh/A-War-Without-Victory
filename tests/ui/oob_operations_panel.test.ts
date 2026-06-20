@@ -182,6 +182,18 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('Turn 6');
   });
 
+  it('routes allocated brigade clicks through corps-preserving field inspection', () => {
+    render(createElement(OperationsPanel));
+
+    fireEvent.click(screen.getByRole('button', { name: '1st Brigade' }));
+
+    const state = useGameStore.getState();
+    expect(state.selectedCorpsId).toBe(CORPS_ID);
+    expect(state.selectedFormationId).toBe('arbih_brigade');
+    expect(state.isOperationsPanelOpen).toBe(false);
+    expect(state.selectedOperationKey).toBeNull();
+  });
+
   it('renders player-safe operation display names without the raw operation slug on OOB cards', () => {
     const { container } = render(createElement(OOBSidebar));
 

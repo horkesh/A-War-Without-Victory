@@ -21447,6 +21447,14 @@ Verification: focused ops modal `npm.cmd exec -- vitest run tests/ui/ops_plannin
 
 Determinism/scope: UI/read-model display, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-20 - Army ops drilldown and BCS copy polish
+
+Closed the next Pyrrhic UI scout slice. Army HQ Operations planning details now render preparation timing and postponements as localized player copy instead of `T+{n}` / `DELAYS` telemetry. OperationsPanel allocated brigade buttons now route through corps-preserving field inspection, closing the bare-formation selection path that dropped operation/corps context. Targeted BCS Game Over, Verdict, tactical tooltip, and directive ambiguity copy now use player-facing `polozaj`, `naselje/naselja`, and `navedeni ciljevi` wording instead of raw `OSID` terminology.
+
+Verification: focused red proof first failed on `T+2 / 4`, `(! 2 DELAYS)`, and allocated-brigade bare selection. Focused green `npm.cmd exec -- vitest run tests/ui/army_hq_timing_copy.test.ts tests/ui/oob_operations_panel.test.ts tests/ui/game_over_i18n.test.ts tests/ui/endgame_interaction_proof.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 46/46. `npm.cmd run typecheck` passed. `git diff --check` passed. Report: `docs/40_reports/implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md`.
+
+Determinism/scope: UI route/read-model behavior, i18n copy, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-20 - Turn-0 provenance surface guards
 
 Extended the turn-0 territory provenance guard to the remaining player-facing surfaces identified by the Pyrrhic UI scout. Records AAR now suppresses turn-0 territory rows and flip lists, the tactical bottom status strip no longer renders opening-week territory trend arrows from scenario-start `territory_net`, and Chronicle Wrapped skips turn-0 territory data when calculating early shifts and peak/total territory gains. Current control percentages and non-territory early-battle counts remain intact.

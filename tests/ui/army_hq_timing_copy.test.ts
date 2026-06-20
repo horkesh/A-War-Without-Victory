@@ -142,6 +142,30 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('W3 - W7');
   });
 
+  it('renders planning preparation timing and delays as player-facing copy', () => {
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [makeOperation({
+        phase: 'planning',
+        preparation_sub_phase: 'intel_gathering',
+        preparation_turns_elapsed: 2,
+        preparation_max_turns: 4,
+        commander_assessment: 'postpone',
+        postponement_count: 2,
+      })],
+      gameState: makeGameState(),
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('Prepared for 2 of 4 weeks');
+    expect(copy).toContain('Delayed 2 times');
+    expect(copy).not.toContain('T+2');
+    expect(copy).not.toContain('DELAYS');
+  });
+
   it('renders command friction and stabilization cooldown timing as calendar dates', () => {
     const { container } = render(React.createElement(CommandRelationshipSection, {
       corpsId: 'arbih_3rd_corps',

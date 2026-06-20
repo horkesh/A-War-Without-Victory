@@ -348,7 +348,11 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         {op.preparation_turns_elapsed != null && (
                             <div className="flex items-center gap-2">
                                 <span className="text-text-secondary/60 uppercase">{t('operationsSection.timeline')}</span>
-                                <span className="text-text-secondary">T+{op.preparation_turns_elapsed}{op.preparation_max_turns != null ? ` / ${op.preparation_max_turns}` : ''}</span>
+                                <span className="text-text-secondary">
+                                    {op.preparation_max_turns != null
+                                        ? t('operationsSection.prepTimelineWithMax', { elapsed: op.preparation_turns_elapsed, max: op.preparation_max_turns })
+                                        : t('operationsSection.prepTimelineOpen', { elapsed: op.preparation_turns_elapsed })}
+                                </span>
                             </div>
                         )}
                         {op.has_active_probe && <span className="text-red-500 font-bold border border-red-500/30 bg-red-500/5 px-1.5 animate-pulse text-[9px]">{t('operationsSection.probeActive')}</span>}
@@ -361,7 +365,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                                     op.commander_assessment === 'abort' ? 'text-red-500 border-red-500/30' : 'text-amber-500 border-amber-500/30'
                                 }`}>{COMMANDER_ASSESSMENT_LABELS[op.commander_assessment] ?? t('operationsSection.assessmentUnreported')}</span>
                             {op.postponement_count != null && op.postponement_count > 0 && (
-                                <span className="text-red-500/60 ml-2 animate-pulse">(! {op.postponement_count} DELAYS)</span>
+                                <span className="text-red-500/70 ml-2">{t('operationsSection.postponementCount', { count: op.postponement_count })}</span>
                             )}
                         </div>
                     )}
