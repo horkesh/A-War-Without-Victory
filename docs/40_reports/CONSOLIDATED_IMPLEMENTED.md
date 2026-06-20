@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest AAR / ORBAT unit-event label polish:** [implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md](implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md) - Army HQ Records AAR unit events and ORBAT expanded brigade details now render narrative-arc labels and faction decoration names instead of raw `garrison`, `bloodied`, or `tier_1` identifiers.
+
 **Latest Army HQ internal browser gate:** [implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md](implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Army HQ Summary, Personnel, and corps-card detail in a real browser, with stable front/detail hooks and raw-token checks.
 
 **Latest counteroffer/personnel/autonomy copy polish:** [implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md](implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md) - Counter-offer response/institution ids, Army HQ Personnel rank ids including tactical commanders, and Autonomy proposal domain ids now render localized player-facing labels or neutral fallbacks.

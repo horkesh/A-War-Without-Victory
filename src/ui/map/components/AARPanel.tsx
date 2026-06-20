@@ -10,11 +10,13 @@ import { formatTurnLabel, toTitleCase } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import {
     getPlayerSafeBrigadeName,
+    getPlayerSafeFormationNarrativeArcLabel,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
 import { EmptyState } from './EmptyState';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { getDecorationName } from '../utils/decorationUtils';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -252,9 +254,9 @@ function ArcRow({ t }: { t: ArcTransition }) {
         <div className="text-[11px] py-0.5 flex items-center gap-2">
             <FactionTag faction={t.faction} />
             <span className="text-text-primary truncate flex-1">{t.formation_name}</span>
-            <span className={`${ARC_COLOR[t.from_arc] ?? 'text-text-secondary'} text-[10px]`}>{t.from_arc}</span>
+            <span className={`${ARC_COLOR[t.from_arc] ?? 'text-text-secondary'} text-[10px]`}>{getPlayerSafeFormationNarrativeArcLabel(t.from_arc)}</span>
             <span className="text-text-muted text-[10px]">→</span>
-            <span className={`${ARC_COLOR[t.to_arc] ?? 'text-text-secondary'} text-[10px] font-semibold`}>{t.to_arc}</span>
+            <span className={`${ARC_COLOR[t.to_arc] ?? 'text-text-secondary'} text-[10px] font-semibold`}>{getPlayerSafeFormationNarrativeArcLabel(t.to_arc)}</span>
         </div>
     );
 }
@@ -264,7 +266,7 @@ function DecorationRow({ award }: { award: DecorationAward }) {
         <div className="text-[11px] py-0.5 flex items-center gap-2">
             <FactionTag faction={award.faction} />
             <span className="text-text-primary truncate flex-1">{award.formation_name}</span>
-            <span className="text-accent-gold text-[10px] font-semibold">{award.decoration.tier.replace('_', ' ')}</span>
+            <span className="text-accent-gold text-[10px] font-semibold">{getDecorationName(award.faction, award.decoration.tier)}</span>
         </div>
     );
 }

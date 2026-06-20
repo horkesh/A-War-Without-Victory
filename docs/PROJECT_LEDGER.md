@@ -21181,3 +21181,10 @@ Reconciled the active command-board wording after the read-only issue #170 sweep
 Current #170 residuals are narrowed to the enclave denominator domain decision and calibration-held same-axis concentration. The same-axis blanket arithmetic fix remains NO-GO after failing 188-week engine health at `matched_osids` 637/712 against the 658 floor.
 
 Verification: docs-only diff review and `git diff --check`. Report: `docs/40_reports/implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md`. Determinism/scope: documentation only; no simulation logic, scenario data, save schema, UI behavior, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+## 2026-06-20 - AAR / ORBAT unit-event label polish
+
+Closed a reachable Army HQ Records / ORBAT raw-copy leak found by the Pyrrhic UI copy QA sweep. AAR arc transitions now render shared player-facing narrative labels (`Garrison duty`, `Blooded in combat`, etc.) instead of engine arc ids, AAR decoration awards now render faction decoration names such as `Slavna` instead of `tier 1`, and ORBAT expanded brigade arc badges use the same player-safe label helper. Unknown decoration tiers now fall back to neutral `Campaign distinction` copy instead of echoing an internal tier id.
+
+Verification: focused red proof first failed in `tests/ui/operation_aar_records_review.test.ts` on visible `tier 1`, `garrison`, and `bloodied` copy, then passed 14/14 after the fix. `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 206/206, and `npm.cmd run qa:live-surface:browser` passed with port 3239 cleanup. Report: `docs/40_reports/implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md`.
+
+Determinism/scope: UI/read-model copy and focused tests only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.

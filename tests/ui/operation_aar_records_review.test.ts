@@ -5,10 +5,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { RecordsContent } from '../../src/ui/map/components/army_hq/RecordsContent.js';
+import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
-import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import type { FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeLoadedState(): LoadedGameState {
     return {
@@ -372,6 +373,86 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Operation History 1/i })).toBeTruthy();
+    });
+
+    it('renders AAR unit-event labels without raw arc or decoration tier identifiers', () => {
+        useGameStore.setState({
+            armyHQRecordsSubTab: 'aar',
+            loadedGameState: {
+                ...makeLoadedState(),
+                latestTurnSummary: {
+                    turn: 18,
+                    battles: [],
+                    territory_net: {},
+                    notable_flips: [],
+                    displacement_total: 0,
+                    displacement_by_ethnicity: {},
+                    decoration_awards: [
+                        {
+                            formation_id: 'rbih_heroic_brigade',
+                            formation_name: 'Heroic Brigade',
+                            faction: 'RBiH',
+                            decoration: { tier: 'tier_1', type: 'unit_citation', awarded_turn: 18, reason: 'steadfast defense' } as never,
+                        },
+                    ],
+                    arc_transitions: [
+                        {
+                            formation_id: 'rbih_heroic_brigade',
+                            formation_name: 'Heroic Brigade',
+                            faction: 'RBiH',
+                            from_arc: 'garrison',
+                            to_arc: 'bloodied',
+                        },
+                    ],
+                    formation_spawns: [],
+                    formation_destructions: [],
+                    supply_deltas: {},
+                    heavy_munitions_deltas: {},
+                    movements: [],
+                    supply_transitions: [],
+                    events_fired: [],
+                    notable_events: [],
+                },
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+        const copy = view.container.textContent ?? '';
+
+        expect(copy).toContain('Slavna');
+        expect(copy).toContain('Garrison duty');
+        expect(copy).toContain('Blooded in combat');
+        expect(copy).not.toMatch(/\btier[_ ]?1\b/i);
+        expect(copy).not.toMatch(/garrison\s*→\s*bloodied/i);
+        expect(copy).not.toMatch(/\bbloodied\b/i);
+    });
+
+    it('renders ORBAT brigade arc badges as player-facing labels', () => {
+        const brigade: FormationView = {
+            id: 'rbih_heroic_brigade',
+            faction: 'RBiH',
+            name: 'Heroic Brigade',
+            kind: 'brigade',
+            readiness: 'ready',
+            cohesion: 64,
+            fatigue: 3,
+            status: 'active',
+            createdTurn: 0,
+            tags: [],
+            narrativeArc: 'garrison',
+            personnel: 1400,
+            posture: 'defend',
+        };
+        useGameStore.setState({
+            armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
+        });
+
+        const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
+        fireEvent.click(screen.getByRole('button', { name: /Heroic Brigade/i }));
+        const copy = view.container.textContent ?? '';
+
+        expect(copy).toContain('Garrison duty');
+        expect(copy).not.toMatch(/\bGARRISON\b/);
     });
 
     it('opens the focused completed operation row when routed from Chronicle', () => {

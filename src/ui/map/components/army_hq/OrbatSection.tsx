@@ -8,7 +8,7 @@ import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, turnToDateString } from '../../utils/formatters';
-import { getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
+import { getPlayerSafeFormationNarrativeArcLabel, getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
@@ -93,7 +93,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
             <div className="flex items-center gap-2 flex-wrap">
                 {arc && ARC_BADGE_STYLE[arc] && (
                     <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded ${ARC_BADGE_STYLE[arc].bg} ${ARC_BADGE_STYLE[arc].text} tracking-widest`}>
-                        {arc}
+                        {getPlayerSafeFormationNarrativeArcLabel(arc)}
                     </span>
                 )}
                 {locationOsid && (

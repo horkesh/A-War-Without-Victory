@@ -32,7 +32,7 @@ const DECORATION_NAMES: Record<string, Record<string, string>> = {
 
 /** Get the display name for a decoration given faction and tier. */
 export function getDecorationName(faction: string, tier: string): string {
-  return DECORATION_NAMES[faction]?.[tier] ?? tier;
+  return DECORATION_NAMES[faction]?.[tier] ?? 'Campaign distinction';
 }
 
 /** Get the highest decoration tier string from a decorations array. Returns null if none. */

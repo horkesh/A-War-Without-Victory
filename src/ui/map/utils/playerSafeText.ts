@@ -106,6 +106,23 @@ export function getPlayerSafeFormationPostureLabel(
     return FORMATION_POSTURE_LABELS[key] ?? fallback;
 }
 
+const FORMATION_NARRATIVE_ARC_LABELS: Record<string, string> = {
+    veteran: 'Veteran formation',
+    bloodied: 'Blooded in combat',
+    shattered: 'Shattered formation',
+    risen: 'Reconstituted formation',
+    destroyed: 'Destroyed formation',
+    garrison: 'Garrison duty',
+};
+
+export function getPlayerSafeFormationNarrativeArcLabel(
+    arc: string | null | undefined,
+    fallback = 'Campaign status recorded',
+): string {
+    const key = (arc ?? '').trim().toLowerCase();
+    return FORMATION_NARRATIVE_ARC_LABELS[key] ?? fallback;
+}
+
 const SECTOR_STANCE_LABELS: Record<string, string> = {
     hold: 'hold the line',
     defend: 'defend in depth',

@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest AAR / ORBAT unit-event label polish** | [implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md](implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md) - Army HQ Records AAR unit events and ORBAT expanded brigade details now render narrative-arc labels and faction decoration names instead of raw `garrison`, `bloodied`, or `tier_1` identifiers. |
 | **Latest issue #170 residual reconciliation** | [implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md](implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md) - Active #170 queue is narrowed to enclave denominator and calibration-held same-axis concentration; Graz HRHB->RS and Trnovo waypoint handling are reclassified closed by existing direct test proof. |
 | **Latest Army HQ internal browser gate** | [implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md](implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Army HQ Summary, Personnel, and corps-card detail in a real browser, with stable front/detail hooks and raw-token checks. |
 | **Latest counteroffer/personnel/autonomy copy polish** | [implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md](implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md) - Counter-offer response/institution ids, Army HQ Personnel rank ids including tactical commanders, and Autonomy proposal domain ids now render localized player-facing labels or neutral fallbacks. |
