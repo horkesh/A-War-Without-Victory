@@ -3,7 +3,7 @@
  * Used by CorpsDetail, ArmyDetail, and FormationDetail.
  */
 import type { FormationView } from '../data/types';
-import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
+import { getPlayerSafeBrigadeName, getPlayerSafeFormationNarrativeArcLabel } from '../utils/playerSafeText';
 import { t } from '../i18n';
 
 const ARC_COLORS: Record<string, string> = {
@@ -47,7 +47,10 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                     <span className="text-text-primary tabular-nums">
                         {summary.battles_fought}
                         <span className="text-text-secondary ml-1">
-                            ({summary.battles_as_attacker} att / {summary.battles_as_defender} def)
+                            ({t('combatRecord.battleRoleBreakdown', {
+                                attacker: summary.battles_as_attacker,
+                                defender: summary.battles_as_defender,
+                            })})
                         </span>
                     </span>
                 </div>
@@ -56,7 +59,11 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                     <span className="text-text-primary tabular-nums">
                         {(summary.win_rate * 100).toFixed(1)}%
                         <span className="text-text-secondary ml-1">
-                            {summary.victories}W {summary.defeats}L {summary.stalemates}D
+                            {t('combatRecord.recordBreakdown', {
+                                wins: summary.victories,
+                                losses: summary.defeats,
+                                stalemates: summary.stalemates,
+                            })}
                         </span>
                     </span>
                 </div>
@@ -101,7 +108,10 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('opsPlanning.phase.brigades')}</span>
                     <span className="text-text-primary tabular-nums">
-                        {summary.active_brigade_count} active / {summary.brigade_count} total
+                        {t('combatRecord.brigadeBreakdown', {
+                            active: summary.active_brigade_count,
+                            total: summary.brigade_count,
+                        })}
                     </span>
                 </div>
                 {summary.peak_aggregate_personnel > 0 && (
@@ -122,7 +132,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                             <span key={arc}>
                                 {i > 0 && <span className="text-text-secondary"> · </span>}
                                 <span className={ARC_COLORS[arc] ?? 'text-text-primary'}>
-                                    {count} {arc}
+                                    {count} {getPlayerSafeFormationNarrativeArcLabel(arc)}
                                 </span>
                             </span>
                         ))

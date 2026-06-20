@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest active operation / combat summary copy polish:** [implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md](implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md) - Active Operation History, shared combat summaries, and settlement timeline casualty rows now spell out objective, attack, role, record, brigade, and arc copy instead of compact combat shorthand.
+
 **Latest ops BrigadeCard i18n polish:** [implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md](implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md) - Ops modal BrigadeCard and BrigadeTray copy now routes through EN/BCS i18n for unit type, tooltip labels, march time, assembly timing, assigned counts, and empty states.
 
 **Latest Records to Chronicle exact focus:** [implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md](implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md) - Chronicle-filed decision consequence rows in Records now route back to the exact Chronicle entry instead of opening Chronicle broadly.
