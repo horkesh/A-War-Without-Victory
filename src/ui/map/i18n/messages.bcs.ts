@@ -314,6 +314,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'chronicle.select': 'Izaberi',
     'chronicle.openTurnRecord': 'Otvori zapis poteza',
     'chronicle.openOperationRecord': 'Otvori zapis operacije',
+    'chronicle.openDecisionRecord': 'Otvori zapis odluke',
     'chronicle.eventCount': '{count} događaja',
     'chronicle.eventRatio': '{filtered}/{total} događaja',
     'chronicle.emptyTitle': 'Nema zapisa hronike',

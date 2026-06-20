@@ -193,4 +193,43 @@ describe('Chronicle completed-operation AAR visibility', () => {
       expect(state.focusedOperationHistoryId).toBe('rs-op-1');
     });
   });
+
+  it('routes Chronicle presidential decision entries to the exact Records decision receipt', async () => {
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      chronicleOpen: true,
+      loadedGameState: {
+        player_faction: 'RBiH',
+        turn: 0,
+        turnSummaries: [],
+        firedEvents: [
+          {
+            id: 'rbih_state_identity',
+            turn: 0,
+            title: 'What Is Bosnia?',
+            narrative: 'The Presidency reaffirmed the civic republic.',
+            category: 'political',
+            effects: [{ kind: 'political', description: 'Civic claim reinforced.' }],
+            isDecision: true,
+          },
+        ],
+      } as any,
+    });
+
+    render(createElement(ChronicleOverlay));
+
+    expect(await screen.findAllByText('What Is Bosnia?')).toHaveLength(2);
+    const action = await screen.findByRole('button', { name: /Open Decision Record/i });
+    expect(action.getAttribute('data-record-target')).toBe('decision');
+    expect(action.getAttribute('data-decision-record-id')).toBe('event:rbih_state_identity');
+    fireEvent.click(action);
+
+    await waitFor(() => {
+      const state = useGameStore.getState();
+      expect(state.chronicleOpen).toBe(false);
+      expect(state.armyHQOpen).toBe(true);
+      expect(state.armyHQRecordsSubTab).toBe('decisions');
+      expect(state.focusedDecisionConsequenceId).toBe('event:rbih_state_identity');
+    });
+  });
 });

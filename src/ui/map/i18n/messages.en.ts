@@ -313,6 +313,7 @@ export const enMessages = {
     'chronicle.select': 'Select',
     'chronicle.openTurnRecord': 'Open Turn Record',
     'chronicle.openOperationRecord': 'Open Operation Record',
+    'chronicle.openDecisionRecord': 'Open Decision Record',
     'chronicle.eventCount': '{count} events',
     'chronicle.eventRatio': '{filtered}/{total} events',
     'chronicle.emptyTitle': 'No chronicle entries',

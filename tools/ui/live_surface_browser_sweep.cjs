@@ -928,6 +928,9 @@ async function runArchiveInboxDrilldown(page, summary) {
   await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
   if (chronicleRecordTarget === 'operation') {
     await waitForVisibleSelector(page, '[data-testid="records-subtab-ops"][data-selected="true"]');
+  } else if (chronicleRecordTarget === 'decision') {
+    await waitForVisibleSelector(page, '[data-testid="records-subtab-decisions"][data-selected="true"]');
+    await waitForVisibleSelector(page, '[data-testid="decision-consequence-records-panel"]');
   } else {
     await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
   }

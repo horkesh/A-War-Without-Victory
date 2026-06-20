@@ -7,7 +7,7 @@ import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
-import { openArmyHQAftermathRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
+import { openArmyHQAftermathRecord, openArmyHQDecisionConsequenceRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
 import {
     buildChronicleCampaignRecap,
     buildChronicleChapters,
@@ -417,11 +417,19 @@ export function ChronicleOverlay() {
             openArmyHQOperationHistory(useGameStore.getState(), entry.metadata.operationAarId);
             return;
         }
+        if (entry.metadata?.decisionRecordId) {
+            openArmyHQDecisionConsequenceRecord(useGameStore.getState(), entry.metadata.decisionRecordId);
+            return;
+        }
         handleOpenTurnRecord(entry.turn);
     }, [handleOpenTurnRecord]);
 
     const actionLabelForEntry = useCallback((entry: ChronicleEntry) => (
-        entry.metadata?.operationAarId ? t('chronicle.openOperationRecord') : t('chronicle.openTurnRecord')
+        entry.metadata?.operationAarId
+            ? t('chronicle.openOperationRecord')
+            : entry.metadata?.decisionRecordId
+                ? t('chronicle.openDecisionRecord')
+                : t('chronicle.openTurnRecord')
     ), []);
 
     if (!open || !state) return null;
@@ -697,9 +705,10 @@ export function ChronicleOverlay() {
                                     <button
                                         type="button"
                                         data-testid="chronicle-open-record"
-                                        data-record-target={entry.metadata?.operationAarId ? 'operation' : 'aftermath'}
+                                        data-record-target={entry.metadata?.operationAarId ? 'operation' : entry.metadata?.decisionRecordId ? 'decision' : 'aftermath'}
                                         data-turn={entry.turn}
                                         data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
+                                        data-decision-record-id={entry.metadata?.decisionRecordId ?? undefined}
                                         onClick={() => handleOpenEntryRecord(entry)}
                                         className="mt-2 h-7 w-full rounded-sm border border-amber-400/30 bg-amber-400/10 px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-200 transition-colors hover:border-amber-300/70 hover:bg-amber-400/15"
                                     >

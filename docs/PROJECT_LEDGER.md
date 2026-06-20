@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): route Chronicle decisions to focused Records receipts
+
+**Type:** UI route ownership and browser QA hardening.
+
+**Fix:** Chronicle presidential decision entries now expose decision-record route metadata, render a localized `Open Decision Record` action, and route through `openArmyHQDecisionConsequenceRecord(...)` to the exact Army HQ Records decision receipt instead of generic Turn Records. `qa:live-surface:browser` now handles Chronicle `data-record-target="decision"` routes by waiting for the Records Decisions subtab and Decision Consequence Records panel.
+
+**Verification:** Red proof first failed on the missing `Open Decision Record` action and missing live-sweep decision-target branch. Green proof passed: `npm.cmd exec -- vitest run tests/ui/first_hour_browser_gate_contract.test.ts tests/ui_chronicle_operation_aar_link.test.ts tests/ui/chronicle_decision_ledger.test.ts tests/ui/decision_consequence_records_panel.test.ts --pool=forks --reporter=dot` (23/23); `npm.cmd run typecheck`; `npm.cmd run qa:live-surface:browser` with `archiveChronicleToRecordsTarget: "decision"`, `archiveChronicleToRecordsDrilldown: true`, `archiveRecordsDecisionToChronicleDrilldown: true`, and port 3239 cleanup; `git diff --check`. Report: `docs/40_reports/implemented/20260620_CHRONICLE_DECISION_RECORD_FOCUS.md`.
+
+**Scope/determinism:** UI route metadata, i18n labels, browser QA tooling, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] test(ui): add Codex internal browser drilldown gate
 
 **Type:** UI/browser QA gate hardening.
