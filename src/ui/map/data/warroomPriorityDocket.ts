@@ -15,6 +15,7 @@ export type WarroomPriorityDocketSourceHandoff = PreAdvanceCommandReviewSourceHa
 
 export interface WarroomPriorityDocketView {
   status: PreAdvanceCommandReviewStatus;
+  statusLabel: string;
   tone: WarroomPriorityDocketTone;
   headline: string;
   summary: string;
@@ -61,6 +62,13 @@ function formatSourceHandoffSummary(
   });
 }
 
+function statusLabel(status: PreAdvanceCommandReviewStatus): string {
+  if (status === 'blocked') return t('warroom.docket.status.blocked');
+  if (status === 'review') return t('warroom.docket.status.review');
+  if (status === 'clear') return t('warroom.docket.status.clear');
+  return t('warroom.docket.status.unavailable');
+}
+
 export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput): WarroomPriorityDocketView {
   const review = buildPreAdvanceCommandReviewView(input);
   const limit = input.limit ?? 4;
@@ -68,6 +76,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
 
   return {
     status: review.status,
+    statusLabel: statusLabel(review.status),
     tone: docketTone(review.status, review.metrics.urgentCount),
     headline: review.headline,
     summary: formatSummary(review.metrics),
