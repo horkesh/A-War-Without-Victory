@@ -25,6 +25,66 @@ import {
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 
+const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
+  offensive_support: 'armyReserve.reason.offensiveSupport',
+  defensive_gap: 'armyReserve.reason.defensiveGap',
+  exploitation: 'armyReserve.reason.exploitation',
+  enclave_relief: 'armyReserve.reason.enclaveRelief',
+  sector_threat: 'armyReserve.reason.sectorThreat',
+};
+
+const BRIEFING_KIND_LABEL_KEYS: Record<string, MessageKey> = {
+  military: 'decisionRoom.briefingKind.military',
+  diplomatic: 'decisionRoom.briefingKind.diplomatic',
+  humanitarian: 'decisionRoom.briefingKind.humanitarian',
+  field_reports: 'decisionRoom.briefingKind.fieldReports',
+  command: 'decisionRoom.briefingKind.command',
+};
+
+const BRIEFING_CATEGORY_LABEL_KEYS: Record<string, MessageKey> = {
+  military: 'decisionRoom.briefingKind.military',
+  diplomatic: 'decisionRoom.briefingKind.diplomatic',
+  humanitarian: 'decisionRoom.briefingKind.humanitarian',
+  field_reports: 'decisionRoom.briefingKind.fieldReports',
+  command: 'decisionRoom.briefingKind.command',
+  operational: 'decisionRoom.category.operational',
+  briefing: 'decisionRoom.category.briefing',
+};
+
+const PROPOSAL_DOMAIN_LABEL_KEYS: Record<string, MessageKey> = {
+  ops: 'decisionRoom.proposalDomain.operations',
+  operations: 'decisionRoom.proposalDomain.operations',
+  military: 'decisionRoom.proposalDomain.military',
+  political: 'decisionRoom.proposalDomain.political',
+  diplomacy: 'decisionRoom.proposalDomain.diplomacy',
+};
+
+function reserveReasonLabel(reason: string | null | undefined): string {
+  const key = (reason ?? '').trim();
+  if (!key) return t('armyReserve.reason.unknown');
+  const messageKey = RESERVE_REASON_LABEL_KEYS[key];
+  return messageKey ? t(messageKey) : t('armyReserve.reason.unknown');
+}
+
+function briefingKindLabel(kind: string | null | undefined): string {
+  const key = (kind ?? '').trim();
+  const messageKey = BRIEFING_KIND_LABEL_KEYS[key];
+  return messageKey ? t(messageKey) : t('decisionRoom.briefingKind.unknown');
+}
+
+function briefingCategoryLabel(category: string | null | undefined, fallbackKind: string | null | undefined): string {
+  const key = (category ?? '').trim();
+  const messageKey = BRIEFING_CATEGORY_LABEL_KEYS[key];
+  if (messageKey) return t(messageKey);
+  return briefingKindLabel(fallbackKind);
+}
+
+function proposalDomainLabel(domain: string | null | undefined): string {
+  const key = (domain ?? '').trim();
+  const messageKey = PROPOSAL_DOMAIN_LABEL_KEYS[key];
+  return messageKey ? t(messageKey) : t('decisionRoom.proposalDomain.unknown');
+}
+
 /**
  * War-Direction directive the president can ISSUE from a Decision Room card
  * (Presidential Command Surface design §2 / LOCKED decision #1). ADDITIVE,
@@ -298,16 +358,6 @@ function formatSigned(value: number): string {
 
 function pluralize(value: number, singular: string, plural = `${singular}s`): string {
   return value === 1 ? singular : plural;
-}
-
-function humanize(value: string | undefined): string {
-  const text = (value ?? '').replace(/[_:-]/g, ' ').trim();
-  if (!text) return 'Staff report';
-  return text
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(' ');
 }
 
 function toDecisionSeverity(state: LoadedGameState): PresidentialDecisionRoomSeverity {
@@ -725,9 +775,9 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       title: item.title,
       explanation: item.detail,
       sourceOwner: t('decisionRoom.card.briefing.sourceOwner'),
-      sourceLabel: humanize(item.kind),
+      sourceLabel: briefingKindLabel(item.kind),
       actionLabel: action.actionLabel,
-      evidence: [item.category ? humanize(item.category) : humanize(item.kind)],
+      evidence: [briefingCategoryLabel(item.category, item.kind)],
       navigationTarget: action.navigationTarget,
       urgencySort: 0,
       sourceSort: `${item.title}:${item.id}`,
@@ -825,14 +875,14 @@ function addProposalReviewDirectiveCards(state: LoadedGameState, cards: Candidat
       category: 'command',
       severity: 'warning',
       title: t('decisionRoom.card.reviewProposal.title', {
-        domain: humanize(review.domain),
+        domain: proposalDomainLabel(review.domain),
       }),
       explanation: review.description,
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
       sourceLabel: t('decisionRoom.card.reviewProposal.sourceLabel'),
       actionLabel: t('decisionRoom.action.personnel'),
       evidence: [
-        t('decisionRoom.card.reviewProposal.evidence.domain', { domain: humanize(review.domain) }),
+        t('decisionRoom.card.reviewProposal.evidence.domain', { domain: proposalDomainLabel(review.domain) }),
         t('decisionRoom.card.reviewProposal.evidence.review'),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
@@ -950,7 +1000,7 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
       sourceLabel: t('decisionRoom.card.eliteDeploy.sourceLabel'),
       actionLabel: t('decisionRoom.action.personnel'),
       evidence: [
-        t('decisionRoom.card.eliteDeploy.evidence.reason', { reason: humanize(request.reason) }),
+        t('decisionRoom.card.eliteDeploy.evidence.reason', { reason: reserveReasonLabel(request.reason) }),
         t('decisionRoom.card.eliteDeploy.evidence.travel', { hops: request.travel_hops }),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },

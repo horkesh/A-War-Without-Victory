@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Peace / Decision Room label copy** | [implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md](implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md) - PeaceStatusPanel and Decision Room priority cards now render peace chrome, reserve reasons, briefing categories, and proposal domains through explicit localized/player-safe labels. |
 | **Latest ops planning prediction labels** | [implemented/20260620_OPS_PLANNING_PREDICTION_LABELS.md](implemented/20260620_OPS_PLANNING_PREDICTION_LABELS.md) - G2 assessment and Narrative briefing now render prediction/recommendation labels instead of raw `costly_victory`, `postpone`, or `abort` ids. |
 | **Latest ops commander unavailable reason copy** | [implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md](implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md) - Ops commander selection now renders localized unavailable-officer reasons instead of raw `KIA`, `ASSIGNED TO OP`, or command shorthand, and treats killed officers as unavailable. |
 | **Latest AAR / ORBAT role label copy** | [implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md](implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md) - AAR casualty rows and ORBAT recent engagements now spell out attacker/defender roles instead of `att` / `def` / `ATK` / `DEF` shorthand. |

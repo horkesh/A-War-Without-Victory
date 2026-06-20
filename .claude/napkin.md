@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**PEACE / DECISION ROOM LABEL COPY (2026-06-20).** PeaceStatusPanel and Decision Room cards are player command copy, not generic enum/title-case surfaces. Do instead: map peace chrome through `peace.*`, reserve reasons through `armyReserve.reason.*`, briefing kinds through `decisionRoom.briefingKind.*`, and proposal domains through `decisionRoom.proposalDomain.*`; keep `sector_threat`, `field_reports`, and `ops` out of normal copy.
+
 **TOOLTIP PLAYER COPY (2026-06-20).** Formation/front tooltips are normal play surfaces, not staff shorthand overlays. Do instead: map posture, order, density, pressure, readiness, defense preview, and contact copy through `tooltip.*` labels; keep raw posture ids, `AoR`, `THIN/DENSE`, `Active Def.`, and `reactive` out of normal tooltip copy.
 
 **SETTLEMENT TIMELINE CONTROL/BATTLE/MOVEMENT COPY (2026-06-20).** Timeline control, battle, and brigade movement rows are localized player records, not English string assembly. Do instead: route start-control, control-change, mechanism, battle title/detail/outcome, capture suffix, and movement arrived/departed copy through `settlementTimeline.*` i18n keys; unknown factions/outcomes should use neutral fallback copy instead of raw ids.

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label peace and Decision Room copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** PeaceStatusPanel now renders pre-war capital, declared-course, declaration-posture, advancing, and end-turn chrome through localized `peace.*` keys. Decision Room priority cards now map elite-deploy reserve reasons, briefing kind/category labels, and proposal-review domains through explicit localized/player-safe labels instead of generic `humanize(...)` title-casing of raw ids such as `sector_threat`, `field_reports`, or `ops`.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/peace_status_panel_copy.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 51/51; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `AWWV_LIVE_SURFACE_BROWSER_PORT=3243 npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish tooltip and settlement timeline copy
 
 **Type:** UI/read-model i18n copy polish.

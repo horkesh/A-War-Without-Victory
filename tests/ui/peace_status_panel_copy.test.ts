@@ -43,7 +43,11 @@ describe('PeaceStatusPanel player copy', () => {
     expect(text).toContain(`War begins: ${turnToDateString(6)}`);
     expect(screen.getByText('Political investment')).toBeTruthy();
     expect(screen.getByText('Political development')).toBeTruthy();
+    expect(text).toContain('Pre-war capital');
+    expect(text).toContain('Political course declared');
+    expect(text).toContain('End turn');
     expect(text).not.toMatch(/\bTurn\s+\d+\b|WAR BEGINS: Turn|Referendum deadline: Turn/i);
     expect(text).not.toMatch(/staged investment|staged_investment|internal debug marker|internal_debug_marker/i);
+    expect(text).not.toMatch(/Pre-War Capital|Declaration posture:/);
   });
 });

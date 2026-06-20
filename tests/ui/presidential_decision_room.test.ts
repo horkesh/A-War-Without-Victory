@@ -266,7 +266,11 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')).toMatchObject({
       navigationTarget: { kind: 'field', target: { kind: 'field-settlement', osid: 'tuzla_1' } },
+      sourceLabel: 'Field reports',
+      evidence: ['Field reports'],
     });
+    expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')?.sourceLabel).not.toBe('Field Reports');
+    expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')?.sourceLabel).not.toBe('field_reports');
   });
 
   it('routes cards to existing owners instead of duplicating inbox, records, cost, or Chronicle data', () => {
@@ -1338,6 +1342,8 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(card?.title).toContain('1st Corps');
     expect(card?.title).not.toContain('arbih_1st_corps');
+    expect(card?.evidence.join(' ')).toContain('Sector Threat');
+    expect(card?.evidence.join(' ')).not.toContain('sector_threat');
   });
 
   it('always emits a single front-visit directive card (cost 10, availability gated in the component)', () => {
@@ -1502,6 +1508,11 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
         (c) => c.id === 'command:proactive-force-launch:arbih_1st_corps:plan_alpha',
       ),
     ).toBeUndefined();
+
+    const reviewCard = view.cards.find((c) => c.id === 'command:review-proposal:rev_1');
+    expect(reviewCard?.title).toContain('Operations');
+    expect(reviewCard?.evidence.join(' ')).toContain('Operations');
+    expect(`${reviewCard?.title} ${reviewCard?.evidence.join(' ')}`).not.toMatch(/\bops\b|Ops/);
   });
 
   it('emits no proactive cards when there is no player faction', () => {

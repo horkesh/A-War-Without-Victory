@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Peace / Decision Room label copy:** [implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md](implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md) - PeaceStatusPanel and Decision Room cards now render peace chrome, reserve reasons, briefing categories, and proposal domains through explicit localized/player-safe labels instead of hardcoded English or title-cased ids.
+
 **Latest settlement timeline control/battle copy:** [implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md](implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md) - Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through localized player copy.
 
 **Latest tooltip player-copy polish:** [implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md](implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md) - Formation/front tooltips now render localized posture, order, density, readiness, and defense-preview copy instead of raw ids and compact shorthand.
