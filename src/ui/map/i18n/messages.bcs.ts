@@ -2275,6 +2275,12 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     // Roadmap localization batch compatibility keys.
     'settlementTimeline.empty': 'Nema zabilježenih događaja za ovo naselje.',
     'settlementTimeline.casualties': 'Gubici: {attacker} nap / {defender} odb',
+    'settlementTimeline.supply.worsened': 'Snabdijevanje pogorsano: {to} (ranije {from})',
+    'settlementTimeline.supply.restored': 'Snabdijevanje obnovljeno: {to} (ranije {from})',
+    'settlementTimeline.supply.level.adequate': 'stabilna',
+    'settlementTimeline.supply.level.strained': 'opterecena',
+    'settlementTimeline.supply.level.critical': 'kriticna',
+    'settlementTimeline.supply.level.unknown': 'neprocijenjena',
     'toolbar.warroom': 'WARROOM',
     'toolbar.returnWarroomTitle': 'Povratak na predsjednički sto',
     'toolbar.chronicle': 'HRONIKA',

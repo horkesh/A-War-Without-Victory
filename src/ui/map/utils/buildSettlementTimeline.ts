@@ -13,6 +13,7 @@
  *   - historical_event → need per-OSID event indexing (currently mun-level)
  */
 
+import { t, type MessageKey } from '../i18n/index.js';
 import { getPlayerSafeOperationName } from './playerSafeText.js';
 
 export type TimelineEventType =
@@ -156,6 +157,16 @@ function operationDisplayName(op: OperationHistoryEntry): string {
     return getPlayerSafeOperationName(op.operation_name, op.corps_id, 'Operation');
 }
 
+const SUPPLY_STATE_LABEL_KEYS: Record<string, MessageKey> = {
+    adequate: 'settlementTimeline.supply.level.adequate',
+    strained: 'settlementTimeline.supply.level.strained',
+    critical: 'settlementTimeline.supply.level.critical',
+};
+
+function supplyStateLabel(state: string): string {
+    return t(SUPPLY_STATE_LABEL_KEYS[state.trim()] ?? 'settlementTimeline.supply.level.unknown');
+}
+
 const EVENT_OWNED_FALL_OSIDS = new Set([
     'op:srebrenica:srebrenica_2',
     'op:rogatica:zepa_2',
@@ -262,14 +273,14 @@ export function buildSettlementTimeline(
     }
 
     // --- Supply transitions ---
-    for (const t of supplyTransitions) {
-        const worsened = (t.from === 'adequate' && t.to !== 'adequate') || (t.from === 'strained' && t.to === 'critical');
+    for (const transition of supplyTransitions) {
+        const worsened = (transition.from === 'adequate' && transition.to !== 'adequate') || (transition.from === 'strained' && transition.to === 'critical');
         events.push({
-            turn: t.turn,
+            turn: transition.turn,
             type: worsened ? 'siege_began' : 'supply_restored',
             title: worsened
-                ? `Supply ${t.to} (was ${t.from})`
-                : `Supply restored to ${t.to} (was ${t.from})`,
+                ? t('settlementTimeline.supply.worsened', { to: supplyStateLabel(transition.to), from: supplyStateLabel(transition.from) })
+                : t('settlementTimeline.supply.restored', { to: supplyStateLabel(transition.to), from: supplyStateLabel(transition.from) }),
         });
     }
 

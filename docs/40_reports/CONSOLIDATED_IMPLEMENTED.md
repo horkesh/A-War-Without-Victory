@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest settlement timeline supply i18n:** [implemented/20260620_SETTLEMENT_TIMELINE_SUPPLY_I18N.md](implemented/20260620_SETTLEMENT_TIMELINE_SUPPLY_I18N.md) - Settlement timeline supply transitions now render localized EN/BCS copy and state labels instead of hardcoded English/raw supply ids.
+
 **Latest OOB HQ reserve drilldown:** [implemented/20260620_OOB_HQ_RESERVE_DRILLDOWN.md](implemented/20260620_OOB_HQ_RESERVE_DRILLDOWN.md) - The OOB sidebar now renders HQ-assigned reserve brigades under their actual Army HQ and routes individual brigade labels to Army HQ formation drilldown.
 
 **Latest Personnel HQ brigade drilldown:** [implemented/20260620_PERSONNEL_HQ_BRIGADE_DRILLDOWN.md](implemented/20260620_PERSONNEL_HQ_BRIGADE_DRILLDOWN.md) - Army HQ Personnel now renders HQ-assigned brigades/officers and routes HQ brigade clicks to the correct Army HQ formation drilldown.

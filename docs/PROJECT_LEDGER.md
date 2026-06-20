@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): localize settlement timeline supply transitions
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Settlement timeline supply transition rows now render through localized EN/BCS messages and state labels instead of hardcoded English strings such as `Supply strained (was adequate)`. BCS uses the existing `Snabdijevanje` vocabulary and rejects raw `Supply`, `adequate`, `strained`, or `critical` leakage in normal timeline copy.
+
+**Verification:** Red proof first failed on visible `Supply strained (was adequate)`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts tests/settlement_timeline_provenance.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` (32/32); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (22 files / 212 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`, temp evidence deleted). Report: `docs/40_reports/implemented/20260620_SETTLEMENT_TIMELINE_SUPPLY_I18N.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): route OOB HQ reserve brigades
 
 **Type:** UI/read-model command-surface polish.

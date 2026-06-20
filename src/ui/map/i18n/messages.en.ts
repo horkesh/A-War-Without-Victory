@@ -2411,6 +2411,12 @@ export const enMessages = {
     // Roadmap localization batch compatibility keys.
     'settlementTimeline.empty': 'No recorded events at this settlement.',
     'settlementTimeline.casualties': 'Casualties: {attacker} att / {defender} def',
+    'settlementTimeline.supply.worsened': 'Supply degraded: {to} (was {from})',
+    'settlementTimeline.supply.restored': 'Supply restored: {to} (was {from})',
+    'settlementTimeline.supply.level.adequate': 'adequate',
+    'settlementTimeline.supply.level.strained': 'strained',
+    'settlementTimeline.supply.level.critical': 'critical',
+    'settlementTimeline.supply.level.unknown': 'unassessed',
     'toolbar.warroom': 'WARROOM',
     'toolbar.returnWarroomTitle': "Return to president's desk",
     'toolbar.chronicle': 'CHRONICLE',

@@ -8,6 +8,7 @@ import {
   formatSettlementTimelineTurnDate,
   SettlementTimeline,
 } from '../../src/ui/map/components/SettlementTimeline.js';
+import { buildSettlementTimeline } from '../../src/ui/map/utils/buildSettlementTimeline.js';
 
 describe('SettlementTimeline localization', () => {
   afterEach(() => {
@@ -50,5 +51,28 @@ describe('SettlementTimeline localization', () => {
 
     expect(screen.getByText('Gubici: 3 nap / 5 odb')).toBeTruthy();
     expect(screen.queryByText('Casualties: 3 att / 5 def')).toBeNull();
+  });
+
+  it('localizes supply transition titles without raw supply state ids in BCS mode', () => {
+    setLocale('bcs');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [],
+      [],
+      [],
+      [],
+      [],
+      [{ turn: 5, from: 'adequate', to: 'strained' }],
+      [],
+      null,
+      null,
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+
+    expect(container.textContent).toContain('Snabdijevanje');
+    expect(container.textContent).not.toMatch(/\bSupply\b|adequate|strained|critical/);
   });
 });
