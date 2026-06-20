@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army HQ internal browser gate:** [implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md](implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Army HQ Summary, Personnel, and corps-card detail in a real browser, with stable front/detail hooks and raw-token checks.
+
 **Latest counteroffer/personnel/autonomy copy polish:** [implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md](implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md) - Counter-offer response/institution ids, Army HQ Personnel rank ids including tactical commanders, and Autonomy proposal domain ids now render localized player-facing labels or neutral fallbacks.
 
 **Latest docs status and raw-copy follow-up:** [implemented/20260619_DOC_STATUS_AND_RAW_COPY_FOLLOWUP.md](implemented/20260619_DOC_STATUS_AND_RAW_COPY_FOLLOWUP.md) - COMMAND_BOARD/plan status now reflects PR #329 closed stale NO-GO and issue #170 same-axis production behavior calibration-held, while follow-up UI fallback leaks and stale CI expectations are closed.

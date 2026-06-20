@@ -73,6 +73,11 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('assertNoRawTechnicalTokens');
     expect(tool).toContain('runOwnerJourneyDrilldown');
     expect(tool).toContain('ownerJourneyDrilldown');
+    expect(tool).toContain('runArmyHqInternalDrilldown');
+    expect(tool).toContain('armyHqInternalDrilldown');
+    expect(tool).toContain('army_hq_internal_summary');
+    expect(tool).toContain('army_hq_internal_personnel');
+    expect(tool).toContain('army_hq_internal_corps_card');
     expect(tool).toContain('activateVisibleControl');
     expect(tool).toContain('clickFirstSectorWithVisibleFormation');
     expect(tool).toContain('No visible Corps Front brigade rows with settlement locations found after inspecting');
@@ -125,6 +130,8 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/FormationDetail.tsx')).toContain("kind: 'field-settlement'");
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain('data-testid={`records-subtab-${id}`}');
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain("data-selected={subTab === id ? 'true' : 'false'}");
+    expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card"');
+    expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card-detail"');
   });
 });
 

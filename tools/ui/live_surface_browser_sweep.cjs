@@ -769,6 +769,39 @@ async function runSurfaceSweep(page, summary) {
   }
 }
 
+async function runArmyHqInternalDrilldown(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-army-hq"]');
+  await assertSingleShellSurface(page, 'Army HQ');
+
+  await activateVisibleControl(page, '#army-hq-tab-summary');
+  await waitForVisibleSelector(page, '#army-hq-tab-summary[aria-selected="true"]');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-summary');
+  await waitForVisibleText(page, 'WAR SUMMARY');
+  await captureEvidence(page, summary, 'army_hq_internal_summary');
+
+  await activateVisibleControl(page, '#army-hq-tab-personnel');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-personnel');
+  await waitForVisibleText(page, 'PERSONNEL COMMAND DOSSIER');
+  await captureEvidence(page, summary, 'army_hq_internal_personnel');
+
+  await activateVisibleControl(page, '#army-hq-tab-briefing');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
+  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
+  await waitForVisibleText(page, 'Back');
+  await waitForVisibleText(page, 'Combat Record');
+  await captureEvidence(page, summary, 'army_hq_internal_corps_card');
+
+  const active = await assertSingleShellSurface(page, 'Army HQ');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Army HQ Internal Drilldown', text);
+  summary.evidence.armyHqInternalDrilldown = true;
+  summary.evidence.armyHqInternalActiveShellSurfaces = active;
+}
+
 async function runOwnerJourneyDrilldown(page, summary) {
   await resetToWarMap(page);
 
@@ -838,6 +871,7 @@ async function run() {
       surfaceSweep: {},
       armyHqReachable: false,
       recordsReachable: false,
+      armyHqInternalDrilldown: false,
       ownerJourneyDrilldown: false,
       serverPortCleanupVerified: false,
     },
@@ -876,9 +910,10 @@ async function run() {
         text: error.message,
       }));
 
-      await runFoundationalFlow(page, summary);
-      await runSurfaceSweep(page, summary);
-      await runOwnerJourneyDrilldown(page, summary);
+    await runFoundationalFlow(page, summary);
+    await runSurfaceSweep(page, summary);
+    await runArmyHqInternalDrilldown(page, summary);
+    await runOwnerJourneyDrilldown(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
     } finally {

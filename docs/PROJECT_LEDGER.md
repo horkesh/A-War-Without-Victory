@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] test(ui): add Army HQ internal browser drilldown gate
+
+**Type:** UI/browser QA gate hardening.
+
+**Fix:** `qa:live-surface:browser` now proves the first-hour Army HQ internal path instead of stopping at top-level reachability: Summary tab, Personnel dossier, and a corps-card back face are clicked in a real browser, with shell exclusivity and raw-token checks after the drilldown. Army HQ corps cards now expose stable front/detail `data-testid` hooks for browser QA.
+
+**Verification:** Red contract proof first failed on the missing live-sweep function and card hooks. Two live-browser iterations corrected over-specific assumptions: campaign-cost is optional at first hour, and Command Relationship intentionally renders silent when healthy. Green proof passed: `npm.cmd exec -- vitest run tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (6/6); `npm.cmd run typecheck`; `npm.cmd run qa:live-surface:browser` with `armyHqInternalDrilldown: true`, `ownerJourneyDrilldown: true`, and port 3239 cleanup; `git diff --check`. Report: `docs/40_reports/implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md`.
+
+**Scope/determinism:** Browser QA tooling, stable UI selectors, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish counteroffer personnel autonomy copy
 
 **Type:** UI/read-model player-copy polish.

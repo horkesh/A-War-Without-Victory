@@ -165,6 +165,7 @@ export function ArmyHQCorpsCard({
         <button
             type="button"
             onClick={onToggleExpand}
+            data-testid="army-hq-corps-card"
             className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
                 ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
@@ -329,6 +330,7 @@ export function ArmyHQCorpsCard({
     // Back face: full detail sections (scrollable)
     const cardBack = (
         <div
+            data-testid="army-hq-corps-card-detail"
             className={`min-h-[256px] bg-panel-card border border-panel-border overflow-hidden flex flex-col
                 ${isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >

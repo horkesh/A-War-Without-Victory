@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ARMY HQ INTERNAL BROWSER GATE (2026-06-20).** Top-level Army HQ reachability is not enough to prove the command surface. Do instead: keep `qa:live-surface:browser` clicking Summary, Personnel, and a corps-card back face; assert stable first-hour content because campaign-cost and command-relationship sections can be absent when no cost/strain exists.
+
 **COUNTEROFFER/PERSONNEL/AUTONOMY COPY (2026-06-20).** Counter-offer responses/institutional models, officer ranks, and proposal domains are player-facing decision/command copy, not enum display fields. Do instead: route known ids through i18n label maps and unknown ids through neutral fallback copy; keep `surprise_counter_offer`, `union_3_republics_extra`, `corps_commander`, and raw `military`/`political` domain chips out of normal play.
 
 **RAW-COPY WAVE 5 SCOUT FIXES (2026-06-20).** Legacy Warroom newspaper/reports, Peace Plan modal, officer dossiers, AAR rows, and battle tooltips are player surfaces. Do instead: render calendar dates, international-pressure copy, localized peace-plan chrome, player-safe officer status/corps labels, and localized AAR friction/confidence labels; keep `Week N`, `[Turn N]`, wrapper `IVP`, raw institutional ids, raw officer status/corps ids, `ambush_risk`, `defender_opsec`, and `low confidence` out of normal play.
