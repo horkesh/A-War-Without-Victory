@@ -33,7 +33,9 @@ export interface BrigadeRowProps {
   onHoverChange?: (hovered: boolean, e?: React.MouseEvent) => void;
 }
 
-function getSupplyState(formation: FormationView): 'supplied' | 'strained' | 'cutoff' {
+type SupplyState = 'supplied' | 'strained' | 'cutoff';
+
+function getSupplyState(formation: FormationView): SupplyState {
   const status = formation.status.toLowerCase();
   const cohesion = formation.cohesion ?? 0;
   if (status.includes('cut') || status.includes('isolated')) return 'cutoff';
@@ -41,10 +43,16 @@ function getSupplyState(formation: FormationView): 'supplied' | 'strained' | 'cu
   return 'supplied';
 }
 
-const SUPPLY_DOT_CLASS: Record<'supplied' | 'strained' | 'cutoff', string> = {
+const SUPPLY_DOT_CLASS: Record<SupplyState, string> = {
   supplied: 'text-faction-rbih',
   strained: 'text-accent-gold',
   cutoff: 'text-faction-rs',
+};
+
+const SUPPLY_LABEL_KEY: Record<SupplyState, MessageKey> = {
+  supplied: 'brigadeRow.supply.supplied',
+  strained: 'brigadeRow.supply.strained',
+  cutoff: 'brigadeRow.supply.cutoff',
 };
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
@@ -59,6 +67,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   const fat = Math.round(formation.fatigue);
   const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
+  const supplyLabel = t(SUPPLY_LABEL_KEY[supplyState]);
 
   // Stance-colored left stripe
   const stanceStripe = STANCE_STRIPE[formation.posture ?? ''] ?? 'border-l-transparent';
@@ -89,10 +98,10 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       onMouseLeave={(e) => onHoverChange?.(false, e)}
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
-      title={t('brigadeRow.title', { supply: supplyState.toUpperCase(), fatigue: fat, cohesion })}
+      title={t('brigadeRow.title', { supply: supplyLabel, fatigue: fat, cohesion })}
     >
       {/* Supply dot */}
-      <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyState}>●</span>
+      <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyLabel}>●</span>
 
       {/* Brigade name */}
       <span className={`truncate min-w-0 flex-1 ${factionText}`}>{formationName}</span>

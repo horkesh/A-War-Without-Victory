@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BrigadeRow supply label i18n:** [implemented/20260620_BRIGADEROW_SUPPLY_LABEL_I18N.md](implemented/20260620_BRIGADEROW_SUPPLY_LABEL_I18N.md) - BrigadeRow supply tooltips and dot accessibility labels now render localized player copy instead of raw `STRAINED`/`CUTOFF`/lowercase state ids.
+
 **Latest compound field drilldowns:** [implemented/20260620_COMPOUND_FIELD_DRILLDOWNS.md](implemented/20260620_COMPOUND_FIELD_DRILLDOWNS.md) - Settlement formation, Formation Detail location, and OOB sector clicks now preserve their related field context.
 
 **Latest OrbatPanel brigade drilldown:** [implemented/20260620_ORBATPANEL_BRIGADE_DRILLDOWN.md](implemented/20260620_ORBATPANEL_BRIGADE_DRILLDOWN.md) - OrbatPanel brigade clicks now route to corps + formation drilldown instead of a bare formation route.

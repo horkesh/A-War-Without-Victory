@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**BRIGADEROW SUPPLY LABEL I18N (2026-06-20).** BrigadeRow supply state is derived UI state, not player copy. Do instead: map `supplied`/`strained`/`cutoff` through `brigadeRow.supply.*` i18n keys, use the resolved label for both tooltip and supply-dot aria label, and keep `tests/ui/brigade_row_supply_labels.test.ts` inside `qa:player-journeys`.
+
 **COMPOUND FIELD DRILLDOWNS (2026-06-20).** Field drilldowns must not use bare targets when the source surface knows related context. Do instead: route settlement formation and Formation Detail location links through `field-formation-at-settlement`, and OOB sector rows through `field-sector-in-corps`; pin with `tests/ui/gamestore_field_inspection.test.ts` and `tests/ui/oob_drilldown_routing.test.ts`.
 
 **CORPS DETAIL BRIGADE DRILLDOWN (2026-06-20).** Corps Detail brigade clicks must not clear the selected corps and leave the player in a bare formation route. Do instead: route combat-summary and ORBAT brigade clicks through `inspectOnField(..., { kind: 'field-formation-in-corps', formationId, corpsId })` and pin rail ownership with `tests/ui/command_drilldown_routing.test.ts`.
