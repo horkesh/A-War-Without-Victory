@@ -7,6 +7,7 @@
  */
 import type { FormationView, OperationView } from '../../data/types';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { t, type MessageKey } from '../../i18n';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -143,6 +144,33 @@ const GRADE_BORDERS: Record<ReadinessGrade, string> = {
     'INEFFECTIVE': 'border-red-600/60',
 };
 
+export const READINESS_GRADE_LABEL_KEYS: Record<ReadinessGrade, MessageKey> = {
+    'COMBAT READY': 'forceReadiness.grade.combatReady',
+    'ADEQUATE': 'forceReadiness.grade.adequate',
+    'STRAINED': 'forceReadiness.grade.strained',
+    'DEGRADED': 'forceReadiness.grade.degraded',
+    'INEFFECTIVE': 'forceReadiness.grade.ineffective',
+};
+
+const RECOMMENDATION_LABEL_KEYS: Record<string, MessageKey> = {
+    'Reorganize immediately': 'forceReadiness.recommendation.reorganizeImmediately',
+    'Reorganize for 2 turns': 'forceReadiness.recommendation.reorganizeTwoTurns',
+    'Reinforce: threat detected': 'forceReadiness.recommendation.reinforceThreat',
+    'Reinforce front sectors': 'forceReadiness.recommendation.reinforceFront',
+    'Hold: operation in progress': 'forceReadiness.recommendation.holdOperation',
+    'Reduce operations tempo': 'forceReadiness.recommendation.reduceTempo',
+    'Hold': 'forceReadiness.recommendation.hold',
+    'No brigades assigned': 'forceReadiness.recommendation.noBrigades',
+};
+
+export function readinessGradeLabel(grade: ReadinessGrade): string {
+    return t(READINESS_GRADE_LABEL_KEYS[grade]);
+}
+
+function recommendationLabel(recommendation: string): string {
+    return t(RECOMMENDATION_LABEL_KEYS[recommendation] ?? 'forceReadiness.recommendation.recorded', { recommendation });
+}
+
 interface ForceReadinessProps {
     items: CorpsReadiness[];
     onCorpsClick?: (corpsId: string) => void;
@@ -154,7 +182,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
             <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
-                FORCE READINESS
+                {t('forceReadiness.title')}
             </div>
             <div className="space-y-1">
                 {items.map(item => (
@@ -167,41 +195,43 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                 <span className="text-text-primary font-bold">{item.corpsName}</span>
                                 <span className="text-[10px] text-text-secondary">—</span>
                                 <span className={`text-[10px] font-bold uppercase tracking-wider ${GRADE_COLORS[item.grade]}`}>
-                                    {item.grade}
+                                    {readinessGradeLabel(item.grade)}
                                 </span>
                                 {item.hasThreat && (
                                     <span className="text-[9px] text-red-400 font-bold animate-pulse tracking-widest">
-                                        ⚠ INCOMING
+                                        {t('forceReadiness.incoming')}
                                     </span>
                                 )}
                             </div>
                             <div className="text-[11px] text-text-secondary leading-snug flex flex-wrap gap-x-3">
                                 {item.ineffectiveCount > 0 && (
-                                    <span>{item.ineffectiveCount} ineff</span>
+                                    <span>{t('forceReadiness.ineffectiveCount', { count: item.ineffectiveCount })}</span>
                                 )}
-                                <span>fatigue {item.avgFatigue}/{FATIGUE_MAX}</span>
+                                <span>{t('forceReadiness.fatigue', { value: item.avgFatigue, max: FATIGUE_MAX })}</span>
                                 {item.disruptedCount > 0 && (
-                                    <span>{item.disruptedCount} disrupted</span>
+                                    <span>{t('forceReadiness.disruptedCount', { count: item.disruptedCount })}</span>
                                 )}
                                 {item.overextendedCount > 0 && (
-                                    <span>{item.overextendedCount} overextended</span>
+                                    <span>{t('forceReadiness.overextendedCount', { count: item.overextendedCount })}</span>
                                 )}
                                 {item.activeOpName && (
                                     <span className="text-red-400">
-                                        Op {item.activeOpName}{item.activeOpBrigadeCount ? ` (${item.activeOpBrigadeCount} brigades)` : ''}
+                                        {item.activeOpBrigadeCount
+                                            ? t('forceReadiness.activeOperationWithBrigades', { name: item.activeOpName, count: item.activeOpBrigadeCount })
+                                            : t('forceReadiness.activeOperation', { name: item.activeOpName })}
                                     </span>
                                 )}
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] text-text-secondary/60 italic">{item.recommendation}</span>
+                            <span className="text-[10px] text-text-secondary/60 italic">{recommendationLabel(item.recommendation)}</span>
                             {onCorpsClick && (
                                 <button
                                     type="button"
                                     onClick={() => onCorpsClick(item.corpsId)}
                                     className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap"
                                 >
-                                    → Corps
+                                    {t('forceReadiness.openCorps')}
                                 </button>
                             )}
                         </div>

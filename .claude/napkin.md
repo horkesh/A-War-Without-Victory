@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ARMY HQ READINESS LABEL BOUNDARY (2026-06-21).** Readiness grades feed Force Readiness, corps cards, and the Command Access strip. Do instead: render `COMBAT READY` / `DEGRADED` / sibling grades through the shared readiness-grade i18n helper at every display edge; live-check BCS because command-access chips can leak raw grades after cards are fixed.
+
 **COMMAND-STRAIN COPY TOKEN BOUNDARY (2026-06-21).** Command-strain derivations feed rendered Army HQ and Operation Briefing surfaces. Do instead: return `CommandCopyToken` metadata beside fallback strings and have renderers call `t(token.key, token.params)`; pin BCS against English leaks like `STRAIN-SHAPED`, `Offensive posture is unavailable`, `Strain resolving in`, and `Commander recommends abort`.
 
 **LIVE PROOF FIXTURE STATE (2026-06-20).** Live browser gates must not fail on optional absent fixture state unless they create it first. Do instead: prove always-present hooks directly, and record explicit `skipped:no-visible-*` evidence for optional rows such as first-hour Records AAR battles while component tests pin the hook.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army HQ readiness / threat copy boundary:** [implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md](implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md) - Army HQ readiness grades, readiness details, recommendations, threat-section chrome, and command-access readiness chips now render through EN/BCS i18n instead of leaking raw English grade/copy strings.
+
 **Latest command-strain localization boundary:** [implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md](implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md) - Command interpretation, stance, recovery, and delegation copy now carry renderable i18n tokens so BCS command-strain surfaces do not fall back to English strings.
 
 **Latest live drilldown hooks and Army Reserve copy polish:** [implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md](implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md) - Live browser sweep now proves Army HQ Personnel brigade drilldown and sector front-segment metadata; Army Reserve request surfaces hide raw prose and unknown ids behind localized neutral copy.

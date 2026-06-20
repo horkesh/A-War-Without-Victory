@@ -3,13 +3,14 @@
  * a prioritized threat picture for the Army HQ Nerve Center.
  */
 import type { ThreatItem } from './generateThreatAssessment';
+import { t, type MessageKey } from '../../i18n';
 export { generateThreatAssessment } from './generateThreatAssessment';
 
 const SEVERITY_STYLES = {
-    offensive: { border: 'border-red-500/60', label: 'OFFENSIVE THREATS', labelColor: 'text-red-400' },
-    hardened: { border: 'border-emerald-500/40', label: 'HARDENED POSITIONS', labelColor: 'text-emerald-400' },
-    gap: { border: 'border-amber-500/40', label: 'INTELLIGENCE GAPS', labelColor: 'text-amber-400' },
-} as const;
+    offensive: { border: 'border-red-500/60', labelKey: 'threatAssessment.section.offensive', labelColor: 'text-red-400' },
+    hardened: { border: 'border-emerald-500/40', labelKey: 'threatAssessment.section.hardened', labelColor: 'text-emerald-400' },
+    gap: { border: 'border-amber-500/40', labelKey: 'threatAssessment.section.gap', labelColor: 'text-amber-400' },
+} as const satisfies Record<'offensive' | 'hardened' | 'gap', { border: string; labelKey: MessageKey; labelColor: string }>;
 
 interface ThreatAssessmentProps {
     items: ThreatItem[];
@@ -26,7 +27,7 @@ export function ThreatAssessment({ items, onCorpsClick }: ThreatAssessmentProps)
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
             <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
-                THREAT ASSESSMENT
+                {t('threatAssessment.title')}
             </div>
             <div className="space-y-3">
                 {activeItems.length > 0 && <ThreatSection severity="offensive" items={activeItems} onCorpsClick={onCorpsClick} />}
@@ -50,7 +51,7 @@ function ThreatSection({
     return (
         <div>
             <div className={`text-[10px] uppercase tracking-[0.25em] font-bold ${styles.labelColor} mb-1.5`}>
-                {styles.label}
+                {t(styles.labelKey)}
             </div>
             <div className="space-y-1">
                 {items.map((item) => (
@@ -68,7 +69,7 @@ function ThreatSection({
                                 onClick={() => onCorpsClick(friendlyCorpsId)}
                                 className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap shrink-0"
                             >
-                                Front
+                                {t('threatAssessment.openFront')}
                             </button>
                             );
                         })()}
