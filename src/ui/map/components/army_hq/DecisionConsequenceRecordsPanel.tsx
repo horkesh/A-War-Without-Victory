@@ -52,7 +52,11 @@ export function DecisionConsequenceRecordsPanel() {
   }, [focusedDecisionConsequenceId, visibleRecords.length]);
 
   return (
-    <section className="rounded-md border border-panel-border bg-panel-card p-4" aria-label={t('decisionConsequences.ariaLabel')}>
+    <section
+      className="rounded-md border border-panel-border bg-panel-card p-4"
+      aria-label={t('decisionConsequences.ariaLabel')}
+      data-testid="decision-consequence-records-panel"
+    >
       <div className="flex items-start justify-between gap-3 border-b border-panel-border/70 pb-3">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold">{t('decisionConsequences.title')}</div>
@@ -102,6 +106,10 @@ export function DecisionConsequenceRecordsPanel() {
           <article
             key={record.id}
             tabIndex={isFocused ? -1 : undefined}
+            data-testid="decision-consequence-record"
+            data-record-id={record.id}
+            data-record-target={record.recordTarget}
+            data-family-id={record.familyId}
             data-focused-decision-consequence-id={record.id}
             className={`rounded border px-3 py-3 ${isFocused ? 'border-accent-gold/70 bg-accent-gold/10 shadow-[0_0_0_1px_rgba(218,165,32,0.18)]' : 'border-panel-border/70 bg-black/20'}`}
           >
@@ -131,6 +139,8 @@ export function DecisionConsequenceRecordsPanel() {
                   {record.recordTarget === 'chronicle' ? (
                     <button
                       type="button"
+                      data-testid="decision-consequence-open-chronicle"
+                      data-record-id={record.id}
                       onClick={() => openChronicle(useGameStore.getState())}
                       className="rounded border border-panel-border bg-black/20 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                     >

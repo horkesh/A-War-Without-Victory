@@ -173,6 +173,9 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(inboxRoute).toContain('gs.setChronicleOpen(false);');
         expect(inboxRoute).toContain('gs.setArmyHQOpen(false);');
         expect(inboxRoute).toContain('gs.setIsOperationsPanelOpen(false);');
+        expect(inboxRoute).toContain('gs.setFocusedAftermathTurn(null);');
+        expect(inboxRoute).toContain('gs.setFocusedOperationHistoryId(null);');
+        expect(inboxRoute).toContain('gs.setFocusedDecisionConsequenceId(null);');
     });
 
     it('routes the Warroom Chronicle hotspot to ChronicleOverlay instead of Authored Choices', () => {

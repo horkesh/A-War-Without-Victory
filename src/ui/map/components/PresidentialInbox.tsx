@@ -74,7 +74,14 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
 
     if (item.type === 'intelligence_notification') {
         return (
-            <div className={`w-full text-left p-2.5 rounded border ${style.border} bg-panel-card`}>
+            <div
+                className={`w-full text-left p-2.5 rounded border ${style.border} bg-panel-card`}
+                data-testid="presidential-inbox-card"
+                data-inbox-item-id={item.id}
+                data-inbox-item-type={item.type}
+                data-inbox-action={item.action}
+                data-actionable={isActionable ? 'true' : 'false'}
+            >
                 <div className="flex items-center gap-1.5 mb-1">
                     <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
                         {cardTypeLabel}
@@ -99,6 +106,11 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
             type="button"
             onClick={isActionable ? onClick : undefined}
             disabled={!isActionable}
+            data-testid="presidential-inbox-card"
+            data-inbox-item-id={item.id}
+            data-inbox-item-type={item.type}
+            data-inbox-action={item.action}
+            data-actionable={isActionable ? 'true' : 'false'}
             className={`w-full text-left p-2.5 rounded border ${style.border} ${
                 isActionable
                     ? 'bg-panel-card hover:bg-panel-card-hover cursor-pointer transition-colors'
@@ -139,7 +151,10 @@ function OpeningBrief({
     if (!brief) return null;
 
     return (
-        <div className="p-3 rounded border border-accent-gold/30 bg-gradient-to-b from-panel-card to-transparent mb-3">
+        <div
+            className="p-3 rounded border border-accent-gold/30 bg-gradient-to-b from-panel-card to-transparent mb-3"
+            data-testid="presidential-inbox-opening-brief"
+        >
             <div className="text-[9px] font-bold uppercase tracking-widest text-accent-gold mb-1.5">
                 {t('inbox.openingBrief.label')}
             </div>
@@ -163,6 +178,7 @@ function OpeningBrief({
             <div className="mt-2.5 flex items-center justify-between gap-3">
                 <button
                     type="button"
+                    data-testid="presidential-inbox-opening-brief-open-desk"
                     onClick={() => {
                         onOpenDesk();
                         onDismiss();
@@ -173,6 +189,7 @@ function OpeningBrief({
                 </button>
                 <button
                     type="button"
+                    data-testid="presidential-inbox-opening-brief-read-later"
                     onClick={onDismiss}
                     className="text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
                 >
@@ -185,7 +202,7 @@ function OpeningBrief({
 
 function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
     return (
-        <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2">
+        <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2" data-testid="presidential-inbox-quiet-capsule">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                     <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-accent-gold">
@@ -204,6 +221,7 @@ function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
                 <button
                     type="button"
                     onClick={onOpenDesk}
+                    data-testid="presidential-inbox-quiet-open-desk"
                     className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
                 >
                     <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent-gold">
@@ -248,6 +266,7 @@ export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
         <div
             style={{ ...DETAIL_PANEL_STYLE, width: '22rem' }}
             className="bg-panel-bg/95 backdrop-blur-sm border-l border-panel-border flex flex-col"
+            data-testid="presidential-inbox"
         >
             {/* Header */}
             <div className="px-3 py-2.5 border-b border-panel-border flex items-center justify-between shrink-0">

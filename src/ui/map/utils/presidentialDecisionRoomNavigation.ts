@@ -4,6 +4,8 @@ import { requestDecisionRoomLens } from './decisionRoomLensRequest';
 import {
   openArmyHQAftermathRecord,
   openArmyHQBriefingForCorps,
+  openArmyHQDecisionConsequenceRecord,
+  openArmyHQOperationHistory,
   openArmyHQRecordsSubTab,
   openArmyHQTab,
   openChronicle,
@@ -23,6 +25,12 @@ export function openPresidentialDecisionRoomNavigationTarget(
   }
   if (target.kind === 'army-hq-aftermath-record') {
     return openArmyHQAftermathRecord(state, target.turn);
+  }
+  if (target.kind === 'army-hq-operation-record') {
+    return openArmyHQOperationHistory(state, target.operationAarId);
+  }
+  if (target.kind === 'army-hq-decision-record') {
+    return openArmyHQDecisionConsequenceRecord(state, target.recordId);
   }
   if (target.kind === 'army-hq-corps-briefing') {
     return openArmyHQBriefingForCorps(state, target.corpsId);
@@ -50,6 +58,9 @@ export function openPresidentialDecisionRoomNavigationTarget(
     state.setSelectedArmyHqId?.(null);
     state.setSelectedOperationKey?.(null);
     state.setSelectedOrbatCorpsId?.(null);
+    state.setFocusedAftermathTurn?.(null);
+    state.setFocusedOperationHistoryId?.(null);
+    state.setFocusedDecisionConsequenceId?.(null);
     return true;
   }
   if (target.kind === 'chronicle') {

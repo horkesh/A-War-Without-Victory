@@ -430,6 +430,13 @@ async function visibleSelectorCount(page, selector) {
   }, selector);
 }
 
+async function getVisibleSelectorAttribute(page, selector, attribute, description = selector) {
+  await waitForVisibleSelector(page, selector);
+  const value = await page.$eval(selector, (el, attr) => el.getAttribute(attr), attribute);
+  if (value == null) throw new Error(`Visible ${description} did not expose ${attribute}`);
+  return value;
+}
+
 async function clickVisibleSelectorAt(page, selector, index, description = selector) {
   const clicked = await page.evaluate((targetSelector, targetIndex) => {
     const isVisible = (el) => {
@@ -448,6 +455,50 @@ async function clickVisibleSelectorAt(page, selector, index, description = selec
     return true;
   }, selector, index);
   if (!clicked) throw new Error(`No visible ${description} matched selector "${selector}" at index ${index}`);
+}
+
+async function clickFirstVisibleWithinSelector(page, parentSelector, childSelector, description = `${parentSelector} ${childSelector}`) {
+  await page.waitForFunction(
+    (rootSelector, targetSelector) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      return Array.from(document.querySelectorAll(rootSelector))
+        .filter(isVisible)
+        .some((root) => Array.from(root.querySelectorAll(targetSelector)).some(isVisible));
+    },
+    { timeout: 30000 },
+    parentSelector,
+    childSelector,
+  );
+  const clicked = await page.evaluate((rootSelector, targetSelector) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    for (const root of Array.from(document.querySelectorAll(rootSelector)).filter(isVisible)) {
+      const target = Array.from(root.querySelectorAll(targetSelector)).find(isVisible);
+      if (target instanceof HTMLElement) {
+        target.click();
+        return true;
+      }
+    }
+    return false;
+  }, parentSelector, childSelector);
+  if (!clicked) throw new Error(`No visible ${description} matched selectors "${parentSelector}" -> "${childSelector}"`);
 }
 
 async function ensureExpanded(page, selector) {
@@ -859,6 +910,65 @@ async function runOwnerJourneyDrilldown(page, summary) {
   summary.evidence.ownerJourneyDrilldown = true;
 }
 
+async function runArchiveInboxDrilldown(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-chronicle"]');
+  await waitForVisibleSelector(page, '[data-testid="chronicle-overlay"]');
+  await assertSingleShellSurface(page, 'Chronicle');
+  const chronicleRecordSelector = '[data-testid="chronicle-open-record"]';
+  const chronicleRecordTarget = await getVisibleSelectorAttribute(
+    page,
+    chronicleRecordSelector,
+    'data-record-target',
+    'Chronicle record route',
+  );
+  await activateVisibleControl(page, chronicleRecordSelector);
+  await waitForVisibleSelector(page, '[data-testid="records-content"]');
+  await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
+  if (chronicleRecordTarget === 'operation') {
+    await waitForVisibleSelector(page, '[data-testid="records-subtab-ops"][data-selected="true"]');
+  } else {
+    await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
+  }
+  await assertSingleShellSurface(page, 'Records');
+  await captureEvidence(page, summary, 'archive_chronicle_to_records');
+  summary.evidence.archiveChronicleToRecordsDrilldown = true;
+  summary.evidence.archiveChronicleToRecordsTarget = chronicleRecordTarget;
+
+  await activateVisibleControl(page, '[data-testid="records-subtab-decisions"]');
+  await waitForVisibleSelector(page, '[data-testid="decision-consequence-records-panel"]');
+  if (await visibleSelectorCount(page, '[data-testid="decision-consequence-record"][data-record-target="chronicle"]') > 0) {
+    await clickFirstVisibleWithinSelector(
+      page,
+      '[data-testid="decision-consequence-record"][data-record-target="chronicle"]',
+      '[data-testid="decision-consequence-open-chronicle"]',
+      'Decision consequence Chronicle route',
+    );
+    await waitForVisibleSelector(page, '[data-testid="chronicle-overlay"]');
+    await assertSingleShellSurface(page, 'Chronicle');
+    await captureEvidence(page, summary, 'archive_records_decision_to_chronicle');
+    summary.evidence.archiveRecordsDecisionToChronicleDrilldown = true;
+  } else {
+    summary.evidence.archiveRecordsDecisionToChronicleDrilldown = 'skipped:no-chronicle-target';
+  }
+
+  await resetToWarMap(page);
+  await waitForVisibleSelector(page, '[data-testid="presidential-inbox"]');
+  summary.evidence.presidentialInboxVisible = true;
+  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
+  await activateVisibleControl(page, '[data-testid="desk-action-records"]');
+  await waitForVisibleSelector(page, '[data-testid="records-content"]');
+  await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
+  await assertSingleShellSurface(page, 'Records');
+  await captureEvidence(page, summary, 'archive_desk_to_records');
+  summary.evidence.deskRecordsRoute = true;
+
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Archive Inbox Drilldown', text);
+}
+
 async function run() {
   ensureDir(OUT_DIR);
   ensureDir(SCREENSHOT_DIR);
@@ -873,6 +983,10 @@ async function run() {
       recordsReachable: false,
       armyHqInternalDrilldown: false,
       ownerJourneyDrilldown: false,
+      archiveChronicleToRecordsDrilldown: false,
+      archiveRecordsDecisionToChronicleDrilldown: false,
+      presidentialInboxVisible: false,
+      deskRecordsRoute: false,
       serverPortCleanupVerified: false,
     },
     consoleMessages: [],
@@ -914,6 +1028,7 @@ async function run() {
     await runSurfaceSweep(page, summary);
     await runArmyHqInternalDrilldown(page, summary);
     await runOwnerJourneyDrilldown(page, summary);
+    await runArchiveInboxDrilldown(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
     } finally {

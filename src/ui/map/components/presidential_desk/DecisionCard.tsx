@@ -37,6 +37,8 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
     <article
       className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${SEVERITY_CLASS[item.severity]}`}
       data-testid={`desk-card-${item.type}`}
+      data-inbox-item-id={item.id}
+      data-inbox-action={item.action}
     >
       <div className="flex min-w-0 items-start gap-3">
         {thumbnail && (
@@ -62,6 +64,7 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
           type="button"
           onClick={() => actionable && onAction(item.action, item.id)}
           disabled={!actionable}
+          data-testid="desk-card-action"
           className="ml-auto shrink-0 border border-accent-gold/45 bg-accent-gold/12 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-default disabled:border-panel-border disabled:bg-transparent disabled:text-text-muted"
         >
           {actionLabel(item)}

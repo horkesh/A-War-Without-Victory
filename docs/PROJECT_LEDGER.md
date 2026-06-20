@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] test(ui): add archive/inbox drilldown browser gate
+
+**Type:** UI/browser QA gate and shell-route hygiene.
+
+**Fix:** `qa:live-surface:browser` now clicks Chronicle dossier records into Army HQ Records, Records decision receipts back into Chronicle, and President's Desk into Records while proving the Presidential Inbox remains visible on the field home state. Chronicle, Records, Decision Consequence Records, Presidential Inbox, and President's Desk now expose stable selector/route metadata hooks for live browser QA. Decision Room navigation gained typed focused archive targets for Operation AAR and Decision Consequence records, and inbox-return routes now clear stale focused archive ids.
+
+**Verification:** Red proof first failed on the missing live-sweep lane and selector hooks. Green proof passed: `npm.cmd exec -- vitest run tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/president_desk_shell.test.ts tests/ui_shell_navigation.test.ts tests/ui/warroom_shell_ownership.test.ts --pool=forks --reporter=dot` (51/51); `npm.cmd run typecheck`; `npm.cmd run qa:live-surface:browser` with `archiveChronicleToRecordsDrilldown: true`, `archiveRecordsDecisionToChronicleDrilldown: true`, `presidentialInboxVisible: true`, `deskRecordsRoute: true`, and port 3239 cleanup; `npm.cmd run qa:player-journeys` (209/209); `git diff --check`. Report: `docs/40_reports/implemented/20260620_ARCHIVE_INBOX_DRILLDOWN_BROWSER_GATE.md`.
+
+**Scope/determinism:** UI selector hooks, route metadata, live browser QA tooling, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] test(ui): add Army HQ internal browser drilldown gate
 
 **Type:** UI/browser QA gate hardening.

@@ -210,6 +210,8 @@ function ChronicleChapterView({
                                     </button>
                                     <button
                                         type="button"
+                                        data-testid="chronicle-chapter-open-turn-record"
+                                        data-turn={ref.turn}
                                         onClick={() => onOpenTurnRecord(ref.turn)}
                                         className="h-6 rounded-sm border border-amber-400/25 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
                                     >
@@ -530,7 +532,11 @@ export function ChronicleOverlay() {
     }
 
     return (
-        <div className="fixed inset-0 bg-black/92 backdrop-blur-sm flex flex-col" style={{ zIndex: Z.MODAL }}>
+        <div
+            className="fixed inset-0 bg-black/92 backdrop-blur-sm flex flex-col"
+            style={{ zIndex: Z.MODAL }}
+            data-testid="chronicle-overlay"
+        >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-2.5 border-b border-white/8">
                 <div className="flex min-w-0 flex-1 flex-wrap items-center gap-3">
@@ -552,6 +558,8 @@ export function ChronicleOverlay() {
                                     key={filter.id}
                                     type="button"
                                     aria-pressed={active}
+                                    data-testid={`chronicle-filter-${filter.id}`}
+                                    data-selected={active ? 'true' : 'false'}
                                     title={`${chronicleFilterLabel(filter)}: ${count}`}
                                     onClick={() => setActiveFilter(filter.id)}
                                     className={[
@@ -579,6 +587,7 @@ export function ChronicleOverlay() {
                 </div>
                 <button
                     onClick={handleClose}
+                    data-testid="chronicle-close"
                     className="ml-3 shrink-0 text-[10px] font-mono text-stone-500 hover:text-red-400 transition-colors uppercase tracking-wider"
                 >
                     {t('chronicle.close')}
@@ -679,10 +688,18 @@ export function ChronicleOverlay() {
                                 <div
                                     key={`${selectedTurn}-${entry.type}-${i}`}
                                     className="border border-panel-border/30 rounded p-2 bg-black/15"
+                                    data-testid="chronicle-dossier-entry"
+                                    data-turn={entry.turn}
+                                    data-entry-type={entry.type}
+                                    data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
                                 >
                                     <ChronicleCard entry={entry} />
                                     <button
                                         type="button"
+                                        data-testid="chronicle-open-record"
+                                        data-record-target={entry.metadata?.operationAarId ? 'operation' : 'aftermath'}
+                                        data-turn={entry.turn}
+                                        data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
                                         onClick={() => handleOpenEntryRecord(entry)}
                                         className="mt-2 h-7 w-full rounded-sm border border-amber-400/30 bg-amber-400/10 px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-200 transition-colors hover:border-amber-300/70 hover:bg-amber-400/15"
                                     >

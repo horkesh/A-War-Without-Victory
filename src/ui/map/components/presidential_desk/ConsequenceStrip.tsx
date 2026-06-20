@@ -37,7 +37,11 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
   const decisionRecords = buildDecisionConsequenceLedger(state, 2);
 
   return (
-    <section className="border-t border-panel-border/70 pt-3" aria-label={t('desk.consequences.ariaLabel')}>
+    <section
+      className="border-t border-panel-border/70 pt-3"
+      aria-label={t('desk.consequences.ariaLabel')}
+      data-testid="desk-consequence-strip"
+    >
       <div className="flex items-center justify-between gap-3">
         <div>
           <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
@@ -48,6 +52,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
         <button
           type="button"
           onClick={onOpenRecords}
+          data-testid="desk-consequence-open-records"
           className="border border-panel-border bg-black/20 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           {t('desk.consequences.records')}
@@ -77,6 +82,10 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
             <button
               key={record.id}
               type="button"
+              data-testid="desk-consequence-row"
+              data-record-id={record.id}
+              data-record-target={record.recordTarget}
+              data-family-id={record.familyId}
               onClick={record.recordTarget === 'chronicle' ? onOpenChronicle : () => {
                 if (onOpenDecisionRecords) {
                   onOpenDecisionRecords(record.id);

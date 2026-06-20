@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest archive/inbox drilldown browser gate** | [implemented/20260620_ARCHIVE_INBOX_DRILLDOWN_BROWSER_GATE.md](implemented/20260620_ARCHIVE_INBOX_DRILLDOWN_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Chronicle -> Records, Records decisions -> Chronicle, and President's Desk -> Records in a real browser, with stable archive/inbox route hooks and stale focused-record cleanup. |
 | **Latest AAR / ORBAT unit-event label polish** | [implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md](implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md) - Army HQ Records AAR unit events and ORBAT expanded brigade details now render narrative-arc labels and faction decoration names instead of raw `garrison`, `bloodied`, or `tier_1` identifiers. |
 | **Latest issue #170 residual reconciliation** | [implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md](implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md) - Active #170 queue is narrowed to enclave denominator and calibration-held same-axis concentration; Graz HRHB->RS and Trnovo waypoint handling are reclassified closed by existing direct test proof. |
 | **Latest Army HQ internal browser gate** | [implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md](implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Army HQ Summary, Personnel, and corps-card detail in a real browser, with stable front/detail hooks and raw-token checks. |

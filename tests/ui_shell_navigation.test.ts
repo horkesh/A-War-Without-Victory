@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyShellHandoffCommand,
   openArmyHQBriefingForCorps,
+  openArmyHQDecisionConsequenceRecord,
   openArmyHQRecordsSubTab,
   openArmyHQTab,
   openChronicle,
@@ -93,6 +94,23 @@ describe('shellNavigation', () => {
       ['setFocusedAftermathTurn', null],
       ['setFocusedOperationHistoryId', null],
       ['setFocusedDecisionConsequenceId', null],
+    ]);
+  });
+
+  it('routes a focused decision consequence record through Army HQ records', () => {
+    const state = createState('RBiH');
+
+    const ok = openArmyHQDecisionConsequenceRecord(state, 'decision-record-1');
+
+    expect(ok).toBe(true);
+    expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
+      ['setArmyHQRecordsSubTab', 'decisions'],
+      ['setFocusedDecisionConsequenceId', 'decision-record-1'],
     ]);
   });
 
@@ -288,6 +306,30 @@ describe('shellNavigation', () => {
     ]);
   });
 
+  it('routes Presidential Decision Room archive drilldown targets to focused Records entries', () => {
+    const state = createState('RBiH');
+
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'army-hq-operation-record', operationAarId: 'op-aar-1' }, state)).toBe(true);
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'army-hq-decision-record', recordId: 'reserve:reserve_00' }, state)).toBe(true);
+
+    expect(state.calls).toEqual([
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
+      ['setArmyHQRecordsSubTab', 'ops'],
+      ['setFocusedOperationHistoryId', 'op-aar-1'],
+      ['setCodexOpen', false],
+      ['setChronicleOpen', false],
+      ['setSelectedArmyId', 'RBiH'],
+      ['setArmyHQOpen', true],
+      ['setArmyHQTab', 'records'],
+      ['setArmyHQRecordsSubTab', 'decisions'],
+      ['setFocusedDecisionConsequenceId', 'reserve:reserve_00'],
+    ]);
+  });
+
   it('routes Presidential Decision Room inbox returns to a clean desk-owned field', () => {
     const state = createState('RBiH');
 
@@ -306,6 +348,9 @@ describe('shellNavigation', () => {
       ['setSelectedArmyHqId', null],
       ['setSelectedOperationKey', null],
       ['setSelectedOrbatCorpsId', null],
+      ['setFocusedAftermathTurn', null],
+      ['setFocusedOperationHistoryId', null],
+      ['setFocusedDecisionConsequenceId', null],
     ]);
   });
 

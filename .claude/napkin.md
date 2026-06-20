@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ARCHIVE / INBOX DRILLDOWN GATE (2026-06-20).** Top-level Records/Chronicle/Desk reachability is not enough. Do instead: keep `qa:live-surface:browser` clicking Chronicle -> Records, Records decision receipts -> Chronicle, and President's Desk -> Records; preserve stable archive/inbox `data-testid` hooks and clear focused aftermath/operation/decision record ids when returning to the inbox/desk home.
+
 **AAR / ORBAT UNIT-EVENT LABELS (2026-06-20).** Records AAR unit events and ORBAT expanded brigade details are player surfaces, not enum displays. Do instead: render narrative arcs via `getPlayerSafeFormationNarrativeArcLabel(...)`, decoration tiers via faction decoration names, and unknown tiers as neutral campaign distinction copy; keep `garrison`, `bloodied`, and `tier_1` out of normal play.
 
 **ARMY HQ INTERNAL BROWSER GATE (2026-06-20).** Top-level Army HQ reachability is not enough to prove the command surface. Do instead: keep `qa:live-surface:browser` clicking Summary, Personnel, and a corps-card back face; assert stable first-hour content because campaign-cost and command-relationship sections can be absent when no cost/strain exists.

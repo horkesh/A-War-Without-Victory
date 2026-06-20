@@ -62,6 +62,7 @@ export function PresidentDeskShell({
       aria-label={t('desk.region.ariaLabel')}
       aria-modal={onClose ? 'false' : undefined}
       tabIndex={onClose ? -1 : undefined}
+      data-testid="president-desk-shell"
       onKeyDown={(event) => {
         if (event.key === 'Escape' && onClose) {
           event.preventDefault();
@@ -116,6 +117,7 @@ export function PresidentDeskShell({
           <button
             type="button"
             onClick={onOpenArmyHQ}
+            data-testid="desk-action-army-hq"
             className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
           >
             {t('desk.action.callArmyHQ')}
@@ -123,6 +125,7 @@ export function PresidentDeskShell({
           <button
             type="button"
             onClick={onOpenMap}
+            data-testid="desk-action-war-map"
             className="border border-panel-border bg-black/20 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
           >
             {t('desk.action.warMap')}
@@ -130,6 +133,7 @@ export function PresidentDeskShell({
           <button
             type="button"
             onClick={onAdvance}
+            data-testid="desk-action-advance-clearance"
             className="border border-red-300/45 bg-red-500/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-red-100 transition-colors hover:bg-red-500/20"
           >
             {t('desk.action.advanceClearance')}
@@ -137,6 +141,7 @@ export function PresidentDeskShell({
           <button
             type="button"
             onClick={onOpenRecords}
+            data-testid="desk-action-records"
             className="border border-panel-border bg-black/20 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
           >
             {t('desk.action.records')}

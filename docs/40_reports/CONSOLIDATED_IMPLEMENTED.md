@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest archive/inbox drilldown browser gate:** [implemented/20260620_ARCHIVE_INBOX_DRILLDOWN_BROWSER_GATE.md](implemented/20260620_ARCHIVE_INBOX_DRILLDOWN_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Chronicle -> Records, Records decisions -> Chronicle, and President's Desk -> Records in a real browser, with stable archive/inbox route hooks and stale focused-record cleanup.
+
 **Latest AAR / ORBAT unit-event label polish:** [implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md](implemented/20260620_AAR_ORBAT_UNIT_EVENT_LABEL_POLISH.md) - Army HQ Records AAR unit events and ORBAT expanded brigade details now render narrative-arc labels and faction decoration names instead of raw `garrison`, `bloodied`, or `tier_1` identifiers.
 
 **Latest Army HQ internal browser gate:** [implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md](implemented/20260620_ARMY_HQ_INTERNAL_BROWSER_GATE.md) - `qa:live-surface:browser` now clicks Army HQ Summary, Personnel, and corps-card detail in a real browser, with stable front/detail hooks and raw-token checks.

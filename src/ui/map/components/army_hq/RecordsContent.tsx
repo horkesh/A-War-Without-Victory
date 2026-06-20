@@ -49,14 +49,18 @@ export function RecordsContent() {
     }, [state, osidNameMap]);
 
     return (
-        <div>
+        <div data-testid="records-content">
             {/* Territory-over-time trend chart. The War's Record surface owns
                 the campaign trend; this is the player-reachable home. */}
             <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3">
                 <TerritoryOverTimeChart />
             </div>
 
-            <section className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3" aria-label={t('recordsContent.archiveSummary.ariaLabel')}>
+            <section
+                className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-3"
+                aria-label={t('recordsContent.archiveSummary.ariaLabel')}
+                data-testid="records-archive-summary"
+            >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-secondary">{t('recordsContent.archiveSummary.title')}</div>

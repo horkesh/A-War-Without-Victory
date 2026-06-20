@@ -87,6 +87,22 @@ describe('PresidentDeskShell', () => {
     expect(onOpenMap).toHaveBeenCalledOnce();
   });
 
+  it('exposes stable live-browser hooks for desk shell handoffs', () => {
+    const onOpenRecords = vi.fn();
+    const { container } = renderDesk({ onOpenRecords });
+
+    expect(screen.getByTestId('president-desk-shell')).toBeTruthy();
+    expect(screen.getByTestId('desk-action-army-hq')).toBeTruthy();
+    expect(screen.getByTestId('desk-action-war-map')).toBeTruthy();
+    expect(screen.getByTestId('desk-action-advance-clearance')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('desk-action-records'));
+
+    expect(onOpenRecords).toHaveBeenCalledOnce();
+    expect(container.querySelector('[data-testid="desk-consequence-strip"]')).toBeTruthy();
+    expect(container.querySelector('[data-testid="desk-consequence-open-records"]')).toBeTruthy();
+  });
+
   it('can close when rendered as a warroom overlay', () => {
     const onClose = vi.fn();
     renderDesk({ onClose });
@@ -155,6 +171,7 @@ describe('PresidentDeskShell', () => {
     expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
     expect(screen.getByText('Decision recorded')).toBeTruthy();
     expect(screen.getByText('Open Chronicle')).toBeTruthy();
+    expect(screen.getByTestId('desk-consequence-row').getAttribute('data-record-target')).toBe('chronicle');
     expect(screen.getByRole('img', { name: 'Cabinet crisis response consequence' }).getAttribute('src')).toContain('consequence_public_pressure');
     expect(container.textContent).toContain(turnToDateString(8));
     expect(container.textContent).not.toContain('Turn 8');

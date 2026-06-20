@@ -1438,6 +1438,9 @@ function App() {
     gs.setSelectedArmyHqId(null);
     gs.setSelectedOperationKey(null);
     gs.setSelectedOrbatCorpsId(null);
+    gs.setFocusedAftermathTurn(null);
+    gs.setFocusedOperationHistoryId(null);
+    gs.setFocusedDecisionConsequenceId(null);
   };
 
   useEffect(() => {

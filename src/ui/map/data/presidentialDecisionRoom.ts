@@ -79,6 +79,8 @@ export type PresidentialDecisionRoomNavigationTarget =
   | { kind: 'army-hq-tab'; tab: ArmyHQTab }
   | { kind: 'army-hq-records'; recordsSubTab: ArmyHQRecordsSubTab }
   | { kind: 'army-hq-aftermath-record'; turn: number }
+  | { kind: 'army-hq-operation-record'; operationAarId: string | null }
+  | { kind: 'army-hq-decision-record'; recordId: string | null }
   | { kind: 'counter-offer'; counterOfferId: string }
   | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
   | { kind: 'decision-room'; lens: PresidentialDecisionRoomLensId; cardId?: string | null }
