@@ -2,6 +2,14 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest ops BrigadeCard i18n polish:** [implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md](implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md) - Ops modal BrigadeCard and BrigadeTray copy now routes through EN/BCS i18n for unit type, tooltip labels, march time, assembly timing, assigned counts, and empty states.
+
+**Latest Records to Chronicle exact focus:** [implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md](implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md) - Chronicle-filed decision consequence rows in Records now route back to the exact Chronicle entry instead of opening Chronicle broadly.
+
+**Latest Operation History weekly copy polish:** [implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md](implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md) - Operation History and Army HQ weekly logs now render localized phase, attack, casualty, held-objective, inflicted-loss, and notable-event labels instead of shorthand/raw ids.
+
+**Latest inbox opportunity recommendation copy:** [implemented/20260620_INBOX_OPPORTUNITY_RECOMMENDATION_COPY.md](implemented/20260620_INBOX_OPPORTUNITY_RECOMMENDATION_COPY.md) - Presidential Inbox operation-opportunity cards now render player-facing staff recommendation copy instead of raw proposal enums such as `approve`.
+
 **Latest opportunity dossier copy polish:** [implemented/20260620_OPPORTUNITY_DOSSIER_COPY_POLISH.md](implemented/20260620_OPPORTUNITY_DOSSIER_COPY_POLISH.md) - Army HQ opportunity dossiers now localize proposal status, staff recommendations, axis states, and force-quality bands instead of raw enum copy.
 
 **Latest Army ops drilldown / BCS copy polish:** [implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md](implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md) - Army HQ operations planning copy no longer exposes `T+` / `DELAYS`, OperationsPanel allocated brigade drilldowns preserve corps context, and targeted BCS player copy no longer exposes raw `OSID` terminology.

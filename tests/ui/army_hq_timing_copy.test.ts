@@ -142,6 +142,49 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('W3 - W7');
   });
 
+  it('renders corps operation weekly rows without raw operation shorthand', () => {
+    storeState.osidDisplayNames = { 'op:ridge:ridge_1': 'Ridge One' };
+
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [makeOperation()],
+      gameState: makeGameState({
+        operationHistory: [
+          {
+            ...makeGameState().operationHistory![0],
+            weekly_log: [
+              {
+                turn: 6,
+                phase: 'execution',
+                attacks_this_turn: 2,
+                objectives_captured_this_turn: ['op:ridge:ridge_1'],
+                notable_events: ['supply_crisis'],
+                casualties_suffered: { killed: 3, wounded: 8 },
+                casualties_inflicted: { killed: 4, wounded: 9 },
+              },
+            ],
+          },
+        ],
+      }),
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+
+    const copy = document.body.textContent ?? '';
+    const weeklyCopy = copy.slice(copy.indexOf('WEEKLY OPERATIONS LOG'));
+    expect(weeklyCopy).toContain('In execution');
+    expect(weeklyCopy).toContain('2 attacks');
+    expect(weeklyCopy).toContain('Held at close: Ridge One');
+    expect(weeklyCopy).toContain('11 casualties');
+    expect(weeklyCopy).toContain('13 inflicted');
+    expect(weeklyCopy).toContain('Notable development');
+    expect(weeklyCopy).not.toMatch(/\b2\s*ATK\b/);
+    expect(weeklyCopy).not.toMatch(/\bOBJ\b/);
+    expect(weeklyCopy).not.toMatch(/\+13e\b/);
+    expect(weeklyCopy).not.toMatch(/supply_crisis/i);
+  });
+
   it('renders planning preparation timing and delays as player-facing copy', () => {
     render(React.createElement(OperationsSection, {
       corpsId: 'arbih_3rd_corps',

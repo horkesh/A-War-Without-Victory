@@ -1,5 +1,13 @@
 # Napkin Runbook
 
+**INBOX OPPORTUNITY RECOMMENDATION COPY (2026-06-20).** Inbox opportunity descriptions may contain raw proposal ids. Do instead: derive known operation-opportunity recommendation subtitles from `proposed_value` labels (`approve` -> authorization) and keep raw enums such as `approve` out of Presidential Inbox cards.
+
+**OPERATION HISTORY WEEKLY COPY (2026-06-20).** Weekly operation rows are player AAR copy, not compact telemetry. Do instead: localize phase, attack, casualty, inflicted, final-held objective, and notable-event labels; keep phase initials, `atk`/`ATK`, `OBJ`, `+Ne`, signed casualty fragments, and raw notable-event ids out of Records/Army HQ weekly logs.
+
+**RECORDS TO CHRONICLE EXACT FOCUS (2026-06-20).** Chronicle-filed decision receipts should not open Chronicle broadly. Do instead: route with `openChronicleDecisionRecord(...)`, set `focusedChronicleDecisionRecordId`, and have Chronicle mark/focus the exact `metadata.decisionRecordId` entry.
+
+**OPS BRIGADECARD I18N (2026-06-20).** Ops modal brigade cards and tray summaries are localized player copy. Do instead: route unit-type badges, title tooltips, march labels, full-assembly timing, assigned counts, and empty states through `src/ui/map/i18n`.
+
 **OPPORTUNITY DOSSIER COPY (2026-06-20).** Opportunity proposal values are internal ids, not player copy. Do instead: map status, recommendation, axis state, and force-quality bands through explicit i18n keys; keep `approve`, `eligible_pending_review`, `not_applicable`, and trait-band ids out of Army HQ dossiers.
 
 **ARMY OPS PLANNING COPY / DRILLDOWN (2026-06-20).** Army HQ Operations and OperationsPanel are player command surfaces, not telemetry panels. Do instead: render planning age/postponements through i18n copy, route allocated brigade clicks through `inspectOnField(... field-formation-in-corps ...)`, and keep targeted BCS player copy free of raw `OSID`.

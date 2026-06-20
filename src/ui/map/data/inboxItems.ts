@@ -50,6 +50,20 @@ function splitOpportunityDescription(description: string): { title: string; deta
     };
 }
 
+const OPPORTUNITY_RECOMMENDATION_LABELS: Record<string, string> = {
+    approve: 'authorization',
+    delay: 'delay',
+    redirect: 'redirection',
+    under_resource: 'authorization with reduced resources',
+    decline: 'declining',
+};
+
+function formatOpportunityRecommendationDetail(proposedValue: string | null | undefined, fallbackDetail: string): string {
+    const label = proposedValue ? OPPORTUNITY_RECOMMENDATION_LABELS[proposedValue] : undefined;
+    if (label) return `Staff recommends ${label}.`;
+    return fallbackDetail;
+}
+
 function normalizeDedupeSubject(value: string | null | undefined): string | null {
     const trimmed = value?.trim();
     if (!trimmed) return null;
@@ -162,7 +176,7 @@ export function deriveInboxItems(
                     type: 'operation_opportunity',
                     severity: 'normal',
                     title,
-                    subtitle: detail,
+                    subtitle: formatOpportunityRecommendationDetail(prop.proposed_value, detail),
                     action: operationSurface.inboxAction,
                     priority: 32,
                 });

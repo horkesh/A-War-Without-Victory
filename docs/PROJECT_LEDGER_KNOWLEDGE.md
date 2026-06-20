@@ -3135,3 +3135,19 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-19 - Multi-surface timing/provenance copy boundary
 
 **Normal player UI timing/provenance copy must cross a display helper boundary:** turn numbers, week shorthands, `T{turn}`, mechanism enums, battle outcome ids, and event ids are internal joins unless the surface is explicitly diagnostic. Durable rule: President's Desk receipts, Decision Room priority/report cards, Army HQ operation/opportunity/friction copy, Chronicle Wrapped/Spine copy, and settlement timeline provenance should render through calendar helpers, authored label maps, or neutral fallbacks before display. Srebrenica/Zepa fall ownership remains event-owned by `srebrenica_falls_1995` / `zepa_falls_1995`; settlement timeline fallback guards do not make Krivaja/Stupcanica operations a fall-delivery path. Applied in `[2026-06-19] fix(ui): polish multi-surface timing and provenance copy`; report `docs/40_reports/implemented/20260619_MULTI_SURFACE_TIMING_COPY_POLISH.md`.
+
+## 2026-06-20 - Ops formation-card i18n boundary
+
+**Ops modal formation-card chrome is player copy, including tooltips and tiny status fragments:** BrigadeCard and BrigadeTray labels should not assemble English strings from raw literals for unit type, march time, assembly timing, assigned counts, or empty states. Durable rule: route card titles, unit-type badges, plural fragments, and tray summaries through `src/ui/map/i18n` keys and pin both EN and BCS render paths when adding ops/modal card copy. Applied in `[2026-06-20] Ops BrigadeCard i18n polish`.
+
+## 2026-06-20 - Operation weekly-row copy boundary
+
+**Weekly operation logs are AAR copy, not telemetry rows:** phase initials, `atk` / `ATK`, `OBJ`, `+Ne`, signed casualty fragments, and raw notable-event ids are internal shorthand. Durable rule: Operation History and Army HQ Operations weekly rows should render localized phase, attack, casualty, inflicted, final-held objective, and notable-event labels before display. Applied in `[2026-06-20] Operation History weekly copy polish`; report `docs/40_reports/implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md`.
+
+## 2026-06-20 - Records-to-Chronicle focus boundary
+
+**Archive back-links should preserve exact record identity:** a Chronicle-filed Records receipt should not open Chronicle broadly when the receipt id is known. Durable rule: route exact receipt links through `openChronicleDecisionRecord(...)`, carry `focusedChronicleDecisionRecordId`, and have Chronicle focus the entry whose `metadata.decisionRecordId` matches the receipt. Applied in `[2026-06-20] Records to Chronicle exact decision focus`; report `docs/40_reports/implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md`.
+
+## 2026-06-20 - Records to Chronicle exact focus
+
+**Chronicle-filed Records decisions need id-targeted Chronicle focus, not a broad overlay open:** Decision consequence records and Chronicle entries already share `DecisionConsequenceRecord.id` through `ChronicleEntry.metadata.decisionRecordId`. Durable rule: Records -> Chronicle actions should route through an id-carrying shell helper, store the focused decision-record id, clear it on broad Chronicle opens, and have Chronicle select/mark the matching dossier entry by metadata id rather than only selecting a turn. Applied in `[2026-06-20] Records to Chronicle exact decision focus`.

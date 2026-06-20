@@ -233,7 +233,7 @@ describe('field toolbar navigation ownership', () => {
     expect(consequenceRecordsSource).not.toContain('setChronicleOpen(true)');
     expect(wrappedOverlaySource).not.toContain('setChronicleOpen(true)');
     expect(recordsContentSource).toContain('openCodex(useGameStore.getState())');
-    expect(consequenceRecordsSource).toContain('openChronicle(useGameStore.getState())');
+    expect(consequenceRecordsSource).toContain('openChronicleDecisionRecord(useGameStore.getState(), record.id)');
     expect(wrappedOverlaySource).toContain('openChronicle(useGameStore.getState())');
   });
 

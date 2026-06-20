@@ -4,7 +4,7 @@
  */
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
-import { t, useLocale } from '../../i18n';
+import { t, useLocale, type Locale, type MessageKey } from '../../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface BrigadeCardProps {
@@ -37,21 +37,40 @@ function getFatigueLabel(fat: number): { text: string; color: string } {
     return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
 }
 
-const UNIT_TYPE_LABEL: Record<string, string> = {
-    armored: 'ARMORED',
-    guards: 'GUARDS',
-    infantry: 'INFANTRY',
-    light: 'LIGHT',
-    light_infantry: 'LIGHT INFANTRY',
-    mechanized: 'MECHANIZED',
-    motorized: 'MOTORIZED',
-    mountain: 'MOUNTAIN',
+const UNIT_TYPE_LABEL_KEYS: Record<string, MessageKey> = {
+    armored: 'opsModal.unitType.armored',
+    guards: 'opsModal.unitType.guards',
+    infantry: 'opsModal.unitType.infantry',
+    light: 'opsModal.unitType.light',
+    light_infantry: 'opsModal.unitType.lightInfantry',
+    mechanized: 'opsModal.unitType.mechanized',
+    motorized: 'opsModal.unitType.motorized',
+    mountain: 'opsModal.unitType.mountain',
 };
+
+function formatInteger(value: number, locale: Locale): string {
+    return value.toLocaleString(locale === 'bcs' ? 'bs-BA' : 'en-US');
+}
+
+function formatMarchTurns(turns: number, locale: Locale): string {
+    return t(turns === 1 ? 'opsModal.march.turn.one' : 'opsModal.march.turn.many', { count: turns }, locale);
+}
+
+function formatMarchTooltip(turns: number | null, locale: Locale): string {
+    if (turns === 0) return t('opsModal.march.inPosition', undefined, locale);
+    if (turns === null || turns === 99) return t('opsModal.march.unknown', undefined, locale);
+    return formatMarchTurns(turns, locale);
+}
+
+function formatMarchDisplay(turns: number, locale: Locale): string {
+    return t(turns === 1 ? 'opsModal.march.display.one' : 'opsModal.march.display.many', { count: turns }, locale);
+}
 
 export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
     const [locale] = useLocale();
     const brigadeName = getLocalizedFormationName(brigade, locale);
     const personnel = brigade.personnel ?? 0;
+    const personnelLabel = formatInteger(personnel, locale);
     const isCombatIneffective = personnel < 400;
     const isDisrupted = !!brigade.disrupted_turns;
     const isUnavailable = isCombatIneffective || isDisrupted;
@@ -61,7 +80,15 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
     const fatigue = brigade.fatigue ?? 0;
     const cohLabel = getCohesionLabel(cohesion);
     const fatLabel = getFatigueLabel(fatigue);
-    const unitType = UNIT_TYPE_LABEL[getFormationUnitType(brigade)] ?? null;
+    const unitTypeKey = UNIT_TYPE_LABEL_KEYS[getFormationUnitType(brigade)] ?? null;
+    const unitType = unitTypeKey ? t(unitTypeKey, undefined, locale) : null;
+    const title = [
+        brigadeName,
+        t('opsModal.brigadeTooltip.personnel', { count: personnelLabel }, locale),
+        `${t('opsModal.brigadeTooltip.tanks', { count: tanks }, locale)} · ${t('opsModal.brigadeTooltip.artillery', { count: arty }, locale)}`,
+        `${t('opsModal.brigadeTooltip.cohesion', { value: Math.round(cohesion) }, locale)} · ${t('opsModal.brigadeTooltip.fatigue', { value: Math.round(fatigue) }, locale)}`,
+        t('opsModal.brigadeTooltip.march', { value: formatMarchTooltip(marchTurns, locale) }, locale),
+    ].join('\n');
 
     return (
         <button
@@ -69,7 +96,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
             // WP2f: title attribute on card
-            title={`${brigadeName}\nPersonnel: ${personnel.toLocaleString()}\nTanks: ${tanks} \u00B7 Artillery: ${arty}\nCohesion: ${Math.round(cohesion)} \u00B7 Fatigue: ${Math.round(fatigue)}\nMarch: ${marchTurns === 0 ? 'In position' : marchTurns === null || marchTurns === 99 ? 'Unknown' : `${marchTurns} turns`}`}
+            title={title}
             className={`
                 relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
                 ${isUnavailable
@@ -116,7 +143,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
 
             {/* Personnel */}
             <div className="text-[18px] font-bold text-white mt-1 leading-none">
-                {personnel.toLocaleString()}
+                {personnelLabel}
             </div>
 
             {/* WP2a: Equipment labels — always show both, spelled out */}
@@ -150,8 +177,8 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                 {marchTurns === null || marchTurns === 99
                     ? '\u2014'
                     : marchTurns === 0
-                        ? 'In position'
-                        : `${marchTurns} turn${marchTurns > 1 ? 's' : ''} march`
+                        ? t('opsModal.march.inPosition', undefined, locale)
+                        : formatMarchDisplay(marchTurns, locale)
                 }
             </div>
         </button>

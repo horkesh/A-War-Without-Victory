@@ -24,6 +24,8 @@ export interface ShellNavigationState {
   setFocusedOperationHistoryId?: (id: string | null) => void;
   /** Optional: focuses a specific decision consequence row after routing to Army HQ Records. */
   setFocusedDecisionConsequenceId?: (id: string | null) => void;
+  /** Optional: focuses a specific decision consequence entry after routing to Chronicle. */
+  setFocusedChronicleDecisionRecordId?: (id: string | null) => void;
   setCodexOpen: (open: boolean) => void;
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
@@ -49,6 +51,7 @@ function getPlayerFaction(state: ShellNavigationState): string | null {
 function closeReferenceOverlays(state: ShellNavigationState): void {
   state.setCodexOpen(false);
   state.setChronicleOpen(false);
+  state.setFocusedChronicleDecisionRecordId?.(null);
 }
 
 function clearFocusedRecords(state: ShellNavigationState): void {
@@ -165,6 +168,15 @@ export function openCodex(state: ShellNavigationState): boolean {
 export function openChronicle(state: ShellNavigationState): boolean {
   state.setCodexOpen(false);
   state.setArmyHQOpen(false);
+  state.setFocusedChronicleDecisionRecordId?.(null);
+  state.setChronicleOpen(true);
+  return true;
+}
+
+export function openChronicleDecisionRecord(state: ShellNavigationState, recordId: string): boolean {
+  state.setCodexOpen(false);
+  state.setArmyHQOpen(false);
+  state.setFocusedChronicleDecisionRecordId?.(recordId);
   state.setChronicleOpen(true);
   return true;
 }

@@ -18,7 +18,7 @@ import {
 } from '../utils/playerSafeText';
 import { turnToDateString } from '../utils/formatters';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -55,11 +55,17 @@ const PHASE_COLOR: Record<string, string> = {
     recovery: 'text-neutral-400',
 };
 
-const NOTABLE_EVENT_LABEL: Record<string, string> = {
-    first_blood: 'First Blood',
-    breakthrough: 'Breakthrough',
-    stalled: 'Stalled',
-    heavy_losses: 'Heavy Losses',
+const WEEKLY_PHASE_LABEL_KEY: Record<string, MessageKey> = {
+    planning: 'operationHistory.weekly.phase.planning',
+    execution: 'operationHistory.weekly.phase.execution',
+    recovery: 'operationHistory.weekly.phase.recovery',
+};
+
+const NOTABLE_EVENT_LABEL_KEY: Record<string, MessageKey> = {
+    first_blood: 'operationHistory.weekly.notable.firstBlood',
+    breakthrough: 'operationHistory.weekly.notable.breakthrough',
+    stalled: 'operationHistory.weekly.notable.stalled',
+    heavy_losses: 'operationHistory.weekly.notable.heavyLosses',
 };
 
 const GRADE_FACTOR_LABEL: Record<string, string> = {
@@ -106,11 +112,28 @@ function formatGradeFactorLabel(key: string): string {
 }
 
 function formatNotableEventLabel(event: string): string {
-    return NOTABLE_EVENT_LABEL[event] ?? 'Notable development';
+    return NOTABLE_EVENT_LABEL_KEY[event] ? t(NOTABLE_EVENT_LABEL_KEY[event]) : t('operationHistory.weekly.notableFallback');
 }
 
 function formatCommanderAssessmentLabel(assessment: string | null | undefined): string {
     return assessment ? COMMANDER_ASSESSMENT_LABEL[assessment] ?? 'Recommendation unavailable' : 'Recommendation unavailable';
+}
+
+function formatWeeklyPhaseLabel(phase: string | null | undefined): string {
+    const key = (phase ?? '').trim().toLowerCase();
+    return WEEKLY_PHASE_LABEL_KEY[key] ? t(WEEKLY_PHASE_LABEL_KEY[key]) : t('operationHistory.weekly.phase.pending');
+}
+
+function formatWeeklyAttackCount(count: number): string {
+    return t(count === 1 ? 'operationHistory.weekly.attack.one' : 'operationHistory.weekly.attack.many', { count: count.toLocaleString() });
+}
+
+function formatWeeklyCasualties(count: number): string {
+    return t(count === 1 ? 'operationHistory.weekly.casualty.one' : 'operationHistory.weekly.casualty.many', { count: count.toLocaleString() });
+}
+
+function formatWeeklyHeldObjectives(objectives: string[]): string {
+    return t('operationHistory.weekly.heldAtClose', { objectives: objectives.join(', ') });
 }
 
 const CAPTURE_PROVENANCE_SUMMARY: Record<string, string> = {
@@ -539,26 +562,28 @@ function CompletedOpCard({
                             <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.weeklyTimeline')}</div>
                             <div className="space-y-0.5 max-h-32 overflow-auto">
                                 {op.weekly_log.map((entry, i) => {
-                                    const hasCas = entry.casualties_suffered.killed + entry.casualties_suffered.wounded > 0;
+                                    const casualties = entry.casualties_suffered.killed + entry.casualties_suffered.wounded;
+                                    const hasCas = casualties > 0;
                                     const hasCaptures = entry.objectives_captured_this_turn.length > 0;
                                     const hasNotable = entry.notable_events.length > 0;
                                     if (!entry.attacks_this_turn && !hasCas && !hasCaptures && !hasNotable) {
                                         return null;
                                     }
+                                    const heldObjectiveNames = entry.objectives_captured_this_turn.map(osid => getOsidDisplayName(osid, osidDisplayNames));
                                     return (
-                                        <div key={i} className="text-[9px] flex items-start gap-1.5">
+                                        <div key={i} className="text-[9px] flex items-start gap-2">
                                             <span className="text-text-muted tabular-nums shrink-0 w-20">{turnToDateString(entry.turn)}</span>
-                                            <span className={`shrink-0 ${PHASE_COLOR[entry.phase] ?? 'text-text-muted'}`}>{entry.phase[0].toUpperCase()}</span>
-                                            <div className="flex-1 min-w-0">
+                                            <span className={`shrink-0 min-w-[5.5rem] ${PHASE_COLOR[entry.phase] ?? 'text-text-muted'}`}>{formatWeeklyPhaseLabel(entry.phase)}</span>
+                                            <div className="flex-1 min-w-0 flex flex-wrap gap-x-2 gap-y-0.5">
                                                 {entry.attacks_this_turn > 0 && (
-                                                    <span className="text-text-secondary">{entry.attacks_this_turn} atk </span>
+                                                    <span className="text-text-secondary">{formatWeeklyAttackCount(entry.attacks_this_turn)}</span>
                                                 )}
-                                                {hasCaptures && entry.objectives_captured_this_turn.map(osid => (
-                                                    <span key={osid} className="text-green-400 capitalize">{getOsidDisplayName(osid, osidDisplayNames)} </span>
-                                                ))}
+                                                {hasCaptures && (
+                                                    <span className="text-green-400">{formatWeeklyHeldObjectives(heldObjectiveNames)}</span>
+                                                )}
                                                 {hasCas && (
                                                     <span className="text-text-muted">
-                                                        -{(entry.casualties_suffered.killed + entry.casualties_suffered.wounded).toLocaleString()}
+                                                        {formatWeeklyCasualties(casualties)}
                                                     </span>
                                                 )}
                                                 {hasNotable && entry.notable_events.map((evt, j) => (

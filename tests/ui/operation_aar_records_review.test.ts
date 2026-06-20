@@ -260,6 +260,90 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toMatch(/supply_crisis/i);
     });
 
+    it('renders Operation History weekly rows without planning shorthand or raw combat labels', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        weekly_log: [
+                            {
+                                turn: 13,
+                                phase: 'execution',
+                                attacks_this_turn: 2,
+                                objectives_captured_this_turn: ['op:prijedor:prijedor_1'],
+                                notable_events: ['supply_crisis'],
+                                casualties_suffered: { killed: 8, wounded: 23 },
+                                casualties_inflicted: { killed: 12, wounded: 31 },
+                            },
+                        ],
+                    },
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('In execution');
+        expect(copy).toContain('2 attacks');
+        expect(copy).toContain('Held at close: Prijedor');
+        expect(copy).toContain('31 casualties');
+        expect(copy).toContain('Notable development');
+        expect(copy).not.toMatch(/\bE\b/);
+        expect(copy).not.toMatch(/\b2\s*atk\b/i);
+        expect(copy).not.toMatch(/\bOBJ\b/i);
+        expect(copy).not.toMatch(/supply_crisis/i);
+    });
+
+    it('localizes Operation History weekly row labels in BCS', () => {
+        setLocale('bcs');
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        weekly_log: [
+                            {
+                                turn: 13,
+                                phase: 'execution',
+                                attacks_this_turn: 2,
+                                objectives_captured_this_turn: ['op:prijedor:prijedor_1'],
+                                notable_events: ['supply_crisis'],
+                                casualties_suffered: { killed: 8, wounded: 23 },
+                                casualties_inflicted: { killed: 12, wounded: 31 },
+                            },
+                        ],
+                    },
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        const historyTab = screen.getAllByRole('button', { name: /^Historija/i })
+            .find((button) => button.textContent?.trim().startsWith('Historija'));
+        expect(historyTab).toBeTruthy();
+        fireEvent.click(historyTab!);
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('U provedbi');
+        expect(copy).toContain('2 napada');
+        expect(copy).toContain('Držano na kraju: Prijedor');
+        expect(copy).toContain('31 gubitaka');
+        expect(copy).toContain('Značajan razvoj');
+        expect(copy).not.toMatch(/\bE\b/);
+        expect(copy).not.toMatch(/\b2\s*atk\b/i);
+        expect(copy).not.toMatch(/\bOBJ\b/i);
+        expect(copy).not.toMatch(/supply_crisis/i);
+    });
+
     it('shows per-axis objective status labels from existing AAR axis summaries', () => {
         render(createElement(RecordsContent));
 

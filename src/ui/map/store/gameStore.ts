@@ -326,6 +326,9 @@ export interface GameStore {
   /** Whether the Game Chronicle panel is open. */
   chronicleOpen: boolean;
   setChronicleOpen: (open: boolean) => void;
+  /** Decision consequence id to focus after routing from Records into Chronicle. */
+  focusedChronicleDecisionRecordId: string | null;
+  setFocusedChronicleDecisionRecordId: (id: string | null) => void;
 
   /** Whether the Chronicle Wrapped cinematic overlay is open. */
   wrappedOpen: boolean;
@@ -480,6 +483,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       focusedAftermathTurn: null,
       focusedOperationHistoryId: null,
       focusedDecisionConsequenceId: null,
+      focusedChronicleDecisionRecordId: null,
     }),
   }),
   setArmyHQTab: (tab) => set({
@@ -549,6 +553,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       focusedAftermathTurn: null,
       focusedOperationHistoryId: null,
       focusedDecisionConsequenceId: null,
+      focusedChronicleDecisionRecordId: null,
       codexOpen: false,
       chronicleOpen: false,
       opsPlanningModalOpen: false,
@@ -906,6 +911,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               // (MAX_SAFE_INTEGER) ledger build. The id is cleared on tab/subtab/
               // close but NOT on save-load/replay reset — clear it here too.
               focusedDecisionConsequenceId: null,
+              focusedChronicleDecisionRecordId: null,
             });
             console.log(`[gameStore] Loaded save: ${state.label} — ${state.formations.length} formations, ${Object.keys(state.controlBySettlement).length} control entries`);
             resolve();
@@ -953,7 +959,12 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPeaceWarTransitionSeen: (v) => set({ peaceWarTransitionSeen: v }),
 
   chronicleOpen: false,
-  setChronicleOpen: (open) => set({ chronicleOpen: open }),
+  setChronicleOpen: (open) => set({
+    chronicleOpen: open,
+    ...(open ? {} : { focusedChronicleDecisionRecordId: null }),
+  }),
+  focusedChronicleDecisionRecordId: null,
+  setFocusedChronicleDecisionRecordId: (id) => set({ focusedChronicleDecisionRecordId: id }),
 
   wrappedOpen: false,
   setWrappedOpen: (open) => set({ wrappedOpen: open }),
