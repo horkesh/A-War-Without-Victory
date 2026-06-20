@@ -4,6 +4,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import type { EventDefinition } from '../../src/sim/events/event_types.js';
+import war1992Events from '../../data/scenarios/events/war_1992.json';
 
 afterEach(() => {
   cleanup();
@@ -11,6 +13,94 @@ afterEach(() => {
 });
 
 describe('EventDecisionModal presidential dossier', () => {
+  const firstHourEventIds = ['rbih_state_identity', 'rs_strategic_goals', 'hrhb_political_goal'] as const;
+  const firstHourCatalog = new Map<string, EventDefinition>(
+    (war1992Events as EventDefinition[])
+      .filter((eventDef) => firstHourEventIds.includes(eventDef.id as typeof firstHourEventIds[number]))
+      .map((eventDef) => [eventDef.id, eventDef]),
+  );
+  const bcsExpectedCopy: Record<typeof firstHourEventIds[number], string[]> = {
+    rbih_state_identity: [
+      'Sta je Bosna?',
+      'Predsjednistvo mora proglasiti viziju drzave.',
+      'Gradjanska multietnicka republika',
+      'Sarajevsko Predsjednistvo cuva gradjanski zahtjev',
+      'Kontekst presude Karadzicu',
+      'Majska platforma iz 1992. nalazi se pred Predsjednistvom.',
+    ],
+    rs_strategic_goals: [
+      'Skupstina govori',
+      'Narodna skupstina se sastala.',
+      'Usvojiti svih sest ciljeva',
+      'Skupstinski paket zadrzava historijski maksimalisticki kurs',
+      'Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva',
+    ],
+    hrhb_political_goal: [
+      'Sta je Herceg-Bosna?',
+      'Zagreb je na vezi.',
+      'Hrvatska republika - slijediti Zagreb',
+      'Vodstvo Herceg-Bosne dobija uskladjenost s patronom',
+      'Presude Kordicu i Prlicu',
+      'Zagrebacka direktiva i institucije Herceg-Bosne vec oblikuju politiku HVO-a.',
+    ],
+  };
+
+  function buildCatalogBackedDecision(eventId: typeof firstHourEventIds[number]) {
+    const eventDef = firstHourCatalog.get(eventId);
+    if (!eventDef) throw new Error(`Missing fixture event: ${eventId}`);
+    return {
+      event_id: eventDef.id,
+      event_title: eventDef.title ?? eventDef.id,
+      narrative: eventDef.narrative,
+      staff_assessment: eventDef.staff_assessment,
+      source_note: eventDef.source_note,
+      historical_source: eventDef.historical_source,
+      category: eventDef.category,
+      turn_fired: 0,
+      faction: eventDef.responding_faction ?? 'RBiH',
+      historical_default_response_id: eventDef.historical_default_response_id,
+      response_options: eventDef.response_options ?? [],
+    };
+  }
+
+  it('renders BCS authored copy for first-hour decision title, situation, options, source note, and staff assessment', () => {
+    setLocale('bcs');
+
+    for (const eventId of firstHourEventIds) {
+      const { container, unmount } = render(React.createElement(EventDecisionModal, {
+        decision: buildCatalogBackedDecision(eventId),
+        eventCatalog: firstHourCatalog,
+        onRespond: () => undefined,
+      }));
+
+      const text = container.textContent ?? '';
+      for (const expected of bcsExpectedCopy[eventId]) {
+        expect(text).toContain(expected);
+      }
+      expect(text).not.toMatch(/What Is Bosnia|The Assembly Speaks|What Is Herceg-Bosna/);
+      expect(text).not.toMatch(/Your Presidency must declare|The National Assembly has convened|Zagreb is on the line/);
+      expect(text).not.toMatch(/Civic multi-ethnic republic|Adopt all six goals|Croat republic\s+[—-]\s+follow Zagreb/);
+      expect(text).not.toMatch(/Karadzic judgment context|ICTY Karadzic Trial Judgment|Kordic and Prlic judgments/);
+      expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
+      unmount();
+    }
+  });
+
+  it('keeps English authored first-hour decision copy as the default locale', () => {
+    for (const eventId of firstHourEventIds) {
+      const { container, unmount } = render(React.createElement(EventDecisionModal, {
+        decision: buildCatalogBackedDecision(eventId),
+        eventCatalog: firstHourCatalog,
+        onRespond: () => undefined,
+      }));
+
+      const text = container.textContent ?? '';
+      expect(text).toContain(firstHourCatalog.get(eventId)?.title);
+      expect(text).not.toContain(bcsExpectedCopy[eventId][0]);
+      unmount();
+    }
+  });
+
   it('renders foundational decision modal chrome through BCS i18n', () => {
     setLocale('bcs');
 

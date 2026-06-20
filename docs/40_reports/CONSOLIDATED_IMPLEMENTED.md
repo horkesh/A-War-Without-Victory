@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS first-hour authored decision copy:** [implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md](implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md) - Foundational opening decisions now carry BCS authored title/body/option/source/staff/trigger copy, and Desk/Inbox packets resolve catalog-localized event titles.
+
 **Latest BCS first-hour decision chrome:** [implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md](implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md) - Foundational event modal chrome, fallback Presidential Inbox items, and President's Desk packet labels now route through EN/BCS i18n instead of preserving English component/registry literals.
 
 **Latest BCS first-hour force briefing copy:** [implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md](implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md) - The game-start force briefing cards now render through EN/BCS i18n keys instead of hardcoded English paragraphs in `PeaceWarTransition`.

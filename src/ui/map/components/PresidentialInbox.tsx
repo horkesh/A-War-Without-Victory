@@ -13,6 +13,7 @@
 import { useGameStore } from '../store/gameStore';
 import { deriveInboxItems, countActionableItems, hasBlockingItems } from '../data/inboxItems';
 import type { InboxItem, InboxSeverity } from '../data/inboxItems';
+import type { EventDefinition } from '../../../sim/events/event_types';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import { t, type MessageKey } from '../i18n';
@@ -246,16 +247,17 @@ function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
 
 interface PresidentialInboxProps {
     onAction: (action: InboxItem['action'], itemId: string) => void;
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
 }
 
-export function PresidentialInbox({ onAction }: PresidentialInboxProps) {
+export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxProps) {
     const state = useGameStore((s) => s.loadedGameState);
     const osidNameMap = useGameStore((s) => s.osidDisplayNames);
     const playerFaction = resolvePlayerFacingFaction(useGameStore.getState().loadedGameState);
     const briefDismissed = useGameStore((s) => s.openingBriefDismissed);
     const setBriefDismissed = useGameStore((s) => s.setOpeningBriefDismissed);
 
-    const items = deriveInboxItems(state, osidNameMap);
+    const items = deriveInboxItems(state, osidNameMap, eventCatalog);
     const actionableCount = countActionableItems(items);
     const blocking = hasBlockingItems(items);
 

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**AUTHORED EVENT LOCALIZATION BOUNDARY (2026-06-21).** Pending event decisions persist English-compatible payloads, but display can resolve locale-specific authored copy from the full event catalog. Do instead: store `localizations.<locale>` on event definitions for title/narrative/staff/source/trigger/options, have modal and Desk/Inbox packet titles resolve through the catalog, and live-check the Desk card because component modal tests can miss an English pending-payload title leak.
+
 **FIRST-HOUR DECISION CHROME (2026-06-21).** Foundational event modal chrome and Desk packet labels are UI copy, but event titles/options/narrative are scenario data. Do instead: route modal headings, badges, fallback inbox titles/subtitles, and desk family/action labels through i18n; keep event-data localization as a separate authored-content lane.
 
 **FIRST-HOUR FORCE BRIEFING COPY (2026-06-21).** The game-start identity modal has localized identity rows and separate force briefing cards. Do instead: keep force names/descriptions behind `intro.forceBriefing.*` keys and render through `t(...)`; live-check BCS because a localized identity block can still sit beside English force-description paragraphs.

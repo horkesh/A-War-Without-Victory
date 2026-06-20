@@ -9,6 +9,7 @@
  */
 
 import type { LoadedGameState } from './types';
+import type { EventDefinition } from '../../../sim/events/event_types';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { playerFactionMatch } from './playerFactionMatch';
 import { strictCompare } from '../../../state/validateGameState';
@@ -16,7 +17,7 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
-import { t } from '../i18n';
+import { getActiveLocale, t } from '../i18n';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -97,6 +98,18 @@ function officerEventDedupeKey(evt: OfficerEvent): string {
     return `${evt.type}:${subjectKey}`;
 }
 
+function localizedEventTitle(
+    eventId: string,
+    fallback: string | null | undefined,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): string {
+    const locale = getActiveLocale();
+    const localized = locale === 'en' ? undefined : eventCatalog?.get(eventId)?.localizations?.[locale]?.title;
+    const trimmed = localized?.trim();
+    if (trimmed) return trimmed;
+    return fallback ?? t('inbox.item.eventDecision.titleFallback');
+}
+
 /**
  * Derive all inbox items from the current game state.
  * Returns items sorted by priority (highest first).
@@ -104,6 +117,7 @@ function officerEventDedupeKey(evt: OfficerEvent): string {
 export function deriveInboxItems(
     state: LoadedGameState | null,
     osidNameMap: Record<string, string> | null,
+    eventCatalog?: ReadonlyMap<string, EventDefinition>,
 ): InboxItem[] {
     if (!state) return [];
 
@@ -130,7 +144,7 @@ export function deriveInboxItems(
                 id: `event:${evt.event_id}`,
                 type: 'event_decision',
                 severity: 'blocking',
-                title: evt.event_title ?? t('inbox.item.eventDecision.titleFallback'),
+                title: localizedEventTitle(evt.event_id, evt.event_title, eventCatalog),
                 subtitle: t('inbox.item.eventDecision.subtitle', { date: turnToDateString(evt.turn_fired) }),
                 action: eventSurface.inboxAction,
                 priority: 10,

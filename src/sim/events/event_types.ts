@@ -429,6 +429,23 @@ export interface EventNotification {
     consumed: boolean;
 }
 
+export interface EventResponseOptionLocalization {
+    label?: string;
+    description?: string;
+}
+
+export interface EventDefinitionLocalization {
+    title?: string;
+    narrative?: string;
+    situation?: string;
+    staff_assessment?: string;
+    trigger_evidence?: string[];
+    historical_source?: string;
+    source_note?: string;
+    source?: string;
+    response_options?: Record<string, EventResponseOptionLocalization>;
+}
+
 export interface EventDefinition {
     id: string;
     /** Display title for event UI headline. */
@@ -473,6 +490,8 @@ export interface EventDefinition {
     bot_response_logic?: 'accept_first' | 'reject_all' | 'capital_based' | 'capital_weighted' | 'historical' | 'personality_weighted' | 'strategic_weighted';
     /** Authored informational notifications shown to non-source factions after a response resolves. */
     notifications_to_other_factions?: EventNotificationTextByResponse;
+    /** Optional authored display localizations. Read-model/UI only; evaluators ignore it. */
+    localizations?: Record<string, EventDefinitionLocalization>;
     // v0.6.0 metagame fields (all optional for backward compat)
     /** Pressure system config: readiness counter with increment/decay. */
     pressure?: PressureConfig;

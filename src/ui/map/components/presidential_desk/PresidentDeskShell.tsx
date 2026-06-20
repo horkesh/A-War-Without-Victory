@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import type { EventDefinition } from '../../../../sim/events/event_types';
 import type { InboxItem } from '../../data/inboxItems';
 import { countActionableItems, deriveInboxItems } from '../../data/inboxItems';
 import { derivePresidentialBlockers } from '../../data/presidentialBlockers';
@@ -13,6 +14,7 @@ import { DeskPacket } from './DeskPacket';
 export interface PresidentDeskShellProps {
   state: LoadedGameState | null;
   osidNameMap: Record<string, string> | null;
+  eventCatalog?: ReadonlyMap<string, EventDefinition>;
   onAction: (action: InboxItem['action'], itemId: string) => void;
   onAdvance: () => void;
   onOpenArmyHQ: () => void;
@@ -35,6 +37,7 @@ function factionTitle(state: LoadedGameState | null): string {
 export function PresidentDeskShell({
   state,
   osidNameMap,
+  eventCatalog,
   onAction,
   onAdvance,
   onOpenArmyHQ,
@@ -46,7 +49,7 @@ export function PresidentDeskShell({
   onOpenCommandSurface,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLElement | null>(null);
-  const items = deriveInboxItems(state, osidNameMap);
+  const items = deriveInboxItems(state, osidNameMap, eventCatalog);
   const actionableCount = countActionableItems(items);
   const advanceReview = buildPreAdvanceCommandReviewView({ state, osidNameMap });
   const blocked = advanceReview.status === 'blocked' || derivePresidentialBlockers(state, osidNameMap).length > 0;

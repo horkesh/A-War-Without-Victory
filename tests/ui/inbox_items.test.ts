@@ -16,6 +16,8 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { deriveInboxItems, countActionableItems, hasBlockingItems, resolveEventQueueIndex } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import type { EventDefinition } from '../../src/sim/events/event_types.js';
+import war1992Events from '../../data/scenarios/events/war_1992.json';
 
 afterEach(() => {
     setLocale('en');
@@ -136,6 +138,34 @@ describe('deriveInboxItems — event decisions', () => {
 
         expect(copy).toContain('6 apr 1992');
         expect(copy).not.toMatch(/Decision Required|A presidential decision requires|Peace Proposal|Peace proposal/);
+    });
+
+    it('uses catalog-localized BCS title for first-hour event decision packets', () => {
+        setLocale('bcs');
+        const firstHourCatalog = new Map<string, EventDefinition>(
+            (war1992Events as EventDefinition[])
+                .filter((eventDef) => eventDef.id === 'rbih_state_identity')
+                .map((eventDef) => [eventDef.id, eventDef]),
+        );
+        const state = makeStub({
+            turn: 0,
+            pendingEventDecisions: [
+                {
+                    event_id: 'rbih_state_identity',
+                    event_title: 'What Is Bosnia?',
+                    turn_fired: 0,
+                    faction: 'RBiH',
+                    response_options: [
+                        { id: 'civic', label: 'Civic multi-ethnic republic', effects: [] },
+                    ],
+                },
+            ],
+        });
+
+        const eventItem = deriveInboxItems(state, null, firstHourCatalog).find(i => i.type === 'event_decision');
+
+        expect(eventItem?.title).toBe('Sta je Bosna?');
+        expect(eventItem?.title).not.toBe('What Is Bosnia?');
     });
 
     it('returns multiple items for multiple pending decisions', () => {

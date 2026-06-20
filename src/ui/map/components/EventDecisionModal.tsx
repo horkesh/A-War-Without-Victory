@@ -28,7 +28,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
-import { t, type MessageKey } from '../i18n';
+import { t, useLocale, type Locale, type MessageKey } from '../i18n';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -40,6 +40,68 @@ type EventDecisionDossier = PendingEventDecision & {
     trigger_evidence?: string[];
     situation?: string;
 };
+
+function eventLocalization(def: EventDefinition | undefined, locale: Locale) {
+    if (locale === 'en') return undefined;
+    return def?.localizations?.[locale];
+}
+
+function localizedField(
+    original: string | undefined,
+    def: EventDefinition | undefined,
+    locale: Locale,
+    field: 'title' | 'narrative' | 'situation' | 'staff_assessment' | 'historical_source' | 'source_note' | 'source',
+): string | undefined {
+    const localized = eventLocalization(def, locale)?.[field];
+    return typeof localized === 'string' && localized.trim().length > 0 ? localized : original;
+}
+
+function localizedTriggerEvidence(
+    original: string[] | undefined,
+    def: EventDefinition | undefined,
+    locale: Locale,
+): string[] | undefined {
+    const localized = eventLocalization(def, locale)?.trigger_evidence;
+    return Array.isArray(localized) && localized.length > 0 ? localized : original;
+}
+
+function localizedResponseOptions(
+    options: EventResponseOption[],
+    def: EventDefinition | undefined,
+    locale: Locale,
+): EventResponseOption[] {
+    const localizedOptions = eventLocalization(def, locale)?.response_options;
+    if (!localizedOptions) return options;
+    return options.map((option) => {
+        const localized = localizedOptions[option.id];
+        if (!localized) return option;
+        return {
+            ...option,
+            label: localized.label?.trim() || option.label,
+            description: localized.description?.trim() || option.description,
+        };
+    });
+}
+
+function resolveLocalizedDecisionDossier(
+    decision: EventDecisionDossier,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+    locale: Locale,
+): EventDecisionDossier {
+    const def = eventCatalog?.get(decision.event_id);
+    return {
+        ...decision,
+        event_title: localizedField(decision.event_title, def, locale, 'title') ?? decision.event_title,
+        narrative: localizedField(decision.narrative, def, locale, 'narrative'),
+        situation: localizedField(decision.situation, def, locale, 'situation'),
+        staff_assessment: localizedField(decision.staff_assessment, def, locale, 'staff_assessment'),
+        trigger_evidence: localizedTriggerEvidence(decision.trigger_evidence, def, locale),
+        historical_source: localizedField(decision.historical_source, def, locale, 'historical_source'),
+        source_note: localizedField(decision.source_note, def, locale, 'source_note'),
+        source: localizedField(decision.source, def, locale, 'source'),
+        response_options: localizedResponseOptions(decision.response_options, def, locale),
+    };
+}
 
 const FACTION_TEXT_CLASS: Record<string, string> = {
     RS: 'text-faction-rs',
@@ -518,11 +580,13 @@ function DecisionContextSection({
     eventCatalog,
     state,
     diagMode,
+    locale,
 }: {
     decision: EventDecisionDossier;
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
     state?: GameState;
     diagMode: boolean;
+    locale: Locale;
 }) {
     // Graceful degradation: if neither catalog nor state is available, omit
     // the entire section. The existing modal sidebar already shows the
@@ -532,7 +596,9 @@ function DecisionContextSection({
     const family = eventDef?.family;
     const sourceTier = eventDef?.source_tier;
     const ancestors = state ? getCausalAncestors(decision.event_id, state) : [];
-    const rawDossier = eventDef?.source_note ?? eventDef?.historical_source ?? null;
+    const rawDossier = localizedField(eventDef?.source_note, eventDef, locale, 'source_note')
+        ?? localizedField(eventDef?.historical_source, eventDef, locale, 'historical_source')
+        ?? null;
     const dossierExcerpt = rawDossier ? truncateSourceDossier(playerSafeDossierText(rawDossier, diagMode)) : null;
     // Resolve ancestry event_ids to catalog titles (humanized id as fallback)
     // so the dev diagnostic shows readable names rather than raw slugs.
@@ -594,17 +660,19 @@ function DecisionContextSection({
 }
 
 export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor }: EventDecisionModalProps) {
-    const factionColor = FACTION_TEXT_CLASS[decision.faction ?? ''] ?? 'text-accent-gold';
-    const category = eventDecisionCategoryLabel(decision.category);
-    const sourceNote = decision.source_note ?? decision.historical_source ?? decision.source ?? null;
-    const hasHistoricalDefault = decision.response_options.some((option) => isHistoricalOption(option, decision));
+    const [locale] = useLocale();
+    const localizedDecision = resolveLocalizedDecisionDossier(decision, eventCatalog, locale);
+    const factionColor = FACTION_TEXT_CLASS[localizedDecision.faction ?? ''] ?? 'text-accent-gold';
+    const category = eventDecisionCategoryLabel(localizedDecision.category);
+    const sourceNote = localizedDecision.source_note ?? localizedDecision.historical_source ?? localizedDecision.source ?? null;
+    const hasHistoricalDefault = localizedDecision.response_options.some((option) => isHistoricalOption(option, localizedDecision));
 
     // Phase 2 slice 1 "Back the Officer": for operation/corps-scoped events
     // the assessment block speaks in a named officer's voice; otherwise it falls
     // back to the generic "Staff assessment". (See deriveAssessmentLabel.)
-    const assessmentLabel = deriveAssessmentLabel(decision.category, advisor);
+    const assessmentLabel = deriveAssessmentLabel(localizedDecision.category, advisor);
     const diagMode = useGameStore((s) => s.diagMode);
-    const decisionDate = turnToDateString(decision.turn_fired);
+    const decisionDate = turnToDateString(localizedDecision.turn_fired);
     const safeSourceNote = sourceNote ? playerSafeDossierText(sourceNote, diagMode) : null;
 
     return (
@@ -632,13 +700,13 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                         {t('eventDecision.decisionRequired')}
                     </span>
                     <span className={`text-[10px] font-mono ${factionColor}`}>
-                        {getPlayerSafePoliticalFactionName(decision.faction)} · {decisionDate}
+                        {getPlayerSafePoliticalFactionName(localizedDecision.faction)} · {decisionDate}
                     </span>
                 </div>
 
                 {/* Title */}
                 <h3 id="event-decision-title" className="font-sans text-lg text-text-primary font-semibold mb-3">
-                    {decision.event_title}
+                    {localizedDecision.event_title}
                 </h3>
 
                 <div className="mb-4 grid gap-3 md:grid-cols-[1fr_220px]">
@@ -647,25 +715,25 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             {t('eventDecision.situation')}
                         </div>
                         <p className="text-[13px] leading-relaxed text-text-primary">
-                            {decision.narrative || decision.situation || t('eventDecision.defaultSituation')}
+                            {localizedDecision.narrative || localizedDecision.situation || t('eventDecision.defaultSituation')}
                         </p>
-                        {decision.staff_assessment && (
+                        {localizedDecision.staff_assessment && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
                                 <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                                     {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
                                 </div>
                                 <p className="text-[12px] leading-relaxed text-text-secondary">
-                                    {playerSafeDossierText(decision.staff_assessment, diagMode)}
+                                    {playerSafeDossierText(localizedDecision.staff_assessment, diagMode)}
                                 </p>
                             </div>
                         )}
-                        {decision.trigger_evidence && decision.trigger_evidence.length > 0 && (
+                        {localizedDecision.trigger_evidence && localizedDecision.trigger_evidence.length > 0 && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
                                 <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
                                     {t('eventDecision.triggerEvidence')}
                                 </div>
                                 <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
-                                    {decision.trigger_evidence.map((evidence) => (
+                                    {localizedDecision.trigger_evidence.map((evidence) => (
                                         <li key={evidence}>{playerSafeDossierText(evidence, diagMode)}</li>
                                     ))}
                                 </ul>
@@ -684,7 +752,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             <div>
                                 <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
                                 <span className="text-text-primary">
-                                    {getPlayerSafePoliticalFactionName(decision.faction)} / {decisionDate}
+                                    {getPlayerSafePoliticalFactionName(localizedDecision.faction)} / {decisionDate}
                                 </span>
                             </div>
                             {safeSourceNote && (
@@ -701,10 +769,11 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     after the dossier sidebar / source-note, before the
                     response option list. See H1 scoping §4.2A. */}
                 <DecisionContextSection
-                    decision={decision}
+                    decision={localizedDecision}
                     eventCatalog={eventCatalog}
                     state={state}
                     diagMode={diagMode}
+                    locale={locale}
                 />
 
                 {!hasHistoricalDefault && (
@@ -719,21 +788,21 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                         {t('eventDecision.presidentialResponse')}
                     </div>
                     <div className="space-y-3">
-                    {decision.response_options.map(option => (
+                    {localizedDecision.response_options.map(option => (
                         <ResponseButton
                             key={option.id}
                             option={option}
-                            decision={decision}
+                            decision={localizedDecision}
                             sourceNote={safeSourceNote}
                             showDiagnostics={diagMode}
-                            onChoose={() => onRespond(decision.event_id, option.id)}
+                            onChoose={() => onRespond(localizedDecision.event_id, option.id)}
                         />
                     ))}
                     </div>
                 </div>
 
                 <DecisionFutureConsequenceDossier
-                    options={decision.response_options}
+                    options={localizedDecision.response_options}
                     showDiagnostics={diagMode}
                 />
 
