@@ -152,7 +152,7 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/FormationDetail.tsx')).toContain('data-testid="formation-detail-panel"');
     expect(read('src/ui/map/components/FormationDetail.tsx')).toContain('idPrefix="formation-detail"');
     expect(read('src/ui/map/components/FormationDetail.tsx')).toContain('data-testid="formation-location-link"');
-    expect(read('src/ui/map/components/FormationDetail.tsx')).toContain("kind: 'field-settlement'");
+    expect(read('src/ui/map/components/FormationDetail.tsx')).toContain("kind: 'field-formation-at-settlement'");
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain('data-testid={`records-subtab-${id}`}');
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain("data-selected={subTab === id ? 'true' : 'false'}");
     expect(read('src/ui/map/components/army_hq/RecordsContent.tsx')).toContain('data-testid="records-content"');

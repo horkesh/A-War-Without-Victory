@@ -1,7 +1,7 @@
 # BrigadeRow Supply Label I18n
 
-**Date:** 2026-06-20  
-**Type:** UI/read-model i18n copy polish  
+**Date:** 2026-06-20
+**Type:** UI/read-model i18n copy polish
 **Branch:** `codex/brigaderow-supply-labels`
 
 ## Summary
