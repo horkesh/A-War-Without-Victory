@@ -1,3 +1,7 @@
+## 2026-06-21 - First-hour decision chrome boundary
+
+**Event modal and desk packet chrome are localized UI copy; authored event data is separate:** `EventDecisionModal`, `deriveInboxItems`, and President's Desk `DecisionCard` should route labels, section headings, fallback titles/subtitles, badges, and action labels through i18n keys. Durable rule: do not treat translating modal chrome as translating event scenario data; `war_1992.json` titles/options/narrative need their own data-localization lane. Applied in `[2026-06-21] BCS First-Hour Decision Chrome`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
+
 ## 2026-06-21 - First-hour force briefing copy boundary
 
 **Game-start force cards are localized UI copy, not component constants:** `PeaceWarTransition` has two text families: the authored player identity block and the three force briefing cards. Durable rule: keep force names/descriptions behind `intro.forceBriefing.*` i18n keys and render through `t(...)`; do not place English paragraphs in `FACTION_BRIEFINGS`. Applied in `[2026-06-21] BCS First-Hour Force Briefing Copy`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md`.

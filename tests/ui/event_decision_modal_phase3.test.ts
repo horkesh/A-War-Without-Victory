@@ -3,10 +3,56 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { EventDecisionModal } from '../../src/ui/map/components/EventDecisionModal.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  setLocale('en');
+});
 
 describe('EventDecisionModal presidential dossier', () => {
+  it('renders foundational decision modal chrome through BCS i18n', () => {
+    setLocale('bcs');
+
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'rbih_state_identity',
+        event_title: 'What Is Bosnia?',
+        narrative: 'Authored event prose remains data-owned for now.',
+        staff_assessment: 'Authored staff assessment remains data-owned for now.',
+        trigger_evidence: ['Authored evidence remains data-owned for now.'],
+        category: 'political',
+        historical_source: 'Authored source packet',
+        turn_fired: 0,
+        faction: 'RBiH',
+        historical_default_response_id: 'civic',
+        response_options: [
+          {
+            id: 'civic',
+            label: 'Civic multi-ethnic republic',
+            historical_marker: 'historical_default',
+            effects: [],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    const text = container.textContent ?? '';
+    expect(text).toContain('Potrebna odluka');
+    expect(text).toContain('Situacija');
+    expect(text).toContain('Dosije');
+    expect(text).toContain('Predsjednicki odgovor');
+    expect(text).toContain('Historijski zadano');
+    expect(text).toContain('Trag zapisa');
+    expect(text).not.toContain('Decision Required');
+    expect(text).not.toContain('Situation');
+    expect(text).not.toContain('Dossier');
+    expect(text).not.toContain('Presidential Response');
+    expect(text).not.toContain('Historical default');
+    expect(text).not.toContain('Record trail');
+  });
+
   it('renders historical marker, descriptions, effect preview, no-effect fallback, and record trail', () => {
     render(React.createElement(EventDecisionModal, {
       decision: {

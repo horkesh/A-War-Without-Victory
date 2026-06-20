@@ -28,6 +28,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { isDisplayEventEffect } from '../utils/eventEffectDisplay';
 import { turnToDateString } from '../utils/formatters';
+import { t, type MessageKey } from '../i18n';
 
 type EventDecisionDossier = PendingEventDecision & {
     narrative?: string;
@@ -44,6 +45,16 @@ const FACTION_TEXT_CLASS: Record<string, string> = {
     RS: 'text-faction-rs',
     RBiH: 'text-faction-rbih',
     HRHB: 'text-faction-hrhb',
+};
+
+const EVENT_CATEGORY_LABEL_KEYS: Record<string, MessageKey> = {
+    command: 'eventDecision.category.command',
+    diplomatic: 'eventDecision.category.diplomatic',
+    economic: 'eventDecision.category.economic',
+    humanitarian: 'eventDecision.category.humanitarian',
+    military: 'eventDecision.category.military',
+    political: 'eventDecision.category.political',
+    territorial: 'eventDecision.category.territorial',
 };
 
 export interface EventDecisionModalProps {
@@ -107,6 +118,12 @@ function sentenceToken(value: string | undefined): string {
     const text = humanizeToken(value).trim();
     if (!text) return '';
     return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+}
+
+function eventDecisionCategoryLabel(category: string | undefined): string {
+    if (!category) return t('eventDecision.defaultCategory');
+    const key = EVENT_CATEGORY_LABEL_KEYS[category];
+    return key ? t(key) : sentenceToken(category);
 }
 
 /** Phase 2 slice 1: "corps_commander" → "Corps Commander" for advisor labels. */
@@ -184,7 +201,7 @@ function buildPreviewRows(option: EventResponseOption): string[] {
     }
     const flagValues = Object.values(option.sets_flags ?? {});
     if (flagValues.length > 0) {
-        rows.push(`Campaign record updated: ${flagValues.map((value) => sentenceToken(String(value))).join(', ')}`);
+        rows.push(t('eventDecision.campaignRecordUpdated', { values: flagValues.map((value) => sentenceToken(String(value))).join(', ') }));
     }
     return rows;
 }
@@ -194,7 +211,7 @@ function EffectPreview({ option }: { option: EventResponseOption }) {
     if (rows.length === 0) {
         return (
             <p className="mt-2 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2 text-[11px] text-text-secondary">
-                No immediate mechanical effects.
+                {t('eventDecision.noImmediateEffects')}
             </p>
         );
     }
@@ -332,7 +349,7 @@ function FutureConsequencePreview({
     return (
         <div className="mt-2">
             <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
-                Future consequences
+                {t('eventDecision.futureConsequences')}
             </div>
             <ul className="space-y-1.5">
                 {consequences.map((consequence) => (
@@ -368,10 +385,21 @@ function DecisionFutureConsequenceDossier({
     return (
         <section className="mb-4 rounded border border-panel-border bg-panel-card/70 p-4">
             <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                Downstream impact preview
+                {t('eventDecision.downstreamImpactPreview')}
             </div>
             <p className="mb-3 text-[11px] leading-relaxed text-text-secondary">
-                {consequenceCount} long-term branch {consequenceCount === 1 ? 'note is' : 'notes are'} available across {optionsWithConsequences.length} response {optionsWithConsequences.length === 1 ? 'option' : 'options'}.
+                {t(
+                    consequenceCount === 1
+                        ? 'eventDecision.downstreamSummary.one'
+                        : 'eventDecision.downstreamSummary.many',
+                    {
+                        consequenceCount,
+                        optionCount: optionsWithConsequences.length,
+                        optionNoun: t(optionsWithConsequences.length === 1
+                            ? 'eventDecision.responseOption.one'
+                            : 'eventDecision.responseOption.many'),
+                    },
+                )}
             </p>
             <div className="space-y-3">
                 {optionsWithConsequences.map((option) => {
@@ -384,7 +412,9 @@ function DecisionFutureConsequenceDossier({
                         </div>
                         <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                             <p className="text-[11px] text-text-muted">
-                                {optionConsequenceCount} downstream branch {optionConsequenceCount === 1 ? 'note' : 'notes'}
+                                {t(optionConsequenceCount === 1
+                                    ? 'eventDecision.downstreamBranchNote.one'
+                                    : 'eventDecision.downstreamBranchNote.many', { count: optionConsequenceCount })}
                             </p>
                             <button
                                 type="button"
@@ -392,7 +422,7 @@ function DecisionFutureConsequenceDossier({
                                 aria-expanded={expanded}
                                 onClick={() => toggleOption(option.id)}
                             >
-                                {expanded ? 'Hide details' : 'Show details'}
+                                {expanded ? t('eventDecision.hideDetails') : t('eventDecision.showDetails')}
                             </button>
                         </div>
                         {expanded && <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />}
@@ -441,29 +471,29 @@ function ResponseButton({
                     {historical && (
                         <span
                             className="rounded-sm border border-accent-gold/60 bg-accent-gold/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold"
-                            title={`The historically attested choice. You are free to choose any option.${sourceNote ? ` Source: ${sourceNote}.` : ''}`}
+                            title={`${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote })}` : ''}`}
                         >
-                            Historical default
+                            {t('eventDecision.historicalDefault')}
                         </span>
                     )}
                     {staffRecommended && (
                         <span
                             className="rounded-sm border border-sky-400/60 bg-sky-500/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-200"
-                            title="Staff recommendation for an abstract command decision. This is not a historical default and does not control bot calibration."
+                            title={t('eventDecision.staffRecommendationDescription')}
                         >
-                            Staff recommendation
+                            {t('eventDecision.staffRecommendation')}
                         </span>
                     )}
                 </span>
             </button>
             {historical && (
                 <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
-                    This is the historically attested choice. You are free to choose any option.{sourceNote ? ` Source: ${sourceNote}.` : ''}
+                    {t('eventDecision.historicalDefaultDescription')}{sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote })}` : ''}
                 </p>
             )}
             {staffRecommended && (
                 <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
-                    Staff recommendation for this abstract command decision. This is not a historical default and does not control bot calibration.
+                    {t('eventDecision.staffRecommendationDescription')}
                 </p>
             )}
             {option.description && (
@@ -530,14 +560,17 @@ function DecisionContextSection({
             data-testid="decision-context-section"
         >
             <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                Decision Context
+                {t('eventDecision.decisionContext')}
             </div>
             {showDiagnostics && eventDef && (family || sourceTier) && (
                 <div
                     className="mb-2 text-[11px] leading-relaxed text-text-secondary"
                     data-testid="decision-context-family-source"
                 >
-                    Family: {family ?? 'unknown'} | Source: {sourceTier ?? 'unknown'}
+                    {t('eventDecision.familySource', {
+                        family: family ?? t('eventDecision.unknown'),
+                        source: sourceTier ?? t('eventDecision.unknown'),
+                    })}
                 </div>
             )}
             {showDiagnostics && ancestors.length > 0 && (
@@ -545,7 +578,7 @@ function DecisionContextSection({
                     className="mb-2 text-[11px] leading-relaxed text-text-secondary"
                     data-testid="decision-context-ancestry"
                 >
-                    Ancestry: {ancestorLabels.join(', ')}
+                    {t('eventDecision.ancestry', { values: ancestorLabels.join(', ') })}
                 </div>
             )}
             {dossierExcerpt && (
@@ -553,7 +586,7 @@ function DecisionContextSection({
                     className="text-[11px] leading-relaxed text-text-secondary"
                     data-testid="decision-context-dossier"
                 >
-                    Source dossier: {dossierExcerpt}
+                    {t('eventDecision.sourceDossier', { dossier: dossierExcerpt })}
                 </div>
             )}
         </section>
@@ -562,7 +595,7 @@ function DecisionContextSection({
 
 export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor }: EventDecisionModalProps) {
     const factionColor = FACTION_TEXT_CLASS[decision.faction ?? ''] ?? 'text-accent-gold';
-    const category = sentenceToken(decision.category) || 'Presidential decision';
+    const category = eventDecisionCategoryLabel(decision.category);
     const sourceNote = decision.source_note ?? decision.historical_source ?? decision.source ?? null;
     const hasHistoricalDefault = decision.response_options.some((option) => isHistoricalOption(option, decision));
 
@@ -596,7 +629,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                 <div className="flex items-center gap-3 mb-4">
                     <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-panel-bg bg-accent-gold px-2 py-0.5 rounded"
                           style={{ transform: 'rotate(-2deg)' }}>
-                        Decision Required
+                        {t('eventDecision.decisionRequired')}
                     </span>
                     <span className={`text-[10px] font-mono ${factionColor}`}>
                         {getPlayerSafePoliticalFactionName(decision.faction)} · {decisionDate}
@@ -611,15 +644,15 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                 <div className="mb-4 grid gap-3 md:grid-cols-[1fr_220px]">
                     <section className="rounded border border-panel-border bg-panel-card/80 p-4">
                         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                            Situation
+                            {t('eventDecision.situation')}
                         </div>
                         <p className="text-[13px] leading-relaxed text-text-primary">
-                            {decision.narrative || decision.situation || 'This decision requires your response.'}
+                            {decision.narrative || decision.situation || t('eventDecision.defaultSituation')}
                         </p>
                         {decision.staff_assessment && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
                                 <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
-                                    {assessmentLabel}
+                                    {assessmentLabel === 'Staff assessment' ? t('eventDecision.staffAssessment') : assessmentLabel}
                                 </div>
                                 <p className="text-[12px] leading-relaxed text-text-secondary">
                                     {playerSafeDossierText(decision.staff_assessment, diagMode)}
@@ -629,7 +662,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                         {decision.trigger_evidence && decision.trigger_evidence.length > 0 && (
                             <div className="mt-3 rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
                                 <div className="mb-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-muted">
-                                    Trigger evidence
+                                    {t('eventDecision.triggerEvidence')}
                                 </div>
                                 <ul className="space-y-1 text-[12px] leading-relaxed text-text-secondary">
                                     {decision.trigger_evidence.map((evidence) => (
@@ -641,22 +674,22 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     </section>
                     <aside className="rounded border border-panel-border bg-panel-card/80 p-4 text-[11px] text-text-secondary">
                         <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                            Dossier
+                            {t('eventDecision.dossier')}
                         </div>
                         <div className="space-y-2">
                             <div>
-                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Category</span>
+                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.category')}</span>
                                 <span className="text-text-primary">{category}</span>
                             </div>
                             <div>
-                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Faction / Date</span>
+                                <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
                                 <span className="text-text-primary">
                                     {getPlayerSafePoliticalFactionName(decision.faction)} / {decisionDate}
                                 </span>
                             </div>
                             {safeSourceNote && (
                                 <div>
-                                    <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">Source note</span>
+                                    <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.sourceNote')}</span>
                                     <span className="text-text-primary">{safeSourceNote}</span>
                                 </div>
                             )}
@@ -676,14 +709,14 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
 
                 {!hasHistoricalDefault && (
                     <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">
-                        Historical default source review required. This is not a recommendation; choose the response that matches your policy.
+                        {t('eventDecision.historicalDefaultSourceReview')}
                     </div>
                 )}
 
                 {/* Response options */}
                 <div className="mb-4">
                     <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold mb-3">
-                        Presidential Response
+                        {t('eventDecision.presidentialResponse')}
                     </div>
                     <div className="space-y-3">
                     {decision.response_options.map(option => (
@@ -705,7 +738,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                 />
 
                 <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-[11px] leading-relaxed text-text-secondary">
-                    Record trail: after your response, this decision appears in the Chronicle decision ledger and Army HQ Records.
+                    {t('eventDecision.recordTrail')}
                 </div>
             </div>
         </Modal>

@@ -16,6 +16,7 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
+import { t } from '../i18n';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -129,8 +130,8 @@ export function deriveInboxItems(
                 id: `event:${evt.event_id}`,
                 type: 'event_decision',
                 severity: 'blocking',
-                title: evt.event_title ?? 'Decision Required',
-                subtitle: `A presidential decision requires your response as of ${turnToDateString(evt.turn_fired)}.`,
+                title: evt.event_title ?? t('inbox.item.eventDecision.titleFallback'),
+                subtitle: t('inbox.item.eventDecision.subtitle', { date: turnToDateString(evt.turn_fired) }),
                 action: eventSurface.inboxAction,
                 priority: 10,
             });
@@ -144,8 +145,8 @@ export function deriveInboxItems(
             id: `peace:${peacePlan.planId}`,
             type: 'peace_plan',
             severity: 'urgent',
-            title: peacePlan.planName ?? 'Peace Proposal',
-            subtitle: 'International mediators have presented a peace plan.',
+            title: peacePlan.planName ?? t('inbox.item.peacePlan.titleFallback'),
+            subtitle: t('inbox.item.peacePlan.subtitle'),
             action: peaceSurface.inboxAction,
             priority: 20,
         });

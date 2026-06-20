@@ -12,9 +12,14 @@
  *  - Empty state returns only date marker
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterEach } from 'vitest';
 import { deriveInboxItems, countActionableItems, hasBlockingItems, resolveEventQueueIndex } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 // ---------------------------------------------------------------------------
 // Minimal stub factory — only fields that deriveInboxItems actually reads
@@ -96,6 +101,41 @@ describe('deriveInboxItems — event decisions', () => {
         expect(eventItems).toHaveLength(1);
         expect(eventItems[0].subtitle).toContain('6 Apr 1992');
         expect(eventItems[0].subtitle).not.toMatch(/\bturn\s+0\b/i);
+    });
+
+    it('localizes turn-zero pending foundational decision fallback copy in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeStub({
+            turn: 0,
+            pendingEventDecisions: [
+                {
+                    event_id: 'evt_opening_foundation',
+                    event_title: undefined as unknown as string,
+                    turn_fired: 0,
+                    faction: 'RBiH',
+                    response_options: [
+                        { id: 'opt_a', label: 'Accept', effects: [] },
+                    ],
+                },
+            ],
+            pendingPeacePlan: {
+                planId: 'opening_peace',
+                planName: undefined as unknown as string,
+                narrative: 'A plan.',
+                turnOffered: 0,
+                proposedSplit: { RBiH: 33, RS: 34, HRHB: 33 },
+                institutionalModel: 'unknown',
+                botResponses: {},
+            },
+        });
+
+        const copy = deriveInboxItems(state, null)
+            .filter((item) => item.type === 'event_decision' || item.type === 'peace_plan')
+            .map((item) => `${item.title} ${item.subtitle}`)
+            .join(' ');
+
+        expect(copy).toContain('6 apr 1992');
+        expect(copy).not.toMatch(/Decision Required|A presidential decision requires|Peace Proposal|Peace proposal/);
     });
 
     it('returns multiple items for multiple pending decisions', () => {
