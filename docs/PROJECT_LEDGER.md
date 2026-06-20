@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): preserve map selection context
+
+**Type:** UI/store route polish.
+
+**Fix:** Direct tactical-map sector/front clicks now route through `field-sector-in-corps` when corps context is known. Direct formation/counter/stack clicks now preserve sector context first, then corps context, then settlement/bare formation fallback through `inspectOnField(...)`, replacing bare map-click setters that cleared parent command context.
+
+**Verification:** focused route/OOB proof passed 37/37; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `AWWV_LIVE_SURFACE_BROWSER_PORT=3245 npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was removed afterward. Report: `docs/40_reports/implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md`.
+
+**Scope/determinism:** UI/store routing/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label peace and Decision Room copy
 
 **Type:** UI/read-model i18n copy polish.

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest direct map selection context routing:** [implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md](implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md) - Direct tactical-map sector/front and formation/counter/stack clicks now preserve corps/sector context through the shared field-inspection contract instead of opening orphaned panels.
+
 **Latest AAA polish wave 3 command-surface / OOB truth:** [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) - Command-surface copy, startup Army HQ command structures, opening commander display, and baked startup OOB parentage were reconciled while preserving Srebrenica/Zepa event-owned fall receipts.
 
 **Latest AAA polish wave 4 live copy / AAR provenance:** [implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md](implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md) - First-hour Situation, toolbar, Inbox, sector briefing, settlement timeline, and Operation History axis copy now avoid raw staff tokens and final-held-as-captured wording while preserving Srebrenica/Zepa event-owned receipts.
