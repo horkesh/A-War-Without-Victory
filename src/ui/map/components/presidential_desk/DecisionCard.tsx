@@ -1,7 +1,7 @@
 import type { InboxItem } from '../../data/inboxItems';
 import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
 import { getPacketThumbnailForInboxType } from '../../data/presidentialDeskAssets';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 
 const SEVERITY_CLASS: Record<InboxItem['severity'], string> = {
   blocking: 'border-red-400/55 bg-red-950/35',
@@ -17,16 +17,48 @@ const BADGE_CLASS: Record<InboxItem['severity'], string> = {
   info: 'border-stone-300/25 bg-stone-500/10 text-stone-200',
 };
 
+const FAMILY_LABEL_KEYS: Partial<Record<InboxItem['type'], MessageKey>> = {
+  event_decision: 'decisionSurface.eventDecision.playerLabel',
+  peace_plan: 'decisionSurface.peacePlan.playerLabel',
+  dayton_negotiation: 'decisionSurface.dayton.playerLabel',
+  convoy_decision: 'decisionSurface.convoy.playerLabel',
+  paramilitary_request: 'decisionSurface.paramilitary.playerLabel',
+  reserve_request: 'decisionSurface.reserve.playerLabel',
+  officer_event: 'decisionSurface.officer.playerLabel',
+  operation_opportunity: 'decisionSurface.operationOpportunity.playerLabel',
+  autonomy_proposal: 'decisionSurface.autonomy.playerLabel',
+  intelligence_notification: 'decisionSurface.intelligence.playerLabel',
+  situation: 'decisionSurface.situation.playerLabel',
+};
+
+const ACTION_LABEL_KEYS: Partial<Record<InboxItem['type'], MessageKey>> = {
+  event_decision: 'decisionSurface.eventDecision.actionLabel',
+  peace_plan: 'decisionSurface.peacePlan.actionLabel',
+  dayton_negotiation: 'decisionSurface.dayton.actionLabel',
+  convoy_decision: 'decisionSurface.convoy.actionLabel',
+  paramilitary_request: 'decisionSurface.paramilitary.actionLabel',
+  reserve_request: 'decisionSurface.reserve.actionLabel',
+  officer_event: 'decisionSurface.officer.actionLabel',
+  operation_opportunity: 'decisionSurface.operationOpportunity.actionLabel',
+  autonomy_proposal: 'decisionSurface.autonomy.actionLabel',
+  intelligence_notification: 'decisionSurface.intelligence.actionLabel',
+  situation: 'decisionSurface.situation.actionLabel',
+};
+
 export interface DecisionCardProps {
   item: InboxItem;
   onAction: (action: InboxItem['action'], itemId: string) => void;
 }
 
 function familyLabel(item: InboxItem): string {
+  const key = FAMILY_LABEL_KEYS[item.type];
+  if (key) return t(key);
   return getDecisionSurfaceForInboxType(item.type)?.playerLabel ?? t('desk.card.familyFallback');
 }
 
 function actionLabel(item: InboxItem): string {
+  const key = ACTION_LABEL_KEYS[item.type];
+  if (key) return t(key);
   return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('desk.card.openFallback');
 }
 

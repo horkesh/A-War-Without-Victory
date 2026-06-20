@@ -13,27 +13,21 @@ interface PeaceWarTransitionProps {
     state: LoadedGameState;
 }
 
-const FACTION_BRIEFINGS: Record<string, { name: string; color: string; briefing: string }> = {
+const FACTION_BRIEFINGS: Record<string, { nameKey: MessageKey; color: string; briefingKey: MessageKey }> = {
     RBiH: {
-        name: 'ARBiH',
+        nameKey: 'intro.forceBriefing.RBiH.name',
         color: '#2563eb',
-        briefing:
-            'The Army of the Republic of Bosnia and Herzegovina musters from territorial defense units, police, and volunteers. ' +
-            'Poorly armed but defending homeland, its early survival depends on holding urban centers and buying time for organization.',
+        briefingKey: 'intro.forceBriefing.RBiH.body',
     },
     RS: {
-        name: 'VRS',
+        nameKey: 'intro.forceBriefing.RS.name',
         color: '#dc2626',
-        briefing:
-            'The Army of Republika Srpska inherits JNA equipment, officers, and doctrine. ' +
-            'Professional and heavily armed, the VRS holds a decisive early advantage but faces long-term attrition as reserves thin.',
+        briefingKey: 'intro.forceBriefing.RS.body',
     },
     HRHB: {
-        name: 'HVO',
+        nameKey: 'intro.forceBriefing.HRHB.name',
         color: '#f59e0b',
-        briefing:
-            'The Croatian Defence Council organizes around western Herzegovina and central Bosnia enclaves. ' +
-            'Capable but geographically fragmented, the HVO walks a tightrope between alliance with ARBiH and its own territorial ambitions.',
+        briefingKey: 'intro.forceBriefing.HRHB.body',
     },
 };
 
@@ -155,7 +149,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                             <div className="flex items-center gap-2 mb-1.5">
                                 <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: info.color }} />
                                 <span className="text-[11px] font-bold text-[#e8e0d4] uppercase tracking-wide">
-                                    {info.name}
+                                    {t(info.nameKey)}
                                 </span>
                                 {isPlayer && (
                                     <span className="text-[8px] bg-[#c4a04a]/20 text-[#c4a04a] px-1.5 py-0.5 rounded border border-[#c4a04a]/30 font-bold uppercase tracking-wider">
@@ -164,7 +158,7 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                                 )}
                             </div>
                             <p className="text-[10px] text-[#b0a898] leading-relaxed mb-2">
-                                {info.briefing}
+                                {t(info.briefingKey)}
                             </p>
                             {summary && (
                                 <div className="flex gap-4 text-[9px] font-mono text-[#8a8578]">

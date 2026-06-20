@@ -1,4 +1,28 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize first-hour decision chrome
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Foundational `EventDecisionModal` chrome, fallback Presidential Inbox items, and President's Desk packet/action labels now render through EN/BCS i18n instead of English component/registry literals. Authored event data remains data-owned and is not translated in this slice.
+
+**Verification:** Focused BCS red proof initially failed on English modal/inbox/desk chrome. Green pack `npm.cmd exec -- vitest run tests/ui/event_decision_modal_phase3.test.ts tests/ui/inbox_items.test.ts tests/ui/president_desk_decision_card_fallback.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 58/58. `npm.cmd exec -- tsc --noEmit --pretty false` passed. Report: `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
+## [2026-06-21] fix(ui): localize first-hour force briefing copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** The game-start `PeaceWarTransition` force briefing cards now render force names and descriptions through `intro.forceBriefing.*` EN/BCS keys instead of component-local hardcoded English paragraphs. This closes the live BCS first-hour leak where the identity block was localized but the RBiH/VRS/HVO force-description paragraphs remained English.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/game_start_intro.test.ts --pool=forks --reporter=dot` initially failed on the BCS force briefing. Green proof passed 10/10. `npm.cmd exec -- vitest run tests/ui/game_start_intro.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 23/23. `npm.cmd exec -- tsc --noEmit --pretty false` passed. Live BCS browser proof showed all three localized force paragraphs, no targeted English force-briefing leaks, and no console errors; temporary dev-server logs were removed. Report: `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize command-strain render boundary
 
 **Type:** UI/read-model i18n copy polish.
@@ -21708,3 +21732,19 @@ Closed the next Army HQ localization boundary from the live polish sweep. Force 
 Verification: red proof `npm.cmd exec -- vitest run tests/ui/army_hq_readiness_threat_copy.test.ts --pool=forks --reporter=dot` initially failed on hardcoded `FORCE READINESS` and `THREAT ASSESSMENT`. Green focused proof passed 3/3. `npm.cmd exec -- vitest run tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 13/13. `npm.cmd exec -- tsc --noEmit --pretty false` passed. Manual live browser BCS proof showed `SPR SPREMNO ZA BORBU` / `SPR OSLABLJENO`, corps cards with `zamor` / `kohezija`, no targeted readiness/threat English leaks, and no console errors. `npm.cmd run qa:player-journeys` passed 234/234. `npm.cmd run qa:live-surface:browser` passed and temp evidence was removed. `npm.cmd run qa:first-hour:browser` passed and temp evidence was removed. Report: `docs/40_reports/implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md`.
 
 Determinism/scope: UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-21 - Foundational event decision modal BCS chrome
+
+Closed the next first-hour BCS residual in `EventDecisionModal`. Required foundational event decision modal chrome now renders through EN/BCS i18n keys for the required-decision stamp, Situation/Dossier/Presidential Response headings, historical-default badge and explanatory copy, source-review notice, record trail, category labels, no-effect fallback, decision-context labels, and downstream-consequence controls. The focused BCS regression pins `rbih_state_identity` modal chrome against English leaks such as `Decision Required`, `Situation`, `Dossier`, `Presidential Response`, `Historical default`, and `Record trail`.
+
+Verification: red proof `.\vitest.cmd run tests\ui\event_decision_modal_phase3.test.ts --pool=forks` first failed on visible English modal chrome under `setLocale('bcs')`. Green focused proof passed 10/10 after the fix. Adjacent catalog proof `.\vitest.cmd run tests\ui\event_decision_modal_catalog.test.ts --pool=forks` passed 1/1. `npm.cmd run typecheck` was attempted but is currently blocked by an unrelated dirty `tests/ui/inbox_items.test.ts` fixture error (`event_title: undefined as unknown as string` is not assignable to `string`).
+
+Determinism/scope: UI component chrome, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, event catalog data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Event data titles/options/narrative/source prose for `rbih_state_identity`, `rs_strategic_goals`, and `hrhb_political_goal` remain authored English data pending a dedicated event-content localization boundary.
+
+## 2026-06-21 - BCS first-hour authored decision copy
+
+Closed the authored-content portion of the first-hour BCS decision residual. `rbih_state_identity`, `rs_strategic_goals`, and `hrhb_political_goal` in `data/scenarios/events/war_1992.json` now carry read-only `localizations.bcs` display data for titles, narrative, staff assessment, source notes, response option labels/descriptions, and trigger evidence where the event has trigger evidence. `EventDecisionModal` resolves localized authored fields from the full event catalog at render time, and President's Desk / Presidential Inbox event packets now use catalog-localized event titles so the first RBiH packet no longer leaks `What Is Bosnia?` in BCS play.
+
+Verification: focused pack `npm.cmd exec -- vitest run tests/ui/event_decision_modal_phase3.test.ts tests/ui/inbox_items.test.ts tests/ui/event_decision_modal_decision_context.test.ts tests/ui/event_decision_advisor_label.test.ts tests/event_loader.test.ts tests/ui/event_decision_modal_catalog.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 107/107. `npm.cmd run typecheck` passed. `git diff --check` passed. Live browser proof on `http://127.0.0.1:3003/` showed RBiH BCS first-hour Desk packet `Sta je Bosna?`, localized modal narrative/trigger/option/source/staff copy, no targeted English authored-content leaks, and no console errors. Report: `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md`.
+
+Determinism/scope: scenario event display metadata, UI read-model title resolution, focused tests, and docs only. The new `localizations` field is ignored by event evaluators; no response ids, effects, flags, historical defaults, bot response logic, save schema, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Residual: effect-preview/faction-name vocabulary inside downstream effect rows still needs a separate event-effect display/i18n lane.

@@ -1651,7 +1651,7 @@ function App() {
         <OperationsPanel />
         <OrderQueue />
         {tacticalDetailRailsVisible && shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && (
-          <PresidentialInbox onAction={handlePresidentialInboxAction} />
+          <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
         )}
         {tacticalDetailRailsVisible && railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
         {tacticalDetailRailsVisible && railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
@@ -1990,6 +1990,7 @@ function App() {
             <PresidentDeskShell
               state={loadedGameState}
               osidNameMap={osidDisplayNames}
+              eventCatalog={eventCatalogFull}
               onAction={handlePresidentialInboxAction}
               onAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
               onOpenArmyHQ={() => {

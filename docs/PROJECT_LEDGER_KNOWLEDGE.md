@@ -1,3 +1,11 @@
+## 2026-06-21 - First-hour decision chrome boundary
+
+**Event modal and desk packet chrome are localized UI copy; authored event data is separate:** `EventDecisionModal`, `deriveInboxItems`, and President's Desk `DecisionCard` should route labels, section headings, fallback titles/subtitles, badges, and action labels through i18n keys. Durable rule: do not treat translating modal chrome as translating event scenario data; `war_1992.json` titles/options/narrative need their own data-localization lane. Applied in `[2026-06-21] BCS First-Hour Decision Chrome`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
+
+## 2026-06-21 - First-hour force briefing copy boundary
+
+**Game-start force cards are localized UI copy, not component constants:** `PeaceWarTransition` has two text families: the authored player identity block and the three force briefing cards. Durable rule: keep force names/descriptions behind `intro.forceBriefing.*` i18n keys and render through `t(...)`; do not place English paragraphs in `FACTION_BRIEFINGS`. Applied in `[2026-06-21] BCS First-Hour Force Briefing Copy`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_FORCE_BRIEFING_COPY.md`.
+
 ## 2026-06-20 - Live proofs must distinguish absent fixture state from broken hooks
 
 **Browser QA should prove reachable controls without inventing data assumptions:** First-hour live fixtures can legitimately have no visible AAR battle rows, while Army HQ Personnel and sector metadata are present. Durable rule: when a live-browser proof depends on optional fixture state, record an explicit `skipped:no-visible-*` evidence value unless the tool first creates that state; keep unit/component tests pinning the hook itself. Applied in `[2026-06-20] Live drilldown hooks and Army Reserve copy polish`; report `docs/40_reports/implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md`.
@@ -3217,3 +3225,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-21 - Army HQ readiness label boundary
 
 **Readiness grades are internal ids until they cross the Army HQ display boundary:** `COMBAT READY`, `DEGRADED`, and sibling readiness grades feed multiple surfaces: Force Readiness, corps cards, and the Command Access strip. Durable rule: render grades through the shared readiness-grade i18n helper everywhere they appear, and treat command-access chips as part of the same readiness boundary. Manual BCS browser proof is useful because the command-access strip can leak raw grades even when the main corps card is fixed. Applied in `[2026-06-21] Army HQ readiness / threat copy boundary`; report `docs/40_reports/implemented/20260621_ARMY_HQ_READINESS_THREAT_COPY.md`.
+
+## 2026-06-21 - Authored event localization boundary
+
+**Foundational event data localization belongs in catalog metadata, while packets and modals must resolve it at display time:** pending event decisions persist English-compatible payloads, but the full event catalog can carry `localizations.<locale>` for title, narrative, staff assessment, trigger evidence, source note, and response option copy. Durable rule: do not mutate response ids, effects, flags, bot defaults, or save payloads for localization; resolve display copy from the catalog in `EventDecisionModal` and any Desk/Inbox packet title read model. Live browser proof is required because component tests can pass while the Desk packet still leaks the pending payload title. Applied in `[2026-06-21] BCS first-hour authored decision copy`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md`.
