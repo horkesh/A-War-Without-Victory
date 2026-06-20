@@ -13,6 +13,7 @@ import type { PredictionResult } from './usePrediction';
 import { NarrativeTab } from './NarrativeTab';
 import { MapLegendTab } from './MapLegendTab';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
+import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { t } from '../../i18n';
 
 // Two player-facing tabs — raw_intel demoted to debug-only
@@ -38,9 +39,7 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
         const name = corpsFormation
             ? formatCorpsDisplayName(corpsFormation.name, corpsFormation.id)
             : corpsId;
-        const commander = (loadedGameState.namedOfficerData ?? []).find(
-            (o) => o.assigned_corps_id === corpsId && o.acting_commander
-        );
+        const commander = resolveCorpsCommanderDisplay(corpsId, fac, loadedGameState);
         return { corpsName: name, faction: fac, commanderName: commander?.name ?? t('opsPlanning.g2.notAvailable'), date: turnToISODate(loadedGameState.turn ?? 0) };
     }, [loadedGameState, corpsId]);
 

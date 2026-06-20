@@ -83,6 +83,39 @@ describe('Chief of Staff briefing localization', () => {
         expect(text).not.toContain('We lost 1 position');
     });
 
+    it('does not narrate turn-0 territory_net as post-start territory movement', () => {
+        const latestTurnSummary: TurnSummary = {
+            turn: 0,
+            battles: [],
+            territory_net: { RBiH: 2, RS: -2 },
+            notable_flips: [],
+            displacement_total: 0,
+            displacement_by_ethnicity: {},
+            decoration_awards: [],
+            arc_transitions: [],
+            formation_spawns: [],
+            formation_destructions: [],
+            supply_deltas: {},
+            heavy_munitions_deltas: {},
+            movements: [],
+            supply_transitions: [],
+            events_fired: [],
+            notable_events: [],
+        };
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 0,
+            latestTurnSummary,
+        } as LoadedGameState;
+
+        const text = flatten(generateCoSBriefing([], state, 'RBiH'));
+
+        expect(text).toContain('The situation is stable for now');
+        expect(text).not.toContain('We gained 2 positions');
+        expect(text).not.toContain('Territory changes');
+        expect(text).not.toContain('Took 2');
+    });
+
     it('localizes precise and aggressive combat and territory prose in BCS mode', () => {
         setLocale('bcs');
         const makeSummary = (battles: TurnSummary['battles'], territoryNet: TurnSummary['territory_net']): TurnSummary => ({

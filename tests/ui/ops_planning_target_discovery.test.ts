@@ -106,6 +106,29 @@ function makeState(): LoadedGameState {
     } as unknown as LoadedGameState;
 }
 
+function makeOpeningCommanderState(): LoadedGameState {
+    const state = makeState();
+    return {
+        ...state,
+        namedOfficerData: [
+            {
+                id: 'opening_corps_commander',
+                name: 'Opening Commander',
+                rank: 'corps_commander',
+                faction: 'RS',
+                status: 'active',
+                home_corps_id: 'rs_1st_krajina',
+                historical_corps_id: 'rs_1st_krajina',
+                is_historical_start: true,
+                pool_tier: 'starter',
+                competence: 0.7,
+                defensive_skill: 0.66,
+                aggressiveness: 0.52,
+            },
+        ],
+    } as unknown as LoadedGameState;
+}
+
 function makePrediction(overrides: Partial<PredictionResult['overall']> = {}): PredictionResult {
     return {
         overall: {
@@ -447,6 +470,40 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Oznake operacije')).toBeTruthy();
         expect(screen.getByText('Cilj')).toBeTruthy();
         expect(screen.queryByText('Territory')).toBeNull();
+    });
+
+    it('uses opening commander display in G2 assessment and OPORD when the corps commander is not seated', () => {
+        useGameStore.setState({
+            loadedGameState: makeOpeningCommanderState(),
+            osidDisplayNames: { enemy_front: 'Enemy Front' },
+        });
+        const planned = makePlan({
+            axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+        });
+
+        const g2 = render(createElement(G2Phase, {
+            plan: planned,
+            prediction: makePrediction(),
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        expect(screen.getAllByText('Opening Commander').length).toBeGreaterThanOrEqual(1);
+        expect(screen.queryByText('N/A')).toBeNull();
+        g2.unmount();
+
+        render(createElement(AuthorizePhase, {
+            plan: planned,
+            prediction: makePrediction(),
+            corpsId: 'rs_1st_krajina',
+            officerId: null,
+            originSectorId: 'sector_1',
+        }));
+
+        expect(screen.getAllByText('Opening Commander').length).toBeGreaterThanOrEqual(1);
+        expect(screen.queryByText('N/A')).toBeNull();
     });
 
     it('CorpsDetail defaults ops planning to a forward sector before falling back to index zero', () => {

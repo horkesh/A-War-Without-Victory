@@ -110,6 +110,13 @@ describe('generals-digest helpers', () => {
         expect(d.notableLosses).toBe(1);
     });
 
+    it('treats turn-0 territory_net as scenario-start provenance, not ground taken', () => {
+        const d = deriveDigestTurn(summary(0, { territory_net: { RBiH: 3, RS: -3 } }), 'RBiH', undefined);
+
+        expect(d.netTerritory).toBe(0);
+        expect(isQuietWeek(d)).toBe(true);
+    });
+
     it('identifies a quiet week (no ops, battles, ground, or losses)', () => {
         const d = deriveDigestTurn(summary(50), 'RBiH', undefined);
         expect(isQuietWeek(d)).toBe(true);
@@ -230,6 +237,15 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         ] });
         const entries = buildGeneralsDigestChronicleEntries([s], 'RBiH', undefined, 85);
         expect(entries[0].detail).toContain('2 settlements given up');
+    });
+
+    it('does not narrate turn-0 territory_net as settlements taken', () => {
+        const s = summary(0, { territory_net: { RBiH: 2, RS: -2 } });
+        const entries = buildGeneralsDigestChronicleEntries([s], 'RBiH', undefined, 0);
+
+        expect(entries[0].title).toBe('The fronts were quiet this week');
+        expect(entries[0].detail).not.toContain('settlements taken');
+        expect(entries[0].metadata?.netFriendlyTerritory).toBeUndefined();
     });
 
     it('is deterministic — identical inputs yield identical entries', () => {

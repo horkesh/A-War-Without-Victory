@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest ops modal commander / turn-0 territory guards** | [implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md](implemented/20260620_OPS_MODAL_COMMANDER_AND_TURN0_TERRITORY_GUARDS.md) - Ops planning now uses opening commander read-model display, and turn-0 territory summaries no longer imply post-start ground taken. |
 | **Latest Warroom docket status copy** | [implemented/20260620_WARROOM_DOCKET_STATUS_COPY.md](implemented/20260620_WARROOM_DOCKET_STATUS_COPY.md) - Warroom priority docket badges now render localized player-facing status labels instead of internal pre-advance status ids. |
 | **Latest docs process/canon terminology cleanup** | [implemented/20260620_DOCS_PROCESS_CANON_TERMINOLOGY_CLEANUP.md](implemented/20260620_DOCS_PROCESS_CANON_TERMINOLOGY_CLEANUP.md) - Active process docs now use Pyrrhic-panel sign-off language, and Srebrenica/Žepa fall-control wording is event-receipt owned. |
 | **Latest Formation Detail movement/engagement copy** | [implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md](implemented/20260620_FORMATION_DETAIL_MOVEMENT_ENGAGEMENT_COPY.md) - Formation Detail movement status and recent-engagement outcomes now use explicit player-facing labels and neutral fallback copy. |

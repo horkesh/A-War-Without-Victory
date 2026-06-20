@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**OPS MODAL COMMANDER DISPLAY (2026-06-20).** Ops planning surfaces are command read-model surfaces too. Do instead: use `resolveCorpsCommanderDisplay(...)` in G2 and OPORD headers when no explicit operation commander is seated; do not assign turn-0 officers to make display copy work.
+
+**TURN-0 TERRITORY SUMMARY GUARD (2026-06-20).** `latestTurnSummary.turn === 0` territory data is scenario-start provenance, not post-start ground movement. Do instead: gate player-facing `territory_net` / `notable_flips` narration through `shouldNarrateTerritorySummary(...)` in digest, briefing, aftermath, and future summary surfaces.
+
 **WARROOM DOCKET STATUS COPY (2026-06-20).** Pre-advance status ids are logic fields, not badge copy. Do instead: keep `WarroomPriorityDocketView.status` for logic and render `statusLabel` in Warroom UI badges; pin EN/BCS labels with `tests/ui/warroom_priority_docket.test.ts`.
 
 **FORMATION DETAIL MOVEMENT/ENGAGEMENT COPY (2026-06-20).** Movement and recent-engagement ids are internal read-model fields. Do instead: map `movementStatus` through `formationDetail.movementStatus.*`, map known engagement outcomes through combat outcome labels, and use `aar.outcome.recorded` for unknown outcomes; pin with `tests/ui/formation_detail_parity.test.ts` in `qa:player-journeys`.

@@ -10,6 +10,7 @@ import type { OpsPlanState } from './types';
 import type { PredictionResult } from './usePrediction';
 import { OpordDocument } from './OpordDocument';
 import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
+import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { findPlayerFacingOperationByKey } from '../../../shared/playerVisibility';
 import { buildAuthorableOpEligibility } from '../../data/backTheOfficer';
 import type { ValidatableOpDef } from '../../../../sim/combat/operation_validation';
@@ -55,12 +56,11 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
         const resolvedOfficerId = matchingOperation?.commander_officer_id ?? officerId;
         const officer = resolvedOfficerId
             ? (loadedGameState.namedOfficerData ?? []).find((o) => o.id === resolvedOfficerId)
-            : (loadedGameState.namedOfficerData ?? []).find(
-                (o) => o.assigned_corps_id === corpsId && o.acting_commander
-              );
+            : null;
+        const commanderDisplay = officer ? null : resolveCorpsCommanderDisplay(corpsId, fac, loadedGameState);
 
-        return { corpsName: name, faction: fac, commanderName: officer?.name ?? t('opsPlanning.g2.notAvailable'), date: turnToISODate(loadedGameState.turn ?? 0) };
-    }, [loadedGameState, corpsId, officerId]);
+        return { corpsName: name, faction: fac, commanderName: officer?.name ?? commanderDisplay?.name ?? t('opsPlanning.g2.notAvailable'), date: turnToISODate(loadedGameState.turn ?? 0) };
+    }, [loadedGameState, corpsId, officerId, plan.opName]);
 
     // Free War Phase 4, #67 (Slice 1): author-new-op eligibility/validation +
     // command-authority cost, surfaced READ-ONLY over the canonical injection
