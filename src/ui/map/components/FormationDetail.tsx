@@ -20,6 +20,7 @@ import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../share
 import {
   getPlayerSafeFormationPostureLabel,
   getPlayerSafeFormationReadinessLabel,
+  getPlayerSafeFormationNarrativeArcLabel,
   getPlayerSafeDisplayLabel,
   getPlayerSafeMunicipalityName,
   getPlayerSafeSectorStanceLabel,
@@ -60,21 +61,13 @@ function formatHistoryMomentDate(turn: number): string {
   return turnToDateString(turn);
 }
 
-const NARRATIVE_ARC_LABELS: Record<string, string> = {
-  veteran: 'Veteran',
-  bloodied: 'Bloodied',
-  risen: 'Risen',
-  shattered: 'Shattered',
-  garrison: 'Garrison',
-};
-
 const ENGAGEMENT_ROLE_LABELS: Record<string, string> = {
   attacker: 'attacker',
   defender: 'defender',
 };
 
 function formatNarrativeArcLabel(arc: string): string {
-  return NARRATIVE_ARC_LABELS[arc] ?? t('formationDetail.campaignHistory');
+  return getPlayerSafeFormationNarrativeArcLabel(arc, t('formationDetail.campaignHistory'));
 }
 
 function formatEngagementRole(role: string): string {
@@ -903,17 +896,20 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <button
                         key={sector.sector_id}
                         type="button"
-                        disabled={isCurrentOverride}
-                        onClick={() => void assignBrigadeToSectorOverrideAction(
-                          { ipc, addStagedOrder, setLoadError },
-                          formation.id,
-                          sector.sector_id
-                        )}
+                        disabled={isCurrentOverride || isCurrentAutomatic}
+                        onClick={() => {
+                          if (isCurrentAutomatic) return;
+                          void assignBrigadeToSectorOverrideAction(
+                            { ipc, addStagedOrder, setLoadError },
+                            formation.id,
+                            sector.sector_id
+                          );
+                        }}
                         className={`w-full text-left px-2 py-1.5 rounded border text-[11px] transition-colors ${
                           isCurrentOverride
                             ? 'bg-accent-gold/10 border-accent-gold/50 text-accent-gold cursor-default'
-                            : isCurrentAutomatic
-                            ? 'bg-white/5 border-white/20 text-text-primary hover:bg-accent-gold/5 hover:border-accent-gold/30'
+                          : isCurrentAutomatic
+                            ? 'bg-white/5 border-white/20 text-text-primary cursor-default'
                             : 'bg-black/20 border-panel-border/30 text-text-secondary hover:bg-white/5 hover:text-text-primary'
                         }`}
                       >

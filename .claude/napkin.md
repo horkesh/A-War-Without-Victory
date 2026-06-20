@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**FORMATION DETAIL PARITY (2026-06-20).** Formation Detail and ORBAT must not diverge on player labels or no-op orders. Do instead: use shared player-safe narrative labels, render decoration names instead of raw decoration types, and keep automatic current-sector rows disabled/no-op.
+
 **ARMY HQ RECORDS FOCUS RESET (2026-06-20).** Army HQ close paths must not preserve focused archive ids. Do instead: keep `setArmyHQOpen(false)` clearing `focusedAftermathTurn`, `focusedOperationHistoryId`, and `focusedDecisionConsequenceId` together; pin with stale-state reset tests.
 
 **OOB SECTOR FRONTAGE COPY (2026-06-20).** `length_edges` is a front-edge/segment count, not geographic kilometers. Do instead: render OOB sector rows through `oob.sectorFrontSegments` and keep focused UI tests rejecting stale `~N km` copy.

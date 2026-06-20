@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Formation Detail parity** | [implemented/20260620_FORMATION_DETAIL_PARITY.md](implemented/20260620_FORMATION_DETAIL_PARITY.md) - Formation Detail now uses shared player-safe narrative labels, current-sector Orders rows no-op, and ORBAT decoration chips render faction decoration names. |
 | **Latest Army HQ aftermath focus reset** | [implemented/20260620_ARMY_HQ_AFTERMATH_FOCUS_RESET.md](implemented/20260620_ARMY_HQ_AFTERMATH_FOCUS_RESET.md) - Closing Army HQ now clears focused aftermath, operation-history, and decision-consequence Records targets together. |
 | **Latest OOB sector frontage copy** | [implemented/20260620_OOB_SECTOR_FRONTAGE_COPY.md](implemented/20260620_OOB_SECTOR_FRONTAGE_COPY.md) - OOB sector rows now label `length_edges` as localized front segments instead of misleading approximate kilometers. |
 | **Latest Chronicle decision record focus** | [implemented/20260620_CHRONICLE_DECISION_RECORD_FOCUS.md](implemented/20260620_CHRONICLE_DECISION_RECORD_FOCUS.md) - Chronicle presidential decision entries now open the exact Army HQ Records decision receipt, and the live browser archive gate handles Chronicle decision targets. |

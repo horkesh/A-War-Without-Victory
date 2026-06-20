@@ -9,6 +9,7 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeFormationNarrativeArcLabel, getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
+import { getDecorationName } from '../../utils/decorationUtils';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
@@ -176,7 +177,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                             return (
                                 <span key={i} className={`text-[9px] font-bold uppercase px-1.5 py-0.5 border rounded ${style}`}
                                     title={d.notes ?? ''}>
-                                    {d.type}
+                                    {getDecorationName(b.faction, d.tier)}
                                 </span>
                             );
                         })}

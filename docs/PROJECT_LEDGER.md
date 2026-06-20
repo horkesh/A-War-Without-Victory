@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): align Formation Detail and ORBAT player-safe labels
+
+**Type:** UI/read-model command-surface polish.
+
+**Fix:** Formation Detail now uses the shared player-safe narrative-arc labels instead of local raw arc copy, Formation Detail Orders disables/no-ops the automatically current sector row so it cannot create a persistent override for no change, and Army HQ ORBAT expanded decoration chips render faction decoration names instead of raw decoration type ids.
+
+**Verification:** Red proof from the worker branch failed on raw `Bloodied`, current-sector override dispatch, and raw `unit_citation`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/formation_detail_parity.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` (16/16); `git diff --check`; `npm.cmd run typecheck`. Report: `docs/40_reports/implemented/20260620_FORMATION_DETAIL_PARITY.md`.
+
+**Scope/determinism:** UI/read-model copy, command-surface no-op protection, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): clear stale Army HQ aftermath focus on close
 
 **Type:** UI/store route-state hygiene.

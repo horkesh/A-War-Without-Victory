@@ -442,6 +442,7 @@ describe('Army HQ Records operation AAR review', () => {
             narrativeArc: 'garrison',
             personnel: 1400,
             posture: 'defend',
+            decorations: [{ tier: 'tier_1', type: 'unit_citation' }],
         };
         useGameStore.setState({
             armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
@@ -452,7 +453,9 @@ describe('Army HQ Records operation AAR review', () => {
         const copy = view.container.textContent ?? '';
 
         expect(copy).toContain('Garrison duty');
+        expect(copy).toContain('Slavna');
         expect(copy).not.toMatch(/\bGARRISON\b/);
+        expect(copy).not.toMatch(/unit_citation/i);
     });
 
     it('opens the focused completed operation row when routed from Chronicle', () => {
