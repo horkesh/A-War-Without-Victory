@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**OPPORTUNITY DOSSIER COPY (2026-06-20).** Opportunity proposal values are internal ids, not player copy. Do instead: map status, recommendation, axis state, and force-quality bands through explicit i18n keys; keep `approve`, `eligible_pending_review`, `not_applicable`, and trait-band ids out of Army HQ dossiers.
+
 **ARMY OPS PLANNING COPY / DRILLDOWN (2026-06-20).** Army HQ Operations and OperationsPanel are player command surfaces, not telemetry panels. Do instead: render planning age/postponements through i18n copy, route allocated brigade clicks through `inspectOnField(... field-formation-in-corps ...)`, and keep targeted BCS player copy free of raw `OSID`.
 
 **TURN-0 PROVENANCE MUST BE GLOBAL (2026-06-20).** Every player summary surface that reads `latestTurnSummary.territory_net`, `turnSummaries[*].territory_net`, or `notable_flips` must apply `shouldNarrateTerritorySummary(...)`. Covered surfaces now include Generals Digest, Chief of Staff, Turn Aftermath, Records AAR, BottomStatusStrip, and Chronicle Wrapped.

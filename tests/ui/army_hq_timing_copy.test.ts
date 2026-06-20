@@ -201,15 +201,59 @@ describe('Army HQ timing copy', () => {
   it('renders opportunity review expiry as a calendar date', () => {
     render(React.createElement(OperationOpportunityDossierPanel, {
       gameState: makeGameState({
-        operationOpportunityProposals: [makeOpportunity({ expires_turn: 24 })],
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          expires_turn: 24,
+          recommendation: 'approve',
+          prerequisite_axes: [
+            { axis: 'axis_north', label: 'Northern Axis', mode: 'optional', green: false, state: 'not_applicable', reason: '' },
+          ],
+          force_quality_traits: [
+            { trait: 'reserve_weight', label: 'Reserve weight', band: 'adequate', reason: 'Enough reserve brigades are near the axis.' },
+          ],
+        })],
       }),
       playerFaction: 'RBiH',
     }));
 
     const copy = document.body.textContent ?? '';
     expect(copy).toContain(`Review by ${turnToDateString(24)}`);
+    expect(copy).toContain('Recommend authorization');
+    expect(copy).toContain('Not applicable');
+    expect(copy).toContain('Adequate');
     expect(copy).not.toContain('Expires w24');
     expect(copy).not.toMatch(/\bIstice\s+s24\b/);
+    expect(copy).not.toContain('approve');
+    expect(copy).not.toContain('eligible pending review');
+    expect(copy).not.toContain('not applicable');
+  });
+
+  it('localizes opportunity dossier labels in BCS without raw proposal enums', () => {
+    setLocale('bcs');
+
+    render(React.createElement(OperationOpportunityDossierPanel, {
+      gameState: makeGameState({
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          recommendation: 'approve',
+          prerequisite_axes: [
+            { axis: 'axis_north', label: 'Sjeverna osovina', mode: 'optional', green: false, state: 'not_applicable', reason: '' },
+          ],
+          force_quality_traits: [
+            { trait: 'reserve_weight', label: 'Rezerva', band: 'adequate', reason: 'Dovoljno rezervi je blizu osovine.' },
+          ],
+        })],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('Preporuka: odobriti');
+    expect(copy).toContain('Nije primjenjivo');
+    expect(copy).toContain('Dovoljno');
+    expect(copy).not.toMatch(/\bapprove\b/i);
+    expect(copy).not.toMatch(/\beligible_pending_review\b/i);
+    expect(copy).not.toMatch(/\bnot_applicable\b/i);
   });
 
   it('renders pending presidential decision timing as a calendar date', () => {

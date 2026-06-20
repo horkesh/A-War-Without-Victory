@@ -3,7 +3,7 @@ import type { LoadedGameState, OperationOpportunityAxisState, OperationOpportuni
 import type { BackTheOfficerView } from '../../data/backTheOfficer';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
 
 type OpportunityUiDecision = OperationOpportunityProposalView['available_actions'][number]['id'];
@@ -28,8 +28,40 @@ const TRAIT_STYLES: Record<OperationOpportunityProposalView['force_quality_trait
     poor: 'border-red-500/30 bg-red-500/10 text-red-300',
 };
 
-function statusLabel(status: string): string {
-    return status.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+const OPPORTUNITY_STATUS_KEYS: Partial<Record<OperationOpportunityProposalView['status'], MessageKey>> = {
+    eligible_pending_review: 'opportunity.status.pendingReview',
+    delayed: 'opportunity.status.delayed',
+};
+
+const OPPORTUNITY_RECOMMENDATION_KEYS: Record<string, MessageKey> = {
+    approve: 'opportunity.recommendation.approve',
+    delay: 'opportunity.recommendation.delay',
+    redirect: 'opportunity.recommendation.redirect',
+    under_resource: 'opportunity.recommendation.underResource',
+    decline: 'opportunity.recommendation.decline',
+};
+
+const AXIS_STATE_KEYS: Record<OperationOpportunityAxisState, MessageKey> = {
+    ready: 'opportunity.axis.ready',
+    blocked: 'opportunity.axis.blocked',
+    strained: 'opportunity.axis.strained',
+    not_applicable: 'opportunity.axis.notApplicable',
+};
+
+const TRAIT_BAND_KEYS: Record<OperationOpportunityProposalView['force_quality_traits'][number]['band'], MessageKey> = {
+    strong: 'opportunity.trait.strong',
+    adequate: 'opportunity.trait.adequate',
+    strained: 'opportunity.trait.strained',
+    poor: 'opportunity.trait.poor',
+};
+
+function knownLabel<T extends string>(value: T, map: Partial<Record<T, MessageKey>>, fallbackKey: MessageKey): string {
+    const key = map[value];
+    return key ? t(key) : t(fallbackKey);
+}
+
+function recommendationLabel(recommendation: string): string {
+    return knownLabel(recommendation, OPPORTUNITY_RECOMMENDATION_KEYS, 'opportunity.recommendation.review');
 }
 
 function actionButtonClass(actionId: OpportunityUiDecision): string {
@@ -52,7 +84,7 @@ function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisi
             title={axis.reason}
         >
             <div className="text-[8px] font-bold uppercase tracking-[0.12em]">{axis.label}</div>
-            <div className="text-[9px] leading-snug opacity-90 line-clamp-2">{axis.reason || statusLabel(axis.state)}</div>
+            <div className="text-[9px] leading-snug opacity-90 line-clamp-2">{axis.reason || t(AXIS_STATE_KEYS[axis.state])}</div>
         </div>
     );
 }
@@ -66,7 +98,7 @@ function TraitPill({ trait }: { trait: OperationOpportunityProposalView['force_q
             <div className="flex items-center justify-between gap-2">
                 <span className="text-[8px] font-bold uppercase tracking-[0.12em]">{trait.label}</span>
                 <span className="text-[8px] font-bold uppercase tracking-[0.12em] opacity-80">
-                    {statusLabel(trait.band)}
+                    {t(TRAIT_BAND_KEYS[trait.band])}
                 </span>
             </div>
             <div className="mt-0.5 text-[9px] leading-snug opacity-90 line-clamp-2">{trait.reason}</div>
@@ -129,7 +161,9 @@ function DossierCard({
                     <div className="text-[11px] font-bold text-text-primary truncate">{proposal.display_name}</div>
                     <div className="mt-1 flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em]">
                         <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-amber-300">
-                            {proposal.recommendation ? t('opportunity.recommend', { recommendation: proposal.recommendation }) : statusLabel(proposal.status)}
+                            {proposal.recommendation
+                                ? t('opportunity.recommend', { recommendation: recommendationLabel(proposal.recommendation) })
+                                : knownLabel(proposal.status, OPPORTUNITY_STATUS_KEYS, 'opportunity.status.review')}
                         </span>
                         {proposal.expires_turn != null && (
                             <span className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-text-secondary">

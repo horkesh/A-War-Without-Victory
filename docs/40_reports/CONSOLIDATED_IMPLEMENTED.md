@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest opportunity dossier copy polish:** [implemented/20260620_OPPORTUNITY_DOSSIER_COPY_POLISH.md](implemented/20260620_OPPORTUNITY_DOSSIER_COPY_POLISH.md) - Army HQ opportunity dossiers now localize proposal status, staff recommendations, axis states, and force-quality bands instead of raw enum copy.
+
 **Latest Army ops drilldown / BCS copy polish:** [implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md](implemented/20260620_ARMY_OPS_DRILLDOWN_AND_BCS_COPY_POLISH.md) - Army HQ operations planning copy no longer exposes `T+` / `DELAYS`, OperationsPanel allocated brigade drilldowns preserve corps context, and targeted BCS player copy no longer exposes raw `OSID` terminology.
 
 **Latest turn-0 provenance surface guards:** [implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md](implemented/20260620_TURN0_PROVENANCE_SURFACE_GUARDS.md) - Records AAR, tactical bottom status, and Chronicle Wrapped now suppress turn-0 scenario-start territory as post-start gains/losses.
