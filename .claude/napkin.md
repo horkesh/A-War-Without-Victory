@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**BCS COMMAND-COPY PARITY (2026-06-20).** BCS is not allowed to lag behind English polish. Do instead: when removing shorthand from player command surfaces, check matching BCS keys for English `Level 3`, `override`, `Command Relationship`, `OPS`, and compact labels like `Snabd.`, `obavj.`, `Kom.`, `{tanks}T`, `{artillery}A`; pin targeted keys in `gui_audit_label_discipline`.
+
 **COMMAND-SURFACE SHORTHAND BOUNDARY (2026-06-20).** Normal command surfaces are player copy, not staff telemetry. Do instead: spell out casualties, no-friendly-loss exchange ratios, front segments, personnel/brigade counts, command authority, operation security, and operational reports through EN/BCS i18n; keep `INF`, `KIA/WIA/MIA`, `INTEL`, `DEF/EDGE`, `MOR`, `FAT`, `PERS`, `brg`, `bde`, `AUTH/AUT`, `OPSEC`, and `SITREP` out of non-diagnostic UI.
 
 **SECONDARY FIELD DRILLDOWN CONTEXT (2026-06-20).** Army HQ, Records, settlement, battle, and AAR links must not use bare selection setters that can hide tactical selections behind shells. Do instead: route Personnel ORBAT, settlement sector, battle-marker, map settlement, and AAR formation links through `inspectOnField(...)` with the richest available `FieldInspectionTarget`.
