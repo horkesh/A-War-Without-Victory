@@ -457,7 +457,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.frontLength')}</span>
                     <span className="font-medium">
-                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : `~${sector.length_edges} km`}
+                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.frontSegmentsCount', { count: sector.length_edges })}
                     </span>
                     <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? t('corpsFront.contiguous') : t('corpsFront.segments', { count: sector.sub_segment_count })}]</span>
                   </div>

@@ -741,7 +741,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
     expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');
     expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na čekanju');
-    expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni SITREP');
+    expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni izvjestaj');
     expect(cardsById['chronicle:review-memory'].title).toBe('Pamćenje Hronike ažurirano');
     expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
   });

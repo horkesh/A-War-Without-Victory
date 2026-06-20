@@ -319,7 +319,13 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.casualties')}</div>
         {playerFaction ? (() => {
           const row = state.casualtyLedger?.[playerFaction];
-          const military = row ? `${row.killed} KIA / ${row.wounded} WIA / ${row.missing_captured} MIA` : t('situation.noData');
+          const military = row
+            ? t('situation.casualtyBreakdown', {
+              killed: row.killed.toLocaleString(),
+              wounded: row.wounded.toLocaleString(),
+              missing: row.missing_captured.toLocaleString(),
+            })
+            : t('situation.noData');
           return (
             <div className="flex items-center justify-between gap-2">
               <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>

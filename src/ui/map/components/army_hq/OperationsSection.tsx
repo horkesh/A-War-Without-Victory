@@ -280,7 +280,9 @@ function CasualtyBlock({ suffered, inflicted, label }: {
             </div>
             <div className="text-[10px] font-mono">
                 <span className="text-text-secondary/60 uppercase">{t('operationsSection.exchangeRatio')} </span>
-                <span className={`font-bold ${ratioColor}`}>{ratio >= 999 ? 'INF' : ratio.toFixed(2)} : 1</span>
+                <span className={`font-bold ${ratioColor}`}>
+                    {ratio >= 999 ? t('operationsSection.exchangeNoFriendlyLosses') : `${ratio.toFixed(2)} : 1`}
+                </span>
             </div>
         </div>
     );

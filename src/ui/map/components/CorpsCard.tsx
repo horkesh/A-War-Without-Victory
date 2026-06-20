@@ -132,7 +132,7 @@ export function CorpsCard({
             <Icon name="personnel" size={11} color={totalPersonnel >= 8000 ? '#34d399' : totalPersonnel >= 4000 ? '#fbbf24' : '#f87171'} />
             <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnel.toLocaleString()}</span>
           </span>
-          <span className="text-text-secondary">{brigades.length} brg</span>
+          <span className="text-text-secondary">{brigades.length} brigades</span>
         </span>
       </button>
 

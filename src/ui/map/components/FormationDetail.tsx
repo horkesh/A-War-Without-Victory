@@ -663,7 +663,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Campaign Losses — top of Record tab. campaignKia/Wia/Mia are
                 supplied by GameStateAdapter: either from the casualty ledger or,
                 when that is empty, from a canonical-fraction fallback split of
-                the combat-summary total (KIA 0.22 / WIA 0.74 / MIA remainder, not
+                the combat-summary total (killed 0.22 / wounded 0.74 / missing remainder, not
                 the legacy 0.30/0.55/0.15). The split lives in the adapter so this
                 component never runtime-imports from src/sim/combat/ (#73). */}
             {isBrigade && (

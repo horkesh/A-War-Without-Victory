@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COMMAND-SURFACE SHORTHAND BOUNDARY (2026-06-20).** Normal command surfaces are player copy, not staff telemetry. Do instead: spell out casualties, no-friendly-loss exchange ratios, front segments, personnel/brigade counts, command authority, operation security, and operational reports through EN/BCS i18n; keep `INF`, `KIA/WIA/MIA`, `INTEL`, `DEF/EDGE`, `MOR`, `FAT`, `PERS`, `brg`, `bde`, `AUTH/AUT`, `OPSEC`, and `SITREP` out of non-diagnostic UI.
+
 **SECONDARY FIELD DRILLDOWN CONTEXT (2026-06-20).** Army HQ, Records, settlement, battle, and AAR links must not use bare selection setters that can hide tactical selections behind shells. Do instead: route Personnel ORBAT, settlement sector, battle-marker, map settlement, and AAR formation links through `inspectOnField(...)` with the richest available `FieldInspectionTarget`.
 
 **ARMY HQ COPY AND FRONT SEGMENTS (2026-06-20).** Army HQ combat records, corps cards, ORBAT losses, and sector lengths are player command surfaces. Do instead: use full localized stance/count/loss/record labels and render `length_edges` as front segments, never kilometers or compact `W/L/D`, `BRG`, `SEC`, `KIA/WIA/MIA` copy.
