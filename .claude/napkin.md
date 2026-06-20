@@ -46,7 +46,7 @@
 
 **FIRST-HOUR BROWSER GATE (2026-06-18).** The first-hour RBiH browser path now has a command gate. Do instead: run `npm run qa:first-hour:browser` after shell/Records/Chronicle/onboarding changes; it proves splash -> identity -> foundational decision -> Desk blocking -> Records/Chronicle receipts, raw-label absence, console health, and strict-port cleanup.
 
-**FIRST-HOUR MODAL FOCUS PARITY (2026-06-19).** War-start intro state is campaign-handoff scoped, not component-global, and required decisions own top-level toolbar focus. Do instead: after first-hour modal/toolbar changes, verify RBiH/RS/HRHB each show splash -> identity -> foundational decision, and keep DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX disabled while `EventDecisionModal` is active.
+**FIRST-HOUR ALL-FACTION GATE (2026-06-20).** War-start intro state is campaign-handoff scoped, not component-global, and required decisions own top-level toolbar plus shell-hotkey focus. Do instead: after first-hour modal/toolbar/New Game changes, run `npm run qa:first-hour:browser`; it must verify RBiH/RS/HRHB splash -> identity -> foundational decision, keep DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX and shell hotkeys locked while `EventDecisionModal` is active, and reset opening-brief dismissal on fresh same-faction New Game starts.
 
 **ARMY HQ FIELD-INSPECTION ROUTE CONTRACT (2026-06-18).** Command briefing, selection, formation, and Decision Room field drilldowns must use the atomic `FieldInspectionTarget` / `inspectOnField` route. Do instead: set compound tactical selections in one store action, close competing shells, and keep Records/Army HQ routes separate from Tactical Map inspection.
 

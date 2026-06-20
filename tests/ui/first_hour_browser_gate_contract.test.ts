@@ -29,6 +29,18 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('rbih_state_identity');
     expect(tool).toContain('turn_fired');
     expect(tool).toContain('response_id');
+    expect(tool).toContain('FACTION_OPENING_FLOWS');
+    expect(tool).toContain("faction: 'RBiH'");
+    expect(tool).toContain("faction: 'RS'");
+    expect(tool).toContain("faction: 'HRHB'");
+    expect(tool).toContain('main-menu-faction-${flow.faction}');
+    expect(tool).toContain('assertToolbarRoutesDisabled');
+    expect(tool).toContain('toolbarLockWhileDecisionActive');
+    expect(tool).toContain('allFactionFoundationalFlows');
+    expect(tool).toContain('rs_strategic_goals');
+    expect(tool).toContain('hrhb_political_goal');
+    expect(tool).toContain('The Assembly Speaks');
+    expect(tool).toContain('What Is Herceg-Bosna?');
   });
 });
 

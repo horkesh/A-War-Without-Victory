@@ -26,6 +26,33 @@ const RAW_FIRST_HOUR_PATTERNS = [
   { label: 'Response recorded: civic.', pattern: /\bResponse recorded:\s+civic\./i },
 ];
 
+const FACTION_OPENING_FLOWS = [
+  {
+    faction: 'RBiH',
+    identityNeedle: 'President of the Presidency of the Republic of Bosnia and Herzegovina',
+    eventId: 'rbih_state_identity',
+    decisionTitle: 'What Is Bosnia?',
+    responseLabel: 'Civic multi-ethnic republic',
+    receiptCheck: true,
+  },
+  {
+    faction: 'RS',
+    identityNeedle: 'six strategic goals for the Serb people of Bosnia',
+    eventId: 'rs_strategic_goals',
+    decisionTitle: 'The Assembly Speaks',
+    responseLabel: 'Adopt all six goals',
+    receiptCheck: false,
+  },
+  {
+    faction: 'HRHB',
+    identityNeedle: 'Croat para-state proclaimed at Grude',
+    eventId: 'hrhb_political_goal',
+    decisionTitle: 'What Is Herceg-Bosna?',
+    responseLabel: 'Croat republic',
+    receiptCheck: false,
+  },
+];
+
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
 }
@@ -327,6 +354,70 @@ async function clickSelector(page, selector, label) {
   if (!clicked) throw new Error(`No visible ${label ?? selector} control found`);
 }
 
+async function assertToolbarRoutesDisabled(page, summary, flow) {
+  const routeTestIds = [
+    'toolbar-route-desk',
+    'toolbar-route-war-map',
+    'toolbar-route-army-hq',
+    'toolbar-route-records',
+    'toolbar-route-chronicle',
+    'toolbar-route-codex',
+  ];
+  const states = await page.evaluate((testIds) => {
+    return Object.fromEntries(testIds.map((testId) => {
+      const el = document.querySelector(`[data-testid="${testId}"]`);
+      if (!(el instanceof HTMLElement)) return [testId, { present: false, disabled: true }];
+      return [testId, {
+        present: true,
+        disabled: Boolean(el.disabled) || el.getAttribute('aria-disabled') === 'true',
+      }];
+    }));
+  }, routeTestIds);
+  summary.evidence.toolbarLockWhileDecisionActive ??= {};
+  summary.evidence.toolbarLockWhileDecisionActive[flow.faction] = states;
+  const unlocked = Object.entries(states)
+    .filter(([, state]) => state.present && !state.disabled)
+    .map(([testId, state]) => ({ testId, state }));
+  if (unlocked.length > 0) {
+    throw new Error(`${flow.faction} toolbar routes were not disabled while decision modal was active: ${JSON.stringify(unlocked)}`);
+  }
+
+  for (const key of ['h', 'c', 'x', 'd', 'u']) {
+    await page.keyboard.press(key);
+    await delay(100);
+  }
+  const leakedSurfaces = await page.evaluate(() => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const visibleTextFor = (selector) => Array.from(document.querySelectorAll(selector))
+      .filter(isVisible)
+      .map((el) => (el.textContent ?? '').replace(/\s+/g, ' ').trim())
+      .join(' ');
+    const hasVisible = (selector) => Array.from(document.querySelectorAll(selector)).some(isVisible);
+    return {
+      armyHq: hasVisible('[id^="army-hq-tabpanel-"], [data-testid="army-hq-corps-index"]'),
+      chronicle: /^War Chronicle$/i.test(visibleTextFor('h1')),
+      codex: Boolean(Array.from(document.querySelectorAll('[data-testid="codex-panel"]')).some(isVisible)),
+      decisionHistory: /Decision History|Authored Choices/i.test(visibleTextFor('[role="dialog"], [aria-modal="true"]')),
+      humanitarianLedger: /National Humanitarian Ledger/i.test(visibleTextFor('[role="dialog"], [aria-modal="true"], aside, section')),
+    };
+  });
+  summary.evidence.hotkeyLockWhileDecisionActive ??= {};
+  summary.evidence.hotkeyLockWhileDecisionActive[flow.faction] = leakedSurfaces;
+  const leaked = Object.entries(leakedSurfaces).filter(([, visible]) => visible);
+  if (leaked.length > 0) {
+    throw new Error(`${flow.faction} hotkeys opened shell surfaces behind the required decision: ${JSON.stringify(leaked)}`);
+  }
+}
+
 async function waitForSelectorHidden(page, selector, timeout = 15000) {
   await page.waitForFunction((targetSelector) => {
     const target = document.querySelector(targetSelector);
@@ -417,6 +508,134 @@ async function dismissTutorialIfPresent(page) {
   }
 }
 
+async function runFoundationalFlow(page, summary, flow) {
+  await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await page.evaluate(() => {
+    window.localStorage?.clear();
+    window.sessionStorage?.clear();
+  });
+  await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+  await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_main_menu`);
+
+  await clickSelector(page, `[data-testid="main-menu-faction-${flow.faction}"]`, `${flow.faction} faction`);
+  await waitForVisibleText(page, 'WAR HAS STARTED');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_war_start_splash`);
+
+  await clickByText(page, 'Acknowledge');
+  await waitForVisibleText(page, 'WAR BEGINS');
+  const identityDialog = await dialogText(page);
+  if (!identityDialog.includes(flow.identityNeedle)) {
+    throw new Error(`${flow.faction} WAR BEGINS identity dialog did not show expected copy: ${identityDialog}`);
+  }
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_war_begins_identity`);
+
+  await clickByText(page, 'Begin');
+  await waitUntilTextAbsent(page, 'WAR BEGINS');
+  await waitForVisibleText(page, 'President');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_opening_brief`);
+
+  await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
+  await page.waitForFunction((title, response) => {
+    const text = document.body?.innerText ?? '';
+    return text.includes(response)
+      || (text.includes("President's Desk") && text.includes('Decision Packet') && text.includes(title));
+  }, { timeout: 30000 }, flow.decisionTitle, flow.responseLabel);
+  const deskBlockEvidence = await page.evaluate((title, response) => {
+    const bodyText = document.body?.innerText ?? '';
+    const compactText = bodyText.replace(/\s+/g, ' ');
+    const hasModalActive = /Decision Required/i.test(compactText)
+      && compactText.includes(title)
+      && compactText.includes(response);
+    const hasDeskPacket = compactText.includes("President's Desk")
+      && compactText.includes('Decision Packet')
+      && compactText.includes(title)
+      && /Advance\s*Blocked/i.test(compactText);
+    return {
+      hasDesk: compactText.includes("President's Desk"),
+      hasDecisionPacket: compactText.includes('Decision Packet'),
+      hasRequired: compactText.includes('Required'),
+      hasFoundationalTitle: compactText.includes(title),
+      hasHistoricalOption: compactText.includes(response),
+      hasAdvanceBlocked: /Advance\s*Blocked/i.test(compactText),
+      hasDecideNow: compactText.includes('Decide now'),
+      hasModalActive,
+      hasDeskPacket,
+      activeModalBlocksDesk: hasModalActive && !compactText.includes("President's Desk") && !compactText.includes('Decide now'),
+      textSample: compactText.slice(0, 1200),
+    };
+  }, flow.decisionTitle, flow.responseLabel);
+  const deskBlockedWhileDecisionActive = deskBlockEvidence.activeModalBlocksDesk || deskBlockEvidence.hasDeskPacket;
+  summary.evidence.deskBlockEvidence ??= {};
+  summary.evidence.deskBlockedWhileDecisionActive ??= {};
+  summary.evidence.deskBlockEvidence[flow.faction] = deskBlockEvidence;
+  summary.evidence.deskBlockedWhileDecisionActive[flow.faction] = deskBlockedWhileDecisionActive;
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_desk_blocked_by_foundational_decision`);
+  if (!deskBlockedWhileDecisionActive) {
+    throw new Error(`${flow.faction} deskBlockedWhileDecisionActive invariant failed: ${JSON.stringify(deskBlockEvidence)}`);
+  }
+
+  if (!deskBlockEvidence.hasModalActive) {
+    await clickByText(page, 'Decide now');
+  }
+  await waitForVisibleText(page, flow.decisionTitle);
+  await waitForVisibleText(page, flow.responseLabel);
+  await assertToolbarRoutesDisabled(page, summary, flow);
+  const decisionDialog = await dialogText(page);
+  if (!decisionDialog.includes(flow.decisionTitle) || !decisionDialog.includes(flow.responseLabel)) {
+    throw new Error(`${flow.faction} foundational decision modal did not show expected option: ${decisionDialog}`);
+  }
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
+
+  await clickByText(page, flow.responseLabel);
+  await waitUntilDialogTextAbsent(page, 'Presidential Response');
+  await dismissTutorialIfPresent(page);
+  summary.evidence.allFactionFoundationalFlows ??= {};
+  summary.evidence.allFactionFoundationalFlows[flow.faction] = {
+    eventId: flow.eventId,
+    decisionTitle: flow.decisionTitle,
+    responseLabel: flow.responseLabel,
+    resolved: true,
+  };
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_decision_receipt`);
+}
+
+async function verifyRbihRecordsAndChronicle(page, summary) {
+  await clickSelector(page, '[data-testid="desk-close-overlay"]', 'Desk close');
+  await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
+  await page.keyboard.press('h');
+  await waitForVisibleText(page, 'BRIEFING');
+  await clickByText(page, 'RECORDS');
+  await waitForVisibleText(page, 'Archive Routes');
+  await captureEvidence(page, summary, 'army_hq_records');
+  await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
+  await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
+  await waitForVisibleText(page, 'Decision Consequences');
+  await waitForVisibleText(page, 'What Is Bosnia?');
+  await waitForVisibleText(page, 'Decision recorded');
+  await waitForVisibleText(page, 'Filed to Chronicle');
+  summary.evidence.recordsReceiptAppears = true;
+  summary.evidence.rawFirstHourLabelsAbsent = true;
+  await captureEvidence(page, summary, 'records_decision_receipt');
+  const recordsText = await visibleSurfaceText(page, [
+    'Decision Consequences',
+    'What Is Bosnia?',
+    'Civic multi-ethnic republic',
+  ]);
+  assertRawLabelsAbsent('Army HQ Records', recordsText);
+
+  await clickFirstMatchingText(page, ['Open Chronicle', 'CHRONICLE', 'Chronicle']);
+  await waitForVisibleText(page, 'War Chronicle');
+  await waitForVisibleText(page, 'What Is Bosnia?');
+  const chronicleText = await visibleSurfaceText(page, [
+    'War Chronicle',
+    'What Is Bosnia?',
+  ]);
+  assertRawLabelsAbsent('Chronicle', chronicleText);
+  summary.evidence.chronicleReceiptAppears = true;
+  await captureEvidence(page, summary, 'chronicle_decision_receipt');
+}
+
 async function run() {
   ensureDir(OUT_DIR);
   ensureDir(SCREENSHOT_DIR);
@@ -460,119 +679,12 @@ async function run() {
         text: error.message,
       }));
 
-      await page.goto(URL, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await page.evaluate(() => {
-        window.localStorage?.clear();
-        window.sessionStorage?.clear();
-      });
-      await page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
-      await waitForVisibleText(page, 'A WAR WITHOUT VICTORY');
-      await captureEvidence(page, summary, 'main_menu');
-
-      await clickByText(page, 'Republic of Bosnia and Herzegovina');
-      await waitForVisibleText(page, 'WAR HAS STARTED');
-      await captureEvidence(page, summary, 'war_start_splash');
-
-      await clickByText(page, 'Acknowledge');
-      await waitForVisibleText(page, 'WAR BEGINS');
-      const identityDialog = await dialogText(page);
-      if (!identityDialog.includes('President of the Presidency of the Republic of Bosnia and Herzegovina')) {
-        throw new Error(`WAR BEGINS identity dialog did not show RBiH identity copy: ${identityDialog}`);
+      for (const flow of FACTION_OPENING_FLOWS) {
+        await runFoundationalFlow(page, summary, flow);
+        if (flow.receiptCheck) {
+          await verifyRbihRecordsAndChronicle(page, summary);
+        }
       }
-      await captureEvidence(page, summary, 'war_begins_identity');
-
-      await clickByText(page, 'Begin');
-      await waitUntilTextAbsent(page, 'WAR BEGINS');
-      await waitForVisibleText(page, 'President');
-      await captureEvidence(page, summary, 'opening_brief');
-
-      await clickFirstMatchingText(page, ['Open Desk', 'President', 'Desk', 'Begin at Desk', 'Open President']);
-      await page.waitForFunction(() => {
-        const text = document.body?.innerText ?? '';
-        return text.includes('Civic multi-ethnic republic')
-          || (text.includes("President's Desk") && text.includes('Decision Packet') && text.includes('Decide now'));
-      }, { timeout: 30000 });
-      const deskBlockEvidence = await page.evaluate(() => {
-        const bodyText = document.body?.innerText ?? '';
-        const compactText = bodyText.replace(/\s+/g, ' ');
-        const hasModalActive = /Decision Required/i.test(compactText)
-          && compactText.includes('What Is Bosnia?')
-          && compactText.includes('Civic multi-ethnic republic');
-        const hasDeskPacket = compactText.includes("President's Desk")
-          && compactText.includes('Decision Packet')
-          && compactText.includes('What Is Bosnia?')
-          && /Advance\s*Blocked/i.test(compactText);
-        return {
-          hasDesk: compactText.includes("President's Desk"),
-          hasDecisionPacket: compactText.includes('Decision Packet'),
-          hasRequired: compactText.includes('Required'),
-          hasFoundationalTitle: compactText.includes('What Is Bosnia?'),
-          hasCivicOption: compactText.includes('Civic multi-ethnic republic'),
-          hasAdvanceBlocked: /Advance\s*Blocked/i.test(compactText),
-          hasDecideNow: compactText.includes('Decide now'),
-          hasModalActive,
-          hasDeskPacket,
-          activeModalBlocksDesk: hasModalActive && !compactText.includes("President's Desk") && !compactText.includes('Decide now'),
-          textSample: compactText.slice(0, 1200),
-        };
-      });
-      const deskBlockedWhileDecisionActive = deskBlockEvidence.activeModalBlocksDesk || deskBlockEvidence.hasDeskPacket;
-      summary.evidence.deskBlockEvidence = deskBlockEvidence;
-      summary.evidence.deskBlockedWhileDecisionActive = deskBlockedWhileDecisionActive;
-      await captureEvidence(page, summary, 'desk_blocked_by_foundational_decision');
-      if (!deskBlockedWhileDecisionActive) {
-        throw new Error(`deskBlockedWhileDecisionActive invariant failed: ${JSON.stringify(deskBlockEvidence)}`);
-      }
-
-      if (!deskBlockEvidence.hasModalActive) {
-        await clickByText(page, 'Decide now');
-      }
-      await waitForVisibleText(page, 'What Is Bosnia?');
-      await waitForVisibleText(page, 'Civic multi-ethnic republic');
-      const decisionDialog = await dialogText(page);
-      if (!decisionDialog.includes('What Is Bosnia?') || !decisionDialog.includes('Civic multi-ethnic republic')) {
-        throw new Error(`Foundational decision modal did not show expected RBiH options: ${decisionDialog}`);
-      }
-      await captureEvidence(page, summary, 'foundational_decision');
-
-      await clickByText(page, 'Civic multi-ethnic republic');
-      await waitUntilDialogTextAbsent(page, 'Presidential Response');
-      await dismissTutorialIfPresent(page);
-      await captureEvidence(page, summary, 'after_decision_receipt');
-
-      await clickSelector(page, '[data-testid="desk-close-overlay"]', 'Desk close');
-      await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
-      await page.keyboard.press('h');
-      await waitForVisibleText(page, 'BRIEFING');
-      await clickByText(page, 'RECORDS');
-      await waitForVisibleText(page, 'Archive Routes');
-      await captureEvidence(page, summary, 'army_hq_records');
-      await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
-      await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
-      await waitForVisibleText(page, 'Decision Consequences');
-      await waitForVisibleText(page, 'What Is Bosnia?');
-      await waitForVisibleText(page, 'Decision recorded');
-      await waitForVisibleText(page, 'Filed to Chronicle');
-      summary.evidence.recordsReceiptAppears = true;
-      summary.evidence.rawFirstHourLabelsAbsent = true;
-      await captureEvidence(page, summary, 'records_decision_receipt');
-      const recordsText = await visibleSurfaceText(page, [
-        'Decision Consequences',
-        'What Is Bosnia?',
-        'Civic multi-ethnic republic',
-      ]);
-      assertRawLabelsAbsent('Army HQ Records', recordsText);
-
-      await clickFirstMatchingText(page, ['Open Chronicle', 'CHRONICLE', 'Chronicle']);
-      await waitForVisibleText(page, 'War Chronicle');
-      await waitForVisibleText(page, 'What Is Bosnia?');
-      const chronicleText = await visibleSurfaceText(page, [
-        'War Chronicle',
-        'What Is Bosnia?',
-      ]);
-      assertRawLabelsAbsent('Chronicle', chronicleText);
-      summary.evidence.chronicleReceiptAppears = true;
-      await captureEvidence(page, summary, 'chronicle_decision_receipt');
 
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;

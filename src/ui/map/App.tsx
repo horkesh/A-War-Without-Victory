@@ -415,6 +415,7 @@ function App() {
   const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const openingBriefDismissed = useGameStore((s) => s.openingBriefDismissed);
+  const setOpeningBriefDismissed = useGameStore((s) => s.setOpeningBriefDismissed);
   const selectedOsid = useGameStore((s) => s.selectedOsid);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
@@ -504,6 +505,8 @@ function App() {
    *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
    *  below when a new turn surfaces pending decisions for the player faction. */
   const [activeEventDecisionId, setActiveEventDecisionId] = useState<string | null>(null);
+  const activeEventDecisionIdRef = useRef<string | null>(null);
+  activeEventDecisionIdRef.current = activeEventDecisionId;
   const [selectedReserveRequestId, setSelectedReserveRequestId] = useState<string | null>(null);
   const [selectedOfficerMatterId, setSelectedOfficerMatterId] = useState<string | null>(null);
   const [selectedIntelligenceBriefId, setSelectedIntelligenceBriefId] = useState<string | null>(null);
@@ -939,6 +942,7 @@ function App() {
 
   const handleSelectFaction = async (faction: StartNewCampaignPayload['playerFaction']) => {
     setCampaignStarting(true);
+    setOpeningBriefDismissed(false);
     // Use scenarioKey 'apr_1992' as default for dev map, mirroring Warroom fix
     const ok = await startCampaignFromSidePicker({ ipc, loadSave, setLoadError }, faction, 'apr_1992');
     setCampaignStarting(false);
@@ -1009,6 +1013,7 @@ function App() {
       // Don't trigger in input/select/textarea
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (activeEventDecisionIdRef.current !== null) return;
 
       if (e.key === 'h' || e.key === 'H') {
         e.preventDefault();
@@ -1060,7 +1065,7 @@ function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [appScreen, isDecisionHistoryOpen]);
+  }, [appScreen, activeEventDecisionId, isDecisionHistoryOpen]);
 
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps

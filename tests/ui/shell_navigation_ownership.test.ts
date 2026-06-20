@@ -180,6 +180,14 @@ describe('field toolbar navigation ownership', () => {
     expect(useGameStore.getState().codexOpen).toBe(false);
   });
 
+  it('locks global shell hotkeys while a required decision modal owns focus', () => {
+    const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+
+    expect(appSource).toContain('if (activeEventDecisionIdRef.current !== null) return;');
+    expect(appSource).toMatch(/window\.addEventListener\('keydown', handler\)[\s\S]*activeEventDecisionId/);
+    expect(appSource).toMatch(/}, \[appScreen, activeEventDecisionId, isDecisionHistoryOpen\]\);/);
+  });
+
   it('mounts tactical map chrome only while the game shell owns the screen', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 

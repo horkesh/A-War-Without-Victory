@@ -86,6 +86,15 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(routeIdx).toBeGreaterThan(okIdx);
     });
 
+    it('resets the opening brief before a fresh same-faction New Game load', () => {
+        const startIdx = app.indexOf('const handleSelectFaction = async');
+        const resetIdx = app.indexOf('setOpeningBriefDismissed(false);', startIdx);
+        const startCampaignIdx = app.indexOf('startCampaignFromSidePicker', startIdx);
+        expect(startIdx).toBeGreaterThan(-1);
+        expect(resetIdx).toBeGreaterThan(startIdx);
+        expect(startCampaignIdx).toBeGreaterThan(resetIdx);
+    });
+
     it('keeps Continue gated on a loaded save (does not clear it)', () => {
         expect(app).toContain("onContinue={() => setAppScreen('game')}");
     });

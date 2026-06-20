@@ -78,6 +78,18 @@ export interface EventDecisionModalProps {
  *  the Decision Context section. Per spec: first 200 chars with "..."
  *  truncation. */
 const SOURCE_DOSSIER_EXCERPT_MAX_CHARS = 200;
+const SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION = new Set([
+    'escape',
+    'h',
+    's',
+    'c',
+    'x',
+    'd',
+    'u',
+    'o',
+    'tab',
+    ' ',
+]);
 
 /** Phase H Packet 3 — Truncate a source-note / historical_source string to
  *  the dossier excerpt limit, appending "..." when truncated. Pure helper. */
@@ -571,7 +583,15 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
             backdropClassName="bg-black/70"
             panelClassName="bg-panel-bg border border-panel-border rounded-lg max-w-[720px] w-[92%] max-h-[88vh] overflow-y-auto shadow-xl backdrop-blur-sm"
         >
-            <div className="p-6">
+            <div
+                className="p-6"
+                onKeyDownCapture={(event) => {
+                    const key = event.key.toLowerCase();
+                    if (SHELL_HOTKEYS_BLOCKED_BY_REQUIRED_DECISION.has(key) || /^[1-9]$/.test(key)) {
+                        event.stopPropagation();
+                    }
+                }}
+            >
                 {/* Category stamp */}
                 <div className="flex items-center gap-3 mb-4">
                     <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-panel-bg bg-accent-gold px-2 py-0.5 rounded"

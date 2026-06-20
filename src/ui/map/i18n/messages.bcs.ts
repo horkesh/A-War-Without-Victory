@@ -2273,6 +2273,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'toolbar.armyHqAriaLabel': '{army} HQ [H]',
     'toolbar.armyHqTitle': 'Posjeti Štab armije [H]',
     'toolbar.turnLabel': 'Potez {turn}',
+    'situation.alliancePosture': 'Saveznicki stav: {posture}',
     'convoyDecision.close': 'Zatvori',
     'convoyDecision.field.route': 'Ruta',
     'convoyDecision.field.supply': 'Snabdijevanje',
@@ -3102,6 +3103,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'warroom.status.priorities': 'PRIORITETI',
     'warroom.status.urgentShort': 'HIT',
     'warroom.status.advance': 'NAPRIJED',
+    'inbox.type.reviewItem': 'STAVKA ZA PREGLED',
     // --- LQA parity pass: BCS translations for previously English-only keys ---
     // 'settings.experimentalFallbackProbe' is intentionally omitted to exercise
     // the English-fallback path (see tests/ui_i18n.test.ts).

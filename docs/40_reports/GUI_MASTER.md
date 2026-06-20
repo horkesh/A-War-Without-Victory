@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-20 (AAA polish wave 3 command-surface copy, startup OOB parent truth, Srebrenica/Zepa event-owned timeline provenance, first-hour shell hardening, Records/Chronicle opening decision filing, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-20 (all-faction first-hour browser gate, required-decision shell hotkey lock, CI i18n parity repair, AAA polish wave 4 live-copy/AAR provenance, startup OOB parent truth, Srebrenica/Zepa event-owned timeline provenance, first-hour shell hardening, Records/Chronicle opening decision filing, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,8 @@
 
 | Need | Go to |
 |------|--------|
+| **All-faction first-hour browser gate** | [implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md](implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md) - `qa:first-hour:browser` now proves RBiH/RS/HRHB splash -> identity -> foundational decision -> required-decision shell lock, repairs CI i18n parity for two BCS keys, and resets opening-brief dismissal on fresh same-faction New Game. |
+| **AAA polish wave 4 live copy / AAR provenance** | [implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md](implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md) - Situation, toolbar, Inbox, sector briefing, settlement timeline, and Operation History axis copy now avoid raw staff tokens and final-held-as-captured wording; Srebrenica/Zepa remain event-owned receipts. |
 | **AAA polish wave 3 command-surface and startup OOB truth** | [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) - Army HQ/OOB/settlement drilldowns now use dates, qualitative coverage, i18n local-support copy, and player-safe phase labels; `vrs_main_staff` is materialized as an opening `army_hq` formation; Srebrenica/Zepa operation-history rows cannot claim event-owned fall receipts. |
 | **Commander read-model surface parity** | [implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md](implemented/20260618_COMMANDER_READ_MODEL_SURFACE_PARITY.md) - ORBAT, Corps Detail, and Formation Detail now show display-only opening command labels when turn-0 corps commanders are intentionally not seated in sim state. |
 | **First-hour shell/Records/Chronicle polish** | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) - Browser-fallback foundational decisions file into Records and Chronicle during opening week, shell chrome renders `Opening week`, Records/Chronicle badges use readable separators, decision-modal shell ownership is guarded, and Army HQ/raw fallback copy uses player-safe labels. |
