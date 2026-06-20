@@ -3199,3 +3199,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-20 - Command-surface shorthand boundary
 
 **Normal command surfaces should not expose compact staff shorthand unless the surface is explicitly diagnostic:** remaining `INF`, `KIA/WIA/MIA`, `INTEL`, `DEF/EDGE`, `MOR`, `FAT`, `PERS`, `brg`, `bde`, `AUTH/AUT`, `OPSEC`, `SITREP`, and approximate-kilometer frontage copy are internal or staff-table shorthand, not player copy. Durable rule: spell out casualties, exchange-ratio no-loss cases, front segments, personnel/brigade counts, command authority, operation security, and operational reports through EN/BCS i18n keys; reserve raw acronyms for debug-only surfaces. Applied in `[2026-06-20] Command copy shorthand wave`; report `docs/40_reports/implemented/20260620_COMMAND_COPY_SHORTHAND_WAVE.md`.
+
+## 2026-06-20 - BCS command-copy parity boundary
+
+**BCS command surfaces need the same no-shorthand standard as English:** localized keys must not retain English `Level 3`, `override`, `Command Relationship`, `OPS`, or compact BCS staff abbreviations such as `Snabd.`, `obavj.`, `Kom.`, `{tanks}T`, and `{artillery}A` in normal player copy. Durable rule: when cleaning English command surfaces, audit matching BCS keys in the same pass and pin targeted keys in `gui_audit_label_discipline`. Applied in `[2026-06-20] BCS command copy residuals`; report `docs/40_reports/implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md`.
