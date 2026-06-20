@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest field drilldown context polish** | [implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md](implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md) - Personnel, settlement, battle-marker, settlement-sector, and embedded AAR drilldowns now route through shared field inspection instead of hidden/bare selection setters. |
 | **Latest direct map selection context routing** | [implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md](implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md) - Direct tactical-map sector/front and formation/counter/stack clicks now preserve corps/sector context through the shared field-inspection contract instead of opening orphaned panels. |
 | **Latest AAA polish wave 3 command-surface / OOB truth** | [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) - Command-surface copy, startup Army HQ command structures, opening commander display, and baked startup OOB parentage were reconciled while preserving Srebrenica/Zepa event-owned fall receipts. |
 | **Latest Peace / Decision Room label copy** | [implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md](implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md) - PeaceStatusPanel and Decision Room priority cards now render peace chrome, reserve reasons, briefing categories, and proposal domains through explicit localized/player-safe labels. |

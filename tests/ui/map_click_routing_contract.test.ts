@@ -4,6 +4,7 @@ import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import {
   resolveMapFormationInspectionTarget,
   resolveMapSectorInspectionTarget,
+  resolveMapSettlementInspectionTarget,
 } from '../../src/ui/map/map/mapSelectionRouting.js';
 
 function loadedState(): LoadedGameState {
@@ -75,6 +76,15 @@ function loadedState(): LoadedGameState {
         offensive_signs: false,
       },
     ],
+    frontEdgesOsid: [
+      {
+        edge_id: 'edge_1',
+        a: 'sarajevo_1',
+        b: 'pale_1',
+        side_a: 'RBiH',
+        side_b: 'RS',
+      },
+    ],
   } as unknown as LoadedGameState;
 }
 
@@ -84,6 +94,20 @@ describe('direct tactical map click routing', () => {
       kind: 'field-sector-in-corps',
       sectorId: 'sector_alpha',
       corpsId: 'corps_alpha',
+    });
+  });
+
+  it('routes settlement clicks with known sector and corps context through the compound sector target', () => {
+    expect(resolveMapSettlementInspectionTarget('sarajevo_1', loadedState())).toEqual({
+      kind: 'field-sector-in-corps',
+      sectorId: 'sector_alpha',
+      corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
+    });
+
+    expect(resolveMapSettlementInspectionTarget('unknown_osid', loadedState())).toEqual({
+      kind: 'field-settlement',
+      osid: 'unknown_osid',
     });
   });
 
@@ -121,6 +145,7 @@ describe('direct tactical map click routing', () => {
 
     expect(source).toContain('inspectFormationFromMap(id, props)');
     expect(source).toContain('inspectSectorFromMap(sectorId, props)');
+    expect(source).toContain('inspectSettlementFromMap(osid, osidToSector.get(osid))');
     expect(source).not.toMatch(/setSelectedFormationId\(id\)/);
     expect(source).not.toMatch(/(?:\.|\b)setSelectedCorpsFrontSectorId\(sectorId\)/);
   });

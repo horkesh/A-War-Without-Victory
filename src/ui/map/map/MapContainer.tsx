@@ -187,7 +187,11 @@ import {
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
 import { pickNearestFormationAtPoint, resolveDeckFormationClickTarget } from './clickSelectionPriority';
-import { resolveMapFormationInspectionTarget, resolveMapSectorInspectionTarget } from './mapSelectionRouting';
+import {
+  resolveMapFormationInspectionTarget,
+  resolveMapSectorInspectionTarget,
+  resolveMapSettlementInspectionTarget,
+} from './mapSelectionRouting';
 import {
   deckLayerRenderInputsChanged,
   shouldRunPulseAnimation,
@@ -220,6 +224,11 @@ function inspectFormationFromMap(formationId: string, properties?: Record<string
 function inspectSectorFromMap(sectorId: string, properties?: Record<string, unknown> | null) {
   const store = useGameStore.getState();
   inspectOnField(store, resolveMapSectorInspectionTarget(sectorId, store.loadedGameState, properties));
+}
+
+function inspectSettlementFromMap(osid: string, sectorId?: string | null) {
+  const store = useGameStore.getState();
+  inspectOnField(store, resolveMapSettlementInspectionTarget(osid, store.loadedGameState, sectorId));
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
@@ -627,7 +636,7 @@ export function MapContainer() {
         {
           id: 'info', label: 'Settlement', icon: '\u{1F3D8}', action: () => {
             const osid = properties?.osid as string;
-            if (osid) useGameStore.getState().setSelectedOsid(osid);
+            if (osid) inspectSettlementFromMap(osid, osidToSector.get(osid));
           }
         },
         {
@@ -989,9 +998,9 @@ export function MapContainer() {
             const sectorId = osidToSector.get(osid);
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
               sectorSelectedFromMapRef.current = true;
-              setSelectedOsidInSector(osid, sectorId);
+              inspectSettlementFromMap(osid, sectorId);
             } else {
-              setSelectedOsid(osid);
+              inspectSettlementFromMap(osid);
             }
           }
         },
@@ -1070,7 +1079,7 @@ export function MapContainer() {
             });
           }
           // Select the OSID to show settlement panel with battle context
-          setSelectedOsid(osid);
+          inspectSettlementFromMap(osid, osidToSector.get(osid));
         },
         onSectorHover: (id) => {
           setHoveredSectorId(id);

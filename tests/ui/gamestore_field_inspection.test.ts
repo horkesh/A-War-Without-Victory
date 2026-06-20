@@ -96,12 +96,14 @@ describe('gameStore field inspection routes', () => {
       kind: 'field-sector-in-corps',
       sectorId: 'sector_alpha',
       corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
     });
 
     expect(useGameStore.getState()).toMatchObject({
       isOperationsPanelOpen: false,
       selectedCorpsFrontSectorId: 'sector_alpha',
       selectedCorpsId: 'corps_alpha',
+      selectedOsid: 'sarajevo_1',
       selectedOperationKey: null,
     });
   });

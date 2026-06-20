@@ -18,6 +18,8 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 import { getDecorationName } from '../utils/decorationUtils';
+import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
+import { inspectOnField } from '../utils/shellNavigation';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -122,9 +124,10 @@ function FactionTag({ faction }: { faction: string }) {
     );
 }
 
-function DefenderBreakdown({ contributions, onSelectFormation, formationNameById }: {
+function DefenderBreakdown({ contributions, onSelectFormation, osid, formationNameById }: {
     contributions: NonNullable<TurnBattle['defender_contributions']>;
-    onSelectFormation?: (id: string) => void;
+    onSelectFormation?: (id: string, osid?: string | null) => void;
+    osid?: string | null;
     formationNameById: Map<string, string>;
 }) {
     const [expanded, setExpanded] = useState(false);
@@ -150,7 +153,7 @@ function DefenderBreakdown({ contributions, onSelectFormation, formationNameById
                                 <button
                                     type="button"
                                     className="hover:text-interactive transition-colors truncate"
-                                    onClick={() => onSelectFormation(c.brigade_id)}
+                                    onClick={() => onSelectFormation(c.brigade_id, osid)}
                                 >
                                     {brigadeLabel}
                                 </button>
@@ -175,7 +178,7 @@ function BattleRow({
     formationNameById,
 }: {
     battle: TurnBattle;
-    onSelectFormation?: (id: string) => void;
+    onSelectFormation?: (id: string, osid?: string | null) => void;
     osidDisplayNames: Record<string, string> | null;
     formationNameById: Map<string, string>;
 }) {
@@ -221,7 +224,7 @@ function BattleRow({
                     <button
                         type="button"
                         className="hover:text-interactive transition-colors"
-                        onClick={() => onSelectFormation(battle.primary_attacker_id)}
+                        onClick={() => onSelectFormation(battle.primary_attacker_id, battle.osid)}
                     >
                         {primaryAttackerLabel}
                     </button>
@@ -231,7 +234,7 @@ function BattleRow({
                             <button
                                 type="button"
                                 className="hover:text-interactive transition-colors"
-                                onClick={() => onSelectFormation(battle.primary_defender_id!)}
+                                onClick={() => onSelectFormation(battle.primary_defender_id!, battle.osid)}
                             >
                                 {primaryDefenderLabel}
                             </button>
@@ -243,6 +246,7 @@ function BattleRow({
                 <DefenderBreakdown
                     contributions={battle.defender_contributions}
                     onSelectFormation={onSelectFormation}
+                    osid={battle.osid}
                     formationNameById={formationNameById}
                 />
             )}
@@ -304,9 +308,21 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
     const [locale] = useLocale();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-    const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
 
     if (!isOpen || !loadedGameState) return null;
+
+    const inspectAarFormation = (formationId: string, osid?: string | null) => {
+        const formation = loadedGameState.formations.find((candidate) => candidate.id === formationId);
+        let target: FieldInspectionTarget;
+        if (osid) {
+            target = { kind: 'field-formation-at-settlement', formationId, osid };
+        } else if (formation?.corps_id) {
+            target = { kind: 'field-formation-in-corps', formationId, corpsId: formation.corps_id };
+        } else {
+            target = { kind: 'field-formation', formationId };
+        }
+        inspectOnField(useGameStore.getState(), target);
+    };
 
     const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
     const narrateTerritory = shouldNarrateTerritorySummary(summary);
@@ -329,7 +345,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                         <BattleRow
                                             key={b.osid}
                                             battle={b}
-                                            onSelectFormation={setSelectedFormationId}
+                                            onSelectFormation={inspectAarFormation}
                                             osidDisplayNames={osidDisplayNames}
                                             formationNameById={formationNameById}
                                         />
