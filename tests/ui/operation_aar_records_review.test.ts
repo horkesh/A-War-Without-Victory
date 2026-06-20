@@ -3,6 +3,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 import { RecordsContent } from '../../src/ui/map/components/army_hq/RecordsContent.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
@@ -142,6 +143,15 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Captured: Prijedor')).toBeTruthy();
         expect(screen.getByText('Held at end: Kozarac')).toBeTruthy();
         expect(screen.getByText('Not held: Sanski Most')).toBeTruthy();
+    });
+
+    it('labels compact AAR final-held objectives as held at close, not taken', () => {
+        const en = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
+        const bcs = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
+
+        expect(en).toContain("'operationsSection.aarObjectivesTaken': '{captured} / {targeted} OBJ HELD AT CLOSE'");
+        expect(en).not.toContain('OBJ TAKEN');
+        expect(bcs).not.toContain('CILJEVA UZETO');
     });
 
     it('renders operation display names in Records instead of raw history identifiers', () => {

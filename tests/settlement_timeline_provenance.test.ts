@@ -262,6 +262,41 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         }
     });
 
+    it('labels final-held operation objectives as held at close unless capture was logged', () => {
+        const osid = 'op:test:held_without_logged_capture';
+        const events = buildSettlementTimeline(
+            osid,
+            null,
+            [],
+            [],
+            [
+                {
+                    operation_name: 'local_push',
+                    operation_display_name: 'Local Push',
+                    corps_id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    started_turn: 12,
+                    ended_turn: 15,
+                    outcome: 'partial',
+                    objectives_targeted: [osid],
+                    objectives_captured: [osid],
+                    objectives_logged_captured: [],
+                } as any,
+            ],
+            [],
+            [],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        const resolved = events.find(e => e.type === 'operation_resolved');
+        expect(resolved?.title).toContain('Local Push');
+        expect(resolved?.title).toContain('objective held at operation close');
+        expect(resolved?.title).not.toContain('objective captured');
+    });
+
     it('renders authored control-event mechanism labels without exposing raw enum tokens', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {

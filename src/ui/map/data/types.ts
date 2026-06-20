@@ -120,7 +120,7 @@ export interface OfficerCombatRecordView {
     casualties_suffered: number;
     /** Total casualties inflicted across all commanded ops (killed + wounded). */
     casualties_inflicted: number;
-    /** Total objectives captured across all commanded ops. */
+    /** Total objectives held at close across all commanded ops. */
     objectives_captured: number;
     /** Most-recent commanded operation (highest ended_turn; ties broken by op id). */
     last_operation?: {

@@ -21028,6 +21028,16 @@ Verification: `node .\node_modules\vitest\vitest.mjs run tests\ui\chronicle_chap
 
 Determinism/scope: UI/read-model copy, tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-20 - AAR final-held provenance copy
+
+Closed the downstream AAR provenance wording lane from the Pyrrhic polish sweep. Army HQ completed-operation compact AAR copy now says objectives were held at close rather than taken; forced-operation receipts use `objectivesHeldAtClose` and render objectives held at resolution; settlement timelines only say `objective captured` when `objectives_logged_captured` contains the OSID, otherwise final-held objectives render as held at operation close; Chronicle operation/personnel entries and Opportunity Ledger AAR counts say objectives held at close; officer combat records label the count as held objectives. BCS mirrors remove the high-risk `UZETO` / `zauzela` / `zauzetih` wording on these final-held AAR surfaces pending native LQA refinement.
+
+Srebrenica/Zepa fall receipts remain event-owned, and Krivaja/Stupcanica remain chronology/AAR context only. No operation lifecycle, calibration, scenario, or event-delivery behavior changed.
+
+Verification: focused red proof first failed 6 stale surfaces; `npm.cmd exec -- vitest run tests/ui/forced_op_receipts.test.ts tests/ui/turn_aftermath_modal_i18n.test.ts tests/settlement_timeline_provenance.test.ts tests/chronicle_entries.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/officer_dossier.test.ts --pool=forks --reporter=dot` passed 73/73; `npm.cmd run typecheck` passed; `npm.cmd exec -- vitest run tests/ui/forced_op_receipts.test.ts tests/ui/turn_aftermath_modal_i18n.test.ts tests/settlement_timeline_provenance.test.ts tests/chronicle_entries.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/officer_dossier.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 85/85; `npm.cmd run qa:live-surface:browser` passed with port 3239 cleanup. Report: `docs/40_reports/implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md`.
+
+Determinism/scope: UI/read-model copy, i18n templates, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-20 - All-faction first-hour browser gate and CI i18n repair
 
 Closed the first-hour faction parity gap and the latest main CI failure. `qa:first-hour:browser` now drives RBiH, RS, and HRHB through main-menu faction selection, war-start splash, identity brief, foundational decision, required-decision Desk blocking, and modal shell/hotkey lock. Required event-decision modals now capture shell hotkeys while active, and fresh same-faction New Game starts clear `openingBriefDismissed` before loading the new campaign so the opening brief cannot be skipped by prior same-session state. The RBiH Records/Chronicle opening-decision receipt proof remains part of the gate.

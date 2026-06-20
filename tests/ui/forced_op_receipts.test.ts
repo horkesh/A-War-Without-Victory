@@ -104,7 +104,7 @@ describe('buildForcedOpReceipts', () => {
         expect(r.grade).toBe(1);
         expect(r.casualtiesSuffered).toBe(200);
         expect(r.casualtiesInflicted).toBe(50);
-        expect(r.objectivesCaptured).toBe(1);
+        expect(r.objectivesHeldAtClose).toBe(1);
         expect(r.endedTurn).toBe(17);
     });
 

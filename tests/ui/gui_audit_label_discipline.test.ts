@@ -155,6 +155,31 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/\bT3\b/);
   });
 
+  it('labels opportunity AAR objectives as held at close, not taken', () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        operationOpportunityRecords: [
+          {
+            proposal_id: 'p1',
+            opportunity_id: 'o1',
+            display_name: 'Pocket relief',
+            faction: 'RBiH',
+            status: 'approved',
+            response: 'approve',
+            exit_class: 'partial_success',
+            objectives_targeted: 3,
+            objectives_captured: 2,
+          },
+        ],
+      }),
+    });
+
+    const { container } = render(createElement(OpportunityLedgerPanel));
+
+    expect(container.textContent).toMatch(/2\/3 held at close/i);
+    expect(container.textContent).not.toMatch(/2\/3 objectives/i);
+  });
+
   it('renders Situation pressure and security copy without telemetry labels', () => {
     const state = makeState({
       internationalVisibilityPressure: {

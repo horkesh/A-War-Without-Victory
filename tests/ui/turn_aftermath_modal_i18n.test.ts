@@ -147,7 +147,7 @@ describe('TurnAftermathModal localization', () => {
             grade: 1,
             casualtiesSuffered: 80,
             casualtiesInflicted: 20,
-            objectivesCaptured: 0,
+            objectivesHeldAtClose: 2,
             endedTurn: 12,
         }];
 
@@ -165,6 +165,8 @@ describe('TurnAftermathModal localization', () => {
 
         expect(screen.getByText(/he recommended waiting/i)).toBeTruthy();
         expect(container.textContent).not.toMatch(/recommended abort/i);
+        expect(container.textContent).toMatch(/2 objectives held at resolution/i);
+        expect(container.textContent).not.toMatch(/objectives? taken|objectives? captured/i);
     });
 
     it('renders consequence and officer resentment timing as calendar dates', () => {

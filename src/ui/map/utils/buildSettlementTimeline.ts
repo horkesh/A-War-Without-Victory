@@ -73,6 +73,7 @@ interface OperationHistoryEntry {
     outcome: string;
     objectives_targeted: string[];
     objectives_captured: string[];
+    objectives_logged_captured?: string[];
 }
 
 /** Ethnicity label for faction key. */
@@ -361,6 +362,7 @@ export function buildSettlementTimeline(
         const targeted = op.objectives_targeted?.includes(osid);
         const captured = op.objectives_captured?.includes(osid);
         const opName = operationDisplayName(op);
+        const loggedCaptured = op.objectives_logged_captured?.includes(osid) ?? false;
         if (targeted) {
             events.push({
                 turn: op.started_turn,
@@ -379,12 +381,20 @@ export function buildSettlementTimeline(
                 detail: 'Control change is owned by the historical event receipt.',
                 outcome: op.outcome,
             });
-        } else if (captured) {
+        } else if (captured && loggedCaptured) {
             events.push({
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
                 title: `${opName} — objective captured`,
+                outcome: op.outcome,
+            });
+        } else if (captured) {
+            events.push({
+                turn: op.ended_turn,
+                type: 'operation_resolved',
+                faction: op.faction,
+                title: `${opName} â€” objective held at operation close`,
                 outcome: op.outcome,
             });
         } else if (targeted && op.ended_turn > 0) {

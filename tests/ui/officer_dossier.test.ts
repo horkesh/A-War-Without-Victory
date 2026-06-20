@@ -218,6 +218,7 @@ describe('OfficerDossierPanel renders read-only dossier', () => {
         );
         expect(html).toContain('Officer A');
         expect(html).toContain('Combat Record');
+        expect(html).toContain('Held objectives');
         // combat-record numbers
         expect(html).toContain('1,400');
         expect(html).toContain('720');

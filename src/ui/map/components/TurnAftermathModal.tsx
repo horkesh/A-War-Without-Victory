@@ -274,8 +274,8 @@ export function TurnAftermathModal({
                         {t('turnAftermath.forcedOpOutcome', {
                           grade: t(`turnAftermath.opOutcome.${receipt.outcome}` as MessageKey),
                           casualties: receipt.casualtiesSuffered,
-                          objectives: receipt.objectivesCaptured > 0
-                            ? t('turnAftermath.forcedOpObjectives', { count: receipt.objectivesCaptured })
+                          objectives: receipt.objectivesHeldAtClose > 0
+                            ? t('turnAftermath.forcedOpObjectives', { count: receipt.objectivesHeldAtClose })
                             : t('turnAftermath.forcedOpNoObjectives'),
                         })}
                       </div>

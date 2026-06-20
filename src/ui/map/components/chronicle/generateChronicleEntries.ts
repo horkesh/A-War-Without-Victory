@@ -275,7 +275,7 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
             title: `${operationName} concluded`,
             detail: [
                 formatOperationOutcome(outcome),
-                `${captured}/${targeted} objectives`,
+                `${captured}/${targeted} objectives held at close`,
                 `${attacks} attacks`,
                 `${suffered} suffered / ${inflicted} inflicted`,
                 `${stars} ${stars === 1 ? 'star' : 'stars'}`,
@@ -325,7 +325,7 @@ function buildOfficerSpotlightEntries(state: any, playerFaction: string | null):
             detail: [
                 operationName,
                 formatOperationOutcome(outcome),
-                `${captured}/${targeted} objectives`,
+                `${captured}/${targeted} objectives held at close`,
                 `${attacks} attacks`,
                 `${stars} ${stars === 1 ? 'star' : 'stars'}`,
             ].join(' | '),

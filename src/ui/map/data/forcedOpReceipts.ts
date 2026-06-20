@@ -60,8 +60,8 @@ export interface ForcedOpReceipt {
     casualtiesSuffered: number;
     /** Enemy casualties inflicted (killed + wounded). */
     casualtiesInflicted: number;
-    /** Number of objectives captured. */
-    objectivesCaptured: number;
+    /** Number of objectives held at operation resolution. */
+    objectivesHeldAtClose: number;
     /** Turn the operation resolved. */
     endedTurn: number;
 }
@@ -100,7 +100,7 @@ export function buildForcedOpReceipts(
             grade: aar.grade?.stars ?? 0,
             casualtiesSuffered: tally(aar.casualties_suffered),
             casualtiesInflicted: tally(aar.casualties_inflicted),
-            objectivesCaptured: aar.objectives_captured?.length ?? 0,
+            objectivesHeldAtClose: aar.objectives_captured?.length ?? 0,
             endedTurn: aar.ended_turn,
         });
     }

@@ -367,7 +367,8 @@ describe('generateChronicleEntries', () => {
         expect(spotlight?.headline).toBe(true);
         expect(spotlight?.title).toBe('Officer of the Week: General Enver Hadzihasanovic');
         expect(spotlight?.detail).toContain('Vitez Relief');
-        expect(spotlight?.detail).toContain('1/2 objectives');
+        expect(spotlight?.detail).toContain('1/2 objectives held at close');
+        expect(spotlight?.detail).not.toContain('1/2 objectives |');
         expect(spotlight?.metadata?.operationAarId).toBe('op-vitez-relief');
     });
 });
