@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] test(ui): add Codex internal browser drilldown gate
+
+**Type:** UI/browser QA gate hardening.
+
+**Fix:** `qa:live-surface:browser` now opens Codex through the toolbar, selects an unlocked/ghost essay row, verifies the selected essay body, captures `codex_internal_selected_essay`, and records whether Dilemma Spine and Distance from History were visible. `CodexPanel` now exposes stable essay-row and selected-essay hooks for live browser QA, including selected-state and essay metadata.
+
+**Verification:** Red proof first failed on the missing live-sweep lane and missing selector hooks. Green proof passed: `npm.cmd exec -- vitest run tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/codex_panel_dynamic_mount.test.ts tests/ui/codex_panel_tier_graph.test.ts tests/ui/codex_panel_unlock_state.test.ts tests/ui/dilemma_spine.test.ts tests/ui/distance_from_history.test.ts --pool=forks --reporter=dot` (45/45); `npm.cmd run typecheck`; `npm.cmd run qa:live-surface:browser` with `codexInternalDrilldown: true`, `codexDilemmaSpineVisible: true`, `codexDistanceFromHistoryVisible: true`, and port 3239 cleanup; `git diff --check`. Report: `docs/40_reports/implemented/20260620_CODEX_INTERNAL_BROWSER_GATE.md`.
+
+**Scope/determinism:** UI selector hooks, browser QA tooling, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] test(ui): add archive/inbox drilldown browser gate
 
 **Type:** UI/browser QA gate and shell-route hygiene.

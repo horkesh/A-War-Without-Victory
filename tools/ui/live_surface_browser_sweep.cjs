@@ -969,6 +969,36 @@ async function runArchiveInboxDrilldown(page, summary) {
   assertNoRawTechnicalTokens('Archive Inbox Drilldown', text);
 }
 
+async function runCodexInternalDrilldown(page, summary) {
+  await resetToWarMap(page);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-codex"]');
+  await waitForVisibleSelector(page, '[data-testid="codex-panel"]');
+  await assertSingleShellSurface(page, 'Codex');
+
+  const essaySelector = [
+    '[data-testid="codex-panel"] [data-testid="codex-essay-row"][data-awwv-codex-state="unlocked"]',
+    '[data-testid="codex-panel"] [data-testid="codex-essay-row"][data-awwv-codex-state="ghost"]',
+  ].join(', ');
+  await activateVisibleControl(page, essaySelector);
+  await waitForVisibleSelector(page, '[data-testid="codex-selected-essay"][data-essay-id]');
+  await waitForVisibleSelector(
+    page,
+    '[data-testid="codex-selected-essay-body"][data-awwv-codex-selected-state="unlocked"], [data-testid="codex-selected-essay-body"][data-awwv-codex-selected-state="ghost"]',
+  );
+  await waitForVisibleSelector(page, '[data-testid="codex-essay-row"][data-selected="true"]');
+
+  summary.evidence.codexDilemmaSpineVisible =
+    await visibleSelectorCount(page, '[data-testid="codex-dilemma-spine-section"]') > 0;
+  summary.evidence.codexDistanceFromHistoryVisible =
+    await visibleSelectorCount(page, '[data-testid="codex-distance-from-history-section"]') > 0;
+
+  await captureEvidence(page, summary, 'codex_internal_selected_essay');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Codex Internal Drilldown', text);
+  summary.evidence.codexInternalDrilldown = true;
+}
+
 async function run() {
   ensureDir(OUT_DIR);
   ensureDir(SCREENSHOT_DIR);
@@ -987,6 +1017,9 @@ async function run() {
       archiveRecordsDecisionToChronicleDrilldown: false,
       presidentialInboxVisible: false,
       deskRecordsRoute: false,
+      codexInternalDrilldown: false,
+      codexDilemmaSpineVisible: false,
+      codexDistanceFromHistoryVisible: false,
       serverPortCleanupVerified: false,
     },
     consoleMessages: [],
@@ -1029,6 +1062,7 @@ async function run() {
     await runArmyHqInternalDrilldown(page, summary);
     await runOwnerJourneyDrilldown(page, summary);
     await runArchiveInboxDrilldown(page, summary);
+    await runCodexInternalDrilldown(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
     } finally {

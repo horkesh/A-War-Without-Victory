@@ -89,6 +89,14 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('presidential-inbox');
     expect(tool).toContain('president-desk-shell');
     expect(tool).toContain('desk-action-records');
+    expect(tool).toContain('runCodexInternalDrilldown');
+    expect(tool).toContain('codexInternalDrilldown');
+    expect(tool).toContain('codexInternalDrilldown: false');
+    expect(tool).toContain('await runCodexInternalDrilldown(page, summary);');
+    expect(tool).toContain('codex_internal_selected_essay');
+    expect(tool).toContain('codex-essay-row');
+    expect(tool).toContain('codex-selected-essay');
+    expect(tool).toContain('codex-selected-essay-body');
     expect(tool).toContain('activateVisibleControl');
     expect(tool).toContain('clickFirstSectorWithVisibleFormation');
     expect(tool).toContain('No visible Corps Front brigade rows with settlement locations found after inspecting');
@@ -127,6 +135,11 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-war-map"');
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-records"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-close"');
+    expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-essay-row"');
+    expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-essay-id={essay.id}');
+    expect(read('src/ui/map/components/CodexPanel.tsx')).toContain("data-selected={isSelected ? 'true' : 'false'}");
+    expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-selected-essay"');
+    expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-selected-essay-body"');
     expect(read('src/ui/map/components/warroom/CommandCardStrip.tsx')).toContain('data-testid="command-card-strip-close"');
     expect(read('src/ui/map/App.tsx')).toContain('data-testid="warroom-decision-room-close"');
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('testId="oob-section-sectors-toggle"');

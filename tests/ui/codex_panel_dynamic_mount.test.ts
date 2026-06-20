@@ -109,8 +109,16 @@ describe('CodexPanel dynamic essay proof', () => {
 
         renderPanel();
         fireEvent.click(screen.getByText('1995'));
-        fireEvent.click(screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions'));
+        const essayRow = screen.getByText('The Dayton Agreement: Ending the War, Freezing the Questions').closest('button');
+        expect(essayRow?.getAttribute('data-testid')).toBe('codex-essay-row');
+        expect(essayRow?.getAttribute('data-awwv-codex-state')).toBe('unlocked');
+        expect(essayRow?.getAttribute('data-selected')).toBe('false');
+        fireEvent.click(essayRow!);
 
+        expect(screen.getByTestId('codex-selected-essay')).toBeTruthy();
+        expect(screen.getByTestId('codex-selected-essay').getAttribute('data-essay-id')).toBe('essay_dayton_signed_1995');
+        expect(screen.getByTestId('codex-selected-essay-body').getAttribute('data-awwv-codex-selected-state')).toBe('unlocked');
+        expect(essayRow?.getAttribute('data-selected')).toBe('true');
         expect(screen.getAllByText('Player War Divergence')).toHaveLength(2);
         expect(screen.getByText('War lasted 6 weeks longer than the historical 182 weeks')).toBeTruthy();
         expect(screen.getByText('Federation controlled 54.0% territory vs historical 51%')).toBeTruthy();

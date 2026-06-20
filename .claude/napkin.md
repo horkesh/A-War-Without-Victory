@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**CODEX INTERNAL BROWSER GATE (2026-06-20).** Top-level Codex reachability is not enough. Do instead: keep `qa:live-surface:browser` opening Codex through `[data-testid="toolbar-route-codex"]`, selecting `[data-testid="codex-essay-row"]`, verifying `[data-testid="codex-selected-essay-body"]`, and recording optional Dilemma Spine / Distance from History visibility.
+
 **ARCHIVE / INBOX DRILLDOWN GATE (2026-06-20).** Top-level Records/Chronicle/Desk reachability is not enough. Do instead: keep `qa:live-surface:browser` clicking Chronicle -> Records, Records decision receipts -> Chronicle, and President's Desk -> Records; preserve stable archive/inbox `data-testid` hooks and clear focused aftermath/operation/decision record ids when returning to the inbox/desk home.
 
 **AAR / ORBAT UNIT-EVENT LABELS (2026-06-20).** Records AAR unit events and ORBAT expanded brigade details are player surfaces, not enum displays. Do instead: render narrative arcs via `getPlayerSafeFormationNarrativeArcLabel(...)`, decoration tiers via faction decoration names, and unknown tiers as neutral campaign distinction copy; keep `garrison`, `bloodied`, and `tier_1` out of normal play.

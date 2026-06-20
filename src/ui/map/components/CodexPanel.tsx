@@ -608,8 +608,12 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                     type="button"
                                                     onClick={() => { if (row.unlocked) setSelectedEssayId(essay.id); }}
                                                     disabled={!row.unlocked}
+                                                    data-testid="codex-essay-row"
+                                                    data-essay-id={essay.id}
+                                                    data-essay-year={essay.year}
                                                     data-awwv-codex-state={row.unlocked ? (ghost ? 'ghost' : 'unlocked') : 'locked-hint'}
                                                     data-tier={row.tier}
+                                                    data-selected={isSelected ? 'true' : 'false'}
                                                     className={`w-full text-left px-2.5 py-1.5 border-b border-neutral-800/30 transition-all ${
                                                         !row.unlocked
                                                             ? 'opacity-50 cursor-default border-l-2 border-l-transparent'
@@ -667,7 +671,13 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                 </div>
                             </div>
                         ) : (
-                            <div className="bg-[#f5f0e8] border border-neutral-300 rounded-lg shadow-md relative max-w-[500px] mx-auto">
+                            <div
+                                className="bg-[#f5f0e8] border border-neutral-300 rounded-lg shadow-md relative max-w-[500px] mx-auto"
+                                data-testid="codex-selected-essay"
+                                data-essay-id={selectedEssay.id}
+                                data-essay-year={selectedEssay.year}
+                                data-codex-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
+                            >
                                 <div className="absolute top-2.5 right-3.5 opacity-[0.06] font-black text-[22px] -rotate-12 select-none uppercase text-neutral-800 pointer-events-none">
                                     {t('codex.title')}
                                 </div>
@@ -692,7 +702,11 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                     </div>
                                 </div>
 
-                                <div className="px-3 py-2.5" data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}>
+                                <div
+                                    className="px-3 py-2.5"
+                                    data-testid="codex-selected-essay-body"
+                                    data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
+                                >
                                     {selectedResolvedEssay.paragraphs.length > 0 ? (
                                         <div className="text-[9px] text-neutral-700 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
                                             {selectedResolvedEssay.paragraphs.map((paragraph, index) => (
