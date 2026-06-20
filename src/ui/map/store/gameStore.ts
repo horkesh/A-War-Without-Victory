@@ -477,6 +477,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       armyHQExpandedCorpsId: null,
       armyHQExpandedSections: {},
       armyHQOfficerSelectionCorpsId: null,
+      focusedAftermathTurn: null,
       focusedOperationHistoryId: null,
       focusedDecisionConsequenceId: null,
     }),

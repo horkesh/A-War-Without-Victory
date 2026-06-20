@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ARMY HQ RECORDS FOCUS RESET (2026-06-20).** Army HQ close paths must not preserve focused archive ids. Do instead: keep `setArmyHQOpen(false)` clearing `focusedAftermathTurn`, `focusedOperationHistoryId`, and `focusedDecisionConsequenceId` together; pin with stale-state reset tests.
+
 **OOB SECTOR FRONTAGE COPY (2026-06-20).** `length_edges` is a front-edge/segment count, not geographic kilometers. Do instead: render OOB sector rows through `oob.sectorFrontSegments` and keep focused UI tests rejecting stale `~N km` copy.
 
 **CHRONICLE DECISION RECORD FOCUS (2026-06-20).** Chronicle decision-ledger entries are exact Records receipts, not generic aftermath turns. Do instead: route entries with `metadata.decisionRecordId` through `openArmyHQDecisionConsequenceRecord(...)`, expose `data-record-target="decision"`, and keep `qa:live-surface:browser` waiting for the Decisions subtab when Chronicle selects a decision target.

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): clear stale Army HQ aftermath focus on close
+
+**Type:** UI/store route-state hygiene.
+
+**Fix:** Closing Army HQ now clears `focusedAftermathTurn` together with focused operation AAR and decision-consequence record ids. This prevents stale Army HQ Records aftermath focus from reopening or expanding an old turn after the player leaves Army HQ for Chronicle, Codex, Desk, War Map, or another shell route.
+
+**Verification:** Red proof first failed because `focusedAftermathTurn` remained `17` after `setArmyHQOpen(false)`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/stale_state_resets.test.ts --pool=forks --reporter=dot` (5/5); `npm.cmd exec -- vitest run tests/ui/stale_state_resets.test.ts tests/ui/gamestore_field_inspection.test.ts tests/ui/gamestore_load_reset.test.ts tests/ui_shell_navigation.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/records_button_behavior.test.ts --pool=forks --reporter=dot` (59/59); `npm.cmd run typecheck`. Report: `docs/40_reports/implemented/20260620_ARMY_HQ_AFTERMATH_FOCUS_RESET.md`.
+
+**Scope/determinism:** UI/store route-state cleanup, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label OOB sector frontage as segments
 
 **Type:** UI/read-model copy polish.

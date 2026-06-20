@@ -16,7 +16,9 @@ describe('GUI audit Batch E stale-state resets', () => {
             armyHQExpandedCorpsId: null,
             armyHQExpandedSections: {},
             armyHQOfficerSelectionCorpsId: null,
+            focusedAftermathTurn: null,
             focusedOperationHistoryId: null,
+            focusedDecisionConsequenceId: null,
         });
     });
 
@@ -28,6 +30,24 @@ describe('GUI audit Batch E stale-state resets', () => {
         store.setArmyHQOpen(false);
 
         expect(useGameStore.getState().armyHQTab).toBe('briefing');
+    });
+
+    it('closing Army HQ clears stale focused Records targets', () => {
+        const store = useGameStore.getState();
+
+        useGameStore.setState({
+            focusedAftermathTurn: 17,
+            focusedOperationHistoryId: 'operation-aar-17',
+            focusedDecisionConsequenceId: 'decision-receipt-17',
+        });
+
+        store.setArmyHQOpen(false);
+
+        expect(useGameStore.getState()).toMatchObject({
+            focusedAftermathTurn: null,
+            focusedOperationHistoryId: null,
+            focusedDecisionConsequenceId: null,
+        });
     });
 
     it('selection-bound confirmation messages reset when the selected target changes', () => {
