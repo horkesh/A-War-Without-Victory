@@ -8,13 +8,13 @@ import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import type { CorpsFrontSectorView } from '../data/types';
 import { t } from '../i18n';
+import { inspectOnField } from '../utils/shellNavigation';
 
 
 export function OrbatPanel() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const selectedOrbatCorpsId = useGameStore((s) => s.selectedOrbatCorpsId);
     const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
-    const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
     const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
     const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
     const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
@@ -133,7 +133,11 @@ export function OrbatPanel() {
                                 formation={b}
                                 compact
                                 onClick={() => {
-                                    setSelectedFormationId(b.id);
+                                    inspectOnField(useGameStore.getState(), {
+                                        kind: 'field-formation-in-corps',
+                                        formationId: b.id,
+                                        corpsId: corps.id,
+                                    });
                                     // R12: ORBAT-map sync — fly to brigade location and flash it
                                     const osid = b.location_osid;
                                     if (osid) {

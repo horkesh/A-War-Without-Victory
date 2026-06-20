@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): preserve OrbatPanel brigade context
+
+**Type:** UI/store route-state polish.
+
+**Fix:** OrbatPanel brigade rows now route through `inspectOnField(...)` with `field-formation-in-corps`, transferring the player from the ORBAT list into corps + formation drilldown instead of using the bare formation setter that cleared parent context. The existing brigade map pan/flash behavior is preserved.
+
+**Verification:** Red proof first failed because the brigade click left `selectedCorpsId` null. Green proof passed: `npm.cmd exec -- vitest run tests/ui/orbatpanel_drilldown_routing.test.ts --pool=forks --reporter=dot` (1/1); `npm.cmd exec -- vitest run tests/ui/orbatpanel_drilldown_routing.test.ts tests/ui/gamestore_field_inspection.test.ts tests/ui_map_panel_rail.test.ts --pool=forks --reporter=dot` (10/10); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (23 files / 213 tests); `git diff --check`. Report: `docs/40_reports/implemented/20260620_ORBATPANEL_BRIGADE_DRILLDOWN.md`.
+
+**Scope/determinism:** UI/store route-state, focused tests, player-journey coverage, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): localize settlement status labels
 
 **Type:** UI/read-model i18n copy polish.

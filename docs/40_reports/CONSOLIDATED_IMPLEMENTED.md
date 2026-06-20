@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest OrbatPanel brigade drilldown:** [implemented/20260620_ORBATPANEL_BRIGADE_DRILLDOWN.md](implemented/20260620_ORBATPANEL_BRIGADE_DRILLDOWN.md) - OrbatPanel brigade clicks now route to corps + formation drilldown instead of a bare formation route.
+
 **Latest settlement status label i18n:** [implemented/20260620_SETTLEMENT_STATUS_LABEL_I18N.md](implemented/20260620_SETTLEMENT_STATUS_LABEL_I18N.md) - Settlement overview status rows now render localized player labels instead of raw ids such as `CONTESTED`.
 
 **Latest Corps Detail brigade drilldown:** [implemented/20260620_CORPSDETAIL_BRIGADE_DRILLDOWN.md](implemented/20260620_CORPSDETAIL_BRIGADE_DRILLDOWN.md) - Corps Detail brigade clicks now preserve corps context while focusing the selected brigade.
