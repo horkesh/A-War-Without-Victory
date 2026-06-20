@@ -628,6 +628,20 @@ describe('FactionReport — direct component mount proof', () => {
         expect(html).toContain('35');
     });
 
+    it('renders peace plan history with plan names instead of raw ids', () => {
+        const html = renderComponentMP(FactionReport, {
+            verdict: makeRsVerdictMP(),
+            factionOsids: 413,
+            totalOsids: 712,
+            brigadeCount: 35,
+            personnel: 85000,
+        });
+        expect(html).toContain('Vance-Owen Peace Plan');
+        expect(html).toContain('Contact Group Plan');
+        expect(html).not.toContain('vance_owen');
+        expect(html).not.toContain('contact_group');
+    });
+
     it('renders enclaves lost for RBiH', () => {
         const html = renderComponentMP(FactionReport, {
             verdict: makeRbihVerdictMP(),

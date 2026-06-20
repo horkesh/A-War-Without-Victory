@@ -1,3 +1,11 @@
+## 2026-06-20 - Economy and recruitment ids stay internal
+
+**Production facility and recruitment ids are backend vocabulary, not modal copy:** Economy facilities and recruitment options preserve type/resource/equipment fields for logic, but player-facing panels should use command-language labels. Durable rule: map `heavy_equipment`, `small_arms`, `ammunition`, compact resource labels, faction abbreviations, and equipment-class ids through localized/player-safe labels; preserve raw equipment ids only as internal command payloads. Applied in `[2026-06-20] fix(ui): label economy facility and recruitment copy`; reports `docs/40_reports/implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md` and `docs/40_reports/implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md`.
+
+## 2026-06-20 - Verdict peace plans use catalog names
+
+**Peace-plan ids are joins, not endgame copy:** Faction capability reports preserve accepted/rejected peace-plan ids for logic and scoring, but the verdict report is player-facing. Durable rule: resolve known ids through the peace-plan catalog before rendering accepted/rejected plan history, and use a neutral player-safe fallback for unknown ids; do not print `vance_owen`, `contact_group`, or future underscore ids in normal endgame copy. Applied in `[2026-06-20] fix(ui): render verdict peace-plan names`; report `docs/40_reports/implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md`.
+
 ## 2026-06-20 - Live browser raw-token guard should track repeated leak classes
 
 **Live browser QA must catch compact staff shorthand before release:** The same leak classes recur across Desk, Army HQ, Records, Chronicle, Codex, and drilldowns. Durable rule: keep `qa:live-surface:browser` guarding broad visible-token families, not just exact historical failures: OSID wording, raw turn timing, operation objective/attack shorthand, attacker/defender shorthand, combat-record shorthand, and known raw enum ids. When the guard grows, immediately run the live browser sweep and record any new reachable failures as player-copy work instead of weakening the guard. Applied in `[2026-06-20] test(ui): expand live-surface raw-token guards`; report `docs/40_reports/implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md`.

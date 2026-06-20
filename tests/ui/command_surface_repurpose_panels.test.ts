@@ -80,8 +80,9 @@ describe('presidential command surface repurpose panels', () => {
             RS: { generalSupply: 1, heavyMunitions: 1 },
           },
           productionFacilities: [
-            { id: 'z_facility', name: 'Zenica Works', type: 'factory', municipality: 'zenica', condition: 0.8, controller: 'RBiH' },
-            { id: 'a_facility', name: 'Alpha Depot', type: 'depot', municipality: 'tuzla', condition: 0.5, controller: 'RBiH' },
+            { id: 'z_facility', name: 'Zenica Works', type: 'heavy_equipment', municipality: 'zenica', condition: 0.8, controller: 'RBiH' },
+            { id: 'm_facility', name: 'Munitions Line', type: 'ammunition', municipality: 'konjic', condition: 0.7, controller: 'RBiH' },
+            { id: 'a_facility', name: 'Alpha Depot', type: 'small_arms', municipality: 'tuzla', condition: 0.5, controller: 'RBiH' },
             { id: 'enemy_facility', name: 'Enemy Plant', type: 'factory', municipality: 'prijedor', condition: 0.9, controller: 'RS' },
           ],
           smugglingRoutes: [
@@ -102,6 +103,12 @@ describe('presidential command surface repurpose panels', () => {
     expect(html).toContain('Strained');
     expect(html).not.toContain('Enemy Plant');
     expect(html).not.toContain('Enemy Run');
+    expect(html).not.toContain('heavy_equipment');
+    expect(html).not.toContain('small_arms');
+    expect(html).not.toContain('ammunition');
+    expect(html).toContain('Heavy equipment');
+    expect(html).toContain('Small arms');
+    expect(html).toContain('Ammunition');
     expect(html.indexOf('Alpha Depot')).toBeLessThan(html.indexOf('Zenica Works'));
     expect(html.indexOf('Southern Run')).toBeLessThan(html.indexOf('Western Run'));
   });

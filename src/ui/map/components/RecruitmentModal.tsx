@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import type { RecruitmentCatalogBrigade } from '../desktop/types';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
+import { getPlayerSafeDisplayLabel, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 
 interface RecruitmentModalProps {
   isOpen: boolean;
@@ -13,6 +14,22 @@ interface RecruitmentModalProps {
   onClose: () => void;
   onRefresh: () => void;
   onApply: (brigadeId: string, equipmentClass: string) => void;
+}
+
+const EQUIPMENT_CLASS_LABEL_KEYS: Record<string, MessageKey> = {
+  garrison: 'recruitment.equipment.garrison',
+  light: 'recruitment.equipment.light',
+  light_infantry: 'recruitment.equipment.lightInfantry',
+  mechanized: 'recruitment.equipment.mechanized',
+  motorized: 'recruitment.equipment.motorized',
+  mountain: 'recruitment.equipment.mountain',
+  police: 'recruitment.equipment.police',
+  special: 'recruitment.equipment.special',
+};
+
+function getEquipmentClassLabel(equipmentClass: string): string {
+  const labelKey = EQUIPMENT_CLASS_LABEL_KEYS[equipmentClass.trim()];
+  return labelKey ? t(labelKey) : getPlayerSafeDisplayLabel(equipmentClass, t('recruitment.equipment.unknown'));
 }
 
 export function RecruitmentModal({
@@ -32,6 +49,7 @@ export function RecruitmentModal({
 
   const [selectedBrigadeId, setSelectedBrigadeId] = useState('');
   const [equipmentClass, setEquipmentClass] = useState('');
+  const equipmentClassLabel = getEquipmentClassLabel(equipmentClass);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -88,7 +106,13 @@ export function RecruitmentModal({
                 >
                   {available.map((b) => (
                     <option key={b.id} value={b.id}>
-                      {t('recruitment.optionLabel', { name: b.name, faction: b.faction, cap: b.capital_cost, manpower: b.manpower_cost })}
+                      {t('recruitment.optionLabel', {
+                        name: b.name,
+                        faction: getPlayerSafePoliticalFactionName(b.faction),
+                        capital: b.capital_cost,
+                        manpower: b.manpower_cost,
+                        equipment: getEquipmentClassLabel(b.default_equipment_class),
+                      })}
                     </option>
                   ))}
                 </select>
@@ -97,8 +121,8 @@ export function RecruitmentModal({
                 {t('recruitment.equipmentClass')}
                 <input
                   aria-label={t('recruitment.equipmentClassAria')}
-                  value={equipmentClass}
-                  onChange={(e) => setEquipmentClass(e.target.value)}
+                  value={equipmentClassLabel}
+                  readOnly
                   className="mt-1 w-full px-2 py-1 bg-panel-bg border border-panel-border rounded text-text-primary"
                 />
               </label>
