@@ -33,6 +33,7 @@ import { isExhaustionContributingToStrain } from '../../data/command_strain';
 import type { CorpsDelegationSummary } from '../../data/command_strain';
 import type { FrictionEventView } from '../../data/types';
 import { t } from '../../i18n';
+import type { CommandCopyToken } from '../../data/command_strain';
 import { turnToDateString } from '../../utils/formatters';
 
 const COMPROMISED_THRESHOLD = 6;
@@ -51,6 +52,7 @@ interface CommandRelationshipSectionProps {
     commandStrain: number;
     commandStrainLabel: 'healthy' | 'strained' | 'compromised';
     recoveryForecast?: string | null;
+    recoveryForecastToken?: CommandCopyToken | null;
     frictionEvents: FrictionEventView[];
     /** Corps exhaustion (0-100) — Wave 6: exhaustion above threshold contributes to strain. */
     corpsExhaustion: number;
@@ -76,6 +78,7 @@ export function CommandRelationshipSection({
     commandStrain,
     commandStrainLabel,
     recoveryForecast,
+    recoveryForecastToken,
     frictionEvents,
     corpsExhaustion,
     factionWarExhaustion,
@@ -186,7 +189,7 @@ export function CommandRelationshipSection({
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
                         <span className="text-[10px] text-text-secondary font-mono">
-                            {recoveryForecast}
+                            {recoveryForecastToken ? t(recoveryForecastToken.key, recoveryForecastToken.params) : recoveryForecast}
                         </span>
                     </div>
                 )}

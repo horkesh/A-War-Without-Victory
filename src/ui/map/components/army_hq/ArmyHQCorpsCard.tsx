@@ -124,9 +124,10 @@ export function ArmyHQCorpsCard({
         const currentTurn = gameState.turn ?? 0;
 
         const recoveryForecast = corps.recoveryForecast ?? null;
+        const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, delegationSummary };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -372,6 +373,7 @@ export function ArmyHQCorpsCard({
                     commandStrain={data.strain}
                     commandStrainLabel={data.strainLabel}
                     recoveryForecast={data.recoveryForecast}
+                    recoveryForecastToken={data.recoveryForecastToken}
                     frictionEvents={data.frictionEvents}
                     corpsExhaustion={corps.corpsExhaustion ?? 0}
                     factionWarExhaustion={gameState.warPhaseExhaustion?.[corps.faction]}

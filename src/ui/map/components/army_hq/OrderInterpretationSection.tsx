@@ -16,6 +16,7 @@
 
 import { deriveOrderInterpretation, deriveStanceInterpretation } from '../../data/command_strain';
 import type { CommandStrainLabel, DragFactor } from '../../data/command_strain';
+import { t } from '../../i18n';
 
 interface OrderInterpretationSectionProps {
     strain: number;
@@ -26,7 +27,7 @@ interface OrderInterpretationSectionProps {
 }
 
 export function OrderInterpretationSection({ strain, commanderAssessment, primaryConstraint, trendDirection, postponementCount }: OrderInterpretationSectionProps) {
-    const { severity, cautionNotice, interventionStrength, categoryLabel, dragFactors } = deriveOrderInterpretation(strain, commanderAssessment, primaryConstraint, trendDirection, postponementCount);
+    const { severity, cautionNotice, cautionNoticeToken, interventionStrength, categoryLabel, categoryLabelKey, dragFactors } = deriveOrderInterpretation(strain, commanderAssessment, primaryConstraint, trendDirection, postponementCount);
 
     // Silence = healthy
     if (severity === 'normal') return null;
@@ -41,7 +42,7 @@ export function OrderInterpretationSection({ strain, commanderAssessment, primar
                 </span>
                 {categoryLabel && (
                     <span className={`text-[8px] font-mono font-bold tracking-widest ${isAlarm ? 'text-red-400' : 'text-amber-400'} opacity-60`}>
-                        {categoryLabel}
+                        {categoryLabelKey ? t(categoryLabelKey) : categoryLabel}
                     </span>
                 )}
             </div>
@@ -54,19 +55,19 @@ export function OrderInterpretationSection({ strain, commanderAssessment, primar
                                     {factor.isPrimary ? '●' : '○'}
                                 </span>
                                 <span className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'} ${factor.isPrimary ? '' : 'opacity-80'}`}>
-                                    {factor.label}
+                                    {factor.labelToken ? t(factor.labelToken.key, factor.labelToken.params) : factor.label}
                                 </span>
                             </div>
                         ))}
                     </div>
                 ) : (
                     <p className={`text-[10px] leading-snug ${isAlarm ? 'text-red-300' : 'text-amber-300'}`}>
-                        {cautionNotice}
+                        {cautionNoticeToken ? t(cautionNoticeToken.key, cautionNoticeToken.params) : cautionNotice}
                     </p>
                 )}
                 {interventionStrength === 'direct_intervention' && (
                     <p className={`text-[10px] leading-snug font-semibold ${isAlarm ? 'text-red-200' : 'text-amber-200'}`}>
-                        Approving this order would constitute Direct Intervention. Institutional damage will compound.
+                        {t('commandStrain.order.directInterventionWarning')}
                     </p>
                 )}
             </div>
@@ -98,7 +99,7 @@ export function StanceInterpretationSection({
     // Only show when there is a pending change
     if (pendingStance === currentStance) return null;
 
-    const { severity, notice } = deriveStanceInterpretation(strain, strainLabel, pendingStance);
+    const { severity, notice, noticeToken } = deriveStanceInterpretation(strain, strainLabel, pendingStance);
     if (severity === 'normal') return null;
 
     const isConstrained = severity === 'constrained';
@@ -111,7 +112,7 @@ export function StanceInterpretationSection({
                 </span>
             </div>
             <p className={`text-[10px] leading-snug mt-1 ${isConstrained ? 'text-red-300' : 'text-amber-300'}`}>
-                {notice}
+                {noticeToken ? t(noticeToken.key, noticeToken.params) : notice}
             </p>
         </div>
     );

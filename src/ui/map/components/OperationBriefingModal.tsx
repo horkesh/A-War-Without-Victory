@@ -163,7 +163,9 @@ function DelegationPathIndicator({ delegation }: { delegation: DelegationContext
         <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-panel-card/60`}>
             <div className="flex items-start gap-2">
                 <span className={`shrink-0 text-[10px] mt-px ${config.textClass}`}>{config.icon}</span>
-                <span className={`text-[10px] leading-snug ${config.textClass}`}>{delegation.label}</span>
+                <span className={`text-[10px] leading-snug ${config.textClass}`}>
+                    {delegation.labelToken ? t(delegation.labelToken.key, delegation.labelToken.params) : delegation.label}
+                </span>
             </div>
         </div>
     );

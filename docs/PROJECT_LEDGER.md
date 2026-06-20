@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize command-strain render boundary
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Command-strain derivations now carry structured copy tokens beside the existing fallback strings for order interpretation notices, category badges, drag factors, stance notices, recovery forecasts, and pre-decision delegation labels. Army HQ and Operation Briefing renderers prefer these tokens, so BCS command-strain surfaces no longer fall back to English strings such as `STRAIN-SHAPED`, `Offensive posture is unavailable`, `Strain resolving in`, or `Commander recommends abort`.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/command_strain_i18n_boundary.test.ts --pool=forks --reporter=dot` passed 2/2; `npm.cmd exec -- vitest run tests/ui/command_strain_i18n_boundary.test.ts tests/ui/command_strain_interpretation.test.ts tests/command_authority_interpretation_review.test.ts tests/command_authority_assessment_constraints.test.ts --pool=forks --reporter=dot` passed 158/158; `npm.cmd exec -- vitest run tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 13/13; `npm.cmd exec -- tsc --noEmit --pretty false` passed. Report: `docs/40_reports/implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): spell out Army HQ copy and frontage
 
 **Type:** UI/read-model i18n copy polish.

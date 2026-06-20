@@ -285,6 +285,7 @@ export interface FormationView {
     projectedStrainNextTurn?: number;
     /** Player-facing recovery forecast string. null = healthy (silence=healthy). */
     recoveryForecast?: string | null;
+    recoveryForecastToken?: import('./command_strain').CommandCopyToken | null;
     /**
      * Corps situation assessment — explains why the commander is leaning a certain way.
      * Derived on-read from CommanderState. Null fields = healthy (silence).
@@ -292,16 +293,19 @@ export interface FormationView {
      */
     situationAssessment?: {
         postureSummary: string | null;
+        postureSummaryToken?: import('./command_strain').CommandCopyToken | null;
         militaryFactors: string[];
         institutionalFactors: string[];
         planExplanation: string | null;
         threatContext: string | null;
         /** Wave 2: The dominant reason this corps is constrained. Null = healthy. */
         dominantReason: string | null;
+        dominantReasonToken?: import('./command_strain').CommandCopyToken | null;
         /** Wave 2: Classification of the primary constraint type. 'none' = healthy. */
         primaryConstraint: 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
         /** Wave 3: What would need to change for the constraint to ease. Null = healthy. */
         reliefPath: string | null;
+        reliefPathToken?: import('./command_strain').CommandCopyToken | null;
     };
 }
 

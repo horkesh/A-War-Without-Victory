@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command-strain localization boundary:** [implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md](implemented/20260621_COMMAND_STRAIN_LOCALIZATION_BOUNDARY.md) - Command interpretation, stance, recovery, and delegation copy now carry renderable i18n tokens so BCS command-strain surfaces do not fall back to English strings.
+
 **Latest live drilldown hooks and Army Reserve copy polish:** [implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md](implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md) - Live browser sweep now proves Army HQ Personnel brigade drilldown and sector front-segment metadata; Army Reserve request surfaces hide raw prose and unknown ids behind localized neutral copy.
 
 **Latest BCS command copy residuals:** [implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md](implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md) - BCS command surfaces now avoid remaining `OPS`, English `Level 3` / `override`, `Command Relationship`, and compact supply/intelligence/commander/equipment shorthand in targeted keys.
