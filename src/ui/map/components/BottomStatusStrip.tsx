@@ -11,6 +11,7 @@ import { t } from '../i18n';
 import { openArmyHQRecordsSubTab } from '../utils/shellNavigation';
 import { BranchTagBadgeRow } from './BranchTagBadgeRow';
 import type { EventDefinition } from '../../../sim/events/event_types';
+import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 
 const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<string, number> };
 
@@ -65,7 +66,9 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
   }, [controlBySettlement]);
 
   // R6: Territory trend from latestTurnSummary.territory_net
-  const territoryNet = loadedGameState?.latestTurnSummary?.territory_net;
+  const territoryNet = shouldNarrateTerritorySummary(loadedGameState?.latestTurnSummary)
+    ? loadedGameState?.latestTurnSummary?.territory_net
+    : undefined;
   const getTrendArrow = useCallback((faction: 'RS' | 'RBiH' | 'HRHB'): string => {
     if (!territoryNet) return '';
     const net = (territoryNet as Partial<Record<string, number>>)[faction] ?? 0;

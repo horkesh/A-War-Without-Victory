@@ -104,4 +104,43 @@ describe('BottomStatusStrip labels', () => {
     expect(screen.getByText('International:')).toBeTruthy();
     expect(screen.getByText('HIGH')).toBeTruthy();
   });
+
+  it('does not show territory trend arrows from turn-0 scenario-start provenance', () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        turn: 0,
+        label: 'Opening week',
+        player_faction: 'RBiH',
+        controlBySettlement: {
+          'op:sarajevo:centar': 'RBiH',
+        },
+        latestTurnSummary: {
+          turn: 0,
+          battles: [],
+          territory_net: { RBiH: 2, RS: -2 },
+          notable_flips: [
+            { osid: 'op:sarajevo:centar', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'municipality_seat' },
+          ],
+          displacement_total: 0,
+          displacement_by_ethnicity: {},
+          decoration_awards: [],
+          arc_transitions: [],
+          formation_spawns: [],
+          formation_destructions: [],
+          supply_deltas: {},
+          heavy_munitions_deltas: {},
+          movements: [],
+          supply_transitions: [],
+          events_fired: [],
+          notable_events: [],
+        },
+      }),
+      mapMode: 'political',
+      devMode: false,
+    });
+
+    const view = render(createElement(BottomStatusStrip));
+
+    expect(view.container.textContent ?? '').not.toContain('\u2191');
+  });
 });

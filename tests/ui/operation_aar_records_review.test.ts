@@ -333,6 +333,44 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByRole('button', { name: /Decision Log 1/i })).toBeTruthy();
     });
 
+    it('does not narrate turn-0 territory provenance in the AAR tab', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                turn: 0,
+                label: 'Opening week',
+                latestTurnSummary: {
+                    turn: 0,
+                    battles: [],
+                    territory_net: { RS: 2, RBiH: -2 },
+                    notable_flips: [
+                        { osid: 'op:prijedor:prijedor_1', mun_id: 'prijedor', from: 'RBiH', to: 'RS', significance: 'municipality_seat' },
+                    ],
+                    displacement_total: 0,
+                    displacement_by_ethnicity: {},
+                    decoration_awards: [],
+                    arc_transitions: [],
+                    formation_spawns: [],
+                    formation_destructions: [],
+                    supply_deltas: {},
+                    heavy_munitions_deltas: {},
+                    movements: [],
+                    supply_transitions: [],
+                    events_fired: [],
+                    notable_events: [],
+                },
+            },
+            armyHQRecordsSubTab: 'aar',
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).not.toContain('VRS+2');
+        expect(copy).not.toContain('ARBiH-2');
+        expect(copy).not.toContain('⬡Prijedor');
+    });
+
     it('localizes the Records archive summary chrome', () => {
         setLocale('bcs');
         useGameStore.setState({
