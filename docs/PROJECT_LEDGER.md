@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): spell out AAR and ORBAT role labels
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** AAR battle casualty rows now spell out attacker/defender roles instead of `att` / `def`, and ORBAT recent-engagement rows now spell out attacker/defender roles instead of `ATK` / `DEF`. The ORBAT recent-engagement role column was widened to fit the full localized labels.
+
+**Verification:** Red focused proof first failed on visible `att -12 / def -20` AAR casualty copy and `ATK` / `DEF` ORBAT recent-engagement copy. Green proof: `npm.cmd exec -- vitest run tests/ui/aar_tooltip_friction_labels.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` passed 20/20; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 232/232; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): label ops commander unavailable reasons
 
 **Type:** UI/read-model i18n copy polish.

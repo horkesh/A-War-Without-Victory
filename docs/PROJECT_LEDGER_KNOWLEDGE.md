@@ -1,3 +1,7 @@
+## 2026-06-20 - AAR and ORBAT role labels should spell out roles
+
+**Combat role shorthand is too compact for player-facing battle records:** AAR casualty rows and ORBAT recent-engagement rows preserve attacker/defender roles internally, but visible role copy should be full labels. Durable rule: render attacker/defender roles through localized full labels in battle/AAR/ORBAT surfaces, widen fixed-width role cells when replacing shorthand, and do not render `att`, `def`, `ATK`, or `DEF` as normal player copy. Applied in `[2026-06-20] fix(ui): spell out AAR and ORBAT role labels`; report `docs/40_reports/implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md`.
+
 ## 2026-06-20 - Ops commander availability reasons are player copy
 
 **Unavailable officer reasons must not expose staff shorthand or ids:** Operations commander selection preserves officer status, assignment, and command ids internally, but the player-facing modal should explain why an officer cannot be selected. Durable rule: map killed/KIA, captured, retired, Army HQ, enclave-locked, assigned-operation, and other-command cases through localized copy; treat both `kia` and `killed` as unavailable; name the other command when known; and do not render `KIA`, `ARMY HQ`, `ASSIGNED TO OP`, `CORPS CMDR`, `ACTING CMDR`, or raw operation ids in normal commander-selection copy. Applied in `[2026-06-20] fix(ui): label ops commander unavailable reasons`; report `docs/40_reports/implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md`.

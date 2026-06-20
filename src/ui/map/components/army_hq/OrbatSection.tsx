@@ -211,7 +211,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                                     style={{ color: OUTCOME_COLORS[e.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[e.outcome] ?? '#d4c5a0') + '40' }}>
                                     {engagementOutcomeLabel(e.outcome)}
                                 </span>
-                                <span className="text-text-secondary/60 w-6 shrink-0">{e.role === 'attacker' ? t('orbat.attackerShort') : t('orbat.defenderShort')}</span>
+                                <span className="text-text-secondary/60 w-16 shrink-0">{e.role === 'attacker' ? t('orbat.attackerShort') : t('orbat.defenderShort')}</span>
                                 <span className="text-red-500 font-bold">-{e.casualties_taken}</span>
                                 {e.territory_flipped && <span className="text-emerald-400 text-[9px] font-bold">[!]</span>}
                             </div>

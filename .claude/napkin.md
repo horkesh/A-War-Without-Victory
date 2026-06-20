@@ -4,6 +4,8 @@
 
 **OPS COMMANDER UNAVAILABLE REASON COPY (2026-06-20).** Commander availability chips are player explanations, not debug status codes. Do instead: localize killed/KIA, captured, retired, Army HQ, enclave lock, assigned-operation, and other-command reasons; treat `killed` as unavailable; keep `KIA`, `ASSIGNED TO OP`, `CORPS CMDR`, `ACTING CMDR`, and raw operation ids out of normal commander-selection copy.
 
+**AAR / ORBAT ROLE LABEL COPY (2026-06-20).** Battle role rows are player records, not narrow telemetry columns. Do instead: spell out attacker/defender labels in AAR casualty rows and ORBAT recent engagements, widen role columns when needed, and keep `att`, `def`, `ATK`, and `DEF` out of normal battle-record copy.
+
 **ARMY OPS COMMAND LABEL COPY (2026-06-20).** Expanded Army HQ Operations detail is a command surface, not a compact telemetry table. Do instead: spell out commander stats, readiness labels, ORBAT columns, disruption status, casualty breakdowns, commander rank labels, and AAR duration/objective rows; keep `COMP`, `AGGR`, `DEF`, `OPS`, `INTEL`, `COHESN`, `OBJ`, `MOM`, `PERS`, `COH`, `MOR`, `STS`, `CMDR`, `KIA`, `WIA`, and `{count}W` out of normal operation detail.
 
 **ACTIVE OP / COMBAT SUMMARY COPY (2026-06-20).** Operation and combat summaries are command reports, not compact telemetry. Do instead: spell out active-operation objective/attack/brigade progress, combat role/record/brigade/arc labels, and settlement casualty roles; keep `Obj`, `atk`, `bdes`, `att / def`, `W/L/D`, `active / total`, and raw arc ids out of normal player copy.

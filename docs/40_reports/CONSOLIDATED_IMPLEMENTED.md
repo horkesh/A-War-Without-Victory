@@ -6,6 +6,8 @@
 
 **Latest ops commander unavailable reason copy:** [implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md](implemented/20260620_OPS_COMMANDER_UNAVAILABLE_REASON_COPY.md) - Operations commander selection now renders localized unavailable-officer reasons instead of raw staff shorthand and keeps killed officers out of the selectable pool.
 
+**Latest AAR / ORBAT role label copy:** [implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md](implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md) - AAR casualty rows and ORBAT recent engagements now spell out attacker/defender roles instead of compact `att` / `def` / `ATK` / `DEF` shorthand.
+
 **Latest Army ops command-label copy polish:** [implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md](implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md) - Army HQ expanded Operations detail now spells out commander stats, readiness, ORBAT, casualty, rank, and AAR labels instead of compact staff shorthand.
 
 **Latest active operation / combat summary copy polish:** [implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md](implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md) - Active Operation History, shared combat summaries, and settlement timeline casualty rows now spell out objective, attack, role, record, brigade, and arc copy instead of compact combat shorthand.

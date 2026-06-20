@@ -97,7 +97,9 @@ describe('AAR and tooltip friction labels', () => {
 
     expect(container.textContent).toContain('Ambush risk');
     expect(container.textContent).toContain('limited confidence');
-    expect(container.textContent).not.toMatch(/ambush_risk|low confidence|defender_opsec/);
+    expect(container.textContent).toMatch(/Attacker\s*[-−]12/);
+    expect(container.textContent).toMatch(/Defender\s*[-−]20/);
+    expect(container.textContent).not.toMatch(/\batt\b|\bdef\b|ambush_risk|low confidence|defender_opsec/);
   });
 
   it('renders battle tooltip friction and confidence bands without raw enum copy', () => {

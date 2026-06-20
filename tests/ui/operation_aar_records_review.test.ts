@@ -570,9 +570,31 @@ describe('Army HQ Records operation AAR review', () => {
             personnel: 1400,
             posture: 'defend',
             decorations: [{ tier: 'tier_1', type: 'unit_citation' }],
+            recent_engagements: [
+                {
+                    turn: 13,
+                    osid: 'op:sarajevo:ilidza_1',
+                    outcome: 'victory',
+                    role: 'attacker',
+                    casualties_taken: 12,
+                    territory_flipped: false,
+                },
+                {
+                    turn: 14,
+                    osid: 'op:sarajevo:dobrinja_1',
+                    outcome: 'repulsed',
+                    role: 'defender',
+                    casualties_taken: 9,
+                    territory_flipped: false,
+                },
+            ],
         };
         useGameStore.setState({
             armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
+            osidDisplayNames: {
+                'op:sarajevo:ilidza_1': 'Ilidza',
+                'op:sarajevo:dobrinja_1': 'Dobrinja',
+            },
         });
 
         const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
@@ -581,7 +603,10 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(copy).toContain('Garrison duty');
         expect(copy).toContain('Slavna');
+        expect(copy).toContain('Attacker');
+        expect(copy).toContain('Defender');
         expect(copy).not.toMatch(/\bGARRISON\b/);
+        expect(copy).not.toMatch(/\bATK\b|\bDEF\b/);
         expect(copy).not.toMatch(/unit_citation/i);
     });
 
