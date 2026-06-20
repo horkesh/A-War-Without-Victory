@@ -220,7 +220,12 @@ describe('Army HQ Records operation AAR review', () => {
 
         const copy = view.container.textContent ?? '';
         expect(copy).toContain(`Since ${turnToDateString(12)}`);
+        expect(copy).toContain('2 brigades');
+        expect(copy).toContain('1/3 objectives held, 2 attacks');
         expect(copy).not.toMatch(/Since W12/);
+        expect(copy).not.toMatch(/\bbdes\b|brig\./i);
+        expect(copy).not.toMatch(/\bObj\b/);
+        expect(copy).not.toMatch(/\b2\s*atk\b/i);
         expect(copy).not.toMatch(/probe_rs_1st_krajina_t12/i);
     });
 

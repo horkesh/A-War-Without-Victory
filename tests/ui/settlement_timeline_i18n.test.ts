@@ -38,7 +38,7 @@ describe('SettlementTimeline localization', () => {
     expect(screen.queryByText('No recorded events at this settlement.')).toBeNull();
   });
 
-  it('localizes the component-owned casualty row label in BCS mode', () => {
+  it('localizes the component-owned casualty row label in BCS mode without role shorthand', () => {
     setLocale('bcs');
 
     render(createElement(SettlementTimeline, {
@@ -50,7 +50,8 @@ describe('SettlementTimeline localization', () => {
       }],
     }));
 
-    expect(screen.getByText('Gubici: 3 nap / 5 odb')).toBeTruthy();
+    expect(screen.getByText('Gubici: 3 napadač / 5 branilac')).toBeTruthy();
+    expect(screen.queryByText('Gubici: 3 nap / 5 odb')).toBeNull();
     expect(screen.queryByText('Casualties: 3 att / 5 def')).toBeNull();
   });
 

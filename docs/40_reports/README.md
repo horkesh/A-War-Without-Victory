@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest active operation / combat summary copy polish** | [implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md](implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md) - Active Operation History, shared combat summaries, and settlement timeline casualty rows now spell out objective, attack, role, record, brigade, and arc copy instead of compact combat shorthand. |
 | **Latest ops BrigadeCard i18n polish** | [implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md](implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md) - Ops modal brigade cards and tray chrome now localize unit type, tooltip, march, assembly, assigned-count, and empty-state copy. |
 | **Latest Records to Chronicle exact focus** | [implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md](implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md) - Chronicle-filed decision receipts in Records now route back to the exact Chronicle entry instead of a broad Chronicle open. |
 | **Latest Operation History weekly copy polish** | [implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md](implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md) - Operation History and Army HQ weekly rows now use localized player-facing labels instead of phase initials, `atk`, `OBJ`, signed casualty fragments, or raw event ids. |

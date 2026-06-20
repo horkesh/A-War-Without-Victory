@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): polish active operation and combat summary copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Active Operation History cards now render held-objective, attack, and brigade counts with explicit player-facing wording instead of `Obj ... | ... atk` / `bdes`. Shared combat summaries now spell out attacker/defender battle-role counts, win/loss/stalemate rows, brigade totals, and narrative arc labels instead of `att / def`, `W/L/D`, `active / total`, or raw arc ids. Settlement timeline casualty rows now spell out attacker/defender roles instead of `att / def` or `nap / odb`.
+
+**Verification:** Red focused tests first failed on `Obj 1/3 | 2 atk`, `3 att / 1 def`, and compact combat-record fragments. Green proof: `npm.cmd exec -- vitest run tests/ui/operation_aar_records_review.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 45/45, `npm.cmd run typecheck` passed, and `git diff --check` passed. Report: `docs/40_reports/implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish inbox opportunity recommendation copy
 
 **Type:** UI/read-model copy polish.

@@ -205,7 +205,7 @@ describe('GUI audit label discipline', () => {
       peak_aggregate_personnel: 6000,
       nadir_aggregate_personnel: 5200,
       current_personnel: 5500,
-      arc_distribution: {},
+      arc_distribution: { bloodied: 2 },
       most_victories_brigade_id: null,
       most_casualties_brigade_id: null,
     };
@@ -214,7 +214,15 @@ describe('GUI audit label discipline', () => {
       summary: combatSummary,
     }));
 
+    expect(summaryContainer.textContent).toMatch(/3 as attacker \/ 1 as defender/i);
+    expect(summaryContainer.textContent).not.toMatch(/\b3 att \/ 1 def\b/i);
+    expect(summaryContainer.textContent).toMatch(/Wins: 2 \/ Losses: 1 \/ Stalemates: 1/i);
+    expect(summaryContainer.textContent).not.toMatch(/\b2W 1L 1D\b/);
     expect(summaryContainer.textContent).toMatch(/3 won \/ 1 lost/i);
+    expect(summaryContainer.textContent).toMatch(/3 active brigades \/ 4 total/i);
+    expect(summaryContainer.textContent).not.toMatch(/3 active \/ 4 total/i);
+    expect(summaryContainer.textContent).toMatch(/2 Blooded in combat/i);
+    expect(summaryContainer.textContent).not.toMatch(/\bbloodied\b/);
     expect(summaryContainer.textContent).not.toMatch(/\bcap\b|captured/i);
 
     cleanup();
@@ -223,7 +231,7 @@ describe('GUI audit label discipline', () => {
 
     const { container: corpsContainer } = render(createElement(CombatRecordSection, {
       corpsId: 'arbih_1st_corps',
-      corps: { combatSummary } as FormationView,
+      corps: { combatSummary } as unknown as FormationView,
     }));
 
     expect(corpsContainer.textContent).toMatch(/Ground Won\/Lost/i);

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ACTIVE OP / COMBAT SUMMARY COPY (2026-06-20).** Operation and combat summaries are command reports, not compact telemetry. Do instead: spell out active-operation objective/attack/brigade progress, combat role/record/brigade/arc labels, and settlement casualty roles; keep `Obj`, `atk`, `bdes`, `att / def`, `W/L/D`, `active / total`, and raw arc ids out of normal player copy.
+
 **INBOX OPPORTUNITY RECOMMENDATION COPY (2026-06-20).** Inbox opportunity descriptions may contain raw proposal ids. Do instead: derive known operation-opportunity recommendation subtitles from `proposed_value` labels (`approve` -> authorization) and keep raw enums such as `approve` out of Presidential Inbox cards.
 
 **OPERATION HISTORY WEEKLY COPY (2026-06-20).** Weekly operation rows are player AAR copy, not compact telemetry. Do instead: localize phase, attack, casualty, inflicted, final-held objective, and notable-event labels; keep phase initials, `atk`/`ATK`, `OBJ`, `+Ne`, signed casualty fragments, and raw notable-event ids out of Records/Army HQ weekly logs.
