@@ -23,12 +23,14 @@ describe('tactical map camera constraints', () => {
     expect(source).toContain('touchPitch: false');
   });
 
-  it('direct map formation clicks clear OSID and sector rail context', () => {
-    expect(source).toContain('function selectFormationFromMap(formationId: string)');
-    expect(source).toContain('useGameStore.getState().setSelectedFormationId(formationId)');
+  it('direct map formation clicks route through field inspection instead of bare setters', () => {
+    expect(source).toContain('function inspectFormationFromMap(formationId: string');
+    expect(source).toContain('resolveMapFormationInspectionTarget(formationId, properties, store.loadedGameState)');
+    expect(source).not.toContain('function selectFormationFromMap(formationId: string)');
+    expect(source).not.toContain('useGameStore.getState().setSelectedFormationId(formationId)');
     const storeSource = readFileSync('src/ui/map/store/gameStore.ts', 'utf8');
-    expect(storeSource).toContain('setSelectedFormationId: (id) => set(id == null');
-    expect(storeSource).toContain('selectedOsid: null');
-    expect(storeSource).toContain('selectedCorpsFrontSectorId: null');
+    expect(storeSource).toContain('inspectOnFieldTarget: (target) => {');
+    expect(storeSource).toContain("if (target.kind === 'field-formation-in-sector')");
+    expect(storeSource).toContain('selectedFormationId: target.formationId');
   });
 });

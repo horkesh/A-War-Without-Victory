@@ -3,6 +3,7 @@ import React from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PersonnelContent } from '../../src/ui/map/components/army_hq/PersonnelContent.js';
+import { derivePanelRailState, shouldRenderTacticalDetailRails } from '../../src/ui/map/components/panelRail.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
@@ -227,6 +228,7 @@ describe('PersonnelContent player-facing display', () => {
       selectedArmyHqId: null,
       selectedCorpsId: null,
       selectedFormationId: null,
+      armyHQOpen: true,
     });
 
     const { container } = render(React.createElement(PersonnelContent));
@@ -241,5 +243,13 @@ describe('PersonnelContent player-facing display', () => {
     expect(store.selectedArmyHqId).toBe('vrs_main_staff');
     expect(store.selectedCorpsId).toBeNull();
     expect(store.selectedFormationId).toBe('vrs_guard_bde');
+    expect(store.armyHQOpen).toBe(false);
+    expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
+    expect(shouldRenderTacticalDetailRails({
+      operationsPanelOpen: store.isOperationsPanelOpen,
+      armyHQOpen: store.armyHQOpen,
+      codexOpen: store.codexOpen,
+      chronicleOpen: store.chronicleOpen,
+    })).toBe(true);
   });
 });

@@ -97,12 +97,24 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const sectorInfo = (() => {
     const sectors = filterPlayerFacingSectors(loadedGameState);
     const edgesOsid = loadedGameState?.frontEdgesOsid;
-    if (!sectors?.length || !edgesOsid?.length) return { sectorName: null as string | null, sectorFaction: null as string | null, sectorId: null as string | null };
+    if (!sectors?.length || !edgesOsid?.length) {
+      return {
+        sectorName: null as string | null,
+        sectorFaction: null as string | null,
+        sectorId: null as string | null,
+        sectorCorpsId: null as string | null,
+      };
+    }
     const osidToSector = buildOsidToSectorMap(sectors, edgesOsid);
     const sectorId = osidToSector.get(selectedOsid);
-    if (!sectorId) return { sectorName: null, sectorFaction: null, sectorId: null };
+    if (!sectorId) return { sectorName: null, sectorFaction: null, sectorId: null, sectorCorpsId: null };
     const sector = sectors.find((s) => s.sector_id === sectorId);
-    return { sectorName: sector?.display_name ?? null, sectorFaction: sector?.faction ?? null, sectorId };
+    return {
+      sectorName: sector?.display_name ?? null,
+      sectorFaction: sector?.faction ?? null,
+      sectorId,
+      sectorCorpsId: sector?.corps_id ?? null,
+    };
   })();
 
   const departedByEthnicity = (() => {
@@ -269,7 +281,9 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
           onFormationClick={(formationId) => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId, osid: selectedOsid })}
-          onSectorClick={(sectorId) => inspectOnField(useGameStore.getState(), { kind: 'field-sector', sectorId, osid: selectedOsid })}
+          onSectorClick={(sectorId) => inspectOnField(useGameStore.getState(), sectorInfo.sectorCorpsId
+            ? { kind: 'field-sector-in-corps', sectorId, corpsId: sectorInfo.sectorCorpsId, osid: selectedOsid }
+            : { kind: 'field-sector', sectorId, osid: selectedOsid })}
           onOperationClick={(operationKey) => inspectOnField(useGameStore.getState(), { kind: 'field-operation', operationKey })}
           currentEthnic={currentEthnic ?? undefined}
           displacementEventLog={loadedGameState?.displacementEventLog}

@@ -57,8 +57,8 @@ function makeState(): LoadedGameState {
     phase: 'war',
     player_faction: 'RBiH',
     formations: [
-      { id: 'bde_attacker', name: '2nd Tuzla Brigade', faction: 'RBiH' },
-      { id: 'bde_defender', name: '1st Drina Brigade', faction: 'RS' },
+      { id: 'bde_attacker', name: '2nd Tuzla Brigade', faction: 'RBiH', corps_id: 'arbih_2_corps' },
+      { id: 'bde_defender', name: '1st Drina Brigade', faction: 'RS', corps_id: 'vrs_drina' },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -100,6 +100,23 @@ describe('AAR and tooltip friction labels', () => {
     expect(container.textContent).toMatch(/Attacker\s*[-−]12/);
     expect(container.textContent).toMatch(/Defender\s*[-−]20/);
     expect(container.textContent).not.toMatch(/\batt\b|\bdef\b|ambush_risk|low confidence|defender_opsec/);
+  });
+
+  it('routes embedded AAR formation links through field inspection with battle context', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+      armyHQOpen: true,
+    });
+
+    render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    screen.getByRole('button', { name: '2nd Tuzla Brigade' }).click();
+
+    const store = useGameStore.getState();
+    expect(store.armyHQOpen).toBe(false);
+    expect(store.selectedFormationId).toBe('bde_attacker');
+    expect(store.selectedOsid).toBe('op:tuzla:center');
   });
 
   it('renders battle tooltip friction and confidence bands without raw enum copy', () => {

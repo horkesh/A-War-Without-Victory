@@ -1,3 +1,7 @@
+## 2026-06-20 - Secondary field drilldowns must use the same atomic route
+
+**Army HQ, Records, settlement, battle, and AAR links can hide selections if they bypass field inspection:** Bare `setSelectedFormationId(...)`, `setSelectedOsid(...)`, or hand-built store state from secondary drilldown surfaces can leave Army HQ/Records open while selecting a tactical entity behind it, or can drop sector/corps context. Durable rule: use `inspectOnField(...)` and a compound `FieldInspectionTarget` whenever the source surface knows settlement, sector, corps, Army HQ, or battle OSID context. Applied in `[2026-06-20] fix(ui): preserve secondary field drilldown context`; report `docs/40_reports/implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md`.
+
 ## 2026-06-20 - Direct map clicks must preserve command context
 
 **Direct tactical-map selections are drilldowns, not bare setter shortcuts:** Map sector/front, formation marker, counter, context-menu, and stack clicks preserve parent corps/sector/settlement context when that context can be resolved. Durable rule: route direct map clicks through `inspectOnField(...)` with `field-sector-in-corps`, `field-formation-in-sector`, `field-formation-in-corps`, or settlement fallback; do not call bare `setSelectedFormationId(...)` / `setSelectedCorpsFrontSectorId(...)` from map click paths that can clear command context. Applied in `[2026-06-20] fix(ui): preserve map selection context`; report `docs/40_reports/implemented/20260620_DIRECT_MAP_SELECTION_CONTEXT_ROUTING.md`.

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): preserve secondary field drilldown context
+
+**Type:** UI/store route polish.
+
+**Fix:** Personnel ORBAT brigade clicks, map settlement context-menu clicks, normal settlement clicks, battle marker clicks, settlement Front Sector links, and embedded AAR formation links now route through `inspectOnField(...)` and field-inspection targets instead of bare selection setters. `field-sector-in-corps` can carry the source settlement OSID when the player drills from a settlement into its owning front sector. The stale camera-constraint source test that still required the retired direct map formation setter was updated to assert the field-inspection route.
+
+**Verification:** focused route proof passed 24/24 including `tests/ui_map_camera_constraints.test.ts`; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `AWWV_LIVE_SURFACE_BROWSER_PORT=3247 npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was removed afterward. Report: `docs/40_reports/implemented/20260620_FIELD_DRILLDOWN_CONTEXT_POLISH.md`.
+
+**Scope/determinism:** UI/store routing/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): preserve map selection context
 
 **Type:** UI/store route polish.

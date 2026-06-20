@@ -1,6 +1,6 @@
 import type { LoadedGameState } from '../data/types';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
-import { getSectorIdForFormation } from '../utils/sectorUtils';
+import { buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
 
 type MapSelectionProperties = Record<string, unknown> | null | undefined;
 
@@ -25,6 +25,26 @@ export function resolveMapSectorInspectionTarget(
     return { kind: 'field-sector-in-corps', sectorId, corpsId };
   }
   return { kind: 'field-sector', sectorId };
+}
+
+export function resolveMapSettlementInspectionTarget(
+  osid: string,
+  state: LoadedGameState | null | undefined,
+  sectorId?: string | null,
+): FieldInspectionTarget {
+  const resolvedSectorId =
+    sectorId
+    ?? (state?.corpsFrontSectors && state.frontEdgesOsid
+      ? buildOsidToSectorMap(state.corpsFrontSectors, state.frontEdgesOsid).get(osid) ?? null
+      : null);
+  if (!resolvedSectorId) {
+    return { kind: 'field-settlement', osid };
+  }
+  const corpsId = findSectorCorpsId(resolvedSectorId, state);
+  if (corpsId) {
+    return { kind: 'field-sector-in-corps', sectorId: resolvedSectorId, corpsId, osid };
+  }
+  return { kind: 'field-sector', sectorId: resolvedSectorId, osid };
 }
 
 export function resolveMapFormationInspectionTarget(
