@@ -259,6 +259,24 @@ describe('buildTurnAftermathView', () => {
     expect(quiet?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
   });
 
+  it('treats turn-0 territory_net as scenario-start provenance, not net change', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        turn: 0,
+        latestTurnSummary: makeSummary({
+          turn: 0,
+          territory_net: { RBiH: 2, RS: -2 },
+        }),
+      }),
+    });
+
+    expect(view?.tone).toBe('quiet');
+    expect(view?.territory.friendlyNet).toBe(0);
+    expect(view?.headline).toBe('No territorial change this turn.');
+    expect(view?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
+    expect(view?.judgment.memoryTone).toBe('quiet');
+  });
+
   it('falls back to a quiet shell when the save has no latest turn summary yet', () => {
     const view = buildTurnAftermathView({ nextState: makeState({ latestTurnSummary: null, turnSummaries: [] }) });
     expect(view?.turn).toBe(12);

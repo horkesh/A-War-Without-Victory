@@ -12,6 +12,7 @@ import { generateLetterHome } from '../../../../sim/letter_home.js';
 import type { LetterHomeInput } from '../../../../sim/letter_home.js';
 import letterHomeData from '../../../../../data/templates/letter_home_templates.json';
 import type { CommandStrainLabel } from '../../data/command_strain.js';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
@@ -187,7 +188,9 @@ export function generateCoSBriefing(
     const factionBattles = battles.filter(
         b => b.attacker_faction === faction || b.defender_faction === faction,
     );
-    const territoryNet = state.latestTurnSummary?.territory_net ?? {};
+    const territoryNet = shouldNarrateTerritorySummary(state.latestTurnSummary)
+        ? (state.latestTurnSummary?.territory_net ?? {})
+        : {};
     const netChange = territoryNet[faction as keyof typeof territoryNet] ?? 0;
     const gained = netChange > 0 ? netChange : 0;
     const lost = netChange < 0 ? -netChange : 0;

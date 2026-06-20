@@ -1,6 +1,7 @@
 import type { LoadedGameState } from './types';
 import type { TurnBattle, TurnSummary } from '../../../state/turn_summary.js';
 import { countActionableItems, deriveInboxItems, type InboxItem } from './inboxItems';
+import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { t, type MessageKey } from '../i18n';
@@ -566,10 +567,13 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
   const summary: TurnSummary | null = nextState.latestTurnSummary ?? null;
   const playerFaction = getPlayerFaction(input);
   const turn = summary?.turn ?? nextState.turn ?? input.lastTurnReport?.turn ?? 0;
-  const friendlyNet = playerFaction ? (summary?.territory_net?.[playerFaction] ?? 0) : 0;
+  const narrateTerritory = shouldNarrateTerritorySummary(summary);
+  const friendlyNet = playerFaction && narrateTerritory ? (summary?.territory_net?.[playerFaction] ?? 0) : 0;
 
   const notable = (summary?.notable_flips ?? []).map((flip): TurnAftermathFlipView => {
-    const direction = playerFaction && flip.to === playerFaction
+    const direction = !narrateTerritory
+      ? 'other'
+      : playerFaction && flip.to === playerFaction
       ? 'gain'
       : playerFaction && flip.from === playerFaction
         ? 'loss'

@@ -37,6 +37,7 @@
  */
 
 import { strictCompare } from '../../../state/validateGameState.js';
+import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
 
 /** Canonical player factions. */
 export type DigestFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -236,7 +237,10 @@ export function deriveDigestTurn(
         friendlyCasualties += friendlyCasualtiesFromBattle(battle, playerFaction);
     }
 
-    const territoryNet = (s as { territory_net?: Record<string, unknown> })?.territory_net ?? {};
+    const narrateTerritory = shouldNarrateTerritorySummary(s);
+    const territoryNet = narrateTerritory
+        ? ((s as { territory_net?: Record<string, unknown> })?.territory_net ?? {})
+        : {};
     const netTerritory = Number(territoryNet?.[playerFaction] ?? 0) || 0;
 
     const destructions = Array.isArray((s as { formation_destructions?: unknown })?.formation_destructions)
@@ -246,7 +250,7 @@ export function deriveDigestTurn(
         (d) => (d as { faction?: unknown })?.faction === playerFaction,
     ).length;
 
-    const flips = Array.isArray((s as { notable_flips?: unknown })?.notable_flips)
+    const flips = narrateTerritory && Array.isArray((s as { notable_flips?: unknown })?.notable_flips)
         ? ((s as { notable_flips: unknown[] }).notable_flips)
         : [];
     let notableGains = 0;
@@ -343,4 +347,3 @@ export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
     const sentence = joined.charAt(0).toUpperCase() + joined.slice(1);
     return `${sentence}. This was your generals' week — the war fought in your name along the front.`;
 }
-
