@@ -1926,6 +1926,7 @@ export const enMessages = {
     'oob.noSectorData': 'No sector data.',
     'oob.sectorLineCount': '{count} on line',
     'oob.sectorHeldBackCount': '{count} held back',
+    'oob.sectorFrontSegments': '{count} front segments',
     'oob.sectorCoverage.label': 'Coverage',
     'oob.sectorCoverage.uncovered': 'No coverage',
     'oob.sectorCoverage.thin': 'Thin coverage',

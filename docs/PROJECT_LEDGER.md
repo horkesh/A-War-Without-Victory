@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label OOB sector frontage as segments
+
+**Type:** UI/read-model copy polish.
+
+**Fix:** OOB sector rows now render `length_edges` as localized front segment count copy instead of a misleading approximate kilometer distance. The row now says `{count} front segments` and rejects stale `~{count} km` display.
+
+**Verification:** Red proof first failed on the stale `~4 km` sector row copy. Green proof passed: `npm.cmd exec -- vitest run tests/ui/oob_operations_panel.test.ts tests/ui/gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` (16/16); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (210/210). Report: `docs/40_reports/implemented/20260620_OOB_SECTOR_FRONTAGE_COPY.md`.
+
+**Scope/determinism:** UI/read-model copy, i18n labels, focused tests, and docs only; no simulation logic, sector construction, map geometry, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): route Chronicle decisions to focused Records receipts
 
 **Type:** UI route ownership and browser QA hardening.

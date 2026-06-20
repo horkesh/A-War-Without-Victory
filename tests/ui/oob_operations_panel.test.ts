@@ -195,4 +195,32 @@ describe('OOB and operations panel operation labels', () => {
     expect(screen.getByText(DISPLAY_OP_NAME)).toBeTruthy();
     expect(container.textContent).not.toContain(RAW_OP_NAME);
   });
+
+  it('labels OOB sector frontage as front segments instead of kilometers', () => {
+    useGameStore.setState({
+      loadedGameState: {
+        ...loadedState(),
+        corpsFrontSectors: [
+          {
+            sector_id: 'sector:arbih_3rd_corps:0',
+            corps_id: CORPS_ID,
+            faction: 'RBiH',
+            display_name: 'Central Bosnia line',
+            assigned_brigade_ids: ['arbih_brigade'],
+            reserve_brigade_ids: [],
+            length_edges: 4,
+            density: 0.2,
+            combat_strength_class: 'held',
+          },
+        ],
+      } as any,
+    });
+
+    const { container } = render(createElement(OOBSidebar));
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+
+    const row = screen.getByTestId('oob-sector-row');
+    expect(row.textContent).toContain('4 front segments');
+    expect(container.textContent).not.toContain('~4 km');
+  });
 });

@@ -631,7 +631,7 @@ export function OOBSidebar() {
                               <div className="text-text-secondary text-[10px] tabular-nums">
                                 {t('oob.sectorLineCount', { count: sector.assigned_brigade_ids.length.toString() })}
                                 {sector.reserve_brigade_ids.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sector.reserve_brigade_ids.length.toString() })}`}
-                                {' \u00B7 ~'}{sector.length_edges} km
+                                {' \u00B7 '}{t('oob.sectorFrontSegments', { count: sector.length_edges.toString() })}
                                 {' \u00B7 '}{sectorCoverageLabel(sector.density)}
                               </div>
                             </div>

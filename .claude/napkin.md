@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**OOB SECTOR FRONTAGE COPY (2026-06-20).** `length_edges` is a front-edge/segment count, not geographic kilometers. Do instead: render OOB sector rows through `oob.sectorFrontSegments` and keep focused UI tests rejecting stale `~N km` copy.
+
 **CHRONICLE DECISION RECORD FOCUS (2026-06-20).** Chronicle decision-ledger entries are exact Records receipts, not generic aftermath turns. Do instead: route entries with `metadata.decisionRecordId` through `openArmyHQDecisionConsequenceRecord(...)`, expose `data-record-target="decision"`, and keep `qa:live-surface:browser` waiting for the Decisions subtab when Chronicle selects a decision target.
 
 **CODEX INTERNAL BROWSER GATE (2026-06-20).** Top-level Codex reachability is not enough. Do instead: keep `qa:live-surface:browser` opening Codex through `[data-testid="toolbar-route-codex"]`, selecting `[data-testid="codex-essay-row"]`, verifying `[data-testid="codex-selected-essay-body"]`, and recording optional Dilemma Spine / Distance from History visibility.

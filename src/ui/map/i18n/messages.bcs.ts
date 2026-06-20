@@ -1810,6 +1810,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'oob.noSectorData': 'Nema podataka o sektorima.',
     'oob.sectorLineCount': '{count} na liniji',
     'oob.sectorHeldBackCount': '{count} zadržano',
+    'oob.sectorFrontSegments': '{count} frontovskih segmenata',
     'oob.sectorCoverage.label': 'Pokrivenost',
     'oob.sectorCoverage.uncovered': 'Bez pokrivenosti',
     'oob.sectorCoverage.thin': 'Tanka pokrivenost',
