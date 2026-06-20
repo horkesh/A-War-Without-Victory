@@ -511,6 +511,9 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md](implemented/20260620_RESERVE_REQUEST_MODAL_LABEL_COPY.md) - Reserve request modals now render localized purpose/reason labels instead of raw reserve request ids.
+- [implemented/20260620_ORDER_QUEUE_LABEL_COPY.md](implemented/20260620_ORDER_QUEUE_LABEL_COPY.md) - Staged orders now render localized order types, posture/target labels, and queue chrome instead of raw order ids.
+- [implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md](implemented/20260620_EVENT_ACK_EFFECT_LABEL_COPY.md) - Event acknowledgement effects now render known effect labels and neutral unknown-effect copy instead of raw effect ids.
 - [implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md](implemented/20260620_RECRUITMENT_MODAL_LABEL_COPY.md) - Recruitment options now render readable resource, faction, and equipment labels while preserving raw equipment ids only for the backend command payload.
 - [implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md](implemented/20260620_ECONOMY_FACILITY_TYPE_LABEL_COPY.md) - Economy production-facility rows now render localized facility-type labels instead of raw facility type ids.
 - [implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md](implemented/20260620_VERDICT_PEACE_PLAN_LABEL_COPY.md) - Faction verdict reports now render peace-plan catalog names instead of raw accepted/rejected plan ids.

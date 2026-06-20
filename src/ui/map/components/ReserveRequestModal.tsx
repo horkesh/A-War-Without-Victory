@@ -5,7 +5,7 @@ import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface ReserveRequestModalProps {
@@ -17,6 +17,35 @@ interface ReserveRequestModalProps {
 
 function stripReservePrefix(requestId: string): string {
   return requestId.startsWith('reserve:') ? requestId.slice('reserve:'.length) : requestId;
+}
+
+const RESERVE_PURPOSE_LABEL_KEYS: Record<string, MessageKey> = {
+  offensive: 'attention.offensive',
+  defensive: 'attention.defensive',
+};
+
+const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
+  offensive_support: 'armyReserve.reason.offensiveSupport',
+  defensive_gap: 'armyReserve.reason.defensiveGap',
+  exploitation: 'armyReserve.reason.exploitation',
+  enclave_relief: 'armyReserve.reason.enclaveRelief',
+};
+
+function fallbackReserveLabel(value: string | null | undefined): string {
+  const normalized = (value ?? '').trim().replace(/[_-]+/g, ' ');
+  if (!normalized) return t('common.unknown');
+  return normalized.replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getReserveRequestPurposeLabel(purpose: string | null | undefined, reason: string | null | undefined): string {
+  const purposeKey = RESERVE_PURPOSE_LABEL_KEYS[(purpose ?? '').trim()];
+  if (purposeKey) return t(purposeKey);
+
+  const reasonId = (reason ?? '').trim();
+  const reasonKey = RESERVE_REASON_LABEL_KEYS[reasonId] ?? RESERVE_PURPOSE_LABEL_KEYS[reasonId];
+  if (reasonKey) return t(reasonKey);
+
+  return fallbackReserveLabel(purpose ?? reason);
 }
 
 export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePanel }: ReserveRequestModalProps) {
@@ -71,7 +100,7 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
             </div>
             <div className="border border-panel-border bg-panel-card px-2 py-2">
               <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionModal.reserve.purpose')}</div>
-              <div className="mt-1 text-[12px] font-bold text-text-primary">{request.purpose ?? request.reason}</div>
+              <div className="mt-1 text-[12px] font-bold text-text-primary">{getReserveRequestPurposeLabel(request.purpose, request.reason)}</div>
             </div>
           </div>
           <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{request.description}</div>
