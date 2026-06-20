@@ -1,3 +1,7 @@
+## 2026-06-20 - Live browser raw-token guard should track repeated leak classes
+
+**Live browser QA must catch compact staff shorthand before release:** The same leak classes recur across Desk, Army HQ, Records, Chronicle, Codex, and drilldowns. Durable rule: keep `qa:live-surface:browser` guarding broad visible-token families, not just exact historical failures: OSID wording, raw turn timing, operation objective/attack shorthand, attacker/defender shorthand, combat-record shorthand, and known raw enum ids. When the guard grows, immediately run the live browser sweep and record any new reachable failures as player-copy work instead of weakening the guard. Applied in `[2026-06-20] test(ui): expand live-surface raw-token guards`; report `docs/40_reports/implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md`.
+
 ## 2026-06-20 - AAR and ORBAT role labels should spell out roles
 
 **Combat role shorthand is too compact for player-facing battle records:** AAR casualty rows and ORBAT recent-engagement rows preserve attacker/defender roles internally, but visible role copy should be full labels. Durable rule: render attacker/defender roles through localized full labels in battle/AAR/ORBAT surfaces, widen fixed-width role cells when replacing shorthand, and do not render `att`, `def`, `ATK`, or `DEF` as normal player copy. Applied in `[2026-06-20] fix(ui): spell out AAR and ORBAT role labels`; report `docs/40_reports/implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md`.

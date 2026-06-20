@@ -8,6 +8,8 @@
 
 **Latest AAR / ORBAT role label copy:** [implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md](implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md) - AAR casualty rows and ORBAT recent engagements now spell out attacker/defender roles instead of compact `att` / `def` / `ATK` / `DEF` shorthand.
 
+**Latest live-surface raw-token guard expansion:** [implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md](implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md) - The live browser sweep now fails on broader compact staff shorthand and raw enum/id leaks, and the next six player-copy targets are queued from a Pyrrhic scout.
+
 **Latest Army ops command-label copy polish:** [implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md](implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md) - Army HQ expanded Operations detail now spells out commander stats, readiness, ORBAT, casualty, rank, and AAR labels instead of compact staff shorthand.
 
 **Latest active operation / combat summary copy polish:** [implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md](implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md) - Active Operation History, shared combat summaries, and settlement timeline casualty rows now spell out objective, attack, role, record, brigade, and arc copy instead of compact combat shorthand.

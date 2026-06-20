@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] test(ui): expand live-surface raw-token guards
+
+**Type:** Browser QA/test-tool hardening.
+
+**Fix:** `qa:live-surface:browser` now fails on a broader class of compact staff shorthand and raw ids: OSID wording, `T+` timing, `DELAYS`, `OBJ`, `ATK`, `DEF`, `att / def`, `W/L/D`, `active / total`, `cap / lost`, and known raw enum ids including `eligible_pending_review`, `not_applicable`, `surprise_counter_offer`, `union_3_republics_extra`, `tactical_commander`, `in_transit`, `tier_1`, `homeDistance`, `ambush_risk`, and `defender_opsec`. Pyrrhic explorer Lorentz returned and was closed; the next player-copy queue is Verdict peace-plan ids, EconomyPanel facility types, RecruitmentModal compact counters/equipment classes, EventModal effect fallback labels, OrderQueue staged-order labels, and ReserveRequestModal purpose/reason copy.
+
+**Verification:** Red focused proof first failed because the live-sweep contract did not include `OSID`, `ATK`, or `raw planning ids`. Green proof: `npm.cmd exec -- vitest run tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` passed 16/16; `npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md`.
+
+**Scope/determinism:** Test/tool/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): spell out AAR and ORBAT role labels
 
 **Type:** UI/read-model i18n copy polish.

@@ -71,6 +71,9 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('data-testid="codex-panel"');
     expect(tool).toContain('assertSingleShellSurface');
     expect(tool).toContain('assertNoRawTechnicalTokens');
+    expect(tool).toContain("label: 'OSID'");
+    expect(tool).toContain("label: 'ATK'");
+    expect(tool).toContain("label: 'raw planning ids'");
     expect(tool).toContain('runOwnerJourneyDrilldown');
     expect(tool).toContain('ownerJourneyDrilldown');
     expect(tool).toContain('runArmyHqInternalDrilldown');
