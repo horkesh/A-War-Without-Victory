@@ -130,6 +130,30 @@ function pressureDriverLabel(raw: number): string {
   return 'quiet';
 }
 
+function contactBand(count: number): string {
+  if (count >= 150) return 'widespread contact';
+  if (count >= 50) return 'broad contact';
+  if (count >= 12) return 'several active sectors';
+  if (count > 0) return 'limited contact';
+  return 'quiet';
+}
+
+function thinFrontBand(count: number): string {
+  if (count >= 100) return 'widespread';
+  if (count >= 25) return 'many';
+  if (count >= 6) return 'several';
+  if (count > 0) return 'isolated';
+  return 'none reported';
+}
+
+function alliancePostureLabel(alliance: number): string {
+  if (alliance <= 0.10) return 'open conflict';
+  if (alliance <= 0.20) return 'mobilizing against each other';
+  if (alliance <= 0.45) return 'strained';
+  if (alliance <= 0.70) return 'working alliance';
+  return 'close coordination';
+}
+
 function legacySitrepTokenForOsid(osid: string): string {
   const raw = osid.startsWith('op:')
     ? osid.split(':').slice(1).join(' ')
@@ -258,7 +282,10 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
         <div className="text-text-secondary">{sitrep.headline}</div>
         <div className="text-text-secondary">
-          {t('situation.frontsLine', { engaged: sitrep.front.engagedCount, exposed: sitrep.front.exposedCount })}
+          {t('situation.frontsLine', {
+            contactBand: contactBand(sitrep.front.engagedCount),
+            thinBand: thinFrontBand(sitrep.front.exposedCount),
+          })}
         </div>
         <div className="text-text-secondary">
           {t('situation.sustainmentLine', { critical: sitrep.sustainment.criticalCount, strained: sitrep.sustainment.strainedCount })}
@@ -312,7 +339,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
         </div>
-        <div className="text-text-secondary tabular-nums">{alliance.toFixed(2)}</div>
+        <div className="text-text-secondary">{t('situation.alliancePosture', { posture: alliancePostureLabel(alliance) })}</div>
       </section>
       )}
 

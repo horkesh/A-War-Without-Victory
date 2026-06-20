@@ -74,6 +74,21 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(events).toHaveLength(0);
     });
 
+    it('renders persisted turn-0 setup control as scenario-start provenance, not a takeover', () => {
+        const osid = 'op:test:test_1';
+        const events = callTimeline(osid, {
+            controlEvents: [
+                { turn: 0, settlementId: osid, from: null, to: 'RBiH', mechanism: 'initial_control' },
+            ],
+        });
+
+        const controlFlips = events.filter(e => e.type === 'control_flip');
+        expect(controlFlips).toHaveLength(1);
+        expect(controlFlips[0].title).toBe('Controlled by ARBiH at scenario start');
+        expect(controlFlips[0].title).not.toContain('took control');
+        expect(controlFlips[0].detail).toBe('initial control');
+    });
+
     it('suppresses displacement-inferred takeover when matching startController', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {

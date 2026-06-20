@@ -110,7 +110,8 @@ describe('operational SITREP views', () => {
     } as any;
 
     const view = getOperationalSitrepView(rawState, 'RBiH');
-    expect(view.headline).toContain('thinly held front contact');
+    expect(view.headline).toContain('thinly held front sector');
+    expect(view.headline).not.toMatch(/\d+ thinly held front/);
     expect(view.front.engagedCount).toBe(1);
     expect(view.readiness.encircledCount).toBe(1);
     expect(view.operations.activeCount).toBe(1);

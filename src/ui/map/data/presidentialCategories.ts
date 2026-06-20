@@ -95,7 +95,7 @@ export const PRESIDENTIAL_COMMAND_CATEGORIES: readonly PresidentialCommandCatego
   {
     id: 'cat_war_direction',
     title: 'War Direction',
-    blurb: 'Operations, opportunities, and the front sitrep.',
+    blurb: 'Operations, opportunities, and the front situation.',
     role: 'act',
     roleLabel: 'Act',
     sources: ['opportunity', 'operational', 'briefing'],

@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { deriveInboxItems } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
-import { PresidentialInbox } from '../../src/ui/map/components/PresidentialInbox.js';
+import { PresidentialInbox, typeLabel } from '../../src/ui/map/components/PresidentialInbox.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { setLocale } from '../../src/ui/map/i18n';
 
@@ -214,12 +214,18 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         render(createElement(PresidentialInbox, { onAction }));
 
-        expect(screen.getByText('INTEL')).toBeTruthy();
+        expect(screen.getByText('INTELLIGENCE')).toBeTruthy();
+        expect(screen.queryByText('INTEL')).toBeNull();
         fireEvent.click(screen.getByRole('button', { name: /dismiss intelligence notification/i }));
 
         expect(onAction).toHaveBeenCalledWith(
             'dismiss_intelligence_notification',
             'intel:rs_strategic_goals:RS:RBiH',
         );
+    });
+
+    it('uses a neutral fallback for unknown future inbox item types', () => {
+        expect(typeLabel('future_raw_enum')).toBe('REVIEW ITEM');
+        expect(typeLabel('future_raw_enum')).not.toContain('FUTURE_RAW_ENUM');
     });
 });

@@ -581,6 +581,13 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Army HQ BRIEFING leads with the Chief of Staff report before Presidential Decision Room synthesis.
 - See `docs/40_reports/implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md`.
 
+## 2026-06-20 - AAA polish wave 4 live copy and AAR provenance
+
+- First-hour Situation, toolbar, Inbox, sector briefing, and Operation History English copy now avoid raw `PAX`, `AUTH`, `INTEL`, exact front-contact telemetry, and misleading axis-capture labels for final-held objectives.
+- Settlement timeline turn-0 setup-control rows now render as scenario-start provenance instead of suggesting territory was taken after the campaign opened.
+- Operation History axis summaries now say objectives were held at end; Srebrenica/Zepa fall receipts remain event-owned, with Krivaja/Stupcanica only as chronology/AAR context.
+- See `docs/40_reports/implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md`.
+
 ## 2026-04-03 - Warroom to Army HQ shell handoff
 
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.

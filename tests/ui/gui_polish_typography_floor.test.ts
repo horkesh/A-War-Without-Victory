@@ -17,12 +17,17 @@ describe('GUI polish typography floor', () => {
     }
   });
 
-  it('makes the PresidentialToolbar AUTH gauge discoverable beyond a title tooltip', () => {
+  it('makes the PresidentialToolbar command-authority gauge discoverable beyond a title tooltip', () => {
     const toolbar = read('src/ui/map/components/PresidentialToolbar.tsx');
+    const enMessages = read('src/ui/map/i18n/messages.en.ts');
 
     expect(toolbar).toContain("aria-label={t('presidentialToolbar.commandAuthorityValue', { current, max })}");
     expect(toolbar).toContain('aria-describedby="command-authority-description"');
     expect(toolbar).toContain('id="command-authority-description"');
     expect(toolbar).not.toContain('<span className="text-[8px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>');
+    expect(enMessages).toContain("'presidentialToolbar.auth': 'Authority'");
+    expect(enMessages).toContain("'toolbar.commandAuthority.label': 'Authority'");
+    expect(enMessages).not.toContain("'presidentialToolbar.auth': 'AUTH'");
+    expect(enMessages).not.toContain("'toolbar.commandAuthority.label': 'AUTH'");
   });
 });

@@ -467,6 +467,7 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md](implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md) - First-hour Situation/toolbar/Inbox/sector copy and Operation History axis labels now avoid raw staff telemetry and misleading final-held-as-captured language.
 - [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Shell navigation exclusivity plus the 2026-06-17 App-level follow-up: Records/Codex/Chronicle/Army HQ/Decision History/Warroom/Inbox/Wrapped handoffs now clear competing shells, and Codex/Decision History Escape do not open Pause behind the top surface.
 - [implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md](implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md) - Receipt route browser proof: live loaded-save smoke verifies Desk Records-filed patron consequences route to Decision Consequences, AAR counts split from Operation History, and patron Chronicle duplicates stay suppressed by focused generator tests.
 - [implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md](implemented/20260516_FIRST_RUN_INBOX_HQ_FLOW_POLISH.md) - First-run and inbox/HQ flow polish: sequenced onboarding, situation-card routing, CoS-first Army HQ briefing, and player-faction inbox filtering.

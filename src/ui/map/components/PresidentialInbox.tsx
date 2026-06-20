@@ -51,7 +51,7 @@ const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; la
     info: { badge: 'bg-stone-600 text-stone-300', border: 'border-stone-600/20', labelKey: null },
 };
 
-function typeLabel(type: string): string {
+export function typeLabel(type: string): string {
     if (type === 'event_decision') return t('inbox.type.eventDecision');
     if (type === 'peace_plan') return t('inbox.type.peacePlan');
     if (type === 'dayton_negotiation') return t('inbox.type.dayton');
@@ -63,7 +63,7 @@ function typeLabel(type: string): string {
     if (type === 'autonomy_proposal') return t('inbox.type.proposal');
     if (type === 'intelligence_notification') return t('inbox.type.intel');
     if (type === 'situation') return t('inbox.type.situation');
-    return type.toUpperCase();
+    return t('inbox.type.reviewItem');
 }
 
 function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {

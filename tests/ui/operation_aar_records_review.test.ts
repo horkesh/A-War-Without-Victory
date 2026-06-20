@@ -256,8 +256,8 @@ describe('Army HQ Records operation AAR review', () => {
         fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
 
         expect(screen.getByText('Western Axis')).toBeTruthy();
-        expect(screen.getByText('Axis captured: Prijedor')).toBeTruthy();
-        expect(screen.getByText('Axis held elsewhere: Kozarac')).toBeTruthy();
+        expect(screen.getByText('Axis held at end: Prijedor')).toBeTruthy();
+        expect(screen.getByText('Held by another axis: Kozarac')).toBeTruthy();
         expect(screen.getByText('Axis not held: Sanski Most')).toBeTruthy();
     });
 

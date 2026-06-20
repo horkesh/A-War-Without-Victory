@@ -122,6 +122,16 @@ function controlMechanismLabel(mechanism: string): string | undefined {
     return CONTROL_MECHANISM_LABELS[normalized];
 }
 
+function isInitialControlEvent(event: ControlEvent): boolean {
+    const mechanism = event.mechanism.trim();
+    return event.turn === 0 && (
+        mechanism === 'initial_control'
+        || mechanism === 'setup_control'
+        || mechanism === 'scenario_start'
+        || mechanism === 'scenario_setup'
+    );
+}
+
 const BATTLE_OUTCOME_LABELS: Record<string, string> = {
     decisive_victory: 'decisive victory',
     victory: 'victory',
@@ -180,12 +190,15 @@ export function buildSettlementTimeline(
     // 1. From persisted control_events (if any)
     for (const ce of controlEvents) {
         if (ce.settlementId !== osid) continue;
+        const initialControl = isInitialControlEvent(ce);
         events.push({
             turn: ce.turn,
             type: 'control_flip',
             faction: ce.to ?? undefined,
-            title: `${ce.to ? factionName(ce.to) : 'Unknown'} took control`,
-            detail: controlMechanismLabel(ce.mechanism),
+            title: initialControl
+                ? `Controlled by ${ce.to ? factionName(ce.to) : 'Unknown'} at scenario start`
+                : `${ce.to ? factionName(ce.to) : 'Unknown'} took control`,
+            detail: initialControl ? 'initial control' : controlMechanismLabel(ce.mechanism),
         });
     }
     // 2. Infer control flips from displacement events — when `caused_by` faction

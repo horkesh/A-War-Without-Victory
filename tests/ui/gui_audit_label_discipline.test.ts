@@ -40,6 +40,7 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 
 function makeSitrepState(): LoadedGameState {
   return makeState({
+    war_alliance_rbih_hrhb: 0.75,
     controlBySettlement: {
       'op:bijeljina:cadjavica_gornja_2': 'RBiH',
       'op:ugljevik:srednja_trnova_2': 'RS',
@@ -48,8 +49,8 @@ function makeSitrepState(): LoadedGameState {
       headline: 'Front contact currently reported.',
       territory: { territoryPercent: 50, settlementsControlled: 1, settlementsTotal: 2 },
       front: {
-        engagedCount: 1,
-        exposedCount: 1,
+        engagedCount: 496,
+        exposedCount: 402,
         edges: [
           {
             id: 'edge-1',
@@ -85,7 +86,11 @@ describe('GUI audit label discipline', () => {
     const { container } = render(createElement(SituationTab, { state: makeSitrepState() }));
 
     expect(screen.getByText(/Priority fronts:/).textContent).toContain('Cadjavica Gornja (Bijeljina) - Srednja Trnova (Ugljevik)');
+    expect(screen.getByText(/Front posture:/).textContent).toContain('widespread contact');
+    expect(screen.getByText(/thinly held sectors:/).textContent).toContain('widespread');
+    expect(screen.getByText(/Alliance posture:/).textContent).toContain('close coordination');
     expect(container.textContent).not.toMatch(/cadjavica_gornja|srednja_trnova|_\d\b/i);
+    expect(container.textContent).not.toMatch(/Front contacts:\s*\d|thinly held:\s*\d|0\.75/);
   });
 
   it('uses player-facing local-support headings without Phase E internals', () => {
@@ -213,12 +218,20 @@ describe('GUI audit label discipline', () => {
     const oobSource = readFileSync('src/ui/map/components/OOBSidebar.tsx', 'utf8');
     const corpsDetailSource = readFileSync('src/ui/map/components/CorpsDetail.tsx', 'utf8');
     const corpsCardSource = readFileSync('src/ui/map/components/CorpsCard.tsx', 'utf8');
+    const presidentialCategoriesSource = readFileSync('src/ui/map/data/presidentialCategories.ts', 'utf8');
+    const liveSurfaceBrowserSweepSource = readFileSync('tools/ui/live_surface_browser_sweep.cjs', 'utf8');
 
     expect(formationDetailSource).toContain('formationDetail.dateParen');
     expect(formationDetailSource).not.toContain('formationDetail.weekParen');
     expect(armyReserveSource).not.toMatch(/turns_deployed\}w|w\{ep\.loan_start_turn|travelWeeks', \{ weeks:/);
     expect(corpsFrontSource).not.toMatch(/'INTEL'|'STAGING'|'SUPPLY'|'ASSESS'|'READY'|\/\{maxTurns\}t/);
     expect(enMessages['corpsFront.frontReserveBrigades']).not.toMatch(/Front|Reserve|\//);
+    expect(enMessages['corpsFront.pax']).toBe('{count} personnel');
+    expect(enMessages['corpsFront.pax']).not.toMatch(/\bPAX\b/);
+    expect(enMessages['situation.frontsLine']).not.toMatch(/Front contacts|thinly held:\s*\{/);
+    expect(enMessages['situation.allianceGauge']).not.toMatch(/Gauge/);
+    expect(presidentialCategoriesSource).not.toMatch(/front sitrep/i);
+    expect(liveSurfaceBrowserSweepSource).toMatch(/label:\s*'PAX'/);
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men/);
     expect(corpsCardSource).toContain('getPlayerSafeOperationPhaseLabel(activeOperationPhase)');

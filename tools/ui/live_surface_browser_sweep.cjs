@@ -16,6 +16,7 @@ const RAW_TECHNICAL_TOKENS = [
   { label: 'OPSEC', pattern: /\bOPSEC\b/ },
   { label: 'SITREP', pattern: /\bSITREP\b/ },
   { label: 'IVP', pattern: /\bIVP\b/ },
+  { label: 'PAX', pattern: /\bPAX\b/ },
   { label: 'Expires T', pattern: /\bExpires\s+T\b/i },
   { label: 'convoy_decision', pattern: /\bconvoy_decision\b/i },
   { label: 'op:', pattern: /\bop:/i },
