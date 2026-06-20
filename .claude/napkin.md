@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**WARROOM DOCKET STATUS COPY (2026-06-20).** Pre-advance status ids are logic fields, not badge copy. Do instead: keep `WarroomPriorityDocketView.status` for logic and render `statusLabel` in Warroom UI badges; pin EN/BCS labels with `tests/ui/warroom_priority_docket.test.ts`.
+
 **FORMATION DETAIL MOVEMENT/ENGAGEMENT COPY (2026-06-20).** Movement and recent-engagement ids are internal read-model fields. Do instead: map `movementStatus` through `formationDetail.movementStatus.*`, map known engagement outcomes through combat outcome labels, and use `aar.outcome.recorded` for unknown outcomes; pin with `tests/ui/formation_detail_parity.test.ts` in `qa:player-journeys`.
 
 **HISTORICAL EVENT FALLBACK COPY (2026-06-20).** Event ids are metadata, not timeline prose. Do instead: use `settlementTimeline.historicalEvent.fallback` when adapter/timeline historical event text is missing, id-identical, or raw-token-like; keep raw ids only in event metadata and pin with `tests/ui/settlement_timeline_i18n.test.ts`.

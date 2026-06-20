@@ -148,6 +148,8 @@ describe('buildWarroomPriorityDocketView', () => {
 
     expect(second.items.map((item) => item.id)).toEqual(first.items.map((item) => item.id));
     expect(first.status).toBe('blocked');
+    expect(first.statusLabel).toBe('Advance blocked');
+    expect(first.statusLabel).not.toBe(first.status);
     expect(first.tone).toBe('danger');
     expect(first.headline).toBe('Review before advance');
     expect(first.summary).toBe('4 advance items / 4 urgent / 2 pending');
@@ -181,6 +183,8 @@ describe('buildWarroomPriorityDocketView', () => {
     });
 
     expect(view.status).toBe('clear');
+    expect(view.statusLabel).toBe('Clear to advance');
+    expect(view.statusLabel).not.toBe(view.status);
     expect(view.tone).toBe('clear');
     expect(view.headline).toBe('Clear to advance');
     expect(view.summary).toBe('0 advance items / 0 urgent / 0 pending');
@@ -194,6 +198,8 @@ describe('buildWarroomPriorityDocketView', () => {
     const view = buildWarroomPriorityDocketView({ state: null });
 
     expect(view.status).toBe('unavailable');
+    expect(view.statusLabel).toBe('No campaign loaded');
+    expect(view.statusLabel).not.toBe(view.status);
     expect(view.tone).toBe('quiet');
     expect(view.headline).toBe('No state loaded');
     expect(view.items).toEqual([]);
@@ -227,6 +233,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na čekanju');
     expect(view.sourceHandoffSummary).toBe('4 izvorna prijenosa / 4 hitno');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
+    expect(view.statusLabel).toBe('Napredovanje blokirano');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('source handoffs');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('Open Decision Room');

@@ -80,7 +80,7 @@ function PriorityDocketPanel({
           <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-amber-300/70">{docket.summary}</div>
         </div>
         <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${docketBadgeClass(docket.tone)}`}>
-          {docket.status}
+          {docket.statusLabel}
         </span>
       </div>
 
