@@ -164,12 +164,12 @@ export function PeaceStatusPanel() {
                                 <div className="text-[9px] text-text-secondary">{getPlayerSafePoliticalFactionName(f.id)}</div>
 
                                 {isPlayer ? (
-                                    <ProgressBar value={f.capital} max={100} color={color} label="Pre-War Capital" />
+                                    <ProgressBar value={f.capital} max={100} color={color} label={t('peace.preWarCapital')} />
                                 ) : (
                                     <div className="text-[9px] text-text-secondary uppercase tracking-wider">
                                         {f.declared
-                                            ? 'Political course declared'
-                                            : `Declaration posture: ${getDeclarationPressureStatus(f.declaration_pressure, f.declared)}`}
+                                            ? t('peace.politicalCourseDeclared')
+                                            : t('peace.declarationPosture', { status: getDeclarationPressureStatus(f.declaration_pressure, f.declared) })}
                                     </div>
                                 )}
                             </div>
@@ -209,7 +209,7 @@ export function PeaceStatusPanel() {
                             disabled={!ipc.isAvailable || advancing}
                             className="w-full py-2 rounded text-[11px] font-bold uppercase tracking-[0.2em] transition-all duration-200 border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                            {advancing ? 'Advancing...' : 'End Turn'}
+                            {advancing ? t('peace.advancing') : t('peace.endTurn')}
                         </button>
                     </div>
                 </div>

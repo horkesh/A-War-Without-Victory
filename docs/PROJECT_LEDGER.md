@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): label peace and Decision Room copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** PeaceStatusPanel now renders pre-war capital, declared-course, declaration-posture, advancing, and end-turn chrome through localized `peace.*` keys. Decision Room priority cards now map elite-deploy reserve reasons, briefing kind/category labels, and proposal-review domains through explicit localized/player-safe labels instead of generic `humanize(...)` title-casing of raw ids such as `sector_threat`, `field_reports`, or `ops`.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/peace_status_panel_copy.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 51/51; `npm.cmd run typecheck` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 234/234; `AWWV_LIVE_SURFACE_BROWSER_PORT=3243 npm.cmd run qa:live-surface:browser` passed with `live surface browser sweep ok`, and `.tmp_live_surface_browser_sweep` was deleted afterward. Report: `docs/40_reports/implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): polish tooltip and settlement timeline copy
 
 **Type:** UI/read-model i18n copy polish.
@@ -21559,7 +21571,7 @@ Determinism/scope: UI/read-model display, focused tests, and docs only; no simul
 
 Closed the Operation History weekly-row shorthand leak found by the Pyrrhic UI scout. Completed-operation weekly rows now render localized, player-facing phase/status, attack, casualty, objective-held, and notable-development copy instead of phase initials, `atk`/`ATK`, `OBJ`, signed casualty shorthand, or raw notable-event ids. The nearby Army HQ corps Operations AAR weekly drilldown now uses the same scoped operation-history row vocabulary.
 
-Verification: focused red proof first failed on `E`, `2 atk`, `2 ATK`, `OBJ`, `+13e`, and `supply_crisis` weekly-row copy. Focused green `node node_modules\vitest\vitest.mjs run tests/ui/operation_aar_records_review.test.ts tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` passed 24/24. Determinism/scope: UI/read-model copy, i18n templates, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+Verification: focused red proof first failed on `E`, `2 atk`, `2 ATK`, `OBJ`, `+13e`, and `supply_crisis` weekly-row copy. Focused green `node node_modules\vitest\vitest.mjs run tests/ui/operation_aar_records_review.test.ts tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` passed 24/24. Report: `docs/40_reports/implemented/20260620_OPERATION_HISTORY_WEEKLY_COPY_POLISH.md`. Determinism/scope: UI/read-model copy, i18n templates, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
 ## 2026-06-20 - Army ops drilldown and BCS copy polish
 
@@ -21589,7 +21601,7 @@ Determinism/scope: UI/read-model display, focused tests, and docs only; no simul
 
 Closed the Pauli BrigadeCard localization finding in the ops planning modal. BrigadeCard unit-type badges, card tooltips, march labels, locale-specific personnel formatting, BrigadeTray full-assembly copy, assigned-brigade summary copy, and empty-tray copy now render through the existing map i18n catalogs in EN and BCS instead of hard-coded English fragments.
 
-Verification: focused red proof first failed in `tests/ui/ops_brigade_card_i18n.test.ts` on raw English tooltip/tray copy and locale drift, then passed 2/2 after the fix. Focused pack `node node_modules/vitest/vitest.mjs run tests/ui/ops_brigade_card_i18n.test.ts tests/ui/ops_modal_auto_propose.test.ts tests/ui/brigade_row_supply_labels.test.ts --pool=forks --reporter=dot` passed 13/13. I18n parity pack `node node_modules/vitest/vitest.mjs run tests/ui_i18n.test.ts tests/ui/ops_brigade_card_i18n.test.ts --pool=forks --reporter=dot` passed 15/15. `npm.cmd run typecheck` was attempted but is currently blocked by an unrelated `tests/ui/chronicle_focus_routing.test.ts` `LoadedGameState` fixture mismatch.
+Verification: focused red proof first failed in `tests/ui/ops_brigade_card_i18n.test.ts` on raw English tooltip/tray copy and locale drift, then passed 2/2 after the fix. Focused pack `node node_modules/vitest/vitest.mjs run tests/ui/ops_brigade_card_i18n.test.ts tests/ui/ops_modal_auto_propose.test.ts tests/ui/brigade_row_supply_labels.test.ts --pool=forks --reporter=dot` passed 13/13. I18n parity pack `node node_modules/vitest/vitest.mjs run tests/ui_i18n.test.ts tests/ui/ops_brigade_card_i18n.test.ts --pool=forks --reporter=dot` passed 15/15. `npm.cmd run typecheck` was attempted but is currently blocked by an unrelated `tests/ui/chronicle_focus_routing.test.ts` `LoadedGameState` fixture mismatch. Report: `docs/40_reports/implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md`.
 
 Determinism/scope: UI copy, locale formatting, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
@@ -21597,7 +21609,7 @@ Determinism/scope: UI copy, locale formatting, i18n templates, focused tests, an
 
 Closed the Pauli Records -> Chronicle precision finding. Chronicle-filed decision consequence rows in Army HQ Records now route through an exact decision-record Chronicle helper instead of the broad Chronicle opener. The store carries `focusedChronicleDecisionRecordId`, broad Chronicle opens clear stale focus, and Chronicle resolves the id against entry `metadata.decisionRecordId`, switches to entry view, selects/scrolls the matching turn, and marks/focuses the exact dossier entry even when the same turn has multiple entries.
 
-Verification: focused red proof first failed on missing `focusedChronicleDecisionRecordId` and absent focused Chronicle entry, then passed with `node .\node_modules\vitest\vitest.mjs run tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_focus_routing.test.ts --pool=forks --reporter=dot` (6/6). Adjacent routing/source-contract pack `node .\node_modules\vitest\vitest.mjs run tests/ui/records_button_behavior.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` passed 21/21. `npm.cmd run typecheck` passed.
+Verification: focused red proof first failed on missing `focusedChronicleDecisionRecordId` and absent focused Chronicle entry, then passed with `node .\node_modules\vitest\vitest.mjs run tests/ui/decision_consequence_records_panel.test.ts tests/ui/chronicle_focus_routing.test.ts --pool=forks --reporter=dot` (6/6). Adjacent routing/source-contract pack `node .\node_modules\vitest\vitest.mjs run tests/ui/records_button_behavior.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` passed 21/21. `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260620_RECORDS_TO_CHRONICLE_EXACT_FOCUS.md`.
 
 Determinism/scope: UI route/focus state, Chronicle display focus, focused tests, and ledger only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 

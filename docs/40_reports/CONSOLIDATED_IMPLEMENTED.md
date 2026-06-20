@@ -2,6 +2,22 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest AAA polish wave 3 command-surface / OOB truth:** [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) - Command-surface copy, startup Army HQ command structures, opening commander display, and baked startup OOB parentage were reconciled while preserving Srebrenica/Zepa event-owned fall receipts.
+
+**Latest AAA polish wave 4 live copy / AAR provenance:** [implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md](implemented/20260620_AAA_POLISH_WAVE4_LIVE_COPY_AND_AAR_PROVENANCE.md) - First-hour Situation, toolbar, Inbox, sector briefing, settlement timeline, and Operation History axis copy now avoid raw staff tokens and final-held-as-captured wording while preserving Srebrenica/Zepa event-owned receipts.
+
+**Latest all-faction first-hour browser gate:** [implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md](implemented/20260620_ALL_FACTION_FIRST_HOUR_BROWSER_GATE.md) - `qa:first-hour:browser` now proves RBiH/RS/HRHB war-start splash, identity brief, foundational decision, Desk blocking, and required-decision shell/hotkey lock.
+
+**Latest AAR final-held provenance copy:** [implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md](implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md) - Army HQ AARs, forced-op receipts, settlement timelines, Chronicle, Opportunity Ledger, and officer dossiers now distinguish logged captures from final-held objectives while preserving Srebrenica/Zepa event-owned receipts.
+
+**Latest combat-record ground-copy discipline:** [implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md](implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md) - Army HQ corps combat records and shared formation summaries now label combat-history territory counters as ground won/lost rather than `cap / lost` shorthand.
+
+**Latest raw-copy wave 5 scout fixes:** [implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md](implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md) - Legacy Warroom date/IVP wrapper copy, Peace Plan modal chrome/fallbacks, officer dossier status/corps labels, and AAR/tooltip friction/confidence labels now use player-facing localized copy.
+
+**Latest issue #170 residual reconciliation:** [implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md](implemented/20260620_ISSUE170_RESIDUAL_RECONCILIATION.md) - Graz HRHB->RS and Trnovo waypoint handling are closed by direct tests, leaving only the enclave denominator domain decision and calibration-held same-axis concentration residuals.
+
+**Latest Peace / Decision Room label copy:** [implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md](implemented/20260620_PEACE_DECISION_ROOM_LABEL_COPY.md) - PeaceStatusPanel and Decision Room cards now render peace chrome, reserve reasons, briefing categories, and proposal domains through explicit localized/player-safe labels instead of hardcoded English or title-cased ids.
+
 **Latest settlement timeline control/battle copy:** [implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md](implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md) - Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through localized player copy.
 
 **Latest tooltip player-copy polish:** [implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md](implemented/20260620_TOOLTIP_PLAYER_COPY_POLISH.md) - Formation/front tooltips now render localized posture, order, density, readiness, and defense-preview copy instead of raw ids and compact shorthand.
@@ -24,7 +40,7 @@
 
 **Latest AAR / ORBAT role label copy:** [implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md](implemented/20260620_AAR_ORBAT_ROLE_LABEL_COPY.md) - AAR casualty rows and ORBAT recent engagements now spell out attacker/defender roles instead of compact `att` / `def` / `ATK` / `DEF` shorthand.
 
-**Latest live-surface raw-token guard expansion:** [implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md](implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md) - The live browser sweep now fails on broader compact staff shorthand and raw enum/id leaks, and the next six player-copy targets are queued from a Pyrrhic scout.
+**Latest live-surface raw-token guard expansion:** [implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md](implemented/20260620_LIVE_SURFACE_RAW_TOKEN_GUARD_EXPANSION.md) - The live browser sweep now fails on broader compact staff shorthand and raw enum/id leaks; the six player-copy targets from that scout are closed by the linked June 20 label-copy reports.
 
 **Latest Army ops command-label copy polish:** [implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md](implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md) - Army HQ expanded Operations detail now spells out commander stats, readiness, ORBAT, casualty, rank, and AAR labels instead of compact staff shorthand.
 
