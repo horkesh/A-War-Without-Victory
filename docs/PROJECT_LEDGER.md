@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): polish counteroffer personnel autonomy copy
+
+**Type:** UI/read-model player-copy polish.
+
+**Fix:** Counter-offer modals now map known response and institutional-model ids to localized player labels and hide unknown ids behind neutral fallback copy. Army HQ Personnel rank rows now use localized rank labels, including tactical commanders, instead of underscore-derived rank ids, and Autonomy proposal domain chips now render proposal-family copy such as `Military proposal` instead of raw `military` / `political` ids.
+
+**Verification:** Red proof first failed on the stale raw/id-derived copy in `tests/ui/decision_family_modals.test.ts`, `tests/ui/personnel_player_safe_display.test.ts`, and `tests/ui/ui_copy_raw_id_fallbacks.test.ts`; the independent Pyrrhic QA review then found and red-proved the `tactical_commander` semantic fallback (`Tactical OfficerStaff officer`). Green proof passed: `npm.cmd exec -- vitest run tests/ui/decision_family_modals.test.ts tests/ui/personnel_player_safe_display.test.ts tests/ui/ui_copy_raw_id_fallbacks.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` (28/28); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (206/206); `npm.cmd run qa:live-surface:browser` with port cleanup. Report: `docs/40_reports/implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md`.
+
+**Scope/determinism:** UI/read-model copy, i18n strings, focused tests, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): close raw-copy wave 5 scout leaks
 
 **Type:** UI/read-model player-copy polish.

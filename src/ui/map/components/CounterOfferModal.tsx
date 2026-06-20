@@ -5,7 +5,7 @@ import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface CounterOfferModalProps {
@@ -19,16 +19,24 @@ function stripCounterOfferPrefix(offerId: string): string {
 }
 
 function responseLabel(response: string): string {
-  if (response === 'conditional_accept') return t('decisionModal.counterOffer.responseConditional');
-  if (response === 'counter') return t('decisionModal.counterOffer.responseCounter');
-  if (response === 'accept') return t('decisionModal.counterOffer.responseAccept');
-  if (response === 'reject') return t('decisionModal.counterOffer.responseReject');
-  return response.replace(/[_-]+/g, ' ');
+  const labelKeys: Record<string, MessageKey> = {
+    conditional_accept: 'decisionModal.counterOffer.responseConditional',
+    counter: 'decisionModal.counterOffer.responseCounter',
+    accept: 'decisionModal.counterOffer.responseAccept',
+    reject: 'decisionModal.counterOffer.responseReject',
+  };
+  return t(labelKeys[response] ?? 'decisionModal.counterOffer.responseUnknown');
 }
 
 function formatInstitution(value: string | undefined): string {
   if (!value) return t('decisionModal.counterOffer.notSpecified');
-  return value.replace(/[_-]+/g, ' ').replace(/\b\w/g, (char) => char.toUpperCase());
+  const labelKeys: Record<string, MessageKey> = {
+    union_3_republics: 'decisionModal.counterOffer.institution.union3Republics',
+    cantons: 'decisionModal.counterOffer.institution.cantons',
+    cantonized: 'decisionModal.counterOffer.institution.cantons',
+    '10_provinces': 'decisionModal.counterOffer.institution.tenProvinces',
+  };
+  return t(labelKeys[value] ?? 'decisionModal.counterOffer.institutionUnknown');
 }
 
 export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModalProps) {

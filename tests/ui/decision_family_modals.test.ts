@@ -176,4 +176,30 @@ describe('decision family modals', () => {
     }));
     delete (window as unknown as { awwv?: unknown }).awwv;
   });
+
+  it('hides unknown counter-offer response and institutional ids behind neutral labels', () => {
+    const { container } = render(React.createElement(CounterOfferModal, {
+      offerId: 'counter-offer:RS_002',
+      state: makeState({
+        pendingCounterOffers: [{
+          id: 'RS_002',
+          author: 'RS',
+          parentOfferId: 'peace_plan',
+          planId: 'peace_plan',
+          planName: 'Peace proposal',
+          chainDepth: 2,
+          createdTurn: 70,
+          response: 'surprise_counter_offer' as never,
+          proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+          institutionalModel: 'union_3_republics_extra',
+          sourceCitation: '',
+        }],
+      }),
+      onClose: vi.fn(),
+    }));
+
+    expect(screen.getByText('Unspecified response')).toBeTruthy();
+    expect(screen.getByText('Unspecified institutional model')).toBeTruthy();
+    expect(container.textContent).not.toMatch(/surprise[_ ]counter[_ ]offer|union[_ ]3[_ ]republics[_ ]extra/i);
+  });
 });

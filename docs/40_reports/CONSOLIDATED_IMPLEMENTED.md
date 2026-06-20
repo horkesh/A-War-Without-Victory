@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest counteroffer/personnel/autonomy copy polish:** [implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md](implemented/20260620_COUNTEROFFER_PERSONNEL_AUTONOMY_COPY_POLISH.md) - Counter-offer response/institution ids, Army HQ Personnel rank ids including tactical commanders, and Autonomy proposal domain ids now render localized player-facing labels or neutral fallbacks.
+
 **Latest docs status and raw-copy follow-up:** [implemented/20260619_DOC_STATUS_AND_RAW_COPY_FOLLOWUP.md](implemented/20260619_DOC_STATUS_AND_RAW_COPY_FOLLOWUP.md) - COMMAND_BOARD/plan status now reflects PR #329 closed stale NO-GO and issue #170 same-axis production behavior calibration-held, while follow-up UI fallback leaks and stale CI expectations are closed.
 
 **Latest raw-copy wave 2 timing/fallback copy:** [implemented/20260619_RAW_COPY_WAVE_2_TIMING_COPY.md](implemented/20260619_RAW_COPY_WAVE_2_TIMING_COPY.md) - President's Desk, Army HQ, Turn Aftermath, Decision History, Operations, Replay, Territory chart, Verdict/share, Peace Status, Advance Turn, Officer Matter, Army CO pushback, Desk decision cards, Peace Plan, Game Over, AAR/tooltip/sector battle fallbacks, and loaded-state labels now render calendar dates, semantic command-cycle wording, and neutral fallback labels instead of raw timing or enum/id strings.

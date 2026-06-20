@@ -142,6 +142,44 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toMatch(/\bA:\d/);
   });
 
+  it('renders officer rank labels without raw rank ids', () => {
+    useGameStore.setState({ loadedGameState: makeState(), selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Corps commander');
+    expect(container.textContent).not.toContain('corps_commander');
+    expect(container.textContent).not.toContain('corps commander');
+  });
+
+  it('renders tactical commander rank labels without raw ids or generic fallbacks', () => {
+    const state = makeState() as LoadedGameState & { namedOfficerData: NonNullable<LoadedGameState['namedOfficerData']> };
+    state.namedOfficerData.push({
+      id: 'officer_3',
+      name: 'Tactical Officer',
+      faction: 'RS',
+      status: 'active',
+      rank: 'tactical_commander',
+      competence: 3,
+      aggressiveness: 4,
+      defensive_skill: 3,
+      political_reliability: 3,
+      origin: 'test',
+      assigned_corps_id: null,
+      acting_commander: false,
+      turns_in_command: 0,
+      battles: 0,
+      victories: 0,
+    });
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Tactical commander');
+    expect(container.textContent).not.toContain('tactical_commander');
+    expect(container.textContent).not.toContain('Tactical OfficerStaff officer');
+  });
+
   it('starts with a presidential personnel dossier before raw ORBAT detail', () => {
     useGameStore.setState({ loadedGameState: makeState(), selectedArmyId: 'RS' });
 

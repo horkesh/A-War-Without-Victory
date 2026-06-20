@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
-import { t, useLocale } from '../../i18n';
+import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { FrontVisitSection } from './FrontVisitSection';
@@ -198,7 +198,7 @@ export function PersonnelContent() {
                             <div className="min-w-0">
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
-                                    {o.rank?.replace(/_/g, ' ')}
+                                    {formatOfficerRank(o.rank)}
                                     {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
                                 {(o.command_style || o.known_for) && (
@@ -249,6 +249,22 @@ function formatPoolName(munId: string): string {
 
 function formatWholeNumber(value: number): string {
     return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value);
+}
+
+const OFFICER_RANK_LABEL_KEYS: Record<string, MessageKey> = {
+    army_commander: 'personnel.rank.armyCommander',
+    corps_commander: 'personnel.rank.corpsCommander',
+    brigadier_general: 'personnel.rank.brigadierGeneral',
+    tactical_commander: 'personnel.rank.tacticalCommander',
+    general: 'personnel.rank.general',
+    colonel: 'personnel.rank.colonel',
+    major: 'personnel.rank.major',
+    deputy: 'personnel.rank.deputy',
+};
+
+function formatOfficerRank(rank: string | undefined): string {
+    if (!rank) return t('personnel.rank.unspecified');
+    return t(OFFICER_RANK_LABEL_KEYS[rank] ?? 'personnel.rank.unspecified');
 }
 
 function strictCompare(a: string, b: string): number {

@@ -126,12 +126,23 @@ const PROPOSAL_VALUE_LABEL_KEYS: Record<string, MessageKey> = {
     defensive: 'autonomy.proposal.value.defensive',
 };
 
+const PROPOSAL_DOMAIN_LABEL_KEYS: Record<PendingProposalReview['domain'], MessageKey> = {
+    military: 'autonomy.proposal.domain.military',
+    political: 'autonomy.proposal.domain.political',
+    events: 'autonomy.proposal.domain.events',
+    ops: 'autonomy.proposal.opOrder',
+};
+
 function formatProposalValue(value: string | undefined): string {
     const safeValue = (value ?? '').trim();
     if (!safeValue) return '—';
     const labelKey = PROPOSAL_VALUE_LABEL_KEYS[safeValue.toLowerCase()];
     if (labelKey) return t(labelKey);
     return toTitleCase(safeValue.replace(/[:\-\s]+/g, '_'));
+}
+
+function formatProposalDomain(domain: PendingProposalReview['domain']): string {
+    return t(PROPOSAL_DOMAIN_LABEL_KEYS[domain] ?? 'autonomy.proposal.domain.generic');
 }
 
 // ── ProposalCard ───────────────────────────────────────────────────────────
@@ -201,7 +212,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                     {isOp ? t('autonomy.proposal.opOrderFor', { corps: corpsLabel }) : corpsLabel}
                 </span>
                 <span className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.15em] shrink-0">
-                    {proposal.domain === 'ops' ? t('autonomy.proposal.opOrder') : proposal.domain}
+                    {formatProposalDomain(proposal.domain)}
                 </span>
             </div>
 

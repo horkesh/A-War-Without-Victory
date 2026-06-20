@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COUNTEROFFER/PERSONNEL/AUTONOMY COPY (2026-06-20).** Counter-offer responses/institutional models, officer ranks, and proposal domains are player-facing decision/command copy, not enum display fields. Do instead: route known ids through i18n label maps and unknown ids through neutral fallback copy; keep `surprise_counter_offer`, `union_3_republics_extra`, `corps_commander`, and raw `military`/`political` domain chips out of normal play.
+
 **RAW-COPY WAVE 5 SCOUT FIXES (2026-06-20).** Legacy Warroom newspaper/reports, Peace Plan modal, officer dossiers, AAR rows, and battle tooltips are player surfaces. Do instead: render calendar dates, international-pressure copy, localized peace-plan chrome, player-safe officer status/corps labels, and localized AAR friction/confidence labels; keep `Week N`, `[Turn N]`, wrapper `IVP`, raw institutional ids, raw officer status/corps ids, `ambush_risk`, `defender_opsec`, and `low confidence` out of normal play.
 
 **COMBAT RECORD GROUND COPY (2026-06-20).** Combat-history `total_osids_captured` / `total_osids_lost` counters are ground won/lost, not AAR final-held objective provenance and not player-facing `cap` shorthand. Do instead: label Army HQ and shared formation combat summaries as `Ground Won/Lost`, render `{won} won / {lost} lost`, and reserve capture/objective language for surfaces with logged-capture provenance.

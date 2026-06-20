@@ -168,6 +168,8 @@ describe('UI copy raw-id fallbacks', () => {
     expect(screen.getByText('Approve')).toBeTruthy();
     expect(container.textContent).not.toContain('pending_review');
     expect(container.innerHTML).not.toContain('>approve<');
+    expect(screen.getByText('Military proposal')).toBeTruthy();
+    expect(container.innerHTML).not.toContain('>military<');
   });
 
   it('Army HQ source uses safe fallbacks for raw sector/operation/detail labels', () => {
