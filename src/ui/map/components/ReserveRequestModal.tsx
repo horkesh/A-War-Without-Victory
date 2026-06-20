@@ -6,6 +6,7 @@ import { useGameStore } from '../store/gameStore';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
+import { getArmyReserveRequestCauseCopy } from '../utils/armyReserveSeverity';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface ReserveRequestModalProps {
@@ -20,8 +21,8 @@ function stripReservePrefix(requestId: string): string {
 }
 
 const RESERVE_PURPOSE_LABEL_KEYS: Record<string, MessageKey> = {
-  offensive: 'attention.offensive',
-  defensive: 'attention.defensive',
+  offensive: 'armyReserve.purpose.offensive',
+  defensive: 'armyReserve.purpose.defensive',
 };
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
@@ -29,23 +30,18 @@ const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   defensive_gap: 'armyReserve.reason.defensiveGap',
   exploitation: 'armyReserve.reason.exploitation',
   enclave_relief: 'armyReserve.reason.enclaveRelief',
+  sector_threat: 'armyReserve.reason.sectorThreat',
 };
-
-function fallbackReserveLabel(value: string | null | undefined): string {
-  const normalized = (value ?? '').trim().replace(/[_-]+/g, ' ');
-  if (!normalized) return t('common.unknown');
-  return normalized.replace(/\b\w/g, (letter) => letter.toUpperCase());
-}
 
 function getReserveRequestPurposeLabel(purpose: string | null | undefined, reason: string | null | undefined): string {
   const purposeKey = RESERVE_PURPOSE_LABEL_KEYS[(purpose ?? '').trim()];
   if (purposeKey) return t(purposeKey);
 
   const reasonId = (reason ?? '').trim();
-  const reasonKey = RESERVE_REASON_LABEL_KEYS[reasonId] ?? RESERVE_PURPOSE_LABEL_KEYS[reasonId];
+  const reasonKey = RESERVE_REASON_LABEL_KEYS[reasonId];
   if (reasonKey) return t(reasonKey);
 
-  return fallbackReserveLabel(purpose ?? reason);
+  return t('armyReserve.purpose.unknown');
 }
 
 export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePanel }: ReserveRequestModalProps) {
@@ -55,6 +51,7 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
   const request = state?.pendingReserveRequests?.find((entry) => entry.request_id === rawId) ?? null;
   const commandFallback = t('decisionModal.reserve.commandFallback');
   const corpsName = request ? getPlayerFacingCorpsName(request.corps_id, state?.formations ?? [], commandFallback) : commandFallback;
+  const causeCopy = request ? getArmyReserveRequestCauseCopy(request) : null;
   const headerImage = getDecisionHeaderForFamily('reserve_request');
 
   const decline = async () => {
@@ -103,7 +100,13 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
               <div className="mt-1 text-[12px] font-bold text-text-primary">{getReserveRequestPurposeLabel(request.purpose, request.reason)}</div>
             </div>
           </div>
-          <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{request.description}</div>
+          {causeCopy && (
+            <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-text-muted">{causeCopy.label}</div>
+              <div className="mt-1 text-text-primary">{causeCopy.summary}</div>
+              <div className="mt-1">{causeCopy.detail}</div>
+            </div>
+          )}
         </div>
       )}
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">

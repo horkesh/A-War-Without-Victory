@@ -1,3 +1,11 @@
+## 2026-06-20 - Live proofs must distinguish absent fixture state from broken hooks
+
+**Browser QA should prove reachable controls without inventing data assumptions:** First-hour live fixtures can legitimately have no visible AAR battle rows, while Army HQ Personnel and sector metadata are present. Durable rule: when a live-browser proof depends on optional fixture state, record an explicit `skipped:no-visible-*` evidence value unless the tool first creates that state; keep unit/component tests pinning the hook itself. Applied in `[2026-06-20] Live drilldown hooks and Army Reserve copy polish`; report `docs/40_reports/implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md`.
+
+## 2026-06-20 - Army Reserve request prose stays internal
+
+**Reserve requests carry diagnostic prose that is not automatically player copy:** `description`, `why_needed`, `how_to_use`, unknown `purpose`, and unknown `reason` values preserve useful command payloads, but normal Army Reserve panels and reserve request modals should not echo them. Durable rule: route known reserve ids through `armyReserve.*` i18n keys and render neutral fallback copy for unknowns; keep raw fields as payload/diagnostic data only. Applied in `[2026-06-20] Live drilldown hooks and Army Reserve copy polish`; report `docs/40_reports/implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md`.
+
 ## 2026-06-20 - Army HQ copy uses full command language
 
 **Army HQ command cards and front sectors should not use compact staff shorthand:** Combat records, corps status cards, ORBAT campaign losses, and sector summary rows preserve compact numeric fields internally, but visible copy should be explicit. Durable rule: render combat records through `combatRecord.recordBreakdown` and `combatRecord.groundWonLostCount`, corps-card stance/counts through localized full labels, ORBAT campaign losses through killed/wounded/missing copy, and `length_edges` as front segments rather than kilometers. Applied in `[2026-06-20] fix(ui): spell out Army HQ copy and frontage`; report `docs/40_reports/implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md`.

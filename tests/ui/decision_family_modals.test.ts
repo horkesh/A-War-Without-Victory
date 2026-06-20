@@ -7,6 +7,7 @@ import { OfficerMatterModal } from '../../src/ui/map/components/OfficerMatterMod
 import { IntelligenceBriefModal } from '../../src/ui/map/components/IntelligenceBriefModal.js';
 import { CounterOfferModal } from '../../src/ui/map/components/CounterOfferModal.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   return {
@@ -38,6 +39,8 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 afterEach(() => cleanup());
 
 describe('decision family modals', () => {
+  afterEach(() => setLocale('en'));
+
   it('surfaces reserve requests as a presidential modal with localized purpose copy and an explicit pool handoff', () => {
     const onOpenReservePanel = vi.fn();
 
@@ -97,6 +100,64 @@ describe('decision family modals', () => {
 
     expect(screen.getByText('Defensive Gap')).toBeTruthy();
     expect(container.textContent).not.toContain('defensive_gap');
+  });
+
+  it('hides unknown reserve reason and purpose ids behind neutral player copy', () => {
+    const { container } = render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-unknown',
+      state: makeState({
+        formations: [{ id: 'drina_corps', name: 'Drina Corps' }] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-unknown',
+          corps_id: 'drina_corps',
+          faction: 'RS',
+          reason: 'sector_threat_urgent',
+          purpose: 'flank_anchor' as never,
+          priority: 64,
+          severityBand: 'routine',
+          travel_hops: 3,
+          description: 'sector_threat_urgent raw description payload',
+          suggested_brigade_id: null,
+          turn_requested: 1,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenReservePanel: vi.fn(),
+    }));
+
+    expect(screen.getByText('Reserve need recorded')).toBeTruthy();
+    expect(screen.getByText('Current reserve pressure has exceeded routine army reserve handling.')).toBeTruthy();
+    expect(container.textContent).not.toMatch(/sector[_ ]threat[_ ]urgent|flank[_ ]anchor|raw description payload/i);
+  });
+
+  it('uses BCS neutral reserve-copy fallbacks without exposing unknown ids', () => {
+    setLocale('bcs');
+
+    const { container } = render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-bcs',
+      state: makeState({
+        formations: [{ id: 'drina_corps', name: 'Drina Corps' }] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-bcs',
+          corps_id: 'drina_corps',
+          faction: 'RS',
+          reason: 'unknown_internal_reason',
+          purpose: 'unknown_internal_purpose' as never,
+          priority: 64,
+          severityBand: 'routine',
+          travel_hops: 3,
+          description: 'unknown_internal_reason raw description payload',
+          suggested_brigade_id: null,
+          turn_requested: 1,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenReservePanel: vi.fn(),
+    }));
+
+    expect(screen.getByText('Zabilježena potreba za rezervom')).toBeTruthy();
+    expect(screen.getByText('Trenutni pritisak na rezervu premašuje rutinsko postupanje armijske rezerve.')).toBeTruthy();
+    expect(container.textContent).not.toMatch(/unknown[_ ]internal[_ ]reason|unknown[_ ]internal[_ ]purpose|raw description payload/i);
   });
 
   it('surfaces officer matters without raw commander stat notation', () => {

@@ -81,6 +81,16 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('army_hq_internal_summary');
     expect(tool).toContain('army_hq_internal_personnel');
     expect(tool).toContain('army_hq_internal_corps_card');
+    expect(tool).toContain('runArmyHqPersonnelBrigadeLiveProof');
+    expect(tool).toContain('armyHqPersonnelBrigadeLiveProof');
+    expect(tool).toContain('personnel-orbat-brigade-link');
+    expect(tool).toContain('runArmyHqSectorFrontSegmentLiveProof');
+    expect(tool).toContain('armyHqSectorFrontSegmentLiveProof');
+    expect(tool).toContain('army-hq-sector-frontage');
+    expect(tool).toContain('runRecordsAarFormationLinkLiveProof');
+    expect(tool).toContain('recordsAarFormationLinkLiveProof');
+    expect(tool).toContain('aar-battle-row');
+    expect(tool).toContain('aar-formation-link');
     expect(tool).toContain('runArchiveInboxDrilldown');
     expect(tool).toContain('archiveChronicleToRecordsDrilldown');
     expect(tool).toContain('archiveRecordsDecisionToChronicleDrilldown');
@@ -177,6 +187,15 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).toContain('data-testid="desk-action-records"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card-detail"');
+    expect(read('src/ui/map/components/army_hq/PersonnelContent.tsx')).toContain('data-testid="personnel-orbat-brigade-link"');
+    expect(read('src/ui/map/components/army_hq/PersonnelContent.tsx')).toContain('data-command-id={command.id}');
+    expect(read('src/ui/map/components/army_hq/PersonnelContent.tsx')).toContain('data-command-kind={command.kind}');
+    expect(read('src/ui/map/components/army_hq/PersonnelContent.tsx')).toContain('data-formation-id={b.id}');
+    expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-row"');
+    expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-frontage"');
+    expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-front-segments={sector.length_edges}');
+    expect(read('src/ui/map/components/AARPanel.tsx')).toContain('data-testid="aar-battle-row"');
+    expect(read('src/ui/map/components/AARPanel.tsx')).toContain('data-testid="aar-formation-link"');
   });
 });
 

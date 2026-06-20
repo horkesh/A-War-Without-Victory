@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest live drilldown hooks and Army Reserve copy polish** | [implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md](implemented/20260620_LIVE_DRILLDOWN_AND_RESERVE_COPY_POLISH.md) - Live browser sweep now proves Army HQ Personnel brigade drilldown and sector front-segment metadata; Army Reserve request surfaces hide raw prose and unknown ids behind localized neutral copy. |
 | **Latest BCS command copy residuals** | [implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md](implemented/20260620_BCS_COMMAND_COPY_RESIDUALS.md) - BCS command surfaces now avoid remaining `OPS`, English `Level 3` / `override`, `Command Relationship`, and compact supply/intelligence/commander/equipment shorthand in targeted keys. |
 | **Latest command copy shorthand wave** | [implemented/20260620_COMMAND_COPY_SHORTHAND_WAVE.md](implemented/20260620_COMMAND_COPY_SHORTHAND_WAVE.md) - Normal command surfaces now spell out remaining casualty, exchange-ratio, frontage, personnel, security, and report-copy shorthand across EN/BCS UI. |
 | **Latest Army HQ copy and front-segment polish** | [implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md](implemented/20260620_ARMY_HQ_COPY_FRONTAGE_POLISH.md) - Army HQ combat records, corps cards, ORBAT campaign losses, and sector length rows now spell out player-facing copy and render front segments instead of kilometers. |
