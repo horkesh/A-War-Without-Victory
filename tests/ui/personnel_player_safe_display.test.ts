@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PersonnelContent } from '../../src/ui/map/components/army_hq/PersonnelContent.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -13,8 +13,10 @@ function makeState(): LoadedGameState {
     phase: 'war',
     formations: [
       { id: 'vrs_drina', name: 'Drina Corps', faction: 'RS', kind: 'corps', status: 'active' },
+      { id: 'vrs_main_staff', name: 'Main Staff VRS', faction: 'RS', kind: 'army_hq', status: 'active' },
       { id: 'vrs_empty', name: 'Empty Corps', faction: 'RS', kind: 'corps', status: 'active' },
       { id: 'vrs_bde_1', name: '1st Brigade', faction: 'RS', kind: 'brigade', status: 'active', corps_id: 'vrs_drina', personnel: 1000 },
+      { id: 'vrs_guard_bde', name: 'Guard Brigade', faction: 'RS', kind: 'brigade', status: 'active', corps_id: 'vrs_main_staff', personnel: 800 },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -45,6 +47,18 @@ function makeState(): LoadedGameState {
         aggressiveness: 3,
         defensive_skill: 5,
         political_reliability: 2,
+      },
+      {
+        id: 'officer_hq',
+        name: 'HQ Officer',
+        faction: 'RS',
+        status: 'active',
+        rank: 'corps_commander',
+        assigned_corps_id: 'vrs_main_staff',
+        competence: 4,
+        aggressiveness: 3,
+        defensive_skill: 5,
+        political_reliability: 3,
       },
       {
         id: 'officer_2',
@@ -204,5 +218,28 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('Command vacancies1No active commander: Empty Corps');
     expect(container.textContent).not.toContain('Command vacancies3');
     expect(container.textContent).not.toContain('No active commander: JNA Herzegovina Command, Drina Corps, Empty Corps');
+  });
+
+  it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      selectedArmyId: 'RS',
+      selectedArmyHqId: null,
+      selectedCorpsId: null,
+      selectedFormationId: null,
+    });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Main Staff VRS');
+    expect(container.textContent).toContain('HQ Officer');
+    expect(container.textContent).toContain('Corps commander - Main Staff VRS');
+
+    fireEvent.click(screen.getByRole('button', { name: /Guard Brigade/i }));
+
+    const store = useGameStore.getState();
+    expect(store.selectedArmyHqId).toBe('vrs_main_staff');
+    expect(store.selectedCorpsId).toBeNull();
+    expect(store.selectedFormationId).toBe('vrs_guard_bde');
   });
 });

@@ -36,7 +36,8 @@ export function PersonnelContent() {
         const formations = state.formations.filter(f => f.faction === faction);
         const brigades = formations.filter(f => f.kind === 'brigade' && f.status === 'active');
         const corpsFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset');
-        const corpsNameById = new Map(corpsFormations.map((corps) => [corps.id, corps.name]));
+        const commandFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq');
+        const commandNameById = new Map(commandFormations.map((command) => [command.id, getLocalizedFormationName(command, locale)]));
         const totalPersonnel = brigades.reduce((s, f) => s + (f.personnel ?? 0), 0);
         const officers = (state.namedOfficerData ?? []).filter(o => o.faction === faction);
         const activeOfficers = officers.filter(o => o.status === 'active');
@@ -61,7 +62,8 @@ export function PersonnelContent() {
         return {
             brigades,
             corpsFormations,
-            corpsNameById,
+            commandFormations,
+            commandNameById,
             totalPersonnel,
             activeOfficers,
             reserveOfficers,
@@ -71,7 +73,7 @@ export function PersonnelContent() {
             lowReliabilityCommanders,
             brigadesByCorps,
         };
-    }, [state, faction]);
+    }, [state, faction, locale]);
 
     if (!data) return <div className="text-text-secondary italic text-[12px] py-8 text-center">{t('personnel.noGameState')}</div>;
 
@@ -90,7 +92,7 @@ export function PersonnelContent() {
                         label={t('personnel.dossier.vacancies')}
                         value={String(data.commanderVacancies.length)}
                         detail={data.commanderVacancies.length > 0
-                            ? t('personnel.dossier.vacanciesDetail', { commands: data.commanderVacancies.map((corps) => corps.name).join(', ') })
+                            ? t('personnel.dossier.vacanciesDetail', { commands: data.commanderVacancies.map((corps) => getLocalizedFormationName(corps, locale)).join(', ') })
                             : t('personnel.dossier.vacanciesClear')}
                         tone={data.commanderVacancies.length > 0 ? 'warning' : 'steady'}
                     />
@@ -165,21 +167,40 @@ export function PersonnelContent() {
                     {t('personnel.orderOfBattle')}
                 </div>
                 <div className="space-y-2">
-                    {data.corpsFormations.map(corps => {
-                        const corpsBrigades = data.brigadesByCorps.get(corps.id) ?? [];
-                        const corpsPers = corpsBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                    {data.commandFormations.map(command => {
+                        const commandBrigades = data.brigadesByCorps.get(command.id) ?? [];
+                        const commandPers = commandBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                        const commandName = data.commandNameById.get(command.id) ?? getLocalizedFormationName(command, locale);
                         return (
-                            <div key={corps.id} className="border border-panel-border/50 rounded-md overflow-hidden">
+                            <div key={command.id} className="border border-panel-border/50 rounded-md overflow-hidden">
                                 <div className="flex items-center justify-between px-3 py-2 bg-panel-bg">
-                                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{corps.name}</span>
-                                    <span className="text-[10px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: corpsBrigades.length, personnel: formatPersonnel(corpsPers) })}</span>
+                                    <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{commandName}</span>
+                                    <span className="text-[10px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: commandBrigades.length, personnel: formatPersonnel(commandPers) })}</span>
                                 </div>
                                 <div className="px-3 py-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
-                                    {corpsBrigades.map(b => (
-                                        <div key={b.id} className="flex items-center justify-between text-[10px] py-0.5">
+                                    {commandBrigades.map(b => (
+                                        <button
+                                            key={b.id}
+                                            type="button"
+                                            className="flex w-full items-center justify-between text-[10px] py-0.5 text-left hover:text-amber-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
+                                            onClick={() => {
+                                                useGameStore.setState({
+                                                    selectedOsid: null,
+                                                    selectedFormationId: b.id,
+                                                    selectedCorpsFrontSectorId: null,
+                                                    selectedCorpsId: command.kind === 'army_hq' ? null : command.id,
+                                                    selectedArmyId: null,
+                                                    selectedArmyHqId: command.kind === 'army_hq' ? command.id : null,
+                                                    selectedOperationKey: null,
+                                                    selectedOrbatCorpsId: null,
+                                                    isOperationsPanelOpen: false,
+                                                    operationTargetOsids: [],
+                                                });
+                                            }}
+                                        >
                                             <span className="text-text-secondary truncate mr-2">{getLocalizedFormationName(b, locale)}</span>
                                             <span className="text-text-primary tabular-nums shrink-0">{formatPersonnel(b.personnel ?? 0)}</span>
-                                        </div>
+                                        </button>
                                     ))}
                                 </div>
                             </div>
@@ -199,7 +220,7 @@ export function PersonnelContent() {
                                 <div className="font-bold text-text-primary truncate">{o.name}</div>
                                 <div className="text-text-secondary/60 text-[9px] uppercase">
                                     {formatOfficerRank(o.rank)}
-                                    {o.assigned_corps_id ? ` - ${data.corpsNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
+                                    {o.assigned_corps_id ? ` - ${data.commandNameById.get(o.assigned_corps_id) ?? t('personnel.attachedCommand')}` : ''}
                                 </div>
                                 {(o.command_style || o.known_for) && (
                                     <div className="mt-1 flex flex-wrap gap-1">

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): route Personnel HQ brigades and officers
+
+**Type:** UI/read-model command-surface polish.
+
+**Fix:** Army HQ Personnel now treats `army_hq` formations as command owners for ORBAT display and officer assignment labels, while keeping corps counts/vacancy checks scoped to corps/corps assets. HQ-assigned brigade rows are visible and clickable, and their click route sets Army HQ parent context plus formation focus in one store update so sequenced selection clears do not erase the parent.
+
+**Verification:** Red proof first failed because `Main Staff VRS` was absent from Personnel and the HQ officer showed `Attached command`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/personnel_player_safe_display.test.ts --pool=forks --reporter=dot` (6/6); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (21 files / 210 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`); `git diff --check`. Report: `docs/40_reports/implemented/20260620_PERSONNEL_HQ_BRIGADE_DRILLDOWN.md`.
+
+**Scope/determinism:** UI/read-model route polish, focused tests, browser QA, and docs only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): show Formation Detail HQ and effectiveness copy safely
 
 **Type:** UI/read-model command-surface polish.
