@@ -11,6 +11,7 @@ import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { toTitleCase } from '../utils/formatters';
 import { SettlementTimeline } from './SettlementTimeline';
 import { buildSettlementTimeline } from '../utils/buildSettlementTimeline';
+import { getPlayerSafeSettlementStatusLabel } from '../utils/settlementStatusLabels';
 import {
   getPlayerSafeFormationReadinessLabel,
   getPlayerSafeBrigadeName,
@@ -205,6 +206,7 @@ export function SettlementDetailContent({
   // player-faction-scoped by the adapter, so an entry exists only for the
   // player's own settlements — no enemy supply truth is surfaced here.
   const supplyExplanation = buildOsidSupplyExplanation(getByOsid(supplyStateByOsid, osid));
+  const settlementStatusLabel = getPlayerSafeSettlementStatusLabel(statusLabel);
   const popOriginal = num(props.population_total) || (num(props.population_bosniaks) + num(props.population_serbs) + num(props.population_croats) + num(props.population_others));
 
   const terrain = toTitleCase(str(props.terrain || props.zone_type));
@@ -397,10 +399,10 @@ export function SettlementDetailContent({
           </div>
         )}
 
-        {isPanel && activeTab === 'overview' && statusLabel && (
+        {isPanel && activeTab === 'overview' && settlementStatusLabel && (
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-text-secondary">{t('settlement.status')}</span>
-            <span className="text-amber-400 font-semibold uppercase tracking-wide">{statusLabel}</span>
+            <span className="text-amber-400 font-semibold uppercase tracking-wide">{settlementStatusLabel}</span>
           </div>
         )}
 

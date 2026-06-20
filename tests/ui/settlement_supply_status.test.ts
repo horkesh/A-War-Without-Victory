@@ -48,6 +48,16 @@ describe('buildOsidSupplyExplanation (read-model)', () => {
 });
 
 describe('SettlementDetailContent supply status surface', () => {
+  it('renders player-legible settlement status without raw ids', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      statusLabel: 'CONTESTED',
+    }));
+
+    expect(screen.getByText('Contested')).toBeTruthy();
+    expect(screen.queryByText('CONTESTED')).toBeNull();
+  });
+
   it('renders a player-legible supply status for a controlled settlement', () => {
     render(createElement(SettlementDetailContent, {
       ...BASE_PROPS,

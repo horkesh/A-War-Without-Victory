@@ -2,6 +2,8 @@
 
 **CORPS DETAIL BRIGADE DRILLDOWN (2026-06-20).** Corps Detail brigade clicks must not clear the selected corps and leave the player in a bare formation route. Do instead: route combat-summary and ORBAT brigade clicks through `inspectOnField(..., { kind: 'field-formation-in-corps', formationId, corpsId })` and pin rail ownership with `tests/ui/command_drilldown_routing.test.ts`.
 
+**SETTLEMENT STATUS LABEL I18N (2026-06-20).** Selected-settlement overview must not print raw `statusBySettlement` ids such as `CONTESTED`. Do instead: render through `getPlayerSafeSettlementStatusLabel(...)` in `src/ui/map/utils/settlementStatusLabels.ts`, keep known ids explicit (`CONSOLIDATED`, `CONTESTED`, `HIGHLY_CONTESTED`), and fall back to neutral status-pending copy.
+
 **LOCAL SUPPORT LABEL I18N (2026-06-20).** Local-support player surfaces must not trust sim-owned `MunicipalitySupportOrderView.label` as display copy. Do instead: render support order types through `src/ui/map/utils/municipalitySupportLabels.ts`; keep SelectionPanel free of `src/sim/combat` runtime imports and pin with `tests/ui_adapter_boundary.test.ts`.
 
 **SETTLEMENT TIMELINE SUPPLY I18N (2026-06-20).** Supply transition rows must not render hardcoded English or raw `adequate`/`strained`/`critical` state ids. Do instead: route `buildSettlementTimeline(...)` supply titles through `settlementTimeline.supply.*` i18n keys, use localized state-label keys, and keep BCS on the existing `Snabdijevanje` vocabulary because `tests/ui_i18n.test.ts` rejects the `opskr*` root.

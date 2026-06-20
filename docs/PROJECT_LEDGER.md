@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): localize settlement status labels
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** Settlement overview status rows now route `statusBySettlement` ids through authored EN/BCS labels instead of rendering raw enum values such as `CONTESTED`. Known `CONSOLIDATED`, `CONTESTED`, and `HIGHLY_CONTESTED` ids get explicit player-facing labels; unknown ids fall back to neutral status-pending copy.
+
+**Verification:** Red proof first failed on visible `CONTESTED`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/settlement_supply_status.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` (19/19); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (22 files / 213 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`, temp evidence deleted); `git diff --check`. Report: `docs/40_reports/implemented/20260620_SETTLEMENT_STATUS_LABEL_I18N.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): preserve Corps Detail brigade context
 
 **Type:** UI/store route-state polish.
