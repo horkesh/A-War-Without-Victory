@@ -10,6 +10,7 @@ import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPan
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { enMessages } from '../../src/ui/map/i18n/messages.en.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { FormationView, LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
@@ -74,6 +75,7 @@ function makeSitrepState(): LoadedGameState {
 describe('GUI audit label discipline', () => {
   afterEach(() => {
     cleanup();
+    setLocale('en');
     useGameStore.setState(useGameStore.getInitialState());
   });
 
@@ -95,7 +97,8 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/Front contacts:\s*\d|thinly held:\s*\d|0\.75/);
   });
 
-  it('uses player-facing local-support headings without Phase E internals', () => {
+  it('localizes local-support labels without English order names in BCS mode', () => {
+    setLocale('bcs');
     const state = makeState({
       controlBySettlement: { 'op:tuzla:center': 'RBiH' },
       municipalitySupportOrders: {
@@ -109,10 +112,11 @@ describe('GUI audit label discipline', () => {
       },
     });
 
-    render(createElement(SituationTab, { state, focusSection: 'support' }));
+    const situation = render(createElement(SituationTab, { state, focusSection: 'support' }));
 
-    expect(screen.getByText('Local Support')).toBeTruthy();
+    expect(situation.container.textContent).not.toMatch(/Phase E|weapons shipment|staff priority|croatian support package|local support/i);
     expect(screen.queryByText(/Phase E/)).toBeNull();
+    cleanup();
 
     useGameStore.setState({
       loadedGameState: state,
@@ -128,9 +132,9 @@ describe('GUI audit label discipline', () => {
       },
     });
 
-    render(createElement(SelectionPanel));
+    const selection = render(createElement(SelectionPanel));
 
-    expect(screen.getAllByText('Local Support').length).toBeGreaterThan(0);
+    expect(selection.container.textContent).not.toMatch(/Phase E|weapons shipment|staff priority|croatian support package|local support/i);
     expect(screen.queryByText(/Phase E/)).toBeNull();
   });
 

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**LOCAL SUPPORT LABEL I18N (2026-06-20).** Local-support player surfaces must not trust sim-owned `MunicipalitySupportOrderView.label` as display copy. Do instead: render support order types through `src/ui/map/utils/municipalitySupportLabels.ts`; keep SelectionPanel free of `src/sim/combat` runtime imports and pin with `tests/ui_adapter_boundary.test.ts`.
+
 **SETTLEMENT TIMELINE SUPPLY I18N (2026-06-20).** Supply transition rows must not render hardcoded English or raw `adequate`/`strained`/`critical` state ids. Do instead: route `buildSettlementTimeline(...)` supply titles through `settlementTimeline.supply.*` i18n keys, use localized state-label keys, and keep BCS on the existing `Snabdijevanje` vocabulary because `tests/ui_i18n.test.ts` rejects the `opskr*` root.
 
 **OOB HQ RESERVE DRILLDOWN (2026-06-20).** OOB HQ reserve rows must not be built from corps-grouped formations after reserve ids are filtered out. Do instead: group `reserveByFaction` by HQ/corps id for HQ reserve cards, include `army_hq` in command-name lookup, and route HQ brigade label clicks with one Army HQ + formation selection update.

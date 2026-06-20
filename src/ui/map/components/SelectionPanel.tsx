@@ -4,12 +4,12 @@ import { SettlementDetailContent } from './SettlementDetailContent';
 import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useEffect, useState } from 'react';
-import { getMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../../../sim/combat/municipality_support.js';
 import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
+import { getLocalizedMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../utils/municipalitySupportLabels';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
@@ -68,7 +68,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
   const supportType = playerFaction ? getMunicipalitySupportTypeForFaction(playerFaction) : null;
-  const supportLabel = playerFaction ? getMunicipalitySupportLabel(playerFaction) : t('selection.localSupport');
+  const supportLabel = getLocalizedMunicipalitySupportLabel(supportType);
   const canStageSupport = Boolean(ipc.isAvailable && playerFaction && selectedMunId && supportType);
   const formationsForDetail = formations.map((f) => ({
     id: f.id,
@@ -290,7 +290,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
             <div className="text-xs text-text-secondary">
               {activeSupport
                 ? t('selection.localSupportTarget', {
-                  label: activeSupport.label,
+                  label: getLocalizedMunicipalitySupportLabel(activeSupport.type),
                   target: getPlayerSafeMunicipalityName(activeSupport.mun_id),
                 })
                 : t('selection.noLocalSupportStaged')}

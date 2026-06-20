@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-20] fix(ui): localize local-support labels
+
+**Type:** UI/read-model i18n and adapter-boundary polish.
+
+**Fix:** SelectionPanel and SituationTab now render municipality-support labels through localized UI message keys keyed by support order type, so BCS surfaces no longer show English labels such as `weapons shipment`. SelectionPanel also stopped importing the sim runtime support helper; staging type lookup now lives in the UI support-label utility.
+
+**Verification:** Red proof first failed on visible `Republic of Bosnia and Herzegovina weapons shipment staged`. Green proof passed: `npm.cmd exec -- vitest run tests/ui/gui_audit_label_discipline.test.ts tests/ui_i18n.test.ts tests/ui_adapter_boundary.test.ts --pool=forks --reporter=dot` (39/39); `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` (22 files / 212 tests); `npm.cmd run qa:live-surface:browser` (`live surface browser sweep ok`, temp evidence deleted). Report: `docs/40_reports/implemented/20260620_LOCAL_SUPPORT_LABEL_I18N.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-20] fix(ui): localize settlement timeline supply transitions
 
 **Type:** UI/read-model i18n copy polish.

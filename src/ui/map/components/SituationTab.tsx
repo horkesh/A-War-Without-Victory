@@ -19,8 +19,8 @@ import {
   getPlayerSafeEnclaveName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
-  getPlayerSafePoliticalFactionName,
 } from '../utils/playerSafeText';
+import { getLocalizedMunicipalitySupportLabel } from '../utils/municipalitySupportLabels';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { getOsidDisplayName, humanizeOsid } from '../utils/osidDisplayName';
 import {
@@ -198,7 +198,6 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   const sitrep = state.operationalSitrep;
   const ivpScore = computeIvpScore(state);
   const playerMilitaryLabel = playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : null;
-  const playerPoliticalLabel = playerFaction ? getPlayerSafePoliticalFactionName(playerFaction) : null;
   const activeMunicipalitySupport = playerFaction
     ? state.municipalitySupportOrders?.[playerFaction]
     : undefined;
@@ -445,7 +444,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn ? (
             <>
               <div className="text-text-secondary">
-                {activeMunicipalitySupport.label.replace(/\bRBiH\b/g, playerPoliticalLabel ?? 'friendly authorities')}
+                {getLocalizedMunicipalitySupportLabel(activeMunicipalitySupport.type)}
               </div>
               <div className="text-text-secondary">
                 {t('situation.targetMunicipality', { name: getPlayerSafeMunicipalityName(activeMunicipalitySupport.mun_id) })}
