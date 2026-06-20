@@ -126,6 +126,22 @@ const GRADE_FACTOR_LABELS: Record<string, string> = {
     momentum: 'Momentum',
 };
 
+const OFFICER_RANK_LABEL_KEYS: Record<string, MessageKey> = {
+    army_commander: 'personnel.rank.armyCommander',
+    corps_commander: 'personnel.rank.corpsCommander',
+    brigadier_general: 'personnel.rank.brigadierGeneral',
+    tactical_commander: 'personnel.rank.tacticalCommander',
+    general: 'personnel.rank.general',
+    colonel: 'personnel.rank.colonel',
+    major: 'personnel.rank.major',
+    deputy: 'personnel.rank.deputy',
+};
+
+function formatOfficerRank(rank: string | undefined): string {
+    if (!rank) return t('personnel.rank.unspecified');
+    return t(OFFICER_RANK_LABEL_KEYS[rank] ?? 'personnel.rank.unspecified');
+}
+
 function isUnsafeRawLabel(value: string | null | undefined): boolean {
     if (!value) return false;
     return /(?:^cmd_|_t\d+\b|[a-z]{2,}_[a-z0-9_]+|[:|])/.test(value);
@@ -172,7 +188,7 @@ function ReadinessBar({ label, value }: { label: string; value: number }) {
 
     return (
         <div className="flex items-center gap-3 font-mono">
-            <span className="text-text-secondary/60 w-12 shrink-0 text-[9px] uppercase tracking-tighter">{label}</span>
+            <span className="text-text-secondary/60 w-24 shrink-0 text-[9px] uppercase tracking-tighter">{label}</span>
             <div className="flex-1 h-1 bg-panel-card border border-panel-border/50">
                 <div className={`h-full ${colorClass}`} style={{ width: `${pct}%` }} />
             </div>
@@ -227,11 +243,11 @@ function BrigadeStatusRow({ brig }: { brig: FormationView }) {
             <span className={`flex-1 min-w-0 truncate font-bold uppercase tracking-tighter ${isDisrupted ? 'text-red-500' : 'text-text-secondary'}`}>
                 {getPlayerSafeBrigadeName(brig.name)}
             </span>
-            <span className={`w-12 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
-            <span className={`w-8 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
-            <span className={`w-8 text-right ${morColor}`}>{Math.round(morale)}</span>
-            {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-6 text-center">{t('operationsSection.disruptedShort')}</span>}
-            {!isDisrupted && <span className="w-6" />}
+            <span className={`w-20 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
+            <span className={`w-16 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
+            <span className={`w-14 text-right ${morColor}`}>{Math.round(morale)}</span>
+            {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-20 text-center">{t('operationsSection.disruptedShort')}</span>}
+            {!isDisrupted && <span className="w-20" />}
         </div>
     );
 }
@@ -254,12 +270,12 @@ function CasualtyBlock({ suffered, inflicted, label }: {
                 <div>
                     <span className="text-text-secondary/60 uppercase">{t('operationsSection.suffered')} </span>
                     <span className="text-red-500 font-bold">{totalSuffered.toLocaleString()}</span>
-                    <span className="text-text-secondary/40 ml-1">({suffered.killed} KIA / {suffered.wounded} WIA)</span>
+                    <span className="text-text-secondary/40 ml-1">({t('operationsSection.casualtyBreakdown', { killed: suffered.killed, wounded: suffered.wounded })})</span>
                 </div>
                 <div>
                     <span className="text-text-secondary/60 uppercase">{t('operationsSection.inflicted')} </span>
                     <span className="text-emerald-400 font-bold">{totalInflicted.toLocaleString()}</span>
-                    <span className="text-text-secondary/40 ml-1">({inflicted.killed} KIA / {inflicted.wounded} WIA)</span>
+                    <span className="text-text-secondary/40 ml-1">({t('operationsSection.casualtyBreakdown', { killed: inflicted.killed, wounded: inflicted.wounded })})</span>
                 </div>
             </div>
             <div className="text-[10px] font-mono">
@@ -348,7 +364,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex items-center gap-2">
                             <span className="text-[10px] text-text-secondary/60 uppercase">{t('operationsSection.operationCommander')}</span>
                             <span className="text-[12px] font-bold text-text-primary uppercase tracking-wider">{cmdOfficer.name}</span>
-                            <span className="text-[9px] text-text-secondary/40 uppercase">{cmdOfficer.rank}</span>
+                            <span className="text-[9px] text-text-secondary/40 uppercase">{formatOfficerRank(cmdOfficer.rank)}</span>
                         </div>
                         <div className="text-[9px] text-accent-gold/80 uppercase tracking-wider font-bold">
                             {getCommanderPersonality(cmdOfficer)}
@@ -478,10 +494,10 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     {/* Column headers */}
                     <div className="flex items-center gap-2 px-2 text-[8px] text-text-secondary/40 uppercase tracking-widest font-bold border-l-2 border-transparent">
                         <span className="flex-1 min-w-0">{t('operationsSection.unit')}</span>
-                        <span className="w-12 text-right">{t('operationsSection.persShort')}</span>
-                        <span className="w-8 text-right">{t('operationsSection.cohShort')}</span>
-                        <span className="w-8 text-right">{t('operationsSection.morShort')}</span>
-                        <span className="w-6 text-center">{t('operationsSection.stsShort')}</span>
+                        <span className="w-20 text-right">{t('operationsSection.persShort')}</span>
+                        <span className="w-16 text-right">{t('operationsSection.cohShort')}</span>
+                        <span className="w-14 text-right">{t('operationsSection.morShort')}</span>
+                        <span className="w-20 text-center">{t('operationsSection.stsShort')}</span>
                     </div>
                     <div className="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-panel-border space-y-0">
                         {brigadeIds.map((id) => {

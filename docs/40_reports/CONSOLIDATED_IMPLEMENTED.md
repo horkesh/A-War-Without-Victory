@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army ops command-label copy polish:** [implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md](implemented/20260620_ARMY_OPS_COMMAND_LABEL_COPY_POLISH.md) - Army HQ expanded Operations detail now spells out commander stats, readiness, ORBAT, casualty, rank, and AAR labels instead of compact staff shorthand.
+
 **Latest active operation / combat summary copy polish:** [implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md](implemented/20260620_ACTIVE_OP_AND_COMBAT_SUMMARY_COPY_POLISH.md) - Active Operation History, shared combat summaries, and settlement timeline casualty rows now spell out objective, attack, role, record, brigade, and arc copy instead of compact combat shorthand.
 
 **Latest ops BrigadeCard i18n polish:** [implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md](implemented/20260620_OPS_BRIGADE_CARD_I18N_POLISH.md) - Ops modal BrigadeCard and BrigadeTray copy now routes through EN/BCS i18n for unit type, tooltip labels, march time, assembly timing, assigned counts, and empty states.

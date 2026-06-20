@@ -185,6 +185,112 @@ describe('Army HQ timing copy', () => {
     expect(weeklyCopy).not.toMatch(/supply_crisis/i);
   });
 
+  it('renders expanded operation command details without compact staff shorthand', () => {
+    storeState.osidDisplayNames = { 'op:ridge:ridge_1': 'Ridge One' };
+    const gameState = makeGameState({
+      namedOfficerData: [{
+        id: 'op_commander',
+        name: 'Commander One',
+        faction: 'RBiH',
+        rank: 'corps_commander',
+        competence: 0.82,
+        aggressiveness: 0.61,
+        defensive_skill: 0.65,
+        political_reliability: 0.5,
+        origin: 'historical',
+        status: 'active',
+        assigned_corps_id: 'arbih_3rd_corps',
+        acting_commander: false,
+        turns_in_command: 4,
+        battles: 3,
+        victories: 2,
+        operations_commanded: 2,
+      }],
+      formations: [{
+        id: 'bde_1',
+        faction: 'RBiH',
+        name: '1st Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 65,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        morale: 70,
+        disrupted_turns: 1,
+      }],
+      operationHistory: [{
+        ...makeGameState().operationHistory![0],
+        objectives_targeted: ['op:ridge:ridge_1'],
+        objectives_captured: ['op:ridge:ridge_1'],
+        casualties_suffered: { killed: 3, wounded: 8 },
+        casualties_inflicted: { killed: 4, wounded: 9 },
+      }],
+    });
+
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [
+        makeOperation({
+          commander_officer_id: 'op_commander',
+          objectives: ['op:ridge:ridge_1'],
+          current_objective_index: 0,
+          participating_brigade_count: 1,
+          participating_brigade_ids: ['bde_1'],
+          axes: [{
+            axis_id: 'axis_north',
+            name: 'Northern axis',
+            assigned_brigades: ['bde_1'],
+            objectives: ['op:ridge:ridge_1'],
+            current_objective_index: 0,
+            status: 'executing',
+            momentum: 1.2,
+          }],
+        }),
+        makeOperation({
+          name: 'operation_planning',
+          display_name: 'Planning Operation',
+          phase: 'planning',
+          preparation_sub_phase: 'intel_gathering',
+          readiness: { intel: 0.75, supply: 0.65, cohesion: 0.55 },
+        }),
+      ],
+      gameState,
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Planning Operation/i }));
+    let copy = document.body.textContent ?? '';
+    expect(copy).toContain('Intelligence');
+    expect(copy).toContain('Supply');
+    expect(copy).toContain('Cohesion');
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+    copy = document.body.textContent ?? '';
+    expect(copy).toContain('Operation commander:');
+    expect(copy).toContain('Corps commander');
+    expect(copy).toContain('Competence');
+    expect(copy).toContain('Aggression');
+    expect(copy).toContain('Defense');
+    expect(copy).toContain('Operations');
+    expect(copy).toContain('2 wins');
+    expect(copy).toContain('Primary objective');
+    expect(copy).toContain('Objective');
+    expect(copy).toContain('Momentum');
+    expect(copy).toContain('Personnel');
+    expect(copy).toContain('Morale');
+    expect(copy).toContain('Status');
+    expect(copy).toContain('Disrupted');
+    expect(copy).toContain('3 killed / 8 wounded');
+    expect(copy).toContain('4 killed / 9 wounded');
+    expect(copy).toContain('4 turns / 2 attacks');
+    expect(copy).toContain('1 / 1 held at close');
+    expect(copy).not.toContain('corps_commander');
+    expect(copy).not.toMatch(/\bCOMP\b|\bAGGR\b|\bDEF\b|\bOPS\b|\bINTEL\b|\bCOHESN\b|\bPRIMARY OBJ\b|\bOBJ\b|\bMOM\b|\bPERS\b|\bCOH\b|\bMOR\b|\bSTS\b|\bCMDR\b|\bKIA\b|\bWIA\b|\b2W\b/);
+  });
+
   it('renders planning preparation timing and delays as player-facing copy', () => {
     render(React.createElement(OperationsSection, {
       corpsId: 'arbih_3rd_corps',
