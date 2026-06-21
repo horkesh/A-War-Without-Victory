@@ -74,6 +74,13 @@ function categoryLabel(category: PreAdvanceCommandReviewItem['category']): strin
   return t('decisionRoom.category.memory');
 }
 
+function severityLabel(severity: PreAdvanceCommandReviewItem['severity']): string {
+  if (severity === 'blocking') return t('warroom.severity.blocking');
+  if (severity === 'critical') return t('warroom.severity.critical');
+  if (severity === 'warning') return t('warroom.severity.warning');
+  return t('warroom.severity.info');
+}
+
 function MetricCell({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) {
   return (
     <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
@@ -105,7 +112,7 @@ function ReviewItemRow({
               {categoryLabel(item.category)}
             </span>
             <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
-              {item.severity}
+              {severityLabel(item.severity)}
             </span>
           </div>
           <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{item.title}</div>
@@ -144,7 +151,7 @@ function BlockerRow({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1">
             <span className="border border-red-500/45 bg-red-950/45 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-red-300">
-              Required
+              {t('advanceTurn.required')}
             </span>
             <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
               {blocker.typeLabel}
@@ -399,7 +406,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
           {blockers.length > 0 && (
             <section className="space-y-1.5">
               <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-red-300">
-                Resolve before advancing
+                {t('advanceTurn.resolveBeforeAdvancing')}
               </div>
               {blockers.map((blocker) => (
                 <BlockerRow

@@ -248,6 +248,43 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(bcsMessages).toContain("'warroom.severity.warning': 'Upozorenje'");
   });
 
+  it('Advance Clearance modal localizes review severity and blocker chrome in BCS mode', () => {
+    setLocale('bcs');
+    setLoadedState(makeState({
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 1,
+        eventDecisionCount: 1,
+        commandInterpretationCount: 0,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+      pendingEventDecisions: [
+        {
+          event_id: 'evt_identity',
+          event_title: 'Identity question',
+          faction: 'RS',
+          turn_fired: 40,
+          response_options: [{ id: 'answer', label: 'Answer', effects: [] }],
+        },
+      ],
+      pendingParamilitaryRequests: [
+        { faction: 'RS', target_osid: 'bratunac_1', strength: 120, estimated_civilian_risk: 14 },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true, osidDisplayNames: { bratunac_1: 'Bratunac' } });
+
+    const { container } = render(createElement(AdvanceTurnModal, { onResolveBlocker: vi.fn() }));
+    const copy = container.textContent ?? '';
+
+    expect(screen.getByText('Riješi prije nastavka')).toBeTruthy();
+    expect(screen.getAllByText('Obavezno').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Blokira').length).toBeGreaterThan(0);
+    expect(copy).not.toContain('Resolve before advancing');
+    expect(copy).not.toContain('Required');
+    expect(copy).not.toContain('blocking');
+  });
+
   it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
     setLocale('bcs');
     setLoadedState(makeState({

@@ -104,4 +104,28 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     expect(screen.queryByTestId('decision-room-priority-card-manifest:peace_plan')).toBeNull();
     expect(screen.getByRole('button', { name: 'Hide Advanced' })).toBeTruthy();
   });
+
+  it('localizes priority-card severity badges in BCS mode', async () => {
+    setLocale('bcs');
+    useGameStore.setState({
+      loadedGameState: makeState({
+        pendingParamilitaryRequests: [
+          {
+            faction: 'RBiH',
+            mode: 'offensive',
+            strength: 80,
+            target_osid: 'op:test:alpha',
+            estimated_civilian_risk: 12,
+          },
+        ],
+      }),
+      osidDisplayNames: null,
+    });
+
+    render(createElement(PresidentialDecisionRoomPanel));
+
+    const card = await screen.findByTestId('decision-room-priority-card-paramilitary:pending');
+    expect(card.textContent).toContain('Blokira');
+    expect(card.textContent).not.toMatch(/\bblocking\b/i);
+  });
 });
