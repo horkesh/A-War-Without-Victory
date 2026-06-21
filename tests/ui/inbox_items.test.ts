@@ -481,6 +481,36 @@ describe('deriveInboxItems — officer events', () => {
         const officerItems = items.filter(i => i.type === 'officer_event');
         expect(officerItems[0].title).toBe('Personnel Matter');
     });
+
+    it('routes command interpretation officer events to Decision Room command review', () => {
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingOfficerEvents: [
+                {
+                    event_id: 'off_command_1',
+                    type: 'order_refused',
+                    faction: 'RBiH',
+                    turn: 5,
+                    officer_id: 'halilovic',
+                    officer_name: 'Sefer Halilovic',
+                    officer_competence: 0.6,
+                    officer_aggressiveness: 0.7,
+                    officer_defensive_skill: 0.5,
+                    acknowledged: false,
+                    reason: 'Refuses the directive as infeasible.',
+                },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+        const officerItems = items.filter(i => i.type === 'officer_event');
+
+        expect(officerItems).toHaveLength(1);
+        expect(officerItems[0]).toMatchObject({
+            action: 'decision_room',
+            title: 'Command Interpretation',
+        });
+    });
 });
 
 // ---------------------------------------------------------------------------

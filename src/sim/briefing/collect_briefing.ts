@@ -393,7 +393,13 @@ registerBriefingCollector('command', (state, faction) => {
         const factionEvents = (pending as PendingOfficerEvent[]).filter(e => e.faction === faction && !e.acknowledged);
 
         // Phase 3 interpretation events (order deviations)
-        const INTERP_TYPES = new Set<OfficerEventType>(['order_modified', 'order_pushback', 'order_refused']);
+        const INTERP_TYPES = new Set<OfficerEventType>([
+            'order_modified',
+            'order_pushback',
+            'order_refused',
+            'order_exceeded',
+            'army_directive_pushback',
+        ]);
         const interpEvents = factionEvents.filter(e => INTERP_TYPES.has(e.type));
         if (interpEvents.length > 0) {
             const hasRefusal = interpEvents.some(e => e.type === 'order_refused');

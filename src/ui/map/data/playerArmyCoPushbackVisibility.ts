@@ -4,7 +4,8 @@
  * UI-2 Decision Room Pushback Explanations (Batch 41). Reads the already-
  * derived pushback signals that the adapter exposes on `LoadedGameState`
  * (`pendingOfficerEvents` of type order_pushback / order_refused /
- * order_modified plus the optional `armyCoDecisionTraces` pass-through)
+ * order_modified / order_exceeded / army_directive_pushback plus the optional
+ * `armyCoDecisionTraces` pass-through)
  * and condenses them into a compact projection the Decision Room can
  * surface without inventing new simulation authority.
  *
@@ -48,6 +49,7 @@ type LooseLGS = LoadedGameState & {
     armyCoDecisionTraces?: Record<string, TraceLike[]>;
     military?: { army_co_decision_traces?: Record<string, TraceLike[]> };
 };
+type PendingOfficerEventType = NonNullable<LoadedGameState['pendingOfficerEvents']>[number]['type'];
 
 function strictCompare(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
@@ -81,6 +83,14 @@ function readPlayerTraces(state: LooseLGS, playerFaction: string): TraceLike[] {
     return Array.isArray(arr) ? arr : [];
 }
 
+function isCommandPushbackEvent(type: PendingOfficerEventType): boolean {
+    return type === 'order_refused'
+        || type === 'order_pushback'
+        || type === 'order_modified'
+        || type === 'order_exceeded'
+        || type === 'army_directive_pushback';
+}
+
 export function buildPlayerArmyCoPushbackVisibility(
     state: LoadedGameState | null,
 ): PlayerArmyCoPushbackView | null {
@@ -106,14 +116,14 @@ export function buildPlayerArmyCoPushbackVisibility(
         if (ev.type === 'order_refused') {
             refusedCount++;
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
-        } else if (ev.type === 'order_pushback') {
+        } else if (ev.type === 'order_pushback' || ev.type === 'army_directive_pushback') {
             pushbackCount++;
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
-        } else if (ev.type === 'order_modified') {
+        } else if (ev.type === 'order_modified' || ev.type === 'order_exceeded') {
             modifiedCount++;
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
         }
-        if ((ev.type === 'order_refused' || ev.type === 'order_pushback' || ev.type === 'order_modified') && ev.reason) {
+        if (isCommandPushbackEvent(ev.type) && ev.reason) {
             if (reasons.length < 3) reasons.push(ev.reason);
         }
     }

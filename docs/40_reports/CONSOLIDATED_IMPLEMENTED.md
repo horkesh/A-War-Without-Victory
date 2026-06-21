@@ -2,6 +2,10 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command pushback Decision Room routing:** [implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md](implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md) - officer command-pushback and Army directive objections now open the Decision Room command lens first, preserve Army HQ Briefing as source handoff, and no longer route through generic Personnel Inbox actions.
+
+**Latest reserve command-review routing:** [implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md](implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md) - Army Reserve requests now enter the Decision Room command lens only when staff has named a concrete brigade to release; no-brigade reserve requests remain in the Army Reserve staff-selection flow.
+
 **Latest live Inbox Decision Room routing proof:** [implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md](implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md) - live-surface QA now loads a deterministic operation-opportunity fixture and hard-proves Presidential Inbox, Desk operation-opportunity, and Record command-category routes reach the Decision Room; campaign-cost cards now open the Cost lens first while preserving Army HQ Records as source handoff.
 
 **Latest live foundational archive proof:** [implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md](implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md) - first-hour browser QA now hard-proves RBiH/RS/HRHB foundational decision receipts in Records and Chronicle, and live-surface QA hard-fails Records-to-Chronicle archive routing instead of accepting skip evidence.

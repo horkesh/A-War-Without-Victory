@@ -78,10 +78,17 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
         const card = view.cards.find((c) => c.id === 'pushback:player-army-co');
         expect(card).toBeDefined();
         expect(card!.severity).toBe('blocking');
-        expect(card!.category).toBe('decision');
+        expect(card).toMatchObject({
+            category: 'command',
+            navigationTarget: {
+                kind: 'decision-room',
+                lens: 'command',
+                cardId: 'pushback:player-army-co',
+            },
+            sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+        });
         const joined = [card!.explanation, ...card!.evidence].join(' ');
         expect(/refused|infeasible|garrison/i.test(joined)).toBe(true);
-        expect(card!.navigationTarget.kind).toBe('army-hq-tab');
     });
 
     it('emits a warning pushback card when player has order_pushback / order_modified events', () => {
@@ -108,7 +115,15 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
         const card = view.cards.find((c) => c.id === 'pushback:player-army-co');
         expect(card).toBeDefined();
         expect(card!.severity === 'critical' || card!.severity === 'warning').toBe(true);
-        expect(card!.category).toBe('decision');
+        expect(card).toMatchObject({
+            category: 'command',
+            navigationTarget: {
+                kind: 'decision-room',
+                lens: 'command',
+                cardId: 'pushback:player-army-co',
+            },
+            sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+        });
         const joined = [card!.explanation, ...card!.evidence].join(' ');
         expect(/push.*back|rifle/i.test(joined)).toBe(true);
     });

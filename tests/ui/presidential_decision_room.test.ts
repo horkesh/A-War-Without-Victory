@@ -1302,11 +1302,28 @@ describe('buildPresidentialDecisionRoomView', () => {
           phase: 'execution',
         },
       ] as LoadedGameState['operations'],
+      pendingOfficerEvents: [
+        {
+          event_id: 'pushback_1',
+          type: 'order_refused',
+          faction: 'RBiH',
+          turn: 24,
+          officer_id: 'arbih_co',
+          officer_name: 'Serving CO',
+          officer_competence: 0.6,
+          officer_aggressiveness: 0.5,
+          officer_defensive_skill: 0.5,
+          corps_name: '3rd Corps',
+          acknowledged: false,
+          reason: 'Refuses the directive as infeasible.',
+        },
+      ] as LoadedGameState['pendingOfficerEvents'],
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
     const stopOp = view.cards.find((c) => c.id === 'command:stop-op:arbih_3rd_corps:operation_breakthrough');
     const replaceCo = view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_corps');
+    const pushback = view.cards.find((c) => c.id === 'pushback:player-army-co');
 
     expect(stopOp?.navigationTarget).toEqual({
       kind: 'decision-room',
@@ -1323,6 +1340,17 @@ describe('buildPresidentialDecisionRoomView', () => {
       cardId: 'command:replace-co:arbih_3rd_corps',
     });
     expect(replaceCo?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'personnel' });
+    expect(pushback?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    });
+    expect(pushback?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'briefing' });
+    expect(view.advanceReadiness.items.find((item) => item.id === 'pushback:player-army-co')?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    });
   });
 
   it('omits a replace-co card when the corps CO is only an acting commander', () => {
@@ -1390,16 +1418,23 @@ describe('buildPresidentialDecisionRoomView', () => {
     const alpha = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_alpha');
     const beta = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_beta');
 
-    expect(alpha?.category).toBe('command');
+    expect(alpha).toMatchObject({
+      category: 'command',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'command',
+        cardId: 'command:elite-deploy:reserve_alpha',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    });
     expect(alpha?.directive).toEqual({
       lever: 'elite_deploy',
       corpsId: 'arbih_3rd_corps',
       cost: 25,
       payload: { requestId: 'reserve_alpha', brigadeId: 'elite_guards' },
     });
-    // A request with no suggested brigade still scans but carries no inline directive.
-    expect(beta).toBeDefined();
-    expect(beta?.directive).toBeUndefined();
+    // A request with no suggested brigade remains a staff-selection matter in Army Reserve.
+    expect(beta).toBeUndefined();
     // Enemy-faction reserve requests never surface to the player.
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });

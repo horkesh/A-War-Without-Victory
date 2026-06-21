@@ -87,6 +87,14 @@ function estimateInternationalStandingImpact(count: number): number {
 
 type OfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
 
+function isCommandInterpretationOfficerEvent(type: OfficerEvent['type']): boolean {
+    return type === 'order_modified'
+        || type === 'order_pushback'
+        || type === 'order_refused'
+        || type === 'order_exceeded'
+        || type === 'army_directive_pushback';
+}
+
 function officerEventDedupeKey(evt: OfficerEvent): string {
     const subjectKey =
         normalizeDedupeSubject(evt.officer_id)
@@ -291,15 +299,20 @@ export function deriveInboxItems(
         for (const [key, events] of officerGroups) {
             const evt = events[0];
             if (!evt) continue;
+            const commandInterpretation = events.some((event) => isCommandInterpretationOfficerEvent(event.type));
             items.push({
                 id: `officer:${key}`,
                 type: 'officer_event',
                 severity: 'normal',
-                title: evt.type === 'replacement_suggested' ? 'Commander Replacement' : 'Personnel Matter',
+                title: commandInterpretation
+                    ? 'Command Interpretation'
+                    : evt.type === 'replacement_suggested'
+                        ? 'Commander Replacement'
+                        : 'Personnel Matter',
                 subtitle: evt.officer_name ? `Regarding ${evt.officer_name}.` : 'A personnel decision requires attention.',
                 updateCount: events.length,
                 sourceIds: events.map(event => event.event_id),
-                action: officerSurface.inboxAction,
+                action: commandInterpretation ? 'decision_room' : officerSurface.inboxAction,
                 priority: 50,
             });
         }

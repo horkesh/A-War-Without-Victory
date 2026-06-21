@@ -1285,10 +1285,19 @@ export interface LoadedGameState {
             osids_captured: number;
         }>;
     }>;
-    /** Pending officer personnel events (new arrivals, suggested replacements, Phase 3 interpretation events). */
+    /** Pending officer personnel and command-interpretation events. */
     pendingOfficerEvents?: Array<{
         event_id: string;
-        type: 'officer_available' | 'replacement_suggested' | 'order_modified' | 'order_pushback' | 'order_refused' | 'officer_relieved';
+        type:
+            | 'officer_available'
+            | 'replacement_suggested'
+            | 'order_modified'
+            | 'order_pushback'
+            | 'order_refused'
+            | 'officer_relieved'
+            | 'order_exceeded'
+            | 'army_directive_pushback'
+            | 'army_co_proposes_op';
         faction: string;
         turn: number;
         officer_id: string;
