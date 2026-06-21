@@ -55,9 +55,45 @@ const TRAIT_BAND_KEYS: Record<OperationOpportunityProposalView['force_quality_tr
     poor: 'opportunity.trait.poor',
 };
 
+const OFFICER_RANK_KEYS: Partial<Record<string, MessageKey>> = {
+    army_commander: 'officer.rank.armyCommander',
+    corps_commander: 'officer.rank.corpsCommander',
+    deputy: 'officer.rank.deputy',
+    major_general: 'officer.rank.majorGeneral',
+};
+
 function knownLabel<T extends string>(value: T, map: Partial<Record<T, MessageKey>>, fallbackKey: MessageKey): string {
     const key = map[value];
     return key ? t(key) : t(fallbackKey);
+}
+
+function formatOfficerRank(rank: string | undefined): string {
+    if (!rank) return '';
+    const key = OFFICER_RANK_KEYS[rank];
+    return key ? t(key) : rank.replace(/[_\s]+/g, ' ').trim();
+}
+
+function joinNames(items: string[]): string {
+    if (items.length <= 1) return items[0] ?? '';
+    return `${items.slice(0, -1).join(', ')} ${items[items.length - 1]}`;
+}
+
+function formatBackTheOfficerFraming(view: BackTheOfficerView): string {
+    const commander = view.commander?.name ?? t('opportunity.backTheOfficer.fieldCommander');
+    const identity = view.tg_name ?? view.op_name;
+    if (view.donors.length === 0) {
+        return t('opportunity.backTheOfficer.framingOwnCorps', { commander, identity });
+    }
+    const donors = joinNames(view.donors.map((donor) => donor.corps_name));
+    if (view.total_personnel_lent > 0) {
+        return t('opportunity.backTheOfficer.framingDonorsWithPersonnel', {
+            commander,
+            identity,
+            count: view.total_personnel_lent,
+            donors,
+        });
+    }
+    return t('opportunity.backTheOfficer.framingDonors', { commander, identity, donors });
 }
 
 function recommendationLabel(recommendation: string): string {
@@ -189,21 +225,26 @@ function DossierCard({
                     </div>
                     {backTheOfficer.commander && (
                         <div className="text-[10px] font-bold text-text-primary">
-                            {backTheOfficer.commander.rank
-                                ? `${backTheOfficer.commander.rank.replace(/[_\s]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())} `
-                                : ''}
+                            {(() => {
+                                const rank = formatOfficerRank(backTheOfficer.commander?.rank);
+                                return rank ? `${rank} ` : '';
+                            })()}
                             {backTheOfficer.commander.name}
-                            {backTheOfficer.tg_name ? ` — ${backTheOfficer.tg_name}` : ''}
+                            {backTheOfficer.tg_name ? ` - ${backTheOfficer.tg_name}` : ''}
                         </div>
                     )}
-                    <div className="text-[10px] leading-relaxed text-text-secondary">{backTheOfficer.framing}</div>
+                    <div className="text-[10px] leading-relaxed text-text-secondary">
+                        {formatBackTheOfficerFraming(backTheOfficer)}
+                    </div>
                     {backTheOfficer.donors.length > 0 && (
                         <div className="flex flex-wrap gap-1">
                             {backTheOfficer.donors.map((donor) => (
                                 <span
                                     key={`${proposal.proposal_id}:donor:${donor.corps_id}`}
                                     className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-text-tertiary"
-                                    title={donor.personnel_lent > 0 ? `${donor.personnel_lent.toLocaleString('en-US')} men lent` : undefined}
+                                    title={donor.personnel_lent > 0
+                                        ? t('opportunity.backTheOfficer.donorPersonnelLent', { count: donor.personnel_lent })
+                                        : undefined}
                                 >
                                     {donor.corps_name}
                                     {donor.personnel_lent > 0 ? ` (${donor.personnel_lent.toLocaleString('en-US')})` : ''}

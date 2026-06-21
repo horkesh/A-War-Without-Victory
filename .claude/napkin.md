@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**COMPACT COPY BOUNDARIES INCLUDE ARIA/TITLE/FALLBACK/LEGACY MODALS (2026-06-21).** Localizing the main panel body can still leave English in tooltip fallback rows, accessible count labels, title attributes, and DOM-string Warroom modals. Do instead: check fallback branches, `aria-label`, `title`, and legacy `innerHTML` renderers; render structured UI sentences from fields rather than echoing English read-model prose.
+
 **LIVE CONTEXT-MENU PROOF TARGETS (2026-06-21).** Anchored map radial menus can have a zero-sized root even when action buttons are visible, and headless Chromium may not deliver MapLibre contextmenu events. Do instead: wait for visible `[data-testid^="map-context-menu-action-"]`, record whether activation was native/contextmenu/dev-seam, and keep any proof seam gated by `import.meta.env.DEV`.
 
 **TACTICAL BATTLE-MARKER LIVE PROOF (2026-06-21).** Battle/AAR fixture rows can render through map overlays while static tests only prove source wiring. Do instead: expose deterministic tactical-map probe attributes such as `data-battle-marker-count` and sorted OSIDs, then hard-fail live browser sweeps on absent expected fixture OSIDs.

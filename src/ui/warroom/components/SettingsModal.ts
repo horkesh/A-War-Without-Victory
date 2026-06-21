@@ -1,5 +1,6 @@
 import { getPlayerFaction } from './warroom_utils.js';
 import { factionHex } from '../../shared/factionPalette.js';
+import { t } from '../../map/i18n/index.js';
 
 export class SettingsModal {
     private gameState: any;
@@ -24,42 +25,42 @@ export class SettingsModal {
         const accentColor = factionHex(factionId);
 
         container.innerHTML = `
-            <h2><span class="wr-text-primary">SYSTEM SETTINGS</span></h2>
+            <h2><span class="wr-text-primary">${t('warroom.settings.title')}</span></h2>
             <div class="wr-dialog-body" style="text-align: left;">
                 <div style="margin-bottom: 20px;">
-                    <h3 style="color: ${accentColor}; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 15px;">AUDIO</h3>
+                    <h3 style="color: ${accentColor}; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 15px;">${t('warroom.settings.audio')}</h3>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span>Master Volume</span>
+                        <span>${t('warroom.settings.masterVolume')}</span>
                         <input type="range" min="0" max="100" value="70" class="wr-range" onchange="console.log('Master volume changed:', this.value)">
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span>Music</span>
+                        <span>${t('warroom.settings.music')}</span>
                         <input type="range" min="0" max="100" value="50" class="wr-range" onchange="console.log('Music volume changed:', this.value)">
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Radio Ambience</span>
+                        <span>${t('warroom.settings.radioAmbience')}</span>
                         <input type="range" min="0" max="100" value="80" class="wr-range" onchange="console.log('Radio volume changed:', this.value)">
                     </div>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h3 style="color: ${accentColor}; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 15px;">VIDEO / UX</h3>
+                    <h3 style="color: ${accentColor}; font-size: 14px; border-bottom: 1px solid #444; padding-bottom: 5px; margin-bottom: 15px;">${t('warroom.settings.videoUx')}</h3>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span>CRT Scanline Effect</span>
+                        <span>${t('warroom.settings.crtScanline')}</span>
                         <label class="wr-switch">
                             <input type="checkbox" checked onchange="console.log('CRT effect toggled:', this.checked)">
                             <span class="wr-slider"></span>
                         </label>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span>High Contrast Mode</span>
+                        <span>${t('warroom.settings.highContrast')}</span>
                         <label class="wr-switch">
                             <input type="checkbox" onchange="console.log('High contrast toggled:', this.checked)">
                             <span class="wr-slider"></span>
                         </label>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Auto-Advance Dialogue</span>
+                        <span>${t('warroom.settings.autoAdvanceDialogue')}</span>
                         <label class="wr-switch">
                             <input type="checkbox" onchange="console.log('Auto-advance toggled:', this.checked)">
                             <span class="wr-slider"></span>
@@ -68,7 +69,7 @@ export class SettingsModal {
                 </div>
 
                 <div style="text-align: center; margin-top: 30px;">
-                    <button class="wr-btn" onclick="this.closest('.wr-dialog').parentElement.querySelector('.modal-close').click()">APPLY & CLOSE</button>
+                    <button class="wr-btn" onclick="this.closest('.wr-dialog').parentElement.querySelector('.modal-close').click()">${t('warroom.settings.applyClose')}</button>
                 </div>
             </div>
             
