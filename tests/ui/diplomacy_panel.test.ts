@@ -239,11 +239,13 @@ describe('DiplomacyPanel', () => {
         expect(panelText).toContain('Srbija');
         expect(panelText).toContain('Vidljivost opsade Sarajeva');
         expect(panelText).toContain('Humanitarni pritisak oko enklava');
+        expect(panelText).toContain('Međunarodne sankcije');
         expect(panelText).toContain('Daytonski pregovarački meni');
         expect(panelText).not.toContain('Serbia');
         expect(panelText).not.toContain('Sarajevo siege visibility');
         expect(panelText).not.toContain('Enclave humanitarian pressure');
         expect(panelText).not.toContain('Belgrade Border Pressure');
+        expect(panelText).not.toContain('International sanctions');
     });
 
     it('omits the gauge when no patron-confidence or defiance data is present', () => {

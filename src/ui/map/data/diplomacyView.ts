@@ -315,6 +315,7 @@ function buildNegotiationTimeline(
     const consequenceEntries: DiplomacyTimelineEntryView[] = activeConsequences.map((item) => ({
         id: `consequence:${item.id}`,
         label: item.label,
+        labelToken: item.labelToken,
         detail: 'Active international-pressure consequence.',
         detailToken: { key: 'diplomacy.timeline.consequenceDetail' },
         turn: undefined,

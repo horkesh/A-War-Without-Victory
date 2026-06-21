@@ -120,6 +120,9 @@ describe('buildDiplomacyView', () => {
         ]);
         expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('Vance-Owen Peace Plan');
         expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('International sanctions');
+        expect(view.negotiationTimeline.find((entry) => entry.id === 'consequence:international_sanctions')?.labelToken).toEqual({
+            key: 'diplomacy.consequence.internationalSanctions',
+        });
         expect(view.needleHints.map((hint) => hint.label)).toContain('Ease Serbia constraint');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
         expect(view.needleHints.find((hint) => hint.id === 'patron-constraint:RS')?.labelToken).toMatchObject({
