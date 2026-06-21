@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] test(ui): harden foundational receipt and archive browser proofs
+
+**Type:** Browser QA hardening.
+
+**Fix:** `qa:first-hour:browser` now verifies Records and Chronicle receipts for all three foundational opening decisions (RBiH, RS, HRHB), with per-faction receipt evidence. `qa:live-surface:browser` no longer accepts `skipped:no-chronicle-target` for Records-to-Chronicle routing; missing route targets now hard-fail with screenshot evidence.
+
+**Verification:** Red proof `node node_modules\vitest\vitest.mjs run tests\ui\first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` failed on missing generalized receipt proof and the live skip string. Green proof passed 6/6 after the fix. `npm.cmd run qa:first-hour:browser` passed and confirmed RBiH/RS/HRHB Records + Chronicle receipts. `npm.cmd run qa:live-surface:browser` passed and confirmed Chronicle-to-Records plus Records-to-Chronicle hard archive proofs; temp evidence directories were inspected and removed. Report: `docs/40_reports/implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md`.
+
+**Scope/determinism:** Browser QA/test/docs only; no event content, simulation logic, scenario data, startup save, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] docs: align active process docs with panel sign-off and packaging pause
 
 **Type:** Documentation/process cleanup.

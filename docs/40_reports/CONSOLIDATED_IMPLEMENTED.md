@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest live foundational archive proof:** [implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md](implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md) - first-hour browser QA now hard-proves RBiH/RS/HRHB foundational decision receipts in Records and Chronicle, and live-surface QA hard-fails Records-to-Chronicle archive routing instead of accepting skip evidence.
+
 **Latest live AAR browser fixture proof:** [implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md](implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md) - live browser QA now loads a deterministic in-memory AAR battle fixture after first-hour/archive/Codex checks and hard-fails if Records AAR formation-link drilldown does not render and route correctly.
 
 **Latest polish residuals: turn-0 / Records / Army Reserve / command surface:** [implemented/20260621_POLISH_RESIDUALS_TURN0_RECORDS_ARMY_RESERVE_COMMAND_SURFACE.md](implemented/20260621_POLISH_RESIDUALS_TURN0_RECORDS_ARMY_RESERVE_COMMAND_SURFACE.md) - Turn Aftermath notable flips now obey the shared turn-0 territory guard, Records severity copy localizes, Army Reserve brigade click-throughs preserve Army HQ context, Codex/Warroom command-surface chrome is localized, and the live raw-token guard catches `STRAIN-SHAPED` globally plus command-strain/order-interpretation English fallback strings in BCS/BS mode.

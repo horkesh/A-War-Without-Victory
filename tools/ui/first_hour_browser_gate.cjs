@@ -41,7 +41,7 @@ const FACTION_OPENING_FLOWS = [
     eventId: 'rs_strategic_goals',
     decisionTitle: 'The Assembly Speaks',
     responseLabel: 'Adopt all six goals',
-    receiptCheck: false,
+    receiptCheck: true,
   },
   {
     faction: 'HRHB',
@@ -49,7 +49,7 @@ const FACTION_OPENING_FLOWS = [
     eventId: 'hrhb_political_goal',
     decisionTitle: 'What Is Herceg-Bosna?',
     responseLabel: 'Croat republic',
-    receiptCheck: false,
+    receiptCheck: true,
   },
 ];
 
@@ -600,7 +600,7 @@ async function runFoundationalFlow(page, summary, flow) {
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_decision_receipt`);
 }
 
-async function verifyRbihRecordsAndChronicle(page, summary) {
+async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await clickSelector(page, '[data-testid="desk-close-overlay"]', 'Desk close');
   await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
   await page.keyboard.press('h');
@@ -611,29 +611,38 @@ async function verifyRbihRecordsAndChronicle(page, summary) {
   await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
   await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
   await waitForVisibleText(page, 'Decision Consequences');
-  await waitForVisibleText(page, 'What Is Bosnia?');
+  await waitForVisibleText(page, flow.decisionTitle);
   await waitForVisibleText(page, 'Decision recorded');
   await waitForVisibleText(page, 'Filed to Chronicle');
+  summary.evidence.receiptChecksByFaction ??= {};
+  summary.evidence.receiptChecksByFaction[flow.faction] = {
+    eventId: flow.eventId,
+    decisionTitle: flow.decisionTitle,
+    responseLabel: flow.responseLabel,
+    records: true,
+    chronicle: false,
+  };
   summary.evidence.recordsReceiptAppears = true;
   summary.evidence.rawFirstHourLabelsAbsent = true;
-  await captureEvidence(page, summary, 'records_decision_receipt');
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_records_decision_receipt`);
   const recordsText = await visibleSurfaceText(page, [
     'Decision Consequences',
-    'What Is Bosnia?',
-    'Civic multi-ethnic republic',
+    flow.decisionTitle,
+    flow.responseLabel,
   ]);
   assertRawLabelsAbsent('Army HQ Records', recordsText);
 
   await clickFirstMatchingText(page, ['Open Chronicle', 'CHRONICLE', 'Chronicle']);
   await waitForVisibleText(page, 'War Chronicle');
-  await waitForVisibleText(page, 'What Is Bosnia?');
+  await waitForVisibleText(page, flow.decisionTitle);
   const chronicleText = await visibleSurfaceText(page, [
     'War Chronicle',
-    'What Is Bosnia?',
+    flow.decisionTitle,
   ]);
   assertRawLabelsAbsent('Chronicle', chronicleText);
   summary.evidence.chronicleReceiptAppears = true;
-  await captureEvidence(page, summary, 'chronicle_decision_receipt');
+  summary.evidence.receiptChecksByFaction[flow.faction].chronicle = true;
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_chronicle_decision_receipt`);
 }
 
 async function run() {
@@ -682,7 +691,7 @@ async function run() {
       for (const flow of FACTION_OPENING_FLOWS) {
         await runFoundationalFlow(page, summary, flow);
         if (flow.receiptCheck) {
-          await verifyRbihRecordsAndChronicle(page, summary);
+          await verifyDecisionRecordsAndChronicle(page, summary, flow);
         }
       }
 

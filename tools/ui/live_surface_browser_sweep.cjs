@@ -1133,7 +1133,8 @@ async function runArchiveInboxDrilldown(page, summary) {
     await captureEvidence(page, summary, 'archive_records_decision_to_chronicle');
     summary.evidence.archiveRecordsDecisionToChronicleDrilldown = true;
   } else {
-    summary.evidence.archiveRecordsDecisionToChronicleDrilldown = 'skipped:no-chronicle-target';
+    await captureEvidence(page, summary, 'archive_records_decision_missing_chronicle_target');
+    throw new Error('Records decision archive did not expose a Chronicle route target');
   }
 
   await resetToWarMap(page);

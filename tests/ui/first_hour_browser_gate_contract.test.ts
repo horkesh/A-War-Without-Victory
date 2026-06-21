@@ -41,6 +41,10 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('hrhb_political_goal');
     expect(tool).toContain('The Assembly Speaks');
     expect(tool).toContain('What Is Herceg-Bosna?');
+    expect(tool).toContain('verifyDecisionRecordsAndChronicle(page, summary, flow)');
+    expect(tool).toContain('receiptChecksByFaction');
+    expect(tool).not.toContain('receiptCheck: false');
+    expect(tool).not.toContain('verifyRbihRecordsAndChronicle');
   });
 });
 
@@ -118,6 +122,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("chronicleRecordTarget === 'decision'");
     expect(tool).toContain('records-content');
     expect(tool).toContain('decision-consequence-open-chronicle');
+    expect(tool).not.toContain('skipped:no-chronicle-target');
     expect(tool).toContain('presidential-inbox');
     expect(tool).toContain('president-desk-shell');
     expect(tool).toContain('desk-action-records');
