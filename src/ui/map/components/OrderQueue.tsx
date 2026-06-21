@@ -50,7 +50,7 @@ function orderTargetLabel(
 ): string {
   if (order.type === 'posture') return postureTargetLabel(order.postureName);
   if (order.type === 'sector') {
-    const label = getPlayerFacingSectorName(order.targetOsid, sectors, t('orderQueue.target.assignedSector'));
+    const label = getPlayerFacingSectorName(order.targetSectorId ?? order.targetOsid, sectors, t('orderQueue.target.assignedSector'));
     return isUnsafeRawLabel(label) ? t('orderQueue.target.assignedSector') : label;
   }
   if (order.targetOsid) {

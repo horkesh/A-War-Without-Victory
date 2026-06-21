@@ -221,6 +221,43 @@ describe('Formation Detail parity display', () => {
     expect(assignBrigadeToSector).not.toHaveBeenCalled();
   });
 
+  it('presents a player override sector as the active assignment instead of the stale roster sector', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? { ...formation, sectorOverrideId: 'sector_south' }
+      : formation);
+    useGameStore.setState({ loadedGameState: state });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const overviewCopy = view.container.textContent ?? '';
+    expect(overviewCopy).toContain('Southern line');
+    expect(overviewCopy).not.toContain('Northern lineOverride');
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const southButton = screen.getByRole('button', { name: /Southern line/i });
+    const northButton = screen.getByRole('button', { name: /Northern line/i });
+
+    expect(southButton.textContent ?? '').toContain('Override');
+    expect(southButton.textContent ?? '').not.toContain('Current');
+    expect(northButton.textContent ?? '').not.toContain('Current');
+  });
+
+  it('does not badge a stale missing override as the active sector assignment', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? { ...formation, sectorOverrideId: 'sector_missing' }
+      : formation);
+    useGameStore.setState({ loadedGameState: state });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const overviewCopy = view.container.textContent ?? '';
+    expect(overviewCopy).toContain('Northern line');
+    expect(overviewCopy).not.toContain('Northern lineOverride');
+  });
+
   it('uses the actual HQ parent name for army-HQ assigned brigades', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_hq_guard_brigade' });
 

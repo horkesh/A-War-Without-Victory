@@ -117,7 +117,7 @@ export async function stageAssignBrigadeToSectorAction(
         setLoadError(result.error ?? 'Sector assignment failed.');
         return;
     }
-    addStagedOrder({ type: 'sector', formationId: brigadeId, targetOsid: sectorId });
+    addStagedOrder({ type: 'sector', formationId: brigadeId, targetSectorId: sectorId });
 }
 
 /**
@@ -136,6 +136,6 @@ export async function assignBrigadeToSectorOverrideAction(
         return;
     }
     if (sectorId) {
-        addStagedOrder({ type: 'sector', formationId: brigadeId, targetOsid: sectorId });
+        addStagedOrder({ type: 'sector', formationId: brigadeId, targetSectorId: sectorId });
     }
 }

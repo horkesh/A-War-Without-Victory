@@ -46,6 +46,7 @@ export interface StagedOrder {
   type: 'attack' | 'posture' | 'sector';
   formationId: string;
   targetOsid?: string;
+  targetSectorId?: string;
   postureName?: string;
 }
 

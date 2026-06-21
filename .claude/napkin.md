@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**SECTOR OVERRIDE FEEDBACK SEMANTICS (2026-06-21).** Brigade-to-sector commands are persistent sector overrides, not OSID movement orders. Do instead: use `StagedOrder.targetSectorId` for sector assignments, keep `targetOsid` for settlement/attack targets, resolve Order Queue labels through sector metadata, prefer `formation.sectorOverrideId` over stale automatic sector roster membership in Formation Detail, and render map feedback by deterministically resolving the sector to a friendly sector OSID.
+
 **OPERATIONAL SITREP COPY-TOKEN BOUNDARY (2026-06-21).** `toOperationalSitrepView` feeds multiple UI surfaces and may keep English fallback strings for compatibility. Do instead: attach `OperationalSitrepCopyToken` to generated headlines, alerts, and corps-operation summaries; render through `localizedOperationalSitrepCopy(...)`; use `paramKeys` for localized operation type/phase labels; keep Situation front/thin/alliance bands behind `situation.*Band.*` keys.
 
 **DIPLOMACY PANEL COPY-TOKEN BOUNDARY (2026-06-21).** Patron Relations/Diplomacy Panel rows are generated read-model copy even when they carry English fallback strings. Do instead: preserve fallback strings for compatibility, add `LocalizedCopyToken` metadata in `buildDiplomacyView`, render via `t(...)`, use `paramKeys` when token params are localized labels, and map qualitative support/constraint/commitment/isolation/pressure bands through `diplomacy.band.*` keys instead of `titleCase(...)`.
