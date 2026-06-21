@@ -703,7 +703,7 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
 
   cards.push({
     id: 'pushback:player-army-co',
-    category: 'decision',
+    category: 'command',
     severity: cardSeverity,
     title: view.headline,
     explanation: view.rationale,
@@ -711,7 +711,12 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
     sourceLabel: t('decisionRoom.panel.title'),
     actionLabel: t('decisionRoom.action.reviewPushback'),
     evidence: view.evidence,
-    navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    navigationTarget: {
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    },
+    sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
     urgencySort: cardSeverity === 'blocking' ? 0 : 5,
     sourceSort: 'pushback:player-army-co',
   });
@@ -1426,6 +1431,7 @@ function buildAdvanceReadiness(
     (card.category === 'decision'
       || card.category === 'counter_offer'
       || card.category === 'opportunity'
+      || card.category === 'command'
       || card.category === 'operational'
       || card.category === 'turn')
     && card.severity !== 'info',

@@ -2807,7 +2807,7 @@ function derivePendingOfficerEvents(
             const stats = getOfficerStats(e.officer_id);
             return {
                 event_id: String(e.event_id),
-                type: e.type as 'officer_available' | 'replacement_suggested' | 'order_modified' | 'order_pushback' | 'order_refused' | 'officer_relieved',
+                type: e.type as NonNullable<LoadedGameState['pendingOfficerEvents']>[number]['type'],
                 faction: String(e.faction),
                 turn: Number(e.turn),
                 officer_id: String(e.officer_id),
@@ -3068,7 +3068,11 @@ function derivePresidentialReviewQueue({
 }): LoadedGameState['presidentialReviewQueue'] {
     const eventDecisionCount = pendingEventDecisions?.length ?? 0;
     const commandInterpretationCount = (pendingOfficerEvents ?? []).filter((event) =>
-        event.type === 'order_modified' || event.type === 'order_pushback' || event.type === 'order_refused',
+        event.type === 'order_modified'
+        || event.type === 'order_pushback'
+        || event.type === 'order_refused'
+        || event.type === 'order_exceeded'
+        || event.type === 'army_directive_pushback',
     ).length;
     const personnelDirectiveCount = (pendingOfficerEvents ?? []).filter((event) =>
         event.type === 'officer_available' || event.type === 'replacement_suggested' || event.type === 'officer_relieved',

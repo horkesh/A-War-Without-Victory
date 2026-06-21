@@ -1302,11 +1302,28 @@ describe('buildPresidentialDecisionRoomView', () => {
           phase: 'execution',
         },
       ] as LoadedGameState['operations'],
+      pendingOfficerEvents: [
+        {
+          event_id: 'pushback_1',
+          type: 'order_refused',
+          faction: 'RBiH',
+          turn: 24,
+          officer_id: 'arbih_co',
+          officer_name: 'Serving CO',
+          officer_competence: 0.6,
+          officer_aggressiveness: 0.5,
+          officer_defensive_skill: 0.5,
+          corps_name: '3rd Corps',
+          acknowledged: false,
+          reason: 'Refuses the directive as infeasible.',
+        },
+      ] as LoadedGameState['pendingOfficerEvents'],
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
     const stopOp = view.cards.find((c) => c.id === 'command:stop-op:arbih_3rd_corps:operation_breakthrough');
     const replaceCo = view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_corps');
+    const pushback = view.cards.find((c) => c.id === 'pushback:player-army-co');
 
     expect(stopOp?.navigationTarget).toEqual({
       kind: 'decision-room',
@@ -1323,6 +1340,17 @@ describe('buildPresidentialDecisionRoomView', () => {
       cardId: 'command:replace-co:arbih_3rd_corps',
     });
     expect(replaceCo?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'personnel' });
+    expect(pushback?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    });
+    expect(pushback?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'briefing' });
+    expect(view.advanceReadiness.items.find((item) => item.id === 'pushback:player-army-co')?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    });
   });
 
   it('omits a replace-co card when the corps CO is only an acting commander', () => {

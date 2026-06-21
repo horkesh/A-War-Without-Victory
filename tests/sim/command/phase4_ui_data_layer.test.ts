@@ -153,6 +153,48 @@ describe('derivePendingOfficerEvents', () => {
         expect(evt.override_action).toBeUndefined();
     });
 
+    it('maps army_directive_pushback as a command interpretation event', () => {
+        const raw = makeRawState({
+            meta: { turn: 10, phase: 'war', player_faction: 'RBiH' },
+            military: {
+                formations: {
+                    arbih_army_hq: { faction: 'RBiH', kind: 'army_hq', name: 'ARBiH Army HQ', status: 'active' },
+                },
+                named_officer_data: [
+                    { id: 'army_co', name: 'Army CO', faction: 'RBiH', rank: 'army_commander',
+                      competence: 4, aggressiveness: 3, defensive_skill: 4, political_reliability: 3 },
+                ],
+                named_officers: {
+                    army_co: { status: 'active', assigned_corps_id: null, acting_commander: false,
+                               turns_in_command: 3, battles: 0, victories: 0 },
+                },
+                brigade_movement_state: {},
+                pending_officer_events: [
+                    {
+                        event_id: 'army-directive-1',
+                        type: 'army_directive_pushback',
+                        faction: 'RBiH',
+                        turn: 10,
+                        officer_id: 'army_co',
+                        acknowledged: false,
+                        reason: 'Army command pushes back on the political directive.',
+                        overridable: true,
+                    },
+                ],
+            },
+        });
+
+        const parsed = parseGameState(raw);
+
+        expect(parsed.pendingOfficerEvents?.[0]?.type).toBe('army_directive_pushback');
+        expect(parsed.presidentialReviewQueue).toMatchObject({
+            pendingCount: 1,
+            criticalCount: 0,
+            commandInterpretationCount: 1,
+            personnelDirectiveCount: 0,
+        });
+    });
+
     it('filters pending officer events to the player faction when present', () => {
         const raw = makeRawState({
             meta: { turn: 10, phase: 'war', player_faction: 'RS' },
