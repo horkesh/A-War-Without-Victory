@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**WAR MAP CHROME LABEL BOUNDARY (2026-06-21).** War Map mode/layer registries own stable ids, hotkeys, and state keys; rendered labels are UI copy. Do instead: keep `MAP_MODES[*].id`/`key` and layer `key`/`setKey` unchanged, add typed `labelKey` metadata, and render through `t(...)` in `BottomStatusStrip` / `MapModeLegend`; queue radial/context and OpsMap legend copy as separate slices.
+
 **SUPPLY VISIBILITY COPY BOUNDARY (2026-06-21).** `buildPlayerSupplyVisibility` is a player-facing read-model projection, even though its counts are engine-derived. Do instead: route supply headlines/evidence through `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count`; do not interpolate English `adequate / strained / critical`, `open / brittle / cut`, or brigade isolation prose.
 
 **DECISION ROOM PRIMARY ROUTE OWNERSHIP (2026-06-21).** Decision Room command, operational, and turn-review cards can cite Army HQ or Records, but their primary review action belongs to the Decision Room. Do instead: normalize those cards in `finalizeCards` to `decision-room` lens/card targets, keep the previous Army HQ/Records target as `sourceHandoffTarget`, and propagate that handoff through pre-advance review.

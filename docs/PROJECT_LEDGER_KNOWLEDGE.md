@@ -1,3 +1,7 @@
+## 2026-06-21 - War Map chrome localization boundary
+
+**War Map display registries should carry ids and label keys separately:** map modes and layer toggles use stable ids/keys for behavior and hotkeys, while rendered labels are UI copy. Durable rule: keep `MAP_MODES[*].id`, numeric `key`, and layer `key`/`setKey` behavior stable; add typed `labelKey` values and render through `t(...)` in `BottomStatusStrip` and `MapModeLegend`. Applied in `[2026-06-21] War Map Chrome I18n Boundary`; report `docs/40_reports/implemented/20260621_WAR_MAP_CHROME_I18N.md`. Remaining adjacent chrome residuals are `MapContainer` radial/context labels and the compact `OpsMap` plan legend.
+
 ## 2026-06-21 - Supply visibility generated copy boundary
 
 **Supply visibility is a player read-model, not English prose:** `buildPlayerSupplyVisibility` preserves player-faction-safe supply counts, but its headline/evidence rows are rendered in normal Decision Room surfaces. Durable rule: keep generated supply headlines/evidence behind `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count` labels instead of interpolating English `adequate / strained / critical` or corridor copy. Applied in `[2026-06-21] Supply Visibility I18n Boundary`; report `docs/40_reports/implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md`.

@@ -120,6 +120,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
   const [moreExpanded, setMoreExpanded] = useState(false);
   const [layersOpen, setLayersOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const activeSecondaryMode = secondaryModes.find(m => m.id === mapMode);
 
   // R8: Close +MORE when clicking outside
   useEffect(() => {
@@ -167,7 +168,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
 
       {/* 1. Map mode pills (primary) + R8: inline secondary expansion */}
       <div className="flex items-center gap-0.5 shrink-0" ref={moreRef}>
-        {primaryModes.map(({ id, label }) => {
+        {primaryModes.map(({ id, labelKey }) => {
           const active = mapMode === id;
           return (
             <button
@@ -179,7 +180,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
               }`}
             >
-              {label}
+              {t(labelKey)}
             </button>
           );
         })}
@@ -194,11 +195,11 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
               : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
           }`}
         >
-          {moreExpanded ? t('statusStrip.less') : secondaryModes.find(m => m.id === mapMode)?.label ?? t('statusStrip.more')}
+          {moreExpanded ? t('statusStrip.less') : activeSecondaryMode ? t(activeSecondaryMode.labelKey) : t('statusStrip.more')}
         </button>
 
         {/* R8: Secondary modes — persistent inline extension */}
-        {moreExpanded && secondaryModes.map(({ id, label, key }) => (
+        {moreExpanded && secondaryModes.map(({ id, labelKey, key }) => (
           <button
             key={id}
             type="button"
@@ -208,9 +209,9 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
                 ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
             }`}
-            title={`${key}: ${label}`}
+            title={`${key}: ${t(labelKey)}`}
           >
-            {label}
+            {t(labelKey)}
           </button>
         ))}
       </div>
@@ -351,19 +352,19 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             className="absolute bottom-full right-0 mb-1 bg-[#0c0c18]/95 backdrop-blur-md border border-white/10 rounded-md shadow-xl overflow-hidden min-w-[120px]"
             style={{ zIndex: Z.SHELL_FLOATING }}
           >
-            {LAYER_TOGGLES.map(({ key, label }) => {
-              const t = toggles[key];
+            {LAYER_TOGGLES.map(({ key, labelKey }) => {
+              const toggle = toggles[key];
               return (
                 <button
                   key={key}
                   type="button"
-                  onClick={() => t.set(!t.value)}
+                  onClick={() => toggle.set(!toggle.value)}
                   className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                    t.value ? 'text-text-primary' : 'text-text-secondary/50'
+                    toggle.value ? 'text-text-primary' : 'text-text-secondary/50'
                   } hover:bg-white/5`}
                 >
-                  <span className={`w-2 h-2 rounded-sm ${t.value ? 'bg-interactive' : 'bg-white/10 border border-white/20'}`} />
-                  {label}
+                  <span className={`w-2 h-2 rounded-sm ${toggle.value ? 'bg-interactive' : 'bg-white/10 border border-white/20'}`} />
+                  {t(labelKey)}
                 </button>
               );
             })}

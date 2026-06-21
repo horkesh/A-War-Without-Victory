@@ -5,6 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { BottomStatusStrip } from '../../src/ui/map/components/BottomStatusStrip.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -37,6 +38,7 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
 describe('BottomStatusStrip labels', () => {
   afterEach(() => {
     cleanup();
+    setLocale('en', undefined);
     useGameStore.setState({
       loadedGameState: null,
       mapMode: 'political',
@@ -56,6 +58,27 @@ describe('BottomStatusStrip labels', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Defense' }));
 
     expect(screen.getAllByRole('button', { name: 'Defense' })).toHaveLength(1);
+  });
+
+  it('renders map mode and layer chrome through the active locale', () => {
+    setLocale('bcs', undefined);
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      mapMode: 'defense',
+      devMode: true,
+    });
+
+    render(createElement(BottomStatusStrip));
+
+    expect(screen.getByRole('button', { name: 'Politički' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Odbrana' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Defense' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'SLOJEVI' }));
+
+    expect(screen.getByRole('button', { name: 'Frontovi' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Jedinice' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Units' })).toBeNull();
   });
 
   it('shows both Bosniak-Croat alliance and Zagreb patron pressure for HRHB', () => {

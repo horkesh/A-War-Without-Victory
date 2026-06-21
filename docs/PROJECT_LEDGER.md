@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize War Map chrome labels
+
+**Type:** UI/i18n copy polish.
+
+**Fix:** War Map mode pills, layer toggles, and map-mode legend titles/stops now render through EN/BCS keys. `MAP_MODES` and layer toggle registries carry typed display keys while preserving existing ids, hotkeys, and layer-state semantics.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/bottom_status_strip_labels.test.ts tests/ui/supply_legend_overlap_contract.test.ts tests/ui/map_modes_no_duplicate_labels.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` failed on English-rendered mode/legend labels and missing `labelKey` registry metadata. Green proof passed 25/25 after the fix. Adjacent registry proof `npm.cmd exec -- vitest run tests/ui_map_modes.test.ts tests/ui/map_mode_shortcut_contract.test.ts tests/ui/bottom_status_strip_labels.test.ts tests/ui/supply_legend_overlap_contract.test.ts tests/ui/map_modes_no_duplicate_labels.test.ts --pool=forks --reporter=dot` passed 17/17. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 239/239. `npm.cmd run qa:live-surface:browser` passed; temporary `.tmp_live_surface_browser_sweep` evidence was inspected and removed. `git diff --check` passed. Report: `docs/40_reports/implemented/20260621_WAR_MAP_CHROME_I18N.md`.
+
+**Scope/determinism:** UI/i18n/test/docs polish only; no simulation logic, scenario data, map-mode ids, numeric hotkeys, layer-state keys, route commands, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize supply visibility read-model copy
 
 **Type:** UI/read-model i18n copy polish.
