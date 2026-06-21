@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize supply visibility read-model copy
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** `buildPlayerSupplyVisibility` now projects generated supply headlines and evidence through EN/BCS keys, reusing the existing supply state/corridor count vocabulary. The player-faction-safe counts, severity, and enemy-supply isolation contract are unchanged.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui_player_supply_visibility.test.ts --pool=forks --reporter=dot` failed on BCS supply headlines/evidence still rendering English. Green proof `npm.cmd exec -- vitest run tests/ui_player_supply_visibility.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 36/36 after the fix. `npm.cmd run qa:player-journeys` passed 239/239. `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, route commands, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): keep Decision Room-owned cards in Decision Room
 
 **Type:** UI/read-model route ownership polish.

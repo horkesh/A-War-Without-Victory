@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest supply visibility i18n boundary:** [implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md](implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md) - Player-scoped supply visibility headlines and evidence now render through EN/BCS keys instead of English read-model strings.
+
 **Latest Decision Room route owner handoff:** [implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md](implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md) - Presidential Decision Room command/operational/turn cards now keep primary actions inside their Decision Room lens/card while preserving Army HQ or Records as source handoff evidence.
 
 **Latest BCS generated Inbox items:** [implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md](implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md) - Generated Presidential Inbox decision/situation rows now localize Dayton, convoy, reserve, territory gain/loss, and date-marker copy through EN/BCS keys.

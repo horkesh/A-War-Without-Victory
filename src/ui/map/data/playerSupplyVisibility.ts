@@ -19,6 +19,7 @@
  * faction rows in `supplySummaryByFaction` are never read.
  */
 import type { LoadedGameState } from './types.js';
+import { t } from '../i18n/index.js';
 
 export type PlayerSupplySeverity = 'critical' | 'warning' | 'info' | 'unknown';
 
@@ -69,41 +70,69 @@ function deriveSeverity(args: {
 
 function buildHeadline(view: Omit<PlayerSupplyVisibilityView, 'headline' | 'evidence'>): string {
     if (!view.hasSupplyData) {
-        return 'Supply status unavailable.';
+        return t('decisionRoom.card.supply.title.unavailable');
     }
     if (view.severity === 'critical') {
         if (view.isolatedFormationCount > 0) {
-            const plural = view.isolatedFormationCount === 1 ? 'brigade' : 'brigades';
-            return `${view.isolatedFormationCount} ${plural} cut off from supply.`;
+            return t('decisionRoom.card.supply.title.isolatedBrigades', {
+                count: view.isolatedFormationCount,
+                brigadeLabel: t(view.isolatedFormationCount === 1
+                    ? 'decisionRoom.card.supply.unit.brigadeSingular'
+                    : 'decisionRoom.card.supply.unit.brigadePlural'),
+            });
         }
         if (view.criticalCount > 0) {
-            return `${view.criticalCount} controlled settlement${view.criticalCount === 1 ? '' : 's'} at critical supply.`;
+            return t('decisionRoom.card.supply.title.criticalSettlements', {
+                count: view.criticalCount,
+                settlementLabel: t(view.criticalCount === 1
+                    ? 'decisionRoom.card.supply.unit.settlementSingular'
+                    : 'decisionRoom.card.supply.unit.settlementPlural'),
+            });
         }
-        return 'Supply lines critically exposed.';
+        return t('decisionRoom.card.supply.title.criticalLines');
     }
     if (view.severity === 'warning') {
         const atRisk = view.corridorBrittleCount + view.corridorCutCount;
-        return `${atRisk} supply corridor${atRisk === 1 ? '' : 's'} at risk.`;
+        return t('decisionRoom.card.supply.title.corridorsAtRisk', {
+            count: atRisk,
+            corridorLabel: t(atRisk === 1
+                ? 'decisionRoom.card.supply.unit.corridorSingular'
+                : 'decisionRoom.card.supply.unit.corridorPlural'),
+        });
     }
-    return 'Supply lines holding.';
+    return t('decisionRoom.card.supply.title.holding');
 }
 
 function buildEvidence(view: Omit<PlayerSupplyVisibilityView, 'headline' | 'evidence'>): string[] {
     if (!view.hasSupplyData) {
-        return ['No supply derivation reported for this turn.'];
+        return [t('decisionRoom.card.supply.evidence.noData')];
     }
     const evidence: string[] = [];
     evidence.push(
-        `${view.adequateCount} adequate / ${view.strainedCount} strained / ${view.criticalCount} critical`,
+        t('decisionRoom.card.supply.evidence.stateMix', {
+            adequate: t('supply.stateAdequateCount', { count: view.adequateCount }),
+            strained: t('supply.stateStrainedCount', { count: view.strainedCount }),
+            critical: t('supply.stateCriticalCount', { count: view.criticalCount }),
+        }),
     );
+    const corridorTotal = view.corridorOpenCount + view.corridorBrittleCount + view.corridorCutCount;
     evidence.push(
-        `${view.corridorOpenCount} open / ${view.corridorBrittleCount} brittle / ${view.corridorCutCount} cut corridor${
-            view.corridorOpenCount + view.corridorBrittleCount + view.corridorCutCount === 1 ? '' : 's'
-        }`,
+        t('decisionRoom.card.supply.evidence.corridorMix', {
+            open: t('supply.corridorOpenCount', { count: view.corridorOpenCount }),
+            brittle: t('supply.corridorStrainedCount', { count: view.corridorBrittleCount }),
+            cut: t('supply.corridorCutCount', { count: view.corridorCutCount }),
+            corridorLabel: t(corridorTotal === 1
+                ? 'decisionRoom.card.supply.unit.corridorSingular'
+                : 'decisionRoom.card.supply.unit.corridorPlural'),
+        }),
     );
     if (view.isolatedFormationCount > 0) {
-        const plural = view.isolatedFormationCount === 1 ? 'brigade' : 'brigades';
-        evidence.push(`${view.isolatedFormationCount} ${plural} isolated at critical-supply settlements`);
+        evidence.push(t('decisionRoom.card.supply.evidence.isolatedBrigades', {
+            count: view.isolatedFormationCount,
+            brigadeLabel: t(view.isolatedFormationCount === 1
+                ? 'decisionRoom.card.supply.unit.brigadeSingular'
+                : 'decisionRoom.card.supply.unit.brigadePlural'),
+        }));
     }
     return evidence;
 }

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**SUPPLY VISIBILITY COPY BOUNDARY (2026-06-21).** `buildPlayerSupplyVisibility` is a player-facing read-model projection, even though its counts are engine-derived. Do instead: route supply headlines/evidence through `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count`; do not interpolate English `adequate / strained / critical`, `open / brittle / cut`, or brigade isolation prose.
+
 **DECISION ROOM PRIMARY ROUTE OWNERSHIP (2026-06-21).** Decision Room command, operational, and turn-review cards can cite Army HQ or Records, but their primary review action belongs to the Decision Room. Do instead: normalize those cards in `finalizeCards` to `decision-room` lens/card targets, keep the previous Army HQ/Records target as `sourceHandoffTarget`, and propagate that handoff through pre-advance review.
 
 **GENERATED INBOX ITEM COPY BOUNDARY (2026-06-21).** Dayton, convoy, reserve, territory gain/loss, and date-marker Inbox rows are generated in `deriveInboxItems`, but still player copy. Do instead: route generated Inbox titles/subtitles through `inbox.item.*` i18n keys and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values.

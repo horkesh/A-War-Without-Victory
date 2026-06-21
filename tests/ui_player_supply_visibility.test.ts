@@ -7,8 +7,9 @@
  * player-faction-scoped view consumed by the presidential Decision Room
  * and operational sitrep surfaces. It MUST NOT leak enemy supply truth.
  */
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildPlayerSupplyVisibility } from '../src/ui/map/data/playerSupplyVisibility.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
 import type { LoadedGameState, FormationView } from '../src/ui/map/data/types.js';
 
 function emptyState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
@@ -54,6 +55,10 @@ function brigade(id: string, faction: string, locationOsid: string): FormationVi
 }
 
 describe('buildPlayerSupplyVisibility', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('returns null when no player faction is loaded', () => {
     const state = emptyState({ player_faction: null });
     expect(buildPlayerSupplyVisibility(state)).toBeNull();
@@ -267,5 +272,67 @@ describe('buildPlayerSupplyVisibility', () => {
       supplySummaryByFaction: summary,
     }))!;
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+
+  it('localizes BCS critical supply headlines and evidence', () => {
+    setLocale('bcs');
+    const state = emptyState({
+      player_faction: 'RBiH',
+      formations: [
+        brigade('arbih_a', 'RBiH', 'op:bi:bihac_1'),
+        brigade('arbih_b', 'RBiH', 'op:bi:bihac_1'),
+      ],
+      supplyStateByOsid: {
+        'op:bi:bihac_1': 'critical',
+      },
+      supplySummaryByFaction: {
+        RBiH: {
+          adequate_count: 0,
+          strained_count: 1,
+          critical_count: 1,
+          corridor_open_count: 0,
+          corridor_brittle_count: 1,
+          corridor_cut_count: 1,
+        },
+      },
+    });
+
+    const view = buildPlayerSupplyVisibility(state)!;
+    const text = [view.headline, ...view.evidence].join(' ');
+
+    expect(view.headline).toContain('2 brigade');
+    expect(text).toContain('napregnuto');
+    expect(text).toContain('kritično');
+    expect(text).toContain('presječeno');
+    expect(text).not.toMatch(/\bSupply\b|adequate|strained|critical|open|brittle|cut corridor|brigades cut off/i);
+  });
+
+  it('localizes BCS corridor warning copy', () => {
+    setLocale('bcs');
+    const state = emptyState({
+      player_faction: 'RBiH',
+      supplyStateByOsid: {
+        'op:sa:sarajevo_1': 'adequate',
+      },
+      supplySummaryByFaction: {
+        RBiH: {
+          adequate_count: 3,
+          strained_count: 0,
+          critical_count: 0,
+          corridor_open_count: 2,
+          corridor_brittle_count: 1,
+          corridor_cut_count: 0,
+        },
+      },
+    });
+
+    const view = buildPlayerSupplyVisibility(state)!;
+    const text = [view.headline, ...view.evidence].join(' ');
+
+    expect(view.severity).toBe('warning');
+    expect(text).toContain('koridor');
+    expect(text).toContain('otvoreno');
+    expect(text).toContain('napregnuto');
+    expect(text).not.toMatch(/\bSupply\b|adequate|strained|critical|open|brittle|cut corridor|corridors at risk/i);
   });
 });
