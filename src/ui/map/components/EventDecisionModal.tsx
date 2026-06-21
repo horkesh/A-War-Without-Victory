@@ -585,6 +585,9 @@ function ResponseButton({
         <div className="rounded border border-panel-border bg-panel-card/90 p-3">
             <button
                 type="button"
+                data-testid="event-decision-response"
+                data-event-id={decision.event_id}
+                data-response-id={option.id}
                 onClick={onChoose}
                 className="w-full text-left rounded border border-panel-border
                            bg-panel-bg px-4 py-2.5 font-sans text-[13px] font-semibold text-text-primary

@@ -25,10 +25,17 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('deskBlockedWhileDecisionActive');
     expect(tool).toContain('Decision consequence records');
     expect(tool).toContain('War Chronicle');
-    expect(tool).toContain('rawFirstHourLabelsAbsent');
+    expect(tool).toContain('rawFirstHourLabelsAbsentByFaction');
+    expect(tool).toContain('serverPortCleanupVerified');
     expect(tool).toContain('rbih_state_identity');
     expect(tool).toContain('turn_fired');
     expect(tool).toContain('response_id');
+    expect(tool).toContain("responseId: 'civic'");
+    expect(tool).toContain("responseId: 'all_six'");
+    expect(tool).toContain("responseId: 'croat_republic'");
+    expect(tool).toContain('data-testid="event-decision-response"');
+    expect(tool).toContain('data-event-id="${flow.eventId}"');
+    expect(tool).toContain('data-response-id="${flow.responseId}"');
     expect(tool).toContain('FACTION_OPENING_FLOWS');
     expect(tool).toContain("faction: 'RBiH'");
     expect(tool).toContain("faction: 'RS'");
@@ -110,6 +117,9 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("rs_1st_birac");
     expect(tool).toContain('loadRecordsAarLiveProofFixture');
     expect(tool).toContain('handleManualSaveLoad');
+    expect(tool).toContain('fixtureBattleSelector');
+    expect(tool).toContain('fixtureAttackerLinkSelector');
+    expect(tool).toContain('clickedFormationId');
     expect(tool).not.toContain('skipped:no-visible-aar-battle-row');
     expect(tool).not.toContain('skipped:no-visible-aar-formation-link');
     expect(tool.indexOf('await runArchiveInboxDrilldown(page, summary);')).toBeLessThan(
@@ -240,6 +250,9 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-testid="decision-consequence-record"');
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-record-target={record.recordTarget}');
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-testid="decision-consequence-open-chronicle"');
+    expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-testid="event-decision-response"');
+    expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-event-id={decision.event_id}');
+    expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-response-id={option.id}');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-testid="opportunity-ledger-record"');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-proposal-id={record.proposal_id}');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-status={record.status}');

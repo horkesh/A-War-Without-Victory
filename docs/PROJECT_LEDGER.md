@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] test(ui): harden browser proof selectors and evidence
+
+**Type:** Browser-QA harness and proof-hook hardening.
+
+**Fix:** Foundational event response buttons now expose stable event/response metadata for browser proof, so the first-hour gate resolves opening decisions by `data-event-id` and `data-response-id` instead of localized prose. First-hour evidence now records raw-label absence by faction and surface and writes success artifacts after dev-server cleanup. Live-surface selector helpers now scan visible/enabled matches instead of trusting the first DOM match, and Records AAR live proof targets the injected fixture OSID and attacker formation exactly.
+
+**Verification:** `node --check tools\ui\first_hour_browser_gate.cjs; node --check tools\ui\live_surface_browser_sweep.cjs` passed. `npx.cmd vitest run tests\ui\first_hour_browser_gate_contract.test.ts --reporter=dot` passed 6/6. `npm.cmd run qa:first-hour:browser` passed and evidence showed all three response ids, per-faction Records/Chronicle raw-label checks, and `serverPortCleanupVerified`. `npm.cmd run qa:live-surface:browser` passed and evidence showed exact AAR fixture proof, battle-marker proof, operation-opportunity routing/ledger proof, and `serverPortCleanupVerified`. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 245/245. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk-size warnings. Report: `docs/40_reports/implemented/20260621_BROWSER_PROOF_SELECTOR_HARDENING.md`.
+
+**Scope/determinism:** Browser harness, UI proof attributes, tests, and docs only; no simulation logic, scenario data, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): add local playtest evidence export and harden browser proofs
 
 **Type:** UI/read-model diagnostics, i18n polish, browser-QA hardening.

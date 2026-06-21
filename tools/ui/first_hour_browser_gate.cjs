@@ -33,6 +33,7 @@ const FACTION_OPENING_FLOWS = [
     eventId: 'rbih_state_identity',
     decisionTitle: 'What Is Bosnia?',
     responseLabel: 'Civic multi-ethnic republic',
+    responseId: 'civic',
     receiptCheck: true,
   },
   {
@@ -41,6 +42,7 @@ const FACTION_OPENING_FLOWS = [
     eventId: 'rs_strategic_goals',
     decisionTitle: 'The Assembly Speaks',
     responseLabel: 'Adopt all six goals',
+    responseId: 'all_six',
     receiptCheck: true,
   },
   {
@@ -49,6 +51,7 @@ const FACTION_OPENING_FLOWS = [
     eventId: 'hrhb_political_goal',
     decisionTitle: 'What Is Herceg-Bosna?',
     responseLabel: 'Croat republic',
+    responseId: 'croat_republic',
     receiptCheck: true,
   },
 ];
@@ -344,10 +347,18 @@ async function clickFirstMatchingText(page, labels) {
 
 async function clickSelector(page, selector, label) {
   const clicked = await page.evaluate((targetSelector) => {
-    const target = document.querySelector(targetSelector);
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
     if (!(target instanceof HTMLElement)) return false;
-    const rect = target.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return false;
     target.click();
     return true;
   }, selector);
@@ -587,7 +598,11 @@ async function runFoundationalFlow(page, summary, flow) {
   }
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
 
-  await clickByText(page, flow.responseLabel);
+  await clickSelector(
+    page,
+    `[data-testid="event-decision-response"][data-event-id="${flow.eventId}"][data-response-id="${flow.responseId}"]`,
+    `${flow.faction} foundational response ${flow.responseId}`,
+  );
   await waitUntilDialogTextAbsent(page, 'Presidential Response');
   await dismissTutorialIfPresent(page);
   summary.evidence.allFactionFoundationalFlows ??= {};
@@ -595,6 +610,7 @@ async function runFoundationalFlow(page, summary, flow) {
     eventId: flow.eventId,
     decisionTitle: flow.decisionTitle,
     responseLabel: flow.responseLabel,
+    responseId: flow.responseId,
     resolved: true,
   };
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_decision_receipt`);
@@ -623,7 +639,6 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
     chronicle: false,
   };
   summary.evidence.recordsReceiptAppears = true;
-  summary.evidence.rawFirstHourLabelsAbsent = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_records_decision_receipt`);
   const recordsText = await visibleSurfaceText(page, [
     'Decision Consequences',
@@ -631,6 +646,9 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
     flow.responseLabel,
   ]);
   assertRawLabelsAbsent('Army HQ Records', recordsText);
+  summary.evidence.rawFirstHourLabelsAbsentByFaction ??= {};
+  summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction] ??= {};
+  summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction].records = true;
 
   await clickFirstMatchingText(page, ['Open Chronicle', 'CHRONICLE', 'Chronicle']);
   await waitForVisibleText(page, 'War Chronicle');
@@ -642,6 +660,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   assertRawLabelsAbsent('Chronicle', chronicleText);
   summary.evidence.chronicleReceiptAppears = true;
   summary.evidence.receiptChecksByFaction[flow.faction].chronicle = true;
+  summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction].chronicle = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_chronicle_decision_receipt`);
 }
 
@@ -653,10 +672,13 @@ async function run() {
     url: URL,
     outDir: path.relative(ROOT, OUT_DIR).replace(/\\/g, '/'),
     steps: [],
-    evidence: {},
+    evidence: {
+      serverPortCleanupVerified: false,
+    },
     consoleMessages: [],
   };
   const server = process.env.AWWV_FIRST_HOUR_BROWSER_URL ? null : startDevServer();
+  let caughtError = null;
 
   try {
     if (server) await waitForServer(URL);
@@ -697,25 +719,30 @@ async function run() {
 
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
-      const evidencePath = path.join(OUT_DIR, 'first_hour_browser_gate.json');
-      fs.writeFileSync(evidencePath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
-      console.log('first-hour browser gate ok');
-      console.log(`evidence: ${evidencePath}`);
     } finally {
       await browser.close();
     }
   } catch (error) {
-    const evidencePath = path.join(OUT_DIR, 'first_hour_browser_gate_failed.json');
-    fs.writeFileSync(evidencePath, `${JSON.stringify({
-      ...summary,
-      ok: false,
-      error: error instanceof Error ? error.message : String(error),
-    }, null, 2)}\n`, 'utf8');
+    caughtError = error;
+    summary.ok = false;
+    summary.error = error instanceof Error ? error.message : String(error);
     if (server) console.error(server.getLog());
-    throw error;
   } finally {
-    if (server) await server.stop();
+    if (server) {
+      await server.stop();
+      summary.evidence.serverPortCleanupVerified = true;
+    }
+    if (summary.ok) {
+      const evidencePath = path.join(OUT_DIR, 'first_hour_browser_gate.json');
+      fs.writeFileSync(evidencePath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
+      console.log('first-hour browser gate ok');
+      console.log(`evidence: ${evidencePath}`);
+    } else {
+      const evidencePath = path.join(OUT_DIR, 'first_hour_browser_gate_failed.json');
+      fs.writeFileSync(evidencePath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
+    }
   }
+  if (caughtError) throw caughtError;
 }
 
 run().catch((error) => {

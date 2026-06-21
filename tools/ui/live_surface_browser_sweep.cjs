@@ -465,10 +465,18 @@ async function clickFirstMatchingText(page, labels) {
 
 async function clickSelectorIfVisible(page, selector) {
   return page.evaluate((targetSelector) => {
-    const target = document.querySelector(targetSelector);
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
     if (!(target instanceof HTMLElement)) return false;
-    const rect = target.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) return false;
     target.click();
     return true;
   }, selector);
@@ -477,15 +485,17 @@ async function clickSelectorIfVisible(page, selector) {
 async function waitForVisibleSelector(page, selector, timeout = 30000) {
   await page.waitForFunction(
     (targetSelector) => {
-      const target = document.querySelector(targetSelector);
-      if (!(target instanceof HTMLElement)) return false;
-      const rect = target.getBoundingClientRect();
-      const style = window.getComputedStyle(target);
-      return rect.width > 0
-        && rect.height > 0
-        && style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && Number(style.opacity || '1') > 0;
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      return Array.from(document.querySelectorAll(targetSelector)).some(isVisible);
     },
     { timeout },
     selector,
@@ -493,16 +503,26 @@ async function waitForVisibleSelector(page, selector, timeout = 30000) {
 }
 
 async function clickVisibleSelector(page, selector, timeout = 30000) {
-  await waitForVisibleSelector(page, selector, timeout);
-  await page.click(selector);
+  await activateVisibleControl(page, selector, timeout);
 }
 
 async function activateVisibleControl(page, selector, timeout = 30000) {
   await waitForVisibleSelector(page, selector, timeout);
   const activated = await page.evaluate((targetSelector) => {
-    const target = document.querySelector(targetSelector);
+    const isVisibleAndEnabled = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      const disabled = el instanceof HTMLButtonElement && el.disabled;
+      return !disabled
+        && rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisibleAndEnabled);
     if (!(target instanceof HTMLElement)) return false;
-    if (target instanceof HTMLButtonElement && target.disabled) return false;
     target.scrollIntoView({ block: 'center', inline: 'nearest' });
     target.click();
     return true;
@@ -565,7 +585,20 @@ async function visibleSelectorCount(page, selector) {
 
 async function getVisibleSelectorAttribute(page, selector, attribute, description = selector) {
   await waitForVisibleSelector(page, selector);
-  const value = await page.$eval(selector, (el, attr) => el.getAttribute(attr), attribute);
+  const value = await page.evaluate((targetSelector, attr) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
+    return target?.getAttribute(attr) ?? null;
+  }, selector, attribute);
   if (value == null) throw new Error(`Visible ${description} did not expose ${attribute}`);
   return value;
 }
@@ -1103,29 +1136,34 @@ async function runOwnerJourneyDrilldown(page, summary) {
 async function runRecordsAarFormationLinkLiveProof(page, summary) {
   await resetToWarMap(page);
 
+  const fixtureBattleSelector = `[data-testid="aar-battle-row"][data-osid="${RECORDS_AAR_FIXTURE_OSID}"]`;
+  const fixtureAttackerLinkSelector = `[data-testid="aar-formation-link"][data-formation-id="${RECORDS_AAR_FIXTURE_ATTACKER_ID}"][data-osid="${RECORDS_AAR_FIXTURE_OSID}"]`;
+
   await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
   await waitForVisibleSelector(page, '[data-testid="records-content"]');
   await activateVisibleControl(page, '[data-testid="records-subtab-aar"]');
   await waitForVisibleSelector(page, '[data-testid="records-subtab-aar"][data-selected="true"]');
-  await delay(500);
-  if (await visibleSelectorCount(page, '[data-testid="aar-battle-row"][data-osid]') === 0) {
+  if (await visibleSelectorCount(page, fixtureBattleSelector) === 0) {
     await captureEvidence(page, summary, 'records_aar_formation_link_missing_battle_rows');
-    throw new Error('Records AAR fixture did not render a visible AAR battle row');
+    throw new Error(`Records AAR fixture did not render battle row for ${RECORDS_AAR_FIXTURE_OSID}`);
   }
-  if (await visibleSelectorCount(page, '[data-testid="aar-formation-link"][data-formation-id][data-osid]') === 0) {
+  if (await visibleSelectorCount(page, fixtureAttackerLinkSelector) === 0) {
     await captureEvidence(page, summary, 'records_aar_formation_link_missing_formation_links');
-    throw new Error('Records AAR fixture did not render a visible formation link');
+    throw new Error(`Records AAR fixture did not render attacker formation link for ${RECORDS_AAR_FIXTURE_ATTACKER_ID}`);
   }
   await clickFirstVisibleSelector(
     page,
-    '[data-testid="aar-formation-link"][data-formation-id][data-osid]',
-    'Records AAR formation link',
+    fixtureAttackerLinkSelector,
+    'Records AAR fixture attacker formation link',
   );
   await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
   await captureEvidence(page, summary, 'records_aar_formation_link_live_proof');
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Records AAR Formation Link Live Proof', text);
-  summary.evidence.recordsAarFormationLinkLiveProof = true;
+  summary.evidence.recordsAarFormationLinkLiveProof = {
+    osid: RECORDS_AAR_FIXTURE_OSID,
+    clickedFormationId: RECORDS_AAR_FIXTURE_ATTACKER_ID,
+  };
 }
 
 async function runMapContextMenuLiveProof(page, summary) {
