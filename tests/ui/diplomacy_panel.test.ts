@@ -5,6 +5,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiplomacyView } from '../../src/ui/map/data/types.js';
 import { DiplomacyPanel } from '../../src/ui/map/components/DiplomacyPanel.js';
+import { buildDiplomacyView } from '../../src/ui/map/data/diplomacyView.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 
@@ -167,6 +168,82 @@ describe('DiplomacyPanel', () => {
         expect(panelText).not.toContain('P31');
         expect(panelText).not.toContain('T31');
         expect(panelText).not.toMatch(/\bpotez\s+31\b/i);
+    });
+
+    it('localizes related-track headings and qualitative labels in BCS', () => {
+        setLocale('bcs');
+        render(createElement(DiplomacyPanel, { view: makeView(), onClose: vi.fn() }));
+
+        const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).toContain('Pregovaračka hronologija');
+        expect(panelText).toContain('Šta bi promijenilo stanje');
+        expect(panelText).toContain('Visok - Poznato');
+        expect(panelText).toContain('Postojana');
+        expect(panelText).toContain('Povišena');
+        expect(panelText).not.toContain('Negotiation Timeline');
+        expect(panelText).not.toContain('What Moves The Needle');
+        expect(panelText).not.toContain('High - Known');
+        expect(panelText).not.toContain('Steady');
+        expect(panelText).not.toContain('Elevated');
+    });
+
+    it('renders generated diplomacy read-model tokens in BCS without English pressure labels', () => {
+        setLocale('bcs');
+        const view = buildDiplomacyView({
+            meta: { turn: 44, phase: 'war', player_faction: 'RS' },
+            factions: [
+                {
+                    id: 'RS',
+                    patron_state: {
+                        material_support_level: 0.62,
+                        diplomatic_isolation: 0.41,
+                        constraint_severity: 0.74,
+                        patron_commitment: 0.55,
+                        last_updated: 44,
+                    },
+                },
+            ],
+            political: {
+                international_visibility_pressure: {
+                    sarajevo_siege_visibility: 0.8,
+                    enclave_humanitarian_pressure: 0.5,
+                    atrocity_visibility: 0.25,
+                    negotiation_momentum: 0.3,
+                    composite_ivp: 0.55,
+                    last_major_shift: 43,
+                },
+                ivp_consequences_active: ['international_sanctions'],
+            },
+            military: {
+                negotiation: {
+                    patron_relationships: {
+                        RS: {
+                            patron_id: 'serbia',
+                            support_level: 66,
+                            override_authority: 71,
+                            sanctions_active: true,
+                            relationship_events: ['belgrade_border_pressure'],
+                        },
+                    },
+                    pending_dayton: {
+                        territorial_packages: [{ id: 'brcko' }],
+                        institutional_packages: [{ id: 'central_state' }],
+                    },
+                },
+            },
+        }, 'RS');
+
+        render(createElement(DiplomacyPanel, { view, onClose: vi.fn() }));
+
+        const panelText = screen.getByTestId('diplomacy-panel').textContent ?? '';
+        expect(panelText).toContain('Srbija');
+        expect(panelText).toContain('Vidljivost opsade Sarajeva');
+        expect(panelText).toContain('Humanitarni pritisak oko enklava');
+        expect(panelText).toContain('Daytonski pregovarački meni');
+        expect(panelText).not.toContain('Serbia');
+        expect(panelText).not.toContain('Sarajevo siege visibility');
+        expect(panelText).not.toContain('Enclave humanitarian pressure');
+        expect(panelText).not.toContain('Belgrade Border Pressure');
     });
 
     it('omits the gauge when no patron-confidence or defiance data is present', () => {

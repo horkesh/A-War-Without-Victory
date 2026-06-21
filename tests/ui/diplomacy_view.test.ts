@@ -84,20 +84,31 @@ describe('buildDiplomacyView', () => {
 
         expect(view.playerFaction).toBe('RS');
         expect(view.patronStance?.patronLabel).toBe('Serbia');
+        expect(view.patronStance?.patronLabelToken).toEqual({ key: 'diplomacy.patron.serbia' });
         expect(view.patronStance?.constraintBand).toBe('high');
         // Player-safe: raw faction slug RS must resolve to the military name VRS in prose.
         expect(view.patronStance?.stanceSummary).toBe('Serbia is constrained by sanctions and keeps the VRS channel under pressure.');
+        expect(view.patronStance?.stanceSummaryToken).toEqual({
+            key: 'diplomacy.actor.summary.sanctions',
+            params: { force: 'VRS' },
+        });
         // The bare slug "RS" must never appear as a standalone word (VRS is fine).
         expect(view.patronStance?.stanceSummary).not.toMatch(/\bRS\b/);
         expect(view.activeProposals.map((proposal) => proposal.name)).toEqual([
             'Dayton negotiation menu',
             'Vance-Owen Peace Plan',
         ]);
+        expect(view.activeProposals[0]?.nameToken).toEqual({ key: 'diplomacy.proposal.dayton.name' });
+        expect(view.activeProposals[0]?.detailToken).toEqual({
+            key: 'diplomacy.proposal.dayton.detail',
+            params: { territorialCount: 1, institutionalCount: 1 },
+        });
         // #124: the player's own patron (Serbia, surfaced as patronStance) must NOT
         // be duplicated under "Other Patrons" — only the non-player actors remain.
         expect(view.externalActors.map((actor) => actor.patronLabel)).toEqual([
             'International Community',
         ]);
+        expect(view.externalActors[0]?.patronLabelToken).toEqual({ key: 'diplomacy.patron.internationalCommunity' });
         expect(view.externalActors.map((actor) => actor.faction)).not.toContain('RS');
         expect(view.pressureReasons.map((reason) => reason.label).slice(0, 2)).toEqual([
             'Sarajevo siege visibility',
@@ -111,6 +122,10 @@ describe('buildDiplomacyView', () => {
         expect(view.negotiationTimeline.map((entry) => entry.label)).toContain('International sanctions');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Ease Serbia constraint');
         expect(view.needleHints.map((hint) => hint.label)).toContain('Reduce Sarajevo siege visibility');
+        expect(view.needleHints.find((hint) => hint.id === 'patron-constraint:RS')?.labelToken).toMatchObject({
+            key: 'diplomacy.needle.easePatronConstraint',
+            paramKeys: { patron: 'diplomacy.patron.serbia' },
+        });
     });
 
     it('does not duplicate the current patron under externalActors (#124)', () => {

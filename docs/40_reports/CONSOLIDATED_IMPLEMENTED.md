@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Patron Relations / Diplomacy Panel i18n boundary:** [implemented/20260621_DIPLOMACY_PANEL_I18N_BOUNDARY.md](implemented/20260621_DIPLOMACY_PANEL_I18N_BOUNDARY.md) - Patron Relations related-track headings, qualitative bands, generated proposal/timeline/needle copy, and read-model copy tokens now render through EN/BCS i18n keys while preserving existing English fallback strings and diplomacy mechanics.
+
 **Latest War Map chrome i18n boundary:** [implemented/20260621_WAR_MAP_CHROME_I18N.md](implemented/20260621_WAR_MAP_CHROME_I18N.md) - War Map mode pills, layer toggles, and map-mode legend titles/stops now render through EN/BCS i18n keys while preserving map-mode ids, hotkeys, and layer-state contracts.
 
 **Latest supply visibility i18n boundary:** [implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md](implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md) - Player-scoped supply visibility headlines and evidence now render through EN/BCS keys instead of English read-model strings.
