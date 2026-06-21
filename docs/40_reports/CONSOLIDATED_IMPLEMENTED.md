@@ -804,6 +804,13 @@
 - Added additive `mutex_suppressed_ids` diagnostics; persisted overflow queueing remains deferred.
 - Report: `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`
 
+# 2026-06-21 - Status strip diplomacy i18n boundary
+
+- Bottom status strip alliance, patron, and international-pressure status labels now render through EN/BCS i18n keys instead of raw English status ids.
+- HRHB BCS now shows localized alliance/patron status copy, and RBiH BCS now shows localized alliance/international-pressure status copy.
+- Verification: red status-strip BCS proof failed before implementation; focused green pack passed 20/20; TypeScript passed; `qa:player-journeys` passed 239/239; `qa:live-surface:browser` passed and temporary evidence was removed.
+- Report: `docs/40_reports/implemented/20260621_STATUS_STRIP_DIPLOMACY_I18N.md`
+
 # 2026-06-21 - War Map context / OpsMap i18n boundary
 
 - Tactical-map radial/context labels now render through `map.context.*` EN/BCS keys instead of hardcoded English strings in `MapContainer`.

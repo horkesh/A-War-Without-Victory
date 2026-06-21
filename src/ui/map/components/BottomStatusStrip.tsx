@@ -19,6 +19,22 @@ const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<strin
 const PRIMARY_MODES = ['political', 'ethnic', 'supply', 'operations'];
 const primaryModes = MAP_MODES.filter(m => PRIMARY_MODES.includes(m.id));
 const secondaryModes = MAP_MODES.filter(m => !PRIMARY_MODES.includes(m.id));
+const ALLIANCE_STATUS_LABEL_KEYS = {
+  WAR: 'statusStrip.allianceStatus.war',
+  MOBILIZING: 'statusStrip.allianceStatus.mobilizing',
+  STRAINED: 'statusStrip.allianceStatus.strained',
+  ALLIED: 'statusStrip.allianceStatus.allied',
+} as const;
+const PATRON_STATUS_LABEL_KEYS = {
+  SUPPORTIVE: 'statusStrip.patronStatus.supportive',
+  CAUTIOUS: 'statusStrip.patronStatus.cautious',
+  WAVERING: 'statusStrip.patronStatus.wavering',
+} as const;
+const INTERNATIONAL_STATUS_LABEL_KEYS = {
+  HIGH: 'statusStrip.internationalStatus.high',
+  ACTIVE: 'statusStrip.internationalStatus.active',
+  QUIET: 'statusStrip.internationalStatus.quiet',
+} as const;
 
 /**
  * Phase H Packet 7 — props for catalog wiring.
@@ -144,8 +160,9 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
     const status = patronValue >= 70 ? 'SUPPORTIVE' : patronValue >= 40 ? 'CAUTIOUS' : 'WAVERING';
     const color = status === 'SUPPORTIVE' ? '#50b850' : status === 'CAUTIOUS' ? '#d4d455' : '#e05050';
     return {
-      label: playerFaction === 'HRHB' ? 'Zagreb:' : 'Belgrade:',
+      label: playerFaction === 'HRHB' ? t('statusStrip.patron.zagreb') : t('statusStrip.patron.belgrade'),
       status,
+      statusLabel: t(PATRON_STATUS_LABEL_KEYS[status]),
       color,
     };
   }, [loadedGameState?.strategicDimensions, playerFaction]);
@@ -157,7 +174,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
     if (pressure == null) return null;
     const status = pressure >= 0.66 ? 'HIGH' : pressure >= 0.33 ? 'ACTIVE' : 'QUIET';
     const color = status === 'HIGH' ? '#d4a055' : status === 'ACTIVE' ? '#d4d455' : '#50b850';
-    return { status, color };
+    return { status, statusLabel: t(INTERNATIONAL_STATUS_LABEL_KEYS[status]), color };
   }, [loadedGameState?.internationalVisibilityPressure, playerFaction]);
 
   return (
@@ -282,7 +299,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           return (
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
               <Icon name="balanced" size={10} color={color} />
-              <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{status}</span>
+              <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{t(ALLIANCE_STATUS_LABEL_KEYS[status])}</span>
             </span>
           );
         })()}
@@ -291,7 +308,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
               <span className="text-[9px] text-white/50 uppercase font-semibold">{patronStatus.label}</span>
-              <span style={{ color: patronStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{patronStatus.status}</span>
+              <span style={{ color: patronStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{patronStatus.statusLabel}</span>
             </span>
           </>
         )}
@@ -300,7 +317,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
               <span className="text-[9px] text-white/50 uppercase font-semibold">{t('statusStrip.international')}:</span>
-              <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{internationalStatus.status}</span>
+              <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{internationalStatus.statusLabel}</span>
             </span>
           </>
         )}

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**STATUS STRIP DIPLOMACY LABEL BOUNDARY (2026-06-21).** Bottom status strip alliance, patron, and international-pressure chips are player copy despite being compact. Do instead: keep thresholds/colors/visibility rules unchanged, but render labels through `statusStrip.allianceStatus.*`, `statusStrip.patron.*`, `statusStrip.patronStatus.*`, and `statusStrip.internationalStatus.*`; pin BCS because CSS uppercase does not translate raw English ids.
+
 **WAR MAP CHROME LABEL BOUNDARY (2026-06-21).** War Map mode/layer registries, radial/context action ids, and OpsMap behavior own stable ids/hotkeys/state/action contracts; rendered labels are UI copy. Do instead: keep `MAP_MODES[*].id`/`key`, layer `key`/`setKey`, context action ids, and OpsMap behavior unchanged; render mode/layer/legend copy through `map.mode.*`, `map.layer.*`, `map.legend.*`, `map.context.*`, and `opsPlanning.compactLegend.*` keys.
 
 **SUPPLY VISIBILITY COPY BOUNDARY (2026-06-21).** `buildPlayerSupplyVisibility` is a player-facing read-model projection, even though its counts are engine-derived. Do instead: route supply headlines/evidence through `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count`; do not interpolate English `adequate / strained / critical`, `open / brittle / cut`, or brigade isolation prose.

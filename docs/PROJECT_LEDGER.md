@@ -21785,6 +21785,14 @@ Verification: red proof `npm.cmd exec -- vitest run tests/ui/ops_planning_target
 
 Determinism/scope: UI/read-model copy, localized presentation helpers, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-21 - Status strip diplomacy i18n boundary
+
+Closed the bottom status strip diplomacy residual from the Pyrrhic localization scout. Alliance posture, Zagreb/Belgrade patron labels, patron-confidence statuses, and international-pressure statuses now render through EN/BCS i18n keys instead of raw English status ids.
+
+Verification: red proof `npm.cmd exec -- vitest run tests/ui/bottom_status_strip_labels.test.ts --pool=forks --reporter=dot` failed 2/7 before implementation on BCS status-strip assertions. Green focused proof `npm.cmd exec -- vitest run tests/ui/bottom_status_strip_labels.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 20/20. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 239/239. `npm.cmd run qa:live-surface:browser` passed; evidence was inspected and `.tmp_live_surface_browser_sweep` was removed. Report: `docs/40_reports/implemented/20260621_STATUS_STRIP_DIPLOMACY_I18N.md`.
+
+Determinism/scope: UI/i18n/test/docs polish only; no status thresholds, colors, player-faction visibility rules, simulation logic, scenario data, route commands, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-21 - War Map context / OpsMap i18n boundary
 
 Closed the two residual War Map chrome i18n items from the previous mode/layer slice. `MapContainer` radial/context menu labels now render through `map.context.*` EN/BCS keys, and the operations-planning compact `OpsMap` legend now renders through `opsPlanning.compactLegend.*` EN/BCS keys.
