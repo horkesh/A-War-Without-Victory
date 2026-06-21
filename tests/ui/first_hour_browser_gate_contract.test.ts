@@ -147,12 +147,16 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('data-inbox-item-type="operation_opportunity"');
     expect(tool).toContain('desk-card-operation_opportunity');
     expect(tool).toContain('desk-card-action');
-    expect(tool).toContain('command-card-cat_record');
     expect(tool).toContain('warroom-decision-room-host');
     expect(tool).toContain('presidential-decision-room');
+    expect(tool).toContain('decision-room-priority-card-opportunity:${OPPORTUNITY_LIVE_FIXTURE_ID}');
     expect(tool).toContain('inbox_routing_decision_room');
     expect(tool).toContain('inbox_routing_desk_card_operation_opportunity');
-    expect(tool).toContain('inbox_routing_record_category_decision_room');
+    expect(tool).toContain('runOperationOpportunityLedgerLiveProof');
+    expect(tool).toContain('operationOpportunityLedgerLiveProof');
+    expect(tool).toContain('operation_opportunity_ledger_live_proof');
+    expect(tool).toContain('opportunity-ledger-record');
+    expect(tool).toContain('data-proposal-id="${OPPORTUNITY_LIVE_FIXTURE_ID}"');
     expect(tool).toContain('deskRecordsRoute');
     expect(tool).toContain('chronicle-open-record');
     expect(tool).toContain("chronicleRecordTarget === 'decision'");
@@ -236,6 +240,9 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-testid="decision-consequence-record"');
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-record-target={record.recordTarget}');
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-testid="decision-consequence-open-chronicle"');
+    expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-testid="opportunity-ledger-record"');
+    expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-proposal-id={record.proposal_id}');
+    expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-status={record.status}');
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-testid="chronicle-overlay"');
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-testid="chronicle-close"');
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-testid={`chronicle-filter-${filter.id}`}');

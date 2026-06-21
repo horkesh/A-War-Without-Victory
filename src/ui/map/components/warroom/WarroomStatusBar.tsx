@@ -42,10 +42,10 @@ function docketBadgeClass(tone: WarroomPriorityDocketTone): string {
 }
 
 function severityLabel(severity: WarroomPriorityDocketItem['severity']): string {
-  if (severity === 'blocking') return 'Blocking';
-  if (severity === 'critical') return 'Critical';
-  if (severity === 'warning') return 'Warning';
-  return 'Info';
+  if (severity === 'blocking') return t('warroom.severity.blocking');
+  if (severity === 'critical') return t('warroom.severity.critical');
+  if (severity === 'warning') return t('warroom.severity.warning');
+  return t('warroom.severity.info');
 }
 
 function categoryLabel(category: WarroomPriorityDocketItem['category']): string {

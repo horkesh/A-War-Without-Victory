@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
@@ -233,6 +234,18 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
     expect(screen.getByText('Nijedna živa stavka stola neće biti zakopana sljedećim potezom.')).toBeTruthy();
     expect(screen.getByText('Predaje izvora')).toBeTruthy();
+  });
+
+  it('Warroom priority severity badges are localized instead of hardcoded English', () => {
+    const source = readFileSync('src/ui/map/components/warroom/WarroomStatusBar.tsx', 'utf8');
+    const bcsMessages = readFileSync('src/ui/map/i18n/messages.bcs.ts', 'utf8');
+
+    expect(source).toContain("t('warroom.severity.blocking')");
+    expect(source).toContain("t('warroom.severity.critical')");
+    expect(source).toContain("t('warroom.severity.warning')");
+    expect(source).toContain("t('warroom.severity.info')");
+    expect(bcsMessages).toContain("'warroom.severity.blocking': 'Blokira'");
+    expect(bcsMessages).toContain("'warroom.severity.warning': 'Upozorenje'");
   });
 
   it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {

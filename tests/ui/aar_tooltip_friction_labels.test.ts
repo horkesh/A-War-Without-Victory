@@ -21,12 +21,12 @@ function makeSummary(): TurnSummary {
         defender_faction: 'RS',
         primary_attacker_id: 'bde_attacker',
         primary_defender_id: 'bde_defender',
-        all_attacker_ids: ['bde_attacker'],
+        all_attacker_ids: ['bde_attacker', 'bde_support_1', 'bde_support_2'],
         outcome: 'victory',
         attacker_casualties: 12,
         defender_casualties: 20,
         territory_flipped: false,
-        was_concentrated: false,
+        was_concentrated: true,
         execution_friction: {
           labels: ['stale_intel', 'defender_opsec', 'ambush_risk'],
           attacker_confidence_band: 'low',
@@ -97,9 +97,11 @@ describe('AAR and tooltip friction labels', () => {
 
     expect(container.textContent).toContain('Ambush risk');
     expect(container.textContent).toContain('limited confidence');
+    expect(container.textContent).toContain('Concentration 3');
     expect(container.textContent).toMatch(/Attacker\s*[-−]12/);
     expect(container.textContent).toMatch(/Defender\s*[-−]20/);
     expect(container.textContent).not.toMatch(/\batt\b|\bdef\b|ambush_risk|low confidence|defender_opsec/);
+    expect(container.textContent).not.toMatch(/3x|3×|concentrated/);
   });
 
   it('routes embedded AAR formation links through field inspection with battle context', () => {
@@ -144,7 +146,9 @@ describe('AAR and tooltip friction labels', () => {
 
     expect(screen.getByText(/Ambush risk/)).toBeTruthy();
     expect(screen.getByText(/limited confidence/)).toBeTruthy();
+    expect(screen.getByText(/3 attacking units concentrated/)).toBeTruthy();
     expect(document.body.textContent).not.toMatch(/ambush_risk|low confidence|defender_opsec/);
+    expect(document.body.textContent).not.toMatch(/3x|3×/);
   });
 
   it('uses localized friction and confidence labels in BCS', () => {
@@ -158,6 +162,8 @@ describe('AAR and tooltip friction labels', () => {
 
     expect(container.textContent).toContain('Rizik zasjede');
     expect(container.textContent).toContain('ogranicena pouzdanost');
+    expect(container.textContent).toContain('Koncentracija 3');
     expect(container.textContent).not.toMatch(/ambush_risk|low confidence|defender_opsec/);
+    expect(container.textContent).not.toMatch(/3x|3×|concentrated/);
   });
 });

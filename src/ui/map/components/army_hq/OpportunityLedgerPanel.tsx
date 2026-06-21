@@ -77,7 +77,12 @@ function OpportunityRecordCard({ record }: { record: OperationOpportunityRecordV
         : null;
 
     return (
-        <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2">
+        <div
+            data-testid="opportunity-ledger-record"
+            data-proposal-id={record.proposal_id}
+            data-status={record.status}
+            className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2"
+        >
             <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                     <div className="text-[12px] font-bold text-text-primary truncate">

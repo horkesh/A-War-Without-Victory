@@ -1308,6 +1308,7 @@ async function runPresidentialInboxRoutingLiveProof(page, summary) {
   await activateVisibleControl(page, inboxOpportunitySelector);
   await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
   await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await waitForVisibleSelector(page, `[data-testid="decision-room-priority-card-opportunity:${OPPORTUNITY_LIVE_FIXTURE_ID}"]`);
   await captureEvidence(page, summary, 'inbox_routing_decision_room');
 
   await resetToWarMap(page);
@@ -1319,25 +1320,38 @@ async function runPresidentialInboxRoutingLiveProof(page, summary) {
   );
   await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
   await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await waitForVisibleSelector(page, `[data-testid="decision-room-priority-card-opportunity:${OPPORTUNITY_LIVE_FIXTURE_ID}"]`);
   await captureEvidence(page, summary, 'inbox_routing_desk_card_operation_opportunity');
-
-  await resetToWarMap(page);
-  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
-  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
-  await activateVisibleControl(page, '[data-testid="desk-open-command-surface"]');
-  await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
-  await activateVisibleControl(page, '[data-testid="command-card-cat_record"]');
-  await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
-  await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
-  await captureEvidence(page, summary, 'inbox_routing_record_category_decision_room');
 
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Presidential Inbox Routing Live Proof', text);
   summary.evidence.presidentialInboxRoutingLiveProof = {
     inboxCard: `opportunity:${OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID}`,
     deskCard: 'desk-card-operation_opportunity',
-    commandCategory: 'command-card-cat_record',
     reached: 'decision-room',
+    targetCard: `opportunity:${OPPORTUNITY_LIVE_FIXTURE_ID}`,
+  };
+}
+
+async function runOperationOpportunityLedgerLiveProof(page, summary) {
+  await resetToWarMap(page);
+  await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
+  await waitForVisibleSelector(page, '[data-testid="records-content"]');
+  await activateVisibleControl(page, '[data-testid="records-subtab-opportunities"]');
+  await waitForVisibleSelector(page, '[data-testid="records-subtab-opportunities"][data-selected="true"]');
+  await waitForVisibleSelector(page, '[data-testid="opportunity-ledger-pulse"]');
+  await waitForVisibleSelector(
+    page,
+    `[data-testid="opportunity-ledger-record"][data-proposal-id="${OPPORTUNITY_LIVE_FIXTURE_ID}"][data-status="eligible_pending_review"]`,
+  );
+  await assertSingleShellSurface(page, 'Records');
+  await captureEvidence(page, summary, 'operation_opportunity_ledger_live_proof');
+
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Operation Opportunity Ledger Live Proof', text);
+  summary.evidence.operationOpportunityLedgerLiveProof = {
+    proposalId: OPPORTUNITY_LIVE_FIXTURE_ID,
+    status: 'eligible_pending_review',
   };
 }
 
@@ -1396,6 +1410,7 @@ async function run() {
       archiveRecordsDecisionToChronicleDrilldown: false,
       presidentialInboxVisible: false,
       presidentialInboxRoutingLiveProof: false,
+      operationOpportunityLedgerLiveProof: false,
       deskRecordsRoute: false,
       codexInternalDrilldown: false,
       codexDilemmaSpineVisible: false,
@@ -1448,6 +1463,7 @@ async function run() {
     await runCodexInternalDrilldown(page, summary);
     await loadOperationOpportunityLiveProofFixture(page, summary);
     await runPresidentialInboxRoutingLiveProof(page, summary);
+    await runOperationOpportunityLedgerLiveProof(page, summary);
     await loadRecordsAarLiveProofFixture(page, summary);
     await runBattleMarkerLiveProof(page, summary);
     await runRecordsAarFormationLinkLiveProof(page, summary);

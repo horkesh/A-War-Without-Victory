@@ -27,9 +27,13 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
 
-const OUTCOME_LABEL: Record<string, string> = {
-  decisive_victory: 'Decisive Victory', victory: 'Victory', costly_victory: 'Costly Victory',
-  stalemate: 'Stalemate', repulsed: 'Repulsed', catastrophic: 'Catastrophic Defeat',
+const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
+  decisive_victory: 'aar.outcome.decisive',
+  victory: 'aar.outcome.victory',
+  costly_victory: 'aar.outcome.costly',
+  stalemate: 'aar.outcome.stalemate',
+  repulsed: 'aar.outcome.repulsed',
+  catastrophic: 'aar.outcome.collapse',
 };
 const OUTCOME_COLOR: Record<string, string> = {
   decisive_victory: '#56d364', victory: '#56d364', costly_victory: '#e8a838',
@@ -54,7 +58,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   if (!battle) {
     return <div className="text-[11px] text-text-secondary">Battle at {getPlayerSafeSettlementName(osid, 'this position')}</div>;
   }
-  const outcomeLabel = OUTCOME_LABEL[battle.outcome] ?? 'Engagement recorded';
+  const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
   const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? '#aaa';
   const locationName = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, 'this position');
   return (
@@ -71,7 +75,11 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
         <span style={{ color: FACTION_COLORS[battle.defender_faction] ?? '#aaa' }}>
           {getPlayerSafeMilitaryFactionName(battle.defender_faction)}
         </span>
-        {battle.was_concentrated && <span className="ml-1 text-text-muted">({battle.all_attacker_ids.length}× concentrated)</span>}
+        {battle.was_concentrated && (
+          <span className="ml-1 text-text-muted">
+            ({t('tooltip.concentratedAttack', { count: battle.all_attacker_ids.length })})
+          </span>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-x-3 text-[10px] tabular-nums">
         <div className="text-text-secondary">{t('tooltip.attackerLosses')}</div>

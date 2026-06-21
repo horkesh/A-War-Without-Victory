@@ -14,8 +14,8 @@
 - The live sweep now loads a RBiH-scoped operation-opportunity review fixture, then clicks:
   - `presidential-inbox-card[data-inbox-item-type="operation_opportunity"]`
   - `desk-card-operation_opportunity [data-testid="desk-card-action"]`
-  - `command-card-cat_record`
 - The proof hard-fails unless each route reaches `warroom-decision-room-host` and `presidential-decision-room`.
+- The command-surface `cat_record` card remains scoped to turn/cost/memory record cards. Operation-opportunity archive coverage is proven directly through the Records opportunity ledger.
 
 ### Decision Room Ownership
 - `finalizeCards()` now treats `cost` cards like command, operational, and turn cards for primary-route ownership.
@@ -37,7 +37,7 @@
 | File | Change |
 |------|--------|
 | `src/ui/map/data/presidentialDecisionRoom.ts` | Cost cards now keep primary Decision Room ownership and loop handoff metadata. |
-| `tools/ui/live_surface_browser_sweep.cjs` | Added deterministic operation-opportunity fixture and strict Inbox/Desk/Record-category Decision Room live proof. |
+| `tools/ui/live_surface_browser_sweep.cjs` | Added deterministic operation-opportunity fixture and strict Inbox/Desk Decision Room live proof. |
 | `tests/ui/first_hour_browser_gate_contract.test.ts` | Pinned the new live fixture, selectors, route ordering, and evidence. |
 | `tests/ui/presidential_decision_room.test.ts` | Pinned Cost card and Cost loop routing to Decision Room with Records as source handoff. |
 

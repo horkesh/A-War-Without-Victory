@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-20 (all-faction first-hour browser gate, required-decision shell hotkey lock, CI i18n parity repair, AAA polish wave 4 live-copy/AAR provenance, startup OOB parent truth, Srebrenica/Zepa event-owned timeline provenance, first-hour shell hardening, Records/Chronicle opening decision filing, Army HQ first-paint/drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-21 (local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Local playtest evidence and browser proof** | [implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md](implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md) - Settings Diagnostics exports a local-only redacted playtest evidence packet, live-surface browser proof reaches the actual operation-opportunity Decision Room card and Records ledger row, and AAR/tooltip/Warroom labels close raw/English copy leaks. |
 | **Raw-copy wave 5 scout fixes** | [implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md](implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md) - Legacy Warroom dates/IVP wrapper copy, Peace Plan modal chrome/fallbacks, officer dossier status/corps labels, and AAR/tooltip friction/confidence labels now avoid raw turn/week/enum/id leaks. |
 | **Combat-record ground-copy discipline** | [implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md](implemented/20260620_COMBAT_RECORD_GROUND_COPY_DISCIPLINE.md) - Army HQ corps combat records and shared formation summaries now label territory combat-history counters as ground won/lost instead of `cap / lost` shorthand. |
 | **AAR final-held provenance copy** | [implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md](implemented/20260620_AAR_FINAL_HELD_PROVENANCE_COPY.md) - Army HQ AARs, forced-op receipts, settlement timelines, Chronicle, Opportunity Ledger, and officer dossiers now label final-held objectives as held at close/resolution unless logged-capture provenance exists; Srebrenica/Zepa remain event-owned. |

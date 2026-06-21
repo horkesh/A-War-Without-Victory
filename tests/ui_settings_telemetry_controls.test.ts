@@ -50,4 +50,33 @@ describe('SettingsScreen crash diagnostics controls', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Share crash diagnostics' }));
         expect(screen.getByRole('button', { name: 'Share crash diagnostics' }).getAttribute('aria-pressed')).toBe('false');
     });
+
+    it('exports a single local playtest evidence packet from diagnostics', () => {
+        render(createElement(SettingsScreen, { onClose: () => {} }));
+        fireEvent.click(screen.getByRole('button', { name: 'Diagnostics' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Share crash diagnostics' }));
+
+        const queue = createCrashDiagnosticsQueue({ storage: window.localStorage, sessionId: 'ui-test-session' });
+        queue.recordCrash({
+            appVersion: '0.9.6-alpha.1',
+            platform: 'browser',
+            osFamily: 'windows',
+            uiSurface: 'settings',
+            errorCategory: 'unhandled_error',
+            stack: 'Error: UI crash at C:\\Users\\LocalUser\\scenario_dump.json',
+        });
+
+        fireEvent.click(screen.getByRole('button', { name: 'Export playtest evidence' }));
+        const exported = screen.getByLabelText('Exported local playtest evidence JSON') as HTMLTextAreaElement;
+        const packet = JSON.parse(exported.value);
+
+        expect(packet.packetKind).toBe('local_playtest_evidence');
+        expect(packet.currentSurface).toBe('settings');
+        expect(packet.preferences.crashDiagnosticsConsent).toBe(true);
+        expect(packet.counts.crashReports).toBe(1);
+        expect(packet.counts.breadcrumbs).toBeGreaterThanOrEqual(1);
+        expect(exported.value).not.toContain('LocalUser');
+        expect(exported.value).not.toContain('scenario_dump');
+        expect(exported.value).not.toContain('timestamp');
+    });
 });

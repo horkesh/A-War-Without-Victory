@@ -31,6 +31,12 @@ import {
     type AudioPreferences,
 } from '../audio/audio_preferences';
 import { createCrashDiagnosticsQueue } from '../services/telemetry/telemetryQueue';
+import { CRASH_DIAGNOSTICS_APP_VERSION } from '../services/telemetry/crashCapture';
+import {
+    buildLocalPlaytestEvidencePacketJson,
+    clearPlaytestEvidenceBreadcrumbs,
+    recordPlaytestEvidenceBreadcrumb,
+} from '../services/telemetry/playtestEvidencePacket';
 import {
     COLORBLIND_PRESETS,
     COLORBLIND_PRESET_STORAGE_KEY,
@@ -68,6 +74,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
     const [crashConsentEnabled, setCrashConsentEnabled] = useState(() => crashQueue.isConsentEnabled());
     const [crashReportCount, setCrashReportCount] = useState(() => crashQueue.listReports().length);
     const [crashExportJson, setCrashExportJson] = useState('');
+    const [playtestEvidenceJson, setPlaytestEvidenceJson] = useState('');
 
     // LANE-NIGHTSHIFT-V092-TUTORIAL-LANE-B-SUBSET: tutorial restart affordance.
     // Read tutorial_state from the canonical UI store (mirrored from
@@ -172,23 +179,44 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
     const setActiveSectionAndRefresh = (sectionId: string) => {
         setActiveSection(sectionId);
-        if (sectionId === 'diagnostics') refreshCrashDiagnosticsStatus();
+        if (sectionId === 'diagnostics') {
+            recordPlaytestEvidenceBreadcrumb({ surface: 'settings', action: 'open_diagnostics' });
+            refreshCrashDiagnosticsStatus();
+        }
     };
 
     const setCrashDiagnosticsEnabled = (enabled: boolean) => {
         crashQueue.setConsentEnabled(enabled);
         setCrashExportJson('');
+        setPlaytestEvidenceJson('');
+        if (!enabled) clearPlaytestEvidenceBreadcrumbs();
         refreshCrashDiagnosticsStatus();
     };
 
     const exportCrashReports = () => {
         setCrashExportJson(crashQueue.exportReportsJson());
+        setPlaytestEvidenceJson('');
+        refreshCrashDiagnosticsStatus();
+    };
+
+    const exportPlaytestEvidence = () => {
+        recordPlaytestEvidenceBreadcrumb({ surface: 'settings', action: 'export_playtest_evidence' });
+        setPlaytestEvidenceJson(buildLocalPlaytestEvidencePacketJson({
+            appVersion: CRASH_DIAGNOSTICS_APP_VERSION,
+            platform: resolveSettingsPlatform(),
+            osFamily: resolveSettingsOsFamily(),
+            currentSurface: 'settings',
+            crashReports: crashQueue.exportReports(),
+        }));
+        setCrashExportJson('');
         refreshCrashDiagnosticsStatus();
     };
 
     const clearCrashReports = () => {
         crashQueue.clearReports();
+        clearPlaytestEvidenceBreadcrumbs();
         setCrashExportJson('');
+        setPlaytestEvidenceJson('');
         refreshCrashDiagnosticsStatus();
     };
 
@@ -355,6 +383,14 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     </button>
                                     <button
                                         type="button"
+                                        onClick={exportPlaytestEvidence}
+                                        className="text-[10px] uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
+                                        style={{ fontFamily: 'Courier New, monospace' }}
+                                    >
+                                        {t('settings.playtestEvidence.export')}
+                                    </button>
+                                    <button
+                                        type="button"
                                         onClick={clearCrashReports}
                                         className="text-[10px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
                                         style={{ fontFamily: 'Courier New, monospace' }}
@@ -367,6 +403,14 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         readOnly
                                         aria-label={t('settings.crashDiagnostics.exportedAriaLabel')}
                                         value={crashExportJson}
+                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-[10px] text-[#d5c9bc]"
+                                    />
+                                )}
+                                {playtestEvidenceJson && (
+                                    <textarea
+                                        readOnly
+                                        aria-label={t('settings.playtestEvidence.exportedAriaLabel')}
+                                        value={playtestEvidenceJson}
                                         className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-[10px] text-[#d5c9bc]"
                                     />
                                 )}
@@ -390,6 +434,20 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
             </div>
         </div>
     );
+}
+
+function resolveSettingsPlatform(): 'desktop' | 'browser' | 'unknown' {
+    if (typeof window === 'undefined') return 'unknown';
+    return window.awwv ? 'desktop' : 'browser';
+}
+
+function resolveSettingsOsFamily(): 'windows' | 'macos' | 'linux' | 'unknown' {
+    if (typeof navigator === 'undefined') return 'unknown';
+    const platform = `${navigator.userAgent} ${navigator.platform}`.toLowerCase();
+    if (platform.includes('win')) return 'windows';
+    if (platform.includes('mac')) return 'macos';
+    if (platform.includes('linux')) return 'linux';
+    return 'unknown';
 }
 
 function SettingRow({ label, description, children }: { label: string; description: string; children: React.ReactNode }) {

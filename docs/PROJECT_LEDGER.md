@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): add local playtest evidence export and harden browser proofs
+
+**Type:** UI/read-model diagnostics, i18n polish, browser-QA hardening.
+
+**Fix:** Settings > Diagnostics now exports a local-only `local_playtest_evidence` JSON packet with app/platform context, local preferences, bounded consent-gated breadcrumbs, and existing redacted crash reports. Disabling crash diagnostics clears the local evidence trail. `qa:live-surface:browser` now proves operation-opportunity routing lands on the actual Decision Room opportunity card and that Records > Opportunities exposes the matching pending ledger row. Tactical battle tooltips and AAR rows localize concentrated-attack copy instead of showing raw multipliers, and Warroom priority severity badges render through EN/BCS i18n keys.
+
+**Verification:** Red tests first covered missing packet service/UI export and raw concentration copy. Focused green proof: `npx.cmd vitest run tests\playtest_evidence_packet.test.ts tests\ui_settings_telemetry_controls.test.ts tests\ui\aar_tooltip_friction_labels.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts tests\ui\first_hour_browser_gate_contract.test.ts --reporter=dot` passed 26/26. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 245/245. `npm.cmd run qa:first-hour:browser` passed and verified foundational start flow plus server cleanup. `npm.cmd run qa:live-surface:browser` passed and evidence showed `presidentialInboxRoutingLiveProof`, `operationOpportunityLedgerLiveProof`, `recordsAarFormationLinkLiveProof`, `battleMarkerLiveProof`, `warStartFoundationalFlow`, and `serverPortCleanupVerified`. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk-size warnings. Report: `docs/40_reports/implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md`.
+
+**Scope/determinism:** UI/read-model/test/docs/browser-proof polish only; no simulation logic, scenario data, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. Evidence packets are local-only and omit saves, scenario dumps, player notes, usernames, file paths, and timestamps.
+
+---
+
 ## [2026-06-21] fix(ui): make sector override feedback explicit and visible
 
 **Type:** UI/read-model map-feedback polish.

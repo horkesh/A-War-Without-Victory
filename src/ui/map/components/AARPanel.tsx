@@ -189,7 +189,9 @@ function BattleRow({
     const label = getOsidDisplayName(battle.osid, osidDisplayNames);
     const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
     const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? 'text-text-secondary';
-    const countLabel = battle.was_concentrated ? `${battle.all_attacker_ids.length}×` : null;
+    const countLabel = battle.was_concentrated
+        ? t('aar.concentratedAttackShort', { count: battle.all_attacker_ids.length })
+        : null;
     const primaryAttackerLabel = getPlayerSafeBrigadeName(formationNameById.get(battle.primary_attacker_id));
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
