@@ -938,3 +938,11 @@ Report: `docs/40_reports/implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLI
 Chronicle Wrapped canonical slides, causality slide chrome, Chronicle chapter summaries, Chronicle accessibility labels, SpiderChart dimension labels/value keys, and Army HQ threat assessment prose now render through localized generated-copy boundaries. Authored event/operation/formation/officer/historical payloads remain authored data; raw causality branch tags remain in data and no longer render as visible bullets.
 
 ---
+
+# 2026-06-22 Command Briefing Structured Metadata
+
+Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_STRUCTURED_METADATA.md`
+
+Command briefing views now carry typed category/subject/copy-token metadata, Chief of Staff briefing consumes metadata instead of parsing English titles, low-cohesion warning items feed the CoS alert path, and Force Readiness recommendations use typed ids with legacy fallback compatibility.
+
+---

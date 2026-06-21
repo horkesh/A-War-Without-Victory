@@ -436,6 +436,55 @@ describe('Tactical map render smoke', () => {
     expect(briefing?.items[1]?.target).toEqual({ type: 'enclaves', enclaveId: 'gorazde' });
   });
 
+  it('canonical command briefing view infers structured metadata from stable ids', () => {
+    const briefing = toCommandBriefingView({
+      turn: 12,
+      faction: 'RBiH',
+      headline: '3 items for your review.',
+      criticalCount: 1,
+      warningCount: 2,
+      items: [
+        {
+          id: 'mil-cohesion-arbih_1st_corps',
+          section: 'military',
+          severity: 'warning',
+          title: '1st Corps: low cohesion',
+          detail: 'Average cohesion 32%.',
+          target: { corpsId: 'arbih_1st_corps' },
+        },
+        {
+          id: 'log-supply',
+          section: 'logistics',
+          severity: 'critical',
+          title: 'Supply lines critically exposed',
+          detail: '1 critical.',
+          target: { kind: 'summary', summaryFocus: 'support', label: 'Supply ledger' },
+        },
+        {
+          id: 'cmd-order-interpretations',
+          section: 'command',
+          severity: 'warning',
+          title: '1 order interpretation pending',
+          detail: 'Review required.',
+          target: { kind: 'officer_events', officerFocus: 'interpretations', label: 'Officer interpretations' },
+        },
+      ],
+    });
+
+    expect(briefing?.items.map(item => item.briefingCategory)).toEqual([
+      'cohesion',
+      'supply',
+      'order_interpretations',
+    ]);
+    expect(briefing?.items[0]?.subject).toEqual({
+      type: 'corps',
+      id: 'arbih_1st_corps',
+      label: '1st Corps',
+    });
+    expect(briefing?.items[1]?.subject).toEqual({ type: 'summary', label: 'Supply ledger' });
+    expect(briefing?.items[2]?.subject).toEqual({ type: 'summary', label: 'Officer interpretations' });
+  });
+
   it('canonical command briefing view maps target kind routes and labels', () => {
     const briefing = toCommandBriefingView({
       turn: 12,

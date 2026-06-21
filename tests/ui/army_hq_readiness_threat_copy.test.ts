@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
-import { ForceReadiness, readinessGradeLabel, type CorpsReadiness } from '../../src/ui/map/components/army_hq/ForceReadiness.js';
+import { ForceReadiness, generateForceReadiness, readinessGradeLabel, type CorpsReadiness } from '../../src/ui/map/components/army_hq/ForceReadiness.js';
 import { ThreatAssessment } from '../../src/ui/map/components/army_hq/ThreatAssessment.js';
 import { generateThreatAssessment } from '../../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import { t } from '../../src/ui/map/i18n/index.js';
@@ -150,6 +150,21 @@ describe('Army HQ readiness and threat copy', () => {
         } finally {
             setLocale('en', undefined);
         }
+    });
+
+    it('generates typed ForceReadiness recommendation ids instead of using English strings as control flow', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'brigade_1', name: '1st Brigade', kind: 'brigade', faction: 'RBiH', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
+        ] as any, [], 'RBiH', new Set(['corps_1']));
+
+        expect(items).toHaveLength(1);
+        expect(items[0]?.recommendationId).toBe('reinforce_front');
+        expect(items[0]?.recommendation).toBe('Reinforce front sectors');
+
+        const html = bcsMarkup(createElement(ForceReadiness, { items }));
+        expect(html).toContain('Pojacati prednje sektore');
+        expect(html).not.toContain('Reinforce front sectors');
     });
 
     it('generates BCS threat copy without English intel prose or raw sector ids', () => {

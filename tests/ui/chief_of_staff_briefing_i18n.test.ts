@@ -214,6 +214,7 @@ describe('Chief of Staff briefing localization', () => {
             id: 'exhaustion',
             kind: 'command',
             category: 'exhaustion',
+            briefingCategory: 'exhaustion',
             severity: 'warning',
             title: 'War exhaustion rising',
             detail: 'Existing source detail.',
@@ -238,6 +239,8 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'cohesion',
                 kind: 'military',
                 category: 'cohesion',
+                briefingCategory: 'cohesion',
+                subject: { type: 'corps', id: 'corps_1', label: '1st Corps' },
                 severity: 'critical',
                 title: '1st Corps cohesion critical',
                 detail: 'Existing source detail.',
@@ -248,6 +251,7 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'operation',
                 kind: 'military',
                 category: 'operations',
+                subject: { type: 'operation', id: 'op_1', label: 'River Line', corpsId: 'corps_1' },
                 severity: 'critical',
                 title: 'Op River Line awaits authorization',
                 detail: 'Existing source detail.',
@@ -258,6 +262,7 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'thin',
                 kind: 'military',
                 category: 'defense',
+                subject: { type: 'sector', id: 'sector_1', label: 'Tuzla corridor', corpsId: 'corps_2' },
                 severity: 'warning',
                 title: 'Thin front: Tuzla corridor',
                 detail: 'Existing source detail.',
@@ -288,6 +293,8 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'cohesion',
                 kind: 'military',
                 category: 'cohesion',
+                briefingCategory: 'cohesion',
+                subject: { type: 'corps', id: 'corps_1', label: '1st Corps' },
                 severity: 'critical',
                 title: '1st Corps cohesion critical',
                 detail: 'Existing source detail.',
@@ -298,6 +305,7 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'operation',
                 kind: 'military',
                 category: 'operations',
+                subject: { type: 'operation', id: 'op_1', label: 'River Line', corpsId: 'corps_1' },
                 severity: 'critical',
                 title: 'Op River Line awaits authorization',
                 detail: 'Existing source detail.',
@@ -308,6 +316,7 @@ describe('Chief of Staff briefing localization', () => {
                 id: 'thin',
                 kind: 'military',
                 category: 'defense',
+                subject: { type: 'sector', id: 'sector_1', label: 'Tuzla corridor', corpsId: 'corps_2' },
                 severity: 'warning',
                 title: 'Thin front: Tuzla corridor',
                 detail: 'Existing source detail.',
@@ -328,6 +337,76 @@ describe('Chief of Staff briefing localization', () => {
         expect(preciseText + aggressiveText).not.toContain('reports critical cohesion');
         expect(preciseText + aggressiveText).not.toContain('Awaiting GO/NO-GO');
         expect(preciseText + aggressiveText).not.toContain('is exposed');
+    });
+
+    it('uses structured briefing metadata instead of parsing rendered English titles', () => {
+        setLocale('bcs');
+        const state = {
+            ...makeMockLoadedGameState(),
+            turn: 1,
+            latestTurnSummary: null,
+            formations: [
+                ...makeMockLoadedGameState().formations,
+                {
+                    id: 'arbih_1st_corps',
+                    faction: 'RBiH',
+                    name: '1st Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    cohesion: 55,
+                    fatigue: 10,
+                    status: 'active',
+                    createdTurn: 0,
+                    tags: [],
+                    personnel: 9000,
+                },
+            ],
+        } as LoadedGameState;
+        const items: CommandBriefingItemView[] = [
+            {
+                id: 'mil-cohesion-arbih_1st_corps',
+                kind: 'military',
+                category: 'military',
+                briefingCategory: 'cohesion',
+                subject: { type: 'corps', id: 'arbih_1st_corps' },
+                severity: 'warning',
+                title: 'Kohezija je niska',
+                detail: 'Existing source detail.',
+                corpsId: 'arbih_1st_corps',
+                target: { type: 'corps', corpsId: 'arbih_1st_corps' },
+            },
+            {
+                id: 'operation',
+                kind: 'military',
+                category: 'operations',
+                subject: { type: 'operation', id: 'op_river', label: 'Operacija Neretva', corpsId: 'arbih_1st_corps' },
+                severity: 'critical',
+                title: 'Ceka se predsjednicka odluka',
+                detail: 'Existing source detail.',
+                corpsId: 'arbih_1st_corps',
+                target: { type: 'operation', operationKey: 'op_river' },
+            },
+            {
+                id: 'thin',
+                kind: 'military',
+                category: 'defense',
+                subject: { type: 'sector', id: 'sector_tuzla', label: 'Tuzlanski koridor', corpsId: 'arbih_1st_corps' },
+                severity: 'warning',
+                title: 'Tanka linija',
+                detail: 'Existing source detail.',
+                corpsId: 'arbih_1st_corps',
+                target: { type: 'sector', sectorId: 'sector_tuzla' },
+            },
+        ];
+
+        const text = flatten(generateCoSBriefing(items, state, 'RBiH'));
+
+        expect(text).toContain('Zabrinut sam zbog 1st Corps - kohezija je opasno niska.');
+        expect(text).toContain('Operacija Neretva');
+        expect(text).toContain('Tuzlanski koridor');
+        expect(text).not.toContain('Kohezija je niska');
+        expect(text).not.toContain('Ceka se predsjednicka odluka');
+        expect(text).not.toContain('Tanka linija');
     });
 
     it('localizes command-strain prose in BCS mode', () => {

@@ -168,6 +168,29 @@ function buildStrainParagraphs(state: LoadedGameState, faction: string, tone: Co
     return paragraphs;
 }
 
+function briefingCategory(item: BriefingItem): string | undefined {
+    return item.briefingCategory ?? item.category;
+}
+
+function findCorpsName(state: LoadedGameState, corpsId: string | undefined): string | undefined {
+    if (!corpsId) return undefined;
+    const formation = state.formations.find(f => f.id === corpsId);
+    return formation?.name ? getPlayerSafeCorpsName(formation.name, formation.id, t('chiefOfStaff.corpsCommandFallback')) : undefined;
+}
+
+function subjectLabel(item: BriefingItem, state: LoadedGameState, fallback: string): string {
+    if (item.subject?.type === 'corps') return findCorpsName(state, item.subject.id) ?? item.subject.label ?? fallback;
+    if (item.subject?.label) return item.subject.label;
+    if (item.target.label) return item.target.label;
+    return fallback;
+}
+
+function subjectCorpsId(item: BriefingItem): string | undefined {
+    if (item.subject?.type === 'corps') return item.subject.id;
+    if (item.subject?.type === 'operation' || item.subject?.type === 'sector') return item.subject.corpsId ?? item.corpsId;
+    return item.corpsId ?? item.target.corpsId;
+}
+
 export function generateCoSBriefing(
     briefingItems: BriefingItem[],
     state: LoadedGameState,
@@ -230,10 +253,10 @@ export function generateCoSBriefing(
         const segments: Segment[] = [text(pickPhrase(GREETINGS[tone], turn) + ' ')];
         let count = 0;
 
-        const cohesionItem = criticals.find(i => i.category === 'cohesion');
+        const cohesionItem = [...criticals, ...warnings].find(i => briefingCategory(i) === 'cohesion');
         if (cohesionItem && count < 3) {
-            const corpsName = cohesionItem.title.split(' cohesion')[0];
-            const corpsId = cohesionItem.corpsId;
+            const corpsName = subjectLabel(cohesionItem, state, t('chiefOfStaff.corpsCommandFallback'));
+            const corpsId = subjectCorpsId(cohesionItem);
             if (tone === 'cautious') {
                 segments.push(text(t('chiefOfStaff.alert.cohesion.cautious.prefix')));
                 segments.push(corpsId ? link(corpsName, corpsId) : text(corpsName));
@@ -248,10 +271,10 @@ export function generateCoSBriefing(
             count++;
         }
 
-        const opItem = criticals.find(i => i.category === 'operations');
+        const opItem = criticals.find(i => briefingCategory(i) === 'operations');
         if (opItem && count < 3) {
-            const opName = opItem.title.replace(/^Op /, '').replace(/ awaits.*/, '');
-            const corpsId = opItem.corpsId;
+            const opName = subjectLabel(opItem, state, opItem.title);
+            const corpsId = subjectCorpsId(opItem);
             if (tone === 'cautious') {
                 segments.push(text(t('chiefOfStaff.alert.operation.cautious.prefix')));
                 segments.push(corpsId ? link(opName, corpsId) : text(opName));
@@ -267,10 +290,10 @@ export function generateCoSBriefing(
             count++;
         }
 
-        const thinItem = warnings.find(i => i.category === 'defense');
+        const thinItem = warnings.find(i => briefingCategory(i) === 'defense');
         if (thinItem && count < 3) {
-            const sectorName = thinItem.title.replace(/^Thin front: /, '');
-            const corpsId = thinItem.corpsId;
+            const sectorName = subjectLabel(thinItem, state, thinItem.title);
+            const corpsId = subjectCorpsId(thinItem);
             if (tone === 'cautious') {
                 segments.push(text(t('chiefOfStaff.alert.defense.cautious.prefix')));
                 segments.push(corpsId ? link(sectorName, corpsId) : text(sectorName));
@@ -286,7 +309,7 @@ export function generateCoSBriefing(
             count++;
         }
 
-        const exhaustionItem = warnings.find(i => i.category === 'exhaustion');
+        const exhaustionItem = warnings.find(i => briefingCategory(i) === 'exhaustion');
         if (exhaustionItem && count < 3) {
             // Wording note (Cluster B): staff interpretation, not prediction.
             // Canonical corps-level readout lives in CommandRelationshipSection;
