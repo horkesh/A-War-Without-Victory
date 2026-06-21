@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command-copy grammar / Inbox / Chronicle label closeout:** [implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md](implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md) - Command-strain, presidential attention, and Operation Briefing count copy now use explicit EN/BCS one/many keys; generated Inbox opportunity/autonomy/paramilitary/officer rows localize instead of echoing English generated prose; Chronicle/Wrapped displacement and faction labels are player-safe and locale-aware.
+
 **Latest Records aftermath label-map hardening:** [implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md](implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md) - Army HQ Records and War Summary aftermath chrome now use explicit typed EN/BCS i18n label maps for tone, cost severity, signal kind, territory direction, campaign momentum, and desk-item action families instead of dynamic enum-key construction.
 
 **Latest pre-advance / desk severity chrome:** [implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md](implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md) - Advance Clearance review rows/blocker chrome, President's Desk packet severity badges/alt text, and Decision Room priority-card severity badges now render through EN/BCS i18n instead of raw enum or hardcoded English component copy.

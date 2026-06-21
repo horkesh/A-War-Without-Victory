@@ -5,7 +5,11 @@ import {
     getCounterfactualDivergencePoints,
     getEventChainSummary,
 } from '../../../../sim/events/causality_query.js';
-import { getPlayerSafeDisplayLabel } from '../../utils/playerSafeText.js';
+import {
+    getPlayerSafeDisplayLabel,
+    getPlayerSafePoliticalFactionName,
+} from '../../utils/playerSafeText.js';
+import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 
@@ -20,17 +24,12 @@ export interface WrappedSlide {
     data?: Record<string, unknown>;
 }
 
-const PLAYER_FACTION_LABELS: Record<string, string> = {
-    RBiH: 'Republic of Bosnia and Herzegovina',
-    RS: 'Republika Srpska',
-    HRHB: 'Herceg-Bosna',
-};
-
 const VALID_FACTION_IDS: ReadonlySet<string> = new Set(['RBiH', 'RS', 'HRHB']);
 
 function getFactionDisplayLabel(faction: string | undefined): string {
     if (!faction) return 'Unknown';
-    return PLAYER_FACTION_LABELS[faction] ?? faction;
+    if (VALID_FACTION_IDS.has(faction)) return sidePickerFactionLabel(faction as 'RBiH' | 'RS' | 'HRHB');
+    return getPlayerSafePoliticalFactionName(faction, getPlayerSafeDisplayLabel(faction, 'Unknown'));
 }
 
 function getPhaseDisplayLabel(phase: string): string {
@@ -286,7 +285,7 @@ export function generateWrappedSlides(
         heroValue: playerCapital != null ? playerCapital.toFixed(0) : '-',
         heroLabel: 'negotiating capital',
         detail: Object.entries(allCapitals)
-            .map(([f, v]) => `${f}: ${(v as number).toFixed(0)}`)
+            .map(([f, v]) => `${getFactionDisplayLabel(f)}: ${(v as number).toFixed(0)}`)
             .join(' | ') || undefined,
         data: { playerCapital: playerCapital ?? null, allCapitals },
     });

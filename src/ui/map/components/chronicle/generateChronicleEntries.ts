@@ -44,6 +44,7 @@ import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
 
 import {
+    getPlayerSafeDisplacementGroupLabel,
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
     getPlayerSafeOfficerName,
@@ -483,7 +484,7 @@ export function generateChronicleEntries(
         if (summary.displacement_total > DISPLACEMENT_THRESHOLD) {
             const ethnicBreakdown = summary.displacement_by_ethnicity || {};
             const detail = Object.entries(ethnicBreakdown)
-                .map(([eth, count]) => `${eth}: ${count}`)
+                .map(([eth, count]) => `${getPlayerSafeDisplacementGroupLabel(eth)}: ${count}`)
                 .join(', ');
             entries.push({
                 turn,

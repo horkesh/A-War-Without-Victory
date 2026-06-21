@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**BCS PLURAL GRAMMAR NEEDS FULL MESSAGE KEYS (2026-06-21).** English-style `{plural}` suffix interpolation creates invalid BCS copy. Do instead: select explicit `.one` / `.many` i18n keys when creating player-facing copy tokens, especially command-strain, presidential attention, and briefing badges.
+
+**CHRONICLE/WRAPPED LABELS MUST BE PLAYER-SAFE AND LOCALE-AWARE (2026-06-21).** Faction/displacement ids are joins, and English player-safe labels are not enough in BCS mode. Do instead: route displacement groups through shared display helpers and Wrapped faction copy through the same EN/BCS faction-label keys used by the side picker.
+
 **ARMY HQ FIELD DRILLDOWNS AND TURN-0 RECORDS PROVENANCE (2026-06-21).** Turn-0 setup summaries can exist without being normal player history, and Army HQ row expansion is not the same as field inspection. Do instead: gate Records/AAR/Chronicle/digest counts through `shouldNarrateTerritorySummary(...)`, expose explicit `Inspect` controls with stable sector/formation/corps data attributes, preserve corps context in briefing targets, and have browser proof target opening-command provenance hooks plus the landed Corps Front copy.
 
 **COMPACT COPY BOUNDARIES INCLUDE ARIA/TITLE/FALLBACK/LEGACY MODALS (2026-06-21).** Localizing the main panel body can still leave English in tooltip fallback rows, accessible count labels, title attributes, and DOM-string Warroom modals. Do instead: check fallback branches, `aria-label`, `title`, and legacy `innerHTML` renderers; render structured UI sentences from fields rather than echoing English read-model prose.

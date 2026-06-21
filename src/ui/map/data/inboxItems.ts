@@ -40,30 +40,47 @@ export interface InboxItem {
 
 function splitOpportunityDescription(description: string): { title: string; detail: string } {
     const trimmed = description.trim();
-    if (!trimmed) return { title: 'Operation Opportunity', detail: 'ops proposal requires your review.' };
+    if (!trimmed) return { title: t('inbox.item.operationOpportunity.titleFallback'), detail: t('inbox.item.operationOpportunity.detailFallback') };
+    if (getActiveLocale() !== 'en') return { title: t('inbox.item.operationOpportunity.titleFallback'), detail: t('inbox.item.operationOpportunity.detailFallback') };
     const emDashIndex = trimmed.indexOf('\u2014');
     const hyphenIndex = trimmed.indexOf(' - ');
     const splitAt = emDashIndex >= 0 ? emDashIndex : hyphenIndex >= 0 ? hyphenIndex : -1;
-    if (splitAt < 0) return { title: trimmed, detail: 'ops proposal requires your review.' };
+    if (splitAt < 0) return { title: trimmed, detail: t('inbox.item.operationOpportunity.detailFallback') };
     const delimiterLength = emDashIndex >= 0 ? 1 : 3;
     return {
-        title: trimmed.slice(0, splitAt).trim() || 'Operation Opportunity',
-        detail: trimmed.slice(splitAt + delimiterLength).trim() || 'ops proposal requires your review.',
+        title: trimmed.slice(0, splitAt).trim() || t('inbox.item.operationOpportunity.titleFallback'),
+        detail: trimmed.slice(splitAt + delimiterLength).trim() || t('inbox.item.operationOpportunity.detailFallback'),
     };
 }
 
-const OPPORTUNITY_RECOMMENDATION_LABELS: Record<string, string> = {
-    approve: 'authorization',
-    delay: 'delay',
-    redirect: 'redirection',
-    under_resource: 'authorization with reduced resources',
-    decline: 'declining',
+const OPPORTUNITY_RECOMMENDATION_LABEL_KEYS: Record<string, MessageKey> = {
+    approve: 'inbox.item.operationOpportunity.recommendation.approve',
+    delay: 'inbox.item.operationOpportunity.recommendation.delay',
+    redirect: 'inbox.item.operationOpportunity.recommendation.redirect',
+    under_resource: 'inbox.item.operationOpportunity.recommendation.underResource',
+    decline: 'inbox.item.operationOpportunity.recommendation.decline',
 };
 
 function formatOpportunityRecommendationDetail(proposedValue: string | null | undefined, fallbackDetail: string): string {
-    const label = proposedValue ? OPPORTUNITY_RECOMMENDATION_LABELS[proposedValue] : undefined;
-    if (label) return `Staff recommends ${label}.`;
+    const labelKey = proposedValue ? OPPORTUNITY_RECOMMENDATION_LABEL_KEYS[proposedValue] : undefined;
+    if (labelKey) return t('inbox.item.operationOpportunity.recommendationDetail', { recommendation: t(labelKey) });
     return fallbackDetail;
+}
+
+const PROPOSAL_DOMAIN_LABEL_KEYS: Partial<Record<string, MessageKey>> = {
+    ops: 'inbox.item.autonomyProposal.domain.ops',
+    military: 'inbox.item.autonomyProposal.domain.military',
+};
+
+function proposalDomainLabel(domain: string | null | undefined): string {
+    if (!domain) return t('inbox.item.autonomyProposal.domain.generic');
+    return t(PROPOSAL_DOMAIN_LABEL_KEYS[domain] ?? 'inbox.item.autonomyProposal.domain.generic');
+}
+
+function formatAutonomyProposalSubtitle(description: string | null | undefined, domain: string | null | undefined): string {
+    const trimmed = description?.trim();
+    if (getActiveLocale() === 'en' && trimmed) return trimmed;
+    return t('inbox.item.autonomyProposal.subtitleFallback', { domain: proposalDomainLabel(domain) });
 }
 
 function normalizeDedupeSubject(value: string | null | undefined): string | null {
@@ -220,8 +237,8 @@ export function deriveInboxItems(
                 id: `proposal:${prop.id}`,
                 type: 'autonomy_proposal',
                 severity: 'normal',
-                title: 'Command Proposal',
-                subtitle: prop.description || `${prop.domain} proposal requires your review.`,
+                title: t('inbox.item.autonomyProposal.title'),
+                subtitle: formatAutonomyProposalSubtitle(prop.description, prop.domain),
                 action: autonomySurface.inboxAction,
                 priority: 35,
             });
@@ -242,11 +259,24 @@ export function deriveInboxItems(
             id: `paramilitary:${state.turn ?? 0}`,
             type: 'paramilitary_request',
             severity: 'blocking',
-            title: paramilitarySurface.playerLabel,
-            subtitle:
-                `${paramilitaryRequests.length} deployment request${paramilitaryRequests.length === 1 ? '' : 's'} near ${samplePlace}; ` +
-                `${projectedCivilianRisk} projected civilian casualties; +${paramilitaryRequests.length} war crimes event${paramilitaryRequests.length === 1 ? '' : 's'}; ` +
-                `${standingImpact} international standing. Estimated strength ${totalStrength}.`,
+            title: t('inbox.item.paramilitary.title'),
+            subtitle: t('inbox.item.paramilitary.subtitle', {
+                requestCount: paramilitaryRequests.length,
+                requestLabel: t(paramilitaryRequests.length === 1
+                    ? 'inbox.item.paramilitary.request.one'
+                    : 'inbox.item.paramilitary.request.many'),
+                place: samplePlace,
+                civilianRisk: projectedCivilianRisk,
+                civilianLabel: t(projectedCivilianRisk === 1
+                    ? 'inbox.item.paramilitary.civilian.one'
+                    : 'inbox.item.paramilitary.civilian.many'),
+                warCrimeCount: paramilitaryRequests.length,
+                warCrimeLabel: t(paramilitaryRequests.length === 1
+                    ? 'inbox.item.paramilitary.warCrime.one'
+                    : 'inbox.item.paramilitary.warCrime.many'),
+                standingImpact,
+                strength: totalStrength,
+            }),
             action: paramilitarySurface.inboxAction,
             priority: 25,
         });
@@ -308,12 +338,14 @@ export function deriveInboxItems(
                 severity: 'normal',
                 title: commandInterpretation
                     ? armyCoOperationProposal
-                        ? 'Autonomous Operation Proposal'
-                        : 'Command Interpretation'
+                        ? t('inbox.item.officer.title.autonomousOperationProposal')
+                        : t('inbox.item.officer.title.commandInterpretation')
                     : evt.type === 'replacement_suggested'
-                        ? 'Commander Replacement'
-                        : 'Personnel Matter',
-                subtitle: evt.officer_name ? `Regarding ${evt.officer_name}.` : 'A personnel decision requires attention.',
+                        ? t('inbox.item.officer.title.commanderReplacement')
+                        : t('inbox.item.officer.title.personnelMatter'),
+                subtitle: evt.officer_name
+                    ? t('inbox.item.officer.subtitle.regarding', { officer: evt.officer_name })
+                    : t('inbox.item.officer.subtitle.fallback'),
                 updateCount: events.length,
                 sourceIds: events.map(event => event.event_id),
                 action: commandInterpretation ? 'decision_room' : officerSurface.inboxAction,

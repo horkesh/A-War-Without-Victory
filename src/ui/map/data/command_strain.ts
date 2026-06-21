@@ -353,7 +353,11 @@ export function deriveOrderInterpretation(
                     ? 'Professional judgment — recommends abort'
                     : 'Professional judgment — recommends waiting';
             const cautionToken = count > 0
-                ? copyToken('commandStrain.order.drag.priorDelays', cautionLabel, { count, plural: count > 1 ? 's' : '' })
+                ? copyToken(
+                    count === 1 ? 'commandStrain.order.drag.priorDelays.one' : 'commandStrain.order.drag.priorDelays.many',
+                    cautionLabel,
+                    { count },
+                )
                 : commanderAssessment === 'abort'
                     ? copyToken('commandStrain.order.drag.recommendsAbort', cautionLabel)
                     : copyToken('commandStrain.order.drag.recommendsWaiting', cautionLabel);
@@ -593,9 +597,9 @@ export function deriveRecoveryForecastToken(
     if (recoveryEntry) {
         const turnsUntilRecovery = recoveryEntry.turn - projections[0].turn;
         return copyToken(
-            'commandStrain.recovery.resolving',
+            turnsUntilRecovery === 1 ? 'commandStrain.recovery.resolving.one' : 'commandStrain.recovery.resolving.many',
             `Strain resolving in ${turnsUntilRecovery} turn${turnsUntilRecovery !== 1 ? 's' : ''}`,
-            { turns: turnsUntilRecovery, plural: turnsUntilRecovery !== 1 ? 's' : '' },
+            { turns: turnsUntilRecovery },
         );
     }
 
@@ -1095,15 +1099,21 @@ function classifyPrimaryConstraint(
     // 3. Defensive duty — garrison deficit, must-hold shortfall, no surplus
     const mustHoldDeficit = mustHoldZones.reduce((sum, z) => sum + z.deficit, 0);
     if (mustHoldDeficit > 0) {
-        const params = { count: mustHoldDeficit, plural: mustHoldDeficit > 1 ? 's' : '' };
+        const params = { count: mustHoldDeficit };
+        const reasonKey = mustHoldDeficit === 1
+            ? 'commandStrain.situation.reason.mustHoldDeficit.one'
+            : 'commandStrain.situation.reason.mustHoldDeficit.many';
+        const reliefKey = mustHoldDeficit === 1
+            ? 'commandStrain.situation.relief.mustHoldDeficit.one'
+            : 'commandStrain.situation.relief.mustHoldDeficit.many';
         const dominantReason = `Critical positions are undermanned — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short of minimum hold requirements`;
         const reliefPath = `Requires ${mustHoldDeficit} additional brigade${mustHoldDeficit > 1 ? 's' : ''} or consolidation of defensive positions`;
         return {
             primaryConstraint: 'defensive_duty',
             dominantReason,
-            dominantReasonToken: copyToken('commandStrain.situation.reason.mustHoldDeficit', dominantReason, params),
+            dominantReasonToken: copyToken(reasonKey, dominantReason, params),
             reliefPath,
-            reliefPathToken: copyToken('commandStrain.situation.relief.mustHoldDeficit', reliefPath, params),
+            reliefPathToken: copyToken(reliefKey, reliefPath, params),
         };
     }
     if (totalDeficit > 2) {

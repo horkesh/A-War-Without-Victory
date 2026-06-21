@@ -12,7 +12,7 @@ import {
 } from '../../src/ui/map/data/command_strain.js';
 import { CorpsSituationSection } from '../../src/ui/map/components/army_hq/CorpsSituationSection';
 import { OperationConstraintContext } from '../../src/ui/map/components/OperationBriefingModal';
-import { setLocale, t } from '../../src/ui/map/i18n/index.js';
+import { setLocale, t, type MessageKey } from '../../src/ui/map/i18n/index.js';
 
 const ENGLISH_LEAKS = [
     'STRAIN-SHAPED',
@@ -64,6 +64,49 @@ describe('command strain i18n boundary', () => {
         expectBcsCopy(t(stance.noticeToken!.key, stance.noticeToken!.params, 'bcs'));
         expectBcsCopy(t(recovery!.key, recovery!.params, 'bcs'));
         expectBcsCopy(t(delegation.labelToken!.key, delegation.labelToken!.params, 'bcs'));
+    });
+
+    it('uses full one/many message keys instead of English suffix composition', () => {
+        const priorDelays = deriveOrderInterpretation(0, 'postpone', undefined, undefined, 2).dragFactors[0].labelToken!;
+        const oneTurnRecovery = deriveRecoveryForecastToken([
+            { turn: 0, projectedStrain: 1 },
+            { turn: 1, projectedStrain: 0 },
+        ])!;
+        const twoTurnRecovery = deriveRecoveryForecastToken([
+            { turn: 0, projectedStrain: 2 },
+            { turn: 1, projectedStrain: 1 },
+            { turn: 2, projectedStrain: 0 },
+        ])!;
+        const mustHold = deriveCorpsSituationAssessment(
+            {
+                threat_assessment: { overall_pressure: 'low', enemy_concentration_zones: [] },
+                force_assessment: { total_brigades: 2, combat_effective: 1, total_surplus: 0 },
+                zone_assessments: [{ posture: 'thin', is_must_hold: true, deficit: 2, surplus_brigades: [], front_edge_count: 4 }],
+            },
+            'balanced',
+            10,
+            0,
+        );
+
+        expect(priorDelays.key).toBe('commandStrain.order.drag.priorDelays.many');
+        expect(oneTurnRecovery.key).toBe('commandStrain.recovery.resolving.one');
+        expect(twoTurnRecovery.key).toBe('commandStrain.recovery.resolving.many');
+        expect(mustHold.dominantReasonToken!.key).toBe('commandStrain.situation.reason.mustHoldDeficit.many');
+        expect(mustHold.reliefPathToken!.key).toBe('commandStrain.situation.relief.mustHoldDeficit.many');
+
+        const bcsCopy = [
+            t(priorDelays.key, priorDelays.params, 'bcs'),
+            t(oneTurnRecovery.key, oneTurnRecovery.params, 'bcs'),
+            t(twoTurnRecovery.key, twoTurnRecovery.params, 'bcs'),
+            t(mustHold.dominantReasonToken!.key, mustHold.dominantReasonToken!.params, 'bcs'),
+            t(mustHold.reliefPathToken!.key, mustHold.reliefPathToken!.params, 'bcs'),
+            t('attention.awaitReview.one' as MessageKey, { count: 1 }, 'bcs'),
+            t('attention.awaitReview.many' as MessageKey, { count: 2 }, 'bcs'),
+            t('operationBriefing.priorPostponements.one' as MessageKey, { count: 1 }, 'bcs'),
+            t('operationBriefing.priorPostponements.many' as MessageKey, { count: 2 }, 'bcs'),
+        ].join(' ');
+
+        expect(bcsCopy).not.toMatch(/odgodes|potezs|brigadas|predmets|postponement|delay|turns|matters/i);
     });
 
     it('emits BCS tokens for threat context, dominant reason, and relief path', () => {

@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
-import { generateWrappedSlides, WrappedSlide } from '../src/ui/map/components/chronicle/generateWrappedSlides.js';
+import { afterEach, describe, it, expect } from 'vitest';
+import { generateWrappedSlides } from '../src/ui/map/components/chronicle/generateWrappedSlides.js';
 import { turnToDateString } from '../src/ui/map/utils/formatters.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
 
 function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
     return {
@@ -40,6 +41,10 @@ function makeMinimalState(overrides: Record<string, any> = {}) {
 }
 
 describe('generateWrappedSlides', () => {
+    afterEach(() => {
+        setLocale('en');
+    });
+
     it('returns exactly 10 slides for null state', () => {
         const slides = generateWrappedSlides(null);
         expect(slides).toHaveLength(10);
@@ -240,8 +245,27 @@ describe('generateWrappedSlides', () => {
             });
             const slide = generateWrappedSlides(state).find(s => s.id === 'at_the_table')!;
             expect(slide.heroValue).toBe('73');
-            expect(slide.detail).toContain('RS');
-            expect(slide.detail).toContain('RBiH');
+            expect(slide.detail).toContain('Republika Srpska: 73');
+            expect(slide.detail).toContain('Republic of Bosnia and Herzegovina: 55');
+            expect(slide.detail).toContain('Croatian Republic of Herzeg-Bosnia: 40');
+            expect(slide.detail).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
+        });
+
+        it('localizes negotiating capital faction labels in BCS mode', () => {
+            setLocale('bcs');
+            const state = makeMinimalState({
+                player_faction: 'HRHB',
+                negotiatingCapital: { RS: 72.5, RBiH: 55.3, HRHB: 40.1 },
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'at_the_table')!;
+            const copy = `${slide.subtitle} ${slide.detail}`;
+
+            expect(copy).toContain('Republika Srpska: 73');
+            expect(copy).toContain('Republika Bosna i Hercegovina: 55');
+            expect(copy).toContain('Hrvatska Republika Herceg-Bosna: 40');
+            expect(copy).not.toContain('Republic of Bosnia and Herzegovina');
+            expect(copy).not.toContain('Croatian Republic of Herzeg-Bosnia');
+            expect(copy).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
         });
     });
 
@@ -343,14 +367,47 @@ describe('generateWrappedSlides', () => {
                 makeTurnSummary(1, { territory_net: { RBiH: 2 } }),
                 makeTurnSummary(2, { territory_net: { RBiH: -1 } }),
             ],
-            negotiatingCapital: { RBiH: 14 },
+            negotiatingCapital: { RBiH: 14, RS: 9, HRHB: 7 },
         }));
 
         const summaryText = slides
-            .flatMap((slide) => [slide.title, slide.subtitle, slide.heroLabel, slide.detail].filter(Boolean))
+            .flatMap((slide) => [
+                slide.title,
+                slide.subtitle,
+                slide.heroValue,
+                slide.heroLabel,
+                slide.detail,
+                ...(slide.bullets ?? []),
+            ].filter(Boolean))
             .join(' ');
 
         expect(summaryText).toContain('Republic of Bosnia and Herzegovina');
+        expect(summaryText).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
         expect(summaryText).not.toContain(' OSID');
+    });
+
+    it('uses localized player faction labels in BCS wrapped copy', () => {
+        setLocale('bcs');
+        const slides = generateWrappedSlides(makeMinimalState({
+            player_faction: 'RBiH',
+            negotiatingCapital: { RBiH: 14, RS: 9, HRHB: 7 },
+        }));
+
+        const summaryText = slides
+            .flatMap((slide) => [
+                slide.title,
+                slide.subtitle,
+                slide.heroValue,
+                slide.heroLabel,
+                slide.detail,
+                ...(slide.bullets ?? []),
+            ].filter(Boolean))
+            .join(' ');
+
+        expect(summaryText).toContain('Republika Bosna i Hercegovina');
+        expect(summaryText).toContain('Hrvatska Republika Herceg-Bosna');
+        expect(summaryText).not.toContain('Republic of Bosnia and Herzegovina');
+        expect(summaryText).not.toContain('Croatian Republic of Herzeg-Bosnia');
+        expect(summaryText).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
     });
 });

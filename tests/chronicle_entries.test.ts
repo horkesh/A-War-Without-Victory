@@ -95,7 +95,7 @@ describe('generateChronicleEntries', () => {
         expect(combat.length).toBe(0);
     });
 
-    it('creates humanitarian card for large displacement', () => {
+    it('creates humanitarian card for large displacement without raw faction ids', () => {
         const state = {
             turn: 8,
             turnSummaries: [{
@@ -103,7 +103,7 @@ describe('generateChronicleEntries', () => {
                 battles: [], notable_flips: [], notable_events: [],
                 events_fired: [],
                 decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
-                displacement_total: 1500, displacement_by_ethnicity: { RBiH: 1200, RS: 300 },
+                displacement_total: 1700, displacement_by_ethnicity: { RBiH: 1200, RS: 300, HRHB: 200 },
                 territory_net: {}, supply_deltas: {}, heavy_munitions_deltas: {},
                 movements: [], supply_transitions: [],
             }],
@@ -111,8 +111,30 @@ describe('generateChronicleEntries', () => {
         const entries = generateChronicleEntries(state as any);
         const humanitarian = entries.filter(e => e.type === 'humanitarian');
         expect(humanitarian.length).toBeGreaterThan(0);
-        expect(humanitarian[0].metadata?.displaced).toBe(1500);
-        expect(humanitarian[0].detail).toContain('1500 displaced');
+        expect(humanitarian[0].metadata?.displaced).toBe(1700);
+        expect(humanitarian[0].detail).toContain('1700 displaced');
+        expect(humanitarian[0].detail).toContain('Bosniaks: 1200');
+        expect(humanitarian[0].detail).toContain('Serbs: 300');
+        expect(humanitarian[0].detail).toContain('Croats: 200');
+        expect(humanitarian[0].detail).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
+    });
+
+    it('uses player-facing plural labels for displacement ethnicity keys', () => {
+        const state = {
+            turn: 8,
+            turnSummaries: [makeTurnSummary(8, {
+                displacement_total: 1750,
+                displacement_by_ethnicity: { Bosniak: 1200, Serb: 300, Croat: 200, Other: 50 },
+            })],
+        };
+
+        const humanitarian = generateChronicleEntries(state as any).find(e => e.type === 'humanitarian');
+
+        expect(humanitarian?.detail).toContain('Bosniaks: 1200');
+        expect(humanitarian?.detail).toContain('Serbs: 300');
+        expect(humanitarian?.detail).toContain('Croats: 200');
+        expect(humanitarian?.detail).toContain('Others: 50');
+        expect(humanitarian?.detail).not.toMatch(/\b(?:Bosniak|Serb|Croat|Other):/);
     });
 
     it('creates a cost card for severe player-scoped campaign cost', () => {

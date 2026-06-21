@@ -171,7 +171,7 @@ describe('buildWarroomPriorityDocketView', () => {
       'turn-aftermath-records',
     ]);
     expect(first.sourceHandoffSummary).toBe('4 source handoffs / 4 urgent');
-    expect(first.openBoardLabel).toBe('Open Desk');
+    expect(first.openBoardLabel).toBe('Open Decision Room');
   });
 
   it('keeps a quiet clear state available without inventing docket rows', () => {
@@ -236,6 +236,6 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.statusLabel).toBe('Napredovanje blokirano');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('source handoffs');
-    expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('Open Decision Room');
+    expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('Open Desk');
   });
 });
