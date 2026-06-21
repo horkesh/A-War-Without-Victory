@@ -4,7 +4,7 @@
 
 Closed the next BCS first-hour residual found by the Pyrrhic sweep. The foundational event modal, fallback Presidential Inbox items, and President's Desk packet labels now route first-hour chrome through EN/BCS i18n instead of preserving English component/registry literals.
 
-This branch does not translate authored event data titles, option labels, narrative, source notes, or staff assessments. Those remain data-owned content and need a separate event-data localization plan.
+This branch did not translate authored event data titles, option labels, narrative, source notes, or staff assessments. That adjacent data-owned lane is now closed by `20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md`; downstream effect-preview copy is closed by `20260621_BCS_FIRST_HOUR_EFFECT_PREVIEW_LOCALIZATION.md`.
 
 ## Files
 
@@ -27,6 +27,6 @@ This branch does not translate authored event data titles, option labels, narrat
 
 UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
-## Remaining Work
+## Follow-Up Status
 
-Author-owned event data localization remains open: BCS first required decisions can still show English authored event title/body/option data such as `What Is Bosnia?` or English option labels because those strings originate in `data/scenarios/events/war_1992.json`.
+Closed by later same-day slices: authored event data localization and downstream effect-preview/faction-name localization. No first-hour BCS decision-copy residual remains in this report's scope.
