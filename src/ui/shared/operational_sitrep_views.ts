@@ -5,10 +5,17 @@ import { humanizeOsid } from '../map/utils/osidDisplayName.js';
 
 export type OperationalSitrepSeverity = 'critical' | 'warning' | 'info';
 
+export interface OperationalSitrepCopyToken {
+    key: string;
+    params?: Record<string, string | number>;
+    paramKeys?: Record<string, string>;
+}
+
 export interface OperationalSitrepAlertView {
     id: string;
     severity: OperationalSitrepSeverity;
     text: string;
+    textToken?: OperationalSitrepCopyToken;
 }
 
 export interface OperationalSitrepFrontEdgeView {
@@ -36,10 +43,12 @@ export interface OperationalSitrepCorpsOperationView {
     phase: string | null;
     startedTurn: number | null;
     summary: string;
+    summaryToken?: OperationalSitrepCopyToken;
 }
 
 export interface OperationalSitrepView {
     headline: string;
+    headlineToken?: OperationalSitrepCopyToken;
     territory: {
         territoryPercent: number;
         settlementsControlled: number;
@@ -119,9 +128,39 @@ function turnToDateLabel(turn: number | null | undefined): string {
     return `${dayOfYear + 1} ${monthLabels[monthIndex]} ${year}`;
 }
 
+const OPERATION_TYPE_KEYS: Record<string, string> = {
+    sector_attack: 'opsPlanning.param.opType.sector_attack',
+    general_offensive: 'opsPlanning.param.opType.general_offensive',
+    strategic_defense: 'opsPlanning.param.opType.strategic_defense',
+    reorganization: 'opsPlanning.param.opType.reorganization',
+    feint: 'opsPlanning.param.opType.feint',
+    probe: 'opsPlanning.param.opType.probe',
+};
+
+const OPERATION_PHASE_KEYS: Record<string, string> = {
+    planning: 'operationHistory.weekly.phase.planning',
+    execution: 'operationHistory.weekly.phase.execution',
+};
+
 function operationSummary(operation: WarDataSnapshot['ownCorpsOps'][number]['operation']): string {
     if (!operation) return 'No active operation';
     return `${formatOperationType(operation.type)} in ${toTitleCase(operation.phase)} since ${turnToDateLabel(operation.started_turn)}.`;
+}
+
+function operationSummaryToken(operation: WarDataSnapshot['ownCorpsOps'][number]['operation']): OperationalSitrepCopyToken {
+    if (!operation) return { key: 'operationalSitrep.operation.none' };
+    return {
+        key: 'operationalSitrep.operation.activeSince',
+        params: {
+            type: formatOperationType(operation.type),
+            phase: toTitleCase(operation.phase),
+            date: turnToDateLabel(operation.started_turn),
+        },
+        paramKeys: {
+            ...(OPERATION_TYPE_KEYS[operation.type] ? { type: OPERATION_TYPE_KEYS[operation.type] } : {}),
+            ...(OPERATION_PHASE_KEYS[operation.phase] ? { phase: OPERATION_PHASE_KEYS[operation.phase] } : {}),
+        },
+    };
 }
 
 function exposedFrontSummary(count: number): string {
@@ -130,6 +169,14 @@ function exposedFrontSummary(count: number): string {
     if (count >= 6) return 'Several thinly held front sectors need staff review.';
     if (count > 0) return 'A thinly held front sector needs staff review.';
     return 'No thinly held front sectors are currently reported.';
+}
+
+function exposedFrontSummaryToken(count: number): OperationalSitrepCopyToken {
+    if (count >= 100) return { key: 'operationalSitrep.headline.frontExposed.widespread' };
+    if (count >= 25) return { key: 'operationalSitrep.headline.frontExposed.many' };
+    if (count >= 6) return { key: 'operationalSitrep.headline.frontExposed.several' };
+    if (count > 0) return { key: 'operationalSitrep.headline.frontExposed.one' };
+    return { key: 'operationalSitrep.headline.frontExposed.none' };
 }
 
 function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
@@ -152,6 +199,48 @@ function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
         return `${view.front.engagedCount} front contact${view.front.engagedCount === 1 ? '' : 's'} currently reported.`;
     }
     return 'No urgent operational developments are currently reported.';
+}
+
+function toHeadlineToken(view: Omit<OperationalSitrepView, 'headline'>): OperationalSitrepCopyToken {
+    if (view.front.exposedCount > 0) {
+        return exposedFrontSummaryToken(view.front.exposedCount);
+    }
+    if (view.readiness.encircledCount > 0) {
+        return {
+            key: view.readiness.encircledCount === 1
+                ? 'operationalSitrep.headline.encircled.one'
+                : 'operationalSitrep.headline.encircled.many',
+            params: { count: view.readiness.encircledCount },
+        };
+    }
+    if (view.sustainment.collapsedMunicipalities.length > 0) {
+        return { key: 'operationalSitrep.headline.sustainmentCollapsed' };
+    }
+    if (view.sustainment.criticalCount > 0) {
+        return {
+            key: view.sustainment.criticalCount === 1
+                ? 'operationalSitrep.headline.sustainmentCritical.one'
+                : 'operationalSitrep.headline.sustainmentCritical.many',
+            params: { count: view.sustainment.criticalCount },
+        };
+    }
+    if (view.operations.activeCount > 0) {
+        return {
+            key: view.operations.activeCount === 1
+                ? 'operationalSitrep.headline.activeOperations.one'
+                : 'operationalSitrep.headline.activeOperations.many',
+            params: { count: view.operations.activeCount },
+        };
+    }
+    if (view.front.engagedCount > 0) {
+        return {
+            key: view.front.engagedCount === 1
+                ? 'operationalSitrep.headline.frontContacts.one'
+                : 'operationalSitrep.headline.frontContacts.many',
+            params: { count: view.front.engagedCount },
+        };
+    }
+    return { key: 'operationalSitrep.headline.noUrgent' };
 }
 
 export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalSitrepView {
@@ -208,6 +297,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             phase: entry.operation?.phase ?? null,
             startedTurn: entry.operation?.started_turn ?? null,
             summary: operationSummary(entry.operation),
+            summaryToken: operationSummaryToken(entry.operation),
         }))
         .sort((a, b) => {
             const nameDelta = compareText(a.corpsName, b.corpsName);
@@ -226,6 +316,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'front-exposed',
             severity: 'critical',
             text: exposedFrontSummary(exposedCount),
+            textToken: exposedFrontSummaryToken(exposedCount),
         });
     }
     if (snapshot.brigadeMovement.encircled.length > 0) {
@@ -234,6 +325,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'brigades-encircled',
             severity: 'critical',
             text: `${encircledCount} brigade${encircledCount === 1 ? '' : 's'} are encircled.`,
+            textToken: {
+                key: encircledCount === 1
+                    ? 'operationalSitrep.alert.brigadesEncircled.one'
+                    : 'operationalSitrep.alert.brigadesEncircled.many',
+                params: { count: encircledCount },
+            },
         });
     }
     if (snapshot.ownExhaustion.collapseEligible) {
@@ -241,6 +338,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'collapse-eligible',
             severity: 'critical',
             text: 'Faction is collapse-eligible.',
+            textToken: { key: 'operationalSitrep.alert.collapseEligible' },
         });
     }
     if (collapsedMunicipalities.length > 0) {
@@ -248,6 +346,10 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'sustainment-collapsed',
             severity: 'warning',
             text: `Collapsed sustainment: ${collapsedMunicipalities.join(', ')}.`,
+            textToken: {
+                key: 'operationalSitrep.alert.sustainmentCollapsed',
+                params: { locations: collapsedMunicipalities.join(', ') },
+            },
         });
     } else if (snapshot.ownSupply.criticalCount > 0) {
         const criticalCount = snapshot.ownSupply.criticalCount;
@@ -255,6 +357,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'sustainment-critical',
             severity: 'warning',
             text: `${criticalCount} controlled municipality${criticalCount === 1 ? '' : 'ies'} are at critical sustainability.`,
+            textToken: {
+                key: criticalCount === 1
+                    ? 'operationalSitrep.alert.sustainmentCritical.one'
+                    : 'operationalSitrep.alert.sustainmentCritical.many',
+                params: { count: criticalCount },
+            },
         });
     }
     if (snapshot.ownAuthority.authority < 0.3) {
@@ -262,6 +370,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'authority-critical',
             severity: 'warning',
             text: 'Central authority is critically low.',
+            textToken: { key: 'operationalSitrep.alert.authorityCritical' },
         });
     }
     if (snapshot.ownExhaustion.increasing) {
@@ -269,6 +378,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'exhaustion-worsening',
             severity: 'warning',
             text: 'Exhaustion trend worsening.',
+            textToken: { key: 'operationalSitrep.alert.exhaustionWorsening' },
         });
     }
     if (
@@ -280,6 +390,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'alliance-strained',
             severity: 'warning',
             text: 'Alliance with partner faction is severely strained.',
+            textToken: { key: 'operationalSitrep.alert.allianceStrained' },
         });
     }
     if (snapshot.ownDisplacement.activeHostileTakeoverTimers > 0) {
@@ -288,6 +399,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'hostile-takeovers',
             severity: 'warning',
             text: `${timerCount} hostile takeover timer${timerCount === 1 ? '' : 's'} remain active.`,
+            textToken: {
+                key: timerCount === 1
+                    ? 'operationalSitrep.alert.hostileTakeovers.one'
+                    : 'operationalSitrep.alert.hostileTakeovers.many',
+                params: { count: timerCount },
+            },
         });
     }
     if (snapshot.brigadeMovement.packing.length > 0) {
@@ -296,6 +413,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'brigades-packing',
             severity: 'warning',
             text: `${packingCount} brigade${packingCount === 1 ? '' : 's'} are packing; front gaps may open.`,
+            textToken: {
+                key: packingCount === 1
+                    ? 'operationalSitrep.alert.brigadesPacking.one'
+                    : 'operationalSitrep.alert.brigadesPacking.many',
+                params: { count: packingCount },
+            },
         });
     }
     const activeOperationCount = corpsOperations.filter((entry) => entry.operationType !== null).length;
@@ -304,6 +427,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             id: 'active-operations',
             severity: 'info',
             text: `${activeOperationCount} corps command${activeOperationCount === 1 ? '' : 's'} are running active operations.`,
+            textToken: {
+                key: activeOperationCount === 1
+                    ? 'operationalSitrep.alert.activeOperations.one'
+                    : 'operationalSitrep.alert.activeOperations.many',
+                params: { count: activeOperationCount },
+            },
         });
     }
 
@@ -349,6 +478,7 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
 
     return {
         headline: toHeadline(viewWithoutHeadline),
+        headlineToken: toHeadlineToken(viewWithoutHeadline),
         ...viewWithoutHeadline,
     };
 }

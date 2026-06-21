@@ -12,6 +12,7 @@ import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeMilitaryFactionName, getPlayerSafeDisplayLabel } from '../utils/playerSafeText';
 import type {
     DiplomacyActorView,
+    LocalizedCopyToken,
     DiplomacyNeedleHintView,
     DiplomacyPressureReasonView,
     DiplomacyProposalView,
@@ -28,10 +29,32 @@ const PATRON_LABELS: Record<string, string> = {
     international_community: 'International Community',
 };
 
+const PATRON_LABEL_KEYS: Record<string, string> = {
+    serbia: 'diplomacy.patron.serbia',
+    croatia: 'diplomacy.patron.croatia',
+    international_community: 'diplomacy.patron.internationalCommunity',
+};
+
 const FACTION_PATRON: Record<string, string> = {
     RS: 'serbia',
     HRHB: 'croatia',
     RBiH: 'international_community',
+};
+
+const PRESSURE_REASON_LABEL_KEYS: Record<string, string> = {
+    atrocity_visibility: 'diplomacy.pressureReason.atrocityVisibility',
+    enclave_humanitarian_pressure: 'diplomacy.pressureReason.enclaveHumanitarianPressure',
+    sarajevo_siege_visibility: 'diplomacy.pressureReason.sarajevoSiegeVisibility',
+    negotiation_momentum: 'diplomacy.pressureReason.negotiationMomentum',
+};
+
+const RELATIONSHIP_EVENT_LABEL_KEYS: Record<string, string> = {
+    belgrade_border_pressure: 'diplomacy.relationshipEvent.belgradeBorderPressure',
+};
+
+const CONSEQUENCE_LABEL_KEYS: Record<string, string> = {
+    international_sanctions: 'diplomacy.consequence.internationalSanctions',
+    drina_blockade: 'diplomacy.consequence.drinaBlockade',
 };
 
 function asRecord(value: unknown): Record<string, any> | undefined {
@@ -111,6 +134,23 @@ function actorStanceSummary(actor: Pick<DiplomacyActorView, 'faction' | 'patronL
     return `${actor.patronLabel} channel is quiet; staff sees no dominant external pressure signal.`;
 }
 
+function actorStanceSummaryToken(actor: Pick<DiplomacyActorView, 'faction' | 'supportBand' | 'constraintBand' | 'commitmentBand' | 'isolationBand' | 'sanctionsActive'>): LocalizedCopyToken {
+    const forceLabel = getPlayerSafeMilitaryFactionName(actor.faction);
+    if (actor.sanctionsActive) {
+        return { key: 'diplomacy.actor.summary.sanctions', params: { force: forceLabel } };
+    }
+    if (actor.constraintBand === 'high' || actor.constraintBand === 'elevated') {
+        return { key: 'diplomacy.actor.summary.constrained' };
+    }
+    if (actor.supportBand === 'strong' && actor.commitmentBand === 'likely') {
+        return { key: 'diplomacy.actor.summary.strong' };
+    }
+    if (actor.isolationBand === 'high' || actor.isolationBand === 'elevated') {
+        return { key: 'diplomacy.actor.summary.isolated' };
+    }
+    return { key: 'diplomacy.actor.summary.quiet' };
+}
+
 function buildActor(state: any, faction: string, relationship: Record<string, any> | undefined): DiplomacyActorView {
     const patronState = getFactionPatronState(state, faction);
     const patronId = String(relationship?.patron_id ?? FACTION_PATRON[faction] ?? 'international_community');
@@ -124,6 +164,7 @@ function buildActor(state: any, faction: string, relationship: Record<string, an
         faction,
         patronId,
         patronLabel: PATRON_LABELS[patronId] ?? patronId,
+        patronLabelToken: PATRON_LABEL_KEYS[patronId] ? { key: PATRON_LABEL_KEYS[patronId] } : undefined,
         supportBand: supportBand(support),
         constraintBand: actorPressureBand(
             typeof relationship?.override_authority === 'number'
@@ -143,6 +184,7 @@ function buildActor(state: any, faction: string, relationship: Record<string, an
             : [],
     };
     actor.stanceSummary = actorStanceSummary(actor);
+    actor.stanceSummaryToken = actorStanceSummaryToken(actor);
     return actor;
 }
 
@@ -170,8 +212,14 @@ function buildActiveProposals(state: any): DiplomacyProposalView[] {
             id: 'dayton:pending',
             kind: 'dayton',
             name: 'Dayton negotiation menu',
+            nameToken: { key: 'diplomacy.proposal.dayton.name' },
             statusLabel: 'Menu prepared',
+            statusLabelToken: { key: 'diplomacy.proposal.dayton.status' },
             detail: `${territorialCount} territorial and ${institutionalCount} institutional items ready for review.`,
+            detailToken: {
+                key: 'diplomacy.proposal.dayton.detail',
+                params: { territorialCount, institutionalCount },
+            },
             confidence: 'known',
         });
     }
@@ -187,8 +235,11 @@ function buildActiveProposals(state: any): DiplomacyProposalView[] {
             id: `peace:${planId}`,
             kind: 'peace_plan',
             name: def?.name ?? 'Peace proposal',
+            nameToken: def ? undefined : { key: 'diplomacy.proposal.peace.defaultName' },
             statusLabel: 'Awaiting presidential response',
+            statusLabelToken: { key: 'diplomacy.proposal.peace.status' },
             detail: def?.narrative ?? 'International mediators have tabled a proposal.',
+            detailToken: def ? undefined : { key: 'diplomacy.proposal.peace.defaultDetail' },
             turnOffered,
             confidence: 'known',
         });
@@ -203,6 +254,7 @@ function buildPressureReasons(state: any): DiplomacyPressureReasonView[] {
         .map((entry) => ({
             key: entry.key,
             label: ivpComponentLabel(entry.key),
+            labelToken: PRESSURE_REASON_LABEL_KEYS[entry.key] ? { key: PRESSURE_REASON_LABEL_KEYS[entry.key] } : undefined,
             band: pressureBand(entry.raw),
             confidence: confidenceFromValue(entry.raw),
         }))
@@ -221,6 +273,7 @@ function buildConsequences(state: any): DiplomacyView['activeConsequences'] {
     return sortIvpConsequenceIds(ids).map((id) => ({
         id,
         label: formatIvpConsequenceLabel(id),
+        labelToken: CONSEQUENCE_LABEL_KEYS[id] ? { key: CONSEQUENCE_LABEL_KEYS[id] } : undefined,
     }));
 }
 
@@ -234,21 +287,37 @@ function buildNegotiationTimeline(
     const proposalEntries: DiplomacyTimelineEntryView[] = activeProposals.map((proposal) => ({
         id: `proposal:${proposal.id}`,
         label: proposal.name,
+        labelToken: proposal.nameToken,
         detail: proposal.statusLabel,
+        detailToken: proposal.statusLabelToken,
         turn: proposal.turnOffered,
         confidence: proposal.confidence,
     }));
     const relationshipEntries: DiplomacyTimelineEntryView[] = externalActors.flatMap((actor) => actor.events.map((event) => ({
         id: `patron:${actor.faction}:${event}`,
         label: `${actor.patronLabel}: ${getPlayerSafeDisplayLabel(event)}`,
+        labelToken: {
+            key: 'diplomacy.timeline.relationshipLabel',
+            params: RELATIONSHIP_EVENT_LABEL_KEYS[event] ? undefined : { event: getPlayerSafeDisplayLabel(event) },
+            paramKeys: {
+                ...(actor.patronLabelToken ? { patron: actor.patronLabelToken.key } : {}),
+                ...(RELATIONSHIP_EVENT_LABEL_KEYS[event] ? { event: RELATIONSHIP_EVENT_LABEL_KEYS[event] } : {}),
+            },
+        },
         detail: `${getPlayerSafeMilitaryFactionName(actor.faction)} channel relationship signal.`,
+        detailToken: {
+            key: 'diplomacy.timeline.relationshipDetail',
+            params: { force: getPlayerSafeMilitaryFactionName(actor.faction) },
+        },
         turn: undefined,
         confidence: 'likely' as const,
     })));
     const consequenceEntries: DiplomacyTimelineEntryView[] = activeConsequences.map((item) => ({
         id: `consequence:${item.id}`,
         label: item.label,
+        labelToken: item.labelToken,
         detail: 'Active international-pressure consequence.',
+        detailToken: { key: 'diplomacy.timeline.consequenceDetail' },
         turn: undefined,
         confidence: 'known' as const,
     }));
@@ -256,7 +325,24 @@ function buildNegotiationTimeline(
         ? patronDefianceCuts.entries.map((entry) => ({
             id: `patron-defiance:${actorFaction}:${entry.turn}:${entry.cutFraction}:${entry.supportAfter}`,
             label: `${PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron'} material support cut`,
+            labelToken: {
+                key: 'diplomacy.timeline.patronCutLabel',
+                params: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]]
+                    ? undefined
+                    : { patron: PATRON_LABELS[FACTION_PATRON[actorFaction]] ?? 'Patron' },
+                paramKeys: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]]
+                    ? { patron: PATRON_LABEL_KEYS[FACTION_PATRON[actorFaction]] }
+                    : undefined,
+            },
             detail: `${getPlayerSafeMilitaryFactionName(actorFaction)} channel lost ${Math.round(entry.cutFraction * 100)}% of material support; support after cut ${Math.round(entry.supportAfter * 100)}%.`,
+            detailToken: {
+                key: 'diplomacy.timeline.patronCutDetail',
+                params: {
+                    force: getPlayerSafeMilitaryFactionName(actorFaction),
+                    pct: Math.round(entry.cutFraction * 100),
+                    support: Math.round(entry.supportAfter * 100),
+                },
+            },
             turn: entry.turn,
             confidence: 'known' as const,
         }))
@@ -276,7 +362,17 @@ function buildNeedleHints(
         hints.push({
             id: `patron-constraint:${patronStance.faction}`,
             label: `Ease ${patronStance.patronLabel} constraint`,
+            labelToken: {
+                key: 'diplomacy.needle.easePatronConstraint',
+                params: patronStance.patronLabelToken ? undefined : { patron: patronStance.patronLabel },
+                paramKeys: patronStance.patronLabelToken ? { patron: patronStance.patronLabelToken.key } : undefined,
+            },
             detail: `${patronStance.patronLabel} pressure is ${patronStance.constraintBand}; staff expects less room for independent bargaining until that channel softens.`,
+            detailToken: {
+                key: 'diplomacy.needle.easePatronConstraintDetail',
+                params: patronStance.patronLabelToken ? undefined : { patron: patronStance.patronLabel },
+                paramKeys: patronStance.patronLabelToken ? { patron: patronStance.patronLabelToken.key } : undefined,
+            },
             confidence: 'likely',
         });
     }
@@ -284,7 +380,17 @@ function buildNeedleHints(
         hints.push({
             id: `pressure:${reason.key}`,
             label: `Reduce ${reason.label}`,
+            labelToken: {
+                key: 'diplomacy.needle.reducePressure',
+                params: reason.labelToken ? undefined : { reason: reason.label },
+                paramKeys: reason.labelToken ? { reason: reason.labelToken.key } : undefined,
+            },
             detail: `${reason.label} is ${reason.band}; this is one of the visible signals shaping external pressure.`,
+            detailToken: {
+                key: 'diplomacy.needle.reducePressureDetail',
+                params: reason.labelToken ? undefined : { reason: reason.label },
+                paramKeys: reason.labelToken ? { reason: reason.labelToken.key } : undefined,
+            },
             confidence: reason.confidence,
         });
     }
@@ -292,7 +398,14 @@ function buildNeedleHints(
         hints.push({
             id: 'proposal-resolution',
             label: 'Resolve the active proposal packet',
+            labelToken: { key: 'diplomacy.needle.resolveProposal' },
             detail: `${activeProposals.length} proposal surface${activeProposals.length === 1 ? ' is' : 's are'} awaiting review; leaving it open keeps the diplomatic agenda unresolved.`,
+            detailToken: {
+                key: activeProposals.length === 1
+                    ? 'diplomacy.needle.resolveProposalDetailSingle'
+                    : 'diplomacy.needle.resolveProposalDetailMulti',
+                params: { count: activeProposals.length },
+            },
             confidence: 'known',
         });
     }

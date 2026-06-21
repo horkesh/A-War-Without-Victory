@@ -13,6 +13,7 @@ import { SituationTab } from '../SituationTab';
 import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
 import { buildTurnAftermathCampaignCost } from '../../data/turnAftermath';
 import { t, type MessageKey } from '../../i18n';
+import { localizedOperationalSitrepCopy } from '../../utils/operationalSitrepCopy';
 
 const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
     ['overview', 'warSummary.tab.overview'],
@@ -201,7 +202,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                             {sitrep && (
                                 <SummarySection title={t('warSummary.section.operationalSitrep')}>
                                     <div className="space-y-1 text-[12px]">
-                                        <div className="text-text-secondary leading-snug">{sitrep.headline}</div>
+                                        <div className="text-text-secondary leading-snug">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
                                         <div className="flex items-center justify-between gap-3">
                                             <span className="text-text-secondary">{t('warSummary.label.fronts')}</span>
                                             <span className="text-text-primary tabular-nums">{t('warSummary.value.fronts', { engaged: sitrep.front.engagedCount, exposed: sitrep.front.exposedCount })}</span>
@@ -216,7 +217,7 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                         </div>
                                         {sitrep.alerts.length > 0 && (
                                             <div className="text-[10px] text-text-secondary leading-snug">
-                                                {sitrep.alerts.slice(0, 2).map((alert) => alert.text).join(' ')}
+                                                {sitrep.alerts.slice(0, 2).map((alert) => localizedOperationalSitrepCopy(alert.textToken, alert.text)).join(' ')}
                                             </div>
                                         )}
                                     </div>

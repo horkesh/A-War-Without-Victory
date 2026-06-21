@@ -38,6 +38,8 @@ import {
   type SiegeFaction,
 } from '../data/sarajevoSiege';
 import { t } from '../i18n';
+import type { MessageKey } from '../i18n';
+import { localizedOperationalSitrepCopy } from '../utils/operationalSitrepCopy';
 
 const FACTIONS: Array<'RS' | 'RBiH' | 'HRHB'> = ['RS', 'RBiH', 'HRHB'];
 
@@ -130,28 +132,28 @@ function pressureDriverLabel(raw: number): string {
   return 'quiet';
 }
 
-function contactBand(count: number): string {
-  if (count >= 150) return 'widespread contact';
-  if (count >= 50) return 'broad contact';
-  if (count >= 12) return 'several active sectors';
-  if (count > 0) return 'limited contact';
-  return 'quiet';
+function contactBandKey(count: number): MessageKey {
+  if (count >= 150) return 'situation.contactBand.widespread';
+  if (count >= 50) return 'situation.contactBand.broad';
+  if (count >= 12) return 'situation.contactBand.several';
+  if (count > 0) return 'situation.contactBand.limited';
+  return 'situation.contactBand.quiet';
 }
 
-function thinFrontBand(count: number): string {
-  if (count >= 100) return 'widespread';
-  if (count >= 25) return 'many';
-  if (count >= 6) return 'several';
-  if (count > 0) return 'isolated';
-  return 'none reported';
+function thinFrontBandKey(count: number): MessageKey {
+  if (count >= 100) return 'situation.thinFrontBand.widespread';
+  if (count >= 25) return 'situation.thinFrontBand.many';
+  if (count >= 6) return 'situation.thinFrontBand.several';
+  if (count > 0) return 'situation.thinFrontBand.isolated';
+  return 'situation.thinFrontBand.none';
 }
 
-function alliancePostureLabel(alliance: number): string {
-  if (alliance <= 0.10) return 'open conflict';
-  if (alliance <= 0.20) return 'mobilizing against each other';
-  if (alliance <= 0.45) return 'strained';
-  if (alliance <= 0.70) return 'working alliance';
-  return 'close coordination';
+function alliancePostureKey(alliance: number): MessageKey {
+  if (alliance <= 0.10) return 'situation.alliancePosture.openConflict';
+  if (alliance <= 0.20) return 'situation.alliancePosture.mobilizing';
+  if (alliance <= 0.45) return 'situation.alliancePosture.strained';
+  if (alliance <= 0.70) return 'situation.alliancePosture.working';
+  return 'situation.alliancePosture.close';
 }
 
 function legacySitrepTokenForOsid(osid: string): string {
@@ -279,11 +281,11 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {!focusedMode && sitrep && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
         <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
-        <div className="text-text-secondary">{sitrep.headline}</div>
+        <div className="text-text-secondary">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
         <div className="text-text-secondary">
           {t('situation.frontsLine', {
-            contactBand: contactBand(sitrep.front.engagedCount),
-            thinBand: thinFrontBand(sitrep.front.exposedCount),
+            contactBand: t(contactBandKey(sitrep.front.engagedCount)),
+            thinBand: t(thinFrontBandKey(sitrep.front.exposedCount)),
           })}
         </div>
         <div className="text-text-secondary">
@@ -344,7 +346,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
         </div>
-        <div className="text-text-secondary">{t('situation.alliancePosture', { posture: alliancePostureLabel(alliance) })}</div>
+        <div className="text-text-secondary">{t('situation.alliancePosture', { posture: t(alliancePostureKey(alliance)) })}</div>
       </section>
       )}
 
@@ -538,7 +540,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         ) : (
           <>
             {(sitrep?.alerts ?? []).map((alert) => (
-              <div key={alert.id} className="text-text-secondary">- {alert.text}</div>
+              <div key={alert.id} className="text-text-secondary">- {localizedOperationalSitrepCopy(alert.textToken, alert.text)}</div>
             ))}
             {alerts.sort((a, b) => a.localeCompare(b)).map((alert) => (
               <div key={alert} className="text-text-secondary">- {alert}</div>

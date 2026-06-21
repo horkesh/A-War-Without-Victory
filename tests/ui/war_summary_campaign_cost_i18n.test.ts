@@ -64,6 +64,34 @@ function stateWithCampaignCost(): LoadedGameState {
     } as LoadedGameState;
 }
 
+function stateWithOperationalSitrep(): LoadedGameState {
+    return {
+        ...stateWithCampaignCost(),
+        operationalSitrep: {
+            headline: 'Widespread thinly held front sectors need staff review.',
+            headlineToken: { key: 'operationalSitrep.headline.frontExposed.widespread' },
+            territory: { territoryPercent: 50, settlementsControlled: 1, settlementsTotal: 2 },
+            front: { engagedCount: 4, exposedCount: 2, edges: [] },
+            readiness: { weakestBrigades: [], encircledCount: 0 },
+            sustainment: {
+                adequateCount: 1,
+                strainedCount: 1,
+                criticalCount: 0,
+                collapsedMunicipalities: [],
+                activeHostileTakeoverTimers: 0,
+                activeCamps: 0,
+            },
+            operations: { activeCount: 0, corps: [] },
+            alerts: [{
+                id: 'collapse-eligible',
+                severity: 'critical',
+                text: 'Faction is collapse-eligible.',
+                textToken: { key: 'operationalSitrep.alert.collapseEligible' },
+            }],
+        },
+    } as LoadedGameState;
+}
+
 describe('War Summary campaign cost localization', () => {
     afterEach(() => {
         cleanup();
@@ -97,5 +125,19 @@ describe('War Summary campaign cost localization', () => {
         expect(campaignCost.textContent).not.toContain('Neto OSID');
         expect(screen.queryByText('Campaign Cost')).toBeNull();
         expect(screen.queryByText('Enemy control is summarized through staff assessments and front reports, not exact faction-wide totals.')).toBeNull();
+    });
+
+    it('renders BCS operational SITREP token copy in the overview', () => {
+        setLocale('bcs');
+        storeState.loadedGameState = stateWithOperationalSitrep();
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const text = screen.getByText('Operativni izvjestaj').parentElement?.textContent ?? '';
+        expect(text).toContain('Široko rasprostranjeni tanko držani frontovski sektori traže pregled štaba.');
+        expect(text).toContain('Frakcija ispunjava uslove za kolaps.');
+        expect(text).not.toContain('Widespread thinly held front sectors need staff review.');
+        expect(text).not.toContain('Faction is collapse-eligible.');
+        expect(text).not.toContain('collapse-eligible');
     });
 });

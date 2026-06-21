@@ -101,6 +101,31 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/Front contacts:\s*\d|thinly held:\s*\d|0\.75/);
   });
 
+  it('renders operational SITREP token copy in BCS mode without English generated fallbacks', () => {
+    setLocale('bcs');
+    const state = makeSitrepState();
+    state.operationalSitrep = {
+      ...state.operationalSitrep!,
+      headline: 'Widespread thinly held front sectors need staff review.',
+      headlineToken: { key: 'operationalSitrep.headline.frontExposed.widespread' },
+      alerts: [{
+        id: 'collapse-eligible',
+        severity: 'critical',
+        text: 'Faction is collapse-eligible.',
+        textToken: { key: 'operationalSitrep.alert.collapseEligible' },
+      }],
+    } as typeof state.operationalSitrep;
+
+    const { container } = render(createElement(SituationTab, { state }));
+
+    expect(container.textContent).toContain('Široko rasprostranjeni tanko držani frontovski sektori traže pregled štaba.');
+    expect(container.textContent).toContain('Frakcija ispunjava uslove za kolaps.');
+    expect(container.textContent).not.toContain('Widespread thinly held front sectors need staff review.');
+    expect(container.textContent).not.toContain('Faction is collapse-eligible.');
+    expect(container.textContent).not.toContain('thinly held front sectors');
+    expect(container.textContent).not.toContain('collapse-eligible');
+  });
+
   it('localizes local-support labels without English order names in BCS mode', () => {
     setLocale('bcs');
     const state = makeState({

@@ -394,16 +394,24 @@ export interface InternationalVisibilityPressureView {
 
 export type PlayerKnowledgeConfidence = 'known' | 'likely' | 'uncertain';
 
+export interface LocalizedCopyToken {
+    key: string;
+    params?: Record<string, string | number>;
+    paramKeys?: Record<string, string>;
+}
+
 export interface DiplomacyActorView {
     faction: string;
     patronId: string;
     patronLabel: string;
+    patronLabelToken?: LocalizedCopyToken;
     supportBand: 'strong' | 'steady' | 'strained' | 'limited';
     constraintBand: 'high' | 'elevated' | 'limited' | 'quiet';
     commitmentBand: 'likely' | 'uncertain' | 'limited' | 'unknown';
     isolationBand: 'high' | 'elevated' | 'limited' | 'quiet';
     sanctionsActive: boolean;
     stanceSummary: string;
+    stanceSummaryToken?: LocalizedCopyToken;
     events: string[];
 }
 
@@ -411,8 +419,11 @@ export interface DiplomacyProposalView {
     id: string;
     kind: 'peace_plan' | 'dayton' | 'proposal_review';
     name: string;
+    nameToken?: LocalizedCopyToken;
     statusLabel: string;
+    statusLabelToken?: LocalizedCopyToken;
     detail: string;
+    detailToken?: LocalizedCopyToken;
     turnOffered?: number;
     confidence: PlayerKnowledgeConfidence;
 }
@@ -420,6 +431,7 @@ export interface DiplomacyProposalView {
 export interface DiplomacyPressureReasonView {
     key: string;
     label: string;
+    labelToken?: LocalizedCopyToken;
     band: 'high' | 'medium' | 'low' | 'quiet';
     confidence: PlayerKnowledgeConfidence;
 }
@@ -427,7 +439,9 @@ export interface DiplomacyPressureReasonView {
 export interface DiplomacyTimelineEntryView {
     id: string;
     label: string;
+    labelToken?: LocalizedCopyToken;
     detail: string;
+    detailToken?: LocalizedCopyToken;
     turn?: number;
     confidence: PlayerKnowledgeConfidence;
 }
@@ -435,7 +449,9 @@ export interface DiplomacyTimelineEntryView {
 export interface DiplomacyNeedleHintView {
     id: string;
     label: string;
+    labelToken?: LocalizedCopyToken;
     detail: string;
+    detailToken?: LocalizedCopyToken;
     confidence: PlayerKnowledgeConfidence;
 }
 
@@ -485,7 +501,7 @@ export interface DiplomacyView {
     activeProposals: DiplomacyProposalView[];
     externalActors: DiplomacyActorView[];
     pressureReasons: DiplomacyPressureReasonView[];
-    activeConsequences: Array<{ id: string; label: string }>;
+    activeConsequences: Array<{ id: string; label: string; labelToken?: LocalizedCopyToken }>;
     negotiationTimeline: DiplomacyTimelineEntryView[];
     needleHints: DiplomacyNeedleHintView[];
 }
