@@ -1,3 +1,7 @@
+## 2026-06-21 - Warroom route labels
+
+**Warroom route metadata and rendered labels are separate:** `WARROOM_ROUTE_ENTRIES` may keep English `label` metadata for contracts and fallback/debug purposes, but rendered toolbar chrome should use typed `labelKey` values through `t(...)`. Durable rule: do not replace route ids, commands, or hotspot mappings when localizing Warroom chrome; add render keys and focused accessibility tests instead. Applied in `[2026-06-21] BCS Warroom Toolbar Chrome`; report `docs/40_reports/implemented/20260621_BCS_WARROOM_TOOLBAR_CHROME.md`.
+
 ## 2026-06-21 - New Game picker faction labels
 
 **Faction picker labels are picker-domain UI copy:** `MainMenu` and `SidePickerOverlay` should use `sidePicker.faction.*` keys for New Game faction labels. Durable rule: do not localize this path by changing global player-safe political-name helpers, because those helpers are shared by broader command-map surfaces with different copy contracts. Applied in `[2026-06-21] BCS Side Picker Faction Labels`; report `docs/40_reports/implemented/20260621_BCS_SIDE_PICKER_FACTION_LABELS.md`.

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { setLocale } from '../../src/ui/map/i18n';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -40,6 +41,7 @@ describe('WarroomShellLayer accessibility proof', () => {
     afterEach(() => {
         cleanup();
         vi.unstubAllGlobals();
+        setLocale('en');
     });
 
     it('exposes hotspots as keyboard-focusable buttons with stable labels', () => {
@@ -83,6 +85,35 @@ describe('WarroomShellLayer accessibility proof', () => {
         ]) {
             expect(within(toolbar).getByRole('button', { name: label })).toBeTruthy();
         }
+    });
+
+    it('renders localized BCS toolbar labels', () => {
+        setLocale('bcs');
+        storeState = {
+            loadedGameState: {
+                player_faction: 'RBiH',
+                metadata: { date: 'April 1993' },
+            },
+        };
+
+        renderShell();
+
+        const toolbar = screen.getByRole('navigation', { name: 'Navigacija ratne sobe' });
+        expect(toolbar).toBeTruthy();
+        for (const label of [
+            /Predsjedni/,
+            /Komandna plo/,
+            /Diplomatija/,
+            /Obavje/,
+            /tab armije/,
+            /Hronika/,
+            /Frakcija/,
+            /Ratna karta/,
+            /Naprijed/,
+        ]) {
+            expect(within(toolbar).getByRole('button', { name: label })).toBeTruthy();
+        }
+        expect(within(toolbar).queryByRole('button', { name: "President's Desk" })).toBeNull();
     });
 
     it('activates mapped hotspots with Enter and Space', () => {

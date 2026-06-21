@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize BCS Warroom toolbar chrome
+
+**Type:** UI/read-model i18n/accessibility copy polish.
+
+**Fix:** `WARROOM_ROUTE_ENTRIES` now keep their English `label` metadata while also carrying typed `labelKey` values. `WarroomShellLayer` renders the toolbar navigation aria label and route button text through EN/BCS i18n keys, closing the BCS leak where the first-frame Warroom toolbar stayed English-only.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/warroom_shell_accessibility.test.ts --pool=forks --reporter=dot` failed on the hardcoded English `Warroom navigation` aria label and English toolbar buttons. Green proof passed 13/13 after the fix. Report: `docs/40_reports/implemented/20260621_BCS_WARROOM_TOOLBAR_CHROME.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, route commands, hotspot ids, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize BCS New Game faction-picker labels
 
 **Type:** UI/read-model i18n copy polish.
