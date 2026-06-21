@@ -1,4 +1,4 @@
-# Owner Decision Backlog — consolidated (2026-06-07)
+# Pyrrhic Decision Register — consolidated (2026-06-07)
 
 > **⚠️ RECONCILED 2026-06-09 (D4 beta-gate sweep) — read this first.** Many items below have
 > SHIPPED or changed disposition since 2026-06-07. Quick map (authoritative state = the alpha-band
@@ -6,7 +6,7 @@
 > territory UNCHANGED at 649/712, anchors 30/30):
 > - **§1 Presidential Command Model** — Option 1 (faction-asymmetric command friction) SHIPPED (#274/#313/#319); force-launch cost preview SHIPPED (#349/#54).
 > - **§3 Event-system observer-flag writer** — SHIPPED (#285); the A3 authorship/dead-bridge fix + dynamic codex morphing SHIPPED (#348 A3; #334 A1c).
-> - **§4 §6 VRS strangle-not-capture** — BUILT as contain Lane V (#339, default-off, §6 release-reliability proven); measured **calibration-INERT** on the historical path (eastern enclaves fall via Krivaja triggered ops). D1 draft recommends SHELVE.
+> - **§4 §6 VRS strangle-not-capture** — BUILT as contain Lane V (#339, default-off, §6 release-reliability proven); later Srebrenica/Žepa reconciliation supersedes the Krivaja-triggered-fall framing: enclave fall receipts are event-owned, while Krivaja/Stupčanica remain chronology/AAR context. D1 draft recommends SHELVE.
 > - **§5 Political-Dimension Propagation** — patron_confidence + military_credibility ACTIVATED (#325); intl_standing + internal_cohesion stay guarded-OFF (task #48). `intl_only`/`cohesion_only` activation = D1-time.
 > - **§7 TG Sept-1995** — HVO western robustness (#278) + Sana (#284) shipped; Mistral SW-belt + Ključ PARKED.
 > - **§10 Fall-1995 combat-math** — E-A5 launch-halt ACTIVATED + firing (#312/#325); E-B1 still the keystone, D1-time.
@@ -14,13 +14,13 @@
 > - **`op:zvornik:zvornik` (tracked item below)** — **RECOVERED by #279 garrison-pin; floor is 30/30 anchors. NO LONGER OPEN** — corrected in that section.
 > - **ALPHA BAND COMPLETE (2026-06-09)** + **1.0 Definition-of-Done RATIFIED** (`docs/plans/2026-06-08-v1.0-definition-of-done.md`); we are at the **0.9.9-beta gate**. **B1 casualty missing-fix** (#344) HELD for D1; the **D1 finalization sequence** is drafted (`docs/plans/2026-06-09-d1-finalization-sequence-DRAFT.md`). Version: package.json = **0.9.6-alpha.1**.
 
-**Purpose:** A single place for the owner to pick up the ten open decisions distilled from the
+**Purpose:** A single Pyrrhic-panel decision register for the ten open decisions distilled from the
 2026-06-07 Pyrrhic decision-packet round, plus two tracked open items (a cross-cutting
 doc-staleness sweep and the `op:zvornik:zvornik` 188w anchor regression). One section per item:
 **Decision / Options / Recommendation / Flags / Build-lane / Status.** Nothing here changes
 behavior — it is a decision register, not an implementation. Where a recommendation says "ready",
-it is byte-identical-by-construction or docs-only unless the owner explicitly authorizes a
-calibration-moving change.
+it is byte-identical-by-construction or docs-only unless the Pyrrhic panel explicitly signs off a
+calibration-moving change under the relevant canon/calibration gate.
 
 **Flag legend:** §6 = sensitive-history gate (`docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md`);
 canon = touches canon-tier docs; calibration = can move a baseline; effort = rough size;
@@ -46,7 +46,7 @@ risk = primary downside if mishandled.
 - **Flags:** §6 none · canon none · calibration none (player-only, byte-identical) · effort medium
   · risk low (documenting an unbuilt consequence as shipped).
 - **Build-lane:** Presidential-command engine lane.
-- **Status:** **READY — owner go-ahead.** Substrate exists; this is a connection packet.
+- **Status:** **READY — panel-routed connection packet.** Substrate exists; this is a connection packet.
 
 ---
 
@@ -101,7 +101,7 @@ risk = primary downside if mishandled.
 - **Flags:** §6 YES (Pyrrhic §6-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to owner) · canon none · calibration yes (changes enclave
   timing) · effort medium · risk HIGH (a stuck release suppresses the historical fall).
 - **Build-lane:** Faction-AI posture lane, under the §6 chain.
-- **Status:** **§6-GATED — needs user approval; documented-ceiling fallback.**
+- **Status:** **§6-GATED — requires Pyrrhic §6-panel GO; documented-ceiling fallback.**
 
 ---
 
@@ -132,7 +132,7 @@ risk = primary downside if mishandled.
 - **Recommendation:** **§6-GATED — remediate `croat_bosniak_war_begins_1993` FIRST.** It still
   carries an unsourced "ethnic cleansing on both sides" symmetry sentence — the highest canon-risk
   sentence in the bank; drop it unless ICTY side-specific sourcing exists. Then, in order: the
-  Bijeljina informational event; the 1992-siege pair; and (user-gated) the Srebrenica-column /
+  Bijeljina informational event; the 1992-siege pair; and (§6-panel gated) the Srebrenica-column /
   UN-safe-area events. Note `federation_ground_offensive_1995` is an OPERATIONAL overclaim, not a
   §6 issue. Also: 6 non-sensitive deposit essays should be RECLASSIFIED OUT of the §6 lane (they
   are gating §6 review for no reason).
@@ -185,8 +185,8 @@ risk = primary downside if mishandled.
 - **Options:** pull the substrate forward now / full continuous condition now / defer entirely.
 - **Recommendation:** **BUILD — hybrid.** Pull the SUBSTRATE forward now: it fixes a real fidelity
   bug — `sarajevo_exception.ts:109` sets `externalSupply = internalSupply`, which makes the Butmir
-  tunnel / airlift fictional. Defer the player surface + the default-flip to post-1.0 (§6 + user
-  approval). Plan: `docs/plans/2026-05-29-b7-sarajevo-siege-continuous-condition-plan.md`
+  tunnel / airlift fictional. Defer the player surface + the default-flip to post-1.0 (§6-panel
+  sign-off). Plan: `docs/plans/2026-05-29-b7-sarajevo-siege-continuous-condition-plan.md`
   Phases 0-3.
 - **Flags:** §6 partial (default-flip + player surface) · canon none · calibration yes (substrate
   fix may move supply) · effort medium · risk medium.

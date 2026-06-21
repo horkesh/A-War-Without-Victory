@@ -21920,3 +21920,11 @@ Repaired the command-card localization boundary after Baseline Regression caught
 Verification: focused CI-repro proof `node node_modules\vitest\vitest.mjs run tests/ui/presidential_categories.test.ts tests/ui/command_card_strip_accessibility.test.ts --pool=forks --reporter=dot` passed 18/18. `npm.cmd run typecheck` passed. `npm.cmd run test:vitest:fast` passed 10,251/10,285 tests with 34 existing skips across 1,092/1,096 files, matching the Baseline Regression fast unit gate that failed before this repair.
 
 Determinism/scope: UI component fallback/docs only; no route ids, command-surface category ids, i18n keys, simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-21 - Pyrrhic decision-register process cleanup
+
+Cleaned the active command-board pointer and June 7 decision register so future agents read the file as a Pyrrhic-panel decision register rather than an owner-wait queue. The cleanup also replaces stale Srebrenica/Žepa Krivaja-triggered-fall wording with the current event-owned receipt contract and removes active `user approval`/`owner approval` gate phrasing from sensitive-history and artifact-governance rows.
+
+Verification: targeted process grep over `docs/plans/COMMAND_BOARD.md` and `docs/plans/2026-06-07-owner-decision-backlog.md` returned no matches for `owner go-ahead`, `owner approval`, `user approval`, `owner-gated`, `owner-wait`, `Owner decision`, `owner decision`, `Krivaja triggered`, or `eastern enclaves fall via Krivaja`. `git diff --check` passed.
+
+Determinism/scope: docs/process cleanup only; no FORAWWV edit, code, simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, randomness, timestamps, or persisted output ordering changed.
