@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize BCS Decision Room source/action labels
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** `presidentialDecisionRoom` now localizes Decision Room generated-card and source-handoff source/action labels at the projection boundary: presidential inbox source labels, manifest decision source/action labels, paramilitary action labels, inbox handoff labels, and peace-plan briefing action labels. The English `DECISION_SURFACE_REGISTRY` literals remain stable contract metadata.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts --pool=forks --reporter=dot` failed on BCS `Presidential Inbox` source/handoff labels and `Review Plan` action copy. Green proof passed 38/38 after the fix. Report: `docs/40_reports/implemented/20260621_BCS_DECISION_ROOM_SOURCE_ACTION_LABELS.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, decision-surface registry literals, route commands, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize BCS Warroom toolbar chrome
 
 **Type:** UI/read-model i18n/accessibility copy polish.

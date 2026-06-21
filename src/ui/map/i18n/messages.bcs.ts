@@ -3212,6 +3212,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionRoom.action.reviewQueue': 'Pregled reda',
     'decisionRoom.action.personnel': 'Personel',
     'decisionRoom.action.reviewBriefing': 'Pregledaj brifing',
+    'decisionRoom.action.reviewPlan': 'Pregledaj plan',
     'decisionRoom.action.reviewEnclaves': 'Pregledaj enklave',
     'decisionRoom.action.openInbox': 'Otvori inbox',
     'decisionRoom.action.reviewDossier': 'Pregledaj dosije',

@@ -345,6 +345,34 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('localizes peace-plan briefing action labels in BCS mode', () => {
+    setLocale('bcs');
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Peace plan requires response.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'dip-peace-plan',
+            kind: 'diplomatic',
+            severity: 'critical',
+            title: 'Peace plan requires response',
+            detail: 'A peace plan has been proposed.',
+            actionLabel: 'Review Plan',
+            target: { type: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'briefing:dip-peace-plan');
+
+    expect(card?.actionLabel).toBe('Pregledaj plan');
+    expect(card?.actionLabel).not.toBe('Review Plan');
+  });
+
   it('groups source handoffs by existing inspection surface without creating a new owner', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -701,6 +729,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(loopsById.cost.summary).toContain('stavke cijene');
     expect(loopsById.report.summary).toContain('zapisana poteza');
     expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Štaba armije');
+    expect(handoffsById['presidential-inbox'].label).toBe('Predsjednički inbox');
+    expect(handoffsById['presidential-inbox'].label).not.toBe('Presidential Inbox');
     expect(handoffsById['turn-aftermath-records'].label).toBe('Zapisi posljedica poteza');
     expect(handoffsById.chronicle.actionLabel).toBe('Otvori Hroniku');
     expect(view.commandQuestions.map((question) => question.label)).not.toContain('Urgent');
@@ -734,6 +764,15 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
 
     const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
+
+    expect(cardsById['review:pending'].sourceLabel).toBe('Predsjednički inbox');
+    expect(cardsById['paramilitary:pending'].actionLabel).toBe('Pregledaj raspoređivanje');
+    expect(cardsById['manifest:peace_plan'].sourceLabel).toBe('Mirovni prijedlog');
+    expect(cardsById['manifest:peace_plan'].actionLabel).toBe('Otvori inbox');
+    expect(cardsById['manifest:convoy_decision'].sourceLabel).toBe('Pregled konvoja');
+    expect(cardsById['manifest:convoy_decision'].actionLabel).toBe('Otvori inbox');
+    expect(Object.values(cardsById).map((card) => `${card.sourceLabel} ${card.actionLabel}`).join('\n'))
+      .not.toMatch(/Presidential Inbox|Diplomatic channel|Humanitarian channel|Review deployment|Review proposal|Review convoy/);
 
     expect(cardsById['review:pending'].title).toBe('Predsjednički pregledi na čekanju');
     expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednički red pregleda');
