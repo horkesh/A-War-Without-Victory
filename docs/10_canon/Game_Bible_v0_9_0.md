@@ -326,7 +326,7 @@ A historical event becomes eligible for rupture status only if it meets all four
 3. **Specific trigger condition:** discrete, deterministic game-state condition (control of a specific OSID, presence of a flag, turn range), NOT a cumulative threshold and NOT a calendar-window heuristic.
 4. **Non-reversible:** once recorded, the event is a fact of the world for the run.
 
-Adding a rupture is a capital-R Decision requiring `/historian` + `/war-or-game` + `/game-designer` + user approval. The default is: do not add one.
+Adding a rupture is a capital-R Decision requiring `/historian` + `/war-or-game` + `/game-designer` review and Pyrrhic-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to the owner. The default is: do not add one.
 
 ### 22.3 Counterfactual silence is canon
 

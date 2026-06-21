@@ -283,7 +283,7 @@ Changes to this system require explicit review:
 | Change | Review required |
 |---|---|
 | Grade anchor thresholds | `/game-designer` + `/war-or-game` |
-| New outcome class | `/game-designer` + `/narrative-designer` + user approval |
+| New outcome class | `/game-designer` + `/narrative-designer` review and Pyrrhic-panel sign-off; BLOCK, split verdict, or bright-line uncertainty escalates to the owner |
 | Dimension weights | `/game-designer` + `/historian` |
 | New condemnation flag | See `SENSITIVE_HISTORY_DESIGN_GATE.md` §6 |
 | Scenario contract schema | `/technical-architect` + `/qa-engineer` |

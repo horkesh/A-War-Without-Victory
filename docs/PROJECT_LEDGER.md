@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] docs: align active process docs with panel sign-off and packaging pause
+
+**Type:** Documentation/process cleanup.
+
+**Fix:** Active canon/planning docs now use Pyrrhic-panel sign-off language instead of stale `user approval` phrasing for rupture/outcome-class additions; the plans index labels the decision register as Pyrrhic-panel routed; the 1.0 DoD marks C3 as closed by the current-state header, clarifies that packaging proof exists but installer work remains paused until D2 player satisfaction, and keeps D3 operator evidence as required; the lower historical roadmap "Current" paragraph is explicitly superseded by the current headers.
+
+**Verification:** Targeted grep over active docs for owner/user-gate phrasing and packaging-ready drift; targeted grep over active docs for Srebrenica/Zepa scripted-op fall-delivery language; `git diff --check`.
+
+**Scope/determinism:** Docs/process wording only; no FORAWWV edit, simulation logic, scenario data, save schema, generated artifact, package version, calibration floor, golden manifest, structural fingerprint, or packaged installer output changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize War Map chrome labels
 
 **Type:** UI/i18n copy polish.

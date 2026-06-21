@@ -9,7 +9,7 @@
 | Current dispatch board, ownership, stop gates | [COMMAND_BOARD.md](COMMAND_BOARD.md) |
 | Current roadmap lineage and supersessions | [MASTER_ROADMAP.md](MASTER_ROADMAP.md) |
 | 1.0 go/no-go definition | [2026-06-08-v1.0-definition-of-done.md](2026-06-08-v1.0-definition-of-done.md) |
-| Owner decision register | [2026-06-07-owner-decision-backlog.md](2026-06-07-owner-decision-backlog.md) |
+| Pyrrhic decision register | [2026-06-07-owner-decision-backlog.md](2026-06-07-owner-decision-backlog.md) |
 | Execution-plan handoff standard | [PLAN_EXECUTION_STANDARD.md](PLAN_EXECUTION_STANDARD.md) |
 | Post-D2 residuals and do-not-autobuild list | [POST_D2_RESIDUALS.md](POST_D2_RESIDUALS.md) |
 
