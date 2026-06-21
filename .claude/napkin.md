@@ -16,6 +16,8 @@
 
 **OFFICER COMMAND PUSHBACK IS DECISION ROOM COMMAND REVIEW (2026-06-21).** Order refusals, pushback, order-exceeded, and army-directive pushback are not generic Personnel. Do instead: route them to Decision Room command lens with Army HQ Briefing as `sourceHandoffTarget`; keep only roster/replacement/relief matters on direct Personnel.
 
+**MAP OVERLAY TIMERS MUST BE CHUNK-LOCAL (2026-06-21).** MapContainer overlay work can be canceled between front and deferred formation passes. Do instead: use unique/idempotent dev timers, start deferred timers inside the scheduled callback, and set `appliedStateRef.current = null` when cleanup cancels deferred overlay work.
+
 **GENERATED INBOX ITEM COPY BOUNDARY (2026-06-21).** Dayton, convoy, reserve, territory gain/loss, and date-marker Inbox rows are generated in `deriveInboxItems`, but still player copy. Do instead: route generated Inbox titles/subtitles through `inbox.item.*` i18n keys and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values.
 
 **EVENT DECISION EFFECT PREVIEW BOUNDARY (2026-06-21).** Response effects, dimension shifts, and `sets_flags` render inside the required decision moment. Do instead: localize faction names and effect templates at the modal display boundary, resolve known dimensions through diplomacy labels, and map flag values to localized option labels or neutral recorded-choice copy instead of humanizing raw ids like `civic`.

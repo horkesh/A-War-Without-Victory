@@ -68,6 +68,7 @@ import {
   type FrontEdgeRecord as CorridorFrontEdgeRecord,
   type FrontPressureRecord as CorridorFrontPressureRecord,
 } from '../layers/buildCorridorHeartbeatOverlay';
+import { createDevTimer } from './overlayTiming';
 
 /**
  * Feature flag: Map That Scars per-OSID damage overlay.
@@ -1163,87 +1164,90 @@ export function MapContainer() {
 
         let controlledGeoJson: FeatureCollection;
         try {
-          if (devMode) console.time('[MapContainer] overlay control');
+          const controlTimer = createDevTimer('[MapContainer] overlay control', devMode);
           const m1 = mapRef.current;
-          controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement, useGameStore.getState().osidPropertiesMap);
-          (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
-          const contestedBandsGeoJson = buildContestedBandsGeoJSON({
-            controlGeoJson: controlledGeoJson,
-            currentTurn: state.turn,
-            recentControlEvents: state.allControlEvents ?? state.recentControlEvents ?? [],
-            frontEdgesOsid: state.frontEdgesOsid ?? [],
-            formations: state.formations,
-          });
-          safeEnsureSource(m1, CONTESTED_BANDS_SOURCE_ID, { type: 'geojson', data: contestedBandsGeoJson });
-          const contestedSource = m1.getSource(CONTESTED_BANDS_SOURCE_ID) as GeoJSONSource | undefined;
-          if (contestedSource) contestedSource.setData(contestedBandsGeoJson);
-          if (!safeHasLayer(m1, CONTESTED_BANDS_FILL_LAYER_ID)) {
-            m1.addLayer(
-              {
-                id: CONTESTED_BANDS_FILL_LAYER_ID,
-                type: 'fill',
-                source: CONTESTED_BANDS_SOURCE_ID,
-                paint: {
-                  'fill-color': [
-                    'match',
-                    ['get', 'contested_reason'],
-                    'recent_change', 'rgba(230, 178, 80, 0.30)',
-                    'adjacent_pressure', 'rgba(220, 80, 70, 0.24)',
-                    'rgba(210, 210, 210, 0.16)',
-                  ],
-                  'fill-opacity': [
-                    'interpolate',
-                    ['linear'],
-                    ['get', 'contested_score'],
-                    0.5, 0.20,
-                    1.0, 0.42,
-                  ],
-                },
-              },
-              OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID,
-            );
-          }
-          if (!safeHasLayer(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID)) {
-            m1.addLayer(
-              {
-                id: CONTESTED_BANDS_OUTLINE_LAYER_ID,
-                type: 'line',
-                source: CONTESTED_BANDS_SOURCE_ID,
-                paint: {
-                  'line-color': [
-                    'match',
-                    ['get', 'contested_reason'],
-                    'recent_change', 'rgba(245, 196, 96, 0.78)',
-                    'adjacent_pressure', 'rgba(238, 103, 88, 0.70)',
-                    'rgba(230, 230, 230, 0.45)',
-                  ],
-                  'line-width': [
-                    'interpolate',
-                    ['linear'],
-                    ['zoom'],
-                    7, 0.6,
-                    10, 1.1,
-                    13, 1.8,
-                  ],
-                  'line-dasharray': [2, 2],
-                },
-              },
-              'front-line-base',
-            );
-          }
-          const showContestedBands = mapMode === 'political' || mapMode === 'ethnic';
-          safeSetLayoutVisibility(m1, CONTESTED_BANDS_FILL_LAYER_ID, showContestedBands);
-          safeSetLayoutVisibility(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID, showContestedBands);
           try {
-            const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
-            setSettlementLabelData(majorLabels.features);
-            safeEnsureSource(m1, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: majorLabels });
-            const lblSrc = m1.getSource(MAJOR_CITY_LABELS_SOURCE_ID) as GeoJSONSource | undefined;
-            if (lblSrc) lblSrc.setData(majorLabels);
-          } catch (labelErr) {
-            console.warn('[MapContainer] major-city-labels setData failed:', labelErr);
+            controlledGeoJson = buildControlGeoJSON(base, state.controlBySettlement, useGameStore.getState().osidPropertiesMap);
+            (m1.getSource('osid-control') as GeoJSONSource)?.setData(controlledGeoJson);
+            const contestedBandsGeoJson = buildContestedBandsGeoJSON({
+              controlGeoJson: controlledGeoJson,
+              currentTurn: state.turn,
+              recentControlEvents: state.allControlEvents ?? state.recentControlEvents ?? [],
+              frontEdgesOsid: state.frontEdgesOsid ?? [],
+              formations: state.formations,
+            });
+            safeEnsureSource(m1, CONTESTED_BANDS_SOURCE_ID, { type: 'geojson', data: contestedBandsGeoJson });
+            const contestedSource = m1.getSource(CONTESTED_BANDS_SOURCE_ID) as GeoJSONSource | undefined;
+            if (contestedSource) contestedSource.setData(contestedBandsGeoJson);
+            if (!safeHasLayer(m1, CONTESTED_BANDS_FILL_LAYER_ID)) {
+              m1.addLayer(
+                {
+                  id: CONTESTED_BANDS_FILL_LAYER_ID,
+                  type: 'fill',
+                  source: CONTESTED_BANDS_SOURCE_ID,
+                  paint: {
+                    'fill-color': [
+                      'match',
+                      ['get', 'contested_reason'],
+                      'recent_change', 'rgba(230, 178, 80, 0.30)',
+                      'adjacent_pressure', 'rgba(220, 80, 70, 0.24)',
+                      'rgba(210, 210, 210, 0.16)',
+                    ],
+                    'fill-opacity': [
+                      'interpolate',
+                      ['linear'],
+                      ['get', 'contested_score'],
+                      0.5, 0.20,
+                      1.0, 0.42,
+                    ],
+                  },
+                },
+                OSID_SELECTED_MUN_SIBLING_FILL_LAYER_ID,
+              );
+            }
+            if (!safeHasLayer(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID)) {
+              m1.addLayer(
+                {
+                  id: CONTESTED_BANDS_OUTLINE_LAYER_ID,
+                  type: 'line',
+                  source: CONTESTED_BANDS_SOURCE_ID,
+                  paint: {
+                    'line-color': [
+                      'match',
+                      ['get', 'contested_reason'],
+                      'recent_change', 'rgba(245, 196, 96, 0.78)',
+                      'adjacent_pressure', 'rgba(238, 103, 88, 0.70)',
+                      'rgba(230, 230, 230, 0.45)',
+                    ],
+                    'line-width': [
+                      'interpolate',
+                      ['linear'],
+                      ['zoom'],
+                      7, 0.6,
+                      10, 1.1,
+                      13, 1.8,
+                    ],
+                    'line-dasharray': [2, 2],
+                  },
+                },
+                'front-line-base',
+              );
+            }
+            const showContestedBands = mapMode === 'political' || mapMode === 'ethnic';
+            safeSetLayoutVisibility(m1, CONTESTED_BANDS_FILL_LAYER_ID, showContestedBands);
+            safeSetLayoutVisibility(m1, CONTESTED_BANDS_OUTLINE_LAYER_ID, showContestedBands);
+            try {
+              const majorLabels = buildMajorCityLabelGeoJSON(controlledGeoJson);
+              setSettlementLabelData(majorLabels.features);
+              safeEnsureSource(m1, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: majorLabels });
+              const lblSrc = m1.getSource(MAJOR_CITY_LABELS_SOURCE_ID) as GeoJSONSource | undefined;
+              if (lblSrc) lblSrc.setData(majorLabels);
+            } catch (labelErr) {
+              console.warn('[MapContainer] major-city-labels setData failed:', labelErr);
+            }
+          } finally {
+            controlTimer.end();
           }
-          if (devMode) console.timeEnd('[MapContainer] overlay control');
         } catch (e) {
           console.error('[MapContainer] overlay control failed:', e);
           appliedStateRef.current = null;
@@ -1253,46 +1257,47 @@ export function MapContainer() {
         requestAnimationFrame(() => {
           if (cancelled || !mapRef.current || !state) return;
           try {
-            if (devMode) console.time('[MapContainer] overlay front+formations');
+            const frontTimer = createDevTimer('[MapContainer] overlay front', devMode);
             const m2 = mapRef.current;
             // Corps-colored fronts when sector data is available; else faction borders
             let frontLinesGeoJson;
-            if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
-              const rbihHrhbAllied = state.war_alliance_rbih_hrhb != null
-                ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
-              frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
-                controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
-                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
-                state.frontPressureByEdge,
-                state.frontEdgesOsid,
-                Object.fromEntries(state.formations.map((formation) => [formation.id, { entrenchment_turns: formation.entrenchment_turns }]))
-              );
-              // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
-              try {
-                const corpsColorExpr = buildCorpsColorExpression(state.corpsFrontSectors);
-                m2.setPaintProperty('faction-border-glow-pos', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
-                m2.setPaintProperty('faction-border-glow-neg', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
-              } catch (e) {
-                console.warn('[MapContainer] Failed to set corps glow colors:', e);
+            try {
+              if (state.corpsFrontSectors && state.corpsFrontSectors.length > 0) {
+                const rbihHrhbAllied = state.war_alliance_rbih_hrhb != null
+                  ? state.war_alliance_rbih_hrhb > 0.2 : undefined;
+                frontLinesGeoJson = buildCorpsFrontLinesGeoJSON(
+                  controlledGeoJson, state.corpsFrontSectors, rbihHrhbAllied,
+                  osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined,
+                  state.frontPressureByEdge,
+                  state.frontEdgesOsid,
+                  Object.fromEntries(state.formations.map((formation) => [formation.id, { entrenchment_turns: formation.entrenchment_turns }]))
+                );
+                // Corps colors on glow layers only; front-line-base/stripe stay black-white stripe.
+                try {
+                  const corpsColorExpr = buildCorpsColorExpression(state.corpsFrontSectors);
+                  m2.setPaintProperty('faction-border-glow-pos', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
+                  m2.setPaintProperty('faction-border-glow-neg', 'line-color', corpsColorExpr as maplibregl.ExpressionSpecification);
+                } catch (e) {
+                  console.warn('[MapContainer] Failed to set corps glow colors:', e);
+                }
+              } else {
+                frontLinesGeoJson = buildFrontLinesGeoJSON(
+                  controlledGeoJson,
+                  state.war_alliance_rbih_hrhb,
+                  osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
+                );
               }
-            } else {
-              frontLinesGeoJson = buildFrontLinesGeoJSON(
-                controlledGeoJson,
-                state.war_alliance_rbih_hrhb,
-                osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined
-              );
-            }
-            const stableFrontLinesGeoJson = buildFrontStabilityGeoJSON(frontLinesGeoJson);
-            (m2.getSource('front-lines') as GeoJSONSource)?.setData(stableFrontLinesGeoJson);
+              const stableFrontLinesGeoJson = buildFrontStabilityGeoJSON(frontLinesGeoJson);
+              (m2.getSource('front-lines') as GeoJSONSource)?.setData(stableFrontLinesGeoJson);
 
-            // Operational Heatmap (Mode 7) update
-            if (Number(mapMode) === 7 && osidCentroidsRef.current.size > 0) {
-              const heatmapData = buildOperationalHeatmapGeoJSON(state, osidCentroidsRef.current);
-              (m2.getSource('operational-heatmap') as GeoJSONSource)?.setData(heatmapData);
-            }
+              // Operational Heatmap (Mode 7) update
+              if (Number(mapMode) === 7 && osidCentroidsRef.current.size > 0) {
+                const heatmapData = buildOperationalHeatmapGeoJSON(state, osidCentroidsRef.current);
+                (m2.getSource('operational-heatmap') as GeoJSONSource)?.setData(heatmapData);
+              }
 
-            const frontEdgesOsid = state.frontEdgesOsid;
-            if (frontEdgesOsid && frontEdgesOsid.length > 0) {
+              const frontEdgesOsid = state.frontEdgesOsid;
+              if (frontEdgesOsid && frontEdgesOsid.length > 0) {
               const centroidsForHover = osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined;
               const frontEdgesHoverData = buildFrontEdgesHoverGeoJSON(
                 controlledGeoJson,
@@ -1448,6 +1453,10 @@ export function MapContainer() {
               }
             }
 
+            } finally {
+              frontTimer.end();
+            }
+
             requestAnimationFrame(() => {
               if (cancelled || !mapRef.current || !state) return;
               try {
@@ -1462,6 +1471,7 @@ export function MapContainer() {
                 const runDeferred = () => {
                   if (cancelled || !mapRef.current || !state) return;
                   const initialMap = mapRef.current;
+                  const deferredTimer = createDevTimer('[MapContainer] overlay deferred formations', devMode);
                   try {
                     try {
                       ensureFormationIcons(initialMap, iconIds);
@@ -1733,10 +1743,11 @@ export function MapContainer() {
                     // Without this, sources like operational-heatmap/enclave-* may never tile,
                     // blocking isStyleLoaded() and leaving the map blank.
                     m.triggerRepaint();
-                    if (devMode) console.timeEnd('[MapContainer] overlay front+formations');
                   } catch (deferredErr) {
                     console.error('[MapContainer] deferred overlay failed:', deferredErr);
                     appliedStateRef.current = null;
+                  } finally {
+                    deferredTimer.end();
                   }
                 };
 
@@ -1766,6 +1777,7 @@ export function MapContainer() {
       if (deferredOverlayHandleRef.current != null) {
         if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(deferredOverlayHandleRef.current as ReturnType<typeof requestIdleCallback>);
         clearTimeout(deferredOverlayHandleRef.current as ReturnType<typeof setTimeout>);
+        appliedStateRef.current = null;
         deferredOverlayHandleRef.current = null;
       }
       if (sourceUpdatePollRef.current) {
