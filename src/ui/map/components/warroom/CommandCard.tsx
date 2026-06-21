@@ -32,6 +32,7 @@
 
 import type { PresidentialCommandCategoryCount } from '../../data/presidentialCategories';
 import { resolvePresidentialCommandArt } from '../../data/presidentialCommandArt';
+import { t } from '../../i18n';
 
 /**
  * Explicit, editable command-strip card id → existing desk asset basename map.
@@ -79,6 +80,37 @@ export function factionInkColor(faction: string | null | undefined): string {
   return 'rgba(35, 112, 63, 0.85)';
 }
 
+function commandCategoryTitle(id: PresidentialCommandCategoryCount['id']): string {
+  switch (id) {
+    case 'cat_war_direction': return t('commandSurface.category.warDirection.title');
+    case 'cat_diplomacy': return t('commandSurface.category.diplomacy.title');
+    case 'cat_home_front': return t('commandSurface.category.homeFront.title');
+    case 'cat_command': return t('commandSurface.category.command.title');
+    case 'cat_conscience': return t('commandSurface.category.conscience.title');
+    case 'cat_record': return t('commandSurface.category.record.title');
+  }
+}
+
+function commandCategoryBlurb(id: PresidentialCommandCategoryCount['id']): string {
+  switch (id) {
+    case 'cat_war_direction': return t('commandSurface.category.warDirection.blurb');
+    case 'cat_diplomacy': return t('commandSurface.category.diplomacy.blurb');
+    case 'cat_home_front': return t('commandSurface.category.homeFront.blurb');
+    case 'cat_command': return t('commandSurface.category.command.blurb');
+    case 'cat_conscience': return t('commandSurface.category.conscience.blurb');
+    case 'cat_record': return t('commandSurface.category.record.blurb');
+  }
+}
+
+function commandCategoryRole(role: PresidentialCommandCategoryCount['role']): string {
+  switch (role) {
+    case 'inspect': return t('commandSurface.role.inspect');
+    case 'monitor': return t('commandSurface.role.monitor');
+    case 'act':
+    default: return t('commandSurface.role.act');
+  }
+}
+
 export interface CommandCardProps {
   category: PresidentialCommandCategoryCount;
   playerFaction: string | null | undefined;
@@ -88,6 +120,12 @@ export interface CommandCardProps {
 export function CommandCard({ category, playerFaction, onSelect }: CommandCardProps) {
   const art = resolveCommandCardArt(category.id, playerFaction);
   const tint = factionInkColor(playerFaction);
+  const roleLabel = commandCategoryRole(category.role);
+  const title = commandCategoryTitle(category.id);
+  const blurb = commandCategoryBlurb(category.id);
+  const footer = category.urgentCount > 0
+    ? t('commandSurface.footer.urgentPending', { urgentCount: category.urgentCount, count: category.count })
+    : t('commandSurface.footer.pending', { count: category.count });
 
   return (
     <button
@@ -129,7 +167,7 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
           data-testid={`command-card-role-${category.id}`}
           className="rounded border border-accent-gold/35 bg-black/65 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.13em] text-accent-gold"
         >
-          {category.roleLabel}
+          {roleLabel}
         </span>
       </div>
 
@@ -158,15 +196,13 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
       {/* Title safe-area */}
       <div className="absolute inset-x-0 bottom-0 p-2.5">
         <div className="text-[12px] font-bold leading-tight text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-          {category.title}
+          {title}
         </div>
         <div className="mt-0.5 line-clamp-2 text-[9px] leading-snug text-stone-200/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-          {category.blurb}
+          {blurb}
         </div>
         <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-stone-300/80">
-          {category.urgentCount > 0
-            ? `${category.urgentCount} urgent · ${category.count} pending`
-            : `${category.count} pending`}
+          {footer}
         </div>
       </div>
     </button>

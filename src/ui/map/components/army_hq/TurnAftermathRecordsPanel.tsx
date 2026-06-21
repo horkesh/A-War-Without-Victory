@@ -92,7 +92,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                             {enumLabel('turnAftermath.tone', view.tone)}
                         </span>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
-                            {t('records.costSeverity', { severity: view.cost.severity })}
+                            {t('records.costSeverity', { severity: enumLabel('turnAftermath.severity', view.cost.severity) })}
                         </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>

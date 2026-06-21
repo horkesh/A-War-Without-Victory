@@ -88,6 +88,92 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
     });
 
+    it('localizes BCS Codex dilemma and history-comparison chrome without translating authored labels', () => {
+        setLocale('bcs');
+        storeState = {
+            loadedGameState: {
+                firedEvents: [firedEvent('arms_embargo_impact_1992')],
+                turn: 40,
+                dilemmaSpine: [
+                    {
+                        dilemmaId: 'arms_embargo',
+                        title: 'Arms embargo decision',
+                        essayId: 'essay_arms_embargo_impact_1992',
+                        sensitive: false,
+                        faced: true,
+                        chosenResponseId: 'appeal',
+                        chosenBranchLabel: 'Appeal for relief',
+                        decisionTurn: 12,
+                    },
+                    {
+                        dilemmaId: 'locked_essay',
+                        title: 'Unopened linked decision',
+                        essayId: 'essay_battle_of_the_barracks_sarajevo',
+                        sensitive: false,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                    {
+                        dilemmaId: 'no_essay',
+                        title: 'Decision without essay',
+                        essayId: null,
+                        sensitive: false,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                ],
+                distanceFromHistory: {
+                    totalDecided: 2,
+                    matchedHistory: 1,
+                    diverged: 1,
+                    divergencePct: 50,
+                    playerDiverged: 1,
+                    divergences: [
+                        {
+                            eventId: 'arms_embargo_impact_1992',
+                            title: 'Arms Embargo',
+                            chosen: 'Appeal for relief',
+                            historical: 'Endure the embargo',
+                            chosenResponseId: 'appeal',
+                            historicalResponseId: 'endure',
+                            turn: 12,
+                            faction: 'RBiH',
+                            source: 'player',
+                        },
+                    ],
+                },
+            },
+        };
+
+        renderPanel();
+
+        const panel = screen.getByTestId('codex-panel');
+        expect(screen.getByText('Izbori koji su oblikovali ovaj rat')).toBeTruthy();
+        expect(screen.getByText('Suočeno')).toBeTruthy();
+        expect(screen.getAllByText('Još ne').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getByText(/Izabrano:/)).toBeTruthy();
+        expect(screen.getByText('Čitaj esej')).toBeTruthy();
+        expect(screen.getByText('Zaključano')).toBeTruthy();
+        expect(screen.getByText('Nema eseja')).toBeTruthy();
+        expect(screen.getByText('Vaš rat i historija')).toBeTruthy();
+        expect(screen.getByText('Vaše')).toBeTruthy();
+
+        expect(panel.textContent).not.toContain('The Choices That Made This War');
+        expect(panel.textContent).not.toContain('Faced');
+        expect(panel.textContent).not.toContain('Not yet');
+        expect(panel.textContent).not.toContain('Chose:');
+        expect(panel.textContent).not.toContain('Read essay');
+        expect(panel.textContent).not.toContain('Locked');
+        expect(panel.textContent).not.toContain('No essay');
+        expect(panel.textContent).not.toContain('Your War vs History');
+        expect(panel.textContent).not.toContain('You authored');
+        expect(panel.textContent).not.toContain('Yours');
+    });
+
     it('renders live divergence notes inside the Dayton essay after game over', () => {
         storeState = {
             loadedGameState: {

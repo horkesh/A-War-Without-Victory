@@ -80,6 +80,7 @@ import {
   officerResentmentReceiptsRealizedOnTurn,
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
+import { t } from './i18n';
 import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -2026,15 +2027,15 @@ function App() {
           {warroomDecisionRoomOpen && (
             <div
               role="dialog"
-              aria-label="Warroom Decision Room"
+              aria-label={t('warroomDecisionRoom.host.aria')}
               aria-modal="false"
               data-testid="warroom-decision-room-host"
               className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto max-h-[76%] max-w-6xl overflow-y-auto rounded-md border border-accent-gold/35 bg-panel-bg/96 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.6)] backdrop-blur-md xl:left-10 xl:right-10"
             >
               <div className="mb-3 flex items-end justify-between gap-2 border-b border-panel-border/70 pb-2">
                 <div>
-                  <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">Command Surface</div>
-                  <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">Decision Room</h2>
+                  <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t('warroomDecisionRoom.host.eyebrow')}</div>
+                  <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">{t('warroomDecisionRoom.host.title')}</h2>
                 </div>
                 <button
                   type="button"
@@ -2042,11 +2043,11 @@ function App() {
                     setWarroomDecisionRoomOpen(false);
                     restoreWarroomFocus();
                   }}
-                  aria-label="Close Decision Room"
+                  aria-label={t('warroomDecisionRoom.host.closeAria')}
                   data-testid="warroom-decision-room-close"
                   className="shrink-0 rounded border border-panel-border bg-black/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                 >
-                  Close
+                  {t('warroomDecisionRoom.host.close')}
                 </button>
               </div>
               <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />

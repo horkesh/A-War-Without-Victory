@@ -139,6 +139,27 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(host).not.toContain('<PresidentialDecisionRoomPanel onNavigateTarget={openDecisionRoomTarget} />');
     });
 
+    it('routes Warroom-hosted Decision Room chrome through i18n keys', () => {
+        const app = read('src/ui/map/App.tsx');
+        const hostStart = app.indexOf('{warroomDecisionRoomOpen && (');
+        const hostEnd = app.indexOf('\n        </div>', hostStart);
+
+        expect(hostStart).toBeGreaterThanOrEqual(0);
+        expect(hostEnd).toBeGreaterThan(hostStart);
+
+        const host = app.slice(hostStart, hostEnd);
+        expect(host).toContain("{t('warroomDecisionRoom.host.aria')}");
+        expect(host).toContain("{t('warroomDecisionRoom.host.eyebrow')}");
+        expect(host).toContain("{t('warroomDecisionRoom.host.title')}");
+        expect(host).toContain("{t('warroomDecisionRoom.host.closeAria')}");
+        expect(host).toContain("{t('warroomDecisionRoom.host.close')}");
+        expect(host).not.toContain('aria-label="Warroom Decision Room"');
+        expect(host).not.toContain('>Command Surface</div>');
+        expect(host).not.toContain('>Decision Room</h2>');
+        expect(host).not.toContain('aria-label="Close Decision Room"');
+        expect(host).not.toContain('>Close</button>');
+    });
+
     it('keeps Desk-local Command Surface mutually exclusive with the Desk overlay', () => {
         const app = read('src/ui/map/App.tsx');
         const openCommandStripStart = app.indexOf('const openCommandStrip =');

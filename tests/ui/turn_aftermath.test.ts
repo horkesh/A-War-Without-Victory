@@ -266,12 +266,19 @@ describe('buildTurnAftermathView', () => {
         latestTurnSummary: makeSummary({
           turn: 0,
           territory_net: { RBiH: 2, RS: -2 },
+          notable_flips: [
+            { osid: 'op:sarajevo:dobrinja', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'generic' },
+          ],
         }),
       }),
+      osidNameMap: { 'op:sarajevo:dobrinja': 'Dobrinja (Sarajevo)' },
     });
 
     expect(view?.tone).toBe('quiet');
     expect(view?.territory.friendlyNet).toBe(0);
+    expect(view?.territory.gains).toBe(0);
+    expect(view?.territory.losses).toBe(0);
+    expect(view?.territory.notable).toEqual([]);
     expect(view?.headline).toBe('No territorial change this turn.');
     expect(view?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
     expect(view?.judgment.memoryTone).toBe('quiet');

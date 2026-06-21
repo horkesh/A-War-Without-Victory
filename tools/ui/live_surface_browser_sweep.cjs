@@ -8,6 +8,7 @@ const { spawn, spawnSync } = require('node:child_process');
 const ROOT = process.cwd();
 const PORT = Number(process.env.AWWV_LIVE_SURFACE_BROWSER_PORT || 3239);
 const URL = process.env.AWWV_LIVE_SURFACE_BROWSER_URL || `http://127.0.0.1:${PORT}/?dev=1`;
+const LOCALE = String(process.env.AWWV_LIVE_SURFACE_BROWSER_LOCALE || process.env.AWWV_UI_LOCALE || 'en').toLowerCase();
 const OUT_DIR = process.env.AWWV_LIVE_SURFACE_BROWSER_OUT_DIR
   || path.join(ROOT, '.tmp_live_surface_browser_sweep');
 const SCREENSHOT_DIR = path.join(OUT_DIR, 'screenshots');
@@ -29,9 +30,17 @@ const RAW_TECHNICAL_TOKENS = [
   { label: 'active / total', pattern: /\bactive\s*\/\s*total\b/i },
   { label: 'cap / lost', pattern: /\bcap\s*\/\s*lost\b/i },
   { label: 'convoy_decision', pattern: /\bconvoy_decision\b/i },
+  { label: 'STRAIN-SHAPED', pattern: /\bSTRAIN-SHAPED\b/ },
   { label: 'raw planning ids', pattern: /\b(?:eligible_pending_review|not_applicable|surprise_counter_offer|union_3_republics_extra|tactical_commander|in_transit|tier_1|homeDistance|ambush_risk|defender_opsec)\b/i },
   { label: 'op:', pattern: /\bop:/i },
   { label: '.json', pattern: /\.json\b/i },
+];
+
+const BCS_ENGLISH_LEAK_TOKENS = [
+  { label: 'order interpretation EN header', pattern: /\bORDER INTERPRETATIONS\s*-\s*\d+\s+PENDING\b/ },
+  { label: 'Officer morale EN relief', pattern: /\bOfficer morale\s+-?\d+\s+if relieved\b/i },
+  { label: 'Enemy offensive fallback', pattern: /\bEnemy offensive threatens corps integrity\b/i },
+  { label: 'Hold defensive fallback', pattern: /\bHold defensive positions and absorb the offensive;\s*request reinforcement from Army HQ\b/i },
 ];
 
 const LIVE_SURFACES = [
@@ -714,6 +723,25 @@ function assertNoRawTechnicalTokens(surfaceName, text) {
   if (found.length > 0) {
     throw new Error(`${surfaceName} exposed raw technical tokens: ${JSON.stringify(found, null, 2)}`);
   }
+  if (LOCALE === 'bcs' || LOCALE === 'bs') {
+    assertNoBcsEnglishLeakTokens(surfaceName, text);
+  }
+}
+
+function assertNoBcsEnglishLeakTokens(surfaceName, text) {
+  const found = [];
+  for (const { label, pattern } of BCS_ENGLISH_LEAK_TOKENS) {
+    const match = pattern.exec(text);
+    if (match?.index !== undefined) {
+      found.push({
+        label,
+        match: match[0],
+      });
+    }
+  }
+  if (found.length > 0) {
+    throw new Error(`${surfaceName} exposed English fallback copy in BCS mode: ${JSON.stringify(found, null, 2)}`);
+  }
 }
 
 async function getVisibleShellSurfaces(page) {
@@ -1174,6 +1202,7 @@ async function run() {
       console.log(`evidence: ${evidencePath}`);
     } else {
       const evidencePath = path.join(OUT_DIR, 'live_surface_browser_sweep_failed.json');
+      ensureDir(OUT_DIR);
       fs.writeFileSync(evidencePath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8');
     }
   }

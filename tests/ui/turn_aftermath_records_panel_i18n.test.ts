@@ -78,14 +78,16 @@ describe('TurnAftermathRecordsPanel localization', () => {
             osidDisplayNames: {},
         });
 
-        render(createElement(TurnAftermathRecordsPanel));
+        const { container } = render(createElement(TurnAftermathRecordsPanel));
 
         expect(screen.getAllByText('Sve').length).toBeGreaterThan(0);
         expect(screen.getByText('Puls kampanje')).toBeTruthy();
         expect(screen.getByText('Dosadasnja cijena kampanje')).toBeTruthy();
         expect(screen.getByText('Strateški signali')).toBeTruthy();
         expect(screen.getAllByText('Arhiva').length).toBeGreaterThan(0);
+        expect(container.textContent).toContain('Cijena kritičan');
         expect(screen.queryByText('Campaign pulse')).toBeNull();
+        expect(container.textContent).not.toContain('Cijena critical');
     });
 
     it('renders latest desk item types as player-facing labels instead of raw ids', () => {

@@ -570,7 +570,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
   const narrateTerritory = shouldNarrateTerritorySummary(summary);
   const friendlyNet = playerFaction && narrateTerritory ? (summary?.territory_net?.[playerFaction] ?? 0) : 0;
 
-  const notable = (summary?.notable_flips ?? []).map((flip): TurnAftermathFlipView => {
+  const notable = (narrateTerritory ? (summary?.notable_flips ?? []) : []).map((flip): TurnAftermathFlipView => {
     const direction = !narrateTerritory
       ? 'other'
       : playerFaction && flip.to === playerFaction

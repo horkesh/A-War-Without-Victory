@@ -313,7 +313,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
                     >
                         <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5">
-                            The Choices That Made This War
+                            {t('codex.dilemmaSpine.title')}
                         </div>
                         <ul className="space-y-1">
                             {dilemmaSpine.map((dilemma) => {
@@ -336,7 +336,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                     : 'bg-neutral-500/15 text-neutral-500'
                                             }`}
                                         >
-                                            {dilemma.faced ? 'Faced' : 'Not yet'}
+                                            {dilemma.faced ? t('codex.dilemma.faced') : t('codex.dilemma.notYet')}
                                         </span>
                                         <div className="flex-1 min-w-0">
                                             <div className="text-neutral-200">{dilemma.title}</div>
@@ -345,7 +345,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                     data-testid="codex-dilemma-branch"
                                                     className="text-neutral-400 text-[8px] mt-0.5"
                                                 >
-                                                    Chose: {dilemma.chosenBranchLabel}
+                                                    {t('codex.dilemma.chose', { choice: dilemma.chosenBranchLabel })}
                                                     {dilemma.decisionTurn !== null && (
                                                         <span className="text-neutral-600"> ({turnToDateString(dilemma.decisionTurn)})</span>
                                                     )}
@@ -368,14 +368,14 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                         : 'text-neutral-600 cursor-default'
                                                 }`}
                                             >
-                                                {essayUnlocked ? 'Read essay' : 'Locked'}
+                                                {essayUnlocked ? t('codex.dilemma.readEssay') : t('codex.dilemma.locked')}
                                             </button>
                                         ) : (
                                             <span
                                                 data-testid="codex-dilemma-no-essay"
                                                 className="shrink-0 text-[8px] uppercase tracking-[0.1em] text-neutral-700 px-1.5 py-0.5"
                                             >
-                                                No essay
+                                                {t('codex.dilemma.noEssay')}
                                             </span>
                                         )}
                                     </li>
@@ -397,21 +397,32 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
                     >
                         <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1">
-                            Your War vs History
+                            {t('codex.distance.title')}
                         </div>
                         <div
                             data-testid="codex-distance-from-history-summary"
                             className="text-[9px] text-neutral-300 mb-1.5"
                         >
                             <span className="text-amber-400 font-bold">
-                                You authored {distanceFromHistory.playerDiverged} departure
-                                {distanceFromHistory.playerDiverged === 1 ? '' : 's'} from history.
+                                {t(
+                                    distanceFromHistory.playerDiverged === 1
+                                        ? 'codex.distance.playerDeparture.one'
+                                        : 'codex.distance.playerDeparture.many',
+                                    { count: distanceFromHistory.playerDiverged },
+                                )}
                             </span>
                             {' '}
                             <span className="text-neutral-400">
-                                {distanceFromHistory.diverged} of {distanceFromHistory.totalDecided} decision
-                                {distanceFromHistory.totalDecided === 1 ? '' : 's'} diverged from the historical
-                                record ({distanceFromHistory.divergencePct}%).
+                                {t(
+                                    distanceFromHistory.totalDecided === 1
+                                        ? 'codex.distance.totalDivergence.one'
+                                        : 'codex.distance.totalDivergence.many',
+                                    {
+                                        diverged: distanceFromHistory.diverged,
+                                        total: distanceFromHistory.totalDecided,
+                                        pct: distanceFromHistory.divergencePct,
+                                    },
+                                )}
                             </span>
                         </div>
                         {distanceFromHistory.divergences.length > 0 && (
@@ -428,8 +439,9 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                         <div className="flex-1 min-w-0">
                                             <span className="text-neutral-200">{d.title}</span>
                                             <span className="text-neutral-500">
-                                                {' '}— chose <span className="text-neutral-300">{d.chosen}</span>
-                                                {' '}(history: {d.historical})
+                                                {' '}{t('codex.distance.rowChoicePrefix')}{' '}
+                                                <span className="text-neutral-300">{d.chosen}</span>
+                                                {' '}{t('codex.distance.rowHistory', { historical: d.historical })}
                                             </span>
                                         </div>
                                         {d.source === 'player' && (
@@ -437,7 +449,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                 data-testid="codex-distance-from-history-player-badge"
                                                 className="shrink-0 text-[7px] font-bold uppercase tracking-[0.1em] px-1 py-0.5 rounded bg-amber-400/15 text-amber-400"
                                             >
-                                                Yours
+                                                {t('codex.distance.yours')}
                                             </span>
                                         )}
                                     </li>

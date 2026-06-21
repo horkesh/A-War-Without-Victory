@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest polish residuals: turn-0 / Records / Army Reserve / command surface:** [implemented/20260621_POLISH_RESIDUALS_TURN0_RECORDS_ARMY_RESERVE_COMMAND_SURFACE.md](implemented/20260621_POLISH_RESIDUALS_TURN0_RECORDS_ARMY_RESERVE_COMMAND_SURFACE.md) - Turn Aftermath notable flips now obey the shared turn-0 territory guard, Records severity copy localizes, Army Reserve brigade click-throughs preserve Army HQ context, Codex/Warroom command-surface chrome is localized, and the live raw-token guard catches `STRAIN-SHAPED` globally plus command-strain/order-interpretation English fallback strings in BCS/BS mode.
+
 **Latest Operational SITREP i18n boundary:** [implemented/20260621_OPERATIONAL_SITREP_I18N_BOUNDARY.md](implemented/20260621_OPERATIONAL_SITREP_I18N_BOUNDARY.md) - shared Operational SITREP headlines, alert rows, corps-operation summaries, front-contact bands, thin-front bands, and alliance-posture bands now render through EN/BCS copy tokens while preserving English fallback strings; diplomacy timeline consequence tokens are propagated.
 
 **Latest polish followups: Chronicle / Personnel / map aria:** [implemented/20260621_POLISH_FOLLOWUPS_CHRONICLE_PERSONNEL_MAP_ARIA.md](implemented/20260621_POLISH_FOLLOWUPS_CHRONICLE_PERSONNEL_MAP_ARIA.md) - turn-0 Chronicle setup territory is suppressed from cost cards, future officers with no mutable state stay out of active Personnel counts before their availability window, and tactical-map aria copy is localized behind a stable browser selector.

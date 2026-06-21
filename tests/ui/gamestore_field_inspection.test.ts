@@ -91,6 +91,24 @@ describe('gameStore field inspection routes', () => {
     });
   });
 
+  it('preserves army reserve formation plus parent HQ context atomically', () => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-formation-in-army-reserve',
+      formationId: 'brigade_alpha',
+      armyHqId: 'army_hq_alpha',
+    });
+
+    expect(useGameStore.getState()).toMatchObject({
+      isOperationsPanelOpen: false,
+      selectedFormationId: 'brigade_alpha',
+      selectedArmyHqId: 'army_hq_alpha',
+      selectedOperationKey: null,
+      focusedAftermathTurn: null,
+      focusedOperationHistoryId: null,
+      focusedDecisionConsequenceId: null,
+    });
+  });
+
   it('preserves corps plus sector context atomically', () => {
     inspectOnField(useGameStore.getState(), {
       kind: 'field-sector-in-corps',

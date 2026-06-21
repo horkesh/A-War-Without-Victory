@@ -29,6 +29,7 @@ import {
 } from '../../data/presidentialCategories';
 import { useGameStore } from '../../store/gameStore';
 import { requestDecisionRoomLens } from '../../utils/decisionRoomLensRequest';
+import { t } from '../../i18n';
 
 export interface CommandCardStripProps {
   /** Category to highlight when opened from a hotspot (null = direct Desk open). */
@@ -66,7 +67,7 @@ export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }:
     <div
       ref={dialogRef}
       role="dialog"
-      aria-label="Presidential command surface"
+      aria-label={t('commandSurface.aria')}
       aria-modal="false"
       tabIndex={-1}
       data-testid="command-card-strip"
@@ -81,17 +82,17 @@ export function CommandCardStrip({ initialCategoryId, onOpenCategory, onClose }:
     >
       <div className="mb-3 flex items-end justify-between gap-2 border-b border-panel-border/70 pb-2">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">Command Surface</div>
-          <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">Where will you direct the war?</h2>
+          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t('commandSurface.eyebrow')}</div>
+          <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">{t('commandSurface.title')}</h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close command surface"
+          aria-label={t('commandSurface.closeAria')}
           data-testid="command-card-strip-close"
           className="shrink-0 rounded border border-panel-border bg-black/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
-          Close
+          {t('commandSurface.close')}
         </button>
       </div>
 

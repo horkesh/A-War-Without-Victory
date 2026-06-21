@@ -25,6 +25,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
 import { turnToDateString } from '../utils/formatters';
+import { inspectOnField } from '../utils/shellNavigation';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -186,7 +187,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         key={brigade.id}
                                         type="button"
                                         className="w-full text-left bg-black/20 border border-panel-border/40 rounded p-1.5 space-y-1 hover:bg-panel-hover transition-colors cursor-pointer"
-                                        onClick={() => useGameStore.setState({ selectedFormationId: brigade.id })}
+                                        onClick={() => inspectOnField(useGameStore.getState(), {
+                                            kind: 'field-formation-in-army-reserve',
+                                            formationId: brigade.id,
+                                            armyHqId: armyHq.id,
+                                        })}
                                     >
                                         <div className="flex items-center justify-between">
                                             <span className="text-text-primary font-semibold truncate">

@@ -26,6 +26,10 @@
 
 **COMMAND-STRAIN / ORDER-INTERPRETATION COPY BOUNDARY (2026-06-21).** Command-strain derivations feed rendered Army HQ and Operation Briefing surfaces, while order-interpretation panels add command chrome around authored reason prose. Do instead: return `CommandCopyToken` metadata beside fallback strings, render with `t(token.key, token.params)`, put panel chrome behind explicit i18n keys, and leave authored reason prose verbatim unless it becomes a typed id; pin BCS against English leaks like `STRAIN-SHAPED`, `Enemy offensive`, `Hold defensive positions`, `ORDER INTERPRETATIONS`, and `Officer morale`.
 
+**LIVE RAW-TOKEN GUARD LOCALE SCOPE (2026-06-21).** Raw ids and English fallback prose are different leak classes. Do instead: keep raw ids such as `STRAIN-SHAPED` in the global live-surface guard; put English prose/header sentinels behind BCS/BS locale checks so English-mode UI does not false-fail on intentional English copy.
+
+**CODEX / COMMAND-SURFACE CHROME BOUNDARY (2026-06-21).** Codex dilemma titles, branch labels, essays, and historical comparison values are authored data, but status/action/distance and command-card chrome are UI copy. Do instead: localize chrome through i18n keys while preserving authored labels, route ids, and command-surface category ids; pin BCS with Codex/Warroom/App host tests.
+
 **LIVE PROOF FIXTURE STATE (2026-06-20).** Live browser gates must not fail on optional absent fixture state unless they create it first. Do instead: prove always-present hooks directly, and record explicit `skipped:no-visible-*` evidence for optional rows such as first-hour Records AAR battles while component tests pin the hook.
 
 **ARMY RESERVE COPY BOUNDARY (2026-06-20).** Reserve requests can carry diagnostic `description`, `why_needed`, `how_to_use`, purpose, and reason payloads. Do instead: render Army Reserve panels/modals through `armyReserve.*` i18n keys with neutral unknown fallbacks; keep raw reserve prose/ids internal.
@@ -77,6 +81,8 @@
 **ARMY OPS PLANNING COPY / DRILLDOWN (2026-06-20).** Army HQ Operations and OperationsPanel are player command surfaces, not telemetry panels. Do instead: render planning age/postponements through i18n copy, route allocated brigade clicks through `inspectOnField(... field-formation-in-corps ...)`, and keep targeted BCS player copy free of raw `OSID`.
 
 **TURN-0 PROVENANCE MUST BE GLOBAL (2026-06-20).** Every player summary surface that reads `latestTurnSummary.territory_net`, `turnSummaries[*].territory_net`, or `notable_flips` must apply `shouldNarrateTerritorySummary(...)`. Covered surfaces now include Generals Digest, Chief of Staff, Turn Aftermath, Records AAR, BottomStatusStrip, and Chronicle Wrapped.
+
+**ARMY RESERVE DRILLDOWN CONTEXT (2026-06-21).** Army Reserve pool rows know both the formation and owning Army HQ. Do instead: route reserve brigade clicks through `inspectOnField(...)` using `field-formation-in-army-reserve` with `armyHqId`; avoid bare formation setters that hide selection behind the Army HQ shell.
 
 **OPS MODAL COMMANDER DISPLAY (2026-06-20).** Ops planning surfaces are command read-model surfaces too. Do instead: use `resolveCorpsCommanderDisplay(...)` in G2 and OPORD headers when no explicit operation commander is seated; do not assign turn-0 officers to make display copy work.
 
