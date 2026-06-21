@@ -511,6 +511,36 @@ describe('deriveInboxItems — officer events', () => {
             title: 'Command Interpretation',
         });
     });
+
+    it('routes autonomous Army CO operation proposals to Decision Room command review', () => {
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingOfficerEvents: [
+                {
+                    event_id: 'off_command_proposal_1',
+                    type: 'army_co_proposes_op',
+                    faction: 'RBiH',
+                    turn: 5,
+                    officer_id: 'halilovic',
+                    officer_name: 'Sefer Halilovic',
+                    officer_competence: 0.6,
+                    officer_aggressiveness: 0.7,
+                    officer_defensive_skill: 0.5,
+                    acknowledged: false,
+                    reason: 'Army command proposes an autonomous operation before the next directive.',
+                },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+        const officerItems = items.filter(i => i.type === 'officer_event');
+
+        expect(officerItems).toHaveLength(1);
+        expect(officerItems[0]).toMatchObject({
+            action: 'decision_room',
+            title: 'Autonomous Operation Proposal',
+        });
+    });
 });
 
 // ---------------------------------------------------------------------------

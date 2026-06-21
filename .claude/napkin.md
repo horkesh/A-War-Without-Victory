@@ -14,7 +14,7 @@
 
 **RESERVE COMMAND REVIEW REQUIRES A NAMED BRIGADE (2026-06-21).** Pending Army Reserve requests are not all presidential command-review items. Do instead: emit `command:elite-deploy:*` Decision Room cards only when `suggested_brigade_id` is present; no-brigade reserve requests remain in the Army Reserve staff-selection flow.
 
-**OFFICER COMMAND PUSHBACK IS DECISION ROOM COMMAND REVIEW (2026-06-21).** Order refusals, pushback, order-exceeded, and army-directive pushback are not generic Personnel. Do instead: route them to Decision Room command lens with Army HQ Briefing as `sourceHandoffTarget`; keep only roster/replacement/relief matters on direct Personnel.
+**OFFICER COMMAND PUSHBACK / PROPOSALS ARE DECISION ROOM COMMAND REVIEW (2026-06-21).** Order refusals, pushback, order-exceeded, army-directive pushback, and `army_co_proposes_op` are not generic Personnel. Do instead: route them to Decision Room command lens with Army HQ Briefing as `sourceHandoffTarget`; keep only roster/replacement/relief matters on direct Personnel; keep `opportunity:*` dossiers on the opportunity lens.
 
 **MAP OVERLAY TIMERS MUST BE CHUNK-LOCAL (2026-06-21).** MapContainer overlay work can be canceled between front and deferred formation passes. Do instead: use unique/idempotent dev timers, start deferred timers inside the scheduled callback, and set `appliedStateRef.current = null` when cleanup cancels deferred overlay work.
 

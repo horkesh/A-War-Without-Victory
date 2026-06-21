@@ -92,7 +92,8 @@ function isCommandInterpretationOfficerEvent(type: OfficerEvent['type']): boolea
         || type === 'order_pushback'
         || type === 'order_refused'
         || type === 'order_exceeded'
-        || type === 'army_directive_pushback';
+        || type === 'army_directive_pushback'
+        || type === 'army_co_proposes_op';
 }
 
 function officerEventDedupeKey(evt: OfficerEvent): string {
@@ -300,12 +301,15 @@ export function deriveInboxItems(
             const evt = events[0];
             if (!evt) continue;
             const commandInterpretation = events.some((event) => isCommandInterpretationOfficerEvent(event.type));
+            const armyCoOperationProposal = events.some((event) => event.type === 'army_co_proposes_op');
             items.push({
                 id: `officer:${key}`,
                 type: 'officer_event',
                 severity: 'normal',
                 title: commandInterpretation
-                    ? 'Command Interpretation'
+                    ? armyCoOperationProposal
+                        ? 'Autonomous Operation Proposal'
+                        : 'Command Interpretation'
                     : evt.type === 'replacement_suggested'
                         ? 'Commander Replacement'
                         : 'Personnel Matter',

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): route Army CO autonomous proposals through Decision Room command review
+
+**Type:** UI/read-model route ownership polish.
+
+**Fix:** `army_co_proposes_op` pending officer events now route as Presidential Decision Room command review rather than Personnel. Presidential Inbox rows use `Autonomous Operation Proposal` and deep-link officer command-review actions to the Decision Room command card; operation-opportunity items retain the opportunity lens. The presidential review queue and command briefing now count autonomous operation proposals as command interpretations, and the Decision Room card renders proposal-specific operation copy instead of generic refusal/pushback language.
+
+**Verification:** Red proof `node node_modules\vitest\vitest.mjs run tests\ui\inbox_items.test.ts tests\sim\command\phase4_ui_data_layer.test.ts tests\ui_map_game_state_adapter.test.ts tests\ui_decision_room_pushback_explanations.test.ts --pool=forks --reporter=dot` failed on Personnel routing, missing briefing/review-queue classification, and absent Decision Room card. Red proof `node node_modules\vitest\vitest.mjs run tests\ui\warroom_shell_ownership.test.ts --pool=forks --reporter=dot` failed on the missing officer Decision Room command-card deep link. Focused green proof passed 106/106. Broader command-review proof passed 177/177. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed and confirmed first-hour/foundational flow, surface reachability, existing Inbox-to-Decision Room live proof, and server cleanup; temporary `.tmp_live_surface_browser_sweep` evidence was removed after inspection. Report: `docs/40_reports/implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md`.
+
+**Scope/determinism:** UI/read-model/briefing route classification, App shell routing, test, and docs polish only; no officer event emission, simulation mechanics, scenario data, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] test(ui): harden foundational receipt and archive browser proofs
 
 **Type:** Browser QA hardening.

@@ -128,6 +128,46 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
         expect(/push.*back|rifle/i.test(joined)).toBe(true);
     });
 
+    it('emits a command-review operation proposal card for autonomous Army CO proposals', () => {
+        const view = buildPresidentialDecisionRoomView({
+            state: makeState({
+                pendingOfficerEvents: [
+                    {
+                        event_id: 'pe_army_co_proposal_1',
+                        type: 'army_co_proposes_op',
+                        faction: 'RBiH',
+                        turn: 30,
+                        officer_id: 'arbih_co',
+                        officer_name: 'General Halilovic',
+                        officer_competence: 6,
+                        officer_aggressiveness: 5,
+                        officer_defensive_skill: 6,
+                        corps_name: 'Army HQ',
+                        acknowledged: false,
+                        reason: 'Army command proposes an autonomous operation toward Vlasenica.',
+                    },
+                ],
+            }),
+        });
+
+        const card = view.cards.find((c) => c.id === 'pushback:player-army-co');
+
+        expect(card).toBeDefined();
+        expect(card).toMatchObject({
+            category: 'command',
+            severity: 'warning',
+            navigationTarget: {
+                kind: 'decision-room',
+                lens: 'command',
+                cardId: 'pushback:player-army-co',
+            },
+            sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+        });
+        const joined = [card!.title, card!.explanation, ...card!.evidence].join(' ');
+        expect(/autonomous|proposes|operation/i.test(joined)).toBe(true);
+        expect(joined).not.toMatch(/refused a political directive|pushed back on political directive/i);
+    });
+
     it('emits a pushback card from an army CO decision trace with PARTIAL / REFUSED rationale', () => {
         const state = makeState({
             armyCoDecisionTraces: {

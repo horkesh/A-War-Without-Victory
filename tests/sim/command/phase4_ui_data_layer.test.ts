@@ -377,6 +377,30 @@ describe('Command briefing collector — Phase 3 event separation', () => {
         expect(item!.severity).toBe('warning');
     });
 
+    it('emits cmd-order-interpretations for autonomous Army CO operation proposals', () => {
+        const state = makeBriefingState({
+            military: {
+                formations: {},
+                corps_command: {},
+                negotiation: {},
+                pending_officer_events: [
+                    { event_id: 'e2b', type: 'army_co_proposes_op', faction: 'RBiH', turn: 10,
+                      officer_id: 'o2b', acknowledged: false,
+                      reason: 'Army command proposes an autonomous operation.' },
+                ],
+            },
+        });
+
+        const briefing = assembleCommandBriefing(state, 'RBiH');
+        const item = briefing.items.find(i => i.id === 'cmd-order-interpretations');
+        const personnelItem = briefing.items.find(i => i.id === 'cmd-officer-events');
+
+        expect(item).toBeDefined();
+        expect(item!.severity).toBe('warning');
+        expect(item!.detail).toContain('operation');
+        expect(personnelItem).toBeUndefined();
+    });
+
     it('emits cmd-officer-events separately for personnel events', () => {
         const state = makeBriefingState({
             military: {

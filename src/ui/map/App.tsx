@@ -1464,6 +1464,8 @@ function App() {
     if (action === 'decision_room') {
       if (itemId.startsWith('opportunity:')) {
         openWarroomDecisionRoomFromField('opportunity', itemId);
+      } else if (itemId.startsWith('officer:')) {
+        openWarroomDecisionRoomFromField('command', 'pushback:player-army-co');
       } else {
         openWarroomDeskFromField();
       }

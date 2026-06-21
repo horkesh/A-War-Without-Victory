@@ -551,6 +551,61 @@ test('parseGameState derives presidential review queue counts from pending milit
     });
 });
 
+test('parseGameState counts autonomous Army CO operation proposals as command review, not personnel', () => {
+    const parsed = parseGameState({
+        meta: { turn: 12, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+            named_officer_data: [
+                {
+                    id: 'officer_current',
+                    name: 'Current Commander',
+                    faction: 'RBiH',
+                    rank: 'army_co',
+                    competence: 3,
+                    aggressiveness: 4,
+                    defensive_skill: 3,
+                    political_reliability: 3,
+                },
+            ],
+            named_officers: {
+                officer_current: {
+                    status: 'active',
+                    assigned_corps_id: null,
+                    acting_commander: false,
+                    turns_in_command: 4,
+                    battles: 0,
+                    victories: 0,
+                },
+            },
+            pending_officer_events: [
+                {
+                    event_id: 'evt-army-co-proposal',
+                    type: 'army_co_proposes_op',
+                    faction: 'RBiH',
+                    turn: 12,
+                    officer_id: 'officer_current',
+                    acknowledged: false,
+                    reason: 'Army command proposes an autonomous operation.',
+                    overridable: true,
+                },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepEqual(parsed.presidentialReviewQueue, {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 1,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+    });
+});
+
 test('parseGameState projects authored officer mini-bio fields without mutating officer state', () => {
     const parsed = parseGameState({
         meta: { turn: 2, phase: 'war', player_faction: 'RS' },

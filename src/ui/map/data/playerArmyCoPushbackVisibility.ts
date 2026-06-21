@@ -4,8 +4,8 @@
  * UI-2 Decision Room Pushback Explanations (Batch 41). Reads the already-
  * derived pushback signals that the adapter exposes on `LoadedGameState`
  * (`pendingOfficerEvents` of type order_pushback / order_refused /
- * order_modified / order_exceeded / army_directive_pushback plus the optional
- * `armyCoDecisionTraces` pass-through)
+ * order_modified / order_exceeded / army_directive_pushback /
+ * army_co_proposes_op plus the optional `armyCoDecisionTraces` pass-through)
  * and condenses them into a compact projection the Decision Room can
  * surface without inventing new simulation authority.
  *
@@ -32,6 +32,7 @@ export interface PlayerArmyCoPushbackView {
     refusedCount: number;
     pushbackCount: number;
     modifiedCount: number;
+    autonomousProposalCount: number;
     traceObjectionCount: number;
     severity: PlayerPushbackSeverity;
     headline: string;
@@ -88,7 +89,8 @@ function isCommandPushbackEvent(type: PendingOfficerEventType): boolean {
         || type === 'order_pushback'
         || type === 'order_modified'
         || type === 'order_exceeded'
-        || type === 'army_directive_pushback';
+        || type === 'army_directive_pushback'
+        || type === 'army_co_proposes_op';
 }
 
 export function buildPlayerArmyCoPushbackVisibility(
@@ -107,6 +109,7 @@ export function buildPlayerArmyCoPushbackVisibility(
     let refusedCount = 0;
     let pushbackCount = 0;
     let modifiedCount = 0;
+    let autonomousProposalCount = 0;
 
     const evidence: string[] = [];
     const reasons: string[] = [];
@@ -121,6 +124,9 @@ export function buildPlayerArmyCoPushbackVisibility(
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
         } else if (ev.type === 'order_modified' || ev.type === 'order_exceeded') {
             modifiedCount++;
+            if (ev.reason && primaryReason === null) primaryReason = ev.reason;
+        } else if (ev.type === 'army_co_proposes_op') {
+            autonomousProposalCount++;
             if (ev.reason && primaryReason === null) primaryReason = ev.reason;
         }
         if (isCommandPushbackEvent(ev.type) && ev.reason) {
@@ -145,6 +151,7 @@ export function buildPlayerArmyCoPushbackVisibility(
         refusedCount > 0 ||
         pushbackCount > 0 ||
         modifiedCount > 0 ||
+        autonomousProposalCount > 0 ||
         traceObjectionCount > 0;
 
     if (!hasSignal) {
@@ -154,6 +161,7 @@ export function buildPlayerArmyCoPushbackVisibility(
             refusedCount: 0,
             pushbackCount: 0,
             modifiedCount: 0,
+            autonomousProposalCount: 0,
             traceObjectionCount: 0,
             severity: 'info',
             headline: 'No Army CO pushback this turn.',
@@ -165,7 +173,7 @@ export function buildPlayerArmyCoPushbackVisibility(
     const severity: PlayerPushbackSeverity =
         refusedCount > 0 || traceRefusal
             ? 'blocking'
-            : pushbackCount > 0 || traceObjectionCount > 0
+            : pushbackCount > 0 || autonomousProposalCount > 0 || traceObjectionCount > 0
                 ? 'warning'
                 : 'info';
 
@@ -178,18 +186,32 @@ export function buildPlayerArmyCoPushbackVisibility(
     if (modifiedCount > 0) {
         evidence.push(`${modifiedCount} modified order${modifiedCount === 1 ? '' : 's'}`);
     }
+    if (autonomousProposalCount > 0) {
+        evidence.push(`${autonomousProposalCount} autonomous operation proposal${autonomousProposalCount === 1 ? '' : 's'}`);
+    }
     if (traceObjectionCount > 0) {
         const role = lastTraceRole ? ` (${lastTraceRole})` : '';
         evidence.push(`${traceObjectionCount} Army CO objection${traceObjectionCount === 1 ? '' : 's'}${role}`);
     }
 
+    const proposalOnly =
+        autonomousProposalCount > 0 &&
+        refusedCount === 0 &&
+        pushbackCount === 0 &&
+        modifiedCount === 0 &&
+        traceObjectionCount === 0;
+
     const headline =
-        severity === 'blocking'
+        proposalOnly
+            ? 'Army command proposes an autonomous operation.'
+        : severity === 'blocking'
             ? 'Army CO refused a political directive.'
             : 'Army CO pushed back on political directive.';
 
     const rationale = primaryReason ?? lastTraceRationale ?? (
-        severity === 'blocking'
+        proposalOnly
+            ? 'Army command has proposed an operation outside the current presidential directive. Review before advancing.'
+        : severity === 'blocking'
             ? 'A subordinate army commander has refused the directive as given. Review the rationale before advancing.'
             : 'A subordinate army commander has objected to the directive. Review the rationale before advancing.'
     );
@@ -204,6 +226,7 @@ export function buildPlayerArmyCoPushbackVisibility(
         refusedCount,
         pushbackCount,
         modifiedCount,
+        autonomousProposalCount,
         traceObjectionCount,
         severity,
         headline,
