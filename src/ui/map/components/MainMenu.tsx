@@ -9,8 +9,8 @@ import { SUPPORTED_LOCALES, t, useLocale, type Locale } from '../i18n';
 import type { StartNewCampaignPayload } from '../desktop/types';
 import { getArmyName, getFactionFlag } from '../utils/factionAssets';
 import { AWWV_APP_VERSION } from '../utils/appVersion';
-import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
+import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 
 interface MainMenuProps {
     hasSave: boolean;
@@ -101,7 +101,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                                 />
                             )}
                             <div className="font-sans text-[15px] font-bold leading-tight text-[#d5c9bc]">
-                                {getPlayerSafePoliticalFactionName(faction)}
+                                {sidePickerFactionLabel(faction)}
                             </div>
                             {getArmyName(faction) && (
                                 <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#8a7a60]">

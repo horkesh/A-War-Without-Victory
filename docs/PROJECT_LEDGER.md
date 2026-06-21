@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize BCS New Game faction-picker labels
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** `MainMenu` and `SidePickerOverlay` now render New Game faction names through picker-domain EN/BCS i18n keys via `sidePickerFactionLabel(...)` instead of the English-only player-safe political-name helper. This closes the BCS leak where the picker chrome was localized but the RBiH and HRHB faction labels remained English.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/side_picker_i18n.test.ts tests/ui/main_menu_i18n.test.ts --pool=forks --reporter=dot` failed on the BCS `Republic of Bosnia and Herzegovina` picker label. Green proof passed 7/7 after the fix. Report: `docs/40_reports/implemented/20260621_BCS_SIDE_PICKER_FACTION_LABELS.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, response ids, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize first-hour decision chrome
 
 **Type:** UI/read-model i18n copy polish.
@@ -21739,7 +21751,7 @@ Closed the next first-hour BCS residual in `EventDecisionModal`. Required founda
 
 Verification: red proof `.\vitest.cmd run tests\ui\event_decision_modal_phase3.test.ts --pool=forks` first failed on visible English modal chrome under `setLocale('bcs')`. Green focused proof passed 10/10 after the fix. Adjacent catalog proof `.\vitest.cmd run tests\ui\event_decision_modal_catalog.test.ts --pool=forks` passed 1/1. `npm.cmd run typecheck` was attempted but is currently blocked by an unrelated dirty `tests/ui/inbox_items.test.ts` fixture error (`event_title: undefined as unknown as string` is not assignable to `string`).
 
-Determinism/scope: UI component chrome, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, event catalog data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Event data titles/options/narrative/source prose for `rbih_state_identity`, `rs_strategic_goals`, and `hrhb_political_goal` remain authored English data pending a dedicated event-content localization boundary.
+Determinism/scope: UI component chrome, i18n templates, focused tests, and ledger only; no simulation logic, scenario data, event catalog data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Event data titles/options/narrative/source prose for `rbih_state_identity`, `rs_strategic_goals`, and `hrhb_political_goal` were still authored English at this point; superseded later on 2026-06-21 by the BCS first-hour authored decision copy lane.
 
 ## 2026-06-21 - BCS first-hour authored decision copy
 

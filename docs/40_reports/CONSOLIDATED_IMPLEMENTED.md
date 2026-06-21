@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS New Game faction-picker labels:** [implemented/20260621_BCS_SIDE_PICKER_FACTION_LABELS.md](implemented/20260621_BCS_SIDE_PICKER_FACTION_LABELS.md) - Main Menu and Side Picker faction labels now render through picker-domain EN/BCS i18n keys instead of English-only player-safe helper output.
+
 **Latest BCS first-hour effect preview localization:** [implemented/20260621_BCS_FIRST_HOUR_EFFECT_PREVIEW_LOCALIZATION.md](implemented/20260621_BCS_FIRST_HOUR_EFFECT_PREVIEW_LOCALIZATION.md) - Foundational event decision effect rows, dimension shifts, campaign-record flag values, and modal faction/date labels now render through EN/BCS display helpers instead of English fallback strings.
 
 **Latest BCS first-hour authored decision copy:** [implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md](implemented/20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md) - Foundational opening decisions now carry BCS authored title/body/option/source/staff/trigger copy, and Desk/Inbox packets resolve catalog-localized event titles.
