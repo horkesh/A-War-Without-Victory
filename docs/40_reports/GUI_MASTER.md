@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-21 (browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-21 (contained copy polish, browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Contained copy polish** | [implemented/20260621_CONTAINED_COPY_POLISH.md](implemented/20260621_CONTAINED_COPY_POLISH.md) - Battle-tooltip fallback copy, Records subtab count aria labels, Back-the-Officer opportunity framing/rank/donor copy, and legacy Warroom Settings chrome now render through EN/BCS i18n keys. |
 | **Browser proof selector hardening** | [implemented/20260621_BROWSER_PROOF_SELECTOR_HARDENING.md](implemented/20260621_BROWSER_PROOF_SELECTOR_HARDENING.md) - First-hour proof clicks foundational responses by event/response id, evidence records raw-label checks by faction/surface after cleanup, and live-surface AAR proof targets the injected fixture exactly. |
 | **Local playtest evidence and browser proof** | [implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md](implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md) - Settings Diagnostics exports a local-only redacted playtest evidence packet, live-surface browser proof reaches the actual operation-opportunity Decision Room card and Records ledger row, and AAR/tooltip/Warroom labels close raw/English copy leaks. |
 | **Raw-copy wave 5 scout fixes** | [implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md](implemented/20260620_RAW_COPY_WAVE5_SCOUT_FIXES.md) - Legacy Warroom dates/IVP wrapper copy, Peace Plan modal chrome/fallbacks, officer dossier status/corps labels, and AAR/tooltip friction/confidence labels now avoid raw turn/week/enum/id leaks. |

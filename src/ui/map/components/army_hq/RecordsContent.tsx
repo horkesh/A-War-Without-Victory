@@ -119,7 +119,7 @@ export function RecordsContent() {
                             {' · '}
                         </span>
                         <span
-                            aria-label={`${archiveCounts[id]} records`}
+                            aria-label={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}
                             className="inline-flex min-w-[1.35rem] justify-center rounded border border-current/20 bg-black/20 px-1 tabular-nums opacity-80"
                         >
                             {archiveCounts[id]}

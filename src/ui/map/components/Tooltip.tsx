@@ -56,7 +56,11 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
 }) {
   const battle = battles?.find((b) => b.osid === osid);
   if (!battle) {
-    return <div className="text-[11px] text-text-secondary">Battle at {getPlayerSafeSettlementName(osid, 'this position')}</div>;
+    return (
+      <div className="text-[11px] text-text-secondary">
+        {t('tooltip.battleAtPosition', { location: getPlayerSafeSettlementName(osid, t('tooltip.thisPosition')) })}
+      </div>
+    );
   }
   const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
   const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? '#aaa';

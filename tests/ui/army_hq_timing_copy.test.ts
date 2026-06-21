@@ -405,6 +405,53 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toMatch(/\bnot_applicable\b/i);
   });
 
+  it('localizes Back-the-Officer rank, framing, and donor title copy in BCS', () => {
+    setLocale('bcs');
+
+    render(React.createElement(OperationOpportunityDossierPanel, {
+      gameState: makeGameState({
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          recommendation: 'approve',
+          description: 'Stab vidi otvoren operativni prozor.',
+        })],
+        backTheOfficerOps: [
+          {
+            op_id: 'sana_95',
+            op_name: 'Sana 95',
+            anchor_corps_id: 'arbih_3rd_corps',
+            anchor_corps_name: '3rd Corps',
+            tg_name: 'TG Sana',
+            tg_id: 'tg_sana',
+            commander: {
+              officer_id: 'ofc_sana',
+              name: 'Neko Komandant',
+              rank: 'major_general',
+              lost: false,
+            },
+            donors: [
+              {
+                corps_id: 'arbih_2nd_corps',
+                corps_name: '2nd Corps',
+                brigade_ids: ['bde_support'],
+                personnel_lent: 1200,
+              },
+            ],
+            total_personnel_lent: 1200,
+            framing: 'Back Major General Neko Komandant and his TG Sana. 1,200 men lent.',
+          },
+        ],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('General-major Neko Komandant');
+    expect(copy).toContain('Podrzite Neko Komandant i TG Sana');
+    expect(document.body.innerHTML).toContain('1200 ljudi izdvojeno iz ovog korpusa');
+    expect(copy).not.toMatch(/Major General|men lent|Back Major/);
+  });
+
   it('renders pending presidential decision timing as a calendar date', () => {
     render(React.createElement(PresidentialAttentionPanel, {
       gameState: makeGameState({

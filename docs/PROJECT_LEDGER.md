@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize contained copy residuals
+
+**Type:** UI/i18n copy-boundary polish.
+
+**Fix:** Battle-tooltip no-row fallback copy now renders through EN/BCS keys, Records subtab count accessible labels are localized, Back-the-Officer opportunity cards render structured localized rank/framing/donor copy instead of echoing English read-model prose, and the legacy Warroom Settings modal renders its chrome through the shared EN/BCS dictionary.
+
+**Verification:** `npx.cmd vitest run tests\ui\aar_tooltip_friction_labels.test.ts tests\ui\operation_aar_records_review.test.ts tests\ui\army_hq_timing_copy.test.ts tests\ui\warroom_settings_modal_i18n.test.ts --reporter=dot` passed 33/33. `npm.cmd run typecheck` passed. `git diff --check` passed with only the existing CRLF normalization warning for `src/ui/warroom/components/SettingsModal.ts`. `npm.cmd run qa:player-journeys` passed 245/245. `npm.cmd run qa:first-hour:browser` passed and evidence showed all three foundational response ids, Records/Chronicle receipts, raw-label absence checks, and dev-server cleanup; `.tmp_first_hour_browser_gate` was removed. `npm.cmd run qa:live-surface:browser` passed and evidence showed major-surface reachability, Army HQ/Records proofs, exact AAR fixture proof, battle-marker proof, operation-opportunity routing/ledger proof, archive drilldowns, and dev-server cleanup; `.tmp_live_surface_browser_sweep` was removed. `npm.cmd run desktop:map:build` passed with the existing Vite browser-external/chunk-size warnings. Report: `docs/40_reports/implemented/20260621_CONTAINED_COPY_POLISH.md`.
+
+**Scope/determinism:** UI/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] test(ui): harden browser proof selectors and evidence
 
 **Type:** Browser-QA harness and proof-hook hardening.

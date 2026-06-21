@@ -488,6 +488,14 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.queryByText('Archive Routes')).toBeNull();
     });
 
+    it('localizes Records subtab count accessible labels in BCS', () => {
+        setLocale('bcs');
+        render(createElement(RecordsContent));
+
+        expect(screen.getAllByLabelText(/\d+ zapisa/).length).toBeGreaterThan(0);
+        expect(document.body.innerHTML).not.toMatch(/aria-label="[^"]*records"/i);
+    });
+
     it('counts the AAR tab from turn reports instead of completed operations', () => {
         useGameStore.setState({
             loadedGameState: {

@@ -151,6 +151,30 @@ describe('AAR and tooltip friction labels', () => {
     expect(document.body.textContent).not.toMatch(/3x|3×/);
   });
 
+  it('localizes the battle tooltip fallback when no battle row is available', () => {
+    vi.useFakeTimers();
+    setLocale('bcs');
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: { ...makeSummary(), battles: [] },
+        turnSummaries: [],
+      },
+      osidDisplayNames: {},
+      tooltipTarget: { type: 'battle', id: '' },
+      tooltipPosition: { x: 1, y: 1 },
+    });
+
+    render(createElement(Tooltip));
+
+    act(() => {
+      vi.advanceTimersByTime(301);
+    });
+
+    expect(document.body.textContent).toContain('Bitka kod: ova pozicija');
+    expect(document.body.textContent).not.toMatch(/Battle at|this position/);
+  });
+
   it('uses localized friction and confidence labels in BCS', () => {
     setLocale('bcs');
     useGameStore.setState({
