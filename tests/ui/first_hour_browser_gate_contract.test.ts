@@ -89,6 +89,24 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('army-hq-sector-frontage');
     expect(tool).toContain('runRecordsAarFormationLinkLiveProof');
     expect(tool).toContain('recordsAarFormationLinkLiveProof');
+    expect(tool).toContain('buildRecordsAarLiveProofFixtureState');
+    expect(tool).toContain('apr_1992_initial_save.json');
+    expect(tool).toContain("op:gradacac:donja_tramosnica_2");
+    expect(tool).toContain("arbih_213th_vitezka_mountain");
+    expect(tool).toContain("rs_1st_birac");
+    expect(tool).toContain('loadRecordsAarLiveProofFixture');
+    expect(tool).toContain('handleManualSaveLoad');
+    expect(tool).not.toContain('skipped:no-visible-aar-battle-row');
+    expect(tool).not.toContain('skipped:no-visible-aar-formation-link');
+    expect(tool.indexOf('await runArchiveInboxDrilldown(page, summary);')).toBeLessThan(
+      tool.indexOf('await loadRecordsAarLiveProofFixture(page, summary);'),
+    );
+    expect(tool.indexOf('await runCodexInternalDrilldown(page, summary);')).toBeLessThan(
+      tool.indexOf('await loadRecordsAarLiveProofFixture(page, summary);'),
+    );
+    expect(tool.indexOf('await loadRecordsAarLiveProofFixture(page, summary);')).toBeLessThan(
+      tool.indexOf('await runRecordsAarFormationLinkLiveProof(page, summary);'),
+    );
     expect(tool).toContain('aar-battle-row');
     expect(tool).toContain('aar-formation-link');
     expect(tool).toContain('runArchiveInboxDrilldown');

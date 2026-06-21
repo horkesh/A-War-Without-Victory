@@ -21928,3 +21928,11 @@ Cleaned the active command-board pointer and June 7 decision register so future 
 Verification: targeted process grep over `docs/plans/COMMAND_BOARD.md` and `docs/plans/2026-06-07-owner-decision-backlog.md` returned no matches for `owner go-ahead`, `owner approval`, `user approval`, `owner-gated`, `owner-wait`, `Owner decision`, `owner decision`, `Krivaja triggered`, or `eastern enclaves fall via Krivaja`. `git diff --check` passed.
 
 Determinism/scope: docs/process cleanup only; no FORAWWV edit, code, simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, randomness, timestamps, or persisted output ordering changed.
+
+## 2026-06-21 - Live browser Records AAR fixture proof
+
+Hardened `qa:live-surface:browser` so Records AAR formation-link coverage is no longer optional. The live sweep now reads the committed April 1992 startup save, deep-clones it in memory, attaches one deterministic turn-1 battle row, loads that QA-only fixture through `window.handleManualSaveLoad(...)` after first-hour/archive/Codex checks, and then hard-fails unless the Records AAR battle row and formation link render and route to Formation Detail. The fixture pins `op:gradacac:donja_tramosnica_2`, `arbih_213th_vitezka_mountain`, and `rs_1st_birac`; the committed startup artifact is not modified.
+
+Verification: TDD red proof `node node_modules\vitest\vitest.mjs run tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` failed before implementation on the missing fixture helper. Green proof passed 6/6 after implementation. `node --check tools\ui\live_surface_browser_sweep.cjs` passed. `npm.cmd run qa:live-surface:browser` passed; inspected evidence showed `recordsAarFormationLinkLiveProof: true`, pinned fixture metadata, and `serverPortCleanupVerified: true`. Temporary `.tmp_live_surface_browser_sweep` evidence was removed.
+
+Determinism/scope: QA harness/test/docs only; no simulation logic, scenario data, committed startup artifact, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md`.

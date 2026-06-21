@@ -30,7 +30,7 @@
 
 **CODEX / COMMAND-SURFACE CHROME BOUNDARY (2026-06-21).** Codex dilemma titles, branch labels, essays, and historical comparison values are authored data, but status/action/distance and command-card chrome are UI copy. Do instead: localize chrome through i18n keys while preserving authored labels, route ids, and command-surface category ids; pin BCS with Codex/Warroom/App host tests.
 
-**LIVE PROOF FIXTURE STATE (2026-06-20).** Live browser gates must not fail on optional absent fixture state unless they create it first. Do instead: prove always-present hooks directly, and record explicit `skipped:no-visible-*` evidence for optional rows such as first-hour Records AAR battles while component tests pin the hook.
+**LIVE PROOF FIXTURE STATE (2026-06-21).** Live browser gates must not pass by skipping optional absent fixture state when the missing state is easy to synthesize. Do instead: prove always-present hooks directly; for optional-but-important rows such as Records AAR battles, deep-clone the startup save in the harness, inject a minimal deterministic read-model fixture, load it through `window.handleManualSaveLoad(...)`, and hard-fail selector proofs.
 
 **ARMY RESERVE COPY BOUNDARY (2026-06-20).** Reserve requests can carry diagnostic `description`, `why_needed`, `how_to_use`, purpose, and reason payloads. Do instead: render Army Reserve panels/modals through `armyReserve.*` i18n keys with neutral unknown fallbacks; keep raw reserve prose/ids internal.
 

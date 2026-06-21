@@ -12,6 +12,10 @@ const LOCALE = String(process.env.AWWV_LIVE_SURFACE_BROWSER_LOCALE || process.en
 const OUT_DIR = process.env.AWWV_LIVE_SURFACE_BROWSER_OUT_DIR
   || path.join(ROOT, '.tmp_live_surface_browser_sweep');
 const SCREENSHOT_DIR = path.join(OUT_DIR, 'screenshots');
+const STARTUP_SAVE_PATH = path.join(ROOT, 'data', 'derived', 'startup', 'apr_1992_initial_save.json');
+const RECORDS_AAR_FIXTURE_OSID = 'op:gradacac:donja_tramosnica_2';
+const RECORDS_AAR_FIXTURE_ATTACKER_ID = 'arbih_213th_vitezka_mountain';
+const RECORDS_AAR_FIXTURE_DEFENDER_ID = 'rs_1st_birac';
 
 const RAW_TECHNICAL_TOKENS = [
   { label: 'OPSEC', pattern: /\bOPSEC\b/ },
@@ -104,6 +108,59 @@ function readJson(filePath) {
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
+}
+
+function buildRecordsAarLiveProofFixtureState() {
+  const state = readJson(STARTUP_SAVE_PATH);
+  const fixtureState = typeof structuredClone === 'function'
+    ? structuredClone(state)
+    : JSON.parse(JSON.stringify(state));
+  fixtureState.meta = { ...(fixtureState.meta ?? {}), turn: 1 };
+  fixtureState.turn_summaries = [
+    {
+      turn: 1,
+      battles: [
+        {
+          osid: RECORDS_AAR_FIXTURE_OSID,
+          mun_id: 'gradacac',
+          attacker_faction: 'RBiH',
+          defender_faction: 'RS',
+          primary_attacker_id: RECORDS_AAR_FIXTURE_ATTACKER_ID,
+          primary_defender_id: RECORDS_AAR_FIXTURE_DEFENDER_ID,
+          all_attacker_ids: [RECORDS_AAR_FIXTURE_ATTACKER_ID],
+          outcome: 'stalemate',
+          attacker_casualties: 12,
+          defender_casualties: 9,
+          territory_flipped: false,
+          was_concentrated: false,
+          defender_contributions: [
+            {
+              brigade_id: RECORDS_AAR_FIXTURE_DEFENDER_ID,
+              distance_hops: 0,
+              is_home_municipality: false,
+              reactive_weight: 1,
+              casualties_taken: 9,
+            },
+          ],
+        },
+      ],
+      territory_net: {},
+      notable_flips: [],
+      displacement_total: 0,
+      displacement_by_ethnicity: {},
+      decoration_awards: [],
+      arc_transitions: [],
+      formation_spawns: [],
+      formation_destructions: [],
+      supply_deltas: {},
+      heavy_munitions_deltas: {},
+      movements: [],
+      supply_transitions: [],
+      events_fired: [],
+      notable_events: [],
+    },
+  ];
+  return fixtureState;
 }
 
 async function waitForServer(url, timeoutMs = 45000) {
@@ -992,19 +1049,16 @@ async function runRecordsAarFormationLinkLiveProof(page, summary) {
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
   await waitForVisibleSelector(page, '[data-testid="records-content"]');
-  await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
   await activateVisibleControl(page, '[data-testid="records-subtab-aar"]');
   await waitForVisibleSelector(page, '[data-testid="records-subtab-aar"][data-selected="true"]');
   await delay(500);
   if (await visibleSelectorCount(page, '[data-testid="aar-battle-row"][data-osid]') === 0) {
-    await captureEvidence(page, summary, 'records_aar_formation_link_skipped_no_battle_rows');
-    summary.evidence.recordsAarFormationLinkLiveProof = 'skipped:no-visible-aar-battle-row';
-    return;
+    await captureEvidence(page, summary, 'records_aar_formation_link_missing_battle_rows');
+    throw new Error('Records AAR fixture did not render a visible AAR battle row');
   }
   if (await visibleSelectorCount(page, '[data-testid="aar-formation-link"][data-formation-id][data-osid]') === 0) {
-    await captureEvidence(page, summary, 'records_aar_formation_link_skipped_no_formation_links');
-    summary.evidence.recordsAarFormationLinkLiveProof = 'skipped:no-visible-aar-formation-link';
-    return;
+    await captureEvidence(page, summary, 'records_aar_formation_link_missing_formation_links');
+    throw new Error('Records AAR fixture did not render a visible formation link');
   }
   await clickFirstVisibleSelector(
     page,
@@ -1016,6 +1070,24 @@ async function runRecordsAarFormationLinkLiveProof(page, summary) {
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Records AAR Formation Link Live Proof', text);
   summary.evidence.recordsAarFormationLinkLiveProof = true;
+}
+
+async function loadRecordsAarLiveProofFixture(page, summary) {
+  const fixtureState = buildRecordsAarLiveProofFixtureState();
+  await page.evaluate(async (state) => {
+    if (typeof window.handleManualSaveLoad !== 'function') {
+      throw new Error('window.handleManualSaveLoad is unavailable');
+    }
+    await window.handleManualSaveLoad(state);
+  }, fixtureState);
+  await waitForTacticalMap(page);
+  summary.evidence.recordsAarFixture = {
+    source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
+    turn: 1,
+    osid: RECORDS_AAR_FIXTURE_OSID,
+    attacker: RECORDS_AAR_FIXTURE_ATTACKER_ID,
+    defender: RECORDS_AAR_FIXTURE_DEFENDER_ID,
+  };
 }
 
 async function runArchiveInboxDrilldown(page, summary) {
@@ -1127,6 +1199,7 @@ async function run() {
       armyHqSectorFrontSegmentLiveProof: false,
       ownerJourneyDrilldown: false,
       recordsAarFormationLinkLiveProof: false,
+      recordsAarFixture: false,
       archiveChronicleToRecordsDrilldown: false,
       archiveRecordsDecisionToChronicleDrilldown: false,
       presidentialInboxVisible: false,
@@ -1177,9 +1250,10 @@ async function run() {
     await runArmyHqPersonnelBrigadeLiveProof(page, summary);
     await runArmyHqSectorFrontSegmentLiveProof(page, summary);
     await runOwnerJourneyDrilldown(page, summary);
-    await runRecordsAarFormationLinkLiveProof(page, summary);
     await runArchiveInboxDrilldown(page, summary);
     await runCodexInternalDrilldown(page, summary);
+    await loadRecordsAarLiveProofFixture(page, summary);
+    await runRecordsAarFormationLinkLiveProof(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;
     } finally {
