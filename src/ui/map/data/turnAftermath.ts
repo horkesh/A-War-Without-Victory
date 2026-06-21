@@ -667,9 +667,10 @@ export function buildTurnAftermathRecordViews(input: TurnAftermathRecordsInput):
 
   const summariesByTurn = new Map<number, TurnSummary>();
   for (const summary of state.turnSummaries ?? []) {
+    if (!shouldNarrateTerritorySummary(summary)) continue;
     summariesByTurn.set(summary.turn, summary);
   }
-  if (state.latestTurnSummary) {
+  if (state.latestTurnSummary && shouldNarrateTerritorySummary(state.latestTurnSummary)) {
     summariesByTurn.set(state.latestTurnSummary.turn, state.latestTurnSummary);
   }
 

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): harden Army HQ Records provenance and field drilldowns
+
+**Type:** UI/read-model route, copy-boundary, and browser-QA polish.
+
+**Fix:** Turn-0 setup provenance is no longer counted as normal Records Turn Aftermath or AAR history; Army HQ briefing/sector routes preserve corps context; sector and ORBAT rows now separate row expansion from explicit field-inspection controls; Army HQ corps cards expose opening-command provenance on first paint; Situation Briefing and command-access labels avoid hardcoded staff shorthand; Corps Front `DEF/EDGE` copy is replaced with player-facing localized copy; the stale fast-suite Records aria expectation now matches localized count labels.
+
+**Verification:** Focused UI/contract pack passed 99/99. `npm.cmd run qa:first-hour:browser` passed and evidence showed RBiH/RS/HRHB turn-0 Records counts `aftermath: 0`, `aar: 0` while foundational decisions filed. `npm.cmd run qa:live-surface:browser` passed after catching and closing the Army HQ sector inspect selector gap and Corps Front shorthand leak. `npm.cmd run qa:player-journeys` passed 246/246. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run typecheck` and `git diff --check` passed. Report: `docs/40_reports/implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md`.
+
+**Scope/determinism:** UI/read-model/browser-proof/test/docs polish only; no simulation logic, scenario data, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. Srebrenica/Zepa fall receipts remain event-owned and untouched.
+
+---
+
 ## [2026-06-21] fix(ui): localize contained copy residuals
 
 **Type:** UI/i18n copy-boundary polish.

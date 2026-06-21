@@ -13,6 +13,7 @@ import { TerritoryOverTimeChart } from '../TerritoryOverTimeChart';
 import { t, type MessageKey } from '../../i18n';
 import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary } from '../../data/decisionConsequenceLedger';
 import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { openCodex } from '../../utils/shellNavigation';
 
 const SUB_TABS = [
@@ -33,7 +34,7 @@ export function RecordsContent() {
         const aftermathCount = buildTurnAftermathRecordViews({ state, osidNameMap, limit: Number.MAX_SAFE_INTEGER }).length;
         const decisionRecords = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
         const decisionSummary = buildDecisionConsequenceLedgerSummary(decisionRecords);
-        const aarCount = state?.latestTurnSummary ? 1 : 0;
+        const aarCount = state?.latestTurnSummary && shouldNarrateTerritorySummary(state.latestTurnSummary) ? 1 : 0;
         const operationCount = state?.operationHistory?.length ?? 0;
         const opportunityCount = (state?.operationOpportunityRecords ?? []).filter((record) =>
             record.status !== 'eligible_pending_review' || record.response_turn != null

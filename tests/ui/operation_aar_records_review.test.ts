@@ -460,6 +460,45 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toContain('⬡Prijedor');
     });
 
+    it('does not file turn-0 provenance as normal Records aftermath or AAR history', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                turn: 0,
+                label: 'Opening week',
+                latestTurnSummary: {
+                    turn: 0,
+                    battles: [],
+                    territory_net: { RS: 2, RBiH: -2 },
+                    notable_flips: [
+                        { osid: 'op:prijedor:prijedor_1', mun_id: 'prijedor', from: 'RBiH', to: 'RS', significance: 'municipality_seat' },
+                    ],
+                    displacement_total: 0,
+                    displacement_by_ethnicity: {},
+                    decoration_awards: [],
+                    arc_transitions: [],
+                    formation_spawns: [],
+                    formation_destructions: [],
+                    supply_deltas: {},
+                    heavy_munitions_deltas: {},
+                    movements: [],
+                    supply_transitions: [],
+                    events_fired: [],
+                    notable_events: [],
+                },
+                turnSummaries: [],
+                operationHistory: [],
+            },
+            armyHQRecordsSubTab: 'aar',
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('button', { name: /Turn Aftermath 0/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
+        expect(document.body.textContent ?? '').toContain('Quiet turn');
+    });
+
     it('localizes the Records archive summary chrome', () => {
         setLocale('bcs');
         useGameStore.setState({
@@ -606,7 +645,7 @@ describe('Army HQ Records operation AAR review', () => {
         });
 
         const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
-        fireEvent.click(screen.getByRole('button', { name: /Heroic Brigade/i }));
+        fireEvent.click(screen.getAllByRole('button', { name: /Heroic Brigade/i })[0]);
         const copy = view.container.textContent ?? '';
 
         expect(copy).toContain('Garrison duty');

@@ -517,7 +517,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
 
                             {/* Empty state — data exists but nothing to show */}
                             {summary.battles.length === 0 &&
-                             Object.keys(summary.territory_net).length === 0 &&
+                             (!narrateTerritory || Object.keys(summary.territory_net).length === 0) &&
                              summary.displacement_total === 0 &&
                              summary.notable_events.length === 0 &&
                              summary.decoration_awards.length === 0 &&

@@ -10,6 +10,7 @@ import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
 import { formatPersonnel, turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeFormationNarrativeArcLabel, getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
 import { getDecorationName } from '../../utils/decorationUtils';
+import { inspectOnField } from '../../utils/shellNavigation';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
@@ -269,51 +270,69 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
                     const cohesionColor = getCohesionColor(cohesion);
                     const filledSegments = Math.ceil(cohesion / 20);
                     const isExpanded = expandedId === b.id;
+                    const formationName = getLocalizedFormationName(b, locale);
 
                     return (
                         <div key={b.id} className={`border border-panel-border/30 mb-[1px] ${isExpanded ? 'bg-panel-bg' : ''}`}>
-                            <button
-                                type="button"
-                                onClick={() => setExpandedId(isExpanded ? null : b.id)}
-                                className={`w-full flex items-center gap-3 px-4 py-2 transition-all text-left ${isExpanded ? '' : 'hover:bg-panel-bg'
-                                    }`}>
-                                {/* Expand indicator */}
-                                <span className={`text-[9px] text-text-secondary/60 w-2 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
-                                    ▶
-                                </span>
+                            <div className={`flex items-center transition-all ${isExpanded ? '' : 'hover:bg-panel-bg'}`}>
+                                <button
+                                    type="button"
+                                    onClick={() => setExpandedId(isExpanded ? null : b.id)}
+                                    className="min-w-0 flex flex-1 items-center gap-3 px-4 py-2 text-left"
+                                >
+                                    {/* Expand indicator */}
+                                    <span className={`text-[9px] text-text-secondary/60 w-2 shrink-0 transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
+                                        ▶
+                                    </span>
 
-                                {/* Name */}
-                                <span className="text-[12px] font-bold text-text-secondary flex-1 min-w-0 uppercase tracking-tight">
-                                    {getLocalizedFormationName(b, locale)}
-                                </span>
+                                    {/* Name */}
+                                    <span className="text-[12px] font-bold text-text-secondary flex-1 min-w-0 uppercase tracking-tight">
+                                        {formationName}
+                                    </span>
 
-                                {/* Personnel */}
-                                <span className="text-[11px] tabular-nums text-text-secondary w-16 text-right shrink-0">
-                                    {formatPersonnel(personnel)}
-                                </span>
+                                    {/* Personnel */}
+                                    <span className="text-[11px] tabular-nums text-text-secondary w-16 text-right shrink-0">
+                                        {formatPersonnel(personnel)}
+                                    </span>
 
-                                {/* Cohesion segments */}
-                                <div className="flex gap-1 w-20 justify-center shrink-0">
-                                    {Array.from({ length: 5 }, (_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`h-2.5 w-2 border border-black/40 ${i < filledSegments ? '' : 'bg-panel-card opacity-20'}`}
-                                            style={{ backgroundColor: i < filledSegments ? cohesionColor : undefined }}
-                                        />
-                                    ))}
-                                </div>
+                                    {/* Cohesion segments */}
+                                    <div className="flex gap-1 w-20 justify-center shrink-0">
+                                        {Array.from({ length: 5 }, (_, i) => (
+                                            <div
+                                                key={i}
+                                                className={`h-2.5 w-2 border border-black/40 ${i < filledSegments ? '' : 'bg-panel-card opacity-20'}`}
+                                                style={{ backgroundColor: i < filledSegments ? cohesionColor : undefined }}
+                                            />
+                                        ))}
+                                    </div>
 
-                                {/* Fatigue */}
-                                <span className={`text-[11px] tabular-nums w-10 text-right shrink-0 font-bold ${fatigue >= 20 ? 'text-red-500 underline' : fatigue >= 10 ? 'text-amber-500' : 'text-text-secondary/60'
-                                    }`}>
-                                    {fatigue}
-                                </span>
+                                    {/* Fatigue */}
+                                    <span className={`text-[11px] tabular-nums w-10 text-right shrink-0 font-bold ${fatigue >= 20 ? 'text-red-500 underline' : fatigue >= 10 ? 'text-amber-500' : 'text-text-secondary/60'
+                                        }`}>
+                                        {fatigue}
+                                    </span>
 
-                                {/* Status posture */}
-                                <span className={`text-[10px] font-bold uppercase w-14 text-right shrink-0 ${statusColor}`}>
-                                    {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, 'Pending')}
-                                </span>
-                            </button>
+                                    {/* Status posture */}
+                                    <span className={`text-[10px] font-bold uppercase w-14 text-right shrink-0 ${statusColor}`}>
+                                        {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, 'Pending')}
+                                    </span>
+                                </button>
+                                <button
+                                    type="button"
+                                    data-testid="army-hq-formation-inspect"
+                                    data-formation-id={b.id}
+                                    data-corps-id={corpsId}
+                                    aria-label={t('orbat.inspectOnField', { formation: formationName })}
+                                    onClick={() => inspectOnField(useGameStore.getState(), {
+                                        kind: 'field-formation-in-corps',
+                                        formationId: b.id,
+                                        corpsId,
+                                    })}
+                                    className="mr-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                >
+                                    {t('orbat.inspect')}
+                                </button>
+                            </div>
                             {isExpanded && <BrigadeExpandedDetail b={b} />}
                         </div>
                     );

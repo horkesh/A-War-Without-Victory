@@ -67,7 +67,10 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
         return;
       case 'sector':
         if (item.target.sectorId) {
-          inspectOnField(useGameStore.getState(), { kind: 'field-sector', sectorId: item.target.sectorId });
+          const corpsId = item.target.corpsId ?? item.corpsId;
+          inspectOnField(useGameStore.getState(), corpsId
+            ? { kind: 'field-sector-in-corps', sectorId: item.target.sectorId, corpsId }
+            : { kind: 'field-sector', sectorId: item.target.sectorId });
         }
         return;
       case 'settlement':

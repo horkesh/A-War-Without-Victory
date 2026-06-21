@@ -443,7 +443,7 @@ describe('GUI audit label discipline', () => {
     useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
     const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
 
-    fireEvent.click(screen.getByRole('button', { name: /101st Brigade/i }));
+    fireEvent.click(screen.getAllByRole('button', { name: /101st Brigade/i })[0]);
 
     expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
     expect(container.textContent).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
@@ -506,6 +506,77 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).toMatch(/Front segments: 4/i);
     expect(container.textContent).toMatch(/Brigades per front segment: 0\.25/i);
     expect(container.textContent).not.toMatch(/\bKM\b|per km|FRONTAGE/i);
+  });
+
+  it('offers separate field-inspection controls for Army HQ sector and ORBAT rows', () => {
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      posture: 'defend',
+      createdTurn: 0,
+      location_osid: 'op:sarajevo:dobrinja_1',
+      corps_id: 'arbih_1st_corps',
+    } as unknown as FormationView;
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:0',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      display_name: 'Sarajevo front',
+      edge_ids: ['edge-1'],
+      assigned_brigade_ids: [brigade.id],
+      reserve_brigade_ids: [],
+      length_edges: 1,
+      sub_segment_count: 1,
+      defensive_power: 1200,
+      density: 1,
+      threat_ratio: 1.1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+      sub_segments: [{ sub_segment_id: 's1', friendly_osids: ['op:sarajevo:dobrinja_1'], enemy_osids: [] }],
+    } as unknown as CorpsFrontSectorView;
+
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [brigade] }),
+      armyHQExpandedSections: { 'sec-arbih_1st_corps': true, 'orbat-arbih_1st_corps': true },
+      osidDisplayNames: { 'op:sarajevo:dobrinja_1': 'Dobrinja' },
+    });
+
+    const { container: sectorsContainer } = render(createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+    expect(sectorsContainer.querySelector('[data-testid="army-hq-sector-inspect"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Inspect Sarajevo front on field/i }));
+    let store = useGameStore.getState();
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
+    expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.armyHQOpen).toBe(false);
+
+    cleanup();
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [brigade] }),
+      armyHQExpandedSections: { 'orbat-arbih_1st_corps': true },
+    });
+
+    const { container: orbatContainer } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
+    expect(orbatContainer.querySelector('[data-testid="army-hq-formation-inspect"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Inspect 101st Brigade on field/i }));
+    store = useGameStore.getState();
+    expect(store.selectedFormationId).toBe('arbih_101_brigade');
+    expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.armyHQOpen).toBe(false);
   });
 
   it('renders Situation pressure and security copy without telemetry labels', () => {
@@ -613,6 +684,8 @@ describe('GUI audit label discipline', () => {
     expect(enMessages['warSummary.label.wia']).not.toMatch(/\bWIA\b/);
     expect(enMessages['sectorsSection.intel']).not.toMatch(/\bINTEL\b/);
     expect(enMessages['sectorsSection.defPerEdge']).not.toMatch(/DEF\/EDGE/);
+    expect(enMessages['corpsFront.defPerEdge']).not.toMatch(/DEF\/EDGE/i);
+    expect(enMessages['corpsFront.defPerEdge']).toContain('Defense per front segment');
     expect(enMessages['sectorsSection.morShort']).not.toMatch(/\bMOR\b/);
     expect(enMessages['sectorsSection.fatShort']).not.toMatch(/\bFAT\b/);
     expect(enMessages['sectorsSection.persShort']).not.toMatch(/\bPERS\b/);
