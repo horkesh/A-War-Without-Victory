@@ -333,6 +333,50 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('Available')).toBeNull();
     });
 
+    it('localizes OpsMap compact legend chrome in BCS mode', async () => {
+        setLocale('bcs');
+        Object.defineProperty(window.URL, 'createObjectURL', {
+            configurable: true,
+            value: vi.fn(() => 'blob:maplibre-worker'),
+        });
+        const { OpsMap } = await import('../../src/ui/map/components/ops_modal/OpsMap.js');
+
+        const { container } = render(createElement(OpsMap, {
+            corpsId: 'rs_1st_krajina',
+            onOsidClick: vi.fn(),
+            objectives: [],
+            validTargetOsids: new Set<string>(),
+            selectableOsids: new Set<string>(),
+            stagingOsid: undefined,
+            schwerpunktOsid: '',
+            axes: [],
+            faction: 'RS',
+            enabled: true,
+        }));
+
+        const legendText = container.textContent ?? '';
+        expect(legendText).toContain('Cilj');
+        expect(legendText).toContain('Glavni napor');
+        expect(legendText).toContain('Polazište');
+        expect(legendText).toContain('Front korpusa');
+        expect(legendText).toContain('Svijetlo = moguće izabrati');
+        expect(legendText).toContain('Zatamnjeno = van dometa');
+        expect(legendText).not.toContain('Objective');
+        expect(legendText).not.toContain('Bright = selectable');
+    });
+
+    it('reuses exact existing OpsMap compact legend keys before adding compact-only keys', () => {
+        const mapSource = readFileSync(
+            resolve(process.cwd(), 'src/ui/map/components/ops_modal/OpsMap.tsx'),
+            'utf8',
+        );
+
+        expect(mapSource).toContain("t('opsPlanning.legend.objective')");
+        expect(mapSource).toContain("t('opsPlanning.phase.staging')");
+        expect(mapSource).not.toContain('opsPlanning.compactLegend.objective');
+        expect(mapSource).not.toContain('opsPlanning.compactLegend.staging');
+    });
+
     it('localizes G2Phase clipboard chrome in BCS mode', () => {
         setLocale('bcs');
         useGameStore.setState({ loadedGameState: makeState() });

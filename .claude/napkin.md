@@ -1,6 +1,6 @@
 # Napkin Runbook
 
-**WAR MAP CHROME LABEL BOUNDARY (2026-06-21).** War Map mode/layer registries own stable ids, hotkeys, and state keys; rendered labels are UI copy. Do instead: keep `MAP_MODES[*].id`/`key` and layer `key`/`setKey` unchanged, add typed `labelKey` metadata, and render through `t(...)` in `BottomStatusStrip` / `MapModeLegend`; queue radial/context and OpsMap legend copy as separate slices.
+**WAR MAP CHROME LABEL BOUNDARY (2026-06-21).** War Map mode/layer registries, radial/context action ids, and OpsMap behavior own stable ids/hotkeys/state/action contracts; rendered labels are UI copy. Do instead: keep `MAP_MODES[*].id`/`key`, layer `key`/`setKey`, context action ids, and OpsMap behavior unchanged; render mode/layer/legend copy through `map.mode.*`, `map.layer.*`, `map.legend.*`, `map.context.*`, and `opsPlanning.compactLegend.*` keys.
 
 **SUPPLY VISIBILITY COPY BOUNDARY (2026-06-21).** `buildPlayerSupplyVisibility` is a player-facing read-model projection, even though its counts are engine-derived. Do instead: route supply headlines/evidence through `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count`; do not interpolate English `adequate / strained / critical`, `open / brittle / cut`, or brigade isolation prose.
 

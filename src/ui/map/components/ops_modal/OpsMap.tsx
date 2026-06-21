@@ -488,8 +488,8 @@ export function OpsMap({
                                 border border-[rgba(180,160,130,0.15)] px-3 py-2 text-[8px]">
                     <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">{t('opsModal.legend')}</div>
                     <div className="space-y-0.5 text-text-secondary">
-                        <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> Objective &middot; <span className="text-accent-gold">&#9733;</span> Schwerpunkt &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> Staging</div>
-                        <div><span className="inline-block w-3 h-0.5 bg-[rgba(255,220,120,0.8)] mr-1" /> Corps front &middot; Bright = selectable &middot; Dim = out of range</div>
+                        <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> {t('opsPlanning.legend.objective')} &middot; <span className="text-accent-gold">&#9733;</span> {t('opsPlanning.compactLegend.schwerpunkt')} &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> {t('opsPlanning.phase.staging')}</div>
+                        <div><span className="inline-block w-3 h-0.5 bg-[rgba(255,220,120,0.8)] mr-1" /> {t('opsPlanning.compactLegend.corpsFront')} &middot; {t('opsPlanning.compactLegend.brightSelectable')} &middot; {t('opsPlanning.compactLegend.dimOutOfRange')}</div>
                     </div>
                 </div>
             )}
@@ -707,5 +707,3 @@ function updateDeckArrows(
 
     overlay.setProps({ layers });
 }
-
-

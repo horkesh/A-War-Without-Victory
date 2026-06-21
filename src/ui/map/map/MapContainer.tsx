@@ -13,7 +13,7 @@ import type {
 import type { FeatureCollection } from 'geojson';
 import type { PickingInfo } from '@deck.gl/core';
 import type { LoadedGameState } from '../data/types';
-import { useLocale } from '../i18n';
+import { t, useLocale } from '../i18n';
 import {
   useMapInteractions,
   queryPreferredFrontFeatureNearPoint,
@@ -620,13 +620,13 @@ export function MapContainer() {
     switch (type) {
       case 'formation': return [
         {
-          id: 'view', label: 'View Unit', icon: '\u{1F441}', action: () => {
+          id: 'view', label: t('map.context.viewUnit'), icon: '\u{1F441}', action: () => {
             const id = properties?.id as string;
             if (id) inspectFormationFromMap(id, properties);
           }
         },
         {
-          id: 'corps', label: 'View Corps', icon: '\u2694', action: () => {
+          id: 'corps', label: t('map.context.viewCorps'), icon: '\u2694', action: () => {
             const corpsId = properties?.corps_id as string;
             if (corpsId) useGameStore.getState().setSelectedCorpsId(corpsId);
           }
@@ -634,13 +634,13 @@ export function MapContainer() {
       ];
       case 'osid': return [
         {
-          id: 'info', label: 'Settlement', icon: '\u{1F3D8}', action: () => {
+          id: 'info', label: t('map.context.settlement'), icon: '\u{1F3D8}', action: () => {
             const osid = properties?.osid as string;
             if (osid) inspectSettlementFromMap(osid, osidToSector.get(osid));
           }
         },
         {
-          id: 'sector', label: 'View Sector', icon: '\u{1F5FA}', action: () => {
+          id: 'sector', label: t('map.context.viewSector'), icon: '\u{1F5FA}', action: () => {
             const osid = properties?.osid as string;
             const sectorId = osidToSector.get(osid ?? '');
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
@@ -651,7 +651,7 @@ export function MapContainer() {
       ];
       case 'front': return [
         {
-          id: 'sector', label: 'Sector Detail', icon: '\u{1F5FA}', action: () => {
+          id: 'sector', label: t('map.context.sectorDetail'), icon: '\u{1F5FA}', action: () => {
             const sectorId = properties?.sector_id as string;
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
               inspectSectorFromMap(sectorId, properties);
@@ -661,7 +661,7 @@ export function MapContainer() {
       ];
       case 'empty': return [
         {
-          id: 'deselect', label: 'Deselect', icon: '\u2715', action: () => {
+          id: 'deselect', label: t('map.context.deselect'), icon: '\u2715', action: () => {
             useGameStore.getState().setSelectedFormationId(null);
             useGameStore.getState().setSelectedOsid('');
           }
@@ -3422,7 +3422,7 @@ export function MapContainer() {
           targetLabel={
             contextMenu.type === 'formation' ? (contextMenu.properties?.name as string)?.split(' ').pop() :
               contextMenu.type === 'osid' ? getOsidDisplayName(contextMenu.properties?.osid as string, osidDisplayNames) :
-                contextMenu.type === 'front' ? 'Front' : ''
+                contextMenu.type === 'front' ? t('map.context.front') : ''
           }
           onClose={() => setContextMenu(null)}
         />
