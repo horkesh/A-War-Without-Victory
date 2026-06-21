@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest War Map chrome i18n boundary:** [implemented/20260621_WAR_MAP_CHROME_I18N.md](implemented/20260621_WAR_MAP_CHROME_I18N.md) - War Map mode pills, layer toggles, and map-mode legend titles/stops now render through EN/BCS i18n keys while preserving map-mode ids, hotkeys, and layer-state contracts.
+
 **Latest supply visibility i18n boundary:** [implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md](implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md) - Player-scoped supply visibility headlines and evidence now render through EN/BCS keys instead of English read-model strings.
 
 **Latest Decision Room route owner handoff:** [implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md](implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md) - Presidential Decision Room command/operational/turn cards now keep primary actions inside their Decision Room lens/card while preserving Army HQ or Records as source handoff evidence.

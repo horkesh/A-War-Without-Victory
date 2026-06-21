@@ -11,6 +11,7 @@
  * Source report: docs/40_reports/playtest/GUI_PLAYTEST_2026-05-16.md defect #8.
  */
 import { describe, expect, it } from 'vitest';
+import { t } from '../../src/ui/map/i18n/index.js';
 import { MAP_MODES } from '../../src/ui/map/utils/mapModes.js';
 
 const PRIMARY_MODES = ['political', 'ethnic', 'supply', 'operations'] as const;
@@ -24,10 +25,17 @@ describe('BottomStatusStrip map mode labels (playtest defect #8)', () => {
         expect(unique.size).toBe(ids.length);
     });
 
-    it('contains each rendered label exactly once across primary + secondary', () => {
-        const labels = [...primaryModes, ...secondaryModes].map((m) => m.label);
-        const unique = new Set(labels);
-        expect(unique.size).toBe(labels.length);
+    it('contains each localized rendered label exactly once across primary + secondary', () => {
+        const entries = [...primaryModes, ...secondaryModes];
+        const labelKeys = entries.map((m) => m.labelKey);
+        const uniqueKeys = new Set(labelKeys);
+        expect(uniqueKeys.size).toBe(labelKeys.length);
+
+        for (const locale of ['en', 'bcs'] as const) {
+            const labels = entries.map((m) => t(m.labelKey, undefined, locale));
+            const uniqueLabels = new Set(labels);
+            expect(uniqueLabels.size).toBe(labels.length);
+        }
     });
 
     it('does not place any mode in both primary and secondary buckets', () => {
