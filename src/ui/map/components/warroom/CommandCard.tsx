@@ -80,7 +80,7 @@ export function factionInkColor(faction: string | null | undefined): string {
   return 'rgba(35, 112, 63, 0.85)';
 }
 
-function commandCategoryTitle(id: PresidentialCommandCategoryCount['id']): string {
+function commandCategoryTitle(id: PresidentialCommandCategoryCount['id'], fallback: string): string {
   switch (id) {
     case 'cat_war_direction': return t('commandSurface.category.warDirection.title');
     case 'cat_diplomacy': return t('commandSurface.category.diplomacy.title');
@@ -88,10 +88,11 @@ function commandCategoryTitle(id: PresidentialCommandCategoryCount['id']): strin
     case 'cat_command': return t('commandSurface.category.command.title');
     case 'cat_conscience': return t('commandSurface.category.conscience.title');
     case 'cat_record': return t('commandSurface.category.record.title');
+    default: return fallback;
   }
 }
 
-function commandCategoryBlurb(id: PresidentialCommandCategoryCount['id']): string {
+function commandCategoryBlurb(id: PresidentialCommandCategoryCount['id'], fallback: string): string {
   switch (id) {
     case 'cat_war_direction': return t('commandSurface.category.warDirection.blurb');
     case 'cat_diplomacy': return t('commandSurface.category.diplomacy.blurb');
@@ -99,6 +100,7 @@ function commandCategoryBlurb(id: PresidentialCommandCategoryCount['id']): strin
     case 'cat_command': return t('commandSurface.category.command.blurb');
     case 'cat_conscience': return t('commandSurface.category.conscience.blurb');
     case 'cat_record': return t('commandSurface.category.record.blurb');
+    default: return fallback;
   }
 }
 
@@ -121,8 +123,8 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
   const art = resolveCommandCardArt(category.id, playerFaction);
   const tint = factionInkColor(playerFaction);
   const roleLabel = commandCategoryRole(category.role);
-  const title = commandCategoryTitle(category.id);
-  const blurb = commandCategoryBlurb(category.id);
+  const title = commandCategoryTitle(category.id, category.title);
+  const blurb = commandCategoryBlurb(category.id, category.blurb);
   const footer = category.urgentCount > 0
     ? t('commandSurface.footer.urgentPending', { urgentCount: category.urgentCount, count: category.count })
     : t('commandSurface.footer.pending', { count: category.count });

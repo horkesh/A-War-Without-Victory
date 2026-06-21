@@ -30,6 +30,7 @@
 
 - Codex dilemma-spine status/action labels and distance-from-history chrome now render through EN/BCS i18n keys while preserving authored dilemma titles, branch labels, essay titles, and historical comparison values.
 - Warroom command-card strip, command-card category chrome, pending footer copy, and App-hosted Decision Room shell chrome now render through EN/BCS i18n keys without changing route ids or command-surface category ids.
+- CI followup: unmapped command-card ids still render their authored fallback title/blurb while using the existing faction-tinted placeholder art path.
 
 ### Live Browser Raw-Token Guard
 
@@ -46,6 +47,7 @@
 - TypeScript passed after the residual code changes.
 - `npm.cmd run qa:player-journeys` passed 240/240.
 - `npm.cmd run qa:live-surface:browser` passed from the normal package script, proving Desk, War Map, Army HQ, Records, Chronicle, Codex, owner drilldown, Codex dilemma/distance sections, and strict server port cleanup; the first-hour fixture still records `recordsAarFormationLinkLiveProof: "skipped:no-visible-aar-battle-row"` as expected.
+- CI followup proof `node node_modules\vitest\vitest.mjs run tests/ui/presidential_categories.test.ts tests/ui/command_card_strip_accessibility.test.ts --pool=forks --reporter=dot` passed 18/18 after restoring unmapped command-card fallback title/blurb rendering.
 
 ## Files Changed
 
