@@ -11,7 +11,7 @@ import { FACTION_HEX_COLORS, FACTION_SHORT_LABELS } from '../../utils/theme';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { SituationTab } from '../SituationTab';
 import { buildWarSummaryOverviewModel, WAR_SUMMARY_FACTIONS } from './warSummaryOverview';
-import { buildTurnAftermathCampaignCost } from '../../data/turnAftermath';
+import { buildTurnAftermathCampaignCost, type TurnAftermathCostSeverity } from '../../data/turnAftermath';
 import { t, type MessageKey } from '../../i18n';
 import { localizedOperationalSitrepCopy } from '../../utils/operationalSitrepCopy';
 
@@ -25,12 +25,15 @@ const SUMMARY_SECTIONS: Array<[SummaryFocusSection, MessageKey]> = [
     ['capital', 'warSummary.tab.capital'],
 ];
 
-function enumLabel(prefix: string, value: string): string {
-    return t(`${prefix}.${value}` as MessageKey);
-}
+const CAMPAIGN_COST_SEVERITY_LABEL_KEYS = {
+    low: 'turnAftermath.severity.low',
+    moderate: 'turnAftermath.severity.moderate',
+    severe: 'turnAftermath.severity.severe',
+    critical: 'turnAftermath.severity.critical',
+} satisfies Record<TurnAftermathCostSeverity, MessageKey>;
 
-function campaignCostSeverityLabel(severity: string): string {
-    return enumLabel('turnAftermath.severity', severity);
+function campaignCostSeverityLabel(severity: TurnAftermathCostSeverity): string {
+    return t(CAMPAIGN_COST_SEVERITY_LABEL_KEYS[severity]);
 }
 
 interface WarSummaryContentProps {

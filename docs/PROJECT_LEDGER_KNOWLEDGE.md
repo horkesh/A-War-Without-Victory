@@ -3333,3 +3333,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-06-21 - Pre-advance and desk severity chrome boundary
 
 **Severity ids remain internal even in tiny badges and alt text:** pre-advance rows, President's Desk packets, and Decision Room priority cards all reuse raw severity/status ids internally, but the display edge must render localized labels. Durable rule: when cleaning a decision-surface family, check compact badges, hard-blocker section headers, image alt text, and related modal rows in both EN and BCS; raw ids such as `blocking`, `urgent`, or `normal` belong in state/tests, not visible chrome. Applied in `[2026-06-21] Pre-advance / desk severity chrome`; report `docs/40_reports/implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md`.
+
+## 2026-06-21 - Records aftermath label-map boundary
+
+**Dynamic i18n key construction is a raw-label risk on compact command records:** Army HQ Records and War Summary aftermath chrome should use explicit typed `MessageKey` maps for enum/family labels instead of prefix/value template interpolation or family-id interpolation. Durable rule: when a visible records/summary badge renders tone, severity, signal kind, direction, momentum, or decision-family action type, make the enum-to-key mapping reviewable and exhaustive with `satisfies Record<..., MessageKey>`, then pin a source-level guard so future dynamic builders do not return. Applied in `[2026-06-21] Records aftermath label-map hardening`; report `docs/40_reports/implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md`.

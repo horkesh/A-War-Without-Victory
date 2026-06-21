@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathRecordFilter, type TurnAftermathView } from '../../data/turnAftermath';
-import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
+import { buildTurnAftermathCampaignCost, buildTurnAftermathCampaignPulse, buildTurnAftermathLedgerSummary, buildTurnAftermathRecordViews, filterTurnAftermathRecords, type TurnAftermathCampaignMomentum, type TurnAftermathCostSeverity, type TurnAftermathRecordFilter, type TurnAftermathSignalKind, type TurnAftermathTone, type TurnAftermathView } from '../../data/turnAftermath';
+import { getDecisionSurfaceForInboxType, type DecisionSurfaceFamilyId } from '../../data/decisionSurfaceRegistry';
 import { useGameStore } from '../../store/gameStore';
 import { t, type MessageKey } from '../../i18n';
 
@@ -49,14 +49,80 @@ function signalClass(severity: TurnAftermathView['signals'][number]['severity'])
     return 'border-panel-border/50 text-text-secondary bg-black/10';
 }
 
-function enumLabel(prefix: string, value: string): string {
-    return t(`${prefix}.${value}` as MessageKey);
+const TONE_LABEL_KEYS = {
+    gain: 'turnAftermath.tone.gain',
+    loss: 'turnAftermath.tone.loss',
+    mixed: 'turnAftermath.tone.mixed',
+    quiet: 'turnAftermath.tone.quiet',
+} satisfies Record<TurnAftermathTone, MessageKey>;
+
+const COST_SEVERITY_LABEL_KEYS = {
+    low: 'turnAftermath.severity.low',
+    moderate: 'turnAftermath.severity.moderate',
+    severe: 'turnAftermath.severity.severe',
+    critical: 'turnAftermath.severity.critical',
+} satisfies Record<TurnAftermathCostSeverity, MessageKey>;
+
+const SIGNAL_KIND_LABEL_KEYS = {
+    event: 'turnAftermath.signal.kind.event',
+    decoration: 'turnAftermath.signal.kind.decoration',
+    arc: 'turnAftermath.signal.kind.arc',
+    supply: 'turnAftermath.signal.kind.supply',
+    movement: 'turnAftermath.signal.kind.movement',
+} satisfies Record<TurnAftermathSignalKind, MessageKey>;
+
+const DIRECTION_LABEL_KEYS = {
+    gain: 'turnAftermath.direction.gain',
+    loss: 'turnAftermath.direction.loss',
+    other: 'turnAftermath.direction.other',
+} satisfies Record<TurnAftermathView['territory']['notable'][number]['direction'], MessageKey>;
+
+const MOMENTUM_LABEL_KEYS = {
+    advancing: 'turnAftermath.momentum.advancing',
+    contested: 'turnAftermath.momentum.contested',
+    bleeding: 'turnAftermath.momentum.bleeding',
+    quiet: 'turnAftermath.momentum.quiet',
+} satisfies Record<TurnAftermathCampaignMomentum, MessageKey>;
+
+const ACTION_TYPE_LABEL_KEYS = {
+    event_decision: 'records.actionType.event_decision',
+    peace_plan: 'records.actionType.peace_plan',
+    dayton_negotiation: 'records.actionType.dayton_negotiation',
+    paramilitary_request: 'records.actionType.paramilitary_request',
+    convoy_decision: 'records.actionType.convoy_decision',
+    reserve_request: 'records.actionType.reserve_request',
+    officer_event: 'records.actionType.officer_event',
+    autonomy_proposal: 'records.actionType.autonomy_proposal',
+    operation_opportunity: 'records.actionType.operation_opportunity',
+    counter_offer: 'records.actionType.counter_offer',
+    intelligence_notification: 'records.actionType.intelligence_notification',
+    situation: 'records.actionType.situation',
+} satisfies Record<DecisionSurfaceFamilyId, MessageKey>;
+
+function toneLabel(tone: TurnAftermathTone): string {
+    return t(TONE_LABEL_KEYS[tone]);
+}
+
+function costSeverityLabel(severity: TurnAftermathCostSeverity): string {
+    return t(COST_SEVERITY_LABEL_KEYS[severity]);
+}
+
+function signalKindLabel(kind: TurnAftermathSignalKind): string {
+    return t(SIGNAL_KIND_LABEL_KEYS[kind]);
+}
+
+function directionLabel(direction: TurnAftermathView['territory']['notable'][number]['direction']): string {
+    return t(DIRECTION_LABEL_KEYS[direction]);
+}
+
+function momentumLabel(momentum: TurnAftermathCampaignMomentum): string {
+    return t(MOMENTUM_LABEL_KEYS[momentum]);
 }
 
 function actionTypeLabel(type: TurnAftermathView['nextActions']['topItems'][number]['type']): string {
     const surface = getDecisionSurfaceForInboxType(type);
     if (!surface) return t('records.actionType.reviewItem');
-    return t(`records.actionType.${surface.familyId}` as MessageKey);
+    return t(ACTION_TYPE_LABEL_KEYS[surface.familyId]);
 }
 
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
@@ -89,10 +155,10 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="text-[12px] font-bold text-text-primary">{view.dateLabel}</div>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${toneClass(view.tone)}`}>
-                            {enumLabel('turnAftermath.tone', view.tone)}
+                            {toneLabel(view.tone)}
                         </span>
                         <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
-                            {t('records.costSeverity', { severity: enumLabel('turnAftermath.severity', view.cost.severity) })}
+                            {t('records.costSeverity', { severity: costSeverityLabel(view.cost.severity) })}
                         </span>
                     </div>
                     <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>
@@ -134,7 +200,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         {signalPreview.map((signal) => (
                             <div key={signal.id} className={`min-w-0 rounded border px-2 py-1 ${signalClass(signal.severity)}`}>
                                 <div className="truncate text-[10px] font-semibold">{signal.label}</div>
-                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signal.detail}</div>
+                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{signalKindLabel(signal.kind)} / {signal.detail}</div>
                             </div>
                         ))}
                     </div>
@@ -147,7 +213,7 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
                             <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadTerritorialNote')}</div>
                             <div className="truncate text-[11px] font-semibold text-text-primary">{firstFlip.label}</div>
-                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{enumLabel('turnAftermath.direction', firstFlip.direction)}</div>
+                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{directionLabel(firstFlip.direction)}</div>
                         </div>
                     )}
                     {firstAction && (
@@ -242,7 +308,7 @@ export function TurnAftermathRecordsPanel() {
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{pulse.briefing}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${momentumClass(pulse.momentum)}`}>
-                        {enumLabel('turnAftermath.momentum', pulse.momentum)}
+                        {momentumLabel(pulse.momentum)}
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-4">
@@ -261,7 +327,7 @@ export function TurnAftermathRecordsPanel() {
                         <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{campaignCost.briefing}</div>
                     </div>
                     <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.severity)}`}>
-                        {enumLabel('turnAftermath.severity', campaignCost.severity)}
+                        {costSeverityLabel(campaignCost.severity)}
                     </span>
                 </div>
                 <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
@@ -292,7 +358,7 @@ export function TurnAftermathRecordsPanel() {
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2">
                                     <span className="text-[11px] font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
                                     <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
-                                        {enumLabel('turnAftermath.severity', campaignCost.mostCostlyTurn.severity)}
+                                        {costSeverityLabel(campaignCost.mostCostlyTurn.severity)}
                                     </span>
                                 </div>
                                 <div className="mt-1 text-[9px] text-text-secondary">

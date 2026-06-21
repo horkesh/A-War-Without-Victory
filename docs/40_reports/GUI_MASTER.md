@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-21 (pre-advance/desk severity chrome, Army HQ Records provenance/drilldown hardening, contained copy polish, browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-21 (Records aftermath label-map hardening, pre-advance/desk severity chrome, Army HQ Records provenance/drilldown hardening, contained copy polish, browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Records aftermath label-map hardening** | [implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md](implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md) - Army HQ Records and War Summary aftermath labels now use explicit typed EN/BCS i18n maps for tone, severity, signal kind, territory direction, campaign momentum, and desk-item action families. |
 | **Pre-advance / desk severity chrome** | [implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md](implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md) - Advance Clearance review rows/blocker chrome, President's Desk severity badges/packet alt text, and Decision Room priority-card severity badges now render through EN/BCS i18n instead of raw enum or hardcoded English copy. |
 | **Army HQ Records provenance / drilldown hardening** | [implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md](implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md) - Turn-0 setup provenance no longer counts as normal Records/AAR history, Army HQ sector/ORBAT rows expose explicit field-inspection controls, opening-command provenance is visible on corps cards, and browser gates prove all-faction first-hour Records counts plus Army HQ sector inspect-on-field routing. |
 | **Contained copy polish** | [implemented/20260621_CONTAINED_COPY_POLISH.md](implemented/20260621_CONTAINED_COPY_POLISH.md) - Battle-tooltip fallback copy, Records subtab count aria labels, Back-the-Officer opportunity framing/rank/donor copy, and legacy Warroom Settings chrome now render through EN/BCS i18n keys. |
