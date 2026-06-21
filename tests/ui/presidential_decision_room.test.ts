@@ -1390,16 +1390,23 @@ describe('buildPresidentialDecisionRoomView', () => {
     const alpha = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_alpha');
     const beta = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_beta');
 
-    expect(alpha?.category).toBe('command');
+    expect(alpha).toMatchObject({
+      category: 'command',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'command',
+        cardId: 'command:elite-deploy:reserve_alpha',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+    });
     expect(alpha?.directive).toEqual({
       lever: 'elite_deploy',
       corpsId: 'arbih_3rd_corps',
       cost: 25,
       payload: { requestId: 'reserve_alpha', brigadeId: 'elite_guards' },
     });
-    // A request with no suggested brigade still scans but carries no inline directive.
-    expect(beta).toBeDefined();
-    expect(beta?.directive).toBeUndefined();
+    // A request with no suggested brigade remains a staff-selection matter in Army Reserve.
+    expect(beta).toBeUndefined();
     // Enemy-faction reserve requests never surface to the player.
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });

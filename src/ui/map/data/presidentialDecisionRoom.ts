@@ -972,17 +972,16 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
     });
   for (const request of reserveRequests) {
     const suggestedBrigadeId = request.suggested_brigade_id;
-    // Only ISSUE inline when the request carries a concrete brigade to release; if
-    // the staff named none, the card still scans + deep-links to the ArmyReservePanel
-    // where the president selects one.
-    const directive: PresidentialDecisionRoomDirective | undefined = suggestedBrigadeId
-      ? {
-          lever: 'elite_deploy',
-          corpsId: request.corps_id,
-          cost: ELITE_DEPLOY_COST,
-          payload: { requestId: request.request_id, brigadeId: suggestedBrigadeId },
-        }
-      : undefined;
+    // Decision Room command review is for a concrete release order. Requests
+    // without a staff-named brigade remain in the Army Reserve selection flow.
+    if (!suggestedBrigadeId) continue;
+
+    const directive: PresidentialDecisionRoomDirective = {
+      lever: 'elite_deploy',
+      corpsId: request.corps_id,
+      cost: ELITE_DEPLOY_COST,
+      payload: { requestId: request.request_id, brigadeId: suggestedBrigadeId },
+    };
     cards.push({
       id: `command:elite-deploy:${request.request_id}`,
       category: 'command',
@@ -1003,7 +1002,7 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
         t('decisionRoom.card.eliteDeploy.evidence.travel', { hops: request.travel_hops }),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
-      ...(directive ? { directive } : {}),
+      directive,
       urgencySort: request.severityBand === 'critical' ? 0 : 5,
       sourceSort: `command:elite-deploy:${request.request_id}`,
     });
