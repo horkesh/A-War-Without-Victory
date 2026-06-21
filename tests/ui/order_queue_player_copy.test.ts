@@ -94,7 +94,7 @@ describe('OrderQueue player copy', () => {
           id: 'order_sector',
           type: 'sector',
           formationId: 'rbih_test_brigade',
-          targetOsid: 'sector:central_front',
+          targetSectorId: 'sector:central_front',
         },
       ],
     });

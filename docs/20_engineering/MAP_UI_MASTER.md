@@ -423,11 +423,15 @@ Both callbacks are unregistered (`null`) in MapContainer cleanup.
 ### 4.5 Order Staging
 
 ```ts
-orderModeForFormation: 'attack' | 'move' | null
+orderModeForFormation: 'attack' | 'sector' | null
 pendingAttackConfirmation: { attackerFormationId: string; targetOsid: string } | null
 confirmPrimaryAction: (() => void) | null   // Enter key callback
-stagedOrders: StagedOrder[]                 // { id, type, formationId, targetOsid?, postureName? }
+stagedOrders: StagedOrder[]                 // { id, type, formationId, targetOsid?, targetSectorId?, postureName? }
 ```
+
+`targetOsid` is reserved for settlement/attack targets. Brigade-to-sector override feedback uses
+`targetSectorId` and resolves that sector to a deterministic friendly OSID only at the map feedback
+builder boundary.
 
 ### 4.6 Data
 

@@ -135,7 +135,7 @@ describe('ui map order actions', () => {
     expect(addStagedOrder).toHaveBeenCalledWith({
       type: 'sector',
       formationId: 'rbih_1st_brigade',
-      targetOsid: 'sector:arbih_3rd_corps:zavidovici',
+      targetSectorId: 'sector:arbih_3rd_corps:zavidovici',
     });
     expect(setLoadError).not.toHaveBeenCalled();
   });

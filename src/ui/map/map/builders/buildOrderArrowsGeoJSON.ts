@@ -5,6 +5,7 @@ import { buildOsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import type { OsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { hashString, buildBezierCurve, buildArrowheadTriangle, getClosestPointOnSectorEdge } from './arrowGeometry';
+import { resolveSectorOrderTargetOsid } from './resolveSectorOrderTarget';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -214,8 +215,11 @@ export function buildOrderArrowsGeoJSON(
       const sourceOsid = sourceByBrigadeId.get(order.formationId) ?? resolveFormationLocationOsid(formation, centroidLookup);
       const sector = sectorByBrigade.get(order.formationId);
       const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
-      if (order.targetOsid) {
-        pushArrow(features, outputType, order.formationId, sourceOsid, order.targetOsid, centroidLookup, formation?.faction, sector, edgePoints);
+      const targetOsid = order.type === 'sector'
+        ? resolveSectorOrderTargetOsid(order, state, centroidLookup, sourceOsid)
+        : order.targetOsid;
+      if (targetOsid) {
+        pushArrow(features, outputType, order.formationId, sourceOsid, targetOsid, centroidLookup, formation?.faction, sector, edgePoints);
       }
     }
   }

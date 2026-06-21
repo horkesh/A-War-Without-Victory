@@ -205,7 +205,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
   // Sector helpers
   const sectors = loadedGameState.corpsFrontSectors ?? [];
-  const currentSector = isBrigade && formation.corps_id
+  const automaticSector = isBrigade && formation.corps_id
     ? sectors.find(s => s.corps_id === formation.corps_id &&
         (s.assigned_brigade_ids.includes(formation.id) || s.reserve_brigade_ids.includes(formation.id)))
     : null;
@@ -213,6 +213,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     ? sectors.filter(s => s.corps_id === formation.corps_id)
     : [];
   const sectorOverrideId = formation.sectorOverrideId;
+  const overrideSector = isBrigade && formation.corps_id && sectorOverrideId
+    ? sectors.find(s => s.corps_id === formation.corps_id && s.sector_id === sectorOverrideId)
+    : null;
+  const currentSector = overrideSector ?? automaticSector;
+  const currentSectorIsOverride = Boolean(overrideSector);
 
   const tabs: { id: DetailTab; label: string }[] = [
     { id: 'overview', label: t('formationDetail.overview') },
@@ -328,7 +333,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
                         {safeSectorLabel(currentSector.sector_id, sectors)}
                       </span>
-                      {sectorOverrideId && (
+                      {currentSectorIsOverride && (
                         <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[9px] uppercase rounded border border-accent-gold/30 font-bold">
                           {t('formationDetail.override')}
                         </span>
@@ -336,7 +341,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-text-secondary italic">
-                        {currentSector.assigned_brigade_ids.includes(formation.id) ? t('formationDetail.frontline') : t('formationDetail.reserve')}
+                        {currentSectorIsOverride
+                          ? t('formationDetail.override')
+                          : currentSector.assigned_brigade_ids.includes(formation.id)
+                            ? t('formationDetail.frontline')
+                            : t('formationDetail.reserve')}
                       </span>
                       <div className="w-1.5 h-1.5 rounded-full bg-accent-gold/40 group-hover:bg-accent-gold transition-colors" />
                     </div>
@@ -929,7 +938,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 <div className="space-y-1">
                   {sameSectorList.map(sector => {
                     const isCurrentOverride = sectorOverrideId === sector.sector_id;
-                    const isCurrentAutomatic = !sectorOverrideId && currentSector?.sector_id === sector.sector_id;
+                    const isCurrentAutomatic = !sectorOverrideId && automaticSector?.sector_id === sector.sector_id;
                     return (
                       <button
                         key={sector.sector_id}

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): make sector override feedback explicit and visible
+
+**Type:** UI/read-model map-feedback polish.
+
+**Fix:** Brigade-to-sector staged orders now carry `targetSectorId` instead of overloading `targetOsid` with a sector id. Order Queue resolves sector-order labels through sector metadata, Formation Detail overview prefers an explicit `sectorOverrideId` over stale automatic sector roster membership, and ghost paths / staged order arrows resolve sector ids to deterministic friendly sector OSIDs so the player gets visible map feedback after assigning a brigade to a sector.
+
+**Verification:** Red proof `node node_modules\vitest\vitest.mjs run tests\ui\formation_detail_parity.test.ts tests\ui_map_order_actions.test.ts tests\ui\order_queue_player_copy.test.ts tests\ui\sector_staged_order_map_feedback.test.ts --pool=forks --reporter=dot` failed on stale Formation Detail overview sector, overloaded sector `targetOsid`, missing Order Queue sector label, and absent staged sector geometry. Reviewer follow-up red proof then failed on a stale missing override id being badged as active. Green proof passed 17/17 after the fix. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 244/244. `npm.cmd run qa:live-surface:browser` passed and confirmed war-start/foundational flow, major-surface reachability, owner drilldown, archive routes, Inbox Decision Room proof, and server cleanup; temporary `.tmp_live_surface_browser_sweep` evidence was removed after inspection. `npm.cmd run desktop:map:build` passed. Report: `docs/40_reports/implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md`.
+
+**Scope/determinism:** UI/read-model/store/map-feedback/test/docs polish only; no simulation logic, scenario data, save schema, generated artifact, calibration floor, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Srebrenica/Zepa fall receipts remain event-owned and untouched.
+
+---
+
 ## [2026-06-21] fix(ui): route Army CO autonomous proposals through Decision Room command review
 
 **Type:** UI/read-model route ownership polish.
