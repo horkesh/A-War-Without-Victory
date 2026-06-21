@@ -189,6 +189,34 @@ function eventDecisionCategoryLabel(category: string | undefined): string {
 }
 
 /** Phase 2 slice 1: "corps_commander" → "Corps Commander" for advisor labels. */
+function eventDecisionFactionLabel(faction: string | undefined): string {
+    switch (faction) {
+        case 'RBiH': return t('desk.faction.rbih');
+        case 'RS': return t('desk.faction.rs');
+        case 'HRHB': return t('desk.faction.hrhb');
+        default: return faction ? getPlayerSafePoliticalFactionName(faction) : t('desk.faction.fallback');
+    }
+}
+
+const EVENT_DIMENSION_LABEL_KEYS: Partial<Record<string, MessageKey>> = {
+    military_credibility: 'diplomacyOverview.dimension.military_credibility',
+    territorial_legitimacy: 'diplomacyOverview.dimension.territorial_legitimacy',
+    international_standing: 'diplomacyOverview.dimension.international_standing',
+    patron_confidence: 'diplomacyOverview.dimension.patron_confidence',
+    internal_cohesion: 'diplomacyOverview.dimension.internal_cohesion',
+    negotiating_leverage: 'diplomacyOverview.dimension.negotiating_leverage',
+};
+
+function eventDecisionDimensionLabel(dimension: string | undefined): string {
+    if (!dimension) return t('eventDecision.unknown');
+    const key = EVENT_DIMENSION_LABEL_KEYS[dimension];
+    return key ? t(key) : humanizeToken(dimension);
+}
+
+function signedDelta(delta: number): string {
+    return `${delta > 0 ? '+' : ''}${delta}`;
+}
+
 function humanizeRank(rank: string): string {
     return rank
         .split(/[_\s]+/)
@@ -219,39 +247,73 @@ export function deriveAssessmentLabel(
 
 /** Render a human-readable summary of an effect. */
 function describeEffect(effect: EventEffect): string {
+    const faction = 'faction' in effect ? eventDecisionFactionLabel(effect.faction) : '';
     switch (effect.kind) {
         case 'narrative': return effect.text;
-        case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
-        case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'alliance_change': return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-        case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${humanizeToken(effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+        case 'morale_change': return t('eventDecision.effect.moraleChange', { faction, delta: signedDelta(effect.delta) });
+        case 'supply_delta': return t('eventDecision.effect.supplyDelta', { faction, delta: signedDelta(effect.delta) });
+        case 'cohesion_change': return t('eventDecision.effect.cohesionChange', { faction, delta: signedDelta(effect.delta) });
+        case 'humanitarian_impact': return t('eventDecision.effect.humanitarianImpact', {
+            faction,
+            delta: effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : '',
+        });
+        case 'patron_pressure': return t('eventDecision.effect.patronPressure', { faction, delta: signedDelta(effect.delta) });
+        case 'alliance_change': return t('eventDecision.effect.allianceChange', {
+            rbih: eventDecisionFactionLabel('RBiH'),
+            hrhb: eventDecisionFactionLabel('HRHB'),
+            delta: signedDelta(effect.delta),
+        });
+        case 'negotiation_capital': return t('eventDecision.effect.negotiationCapital', {
+            faction,
+            dimension: eventDecisionDimensionLabel(effect.dimension),
+            delta: signedDelta(effect.delta),
+        });
         case 'equipment_grant': {
             const granted = [
-                effect.tanks ? `${effect.tanks} tanks` : '',
-                effect.artillery ? `${effect.artillery} artillery` : '',
-                effect.aa_systems ? `${effect.aa_systems} AA systems` : '',
+                effect.tanks ? t('eventDecision.equipment.tanks', { count: effect.tanks }) : '',
+                effect.artillery ? t('eventDecision.equipment.artillery', { count: effect.artillery }) : '',
+                effect.aa_systems ? t('eventDecision.equipment.aaSystems', { count: effect.aa_systems }) : '',
             ].filter(Boolean).join(', ');
-            return `${getPlayerSafePoliticalFactionName(effect.faction)} equipment ${granted || 'support'} added`;
+            return t('eventDecision.effect.equipmentGrant', {
+                faction,
+                equipment: granted || t('eventDecision.equipment.support'),
+            });
         }
-        case 'aggression_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} operational aggression ${effect.delta > 0 ? '+' : ''}${effect.delta} for ${effect.duration_turns} turns`;
-        case 'control_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
-        case 'guerrilla_threat': return `${getPlayerSafePoliticalFactionName(effect.faction)} rear-area threat for ${effect.duration_turns} turns`;
-        case 'recruitment_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} turns`;
-        case 'equipment_quality_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} turns`;
-        case 'doctrine_constraint': return `${getPlayerSafePoliticalFactionName(effect.faction)} doctrine constraint for ${effect.duration_turns} turns`;
-        case 'offensive_ops_suppression': return `${getPlayerSafePoliticalFactionName(effect.faction)} offensive operations suppressed for ${effect.duration_turns} turns`;
-        case 'alliance_lock': return `Alliance ${effect.mode === 'floor' ? 'floor' : 'ceiling'} ${effect.value} for ${effect.duration_turns} turns`;
-        case 'bot_priority_shift': return `${getPlayerSafePoliticalFactionName(effect.faction)} staff priorities shift for ${effect.duration_turns} turns`;
-        case 'cost_ledger_annotation': return effect.text ?? 'Campaign cost ledger annotation recorded';
+        case 'aggression_modifier': return t('eventDecision.effect.aggressionModifier', { faction, delta: signedDelta(effect.delta), turns: effect.duration_turns });
+        case 'control_change': return t('eventDecision.effect.controlChange', {
+            faction,
+            count: effect.osids.length,
+            areaNoun: t(effect.osids.length === 1 ? 'eventDecision.area.one' : 'eventDecision.area.many'),
+        });
+        case 'guerrilla_threat': return t('eventDecision.effect.guerrillaThreat', { faction, turns: effect.duration_turns });
+        case 'recruitment_modifier': return t('eventDecision.effect.recruitmentModifier', { faction, percent: Math.round(effect.pool_multiplier * 100), turns: effect.duration_turns });
+        case 'equipment_quality_modifier': return t('eventDecision.effect.equipmentQualityModifier', { faction, percent: Math.round(effect.multiplier * 100), turns: effect.duration_turns });
+        case 'doctrine_constraint': return t('eventDecision.effect.doctrineConstraint', { faction, turns: effect.duration_turns });
+        case 'offensive_ops_suppression': return t('eventDecision.effect.offensiveOpsSuppression', { faction, turns: effect.duration_turns });
+        case 'alliance_lock': return t('eventDecision.effect.allianceLock', {
+            mode: t(effect.mode === 'floor' ? 'eventDecision.lockMode.floor' : 'eventDecision.lockMode.ceiling'),
+            value: effect.value,
+            turns: effect.duration_turns,
+        });
+        case 'bot_priority_shift': return t('eventDecision.effect.botPriorityShift', { faction, turns: effect.duration_turns });
+        case 'cost_ledger_annotation': return effect.text ?? t('eventDecision.effect.costLedgerAnnotation');
     }
-    return 'Effect recorded';
+    return t('eventDecision.effect.recorded');
 }
 
 function describeDimensionShift(shift: DimensionShift): string {
-    return `${getPlayerSafePoliticalFactionName(shift.faction)} ${humanizeToken(shift.dimension).toLowerCase()} ${shift.delta > 0 ? '+' : ''}${shift.delta}`;
+    return t('eventDecision.effect.dimensionShift', {
+        faction: eventDecisionFactionLabel(shift.faction),
+        dimension: eventDecisionDimensionLabel(shift.dimension),
+        delta: signedDelta(shift.delta),
+    });
+}
+
+function describeFlagValue(value: string | number | boolean, option: EventResponseOption): string {
+    const valueText = String(value);
+    if (valueText === option.id) return option.label;
+    if (typeof value === 'number' || typeof value === 'boolean') return valueText;
+    return t('eventDecision.flag.recordedChoice');
 }
 
 function buildPreviewRows(option: EventResponseOption): string[] {
@@ -263,7 +325,7 @@ function buildPreviewRows(option: EventResponseOption): string[] {
     }
     const flagValues = Object.values(option.sets_flags ?? {});
     if (flagValues.length > 0) {
-        rows.push(t('eventDecision.campaignRecordUpdated', { values: flagValues.map((value) => sentenceToken(String(value))).join(', ') }));
+        rows.push(t('eventDecision.campaignRecordUpdated', { values: flagValues.map((value) => describeFlagValue(value, option)).join(', ') }));
     }
     return rows;
 }
@@ -700,7 +762,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                         {t('eventDecision.decisionRequired')}
                     </span>
                     <span className={`text-[10px] font-mono ${factionColor}`}>
-                        {getPlayerSafePoliticalFactionName(localizedDecision.faction)} · {decisionDate}
+                        {eventDecisionFactionLabel(localizedDecision.faction)} · {decisionDate}
                     </span>
                 </div>
 
@@ -752,7 +814,7 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                             <div>
                                 <span className="block text-[9px] uppercase tracking-[0.12em] text-text-muted">{t('eventDecision.factionDate')}</span>
                                 <span className="text-text-primary">
-                                    {getPlayerSafePoliticalFactionName(localizedDecision.faction)} / {decisionDate}
+                                    {eventDecisionFactionLabel(localizedDecision.faction)} / {decisionDate}
                                 </span>
                             </div>
                             {safeSourceNote && (

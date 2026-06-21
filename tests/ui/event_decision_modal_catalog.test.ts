@@ -29,6 +29,31 @@ function sentenceToken(value: string | undefined): string {
   return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
 }
 
+function displayFactionName(faction: string | undefined): string {
+  switch (faction) {
+    case 'RBiH': return 'Republic of Bosnia and Herzegovina';
+    case 'RS': return 'Republika Srpska';
+    case 'HRHB': return 'Herzeg-Bosna';
+    default: return faction ? getPlayerSafePoliticalFactionName(faction) : 'Campaign';
+  }
+}
+
+function displayDimensionName(dimension: string | undefined): string {
+  switch (dimension) {
+    case 'military_credibility': return 'Military Credibility';
+    case 'territorial_legitimacy': return 'Territorial Legitimacy';
+    case 'international_standing': return "Int'l Standing";
+    case 'patron_confidence': return 'Patron Confidence';
+    case 'internal_cohesion': return 'Internal Cohesion';
+    case 'negotiating_leverage': return 'Negotiating Leverage';
+    default: return humanizeToken(dimension);
+  }
+}
+
+function signedDelta(delta: number): string {
+  return `${delta > 0 ? '+' : ''}${delta}`;
+}
+
 function playerSafeDossierText(value: string): string {
   return value
     .replace(/`([^`]+)`/g, '$1')
@@ -44,30 +69,31 @@ function playerSafeDossierText(value: string): string {
 }
 
 function describeEffect(effect: EventEffect): string | null {
+  const faction = 'faction' in effect ? displayFactionName(effect.faction) : '';
   switch (effect.kind) {
     case 'narrative': return null;
-    case 'morale_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} morale ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'supply_delta': return `${getPlayerSafePoliticalFactionName(effect.faction)} supply ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'cohesion_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} cohesion ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'humanitarian_impact': return `${getPlayerSafePoliticalFactionName(effect.faction)} humanitarian impact${effect.war_crimes_delta ? ` (${effect.war_crimes_delta > 0 ? '+' : ''}${effect.war_crimes_delta})` : ''}`;
-    case 'patron_pressure': return `${getPlayerSafePoliticalFactionName(effect.faction)} patron pressure ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'alliance_change': return `${getPlayerSafePoliticalFactionName('RBiH')} / ${getPlayerSafePoliticalFactionName('HRHB')} alliance ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
-    case 'negotiation_capital': return `${getPlayerSafePoliticalFactionName(effect.faction)} ${humanizeToken(effect.dimension)} ${effect.delta > 0 ? '+' : ''}${effect.delta}`;
+    case 'morale_change': return `${faction} morale ${signedDelta(effect.delta)}`;
+    case 'supply_delta': return `${faction} supply ${signedDelta(effect.delta)}`;
+    case 'cohesion_change': return `${faction} cohesion ${signedDelta(effect.delta)}`;
+    case 'humanitarian_impact': return `${faction} humanitarian impact${effect.war_crimes_delta ? ` (${signedDelta(effect.war_crimes_delta)})` : ''}`;
+    case 'patron_pressure': return `${faction} patron pressure ${signedDelta(effect.delta)}`;
+    case 'alliance_change': return `${displayFactionName('RBiH')} / ${displayFactionName('HRHB')} alliance ${signedDelta(effect.delta)}`;
+    case 'negotiation_capital': return `${faction} ${displayDimensionName(effect.dimension)} ${signedDelta(effect.delta)}`;
     case 'equipment_grant': {
       const granted = [
         effect.tanks ? `${effect.tanks} tanks` : '',
         effect.artillery ? `${effect.artillery} artillery` : '',
         effect.aa_systems ? `${effect.aa_systems} AA systems` : '',
       ].filter(Boolean).join(', ');
-      return `${getPlayerSafePoliticalFactionName(effect.faction)} equipment ${granted || 'support'} added`;
+      return `${faction} equipment added: ${granted || 'support'}`;
     }
-    case 'aggression_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} operational aggression ${effect.delta > 0 ? '+' : ''}${effect.delta} for ${effect.duration_turns} turns`;
-    case 'control_change': return `${getPlayerSafePoliticalFactionName(effect.faction)} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
-    case 'guerrilla_threat': return `${getPlayerSafePoliticalFactionName(effect.faction)} rear-area threat for ${effect.duration_turns} turns`;
-    case 'recruitment_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} turns`;
-    case 'equipment_quality_modifier': return `${getPlayerSafePoliticalFactionName(effect.faction)} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} turns`;
-    case 'doctrine_constraint': return `${getPlayerSafePoliticalFactionName(effect.faction)} doctrine constraint for ${effect.duration_turns} turns`;
-    case 'offensive_ops_suppression': return `${getPlayerSafePoliticalFactionName(effect.faction)} offensive operations suppressed for ${effect.duration_turns} turns`;
+    case 'aggression_modifier': return `${faction} operational aggression ${signedDelta(effect.delta)} for ${effect.duration_turns} turns`;
+    case 'control_change': return `${faction} territorial control changes in ${effect.osids.length} area${effect.osids.length === 1 ? '' : 's'}`;
+    case 'guerrilla_threat': return `${faction} rear-area threat for ${effect.duration_turns} turns`;
+    case 'recruitment_modifier': return `${faction} recruitment ${Math.round(effect.pool_multiplier * 100)}% for ${effect.duration_turns} turns`;
+    case 'equipment_quality_modifier': return `${faction} combat effectiveness ${Math.round(effect.multiplier * 100)}% for ${effect.duration_turns} turns`;
+    case 'doctrine_constraint': return `${faction} doctrine constraint for ${effect.duration_turns} turns`;
+    case 'offensive_ops_suppression': return `${faction} offensive operations suppressed for ${effect.duration_turns} turns`;
     case 'alliance_lock': return `Alliance ${effect.mode === 'floor' ? 'floor' : 'ceiling'} ${effect.value} for ${effect.duration_turns} turns`;
     case 'bot_priority_shift': return `${getPlayerSafePoliticalFactionName(effect.faction)} staff priorities shift for ${effect.duration_turns} turns`;
     case 'cost_ledger_annotation': return effect.text ?? 'Campaign cost ledger annotation recorded';
@@ -76,7 +102,14 @@ function describeEffect(effect: EventEffect): string | null {
 }
 
 function describeDimensionShift(shift: DimensionShift): string {
-  return `${getPlayerSafePoliticalFactionName(shift.faction)} ${humanizeToken(shift.dimension).toLowerCase()} ${shift.delta > 0 ? '+' : ''}${shift.delta}`;
+  return `${displayFactionName(shift.faction)} ${displayDimensionName(shift.dimension)} ${signedDelta(shift.delta)}`;
+}
+
+function describeFlagValue(value: string | number | boolean, option: EventResponseOption): string {
+  const valueText = String(value);
+  if (valueText === option.id) return option.label;
+  if (typeof value === 'number' || typeof value === 'boolean') return valueText;
+  return 'recorded choice';
 }
 
 function expectedPreviewRows(option: EventResponseOption): string[] {
@@ -87,7 +120,7 @@ function expectedPreviewRows(option: EventResponseOption): string[] {
   for (const shift of option.dimension_shifts ?? []) rows.push(describeDimensionShift(shift));
   const flagValues = Object.values(option.sets_flags ?? {});
   if (flagValues.length > 0) {
-    rows.push(`Campaign record updated: ${flagValues.map((value) => sentenceToken(String(value))).join(', ')}`);
+    rows.push(`Campaign record updated: ${flagValues.map((value) => describeFlagValue(value, option)).join(', ')}`);
   }
   return rows;
 }

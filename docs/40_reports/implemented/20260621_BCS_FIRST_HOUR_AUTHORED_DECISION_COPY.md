@@ -31,4 +31,4 @@ Scenario event display data, UI read-model title resolution, focused tests, and 
 
 ## Remaining Work
 
-The live BCS modal still exposes separate effect-preview/faction-name vocabulary in downstream effect rows, for example English faction names and branch-record values such as `Civic`. That belongs to the event-effect display/i18n boundary, not authored scenario narrative data.
+Later same-day closeout: the separate effect-preview/faction-name vocabulary in downstream effect rows is closed by `20260621_BCS_FIRST_HOUR_EFFECT_PREVIEW_LOCALIZATION.md`. That work stayed in the event-effect display/i18n boundary, not authored scenario narrative data.

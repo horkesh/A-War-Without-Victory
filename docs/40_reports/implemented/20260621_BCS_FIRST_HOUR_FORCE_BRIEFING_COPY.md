@@ -25,10 +25,11 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, Sr
 
 ## Follow-Up From Pyrrhic Sweep
 
-The parallel first-hour BCS sweep found adjacent but larger lanes that were intentionally left out of this focused branch:
+The parallel first-hour BCS sweep found adjacent but larger lanes that were intentionally left out of this focused branch. Current status:
 
-- Foundational event modal BCS content/chrome: first required decisions still carry English data/chrome around `EventDecisionModal`.
-- Presidential Inbox/Desk packet labels: derived inbox items and decision-surface registry values still emit English card/action/source copy.
-- First-modal failure paths: event/peace/Dayton failure strings still need localized error-copy plumbing.
+- Foundational event modal BCS content/chrome: closed by `20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
+- Authored first-hour event data and Desk/Inbox event packet titles: closed by `20260621_BCS_FIRST_HOUR_AUTHORED_DECISION_COPY.md`.
+- Downstream effect-preview/faction-name vocabulary: closed by `20260621_BCS_FIRST_HOUR_EFFECT_PREVIEW_LOCALIZATION.md`.
+- First-modal failure paths: event/peace/Dayton failure strings remain a separate non-first-hour-force-briefing lane.
 
 These should be handled as separate test-first branches because they touch event data, modal chrome, and decision-surface packet plumbing rather than the force-briefing component boundary.

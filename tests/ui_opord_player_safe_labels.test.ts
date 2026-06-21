@@ -95,7 +95,9 @@ describe('buildOpordDisplayModel', () => {
         expect(attackSource).toContain('getPlayerSafeMilitaryFactionName(defender.faction)');
         expect(eventSource).toContain('getPlayerSafePoliticalFactionName(effect.faction)');
         expect(eventSource).toContain("getPlayerSafePoliticalFactionName('RBiH')");
-        expect(decisionSource).toContain('getPlayerSafePoliticalFactionName(decision.faction)');
+        expect(decisionSource).toContain('function eventDecisionFactionLabel');
+        expect(decisionSource).toContain("case 'RBiH': return t('desk.faction.rbih')");
+        expect(decisionSource).toContain('eventDecisionFactionLabel(localizedDecision.faction)');
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
         expect(corpsDetailSource).toContain('filterPlayerFacingOperations');
         expect(corpsDetailSource).not.toContain('loadedGameState?.operations?.filter');

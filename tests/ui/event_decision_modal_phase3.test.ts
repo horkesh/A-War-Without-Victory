@@ -82,6 +82,14 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toMatch(/Civic multi-ethnic republic|Adopt all six goals|Croat republic\s+[—-]\s+follow Zagreb/);
       expect(text).not.toMatch(/Karadzic judgment context|ICTY Karadzic Trial Judgment|Kordic and Prlic judgments/);
       expect(text).not.toMatch(/The May 1992 platform debate|Zagreb's directive and Herceg-Bosna institutions/);
+      if (eventId === 'rbih_state_identity') {
+        expect(text).toContain('Republika Bosna i Hercegovina moral +3');
+        expect(text).toContain('Zapis kampanje azuriran: Gradjanska multietnicka republika');
+        expect(text).not.toContain('Republic of Bosnia and Herzegovina');
+        expect(text).not.toContain('morale +3');
+        expect(text).not.toContain('international standing');
+        expect(text).not.toContain('Civic');
+      }
       unmount();
     }
   });
@@ -193,9 +201,9 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Historical default')).toBeTruthy();
     expect(screen.getByText(/historically attested choice/)).toBeTruthy();
     expect(screen.getByText('Keep the institutions aligned with the existing wartime project.')).toBeTruthy();
-    expect(screen.getByText('Croatian Republic of Herzeg-Bosnia morale +4')).toBeTruthy();
-    expect(screen.getByText('Croatian Republic of Herzeg-Bosnia patron pressure -2')).toBeTruthy();
-    expect(screen.getByText('Croatian Republic of Herzeg-Bosnia patron confidence +6')).toBeTruthy();
+    expect(screen.getByText('Herzeg-Bosna morale +4')).toBeTruthy();
+    expect(screen.getByText('Herzeg-Bosna patron pressure -2')).toBeTruthy();
+    expect(screen.getByText('Herzeg-Bosna Patron Confidence +6')).toBeTruthy();
     expect(screen.getByText('No immediate mechanical effects.')).toBeTruthy();
     expect(screen.getByText(/Chronicle decision ledger and Army HQ Records/i)).toBeTruthy();
     expect(screen.queryByText(/source review required/i)).toBeNull();
