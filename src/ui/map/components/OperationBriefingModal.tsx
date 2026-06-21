@@ -12,9 +12,9 @@ import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
-import { t } from '../i18n';
+import { t, type MessageKey } from '../i18n';
 import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext } from '../data/command_strain';
-import type { RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
+import type { CommandCopyToken, RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 import { FORCE_LAUNCH_COST } from '../utils/commandAuthority';
 
 interface OperationBriefingModalProps {
@@ -269,28 +269,30 @@ function RecommendationDriverSection({ explanation }: {
 
 type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
 
-const CONSTRAINT_BADGE_MODAL: Record<PrimaryConstraint, { label: string; className: string } | null> = {
-    siege: { label: 'SIEGE', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
-    threat_pressure: { label: 'THREAT', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
-    defensive_duty: { label: 'GARRISON', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
-    force_condition: { label: 'READINESS', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
-    institutional_strain: { label: 'INSTITUTIONAL', className: 'bg-blue-950/40 text-blue-200 border-blue-500/50' },
-    plan_lifecycle: { label: 'PLANNING', className: 'bg-panel-card text-text-muted border-panel-border' },
+const CONSTRAINT_BADGE_MODAL: Record<PrimaryConstraint, { labelKey: MessageKey; className: string } | null> = {
+    siege: { labelKey: 'corpsSituation.constraint.siege', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
+    threat_pressure: { labelKey: 'corpsSituation.constraint.threat', className: 'bg-red-950/40 text-red-200 border-red-500/50' },
+    defensive_duty: { labelKey: 'corpsSituation.constraint.garrison', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
+    force_condition: { labelKey: 'corpsSituation.constraint.readiness', className: 'bg-amber-950/40 text-amber-200 border-amber-500/50' },
+    institutional_strain: { labelKey: 'corpsSituation.constraint.institutional', className: 'bg-blue-950/40 text-blue-200 border-blue-500/50' },
+    plan_lifecycle: { labelKey: 'corpsSituation.constraint.planning', className: 'bg-panel-card text-text-muted border-panel-border' },
     none: null,
 };
 
 /** Compact corps-level constraint context for the operation decision surface.
  *  Shows WHY the commander is leaning a certain way — the operational constraint
  *  that readiness gauges alone don't explain. */
-function OperationConstraintContext({ assessment }: {
+export function OperationConstraintContext({ assessment }: {
     assessment: {
         dominantReason: string | null;
+        dominantReasonToken?: CommandCopyToken | null;
         primaryConstraint: PrimaryConstraint;
         reliefPath: string | null;
+        reliefPathToken?: CommandCopyToken | null;
     } | undefined;
 }) {
     if (!assessment) return null;
-    const { dominantReason, primaryConstraint, reliefPath } = assessment;
+    const { dominantReason, dominantReasonToken, primaryConstraint, reliefPath, reliefPathToken } = assessment;
     if (primaryConstraint === 'none' || !dominantReason) return null;
 
     const badge = CONSTRAINT_BADGE_MODAL[primaryConstraint];
@@ -301,15 +303,19 @@ function OperationConstraintContext({ assessment }: {
             <div className="flex items-start gap-2">
                 {badge && (
                     <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
-                        {badge.label}
+                        {t(badge.labelKey)}
                     </span>
                 )}
-                <span className="text-[10px] text-neutral-700 leading-snug">{dominantReason}</span>
+                <span className="text-[10px] text-neutral-700 leading-snug">
+                    {dominantReasonToken ? t(dominantReasonToken.key, dominantReasonToken.params) : dominantReason}
+                </span>
             </div>
             {reliefPath && (
                 <div className="flex items-start gap-1.5 mt-1 pl-0.5">
                     <span className="text-neutral-400 shrink-0 mt-px text-[10px]">&rarr;</span>
-                    <span className="text-[9px] text-neutral-500 leading-snug">{reliefPath}</span>
+                    <span className="text-[9px] text-neutral-500 leading-snug">
+                        {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
+                    </span>
                 </div>
             )}
         </div>

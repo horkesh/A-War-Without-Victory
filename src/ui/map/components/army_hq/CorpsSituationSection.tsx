@@ -16,6 +16,7 @@
 
 import { CollapsibleSection } from './CollapsibleSection';
 import { t, type MessageKey } from '../../i18n';
+import type { CommandCopyToken } from '../../data/command_strain';
 
 type PrimaryConstraint = 'siege' | 'threat_pressure' | 'defensive_duty' | 'force_condition' | 'institutional_strain' | 'plan_lifecycle' | 'none';
 
@@ -26,9 +27,12 @@ interface CorpsSituationSectionProps {
         institutionalFactors: string[];
         planExplanation: string | null;
         threatContext: string | null;
+        threatContextToken?: CommandCopyToken | null;
         dominantReason: string | null;
+        dominantReasonToken?: CommandCopyToken | null;
         primaryConstraint: PrimaryConstraint;
         reliefPath: string | null;
+        reliefPathToken?: CommandCopyToken | null;
     } | undefined;
 }
 
@@ -53,6 +57,9 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
         institutionalFactors,
         planExplanation,
         threatContext,
+        threatContextToken,
+        dominantReasonToken,
+        reliefPathToken,
     } = assessment;
 
     // Silence = healthy: nothing to explain
@@ -84,7 +91,9 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                                 {t(badge.labelKey)}
                             </span>
                         )}
-                        <span className="text-neutral-200 font-medium leading-snug">{dominantReason}</span>
+                        <span className="text-neutral-200 font-medium leading-snug">
+                            {dominantReasonToken ? t(dominantReasonToken.key, dominantReasonToken.params) : dominantReason}
+                        </span>
                     </div>
                 )}
 
@@ -92,7 +101,9 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                 {reliefPath && (
                     <div className="flex items-start gap-1.5 pl-0.5">
                         <span className="text-neutral-500 shrink-0 mt-px">&rarr;</span>
-                        <span className="text-neutral-400 leading-snug">{reliefPath}</span>
+                        <span className="text-neutral-400 leading-snug">
+                            {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
+                        </span>
                     </div>
                 )}
 
@@ -103,7 +114,9 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                         {threatContext && primaryConstraint !== 'threat_pressure' && primaryConstraint !== 'siege' && (
                             <div className="flex items-start gap-1.5">
                                 <span className="text-red-400/70 shrink-0 mt-px">&#9650;</span>
-                                <span className="text-neutral-400">{threatContext}</span>
+                                <span className="text-neutral-400">
+                                    {threatContextToken ? t(threatContextToken.key, threatContextToken.params) : threatContext}
+                                </span>
                             </div>
                         )}
 

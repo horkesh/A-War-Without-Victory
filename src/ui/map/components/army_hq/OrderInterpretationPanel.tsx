@@ -12,6 +12,7 @@ import type { LoadedGameState } from '../../data/types';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import { t } from '../../i18n';
+import type { MessageKey } from '../../i18n';
 import { RELIEF_MORALE_PENALTY } from '../../../../sim/combat/order_interpretation.js';
 
 // Phase 3 interpretation event types only (not personnel events)
@@ -21,7 +22,7 @@ interface BadgeStyle {
     border: string;
     bg: string;
     text: string;
-    label: string;
+    labelKey: MessageKey;
 }
 
 const BADGE_STYLES: Record<string, BadgeStyle> = {
@@ -29,19 +30,19 @@ const BADGE_STYLES: Record<string, BadgeStyle> = {
         border: 'border-amber-500/30',
         bg: 'bg-amber-900/10',
         text: 'text-amber-400',
-        label: 'MODIFIED',
+        labelKey: 'orderInterpretation.badge.modified',
     },
     order_pushback: {
         border: 'border-orange-500/30',
         bg: 'bg-orange-900/10',
         text: 'text-orange-400',
-        label: 'PUSHBACK',
+        labelKey: 'orderInterpretation.badge.pushback',
     },
     order_refused: {
         border: 'border-red-500/30',
         bg: 'bg-red-900/10',
         text: 'text-red-400',
-        label: 'REFUSED',
+        labelKey: 'orderInterpretation.badge.refused',
     },
 };
 
@@ -80,7 +81,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
         <div className="space-y-2">
             {/* Section header */}
             <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary/60">
-                ORDER INTERPRETATIONS - {events.length} PENDING
+                {t('orderInterpretation.header', { count: events.length })}
             </div>
 
             {events.map((event) => {
@@ -94,7 +95,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                         {/* Type badge + officer name */}
                         <div className="flex items-center gap-2 flex-wrap">
                             <span className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 border ${badge.border} ${badge.text}`}>
-                                {badge.label}
+                                {t(badge.labelKey)}
                             </span>
                             <span className="text-[11px] font-bold text-text-primary font-mono">
                                 {event.officer_name}
@@ -120,7 +121,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                                 onClick={() => { void handleAcknowledge(event.event_id); }}
                                 className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
                             >
-                                ACCEPT
+                                {t('orderInterpretation.accept')}
                             </button>
                             {showOverride && (
                                 <button
@@ -128,7 +129,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                                     onClick={() => { setLoadError(t('orderInterpretation.overrideBridgeError')); }}
                                     className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
                                 >
-                                    OVERRIDE
+                                    {t('orderInterpretation.override')}
                                 </button>
                             )}
                         </div>
@@ -139,7 +140,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                         )}
                         {event.type === 'order_refused' && event.overridable && (
                             <div className="text-[9px] text-text-secondary/60 italic">
-                                Officer morale {RELIEF_MORALE_PENALTY} if relieved
+                                {t('orderInterpretation.reliefMoralePenalty', { penalty: RELIEF_MORALE_PENALTY })}
                             </div>
                         )}
                     </div>

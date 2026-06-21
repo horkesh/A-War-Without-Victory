@@ -298,6 +298,7 @@ export interface FormationView {
         institutionalFactors: string[];
         planExplanation: string | null;
         threatContext: string | null;
+        threatContextToken?: import('./command_strain').CommandCopyToken | null;
         /** Wave 2: The dominant reason this corps is constrained. Null = healthy. */
         dominantReason: string | null;
         dominantReasonToken?: import('./command_strain').CommandCopyToken | null;
