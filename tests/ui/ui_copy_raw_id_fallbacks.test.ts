@@ -110,7 +110,7 @@ describe('UI copy raw-id fallbacks', () => {
       onCorpsClick,
     }));
 
-    screen.getByRole('button', { name: 'Corps command' }).click();
+    screen.getByRole('button', { name: 'a corps command' }).click();
 
     expect(onCorpsClick).toHaveBeenCalledWith('rbih_internal_corps_slug');
     expect(container.textContent).not.toContain('rbih_internal_corps_slug');

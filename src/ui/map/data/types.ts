@@ -548,10 +548,37 @@ export interface CommandBriefingTargetView {
     label?: string;
 }
 
+export type CommandBriefingSubjectView =
+    | { type: 'corps'; id: string; label?: string }
+    | { type: 'operation'; id?: string; label?: string; corpsId?: string }
+    | { type: 'sector'; id?: string; label?: string; corpsId?: string }
+    | { type: 'summary'; label?: string }
+    | { type: 'none'; label?: string };
+
+export type CommandBriefingCategoryView =
+    | 'cohesion'
+    | 'operations'
+    | 'defense'
+    | 'exhaustion'
+    | 'active_operations'
+    | 'disrupted_brigades'
+    | 'supply'
+    | 'peace_plan'
+    | 'patron_override'
+    | 'patron_pressure'
+    | 'enclave'
+    | 'field_report'
+    | 'order_interpretations'
+    | 'personnel'
+    | 'unknown';
+
 export interface CommandBriefingItemView {
     id: string;
     kind: 'military' | 'diplomatic' | 'humanitarian' | 'field_reports' | 'command';
     category?: string;
+    briefingCategory?: CommandBriefingCategoryView;
+    subject?: CommandBriefingSubjectView;
+    copyToken?: string;
     severity: CommandBriefingSeverity;
     title: string;
     detail: string;

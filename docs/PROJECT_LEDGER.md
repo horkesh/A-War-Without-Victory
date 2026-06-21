@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): structure Command Briefing metadata and Force Readiness recommendation ids
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Command briefing views now carry typed `briefingCategory`, `subject`, and `copyToken` metadata beside saved fallback strings. Chief of Staff briefing consumes that metadata and current formation state instead of parsing English rendered titles, and low-cohesion warnings are visible to the CoS narrative instead of being missed because they were not critical items. Force Readiness now generates typed `recommendationId` values and maps them to EN/BCS labels, keeping legacy recommendation strings only as compatibility fallback.
+
+**Verification:** Focused proof `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_game_state_adapter.test.ts tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui\ui_copy_raw_id_fallbacks.test.ts --reporter=dot` passed 68/68. Broader command/briefing proof `npx.cmd vitest run tests\ui\chief_of_staff_briefing_i18n.test.ts tests\ui_map_render_smoke.test.ts tests\ui_map_game_state_adapter.test.ts tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui\ui_copy_raw_id_fallbacks.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\warroom_priority_docket.test.ts --reporter=dot` passed 118/118. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 249/249. `npm.cmd run qa:live-surface:browser` passed on fresh port `3251`, with live-surface evidence and dev-server cleanup verified. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `git diff --check` passed. Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_STRUCTURED_METADATA.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, turn pipeline, Srebrenica/Zepa event ownership, save schema, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): localize Chronicle/Wrapped and Army HQ threat generated copy
 
 **Type:** UI/read-model/i18n/test/docs polish.

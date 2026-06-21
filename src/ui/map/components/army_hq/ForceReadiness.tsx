@@ -12,6 +12,15 @@ import { t, type MessageKey } from '../../i18n';
 // ── Types ────────────────────────────────────────────────────────────────
 
 export type ReadinessGrade = 'COMBAT READY' | 'ADEQUATE' | 'STRAINED' | 'DEGRADED' | 'INEFFECTIVE';
+export type ForceReadinessRecommendationId =
+    | 'reorganize_immediately'
+    | 'reorganize_two_turns'
+    | 'reinforce_threat'
+    | 'reinforce_front'
+    | 'hold_operation'
+    | 'reduce_tempo'
+    | 'hold'
+    | 'no_brigades';
 
 export interface CorpsReadiness {
     corpsId: string;
@@ -26,6 +35,7 @@ export interface CorpsReadiness {
     activeOpName?: string;
     activeOpBrigadeCount?: number;
     hasThreat: boolean;
+    recommendationId?: ForceReadinessRecommendationId;
     recommendation: string;
 }
 
@@ -47,14 +57,18 @@ export function computeReadinessGrade(
     return 'COMBAT READY';
 }
 
-function getRecommendation(grade: ReadinessGrade, hasThreat: boolean, hasActiveOp: boolean): string {
-    if (grade === 'INEFFECTIVE') return 'Reorganize immediately';
-    if (grade === 'DEGRADED' && !hasThreat) return 'Reorganize for 2 turns';
-    if (grade === 'DEGRADED' && hasThreat) return 'Reinforce: threat detected';
-    if (hasThreat) return 'Reinforce front sectors';
-    if (hasActiveOp) return 'Hold: operation in progress';
-    if (grade === 'STRAINED') return 'Reduce operations tempo';
-    return 'Hold';
+function getRecommendationId(
+    grade: ReadinessGrade,
+    hasThreat: boolean,
+    hasActiveOp: boolean,
+): ForceReadinessRecommendationId {
+    if (grade === 'INEFFECTIVE') return 'reorganize_immediately';
+    if (grade === 'DEGRADED' && !hasThreat) return 'reorganize_two_turns';
+    if (grade === 'DEGRADED' && hasThreat) return 'reinforce_threat';
+    if (hasThreat) return 'reinforce_front';
+    if (hasActiveOp) return 'hold_operation';
+    if (grade === 'STRAINED') return 'reduce_tempo';
+    return 'hold';
 }
 
 export function generateForceReadiness(
@@ -86,6 +100,7 @@ export function generateForceReadiness(
                 disruptedCount: 0,
                 overextendedCount: 0,
                 hasThreat: threatCorpsIds.has(corps.id),
+                recommendationId: 'no_brigades',
                 recommendation: 'No brigades assigned',
             });
             continue;
@@ -104,7 +119,7 @@ export function generateForceReadiness(
         const hasThreat = threatCorpsIds.has(corps.id);
 
         const grade = computeReadinessGrade(ineffPct, avgFatigue, avgCohesion, disruptedCount);
-        const recommendation = getRecommendation(grade, hasThreat, !!activeOp);
+        const recommendationId = getRecommendationId(grade, hasThreat, !!activeOp);
 
         result.push({
             corpsId: corps.id,
@@ -119,7 +134,8 @@ export function generateForceReadiness(
             activeOpName: activeOp?.name,
             activeOpBrigadeCount: activeOp?.participating_brigade_ids?.length,
             hasThreat,
-            recommendation,
+            recommendationId,
+            recommendation: t(RECOMMENDATION_LABEL_KEYS[recommendationId]),
         });
     }
 
@@ -152,23 +168,36 @@ export const READINESS_GRADE_LABEL_KEYS: Record<ReadinessGrade, MessageKey> = {
     'INEFFECTIVE': 'forceReadiness.grade.ineffective',
 };
 
-const RECOMMENDATION_LABEL_KEYS: Record<string, MessageKey> = {
-    'Reorganize immediately': 'forceReadiness.recommendation.reorganizeImmediately',
-    'Reorganize for 2 turns': 'forceReadiness.recommendation.reorganizeTwoTurns',
-    'Reinforce: threat detected': 'forceReadiness.recommendation.reinforceThreat',
-    'Reinforce front sectors': 'forceReadiness.recommendation.reinforceFront',
-    'Hold: operation in progress': 'forceReadiness.recommendation.holdOperation',
-    'Reduce operations tempo': 'forceReadiness.recommendation.reduceTempo',
-    'Hold': 'forceReadiness.recommendation.hold',
-    'No brigades assigned': 'forceReadiness.recommendation.noBrigades',
+const RECOMMENDATION_LABEL_KEYS: Record<ForceReadinessRecommendationId, MessageKey> = {
+    reorganize_immediately: 'forceReadiness.recommendation.reorganizeImmediately',
+    reorganize_two_turns: 'forceReadiness.recommendation.reorganizeTwoTurns',
+    reinforce_threat: 'forceReadiness.recommendation.reinforceThreat',
+    reinforce_front: 'forceReadiness.recommendation.reinforceFront',
+    hold_operation: 'forceReadiness.recommendation.holdOperation',
+    reduce_tempo: 'forceReadiness.recommendation.reduceTempo',
+    hold: 'forceReadiness.recommendation.hold',
+    no_brigades: 'forceReadiness.recommendation.noBrigades',
+};
+
+const LEGACY_RECOMMENDATION_IDS: Record<string, ForceReadinessRecommendationId> = {
+    'Reorganize immediately': 'reorganize_immediately',
+    'Reorganize for 2 turns': 'reorganize_two_turns',
+    'Reinforce: threat detected': 'reinforce_threat',
+    'Reinforce front sectors': 'reinforce_front',
+    'Hold: operation in progress': 'hold_operation',
+    'Reduce operations tempo': 'reduce_tempo',
+    Hold: 'hold',
+    'No brigades assigned': 'no_brigades',
 };
 
 export function readinessGradeLabel(grade: ReadinessGrade): string {
     return t(READINESS_GRADE_LABEL_KEYS[grade]);
 }
 
-function recommendationLabel(recommendation: string): string {
-    return t(RECOMMENDATION_LABEL_KEYS[recommendation] ?? 'forceReadiness.recommendation.recorded', { recommendation });
+function recommendationLabel(item: CorpsReadiness): string {
+    const recommendationId = item.recommendationId ?? LEGACY_RECOMMENDATION_IDS[item.recommendation];
+    if (recommendationId) return t(RECOMMENDATION_LABEL_KEYS[recommendationId]);
+    return t('forceReadiness.recommendation.recorded', { recommendation: item.recommendation });
 }
 
 interface ForceReadinessProps {
@@ -224,7 +253,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] text-text-secondary/60 italic">{recommendationLabel(item.recommendation)}</span>
+                            <span className="text-[10px] text-text-secondary/60 italic">{recommendationLabel(item)}</span>
                             {onCorpsClick && (
                                 <button
                                     type="button"
