@@ -3072,7 +3072,8 @@ function derivePresidentialReviewQueue({
         || event.type === 'order_pushback'
         || event.type === 'order_refused'
         || event.type === 'order_exceeded'
-        || event.type === 'army_directive_pushback',
+        || event.type === 'army_directive_pushback'
+        || event.type === 'army_co_proposes_op',
     ).length;
     const personnelDirectiveCount = (pendingOfficerEvents ?? []).filter((event) =>
         event.type === 'officer_available' || event.type === 'replacement_suggested' || event.type === 'officer_relieved',

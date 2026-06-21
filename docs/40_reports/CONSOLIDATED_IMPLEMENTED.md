@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army CO proposal Decision Room routing:** [implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md](implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md) - autonomous Army CO operation proposals now route as Presidential Decision Room command review, not Personnel; the Inbox deep-links to the command card and the card uses proposal-specific copy.
+
 **Latest map overlay timing lifecycle guard:** [implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md](implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md) - MapContainer dev overlay timers are now unique/idempotent and chunk-local; canceling deferred overlay work marks applied state stale so partial overlay updates are not treated as complete.
 
 **Latest command pushback Decision Room routing:** [implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md](implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md) - officer command-pushback and Army directive objections now open the Decision Room command lens first, preserve Army HQ Briefing as source handoff, and no longer route through generic Personnel Inbox actions.

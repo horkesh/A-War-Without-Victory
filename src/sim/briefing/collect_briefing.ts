@@ -399,10 +399,12 @@ registerBriefingCollector('command', (state, faction) => {
             'order_refused',
             'order_exceeded',
             'army_directive_pushback',
+            'army_co_proposes_op',
         ]);
         const interpEvents = factionEvents.filter(e => INTERP_TYPES.has(e.type));
         if (interpEvents.length > 0) {
             const hasRefusal = interpEvents.some(e => e.type === 'order_refused');
+            const hasOperationProposal = interpEvents.some(e => e.type === 'army_co_proposes_op');
             items.push({
                 id: 'cmd-order-interpretations',
                 section: 'command',
@@ -410,6 +412,8 @@ registerBriefingCollector('command', (state, faction) => {
                 title: `${interpEvents.length} order interpretation${interpEvents.length > 1 ? 's' : ''} pending`,
                 detail: hasRefusal
                     ? 'One or more officers have refused orders. Review required.'
+                    : hasOperationProposal
+                        ? 'Army command has proposed an autonomous operation. Review before advancing.'
                     : 'Officers have modified or pushed back on orders.',
                 actionLabel: 'Review Interpretations',
                 target: { kind: 'officer_events', officerFocus: 'interpretations', label: 'Officer interpretations' },

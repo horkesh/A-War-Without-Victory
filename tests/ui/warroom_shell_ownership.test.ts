@@ -199,6 +199,24 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(inboxRoute).toContain('gs.setFocusedDecisionConsequenceId(null);');
     });
 
+    it('routes officer command-review inbox items to the Decision Room command card', () => {
+        const app = read('src/ui/map/App.tsx');
+        const handlerStart = app.indexOf('const handlePresidentialInboxAction =');
+        const handlerEnd = app.indexOf('\n  const openInboxHome =', handlerStart);
+
+        expect(handlerStart).toBeGreaterThanOrEqual(0);
+        expect(handlerEnd).toBeGreaterThan(handlerStart);
+
+        const handler = app.slice(handlerStart, handlerEnd);
+        expect(handler).toContain("if (itemId.startsWith('opportunity:'))");
+        expect(handler).toContain("openWarroomDecisionRoomFromField('opportunity', itemId);");
+        expect(handler).toContain("if (itemId.startsWith('officer:'))");
+        expect(handler).toContain("openWarroomDecisionRoomFromField('command', 'pushback:player-army-co');");
+        expect(handler.indexOf("if (itemId.startsWith('opportunity:'))")).toBeLessThan(
+            handler.indexOf("if (itemId.startsWith('officer:'))"),
+        );
+    });
+
     it('routes the Warroom Chronicle hotspot to ChronicleOverlay instead of Authored Choices', () => {
         const app = read('src/ui/map/App.tsx');
         const routeStart = app.indexOf("if (surface === 'chronicle') {");

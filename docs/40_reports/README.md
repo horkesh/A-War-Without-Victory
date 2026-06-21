@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Army CO proposal Decision Room routing** | [implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md](implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md) - Autonomous Army CO operation proposals now route through Decision Room command review, with Army HQ Briefing preserved as source handoff. |
 | **Latest live Inbox Decision Room routing proof** | [implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md](implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md) - Live browser QA now hard-proves operation-opportunity Inbox and Desk cards plus the Record command category reach the Decision Room, and Cost cards preserve Records as handoff rather than primary route. |
 | **Latest live foundational archive proof** | [implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md](implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md) - First-hour browser QA now hard-proves RBiH/RS/HRHB foundational decision receipts in Records and Chronicle, and live-surface QA hard-fails Records-to-Chronicle archive routing instead of accepting skip evidence. |
 | **Latest live AAR browser fixture proof** | [implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md](implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md) - Live browser QA now loads a deterministic in-memory Records AAR battle fixture and hard-fails if formation-link drilldown is missing. |
