@@ -562,7 +562,7 @@ export interface WarroomShellLayerProps {
 function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigationCommand) => void }) {
   return (
     <nav
-      aria-label="Warroom navigation"
+      aria-label={t('warroomShell.navigation')}
       data-testid="warroom-toolbar"
       style={{
         position: 'absolute',
@@ -603,7 +603,7 @@ function WarroomToolbar({ onNavigate }: { onNavigate: (command?: WarroomNavigati
             whiteSpace: 'nowrap',
           }}
         >
-          {entry.label}
+          {t(entry.labelKey)}
         </button>
       ))}
     </nav>
