@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { CorpsDetail } from '../../src/ui/map/components/CorpsDetail.js';
 import { FormationDetail } from '../../src/ui/map/components/FormationDetail.js';
 import { OrbatPanel } from '../../src/ui/map/components/OrbatPanel.js';
+import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
@@ -133,5 +134,29 @@ describe('commander read-model surfaces', () => {
         expect(container.textContent).toContain('Selmo Cikotic');
         expect(container.textContent).toContain('Opening command');
         expect(container.textContent).not.toContain('[!]');
+    });
+
+    it('surfaces opening-command provenance on the Army HQ corps card face', () => {
+        const gameState = makeOpeningCommandState();
+        const corps = gameState.formations.find((formation) => formation.id === 'arbih_3rd_corps')!;
+        const brigades = gameState.formations.filter((formation) => formation.corps_id === 'arbih_3rd_corps');
+
+        const { container } = render(React.createElement(ArmyHQCorpsCard, {
+            corps,
+            brigades,
+            sectors: [],
+            operations: [],
+            factionBattles: [],
+            gameState,
+            isExpanded: false,
+            isCompressed: false,
+            onToggleExpand: () => undefined,
+        }));
+
+        expect(container.textContent).toContain('Selmo Cikotic');
+        expect(container.textContent).toContain('Opening command');
+        expect(container.textContent).toContain('permanent assignment pending');
+        expect(container.textContent).not.toContain('[!] UNASSIGNED');
+        expect(gameState.namedOfficerStateById?.arbih_cikotic?.assigned_corps_id).toBeNull();
     });
 });

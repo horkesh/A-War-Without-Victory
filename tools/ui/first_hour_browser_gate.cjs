@@ -623,6 +623,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await waitForVisibleText(page, 'BRIEFING');
   await clickByText(page, 'RECORDS');
   await waitForVisibleText(page, 'Archive Routes');
+  await assertTurnZeroRecordsProvenanceCounts(page, summary, flow);
   await captureEvidence(page, summary, 'army_hq_records');
   await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
   await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
@@ -662,6 +663,31 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   summary.evidence.receiptChecksByFaction[flow.faction].chronicle = true;
   summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction].chronicle = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_chronicle_decision_receipt`);
+}
+
+async function assertTurnZeroRecordsProvenanceCounts(page, summary, flow) {
+  const counts = await page.evaluate(() => {
+    const readCount = (id) => {
+      const tab = document.querySelector(`[data-testid="records-subtab-${id}"]`);
+      if (!(tab instanceof HTMLElement)) return null;
+      const count = Array.from(tab.querySelectorAll('span'))
+        .map((el) => (el.textContent ?? '').trim())
+        .filter((text) => /^\d+$/.test(text))
+        .at(-1);
+      return count == null ? null : Number(count);
+    };
+    return {
+      aftermath: readCount('aftermath'),
+      aar: readCount('aar'),
+    };
+  });
+
+  if (counts.aftermath !== 0 || counts.aar !== 0) {
+    throw new Error(`${flow.faction} turn-0 Records provenance leaked into normal history: aftermath=${counts.aftermath}, aar=${counts.aar}`);
+  }
+
+  summary.evidence.turnZeroRecordsProvenanceCountsByFaction ??= {};
+  summary.evidence.turnZeroRecordsProvenanceCountsByFaction[flow.faction] = counts;
 }
 
 async function run() {

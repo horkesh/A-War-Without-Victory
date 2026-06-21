@@ -1,3 +1,13 @@
+## 2026-06-21 - Army HQ Records provenance and field-inspection proof
+
+**Turn-0 provenance must not become normal history just because a summary object exists:** setup control/provenance can populate `latestTurnSummary`, but Records/AAR/player history surfaces should only narrate it when `shouldNarrateTerritorySummary(...)` says it is real post-start history. Durable rule: any Records, AAR, Chronicle, dashboard, or browser-proof count derived from `latestTurnSummary` must distinguish setup provenance from normal aftermath.
+
+**Army HQ rows need separate inspect controls from expansion controls:** row expansion is information disclosure; field inspection is a shell-route action that must preserve corps/sector/formation context. Durable rule: add explicit `Inspect` controls with stable `data-*` ids for field routes and keep row expand/collapse buttons separate so both players and browser QA can prove the intended action.
+
+**Browser proofs should target provenance hooks, not whichever card appears first:** Army HQ card order can change. Durable rule: expose stable commander-source/provenance hooks for opening-command and synthetic command-staff read-model displays, and have live browser proof target those hooks rather than broad card selectors or localized prose.
+
+**Corps Front copy is part of Army HQ drilldown quality:** Army HQ sector inspect routes land in Corps Front, so raw shorthand there still harms the Army HQ experience. Durable rule: live drilldown failures should be fixed at the landed owner surface, not narrowed away from the proof path; `DEF/EDGE`-style labels should use player-facing localized text.
+
 ## 2026-06-21 - Polish residuals: turn-0 notable flips, reserve drilldowns, and command chrome
 
 **Legacy and compact modals still need display-boundary i18n even when they are not React panels:** copy leaks can hide in DOM-string modals, aria labels, fallback tooltip rows, and structured-card title attributes after the main panel body is localized. Durable rule: when localizing a surface, check fallback branches, accessible labels, `title` attributes, and legacy string-rendered Warroom modals; prefer rendering structured UI sentences from existing view fields instead of echoing English read-model prose. Applied in `[2026-06-21] contained copy polish`; report `docs/40_reports/implemented/20260621_CONTAINED_COPY_POLISH.md`.

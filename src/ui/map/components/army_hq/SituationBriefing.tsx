@@ -1,4 +1,5 @@
 import type { CommandBriefingItemView, CommandBriefingTargetView } from '../../data/types.js';
+import { t, type MessageKey } from '../../i18n';
 
 export type BriefingItem = CommandBriefingItemView;
 export type BriefingTarget = CommandBriefingTargetView;
@@ -8,16 +9,26 @@ export interface SituationBriefingProps {
     onNavigate?: (target: BriefingTarget) => void;
 }
 
-const TARGET_LABELS: Partial<Record<BriefingTarget['type'], string>> = {
-    corps: '-> CORPS',
-    sector: '-> SECTOR',
-    operation: '-> OP',
-    enclaves: '-> ENCLAVES',
-    settlement: '-> MAP',
-    summary: '-> SUMMARY',
-    officer_events: '-> PERSONNEL',
-    peace_plan: '-> PLAN',
+const TARGET_LABEL_KEYS: Partial<Record<BriefingTarget['type'], MessageKey>> = {
+    corps: 'situationBriefing.target.corps',
+    sector: 'situationBriefing.target.sector',
+    operation: 'situationBriefing.target.operation',
+    enclaves: 'situationBriefing.target.enclaves',
+    settlement: 'situationBriefing.target.map',
+    summary: 'situationBriefing.target.summary',
+    officer_events: 'situationBriefing.target.personnel',
+    peace_plan: 'situationBriefing.target.plan',
 };
+
+function fallbackTargetLabel(type: BriefingTarget['type']): string | undefined {
+    const key = TARGET_LABEL_KEYS[type];
+    return key ? t(key) : undefined;
+}
+
+function enrichTargetWithItemContext(item: BriefingItem): BriefingTarget {
+    if (item.target.type !== 'sector' || !item.corpsId || item.target.corpsId) return item.target;
+    return { ...item.target, corpsId: item.corpsId };
+}
 
 /**
  * UI-4 progressive disclosure (Batch 43):
@@ -41,8 +52,8 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
     const infoCount = items.length - criticalCount - warningCount;
     const defaultOpen = criticalCount > 0;
     const summaryLabel = items.length === 0
-        ? 'No alerts'
-        : `${items.length} item${items.length === 1 ? '' : 's'} · ${criticalCount} critical / ${warningCount} warning / ${infoCount} info`;
+        ? t('situationBriefing.noAlerts')
+        : t('situationBriefing.summary', { count: items.length, critical: criticalCount, warning: warningCount, info: infoCount });
 
     return (
         <details
@@ -52,7 +63,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
         >
             <summary className="cursor-pointer list-none flex items-center justify-between px-4 py-2.5 border-b border-panel-border">
                 <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary">
-                    Situation Briefing
+                    {t('situationBriefing.title')}
                 </span>
                 <span className="text-[9px] uppercase tracking-[0.15em] text-text-muted tabular-nums">
                     {summaryLabel}
@@ -61,7 +72,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
 
             {items.length === 0 ? (
                 <div className="px-4 py-2 text-[11px] text-text-secondary italic">
-                    No alerts - situation nominal
+                    {t('situationBriefing.empty')}
                 </div>
             ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 px-4 py-3">
@@ -78,14 +89,15 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 : item.severity === 'warning'
                                     ? 'border-amber-500/30 hover:border-amber-500/50'
                                     : 'border-panel-border hover:border-panel-border';
-                        const hasTarget = item.target.type !== 'none';
-                        const targetLabel = item.actionChipLabel ?? item.target.label ?? TARGET_LABELS[item.target.type];
+                        const target = enrichTargetWithItemContext(item);
+                        const hasTarget = target.type !== 'none';
+                        const targetLabel = item.actionChipLabel ?? target.label ?? fallbackTargetLabel(target.type);
 
                         return (
                             <button
                                 key={item.id}
                                 type="button"
-                                onClick={() => hasTarget && onNavigate?.(item.target)}
+                                onClick={() => hasTarget && onNavigate?.(target)}
                                 disabled={!hasTarget || !onNavigate}
                                 className={`text-left rounded-md border ${borderColor} bg-panel-bg p-2.5 transition-colors group disabled:cursor-default`}
                             >

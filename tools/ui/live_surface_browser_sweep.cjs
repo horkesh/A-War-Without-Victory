@@ -1025,7 +1025,8 @@ async function runArmyHqInternalDrilldown(page, summary) {
   await activateVisibleControl(page, '#army-hq-tab-briefing');
   await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
-  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-opening-command-provenance"]');
+  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"][data-commander-source="opening_read_model"]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
   await waitForVisibleText(page, 'Back');
   await waitForVisibleText(page, 'Combat Record');
@@ -1070,10 +1071,16 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-frontage"][data-front-segments]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]');
   await captureEvidence(page, summary, 'army_hq_sector_front_segment_live_proof');
+  await clickFirstVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]', 'Army HQ sector inspect-on-field control');
+  await waitForVisibleSelector(page, '#sector-intel-tab-overview');
+  await waitForVisibleSelector(page, '#sector-intel-panel-overview');
+  await captureEvidence(page, summary, 'army_hq_sector_inspect_on_field_live_proof');
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Army HQ Sector Front Segment Live Proof', text);
   summary.evidence.armyHqSectorFrontSegmentLiveProof = true;
+  summary.evidence.armyHqSectorInspectOnFieldLiveProof = true;
 }
 
 async function runOwnerJourneyDrilldown(page, summary) {

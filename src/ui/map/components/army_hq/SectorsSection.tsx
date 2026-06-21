@@ -15,6 +15,7 @@ import {
 } from '../../utils/playerSafeText';
 import { getPlayerSafeThreatPresentation } from '../../utils/playerSafeThreat';
 import { getPlayerFacingSectorName } from '../../../shared/playerFacingLabels';
+import { inspectOnField } from '../../utils/shellNavigation';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
@@ -274,6 +275,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const battleCount = factionBattles.filter((b) => sectorOsids.has(b.osid)).length;
                         const hasBattle = battleCount > 0;
                         const isExpanded = effectiveExpandedId === sector.sector_id;
+                        const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
 
                         return (
                             <div
@@ -294,7 +296,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                             </span>
                                             <span className="text-[12px] font-bold text-text-primary uppercase font-mono truncate"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
-                                                {safeSectorLabel(sector.sector_id, sectors)}
+                                                {sectorLabel}
                                             </span>
                                             {hasBattle && (
                                                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-sm bg-red-900/40 text-red-400 border border-red-500/30 animate-pulse">
@@ -310,6 +312,21 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 density: sector.density.toFixed(2),
                                             })}
                                         </div>
+                                    </button>
+                                    <button
+                                        type="button"
+                                        data-testid="army-hq-sector-inspect"
+                                        data-sector-id={sector.sector_id}
+                                        data-corps-id={corpsId}
+                                        aria-label={t('sectorsSection.inspectOnField', { sector: sectorLabel })}
+                                        onClick={() => inspectOnField(useGameStore.getState(), {
+                                            kind: 'field-sector-in-corps',
+                                            sectorId: sector.sector_id,
+                                            corpsId,
+                                        })}
+                                        className="ml-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                    >
+                                        {t('sectorsSection.inspect')}
                                     </button>
                                 </div>
                                 {isExpanded && <SectorExpandedDetail

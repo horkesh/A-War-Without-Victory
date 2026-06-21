@@ -262,7 +262,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: 'arbih_3rd_corps|op_alpha' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:sector')).toMatchObject({
-      navigationTarget: { kind: 'field', target: { kind: 'field-sector', sectorId: 'sector_tuzla' } },
+      navigationTarget: { kind: 'field', target: { kind: 'field-sector-in-corps', sectorId: 'sector_tuzla', corpsId: 'arbih_3rd_corps' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')).toMatchObject({
       navigationTarget: { kind: 'field', target: { kind: 'field-settlement', osid: 'tuzla_1' } },

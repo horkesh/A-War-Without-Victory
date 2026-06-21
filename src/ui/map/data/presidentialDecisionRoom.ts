@@ -408,9 +408,15 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
   }
   if (item.target.type === 'sector') {
     if (item.target.sectorId) {
+      const corpsId = item.target.corpsId ?? item.corpsId;
       return {
         actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectCorps'),
-        navigationTarget: { kind: 'field', target: { kind: 'field-sector', sectorId: item.target.sectorId } },
+        navigationTarget: {
+          kind: 'field',
+          target: corpsId
+            ? { kind: 'field-sector-in-corps', sectorId: item.target.sectorId, corpsId }
+            : { kind: 'field-sector', sectorId: item.target.sectorId },
+        },
       };
     }
     return {

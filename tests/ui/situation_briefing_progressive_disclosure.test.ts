@@ -98,6 +98,32 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
         expect(container.textContent).toContain('No alerts');
     });
 
+    it('uses player-facing briefing copy instead of staff arrows or hardcoded English chrome', () => {
+        const items: BriefingItem[] = [
+            makeItem({
+                id: 'op',
+                title: 'Operation window',
+                target: { type: 'operation', operationKey: 'arbih_3rd_corps|op_alpha' },
+            }),
+            makeItem({
+                id: 'settlement',
+                title: 'Settlement report',
+                target: { type: 'settlement', osid: 'tuzla_1' },
+            }),
+        ];
+
+        const { container } = render(createElement(SituationBriefing, { items, onNavigate: () => undefined }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Situation briefing');
+        expect(copy).toContain('2 items');
+        expect(copy).toContain('Inspect operation');
+        expect(copy).toContain('Inspect map');
+        expect(copy).not.toContain('-> OP');
+        expect(copy).not.toContain('-> MAP');
+        expect(copy).not.toContain('Situation Briefing');
+    });
+
     it('renders normalized action chip labels instead of static target type labels', () => {
         const items: BriefingItem[] = [
             makeItem({
@@ -143,7 +169,7 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
         fireEvent.click(getByText('Inspect settlement'));
 
         expect(onNavigate).toHaveBeenNthCalledWith(1, { type: 'operation', operationKey: 'arbih_3rd_corps|op_alpha' });
-        expect(onNavigate).toHaveBeenNthCalledWith(2, { type: 'sector', sectorId: 'sector_tuzla' });
+        expect(onNavigate).toHaveBeenNthCalledWith(2, { type: 'sector', sectorId: 'sector_tuzla', corpsId: 'rs_1k_corps' });
         expect(onNavigate).toHaveBeenNthCalledWith(3, { type: 'settlement', osid: 'tuzla_1' });
     });
 });

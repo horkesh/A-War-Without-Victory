@@ -261,7 +261,12 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                 break;
             case 'sector': {
                 if (target.sectorId) {
-                    onDecisionRoomNavigateTarget?.({ kind: 'field', target: { kind: 'field-sector', sectorId: target.sectorId } });
+                    onDecisionRoomNavigateTarget?.({
+                        kind: 'field',
+                        target: target.corpsId
+                            ? { kind: 'field-sector-in-corps', sectorId: target.sectorId, corpsId: target.corpsId }
+                            : { kind: 'field-sector', sectorId: target.sectorId },
+                    });
                 }
                 break;
             }

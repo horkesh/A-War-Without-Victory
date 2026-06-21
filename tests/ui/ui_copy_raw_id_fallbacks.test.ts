@@ -199,7 +199,7 @@ describe('UI copy raw-id fallbacks', () => {
     expect(formationSource).toContain('sanitizeHistoryMoment');
     expect(formationSource).not.toContain('m.description.replace');
 
-    expect(recordsSource).toContain('aria-label={`${archiveCounts[id]} records`}');
+    expect(recordsSource).toContain("aria-label={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}");
     expect(recordsSource).toContain("{' · '}");
 
     expect(chronicleSource).toContain('aria-label={`${count} entries`}');

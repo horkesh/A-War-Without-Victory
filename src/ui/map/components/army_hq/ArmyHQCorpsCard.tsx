@@ -174,6 +174,7 @@ export function ArmyHQCorpsCard({
             type="button"
             onClick={onToggleExpand}
             data-testid="army-hq-corps-card"
+            data-commander-source={data.commanderDisplay?.source ?? 'none'}
             aria-label={expandCardAria}
             className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
                 ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
@@ -220,6 +221,19 @@ export function ArmyHQCorpsCard({
                         </>
                     )}
                 </div>
+
+                {data.commanderDisplay?.source === 'opening_read_model' && (
+                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-[10px] leading-4 text-amber-300/85 font-mono">
+                        <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.openingCommand')}</span>
+                        <span className="text-text-secondary/80"> - {t('commanderDisplay.openingCommandHelp')}</span>
+                    </div>
+                )}
+                {data.commanderDisplay?.source === 'synthetic' && (
+                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-[10px] leading-4 text-amber-300/85 font-mono">
+                        <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.commandStaff')}</span>
+                        <span className="text-text-secondary/80"> - {t('commanderDisplay.commandStaffHelp')}</span>
+                    </div>
+                )}
 
                 {readinessGrade && (
                     <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary/80 font-mono">

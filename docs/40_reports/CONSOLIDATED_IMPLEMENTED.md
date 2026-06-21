@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Army HQ Records provenance / drilldown hardening:** [implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md](implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md) - turn-0 setup provenance no longer counts as normal Records/AAR history, Army HQ sector/ORBAT rows expose explicit field-inspection controls, opening-command provenance is visible on corps cards, and browser gates prove all-faction first-hour Records counts plus Army HQ sector inspect-on-field routing.
+
 **Latest accessibility and browser drilldown proof:** [implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md](implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md) - Army HQ, Army Reserve, Order Queue, President's Desk, and Warroom priority controls now expose stateful localized accessible names; live-surface QA now records hard evidence for tactical-map context actions and battle markers.
 
 **Latest sector override feedback semantics:** [implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md](implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md) - brigade-to-sector staged orders now use `targetSectorId`, Formation Detail prefers explicit sector overrides over stale roster membership, and map ghost paths / staged arrows resolve sector ids to deterministic friendly sector OSIDs.

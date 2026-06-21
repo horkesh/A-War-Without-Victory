@@ -2,7 +2,7 @@
 
 **Purpose:** Single living reference for GUI (map + warroom) status. Read first when starting GUI work; update during the session when completing GUI changes.
 
-**Updated:** 2026-06-21 (contained copy polish, browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
+**Updated:** 2026-06-21 (Army HQ Records provenance/drilldown hardening, contained copy polish, browser proof selector hardening, local playtest evidence export, live operation-opportunity browser proof, AAR/tooltip concentration labels, Warroom severity i18n, all-faction first-hour browser gate, first-hour shell hardening, Records/Chronicle filing, Army HQ drilldown closeout, and commander read-model surface parity)
 
 **Relationship to calibration:** Calibration has [CALIBRATION_MASTER.md](CALIBRATION_MASTER.md) as its control file. This document is the GUI analogue — one place to see current status, gates, and where to record changes.
 
@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Army HQ Records provenance / drilldown hardening** | [implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md](implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md) - Turn-0 setup provenance no longer counts as normal Records/AAR history, Army HQ sector/ORBAT rows expose explicit field-inspection controls, opening-command provenance is visible on corps cards, and browser gates prove all-faction first-hour Records counts plus Army HQ sector inspect-on-field routing. |
 | **Contained copy polish** | [implemented/20260621_CONTAINED_COPY_POLISH.md](implemented/20260621_CONTAINED_COPY_POLISH.md) - Battle-tooltip fallback copy, Records subtab count aria labels, Back-the-Officer opportunity framing/rank/donor copy, and legacy Warroom Settings chrome now render through EN/BCS i18n keys. |
 | **Browser proof selector hardening** | [implemented/20260621_BROWSER_PROOF_SELECTOR_HARDENING.md](implemented/20260621_BROWSER_PROOF_SELECTOR_HARDENING.md) - First-hour proof clicks foundational responses by event/response id, evidence records raw-label checks by faction/surface after cleanup, and live-surface AAR proof targets the injected fixture exactly. |
 | **Local playtest evidence and browser proof** | [implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md](implemented/20260621_LOCAL_PLAYTEST_EVIDENCE_AND_BROWSER_PROOF.md) - Settings Diagnostics exports a local-only redacted playtest evidence packet, live-surface browser proof reaches the actual operation-opportunity Decision Room card and Records ledger row, and AAR/tooltip/Warroom labels close raw/English copy leaks. |
@@ -149,6 +150,7 @@
 
 | Date | Change | Report / spec |
 |------|--------|----------------|
+| 2026-06-21 | **Army HQ Records provenance / drilldown hardening:** turn-0 setup provenance no longer files as normal Records/AAR history, corps-context field routes are preserved, Army HQ sector/ORBAT rows have explicit Inspect controls, and browser gates prove the all-faction first-hour count contract plus Army HQ sector inspect-on-field path. | [implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md](implemented/20260621_ARMY_HQ_RECORDS_PROVENANCE_DRILLDOWN.md) |
 | 2026-06-20 | **AAA polish wave 3 command-surface and startup OOB truth:** audited Army HQ/OOB/settlement command surfaces now use dates, qualitative coverage, i18n local-support copy, and player-safe phase labels; opening VRS Main Staff is materialized as an `army_hq` formation; Srebrenica/Zepa operation-history rows cannot claim event-owned fall receipts. | [implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md](implemented/20260620_AAA_POLISH_WAVE3_COMMAND_SURFACE_OOB.md) |
 | 2026-06-18 | **First-hour shell/Records/Chronicle polish:** browser-fallback foundational decisions now file immediately into Records and Chronicle, first-hour shell chrome renders `Opening week`, count badges use readable separators, and decision-modal shell ownership is guarded. | [implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md](implemented/20260618_FIRST_HOUR_SHELL_RECORDS_CHRONICLE_POLISH.md) |
 | 2026-06-18 | **P1 raw-copy calendar boundary:** event decisions and inbox event cards now use calendar dates and non-diagnostic event/dossier internals stay out of player-facing copy; live browser verified the `What Is Bosnia?` modal. | [implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md](implemented/20260618_P1_RAW_COPY_CALENDAR_BOUNDARY.md) |
