@@ -92,6 +92,8 @@ export function OrderQueue() {
       <button
         type="button"
         onClick={() => setCollapsed(false)}
+        aria-label={t('orderQueue.expandAria')}
+        aria-expanded={false}
         className="flex items-center w-full text-left bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-t-lg hover:bg-panel-hover transition-colors"
         style={{
           position: 'absolute',
@@ -140,7 +142,8 @@ export function OrderQueue() {
             type="button"
             onClick={() => setCollapsed(true)}
             className="text-text-secondary hover:text-interactive text-xs leading-none p-0.5"
-            aria-label={t('orderQueue.collapse')}
+            aria-label={t('orderQueue.collapseAria')}
+            aria-expanded={true}
           >
             ▼
           </button>

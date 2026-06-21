@@ -160,7 +160,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                     type="button"
                     onClick={() => useGameStore.setState({ selectedArmyHqId: null, selectedFormationId: null })}
                     className="text-text-secondary hover:text-text-primary text-lg leading-none px-1"
-                    aria-label={t('armyReserve.close')}
+                    aria-label={t('armyReserve.closePanelAria')}
                 >×</button>
             </div>
 

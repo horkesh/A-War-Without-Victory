@@ -109,7 +109,7 @@ describe('PresidentDeskShell', () => {
 
     expect(screen.getByRole('dialog', { name: 'President desk' })).toBe(document.activeElement);
 
-    fireEvent.click(screen.getByTestId('desk-close-overlay'));
+    fireEvent.click(screen.getByRole('button', { name: 'Close President desk overlay' }));
 
     expect(onClose).toHaveBeenCalledOnce();
   });

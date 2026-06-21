@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest accessibility and browser drilldown proof:** [implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md](implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md) - Army HQ, Army Reserve, Order Queue, President's Desk, and Warroom priority controls now expose stateful localized accessible names; live-surface QA now records hard evidence for tactical-map context actions and battle markers.
+
 **Latest sector override feedback semantics:** [implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md](implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md) - brigade-to-sector staged orders now use `targetSectorId`, Formation Detail prefers explicit sector overrides over stale roster membership, and map ghost paths / staged arrows resolve sector ids to deterministic friendly sector OSIDs.
 
 **Latest Army CO proposal Decision Room routing:** [implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md](implemented/20260621_ARMY_CO_PROPOSES_OP_DECISION_ROOM_ROUTING.md) - autonomous Army CO operation proposals now route as Presidential Decision Room command review, not Personnel; the Inbox deep-links to the command card and the card uses proposal-specific copy.

@@ -9,6 +9,7 @@ import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
+import { CollapsibleSection } from '../../src/ui/map/components/army_hq/CollapsibleSection.js';
 import { OrbatSection } from '../../src/ui/map/components/army_hq/OrbatSection.js';
 import { OpportunityLedgerPanel } from '../../src/ui/map/components/army_hq/OpportunityLedgerPanel.js';
 import { SectorsSection } from '../../src/ui/map/components/army_hq/SectorsSection.js';
@@ -358,6 +359,68 @@ describe('GUI audit label discipline', () => {
     expect(backContainer.textContent).not.toMatch(/\bPers\b|\bBrg\b|\bSec\b/);
   });
 
+  it('gives Army HQ expand and collapse controls explicit stateful accessible names', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      cohesion: 75,
+      fatigue: 5,
+      corpsStance: 'defensive',
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps] });
+    const onToggleExpand = vi.fn();
+
+    const { rerender } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Expand 1st Corps command card' }));
+    expect(onToggleExpand).toHaveBeenCalledOnce();
+
+    rerender(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: true,
+      isCompressed: false,
+      onToggleExpand,
+    }));
+
+    expect(screen.getByRole('button', { name: 'Collapse 1st Corps command card' })).toBeTruthy();
+
+    cleanup();
+
+    useGameStore.setState({ armyHQExpandedSections: {} });
+    render(createElement(CollapsibleSection, {
+      sectionKey: 'combat-arbih_1st_corps',
+      title: 'Combat record',
+      count: 2,
+      defaultOpen: false,
+      children: createElement('div', null, 'Combat body'),
+    }));
+
+    const sectionToggle = screen.getByRole('button', { name: 'Expand Combat record section' });
+    fireEvent.click(sectionToggle);
+    expect(screen.getByRole('button', { name: 'Collapse Combat record section' })).toBeTruthy();
+  });
+
   it('spells out Army HQ ORBAT campaign losses', () => {
     const brigade = {
       id: 'arbih_101_brigade',
@@ -590,6 +653,15 @@ describe('GUI audit label discipline', () => {
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);
     expect(corpsFrontSource).not.toMatch(/`~\$\{sector\.length_edges\} km`/);
     expect(corpsCardSource).toContain('getPlayerSafeOperationPhaseLabel(activeOperationPhase)');
+  });
+
+  it('uses a contextual accessible close name for the Army Reserve panel', () => {
+    const armyReserveSource = readFileSync('src/ui/map/components/ArmyReservePanel.tsx', 'utf8');
+
+    expect(armyReserveSource).toContain("aria-label={t('armyReserve.closePanelAria')}");
+    expect(enMessages['armyReserve.closePanelAria']).toBe('Close Army Reserve panel');
+    expect(enMessages['armyReserve.closePanelAria']).not.toBe('Close');
+    expect(bcsMessages['armyReserve.closePanelAria']).toBeTruthy();
   });
 
   it('keeps settlement support panel copy on i18n keys', () => {

@@ -224,6 +224,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         disabled={!canReviewPriorities}
         title={t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
         className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
+        aria-label={t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
         aria-expanded={priorityDocketOpen}
       >
         <span>{t('warroom.priorities')}</span>

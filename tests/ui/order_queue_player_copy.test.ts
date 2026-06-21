@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { OrderQueue } from '../../src/ui/map/components/OrderQueue.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
@@ -122,5 +122,17 @@ describe('OrderQueue player copy', () => {
     expect(copy).not.toMatch(/\bposture\b/);
     expect(copy).not.toMatch(/\bsector\b/);
     expect(copy).not.toContain('sector:central_front');
+  });
+
+  it('uses stateful accessible names for staged order queue expand and collapse controls', () => {
+    render(React.createElement(OrderQueue));
+
+    const collapseButton = screen.getByRole('button', { name: 'Collapse staged orders queue' });
+    expect(collapseButton.getAttribute('aria-expanded')).toBe('true');
+
+    fireEvent.click(collapseButton);
+
+    const expandButton = screen.getByRole('button', { name: 'Expand staged orders queue' });
+    expect(expandButton.getAttribute('aria-expanded')).toBe('false');
   });
 });

@@ -473,6 +473,50 @@ export function MapContainer() {
     properties: Record<string, unknown> | null;
     position: { x: number; y: number };
   } | null>(null);
+  const [battleMarkerProbe, setBattleMarkerProbe] = useState({ count: 0, osids: '' });
+
+  useEffect(() => {
+    if (!import.meta.env.DEV) return;
+    const win = window as Window & {
+      __awwvLiveSurfaceOpenMapContextMenu?: (position?: { x: number; y: number }) => void;
+    };
+    win.__awwvLiveSurfaceOpenMapContextMenu = (position) => {
+      setContextMenu({
+        type: 'empty',
+        properties: null,
+        position: position ?? { x: window.innerWidth / 2, y: window.innerHeight / 2 },
+      });
+    };
+    return () => {
+      delete win.__awwvLiveSurfaceOpenMapContextMenu;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleDocumentContextMenu = (event: MouseEvent) => {
+      if (event.defaultPrevented) return;
+      const mapEl = document.querySelector('[data-testid="tactical-map"]');
+      if (!(mapEl instanceof HTMLElement)) return;
+      const rect = mapEl.getBoundingClientRect();
+      const insideTacticalMap = event.clientX >= rect.left
+        && event.clientX <= rect.right
+        && event.clientY >= rect.top
+        && event.clientY <= rect.bottom;
+      if (!insideTacticalMap) return;
+      const target = event.target instanceof Element ? event.target : null;
+      if (target?.closest('button, a, input, textarea, select, [role="button"], [role="dialog"]')) return;
+      event.preventDefault();
+      setContextMenu({
+        type: 'empty',
+        properties: null,
+        position: { x: event.clientX, y: event.clientY },
+      });
+    };
+    document.addEventListener('contextmenu', handleDocumentContextMenu);
+    return () => {
+      document.removeEventListener('contextmenu', handleDocumentContextMenu);
+    };
+  }, []);
 
   // Robust anchor synchronization: if expandedStackOsid is set but we have no anchor (e.g. from sidebar),
   // calculate it from the OSID centroid.
@@ -1662,6 +1706,23 @@ export function MapContainer() {
                       state.latestTurnSummary?.battles,
                       state.latestTurnSummary?.turn ?? null,
                     );
+                    const nextBattleMarkerProbe = {
+                      count: battleMarkersGeoJson.features.length,
+                      osids: battleMarkersGeoJson.features
+                        .map((feature) => {
+                          const osid = feature.properties?.osid;
+                          return typeof osid === 'string' ? osid : '';
+                        })
+                        .filter(Boolean)
+                        .sort()
+                        .join(','),
+                    };
+                    setBattleMarkerProbe((previous) => (
+                      previous.count === nextBattleMarkerProbe.count
+                        && previous.osids === nextBattleMarkerProbe.osids
+                        ? previous
+                        : nextBattleMarkerProbe
+                    ));
                     safeEnsureLayer(m, {
                       id: BATTLE_MARKERS_LAYER_ID,
                       type: 'circle',
@@ -3348,6 +3409,18 @@ export function MapContainer() {
   // inputs. Keyboard events only fire when the <main> wrapper has focus
   // (tabIndex={0}), so they do not collide with global shortcuts when
   // focus is elsewhere (Army HQ tabs, modals, sidebar).
+  const handleFallbackContextMenu = (e: React.MouseEvent<HTMLElement>) => {
+    if (e.defaultPrevented) return;
+    const target = e.target instanceof Element ? e.target : null;
+    if (target?.closest('button, a, input, textarea, select, [role="button"], [role="dialog"]')) return;
+    e.preventDefault();
+    setContextMenu({
+      type: 'empty',
+      properties: null,
+      position: { x: e.clientX, y: e.clientY },
+    });
+  };
+
   const handleMapKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     const map = mapRef.current;
     if (!map) return;
@@ -3399,9 +3472,12 @@ export function MapContainer() {
       role="main"
       id="main-content"
       data-testid="tactical-map"
+      data-battle-marker-count={battleMarkerProbe.count}
+      data-battle-marker-osids={battleMarkerProbe.osids}
       data-tutorial-step="map-container"
       aria-label={t('map.aria.tacticalMap')}
       tabIndex={0}
+      onContextMenu={handleFallbackContextMenu}
       onKeyDown={handleMapKeyDown}
       className="absolute inset-0 outline-none"
     >

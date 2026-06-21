@@ -3,6 +3,7 @@
  * Warroom dark palette.
  */
 import { useGameStore } from '../../store/gameStore';
+import { t } from '../../i18n';
 
 interface CollapsibleSectionProps {
     sectionKey: string;
@@ -15,12 +16,16 @@ interface CollapsibleSectionProps {
 export function CollapsibleSection({ sectionKey, title, count, children, defaultOpen = false }: CollapsibleSectionProps) {
     const expanded = useGameStore((s) => s.armyHQExpandedSections[sectionKey] ?? defaultOpen);
     const toggle = useGameStore((s) => s.toggleArmyHQSection);
+    const ariaLabel = expanded
+        ? t('armyHqCorps.collapseSectionAria', { title })
+        : t('armyHqCorps.expandSectionAria', { title });
 
     return (
         <div className="border-t border-panel-border bg-panel-card">
             <button
                 type="button"
                 onClick={() => toggle(sectionKey)}
+                aria-label={ariaLabel}
                 className="w-full flex items-center justify-between px-4 py-2 hover:bg-panel-bg transition-colors group"
             >
                 <div className="flex items-center gap-2.5">

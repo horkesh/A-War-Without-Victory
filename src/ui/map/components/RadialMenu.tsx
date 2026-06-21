@@ -46,6 +46,7 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
   return (
     <div
       ref={ref}
+      data-testid="map-context-menu"
       className="fixed"
       style={{ left: x, top: y, zIndex: Z.SHELL_FLOATING }}
     >
@@ -66,6 +67,7 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
           <button
             key={item.id}
             type="button"
+            data-testid={`map-context-menu-action-${item.id}`}
             disabled={item.disabled}
             onClick={() => { item.action(); onClose(); }}
             className={`absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-all duration-150 ${

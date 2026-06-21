@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import type { FeatureCollection, Polygon } from 'geojson';
 
 import { buildBattleMarkersGeoJSON } from '../src/ui/map/map/builders/buildBattleMarkersGeoJSON.js';
@@ -103,5 +104,13 @@ describe('map battle and casualty truth gates', () => {
     const overlay = buildCasualtiesGeoJSON(baseGeoJson(), formations, 5);
 
     expect(overlay.features).toHaveLength(0);
+  });
+
+  it('keeps live-browser battle-marker evidence on the tactical map landmark', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+
+    expect(source).toContain('battleMarkerProbe');
+    expect(source).toContain('data-battle-marker-count={battleMarkerProbe.count}');
+    expect(source).toContain('data-battle-marker-osids={battleMarkerProbe.osids}');
   });
 });

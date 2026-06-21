@@ -137,6 +137,8 @@ export function ArmyHQCorpsCard({
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
     const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.balanced');
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
+    const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
+    const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });
 
     // Compressed: single line when another card is flipped
     if (isCompressed) {
@@ -144,6 +146,7 @@ export function ArmyHQCorpsCard({
             <button
                 type="button"
                 onClick={onToggleExpand}
+                aria-label={expandCardAria}
                 className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
             >
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
@@ -171,6 +174,7 @@ export function ArmyHQCorpsCard({
             type="button"
             onClick={onToggleExpand}
             data-testid="army-hq-corps-card"
+            aria-label={expandCardAria}
             className={`min-h-[256px] w-full bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/50 transition-all cursor-pointer relative flex flex-col text-left
                 ${readinessGrade && READINESS_BORDER[readinessGrade] ? `border-l-[3px] ${READINESS_BORDER[readinessGrade]}` : isCritical ? 'border-l-[3px] border-l-red-600' : noCommander ? 'border-l-[3px] border-l-amber-500' : ''}`}
         >
@@ -347,6 +351,7 @@ export function ArmyHQCorpsCard({
                 <button
                     type="button"
                     onClick={onToggleExpand}
+                    aria-label={collapseCardAria}
                     className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                 >
                     <span className="text-[12px] text-text-secondary font-mono">&larr; {t('armyHqCorps.back')}</span>
