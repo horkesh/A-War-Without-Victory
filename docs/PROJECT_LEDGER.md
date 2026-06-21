@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): localize Chronicle FEEL generated copy
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Generated Chronicle and FEEL templates now render through explicit EN/BCS keys for combat/cost/displacement/formation cards, operation AARs, officer spotlights, endgame comparison chrome, confirmed consequence receipts, war-weariness beats, refugee-flow cadence beats, Sarajevo-siege beats, generals' digest beats, and patron-defiance material receipts. Authored event/operation/officer/settlement/historical note content remains data-owned and verbatim.
+
+**Verification:** Focused generated-copy pack `npx.cmd vitest run tests\chronicle_entries.test.ts tests\war_weariness_chronicle.test.ts tests\refugee_flow_chronicle.test.ts tests\sarajevo_siege_legibility.test.ts tests\generals_digest_chronicle.test.ts tests\ui\consequence_receipts.test.ts tests\ui\chronicle_endgame_mount.test.ts --reporter=dot` passed 112/112. Broader UI/i18n pack with `tests\ui_i18n.test.ts`, `tests\ui\ui_copy_raw_id_fallbacks.test.ts`, and `tests\wrapped_slides.test.ts` passed 157/157. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 249/249. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run qa:live-surface:browser` passed on port 3239 and verified dev-server cleanup; `.tmp_live_surface_browser_sweep` was removed. `git diff --check` passed. Report: `docs/40_reports/implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, Srebrenica/Zepa event ownership, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): structure Command Briefing metadata and Force Readiness recommendation ids
 
 **Type:** UI/read-model/i18n/test/docs polish.

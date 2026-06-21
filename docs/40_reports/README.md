@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Chronicle FEEL generated-copy localization** | [implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md](implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md) - Generated Chronicle/FEEL scaffolding now renders through EN/BCS keys while authored event/operation/officer/settlement/historical note content stays data-owned. |
 | **Latest Command Briefing structured metadata** | [implemented/20260622_COMMAND_BRIEFING_STRUCTURED_METADATA.md](implemented/20260622_COMMAND_BRIEFING_STRUCTURED_METADATA.md) - Command briefing views carry typed category/subject/copy-token metadata, Chief of Staff no longer parses English titles, and Force Readiness recommendations use typed ids. |
 | **Latest command-copy grammar / Inbox / Chronicle label closeout** | [implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md](implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md) - Command count grammar uses explicit EN/BCS one/many keys, generated Inbox rows avoid English proposal leaks, and Chronicle/Wrapped labels are player-safe and locale-aware. |
 | **Latest Records aftermath label-map hardening** | [implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md](implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md) - Army HQ Records and War Summary aftermath chrome now resolve tone, severity, signal, direction, momentum, and desk-item action labels through explicit typed EN/BCS i18n maps instead of dynamic enum-key construction. |

@@ -38,6 +38,7 @@ import type {
 } from '../../../sim/events/event_types.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
+import { t } from '../i18n/index.js';
 
 /** Realization status of a single predicted downstream event. */
 export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
@@ -131,9 +132,9 @@ function resolveOptionLabel(option: EventResponseOption, fallbackId: string): st
 /** Player-facing label for a faction's coercive patron — sober, factual. */
 function patronLabelForFaction(factionId: string): string {
     switch (factionId) {
-        case 'RS': return "Belgrade's";
-        case 'HRHB': return "Zagreb's";
-        default: return "the patron's";
+        case 'RS': return t('chronicle.generated.patron.belgradePossessive');
+        case 'HRHB': return t('chronicle.generated.patron.zagrebPossessive');
+        default: return t('chronicle.generated.patron.genericPossessive');
     }
 }
 
@@ -160,14 +161,13 @@ function buildPatronDefianceReceipts(state: GameState): ConsequenceReceipt[] {
         out.push({
             id: `patron_defiance::${cut.faction}::${cut.turn}`,
             decisionEventId: `patron_defiance_${cut.faction}`,
-            decisionTitle: 'Patron defiance',
-            decisionOptionLabel: `Refused ${patron} demand`,
+            decisionTitle: t('chronicle.generated.patron.defianceTitle'),
+            decisionOptionLabel: t('chronicle.generated.patron.refusedDemand', { patron }),
             decisionTurn: cut.turn,
             predictedEventId: `patron_supply_cut_${cut.faction}`,
-            predictedLabel: `${patron} materiel cut by ${pct}%`,
+            predictedLabel: t('chronicle.generated.patron.materielCut', { patron, pct }),
             predictedExplanation:
-                `Defiance collapsed patron confidence; ${patron} support to the front fell to ${supportPct}%. ` +
-                `The refusal stands on the record — the cost is borne at the front.`,
+                t('chronicle.generated.patron.predictedExplanation', { patron, supportPct }),
             status: 'confirmed',
             firedTurn: cut.turn,
             turnsElapsed: 0,

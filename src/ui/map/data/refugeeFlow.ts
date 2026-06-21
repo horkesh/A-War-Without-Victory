@@ -32,6 +32,8 @@
  * Determinism: pure function of its numeric input. No RNG, no clock.
  */
 
+import { getActiveLocale, t } from '../i18n/index.js';
+
 /** Cumulative-displacement milestone rungs (people displaced, ascending).
  *  A beat fires at the FIRST turn the running total crosses each rung. Chosen to
  *  span the whole war: the early-war expulsions cross the low rungs in 1992, and
@@ -58,19 +60,21 @@ export const REFUGEE_SURGE_RATIO = 3;
 /** Format a people-count as a compact, somber figure (e.g. 1,500,000). */
 export function formatRefugeeCount(n: number): string {
     const safe = Number.isFinite(n) ? Math.max(0, Math.round(n)) : 0;
-    return safe.toLocaleString('en-US');
+    return safe.toLocaleString(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US');
 }
 
 /** Prose for a cumulative-milestone note. Faction-agnostic, non-gamified — the
  *  grind in words. Never names an enclave or perpetrator. */
 export function refugeeMilestoneGloss(cumulativeRung: number): string {
-    return `The war has now driven ${formatRefugeeCount(cumulativeRung)} people from their homes. `
-        + `The front has barely moved; the country empties out regardless.`;
+    return t('chronicle.generated.refugee.milestoneGloss', {
+        count: formatRefugeeCount(cumulativeRung),
+    });
 }
 
 /** Prose for a single-turn surge note. Observes a sudden displacement wave
  *  without attributing it — refugee-flow observation only, never the §6 record. */
 export function refugeeSurgeGloss(turnFlow: number): string {
-    return `A fresh wave of displacement this week — roughly ${formatRefugeeCount(turnFlow)} people uprooted at once. `
-        + `Columns on the roads, villages emptied, the human cost arriving faster than any front line.`;
+    return t('chronicle.generated.refugee.surgeGloss', {
+        count: formatRefugeeCount(turnFlow),
+    });
 }

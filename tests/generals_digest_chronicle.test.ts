@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { buildGeneralsDigestChronicleEntries } from '../src/ui/map/components/chronicle/generalsDigestChronicle.js';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
 import {
@@ -10,6 +10,11 @@ import {
     isQuietWeek,
     DIGEST_FORBIDDEN_VOCAB,
 } from '../src/ui/map/data/generalsDigest.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 /** A minimal TurnSummary-shaped object. */
 function summary(turn: number, over: Record<string, unknown> = {}) {
@@ -335,6 +340,32 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         });
         const ops = deriveActiveOps(cmd, 'RS');
         expect(ops[0].opName).toBe('Operation Krivaja-95');
+    });
+
+    it('keeps generated generals-digest copy localized in BCS mode while preserving corps/op labels', () => {
+        setLocale('bcs');
+        const cmd = corpsCommandWith({
+            arbih_2nd_corps: [{ name: 'Operation Olovo', phase: 'execution' }],
+        });
+        const entries = buildGeneralsDigestChronicleEntries([
+            summary(60, {
+                battles: [{ attacker_faction: 'RBiH', defender_faction: 'RS', attacker_casualties: 44, defender_casualties: 30 }],
+                territory_net: { RBiH: 2 },
+            }),
+        ], 'RBiH', cmd, 60);
+        const text = `${entries[0].title} ${entries[0].detail}`;
+
+        expect(text).toContain('Sedmica vasih generala');
+        expect(text).toContain('2nd Corps');
+        expect(text).toContain('Operation Olovo');
+        expect(text).toContain('2 naselja zauzeta');
+        expect(text).not.toMatch(/Your generals|settlements taken|casualties borne|war fought in your name|ground gained/i);
+
+        const scrubbed = deriveActiveOps(
+            corpsCommandWith({ arbih_2nd_corps: [{ name: 'Operation Srebrenica Ring', phase: 'execution' }] }),
+            'RBiH',
+        );
+        expect(scrubbed[0].opName).toBe('operacija');
     });
 
     it('integrates into generateChronicleEntries via turnSummaries + rawGameState', () => {

@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**CHRONICLE FEEL GENERATED COPY IS UI COPY (2026-06-22).** Chronicle helper prose is generated UI scaffolding unless it is authored scenario data. Do instead: route combat/cost/displacement/formation, AAR, officer spotlight, endgame chrome, receipt wrappers, war-weariness/refugee/Sarajevo/generals-digest, and patron-defiance frames through `chronicle.generated.*` keys; keep event titles/options, operation/officer/settlement names, and historical notes verbatim.
+
 **BCS PLURAL GRAMMAR NEEDS FULL MESSAGE KEYS (2026-06-21).** English-style `{plural}` suffix interpolation creates invalid BCS copy. Do instead: select explicit `.one` / `.many` i18n keys when creating player-facing copy tokens, especially command-strain, presidential attention, and briefing badges.
 
 **CHRONICLE/WRAPPED LABELS MUST BE PLAYER-SAFE AND LOCALE-AWARE (2026-06-21).** Faction/displacement ids are joins, and English player-safe labels are not enough in BCS mode. Do instead: route displacement groups through shared display helpers and Wrapped faction copy through the same EN/BCS faction-label keys used by the side picker.

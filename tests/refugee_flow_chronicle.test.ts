@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { buildRefugeeFlowChronicleEntries } from '../src/ui/map/components/chronicle/refugeeFlowChronicle.js';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
@@ -6,6 +6,11 @@ import {
     REFUGEE_MILESTONE_RUNGS,
     REFUGEE_SURGE_ABSOLUTE_FLOOR,
 } from '../src/ui/map/data/refugeeFlow.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 function rawStateWith(recentByTurn: Record<number, number>): GameState {
     return {
@@ -183,5 +188,16 @@ describe('refugee-flow Chronicle cadence beats (D2 mid-1995 void)', () => {
         expect(REFUGEE_MILESTONE_RUNGS[0]).toBe(250_000);
         expect([...REFUGEE_MILESTONE_RUNGS]).toEqual([...REFUGEE_MILESTONE_RUNGS].sort((a, b) => a - b));
         expect(REFUGEE_SURGE_ABSOLUTE_FLOOR).toBeGreaterThan(0);
+    });
+
+    it('keeps generated refugee-flow copy localized in BCS mode', () => {
+        setLocale('bcs');
+        const entries = buildRefugeeFlowChronicleEntries(rawStateWith({ 5: 700_000, 6: 3_460 }), 188);
+        const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
+
+        expect(text).toContain('Bilans izbjeglica');
+        expect(text).toContain('Talas raseljavanja');
+        expect(text).toContain('700.000');
+        expect(text).not.toMatch(/Refugee tally|Displacement wave|people from their homes|fresh wave of displacement|uprooted/i);
     });
 });

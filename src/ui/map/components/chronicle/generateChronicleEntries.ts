@@ -39,6 +39,7 @@ import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
 import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js';
 import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
+import { t, type MessageKey } from '../../i18n/index.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
@@ -61,28 +62,34 @@ const COST_THEATER_CASUALTY_THRESHOLD = 150;
 const COST_DISPLACEMENT_THRESHOLD = 1000;
 
 function formatOutcome(outcome: string): string {
+    let key: MessageKey;
     switch (outcome) {
         case 'attacker_victory':
         case 'victory':
         case 'success':
-            return 'Attacker advance';
+            key = 'chronicle.generated.outcome.attackerAdvance';
+            break;
         case 'defender_victory':
         case 'failed':
         case 'failure':
-            return 'Defender held';
+            key = 'chronicle.generated.outcome.defenderHeld';
+            break;
         case 'draw':
         case 'stalemate':
-            return 'Indecisive action';
+            key = 'chronicle.generated.outcome.indecisive';
+            break;
         case 'partial':
-            return 'Partial result';
+            key = 'chronicle.generated.outcome.partial';
+            break;
         default:
-            return 'Result unreported';
+            key = 'chronicle.generated.outcome.unreported';
+            break;
     }
+    return t(key);
 }
 
 function formatOperationOutcome(outcome: string): string {
-    const formatted = formatOutcome(outcome);
-    return formatted ? `${formatted[0].toUpperCase()}${formatted.slice(1)}` : 'Result unreported';
+    return formatOutcome(outcome);
 }
 
 function isDiplomaticEvent(id: string): boolean {
@@ -147,28 +154,37 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
 
     const reasons: string[] = [];
     if (playerFaction && friendlyCasualties > 0) {
-        reasons.push(`${friendlyCasualties} friendly casualties`);
+        reasons.push(t('chronicle.generated.cost.friendlyCasualties', { count: friendlyCasualties }));
     } else if (!playerFaction && theaterCasualties > 0) {
-        reasons.push(`${theaterCasualties} battlefield casualties`);
+        reasons.push(t('chronicle.generated.cost.battlefieldCasualties', { count: theaterCasualties }));
     }
     if (opposingCasualties > 0) {
-        reasons.push(`${opposingCasualties} opposing casualties`);
+        reasons.push(t('chronicle.generated.cost.opposingCasualties', { count: opposingCasualties }));
     }
     if (displaced > 0) {
-        reasons.push(`${displaced} displaced`);
+        reasons.push(t('chronicle.generated.cost.displaced', { count: displaced }));
     }
     if (ownFormationsDestroyed > 0) {
-        reasons.push(`${ownFormationsDestroyed} own ${ownFormationsDestroyed === 1 ? 'formation' : 'formations'} destroyed`);
+        reasons.push(t(
+            ownFormationsDestroyed === 1
+                ? 'chronicle.generated.cost.ownFormationDestroyed.one'
+                : 'chronicle.generated.cost.ownFormationDestroyed.many',
+            { count: ownFormationsDestroyed },
+        ));
     }
     if (playerFaction && narrateTerritory && netFriendlyTerritory !== 0) {
-        reasons.push(`${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory} net settlements`);
+        reasons.push(t('chronicle.generated.cost.netSettlements', {
+            count: `${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory}`,
+        }));
     }
 
     return {
         turn,
         type: 'cost',
         headline: severity === 'critical',
-        title: severity === 'critical' ? 'Critical campaign cost' : 'Costly campaign turn',
+        title: severity === 'critical'
+            ? t('chronicle.generated.cost.title.critical')
+            : t('chronicle.generated.cost.title.severe'),
         detail: reasons.join(' | '),
         metadata: {
             casualties: playerFaction ? friendlyCasualties : theaterCasualties,
@@ -210,10 +226,15 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
         turn,
         type: 'narrative',
         headline: true,
-        title: 'History kept its own ledger',
+        title: t('chronicle.generated.endgame.ledgerTitle'),
         detail: visibleComparisons > 0
-            ? `${visibleComparisons} divergence ${visibleComparisons === 1 ? 'note' : 'notes'} marked against the historical war`
-            : 'No divergence notes were recorded against the historical war',
+            ? t(
+                visibleComparisons === 1
+                    ? 'chronicle.generated.endgame.divergenceCount.one'
+                    : 'chronicle.generated.endgame.divergenceCount.many',
+                { count: visibleComparisons },
+            )
+            : t('chronicle.generated.endgame.noDivergence'),
     });
 
     for (const note of nonGhostNotes) {
@@ -221,7 +242,7 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
             turn,
             type: 'narrative',
             headline: false,
-            title: 'Historical divergence',
+            title: t('chronicle.generated.endgame.divergenceTitle'),
             detail: note,
         });
     }
@@ -232,8 +253,8 @@ function buildEndgameComparisonEntries(state: any): ChronicleEntry[] {
             type: 'narrative',
             headline: false,
             ghost: true,
-            title: 'Historical rupture absent',
-            detail: 'Srebrenica enclave survived in your war; the historical July 1995 catastrophe never arrived.',
+            title: t('chronicle.generated.endgame.ruptureAbsentTitle'),
+            detail: t('chronicle.generated.endgame.srebrenicaGhostDetail'),
         });
     }
 
@@ -275,13 +296,13 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
             turn: Number(op.ended_turn ?? state.turn ?? 0),
             type: 'military',
             headline: captured > 0 || outcome === 'success' || outcome === 'partial',
-            title: `${operationName} concluded`,
+            title: t('chronicle.generated.operation.concludedTitle', { operationName }),
             detail: [
                 formatOperationOutcome(outcome),
-                `${captured}/${targeted} objectives held at close`,
-                `${attacks} attacks`,
-                `${suffered} suffered / ${inflicted} inflicted`,
-                `${stars} ${stars === 1 ? 'star' : 'stars'}`,
+                t('chronicle.generated.operation.objectivesHeld', { captured, targeted }),
+                t(attacks === 1 ? 'chronicle.generated.operation.attacks.one' : 'chronicle.generated.operation.attacks.many', { count: attacks }),
+                t('chronicle.generated.operation.casualtyExchange', { suffered, inflicted }),
+                t(stars === 1 ? 'chronicle.generated.operation.stars.one' : 'chronicle.generated.operation.stars.many', { count: stars }),
             ].join(' | '),
             metadata: {
                 corpsId: typeof op.corps_id === 'string' ? op.corps_id : undefined,
@@ -324,13 +345,13 @@ function buildOfficerSpotlightEntries(state: any, playerFaction: string | null):
             turn: Number(op.ended_turn ?? state.turn ?? 0),
             type: 'personnel',
             headline: captured > 0 || outcome === 'success' || outcome === 'partial',
-            title: `Officer of the Week: ${displayName}`,
+            title: t('chronicle.generated.officer.title', { displayName }),
             detail: [
                 operationName,
                 formatOperationOutcome(outcome),
-                `${captured}/${targeted} objectives held at close`,
-                `${attacks} attacks`,
-                `${stars} ${stars === 1 ? 'star' : 'stars'}`,
+                t('chronicle.generated.operation.objectivesHeld', { captured, targeted }),
+                t(attacks === 1 ? 'chronicle.generated.operation.attacks.one' : 'chronicle.generated.operation.attacks.many', { count: attacks }),
+                t(stars === 1 ? 'chronicle.generated.operation.stars.one' : 'chronicle.generated.operation.stars.many', { count: stars }),
             ].join(' | '),
             metadata: {
                 corpsId: typeof op.corps_id === 'string' ? op.corps_id : undefined,
@@ -394,8 +415,11 @@ function buildConsequenceReceiptEntries(
             turn: receipt.firedTurn,
             type: 'consequence',
             headline: false,
-            title: `Consequence realized: ${receipt.predictedLabel}`,
-            detail: `Your decision "${receipt.decisionOptionLabel}" on ${turnToDateString(receipt.decisionTurn)} brought this about, as the dossier warned.`,
+            title: t('chronicle.generated.consequence.title', { predictedLabel: receipt.predictedLabel }),
+            detail: t('chronicle.generated.consequence.detail', {
+                decisionOptionLabel: receipt.decisionOptionLabel,
+                date: turnToDateString(receipt.decisionTurn),
+            }),
             metadata: {
                 decisionRecordId: `event:${receipt.decisionEventId}`,
             },
@@ -440,8 +464,11 @@ export function generateChronicleEntries(
                     turn,
                     type: 'combat',
                     headline: battle.territory_flipped === true,
-                    title: `Battle of ${location}`,
-                    detail: `${formatOutcome(battle.outcome || 'unknown')} — ${totalCasualties} casualties`,
+                    title: t('chronicle.generated.battle.title', { location }),
+                    detail: t('chronicle.generated.battle.detail', {
+                        outcome: formatOutcome(battle.outcome || 'unknown'),
+                        casualties: totalCasualties,
+                    }),
                     metadata: {
                         osid: battle.osid,
                         casualties: totalCasualties,
@@ -490,8 +517,13 @@ export function generateChronicleEntries(
                 turn,
                 type: 'humanitarian',
                 headline: summary.displacement_total > 5000,
-                title: 'Displacement wave',
-                detail: `${summary.displacement_total} displaced${detail ? ` (${detail})` : ''}`,
+                title: t('chronicle.generated.displacement.title'),
+                detail: detail
+                    ? t('chronicle.generated.displacement.detailWithBreakdown', {
+                        count: summary.displacement_total,
+                        breakdown: detail,
+                    })
+                    : t('chronicle.generated.displacement.detail', { count: summary.displacement_total }),
                 metadata: {
                     displaced: summary.displacement_total,
                 },
@@ -504,7 +536,9 @@ export function generateChronicleEntries(
                     turn,
                     type: 'military',
                     headline: false,
-                    title: `${getPlayerSafeDisplayLabel(spawn.formation_name || spawn.formation_id, 'Formation')} formed`,
+                    title: t('chronicle.generated.formation.formed', {
+                        formation: getPlayerSafeDisplayLabel(spawn.formation_name || spawn.formation_id, 'Formation'),
+                    }),
                     detail: spawn.faction ? getPlayerSafeMilitaryFactionName(spawn.faction) : '',
                 });
             }
@@ -516,7 +550,9 @@ export function generateChronicleEntries(
                     turn,
                     type: 'military',
                     headline: true,
-                    title: `${getPlayerSafeDisplayLabel(destruction.formation_name || destruction.formation_id, 'Formation')} destroyed`,
+                    title: t('chronicle.generated.formation.destroyed', {
+                        formation: getPlayerSafeDisplayLabel(destruction.formation_name || destruction.formation_id, 'Formation'),
+                    }),
                     detail: destruction.faction ? getPlayerSafeMilitaryFactionName(destruction.faction) : '',
                 });
             }

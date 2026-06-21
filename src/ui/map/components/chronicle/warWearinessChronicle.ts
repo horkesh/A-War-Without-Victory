@@ -44,12 +44,11 @@
 import type { FactionId, GameState, WarWearinessBand } from '../../../../state/game_state.js';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText.js';
 import {
-    WAR_WEARINESS_GLOSS,
-    WAR_WEARINESS_LABEL,
     WAR_WEARINESS_RANK,
     deriveWarWeariness,
     type WarWearinessLevel,
 } from '../../data/warWeariness.js';
+import { t, type MessageKey } from '../../i18n/index.js';
 import type { ChronicleEntry } from './generateChronicleEntries.js';
 
 /** Bands that warrant a beat (steady is the baseline — no beat), lowest → highest.
@@ -59,6 +58,18 @@ const BEAT_BANDS: readonly WarWearinessBand[] = ['strained', 'cracking', 'collap
 
 /** Fixed faction iteration order for determinism. */
 const FACTION_ORDER: readonly FactionId[] = ['HRHB', 'RBiH', 'RS'];
+
+const WAR_WEARINESS_LABEL_KEYS: Record<WarWearinessBand, MessageKey> = {
+    strained: 'chronicle.generated.warWeariness.label.strained',
+    cracking: 'chronicle.generated.warWeariness.label.cracking',
+    collapsing: 'chronicle.generated.warWeariness.label.collapsing',
+};
+
+const WAR_WEARINESS_GLOSS_KEYS: Record<WarWearinessBand, MessageKey> = {
+    strained: 'chronicle.generated.warWeariness.gloss.strained',
+    cracking: 'chronicle.generated.warWeariness.gloss.cracking',
+    collapsing: 'chronicle.generated.warWeariness.gloss.collapsing',
+};
 
 /** Headline only the deepest band (collapsing) — the rest are quiet ledger beats. */
 function isHeadlineBand(band: WarWearinessLevel): boolean {
@@ -110,8 +121,11 @@ export function buildWarWearinessChronicleEntries(
                 turn,
                 type: 'consequence',
                 headline: isHeadlineBand(band),
-                title: `War-weariness: ${factionName} — ${WAR_WEARINESS_LABEL[band]}`,
-                detail: WAR_WEARINESS_GLOSS[band],
+                title: t('chronicle.generated.warWeariness.title', {
+                    factionName,
+                    label: t(WAR_WEARINESS_LABEL_KEYS[band]),
+                }),
+                detail: t(WAR_WEARINESS_GLOSS_KEYS[band]),
             });
         }
     }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { GameState } from '../src/state/game_state.js';
 import { SARAJEVO_CITY_CORE_MUN_IDS } from '../src/state/enclave_integrity.js';
 import {
@@ -10,6 +10,11 @@ import {
 } from '../src/ui/map/data/sarajevoSiege.js';
 import { buildSarajevoSiegeChronicleEntries } from '../src/ui/map/components/chronicle/sarajevoSiegeChronicle.js';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+  setLocale('en');
+});
 
 /** The four urban-core OSIDs the SRK strangles (one per core municipality). */
 const CORE_OSIDS = [
@@ -148,6 +153,16 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
     expect(entries[0].headline).toBe(true);
     // Chair-aware: the RBiH (besieged) framing reaches the beat.
     expect(entries[0].detail).toEqual(sarajevoSiegeGloss('RBiH'));
+  });
+
+  it('keeps generated Sarajevo siege copy localized in BCS mode', () => {
+    setLocale('bcs');
+    const entries = buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RBiH');
+    const text = `${entries[0].title} ${entries[0].detail}`;
+
+    expect(text).toContain('Sarajevo: grad je opkoljen');
+    expect(text).toContain('Sarajevo je opkoljeno');
+    expect(text).not.toMatch(/encircled|shelled|city is|not stormed|it holds/i);
   });
 
   it('chronicle: emits nothing when the SRK posture is off / state absent', () => {

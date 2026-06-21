@@ -1,5 +1,10 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
     return {
@@ -428,5 +433,62 @@ describe('generateChronicleEntries', () => {
         expect(spotlight?.detail).toContain('1/2 objectives held at close');
         expect(spotlight?.detail).not.toContain('1/2 objectives |');
         expect(spotlight?.metadata?.operationAarId).toBe('op-vitez-relief');
+    });
+
+    it('keeps generated Chronicle scaffolding localized in BCS mode while preserving names', () => {
+        setLocale('bcs');
+        const state = {
+            player_faction: 'RBiH',
+            turn: 188,
+            gameOver: true,
+            historicalComparison: {
+                divergence_notes: ['War lasted 18 weeks shorter than the historical 188 weeks'],
+                rupture_divergence: ['srebrenica_genocide_1995'],
+            },
+            turnSummaries: [makeTurnSummary(24, {
+                battles: [{
+                    osid: 'op:brcko:brcko_2',
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'partial',
+                    attacker_casualties: 35,
+                    defender_casualties: 120,
+                    territory_flipped: true,
+                }],
+                displacement_total: 1750,
+                displacement_by_ethnicity: { Bosniak: 1200 },
+                formation_spawns: [{ formation_id: 'arbih_new', formation_name: '312th Brigade', faction: 'RBiH' }],
+                formation_destructions: [{ formation_id: 'arbih_lost', formation_name: '305th Brigade', faction: 'RBiH' }],
+                territory_net: { RBiH: -2, RS: 2 },
+            })],
+            operationHistory: [{
+                operation_id: 'op-vitez-relief',
+                operation_name: 'Vitez Relief',
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                ended_turn: 24,
+                outcome: 'partial',
+                commander_name: 'Enver Hadzihasanovic',
+                commander_rank: 'General',
+                objectives_targeted: ['a', 'b'],
+                objectives_captured: ['a'],
+                total_attacks: 4,
+                casualties_suffered: { killed: 20, wounded: 50 },
+                casualties_inflicted: { killed: 35, wounded: 90 },
+                grade: { stars: 3 },
+            }],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+        const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
+
+        expect(text).toContain('Bitka za');
+        expect(text).toContain('Talas raseljavanja');
+        expect(text).toContain('312th Brigade formirana');
+        expect(text).toContain('305th Brigade unistena');
+        expect(text).toContain('Vitez Relief zakljucena');
+        expect(text).toContain('Oficir sedmice: General Enver Hadzihasanovic');
+        expect(text).toContain('Historija je vodila vlastitu knjigu');
+        expect(text).not.toMatch(/\b(?:Battle of|Displacement wave|formed|destroyed|Officer of the Week|History kept its own ledger|friendly casualties|objectives held at close|attacks|stars)\b/);
     });
 });

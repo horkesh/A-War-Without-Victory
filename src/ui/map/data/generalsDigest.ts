@@ -38,6 +38,7 @@
 
 import { strictCompare } from '../../../state/validateGameState.js';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
+import { t } from '../i18n/index.js';
 
 /** Canonical player factions. */
 export type DigestFaction = 'RBiH' | 'RS' | 'HRHB';
@@ -53,7 +54,7 @@ export function factionFromCorpsId(corpsId: string): DigestFaction | null {
 /** Title-case a corps slug, stripping the faction prefix. `arbih_2nd_corps` → "2nd Corps". */
 export function formatDigestCorpsName(corpsId: string): string {
     const stripped = corpsId.replace(/^(arbih|vrs|hvo)_/, '');
-    if (!stripped) return 'a corps';
+    if (!stripped) return t('chronicle.generated.generals.fallbackCorps');
     return stripped
         .split(/[_-]/)
         .filter((w) => w.length > 0)
@@ -123,7 +124,7 @@ export function assertDigestProseClean(text: string): void {
  */
 function formatOpName(raw: string | null | undefined): string {
     const name = (raw ?? '').trim();
-    if (!name) return 'an operation';
+    if (!name) return t('chronicle.generated.generals.fallbackOperation');
     const humanized = /\s/.test(name) || /[A-Z]/.test(name)
         // Already a human label (has spaces / mixed case) → keep verbatim.
         ? name
@@ -142,7 +143,7 @@ function formatOpName(raw: string | null | undefined): string {
  * throws (a render-path scrub, not a crash), never renders the token. Pure; no clock/RNG.
  */
 function scrubForbiddenTokens(text: string): string {
-    return DIGEST_FORBIDDEN_VOCAB.test(text) ? 'an operation' : text;
+    return DIGEST_FORBIDDEN_VOCAB.test(text) ? t('chronicle.generated.generals.fallbackOperation') : text;
 }
 
 /**
@@ -286,13 +287,13 @@ export function isQuietWeek(digest: GeneralsDigestTurn): boolean {
 
 /** Short, presentation-ready digest heading. Stays neutral and factual. */
 export function generalsDigestTitle(digest: GeneralsDigestTurn): string {
-    if (isQuietWeek(digest)) return 'The fronts were quiet this week';
-    if (digest.activeOps.some((op) => op.pressing)) return "Your generals' week: operations under way";
-    if (digest.netTerritory > 0 || digest.notableGains > 0) return "Your generals' week: ground gained";
+    if (isQuietWeek(digest)) return t('chronicle.generated.generals.title.quiet');
+    if (digest.activeOps.some((op) => op.pressing)) return t('chronicle.generated.generals.title.operations');
+    if (digest.netTerritory > 0 || digest.notableGains > 0) return t('chronicle.generated.generals.title.groundGained');
     if (digest.netTerritory < 0 || digest.notableLosses > 0 || digest.ownFormationsDestroyed > 0) {
-        return "Your generals' week: the line held under pressure";
+        return t('chronicle.generated.generals.title.pressure');
     }
-    return "Your generals' week: holding the line";
+    return t('chronicle.generated.generals.title.holding');
 }
 
 /**
@@ -303,8 +304,7 @@ export function generalsDigestTitle(digest: GeneralsDigestTurn): string {
  */
 export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
     if (isQuietWeek(digest)) {
-        return 'No operations, no ground changed hands, no formations lost. Across your sectors '
-            + 'the front sat still — the war grinding on without a battle to mark the week.';
+        return t('chronicle.generated.generals.gloss.quiet');
     }
 
     const clauses: string[] = [];
@@ -313,37 +313,57 @@ export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
     const pressing = digest.activeOps.filter((op) => op.pressing);
     const planning = digest.activeOps.filter((op) => !op.pressing);
     for (const op of pressing) {
-        clauses.push(`your ${op.corpsName} pressed ${op.opName}`);
+        clauses.push(t('chronicle.generated.generals.clause.pressed', {
+            corpsName: op.corpsName,
+            opName: op.opName,
+        }));
     }
     for (const op of planning) {
-        clauses.push(`your ${op.corpsName} prepared ${op.opName}`);
+        clauses.push(t('chronicle.generated.generals.clause.prepared', {
+            corpsName: op.corpsName,
+            opName: op.opName,
+        }));
     }
 
     // Ground held or lost this week.
     if (digest.netTerritory > 0) {
-        clauses.push(`${digest.netTerritory} settlement${digest.netTerritory === 1 ? '' : 's'} taken`);
+        clauses.push(t(
+            digest.netTerritory === 1
+                ? 'chronicle.generated.generals.clause.settlementsTaken.one'
+                : 'chronicle.generated.generals.clause.settlementsTaken.many',
+            { count: digest.netTerritory },
+        ));
     } else if (digest.netTerritory < 0) {
         const lost = Math.abs(digest.netTerritory);
-        clauses.push(`${lost} settlement${lost === 1 ? '' : 's'} given up`);
+        clauses.push(t(
+            lost === 1
+                ? 'chronicle.generated.generals.clause.settlementsGiven.one'
+                : 'chronicle.generated.generals.clause.settlementsGiven.many',
+            { count: lost },
+        ));
     } else if (digest.battleCount > 0) {
-        clauses.push('the line held, no ground changed hands');
+        clauses.push(t('chronicle.generated.generals.clause.lineHeld'));
     }
 
     // Attrition — the cost the generals paid.
     if (digest.ownFormationsDestroyed > 0) {
         // "N of your formations lost" — the partitive reads plural even at N=1.
-        clauses.push(`${digest.ownFormationsDestroyed} of your formations lost`);
+        clauses.push(t('chronicle.generated.generals.clause.formationsLost', {
+            count: digest.ownFormationsDestroyed,
+        }));
     } else if (digest.friendlyCasualties > 0) {
-        clauses.push(`${digest.friendlyCasualties} casualties borne`);
+        clauses.push(t('chronicle.generated.generals.clause.casualtiesBorne', {
+            count: digest.friendlyCasualties,
+        }));
     }
 
     if (clauses.length === 0) {
         // Battles fought but nothing else to report (e.g. defensive skirmishing).
-        return 'Your corps traded fire along the front this week; the line held and the map sat still.';
+        return t('chronicle.generated.generals.gloss.skirmish');
     }
 
     // Capitalize the first clause; join the rest as a running account.
     const joined = clauses.join('; ');
     const sentence = joined.charAt(0).toUpperCase() + joined.slice(1);
-    return `${sentence}. This was your generals' week — the war fought in your name along the front.`;
+    return t('chronicle.generated.generals.gloss.activity', { sentence });
 }

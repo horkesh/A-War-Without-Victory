@@ -11,13 +11,18 @@
  * exclusion, and last-wins recurring-decision semantics.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 import {
     buildConsequenceReceipts,
     receiptsRealizedOnTurn,
 } from '../../src/ui/map/data/consequenceReceipts.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
 import type { GameState, CausalityLogEntry } from '../../src/state/game_state.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 interface DecisionInput {
     event_id: string;
@@ -318,5 +323,32 @@ describe('buildConsequenceReceipts', () => {
         const receipts = buildConsequenceReceipts(state, catalog);
         const onTurn5 = receiptsRealizedOnTurn(receipts, 5);
         expect(onTurn5.map((r) => r.predictedEventId)).toEqual(['p1']);
+    });
+
+    it('keeps generated patron-defiance receipt copy localized in BCS mode', () => {
+        setLocale('bcs');
+        const state = {
+            military: {
+                patron_defiance_supply_cuts: [{
+                    faction: 'RS',
+                    turn: 12,
+                    cut_fraction: 0.25,
+                    support_after: 0.55,
+                }],
+            },
+        } as unknown as GameState;
+
+        const [receipt] = buildConsequenceReceipts(state, undefined);
+        const text = [
+            receipt.decisionTitle,
+            receipt.decisionOptionLabel,
+            receipt.predictedLabel,
+            receipt.predictedExplanation,
+        ].join(' ');
+
+        expect(text).toContain('Prkos pokrovitelju');
+        expect(text).toContain('Odbijen zahtjev Beograda');
+        expect(text).toContain('Materijalna podrska Beograda smanjena za 25%');
+        expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
     });
 });
