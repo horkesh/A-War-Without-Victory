@@ -16,6 +16,8 @@ const STARTUP_SAVE_PATH = path.join(ROOT, 'data', 'derived', 'startup', 'apr_199
 const RECORDS_AAR_FIXTURE_OSID = 'op:gradacac:donja_tramosnica_2';
 const RECORDS_AAR_FIXTURE_ATTACKER_ID = 'arbih_213th_vitezka_mountain';
 const RECORDS_AAR_FIXTURE_DEFENDER_ID = 'rs_1st_birac';
+const OPPORTUNITY_LIVE_FIXTURE_ID = 'live_window';
+const OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID = 'live_window';
 
 const RAW_TECHNICAL_TOKENS = [
   { label: 'OPSEC', pattern: /\bOPSEC\b/ },
@@ -115,7 +117,12 @@ function buildRecordsAarLiveProofFixtureState() {
   const fixtureState = typeof structuredClone === 'function'
     ? structuredClone(state)
     : JSON.parse(JSON.stringify(state));
-  fixtureState.meta = { ...(fixtureState.meta ?? {}), turn: 1 };
+  fixtureState.meta = {
+    ...(fixtureState.meta ?? {}),
+    turn: 1,
+    player_faction: 'RBiH',
+    tutorial_state: { dismissed: true, completed_steps: [] },
+  };
   fixtureState.turn_summaries = [
     {
       turn: 1,
@@ -160,6 +167,55 @@ function buildRecordsAarLiveProofFixtureState() {
       notable_events: [],
     },
   ];
+  return fixtureState;
+}
+
+function buildOperationOpportunityLiveProofFixtureState() {
+  const state = readJson(STARTUP_SAVE_PATH);
+  const fixtureState = typeof structuredClone === 'function'
+    ? structuredClone(state)
+    : JSON.parse(JSON.stringify(state));
+  fixtureState.meta = {
+    ...(fixtureState.meta ?? {}),
+    turn: 1,
+    player_faction: 'RBiH',
+    tutorial_state: { dismissed: true, completed_steps: [] },
+    pending_proposal_reviews: [
+      {
+        id: OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID,
+        turn: 1,
+        faction: 'RBiH',
+        domain: 'ops',
+        description: 'Live Window - staff recommendation: approve',
+        proposed_action: `OPPORTUNITY:${OPPORTUNITY_LIVE_FIXTURE_ID}`,
+        current_value: 'pending_review',
+        proposed_value: 'approve',
+      },
+    ],
+  };
+  fixtureState.military = {
+    ...(fixtureState.military ?? {}),
+    operation_opportunities: [
+      {
+        proposal_id: OPPORTUNITY_LIVE_FIXTURE_ID,
+        opportunity_id: OPPORTUNITY_LIVE_FIXTURE_ID,
+        status: 'eligible_pending_review',
+        approver_faction: 'RBiH',
+        eligibility_turn: 1,
+        expires_turn: 4,
+        last_axis_evaluation: [
+          { axis: 'political_authorization', mode: 'required', green: true, reason: 'Presidential review is available.' },
+          { axis: 'force_readiness', mode: 'required', green: true, reason: 'Staff reports the window can be authorized.' },
+        ],
+        last_force_quality_traits: [],
+        last_footprint: {
+          objectives: ['sarajevo_1'],
+          staging_osids: ['sarajevo_1'],
+        },
+        redirect_variants: [],
+      },
+    ],
+  };
   return fixtureState;
 }
 
@@ -1080,13 +1136,29 @@ async function loadRecordsAarLiveProofFixture(page, summary) {
     }
     await window.handleManualSaveLoad(state);
   }, fixtureState);
-  await waitForTacticalMap(page);
+  await resetToWarMap(page);
   summary.evidence.recordsAarFixture = {
     source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
     turn: 1,
     osid: RECORDS_AAR_FIXTURE_OSID,
     attacker: RECORDS_AAR_FIXTURE_ATTACKER_ID,
     defender: RECORDS_AAR_FIXTURE_DEFENDER_ID,
+  };
+}
+
+async function loadOperationOpportunityLiveProofFixture(page, summary) {
+  const fixtureState = buildOperationOpportunityLiveProofFixtureState();
+  await page.evaluate(async (state) => {
+    if (typeof window.handleManualSaveLoad !== 'function') {
+      throw new Error('window.handleManualSaveLoad is unavailable');
+    }
+    await window.handleManualSaveLoad(state);
+  }, fixtureState);
+  await resetToWarMap(page);
+  summary.evidence.operationOpportunityFixture = {
+    source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
+    reviewId: OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID,
+    proposalId: OPPORTUNITY_LIVE_FIXTURE_ID,
   };
 }
 
@@ -1153,6 +1225,48 @@ async function runArchiveInboxDrilldown(page, summary) {
   assertNoRawTechnicalTokens('Archive Inbox Drilldown', text);
 }
 
+async function runPresidentialInboxRoutingLiveProof(page, summary) {
+  await resetToWarMap(page);
+  await waitForVisibleSelector(page, '[data-testid="presidential-inbox"]');
+  summary.evidence.presidentialInboxVisible = true;
+
+  const inboxOpportunitySelector = `[data-testid="presidential-inbox-card"][data-inbox-action="decision_room"][data-actionable="true"][data-inbox-item-type="operation_opportunity"][data-inbox-item-id="opportunity:${OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID}"]`;
+  await activateVisibleControl(page, inboxOpportunitySelector);
+  await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
+  await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await captureEvidence(page, summary, 'inbox_routing_decision_room');
+
+  await resetToWarMap(page);
+  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
+  await activateVisibleControl(
+    page,
+    `[data-testid="desk-card-operation_opportunity"][data-inbox-item-id="opportunity:${OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID}"] [data-testid="desk-card-action"]`,
+  );
+  await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
+  await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await captureEvidence(page, summary, 'inbox_routing_desk_card_operation_opportunity');
+
+  await resetToWarMap(page);
+  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
+  await activateVisibleControl(page, '[data-testid="desk-open-command-surface"]');
+  await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
+  await activateVisibleControl(page, '[data-testid="command-card-cat_record"]');
+  await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
+  await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
+  await captureEvidence(page, summary, 'inbox_routing_record_category_decision_room');
+
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Presidential Inbox Routing Live Proof', text);
+  summary.evidence.presidentialInboxRoutingLiveProof = {
+    inboxCard: `opportunity:${OPPORTUNITY_LIVE_FIXTURE_REVIEW_ID}`,
+    deskCard: 'desk-card-operation_opportunity',
+    commandCategory: 'command-card-cat_record',
+    reached: 'decision-room',
+  };
+}
+
 async function runCodexInternalDrilldown(page, summary) {
   await resetToWarMap(page);
 
@@ -1201,9 +1315,11 @@ async function run() {
       ownerJourneyDrilldown: false,
       recordsAarFormationLinkLiveProof: false,
       recordsAarFixture: false,
+      operationOpportunityFixture: false,
       archiveChronicleToRecordsDrilldown: false,
       archiveRecordsDecisionToChronicleDrilldown: false,
       presidentialInboxVisible: false,
+      presidentialInboxRoutingLiveProof: false,
       deskRecordsRoute: false,
       codexInternalDrilldown: false,
       codexDilemmaSpineVisible: false,
@@ -1253,6 +1369,8 @@ async function run() {
     await runOwnerJourneyDrilldown(page, summary);
     await runArchiveInboxDrilldown(page, summary);
     await runCodexInternalDrilldown(page, summary);
+    await loadOperationOpportunityLiveProofFixture(page, summary);
+    await runPresidentialInboxRoutingLiveProof(page, summary);
     await loadRecordsAarLiveProofFixture(page, summary);
     await runRecordsAarFormationLinkLiveProof(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);

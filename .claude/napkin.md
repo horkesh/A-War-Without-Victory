@@ -10,7 +10,7 @@
 
 **SUPPLY VISIBILITY COPY BOUNDARY (2026-06-21).** `buildPlayerSupplyVisibility` is a player-facing read-model projection, even though its counts are engine-derived. Do instead: route supply headlines/evidence through `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count`; do not interpolate English `adequate / strained / critical`, `open / brittle / cut`, or brigade isolation prose.
 
-**DECISION ROOM PRIMARY ROUTE OWNERSHIP (2026-06-21).** Decision Room command, operational, and turn-review cards can cite Army HQ or Records, but their primary review action belongs to the Decision Room. Do instead: normalize those cards in `finalizeCards` to `decision-room` lens/card targets, keep the previous Army HQ/Records target as `sourceHandoffTarget`, and propagate that handoff through pre-advance review.
+**DECISION ROOM PRIMARY ROUTE OWNERSHIP (2026-06-21).** Decision Room command, operational, turn-review, and cost cards can cite Army HQ or Records, but their primary review action belongs to the Decision Room. Do instead: normalize those cards in `finalizeCards` to `decision-room` lens/card targets, keep the previous Army HQ/Records target as `sourceHandoffTarget`, and propagate that handoff through pre-advance/loop review.
 
 **GENERATED INBOX ITEM COPY BOUNDARY (2026-06-21).** Dayton, convoy, reserve, territory gain/loss, and date-marker Inbox rows are generated in `deriveInboxItems`, but still player copy. Do instead: route generated Inbox titles/subtitles through `inbox.item.*` i18n keys and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values.
 
@@ -30,7 +30,7 @@
 
 **CODEX / COMMAND-SURFACE CHROME BOUNDARY (2026-06-21).** Codex dilemma titles, branch labels, essays, and historical comparison values are authored data, but status/action/distance and command-card chrome are UI copy. Do instead: localize chrome through i18n keys while preserving authored labels, route ids, and command-surface category ids; pin BCS with Codex/Warroom/App host tests.
 
-**LIVE PROOF FIXTURE STATE (2026-06-21).** Live browser gates must not pass by skipping optional absent fixture state when the missing state is easy to synthesize. Do instead: prove always-present hooks directly; for optional-but-important rows such as Records AAR battles, deep-clone the startup save in the harness, inject a minimal deterministic read-model fixture, load it through `window.handleManualSaveLoad(...)`, and hard-fail selector proofs.
+**LIVE PROOF FIXTURE STATE (2026-06-21).** Live browser gates must not pass by skipping optional absent fixture state when the missing state is easy to synthesize. Do instead: prove always-present hooks directly; for optional-but-important rows such as Records AAR battles or operation opportunities, deep-clone the startup save in the harness, set `meta.player_faction` when the adapter scopes by player, inject a minimal deterministic read-model fixture, load it through `window.handleManualSaveLoad(...)`, return to War Map, and hard-fail selector proofs.
 
 **ARMY RESERVE COPY BOUNDARY (2026-06-20).** Reserve requests can carry diagnostic `description`, `why_needed`, `how_to_use`, purpose, and reason payloads. Do instead: render Army Reserve panels/modals through `armyReserve.*` i18n keys with neutral unknown fallbacks; keep raw reserve prose/ids internal.
 

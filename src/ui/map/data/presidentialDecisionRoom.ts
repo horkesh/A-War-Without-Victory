@@ -246,6 +246,7 @@ export interface PresidentialDecisionRoomLoopStep {
   cardIds: string[];
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
 }
 
 export interface PresidentialDecisionRoomSourceHandoff {
@@ -1375,7 +1376,12 @@ function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void 
 }
 
 function isDecisionRoomOwnedPrimaryCard(card: CandidateCard): boolean {
-  return (card.category === 'command' || card.category === 'operational' || card.category === 'turn')
+  return (
+    card.category === 'command'
+      || card.category === 'operational'
+      || card.category === 'turn'
+      || card.category === 'cost'
+  )
     && card.navigationTarget.kind !== 'decision-room'
     && card.navigationTarget.kind !== 'none';
 }
@@ -1849,6 +1855,7 @@ function buildCardLoopStep(
     cardIds: cards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel,
     navigationTarget: topCard?.navigationTarget ?? options.fallbackNavigationTarget ?? { kind: 'none' },
+    ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
   };
 }
 

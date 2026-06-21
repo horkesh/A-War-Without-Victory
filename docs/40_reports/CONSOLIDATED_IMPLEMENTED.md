@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest live Inbox Decision Room routing proof:** [implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md](implemented/20260621_LIVE_INBOX_DECISION_ROOM_ROUTING_PROOF.md) - live-surface QA now loads a deterministic operation-opportunity fixture and hard-proves Presidential Inbox, Desk operation-opportunity, and Record command-category routes reach the Decision Room; campaign-cost cards now open the Cost lens first while preserving Army HQ Records as source handoff.
+
 **Latest live foundational archive proof:** [implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md](implemented/20260621_LIVE_FOUNDATIONAL_ARCHIVE_PROOF.md) - first-hour browser QA now hard-proves RBiH/RS/HRHB foundational decision receipts in Records and Chronicle, and live-surface QA hard-fails Records-to-Chronicle archive routing instead of accepting skip evidence.
 
 **Latest live AAR browser fixture proof:** [implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md](implemented/20260621_LIVE_AAR_BROWSER_FIXTURE_PROOF.md) - live browser QA now loads a deterministic in-memory AAR battle fixture after first-hour/archive/Codex checks and hard-fails if Records AAR formation-link drilldown does not render and route correctly.
