@@ -1,3 +1,7 @@
+## 2026-06-21 - Decision Room label projection
+
+**Decision-surface registry labels are contract metadata; Decision Room output is localized at projection time:** keep `DECISION_SURFACE_REGISTRY` English literals stable unless intentionally changing registry contracts. Durable rule: localize generated Decision Room card/source-handoff labels inside `presidentialDecisionRoom` with `t(...)` keys, especially when registry or sim briefing read models still carry English fallback labels. Applied in `[2026-06-21] BCS Decision Room Source / Action Labels`; report `docs/40_reports/implemented/20260621_BCS_DECISION_ROOM_SOURCE_ACTION_LABELS.md`.
+
 ## 2026-06-21 - Warroom route labels
 
 **Warroom route metadata and rendered labels are separate:** `WARROOM_ROUTE_ENTRIES` may keep English `label` metadata for contracts and fallback/debug purposes, but rendered toolbar chrome should use typed `labelKey` values through `t(...)`. Durable rule: do not replace route ids, commands, or hotspot mappings when localizing Warroom chrome; add render keys and focused accessibility tests instead. Applied in `[2026-06-21] BCS Warroom Toolbar Chrome`; report `docs/40_reports/implemented/20260621_BCS_WARROOM_TOOLBAR_CHROME.md`.

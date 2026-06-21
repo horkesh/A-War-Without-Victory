@@ -437,7 +437,7 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
   }
   if (item.target.type === 'peace_plan') {
     return {
-      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
+      actionLabel: t('decisionRoom.action.reviewPlan'),
       navigationTarget: { kind: 'inbox' },
     };
   }
@@ -472,7 +472,7 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
       ? t('decisionRoom.card.review.explanation.blocking')
       : t('decisionRoom.card.review.explanation.openWork'),
     sourceOwner: t('decisionRoom.card.review.sourceOwner'),
-    sourceLabel: 'Presidential Inbox',
+    sourceLabel: t('inbox.title'),
     actionLabel: t('decisionRoom.action.openInbox'),
     evidence,
     navigationTarget: { kind: 'inbox' },
@@ -489,7 +489,6 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     .filter((request) => request.faction === playerFaction);
   if (requests.length === 0) return;
 
-  const surface = getDecisionSurface('paramilitary_request');
   const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
   const deploymentRequestEvidenceKey = requests.length === 1
     ? 'decisionRoom.card.paramilitary.evidence.deploymentRequest'
@@ -502,7 +501,7 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     explanation: t('decisionRoom.card.paramilitary.explanation'),
     sourceOwner: t('decisionRoom.card.paramilitary.sourceOwner'),
     sourceLabel: t('decisionRoom.card.paramilitary.sourceLabel'),
-    actionLabel: surface.actionLabel,
+    actionLabel: t('decisionSurface.paramilitary.actionLabel'),
     evidence: [
       t(deploymentRequestEvidenceKey, { count: requests.length }),
       t('decisionRoom.card.paramilitary.evidence.estimatedStrength', { strength: totalStrength }),
@@ -551,7 +550,6 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
     if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
     if (!isManifestModalFamilyId(family.id)) continue;
     const spec = cardSpecs[family.id];
-    const surface = getDecisionSurface(family.id);
     const id = `manifest:${family.id}`;
     if (existingIds.has(id)) continue;
     cards.push({
@@ -561,8 +559,8 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
       title: t(spec.titleKey),
       explanation: t(spec.explanationKey),
       sourceOwner: t('decisionRoom.card.manifest.sourceOwner'),
-      sourceLabel: surface.sourceLabel,
-      actionLabel: surface.actionLabel,
+      sourceLabel: t(spec.sourceLabelKey),
+      actionLabel: t(spec.actionLabelKey),
       evidence: [t('decisionRoom.card.manifest.evidence.pendingItems', { count: blockingCount })],
       navigationTarget: { kind: 'inbox' },
       urgencySort: -1,
@@ -1527,7 +1525,7 @@ function describeSourceHandoffTarget(
   if (target.kind === 'inbox') {
     return {
       id: 'presidential-inbox',
-      label: 'Presidential Inbox',
+      label: t('inbox.title'),
       actionLabel: t('decisionRoom.action.openInbox'),
     };
   }

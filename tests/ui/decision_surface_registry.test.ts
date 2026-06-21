@@ -122,7 +122,7 @@ describe('decision surface registry', () => {
     });
   });
 
-  it('uses registry action copy for modal-required advance review families', () => {
+  it('projects modal-required advance review families through player-facing card copy', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: {
         label: 'Turn 1',
@@ -158,10 +158,18 @@ describe('decision surface registry', () => {
     });
 
     expect(view.items.find((item) => item.id === 'manifest:peace_plan')).toMatchObject({
+      actionLabel: 'Open Inbox',
+      sourceLabel: 'Peace proposal',
+    });
+    expect(view.items.find((item) => item.id === 'manifest:convoy_decision')).toMatchObject({
+      actionLabel: 'Open Inbox',
+      sourceLabel: 'Convoy review',
+    });
+    expect(getDecisionSurface('peace_plan')).toMatchObject({
       actionLabel: 'Review proposal',
       sourceLabel: 'Diplomatic channel',
     });
-    expect(view.items.find((item) => item.id === 'manifest:convoy_decision')).toMatchObject({
+    expect(getDecisionSurface('convoy_decision')).toMatchObject({
       actionLabel: 'Review convoy',
       sourceLabel: 'Humanitarian channel',
     });
