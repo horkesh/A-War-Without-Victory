@@ -804,6 +804,13 @@
 - Added additive `mutex_suppressed_ids` diagnostics; persisted overflow queueing remains deferred.
 - Report: `docs/40_reports/implemented/20260527_EVENT_MUTEX_FILTERING.md`
 
+# 2026-06-21 - War Map context / OpsMap i18n boundary
+
+- Tactical-map radial/context labels now render through `map.context.*` EN/BCS keys instead of hardcoded English strings in `MapContainer`.
+- The operations-planning compact map legend now renders through `opsPlanning.compactLegend.*` EN/BCS keys instead of hardcoded English copy.
+- Verification: red MapContainer i18n proof failed before implementation; focused green pack passed 38/38; TypeScript passed; `qa:player-journeys` passed 239/239; `qa:live-surface:browser` passed and temporary evidence was removed; `desktop:map:build` passed.
+- Report: `docs/40_reports/implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md`
+
 # 2026-05-27 - Event overflow queue implementation
 
 - Added persisted save-schema v22 `military.event_overflow_queue` for events delayed only by the four-event cap.

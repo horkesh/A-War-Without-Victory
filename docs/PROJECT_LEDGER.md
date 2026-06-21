@@ -21785,6 +21785,14 @@ Verification: red proof `npm.cmd exec -- vitest run tests/ui/ops_planning_target
 
 Determinism/scope: UI/read-model copy, localized presentation helpers, focused tests, and docs only; no simulation logic, scenario data, Srebrenica/Zepa lifecycle ownership, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
 
+## 2026-06-21 - War Map context / OpsMap i18n boundary
+
+Closed the two residual War Map chrome i18n items from the previous mode/layer slice. `MapContainer` radial/context menu labels now render through `map.context.*` EN/BCS keys, and the operations-planning compact `OpsMap` legend now renders through `opsPlanning.compactLegend.*` EN/BCS keys.
+
+Verification: red proof `npm.cmd exec -- vitest run tests/ui/map_context_menu_i18n.test.ts --pool=forks --reporter=dot` failed before implementation on missing i18n calls and stale English literals. Green focused proof `npm.cmd exec -- vitest run tests/ui/map_context_menu_i18n.test.ts tests/ui/ops_planning_target_discovery.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 38/38. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 239/239. `npm.cmd run qa:live-surface:browser` passed; evidence was inspected and `.tmp_live_surface_browser_sweep` was removed. `npm.cmd run desktop:map:build` passed. Report: `docs/40_reports/implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md`.
+
+Determinism/scope: UI/i18n/test/docs polish only; no simulation logic, scenario data, route commands, map-mode ids, layer-state ids, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
 ## 2026-06-20 - Command copy shorthand wave
 
 Closed the next Pyrrhic raw-copy scout slice across normal command surfaces. Army HQ, Operation History, Situation, Corps Front, Corps Detail, Personnel, and ops-modal copy now spells out casualty, exchange-ratio, frontage, intelligence, defense, morale, fatigue, personnel, brigade, command-authority, operation-security, and operational-report language instead of compact staff shorthand. EN/BCS catalogs are covered, including removal of visible `INF`, `KIA/WIA/MIA`, `INTEL`, `DEF/EDGE`, `MOR`, `FAT`, `PERS`, `brg`, `bde`, `AUTH`/`AUT`, `OPSEC`, and `SITREP` fragments from the targeted player-copy keys.

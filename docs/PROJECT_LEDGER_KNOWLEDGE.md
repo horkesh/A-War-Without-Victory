@@ -3182,6 +3182,10 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 
 **Reuse active enemy personnel by OSID inside sector brigade classification:** `classifyBrigadesByTerritory(...)` already has a deterministic helper that builds active enemy personnel totals by OSID. Durable rule: when sector-local budgeting needs enemy personnel totals for many sector enemy-OSID sets, build the sorted active enemy personnel map once per classification pass and sum by OSID membership; do not rescan all formations once per sector. Keep the helper invocation-local and preserve direct predicates/order. Applied in `[2026-06-06] perf(sector): reuse enemy personnel OSID index in brigade classification`; report `docs/40_reports/implemented/20260606_SECTOR_ENEMY_PERSONNEL_INDEX_REUSE.md`.
 
+## 2026-06-21 - War Map context and compact planning legend boundary
+
+**Tactical-map context actions and compact planning legends are player copy, not debug labels:** `MapContainer` context menu action labels and `OpsMap` compact legend strings can be reached during normal play and must respect locale. Durable rule: keep action ids and map behavior unchanged, but resolve labels through `map.context.*` and compact planning legend strings through `opsPlanning.compactLegend.*`; pin both the absence of hardcoded English literals and the BCS render path. Applied in `[2026-06-21] War Map context / OpsMap i18n boundary`; report `docs/40_reports/implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md`.
+
 ## 2026-06-06 - Intel ambush-depth collision gate
 
 **Ambush-depth friction must wait for the attack-resolution casualty owner to clear:** the remaining intel surprise depth amplifier needs both depth derivation and casualty-multiplier consumption in `attack_resolution_osid.ts`, which overlaps ADR-0007 casualty-base work. Durable rule: packet bounded/default-off/clamped ambush-depth designs when the only runtime hook collides; do not implement through an alternate hidden-truth or unbounded path. Applied in `[2026-06-06] docs(intel): packet bounded ambush-depth friction`; packet `docs/40_reports/proposals/20260605_INTEL_AMBUSH_FRICTION_DESIGN.md`.

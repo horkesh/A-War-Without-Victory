@@ -12,7 +12,8 @@
 
 | Need | Go to |
 |------|--------|
-| **Latest War Map chrome i18n boundary** | [implemented/20260621_WAR_MAP_CHROME_I18N.md](implemented/20260621_WAR_MAP_CHROME_I18N.md) - War Map mode pills, layer toggles, and map-mode legends now render through EN/BCS i18n keys. |
+| **Latest War Map context / OpsMap i18n boundary** | [implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md](implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md) - Tactical-map radial/context labels and the operations-planning compact map legend now render through EN/BCS i18n keys. |
+| **War Map chrome i18n boundary** | [implemented/20260621_WAR_MAP_CHROME_I18N.md](implemented/20260621_WAR_MAP_CHROME_I18N.md) - War Map mode pills, layer toggles, and map-mode legends now render through EN/BCS i18n keys. |
 | **Latest supply visibility i18n boundary** | [implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md](implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md) - Player-scoped supply visibility headlines/evidence now render through EN/BCS keys. |
 | **Latest Decision Room route owner handoff** | [implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md](implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md) - Decision Room command/operational/turn cards keep primary actions inside Decision Room while preserving Army HQ/Records as source evidence handoffs. |
 | **Latest BCS generated Inbox items** | [implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md](implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md) - Generated Presidential Inbox Dayton, convoy, reserve, territory gain/loss, and date-marker rows now render through EN/BCS i18n keys. |
