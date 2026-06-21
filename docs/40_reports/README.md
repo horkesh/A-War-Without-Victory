@@ -541,6 +541,7 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md](implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md) - Map overlay dev timers are unique and chunk-local, and canceled deferred overlay work marks applied state stale before the next pass.
 - [implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md](implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md) - Officer command-pushback rows now open Decision Room command review with Army HQ Briefing as the evidence handoff; true personnel rows still route to Personnel.
 - [implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md](implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md) - Army Reserve requests now enter Decision Room command review only when a concrete brigade is named; generic reserve-selection requests stay in Army Reserve.
 - [implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md](implemented/20260620_SETTLEMENT_TIMELINE_CONTROL_BATTLE_COPY.md) - Settlement timeline control, battle, outcome, capture, mechanism, and movement rows now render through localized player copy.

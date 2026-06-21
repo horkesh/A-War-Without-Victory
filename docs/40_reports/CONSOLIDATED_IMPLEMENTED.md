@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest map overlay timing lifecycle guard:** [implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md](implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md) - MapContainer dev overlay timers are now unique/idempotent and chunk-local; canceling deferred overlay work marks applied state stale so partial overlay updates are not treated as complete.
+
 **Latest command pushback Decision Room routing:** [implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md](implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md) - officer command-pushback and Army directive objections now open the Decision Room command lens first, preserve Army HQ Briefing as source handoff, and no longer route through generic Personnel Inbox actions.
 
 **Latest reserve command-review routing:** [implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md](implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md) - Army Reserve requests now enter the Decision Room command lens only when staff has named a concrete brigade to release; no-brigade reserve requests remain in the Army Reserve staff-selection flow.
