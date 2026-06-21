@@ -24,6 +24,7 @@ export interface PreAdvanceCommandReviewItem {
   actionLabel: string;
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
 }
 
 export type PreAdvanceCommandReviewMetrics = PresidentialDecisionRoomMetrics;
@@ -56,6 +57,7 @@ function mapReadinessItem(card: PresidentialDecisionRoomCard): PreAdvanceCommand
     actionLabel: card.actionLabel,
     evidence: card.evidence,
     navigationTarget: card.navigationTarget,
+    ...(card.sourceHandoffTarget ? { sourceHandoffTarget: card.sourceHandoffTarget } : {}),
   };
 }
 

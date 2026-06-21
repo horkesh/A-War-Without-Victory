@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): keep Decision Room-owned cards in Decision Room
+
+**Type:** UI/read-model route ownership polish.
+
+**Fix:** Presidential Decision Room command, operational, and turn cards now use their Decision Room lens/card as the primary `navigationTarget` when the builder produced an Army HQ or Records route. The original target is preserved as `sourceHandoffTarget`, and pre-advance review items now carry that source handoff forward.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts --pool=forks --reporter=dot` failed on stale Army HQ/Records primary route expectations after adding the route-owner tests. Green proof passed 46/46 after the fix. Adjacent UI proof `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/warroom_priority_docket.test.ts --pool=forks --reporter=dot` passed 50/50. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed and verified first-hour reachability plus Decision Room/Army HQ/War Map/Records/Chronicle/Codex surfaces through the repo's Puppeteer gate; temporary `.tmp_live_surface_browser_sweep` evidence was removed after inspection. Report: `docs/40_reports/implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md`.
+
+**Scope/determinism:** UI/read-model route/test/docs polish only; no simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize BCS generated Inbox items
 
 **Type:** UI/read-model i18n copy polish.

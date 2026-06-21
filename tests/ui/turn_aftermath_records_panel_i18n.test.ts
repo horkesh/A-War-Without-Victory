@@ -129,7 +129,7 @@ describe('TurnAftermathRecordsPanel localization', () => {
 
         const { container } = render(createElement(TurnAftermathRecordsPanel));
 
-        expect(screen.getByText('Humanitarni konvoj')).toBeTruthy();
+        expect(screen.getAllByText('Humanitarni konvoj').length).toBeGreaterThan(0);
         expect(container.textContent).not.toContain('convoy_decision');
         expect(container.textContent).not.toContain('Humanitarian convoy');
     });

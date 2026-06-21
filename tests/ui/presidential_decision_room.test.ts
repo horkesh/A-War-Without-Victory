@@ -305,7 +305,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(view.cards.find((card) => card.id === 'turn:24:hard-turn')).toMatchObject({
       sourceOwner: 'Turn Aftermath records',
-      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
+      sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
     });
     expect(view.cards.find((card) => card.id === 'campaign-cost')).toMatchObject({
       sourceOwner: 'Active campaign cost',
@@ -526,7 +527,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(byId.turn).toMatchObject({
       topCardId: 'turn:24:hard-turn',
-      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
     });
   });
 
@@ -623,7 +624,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(byId.fronts).toMatchObject({
       label: 'Fronts',
       cardIds: ['sitrep:front-exposed', 'briefing:briefing:zeta'],
-      navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+      navigationTarget: { kind: 'decision-room', lens: 'operational', cardId: 'sitrep:front-exposed' },
     });
     expect(byId.inspect.cardIds).toEqual(first.inspectNext.map((card) => card.id));
     expect(byId.advance).toMatchObject({
@@ -919,7 +920,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(byId.brief).toMatchObject({
       label: 'Brief',
       count: 2,
-      navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+      navigationTarget: { kind: 'decision-room', lens: 'operational', cardId: 'sitrep:front-exposed' },
     });
     expect(byId.inspect).toMatchObject({
       label: 'Inspect',
@@ -1125,7 +1126,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       },
       relatedCardIds: [],
       advanceSensitive: true,
-      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
+      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
     });
     expect(fallbackView.activeDossier?.cardId).toBe(defaultView.cards[0]?.id);
   });
@@ -1274,6 +1275,52 @@ describe('buildPresidentialDecisionRoomView', () => {
     // Enemy-faction corps and the player's brigade never get a replace-co card.
     expect(view.cards.find((c) => c.id === 'command:replace-co:vrs_1st_corps')).toBeUndefined();
     expect(view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_brigade')).toBeUndefined();
+  });
+
+  it('keeps Decision Room command cards in the command lens while preserving Army HQ source handoffs', () => {
+    const state = makeState({
+      formations: [
+        { id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      namedOfficerData: [
+        {
+          id: 'arbih_co', name: 'Serving CO', faction: 'RBiH', rank: 'corps_commander',
+          competence: 0.6, aggressiveness: 0.5, defensive_skill: 0.5, political_reliability: 4,
+          origin: 'authored', status: 'active', assigned_corps_id: 'arbih_3rd_corps',
+          acting_commander: false, turns_in_command: 8, battles: 2, victories: 1,
+        },
+      ] as LoadedGameState['namedOfficerData'],
+      operations: [
+        {
+          name: 'operation_breakthrough',
+          display_name: 'Operation Breakthrough',
+          corps_id: 'arbih_3rd_corps',
+          corps_name: '3rd Corps',
+          faction: 'RBiH',
+          phase: 'execution',
+        },
+      ] as LoadedGameState['operations'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const stopOp = view.cards.find((c) => c.id === 'command:stop-op:arbih_3rd_corps:operation_breakthrough');
+    const replaceCo = view.cards.find((c) => c.id === 'command:replace-co:arbih_3rd_corps');
+
+    expect(stopOp?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'command:stop-op:arbih_3rd_corps:operation_breakthrough',
+    });
+    expect(stopOp?.sourceHandoffTarget).toEqual({
+      kind: 'army-hq-corps-briefing',
+      corpsId: 'arbih_3rd_corps',
+    });
+    expect(replaceCo?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'command:replace-co:arbih_3rd_corps',
+    });
+    expect(replaceCo?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'personnel' });
   });
 
   it('omits a replace-co card when the corps CO is only an acting commander', () => {

@@ -1,3 +1,7 @@
+## 2026-06-21 - Decision Room primary route ownership
+
+**Decision Room-owned priority cards stay in the Decision Room:** command, operational, and turn-review cards may need Army HQ or Records as source evidence, but those surfaces should not be their primary action route. Durable rule: normalize these cards in `finalizeCards` to `decision-room` lens/card targets, preserve the previous owner route as `sourceHandoffTarget`, and carry the handoff through pre-advance review. Applied in `[2026-06-21] Decision Room Route Owner Handoff`; report `docs/40_reports/implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md`.
+
 ## 2026-06-21 - Generated Inbox item projection
 
 **Generated Inbox rows are display copy, not English literals:** Dayton, convoy, reserve, territory gain/loss, and situation date rows are built in `deriveInboxItems`, so they must localize at that projection boundary. Durable rule: put generated Inbox titles/subtitles behind `inbox.item.*` keys, preserve English text in the EN dictionary, and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values. Applied in `[2026-06-21] BCS Generated Inbox Items`; report `docs/40_reports/implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md`.
