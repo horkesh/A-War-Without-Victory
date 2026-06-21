@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): localize BCS generated Inbox items
+
+**Type:** UI/read-model i18n copy polish.
+
+**Fix:** `deriveInboxItems` now localizes generated Presidential Inbox rows for Dayton negotiations, humanitarian convoy decisions, reserve requests, territory loss/gain situation rows, and the date marker. Reserve request purpose text uses the existing `armyReserve.purpose.*` localized labels instead of echoing raw purpose ids.
+
+**Verification:** Red proof `npm.cmd exec -- vitest run tests/ui/inbox_items.test.ts --pool=forks --reporter=dot` failed on hardcoded BCS generated Inbox copy. Green proof `npm.cmd exec -- vitest run tests/ui/inbox_items.test.ts tests/ui_i18n.test.ts --pool=forks --reporter=dot` passed 48/48 after the fix. `npm.cmd run typecheck` passed. Report: `docs/40_reports/implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, route commands, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): localize BCS Decision Room source/action labels
 
 **Type:** UI/read-model i18n copy polish.

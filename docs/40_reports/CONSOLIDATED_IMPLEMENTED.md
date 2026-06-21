@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest BCS generated Inbox items:** [implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md](implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md) - Generated Presidential Inbox decision/situation rows now localize Dayton, convoy, reserve, territory gain/loss, and date-marker copy through EN/BCS keys.
+
 **Latest BCS Decision Room source/action labels:** [implemented/20260621_BCS_DECISION_ROOM_SOURCE_ACTION_LABELS.md](implemented/20260621_BCS_DECISION_ROOM_SOURCE_ACTION_LABELS.md) - Decision Room cards and source handoffs now localize source/action labels at the read-model projection boundary while preserving English decision-surface registry metadata.
 
 **Latest BCS Warroom toolbar chrome:** [implemented/20260621_BCS_WARROOM_TOOLBAR_CHROME.md](implemented/20260621_BCS_WARROOM_TOOLBAR_CHROME.md) - Warroom toolbar navigation and route buttons now render through EN/BCS i18n keys while preserving English route metadata for contracts.

@@ -17,7 +17,7 @@ import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
-import { getActiveLocale, t } from '../i18n';
+import { getActiveLocale, t, type MessageKey } from '../i18n';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -110,6 +110,16 @@ function localizedEventTitle(
     return fallback ?? t('inbox.item.eventDecision.titleFallback');
 }
 
+const RESERVE_PURPOSE_LABEL_KEYS: Partial<Record<string, MessageKey>> = {
+    offensive: 'armyReserve.purpose.offensive',
+    defensive: 'armyReserve.purpose.defensive',
+};
+
+function reservePurposeLabel(purpose: string | null | undefined): string | null {
+    if (!purpose) return null;
+    return t(RESERVE_PURPOSE_LABEL_KEYS[purpose] ?? 'armyReserve.purpose.unknown');
+}
+
 /**
  * Derive all inbox items from the current game state.
  * Returns items sorted by priority (highest first).
@@ -173,8 +183,8 @@ export function deriveInboxItems(
             id: `dayton:${state.turn ?? 0}`,
             type: 'dayton_negotiation',
             severity: 'blocking',
-            title: 'Dayton Negotiation',
-            subtitle: 'A final peace framework requires your territorial and institutional proposal.',
+            title: t('inbox.item.dayton.title'),
+            subtitle: t('inbox.item.dayton.subtitle'),
             action: daytonSurface.inboxAction,
             priority: 22,
         });
@@ -239,8 +249,8 @@ export function deriveInboxItems(
             id: `convoy:${convoy.id}`,
             type: 'convoy_decision',
             severity: 'normal',
-            title: 'Humanitarian Convoy',
-            subtitle: `${convoy.supply_amount} supply is awaiting a presidential instruction: allow, block, or divert the convoy.`,
+            title: t('inbox.item.convoy.title'),
+            subtitle: t('inbox.item.convoy.subtitle', { supply: convoy.supply_amount }),
             action: convoySurface.inboxAction,
             priority: 38,
         });
@@ -252,12 +262,15 @@ export function deriveInboxItems(
         for (const req of reserveRequests) {
             if (!playerFactionMatch(req.faction, playerFaction)) continue;
             const corpsName = getPlayerFacingCorpsName(req.corps_id, state.formations, 'An assigned command');
+            const purposeLabel = reservePurposeLabel(req.purpose);
             items.push({
                 id: `reserve:${req.request_id}`,
                 type: 'reserve_request',
                 severity: 'normal',
-                title: 'Reserve Request',
-                subtitle: `${corpsName} requests reinforcement${req.purpose ? ` for ${req.purpose}` : ''}.`,
+                title: t('inbox.item.reserve.title'),
+                subtitle: purposeLabel
+                    ? t('inbox.item.reserve.subtitleWithPurpose', { corps: corpsName, purpose: purposeLabel })
+                    : t('inbox.item.reserve.subtitle', { corps: corpsName }),
                 action: reserveSurface.inboxAction,
                 priority: 40,
             });
@@ -325,10 +338,10 @@ export function deriveInboxItems(
             id: `sit:territory_loss:${turn}`,
             type: 'situation',
             severity: 'info',
-            title: 'Territory Lost',
+            title: t('inbox.item.territoryLost.title'),
             subtitle: losses.length === 1
-                ? `Enemy forces captured ${placeName}.`
-                : `Enemy forces captured ${losses.length} positions including ${placeName}.`,
+                ? t('inbox.item.territoryLost.single', { place: placeName })
+                : t('inbox.item.territoryLost.many', { count: losses.length, place: placeName }),
             action: situationSurface.inboxAction,
             priority: 60,
         });
@@ -339,10 +352,10 @@ export function deriveInboxItems(
             id: `sit:territory_gain:${turn}`,
             type: 'situation',
             severity: 'info',
-            title: 'Territory Gained',
+            title: t('inbox.item.territoryGained.title'),
             subtitle: gains.length === 1
-                ? `Your forces secured ${placeName}.`
-                : `Your forces secured ${gains.length} positions including ${placeName}.`,
+                ? t('inbox.item.territoryGained.single', { place: placeName })
+                : t('inbox.item.territoryGained.many', { count: gains.length, place: placeName }),
             action: situationSurface.inboxAction,
             priority: 65,
         });
@@ -354,7 +367,7 @@ export function deriveInboxItems(
         type: 'situation',
         severity: 'info',
         title: dateStr,
-        subtitle: `Situation as of ${dateStr}.`,
+        subtitle: t('inbox.item.situationDate.subtitle', { date: dateStr }),
         action: situationSurface.inboxAction,
         priority: 99,
     });
