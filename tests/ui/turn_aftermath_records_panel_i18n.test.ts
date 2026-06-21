@@ -3,6 +3,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { createElement } from 'react';
 import { cleanup, render, screen } from '@testing-library/react';
+import { readFileSync } from 'node:fs';
 import { TurnAftermathRecordsPanel } from '../../src/ui/map/components/army_hq/TurnAftermathRecordsPanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
@@ -134,5 +135,21 @@ describe('TurnAftermathRecordsPanel localization', () => {
         expect(screen.getAllByText('Humanitarni konvoj').length).toBeGreaterThan(0);
         expect(container.textContent).not.toContain('convoy_decision');
         expect(container.textContent).not.toContain('Humanitarian convoy');
+    });
+
+    it('uses explicit aftermath label maps instead of dynamic enum i18n keys', () => {
+        const recordsSource = readFileSync('src/ui/map/components/army_hq/TurnAftermathRecordsPanel.tsx', 'utf8');
+        const summarySource = readFileSync('src/ui/map/components/army_hq/WarSummaryContent.tsx', 'utf8');
+
+        expect(recordsSource).toContain('TONE_LABEL_KEYS');
+        expect(recordsSource).toContain('COST_SEVERITY_LABEL_KEYS');
+        expect(recordsSource).toContain('SIGNAL_KIND_LABEL_KEYS');
+        expect(recordsSource).toContain('DIRECTION_LABEL_KEYS');
+        expect(recordsSource).toContain('MOMENTUM_LABEL_KEYS');
+        expect(recordsSource).toContain('ACTION_TYPE_LABEL_KEYS');
+        expect(summarySource).toContain('CAMPAIGN_COST_SEVERITY_LABEL_KEYS');
+        expect(recordsSource + summarySource).not.toContain('function enumLabel(');
+        expect(recordsSource + summarySource).not.toContain('`${prefix}.${value}`');
+        expect(recordsSource).not.toContain('`records.actionType.${surface.familyId}`');
     });
 });

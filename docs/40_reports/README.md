@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest Records aftermath label-map hardening** | [implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md](implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md) - Army HQ Records and War Summary aftermath chrome now resolve tone, severity, signal, direction, momentum, and desk-item action labels through explicit typed EN/BCS i18n maps instead of dynamic enum-key construction. |
 | **Latest pre-advance / desk severity chrome** | [implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md](implemented/20260621_PRE_ADVANCE_DESK_SEVERITY_CHROME.md) - Advance Clearance review rows/blocker chrome, President's Desk packet severity badges/alt text, and Decision Room priority-card severity badges now render through EN/BCS i18n instead of raw enum or hardcoded English component copy. |
 | **Latest accessibility and browser drilldown proof** | [implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md](implemented/20260621_A11Y_BROWSER_DRILLDOWN_PROOF.md) - Army HQ, Army Reserve, Order Queue, President's Desk, and Warroom priority controls now expose stateful localized accessible names; live browser QA proves tactical-map context actions and battle markers. |
 | **Latest sector override feedback semantics** | [implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md](implemented/20260621_SECTOR_OVERRIDE_FEEDBACK_SEMANTICS.md) - Brigade-to-sector staged orders now carry sector targets separately, Formation Detail reflects explicit overrides, and map ghost paths / staged arrows render deterministic sector feedback. |
