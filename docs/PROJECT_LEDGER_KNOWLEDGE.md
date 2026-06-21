@@ -1,3 +1,7 @@
+## 2026-06-21 - Generated Inbox item projection
+
+**Generated Inbox rows are display copy, not English literals:** Dayton, convoy, reserve, territory gain/loss, and situation date rows are built in `deriveInboxItems`, so they must localize at that projection boundary. Durable rule: put generated Inbox titles/subtitles behind `inbox.item.*` keys, preserve English text in the EN dictionary, and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values. Applied in `[2026-06-21] BCS Generated Inbox Items`; report `docs/40_reports/implemented/20260621_BCS_GENERATED_INBOX_ITEMS.md`.
+
 ## 2026-06-21 - Decision Room label projection
 
 **Decision-surface registry labels are contract metadata; Decision Room output is localized at projection time:** keep `DECISION_SURFACE_REGISTRY` English literals stable unless intentionally changing registry contracts. Durable rule: localize generated Decision Room card/source-handoff labels inside `presidentialDecisionRoom` with `t(...)` keys, especially when registry or sim briefing read models still carry English fallback labels. Applied in `[2026-06-21] BCS Decision Room Source / Action Labels`; report `docs/40_reports/implemented/20260621_BCS_DECISION_ROOM_SOURCE_ACTION_LABELS.md`.

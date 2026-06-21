@@ -335,6 +335,63 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
         });
         expect(convoyItems[0].subtitle).toContain('allow, block, or divert');
     });
+
+    it('localizes generated decision and situation inbox items in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeStub({
+            pendingDayton: {
+                territorialPackages: [],
+                institutionalPackages: [],
+                factionCapital: { RBiH: 50, RS: 50, HRHB: 50 },
+                patronOverride: { RBiH: 0, RS: 0, HRHB: 0 },
+            },
+            pendingConvoyDecisions: [
+                {
+                    id: 'convoy_1',
+                    target_enclave: 'Gorazde',
+                    route_faction: 'RS',
+                    supply_amount: 25,
+                },
+            ],
+            formations: [
+                { id: 'first_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active' },
+            ] as LoadedGameState['formations'],
+            pendingReserveRequests: [
+                {
+                    request_id: 'req_1',
+                    corps_id: 'first_corps',
+                    faction: 'RBiH',
+                    reason: 'Sector under pressure',
+                    purpose: 'defensive',
+                    priority: 1,
+                    severityBand: 'routine' as const,
+                    travel_hops: 2,
+                    description: 'Needs reinforcement.',
+                    suggested_brigade_id: null,
+                    turn_requested: 5,
+                },
+            ],
+            recentControlEvents: [
+                { turn: 5, settlementId: 'op:lost:town', from: 'RBiH', to: 'RS', mechanism: 'combat', municipalityId: 'lost' },
+                { turn: 5, settlementId: 'op:gained:town', from: 'RS', to: 'RBiH', mechanism: 'combat', municipalityId: 'gained' },
+            ],
+        });
+
+        const copy = deriveInboxItems(state, {
+            'op:lost:town': 'Lost Town',
+            'op:gained:town': 'Gained Town',
+        })
+            .map((item) => `${item.title} ${item.subtitle}`)
+            .join('\n');
+
+        expect(copy).toContain('Daytonsko pregovaranje');
+        expect(copy).toContain('Humanitarni konvoj');
+        expect(copy).toContain('Zahtjev za rezervom');
+        expect(copy).toContain('Izgubljena teritorija');
+        expect(copy).toContain('Osvojena teritorija');
+        expect(copy).toContain('Situacija na dan');
+        expect(copy).not.toMatch(/Dayton Negotiation|A final peace framework|Humanitarian Convoy|allow, block, or divert|Reserve Request|requests reinforcement|defensive|Territory Lost|Territory Gained|Enemy forces captured|Your forces secured|Situation as of/);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -369,7 +426,7 @@ describe('deriveInboxItems — reserve requests', () => {
         expect(reserveItems[0].severity).toBe('normal');
         expect(reserveItems[0].subtitle).toContain('1st Corps');
         expect(reserveItems[0].subtitle).not.toContain('first_corps');
-        expect(reserveItems[0].subtitle).toContain('defensive');
+        expect(reserveItems[0].subtitle).toContain('Defensive');
     });
 });
 
