@@ -62,9 +62,17 @@ function actionLabel(item: InboxItem): string {
   return getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('desk.card.openFallback');
 }
 
+function severityLabel(severity: InboxItem['severity']): string {
+  if (severity === 'blocking') return t('desk.card.required');
+  if (severity === 'urgent') return t('desk.card.urgent');
+  if (severity === 'normal') return t('desk.card.normal');
+  return t('desk.card.info');
+}
+
 export function DecisionCard({ item, onAction }: DecisionCardProps) {
   const actionable = item.action !== 'none';
   const thumbnail = getPacketThumbnailForInboxType(item.type);
+  const family = familyLabel(item);
   return (
     <article
       className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${SEVERITY_CLASS[item.severity]}`}
@@ -76,17 +84,17 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
         {thumbnail && (
           <img
             src={thumbnail}
-            alt={`${familyLabel(item)} packet`}
+            alt={t('desk.card.thumbnailAlt', { family })}
             className="h-20 w-24 shrink-0 border border-panel-border/70 object-cover shadow-[0_8px_18px_rgba(0,0,0,0.28)]"
           />
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className={`border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[item.severity]}`}>
-              {item.severity === 'blocking' ? t('desk.card.required') : item.severity}
+              {severityLabel(item.severity)}
             </span>
             <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
-              {familyLabel(item)}
+              {family}
             </span>
           </div>
           <h3 className="mt-2 text-[13px] font-bold leading-tight text-text-primary">{item.title}</h3>

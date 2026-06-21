@@ -34,6 +34,13 @@ function severityClass(severity: PresidentialDecisionRoomSeverity): string {
   return 'border-panel-border/70 bg-panel-bg/60 text-text-secondary';
 }
 
+function severityLabel(severity: PresidentialDecisionRoomSeverity): string {
+  if (severity === 'blocking') return t('warroom.severity.blocking');
+  if (severity === 'critical') return t('warroom.severity.critical');
+  if (severity === 'warning') return t('warroom.severity.warning');
+  return t('warroom.severity.info');
+}
+
 function categoryLabel(category: PresidentialDecisionRoomCard['category']): string {
   if (category === 'decision') return t('decisionRoom.category.decision');
   if (category === 'counter_offer') return t('decisionRoom.category.counter');
@@ -238,7 +245,7 @@ function PriorityCard({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${severityClass(card.severity)}`}>
-              {card.severity}
+              {severityLabel(card.severity)}
             </span>
             <span className="rounded border border-panel-border/70 bg-panel-bg/70 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary">
               {categoryLabel(card.category)}
