@@ -104,4 +104,63 @@ describe('chronicle endgame narrative mounts', () => {
         expect(wrappedHtml).toContain('Rat je trajao 18 sedmica kraće od historijskih 188 sedmica.');
         expect(wrappedHtml).toContain('Federacija je kontrolisala 54.0% teritorije naspram historijskih 51%.');
     });
+
+    it('renders your-war wrapped faction hero with player-facing names', () => {
+        for (const [faction, label] of [
+            ['RBiH', 'Republic of Bosnia and Herzegovina'],
+            ['RS', 'Republika Srpska'],
+            ['HRHB', 'Croatian Republic of Herzeg-Bosnia'],
+        ] as const) {
+            const html = renderToStaticMarkup(
+                React.createElement(WrappedSlideComponent, {
+                    slide: {
+                        id: 'your_war',
+                        title: 'Your War',
+                        subtitle: `You led ${label} through 40 weeks of conflict`,
+                        heroValue: '40',
+                        heroLabel: 'weeks at war',
+                        detail: 'Campaign phase: War',
+                        data: { faction },
+                    },
+                    index: 0,
+                    total: 10,
+                    faction,
+                }),
+            );
+
+            expect(html).toContain(label);
+            expect(html).not.toMatch(new RegExp(`>${faction}<`));
+        }
+    });
+
+    it('renders your-war wrapped faction hero with BCS faction labels', () => {
+        setLocale('bcs');
+        for (const [faction, label] of [
+            ['RBiH', 'Republika Bosna i Hercegovina'],
+            ['RS', 'Republika Srpska'],
+            ['HRHB', 'Hrvatska Republika Herceg-Bosna'],
+        ] as const) {
+            const html = renderToStaticMarkup(
+                React.createElement(WrappedSlideComponent, {
+                    slide: {
+                        id: 'your_war',
+                        title: 'Your War',
+                        subtitle: `You led ${label} through 40 weeks of conflict`,
+                        heroValue: '40',
+                        heroLabel: 'weeks at war',
+                        detail: 'Campaign phase: War',
+                        data: { faction },
+                    },
+                    index: 0,
+                    total: 10,
+                    faction,
+                }),
+            );
+
+            expect(html).toContain(label);
+            expect(html).not.toContain('Republic of Bosnia and Herzegovina');
+            expect(html).not.toContain('Croatian Republic of Herzeg-Bosnia');
+            expect(html).not.toMatch(new RegExp(`>${faction}<`));
+        }
+    });
 });

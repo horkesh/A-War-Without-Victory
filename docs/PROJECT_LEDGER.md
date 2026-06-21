@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-21] fix(ui): close command-copy grammar, Inbox, and Chronicle label residuals
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Command strain, presidential attention, and Operation Briefing count copy now use explicit EN/BCS `one` / `many` message keys instead of suffix composition. Generated Presidential Inbox rows for operation opportunities, autonomy proposals, paramilitary requests, and officer matters now render through localized copy, including non-empty BCS proposal-description fallbacks. Chronicle displacement details and Wrapped endgame slides now use player-safe and localized faction/displacement labels instead of raw ids. Warroom docket action copy now consistently says `Open Decision Room`.
+
+**Verification:** Focused pack `npx.cmd vitest run tests\ui\warroom_priority_docket.test.ts tests\ui\command_strain_i18n_boundary.test.ts tests\ui\army_hq_timing_copy.test.ts tests\ui\inbox_items.test.ts tests\ui\paramilitary_inbox_items.test.ts tests\chronicle_entries.test.ts tests\wrapped_slides.test.ts tests\ui\chronicle_endgame_mount.test.ts --reporter=dot` passed 107/107. Expanded focused/i18n pack with `tests\ui_i18n.test.ts` passed 124/124. Reviewer follow-up pack `npx.cmd vitest run tests\ui\inbox_items.test.ts tests\wrapped_slides.test.ts tests\ui\chronicle_endgame_mount.test.ts --reporter=dot` passed 70/70. `npm.cmd run qa:player-journeys` passed 249/249. `npm.cmd run qa:first-hour:browser` passed and verified all-faction foundational flows, Records/Chronicle receipts, raw first-hour label absence, and dev-server cleanup. `npm.cmd run qa:live-surface:browser` passed and verified major surfaces, Army HQ/Records drilldowns, operation-opportunity Decision Room routing, battle marker/AAR fixture proof, archive routes, Codex drilldowns, and dev-server cleanup. `npm.cmd run desktop:map:build` passed with existing Vite browser-external/chunk-size warnings. `npm.cmd run typecheck` passed. `git diff --check` passed. Report: `docs/40_reports/implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. Srebrenica/Zepa fall receipts remain event-owned and untouched.
+
+---
+
 ## [2026-06-21] fix(ui): harden Army HQ Records provenance and field drilldowns
 
 **Type:** UI/read-model route, copy-boundary, and browser-QA polish.

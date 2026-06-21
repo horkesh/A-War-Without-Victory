@@ -541,6 +541,49 @@ describe('deriveInboxItems — officer events', () => {
             title: 'Autonomous Operation Proposal',
         });
     });
+
+    it('localizes officer event titles and subtitles in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingOfficerEvents: [
+                {
+                    event_id: 'off_command_1',
+                    type: 'order_refused',
+                    faction: 'RBiH',
+                    turn: 5,
+                    officer_id: 'halilovic',
+                    officer_name: 'Sefer Halilovic',
+                    officer_competence: 0.6,
+                    officer_aggressiveness: 0.7,
+                    officer_defensive_skill: 0.5,
+                    acknowledged: false,
+                },
+                {
+                    event_id: 'off_replacement_1',
+                    type: 'replacement_suggested',
+                    faction: 'RBiH',
+                    turn: 5,
+                    officer_id: 'divjak',
+                    officer_name: 'Jovan Divjak',
+                    officer_competence: 0.6,
+                    officer_aggressiveness: 0.7,
+                    officer_defensive_skill: 0.5,
+                    acknowledged: false,
+                },
+            ],
+        });
+
+        const copy = deriveInboxItems(state, null)
+            .filter(i => i.type === 'officer_event')
+            .map(i => `${i.title} ${i.subtitle}`)
+            .join(' ');
+
+        expect(copy).toContain('Tumačenje komande');
+        expect(copy).toContain('Zamjena komandanta');
+        expect(copy).toContain('U vezi sa Sefer Halilovic.');
+        expect(copy).not.toMatch(/Command Interpretation|Commander Replacement|Regarding|Personnel Matter/);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -590,6 +633,73 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(opportunityItems[0].subtitle).toBe('Staff recommends authorization.');
         expect(opportunityItems[0].subtitle).not.toContain('approve');
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
+    });
+
+    it('localizes operation-opportunity recommendation and autonomy fallback copy in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_176_opportunity_0',
+                    turn: 176,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: '',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+                { id: 'PROP_5_military_0', turn: 5, faction: 'RBiH', domain: 'military', description: '' },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const opportunity = items.find(i => i.type === 'operation_opportunity')!;
+        const proposal = items.find(i => i.type === 'autonomy_proposal')!;
+
+        expect(opportunity.title).toBe('Operativna prilika');
+        expect(opportunity.subtitle).toBe('Stab preporucuje odobrenje.');
+        expect(proposal.title).toBe('Komandni prijedlog');
+        expect(proposal.subtitle).toBe('Vojni prijedlog trazi pregled.');
+        expect(`${opportunity.title} ${opportunity.subtitle} ${proposal.title} ${proposal.subtitle}`)
+            .not.toMatch(/Operation Opportunity|Staff recommends|authorization|Command Proposal|proposal requires your review/i);
+    });
+
+    it('does not echo non-localized generated proposal descriptions in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_177_opportunity_0',
+                    turn: 177,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: 'Launch operation Corridor - staff recommendation: approve',
+                    proposed_action: 'OPPORTUNITY:OPP_177_corridor',
+                    current_value: 'pending_review',
+                    proposed_value: undefined,
+                },
+                {
+                    id: 'PROP_177_military_0',
+                    turn: 177,
+                    faction: 'RBiH',
+                    domain: 'military',
+                    description: 'Reinforce 1st Corps sector',
+                },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+        const opportunity = items.find(i => i.type === 'operation_opportunity')!;
+        const proposal = items.find(i => i.type === 'autonomy_proposal')!;
+        const copy = `${opportunity.title} ${opportunity.subtitle} ${proposal.title} ${proposal.subtitle}`;
+
+        expect(opportunity.title).toBe('Operativna prilika');
+        expect(opportunity.subtitle).toBe('operativni prijedlog trazi pregled.');
+        expect(proposal.title).toBe('Komandni prijedlog');
+        expect(proposal.subtitle).toBe('Vojni prijedlog trazi pregled.');
+        expect(copy).not.toMatch(/Launch operation|staff recommendation|approve|Reinforce|Corps sector|proposal requires your review/i);
     });
 
     it('does not produce items when pendingProposalReviews is undefined', () => {

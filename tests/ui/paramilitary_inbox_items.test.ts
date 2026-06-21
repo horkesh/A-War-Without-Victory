@@ -1,7 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import { deriveInboxItems } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 function makeLoadedState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
     return {
@@ -99,5 +104,26 @@ describe('paramilitary Presidential Inbox items', () => {
         });
 
         expect(deriveInboxItems(state, null).some((item) => item.type === 'paramilitary_request')).toBe(true);
+    });
+
+    it('localizes generated paramilitary request subtitles in BCS mode', () => {
+        setLocale('bcs');
+        const state = makeLoadedState({
+            pendingParamilitaryRequests: [
+                { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 100 },
+                { faction: 'RS', strength: 75, target_osid: 'op:brcko:brcko_2', estimated_civilian_risk: 50 },
+            ],
+            paramilitaryPolicy: 'ask',
+        });
+
+        const paramilitary = deriveInboxItems(state, null).find((item) => item.type === 'paramilitary_request');
+        const copy = `${paramilitary?.title} ${paramilitary?.subtitle}`;
+
+        expect(copy).toContain('2 zahtjeva za rasporedivanje kod Bijeljina');
+        expect(copy).toContain('150 predvidenih civilnih zrtava');
+        expect(copy).toContain('2 dogadaja ratnih zlocina');
+        expect(copy).toContain('-4 medunarodni ugled');
+        expect(copy).toContain('Procijenjena snaga 225');
+        expect(copy).not.toMatch(/deployment request|projected civilian casualties|war crimes events|international standing|Estimated strength/i);
     });
 });

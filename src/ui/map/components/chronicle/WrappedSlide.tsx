@@ -3,6 +3,8 @@ import { SpiderChart } from './SpiderChart.js';
 import type { WrappedSlide as WrappedSlideType } from './generateWrappedSlides.js';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
 import { useLocale } from '../../i18n';
+import { getPlayerSafePoliticalFactionName } from '../../utils/playerSafeText.js';
+import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 
 const FACTION_TINTS: Record<string, string> = {
     RBiH: 'rgba(74, 154, 85, 0.15)',
@@ -15,6 +17,13 @@ const FACTION_ACCENT: Record<string, string> = {
     RS: '#c24040',
     HRHB: '#4080b8',
 };
+
+const VALID_FACTION_IDS: ReadonlySet<string> = new Set(['RBiH', 'RS', 'HRHB']);
+
+function getWrappedFactionLabel(factionId: string): string {
+    if (VALID_FACTION_IDS.has(factionId)) return sidePickerFactionLabel(factionId as 'RBiH' | 'RS' | 'HRHB');
+    return getPlayerSafePoliticalFactionName(factionId, factionId);
+}
 
 interface WrappedSlideProps {
     slide: WrappedSlideType;
@@ -166,12 +175,13 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
         }
 
         case 'your_war': {
-            const factionName = (slide.data?.faction as string) ?? 'Unknown';
+            const factionId = (slide.data?.faction as string) ?? 'Unknown';
+            const factionName = getWrappedFactionLabel(factionId);
             return (
                 <div className="flex flex-col items-center gap-3">
                     <div
                         className="text-[56px] font-bold uppercase tracking-wider leading-none"
-                        style={{ color: FACTION_ACCENT[factionName] ?? '#c4a35a' }}
+                        style={{ color: FACTION_ACCENT[factionId] ?? '#c4a35a' }}
                     >
                         {factionName}
                     </div>

@@ -473,4 +473,38 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('Pending since week 14');
     expect(copy).not.toMatch(/\bweek 14\b/i);
   });
+
+  it('renders presidential attention counts through BCS one/many keys', () => {
+    setLocale('bcs', undefined);
+    render(React.createElement(PresidentialAttentionPanel, {
+      gameState: makeGameState({
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 1,
+          eventDecisionCount: 1,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+        pendingEventDecisions: [
+          {
+            event_id: 'evt_cabinet_crisis',
+            event_title: 'Cabinet crisis',
+            faction: 'RBiH',
+            turn_fired: 14,
+            response_options: [
+              { id: 'hold_line', label: 'Hold the line', effects: [] },
+              { id: 'seek_compromise', label: 'Seek compromise', effects: [] },
+            ],
+          },
+        ],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('2 predmeta');
+    expect(copy).toContain('2 predsjednicka odgovora');
+    expect(copy).not.toMatch(/matters|response|responses|predmets/i);
+  });
 });

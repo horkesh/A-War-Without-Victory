@@ -110,7 +110,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                         </div>
                         <div className="text-[12px] font-bold text-text-primary">
                             {liveReviewCount > 0
-                                ? t('attention.awaitReview', { count: liveReviewCount, plural: liveReviewCount === 1 ? '' : 's' })
+                                ? t(liveReviewCount === 1 ? 'attention.awaitReview.one' : 'attention.awaitReview.many', { count: liveReviewCount })
                                 : t('attention.noReviews')}
                         </div>
                         <div className="text-[10px] text-text-secondary mt-1">
@@ -189,7 +189,12 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                 </span>
                             </div>
                             <div className="rounded border border-panel-border/70 bg-panel-bg/70 px-3 py-2 text-[10px] leading-relaxed text-text-secondary">
-                                {decision.response_options.length} presidential response{decision.response_options.length === 1 ? '' : 's'} awaiting dossier review.
+                                {t(
+                                    decision.response_options.length === 1
+                                        ? 'attention.responseOptionsAwaiting.one'
+                                        : 'attention.responseOptionsAwaiting.many',
+                                    { count: decision.response_options.length },
+                                )}
                             </div>
                         </div>
                     ))}

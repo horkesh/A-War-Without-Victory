@@ -13,6 +13,20 @@ const POLITICAL_FACTION_LABELS: Record<string, string> = {
     HRHB: 'Croatian Republic of Herzeg-Bosnia',
 };
 
+const DISPLACEMENT_GROUP_LABELS: Record<string, string> = {
+    rbih: 'Bosniaks',
+    bosniak: 'Bosniaks',
+    bosniaks: 'Bosniaks',
+    rs: 'Serbs',
+    serb: 'Serbs',
+    serbs: 'Serbs',
+    hrhb: 'Croats',
+    croat: 'Croats',
+    croats: 'Croats',
+    other: 'Others',
+    others: 'Others',
+};
+
 function humanizeIdentifierLabel(value: string | null | undefined): string {
     const safeValue = (value ?? '').trim();
     if (!safeValue) return '';
@@ -178,6 +192,15 @@ export function getPlayerSafeMilitaryFactionName(
     if (!factionId) return fallback;
     const label = MILITARY_FACTION_LABELS[normalizeFactionId(factionId)];
     return label || fallback;
+}
+
+export function getPlayerSafeDisplacementGroupLabel(
+    groupId: string | null | undefined,
+    fallback = 'Civilians',
+): string {
+    const key = (groupId ?? '').trim().toLowerCase();
+    if (!key) return fallback;
+    return DISPLACEMENT_GROUP_LABELS[key] ?? getPlayerSafeDisplayLabel(groupId, fallback);
 }
 
 export function getPlayerSafeCorpsName(

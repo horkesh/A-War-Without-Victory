@@ -468,7 +468,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('operationBriefing.commanderAssessment')}</span>
                     <AssessmentBadge assessment={assessment} />
                     {postponements > 0 && (
-                        <span className="text-[8px] text-neutral-400">({t('operationBriefing.priorPostponements', { count: postponements, plural: postponements > 1 ? 's' : '' })})</span>
+                        <span className="text-[8px] text-neutral-400">({t(postponements === 1 ? 'operationBriefing.priorPostponements.one' : 'operationBriefing.priorPostponements.many', { count: postponements })})</span>
                     )}
                 </div>
 
