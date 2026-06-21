@@ -1,3 +1,7 @@
+## 2026-06-22 - Chronicle FEEL generated-copy boundary
+
+**Chronicle/FEEL helper prose is UI copy unless it is authored scenario data:** generated combat/cost/displacement/formation rows, AAR scaffolding, officer spotlight framing, endgame comparison chrome, consequence-receipt wrappers, war-weariness/refugee/Sarajevo/generals-digest beats, and patron-defiance receipts must not live as English literals in read-model helpers. Durable rule: keep authored event titles, option labels, operation names, officer names, settlement names, and historical comparison note text data-owned/verbatim, but route generated sentence frames through explicit EN/BCS `chronicle.generated.*` keys and pin BCS sentinels. Applied in `[2026-06-22] Chronicle FEEL generated-copy localization`; report `docs/40_reports/implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md`.
+
 ## 2026-06-21 - Army HQ Records provenance and field-inspection proof
 
 **Turn-0 provenance must not become normal history just because a summary object exists:** setup control/provenance can populate `latestTurnSummary`, but Records/AAR/player history surfaces should only narrate it when `shouldNarrateTerritorySummary(...)` says it is real post-start history. Durable rule: any Records, AAR, Chronicle, dashboard, or browser-proof count derived from `latestTurnSummary` must distinguish setup provenance from normal aftermath.

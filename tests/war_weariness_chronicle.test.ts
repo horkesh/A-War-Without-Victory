@@ -1,8 +1,13 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import type { FactionId, GameState } from '../src/state/game_state.js';
 import { buildWarWearinessChronicleEntries } from '../src/ui/map/components/chronicle/warWearinessChronicle.js';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
 import { recordWarWearinessBandCrossings } from '../src/state/exhaustion.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
+
+afterEach(() => {
+    setLocale('en');
+});
 
 function rawStateWith(
     warExhaustion: Record<string, number>,
@@ -147,6 +152,16 @@ describe('war-weariness Chronicle beats (Collapse Repurpose Design A)', () => {
         // Concretely: the Chronicle UI groups by turn, so this beat lands in
         // exactly ONE turn-group (week 58) regardless of how far the war has run.
         expect(collapsingTurns.every(t => t === 58)).toBe(true);
+    });
+
+    it('keeps generated war-weariness copy localized in BCS mode', () => {
+        setLocale('bcs');
+        const entries = buildWarWearinessChronicleEntries(rawStateWith({ RS: 9000 }), 80);
+        const text = entries.map((e) => `${e.title} ${e.detail}`).join('\n');
+
+        expect(text).toContain('Zamor ratom');
+        expect(text).toContain('Pred slomom');
+        expect(text).not.toMatch(/War-weariness|Strained|Cracking|Collapsing|campaign is eating|state is near exhaustion/i);
     });
 });
 

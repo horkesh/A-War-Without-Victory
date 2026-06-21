@@ -46,9 +46,11 @@ import {
     REFUGEE_MILESTONE_RUNGS,
     REFUGEE_SURGE_ABSOLUTE_FLOOR,
     REFUGEE_SURGE_RATIO,
+    formatRefugeeCount,
     refugeeMilestoneGloss,
     refugeeSurgeGloss,
 } from '../../data/refugeeFlow.js';
+import { t } from '../../i18n/index.js';
 import type { ChronicleEntry } from './generateChronicleEntries.js';
 
 /**
@@ -103,7 +105,9 @@ export function buildRefugeeFlowChronicleEntries(
                 // The deepest rungs (>= 1M displaced) headline; the rest are
                 // quiet ledger beats so the cadence never shouts.
                 headline: rung >= 1_000_000,
-                title: `Refugee tally: ${(rung / 1000).toLocaleString('en-US')},000 displaced`,
+                title: t('chronicle.generated.refugee.milestoneTitle', {
+                    count: formatRefugeeCount(rung),
+                }),
                 detail: refugeeMilestoneGloss(rung),
                 metadata: { displaced: rung },
             });
@@ -124,7 +128,7 @@ export function buildRefugeeFlowChronicleEntries(
                 turn,
                 type: 'humanitarian',
                 headline: false,
-                title: 'Displacement wave',
+                title: t('chronicle.generated.displacement.title'),
                 detail: refugeeSurgeGloss(safeFlow),
                 metadata: { displaced: safeFlow },
             });

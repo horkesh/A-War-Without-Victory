@@ -36,6 +36,7 @@
 
 import { strictCompare } from '../../../state/validateGameState.js';
 import type { GameState } from '../../../state/game_state.js';
+import { t } from '../i18n/index.js';
 
 /**
  * The four Sarajevo urban-core municipality slugs the SRK historically strangled
@@ -159,7 +160,7 @@ export function deriveSarajevoSiegeStateFromGameState(
 
 /** Short, presentation-ready siege label for a chronicle/situation heading. */
 export function sarajevoSiegeTitle(): string {
-  return 'Sarajevo: the city is encircled, not stormed';
+  return t('chronicle.generated.sarajevo.title');
 }
 
 /**
@@ -173,17 +174,11 @@ export function sarajevoSiegeTitle(): string {
 export function sarajevoSiegeGloss(playerFaction: SiegeFaction | null): string {
   switch (playerFaction) {
     case 'RS':
-      return 'Your corps holds Sarajevo in a ring — encirclement and bombardment, '
-        + 'not a ground assault to take the core. The urban heart is besieged, but it '
-        + 'does not fall. The siege grinds on without a verdict.';
+      return t('chronicle.generated.sarajevo.gloss.rs');
     case 'RBiH':
-      return 'Sarajevo is encircled and shelled, week after week — the ring tightens, '
-        + 'the bombardment never lifts. But the urban core is not stormed: the city '
-        + 'holds. It is besieged, not taken.';
+      return t('chronicle.generated.sarajevo.gloss.rbih');
     case 'HRHB':
     default:
-      return 'Sarajevo lies under siege — encircled and bombarded, week after week, '
-        + 'but never stormed. The ring holds; so does the city. It is besieged, not '
-        + 'captured.';
+      return t('chronicle.generated.sarajevo.gloss.neutral');
   }
 }
