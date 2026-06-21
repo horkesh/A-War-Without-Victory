@@ -1,13 +1,21 @@
 import React from 'react';
+import { t, type MessageKey, useLocale } from '../../i18n';
 
 interface SpiderChartProps {
     values: Record<string, number>; // 0-100 per dimension
-    labels?: string[];
+    axes?: Array<{ key: string; label: string }>;
     color?: string;
     size?: number;
 }
 
-const DEFAULT_LABELS = ['MIL CRED', 'TERR LEG', 'INTL STD', 'PATRON', 'COHESION', 'LEVERAGE'];
+const DEFAULT_AXES: Array<{ key: string; labelKey: MessageKey }> = [
+    { key: 'military_credibility', labelKey: 'diplomacyOverview.dimension.military_credibility' },
+    { key: 'territorial_legitimacy', labelKey: 'diplomacyOverview.dimension.territorial_legitimacy' },
+    { key: 'international_standing', labelKey: 'diplomacyOverview.dimension.international_standing' },
+    { key: 'patron_confidence', labelKey: 'diplomacyOverview.dimension.patron_confidence' },
+    { key: 'internal_cohesion', labelKey: 'diplomacyOverview.dimension.internal_cohesion' },
+    { key: 'negotiating_leverage', labelKey: 'diplomacyOverview.dimension.negotiating_leverage' },
+];
 const GRID_LEVELS = [0.25, 0.50, 0.75];
 const AXIS_COUNT = 6;
 
@@ -30,19 +38,20 @@ function hexagonPoints(cx: number, cy: number, radius: number): string {
 
 export const SpiderChart = React.memo(function SpiderChart({
     values,
-    labels = DEFAULT_LABELS,
+    axes,
     color = '#c4a35a',
     size = 200,
 }: SpiderChartProps) {
+    useLocale();
     const cx = size / 2;
     const cy = size / 2;
     const maxRadius = size * 0.38; // leave room for labels
     const labelRadius = size * 0.47;
 
-    const keys = labels;
+    const resolvedAxes = axes ?? DEFAULT_AXES.map((axis) => ({ key: axis.key, label: t(axis.labelKey) }));
     const dataPoints: string[] = [];
     for (let i = 0; i < AXIS_COUNT; i++) {
-        const key = keys[i];
+        const key = resolvedAxes[i]?.key ?? '';
         const val = Math.max(0, Math.min(100, values[key] ?? 0));
         const r = (val / 100) * maxRadius;
         const { x, y } = polarToCartesian(cx, cy, r, i);
@@ -103,7 +112,7 @@ export const SpiderChart = React.memo(function SpiderChart({
 
             {/* Data vertices */}
             {Array.from({ length: AXIS_COUNT }, (_, i) => {
-                const key = keys[i];
+                const key = resolvedAxes[i]?.key ?? '';
                 const val = Math.max(0, Math.min(100, values[key] ?? 0));
                 const r = (val / 100) * maxRadius;
                 const { x, y } = polarToCartesian(cx, cy, r, i);
@@ -119,11 +128,11 @@ export const SpiderChart = React.memo(function SpiderChart({
             })}
 
             {/* Labels */}
-            {keys.map((label, i) => {
+            {resolvedAxes.map((axis, i) => {
                 const { x, y } = polarToCartesian(cx, cy, labelRadius, i);
                 return (
                     <text
-                        key={i}
+                        key={axis.key}
                         x={x}
                         y={y}
                         textAnchor="middle"
@@ -134,7 +143,7 @@ export const SpiderChart = React.memo(function SpiderChart({
                         fontWeight="bold"
                         letterSpacing="0.05em"
                     >
-                        {label}
+                        {axis.label}
                     </text>
                 );
             })}

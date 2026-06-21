@@ -410,4 +410,53 @@ describe('generateWrappedSlides', () => {
         expect(summaryText).not.toContain('Croatian Republic of Herzeg-Bosnia');
         expect(summaryText).not.toMatch(/\b(?:RBiH|RS|HRHB)\b/);
     });
+
+    it('localizes generated BCS wrapped slide prose, labels, and fallbacks', () => {
+        setLocale('bcs');
+        const slides = generateWrappedSlides(makeMinimalState({
+            turn: 12,
+            phase: 'war',
+            player_faction: 'RBiH',
+            turnSummaries: [
+                makeTurnSummary(1, { territory_net: { RBiH: 2 }, battles: [{ attacker_casualties: 15, defender_casualties: 20 }] }),
+                makeTurnSummary(4, { displacement_total: 120 }),
+                makeTurnSummary(8, { territory_net: { RBiH: -1 }, battles: [{ attacker_casualties: 40, defender_casualties: 30 }] }),
+            ],
+            formations: [
+                { id: 'brig-1', kind: 'brigade', faction: 'RBiH', name: '1. brigada', decorations: [{ tier: 'gold' }], combatSummary: { battles_fought: 3 } },
+            ],
+            firedEvents: [{ id: 'decision-1', isDecision: true }],
+            historicalEventsByTurn: [{ id: 'historical-1' }],
+            strategicDimensions: {
+                RBiH: {
+                    international_standing: { base_value: 45, event_modifier: 2, effective_value: 47 },
+                    military_credibility: { base_value: 50, event_modifier: 5, effective_value: 55 },
+                },
+            },
+            negotiatingCapital: { RBiH: 14, RS: 9, HRHB: 7 },
+        }));
+
+        const summaryText = slides
+            .flatMap((slide) => [
+                slide.title,
+                slide.subtitle,
+                slide.heroValue,
+                slide.heroLabel,
+                slide.detail,
+                ...(slide.bullets ?? []),
+            ].filter(Boolean))
+            .join(' ');
+
+        expect(summaryText).toContain('Republika Bosna i Hercegovina');
+        expect(summaryText).not.toMatch(/Your War|You led|weeks of conflict|Campaign phase|weeks at war/i);
+        expect(summaryText).not.toMatch(/The Opening|first 8 weeks|early battles|Territory shifts|positions/i);
+        expect(summaryText).not.toMatch(/Bloodiest Week|No battles recorded|casualties in one week|Fighting peaked/i);
+        expect(summaryText).not.toMatch(/Best Brigade|stood above the rest|decorations|battles|No brigades found/i);
+        expect(summaryText).not.toMatch(/What You Built|forces at their peak|formations fielded|Peak territory gain|Operations launched/i);
+        expect(summaryText).not.toMatch(/What It Cost|price of this war|total casualties|people displaced/i);
+        expect(summaryText).not.toMatch(/World Was Watching|international standing|Base:|modifier|unavailable/i);
+        expect(summaryText).not.toMatch(/Your Decisions|critical decisions?|No decision events recorded|decisions made|total events witnessed/i);
+        expect(summaryText).not.toMatch(/At the Table|negotiating capital|Negotiating capital data unavailable/i);
+        expect(summaryText).not.toMatch(/Another Such Victory|History remembered|final score|And we are undone/i);
+    });
 });

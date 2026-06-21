@@ -1,6 +1,7 @@
 import React from 'react';
 import { FACTION_HEX_COLORS } from '../../utils/theme.js';
 import { turnToDateString } from '../../utils/formatters.js';
+import { t } from '../../i18n';
 
 const FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -126,7 +127,7 @@ export const ChronicleRibbonScrubber = React.memo(function ChronicleRibbonScrubb
                                 className="flex-1 cursor-pointer hover:opacity-100 transition-opacity border-0 p-0"
                                 style={{ backgroundColor: color, opacity: 0.5 }}
                                 onClick={() => onClickTurn(turn)}
-                                aria-label={`Jump to ${dateLabel}`}
+                                aria-label={t('chronicle.scrubber.jumpTo', { date: dateLabel })}
                                 title={dateLabel}
                             />
                     );

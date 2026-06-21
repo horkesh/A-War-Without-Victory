@@ -9,6 +9,7 @@ import {
     getPlayerSafeDisplayLabel,
     getPlayerSafePoliticalFactionName,
 } from '../../utils/playerSafeText.js';
+import { t } from '../../i18n';
 import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 import { turnToDateString } from '../../utils/formatters.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
@@ -33,10 +34,10 @@ function getFactionDisplayLabel(faction: string | undefined): string {
 }
 
 function getPhaseDisplayLabel(phase: string): string {
-    if (phase === 'war') return 'War';
-    if (phase === 'peace') return 'Peace';
-    if (phase === 'postwar') return 'Postwar';
-    return getPlayerSafeDisplayLabel(phase, 'Campaign');
+    if (phase === 'war') return t('wrapped.phase.war');
+    if (phase === 'peace') return t('wrapped.phase.peace');
+    if (phase === 'postwar') return t('wrapped.phase.postwar');
+    return getPlayerSafeDisplayLabel(phase, t('wrapped.phase.campaign'));
 }
 
 function resolveEventFallbackLabel(fallbackId: string): string {
@@ -102,11 +103,11 @@ export function generateWrappedSlides(
     // --- Slide 1: your_war ---
     slides.push({
         id: 'your_war',
-        title: 'Your War',
-        subtitle: `You led ${playerFactionLabel} through ${currentTurn} weeks of conflict`,
+        title: t('wrapped.slide.yourWar.title'),
+        subtitle: t('wrapped.slide.yourWar.subtitle', { faction: playerFactionLabel, weeks: currentTurn }),
         heroValue: String(currentTurn),
-        heroLabel: 'weeks at war',
-        detail: `Campaign phase: ${getPhaseDisplayLabel(phase)}`,
+        heroLabel: t('wrapped.slide.yourWar.heroLabel'),
+        detail: t('wrapped.slide.yourWar.detail', { phase: getPhaseDisplayLabel(phase) }),
         data: { faction: playerFaction, turn: currentTurn, phase },
     });
 
@@ -124,11 +125,11 @@ export function generateWrappedSlides(
     const earlyBattles = earlyTurns.reduce((sum: number, s: any) => sum + (Array.isArray(s?.battles) ? s.battles.length : 0), 0);
     slides.push({
         id: 'the_opening',
-        title: 'The Opening',
-        subtitle: `The first 8 weeks set the stage`,
+        title: t('wrapped.slide.opening.title'),
+        subtitle: t('wrapped.slide.opening.subtitle'),
         heroValue: earlyBattles > 0 ? String(earlyBattles) : '0',
-        heroLabel: 'early battles',
-        detail: `Territory shifts: +${earlyGains} / -${earlyLosses} positions`,
+        heroLabel: t('wrapped.slide.opening.heroLabel'),
+        detail: t('wrapped.slide.opening.detail', { gains: earlyGains, losses: earlyLosses }),
         data: { earlyGains, earlyLosses, earlyBattles },
     });
 
@@ -149,11 +150,13 @@ export function generateWrappedSlides(
     }
     slides.push({
         id: 'bloodiest_week',
-        title: 'Bloodiest Week',
-        subtitle: bloodiestCasualties > 0 ? `${turnToDateString(bloodiestTurn)} saw the worst fighting` : 'No battles recorded',
+        title: t('wrapped.slide.bloodiest.title'),
+        subtitle: bloodiestCasualties > 0
+            ? t('wrapped.slide.bloodiest.subtitle', { date: turnToDateString(bloodiestTurn) })
+            : t('wrapped.slide.bloodiest.subtitle.none'),
         heroValue: bloodiestCasualties > 0 ? String(bloodiestCasualties) : '0',
-        heroLabel: 'casualties in one week',
-        detail: bloodiestTurn > 0 ? `Fighting peaked on ${turnToDateString(bloodiestTurn)}` : undefined,
+        heroLabel: t('wrapped.slide.bloodiest.heroLabel'),
+        detail: bloodiestTurn > 0 ? t('wrapped.slide.bloodiest.detail', { date: turnToDateString(bloodiestTurn) }) : undefined,
         data: { bloodiestTurn, bloodiestCasualties },
     });
 
@@ -175,11 +178,11 @@ export function generateWrappedSlides(
     const bestBattles = bestBrigade?.combatSummary?.battles_fought ?? 0;
     slides.push({
         id: 'best_brigade',
-        title: 'Best Brigade',
-        subtitle: bestBrigade ? `${bestName} stood above the rest` : 'No brigades found',
+        title: t('wrapped.slide.best.title'),
+        subtitle: bestBrigade ? t('wrapped.slide.best.subtitle', { name: bestName }) : t('wrapped.slide.best.subtitle.none'),
         heroValue: bestBrigade ? bestName : '-',
-        heroLabel: bestBrigade ? `${bestDecorations} decorations, ${bestBattles} battles` : '',
-        detail: bestBrigade?.narrativeArc ? `Arc: ${bestBrigade.narrativeArc}` : undefined,
+        heroLabel: bestBrigade ? t('wrapped.slide.best.heroLabel', { decorations: bestDecorations, battles: bestBattles }) : '',
+        detail: bestBrigade?.narrativeArc ? t('wrapped.slide.best.detail', { arc: bestBrigade.narrativeArc }) : undefined,
         data: { brigadeId: bestBrigade?.id, decorations: bestDecorations, battles: bestBattles },
     });
 
@@ -209,11 +212,11 @@ export function generateWrappedSlides(
     }
     slides.push({
         id: 'what_you_built',
-        title: 'What You Built',
-        subtitle: `Your forces at their peak`,
+        title: t('wrapped.slide.built.title'),
+        subtitle: t('wrapped.slide.built.subtitle'),
         heroValue: String(totalFormations),
-        heroLabel: 'formations fielded',
-        detail: `Peak territory gain: +${peakTerritory} positions. Operations launched: ${opsLaunched}`,
+        heroLabel: t('wrapped.slide.built.heroLabel'),
+        detail: t('wrapped.slide.built.detail', { peak: peakTerritory, ops: opsLaunched }),
         data: { peakTerritory, totalFormations, opsLaunched, totalGained },
     });
 
@@ -230,11 +233,11 @@ export function generateWrappedSlides(
     }
     slides.push({
         id: 'what_it_cost',
-        title: 'What It Cost',
-        subtitle: 'The price of this war',
+        title: t('wrapped.slide.cost.title'),
+        subtitle: t('wrapped.slide.cost.subtitle'),
         heroValue: String(totalCasualties),
-        heroLabel: 'total casualties (all factions)',
-        detail: `${totalDisplaced} people displaced`,
+        heroLabel: t('wrapped.slide.cost.heroLabel'),
+        detail: t('wrapped.slide.cost.detail', { displaced: totalDisplaced }),
         data: { totalCasualties, totalDisplaced },
     });
 
@@ -243,16 +246,19 @@ export function generateWrappedSlides(
     const internationalStanding = playerDimensions?.['international_standing'] ?? playerDimensions?.['International Standing'];
     const intlValue = internationalStanding?.effective_value;
     const internationalStandingDetail = internationalStanding && intlValue != null
-        ? `Base: ${internationalStanding.base_value.toFixed(1)}, modifier: ${internationalStanding.event_modifier >= 0 ? '+' : ''}${internationalStanding.event_modifier.toFixed(1)}`
+        ? t('wrapped.slide.world.detail', {
+            base: internationalStanding.base_value.toFixed(1),
+            modifier: `${internationalStanding.event_modifier >= 0 ? '+' : ''}${internationalStanding.event_modifier.toFixed(1)}`,
+        })
         : undefined;
     slides.push({
         id: 'world_watching',
-        title: 'The World Was Watching',
+        title: t('wrapped.slide.world.title'),
         subtitle: intlValue != null
-            ? `Your international standing: ${intlValue.toFixed(1)}`
-            : 'International standing data unavailable',
+            ? t('wrapped.slide.world.subtitle', { value: intlValue.toFixed(1) })
+            : t('wrapped.slide.world.subtitle.none'),
         heroValue: intlValue != null ? intlValue.toFixed(1) : '-',
-        heroLabel: 'international standing',
+        heroLabel: t('wrapped.slide.world.heroLabel'),
         detail: internationalStandingDetail,
         data: { internationalStanding: internationalStanding ?? null },
     });
@@ -263,13 +269,13 @@ export function generateWrappedSlides(
     const totalEvents = historicalEventsByTurn.length + firedEvents.length;
     slides.push({
         id: 'your_decisions',
-        title: 'Your Decisions',
+        title: t('wrapped.slide.decisions.title'),
         subtitle: decisionCount > 0
-            ? `You made ${decisionCount} critical decision${decisionCount !== 1 ? 's' : ''}`
-            : 'No decision events recorded',
+            ? t(decisionCount === 1 ? 'wrapped.slide.decisions.subtitle.one' : 'wrapped.slide.decisions.subtitle.many', { count: decisionCount })
+            : t('wrapped.slide.decisions.subtitle.none'),
         heroValue: String(decisionCount),
-        heroLabel: 'decisions made',
-        detail: `${totalEvents} total events witnessed`,
+        heroLabel: t('wrapped.slide.decisions.heroLabel'),
+        detail: t('wrapped.slide.decisions.detail', { count: totalEvents }),
         data: { decisionCount, totalEvents },
     });
 
@@ -278,12 +284,12 @@ export function generateWrappedSlides(
     const allCapitals = negotiatingCapital ?? {};
     slides.push({
         id: 'at_the_table',
-        title: 'At the Table',
+        title: t('wrapped.slide.table.title'),
         subtitle: playerCapital != null
-            ? `Your negotiating capital: ${playerCapital.toFixed(0)}`
-            : 'Negotiating capital data unavailable',
+            ? t('wrapped.slide.table.subtitle', { value: playerCapital.toFixed(0) })
+            : t('wrapped.slide.table.subtitle.none'),
         heroValue: playerCapital != null ? playerCapital.toFixed(0) : '-',
-        heroLabel: 'negotiating capital',
+        heroLabel: t('wrapped.slide.table.heroLabel'),
         detail: Object.entries(allCapitals)
             .map(([f, v]) => `${getFactionDisplayLabel(f)}: ${(v as number).toFixed(0)}`)
             .join(' | ') || undefined,
@@ -302,14 +308,14 @@ export function generateWrappedSlides(
         : [];
     slides.push({
         id: 'another_such_victory',
-        title: 'Another Such Victory',
+        title: t('wrapped.slide.victory.title'),
         subtitle: divergenceNotes.length > 0
-            ? 'History remembered this war differently'
-            : 'And we are undone',
+            ? t('wrapped.slide.victory.subtitle.divergence')
+            : t('wrapped.slide.victory.subtitle.default'),
         heroValue: negotiatingCapital?.[playerFaction] != null
             ? negotiatingCapital[playerFaction].toFixed(0)
             : '-',
-        heroLabel: 'final score',
+        heroLabel: t('wrapped.slide.victory.heroLabel'),
         detail: playerFactionLabel,
         bullets: divergenceNotes.slice(0, 3),
         data: finalDimensions,
@@ -381,14 +387,14 @@ export function generateCausalitySlides(
             const tagsList = tags.slice(0, 5);
             slides.push({
                 id: 'foundational_choice',
-                title: 'Foundational Choice',
+                title: t('wrapped.causality.foundational.title'),
                 subtitle: foundationalInfo
-                    ? `${playerFactionLabel} chose: ${foundationalInfo.optionLabel}`
-                    : `${playerFactionLabel} branch tags activated`,
+                    ? t('wrapped.causality.foundational.subtitle.chosen', { faction: playerFactionLabel, option: foundationalInfo.optionLabel })
+                    : t('wrapped.causality.foundational.subtitle.tags', { faction: playerFactionLabel }),
                 heroValue: String(tags.length),
-                heroLabel: tags.length === 1 ? 'branch tag activated' : 'branch tags activated',
+                heroLabel: t(tags.length === 1 ? 'wrapped.causality.foundational.heroLabel.one' : 'wrapped.causality.foundational.heroLabel.many'),
                 detail: foundationalInfo?.sourceNote,
-                bullets: tagsList,
+                bullets: tagsList.map((tag) => getPlayerSafeDisplayLabel(tag, 'Recorded branch')),
                 data: {
                     faction: playerFaction,
                     tags: tags.slice(),
@@ -408,19 +414,24 @@ export function generateCausalitySlides(
             const title = resolveEventDisplayTitle(def, d.event_id);
             const chosenOption = resolveResponseDisplayLabel(def, d.chosen_option, 'Chosen response');
             const historicalDefault = resolveResponseDisplayLabel(def, d.historical_default, 'Historical response');
-            return `${turnToDateString(d.turn)} ${title}: ${chosenOption} (history: ${historicalDefault})`;
+            return t('wrapped.causality.divergence.bullet', {
+                date: turnToDateString(d.turn),
+                title,
+                chosen: chosenOption,
+                historical: historicalDefault,
+            });
         });
         slides.push({
             id: 'your_divergences',
-            title: 'You Defied History',
+            title: t('wrapped.causality.divergence.title'),
             subtitle:
                 divergences.length === 1
-                    ? 'One decision broke from the historical path'
-                    : `${divergences.length} decisions broke from the historical path`,
+                    ? t('wrapped.causality.divergence.subtitle.one')
+                    : t('wrapped.causality.divergence.subtitle.many', { count: divergences.length }),
             heroValue: String(divergences.length),
-            heroLabel: divergences.length === 1 ? 'counterfactual divergence' : 'counterfactual divergences',
+            heroLabel: t(divergences.length === 1 ? 'wrapped.causality.divergence.heroLabel.one' : 'wrapped.causality.divergence.heroLabel.many'),
             detail: divergences.length > bullets.length
-                ? `Showing top ${bullets.length} of ${divergences.length}`
+                ? t('wrapped.causality.divergence.detail', { shown: bullets.length, total: divergences.length })
                 : undefined,
             bullets,
             data: {
@@ -442,20 +453,24 @@ export function generateCausalitySlides(
         const totalReshaped = summary.foundational_count + summary.downstream_fired_count;
         slides.push({
             id: 'causal_chain_summary',
-            title: 'Your Decisions Reshaped The War',
+            title: t('wrapped.causality.chain.title'),
             subtitle:
                 totalReshaped > 0
-                    ? `${totalReshaped} events fired in your causal chain`
-                    : 'The causal substrate persisted your choices',
+                    ? t('wrapped.causality.chain.subtitle.events', { count: totalReshaped })
+                    : t('wrapped.causality.chain.subtitle.persisted'),
             heroValue: String(summary.max_depth),
-            heroLabel: summary.max_depth === 1 ? 'link in causal chain' : 'links in causal chain',
-            detail: `${summary.foundational_count} foundational | ${summary.downstream_fired_count} downstream | ${summary.closed_count} closed`,
+            heroLabel: t(summary.max_depth === 1 ? 'wrapped.causality.chain.heroLabel.one' : 'wrapped.causality.chain.heroLabel.many'),
+            detail: t('wrapped.causality.chain.detail', {
+                foundational: summary.foundational_count,
+                downstream: summary.downstream_fired_count,
+                closed: summary.closed_count,
+            }),
             bullets: [
-                `Foundational events fired: ${summary.foundational_count}`,
-                `Downstream events fired: ${summary.downstream_fired_count}`,
-                `Events foreclosed: ${summary.closed_count}`,
-                `Player divergences: ${summary.player_divergence_count}`,
-                `Max chain depth: ${summary.max_depth}`,
+                t('wrapped.causality.chain.bullet.foundational', { count: summary.foundational_count }),
+                t('wrapped.causality.chain.bullet.downstream', { count: summary.downstream_fired_count }),
+                t('wrapped.causality.chain.bullet.closed', { count: summary.closed_count }),
+                t('wrapped.causality.chain.bullet.divergences', { count: summary.player_divergence_count }),
+                t('wrapped.causality.chain.bullet.depth', { count: summary.max_depth }),
             ],
             data: { ...summary },
         });

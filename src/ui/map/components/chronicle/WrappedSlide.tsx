@@ -2,7 +2,7 @@ import React from 'react';
 import { SpiderChart } from './SpiderChart.js';
 import type { WrappedSlide as WrappedSlideType } from './generateWrappedSlides.js';
 import { formatHistoricalDivergenceNote } from '../../data/historicalDivergenceNotes.js';
-import { useLocale } from '../../i18n';
+import { t, useLocale } from '../../i18n';
 import { getPlayerSafePoliticalFactionName } from '../../utils/playerSafeText.js';
 import { sidePickerFactionLabel } from '../../utils/sidePickerLabels.js';
 
@@ -82,7 +82,7 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
 
             {/* Navigation hint */}
             <div className="absolute bottom-8 text-[9px] font-mono text-white/15 tracking-wider uppercase">
-                {index < total - 1 ? 'click or arrow key to continue' : 'press ESC to close'}
+                {index < total - 1 ? t('wrapped.navHint.next') : t('wrapped.navHint.close')}
             </div>
         </div>
     );
@@ -135,11 +135,11 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         {slide.heroValue ?? '0'}
                     </div>
                     <div className="text-[11px] font-mono text-red-400/60 uppercase tracking-wider">
-                        {slide.heroLabel ?? 'casualties'}
+                        {slide.heroLabel ?? t('wrapped.hero.casualtiesFallback')}
                     </div>
                     {(casualties ?? 0) > 500 && (
                         <div className="text-[9px] text-red-400/30 italic mt-1">
-                            A week the survivors will never forget
+                            {t('wrapped.hero.survivorMemory')}
                         </div>
                     )}
                 </div>
@@ -158,7 +158,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         {(totalCasualties ?? 0).toLocaleString()}
                     </div>
                     <div className="text-[10px] font-mono text-red-400/50 uppercase tracking-wider">
-                        total casualties
+                        {t('wrapped.hero.totalCasualties')}
                     </div>
                     {(totalDisplaced ?? 0) > 0 && (
                         <div className="text-[28px] font-bold tabular-nums text-amber-500/60 leading-none mt-2">
@@ -167,7 +167,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                     )}
                     {(totalDisplaced ?? 0) > 0 && (
                         <div className="text-[10px] font-mono text-amber-500/30 uppercase tracking-wider">
-                            people displaced
+                            {t('wrapped.hero.peopleDisplaced')}
                         </div>
                     )}
                 </div>

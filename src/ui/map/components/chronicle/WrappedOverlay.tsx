@@ -136,7 +136,7 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
                         }}
                         className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border border-white/20 bg-white/5 text-white/50 hover:bg-white/10 transition-colors cursor-pointer"
                     >
-                        Close
+                        {t('wrapped.close')}
                     </button>
                 </div>
             )}

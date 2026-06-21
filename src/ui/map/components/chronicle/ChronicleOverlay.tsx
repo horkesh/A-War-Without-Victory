@@ -599,7 +599,7 @@ export function ChronicleOverlay() {
                                     aria-pressed={active}
                                     data-testid={`chronicle-filter-${filter.id}`}
                                     data-selected={active ? 'true' : 'false'}
-                                    title={`${chronicleFilterLabel(filter)}: ${count}`}
+                                    title={t('chronicle.filterTitle', { label: chronicleFilterLabel(filter), count })}
                                     onClick={() => setActiveFilter(filter.id)}
                                     className={[
                                         'h-6 min-w-[54px] rounded-sm border px-2 font-mono text-[8px] uppercase transition-colors',
@@ -612,7 +612,12 @@ export function ChronicleOverlay() {
                                     <span aria-hidden="true" className="text-stone-600">
                                         {' · '}
                                     </span>
-                                    <span aria-label={`${count} entries`} className="text-stone-500">{count}</span>
+                                    <span
+                                        aria-label={t(count === 1 ? 'chronicle.entryCount.one' : 'chronicle.entryCount.many', { count })}
+                                        className="text-stone-500"
+                                    >
+                                        {count}
+                                    </span>
                                 </button>
                             );
                         })}

@@ -1,12 +1,14 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import {
     buildChronicleCampaignRecap,
     buildChronicleChapters,
+    chronicleTypeLabel,
     formatChronicleBoundaryKind,
     formatChronicleChapterDateRange,
     formatChronicleTurnDateRange,
 } from '../../src/ui/map/data/chronicleChapters.js';
 import type { ChronicleEntry } from '../../src/ui/map/components/chronicle/generateChronicleEntries.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 function entry(turn: number, title: string, overrides: Partial<ChronicleEntry> = {}): ChronicleEntry {
     return {
@@ -35,6 +37,10 @@ const timeline = {
         ],
     },
 };
+
+afterEach(() => {
+    setLocale('en');
+});
 
 describe('buildChronicleChapters', () => {
     it('groups entries by player-faction standing-order windows and preserves source ids', () => {
@@ -187,5 +193,48 @@ describe('buildChronicleChapters', () => {
             openingChapterTitle: 'Survival Defense',
             closingChapterTitle: 'Local Counterattacks',
         });
+    });
+
+    it('localizes generated BCS chapter summaries, type labels, and boundary labels', () => {
+        setLocale('bcs');
+        const chapters = buildChronicleChapters(
+            [
+                entry(1, 'Cijena sedmice', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
+                entry(2, 'Linija se drzi', { type: 'combat' } as Partial<ChronicleEntry>),
+                entry(7, 'Jos jedna teska sedmica', { type: 'cost', headline: true } as Partial<ChronicleEntry>),
+            ],
+            { player_faction: 'RBiH', military: { war_timeline: timeline } },
+        );
+
+        const summary = chapters[0].summary;
+        expect(summary).not.toMatch(/Across|sourced entries|sourced entry|dominant thread|headline records|anchor the chapter/i);
+        expect(summary).toMatch(/zapisa|glavn/i);
+        expect(formatChronicleBoundaryKind(chapters[0].boundaryKind)).not.toBe('Campaign order');
+        expect(formatChronicleBoundaryKind('doctrine_phase')).not.toBe('Doctrine posture');
+        expect(chronicleTypeLabel('humanitarian')).not.toBe('humanitarian pressure');
+        expect(chronicleTypeLabel('military')).not.toBe('military affairs');
+    });
+
+    it('localizes generated BCS doctrine fallback chapter titles', () => {
+        setLocale('bcs');
+        const chapters = buildChronicleChapters(
+            [entry(2, 'Pocetna direktiva')],
+            {
+                player_faction: 'RS',
+                military: {
+                    war_timeline: {
+                        standing_orders: {},
+                        doctrine_phases: {
+                            RS: [
+                                { start_week: 0, end_week: 12, default_corps_stance: 'general_offensive' },
+                            ],
+                        },
+                    },
+                },
+            },
+        );
+
+        expect(chapters[0].title).not.toMatch(/Doctrine Phase|Offensive posture|general_offensive/i);
+        expect(chapters[0].title).toMatch(/doktrin|ofanziv/i);
     });
 });
