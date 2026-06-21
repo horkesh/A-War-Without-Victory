@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const mapContainerSource = () => readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+const radialMenuSource = () => readFileSync('src/ui/map/components/RadialMenu.tsx', 'utf8');
 
 describe('MapContainer radial context menu i18n boundary', () => {
   it('routes radial menu labels through map.context i18n keys', () => {
@@ -31,5 +32,30 @@ describe('MapContainer radial context menu i18n boundary', () => {
     ]) {
       expect(source).not.toContain(stale);
     }
+  });
+
+  it('exposes stable live-browser selectors for the context menu shell and actions', () => {
+    const source = radialMenuSource();
+
+    expect(source).toContain('data-testid="map-context-menu"');
+    expect(source).toContain('data-testid={`map-context-menu-action-${item.id}`}');
+  });
+
+  it('keeps a tactical-map wrapper fallback for missed right-click events', () => {
+    const source = mapContainerSource();
+
+    expect(source).toContain('handleFallbackContextMenu');
+    expect(source).toContain('onContextMenu={handleFallbackContextMenu}');
+    expect(source).toContain('handleDocumentContextMenu');
+    expect(source).toContain("document.addEventListener('contextmenu', handleDocumentContextMenu)");
+    expect(source).toContain("type: 'empty'");
+  });
+
+  it('keeps the context-menu live proof seam dev-only', () => {
+    const source = mapContainerSource();
+
+    expect(source).toContain('import.meta.env.DEV');
+    expect(source).toContain('__awwvLiveSurfaceOpenMapContextMenu');
+    expect(source).toContain('delete win.__awwvLiveSurfaceOpenMapContextMenu');
   });
 });

@@ -1128,6 +1128,80 @@ async function runRecordsAarFormationLinkLiveProof(page, summary) {
   summary.evidence.recordsAarFormationLinkLiveProof = true;
 }
 
+async function runMapContextMenuLiveProof(page, summary) {
+  await resetToWarMap(page);
+  const mapBounds = await page.evaluate(() => {
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    if (!(map instanceof HTMLElement)) return null;
+    const rect = map.getBoundingClientRect();
+    return {
+      x: rect.left + rect.width * 0.52,
+      y: rect.top + rect.height * 0.50,
+    };
+  });
+  if (!mapBounds) throw new Error('Tactical map bounds unavailable for context-menu proof');
+  await page.mouse.click(mapBounds.x, mapBounds.y, { button: 'right' });
+  await delay(500);
+  let activationMethod = 'right-click';
+  if (await visibleSelectorCount(page, '[data-testid="map-context-menu"]') === 0) {
+    const dispatched = await page.evaluate(({ x, y }) => {
+      const map = document.querySelector('[data-testid="tactical-map"]');
+      if (!(map instanceof HTMLElement)) return false;
+      document.dispatchEvent(new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: x,
+        clientY: y,
+        button: 2,
+        buttons: 2,
+      }));
+      return true;
+    }, mapBounds);
+    if (!dispatched) throw new Error('Tactical map unavailable for DOM context-menu proof');
+    activationMethod = 'dom-contextmenu';
+  }
+  if (await visibleSelectorCount(page, '[data-testid="map-context-menu"]') === 0) {
+    const openedViaSeam = await page.evaluate((position) => {
+      if (typeof window.__awwvLiveSurfaceOpenMapContextMenu !== 'function') return false;
+      window.__awwvLiveSurfaceOpenMapContextMenu(position);
+      return true;
+    }, mapBounds);
+    if (!openedViaSeam) throw new Error('Dev live-surface map context-menu seam unavailable');
+    activationMethod = 'dev-seam';
+  }
+  await page.waitForFunction(() => Boolean(document.querySelector('[data-testid="map-context-menu"]')), { timeout: 30000 });
+  await waitForVisibleSelector(page, '[data-testid^="map-context-menu-action-"]');
+  const actionCount = await visibleSelectorCount(page, '[data-testid^="map-context-menu-action-"]');
+  if (actionCount === 0) {
+    await captureEvidence(page, summary, 'map_context_menu_missing_actions');
+    throw new Error('Map context menu opened without visible actions');
+  }
+  await captureEvidence(page, summary, 'map_context_menu_live_proof');
+  await page.keyboard.press('Escape');
+  summary.evidence.mapContextMenuLiveProof = { actions: actionCount, activationMethod };
+}
+
+async function runBattleMarkerLiveProof(page, summary) {
+  await resetToWarMap(page);
+  await page.waitForFunction((fixtureOsid) => {
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    if (!(map instanceof HTMLElement)) return false;
+    const count = Number(map.dataset.battleMarkerCount ?? '0');
+    const osids = map.dataset.battleMarkerOsids ?? '';
+    return count > 0 && osids.split(',').includes(fixtureOsid);
+  }, { timeout: 30000 }, RECORDS_AAR_FIXTURE_OSID);
+  const markerEvidence = await page.evaluate(() => {
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    if (!(map instanceof HTMLElement)) return null;
+    return {
+      count: Number(map.dataset.battleMarkerCount ?? '0'),
+      osids: map.dataset.battleMarkerOsids ?? '',
+    };
+  });
+  await captureEvidence(page, summary, 'battle_marker_live_proof');
+  summary.evidence.battleMarkerLiveProof = markerEvidence;
+}
+
 async function loadRecordsAarLiveProofFixture(page, summary) {
   const fixtureState = buildRecordsAarLiveProofFixtureState();
   await page.evaluate(async (state) => {
@@ -1312,8 +1386,10 @@ async function run() {
       armyHqInternalDrilldown: false,
       armyHqPersonnelBrigadeLiveProof: false,
       armyHqSectorFrontSegmentLiveProof: false,
+      mapContextMenuLiveProof: false,
       ownerJourneyDrilldown: false,
       recordsAarFormationLinkLiveProof: false,
+      battleMarkerLiveProof: false,
       recordsAarFixture: false,
       operationOpportunityFixture: false,
       archiveChronicleToRecordsDrilldown: false,
@@ -1366,12 +1442,14 @@ async function run() {
     await runArmyHqInternalDrilldown(page, summary);
     await runArmyHqPersonnelBrigadeLiveProof(page, summary);
     await runArmyHqSectorFrontSegmentLiveProof(page, summary);
+    await runMapContextMenuLiveProof(page, summary);
     await runOwnerJourneyDrilldown(page, summary);
     await runArchiveInboxDrilldown(page, summary);
     await runCodexInternalDrilldown(page, summary);
     await loadOperationOpportunityLiveProofFixture(page, summary);
     await runPresidentialInboxRoutingLiveProof(page, summary);
     await loadRecordsAarLiveProofFixture(page, summary);
+    await runBattleMarkerLiveProof(page, summary);
     await runRecordsAarFormationLinkLiveProof(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
       summary.ok = true;

@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**LIVE CONTEXT-MENU PROOF TARGETS (2026-06-21).** Anchored map radial menus can have a zero-sized root even when action buttons are visible, and headless Chromium may not deliver MapLibre contextmenu events. Do instead: wait for visible `[data-testid^="map-context-menu-action-"]`, record whether activation was native/contextmenu/dev-seam, and keep any proof seam gated by `import.meta.env.DEV`.
+
+**TACTICAL BATTLE-MARKER LIVE PROOF (2026-06-21).** Battle/AAR fixture rows can render through map overlays while static tests only prove source wiring. Do instead: expose deterministic tactical-map probe attributes such as `data-battle-marker-count` and sorted OSIDs, then hard-fail live browser sweeps on absent expected fixture OSIDs.
+
 **SECTOR OVERRIDE FEEDBACK SEMANTICS (2026-06-21).** Brigade-to-sector commands are persistent sector overrides, not OSID movement orders. Do instead: use `StagedOrder.targetSectorId` for sector assignments, keep `targetOsid` for settlement/attack targets, resolve Order Queue labels through sector metadata, prefer `formation.sectorOverrideId` over stale automatic sector roster membership in Formation Detail, and render map feedback by deterministically resolving the sector to a friendly sector OSID.
 
 **OPERATIONAL SITREP COPY-TOKEN BOUNDARY (2026-06-21).** `toOperationalSitrepView` feeds multiple UI surfaces and may keep English fallback strings for compatibility. Do instead: attach `OperationalSitrepCopyToken` to generated headlines, alerts, and corps-operation summaries; render through `localizedOperationalSitrepCopy(...)`; use `paramKeys` for localized operation type/phase labels; keep Situation front/thin/alliance bands behind `situation.*Band.*` keys.

@@ -91,8 +91,18 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('runArmyHqSectorFrontSegmentLiveProof');
     expect(tool).toContain('armyHqSectorFrontSegmentLiveProof');
     expect(tool).toContain('army-hq-sector-frontage');
+    expect(tool).toContain('runMapContextMenuLiveProof');
+    expect(tool).toContain('mapContextMenuLiveProof');
+    expect(tool).toContain('map_context_menu_live_proof');
+    expect(tool).toContain('map-context-menu-action-');
+    expect(tool).toContain('dom-contextmenu');
+    expect(tool).toContain('dev-seam');
     expect(tool).toContain('runRecordsAarFormationLinkLiveProof');
     expect(tool).toContain('recordsAarFormationLinkLiveProof');
+    expect(tool).toContain('runBattleMarkerLiveProof');
+    expect(tool).toContain('battleMarkerLiveProof');
+    expect(tool).toContain('battle_marker_live_proof');
+    expect(tool).toContain('battleMarkerOsids');
     expect(tool).toContain('buildRecordsAarLiveProofFixtureState');
     expect(tool).toContain('apr_1992_initial_save.json');
     expect(tool).toContain("op:gradacac:donja_tramosnica_2");

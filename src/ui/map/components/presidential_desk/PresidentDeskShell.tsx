@@ -79,7 +79,7 @@ export function PresidentDeskShell({
         <button
           type="button"
           onClick={onClose}
-          aria-label={t('common.close')}
+          aria-label={t('desk.closeOverlayAria')}
           data-testid="desk-close-overlay"
           className="pointer-events-auto self-end border border-panel-border/80 bg-panel-bg/92 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
