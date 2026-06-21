@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest status strip diplomacy i18n boundary** | [implemented/20260621_STATUS_STRIP_DIPLOMACY_I18N.md](implemented/20260621_STATUS_STRIP_DIPLOMACY_I18N.md) - Bottom status strip alliance, patron, and international-pressure statuses now render through EN/BCS i18n keys. |
 | **Latest War Map context / OpsMap i18n boundary** | [implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md](implemented/20260621_WAR_MAP_CONTEXT_OPSMAP_I18N.md) - Tactical-map radial/context labels and the operations-planning compact map legend now render through EN/BCS i18n keys. |
 | **War Map chrome i18n boundary** | [implemented/20260621_WAR_MAP_CHROME_I18N.md](implemented/20260621_WAR_MAP_CHROME_I18N.md) - War Map mode pills, layer toggles, and map-mode legends now render through EN/BCS i18n keys. |
 | **Latest supply visibility i18n boundary** | [implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md](implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md) - Player-scoped supply visibility headlines/evidence now render through EN/BCS keys. |

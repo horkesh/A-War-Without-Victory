@@ -103,6 +103,32 @@ describe('BottomStatusStrip labels', () => {
     expect(screen.getByText('WAVERING')).toBeTruthy();
   });
 
+  it('localizes HRHB alliance and Zagreb patron pressure in BCS mode', () => {
+    setLocale('bcs', undefined);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'HRHB',
+        war_alliance_rbih_hrhb: 0.35,
+        strategicDimensions: {
+          HRHB: {
+            patron_confidence: { base_value: 55, event_modifier: -25, effective_value: 30 },
+          },
+        },
+      }),
+      mapMode: 'political',
+      devMode: false,
+    });
+
+    render(createElement(BottomStatusStrip));
+
+    const stripText = document.body.textContent ?? '';
+    expect(stripText).toContain('NAPETO');
+    expect(stripText).toContain('Zagreb:');
+    expect(stripText).toContain('KOLEBLJIV');
+    expect(stripText).not.toContain('STRAINED');
+    expect(stripText).not.toContain('WAVERING');
+  });
+
   it('shows both Bosniak-Croat alliance and international pressure for RBiH', () => {
     useGameStore.setState({
       loadedGameState: makeState({
@@ -126,6 +152,35 @@ describe('BottomStatusStrip labels', () => {
     expect(screen.getByText('ALLIED')).toBeTruthy();
     expect(screen.getByText('International:')).toBeTruthy();
     expect(screen.getByText('HIGH')).toBeTruthy();
+  });
+
+  it('localizes RBiH alliance and international pressure in BCS mode', () => {
+    setLocale('bcs', undefined);
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RBiH',
+        war_alliance_rbih_hrhb: 0.62,
+        internationalVisibilityPressure: {
+          atrocity_visibility: 0,
+          enclave_humanitarian_pressure: 0,
+          sarajevo_siege_visibility: 0,
+          negotiation_momentum: 0.72,
+          composite_ivp: 0.72,
+          last_major_shift: 39,
+        },
+      }),
+      mapMode: 'political',
+      devMode: false,
+    });
+
+    render(createElement(BottomStatusStrip));
+
+    const stripText = document.body.textContent ?? '';
+    expect(stripText).toContain('SAVEZNICI');
+    expect(stripText).toContain('Međunarodno:');
+    expect(stripText).toContain('VISOK');
+    expect(stripText).not.toContain('ALLIED');
+    expect(stripText).not.toContain('HIGH');
   });
 
   it('does not show territory trend arrows from turn-0 scenario-start provenance', () => {
