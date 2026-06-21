@@ -1,8 +1,9 @@
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { ForceReadiness, readinessGradeLabel, type CorpsReadiness } from '../../src/ui/map/components/army_hq/ForceReadiness.js';
 import { ThreatAssessment } from '../../src/ui/map/components/army_hq/ThreatAssessment.js';
+import { generateThreatAssessment } from '../../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import { t } from '../../src/ui/map/i18n/index.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 
@@ -14,6 +15,81 @@ function bcsMarkup(element: React.ReactElement): string {
         setLocale('en', undefined);
     }
 }
+
+function makeThreatState(overrides: Record<string, unknown> = {}): any {
+    return {
+        formations: [
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+        ],
+        corpsFrontSectors: [
+            {
+                sector_id: 'sector-offensive',
+                corps_id: 'corps_1',
+                corps_name: '1st Corps',
+                display_name: 'Northern line',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segment_count: 1,
+                length_edges: 3,
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                density: 0.5,
+                threat_ratio: 1.2,
+                defensive_power: 20,
+                intel_confidence: 0.9,
+                offensive_signs: true,
+            },
+            {
+                sector_id: 'sector-hardened',
+                corps_id: 'corps_1',
+                corps_name: '1st Corps',
+                display_name: 'Central line',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segment_count: 1,
+                length_edges: 2,
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                density: 0.4,
+                threat_ratio: 0.8,
+                defensive_power: 18,
+                intel_confidence: 0.8,
+                offensive_signs: false,
+            },
+            {
+                sector_id: 'sector-gap',
+                corps_id: 'corps_1',
+                corps_name: '1st Corps',
+                display_name: 'Western line',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: [],
+                sub_segment_count: 1,
+                length_edges: 2,
+                assigned_brigade_ids: [],
+                reserve_brigade_ids: [],
+                density: 0.2,
+                threat_ratio: 0.5,
+                defensive_power: 8,
+                intel_confidence: 0.1,
+                offensive_signs: false,
+            },
+        ],
+        sectorIntel: [
+            { friendly_sector_id: 'sector-offensive', offensive_signs: true, posture_observed: 'offensive_prep', strength_category: 'dense', confidence: 0.86 },
+            { friendly_sector_id: 'sector-offensive', offensive_signs: true, posture_observed: 'offensive_prep', strength_category: 'moderate', confidence: 0.75 },
+            { friendly_sector_id: 'sector-hardened', offensive_signs: false, posture: 'defending', posture_observed: 'defending', strength_category: 'fortress', confidence: 0.8 },
+            { friendly_sector_id: 'sector-gap', offensive_signs: false, strength_category: 'unknown', confidence: 0.1 },
+        ],
+        ...overrides,
+    };
+}
+
+afterEach(() => {
+    setLocale('en', undefined);
+});
 
 describe('Army HQ readiness and threat copy', () => {
     it('renders ForceReadiness labels through BCS copy instead of English staff labels', () => {
@@ -74,5 +150,19 @@ describe('Army HQ readiness and threat copy', () => {
         } finally {
             setLocale('en', undefined);
         }
+    });
+
+    it('generates BCS threat copy without English intel prose or raw sector ids', () => {
+        setLocale('bcs', undefined);
+        const items = generateThreatAssessment(makeThreatState(), 'RBiH');
+        const copy = items.flatMap(item => [item.title, item.detail]).join(' ');
+
+        expect(items.map(item => item.severity)).toEqual(['offensive', 'hardened', 'gap']);
+        expect(copy).not.toMatch(/High confidence|Moderate confidence|Low confidence/i);
+        expect(copy).not.toMatch(/enemy strength unknown|limited enemy presence|moderate enemy strength|significant enemy presence|heavily fortified/i);
+        expect(copy).not.toMatch(/hostile offensive preparation|hostile defenses consolidating|weak intelligence picture/i);
+        expect(copy).not.toMatch(/Strength estimate|sector reporting|sectors reporting|Entrenchment|defensive posture|Blind sector|Reconnaissance/i);
+        expect(copy).not.toMatch(/sector-offensive|sector-hardened|sector-gap|sector:/i);
+        expect(copy).toMatch(/procjena|izvjestaj|slika/i);
     });
 });

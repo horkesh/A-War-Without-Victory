@@ -547,6 +547,7 @@ The main docs index is [docs/00_start_here/docs_index.md](../00_start_here/docs_
 
 Latest shell-ownership work:
 
+- [implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLISH.md](implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLISH.md) - Chronicle Wrapped slides, causality slides, Chronicle chapter summaries/accessibility labels, SpiderChart labels, and Army HQ threat prose now render through EN/BCS generated-copy boundaries.
 - [implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md](implemented/20260621_MAP_OVERLAY_TIMING_LIFECYCLE.md) - Map overlay dev timers are unique and chunk-local, and canceled deferred overlay work marks applied state stale before the next pass.
 - [implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md](implemented/20260621_COMMAND_PUSHBACK_DECISION_ROOM_ROUTING.md) - Officer command-pushback rows now open Decision Room command review with Army HQ Briefing as the evidence handoff; true personnel rows still route to Personnel.
 - [implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md](implemented/20260621_RESERVE_COMMAND_REVIEW_ROUTING.md) - Army Reserve requests now enter Decision Room command review only when a concrete brigade is named; generic reserve-selection requests stay in Army Reserve.

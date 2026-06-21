@@ -1,4 +1,5 @@
 import type { ChronicleEntry } from '../components/chronicle/generateChronicleEntries.js';
+import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters.js';
 
 export type ChronicleBoundaryKind = 'standing_order' | 'doctrine_phase' | 'month';
@@ -83,25 +84,25 @@ export function formatChronicleChapterDateRange(chapter: Pick<ChronicleChapter, 
 }
 
 export function formatChronicleBoundaryKind(kind: ChronicleBoundaryKind): string {
-    const labels: Record<ChronicleBoundaryKind, string> = {
-        standing_order: 'Campaign order',
-        doctrine_phase: 'Doctrine posture',
-        month: 'Calendar month',
+    const labels: Record<ChronicleBoundaryKind, MessageKey> = {
+        standing_order: 'chronicle.boundary.standingOrder',
+        doctrine_phase: 'chronicle.boundary.doctrinePhase',
+        month: 'chronicle.boundary.month',
     };
-    return labels[kind];
+    return t(labels[kind]);
 }
 
 function formatDoctrineStanceLabel(stance: unknown): string {
-    const labels: Record<string, string> = {
-        defensive: 'Defensive posture',
-        general_defensive: 'Defensive posture',
-        balanced: 'Balanced posture',
-        offensive: 'Offensive posture',
-        general_offensive: 'Offensive posture',
-        reorganize: 'Reorganization posture',
-        campaign: 'Campaign posture',
+    const labels: Record<string, MessageKey> = {
+        defensive: 'chronicle.doctrine.defensive',
+        general_defensive: 'chronicle.doctrine.defensive',
+        balanced: 'chronicle.doctrine.balanced',
+        offensive: 'chronicle.doctrine.offensive',
+        general_offensive: 'chronicle.doctrine.offensive',
+        reorganize: 'chronicle.doctrine.reorganize',
+        campaign: 'chronicle.doctrine.campaign',
     };
-    return labels[String(stance ?? 'campaign')] ?? 'Campaign posture';
+    return t(labels[String(stance ?? 'campaign')] ?? 'chronicle.doctrine.campaign');
 }
 
 function stableEntryBaseId(entry: ChronicleEntry): string {
@@ -163,7 +164,10 @@ function doctrineWindows(timeline: any, playerFaction: string): TimelineWindow[]
         .filter(phase => typeof phase?.start_week === 'number' && typeof phase?.end_week === 'number')
         .map((phase, index) => ({
             kind: 'doctrine_phase' as const,
-            title: `Doctrine Phase ${index + 1}: ${formatDoctrineStanceLabel(phase.default_corps_stance)}`,
+            title: t('chronicle.doctrine.title', {
+                index: index + 1,
+                stance: formatDoctrineStanceLabel(phase.default_corps_stance),
+            }),
             startTurn: phase.start_week,
             endTurn: phase.end_week,
         }))
@@ -223,24 +227,25 @@ function uniqueMonthLabelsByTurn(entries: ChronicleEntry[]): string[] {
 }
 
 export function chronicleTypeLabel(type: ChronicleEntry['type']): string {
-    const labels: Partial<Record<ChronicleEntry['type'], string>> = {
-        combat: 'combat',
-        consequence: 'consequence',
-        cost: 'cost',
-        diplomatic: 'diplomacy',
-        humanitarian: 'humanitarian pressure',
-        military: 'military affairs',
-        narrative: 'campaign memory',
-        personnel: 'personnel',
-        political: 'politics',
+    const labels: Partial<Record<ChronicleEntry['type'], MessageKey>> = {
+        combat: 'chronicle.type.combat',
+        consequence: 'chronicle.type.consequence',
+        cost: 'chronicle.type.cost',
+        diplomatic: 'chronicle.type.diplomatic',
+        humanitarian: 'chronicle.type.humanitarian',
+        military: 'chronicle.type.military',
+        narrative: 'chronicle.type.narrative',
+        personnel: 'chronicle.type.personnel',
+        political: 'chronicle.type.political',
     };
-    return labels[type] ?? String(type).replace(/_/g, ' ');
+    const key = labels[type];
+    return key ? t(key) : String(type).replace(/_/g, ' ');
 }
 
 function chapterMonthRange(monthLabels: readonly string[]): string {
-    if (monthLabels.length === 0) return 'the recorded window';
+    if (monthLabels.length === 0) return t('chronicle.monthRange.empty');
     if (monthLabels.length === 1) return monthLabels[0];
-    return `${monthLabels[0]}-${monthLabels[monthLabels.length - 1]}`;
+    return t('chronicle.monthRange.many', { start: monthLabels[0], end: monthLabels[monthLabels.length - 1] });
 }
 
 function buildChapterSummary(entries: readonly ChronicleEntry[], monthLabels: readonly string[]): string {
@@ -254,12 +259,16 @@ function buildChapterSummary(entries: readonly ChronicleEntry[], monthLabels: re
     const dominantType = Array.from(typeCounts.entries())
         .sort((a, b) => b[1] - a[1] || strictCompare(chronicleTypeLabel(a[0]), chronicleTypeLabel(b[0])))[0]?.[0] ?? 'narrative';
     const entryCount = entries.length;
-    const entryPhrase = `${entryCount} sourced ${entryCount === 1 ? 'entry' : 'entries'}`;
+    const entryPhrase = t(entryCount === 1 ? 'chronicle.sourcedEntry.one' : 'chronicle.sourcedEntry.many', { count: entryCount });
     const headlinePhrase = headlineCount === 0
-        ? 'no headline records'
-        : `${headlineCount} headline ${headlineCount === 1 ? 'record' : 'records'}`;
-    const verb = entryCount === 1 ? 'makes' : 'make';
-    return `Across ${chapterMonthRange(monthLabels)}, ${entryPhrase} ${verb} ${chronicleTypeLabel(dominantType)} the dominant thread; ${headlinePhrase} anchor the chapter.`;
+        ? t('chronicle.headlineRecord.none')
+        : t(headlineCount === 1 ? 'chronicle.headlineRecord.one' : 'chronicle.headlineRecord.many', { count: headlineCount });
+    return t(entryCount === 1 ? 'chronicle.summary.one' : 'chronicle.summary.many', {
+        range: chapterMonthRange(monthLabels),
+        entries: entryPhrase,
+        thread: chronicleTypeLabel(dominantType),
+        headlines: headlinePhrase,
+    });
 }
 
 export function buildChronicleChapters(entries: ChronicleEntry[], state: any): ChronicleChapter[] {

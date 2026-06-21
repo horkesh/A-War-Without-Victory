@@ -930,3 +930,11 @@ Report: `docs/40_reports/implemented/20260606_RECEIPT_ROUTE_BROWSER_PROOF.md`
 Records-filed President's Desk consequence rows now route to Army HQ Records -> Decision Consequences; AAR tab counts now come from `latestTurnSummary` instead of completed-operation history; patron-defiance Chronicle duplicate generation is suppressed in the generator path. The new live browser smoke loads a deterministic modified startup save through the app save loader and proves the desk-to-Records route and AAR/Operation History count split.
 
 ---
+
+# 2026-06-21 Chronicle/Wrapped and Army HQ Threat Copy Polish
+
+Report: `docs/40_reports/implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLISH.md`
+
+Chronicle Wrapped canonical slides, causality slide chrome, Chronicle chapter summaries, Chronicle accessibility labels, SpiderChart dimension labels/value keys, and Army HQ threat assessment prose now render through localized generated-copy boundaries. Authored event/operation/formation/officer/historical payloads remain authored data; raw causality branch tags remain in data and no longer render as visible bullets.
+
+---

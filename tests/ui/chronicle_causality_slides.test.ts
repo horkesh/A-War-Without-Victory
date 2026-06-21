@@ -22,7 +22,7 @@
  * Determinism: all inputs constructed inline. No file I/O. No timestamps.
  */
 
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect } from 'vitest';
 
 import {
     generateCausalitySlides,
@@ -32,6 +32,7 @@ import {
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
 import type { CausalityLogEntry } from '../../src/state/game_state.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
+import { setLocale } from '../../src/ui/map/i18n';
 
 // ---------------------------------------------------------------------------
 // Synthetic state builders. Minimal MilitaryState shape, mirrors the
@@ -79,6 +80,10 @@ function buildCatalog(defs: EventDefinition[]): ReadonlyMap<string, EventDefinit
     for (const d of defs) out.set(d.id, d);
     return out;
 }
+
+afterEach(() => {
+    setLocale('en');
+});
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -162,7 +167,9 @@ describe('generateWrappedSlides — causality slide F1 (foundational_choice)', (
         expect(f1).toBeDefined();
         expect(f1!.heroValue).toBe('1');
         expect(f1!.subtitle).toContain('Bosniak-national');
-        expect(f1!.bullets).toContain('rbih_bosniak_national');
+        expect(f1!.bullets).toContain('Rbih Bosniak National');
+        expect(f1!.bullets).not.toContain('rbih_bosniak_national');
+        expect(f1!.data?.tags).toContain('rbih_bosniak_national');
         expect(f1!.data?.foundational_event_id).toBe('rbih_state_identity_1992');
         expect(f1!.data?.chosen_option_id).toBe('bosniak_national');
     });
@@ -554,6 +561,96 @@ describe('generateWrappedSlides — slide ordering + rendering contract', () => 
         for (const s of slides) {
             assertWrappedSlideContract(s);
         }
+    });
+
+    it('localizes generated BCS causality slide chrome while preserving authored event data', () => {
+        setLocale('bcs');
+        const catalog = buildCatalog([
+            eventDef('rbih_state_identity_1992', {
+                title: 'Drzavni identitet',
+                historical_default_response_id: 'civic',
+                source_note: 'Izvor',
+                response_options: [
+                    {
+                        id: 'civic',
+                        label: 'Gradjanska drzava',
+                        effects: [],
+                        sets_flags: { rbih_civic: true },
+                    } as any,
+                    {
+                        id: 'national',
+                        label: 'Nacionalni kurs',
+                        effects: [],
+                        sets_flags: { rbih_national: true },
+                    } as any,
+                ],
+            }),
+            eventDef('peace_plan', {
+                title: 'Mirovni plan',
+                historical_default_response_id: 'reject',
+                response_options: [
+                    { id: 'accept', label: 'Prihvati', effects: [] } as any,
+                    { id: 'reject', label: 'Odbij', effects: [] } as any,
+                ],
+            }),
+        ]);
+        const state = buildMinimalState({
+            player_faction: 'RBiH',
+            military: {
+                fired_event_ids: ['rbih_state_identity_1992', 'peace_plan'],
+                enabled_event_ids: ['peace_plan'],
+                closed_event_ids: ['closed_evt'],
+                event_causality_log: [
+                    {
+                        turn: 1,
+                        from_event: 'rbih_state_identity_1992',
+                        to_event: 'peace_plan',
+                        to_flag: null,
+                        kind: 'enables',
+                        source_response_id: 'national',
+                    } as any,
+                ],
+                event_decision_log: [
+                    {
+                        event_id: 'rbih_state_identity_1992',
+                        response_id: 'national',
+                        decision_source: 'player',
+                        faction: 'RBiH',
+                        turn: 1,
+                    },
+                    {
+                        event_id: 'peace_plan',
+                        response_id: 'accept',
+                        decision_source: 'player',
+                        faction: 'RBiH',
+                        turn: 8,
+                    },
+                ],
+                event_last_fired_turn: { rbih_state_identity_1992: 1, peace_plan: 8 },
+            },
+        });
+
+        const slides = generateWrappedSlides(state, catalog).filter(slide =>
+            ['foundational_choice', 'your_divergences', 'causal_chain_summary'].includes(slide.id),
+        );
+        const copy = slides
+            .flatMap(slide => [
+                slide.title,
+                slide.subtitle,
+                slide.heroLabel,
+                slide.detail,
+                ...(slide.bullets ?? []),
+            ].filter(Boolean))
+            .join(' ');
+
+        expect(slides).toHaveLength(3);
+        expect(copy).toContain('Drzavni identitet');
+        expect(copy).toContain('Mirovni plan');
+        expect(copy).not.toMatch(/Foundational Choice|branch tags activated|branch tag activated/i);
+        expect(copy).not.toMatch(/You Defied History|decision broke from the historical path|decisions broke from the historical path|history:/i);
+        expect(copy).not.toMatch(/counterfactual divergence|counterfactual divergences|Showing top/i);
+        expect(copy).not.toMatch(/Your Decisions Reshaped The War|events fired in your causal chain|causal substrate persisted/i);
+        expect(copy).not.toMatch(/foundational|downstream|closed|Player divergences|Max chain depth|Events foreclosed/i);
     });
 });
 

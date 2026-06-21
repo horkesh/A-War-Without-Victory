@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): localize Chronicle/Wrapped and Army HQ threat generated copy
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Continuation pointer for the 2026-06-21 generated-copy batch committed after local midnight in Sarajevo. Chronicle Wrapped canonical slides, causality slide chrome, Chronicle chapter summaries/accessibility labels, SpiderChart dimension labels/value keys, and Army HQ threat assessment prose now render through localized generated-copy boundaries while authored event/operation/formation/officer/historical payloads remain authored data.
+
+**Verification:** See the full verification record in `docs/40_reports/implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLISH.md` and the detailed 2026-06-21 ledger entry below. Local proof included focused, expanded, broader UI/i18n, typecheck, `qa:player-journeys`, `desktop:map:build`, `qa:live-surface:browser`, and `git diff --check`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed.
+
+---
+
 ## [2026-06-21] fix(ui): close command-copy grammar, Inbox, and Chronicle label residuals
 
 **Type:** UI/read-model/i18n/test/docs polish.
@@ -22100,3 +22112,11 @@ Hardened the Army HQ Records and War Summary aftermath label boundary. `TurnAfte
 Verification: focused pack `npx.cmd vitest run tests\ui\turn_aftermath_records_panel_i18n.test.ts tests\ui\war_summary_campaign_cost_i18n.test.ts --reporter=dot` passed 6/6. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 246/246. `npm.cmd run qa:live-surface:browser` passed; inspected evidence showed Records AAR formation-link proof, operation-opportunity Inbox/Desk/Decision Room routing proof, map context-menu proof, battle-marker proof, and `serverPortCleanupVerified: true`. `.tmp_live_surface_browser_sweep` was removed after evidence inspection.
 
 Determinism/scope: UI/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, decision routing, blocker semantics, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260621_RECORDS_AFTERMATH_LABEL_MAPS.md`.
+
+## 2026-06-21 - Chronicle/Wrapped and Army HQ threat generated-copy polish
+
+Closed the generated-copy boundary for Chronicle Wrapped, Chronicle chapter summaries, Chronicle accessibility chrome, and Army HQ threat assessment rows. Wrapped canonical slides and causality slides now render through EN/BCS i18n keys; causality branch tags remain preserved in `data.tags` but visible bullets use player-safe labels. The Wrapped spider chart now separates canonical strategic-dimension keys from localized display labels, fixing the zero-value chart path. Chronicle chapter fallback doctrine titles, type labels, boundary labels, summaries, filter titles, count aria labels, and scrubber jump labels now use localized templates. Army HQ threat assessment rows now generate localized threat titles/details and carry sector context fields alongside corps context for later drilldown routing.
+
+Verification: red focused proof failed before implementation on BCS Wrapped core slides, causality slides, Chronicle chapter summaries, Wrapped component chrome/chart labels, and Army HQ threat prose. Green focused proof `npx.cmd vitest run tests\ui\army_hq_readiness_threat_copy.test.ts tests\wrapped_slides.test.ts tests\ui\chronicle_endgame_mount.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_causality_slides.test.ts --reporter=dot` passed 62/62. Expanded proof `npx.cmd vitest run tests\ui\army_hq_readiness_threat_copy.test.ts tests\wrapped_slides.test.ts tests\ui\chronicle_endgame_mount.test.ts tests\ui\chronicle_chapters.test.ts tests\ui\chronicle_causality_slides.test.ts tests\ui\ui_copy_raw_id_fallbacks.test.ts tests\ui\chronicle_spine_scrubber.test.ts tests\ui\chronicle_chapter_ui.test.ts --reporter=dot` passed 71/71. Broader UI/i18n proof `npx.cmd vitest run tests\ui_i18n.test.ts tests\chronicle_entries.test.ts tests\ui\chronicle_decision_ledger.test.ts --reporter=dot` passed 37/37. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 249/249. `npm.cmd run desktop:map:build` passed with existing Vite warnings. `npm.cmd run qa:live-surface:browser` passed on fresh port `3247` after an initial stale-port timeout, with live-surface evidence and dev-server cleanup verified. `git diff --check` passed with only the existing CRLF normalization warning for `src/ui/map/components/army_hq/generateThreatAssessment.ts`.
+
+Determinism/scope: UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event mechanics, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260621_CHRONICLE_WRAPPED_THREAT_COPY_POLISH.md`.

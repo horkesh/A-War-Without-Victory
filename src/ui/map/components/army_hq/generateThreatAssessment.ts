@@ -1,4 +1,5 @@
 import type { LoadedGameState } from '../../data/types';
+import { t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 
 interface SectorIntelRecordView {
@@ -19,30 +20,32 @@ export interface ThreatItem {
     confidence?: number;
     friendlyCorpsId?: string;
     friendlyCorpsName?: string;
+    friendlySectorId?: string;
+    friendlySectorName?: string;
 }
 
 function frontLabel(corpsName?: string, fallback?: string): string {
-    return `${corpsName ?? fallback ?? 'Front'} front`;
+    return t('threatAssessment.frontLabel', { name: corpsName ?? fallback ?? t('threatAssessment.frontFallback') });
 }
 
 /** Map raw engine strength_category enum values to player-safe uncertainty language. */
-const STRENGTH_DISPLAY: Record<string, string> = {
-    thin:     'limited enemy presence (assessed)',
-    moderate: 'moderate enemy strength (estimated)',
-    dense:    'significant enemy presence (estimated)',
-    fortress: 'heavily fortified (assessed)',
+const STRENGTH_DISPLAY: Record<string, MessageKey> = {
+    thin: 'threatAssessment.strength.thin',
+    moderate: 'threatAssessment.strength.moderate',
+    dense: 'threatAssessment.strength.dense',
+    fortress: 'threatAssessment.strength.fortress',
 };
 
 function describeStrength(strengthCategories: string[]): string {
-    if (strengthCategories.length === 0) return 'enemy strength unknown';
+    if (strengthCategories.length === 0) return t('threatAssessment.strength.unknown');
     const raw = strengthCategories[strengthCategories.length - 1].toLowerCase();
-    return STRENGTH_DISPLAY[raw] ?? 'enemy presence reported (estimated)';
+    return t(STRENGTH_DISPLAY[raw] ?? 'threatAssessment.strength.reported');
 }
 
 function describeConfidence(confidence: number): string {
-    if (confidence >= 0.8) return 'High confidence';
-    if (confidence >= 0.5) return 'Moderate confidence';
-    return 'Low confidence';
+    if (confidence >= 0.8) return t('threatAssessment.confidence.high');
+    if (confidence >= 0.5) return t('threatAssessment.confidence.moderate');
+    return t('threatAssessment.confidence.low');
 }
 
 export function generateThreatAssessment(
@@ -61,7 +64,7 @@ export function generateThreatAssessment(
 
     const formationById = new Map(formations.map((f) => [f.id, f]));
 
-    const sectorToCorps = new Map<string, { corpsId: string; corpsName: string }>();
+    const sectorToCorps = new Map<string, { corpsId: string; corpsName: string; sectorName: string }>();
     for (const sector of sectors) {
         if (sector.faction !== faction) continue;
         sectorToCorps.set(sector.sector_id, {
@@ -71,6 +74,7 @@ export function generateThreatAssessment(
                 sector.corps_id,
                 'Field Command',
             ),
+            sectorName: sector.display_name,
         });
     }
 
@@ -99,11 +103,17 @@ export function generateThreatAssessment(
         items.push({
             id: tid(),
             severity: 'offensive',
-            title: `${frontLabel(corpsInfo?.corpsName)} - hostile offensive preparation`,
-            detail: `Strength estimate: ${describeStrength(strengthCategories)}. ${describeConfidence(bestConf)}. ${records.length} sector${records.length > 1 ? 's' : ''} reporting preparation signs.`,
+            title: t('threatAssessment.offensive.title', { front: frontLabel(corpsInfo?.corpsName) }),
+            detail: t(records.length === 1 ? 'threatAssessment.offensive.detail.one' : 'threatAssessment.offensive.detail.many', {
+                strength: describeStrength(strengthCategories),
+                confidence: describeConfidence(bestConf),
+                count: records.length,
+            }),
             confidence: bestConf,
             friendlyCorpsId: corpsInfo?.corpsId,
             friendlyCorpsName: corpsInfo?.corpsName,
+            friendlySectorId,
+            friendlySectorName: corpsInfo?.sectorName,
         });
     }
 
@@ -115,13 +125,15 @@ export function generateThreatAssessment(
         items.push({
             id: tid(),
             severity: 'hardened',
-            title: `${frontLabel(ourCorps?.corpsName)} - hostile defenses consolidating`,
+            title: t('threatAssessment.hardened.title', { front: frontLabel(ourCorps?.corpsName) }),
             detail: avgConf >= 0.75
-                ? 'Entrenchment and defensive posture are consistently reported along this front.'
-                : 'Defensive preparations are being reported along this front.',
+                ? t('threatAssessment.hardened.detail.consistent')
+                : t('threatAssessment.hardened.detail.reported'),
             confidence: avgConf,
             friendlyCorpsId: ourCorps?.corpsId,
             friendlyCorpsName: ourCorps?.corpsName,
+            friendlySectorId,
+            friendlySectorName: ourCorps?.sectorName,
         });
     }
 
@@ -135,11 +147,13 @@ export function generateThreatAssessment(
         items.push({
             id: tid(),
             severity: 'gap',
-            title: `${frontLabel(corpsInfo?.corpsName)} - weak intelligence picture`,
-            detail: avgConf < 0.15 ? 'Blind sector. Recommend probe or reconnaissance.' : 'Low confidence reporting. Reconnaissance recommended.',
+            title: t('threatAssessment.gap.title', { front: frontLabel(corpsInfo?.corpsName) }),
+            detail: avgConf < 0.15 ? t('threatAssessment.gap.detail.blind') : t('threatAssessment.gap.detail.low'),
             confidence: avgConf,
             friendlyCorpsId: corpsInfo?.corpsId,
             friendlyCorpsName: corpsInfo?.corpsName,
+            friendlySectorId: sector.sector_id,
+            friendlySectorName: corpsInfo?.sectorName,
         });
     }
 

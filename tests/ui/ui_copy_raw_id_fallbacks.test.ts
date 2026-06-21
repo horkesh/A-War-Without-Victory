@@ -202,7 +202,7 @@ describe('UI copy raw-id fallbacks', () => {
     expect(recordsSource).toContain("aria-label={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}");
     expect(recordsSource).toContain("{' · '}");
 
-    expect(chronicleSource).toContain('aria-label={`${count} entries`}');
+    expect(chronicleSource).toContain("aria-label={t(count === 1 ? 'chronicle.entryCount.one' : 'chronicle.entryCount.many', { count })}");
     expect(chronicleSource).toContain("{' · '}");
   });
 });

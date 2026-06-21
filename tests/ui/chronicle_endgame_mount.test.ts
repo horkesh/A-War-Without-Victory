@@ -163,4 +163,36 @@ describe('chronicle endgame narrative mounts', () => {
             expect(html).not.toMatch(new RegExp(`>${faction}<`));
         }
     });
+
+    it('localizes wrapped component chrome and strategic chart labels in BCS mode', () => {
+        setLocale('bcs');
+        const html = renderToStaticMarkup(
+            React.createElement(WrappedSlideComponent, {
+                slide: {
+                    id: 'another_such_victory',
+                    title: 'Jos jedna takva pobjeda',
+                    subtitle: 'Historija je ovaj rat pamtila drugacije',
+                    heroValue: '48',
+                    heroLabel: 'konacni ishod',
+                    detail: 'Republika Bosna i Hercegovina',
+                    data: {
+                        military_credibility: 60,
+                        territorial_legitimacy: 55,
+                        international_standing: 35,
+                        patron_confidence: 45,
+                        internal_cohesion: 50,
+                        negotiating_leverage: 48,
+                    },
+                },
+                index: 9,
+                total: 10,
+                faction: 'RBiH',
+            }),
+        );
+
+        expect(html).not.toMatch(/click or arrow key to continue|press ESC to close/i);
+        expect(html).not.toMatch(/MIL CRED|TERR LEG|INTL STD|PATRON|COHESION|LEVERAGE/);
+        expect(html).toContain('Vojni kredibilitet');
+        expect(html).toContain('Pregovara');
+    });
 });
