@@ -38,6 +38,7 @@ import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
 import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
 import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js';
 import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.js';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
@@ -127,6 +128,7 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
     const netFriendlyTerritory = playerFaction
         ? Number(summary?.territory_net?.[playerFaction] ?? 0)
         : 0;
+    const narrateTerritory = shouldNarrateTerritorySummary(summary);
 
     const playerScopedCost = playerFaction
         ? friendlyCasualties >= COST_FRIENDLY_CASUALTY_THRESHOLD
@@ -157,7 +159,7 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
     if (ownFormationsDestroyed > 0) {
         reasons.push(`${ownFormationsDestroyed} own ${ownFormationsDestroyed === 1 ? 'formation' : 'formations'} destroyed`);
     }
-    if (playerFaction && netFriendlyTerritory !== 0) {
+    if (playerFaction && narrateTerritory && netFriendlyTerritory !== 0) {
         reasons.push(`${netFriendlyTerritory >= 0 ? '+' : ''}${netFriendlyTerritory} net settlements`);
     }
 
@@ -171,7 +173,7 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
             casualties: playerFaction ? friendlyCasualties : theaterCasualties,
             displaced,
             costSeverity: severity,
-            netFriendlyTerritory: playerFaction ? netFriendlyTerritory : undefined,
+            netFriendlyTerritory: playerFaction && narrateTerritory ? netFriendlyTerritory : undefined,
             ownFormationsDestroyed,
         },
     };

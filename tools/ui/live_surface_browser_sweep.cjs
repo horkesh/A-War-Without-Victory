@@ -289,7 +289,7 @@ async function waitUntilDialogTextAbsent(page, text, timeout = 15000) {
 
 async function waitForTacticalMap(page, timeout = 30000) {
   await page.waitForFunction(() => {
-    const map = document.querySelector('main[aria-label^="Tactical map"]');
+    const map = document.querySelector('[data-testid="tactical-map"]');
     if (!(map instanceof HTMLElement)) return false;
     const rect = map.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
@@ -915,7 +915,7 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await captureEvidence(page, summary, 'owner_journey_decision_room');
 
   await resetToWarMap(page);
-  await waitForVisibleSelector(page, 'main[aria-label^="Tactical map"]');
+  await waitForVisibleSelector(page, '[data-testid="tactical-map"]');
   await ensureExpanded(page, '[data-testid="oob-section-sectors-toggle"]');
   await clickFirstSectorWithVisibleFormation(page, summary);
   await waitForVisibleSelector(page, '#sector-intel-tab-overview');

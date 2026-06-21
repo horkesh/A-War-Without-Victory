@@ -122,6 +122,8 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('data-testid="desk-open-command-surface"');
     expect(tool).toContain('toolbar-route-desk');
     expect(tool).toContain('toolbar-route-war-map');
+    expect(tool).toContain('[data-testid="tactical-map"]');
+    expect(tool).not.toContain('main[aria-label^="Tactical map"]');
     expect(tool).toContain('toolbar-route-records');
     expect(tool).toContain('data-testid="codex-close"');
     expect(tool).toContain('data-testid="command-card-strip-close"');
@@ -148,6 +150,7 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-desk"');
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-war-map"');
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-records"');
+    expect(read('src/ui/map/map/MapContainer.tsx')).toContain('data-testid="tactical-map"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-close"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-essay-row"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-essay-id={essay.id}');

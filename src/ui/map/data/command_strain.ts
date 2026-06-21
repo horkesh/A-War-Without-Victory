@@ -777,6 +777,7 @@ export interface CorpsSituationAssessment {
     planExplanation: string | null;
     /** Threat context. Null = low threat / nothing notable. */
     threatContext: string | null;
+    threatContextToken?: CommandCopyToken | null;
     /**
      * Wave 2: The single dominant reason this corps is constrained.
      * One sentence naming THE main factor. Null = healthy (silence).
@@ -946,13 +947,17 @@ export function deriveCorpsSituationAssessment(
 
     // ── Threat context ───────────────────────────────────────────────────
     let threatContext: string | null = null;
+    let threatContextToken: CommandCopyToken | null = null;
     const pressure = threat?.overall_pressure;
     if (pressure === 'critical') {
         threatContext = 'Under critical pressure — enemy offensive threatens corps integrity';
+        threatContextToken = copyToken('commandStrain.situation.threat.critical', threatContext);
     } else if (pressure === 'heavy') {
         threatContext = 'Heavy enemy pressure across the front';
+        threatContextToken = copyToken('commandStrain.situation.threat.heavy', threatContext);
     } else if (pressure === 'moderate' && (threat?.enemy_concentration_zones?.length ?? 0) > 0) {
         threatContext = 'Enemy concentration detected — defensive readiness elevated';
+        threatContextToken = copyToken('commandStrain.situation.threat.concentration', threatContext);
     }
 
     // ── Posture summary (one-line) ───────────────────────────────────────
@@ -993,7 +998,13 @@ export function deriveCorpsSituationAssessment(
 
     // ── Wave 2+3: Dominant reason + primary constraint + relief path ────────
     // Priority order (highest = most urgent): siege > threat > defensive_duty > force_condition > institutional > plan > none
-    const { dominantReason, primaryConstraint, reliefPath } = classifyPrimaryConstraint(
+    const {
+        dominantReason,
+        dominantReasonToken,
+        primaryConstraint,
+        reliefPath,
+        reliefPathToken,
+    } = classifyPrimaryConstraint(
         zones, threat, forces, plan, commanderState,
         corpsStance, exhaustion, commandStrain ?? 0, totalDeficit, totalSurplus,
         combatEffective, totalBrigades, besiegedZones, mustHoldZones,
@@ -1006,9 +1017,12 @@ export function deriveCorpsSituationAssessment(
         institutionalFactors,
         planExplanation,
         threatContext,
+        threatContextToken,
         dominantReason,
+        dominantReasonToken,
         primaryConstraint,
         reliefPath,
+        reliefPathToken,
     };
 }
 
@@ -1032,136 +1046,212 @@ function classifyPrimaryConstraint(
     totalBrigades: number,
     besiegedZones: Array<{ posture: string }>,
     mustHoldZones: Array<{ posture: string; deficit: number }>,
-): { dominantReason: string | null; primaryConstraint: PrimaryConstraint; reliefPath: string | null } {
+): {
+    dominantReason: string | null;
+    dominantReasonToken?: CommandCopyToken | null;
+    primaryConstraint: PrimaryConstraint;
+    reliefPath: string | null;
+    reliefPathToken?: CommandCopyToken | null;
+} {
 
     // 1. Siege — existential
     if (besiegedZones.length > 0) {
+        const dominantReason = 'Corps area is under siege — survival takes priority over offensive planning';
+        const reliefPath = 'Requires breaking the encirclement or widening the corridor to restore movement freedom';
         return {
             primaryConstraint: 'siege',
-            dominantReason: 'Corps area is under siege — survival takes priority over offensive planning',
-            reliefPath: 'Requires breaking the encirclement or widening the corridor to restore movement freedom',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.siege', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.siege', reliefPath),
         };
     }
 
     // 2. Threat pressure — critical/heavy enemy pressure
     const pressure = threat?.overall_pressure;
     if (pressure === 'critical') {
+        const dominantReason = 'Enemy offensive threatens corps integrity — all resources committed to defense';
+        const reliefPath = 'Hold defensive positions and absorb the offensive; request reinforcement from Army HQ';
         return {
             primaryConstraint: 'threat_pressure',
-            dominantReason: 'Enemy offensive threatens corps integrity — all resources committed to defense',
-            reliefPath: 'Hold defensive positions and absorb the offensive; request reinforcement from Army HQ',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.threatCritical', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.threatCritical', reliefPath),
         };
     }
     if (pressure === 'heavy') {
+        const dominantReason = 'Heavy enemy pressure demands defensive priority across the front';
+        const reliefPath = 'Stabilize the front through sustained defense; pressure eases as enemy offensive culminates';
         return {
             primaryConstraint: 'threat_pressure',
-            dominantReason: 'Heavy enemy pressure demands defensive priority across the front',
-            reliefPath: 'Stabilize the front through sustained defense; pressure eases as enemy offensive culminates',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.threatHeavy', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.threatHeavy', reliefPath),
         };
     }
 
     // 3. Defensive duty — garrison deficit, must-hold shortfall, no surplus
     const mustHoldDeficit = mustHoldZones.reduce((sum, z) => sum + z.deficit, 0);
     if (mustHoldDeficit > 0) {
+        const params = { count: mustHoldDeficit, plural: mustHoldDeficit > 1 ? 's' : '' };
+        const dominantReason = `Critical positions are undermanned — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short of minimum hold requirements`;
+        const reliefPath = `Requires ${mustHoldDeficit} additional brigade${mustHoldDeficit > 1 ? 's' : ''} or consolidation of defensive positions`;
         return {
             primaryConstraint: 'defensive_duty',
-            dominantReason: `Critical positions are undermanned — ${mustHoldDeficit} brigade${mustHoldDeficit > 1 ? 's' : ''} short of minimum hold requirements`,
-            reliefPath: `Requires ${mustHoldDeficit} additional brigade${mustHoldDeficit > 1 ? 's' : ''} or consolidation of defensive positions`,
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.mustHoldDeficit', dominantReason, params),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.mustHoldDeficit', reliefPath, params),
         };
     }
     if (totalDeficit > 2) {
+        const params = { count: totalDeficit };
+        const dominantReason = `Garrison requirements exceed available forces by ${totalDeficit} brigades`;
+        const reliefPath = `Requires ${totalDeficit} additional brigades or reduced garrison burden through consolidation`;
         return {
             primaryConstraint: 'defensive_duty',
-            dominantReason: `Garrison requirements exceed available forces by ${totalDeficit} brigades`,
-            reliefPath: `Requires ${totalDeficit} additional brigades or reduced garrison burden through consolidation`,
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.garrisonDeficit', dominantReason, params),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.garrisonDeficit', reliefPath, params),
         };
     }
     if (totalSurplus === 0 && totalBrigades > 0) {
+        const dominantReason = 'All brigades committed to garrison — no surplus available for operations';
+        const reliefPath = 'Free surplus by receiving reinforcement or consolidating defended positions';
         return {
             primaryConstraint: 'defensive_duty',
-            dominantReason: 'All brigades committed to garrison — no surplus available for operations',
-            reliefPath: 'Free surplus by receiving reinforcement or consolidating defended positions',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.noSurplus', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.noSurplus', reliefPath),
         };
     }
 
     // 4. Force condition — exhaustion, low combat effectiveness
     if (exhaustion >= 60) {
+        const params = { pct: Math.round(exhaustion) };
+        const dominantReason = 'Corps is heavily exhausted — offensive capacity severely limited';
+        const reliefPath = `Exhaustion at ${Math.round(exhaustion)}% — requires reduced operational tempo to recover`;
         return {
             primaryConstraint: 'force_condition',
-            dominantReason: 'Corps is heavily exhausted — offensive capacity severely limited',
-            reliefPath: `Exhaustion at ${Math.round(exhaustion)}% — requires reduced operational tempo to recover`,
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.exhaustionSevere', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.exhaustionSevere', reliefPath, params),
         };
     }
     if (totalBrigades > 0 && combatEffective < totalBrigades * 0.5) {
+        const params = { effective: combatEffective, total: totalBrigades };
+        const dominantReason = `Only ${combatEffective} of ${totalBrigades} brigades are combat-effective`;
+        const reliefPath = 'Rotate depleted brigades to rear for refit; bring replacements forward';
         return {
             primaryConstraint: 'force_condition',
-            dominantReason: `Only ${combatEffective} of ${totalBrigades} brigades are combat-effective`,
-            reliefPath: 'Rotate depleted brigades to rear for refit; bring replacements forward',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.lowCombatEffective', dominantReason, params),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.lowCombatEffective', reliefPath),
         };
     }
     if (exhaustion >= 40) {
+        const params = { pct: Math.round(exhaustion) };
+        const dominantReason = 'Significant corps exhaustion is limiting operational tempo';
+        const reliefPath = `Exhaustion at ${Math.round(exhaustion)}% - limit operations to allow gradual recovery`;
         return {
             primaryConstraint: 'force_condition',
-            dominantReason: 'Significant corps exhaustion is limiting operational tempo',
-            reliefPath: `Exhaustion at ${Math.round(exhaustion)}% �� limit operations to allow gradual recovery`,
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.exhaustionModerate', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.exhaustionModerate', reliefPath, params),
         };
     }
 
     // 5. Institutional strain — command compromised, defensive/reorganize stance
     if (corpsStance === 'reorganize') {
+        const dominantReason = 'Corps is reorganizing — all operations suspended by directive';
+        const reliefPath = 'Change corps stance to balanced or defensive when reorganization is complete';
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason: 'Corps is reorganizing — all operations suspended by directive',
-            reliefPath: 'Change corps stance to balanced or defensive when reorganization is complete',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.reorganizing', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.reorganizing', reliefPath),
         };
     }
     if (commandStrain >= COMPROMISED_THRESHOLD) {
+        const dominantReason = 'Command relationship is compromised — offensive options restricted until stabilized';
+        const reliefPath = 'Stabilize the command relationship or allow natural strain decay over time';
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason: 'Command relationship is compromised — offensive options restricted until stabilized',
-            reliefPath: 'Stabilize the command relationship or allow natural strain decay over time',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.commandCompromised', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.commandCompromised', reliefPath),
         };
     }
     if (corpsStance === 'defensive') {
+        const dominantReason = 'Corps directed to hold defensive posture — no offensive planning authorized';
+        const reliefPath = 'Change corps stance to balanced or offensive to authorize new operations';
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason: 'Corps directed to hold defensive posture — no offensive planning authorized',
-            reliefPath: 'Change corps stance to balanced or offensive to authorize new operations',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.defensivePosture', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.defensivePosture', reliefPath),
         };
     }
 
     // 6. Plan lifecycle — suspended/abandoned/concentrating (non-urgent but notable)
     if (plan?.status === 'suspended') {
         const reason = plan.suspension_reason || commanderState.last_plan_reason || 'conditions deteriorated';
+        const dominantReason = `Operation plan suspended — ${reason}`;
+        const reliefPath = 'Address the suspension cause; plan resumes automatically when conditions improve';
         return {
             primaryConstraint: 'plan_lifecycle',
-            dominantReason: `Operation plan suspended — ${reason}`,
-            reliefPath: 'Address the suspension cause; plan resumes automatically when conditions improve',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.planSuspended', dominantReason, { reason }),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.planSuspended', reliefPath),
         };
     }
     if (commanderState.last_plan_action === 'abandoned' && commanderState.last_plan_reason) {
+        const reason = commanderState.last_plan_reason;
+        const dominantReason = `Recent operation plan abandoned — ${reason}`;
+        const reliefPath = 'Commander will evaluate new objectives when surplus and conditions permit';
         return {
             primaryConstraint: 'plan_lifecycle',
-            dominantReason: `Recent operation plan abandoned — ${commanderState.last_plan_reason}`,
-            reliefPath: 'Commander will evaluate new objectives when surplus and conditions permit',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.planAbandoned', dominantReason, { reason }),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.planAbandoned', reliefPath),
         };
     }
 
     // 7. Moderate threat with concentration signs (lower priority than direct pressure)
     if (pressure === 'moderate' && (threat?.enemy_concentration_zones?.length ?? 0) > 0) {
+        const dominantReason = 'Enemy concentration detected — defensive readiness elevated';
+        const reliefPath = 'Reinforce threatened sectors; concentration may dissipate if enemy commits elsewhere';
         return {
             primaryConstraint: 'threat_pressure',
-            dominantReason: 'Enemy concentration detected — defensive readiness elevated',
-            reliefPath: 'Reinforce threatened sectors; concentration may dissipate if enemy commits elsewhere',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.threatConcentration', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.threatConcentration', reliefPath),
         };
     }
 
     // 8. Strained command (lower than compromised — notable but not blocking)
     if (commandStrain >= STRAINED_THRESHOLD) {
+        const dominantReason = 'Command relationship under strain from recent presidential interventions';
+        const reliefPath = 'Avoid further direct interventions; strain decays naturally over time';
         return {
             primaryConstraint: 'institutional_strain',
-            dominantReason: 'Command relationship under strain from recent presidential interventions',
-            reliefPath: 'Avoid further direct interventions; strain decays naturally over time',
+            dominantReason,
+            dominantReasonToken: copyToken('commandStrain.situation.reason.commandStrained', dominantReason),
+            reliefPath,
+            reliefPathToken: copyToken('commandStrain.situation.relief.commandStrained', reliefPath),
         };
     }
 

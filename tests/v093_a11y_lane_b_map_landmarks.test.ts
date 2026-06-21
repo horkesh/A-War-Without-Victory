@@ -37,6 +37,8 @@ const read = (p: string) => readFileSync(resolve(repoRoot, p), 'utf8');
 
 const APP_PATH = 'src/ui/map/App.tsx';
 const MAP_CONTAINER_PATH = 'src/ui/map/map/MapContainer.tsx';
+const EN_MESSAGES_PATH = 'src/ui/map/i18n/messages.en.ts';
+const BCS_MESSAGES_PATH = 'src/ui/map/i18n/messages.bcs.ts';
 const OOB_SIDEBAR_PATH = 'src/ui/map/components/OOBSidebar.tsx';
 const BOTTOM_STATUS_PATH = 'src/ui/map/components/BottomStatusStrip.tsx';
 const PRESIDENTIAL_TOOLBAR_PATH = 'src/ui/map/components/PresidentialToolbar.tsx';
@@ -73,6 +75,13 @@ function collectLandmarkAriaLabels(src: string): string[] {
         out.push(m[1]);
     }
     return out;
+}
+
+function collectMessageValues(src: string, keys: string[]): string[] {
+    return keys.flatMap((key) => {
+        const match = src.match(new RegExp(`'${key}':\\s*'([^']+)'`));
+        return match ? [match[1]] : [];
+    });
 }
 
 describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboard + tutorial anchor', () => {
@@ -139,16 +148,24 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
         // It must declare tabIndex={0} so keyboard users can focus it and
         // receive arrow-key/+/-/Home events.
         expect(mapSrc).toMatch(/<main[\s\S]*?tabIndex=\{0\}[\s\S]*?>/);
-        // It must carry an aria-label that describes the map and keyboard
-        // controls (so SR announces "Tactical map ... pan with arrow keys").
-        expect(mapSrc).toMatch(/<main[\s\S]*?aria-label=["'][^"']*[Tt]actical map[\s\S]*?>/);
-        // The aria-label should mention arrow keys (keyboard discoverability).
+        // It must carry a localized aria-label that describes the map and
+        // keyboard controls. Browser gates use data-testid, not localized copy.
+        expect(mapSrc).toContain("aria-label={t('map.aria.tacticalMap')}");
+        expect(mapSrc).not.toMatch(/aria-label=["'][^"']*[Tt]actical map/);
+
+        const enMessages = read(EN_MESSAGES_PATH);
+        const bcsMessages = read(BCS_MESSAGES_PATH);
+        expect(enMessages).toContain("'map.aria.tacticalMap'");
+        expect(bcsMessages).toContain("'map.aria.tacticalMap'");
+        expect(enMessages).toContain('arrow keys');
+
+        // The rendered aria-label should mention arrow keys (keyboard discoverability).
         // Match the multiline JSX opening tag (which has attributes spread
         // across lines), not the bare `<main>` token that may appear in
         // doc comments.
         const mainTag = mapSrc.match(/<main\s[\s\S]*?>/);
         expect(mainTag, 'expected to find <main ...> JSX opening tag').not.toBeNull();
-        expect(mainTag![0]).toMatch(/arrow/i);
+        expect(mainTag![0]).toContain("aria-label={t('map.aria.tacticalMap')}");
     });
 
     it('T5 — tutorial `map-container` anchor wired on MapContainer wrapper', () => {
@@ -224,9 +241,13 @@ describe('LANE-NIGHTSHIFT-V093-A11Y-LANE-B — Map / tactical landmarks + keyboa
         // Faction-agnostic: aria-labels on the new landmarks must not name
         // a faction (RBiH / ARBiH / RS / VRS / HRHB / HVO).
         const appSrc = read(APP_PATH);
+        const enMessages = read(EN_MESSAGES_PATH);
+        const bcsMessages = read(BCS_MESSAGES_PATH);
         const allLabels = [
             ...collectLandmarkAriaLabels(appSrc),
             ...collectLandmarkAriaLabels(mapSrc),
+            ...collectMessageValues(enMessages, ['map.aria.tacticalMap']),
+            ...collectMessageValues(bcsMessages, ['map.aria.tacticalMap']),
         ];
         expect(
             allLabels.length,

@@ -3386,8 +3386,9 @@ export function MapContainer() {
     <main
       role="main"
       id="main-content"
+      data-testid="tactical-map"
       data-tutorial-step="map-container"
-      aria-label="Tactical map of Bosnia and Herzegovina; pan with arrow keys, zoom with plus and minus, press Home to reset view"
+      aria-label={t('map.aria.tacticalMap')}
       tabIndex={0}
       onKeyDown={handleMapKeyDown}
       className="absolute inset-0 outline-none"

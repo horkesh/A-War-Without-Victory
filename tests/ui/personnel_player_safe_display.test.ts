@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { PersonnelContent } from '../../src/ui/map/components/army_hq/PersonnelContent.js';
 import { derivePanelRailState, shouldRenderTacticalDetailRails } from '../../src/ui/map/components/panelRail.js';
+import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
@@ -140,6 +141,54 @@ function makeOpeningCommanderState(): LoadedGameState {
   } as unknown as LoadedGameState;
 }
 
+function makeRawFutureOfficerState() {
+  return {
+    meta: { turn: 0, phase: 'war', player_faction: 'RS' },
+    military: {
+      formations: {
+        vrs_drina: { id: 'vrs_drina', name: 'Drina Corps', faction: 'RS', kind: 'corps', status: 'active' },
+      },
+      brigade_movement_state: {},
+      named_officer_data: [
+        {
+          id: 'current_commander',
+          name: 'Current Commander',
+          faction: 'RS',
+          rank: 'corps_commander',
+          competence: 4,
+          aggressiveness: 3,
+          defensive_skill: 4,
+          political_reliability: 3,
+          available_from_turn: 0,
+        },
+        {
+          id: 'future_commander',
+          name: 'Future Commander',
+          faction: 'RS',
+          rank: 'corps_commander',
+          competence: 5,
+          aggressiveness: 4,
+          defensive_skill: 4,
+          political_reliability: 3,
+          available_from_turn: 12,
+        },
+      ],
+      named_officers: {
+        current_commander: {
+          officer_id: 'current_commander',
+          status: 'active',
+          assigned_corps_id: 'vrs_drina',
+          acting_commander: false,
+          turns_in_command: 0,
+          battles: 0,
+          victories: 0,
+        },
+      },
+    },
+    political: { political_controllers: {} },
+  };
+}
+
 afterEach(() => {
   cleanup();
   useGameStore.setState({ loadedGameState: null, selectedArmyId: null });
@@ -219,6 +268,22 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('Command vacancies1No active commander: Empty Corps');
     expect(container.textContent).not.toContain('Command vacancies3');
     expect(container.textContent).not.toContain('No active commander: JNA Herzegovina Command, Drina Corps, Empty Corps');
+  });
+
+  it('does not count future officers with no mutable state in the turn-0 roster', () => {
+    const loaded = parseGameState(makeRawFutureOfficerState());
+    const future = loaded.namedOfficerData?.find((officer) => officer.id === 'future_commander');
+
+    expect(future?.status).not.toBe('active');
+    expect(future?.status).not.toBe('reserve');
+
+    useGameStore.setState({ loadedGameState: loaded, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('OFFICER ROSTER (1 active, 0 reserve)');
+    expect(container.textContent).toContain('Current Commander');
+    expect(container.textContent).not.toContain('Future Commander');
   });
 
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {

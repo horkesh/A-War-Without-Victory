@@ -160,6 +160,42 @@ describe('generateChronicleEntries', () => {
         });
     });
 
+    it('does not narrate turn-0 territory_net on cost cards', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 0,
+            turnSummaries: [makeTurnSummary(0, {
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'breakthrough',
+                    attacker_casualties: 20,
+                    defender_casualties: 80,
+                    territory_flipped: false,
+                }],
+                displacement_total: 1250,
+                territory_net: { RBiH: 3, RS: -3 },
+            })],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+        const cost = entries.find(e => e.type === 'cost');
+
+        expect(cost).toBeDefined();
+        expect(cost?.turn).toBe(0);
+        expect(cost?.detail).toContain('80 friendly casualties');
+        expect(cost?.detail).toContain('1250 displaced');
+        expect(cost?.detail).not.toContain('net settlements');
+        expect(cost?.detail).not.toContain('+3');
+        expect(cost?.metadata).toMatchObject({
+            casualties: 80,
+            displaced: 1250,
+            costSeverity: 'critical',
+        });
+        expect(cost?.metadata?.netFriendlyTerritory).toBeUndefined();
+    });
+
     it('does not create cost cards for quiet minor turns', () => {
         const state = {
             player_faction: 'RBiH',
