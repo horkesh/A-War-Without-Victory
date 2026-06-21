@@ -1,3 +1,7 @@
+## 2026-06-21 - Supply visibility generated copy boundary
+
+**Supply visibility is a player read-model, not English prose:** `buildPlayerSupplyVisibility` preserves player-faction-safe supply counts, but its headline/evidence rows are rendered in normal Decision Room surfaces. Durable rule: keep generated supply headlines/evidence behind `decisionRoom.card.supply.*` keys and reuse `supply.state*Count` / `supply.corridor*Count` labels instead of interpolating English `adequate / strained / critical` or corridor copy. Applied in `[2026-06-21] Supply Visibility I18n Boundary`; report `docs/40_reports/implemented/20260621_SUPPLY_VISIBILITY_I18N_BOUNDARY.md`.
+
 ## 2026-06-21 - Decision Room primary route ownership
 
 **Decision Room-owned priority cards stay in the Decision Room:** command, operational, and turn-review cards may need Army HQ or Records as source evidence, but those surfaces should not be their primary action route. Durable rule: normalize these cards in `finalizeCards` to `decision-room` lens/card targets, preserve the previous owner route as `sourceHandoffTarget`, and carry the handoff through pre-advance review. Applied in `[2026-06-21] Decision Room Route Owner Handoff`; report `docs/40_reports/implemented/20260621_DECISION_ROOM_ROUTE_OWNER_HANDOFF.md`.
