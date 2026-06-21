@@ -2136,6 +2136,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'map.layer.fog': 'Magla',
     'map.layer.borders': 'Granice',
     'map.layer.ghost1991': '1991',
+    'map.aria.tacticalMap': 'Taktička karta Bosne i Hercegovine; pomjerajte je strelicama, zumirajte plusom i minusom, pritisnite Home za reset pogleda',
     'map.context.viewUnit': 'Pregled jedinice',
     'map.context.viewCorps': 'Pregled korpusa',
     'map.context.settlement': 'Naselje',

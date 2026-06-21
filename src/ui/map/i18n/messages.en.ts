@@ -2262,6 +2262,7 @@ export const enMessages = {
     'map.layer.fog': 'Fog',
     'map.layer.borders': 'Borders',
     'map.layer.ghost1991': '1991',
+    'map.aria.tacticalMap': 'Tactical map of Bosnia and Herzegovina; pan with arrow keys, zoom with plus and minus, press Home to reset view',
     'map.context.viewUnit': 'View Unit',
     'map.context.viewCorps': 'View Corps',
     'map.context.settlement': 'Settlement',

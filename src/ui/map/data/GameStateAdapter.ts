@@ -131,6 +131,19 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function projectedOfficerStatus(data: Record<string, unknown>, os: Record<string, unknown> | undefined, turn: number): string {
+    if (typeof os?.status === 'string') return os.status;
+    const availableFrom = typeof data.available_from_turn === 'number' && Number.isFinite(data.available_from_turn)
+        ? data.available_from_turn
+        : 0;
+    if (availableFrom > turn) return 'future';
+    const availableUntil = typeof data.available_until_turn === 'number' && Number.isFinite(data.available_until_turn)
+        ? data.available_until_turn
+        : undefined;
+    if (availableUntil !== undefined && availableUntil <= turn) return 'retired';
+    return 'active';
+}
+
 function asLooseRecord(value: unknown): LooseRecord | undefined {
     return value != null && typeof value === 'object' && !Array.isArray(value)
         ? value as LooseRecord
@@ -1655,6 +1668,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const id = typeof data?.id === 'string' ? data.id : '';
             if (!id) continue;
             const os = rawOfficers[id];
+            const status = projectedOfficerStatus(data, os, turn);
             officerList.push({
                 id,
                 name: getPlayerSafeOfficerName(typeof data.name === 'string' ? data.name : null),
@@ -1677,7 +1691,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 known_for: typeof data.known_for === 'string' ? data.known_for : undefined,
                 political_alignment_note: typeof data.political_alignment_note === 'string' ? data.political_alignment_note : undefined,
                 sensitive_history_note: typeof data.sensitive_history_note === 'string' ? data.sensitive_history_note : undefined,
-                status: typeof os?.status === 'string' ? os.status : 'active',
+                status,
                 assigned_corps_id: typeof os?.assigned_corps_id === 'string' ? os.assigned_corps_id : null,
                 acting_commander: Boolean(os?.acting_commander),
                 turns_in_command: finiteNumber(os?.turns_in_command, 0),
