@@ -310,7 +310,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(view.cards.find((card) => card.id === 'campaign-cost')).toMatchObject({
       sourceOwner: 'Active campaign cost',
-      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
+      navigationTarget: { kind: 'decision-room', lens: 'cost', cardId: 'campaign-cost' },
+      sourceHandoffTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
     });
     expect(view.cards.find((card) => card.id === 'chronicle:review-memory')).toMatchObject({
       sourceOwner: 'Chronicle',
@@ -943,7 +944,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(byId.cost).toMatchObject({
       label: 'Cost',
-      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
+      navigationTarget: { kind: 'decision-room', lens: 'cost', cardId: 'campaign-cost' },
+      sourceHandoffTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
     });
     expect(byId.judge).toMatchObject({
       label: 'Judge',

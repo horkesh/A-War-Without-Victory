@@ -103,6 +103,15 @@ describe('live surface browser sweep contract', () => {
     expect(tool).not.toContain('skipped:no-visible-aar-battle-row');
     expect(tool).not.toContain('skipped:no-visible-aar-formation-link');
     expect(tool.indexOf('await runArchiveInboxDrilldown(page, summary);')).toBeLessThan(
+      tool.indexOf('await loadOperationOpportunityLiveProofFixture(page, summary);'),
+    );
+    expect(tool.indexOf('await runCodexInternalDrilldown(page, summary);')).toBeLessThan(
+      tool.indexOf('await loadOperationOpportunityLiveProofFixture(page, summary);'),
+    );
+    expect(tool.indexOf('await loadOperationOpportunityLiveProofFixture(page, summary);')).toBeLessThan(
+      tool.indexOf('await runPresidentialInboxRoutingLiveProof(page, summary);'),
+    );
+    expect(tool.indexOf('await runPresidentialInboxRoutingLiveProof(page, summary);')).toBeLessThan(
       tool.indexOf('await loadRecordsAarLiveProofFixture(page, summary);'),
     );
     expect(tool.indexOf('await runCodexInternalDrilldown(page, summary);')).toBeLessThan(
@@ -117,6 +126,23 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('archiveChronicleToRecordsDrilldown');
     expect(tool).toContain('archiveRecordsDecisionToChronicleDrilldown');
     expect(tool).toContain('presidentialInboxVisible');
+    expect(tool).toContain('runPresidentialInboxRoutingLiveProof');
+    expect(tool).toContain('presidentialInboxRoutingLiveProof');
+    expect(tool).toContain('presidentialInboxRoutingLiveProof: false');
+    expect(tool).toContain('buildOperationOpportunityLiveProofFixtureState');
+    expect(tool).toContain('loadOperationOpportunityLiveProofFixture');
+    expect(tool).toContain('operation_opportunities');
+    expect(tool).toContain('live_window');
+    expect(tool).toContain('data-inbox-action="decision_room"');
+    expect(tool).toContain('data-inbox-item-type="operation_opportunity"');
+    expect(tool).toContain('desk-card-operation_opportunity');
+    expect(tool).toContain('desk-card-action');
+    expect(tool).toContain('command-card-cat_record');
+    expect(tool).toContain('warroom-decision-room-host');
+    expect(tool).toContain('presidential-decision-room');
+    expect(tool).toContain('inbox_routing_decision_room');
+    expect(tool).toContain('inbox_routing_desk_card_operation_opportunity');
+    expect(tool).toContain('inbox_routing_record_category_decision_room');
     expect(tool).toContain('deskRecordsRoute');
     expect(tool).toContain('chronicle-open-record');
     expect(tool).toContain("chronicleRecordTarget === 'decision'");
@@ -209,6 +235,8 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/i18n/messages.en.ts')).toContain("'chronicle.openDecisionRecord': 'Open Decision Record'");
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-testid="presidential-inbox"');
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-testid="presidential-inbox-card"');
+    expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain("onAction('decision_room', 'opening-brief:desk')");
+    expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-inbox-action={item.action}');
     expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).toContain('data-testid="president-desk-shell"');
     expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).toContain('data-testid="desk-action-records"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card"');
