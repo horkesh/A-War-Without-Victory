@@ -51,6 +51,8 @@ describe('SidePickerOverlay localization', () => {
         expect(screen.getByRole('button', { name: /Nastavi zadnje pokretanje/ })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zatvori' })).toBeTruthy();
         expect(screen.getAllByText(/^Snage /).length).toBeGreaterThan(0);
+        expect(screen.getByRole('button', { name: /Republika Bosna i Hercegovina/ })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /Republic of Bosnia and Herzegovina/ })).toBeNull();
     });
 
     it('sanitizes raw startup errors before rendering them', () => {

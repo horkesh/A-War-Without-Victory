@@ -52,7 +52,9 @@ describe('MainMenu localization', () => {
 
         expect(screen.getByText('Pyrrhic Games predstavlja')).toBeTruthy();
         expect(screen.getByText('Bosna i Hercegovina, 1992-1995')).toBeTruthy();
+        expect(screen.getByRole('button', { name: /Republika Bosna i Hercegovina/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /Republika Srpska/i })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /Republic of Bosnia and Herzegovina/i })).toBeNull();
         expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Učitaj igru' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Zasluge' })).toBeTruthy();

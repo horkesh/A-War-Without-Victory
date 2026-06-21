@@ -1,6 +1,10 @@
+## 2026-06-21 - New Game picker faction labels
+
+**Faction picker labels are picker-domain UI copy:** `MainMenu` and `SidePickerOverlay` should use `sidePicker.faction.*` keys for New Game faction labels. Durable rule: do not localize this path by changing global player-safe political-name helpers, because those helpers are shared by broader command-map surfaces with different copy contracts. Applied in `[2026-06-21] BCS Side Picker Faction Labels`; report `docs/40_reports/implemented/20260621_BCS_SIDE_PICKER_FACTION_LABELS.md`.
+
 ## 2026-06-21 - First-hour decision chrome boundary
 
-**Event modal and desk packet chrome are localized UI copy; authored event data is separate:** `EventDecisionModal`, `deriveInboxItems`, and President's Desk `DecisionCard` should route labels, section headings, fallback titles/subtitles, badges, and action labels through i18n keys. Durable rule: do not treat translating modal chrome as translating event scenario data; `war_1992.json` titles/options/narrative need their own data-localization lane. Applied in `[2026-06-21] BCS First-Hour Decision Chrome`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
+**Event modal and desk packet chrome are localized UI copy; authored event data is separate:** `EventDecisionModal`, `deriveInboxItems`, and President's Desk `DecisionCard` should route labels, section headings, fallback titles/subtitles, badges, and action labels through i18n keys. Durable rule: do not treat translating modal chrome as translating event scenario data; future `war_1992.json` title/option/narrative localization should use a dedicated event-data lane, while the first-hour foundational decisions were localized on 2026-06-21. Applied in `[2026-06-21] BCS First-Hour Decision Chrome`; report `docs/40_reports/implemented/20260621_BCS_FIRST_HOUR_DECISION_CHROME.md`.
 
 ## 2026-06-21 - First-hour force briefing copy boundary
 
