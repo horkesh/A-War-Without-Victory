@@ -189,8 +189,9 @@ describe('buildPreAdvanceCommandReviewView', () => {
       navigationTarget: { kind: 'inbox' },
     });
     expect(view.items.find((item) => item.id === 'turn:31:hard-turn')).toMatchObject({
-      actionLabel: 'Open Turn Record',
-      navigationTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
+      actionLabel: 'Review',
+      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:31:hard-turn' },
+      sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 31 },
     });
     expect(view.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
       'presidential-inbox',
@@ -329,6 +330,12 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(review.items.map((item) => [item.id, item.navigationTarget])).toEqual(
       review.items.map((item) => [item.id, sourceTargetsById[item.id]]),
     );
+    expect(review.items.map((item) => [item.id, item.navigationTarget.kind])).toEqual([
+      ['review:pending', 'inbox'],
+      ['opportunity:opp_pre_advance', 'decision-room'],
+      ['sitrep:front-critical', 'decision-room'],
+      ['turn:31:hard-turn', 'decision-room'],
+    ]);
     expect(review.sourceHandoffs.map((handoff) => [handoff.id, handoff.navigationTarget])).toEqual([
       ['presidential-inbox', { kind: 'inbox' }],
       ['army-hq-briefing', { kind: 'army-hq-tab', tab: 'briefing' }],

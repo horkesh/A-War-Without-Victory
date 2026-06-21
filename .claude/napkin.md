@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**DECISION ROOM PRIMARY ROUTE OWNERSHIP (2026-06-21).** Decision Room command, operational, and turn-review cards can cite Army HQ or Records, but their primary review action belongs to the Decision Room. Do instead: normalize those cards in `finalizeCards` to `decision-room` lens/card targets, keep the previous Army HQ/Records target as `sourceHandoffTarget`, and propagate that handoff through pre-advance review.
+
 **GENERATED INBOX ITEM COPY BOUNDARY (2026-06-21).** Dayton, convoy, reserve, territory gain/loss, and date-marker Inbox rows are generated in `deriveInboxItems`, but still player copy. Do instead: route generated Inbox titles/subtitles through `inbox.item.*` i18n keys and map reserve purpose ids through `armyReserve.purpose.*` rather than interpolating raw payload values.
 
 **EVENT DECISION EFFECT PREVIEW BOUNDARY (2026-06-21).** Response effects, dimension shifts, and `sets_flags` render inside the required decision moment. Do instead: localize faction names and effect templates at the modal display boundary, resolve known dimensions through diplomacy labels, and map flag values to localized option labels or neutral recorded-choice copy instead of humanizing raw ids like `civic`.

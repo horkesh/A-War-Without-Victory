@@ -1374,24 +1374,43 @@ function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void 
   });
 }
 
+function isDecisionRoomOwnedPrimaryCard(card: CandidateCard): boolean {
+  return (card.category === 'command' || card.category === 'operational' || card.category === 'turn')
+    && card.navigationTarget.kind !== 'decision-room'
+    && card.navigationTarget.kind !== 'none';
+}
+
+function decisionRoomOwnedTarget(card: CandidateCard): PresidentialDecisionRoomNavigationTarget {
+  return {
+    kind: 'decision-room',
+    lens: card.category,
+    cardId: card.id,
+  };
+}
+
 function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
   return cards
     .sort(compareCandidates)
-    .map((card, index) => ({
-      id: card.id,
-      category: card.category,
-      severity: card.severity,
-      title: card.title,
-      explanation: card.explanation,
-      sourceOwner: card.sourceOwner,
-      sourceLabel: card.sourceLabel,
-      actionLabel: card.actionLabel,
-      evidence: card.evidence,
-      navigationTarget: card.navigationTarget,
-      ...(card.sourceHandoffTarget ? { sourceHandoffTarget: card.sourceHandoffTarget } : {}),
-      ...(card.directive ? { directive: card.directive } : {}),
-      sortKey: index,
-    }));
+    .map((card, index) => {
+      const decisionRoomOwned = isDecisionRoomOwnedPrimaryCard(card);
+      const navigationTarget = decisionRoomOwned ? decisionRoomOwnedTarget(card) : card.navigationTarget;
+      const sourceHandoffTarget = card.sourceHandoffTarget ?? (decisionRoomOwned ? card.navigationTarget : undefined);
+      return {
+        id: card.id,
+        category: card.category,
+        severity: card.severity,
+        title: card.title,
+        explanation: card.explanation,
+        sourceOwner: card.sourceOwner,
+        sourceLabel: card.sourceLabel,
+        actionLabel: decisionRoomOwned ? t('decisionRoom.action.review') : card.actionLabel,
+        evidence: card.evidence,
+        navigationTarget,
+        ...(sourceHandoffTarget ? { sourceHandoffTarget } : {}),
+        ...(card.directive ? { directive: card.directive } : {}),
+        sortKey: index,
+      };
+    });
 }
 
 function buildAdvanceReadiness(
