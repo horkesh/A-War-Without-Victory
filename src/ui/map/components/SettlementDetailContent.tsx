@@ -279,6 +279,9 @@ export function SettlementDetailContent({
   const popDelta = currentPop != null && popOriginal > 0 ? currentPop - popOriginal : null;
 
   // Build settlement timeline from all available data sources
+  const settlementBattles = battlesByOsid?.[osid];
+  const settlementMovements = movementsByOsid?.[osid];
+  const settlementSupplyTransitions = supplyTransitionsByOsid?.[osid];
   const timelineEvents = useMemo(() => {
     if (variant !== 'panel') return [];
     return buildSettlementTimeline(
@@ -287,9 +290,9 @@ export function SettlementDetailContent({
       displacementEventLog ?? [],
       allControlEvents ?? [],
       operationHistory ?? [],
-      battlesByOsid?.[osid] ?? [],
-      movementsByOsid?.[osid] ?? [],
-      supplyTransitionsByOsid?.[osid] ?? [],
+      settlementBattles ?? [],
+      settlementMovements ?? [],
+      settlementSupplyTransitions ?? [],
       (historicalEventsByTurn ?? []).filter(e => {
         // Match events to this OSID's municipality (event IDs often contain mun name)
         if (!munId) return false;
@@ -304,7 +307,7 @@ export function SettlementDetailContent({
       } : null,
       initialControlBySettlement?.[osid] ?? null,
     );
-  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others, initialControlBySettlement]);
+  }, [osid, munId, displacementEventLog, allControlEvents, operationHistory, settlementBattles, settlementMovements, settlementSupplyTransitions, historicalEventsByTurn, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others, initialControlBySettlement]);
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
   const settlementShare =
     disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;

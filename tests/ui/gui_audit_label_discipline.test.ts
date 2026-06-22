@@ -569,6 +569,7 @@ describe('GUI audit label discipline', () => {
     store = useGameStore.getState();
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
+    expect(store.selectedCorpsId).toBe('arbih_1st_corps');
     expect(store.armyHQOpen).toBe(false);
 
     cleanup();

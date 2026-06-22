@@ -506,6 +506,19 @@ export function useMapInteractions(
       ...OSID_INTERACTIVE_FILL_LAYERS].filter(id => !!map.getLayer(id));
 
     const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
+    const first = hits[0];
+    if (first?.layer.id === 'formation-markers') {
+      const props = first.properties as Record<string, unknown>;
+      onContextMenu('formation', props, point);
+      return;
+    }
+
+    const fallbackFormation = getFormationClickFallback?.(e.point);
+    if (fallbackFormation) {
+      onContextMenu('formation', fallbackFormation.properties, point);
+      return;
+    }
+
     const selectableFrontFeature = pickPreferredFrontFeature(
       hits as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
     );
@@ -515,13 +528,10 @@ export function useMapInteractions(
       return;
     }
 
-    const first = hits[0];
     if (!first) { onContextMenu('empty', null, point); return; }
 
     const props = first.properties as Record<string, unknown>;
-    if (first.layer.id === 'formation-markers') {
-      onContextMenu('formation', props, point);
-    } else if (
+    if (
       first.layer.id.includes('front-edges')
       || first.layer.id.startsWith('sector-edge-glow-')
       || first.layer.id.startsWith('sector-edge-hit-')

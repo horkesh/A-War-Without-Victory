@@ -2766,6 +2766,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'corpsFront.defensivePower': 'Odbrambena moć',
     'corpsFront.defPerEdge': 'Odbrana po frontovskom segmentu',
     'corpsFront.forceBalance': 'Odnos snaga',
+    'corpsFront.noFriendlyLine': 'Nema prijateljske linije',
     'corpsFront.unitCondition': 'Stanje jedinice',
     'corpsFront.morale': 'Moral',
     'corpsFront.cohesion': 'Kohezija',

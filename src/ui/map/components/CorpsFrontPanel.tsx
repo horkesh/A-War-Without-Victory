@@ -15,6 +15,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { formatPosture, toTitleCase, turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { inspectOnField } from '../utils/shellNavigation';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
@@ -241,6 +242,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel;
+  const hasFriendlyLine = assignedFormations.length + reserveFormations.length + overrideFormations.length > 0;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
   const avgOperationSupply = relatedOperations.length > 0
     ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
@@ -267,6 +269,15 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     setSectorActionMessage(result.ok
       ? t((sector.opsec_active ?? false) ? 'corpsFront.opsecDisabled' : 'corpsFront.opsecEnabled')
       : (result.error ?? t('corpsFront.opsecToggleFailed')));
+  };
+
+  const inspectSectorFormation = (formationId: string) => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-formation-in-sector',
+      formationId,
+      sectorId: selectedSectorId,
+      corpsId: selectedCorpsId,
+    });
   };
 
   return (
@@ -427,6 +438,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                       <div className="pt-0.5">
                         {sector.intel_confidence < 0.4 ? (
                           <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
+                        ) : !hasFriendlyLine ? (
+                          <span className="text-red-600 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
                         ) : (
                           <ThreatBadge ratio={sector.threat_ratio} />
                         )}
@@ -558,13 +571,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-location-osid={f.location_osid ?? undefined}
                           aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
-                          onClick={() => useGameStore.setState({
-                            selectedCorpsId,
-                            selectedCorpsFrontSectorId: selectedSectorId,
-                            selectedFormationId: f.id,
-                            selectedOperationKey: null,
-                            selectedOsid: null,
-                          })}
+                          onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
                             if (f.location_osid) setHoveredOsids([f.location_osid]);
                             setHoveredSectorId(selectedSectorId);
@@ -598,13 +605,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-location-osid={f.location_osid ?? undefined}
                           aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
-                          onClick={() => useGameStore.setState({
-                            selectedCorpsId,
-                            selectedCorpsFrontSectorId: selectedSectorId,
-                            selectedFormationId: f.id,
-                            selectedOperationKey: null,
-                            selectedOsid: null,
-                          })}
+                          onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
                             if (f.location_osid) setHoveredOsids([f.location_osid]);
                             setHoveredSectorId(selectedSectorId);
@@ -638,13 +639,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-location-osid={f.location_osid ?? undefined}
                           aria-label={t('corpsFront.commandDirectedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
                           className="kbd-focus w-full flex justify-between items-center bg-amber-100/50 hover:bg-amber-200/50 transition-colors text-left px-1 py-0.5 rounded"
-                          onClick={() => useGameStore.setState({
-                            selectedCorpsId,
-                            selectedCorpsFrontSectorId: selectedSectorId,
-                            selectedFormationId: f.id,
-                            selectedOperationKey: null,
-                            selectedOsid: null,
-                          })}
+                          onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
                             if (f.location_osid) setHoveredOsids([f.location_osid]);
                             setHoveredSectorId(selectedSectorId);
@@ -675,13 +670,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           type="button"
                           aria-label={t('corpsFront.unassignedBrigadeAria', { name: getLocalizedFormationName(f, locale) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-red-50 transition-colors text-left px-1 py-0.5 rounded border border-red-200/60"
-                          onClick={() => useGameStore.setState({
-                            selectedCorpsId,
-                            selectedCorpsFrontSectorId: selectedSectorId,
-                            selectedFormationId: f.id,
-                            selectedOperationKey: null,
-                            selectedOsid: null,
-                          })}
+                          onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
                             if (f.location_osid) setHoveredOsids([f.location_osid]);
                           }}

@@ -2905,6 +2905,7 @@ export const enMessages = {
     'corpsFront.defensivePower': 'Defensive Power',
     'corpsFront.defPerEdge': 'Defense per front segment',
     'corpsFront.forceBalance': 'Force Balance',
+    'corpsFront.noFriendlyLine': 'No friendly line',
     'corpsFront.unitCondition': 'Unit Condition',
     'corpsFront.morale': 'Morale',
     'corpsFront.cohesion': 'Cohesion',

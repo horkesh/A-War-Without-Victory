@@ -88,17 +88,31 @@ afterEach(() => {
 
 describe('OOBSidebar drilldown routing', () => {
   it('renders HQ reserve brigades and routes their labels to Army HQ formation drilldown', () => {
+    useGameStore.setState({
+      codexOpen: true,
+      chronicleOpen: true,
+      focusedAftermathTurn: 7,
+      focusedOperationHistoryId: 'stale-aar',
+    });
     const { container } = render(React.createElement(OOBSidebar));
 
     expect(container.textContent).toContain('Reserve HQ / Main Staff VRS');
     expect(container.textContent).toContain('Guard Brigade');
+    const reserveButton = screen.getByRole('button', { name: /Guard Brigade/i });
+    expect(reserveButton.getAttribute('data-testid')).toBe('oob-hq-reserve-brigade');
+    expect(reserveButton.getAttribute('data-formation-id')).toBe('vrs_guard_bde');
+    expect(reserveButton.getAttribute('data-army-hq-id')).toBe('vrs_main_staff');
 
-    fireEvent.click(screen.getByRole('button', { name: /Guard Brigade/i }));
+    fireEvent.click(reserveButton);
 
     const store = useGameStore.getState();
     expect(store.selectedArmyHqId).toBe('vrs_main_staff');
     expect(store.selectedCorpsId).toBeNull();
     expect(store.selectedFormationId).toBe('vrs_guard_bde');
+    expect(store.codexOpen).toBe(false);
+    expect(store.chronicleOpen).toBe(false);
+    expect(store.focusedAftermathTurn).toBeNull();
+    expect(store.focusedOperationHistoryId).toBeNull();
     expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
   });
 

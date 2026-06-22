@@ -152,6 +152,7 @@ function SectorExpandedDetail({
                                                 kind: 'field-formation-in-sector',
                                                 formationId: b.id,
                                                 sectorId: sector.sector_id,
+                                                corpsId: sector.corps_id,
                                             })}
                                             className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                         >
@@ -198,6 +199,7 @@ function SectorExpandedDetail({
                                             kind: 'field-formation-in-sector',
                                             formationId: b.id,
                                             sectorId: sector.sector_id,
+                                            corpsId: sector.corps_id,
                                         })}
                                         className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
@@ -234,6 +236,7 @@ function SectorExpandedDetail({
                                             kind: 'field-formation-in-sector',
                                             formationId: b.id,
                                             sectorId: sector.sector_id,
+                                            corpsId: sector.corps_id,
                                         })}
                                         className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >

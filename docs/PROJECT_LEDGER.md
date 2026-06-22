@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): harden surface truth and routing polish
+
+**Type:** UI/read-model/store-route/test/docs polish.
+
+**Fix:** Corps Front no longer describes sectors with no friendly line as force-balance advantages; Army HQ sector brigade inspect buttons preserve corps context; Corps Front brigade rows and OOB HQ reserve brigade chips now use the shared field-inspection route and clear stale shell focus; OOB reserve chips expose stable formation/HQ ids; tactical-map right-click uses the Deck formation fallback before front/OSID/empty menus; settlement timelines refresh when per-OSID battle, movement, supply-transition, or historical-event sources update.
+
+**Verification:** Red/green focused tests were added for the sector truth, Army HQ/Corps Front/OOB routing, settlement timeline rerender, and Deck context-menu fallback cases. Combined focused pack `node node_modules\vitest\vitest.mjs run tests\ui_map_interactions.test.ts tests\ui\gui_audit_label_discipline.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\settlement_supply_status.test.ts tests\ui\oob_drilldown_routing.test.ts --pool=forks --reporter=dot` passed 51/51. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified. Report: `docs/40_reports/implemented/20260622_SURFACE_TRUTH_ROUTING_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/store-route/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): harden general surface drilldowns and PMTiles browser gate
 
 **Type:** UI/read-model/browser-QA/test/docs cleanup plus tracked temp-fixture removal.

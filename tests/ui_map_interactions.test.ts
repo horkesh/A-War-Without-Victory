@@ -776,4 +776,37 @@ describe('useMapInteractions', () => {
     });
     expect(onFrontEdgeClick).toHaveBeenCalledTimes(1);
   });
+
+  it('uses the Deck formation fallback for context-menu formation picks', () => {
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent & { preventDefault?: () => void }) => void>();
+    const onContextMenu = vi.fn();
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') mapHandlers.set(event, layerOrHandler as (e: MapLayerMouseEvent) => void);
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures: () => [],
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], {
+      onContextMenu,
+      getFormationClickFallback: () => ({
+        id: 'arbih_101_brigade',
+        properties: { formation_id: 'arbih_101_brigade', name: '101st Brigade' },
+      }),
+    });
+    mapHandlers.get('contextmenu')?.({
+      preventDefault: () => {},
+      point: { x: 10, y: 10 },
+      originalEvent: { clientX: 100, clientY: 120 },
+    });
+
+    expect(onContextMenu).toHaveBeenCalledWith(
+      'formation',
+      { formation_id: 'arbih_101_brigade', name: '101st Brigade' },
+      { x: 100, y: 120 },
+    );
+  });
 });

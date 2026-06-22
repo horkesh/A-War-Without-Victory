@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -97,5 +97,20 @@ describe('SettlementDetailContent supply status surface', () => {
   it('shows nothing when no supply data is provided at all', () => {
     render(createElement(SettlementDetailContent, { ...BASE_PROPS }));
     expect(screen.queryByTestId('settlement-supply-status')).toBeNull();
+  });
+
+  it('refreshes timeline rows when per-settlement movement data changes', () => {
+    const { rerender } = render(createElement(SettlementDetailContent, { ...BASE_PROPS }));
+    fireEvent.click(screen.getByRole('tab', { name: /Timeline/i }));
+    expect(screen.getByText('No recorded events at this settlement.')).toBeTruthy();
+
+    rerender(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      movementsByOsid: {
+        'op:test:a': [{ turn: 3, formation_id: 'bde_101', formation_name: '101st Brigade', type: 'arrived' }],
+      },
+    }));
+
+    expect(screen.getByText(/101st Brigade stationed at settlement/i)).toBeTruthy();
   });
 });

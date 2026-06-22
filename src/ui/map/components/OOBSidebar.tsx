@@ -410,21 +410,15 @@ export function OOBSidebar() {
                                     <button
                                       key={b.id}
                                       type="button"
+                                      data-testid="oob-hq-reserve-brigade"
+                                      data-formation-id={b.id}
+                                      data-army-hq-id={hqId}
                                       className="text-[9px] text-accent-gold/70 truncate hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
-                                      onClick={() => {
-                                        useGameStore.setState({
-                                          selectedOsid: null,
-                                          selectedFormationId: b.id,
-                                          selectedCorpsFrontSectorId: null,
-                                          selectedCorpsId: null,
-                                          selectedArmyId: null,
-                                          selectedArmyHqId: hqId,
-                                          selectedOperationKey: null,
-                                          selectedOrbatCorpsId: null,
-                                          isOperationsPanelOpen: false,
-                                          operationTargetOsids: [],
-                                        });
-                                      }}
+                                      onClick={() => inspectOnField(useGameStore.getState(), {
+                                        kind: 'field-formation-in-army-reserve',
+                                        formationId: b.id,
+                                        armyHqId: hqId,
+                                      })}
                                     >
                                       {getLocalizedFormationName(b, locale)}
                                     </button>
