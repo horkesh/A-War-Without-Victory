@@ -457,6 +457,7 @@ export function generateChronicleEntries(
 
     for (const summary of turnSummaries) {
         const turn = summary.turn;
+        if (!shouldNarrateTerritorySummary(summary)) continue;
 
         if (Array.isArray(summary.battles)) {
             for (const battle of summary.battles) {

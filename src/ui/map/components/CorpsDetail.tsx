@@ -370,6 +370,13 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 <button
                   key={s.sector_id}
                   type="button"
+                  data-testid="corps-detail-sector-row"
+                  data-sector-id={s.sector_id}
+                  data-coverage-tier={coverageTier}
+                  data-current-brigade-count={sectorAssignment.allCurrentIds.length}
+                  data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
+                  data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                  data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                   onClick={() => useGameStore.setState({
                     selectedArmyId,
                     selectedCorpsId,

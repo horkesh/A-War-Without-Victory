@@ -206,7 +206,11 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     };
 
     return (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center">
+        <div
+            className="absolute inset-0 z-10 flex flex-col items-center justify-center"
+            data-testid="ops-planning-phase-panel"
+            data-phase="authorize"
+        >
             {/* Dim overlay */}
             <div className="absolute inset-0 bg-black/40" />
 

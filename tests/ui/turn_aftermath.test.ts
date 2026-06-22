@@ -357,6 +357,30 @@ describe('buildTurnAftermathView', () => {
     expect(records.map((record) => record.nextActions.actionableCount)).toEqual([1, 0]);
   });
 
+  it('excludes turn-zero setup summaries from persistent aftermath records', () => {
+    const setupSummary = makeSummary({
+      turn: 0,
+      territory_net: { RBiH: -4 },
+      displacement_total: 900,
+      notable_flips: [
+        { osid: 'op:test:setup', mun_id: 'test', from: 'RS', to: 'RBiH', significance: 'generic' },
+      ],
+    });
+    const state = makeState({
+      turn: 0,
+      latestTurnSummary: setupSummary,
+      turnSummaries: [setupSummary],
+    });
+
+    expect(buildTurnAftermathRecordViews({ state })).toEqual([]);
+    expect(buildTurnAftermathCampaignCost({ state })).toMatchObject({
+      recordCount: 0,
+      headline: 'No campaign cost records yet.',
+      totalDisplaced: 0,
+      netFriendlyTerritory: 0,
+    });
+  });
+
   it('summarizes persistent aftermath records into a campaign ledger pulse', () => {
     const records = [
       buildTurnAftermathView({

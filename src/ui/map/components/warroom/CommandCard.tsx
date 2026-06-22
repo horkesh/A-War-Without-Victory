@@ -133,6 +133,8 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
     <button
       type="button"
       data-testid={`command-card-${category.id}`}
+      data-awwv-count={category.count}
+      data-awwv-urgent-count={category.urgentCount}
       onClick={() => onSelect(category)}
       className="group relative block aspect-[4/3] w-full overflow-hidden rounded-sm border border-accent-gold/40 bg-black/40 text-left shadow-[0_12px_28px_rgba(0,0,0,0.32)] transition-colors hover:border-accent-gold/70"
     >

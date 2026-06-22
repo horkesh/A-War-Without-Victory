@@ -7,6 +7,7 @@ import {
   type TurnAftermathCostSeverity,
   type TurnAftermathView,
 } from './turnAftermath';
+import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
 import { resolveCommandBriefingItemCopy } from './commandBriefingCopy';
@@ -1367,8 +1368,24 @@ function addCampaignCostCard(
   });
 }
 
+function filedTurnRecordTurns(state: LoadedGameState): number[] {
+  const turns = new Set<number>();
+  for (const summary of state.turnSummaries ?? []) {
+    if (!shouldNarrateTerritorySummary(summary)) continue;
+    if (typeof summary.turn === 'number') turns.add(summary.turn);
+  }
+  if (state.latestTurnSummary && shouldNarrateTerritorySummary(state.latestTurnSummary)) {
+    if (typeof state.latestTurnSummary.turn === 'number') turns.add(state.latestTurnSummary.turn);
+  }
+  return [...turns].sort((a, b) => a - b);
+}
+
+function countFiledTurnRecords(state: LoadedGameState): number {
+  return filedTurnRecordTurns(state).length;
+}
+
 function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void {
-  const turnCount = state.turnSummaries?.length ?? 0;
+  const turnCount = countFiledTurnRecords(state);
   if (turnCount <= 0) return;
 
   cards.push({
@@ -1876,21 +1893,24 @@ function buildReportLoopStep(
   state: LoadedGameState,
   turnCards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLoopStep {
-  const recordCount = state.turnSummaries?.length ?? 0;
-  const latestTurn = state.latestTurnSummary?.turn ?? null;
+  const filedTurns = filedTurnRecordTurns(state);
+  const recordCount = filedTurns.length;
+  const latestTurn = filedTurns[filedTurns.length - 1] ?? null;
+  const topCard = turnCards[0] ?? null;
   const urgentCount = turnCards.filter(isUrgentCard).length;
   return {
     id: 'report',
     label: t('decisionRoom.loop.report'),
-    headline: turnCards[0]?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { dateLabel: turnToDateString(latestTurn) }) : t('decisionRoom.loop.noTurnRecordsYet')),
+    headline: topCard?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { dateLabel: turnToDateString(latestTurn) }) : t('decisionRoom.loop.noTurnRecordsYet')),
     summary: recordCount > 0
       ? summaryCount(recordCount, urgentCount, 'decisionRoom.noun.recordedTurn.many')
       : summaryCount(0, 0, 'decisionRoom.noun.record.many'),
     count: recordCount,
     urgentCount,
     cardIds: turnCards.map((card) => card.id),
-    actionLabel: t('decisionRoom.action.turnRecords'),
-    navigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
+    actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.turnRecords'),
+    navigationTarget: topCard?.navigationTarget ?? (recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' }),
+    ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
   };
 }
 
@@ -1898,7 +1918,7 @@ function buildCostLoopStep(
   state: LoadedGameState,
   costCards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLoopStep {
-  const recordCount = state.turnSummaries?.length ?? 0;
+  const recordCount = countFiledTurnRecords(state);
   const cardStep = buildCardLoopStep('cost', t('decisionRoom.loop.cost'), costCards, {
     fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.campaignCostArchiveAvailable') : t('decisionRoom.loop.noCampaignCostYet'),
     fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.costRecord.many'),
@@ -1917,7 +1937,7 @@ function buildJudgeLoopStep(
   state: LoadedGameState,
   memoryCards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLoopStep {
-  const recordCount = state.turnSummaries?.length ?? 0;
+  const recordCount = countFiledTurnRecords(state);
   const cardStep = buildCardLoopStep('judge', t('decisionRoom.loop.judge'), memoryCards, {
     fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.chronicleMemoryAvailable') : t('decisionRoom.loop.noCampaignMemoryYet'),
     fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.memoryRecord.many'),

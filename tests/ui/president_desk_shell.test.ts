@@ -177,6 +177,55 @@ describe('PresidentDeskShell', () => {
     expect(container.textContent).not.toContain('Turn 8');
   });
 
+  it('does not label turn-zero setup summaries as filed consequences', () => {
+    const { container } = renderDesk({
+      state: makeState({
+        turn: 0,
+        latestTurnSummary: {
+          turn: 0,
+          battles: [{
+            osid: 'op:test:setup',
+            attacker_faction: 'RS',
+            defender_faction: 'RBiH',
+            primary_attacker_id: 'rs_setup',
+            primary_defender_id: 'arbih_setup',
+            all_attacker_ids: ['rs_setup'],
+            outcome: 'breakthrough' as never,
+            attacker_casualties: 25,
+            defender_casualties: 80,
+            territory_flipped: false,
+            was_concentrated: false,
+          }],
+          territory_net: { RBiH: -4 },
+          notable_flips: [],
+          displacement_total: 2400,
+          displacement_by_ethnicity: {},
+          decoration_awards: [],
+          arc_transitions: [],
+          formation_spawns: [],
+          formation_destructions: [],
+          supply_deltas: {},
+          heavy_munitions_deltas: {},
+          movements: [],
+          supply_transitions: [],
+          events_fired: [],
+          notable_events: [{ kind: 'first_battle', description: 'Scenario setup', faction: 'RBiH' }],
+        },
+        turnSummaries: [],
+        firedEvents: [],
+        rawGameState: {} as any,
+      }),
+    });
+
+    expect(container.textContent).toContain('No campaign record loaded.');
+    expect(container.textContent).not.toContain('Last filed record');
+    expect(container.textContent).toMatch(/Battles\s*0/);
+    expect(container.textContent).toMatch(/Displaced\s*0/);
+    expect(container.textContent).toMatch(/Events\s*0/);
+    expect(container.textContent).toMatch(/Decisions\s*0/);
+    expect(container.querySelector('[data-testid="desk-consequence-row"]')).toBeNull();
+  });
+
   it('matches Advance Clearance blocking truth for counter-offer reviews', () => {
     renderDesk({
       state: makeState({

@@ -1,6 +1,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { buildDecisionConsequenceLedger, resolveDecisionConsequenceCopy } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { t, type MessageKey } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
 import type { DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger';
@@ -29,13 +30,14 @@ function familyLabel(record: DecisionConsequenceRecord): string {
 }
 
 export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, onOpenChronicle }: ConsequenceStripProps) {
-  const turn = state?.turn ?? 0;
   const latestSummary = state?.latestTurnSummary ?? null;
-  const battleCount = latestSummary?.battles?.length ?? 0;
-  const displacement = latestSummary?.displacement_total ?? 0;
-  const notableEvents = latestSummary?.notable_events?.length ?? 0;
+  const filedSummary = shouldNarrateTerritorySummary(latestSummary) ? latestSummary : null;
+  const battleCount = filedSummary?.battles?.length ?? 0;
+  const displacement = filedSummary?.displacement_total ?? 0;
+  const notableEvents = filedSummary?.notable_events?.length ?? 0;
   const decisionRecords = buildDecisionConsequenceLedger(state, 2);
   const decisionRecordCount = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).length;
+  const latestFiledTurn = filedSummary?.turn ?? decisionRecords[0]?.turn ?? null;
 
   return (
     <section
@@ -47,7 +49,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
         <div>
           <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
           <div className="mt-1 text-[11px] text-text-secondary">
-            {state ? t('desk.consequences.lastFiled', { date: turnToDateString(turn) }) : t('desk.consequences.noRecord')}
+            {latestFiledTurn != null ? t('desk.consequences.lastFiled', { date: turnToDateString(latestFiledTurn) }) : t('desk.consequences.noRecord')}
           </div>
         </div>
         <button

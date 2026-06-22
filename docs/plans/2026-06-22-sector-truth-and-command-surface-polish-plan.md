@@ -69,6 +69,8 @@
 
 ### Task 4: Records And Decision Room Provenance Consistency
 
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_RECORD_PROVENANCE_AND_LIVE_SWEEP_HARDENING.md`.
+
 **Files:**
 - Audit first: `src/ui/map/data/presidentialCategories.ts`, `src/ui/map/components/DecisionRoom*`, Records/Chronicle adapters.
 
@@ -79,7 +81,11 @@
 
 **Acceptance:** The player never sees turn-zero setup facts as if they happened during play.
 
+**Evidence:** Decision Room record-category cards, report/cost/judge loop steps, Chronicle generated entries/generals digest, and President's Desk consequence strip now share the turn-zero filed-record guard. Report loop routing uses the normalized Decision Room card as primary action and preserves Army HQ aftermath as the source handoff. Focused proof passed 112/112, `npm.cmd run typecheck` passed, and `npm.cmd run qa:live-surface:browser` passed with temp evidence cleaned.
+
 ### Task 5: Targeted Live Browser Sweep
+
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_RECORD_PROVENANCE_AND_LIVE_SWEEP_HARDENING.md`.
 
 **Files:**
 - Extend if needed: `tools/ui/live_surface_browser_sweep.cjs`
@@ -90,3 +96,5 @@
 3. Keep failures focused on player truth/usability, not Bosnian localization.
 
 **Acceptance:** The live browser journey confirms the corrected surfaces and no console errors.
+
+**Evidence:** `qa:live-surface:browser` now runs the owner drilldown for RBiH and an RS startup fixture through Desk -> Command Surface -> Decision Room -> OOB sector -> Corps Front tabs -> Ops Planning modal -> Formation Detail -> Settlement Detail -> Records tabs. It also injects a turn-zero setup-provenance fixture and proves the Desk does not show `Last filed record` while the command-strip record card stays at `data-awwv-count="0"`. Live proof passed with `ownerJourneyDrilldownByFaction: { RBiH: true, RS: true }`, `ownerJourneyOpsPlanningModalByFaction: { RBiH: true, RS: true }`, `turnZeroSetupProvenanceLiveProof.recordCardCount: 0`, and server port cleanup verified.

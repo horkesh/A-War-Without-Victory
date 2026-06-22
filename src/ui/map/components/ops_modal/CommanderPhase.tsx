@@ -155,7 +155,11 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
         : null;
 
     return (
-        <div className="absolute inset-0 z-10 flex items-end justify-center pb-8 pointer-events-none">
+        <div
+            className="absolute inset-0 z-10 flex items-end justify-center pb-8 pointer-events-none"
+            data-testid="ops-planning-phase-panel"
+            data-phase="commander"
+        >
             {/* Corps Identity Card — bottom left */}
             <div className="pointer-events-auto absolute bottom-8 left-8 w-64
                             bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg

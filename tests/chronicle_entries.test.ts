@@ -187,7 +187,7 @@ describe('generateChronicleEntries', () => {
         });
     });
 
-    it('does not narrate turn-0 territory_net on cost cards', () => {
+    it('does not emit normal Chronicle entries from turn-zero setup summaries', () => {
         const state = {
             player_faction: 'RBiH',
             turn: 0,
@@ -202,25 +202,21 @@ describe('generateChronicleEntries', () => {
                     territory_flipped: false,
                 }],
                 displacement_total: 1250,
+                displacement_by_ethnicity: { Bosniak: 1000, Serb: 250 },
                 territory_net: { RBiH: 3, RS: -3 },
+                formation_spawns: [{ formation_id: 'arbih_setup', formation_name: 'Setup Brigade', faction: 'RBiH' }],
+                formation_destructions: [{ formation_id: 'rs_setup', formation_name: 'Setup Loss', faction: 'RS' }],
+                notable_events: [{ id: 'setup-note', text: 'Setup note' }],
             })],
         };
 
         const entries = generateChronicleEntries(state as any);
-        const cost = entries.find(e => e.type === 'cost');
 
-        expect(cost).toBeDefined();
-        expect(cost?.turn).toBe(0);
-        expect(cost?.detail).toContain('80 friendly casualties');
-        expect(cost?.detail).toContain('1250 displaced');
-        expect(cost?.detail).not.toContain('net settlements');
-        expect(cost?.detail).not.toContain('+3');
-        expect(cost?.metadata).toMatchObject({
-            casualties: 80,
-            displaced: 1250,
-            costSeverity: 'critical',
-        });
-        expect(cost?.metadata?.netFriendlyTerritory).toBeUndefined();
+        expect(entries.filter(e => e.turn === 0 && ['combat', 'cost', 'humanitarian', 'military', 'narrative'].includes(e.type))).toEqual([]);
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('Setup Brigade');
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('Setup Loss');
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('Setup note');
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('1250 displaced');
     });
 
     it('does not create cost cards for quiet minor turns', () => {

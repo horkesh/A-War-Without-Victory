@@ -162,7 +162,11 @@ export function PlanPhase({
     ]);
 
     return (
-        <div className="absolute inset-0 z-10 pointer-events-none">
+        <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            data-testid="ops-planning-phase-panel"
+            data-phase="plan"
+        >
             {/* Planning status panel — top left */}
             <div className="absolute top-16 left-4 w-[340px] pointer-events-auto">
                 <div className="rounded-lg border border-[rgba(180,160,130,0.16)] bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">

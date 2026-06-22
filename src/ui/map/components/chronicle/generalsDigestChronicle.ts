@@ -43,6 +43,7 @@ import {
     isQuietWeek,
     type DigestFaction,
 } from '../../data/generalsDigest.js';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 import type { ChronicleEntry } from './generateChronicleEntries.js';
 
 function asDigestFaction(fid: string | null | undefined): DigestFaction | null {
@@ -90,7 +91,7 @@ export function buildGeneralsDigestChronicleEntries(
     const ordered = [...turnSummaries]
         .filter((s) => {
             const t = Number((s as { turn?: unknown })?.turn ?? NaN);
-            return Number.isFinite(t) && t <= upper;
+            return Number.isFinite(t) && t <= upper && shouldNarrateTerritorySummary(s as { turn?: unknown });
         })
         .sort((a, b) => Number((a as { turn?: unknown }).turn ?? 0) - Number((b as { turn?: unknown }).turn ?? 0));
     if (ordered.length === 0) return [];

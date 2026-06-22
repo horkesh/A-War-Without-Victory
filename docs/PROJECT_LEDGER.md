@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): harden record provenance and live owner sweep
+
+**Type:** UI/read-model/browser-QA/test/docs polish.
+
+**Fix:** Decision Room record cards and report/cost/judge loop steps now use filed, narratable turn-record counts instead of raw `turnSummaries.length`, so turn-zero setup summaries cannot appear as recorded campaign history. The report loop keeps its primary route inside the Decision Room card and preserves Army HQ aftermath as source handoff evidence. Chronicle generated entries and generals' digest beats skip setup summaries, and the President's Desk consequence strip no longer labels setup/current-state metrics as `Last filed record`. OOB/Corps Detail sector rows, Corps Front draft controls, and Ops Planning modal phase surfaces now expose stable browser-proof hooks.
+
+**Verification:** Focused provenance/browser-contract pack `node node_modules\vitest\vitest.mjs run tests\ui\presidential_decision_room.test.ts tests\ui\turn_aftermath.test.ts tests\chronicle_entries.test.ts tests\ui\president_desk_shell.test.ts tests\ui\oob_drilldown_routing.test.ts tests\ui\corps_detail_sector_truth.test.ts tests\ui\first_hour_browser_gate_contract.test.ts tests\ui\presidential_categories.test.ts --pool=forks --reporter=dot` passed 112/112. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed with RBiH and RS owner drilldowns, Ops modal reachability for both factions, turn-zero setup provenance proof (`recordCardCount: 0`), and server cleanup verified; temp evidence was removed. Report: `docs/40_reports/implemented/20260622_RECORD_PROVENANCE_AND_LIVE_SWEEP_HARDENING.md`.
+
+**Scope/determinism:** UI/read-model/browser-QA/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): harden ops and command surfaces
 
 **Type:** UI/read-model/i18n/test/docs polish.

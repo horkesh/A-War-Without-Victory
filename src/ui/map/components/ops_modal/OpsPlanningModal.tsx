@@ -343,7 +343,14 @@ export function OpsPlanningModal() {
     const currentIdx = PHASE_ORDER.indexOf(phase);
 
     return (
-        <div className="fixed inset-0 bg-black/60" style={{ zIndex: Z.MODAL }}>
+        <div
+            className="fixed inset-0 bg-black/60"
+            style={{ zIndex: Z.MODAL }}
+            data-testid="ops-planning-modal"
+            data-corps-id={corpsId}
+            data-origin-sector-id={originSectorId ?? ''}
+            data-phase={phase}
+        >
             {/* Full-bleed map background */}
             <OpsMap
                 corpsId={corpsId}
@@ -369,6 +376,8 @@ export function OpsPlanningModal() {
                         key={p}
                         type="button"
                         onClick={() => goToPhase(p)}
+                        data-testid={`ops-planning-phase-${p}`}
+                        data-phase={p}
                         data-locked={i > highestPhase ? 'true' : undefined}
                         className="flex items-center gap-2 group"
                     >
@@ -444,8 +453,13 @@ export function OpsPlanningModal() {
             )}
 
             {/* Phase content */}
-            {phase === 'commander' && <CommanderPhase onAdvance={advancePhase} />}
+            {phase === 'commander' && (
+                <div data-testid="ops-planning-phase-panel" data-phase="commander">
+                    <CommanderPhase onAdvance={advancePhase} />
+                </div>
+            )}
             {phase === 'plan' && (
+                <div data-testid="ops-planning-phase-panel" data-phase="plan">
                 <PlanPhase
                     plan={plan}
                     onUpdate={updatePlan}
@@ -456,8 +470,10 @@ export function OpsPlanningModal() {
                     canSuggestPlan={hasCommander}
                     canAdvanceToG2={canAdvanceToG2}
                 />
+                </div>
             )}
             {phase === 'g2_assessment' && (
+                <div data-testid="ops-planning-phase-panel" data-phase="g2_assessment">
                 <G2Phase
                     plan={plan}
                     prediction={prediction}
@@ -466,8 +482,10 @@ export function OpsPlanningModal() {
                     corpsId={corpsId}
                     onAdvance={advancePhase}
                 />
+                </div>
             )}
             {phase === 'authorize' && (
+                <div data-testid="ops-planning-phase-panel" data-phase="authorize">
                 <AuthorizePhase
                     plan={plan}
                     prediction={prediction}
@@ -475,6 +493,7 @@ export function OpsPlanningModal() {
                     officerId={selectedOfficerId}
                     originSectorId={originSectorId}
                 />
+                </div>
             )}
 
             {/* Close button — top right */}
@@ -483,6 +502,7 @@ export function OpsPlanningModal() {
                 type="button"
                 onClick={requestCloseOpsPlanning}
                 title={t('opsModal.closePlanningTitle')}
+                data-testid="ops-planning-close"
                 className="absolute top-4 right-4 z-30 w-10 h-10 flex items-center justify-center
                            text-text-secondary hover:text-white rounded-full
                            bg-[rgba(20,18,15,0.6)] hover:bg-[rgba(20,18,15,0.9)]

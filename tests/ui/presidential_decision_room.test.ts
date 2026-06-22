@@ -321,6 +321,48 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('does not treat turn-zero setup summaries as filed war records', () => {
+    const setupSummary = makeSummary({
+      turn: 0,
+      territory_net: { RBiH: -8 },
+      displacement_total: 1200,
+      notable_flips: [
+        { osid: 'op:test:setup', mun_id: 'test', from: 'RS', to: 'RBiH', significance: 'generic' },
+      ],
+    });
+    const state = makeState({
+      turn: 0,
+      latestTurnSummary: setupSummary,
+      turnSummaries: [setupSummary],
+      operationalSitrep: undefined,
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.some((card) => card.category === 'turn')).toBe(false);
+    expect(view.cards.some((card) => card.category === 'cost')).toBe(false);
+    expect(view.cards.some((card) => card.category === 'memory')).toBe(false);
+    expect(view.lenses.some((lens) => lens.id === 'turn' || lens.id === 'cost' || lens.id === 'memory')).toBe(false);
+    expect(view.sourceHandoffs.some((handoff) => handoff.id === 'chronicle' || handoff.id.startsWith('army-hq-records'))).toBe(false);
+    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
+    expect(loopsById.report).toMatchObject({
+      count: 0,
+      urgentCount: 0,
+      navigationTarget: { kind: 'none' },
+    });
+    expect(loopsById.cost).toMatchObject({
+      count: 0,
+      urgentCount: 0,
+      navigationTarget: { kind: 'none' },
+    });
+    expect(loopsById.judge).toMatchObject({
+      count: 0,
+      urgentCount: 0,
+      navigationTarget: { kind: 'none' },
+    });
+    expect(`${loopsById.report.summary} ${loopsById.cost.summary} ${loopsById.judge.summary}`).not.toContain('recorded turn');
+  });
+
   it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
     const state = makeState({
       commandBriefing: {
@@ -988,7 +1030,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
     expect(byId.report).toMatchObject({
       label: 'Report',
-      navigationTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
+      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
+      sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
     });
     expect(byId.cost).toMatchObject({
       label: 'Cost',

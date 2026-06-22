@@ -642,6 +642,11 @@ export function OOBSidebar() {
                             type="button"
                             data-testid="oob-sector-row"
                             data-sector-id={sector.sector_id}
+                            data-coverage-tier={coverageTier}
+                            data-current-brigade-count={sectorAssignment.allCurrentIds.length}
+                            data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
+                            data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                            data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                             data-selected={selectedCorpsFrontSectorId === sector.sector_id ? 'true' : 'false'}
                             onClick={() => inspectOnField(useGameStore.getState(), {
                               kind: 'field-sector-in-corps',

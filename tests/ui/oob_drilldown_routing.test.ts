@@ -141,9 +141,15 @@ describe('OOBSidebar drilldown routing', () => {
     const { container } = render(React.createElement(OOBSidebar));
 
     fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    const row = screen.getByTestId('oob-sector-row');
 
     expect(container.textContent).toContain('0 on line');
     expect(container.textContent).toContain('No coverage');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+    expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 });

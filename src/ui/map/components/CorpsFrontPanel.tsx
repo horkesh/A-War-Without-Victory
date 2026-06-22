@@ -819,6 +819,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="pt-3">
                   <button
                     type="button"
+                    data-testid="corps-front-draft-directive"
+                    data-corps-id={sector?.corps_id ?? ''}
+                    data-origin-sector-id={sector?.sector_id ?? ''}
                     onClick={() => {
                       if (sector?.corps_id) {
                         setOpsPlanningContext(sector.corps_id, sector.sector_id);

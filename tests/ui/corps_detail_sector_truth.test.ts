@@ -77,9 +77,15 @@ describe('CorpsDetail sector truth', () => {
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    const row = screen.getByTestId('corps-detail-sector-row');
 
     expect(container.textContent).toContain('0 on line');
     expect(container.textContent).toContain('Coverage: No coverage');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+    expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 });

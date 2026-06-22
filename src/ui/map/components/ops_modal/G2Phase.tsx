@@ -58,7 +58,11 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                 : t('opsPlanning.g2.proceedAuthorization');
 
     return (
-        <div className="absolute inset-0 z-10 pointer-events-none">
+        <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            data-testid="ops-planning-phase-panel"
+            data-phase="g2_assessment"
+        >
             {/* Assessment snapshot — left side */}
             <div className="absolute top-16 left-4 w-[380px] pointer-events-auto
                             rounded-lg border border-[rgba(180,160,130,0.16)]

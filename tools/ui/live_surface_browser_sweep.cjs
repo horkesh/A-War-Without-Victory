@@ -178,6 +178,71 @@ function buildRecordsAarLiveProofFixtureState() {
   return fixtureState;
 }
 
+function buildTurnZeroSetupProvenanceFixtureState() {
+  const state = readJson(STARTUP_SAVE_PATH);
+  const fixtureState = typeof structuredClone === 'function'
+    ? structuredClone(state)
+    : JSON.parse(JSON.stringify(state));
+  fixtureState.meta = {
+    ...(fixtureState.meta ?? {}),
+    turn: 0,
+    player_faction: 'RBiH',
+    tutorial_state: { dismissed: true, completed_steps: [] },
+  };
+  fixtureState.turn_summaries = [
+    {
+      turn: 0,
+      battles: [
+        {
+          osid: 'op:test:setup',
+          mun_id: 'test',
+          attacker_faction: 'RS',
+          defender_faction: 'RBiH',
+          primary_attacker_id: 'rs_setup_probe',
+          primary_defender_id: 'arbih_setup_guard',
+          all_attacker_ids: ['rs_setup_probe'],
+          outcome: 'breakthrough',
+          attacker_casualties: 25,
+          defender_casualties: 80,
+          territory_flipped: false,
+          was_concentrated: false,
+        },
+      ],
+      territory_net: { RBiH: -4, RS: 4 },
+      notable_flips: [
+        { osid: 'op:test:setup', mun_id: 'test', from: 'RS', to: 'RBiH', significance: 'initial_control' },
+      ],
+      displacement_total: 2400,
+      displacement_by_ethnicity: { Bosniak: 1800, Serb: 600 },
+      decoration_awards: [],
+      arc_transitions: [],
+      formation_spawns: [{ formation_id: 'arbih_setup_guard', formation_name: 'Setup Guard', faction: 'RBiH' }],
+      formation_destructions: [{ formation_id: 'rs_setup_loss', formation_name: 'Setup Loss', faction: 'RS' }],
+      supply_deltas: {},
+      heavy_munitions_deltas: {},
+      movements: [],
+      supply_transitions: [],
+      events_fired: [],
+      notable_events: [{ kind: 'setup', description: 'Scenario setup marker.', faction: 'RBiH' }],
+    },
+  ];
+  return fixtureState;
+}
+
+function buildPlayerFactionStartupFixtureState(faction) {
+  const state = readJson(STARTUP_SAVE_PATH);
+  const fixtureState = typeof structuredClone === 'function'
+    ? structuredClone(state)
+    : JSON.parse(JSON.stringify(state));
+  fixtureState.meta = {
+    ...(fixtureState.meta ?? {}),
+    turn: 0,
+    player_faction: faction,
+    tutorial_state: { dismissed: true, completed_steps: [] },
+  };
+  return fixtureState;
+}
+
 function buildOperationOpportunityLiveProofFixtureState() {
   const state = readJson(STARTUP_SAVE_PATH);
   const fixtureState = typeof structuredClone === 'function'
@@ -1250,7 +1315,9 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   summary.evidence.armyHqSectorInspectOnFieldLiveProof = true;
 }
 
-async function runOwnerJourneyDrilldown(page, summary) {
+async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
+  const journeyKey = String(faction || 'unknown').toLowerCase();
+  const evidenceId = (id) => (journeyKey === 'rbih' ? id : `${journeyKey}_${id}`);
   await resetToWarMap(page);
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
@@ -1260,7 +1327,7 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await clickVisibleSelector(page, '[data-testid="command-card-cat_war_direction"]');
   await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
   await waitForVisibleSelector(page, '[data-testid="presidential-decision-room"]');
-  await captureEvidence(page, summary, 'owner_journey_decision_room');
+  await captureEvidence(page, summary, evidenceId('owner_journey_decision_room'));
 
   await resetToWarMap(page);
   await waitForVisibleSelector(page, '[data-testid="tactical-map"]');
@@ -1278,12 +1345,22 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await waitForVisibleSelector(page, '#sector-intel-tab-overview');
   await activateVisibleControl(page, '#sector-intel-tab-overview');
   await waitForVisibleSelector(page, '#sector-intel-panel-overview');
-  await captureEvidence(page, summary, 'owner_journey_sector_overview');
+  await waitForVisibleSelector(page, '[data-testid="oob-sector-row"][data-selected="true"][data-coverage-tier][data-current-brigade-count][data-frontline-brigade-count][data-reserve-brigade-count][data-command-directed-brigade-count]');
+  await captureEvidence(page, summary, evidenceId('owner_journey_sector_overview'));
 
   await activateVisibleControl(page, '#sector-intel-tab-logistics');
   await waitForVisibleSelector(page, '#sector-intel-panel-logistics');
   await activateVisibleControl(page, '#sector-intel-tab-ops');
   await waitForVisibleSelector(page, '#sector-intel-panel-ops');
+  await activateVisibleControl(page, `[data-testid="corps-front-draft-directive"][data-origin-sector-id="${quoteCssAttributeValue(sectorId)}"]`);
+  await waitForVisibleSelector(page, '[data-testid="ops-planning-modal"][data-origin-sector-id]');
+  await waitForVisibleSelector(page, '[data-testid="ops-planning-phase-panel"][data-phase="commander"]');
+  for (const phase of ['commander', 'plan', 'g2_assessment', 'authorize']) {
+    await waitForVisibleSelector(page, `[data-testid="ops-planning-phase-${phase}"][data-phase="${phase}"]`);
+  }
+  await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_modal'));
+  await activateVisibleControl(page, '[data-testid="ops-planning-close"]');
+  await page.waitForFunction(() => !document.querySelector('[data-testid="ops-planning-modal"]'), { timeout: 15000 });
   await activateVisibleControl(page, '#sector-intel-tab-forces');
   await waitForVisibleSelector(page, '#sector-intel-panel-forces');
   const formationId = await getVisibleSelectorAttribute(
@@ -1304,7 +1381,7 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await waitForVisibleSelector(page, '#formation-detail-tab-record[aria-selected="true"]');
   await activateVisibleControl(page, '#formation-detail-tab-orders');
   await waitForVisibleSelector(page, '#formation-detail-tab-orders[aria-selected="true"]');
-  await captureEvidence(page, summary, 'owner_journey_formation_detail');
+  await captureEvidence(page, summary, evidenceId('owner_journey_formation_detail'));
 
   await activateVisibleControl(page, '#formation-detail-tab-overview');
   await waitForVisibleSelector(page, '#formation-detail-tab-overview[aria-selected="true"]');
@@ -1318,7 +1395,7 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await waitForVisibleSelector(page, '[data-testid="settlement-panel-municipality"]');
   await activateVisibleControl(page, '#settlement-tab-timeline');
   await waitForVisibleSelector(page, '[data-testid="settlement-panel-timeline"]');
-  await captureEvidence(page, summary, 'owner_journey_settlement_detail');
+  await captureEvidence(page, summary, evidenceId('owner_journey_settlement_detail'));
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
   await waitForVisibleSelector(page, '#army-hq-tab-records');
@@ -1326,11 +1403,14 @@ async function runOwnerJourneyDrilldown(page, summary) {
     await activateVisibleControl(page, `[data-testid="records-subtab-${subTab}"]`);
     await waitForVisibleSelector(page, `[data-testid="records-subtab-${subTab}"][data-selected="true"]`);
   }
-  await captureEvidence(page, summary, 'owner_journey_records_tabs');
+  await captureEvidence(page, summary, evidenceId('owner_journey_records_tabs'));
 
   const text = await visibleText(page);
-  assertNoRawTechnicalTokens('Owner Journey Drilldown', text);
+  assertNoRawTechnicalTokens(`Owner Journey Drilldown ${faction}`, text);
   summary.evidence.ownerJourneyDrilldown = true;
+  summary.evidence.ownerJourneyDrilldownByFaction[faction] = true;
+  summary.evidence.ownerJourneyOpsPlanningModal = true;
+  summary.evidence.ownerJourneyOpsPlanningModalByFaction[faction] = true;
 }
 
 async function runRecordsAarFormationLinkLiveProof(page, summary) {
@@ -1455,6 +1535,63 @@ async function loadRecordsAarLiveProofFixture(page, summary) {
     osid: RECORDS_AAR_FIXTURE_OSID,
     attacker: RECORDS_AAR_FIXTURE_ATTACKER_ID,
     defender: RECORDS_AAR_FIXTURE_DEFENDER_ID,
+  };
+}
+
+async function loadTurnZeroSetupProvenanceFixture(page, summary) {
+  const fixtureState = buildTurnZeroSetupProvenanceFixtureState();
+  await page.evaluate(async (state) => {
+    if (typeof window.handleManualSaveLoad !== 'function') {
+      throw new Error('window.handleManualSaveLoad is unavailable');
+    }
+    await window.handleManualSaveLoad(state);
+  }, fixtureState);
+  await resetToWarMap(page);
+  summary.evidence.turnZeroSetupProvenanceFixture = {
+    source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
+    turn: 0,
+    playerFaction: 'RBiH',
+  };
+}
+
+async function loadPlayerFactionStartupFixture(page, summary, faction) {
+  const fixtureState = buildPlayerFactionStartupFixtureState(faction);
+  await page.evaluate(async (state) => {
+    if (typeof window.handleManualSaveLoad !== 'function') {
+      throw new Error('window.handleManualSaveLoad is unavailable');
+    }
+    await window.handleManualSaveLoad(state);
+  }, fixtureState);
+  await resetToWarMap(page);
+  summary.evidence.ownerJourneyStartupFixtureByFaction[faction] = {
+    source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
+    turn: 0,
+    playerFaction: faction,
+  };
+}
+
+async function runTurnZeroSetupProvenanceLiveProof(page, summary) {
+  await loadTurnZeroSetupProvenanceFixture(page, summary);
+
+  await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
+  await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
+  await waitForVisibleText(page, 'No campaign record loaded.');
+  const deskText = await visibleText(page);
+  if (/Last filed record/i.test(deskText)) {
+    await captureEvidence(page, summary, 'turn_zero_setup_provenance_desk_failed');
+    throw new Error('Desk consequence strip treated turn-zero setup as a filed record');
+  }
+
+  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
+  await activateVisibleControl(page, '[data-testid="desk-open-command-surface"]');
+  await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
+  await waitForVisibleSelector(page, '[data-testid="command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
+  await captureEvidence(page, summary, 'turn_zero_setup_provenance_live_proof');
+  const text = await visibleText(page);
+  assertNoRawTechnicalTokens('Turn-Zero Setup Provenance Live Proof', text);
+  summary.evidence.turnZeroSetupProvenanceLiveProof = {
+    recordCardCount: 0,
+    recordCardUrgentCount: 0,
   };
 }
 
@@ -1651,9 +1788,15 @@ async function run() {
       armyHqSectorFrontSegmentLiveProof: false,
       mapContextMenuLiveProof: false,
       ownerJourneyDrilldown: false,
+      ownerJourneyDrilldownByFaction: {},
+      ownerJourneyOpsPlanningModal: false,
+      ownerJourneyOpsPlanningModalByFaction: {},
+      ownerJourneyStartupFixtureByFaction: {},
       recordsAarFormationLinkLiveProof: false,
       battleMarkerLiveProof: false,
       recordsAarFixture: false,
+      turnZeroSetupProvenanceFixture: false,
+      turnZeroSetupProvenanceLiveProof: false,
       operationOpportunityFixture: false,
       archiveChronicleToRecordsDrilldown: false,
       archiveRecordsDecisionToChronicleDrilldown: false,
@@ -1710,6 +1853,9 @@ async function run() {
     await runOwnerJourneyDrilldown(page, summary);
     await runArchiveInboxDrilldown(page, summary);
     await runCodexInternalDrilldown(page, summary);
+    await loadPlayerFactionStartupFixture(page, summary, 'RS');
+    await runOwnerJourneyDrilldown(page, summary, 'RS');
+    await runTurnZeroSetupProvenanceLiveProof(page, summary);
     await loadOperationOpportunityLiveProofFixture(page, summary);
     await runPresidentialInboxRoutingLiveProof(page, summary);
     await runOperationOpportunityLedgerLiveProof(page, summary);
