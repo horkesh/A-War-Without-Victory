@@ -244,13 +244,11 @@ describe('generals-digest Chronicle beats (D2 task #42)', () => {
         expect(entries[0].detail).toContain('2 settlements given up');
     });
 
-    it('does not narrate turn-0 territory_net as settlements taken', () => {
+    it('does not emit a digest beat for turn-0 setup provenance', () => {
         const s = summary(0, { territory_net: { RBiH: 2, RS: -2 } });
         const entries = buildGeneralsDigestChronicleEntries([s], 'RBiH', undefined, 0);
 
-        expect(entries[0].title).toBe('The fronts were quiet this week');
-        expect(entries[0].detail).not.toContain('settlements taken');
-        expect(entries[0].metadata?.netFriendlyTerritory).toBeUndefined();
+        expect(entries).toEqual([]);
     });
 
     it('is deterministic — identical inputs yield identical entries', () => {
