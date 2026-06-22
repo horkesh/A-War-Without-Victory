@@ -14,7 +14,7 @@ import { inspectOnField } from '../../utils/shellNavigation';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
-import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { compareLocalizedFormationNames, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 interface OrbatSectionProps {
     corpsId: string;
@@ -246,7 +246,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
 export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
     const [locale] = useLocale();
     const [expandedId, setExpandedId] = useState<string | null>(null);
-    const sorted = useMemo(() => [...brigades].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })), [brigades]);
+    const sorted = useMemo(() => [...brigades].sort((a, b) => compareLocalizedFormationNames(a, b, locale)), [brigades, locale]);
 
     return (
         <CollapsibleSection sectionKey={`orbat-${corpsId}`} title={t('orbat.title')} count={brigades.length}>

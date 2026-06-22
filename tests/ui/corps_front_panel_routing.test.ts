@@ -41,6 +41,21 @@ function makeState(): LoadedGameState {
         location_osid: 'op:sarajevo:dobrinja_1',
         corps_id: 'arbih_1st_corps',
       },
+      {
+        id: 'arbih_unresolved_brigade',
+        faction: 'RBiH',
+        name: 'Unresolved Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        personnel: 800,
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -59,6 +74,22 @@ function makeState(): LoadedGameState {
     latestTurnSummary: null,
     turnSummaries: [],
     player_faction: 'RBiH',
+    activeOperations: [
+      {
+        corps_id: 'arbih_1st_corps',
+        operation_name: 'Known Supply Operation',
+        faction: 'RBiH',
+        type: 'sector_attack',
+        phase: 'execution',
+        started_turn: 0,
+        participating_brigades: ['arbih_101_brigade'],
+        objectives_count: 1,
+        objectives_captured: 0,
+        attacks: 0,
+        weekly_log_length: 0,
+        supply_readiness: 0,
+      },
+    ],
     frontEdgesOsid: [],
     corpsFrontSectors: [
       {
@@ -134,6 +165,67 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+  });
+
+  it('exposes unresolved brigade proof hooks and preserves its field route', () => {
+    const state = makeState();
+    state.unresolvedSectorBrigades = ['arbih_unresolved_brigade'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    const unresolvedRow = screen.getByTestId('corps-front-brigade-row-unresolved');
+    expect(unresolvedRow.getAttribute('data-testid')).toBe('corps-front-brigade-row-unresolved');
+    expect(unresolvedRow.getAttribute('data-formation-id')).toBe('arbih_unresolved_brigade');
+    expect(unresolvedRow.getAttribute('data-location-osid')).toBe('op:sarajevo:dobrinja_1');
+    fireEvent.click(unresolvedRow);
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
+    expect(store.selectedFormationId).toBe('arbih_unresolved_brigade');
+  });
+
+  it('does not treat unassessed operation supply readiness as zero percent', () => {
+    const state = makeState();
+    state.activeOperations = [
+      {
+        corps_id: 'arbih_1st_corps',
+        operation_name: 'Unassessed Supply Operation',
+        faction: 'RBiH',
+        type: 'sector_attack',
+        phase: 'execution',
+        started_turn: 0,
+        participating_brigades: ['arbih_101_brigade'],
+        objectives_count: 1,
+        objectives_captured: 0,
+        attacks: 0,
+        weekly_log_length: 0,
+      },
+    ] as LoadedGameState['activeOperations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Ops Supply Readiness\s*—/);
+    expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*0%/);
+  });
+
+  it('preserves explicit zero operation supply readiness', () => {
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toContain('0%');
   });
 
   it('does not describe an uncovered sector as a force-balance advantage', () => {

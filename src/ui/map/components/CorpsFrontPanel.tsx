@@ -245,8 +245,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel + overridePersonnel;
   const hasFriendlyLine = assignedFormations.length + reserveFormations.length + overrideFormations.length > 0;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
-  const avgOperationSupply = relatedOperations.length > 0
-    ? relatedOperations.reduce((sum, op) => sum + (op.supply_readiness ?? 0), 0) / relatedOperations.length
+  const operationSupplyReadinessValues = relatedOperations
+    .map((op) => op.supply_readiness)
+    .filter((readiness): readiness is number => typeof readiness === 'number' && Number.isFinite(readiness));
+  const avgOperationSupply = operationSupplyReadinessValues.length > 0
+    ? operationSupplyReadinessValues.reduce((sum, readiness) => sum + readiness, 0) / operationSupplyReadinessValues.length
     : null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
   const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
@@ -669,6 +672,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={f.id}
                           type="button"
+                          data-testid="corps-front-brigade-row-unresolved"
+                          data-formation-id={f.id}
+                          data-location-osid={f.location_osid ?? undefined}
+                          data-corps-front-row-kind="unresolved"
                           aria-label={t('corpsFront.unassignedBrigadeAria', { name: getLocalizedFormationName(f, locale) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-red-50 transition-colors text-left px-1 py-0.5 rounded border border-red-200/60"
                           onClick={() => inspectSectorFormation(f.id)}

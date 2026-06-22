@@ -26,6 +26,7 @@ import {
   PROACTIVE_FORCE_LAUNCH_COST,
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
+import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -579,8 +580,19 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
   }
 }
 
+function formatCounterOfferFactionLabel(faction: string): string {
+  if (faction === 'RBiH' || faction === 'RS' || faction === 'HRHB') {
+    return sidePickerFactionLabel(faction);
+  }
+  return faction;
+}
+
 function formatCounterOfferSplit(split: { RBiH: number; RS: number; HRHB: number }): string {
-  return `RBiH ${split.RBiH} / RS ${split.RS} / HRHB ${split.HRHB}`;
+  return [
+    `${formatCounterOfferFactionLabel('RBiH')} ${split.RBiH}%`,
+    `${formatCounterOfferFactionLabel('RS')} ${split.RS}%`,
+    `${formatCounterOfferFactionLabel('HRHB')} ${split.HRHB}%`,
+  ].join(' / ');
 }
 
 function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): void {
@@ -596,7 +608,7 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
       id: `counter-offer:${offer.id}`,
       category: 'counter_offer',
       severity: 'blocking',
-      title: t('decisionRoom.card.counterOffer.title', { author: offer.author }),
+      title: t('decisionRoom.card.counterOffer.title', { author: formatCounterOfferFactionLabel(offer.author) }),
       explanation: t('decisionRoom.card.counterOffer.explanation', { planName: offer.planName }),
       sourceOwner: t('decisionRoom.source.counterOfferDocket'),
       sourceLabel: offer.planName,

@@ -51,12 +51,14 @@ const STANCE_LABEL_KEYS: Record<string, MessageKey> = {
     defensive: 'armyHqCorps.stance.defensive',
     balanced: 'armyHqCorps.stance.balanced',
     reorganize: 'armyHqCorps.stance.reorganize',
+    unreported: 'armyHqCorps.stance.unreported',
 };
 const STANCE_COLORS: Record<string, string> = {
     offensive: 'text-red-500 border-red-500/30 bg-red-500/5',
     defensive: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
     balanced: 'text-accent-gold border-accent-gold/30 bg-accent-gold/5',
     reorganize: 'text-neutral-400 border-neutral-400/30 bg-neutral-400/5',
+    unreported: 'text-neutral-400 border-neutral-400/30 bg-neutral-400/5',
 };
 
 const READINESS_BORDER: Record<string, string> = {
@@ -93,7 +95,7 @@ export function ArmyHQCorpsCard({
         const syntheticCommand = commanderDisplay?.source === 'synthetic'
             ? getSyntheticJnaCommandPresentation(corps, operations, gameState)
             : null;
-        const stance = corps.corpsStance ?? 'balanced';
+        const stance = corps.corpsStance ?? 'unreported';
         const activeOp = operations.find((op) => op.phase === 'execution');
         const planningOp = activeOp ? null : operations.find((op) => op.phase === 'planning');
         const displayedOp = activeOp ?? planningOp ?? null;
@@ -148,8 +150,8 @@ export function ArmyHQCorpsCard({
     const isCritical = data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commanderDisplay;
     const displayCommanderName = data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
-    const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.balanced;
-    const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.balanced');
+    const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.unreported;
+    const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.unreported');
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
     const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
     const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });

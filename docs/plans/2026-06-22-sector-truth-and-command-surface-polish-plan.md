@@ -149,3 +149,34 @@
 **Acceptance:** Destroyed/forming/non-fielded brigades and operational groups do not appear as active field counters, active field-unit counts are consistent across OOB/Corps/ORBAT/Army HQ-adjacent views, terminal lifecycle is visible when a row is rendered, and command drilldowns preserve owner context.
 
 **Evidence:** Focused red/green pack passed 80/80 and `npm.cmd run typecheck` passed, including code-review follow-up coverage for statusless lightweight sector projection records and `sit:*` Situation row Desk ownership. `npm.cmd run qa:first-hour:browser` passed after preserving the Desk-owned `opening-brief:desk` and `empty:desk` exceptions. `npm.cmd run qa:live-surface:browser` passed the owner drilldown and setup/foundational proof paths. `npm.cmd run qa:player-journeys` passed 267/267. Temporary browser evidence folders were removed after verification.
+
+### Task 8: Command Surface Truth Polish
+
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_COMMAND_SURFACE_TRUTH_POLISH.md`.
+
+**Files:**
+- Modified: `src/ui/map/components/FormationDetail.tsx`
+- Modified: `src/ui/map/components/BrigadeRow.tsx`
+- Modified: `src/ui/map/components/OOBSidebar.tsx`
+- Modified: `src/ui/map/components/CorpsDetail.tsx`
+- Modified: `src/ui/map/components/OrbatPanel.tsx`
+- Modified: `src/ui/map/components/army_hq/OrbatSection.tsx`
+- Modified: `src/ui/map/components/CorpsFrontPanel.tsx`
+- Modified: `src/ui/map/components/CorpsCard.tsx`
+- Modified: `src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx`
+- Modified: `src/ui/map/data/formationNameLocalizations.ts`
+- Modified: `src/ui/map/data/presidentialDecisionRoom.ts`
+- Modified: `src/ui/map/i18n/messages.en.ts`
+- Modified: `src/ui/map/i18n/messages.bcs.ts`
+- Tests: `tests/ui/formation_detail_parity.test.ts`, `tests/ui/brigade_row_supply_labels.test.ts`, `tests/brigade_name_localization.test.ts`, `tests/presidential_decision_room_counter_offer.test.ts`, `tests/ui/command_drilldown_routing.test.ts`, `tests/ui/corps_front_panel_routing.test.ts`
+
+**Steps:**
+1. Verify Pyrrhic UI/detail scout claims with focused tests.
+2. Remove invented hold/balanced/active/0% defaults from command surfaces where the read-model does not report that truth.
+3. Sort formation lists by localized display names with deterministic id fallback.
+4. Route Corps Detail operation rows through the canonical field-operation inspection path.
+5. Localize Decision Room counter-offer faction labels and split evidence.
+
+**Acceptance:** Formation, corps, ORBAT, Corps Front, and Decision Room surfaces no longer convert missing data into favorable/default command truth, and display ordering/labels match the player-visible locale.
+
+**Evidence:** Focused proof passed 60/60 after the editable CorpsCard missing-stance branch was pinned, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 271/271, `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified, and `git diff --check` passed.

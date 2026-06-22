@@ -252,6 +252,32 @@ describe('Formation Detail parity display', () => {
     expect(screen.queryByRole('button', { name: /Southern line/i })).toBeNull();
   });
 
+  it('renders corps posture and exhaustion without brigade defaults or double scaling', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_1st_corps'
+      ? { ...formation, corpsStance: undefined, corpsExhaustion: 12.5 }
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_1st_corps' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Stance unreported');
+    expect(copy).toContain('13%');
+    expect(copy).not.toContain('Hold');
+    expect(copy).not.toContain('1250%');
+  });
+
+  it('does not invent a field posture for army headquarters', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_general_staff' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Command posture unreported');
+    expect(copy).not.toContain('Hold');
+  });
+
   it('presents a player override sector as the active assignment instead of the stale roster sector', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'

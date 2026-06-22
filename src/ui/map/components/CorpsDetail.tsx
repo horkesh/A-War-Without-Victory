@@ -25,8 +25,9 @@ import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 import { buildSectorFormationAssignment, getSectorCoverageTier, resolveCurrentSectorForFormation, type SectorCoverageTier } from '../utils/sectorUtils';
+import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -43,6 +44,7 @@ interface CorpsDetailProps {
 
 export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   const [activeTab, setActiveTab] = useState<CorpsTab>('overview');
+  const [locale] = useLocale();
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const selectedArmyId = useGameStore((s) => s.selectedArmyId);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -162,6 +164,13 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
       kind: 'field-sector-in-corps',
       sectorId,
       corpsId: selectedCorpsId,
+    });
+  };
+
+  const inspectOperationInField = (operationKey: string) => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-operation',
+      operationKey,
     });
   };
 
@@ -337,7 +346,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               <div className="p-3 text-text-secondary italic text-xs">{t('corpsDetail.noSubordinateBrigades')}</div>
             ) : (
               [...subordinates]
-                .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+                .sort((a, b) => compareLocalizedFormationNames(a, b, locale))
                 .map((f) => (
                   <BrigadeRow
                     key={f.id}
@@ -446,14 +455,9 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <button
                     key={opKey}
                     type="button"
-                    onClick={() => useGameStore.setState({
-                      selectedArmyId,
-                      selectedCorpsId,
-                      selectedCorpsFrontSectorId: null,
-                      selectedFormationId: null,
-                      selectedOperationKey: opKey,
-                      selectedOsid: null,
-                    })}
+                    data-testid="corps-detail-operation-row"
+                    data-operation-key={opKey}
+                    onClick={() => inspectOperationInField(opKey)}
                     className={`w-full text-left rounded border p-2 transition-colors ${
                       isSelected
                         ? 'border-accent-gold bg-panel-active shadow-[inset_0_0_10px_rgba(212,160,85,0.1)]'

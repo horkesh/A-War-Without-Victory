@@ -7,13 +7,15 @@ import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/of
 import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import type { CorpsFrontSectorView } from '../data/types';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
+import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
 
 export function OrbatPanel() {
+    const [locale] = useLocale();
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const selectedOrbatCorpsId = useGameStore((s) => s.selectedOrbatCorpsId);
     const setSelectedOrbatCorpsId = useGameStore((s) => s.setSelectedOrbatCorpsId);
@@ -34,8 +36,8 @@ export function OrbatPanel() {
         if (!loadedGameState || !selectedOrbatCorpsId) return [];
         return loadedGameState.formations
             .filter((f) => f.corps_id === selectedOrbatCorpsId && isFieldedTacticalFormation(f))
-            .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
-    }, [loadedGameState, selectedOrbatCorpsId]);
+            .sort((a, b) => compareLocalizedFormationNames(a, b, locale));
+    }, [loadedGameState, selectedOrbatCorpsId, locale]);
 
     const commander = useMemo(() => {
         if (!loadedGameState || !corps) return null;

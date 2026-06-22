@@ -22,7 +22,7 @@ import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/p
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 import { t, useLocale } from '../i18n';
-import { getLocalizedFormationName } from '../data/formationNameLocalizations';
+import { compareLocalizedFormationNames, getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { buildSectorFormationAssignment, getSectorCoverageTier, type SectorCoverageTier } from '../utils/sectorUtils';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
@@ -38,7 +38,7 @@ function sectorCoverageLabel(tier: SectorCoverageTier): string {
   return t(SECTOR_COVERAGE_KEYS[tier]);
 }
 
-function groupFormationsByCorps(formations: FormationView[]): Map<string, FormationView[]> {
+function groupFormationsByCorps(formations: FormationView[], locale: ReturnType<typeof useLocale>[0]): Map<string, FormationView[]> {
   const byCorps = new Map<string, FormationView[]>();
   for (const f of formations) {
     const key = f.corps_id ?? '_ungrouped';
@@ -47,7 +47,7 @@ function groupFormationsByCorps(formations: FormationView[]): Map<string, Format
     byCorps.set(key, list);
   }
   for (const list of byCorps.values()) {
-    list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    list.sort((a, b) => compareLocalizedFormationNames(a, b, locale));
   }
   return byCorps;
 }
@@ -136,10 +136,10 @@ export function OOBSidebar() {
       map.set(formation.faction, list);
     }
     for (const list of map.values()) {
-      list.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+      list.sort((a, b) => compareLocalizedFormationNames(a, b, locale));
     }
     return map;
-  }, [loadedGameState, playerFaction]);
+  }, [loadedGameState, playerFaction, locale]);
 
   const armyByFaction = useMemo(() => {
     if (!loadedGameState || !loadedGameState.formations || !playerFaction) return new Map<string, FormationView[]>();
@@ -153,10 +153,10 @@ export function OOBSidebar() {
       map.set(f.faction, list);
     }
     for (const list of map.values()) {
-      list.sort((a, b) => (a.corps_id ?? '').localeCompare(b.corps_id ?? '', undefined, { sensitivity: 'base' }) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+      list.sort((a, b) => (a.corps_id ?? '').localeCompare(b.corps_id ?? '', 'en-US', { numeric: true, sensitivity: 'base' }) || compareLocalizedFormationNames(a, b, locale));
     }
     return map;
-  }, [loadedGameState, reserveByFaction, playerFaction]);
+  }, [loadedGameState, reserveByFaction, playerFaction, locale]);
 
   const corpsColorMap = useMemo(
     () => (loadedGameState?.corpsFrontSectors ? buildCorpsColorMap(loadedGameState.corpsFrontSectors) : {}),
@@ -216,7 +216,7 @@ export function OOBSidebar() {
 
   const getCorpsStance = (corpsId: string, faction: string) => {
     const corpsFormation = corpsFormationById.get(corpsId);
-    return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction] ?? 'balanced';
+    return corpsFormation?.corpsStance ?? loadedGameState?.armyStance?.[faction];
   };
 
   const totalFormations = useMemo(() => {
@@ -291,8 +291,8 @@ export function OOBSidebar() {
                   const formations = armyByFaction.get(faction) ?? [];
                   const reserves = reserveByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
-                  const byCorps = groupFormationsByCorps(formations);
-                  const reserveByCorps = groupFormationsByCorps(reserves);
+                  const byCorps = groupFormationsByCorps(formations, locale);
+                  const reserveByCorps = groupFormationsByCorps(reserves, locale);
                   // Separate army HQ groups from real corps — HQ units render first with distinct styling
                   const armyHqIds = new Set(
                     loadedGameState.formations

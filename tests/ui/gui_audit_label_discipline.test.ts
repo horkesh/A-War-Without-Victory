@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
 import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
+import { CorpsCard } from '../../src/ui/map/components/CorpsCard.js';
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
 import { CollapsibleSection } from '../../src/ui/map/components/army_hq/CollapsibleSection.js';
@@ -357,6 +358,51 @@ describe('GUI audit label discipline', () => {
     expect(backContainer.textContent).toContain('brigades');
     expect(backContainer.textContent).toContain('sectors');
     expect(backContainer.textContent).not.toMatch(/\bPers\b|\bBrg\b|\bSec\b/);
+  });
+
+  it('renders missing corps stance as unreported instead of balanced', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      cohesion: 75,
+      fatigue: 5,
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps] });
+
+    const { container } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('UNREPORTED');
+    expect(container.textContent).not.toContain('BALANCED');
+    cleanup();
+
+    render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [],
+      faction: 'RBiH',
+      onStanceChange: vi.fn(),
+    } as Parameters<typeof CorpsCard>[0]));
+
+    const stanceSelect = screen.getByLabelText('Corps stance') as HTMLSelectElement;
+    expect(stanceSelect.value).toBe('unreported');
+    expect(stanceSelect.textContent).toContain('Unreported');
+    expect(stanceSelect.textContent).toContain('Balanced');
   });
 
   it('describes planning-only corps operations without saying the corps has no active operations', () => {

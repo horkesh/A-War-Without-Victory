@@ -1544,6 +1544,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
+1. **[2026-06-22] Missing command-surface data is unreported, not favorable**
+   Do instead: Preserve absent posture/stance/lifecycle/supply readiness as unreported/recorded/unassessed; never default corps/army rows to hold, balanced, active, or 0% unless the read-model explicitly says so. Sort formation lists by localized display names with deterministic id fallback.
 1. **[2026-06-22] Fielded tactical-unit truth is active-status truth**
    Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, and sector assignment projections; terminal/forming brigades and operational groups need lifecycle copy, not active field affordances.
 1. **[2026-06-22] Pending foundational decisions are not filed history**

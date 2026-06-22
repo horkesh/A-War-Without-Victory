@@ -181,6 +181,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
   const isBrigade = formation.kind === 'brigade';
   const isFieldedSelectedBrigade = isFieldedBrigade(formation);
+  const postureValue = (() => {
+    if (isBrigade) return getPlayerSafeFormationPostureLabel(formation.posture);
+    if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+      return formation.corpsStance
+        ? getPlayerSafeSectorStanceLabel(formation.corpsStance)
+        : t('formationDetail.corpsStanceUnreported');
+    }
+    if (formation.kind === 'army_hq') return t('formationDetail.commandPostureUnreported');
+    return formation.posture ? getPlayerSafeFormationPostureLabel(formation.posture) : t('formationDetail.commandPostureUnreported');
+  })();
   const formationName = getLocalizedFormationName(formation, locale);
 
   // Home-distance helpers
@@ -405,7 +415,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Posture & readiness */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
               <span className="text-text-secondary">{t('formationDetail.posture')}</span>
-              <span className="text-text-primary font-semibold">{getPlayerSafeFormationPostureLabel(formation.posture ?? 'hold')}</span>
+              <span className="text-text-primary font-semibold">{postureValue}</span>
               <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
               <span className="text-text-primary">{getPlayerSafeFormationReadinessLabel(formation.readiness)}</span>
             </div>
@@ -632,7 +642,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               {formation.kind === 'corps' && formation.corpsExhaustion != null && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.exhaustion')}</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion * 100)}%</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion)}%</span>
                 </>
               )}
               {formation.kind === 'corps' && formation.corpsCommandSpan != null && (
@@ -1022,14 +1032,6 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               </div>
             )}
 
-
-            {/* Non-brigade: corps stance info placeholder */}
-            {!isBrigade && formation.corpsStance && (
-              <div className="text-xs space-y-1">
-                <span className="text-text-secondary">{t('formationDetail.corpsStance')} </span>
-                <span className="text-text-primary font-semibold">{getPlayerSafeSectorStanceLabel(formation.corpsStance)}</span>
-              </div>
-            )}
           </>
         )}
       </div>

@@ -246,6 +246,21 @@ export function getLocalizedFormationName(
     ?? localizeGenericBrigadeName(formation.name);
 }
 
+export function compareLocalizedFormationNames(
+  a: FormationNameInput,
+  b: FormationNameInput,
+  locale: Locale,
+): number {
+  const localeTag = locale === 'bcs' ? 'bs-BA' : 'en-US';
+  const nameCompare = getLocalizedFormationName(a, locale).localeCompare(
+    getLocalizedFormationName(b, locale),
+    localeTag,
+    { numeric: true, sensitivity: 'base' },
+  );
+  if (nameCompare !== 0) return nameCompare;
+  return a.id.localeCompare(b.id, 'en-US', { numeric: true, sensitivity: 'base' });
+}
+
 export function getFormationUnitType(formation: FormationNameInput): FormationUnitType {
   const catalogType = DESIGNATION_BY_ID.get(formation.id)?.unit_type;
   if (catalogType) return catalogType;

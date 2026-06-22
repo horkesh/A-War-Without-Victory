@@ -8,7 +8,7 @@ import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
 
 const STANCE_ICON: Record<string, IconName> = {
-  offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced',
+  offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced', unreported: 'balanced',
 };
 
 const STANCE_COLOR: Record<string, string> = {
@@ -16,6 +16,7 @@ const STANCE_COLOR: Record<string, string> = {
   defensive: 'border-l-blue-400/70',
   balanced: 'border-l-amber-400/70',
   reorganize: 'border-l-gray-400/70',
+  unreported: 'border-l-gray-400/50',
 };
 
 const STANCE_LABEL_KEY: Record<string, MessageKey> = {
@@ -23,6 +24,7 @@ const STANCE_LABEL_KEY: Record<string, MessageKey> = {
   defensive: 'corpsCard.stance.defensive',
   balanced: 'corpsCard.stance.balanced',
   reorganize: 'corpsCard.stance.reorganize',
+  unreported: 'corpsCard.stance.unreported',
 };
 
 export interface CorpsCardProps {
@@ -99,7 +101,8 @@ export function CorpsCard({
   const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
   const avgCohesion = getAvgCohesion(brigades);
   const equip = getEquipmentSummary(brigades);
-  const stanceBorder = STANCE_COLOR[stance ?? 'balanced'] ?? 'border-l-gray-400/70';
+  const stanceKey = stance ?? 'unreported';
+  const stanceBorder = STANCE_COLOR[stanceKey] ?? STANCE_COLOR.unreported;
   const corpsOsids = Array.from(
     new Set(
       brigades
@@ -114,7 +117,7 @@ export function CorpsCard({
   };
 
   // R5: Stance change confirmation — flash + toast
-  const stanceLabel = STANCE_LABEL_KEY[stance ?? 'balanced'] ? t(STANCE_LABEL_KEY[stance ?? 'balanced']) : stance ?? 'balanced';
+  const stanceLabel = STANCE_LABEL_KEY[stanceKey] ? t(STANCE_LABEL_KEY[stanceKey]) : t('corpsCard.stance.unreported');
 
   const cardFront = (
     <div
@@ -190,17 +193,20 @@ export function CorpsCard({
       <div className="px-3 py-1.5 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
-            <Icon name={STANCE_ICON[stance ?? 'balanced'] ?? 'balanced'} size={11} />
+            <Icon name={STANCE_ICON[stanceKey] ?? 'balanced'} size={11} />
             {t('corpsCard.stance')}
           </span>
           {onStanceChange ? (
             <select
-              value={stance ?? 'balanced'}
+              value={stanceKey}
               onChange={(event) => onStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
               aria-label={t('corpsCard.stanceAria')}
               className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
             >
+              {stanceKey === 'unreported' && (
+                <option value="unreported" disabled>{t('corpsCard.stance.unreported')}</option>
+              )}
               <option value="defensive" title={t('corpsCard.stance.defensiveTitle')}>{t('corpsCard.stance.defensive')}</option>
               <option value="balanced" title={t('corpsCard.stance.balancedTitle')}>{t('corpsCard.stance.balanced')}</option>
               <option value="offensive" title={t('corpsCard.stance.offensiveTitle')}>{t('corpsCard.stance.offensive')}</option>

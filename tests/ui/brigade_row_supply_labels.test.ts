@@ -66,4 +66,14 @@ describe('BrigadeRow supply labels', () => {
     expect(screen.getByText('COLLAPSED')).toBeTruthy();
     expect(screen.queryByText('ACTIVE')).toBeNull();
   });
+
+  it('renders unknown lifecycle badges as recorded state instead of active', () => {
+    render(React.createElement(BrigadeRow, {
+      formation: makeFormation({ status: 'awaiting_reconstitution', readiness: 'degraded' }),
+    }));
+
+    expect(screen.getByText('RECORDED')).toBeTruthy();
+    expect(screen.queryByText('ACTIVE')).toBeNull();
+    expect(screen.queryByText('AWAITING_RECONSTITUTION')).toBeNull();
+  });
 });

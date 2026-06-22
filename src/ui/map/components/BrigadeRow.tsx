@@ -18,6 +18,7 @@ const STATUS_BADGE: Record<string, { class: string; labelKey: MessageKey }> = {
   collapsed: { class: 'text-red-500 border-red-500/60', labelKey: 'brigadeRow.status.collapsed' },
   inactive: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.inactive' },
   unavailable: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.unavailable' },
+  recorded: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.recorded' },
 };
 
 const STANCE_STRIPE: Record<string, string> = {
@@ -83,7 +84,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   // Status determination — disrupted overrides normal status
   const isDisrupted = (formation.disrupted_turns ?? 0) > 0;
   const displayStatus = isDisrupted ? 'disrupted' : formation.status.toLowerCase();
-  const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.active;
+  const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.recorded;
 
   const containerClasses = [
     'flex items-center gap-1.5 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',

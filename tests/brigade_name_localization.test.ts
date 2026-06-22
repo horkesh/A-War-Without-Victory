@@ -6,6 +6,7 @@ import {
   getLocalizedFormationName,
   getFormationDesignation,
   getFormationUnitType,
+  compareLocalizedFormationNames,
 } from '../src/ui/map/data/formationNameLocalizations';
 
 interface OobBrigadeRow {
@@ -119,5 +120,27 @@ describe('BCS brigade name localizations', () => {
       kind: 'brigade',
       name: '1st Sarajevo Mechanized',
     })).toBe('mechanized');
+  });
+
+  test('sorts formation rows by displayed localized name with stable id tiebreaks', () => {
+    const rows = [
+      { id: 'z_same', kind: 'brigade', name: 'Same Display' },
+      { id: 'a_same', kind: 'brigade', name: 'Same Display' },
+      { id: 'rs_1st_sarajevo_mechanized', kind: 'brigade', name: 'Zzz English' },
+      { id: 'arbih_503rd_slavna_mountain', kind: 'brigade', name: 'Aaa English' },
+    ];
+
+    expect([...rows].sort((a, b) => compareLocalizedFormationNames(a, b, 'en')).map((row) => row.id)).toEqual([
+      'arbih_503rd_slavna_mountain',
+      'a_same',
+      'z_same',
+      'rs_1st_sarajevo_mechanized',
+    ]);
+    expect([...rows].sort((a, b) => compareLocalizedFormationNames(a, b, 'bcs')).map((row) => row.id)).toEqual([
+      'rs_1st_sarajevo_mechanized',
+      'arbih_503rd_slavna_mountain',
+      'a_same',
+      'z_same',
+    ]);
   });
 });

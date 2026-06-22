@@ -85,6 +85,21 @@ function makeState(): LoadedGameState {
         density: 0.2,
       },
     ],
+    operations: [
+      {
+        corps_id: 'rbih_1_corps',
+        corps_name: '1st Corps',
+        faction: 'RBiH',
+        name: 'op_test_corps',
+        display_name: 'Test Corps Operation',
+        type: 'sector_attack',
+        phase: 'planning',
+        started_turn: 0,
+        current_objective_index: 0,
+        objectives: ['op:test_objective'],
+        participating_brigade_count: 1,
+      },
+    ],
   } as unknown as LoadedGameState;
 }
 
@@ -156,5 +171,37 @@ describe('command drilldown routing', () => {
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
+  });
+
+  it('routes CorpsDetail operation rows through canonical field inspection', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+      selectedCorpsFrontSectorId: 'sector:stale',
+      selectedFormationId: 'rbih_1_brigade',
+      codexOpen: true,
+      chronicleOpen: true,
+      focusedAftermathTurn: 2,
+      focusedOperationHistoryId: 'stale-history',
+    });
+
+    render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
+    const operationRow = screen.getByTestId('corps-detail-operation-row');
+    expect(operationRow.getAttribute('data-operation-key')).toBe('rbih_1_corps|op_test_corps');
+    fireEvent.click(operationRow);
+
+    const store = useGameStore.getState();
+    expect(store.selectedOperationKey).toBe('rbih_1_corps|op_test_corps');
+    expect(store.isOperationsPanelOpen).toBe(true);
+    expect(store.selectedCorpsId).toBeNull();
+    expect(store.selectedCorpsFrontSectorId).toBeNull();
+    expect(store.selectedFormationId).toBeNull();
+    expect(store.codexOpen).toBe(false);
+    expect(store.chronicleOpen).toBe(false);
+    expect(store.focusedAftermathTurn).toBeNull();
+    expect(store.focusedOperationHistoryId).toBeNull();
   });
 });
