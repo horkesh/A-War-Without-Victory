@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): harden ops and command surfaces
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** The ops-planning G-2 clipboard no longer renders raw IPC/engine prediction errors such as invalid response strings, internal engine wording, raw OSIDs, or exception payloads. Plan staging now resolves to player-facing settlement names, the ops modal phase rail is i18n-backed, G-2 proceed is disabled while an assessment is loading/absent, Authorize eligibility findings render player-safe staff copy, OOB/Corps Detail objective progress is one-based for the player, Corps Front logistics includes command-directed override brigades, Corps Front header metadata separates date from turn number, Formation Detail sector assignment counts use projected current brigades, Army HQ/ORBAT equipment readiness fractions now render as operational equipment counts, and Army HQ cards label planning-only operations explicitly.
+
+**Verification:** Red/green focused tests reproduced each player-surface defect and then passed after the display/read-model fixes: `node node_modules\vitest\vitest.mjs run tests\ui\ops_planning_target_discovery.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` passed 57/57; the final combined follow-up pack `node node_modules\vitest\vitest.mjs run tests\ui\ops_planning_target_discovery.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` passed 74/74. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified and temp evidence removed. Report: `docs/40_reports/implemented/20260622_OPS_AND_COMMAND_SURFACE_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario source data, event mechanics, operation authorization behavior, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): align sector coverage labels with current formations
 
 **Type:** UI/read-model/test/docs polish.

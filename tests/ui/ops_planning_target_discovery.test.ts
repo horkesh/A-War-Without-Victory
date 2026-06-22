@@ -290,6 +290,26 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('3')).toBeTruthy();
     });
 
+    it('renders PlanPhase staging with the settlement display name instead of raw OSID', () => {
+        useGameStore.setState({
+            loadedGameState: makeState(),
+            osidDisplayNames: { 'op:test:staging_1': 'Staging Ridge' },
+        });
+
+        const { container } = render(createElement(PlanPhase, {
+            plan: makePlan({ defaultStagingOsid: 'op:test:staging_1' }),
+            onUpdate: vi.fn(),
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+            centroidLookup: new Map(),
+            availableObjectiveOsids: [],
+            canSuggestPlan: true,
+        }));
+
+        expect(container.textContent).toContain('Staging Ridge');
+        expect(container.textContent).not.toContain('op:test:staging_1');
+    });
+
     it('localizes PlanPhase status chrome in BCS mode', () => {
         setLocale('bcs');
         useGameStore.setState({ loadedGameState: makeState(), osidDisplayNames: null });
@@ -377,6 +397,20 @@ describe('ops planning target discovery', () => {
         expect(mapSource).not.toContain('opsPlanning.compactLegend.staging');
     });
 
+    it('routes the modal phase rail through i18n labels instead of hardcoded English labels', () => {
+        const modalSource = readFileSync(
+            resolve(process.cwd(), 'src/ui/map/components/ops_modal/OpsPlanningModal.tsx'),
+            'utf8',
+        );
+        const typesSource = readFileSync(
+            resolve(process.cwd(), 'src/ui/map/components/ops_modal/types.ts'),
+            'utf8',
+        );
+
+        expect(modalSource).not.toContain('PHASE_LABELS[p]');
+        expect(typesSource).not.toContain('PHASE_LABELS');
+    });
+
     it('localizes G2Phase clipboard chrome in BCS mode', () => {
         setLocale('bcs');
         useGameStore.setState({ loadedGameState: makeState() });
@@ -394,11 +428,112 @@ describe('ops planning target discovery', () => {
         expect(screen.getByText('Prije odobrenja')).toBeTruthy();
         expect(screen.getByText('Korpus')).toBeTruthy();
         expect(screen.getByText('Datum')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /procjena/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: /^procjena$/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /legenda karte/i })).toBeTruthy();
         expect(screen.getByText('Dovršite plan za izradu procjene')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /nastavi na odobrenje/i })).toBeTruthy();
+        const awaitingProceed = screen.getByRole('button', { name: /ceka se procjena/i });
+        expect(awaitingProceed.hasAttribute('disabled')).toBe(true);
         expect(screen.queryByText('G2 Snapshot')).toBeNull();
+    });
+
+    it('renders G2 prediction failures as player-facing staff copy', () => {
+        useGameStore.setState({ loadedGameState: makeState() });
+
+        const { container } = render(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: null,
+            loading: false,
+            error: 'Invalid prediction response from engine: raw_osid op:test:objective',
+            corpsId: 'rs_1st_krajina',
+            onAdvance: vi.fn(),
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('G-2 assessment unavailable');
+        expect(copy).toContain('You can adjust the plan or continue to authorization without a live estimate.');
+        expect(copy).not.toMatch(/Invalid prediction|engine|raw_osid|op:test:objective/i);
+    });
+
+    it('does not advance from G2 while the staff assessment is still unavailable', () => {
+        useGameStore.setState({ loadedGameState: makeState() });
+        const onAdvance = vi.fn();
+
+        const { rerender } = render(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: null,
+            loading: true,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance,
+        }));
+
+        const loadingProceed = screen.getByRole('button', { name: /preparing assessment/i });
+        expect(loadingProceed.hasAttribute('disabled')).toBe(true);
+        fireEvent.click(loadingProceed);
+        expect(onAdvance).not.toHaveBeenCalled();
+
+        rerender(createElement(G2Phase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_1', name: 'Main Axis', brigadeIds: ['brigade_alpha'], objectives: ['enemy_front'] }],
+            }),
+            prediction: null,
+            loading: false,
+            error: null,
+            corpsId: 'rs_1st_krajina',
+            onAdvance,
+        }));
+
+        const awaitingProceed = screen.getByRole('button', { name: /awaiting assessment/i });
+        expect(awaitingProceed.hasAttribute('disabled')).toBe(true);
+        expect(onAdvance).not.toHaveBeenCalled();
+    });
+
+    it('renders AuthorizePhase eligibility findings as player-safe staff copy', () => {
+        const state = makeState();
+        useGameStore.setState({
+            loadedGameState: {
+                ...state,
+                rawGameState: {
+                    meta: { turn: 0, player_faction: 'RS' },
+                    military: {
+                        command_authority: { current: 10 },
+                        formations: {
+                            rs_1st_krajina: {
+                                id: 'rs_1st_krajina',
+                                name: '1st Krajina Corps',
+                                kind: 'corps',
+                                faction: 'RS',
+                                status: 'active',
+                            },
+                        },
+                        corps_command: {
+                            rs_1st_krajina: { active_operations: [] },
+                        },
+                    },
+                },
+            } as unknown as LoadedGameState,
+            osidDisplayNames: null,
+        });
+
+        const { container } = render(createElement(AuthorizePhase, {
+            plan: makePlan({
+                axes: [{ id: 'axis_raw_1', name: 'Main Axis', brigadeIds: ['bde_raw_missing'], objectives: [] }],
+            }),
+            prediction: makePrediction(),
+            corpsId: 'rs_1st_krajina',
+            officerId: null,
+            originSectorId: 'sector_1',
+        }));
+
+        const copy = container.textContent ?? '';
+        expect(copy).toContain('Assign at least one available brigade and one enemy-held objective.');
+        expect(copy).toContain('Selected brigade is no longer available for this operation.');
+        expect(copy).toContain('This operation cannot launch until the plan has a valid axis.');
+        expect(copy).not.toMatch(/axis_raw_1|bde_raw_missing|formations|0 valid|would be dropped|axis_empty|op_empty|brigade_missing/i);
     });
 
     it('localizes AuthorizePhase action chrome in BCS mode', () => {

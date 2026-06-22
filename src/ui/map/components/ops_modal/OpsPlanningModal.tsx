@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../../store/gameStore';
 import type { OpsPhase, OpsPlanState, AxisState } from './types';
-import { PHASE_ORDER, PHASE_LABELS } from './types';
+import { PHASE_ORDER } from './types';
 import { CommanderPhase } from './CommanderPhase';
 import { PlanPhase } from './PlanPhase';
 import { G2Phase } from './G2Phase';
@@ -13,6 +13,13 @@ import { Z } from '../../../shared/zIndex';
 import { getOpsPhaseAdvanceMessage, getOpsPhaseGateMessage, planHasObjectiveAndBrigade } from './phaseGate';
 import { t } from '../../i18n';
 import { getNextAxisId, hasOpsPlanningDraftAssignments } from './opsPlanningDraft';
+
+const PHASE_LABEL_KEYS: Record<OpsPhase, Parameters<typeof t>[0]> = {
+    commander: 'opsPlanning.phaseLabel.commander',
+    plan: 'opsPlanning.phaseLabel.plan',
+    g2_assessment: 'opsPlanning.phaseLabel.g2',
+    authorize: 'opsPlanning.phaseLabel.authorize',
+};
 
 function generateOpName(corpsId: string, turn: number, faction: string): string {
     // Use faction-specific names if available, else all names
@@ -376,7 +383,7 @@ export function OpsPlanningModal() {
                         <span className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors ${
                             i === currentIdx ? 'text-accent-gold' : i <= highestPhase ? 'text-text-secondary' : 'text-text-secondary/30'
                         }`}>
-                            {PHASE_LABELS[p]}
+                            {t(PHASE_LABEL_KEYS[p])}
                             <span className="text-[7px] text-text-secondary/30 ml-1">{i + 1}</span>
                         </span>
                         {i < PHASE_ORDER.length - 1 && (

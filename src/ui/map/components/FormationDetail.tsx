@@ -27,6 +27,7 @@ import {
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
+import { buildSectorFormationAssignment } from '../utils/sectorUtils';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -222,6 +223,12 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     : null;
   const currentSector = overrideSector ?? automaticSector;
   const currentSectorIsOverride = Boolean(overrideSector);
+  const sectorAssignmentById = new Map(
+    sameSectorList.map((sector) => [
+      sector.sector_id,
+      buildSectorFormationAssignment(sector, loadedGameState.formations),
+    ]),
+  );
 
   const tabs: { id: DetailTab; label: string }[] = [
     { id: 'overview', label: t('formationDetail.overview') },
@@ -996,7 +1003,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                             {isCurrentAutomatic && (
                               <span className="text-[9px] text-text-secondary italic">{t('formationDetail.current')}</span>
                             )}
-                            <span className="text-[10px] text-text-secondary">{sector.assigned_brigade_ids.length}b</span>
+                            <span className="text-[10px] text-text-secondary">
+                              {t('formationDetail.sectorBrigadeCount', {
+                                count: sectorAssignmentById.get(sector.sector_id)?.allCurrentIds.length ?? 0,
+                              })}
+                            </span>
                           </div>
                         </div>
                       </button>

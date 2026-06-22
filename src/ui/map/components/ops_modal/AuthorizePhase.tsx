@@ -13,9 +13,10 @@ import { formatCorpsDisplayName, turnToISODate } from '../../utils/formatters';
 import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { findPlayerFacingOperationByKey } from '../../../shared/playerVisibility';
 import { buildAuthorableOpEligibility } from '../../data/backTheOfficer';
+import type { AuthorableOpWarningView } from '../../data/backTheOfficer';
 import type { ValidatableOpDef } from '../../../../sim/combat/operation_validation';
 import type { FactionId } from '../../../../state/game_state';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 
 interface AuthorizePhaseProps {
     plan: OpsPlanState;
@@ -23,6 +24,22 @@ interface AuthorizePhaseProps {
     corpsId: string;
     officerId: string | null;
     originSectorId: string | null;
+}
+
+const ELIGIBILITY_MESSAGE_KEYS: Record<AuthorableOpWarningView['code'], MessageKey> = {
+    staging_adjacency: 'opsPlanning.authorize.eligibility.finding.stagingAdjacency',
+    chain_gap: 'opsPlanning.authorize.eligibility.finding.chainGap',
+    brigade_missing: 'opsPlanning.authorize.eligibility.finding.brigadeUnavailable',
+    brigade_ineligible: 'opsPlanning.authorize.eligibility.finding.brigadeUnavailable',
+    all_objectives_owned: 'opsPlanning.authorize.eligibility.finding.objectivesAlreadyHeld',
+    axis_empty: 'opsPlanning.authorize.eligibility.finding.axisEmpty',
+    op_empty: 'opsPlanning.authorize.eligibility.finding.operationEmpty',
+    objective_overlap: 'opsPlanning.authorize.eligibility.finding.objectiveOverlap',
+    participants_below_attack_floor: 'opsPlanning.authorize.eligibility.finding.participantsBelowFloor',
+};
+
+function playerSafeEligibilityMessage(warning: AuthorableOpWarningView): string {
+    return t(ELIGIBILITY_MESSAGE_KEYS[warning.code] ?? 'opsPlanning.authorize.eligibility.finding.generic');
 }
 
 export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSectorId }: AuthorizePhaseProps) {
@@ -281,7 +298,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                     <span className="font-bold uppercase text-[9px] mt-[1px]">
                                         {t('opsPlanning.authorize.eligibility.block')}
                                     </span>
-                                    <span>{w.message}</span>
+                                    <span>{playerSafeEligibilityMessage(w)}</span>
                                 </li>
                             ))}
                             {eligibilityWarnings.map((w, i) => (
@@ -289,7 +306,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                     <span className="font-bold uppercase text-[9px] mt-[1px]">
                                         {t('opsPlanning.authorize.eligibility.warn')}
                                     </span>
-                                    <span>{w.message}</span>
+                                    <span>{playerSafeEligibilityMessage(w)}</span>
                                 </li>
                             ))}
                         </ul>

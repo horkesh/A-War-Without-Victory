@@ -57,13 +57,6 @@ export const TOLERANCE_LABELS: Record<Tolerance, string> = {
     repulsed: 'Regardless',
 };
 
-export const PHASE_LABELS: Record<OpsPhase, string> = {
-    commander: 'Commander',
-    plan: 'Plan',
-    g2_assessment: 'G-2 Assessment',
-    authorize: 'Authorize',
-};
-
 export const PHASE_ORDER: OpsPhase[] = ['commander', 'plan', 'g2_assessment', 'authorize'];
 
 export const FACTION_ARMY_HEADERS: Record<string, { republic: string; army: string; crest: string }> = {

@@ -210,6 +210,15 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain(RAW_OP_NAME);
   });
 
+  it('renders OOB operation objective progress as player-facing one-based progress', () => {
+    const { container } = render(createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+
+    expect(container.textContent).toContain('1/1');
+    expect(container.textContent).not.toContain('0/1');
+  });
+
   it('labels OOB sector frontage as front segments instead of kilometers', () => {
     useGameStore.setState({
       loadedGameState: {

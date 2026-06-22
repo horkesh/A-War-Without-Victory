@@ -141,4 +141,66 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toMatch(/No friendly line/i);
     expect(container.textContent).not.toMatch(/SUPERIOR|clear advantage/i);
   });
+
+  it('includes command-directed brigades in Corps Front logistics manpower', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'arbih_directed_brigade',
+        faction: 'RBiH',
+        name: 'Directed Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        morale: 60,
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+        sectorOverrideId: 'sector:arbih_1st_corps:0',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      combat_personnel: 0,
+      combat_offensive_power: 0,
+      combat_defensive_power: 0,
+      defensive_power: 0,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+
+    expect(container.textContent).toContain('900');
+    expect(container.textContent).not.toMatch(/Total manpower\s*0/i);
+  });
+
+  it('labels Corps Front metadata with a true turn number instead of a second date', () => {
+    const state = makeState();
+    state.turn = 8;
+    state.label = '8 APR 1992';
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Date:\s*1 Jun 1992/i);
+    expect(container.textContent).toMatch(/Turn:\s*8/i);
+    expect(container.textContent).not.toMatch(/Turn:\s*\d+\s+\w+\s+1991/i);
+  });
 });

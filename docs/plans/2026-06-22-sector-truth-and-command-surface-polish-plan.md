@@ -36,6 +36,8 @@
 
 ### Task 2: Ops Modal Player-Surface Hardening
 
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_OPS_AND_COMMAND_SURFACE_POLISH.md`.
+
 **Files:**
 - Audit first: `src/ui/map/components/ops_modal/**`
 - Likely tests: `tests/ui/oob_operations_panel.test.ts`, `tests/ui/ops_planning_target_discovery.test.ts`
@@ -47,7 +49,11 @@
 
 **Acceptance:** Operation planning reads like staff work, not validation output.
 
+**Evidence:** G-2 prediction failures now render localized staff copy instead of raw IPC/engine diagnostics; Plan staging displays the settlement name rather than raw staging OSID; the modal phase rail is i18n-backed; Authorize eligibility findings map to player-safe copy; G-2 proceed is disabled while loading/awaiting assessment. Green proof included in the final combined command-surface pack: `node node_modules\vitest\vitest.mjs run tests\ui\ops_planning_target_discovery.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` passed 74/74.
+
 ### Task 3: Army HQ And OOB Command Copy Cleanup
+
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_OPS_AND_COMMAND_SURFACE_POLISH.md`.
 
 **Files:**
 - Audit first: `src/ui/map/components/army_hq/**`, `src/ui/map/components/OOBSidebar.tsx`, `src/ui/map/components/CorpsDetail.tsx`
@@ -58,6 +64,8 @@
 3. Prefer existing localized/player-safe helpers over new one-off string assembly.
 
 **Acceptance:** Corps/brigade command surfaces are internally consistent and free of shorthand or ambiguous staff abbreviations.
+
+**Evidence:** OOB and Corps Detail objective progress now shows one-based player progress; Corps Front logistics includes command-directed override brigade manpower; Corps Front metadata separates calendar date from numeric turn; Formation Detail sector picker counts use projected current brigade assignments; Army HQ corps cards and ORBAT expanded brigade rows convert equipment condition fractions into operational equipment counts; Army HQ cards label planning-only operations explicitly. Green proof included in the final combined command-surface pack: `node node_modules\vitest\vitest.mjs run tests\ui\ops_planning_target_discovery.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\gui_audit_label_discipline.test.ts --pool=forks --reporter=dot` passed 74/74.
 
 ### Task 4: Records And Decision Room Provenance Consistency
 

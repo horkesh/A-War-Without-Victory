@@ -55,6 +55,13 @@ function MiniBar({ value, max, color, width = 60 }: { value: number; max: number
     );
 }
 
+function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
+    const count = Math.max(0, total ?? 0);
+    const condition = operational ?? 1;
+    const operationalCount = condition <= 1 ? count * condition : condition;
+    return Math.min(count, Math.max(0, Math.round(operationalCount)));
+}
+
 const ARC_BADGE_STYLE: Record<string, { bg: string; text: string }> = {
     veteran:   { bg: 'bg-emerald-900/60', text: 'text-emerald-300' },
     bloodied:  { bg: 'bg-red-900/60',     text: 'text-red-400' },
@@ -159,13 +166,13 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                         {comp.tanks > 0 && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.armour')}</span>
-                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: Math.round(comp.tank_condition.operational), total: Math.round(comp.tanks) })}</span>
+                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: operationalEquipmentCount(comp.tanks, comp.tank_condition?.operational), total: Math.round(comp.tanks) })}</span>
                             </div>
                         )}
                         {comp.artillery > 0 && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.artillery')}</span>
-                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: Math.round(comp.artillery_condition.operational), total: Math.round(comp.artillery) })}</span>
+                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: operationalEquipmentCount(comp.artillery, comp.artillery_condition?.operational), total: Math.round(comp.artillery) })}</span>
                             </div>
                         )}
                     </div>

@@ -484,7 +484,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <span className="text-text-secondary">{t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                       {op.objectives && op.current_objective_index !== undefined && (
                         <span className="text-accent-gold">
-                          {t('operationsPanel.objShort')} <span className="text-text-primary tabular-nums">{op.current_objective_index}/{op.objectives.length}</span>
+                          {t('operationsPanel.objShort')} <span className="text-text-primary tabular-nums">{Math.min(op.objectives.length, Math.max(1, op.current_objective_index + 1))}/{op.objectives.length}</span>
                         </span>
                       )}
                     </div>

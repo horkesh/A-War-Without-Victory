@@ -67,6 +67,13 @@ const READINESS_BORDER: Record<string, string> = {
     'INEFFECTIVE': 'border-l-red-600',
 };
 
+function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
+    const count = Math.max(0, total ?? 0);
+    const condition = operational ?? 1;
+    const operationalCount = condition <= 1 ? count * condition : condition;
+    return Math.min(count, Math.max(0, Math.round(operationalCount)));
+}
+
 export function ArmyHQCorpsCard({
     corps, brigades, sectors, operations, factionBattles, gameState,
     isExpanded, isCompressed, onToggleExpand,
@@ -88,6 +95,13 @@ export function ArmyHQCorpsCard({
             : null;
         const stance = corps.corpsStance ?? 'balanced';
         const activeOp = operations.find((op) => op.phase === 'execution');
+        const planningOp = activeOp ? null : operations.find((op) => op.phase === 'planning');
+        const displayedOp = activeOp ?? planningOp ?? null;
+        const displayedOpLabel = activeOp
+            ? t('armyHqCorps.activeOperation')
+            : planningOp
+                ? t('armyHqCorps.planningOperation')
+                : null;
 
         // This-week battles: count battles in this corps' territory
         const corpsTerritoryOsids = new Set<string>();
@@ -101,9 +115,9 @@ export function ArmyHQCorpsCard({
         const rawEquip = brigades.reduce((acc, b) => {
             const c = b.composition;
             if (!c) return acc;
-            acc.tanksOp += c.tank_condition?.operational ?? 0;
+            acc.tanksOp += operationalEquipmentCount(c.tanks, c.tank_condition?.operational);
             acc.tanksTotal += c.tanks ?? 0;
-            acc.artyOp += c.artillery_condition?.operational ?? 0;
+            acc.artyOp += operationalEquipmentCount(c.artillery, c.artillery_condition?.operational);
             acc.artyTotal += c.artillery ?? 0;
             return acc;
         }, { tanksOp: 0, tanksTotal: 0, artyOp: 0, artyTotal: 0 });
@@ -127,7 +141,7 @@ export function ArmyHQCorpsCard({
         const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
+        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -278,13 +292,13 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Active op indicator */}
-                {data.activeOp && (
+                {data.displayedOp && data.displayedOpLabel && (
                     <div className="mt-3 pt-2.5 border-t border-panel-border flex flex-col gap-1">
-                        <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">{t('armyHqCorps.activeOperation')}</span>
+                        <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">{data.displayedOpLabel}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
                             <span className="text-[11px] text-red-400 font-bold truncate uppercase font-mono">
-                                {data.activeOp.display_name}
+                                {data.displayedOp.display_name}
                             </span>
                         </div>
                     </div>

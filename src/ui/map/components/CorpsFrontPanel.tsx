@@ -241,7 +241,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const totalSectorPersonnel = assignedPersonnel + reservePersonnel;
+  const overridePersonnel = overrideFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const totalSectorPersonnel = assignedPersonnel + reservePersonnel + overridePersonnel;
   const hasFriendlyLine = assignedFormations.length + reserveFormations.length + overrideFormations.length > 0;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
   const avgOperationSupply = relatedOperations.length > 0
@@ -339,7 +340,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             </div>
             <div className="flex flex-col items-end text-[9px] text-neutral-500">
               <div className="uppercase"><span className="font-bold">{t('corpsFront.date')}:</span> {displayDate}</div>
-              <div className="uppercase"><span className="font-bold">{t('corpsFront.turn')}:</span> {turnToDateString(loadedGameState.turn)}</div>
+              <div className="uppercase"><span className="font-bold">{t('corpsFront.turn')}:</span> {loadedGameState.turn}</div>
             </div>
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">

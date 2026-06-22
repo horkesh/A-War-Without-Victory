@@ -48,6 +48,14 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
     const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
     const totalObjectives = plan.axes.reduce((sum, axis) => sum + axis.objectives.length, 0);
     const totalAssignedBrigades = plan.axes.reduce((sum, axis) => sum + axis.brigadeIds.length, 0);
+    const canProceed = !loading && (prediction != null || error != null);
+    const proceedLabel = loading
+        ? t('opsPlanning.g2.proceedPreparing')
+        : !canProceed
+            ? t('opsPlanning.g2.proceedAwaiting')
+            : isLowIntel
+                ? t('opsPlanning.g2.proceedLowIntel')
+                : t('opsPlanning.g2.proceedAuthorization');
 
     return (
         <div className="absolute inset-0 z-10 pointer-events-none">
@@ -138,8 +146,9 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     )}
 
                     {error && (
-                        <div className="text-[10px] text-red-600 bg-red-100 rounded p-2">
-                            {error}
+                        <div className="text-[10px] text-red-700 bg-red-100 rounded p-2 space-y-1">
+                            <div className="font-bold">{t('opsPlanning.g2.errorTitle')}</div>
+                            <div>{t('opsPlanning.g2.errorBody')}</div>
                         </div>
                     )}
 
@@ -174,13 +183,14 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     <button
                         type="button"
                         onClick={onAdvance}
-                        className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-colors border
+                        disabled={!canProceed}
+                        className={`px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-wider transition-colors border disabled:opacity-50 disabled:cursor-not-allowed
                             ${isLowIntel
                                 ? 'bg-amber-400/20 text-amber-400 border-amber-400/20 hover:bg-amber-400/30'
                                 : 'bg-accent-gold/20 text-accent-gold border-accent-gold/20 hover:bg-accent-gold/30'
                             }`}
                     >
-                        {isLowIntel ? t('opsPlanning.g2.proceedLowIntel') : t('opsPlanning.g2.proceedAuthorization')}
+                        {proceedLabel}
                     </button>
                 </div>
             </div>

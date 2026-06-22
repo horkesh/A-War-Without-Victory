@@ -101,6 +101,9 @@ export function PlanPhase({
     const allObjectives = plan.axes.flatMap((a) => a.objectives);
     const selectedAxis = activeAxis;
     const selectedStaging = selectedAxis?.stagingOsid ?? plan.defaultStagingOsid;
+    const selectedStagingLabel = selectedStaging
+        ? getOsidDisplayName(selectedStaging, osidDisplayNames)
+        : t('opsPlanning.phase.selectOnMap');
     const selectedAxisName = selectedAxis?.name ?? t('opsPlanning.phase.mainAxis');
     const selectedAxisObjectives = selectedAxis?.objectives.length ?? 0;
     const selectedAxisBrigades = selectedAxis?.brigadeIds.length ?? 0;
@@ -194,7 +197,7 @@ export function PlanPhase({
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
                             <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.staging')}</div>
                             <div className="text-[10px] font-bold text-white truncate">
-                                {selectedStaging ? selectedStaging : t('opsPlanning.phase.selectOnMap')}
+                                {selectedStagingLabel}
                             </div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">

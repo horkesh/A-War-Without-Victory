@@ -260,6 +260,40 @@ describe('Formation Detail parity display', () => {
     expect(northButton.textContent ?? '').not.toContain('Current');
   });
 
+  it('uses projected current brigade counts in the sector assignment picker', () => {
+    const state = makeFormationDetailState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'rbih_override_brigade',
+        faction: 'RBiH',
+        name: 'Override Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 62,
+        fatigue: 4,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        personnel: 1000,
+        posture: 'defend',
+        sectorOverrideId: 'sector_south',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
+      ? { ...sector, reserve_brigade_ids: ['rbih_rear_brigade'] }
+      : sector);
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const southButton = screen.getByRole('button', { name: /Southern line/i });
+    expect(southButton.textContent ?? '').toContain('2 brigades');
+    expect(southButton.textContent ?? '').not.toMatch(/\b0b\b|\b1b\b/);
+  });
+
   it('does not badge a stale missing override as the active sector assignment', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'

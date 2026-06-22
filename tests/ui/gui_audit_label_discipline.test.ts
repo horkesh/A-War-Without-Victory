@@ -359,6 +359,57 @@ describe('GUI audit label discipline', () => {
     expect(backContainer.textContent).not.toMatch(/\bPers\b|\bBrg\b|\bSec\b/);
   });
 
+  it('describes planning-only corps operations without saying the corps has no active operations', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      cohesion: 75,
+      fatigue: 5,
+      corpsStance: 'defensive',
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      createdTurn: 0,
+      corps_id: 'arbih_1st_corps',
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps, brigade] });
+
+    const { container } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [brigade],
+      sectors: [],
+      operations: [{
+        name: 'operation_planning',
+        display_name: 'Planning Operation',
+        phase: 'planning',
+      } as unknown as Parameters<typeof ArmyHQCorpsCard>[0]['operations'][number]],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('PLANNING OPERATION');
+    expect(container.textContent).toContain('Planning Operation');
+    expect(container.textContent).not.toContain('No active operations');
+  });
+
   it('gives Army HQ expand and collapse controls explicit stateful accessible names', () => {
     const corps = {
       id: 'arbih_1st_corps',
@@ -447,6 +498,82 @@ describe('GUI audit label discipline', () => {
 
     expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
     expect(container.textContent).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+  });
+
+  it('renders Army HQ equipment condition fractions as operational equipment counts', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      cohesion: 75,
+      fatigue: 5,
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const first = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      morale: 60,
+      createdTurn: 0,
+      composition: {
+        infantry: 1200,
+        tanks: 10,
+        artillery: 5,
+        aa_systems: 0,
+        tank_condition: { operational: 0.8 },
+        artillery_condition: { operational: 0.6 },
+      },
+    } as unknown as FormationView;
+    const second = {
+      ...first,
+      id: 'arbih_102_brigade',
+      name: '102nd Brigade',
+      composition: {
+        infantry: 1000,
+        tanks: 10,
+        artillery: 5,
+        aa_systems: 0,
+        tank_condition: { operational: 0.5 },
+        artillery_condition: { operational: 0.4 },
+      },
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps, first, second] });
+
+    const { container: cardContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [first, second],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(cardContainer.textContent).toContain('13/20');
+    expect(cardContainer.textContent).toContain('5/10');
+    expect(cardContainer.textContent).not.toContain('1/20');
+    cleanup();
+
+    useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
+    const { container: orbatContainer } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [first] }));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /101st Brigade/i })[0]);
+
+    expect(orbatContainer.textContent).toContain('8/10');
+    expect(orbatContainer.textContent).toContain('3/5');
+    expect(orbatContainer.textContent).not.toContain('1/10');
   });
 
   it('renders Army HQ sector length as front segments instead of kilometers', () => {
