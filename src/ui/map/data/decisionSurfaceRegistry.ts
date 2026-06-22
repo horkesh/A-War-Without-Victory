@@ -3,6 +3,7 @@ import {
   type PlayerDecisionFamilyId,
   type PlayerDecisionGatePolicy,
 } from '../../../state/player_decision_manifest';
+import { t, type MessageKey } from '../i18n';
 import type { InboxItem, InboxItemType } from './inboxItems';
 
 export type DecisionSurfaceFamilyId =
@@ -63,6 +64,99 @@ type DecisionSurfaceSpec = Omit<
 
 const MANIFEST_BY_ID = new Map(PLAYER_DECISION_FAMILIES.map((family) => [family.id, family]));
 
+const SURFACE_COPY_KEYS: Record<DecisionSurfaceFamilyId, {
+  playerLabel: MessageKey;
+  actionLabel: MessageKey;
+  sourceLabel: MessageKey;
+  fallbackTitle: MessageKey;
+  fallbackSummary: MessageKey;
+}> = {
+  event_decision: {
+    playerLabel: 'decisionSurface.eventDecision.playerLabel',
+    actionLabel: 'decisionSurface.eventDecision.actionLabel',
+    sourceLabel: 'decisionSurface.eventDecision.sourceLabel',
+    fallbackTitle: 'decisionSurface.eventDecision.fallbackTitle',
+    fallbackSummary: 'decisionSurface.eventDecision.fallbackSummary',
+  },
+  peace_plan: {
+    playerLabel: 'decisionSurface.peacePlan.playerLabel',
+    actionLabel: 'decisionSurface.peacePlan.actionLabel',
+    sourceLabel: 'decisionSurface.peacePlan.sourceLabel',
+    fallbackTitle: 'decisionSurface.peacePlan.fallbackTitle',
+    fallbackSummary: 'decisionSurface.peacePlan.fallbackSummary',
+  },
+  dayton_negotiation: {
+    playerLabel: 'decisionSurface.dayton.playerLabel',
+    actionLabel: 'decisionSurface.dayton.actionLabel',
+    sourceLabel: 'decisionSurface.dayton.sourceLabel',
+    fallbackTitle: 'decisionSurface.dayton.fallbackTitle',
+    fallbackSummary: 'decisionSurface.dayton.fallbackSummary',
+  },
+  paramilitary_request: {
+    playerLabel: 'decisionSurface.paramilitary.playerLabel',
+    actionLabel: 'decisionSurface.paramilitary.actionLabel',
+    sourceLabel: 'decisionSurface.paramilitary.sourceLabel',
+    fallbackTitle: 'decisionSurface.paramilitary.fallbackTitle',
+    fallbackSummary: 'decisionSurface.paramilitary.fallbackSummary',
+  },
+  convoy_decision: {
+    playerLabel: 'decisionSurface.convoy.playerLabel',
+    actionLabel: 'decisionSurface.convoy.actionLabel',
+    sourceLabel: 'decisionSurface.convoy.sourceLabel',
+    fallbackTitle: 'decisionSurface.convoy.fallbackTitle',
+    fallbackSummary: 'decisionSurface.convoy.fallbackSummary',
+  },
+  reserve_request: {
+    playerLabel: 'decisionSurface.reserve.playerLabel',
+    actionLabel: 'decisionSurface.reserve.actionLabel',
+    sourceLabel: 'decisionSurface.reserve.sourceLabel',
+    fallbackTitle: 'decisionSurface.reserve.fallbackTitle',
+    fallbackSummary: 'decisionSurface.reserve.fallbackSummary',
+  },
+  officer_event: {
+    playerLabel: 'decisionSurface.officer.playerLabel',
+    actionLabel: 'decisionSurface.officer.actionLabel',
+    sourceLabel: 'decisionSurface.officer.sourceLabel',
+    fallbackTitle: 'decisionSurface.officer.fallbackTitle',
+    fallbackSummary: 'decisionSurface.officer.fallbackSummary',
+  },
+  autonomy_proposal: {
+    playerLabel: 'decisionSurface.autonomy.playerLabel',
+    actionLabel: 'decisionSurface.autonomy.actionLabel',
+    sourceLabel: 'decisionSurface.autonomy.sourceLabel',
+    fallbackTitle: 'decisionSurface.autonomy.fallbackTitle',
+    fallbackSummary: 'decisionSurface.autonomy.fallbackSummary',
+  },
+  operation_opportunity: {
+    playerLabel: 'decisionSurface.operationOpportunity.playerLabel',
+    actionLabel: 'decisionSurface.operationOpportunity.actionLabel',
+    sourceLabel: 'decisionSurface.operationOpportunity.sourceLabel',
+    fallbackTitle: 'decisionSurface.operationOpportunity.fallbackTitle',
+    fallbackSummary: 'decisionSurface.operationOpportunity.fallbackSummary',
+  },
+  counter_offer: {
+    playerLabel: 'decisionSurface.counterOffer.playerLabel',
+    actionLabel: 'decisionSurface.counterOffer.actionLabel',
+    sourceLabel: 'decisionSurface.counterOffer.sourceLabel',
+    fallbackTitle: 'decisionSurface.counterOffer.fallbackTitle',
+    fallbackSummary: 'decisionSurface.counterOffer.fallbackSummary',
+  },
+  intelligence_notification: {
+    playerLabel: 'decisionSurface.intelligence.playerLabel',
+    actionLabel: 'decisionSurface.intelligence.actionLabel',
+    sourceLabel: 'decisionSurface.intelligence.sourceLabel',
+    fallbackTitle: 'decisionSurface.intelligence.fallbackTitle',
+    fallbackSummary: 'decisionSurface.intelligence.fallbackSummary',
+  },
+  situation: {
+    playerLabel: 'decisionSurface.situation.playerLabel',
+    actionLabel: 'decisionSurface.situation.actionLabel',
+    sourceLabel: 'decisionSurface.situation.sourceLabel',
+    fallbackTitle: 'decisionSurface.situation.fallbackTitle',
+    fallbackSummary: 'decisionSurface.situation.fallbackSummary',
+  },
+};
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
@@ -81,6 +175,17 @@ function rawCopy(raw: unknown, fallbackTitle: string, fallbackSummary: string): 
   const summary = stringFrom(raw.summary) ?? stringFrom(raw.subtitle) ?? stringFrom(raw.body) ?? fallbackSummary;
   if (title.includes('_') || summary.includes('pending_required_decisions')) return copy(fallbackTitle, fallbackSummary);
   return copy(title, summary);
+}
+
+function localizedSurface(surface: DecisionSurfaceDefinition): DecisionSurfaceDefinition {
+  const keys = SURFACE_COPY_KEYS[surface.familyId];
+  return {
+    ...surface,
+    playerLabel: t(keys.playerLabel),
+    actionLabel: t(keys.actionLabel),
+    sourceLabel: t(keys.sourceLabel),
+    copySanitizer: (raw) => rawCopy(raw, t(keys.fallbackTitle), t(keys.fallbackSummary)),
+  };
 }
 
 function manifestSurface(spec: DecisionSurfaceSpec): DecisionSurfaceDefinition {
@@ -301,11 +406,11 @@ export const DECISION_SURFACE_REGISTRY = {
 } as const satisfies Record<DecisionSurfaceFamilyId, DecisionSurfaceDefinition>;
 
 export function listDecisionSurfaces(): DecisionSurfaceDefinition[] {
-  return Object.values(DECISION_SURFACE_REGISTRY);
+  return Object.values(DECISION_SURFACE_REGISTRY).map(localizedSurface);
 }
 
 export function getDecisionSurface(familyId: DecisionSurfaceFamilyId): DecisionSurfaceDefinition {
-  return DECISION_SURFACE_REGISTRY[familyId];
+  return localizedSurface(DECISION_SURFACE_REGISTRY[familyId]);
 }
 
 export function getDecisionSurfaceForInboxType(inboxType: InboxItemType): DecisionSurfaceDefinition | null {

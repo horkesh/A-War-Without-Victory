@@ -125,4 +125,30 @@ describe('derivePresidentialBlockers', () => {
       actionLabel: 'Review deployment',
     });
   });
+
+  it('localizes convoy blocker and registry action copy', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    try {
+      setLocale('bcs', undefined);
+      const blockers = derivePresidentialBlockers(makeState({
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_1',
+            target_enclave: 'srebrenica_enclave',
+            route_faction: 'RS',
+            supply_amount: 25,
+          },
+        ],
+      }), null);
+
+      expect(blockers[0]).toMatchObject({
+        typeLabel: 'Humanitarni konvoj',
+        actionLabel: 'Pregledaj konvoj',
+        summary: 'Zahtjev za humanitarni konvoj treba vašu instrukciju prije napredovanja poteza.',
+      });
+      expect(`${blockers[0]?.typeLabel} ${blockers[0]?.actionLabel} ${blockers[0]?.summary}`).not.toMatch(/Humanitarian convoy|Review convoy|before the turn can proceed/);
+    } finally {
+      setLocale('en', undefined);
+    }
+  });
 });

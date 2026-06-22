@@ -170,6 +170,12 @@
 
 **AAR FINAL-HELD WORDING (2026-06-20).** `OperationAAR.objectives_captured` means held at close/finalization unless split by `objectives_logged_captured`. Do instead: reserve `Captured` for logged-capture provenance, label final-held counts as held at close/resolution in Army HQ, Turn Aftermath, settlement timelines, Chronicle, Opportunity Ledger, and officer dossiers, and keep Srebrenica/Zepa fall receipts event-owned.
 
+**ARMY HQ ROW DRILLDOWN BOUNDARY (2026-06-22).** Sector and operation rows that name a brigade need a direct field-inspection control on the row, not only a parent corps/sector inspection route. Do instead: use stable selectors plus target ids, route through `inspectOnField(...)`, and pin at least one live browser path from the row to the formation detail panel.
+
+**RECORDS AAR SCOPE COPY (2026-06-22).** Records tabs must distinguish latest-turn aftermath from completed operation AAR archives. Do instead: label latest panels explicitly and keep archive summaries separate so players do not mistake a latest-turn panel for the full operation-history archive.
+
+**GENERATED RECEIPT READ-MODEL LOCALIZATION (2026-06-22).** Decision consequences, pushback cards, decision-surface fallbacks, blocker summaries, event acknowledgement effects, Warroom overlay chrome, and fired-event wrappers are generated UI copy; authored event/operation/officer/formation names and commander reasons are data. Do instead: attach/resolve i18n tokens for generated wrappers at every consumer surface, and do not localize authored names by accident.
+
 **PATRON RELATIONS DATE COPY (2026-06-19).** Patron Relations defiance consequences and Diplomacy timeline markers are player records, not debug turn chips. Do instead: pass `turnToDateString(...)` into defiance summary/receipt i18n and timeline labels; guard against `T{turn}`, `P{turn}`, `turn {n}`, and `potez {n}` in `DiplomacyPanel` tests.
 
 **MULTI-SURFACE TIMING/PROVENANCE COPY (2026-06-19).** Player-facing timing/provenance copy should not expose raw turn/week shorthand, `T{turn}`, mechanism enums, battle outcome ids, or event ids. Do instead: use `turnToDateString(...)`, authored label maps, or neutral fallback copy in President's Desk receipts, Decision Room cards/report fallbacks, Army HQ operation/opportunity/friction copy, Chronicle Wrapped/Spine, and settlement timelines. Srebrenica/Zepa remain event-owned receipts; Krivaja/Stupcanica are chronology/AAR context only.

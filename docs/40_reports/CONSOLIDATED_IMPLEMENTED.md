@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Decision copy and drilldown polish:** [implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md](implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md) - Army HQ sector/operation brigade rows now expose field-inspection controls, Decision Room operation/sector actions have precise labels, Warroom priority docket hooks are inspectable, Records labels the AAR tab as latest-turn scope, and generated receipt/read-model copy localizes across decision consequences, pushback, blockers, event effects, overlays, and fired-event wrappers.
+
 **Latest Chronicle FEEL generated-copy localization:** [implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md](implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md) - Generated Chronicle/FEEL scaffolding now renders through EN/BCS keys for combat, cost, displacement, formations, AARs, officer spotlights, endgame comparison chrome, consequence receipts, war-weariness, refugee-flow, Sarajevo-siege, generals' digest, and patron-defiance receipts while authored content remains data-owned.
 
 **Latest command-copy grammar / Inbox / Chronicle label closeout:** [implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md](implemented/20260621_COMMAND_COPY_GRAMMAR_INBOX_CHRONICLE_LABELS.md) - Command-strain, presidential attention, and Operation Briefing count copy now use explicit EN/BCS one/many keys; generated Inbox opportunity/autonomy/paramilitary/officer rows localize instead of echoing English generated prose; Chronicle/Wrapped displacement and faction labels are player-safe and locale-aware.

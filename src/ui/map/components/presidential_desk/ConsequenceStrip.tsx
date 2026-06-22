@@ -1,5 +1,5 @@
 import type { LoadedGameState } from '../../data/types';
-import { buildDecisionConsequenceLedger } from '../../data/decisionConsequenceLedger';
+import { buildDecisionConsequenceLedger, resolveDecisionConsequenceCopy } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../../i18n';
 import { turnToDateString } from '../../utils/formatters';
@@ -78,7 +78,11 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
       </div>
       {decisionRecords.length > 0 && (
         <div className="mt-3 space-y-2">
-          {decisionRecords.map((record) => (
+          {decisionRecords.map((record) => {
+            const title = resolveDecisionConsequenceCopy(record, 'title');
+            const outcome = resolveDecisionConsequenceCopy(record, 'outcome');
+            const detail = resolveDecisionConsequenceCopy(record, 'detail');
+            return (
             <button
               key={record.id}
               type="button"
@@ -97,16 +101,16 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
             >
               <img
                 src={getConsequenceStillForRecord(record)}
-                alt={`${record.title} consequence`}
+                alt={t('decisionConsequences.imageAlt', { title })}
                 className="h-12 w-20 shrink-0 border border-panel-border/60 object-cover"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="truncate text-[11px] font-bold text-text-primary">{record.title}</div>
-                  <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{record.outcome}</div>
+                  <div className="truncate text-[11px] font-bold text-text-primary">{title}</div>
+                  <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{outcome}</div>
                 </div>
                 <div className="mt-1 truncate text-[9px] text-text-secondary">
-                  {familyLabel(record)} / {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} / {record.detail}
+                  {familyLabel(record)} / {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} / {detail}
                 </div>
                 <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">
                   {record.recordTarget === 'chronicle'
@@ -115,7 +119,8 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
                 </div>
               </div>
             </button>
-          ))}
+            );
+          })}
         </div>
       )}
     </section>

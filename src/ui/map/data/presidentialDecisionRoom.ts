@@ -396,7 +396,7 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
   if (item.target.type === 'operation') {
     if (item.target.operationKey) {
       return {
-        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectCorps'),
+        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectOperation'),
         navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: item.target.operationKey } },
       };
     }
@@ -410,7 +410,7 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
     if (item.target.sectorId) {
       const corpsId = item.target.corpsId ?? item.corpsId;
       return {
-        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectCorps'),
+        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectSector'),
         navigationTarget: {
           kind: 'field',
           target: corpsId

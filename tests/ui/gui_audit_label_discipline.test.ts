@@ -558,10 +558,17 @@ describe('GUI audit label discipline', () => {
       defaultOpen: true,
     }));
     expect(sectorsContainer.querySelector('[data-testid="army-hq-sector-inspect"]')).toBeTruthy();
+    expect(sectorsContainer.querySelector('[data-testid="army-hq-sector-brigade-inspect"]')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Inspect Sarajevo front on field/i }));
     let store = useGameStore.getState();
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.armyHQOpen).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: /Inspect 101st Brigade on field/i }));
+    store = useGameStore.getState();
+    expect(store.selectedFormationId).toBe('arbih_101_brigade');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.armyHQOpen).toBe(false);
 
     cleanup();
@@ -722,6 +729,10 @@ describe('GUI audit label discipline', () => {
     expect(bcsMessages['operationHistory.equipmentCaptured']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
     expect(presidentialCategoriesSource).not.toMatch(/front sitrep/i);
     expect(liveSurfaceBrowserSweepSource).toMatch(/label:\s*'PAX'/);
+    expect(enMessages['recordsContent.tab.aar']).toMatch(/LATEST AFTER-ACTION REPORT/i);
+    expect(enMessages['recordsContent.archiveSummary.operationAars']).toMatch(/Completed Operation AARs/i);
+    expect(bcsMessages['recordsContent.tab.aar']).toMatch(/NAJNOVIJI/);
+    expect(bcsMessages['recordsContent.archiveSummary.operationAars']).not.toMatch(/\bAAR\b/);
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);
     expect(corpsFrontSource).not.toMatch(/`~\$\{sector\.length_edges\} km`/);

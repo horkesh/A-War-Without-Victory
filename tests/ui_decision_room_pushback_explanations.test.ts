@@ -10,6 +10,7 @@
  * events are never read.
  */
 import { describe, expect, it } from 'vitest';
+import { buildPlayerArmyCoPushbackVisibility } from '../src/ui/map/data/playerArmyCoPushbackVisibility.js';
 import { buildPresidentialDecisionRoomView } from '../src/ui/map/data/presidentialDecisionRoom.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 
@@ -217,5 +218,36 @@ describe('PresidentialDecisionRoom pushback explanations card', () => {
             } as Partial<LooseLGS>),
         });
         expect(enemyOnly.cards.find((c) => c.id === 'pushback:player-army-co')).toBeUndefined();
+    });
+
+    it('localizes generated Army CO pushback copy without localizing authored reasons', async () => {
+        const { setLocale } = await import('../src/ui/map/i18n/index.js');
+        try {
+            setLocale('bcs', undefined);
+            const view = buildPlayerArmyCoPushbackVisibility(makeState({
+                pendingOfficerEvents: [
+                    {
+                        event_id: 'pe_army_co_proposal_no_reason',
+                        type: 'army_co_proposes_op',
+                        faction: 'RBiH',
+                        turn: 30,
+                        officer_id: 'arbih_co',
+                        officer_name: 'General Halilovic',
+                        officer_competence: 6,
+                        officer_aggressiveness: 5,
+                        officer_defensive_skill: 6,
+                        corps_name: 'Army HQ',
+                        acknowledged: false,
+                    },
+                ],
+            }));
+
+            expect(view?.headline).toBe('Komanda armije predlaže autonomnu operaciju.');
+            expect(view?.rationale).toContain('predložila je operaciju');
+            expect(view?.evidence).toEqual(['1 autonomni operativni prijedlog']);
+            expect([view?.headline, view?.rationale, ...(view?.evidence ?? [])].join(' ')).not.toMatch(/Army command|autonomous operation proposal/);
+        } finally {
+            setLocale('en', undefined);
+        }
     });
 });

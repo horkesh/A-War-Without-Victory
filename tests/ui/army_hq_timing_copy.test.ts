@@ -19,6 +19,22 @@ const storeState: Record<string, any> = {
   setLoadError: () => {},
   setOperationBriefingContext: () => {},
   setOperationTargetOsids: () => {},
+  setCodexOpen: () => {},
+  setChronicleOpen: () => {},
+  setFocusedChronicleDecisionRecordId: () => {},
+  setFocusedAftermathTurn: () => {},
+  setFocusedOperationHistoryId: () => {},
+  setFocusedDecisionConsequenceId: () => {},
+  selectedFormationId: null,
+  selectedCorpsId: null,
+  armyHQOpen: true,
+  inspectOnFieldTarget: (target: any) => {
+    if (target.kind === 'field-formation-in-corps') {
+      storeState.selectedFormationId = target.formationId;
+      storeState.selectedCorpsId = target.corpsId;
+      storeState.armyHQOpen = false;
+    }
+  },
   osidDisplayNames: {},
 };
 
@@ -120,6 +136,9 @@ function makeOpportunity(overrides: Partial<OperationOpportunityProposalView> = 
 afterEach(() => {
   cleanup();
   storeState.armyHQExpandedSections = {};
+  storeState.selectedFormationId = null;
+  storeState.selectedCorpsId = null;
+  storeState.armyHQOpen = true;
   setLocale('en', undefined);
   vi.restoreAllMocks();
 });
@@ -289,6 +308,46 @@ describe('Army HQ timing copy', () => {
     expect(copy).toContain('1 / 1 held at close');
     expect(copy).not.toContain('corps_commander');
     expect(copy).not.toMatch(/\bCOMP\b|\bAGGR\b|\bDEF\b|\bOPS\b|\bINTEL\b|\bCOHESN\b|\bPRIMARY OBJ\b|\bOBJ\b|\bMOM\b|\bPERS\b|\bCOH\b|\bMOR\b|\bSTS\b|\bCMDR\b|\bKIA\b|\bWIA\b|\b2W\b/);
+  });
+
+  it('offers field-inspection controls for operation participant brigades', () => {
+    const gameState = makeGameState({
+      formations: [{
+        id: 'bde_1',
+        faction: 'RBiH',
+        name: '1st Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 65,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        morale: 70,
+        corps_id: 'arbih_3rd_corps',
+      }],
+    });
+
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [makeOperation({
+        participating_brigade_count: 1,
+        participating_brigade_ids: ['bde_1'],
+      })],
+      gameState,
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+    const inspect = screen.getByRole('button', { name: /Inspect 1st Brigade on field/i });
+
+    expect(inspect.getAttribute('data-testid')).toBe('army-hq-operation-brigade-inspect');
+    fireEvent.click(inspect);
+
+    expect(storeState.selectedFormationId).toBe('bde_1');
+    expect(storeState.selectedCorpsId).toBe('arbih_3rd_corps');
+    expect(storeState.armyHQOpen).toBe(false);
   });
 
   it('renders planning preparation timing and delays as player-facing copy', () => {

@@ -72,7 +72,13 @@ function PriorityDocketPanel({
   onReviewTarget: (target: PresidentialDecisionRoomNavigationTarget) => void;
 }) {
   return (
-    <div className="absolute bottom-full right-0 mb-2 w-[min(26rem,calc(100vw-2rem))] rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50">
+    <div
+      id="warroom-priority-docket-panel"
+      data-testid="warroom-priority-docket-panel"
+      role="region"
+      aria-label={t('warroom.priorityDocketAria')}
+      className="absolute bottom-full right-0 mb-2 w-[min(26rem,calc(100vw-2rem))] rounded border border-amber-900/70 bg-black/90 p-2 text-amber-100 shadow-2xl shadow-black/50"
+    >
       <div className="flex min-w-0 items-start justify-between gap-3 border-b border-amber-900/45 pb-2">
         <div className="min-w-0">
           <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-amber-500/80">{t('decisionRoom.reviewBeforeAdvance')}</div>
@@ -225,6 +231,7 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         title={t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
         className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
         aria-label={t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
+        aria-controls="warroom-priority-docket-panel"
         aria-expanded={priorityDocketOpen}
       >
         <span>{t('warroom.priorities')}</span>

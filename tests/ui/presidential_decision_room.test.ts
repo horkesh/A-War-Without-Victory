@@ -259,9 +259,11 @@ describe('buildPresidentialDecisionRoomView', () => {
     const view = buildPresidentialDecisionRoomView({ state });
 
     expect(view.cards.find((card) => card.id === 'briefing:briefing:operation')).toMatchObject({
+      actionLabel: 'Inspect Operation',
       navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: 'arbih_3rd_corps|op_alpha' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:sector')).toMatchObject({
+      actionLabel: 'Inspect Sector',
       navigationTarget: { kind: 'field', target: { kind: 'field-sector-in-corps', sectorId: 'sector_tuzla', corpsId: 'arbih_3rd_corps' } },
     });
     expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')).toMatchObject({

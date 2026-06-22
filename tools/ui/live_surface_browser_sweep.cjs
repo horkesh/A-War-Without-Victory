@@ -667,6 +667,105 @@ async function clickFirstVisibleWithinSelector(page, parentSelector, childSelect
   if (!clicked) throw new Error(`No visible ${description} matched selectors "${parentSelector}" -> "${childSelector}"`);
 }
 
+async function expandVisibleArmyHqSectorWithBrigadeInspect(page) {
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
+  const sectorCount = await visibleSelectorCount(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
+  for (let index = 0; index < sectorCount; index += 1) {
+    const candidate = await page.evaluate((targetIndex) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      const rows = Array.from(document.querySelectorAll('[data-testid="army-hq-sector-row"][data-sector-id]')).filter(isVisible);
+      const row = rows[targetIndex];
+      if (!(row instanceof HTMLElement)) return null;
+      const sectorId = row.getAttribute('data-sector-id') ?? '';
+      const visibleBrigadeInspect = Array.from(row.querySelectorAll('[data-testid="army-hq-sector-brigade-inspect"][data-formation-id][data-sector-id]')).find(isVisible);
+      const visibleFrontage = Array.from(row.querySelectorAll('[data-testid="army-hq-sector-frontage"][data-front-segments]')).find(isVisible);
+      if (visibleBrigadeInspect instanceof HTMLElement && visibleFrontage instanceof HTMLElement) {
+        return {
+          sectorId,
+          formationId: visibleBrigadeInspect.getAttribute('data-formation-id') ?? '',
+          expanded: true,
+        };
+      }
+      const expandButton = Array.from(row.querySelectorAll('button')).find((button) => (
+        button instanceof HTMLElement
+        && isVisible(button)
+        && !button.hasAttribute('data-testid')
+      ));
+      if (!(expandButton instanceof HTMLElement)) return { sectorId, expanded: false };
+      expandButton.click();
+      return { sectorId, expanded: false };
+    }, index);
+
+    if (!candidate?.sectorId) continue;
+    const found = await page.waitForFunction(
+      (sectorId) => {
+        const isVisible = (el) => {
+          if (!(el instanceof HTMLElement)) return false;
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          return rect.width > 0
+            && rect.height > 0
+            && style.display !== 'none'
+            && style.visibility !== 'hidden'
+            && Number(style.opacity || '1') > 0;
+        };
+        const row = Array.from(document.querySelectorAll('[data-testid="army-hq-sector-row"][data-sector-id]'))
+          .find((el) => el instanceof HTMLElement && isVisible(el) && el.getAttribute('data-sector-id') === sectorId);
+        if (!(row instanceof HTMLElement)) return null;
+        const brigadeInspect = Array.from(row.querySelectorAll('[data-testid="army-hq-sector-brigade-inspect"][data-formation-id][data-sector-id]')).find(isVisible);
+        const frontage = Array.from(row.querySelectorAll('[data-testid="army-hq-sector-frontage"][data-front-segments]')).find(isVisible);
+        if (!(brigadeInspect instanceof HTMLElement) || !(frontage instanceof HTMLElement)) return null;
+        return {
+          sectorId,
+          formationId: brigadeInspect.getAttribute('data-formation-id') ?? '',
+        };
+      },
+      { timeout: candidate.expanded ? 500 : 3000 },
+      candidate.sectorId,
+    ).then((handle) => handle.jsonValue(), () => null);
+    if (found?.formationId) return found;
+  }
+  return null;
+}
+
+async function selectArmyHqCorpsWithSectorBrigadeInspect(page, summary) {
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
+  if (await visibleSelectorCount(page, '[data-testid="army-hq-corps-card-detail"]') > 0) {
+    const foundInOpenDetail = await expandVisibleArmyHqSectorWithBrigadeInspect(page);
+    if (foundInOpenDetail) {
+      summary.evidence.armyHqSectorBrigadeProofCorpsIndex = 'existing-detail';
+      summary.evidence.armyHqSectorBrigadeProofSectorId = foundInOpenDetail.sectorId;
+      summary.evidence.armyHqSectorBrigadeProofFormationId = foundInOpenDetail.formationId;
+      return foundInOpenDetail;
+    }
+  }
+
+  const corpsCount = await visibleSelectorCount(page, '[data-testid="army-hq-corps-card"]');
+  for (let index = 0; index < corpsCount; index += 1) {
+    await clickVisibleSelectorAt(page, '[data-testid="army-hq-corps-card"]', index, 'Army HQ corps card');
+    await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
+    await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
+    const found = await expandVisibleArmyHqSectorWithBrigadeInspect(page);
+    if (found) {
+      summary.evidence.armyHqSectorBrigadeProofCorpsIndex = index;
+      summary.evidence.armyHqSectorBrigadeProofSectorId = found.sectorId;
+      summary.evidence.armyHqSectorBrigadeProofFormationId = found.formationId;
+      return found;
+    }
+  }
+
+  throw new Error(`No Army HQ corps sector exposed a visible brigade inspect-on-field control after inspecting ${corpsCount} corps cards`);
+}
+
 async function ensureExpanded(page, selector) {
   await waitForVisibleSelector(page, selector);
   const expanded = await page.$eval(selector, (el) => el.getAttribute('aria-expanded') === 'true');
@@ -1066,13 +1165,29 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   await assertSingleShellSurface(page, 'Army HQ');
   await activateVisibleControl(page, '#army-hq-tab-briefing');
   await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
-  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
-  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
-  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
+  await selectArmyHqCorpsWithSectorBrigadeInspect(page, summary);
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-frontage"][data-front-segments]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-brigade-inspect"][data-formation-id][data-sector-id]');
   await captureEvidence(page, summary, 'army_hq_sector_front_segment_live_proof');
+  await clickFirstVisibleSelector(
+    page,
+    '[data-testid="army-hq-sector-brigade-inspect"][data-formation-id][data-sector-id]',
+    'Army HQ sector brigade inspect-on-field control',
+  );
+  await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
+  await captureEvidence(page, summary, 'army_hq_sector_brigade_inspect_on_field_live_proof');
+
+  await resetToWarMap(page);
+  await activateVisibleControl(page, '[data-testid="toolbar-route-army-hq"]');
+  await assertSingleShellSurface(page, 'Army HQ');
+  await activateVisibleControl(page, '#army-hq-tab-briefing');
+  await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-index"]');
+  await activateVisibleControl(page, '[data-testid="army-hq-corps-card"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-corps-card-detail"]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]');
   await clickFirstVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]', 'Army HQ sector inspect-on-field control');
   await waitForVisibleSelector(page, '#sector-intel-tab-overview');
   await waitForVisibleSelector(page, '#sector-intel-panel-overview');
@@ -1080,6 +1195,7 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Army HQ Sector Front Segment Live Proof', text);
   summary.evidence.armyHqSectorFrontSegmentLiveProof = true;
+  summary.evidence.armyHqSectorBrigadeInspectOnFieldLiveProof = true;
   summary.evidence.armyHqSectorInspectOnFieldLiveProof = true;
 }
 

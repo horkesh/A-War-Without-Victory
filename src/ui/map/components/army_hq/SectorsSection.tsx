@@ -129,6 +129,21 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                             {cohesion}%
                                         </span>
                                         {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">{t('sectorsSection.disrupted')}</span>}
+                                        <button
+                                            type="button"
+                                            data-testid="army-hq-sector-brigade-inspect"
+                                            data-formation-id={b.id}
+                                            data-sector-id={sector.sector_id}
+                                            aria-label={t('sectorsSection.inspectFormationOnField', { formation: getLocalizedFormationName(b, locale) })}
+                                            onClick={() => inspectOnField(useGameStore.getState(), {
+                                                kind: 'field-formation-in-sector',
+                                                formationId: b.id,
+                                                sectorId: sector.sector_id,
+                                            })}
+                                            className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                        >
+                                            {t('sectorsSection.inspect')}
+                                        </button>
                                     </div>
                                     {b.location_osid && (
                                         <div className="text-[9px] text-text-secondary/40 ml-4 mt-0.5 truncate">
@@ -160,6 +175,21 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                             @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </span>
                                     )}
+                                    <button
+                                        type="button"
+                                        data-testid="army-hq-sector-brigade-inspect"
+                                        data-formation-id={b.id}
+                                        data-sector-id={sector.sector_id}
+                                        aria-label={t('sectorsSection.inspectFormationOnField', { formation: getLocalizedFormationName(b, locale) })}
+                                        onClick={() => inspectOnField(useGameStore.getState(), {
+                                            kind: 'field-formation-in-sector',
+                                            formationId: b.id,
+                                            sectorId: sector.sector_id,
+                                        })}
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                    >
+                                        {t('sectorsSection.inspect')}
+                                    </button>
                                 </div>
                             );
                         })}

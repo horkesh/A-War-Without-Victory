@@ -136,7 +136,7 @@ function formatSignedEventDelta(delta: number | undefined): string {
 
 function formatEventDuration(turns: number | undefined): string {
   return typeof turns === 'number' && Number.isFinite(turns) && turns > 0
-    ? ` for ${turns} turns`
+    ? t('eventModal.effect.duration', { turns })
     : '';
 }
 
@@ -149,37 +149,37 @@ export function formatAcknowledgementEventEffect(effect: AcknowledgementEventEff
 
   switch (effect.kind) {
     case 'morale_change':
-      return `${factionPrefix}morale${delta}`;
+      return t('eventModal.effect.moraleChange', { faction: factionPrefix, delta });
     case 'supply_delta':
-      return `${factionPrefix}supply${delta}`;
+      return t('eventModal.effect.supplyDelta', { faction: factionPrefix, delta });
     case 'cohesion_change':
-      return `${factionPrefix}cohesion${delta}`;
+      return t('eventModal.effect.cohesionChange', { faction: factionPrefix, delta });
     case 'humanitarian_impact':
-      return `${factionPrefix}humanitarian impact${formatSignedEventDelta(effect.war_crimes_delta)}`;
+      return t('eventModal.effect.humanitarianImpact', { faction: factionPrefix, delta: formatSignedEventDelta(effect.war_crimes_delta) });
     case 'patron_pressure':
-      return `${factionPrefix}patron pressure${delta}`;
+      return t('eventModal.effect.patronPressure', { faction: factionPrefix, delta });
     case 'alliance_change':
-      return `Army of RBiH / HVO alliance${delta}`;
+      return t('eventModal.effect.allianceChange', { delta });
     case 'negotiation_capital':
-      return `${factionPrefix}negotiating position${delta}`;
+      return t('eventModal.effect.negotiationCapital', { faction: factionPrefix, delta });
     case 'equipment_grant':
-      return `${factionPrefix}equipment support recorded`;
+      return t('eventModal.effect.equipmentGrant', { faction: factionPrefix });
     case 'aggression_modifier':
-      return `${factionPrefix}operational aggression${delta}${duration}`;
+      return t('eventModal.effect.aggressionModifier', { faction: factionPrefix, delta, duration });
     case 'control_change': {
       const count = effect.osids?.length ?? 0;
       return count > 0
-        ? `${factionPrefix}territorial control changes in ${count} area${count === 1 ? '' : 's'}`
-        : `${factionPrefix}territorial control changes recorded`;
+        ? t(count === 1 ? 'eventModal.effect.controlChange.one' : 'eventModal.effect.controlChange.many', { faction: factionPrefix, count })
+        : t('eventModal.effect.controlChange.recorded', { faction: factionPrefix });
     }
     case 'guerrilla_threat':
-      return `${factionPrefix}rear-area threat recorded${duration}`;
+      return t('eventModal.effect.guerrillaThreat', { faction: factionPrefix, duration });
     case 'offensive_ops_suppression':
-      return `${factionPrefix}offensive operations suppressed${duration}`;
+      return t('eventModal.effect.offensiveSuppression', { faction: factionPrefix, duration });
     case 'alliance_lock':
-      return `Alliance constraint recorded${duration}`;
+      return t('eventModal.effect.allianceLock', { duration });
     default:
-      return `${factionPrefix}campaign effect recorded`;
+      return t('eventModal.effect.default', { faction: factionPrefix });
   }
 }
 
@@ -387,28 +387,28 @@ function OnboardingOverlayWrapper() {
 type NativeWarroomOverlaySurface = Extract<WarroomOverlaySurface, 'intelligence' | 'staff' | 'faction'>;
 
 const WARROOM_OVERLAY_COPY: Record<NativeWarroomOverlaySurface, {
-  title: string;
-  eyebrow: string;
-  body: string;
-  drillInLabel: string;
+  titleKey: Parameters<typeof t>[0];
+  eyebrowKey: Parameters<typeof t>[0];
+  bodyKey: Parameters<typeof t>[0];
+  drillInLabelKey: Parameters<typeof t>[0];
 }> = {
   intelligence: {
-    title: 'Intelligence',
-    eyebrow: 'Radio briefs',
-    body: 'Signals, intelligence notices, and source-filtered briefs surface here before records or map focus.',
-    drillInLabel: 'Open intelligence records',
+    titleKey: 'warroom.overlay.intelligence.title',
+    eyebrowKey: 'warroom.overlay.intelligence.eyebrow',
+    bodyKey: 'warroom.overlay.intelligence.body',
+    drillInLabelKey: 'warroom.overlay.intelligence.drillIn',
   },
   staff: {
-    title: 'Army HQ',
-    eyebrow: 'Staff and command',
-    body: 'Commanders, vacancies, personnel friction, and replacement actions are reviewed here before entering Army HQ.',
-    drillInLabel: 'Open Army HQ personnel',
+    titleKey: 'warroom.overlay.staff.title',
+    eyebrowKey: 'warroom.overlay.staff.eyebrow',
+    bodyKey: 'warroom.overlay.staff.body',
+    drillInLabelKey: 'warroom.overlay.staff.drillIn',
   },
   faction: {
-    title: 'Faction',
-    eyebrow: 'Presidential constraints',
-    body: 'Faction legitimacy, doctrine, institutional constraints, and strategic posture stay visible as Warroom context first.',
-    drillInLabel: 'Open faction summary',
+    titleKey: 'warroom.overlay.faction.title',
+    eyebrowKey: 'warroom.overlay.faction.eyebrow',
+    bodyKey: 'warroom.overlay.faction.body',
+    drillInLabelKey: 'warroom.overlay.faction.drillIn',
   },
 };
 
@@ -423,6 +423,7 @@ function WarroomNativeOverlay({
 }) {
   const dialogRef = useRef<HTMLElement | null>(null);
   const copy = WARROOM_OVERLAY_COPY[surface];
+  const title = t(copy.titleKey);
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -433,7 +434,7 @@ function WarroomNativeOverlay({
       ref={dialogRef}
       role="dialog"
       aria-modal="false"
-      aria-label={`${copy.title} Warroom overlay`}
+      aria-label={t('warroom.overlay.ariaLabel', { title })}
       tabIndex={-1}
       data-testid={`warroom-overlay-${surface}`}
       onKeyDown={(event) => {
@@ -447,27 +448,27 @@ function WarroomNativeOverlay({
     >
       <div className="flex items-start justify-between gap-4 border-b border-panel-border/70 pb-3">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{copy.eyebrow}</div>
-          <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{copy.title}</h2>
+          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t(copy.eyebrowKey)}</div>
+          <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{title}</h2>
         </div>
         <button
           type="button"
           onClick={onClose}
-          aria-label={`Close ${copy.title} overlay`}
+          aria-label={t('warroom.overlay.closeAria', { title })}
           data-testid={`warroom-overlay-${surface}-close`}
           className="border border-panel-border/80 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
-          Close
+          {t('warroom.overlay.close')}
         </button>
       </div>
-      <p className="mt-3 text-[12px] leading-relaxed text-text-secondary">{copy.body}</p>
+      <p className="mt-3 text-[12px] leading-relaxed text-text-secondary">{t(copy.bodyKey)}</p>
       <button
         type="button"
         onClick={onDrillIn}
         data-testid={`warroom-overlay-${surface}-drill-in`}
         className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
       >
-        {copy.drillInLabel}
+        {t(copy.drillInLabelKey)}
       </button>
     </section>
   );

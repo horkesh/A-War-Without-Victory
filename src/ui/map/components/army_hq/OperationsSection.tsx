@@ -14,6 +14,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { deriveOperationOutcomeCategory } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
+import { inspectOnField } from '../../utils/shellNavigation';
 
 type CompletedOp = NonNullable<LoadedGameState['operationHistory']>[number];
 
@@ -228,11 +229,12 @@ function getCommanderPersonality(officer: NamedOfficerView): string {
 }
 
 /** Brigade status row within operation ORBAT. */
-function BrigadeStatusRow({ brig }: { brig: FormationView }) {
+function BrigadeStatusRow({ brig, corpsId }: { brig: FormationView; corpsId: string }) {
     const personnel = brig.personnel ?? 0;
     const cohesion = brig.cohesion;
     const morale = brig.morale ?? 0;
     const isDisrupted = (brig.disrupted_turns ?? 0) > 0;
+    const brigadeName = getPlayerSafeBrigadeName(brig.name);
 
     const persColor = personnel >= 800 ? 'text-emerald-400' : personnel >= 400 ? 'text-accent-gold' : 'text-red-500';
     const cohColor = cohesion >= 60 ? 'text-emerald-400' : cohesion >= 30 ? 'text-accent-gold' : 'text-red-500';
@@ -241,13 +243,28 @@ function BrigadeStatusRow({ brig }: { brig: FormationView }) {
     return (
         <div className={`flex items-center gap-2 px-2 py-0.5 text-[10px] font-mono tabular-nums ${isDisrupted ? 'bg-red-500/5 border-l-2 border-red-500/40' : 'border-l-2 border-transparent'}`}>
             <span className={`flex-1 min-w-0 truncate font-bold uppercase tracking-tighter ${isDisrupted ? 'text-red-500' : 'text-text-secondary'}`}>
-                {getPlayerSafeBrigadeName(brig.name)}
+                {brigadeName}
             </span>
             <span className={`w-20 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
             <span className={`w-16 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
             <span className={`w-14 text-right ${morColor}`}>{Math.round(morale)}</span>
             {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-20 text-center">{t('operationsSection.disruptedShort')}</span>}
             {!isDisrupted && <span className="w-20" />}
+            <button
+                type="button"
+                data-testid="army-hq-operation-brigade-inspect"
+                data-formation-id={brig.id}
+                data-corps-id={corpsId}
+                aria-label={t('operationsSection.inspectFormationOnField', { formation: brigadeName })}
+                onClick={() => inspectOnField(useGameStore.getState(), {
+                    kind: 'field-formation-in-corps',
+                    formationId: brig.id,
+                    corpsId,
+                })}
+                className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+            >
+                {t('operationsSection.inspect')}
+            </button>
         </div>
     );
 }
@@ -500,12 +517,13 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <span className="w-16 text-right">{t('operationsSection.cohShort')}</span>
                         <span className="w-14 text-right">{t('operationsSection.morShort')}</span>
                         <span className="w-20 text-center">{t('operationsSection.stsShort')}</span>
+                        <span className="w-10 text-right">{t('operationsSection.inspect')}</span>
                     </div>
                     <div className="max-h-40 overflow-y-auto scrollbar-thin scrollbar-thumb-panel-border space-y-0">
                         {brigadeIds.map((id) => {
                             const brig = formationMap.get(id);
                             if (!brig) return null;
-                            return <BrigadeStatusRow key={id} brig={brig} />;
+                            return <BrigadeStatusRow key={id} brig={brig} corpsId={op.corps_id} />;
                         })}
                     </div>
                 </div>

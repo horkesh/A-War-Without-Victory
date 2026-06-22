@@ -247,6 +247,11 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(appSource).toContain('statusDock={(');
         expect(statusSource).not.toContain('className="fixed ');
         expect(statusSource).not.toContain("t('warroom.advance')");
+        expect(statusSource).toContain('id="warroom-priority-docket-panel"');
+        expect(statusSource).toContain('data-testid="warroom-priority-docket-panel"');
+        expect(statusSource).toContain('aria-controls="warroom-priority-docket-panel"');
+        expect(statusSource).toContain('role="region"');
+        expect(statusSource).toContain("aria-label={t('warroom.priorityDocketAria')}");
         expect(source).toContain('<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"');
         expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
     });

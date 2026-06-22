@@ -198,6 +198,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
     try {
       render(React.createElement(DecisionConsequenceRecordsPanel));
 
+      expect(screen.getByText('Odluka zabilježena')).toBeTruthy();
       expect(screen.getByRole('region', { name: 'Zapisi posljedica odluka' })).toBeTruthy();
       expect(screen.getByText('Posljedice odluka')).toBeTruthy();
       expect(screen.getByText('Put Hronike')).toBeTruthy();
@@ -205,6 +206,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
       expect(screen.queryByText(/Odluka događaja \/ Potez 8/)).toBeNull();
       expect(screen.getByText('Arhivirano u: Hronika')).toBeTruthy();
       expect(screen.getByRole('button', { name: 'Otvori Hroniku' })).toBeTruthy();
+      expect(screen.queryByText('Decision recorded')).toBeNull();
       expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();
     } finally {
       setLocale('en', undefined);

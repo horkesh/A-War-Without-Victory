@@ -1,6 +1,7 @@
 import type { LoadedGameState } from './types';
 import { deriveInboxItems, type InboxItem } from './inboxItems';
 import { getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
+import { t } from '../i18n';
 
 type PresidentialBlockerType = Extract<
   InboxItem['type'],
@@ -29,7 +30,7 @@ const BLOCKING_TYPES = new Set<InboxItem['type']>([
 
 function blockerSummary(item: InboxItem): string {
   if (item.type === 'convoy_decision') {
-    return 'A humanitarian convoy request needs your instruction before the turn can proceed.';
+    return t('presidentialBlockers.convoy.summary');
   }
   const surface = getDecisionSurfaceForInboxType(item.type);
   return surface?.copySanitizer({ title: item.title, subtitle: item.subtitle }).summary ?? item.subtitle;
@@ -50,12 +51,12 @@ export function derivePresidentialBlockers(
       return {
         id: item.id,
         type: item.type,
-        typeLabel: surface?.playerLabel ?? 'Required decision',
+        typeLabel: surface?.playerLabel ?? t('presidentialBlockers.requiredDecision'),
         severity: item.severity,
         title: item.title,
         summary: blockerSummary(item),
         action: item.action,
-        actionLabel: surface?.actionLabel ?? 'Open item',
+        actionLabel: surface?.actionLabel ?? t('presidentialBlockers.openItem'),
         priority: item.priority,
       };
     });

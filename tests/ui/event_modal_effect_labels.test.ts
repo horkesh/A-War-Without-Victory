@@ -16,7 +16,25 @@ describe('event acknowledgement modal effect labels', () => {
     expect(renderedCopy).toBe('ARBiH operational aggression -0.1 for 8 turns');
     expect(renderedCopy).not.toContain('aggression_modifier');
     expect(APP_SOURCE).toContain('formatAcknowledgementEventEffect');
-    expect(APP_SOURCE).toContain('operational aggression');
+    expect(APP_SOURCE).toContain('eventModal.effect.aggressionModifier');
     expect(APP_SOURCE).not.toContain('${getPlayerSafeMilitaryFactionName(eff.faction)} ${eff.kind}');
+  });
+
+  it('localizes generated acknowledgement effect copy', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    try {
+      setLocale('bcs', undefined);
+      const renderedCopy = formatAcknowledgementEventEffect({
+        kind: 'aggression_modifier',
+        faction: 'RBiH',
+        delta: -0.1,
+        duration_turns: 8,
+      });
+
+      expect(renderedCopy).toBe('ARBiH operativna agresivnost -0.1 tokom 8 poteza');
+      expect(renderedCopy).not.toMatch(/operational aggression|for 8 turns|aggression_modifier/);
+    } finally {
+      setLocale('en', undefined);
+    }
   });
 });

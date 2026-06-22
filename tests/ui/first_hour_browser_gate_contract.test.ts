@@ -104,6 +104,9 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('armyHqSectorFrontSegmentLiveProof');
     expect(tool).toContain('army-hq-sector-frontage');
     expect(tool).toContain('army-hq-sector-inspect');
+    expect(tool).toContain('army-hq-sector-brigade-inspect');
+    expect(tool).toContain('army_hq_sector_brigade_inspect_on_field_live_proof');
+    expect(tool).toContain('armyHqSectorBrigadeInspectOnFieldLiveProof');
     expect(tool).toContain('army_hq_sector_inspect_on_field_live_proof');
     expect(tool).toContain('armyHqSectorInspectOnFieldLiveProof');
     expect(tool).toContain('runMapContextMenuLiveProof');
@@ -291,9 +294,11 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-row"');
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-frontage"');
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-inspect"');
+    expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-testid="army-hq-sector-brigade-inspect"');
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-sector-id={sector.sector_id}');
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-corps-id={corpsId}');
     expect(read('src/ui/map/components/army_hq/SectorsSection.tsx')).toContain('data-front-segments={sector.length_edges}');
+    expect(read('src/ui/map/components/army_hq/OperationsSection.tsx')).toContain('data-testid="army-hq-operation-brigade-inspect"');
     expect(read('src/ui/map/components/army_hq/OrbatSection.tsx')).toContain('data-testid="army-hq-formation-inspect"');
     expect(read('src/ui/map/components/army_hq/OrbatSection.tsx')).toContain('data-formation-id={b.id}');
     expect(read('src/ui/map/components/army_hq/OrbatSection.tsx')).toContain('data-corps-id={corpsId}');

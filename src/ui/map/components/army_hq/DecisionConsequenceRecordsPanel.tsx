@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react';
 import {
   buildDecisionConsequenceLedger,
   buildDecisionConsequenceLedgerSummary,
+  resolveDecisionConsequenceCopy,
   type DecisionConsequenceRecord,
 } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
@@ -102,6 +103,9 @@ export function DecisionConsequenceRecordsPanel() {
           </div>
         ) : visibleRecords.map((record) => {
           const isFocused = record.id === focusedDecisionConsequenceId;
+          const title = resolveDecisionConsequenceCopy(record, 'title');
+          const outcome = resolveDecisionConsequenceCopy(record, 'outcome');
+          const detail = resolveDecisionConsequenceCopy(record, 'detail');
           return (
           <article
             key={record.id}
@@ -116,22 +120,22 @@ export function DecisionConsequenceRecordsPanel() {
             <div className="flex items-start gap-3">
               <img
                 src={getConsequenceStillForRecord(record)}
-                alt={`${record.title} consequence`}
+                alt={t('decisionConsequences.imageAlt', { title })}
                 className="h-16 w-28 shrink-0 rounded-sm border border-panel-border/70 object-cover"
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="truncate text-[13px] font-bold text-text-primary">{record.title}</div>
+                    <div className="truncate text-[13px] font-bold text-text-primary">{title}</div>
                     <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-text-muted">
                       {`${familyLabel(record)} / ${turnToDateString(record.turn)}`}
                     </div>
                   </div>
                   <div className="shrink-0 rounded border border-accent-gold/35 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
-                    {record.outcome}
+                    {outcome}
                   </div>
                 </div>
-                <div className="mt-2 text-[11px] leading-5 text-text-secondary">{record.detail}</div>
+                <div className="mt-2 text-[11px] leading-5 text-text-secondary">{detail}</div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary">
                     {t('decisionConsequences.filedTo', { route: routeLabel(record) })}

@@ -23,6 +23,7 @@
  * events and trace slice; enemy pushback signals are never surfaced.
  */
 import type { LoadedGameState } from './types.js';
+import { t } from '../i18n/index.js';
 
 export type PlayerPushbackSeverity = 'blocking' | 'warning' | 'info';
 
@@ -164,7 +165,7 @@ export function buildPlayerArmyCoPushbackVisibility(
             autonomousProposalCount: 0,
             traceObjectionCount: 0,
             severity: 'info',
-            headline: 'No Army CO pushback this turn.',
+            headline: t('decisionRoom.card.pushback.headline.none'),
             rationale: '',
             evidence: [],
         };
@@ -178,20 +179,30 @@ export function buildPlayerArmyCoPushbackVisibility(
                 : 'info';
 
     if (refusedCount > 0) {
-        evidence.push(`${refusedCount} order${refusedCount === 1 ? '' : 's'} refused`);
+        evidence.push(t(refusedCount === 1
+            ? 'decisionRoom.card.pushback.evidence.refused.one'
+            : 'decisionRoom.card.pushback.evidence.refused.many', { count: refusedCount }));
     }
     if (pushbackCount > 0) {
-        evidence.push(`${pushbackCount} pushback event${pushbackCount === 1 ? '' : 's'}`);
+        evidence.push(t(pushbackCount === 1
+            ? 'decisionRoom.card.pushback.evidence.pushback.one'
+            : 'decisionRoom.card.pushback.evidence.pushback.many', { count: pushbackCount }));
     }
     if (modifiedCount > 0) {
-        evidence.push(`${modifiedCount} modified order${modifiedCount === 1 ? '' : 's'}`);
+        evidence.push(t(modifiedCount === 1
+            ? 'decisionRoom.card.pushback.evidence.modified.one'
+            : 'decisionRoom.card.pushback.evidence.modified.many', { count: modifiedCount }));
     }
     if (autonomousProposalCount > 0) {
-        evidence.push(`${autonomousProposalCount} autonomous operation proposal${autonomousProposalCount === 1 ? '' : 's'}`);
+        evidence.push(t(autonomousProposalCount === 1
+            ? 'decisionRoom.card.pushback.evidence.autonomous.one'
+            : 'decisionRoom.card.pushback.evidence.autonomous.many', { count: autonomousProposalCount }));
     }
     if (traceObjectionCount > 0) {
         const role = lastTraceRole ? ` (${lastTraceRole})` : '';
-        evidence.push(`${traceObjectionCount} Army CO objection${traceObjectionCount === 1 ? '' : 's'}${role}`);
+        evidence.push(t(traceObjectionCount === 1
+            ? 'decisionRoom.card.pushback.evidence.trace.one'
+            : 'decisionRoom.card.pushback.evidence.trace.many', { count: traceObjectionCount, role }));
     }
 
     const proposalOnly =
@@ -203,17 +214,17 @@ export function buildPlayerArmyCoPushbackVisibility(
 
     const headline =
         proposalOnly
-            ? 'Army command proposes an autonomous operation.'
+            ? t('decisionRoom.card.pushback.headline.proposal')
         : severity === 'blocking'
-            ? 'Army CO refused a political directive.'
-            : 'Army CO pushed back on political directive.';
+            ? t('decisionRoom.card.pushback.headline.refused')
+            : t('decisionRoom.card.pushback.headline.pushback');
 
     const rationale = primaryReason ?? lastTraceRationale ?? (
         proposalOnly
-            ? 'Army command has proposed an operation outside the current presidential directive. Review before advancing.'
+            ? t('decisionRoom.card.pushback.rationale.proposal')
         : severity === 'blocking'
-            ? 'A subordinate army commander has refused the directive as given. Review the rationale before advancing.'
-            : 'A subordinate army commander has objected to the directive. Review the rationale before advancing.'
+            ? t('decisionRoom.card.pushback.rationale.refused')
+            : t('decisionRoom.card.pushback.rationale.pushback')
     );
 
     if (reasons.length === 0 && lastTraceRationale) {

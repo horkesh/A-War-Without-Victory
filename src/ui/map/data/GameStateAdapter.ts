@@ -3021,9 +3021,9 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
             id,
             turn,
             title: getPlayerSafeDecisionTitle(staticInfo?.title ?? info?.text ?? getPlayerSafeDisplayLabel(id, 'Recorded decision')),
-            narrative: decision ? 'Presidential response filed in the campaign record.' : '',
+            narrative: decision ? t('firedEvent.wrapper.narrative') : '',
             category: decision ? 'political' : 'military',
-            effects: decision && response ? [{ kind: 'decision', description: `Response recorded: ${response}.` }] : [],
+            effects: decision && response ? [{ kind: 'decision', description: t('firedEvent.wrapper.responseRecorded', { response }) }] : [],
             isDecision: Boolean(decision),
         });
     }

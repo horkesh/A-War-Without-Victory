@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildDecisionConsequenceLedger,
   buildDecisionConsequenceLedgerSummary,
+  resolveDecisionConsequenceCopy,
 } from '../../src/ui/map/data/decisionConsequenceLedger.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
@@ -509,6 +510,31 @@ describe('decision consequence trail', () => {
       recordTarget: 'records',
     });
     expect(ledger.map((record) => record.detail).join(' ')).not.toMatch(/\bRS\b|_/);
+  });
+
+  it('resolves generated decision consequence copy through locale tokens', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: {
+        meta: { player_faction: 'RS' },
+        military: {
+          patron_defiance_supply_cuts: [
+            { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
+          ],
+        },
+      } as any,
+    } as Partial<LoadedGameState>), 10);
+
+    try {
+      setLocale('bcs', undefined);
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'title')).toBe('Patronsko smanjenje snabdijevanja');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'outcome')).toBe('Materijalna podrška smanjena');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).toBe('Serbia je smanjio materijalnu podršku za VRS za 35%; podrška nakon smanjenja 45%.');
+      expect(resolveDecisionConsequenceCopy(ledger[0]!, 'detail')).not.toMatch(/Material support reduced|support after cut/);
+    } finally {
+      setLocale('en', undefined);
+    }
   });
 
   it('orders patron defiance receipts newest first with stable same-turn tiebreaks', () => {

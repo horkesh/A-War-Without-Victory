@@ -1,5 +1,11 @@
 # Calibration-Affecting Prerequisites — Master Execution Sequence
 
+> **Historical note (2026-06-22):** this is retained as a June 8 calibration synthesis, not the
+> active dispatch board. Active lane truth lives in `docs/plans/COMMAND_BOARD.md`,
+> `docs/plans/MASTER_ROADMAP.md`, and `docs/40_reports/CALIBRATION_MASTER.md`. Any old owner-wait
+> or fall-delivery wording in this file is superseded by Pyrrhic-panel sign-off practice and by the
+> current rule that Srebrenica/Zepa fall receipts are event-owned.
+
 **Status:** PLAN — **LARGELY EXECUTED (2026-06-08).** Phase 0 ✅, Phase-2 casualty Lanes 1b/2/3 + ADR-0007 Phase B ✅ (PR-1 v2 #316), Phase-3 Farz `brijesnica_donja_2` ✅ + E-A5 wired ✅ (PR-3 #312). **REMAINING:** E-B1 (in flight, last spine item); ADR-0007 Phase C (deferred/§6-canon-blocked); Phase-4 PDP activations (built-but-off, panel-approved); E-A5 emitter activation + intel-ambush (panel-approved experiments); #170 enclave-resilience (parked); E-A6 (deferred). See `CALIBRATION_MASTER.md` for the live floor.
 **Authoritative floor of record:** ~~188w 634/712 hash `2fdbff2fdba1b9c2`, anchors 29/30~~ → **SUPERSEDED: 188w 649/712 hash `89ef697dfb27c989`, anchors 30/30, 0 criticals; 40w `235c61f408dc3d95`** (PR-3 #312 → PR-1 v2 #316). 52w `9991ff2d29ebbbcd`. Authoritative = `docs/40_reports/CALIBRATION_MASTER.md`.
 **Marking:** see the "⚠️ CALIBRATION-AFFECTING PREREQUISITES" note in `docs/plans/COMMAND_BOARD.md`.

@@ -100,6 +100,27 @@ describe('decision surface registry', () => {
     });
   });
 
+  it('resolves registry labels and fallback copy through the active locale', async () => {
+    const { setLocale } = await import('../../src/ui/map/i18n/index.js');
+    try {
+      setLocale('bcs', undefined);
+      expect(getDecisionSurface('operation_opportunity')).toMatchObject({
+        playerLabel: 'Operativna prilika',
+        actionLabel: 'Otvori sobu odluka',
+        sourceLabel: 'Štab armije',
+      });
+      expect(sanitizeDecisionCopy('convoy_decision', {
+        title: 'pending_required_decisions',
+        summary: 'convoy_decision_raw_id',
+      })).toEqual({
+        title: 'Humanitarni konvoj',
+        summary: 'Zahtjev za konvoj treba vašu instrukciju: propustiti, blokirati ili preusmjeriti.',
+      });
+    } finally {
+      setLocale('en', undefined);
+    }
+  });
+
   it('projects pending paramilitary requests as direct blocking desk decisions even without policy echo', () => {
     const items = deriveInboxItems({
       turn: 1,

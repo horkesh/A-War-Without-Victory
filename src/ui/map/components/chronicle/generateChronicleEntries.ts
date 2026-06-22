@@ -31,7 +31,11 @@ export interface ChronicleEntry {
     };
 }
 
-import { buildDecisionConsequenceLedger, type DecisionConsequenceRecord } from '../../data/decisionConsequenceLedger.js';
+import {
+    buildDecisionConsequenceLedger,
+    resolveDecisionConsequenceCopy,
+    type DecisionConsequenceRecord,
+} from '../../data/decisionConsequenceLedger.js';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets.js';
 import { buildConsequenceReceipts } from '../../data/consequenceReceipts.js';
 import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
@@ -368,8 +372,8 @@ function buildOfficerSpotlightEntries(state: any, playerFaction: string | null):
 }
 
 function decisionRecordType(record: DecisionConsequenceRecord): ChronicleCardType {
-    if (record.family === 'Army reserve' || record.family === 'Operation opportunity') return 'military';
-    if (record.family.toLowerCase().includes('peace')) return 'diplomatic';
+    if (record.familyId === 'army-reserve' || record.familyId === 'operation-opportunity') return 'military';
+    if (record.familyId === 'peace-proposal' || record.familyId === 'dayton-settlement') return 'diplomatic';
     return 'political';
 }
 
@@ -379,8 +383,8 @@ function buildDecisionLedgerEntries(state: any): ChronicleEntry[] {
         turn: record.turn,
         type: decisionRecordType(record),
         headline: record.recordTarget === 'chronicle',
-        title: record.title,
-        detail: record.detail,
+        title: resolveDecisionConsequenceCopy(record, 'title'),
+        detail: resolveDecisionConsequenceCopy(record, 'detail'),
         metadata: {
             decisionRecordId: record.id,
             imageUrl: getConsequenceStillForRecord(record),

@@ -1,5 +1,11 @@
 # D1 — Calibration-Finalization Re-Floor: Dependency-Ordered Execution Plan
 
+> **Historical note (2026-06-22):** this D1 draft is retained as planning history, not as active
+> execution authority. Current dispatch and governance live in `docs/plans/COMMAND_BOARD.md`,
+> `docs/plans/MASTER_ROADMAP.md`, and `docs/40_reports/CALIBRATION_MASTER.md`. Srebrenica/Zepa
+> fall receipts are event-owned; Krivaja/Stupcanica references here are chronology/AAR context or
+> historical analysis, not a scripted fall-delivery implementation lane.
+
 **Status:** **DRAFT — for team / owner ratification.** READ-ONLY prep (task #79). No code / data / scenario / baseline changed. This is the build-ready sequence to execute *when D1 is reached* (after the 0.9.9-beta feature-freeze, per the 1.0 Definition-of-Done). It is NOT an authorization to start.
 
 **Author:** calibration + scenario-tester specialist (scenario-creator-runner-tester).

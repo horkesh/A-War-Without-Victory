@@ -1,5 +1,10 @@
 # Pyrrhic Decision Register — consolidated (2026-06-07)
 
+> **Historical note (2026-06-22):** this filename is legacy. Treat this as a Pyrrhic decision
+> register, not an owner-wait queue or active dispatch board. Active governance lives in
+> `docs/plans/COMMAND_BOARD.md` under Pyrrhic-panel sign-off. Srebrenica/Zepa fall receipts are
+> event-owned; do not revive Krivaja/Stupcanica as fall-delivery calibration lanes from this file.
+
 > **⚠️ RECONCILED 2026-06-09 (D4 beta-gate sweep) — read this first.** Many items below have
 > SHIPPED or changed disposition since 2026-06-07. Quick map (authoritative state = the alpha-band
 > session; floor 188w `5f57d17287b87dfb` / 40w `be76e56dd9d288c2` / 52w golden `9b426732…`,
@@ -205,12 +210,12 @@ risk = primary downside if mishandled.
      turn-gated 182, prefer an event-gate over an area-ratio).
   2. **E-B1 second** — corps coherence-decay (the keystone, +3-5pp, lights up E-B4; SPLIT into
      2 changes).
-  3. **E-A6 last / optional** — Sloboda scripted op.
+  3. **E-A6 last / optional** — deferred rear-clearing / opportunity follow-up.
   Dual-horizon + re-floor (COMBAT-P14 lesson: 40w-clean ≠ 188w-clean).
 - **Flags:** §6 none · canon none · calibration YES · effort medium-high · risk medium
   (E-B1 is a keystone; dual-horizon mandatory).
 - **Build-lane:** Calibration / combat-engine lane (NOT event-system).
-- **Status:** **CALIBRATION-REC — E-A5 → E-B1 → E-A6.**
+- **Status:** **CALIBRATION-REC — E-A5 → E-B1 → E-A6 deferred rear-clearing follow-up.**
 
 ---
 
