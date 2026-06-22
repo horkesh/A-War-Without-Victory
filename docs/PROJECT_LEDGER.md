@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): harden surface truth and pending-history provenance
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** Formation Detail sector-picker counts now subtract brigades validly overridden away from their stale roster sector; OOB corps cards show planning-only operations when no execution operation exists; setup-control provenance markers are suppressed from normal Aftermath/Chronicle/Decision Room history beyond turn zero; and pending unanswered foundational decisions no longer project as fired-event history or faced Dilemma Spine entries until a response is recorded.
+
+**Verification:** Focused red/green pack `node node_modules\vitest\vitest.mjs run tests\ui\formation_detail_parity.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\turn_aftermath.test.ts tests\chronicle_entries.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\first_hour_fired_event_labels.test.ts tests\ui\dilemma_spine.test.ts --pool=forks --reporter=dot` passed 116/116. `npm.cmd run typecheck` passed. `npm.cmd run qa:first-hour:browser` passed across all three factions with turn-zero Records/AAR provenance counts at zero and server cleanup verified. `npm.cmd run qa:live-surface:browser` passed the RBiH/RS owner drilldowns, Ops Planning modal reachability, setup-provenance proof, war-start foundational flow proof, and server cleanup verification. `npm.cmd run qa:player-journeys` passed 263/263. Temporary browser evidence folders were removed. Report: `docs/40_reports/implemented/20260622_SURFACE_TRUTH_AND_PROVENANCE_FOLLOWUP.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, event evaluator mechanics, scenario source data, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): harden record provenance and live owner sweep
 
 **Type:** UI/read-model/browser-QA/test/docs polish.

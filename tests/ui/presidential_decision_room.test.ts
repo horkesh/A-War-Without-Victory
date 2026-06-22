@@ -363,6 +363,36 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(`${loopsById.report.summary} ${loopsById.cost.summary} ${loopsById.judge.summary}`).not.toContain('recorded turn');
   });
 
+  it('does not treat setup-control summaries after turn zero as filed war records', () => {
+    const setupSummary = makeSummary({
+      turn: 1,
+      territory_net: { RBiH: -8 },
+      displacement_total: 1200,
+      notable_flips: [
+        { osid: 'op:test:setup', mun_id: 'test', from: 'RS', to: 'RBiH', significance: 'generic' },
+      ],
+      mechanism: 'setup_control',
+    } as Partial<TurnSummary> & { mechanism: string });
+    const state = makeState({
+      turn: 1,
+      latestTurnSummary: setupSummary,
+      turnSummaries: [setupSummary],
+      operationalSitrep: undefined,
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.some((card) => card.category === 'turn')).toBe(false);
+    expect(view.cards.some((card) => card.category === 'cost')).toBe(false);
+    expect(view.cards.some((card) => card.category === 'memory')).toBe(false);
+    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
+    expect(loopsById.report).toMatchObject({
+      count: 0,
+      urgentCount: 0,
+      navigationTarget: { kind: 'none' },
+    });
+  });
+
   it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
     const state = makeState({
       commandBriefing: {

@@ -1544,6 +1544,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
+1. **[2026-06-22] Pending foundational decisions are not filed history**
+   Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex unlocks, and Dilemma Spine faced state should wait for `event_decision_log` or a non-pending event.
 1. **[2026-06-06] Desk consequence receipts route by filed surface**
    Do instead: Use `recordTarget` from the shared decision consequence ledger for receipt actions: `chronicle` opens Chronicle, `records` opens Army HQ Records. Localize the route chrome; do not add another archive surface for the same receipt.
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

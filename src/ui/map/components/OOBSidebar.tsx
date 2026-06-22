@@ -435,6 +435,7 @@ export function OOBSidebar() {
                             const corpsSectors = loadedGameState?.corpsFrontSectors?.filter((s) => s.corps_id === corpsId) ?? [];
                             const corpsOps = filterPlayerFacingOperations(loadedGameState).filter((op) => op.corps_id === corpsId);
                             const activeOp = corpsOps.find((op) => op.phase === 'execution');
+                            const displayedOp = activeOp ?? corpsOps.find((op) => op.phase === 'planning');
                             const commander = loadedGameState
                               ? resolveCorpsCommanderDisplay(corpsId, faction, loadedGameState)
                               : null;
@@ -465,8 +466,8 @@ export function OOBSidebar() {
                                 onMouseLeave={() => setHoveredCorpsId(null)}
                                 onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
                                 sectorCount={corpsSectors.length}
-                                activeOperationName={activeOp?.display_name}
-                                activeOperationPhase={activeOp?.phase}
+                                activeOperationName={displayedOp?.display_name}
+                                activeOperationPhase={displayedOp?.phase}
                                 commanderName={syntheticCommand?.commanderName ?? commander?.name}
                                 commanderActing={syntheticCommand ? false : commander?.acting}
                                 commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}

@@ -18,6 +18,7 @@ import war1995 from '../../data/scenarios/events/war_1995.json';
 function fixtureLoaded(opts: {
     firedIds?: string[];
     rawFiredIds?: string[];
+    pendingIds?: string[];
     decisions?: Array<{ event_id: string; response_id: string; turn: number }>;
 }): LoadedGameState {
     const firedEvents = (opts.firedIds ?? []).map((id) => ({
@@ -40,6 +41,14 @@ function fixtureLoaded(opts: {
                 // Authoritative uncapped fired set. Defaults to the view ids so existing
                 // cases stay realistic (the capped view is always a subset of this).
                 fired_event_ids: opts.rawFiredIds ?? opts.firedIds ?? [],
+                pending_event_decisions: (opts.pendingIds ?? []).map((id) => ({
+                    event_id: id,
+                    event_title: id,
+                    turn_fired: 0,
+                    faction: 'RBiH',
+                    requires_player_response: true,
+                    response_options: [{ id: 'historical', label: 'Historical', effects: [] }],
+                })),
                 event_decision_log: (opts.decisions ?? []).map((d) => ({
                     event_id: d.event_id,
                     response_id: d.response_id,
@@ -131,6 +140,36 @@ describe('buildDilemmaSpine', () => {
         assert.strictEqual(vopp.chosenResponseId, 'reject');
         assert.strictEqual(vopp.decisionTurn, 41);
         assert.strictEqual(vopp.chosenBranchLabel, 'Reject the Vance-Owen Plan');
+    });
+
+    test('pending unanswered foundational events are not faced until a response is recorded', () => {
+        const views = buildDilemmaSpine(
+            fixtureLoaded({
+                firedIds: [],
+                rawFiredIds: ['rs_strategic_goals'],
+                pendingIds: ['rs_strategic_goals'],
+            }),
+        );
+        const rs = byId(views, 'rs_six_strategic_goals');
+        assert.strictEqual(rs.faced, false);
+        assert.strictEqual(rs.chosenResponseId, null);
+        assert.strictEqual(rs.decisionTurn, null);
+    });
+
+    test('pending event rows with recorded responses are still faced history', () => {
+        const views = buildDilemmaSpine(
+            fixtureLoaded({
+                firedIds: [],
+                rawFiredIds: ['rs_strategic_goals'],
+                pendingIds: ['rs_strategic_goals'],
+                decisions: [{ event_id: 'rs_strategic_goals', response_id: 'all_six', turn: 0 }],
+            }),
+        );
+        const rs = byId(views, 'rs_six_strategic_goals');
+        assert.strictEqual(rs.faced, true);
+        assert.strictEqual(rs.chosenResponseId, 'all_six');
+        assert.strictEqual(rs.decisionTurn, 0);
+        assert.strictEqual(rs.chosenBranchLabel, 'Adopt all six goals');
     });
 
     test('unresolvable response id falls back to player-safe copy, not the raw response id', () => {

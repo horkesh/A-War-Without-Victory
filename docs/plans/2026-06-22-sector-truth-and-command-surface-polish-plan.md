@@ -98,3 +98,26 @@
 **Acceptance:** The live browser journey confirms the corrected surfaces and no console errors.
 
 **Evidence:** `qa:live-surface:browser` now runs the owner drilldown for RBiH and an RS startup fixture through Desk -> Command Surface -> Decision Room -> OOB sector -> Corps Front tabs -> Ops Planning modal -> Formation Detail -> Settlement Detail -> Records tabs. It also injects a turn-zero setup-provenance fixture and proves the Desk does not show `Last filed record` while the command-strip record card stays at `data-awwv-count="0"`. Live proof passed with `ownerJourneyDrilldownByFaction: { RBiH: true, RS: true }`, `ownerJourneyOpsPlanningModalByFaction: { RBiH: true, RS: true }`, `turnZeroSetupProvenanceLiveProof.recordCardCount: 0`, and server port cleanup verified.
+
+### Task 6: Pyrrhic Scout Surface-Truth Follow-Up
+
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_SURFACE_TRUTH_AND_PROVENANCE_FOLLOWUP.md`.
+
+**Files:**
+- Modified: `src/ui/map/components/FormationDetail.tsx`
+- Modified: `src/ui/map/components/OOBSidebar.tsx`
+- Modified: `src/ui/map/data/territorySummaryGuard.ts`
+- Modified: `src/ui/map/data/GameStateAdapter.ts`
+- Modified: `src/ui/map/data/dilemmaSpine.ts`
+- Tests: `tests/ui/formation_detail_parity.test.ts`, `tests/ui/oob_operations_panel.test.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/chronicle_entries.test.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/first_hour_fired_event_labels.test.ts`, `tests/ui/dilemma_spine.test.ts`
+
+**Steps:**
+1. Verify Pyrrhic scout claims with red focused tests.
+2. Fix stale Formation Detail sector counts for valid overrides.
+3. Fix OOB corps cards so planning-only operations are visible.
+4. Extend setup-provenance suppression beyond turn-zero-only summaries.
+5. Keep unanswered foundational decisions out of filed/faced UI history until a response is recorded.
+
+**Acceptance:** Current-sector counts, OOB operation cards, setup-control summaries, fired-event wrappers, and Dilemma Spine state all represent the player's actual authored history rather than setup or pending bookkeeping.
+
+**Evidence:** Focused red/green pack passed 116/116 and `npm.cmd run typecheck` passed. `npm.cmd run qa:first-hour:browser` passed with all faction foundational flows resolved, turn-zero Records/AAR provenance counts at zero, receipt checks true, raw first-hour labels absent, and server cleanup verified. `npm.cmd run qa:live-surface:browser` passed with RBiH/RS owner drilldowns, Ops Planning modal reachability, setup-provenance record-card count at zero, war-start foundational flow proof, and server cleanup verified. `npm.cmd run qa:player-journeys` passed 263/263. Temporary browser evidence folders were removed.

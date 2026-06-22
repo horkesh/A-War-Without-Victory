@@ -2968,8 +2968,19 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
         turn?: number;
         decision_source?: string;
     }>;
+    const pendingDecisionIds = new Set<string>(
+        ((state.military?.pending_event_decisions ?? []) as Array<{ event_id?: unknown }>)
+            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
+    const recordedDecisionIds = new Set<string>(
+        decisionLog
+            .map((decision) => typeof decision.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
     const orderedIds: string[] = [];
     for (const id of firedIds ?? []) {
+        if (pendingDecisionIds.has(id) && !recordedDecisionIds.has(id)) continue;
         if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
     }
     for (const decision of decisionLog) {

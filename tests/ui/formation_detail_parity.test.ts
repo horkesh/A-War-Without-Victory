@@ -281,17 +281,26 @@ describe('Formation Detail parity display', () => {
         sectorOverrideId: 'sector_south',
       },
     ] as LoadedGameState['formations'];
-    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
-      ? { ...sector, reserve_brigade_ids: ['rbih_rear_brigade'] }
-      : sector);
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => {
+      if (sector.sector_id === 'sector_north') {
+        return { ...sector, assigned_brigade_ids: ['rbih_heroic_brigade', 'rbih_override_brigade'] };
+      }
+      if (sector.sector_id === 'sector_south') {
+        return { ...sector, reserve_brigade_ids: ['rbih_rear_brigade'] };
+      }
+      return sector;
+    });
     useGameStore.setState({ loadedGameState: state });
 
     render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
 
     const southButton = screen.getByRole('button', { name: /Southern line/i });
+    const northButton = screen.getByRole('button', { name: /Northern line/i });
     expect(southButton.textContent ?? '').toContain('2 brigades');
     expect(southButton.textContent ?? '').not.toMatch(/\b0b\b|\b1b\b/);
+    expect(northButton.textContent ?? '').toContain('1 brigade');
+    expect(northButton.textContent ?? '').not.toContain('2 brigades');
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {

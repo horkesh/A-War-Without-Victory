@@ -226,7 +226,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const sectorAssignmentById = new Map(
     sameSectorList.map((sector) => [
       sector.sector_id,
-      buildSectorFormationAssignment(sector, loadedGameState.formations),
+      buildSectorFormationAssignment(sector, loadedGameState.formations, sameSectorList),
     ]),
   );
 

@@ -284,6 +284,28 @@ describe('buildTurnAftermathView', () => {
     expect(view?.judgment.memoryTone).toBe('quiet');
   });
 
+  it('treats setup-control provenance as setup history even after turn zero', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        turn: 1,
+        latestTurnSummary: makeSummary({
+          turn: 1,
+          territory_net: { RBiH: 2, RS: -2 },
+          notable_flips: [
+            { osid: 'op:sarajevo:dobrinja', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'generic' },
+          ],
+          mechanism: 'setup_control',
+        } as Partial<TurnSummary> & { mechanism: string }),
+      }),
+      osidNameMap: { 'op:sarajevo:dobrinja': 'Dobrinja (Sarajevo)' },
+    });
+
+    expect(view?.tone).toBe('quiet');
+    expect(view?.territory.friendlyNet).toBe(0);
+    expect(view?.territory.notable).toEqual([]);
+    expect(view?.headline).toBe('No territorial change this turn.');
+  });
+
   it('falls back to a quiet shell when the save has no latest turn summary yet', () => {
     const view = buildTurnAftermathView({ nextState: makeState({ latestTurnSummary: null, turnSummaries: [] }) });
     expect(view?.turn).toBe(12);

@@ -219,6 +219,43 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('0/1');
   });
 
+  it('opens the operation drilldown when an OOB operation row is clicked', () => {
+    useGameStore.setState({
+      isOperationsPanelOpen: false,
+      selectedOperationKey: null,
+    });
+
+    render(createElement(OOBSidebar));
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
+
+    const state = useGameStore.getState();
+    expect(state.selectedOperationKey).toBe(`${CORPS_ID}|${RAW_OP_NAME}`);
+    expect(state.isOperationsPanelOpen).toBe(true);
+  });
+
+  it('shows planning-only operations on OOB corps cards instead of saying none are active', () => {
+    const planning = { ...operation(), phase: 'planning' as const, display_name: 'Operation Queueing' };
+    useGameStore.setState({
+      loadedGameState: {
+        ...loadedState(),
+        operations: [planning],
+      } as LoadedGameState,
+    });
+
+    const { container } = render(createElement(OOBSidebar));
+    const corpsCard = screen
+      .getAllByText('Corps Commander')
+      .map((element) => element.closest('[role="button"]'))
+      .find(Boolean);
+    expect(corpsCard).toBeTruthy();
+    fireEvent.click(corpsCard!);
+
+    expect(container.textContent).toContain('Operation Queueing');
+    expect(container.textContent).toContain('Planning');
+    expect(container.textContent).not.toContain('No active operations');
+  });
+
   it('labels OOB sector frontage as front segments instead of kilometers', () => {
     useGameStore.setState({
       loadedGameState: {

@@ -260,6 +260,11 @@ export function buildDilemmaSpine(
     for (const entry of loaded?.firedEvents ?? []) {
         if (entry?.id) firedIds.add(entry.id);
     }
+    const pendingDecisionIds = new Set<string>(
+        ((loaded?.rawGameState?.military?.pending_event_decisions ?? []) as ReadonlyArray<{ event_id?: unknown }>)
+            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
     const decisionResponses = loaded?.decisionResponses ?? null;
     const decisionLog = (loaded?.rawGameState?.military?.event_decision_log ?? []) as ReadonlyArray<{
         event_id: string;
@@ -270,7 +275,7 @@ export function buildDilemmaSpine(
     const views: DilemmaSpineView[] = DILEMMA_SPINE.map((def) => {
         // faced: any keystone event fired, OR any keystone event has a recorded
         // response (decisionResponses is a set of `${event_id}:${response_id}`).
-        const facedByFire = def.keystoneEventIds.some((id) => firedIds.has(id));
+        const facedByFire = def.keystoneEventIds.some((id) => firedIds.has(id) && !pendingDecisionIds.has(id));
         const facedByResponse = decisionResponses
             ? def.keystoneEventIds.some((id) => {
                 for (const key of decisionResponses) {

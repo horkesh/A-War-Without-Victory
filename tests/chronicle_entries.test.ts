@@ -219,6 +219,38 @@ describe('generateChronicleEntries', () => {
         expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('1250 displaced');
     });
 
+    it('does not emit normal Chronicle entries from explicit setup-control summaries after turn zero', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 1,
+            turnSummaries: [makeTurnSummary(1, {
+                mechanism: 'setup_control',
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'breakthrough',
+                    attacker_casualties: 20,
+                    defender_casualties: 80,
+                    territory_flipped: false,
+                }],
+                displacement_total: 1250,
+                displacement_by_ethnicity: { Bosniak: 1000, Serb: 250 },
+                territory_net: { RBiH: 3, RS: -3 },
+                formation_spawns: [{ formation_id: 'arbih_setup', formation_name: 'Setup Brigade', faction: 'RBiH' }],
+                formation_destructions: [{ formation_id: 'rs_setup', formation_name: 'Setup Loss', faction: 'RS' }],
+                notable_events: [{ id: 'setup-note', text: 'Setup note' }],
+            })],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+
+        expect(entries.filter(e => e.turn === 1 && ['combat', 'cost', 'humanitarian', 'military', 'narrative'].includes(e.type))).toEqual([]);
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('Setup Brigade');
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('Setup Loss');
+        expect(entries.map(e => `${e.title} ${e.detail}`).join('\n')).not.toContain('1250 displaced');
+    });
+
     it('does not create cost cards for quiet minor turns', () => {
         const state = {
             player_faction: 'RBiH',
