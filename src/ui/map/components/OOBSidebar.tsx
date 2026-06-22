@@ -23,15 +23,19 @@ import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
-import { buildSectorFormationAssignment } from '../utils/sectorUtils';
+import { buildSectorFormationAssignment, getSectorCoverageTier, type SectorCoverageTier } from '../utils/sectorUtils';
 
 const FACTION_ORDER = ['RS', 'RBiH', 'HRHB'] as const;
 
-function sectorCoverageLabel(density: number): string {
-  if (density <= 0) return t('oob.sectorCoverage.uncovered');
-  if (density < 0.12) return t('oob.sectorCoverage.thin');
-  if (density < 0.28) return t('oob.sectorCoverage.held');
-  return t('oob.sectorCoverage.dense');
+const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> = {
+  uncovered: 'oob.sectorCoverage.uncovered',
+  thin: 'oob.sectorCoverage.thin',
+  held: 'oob.sectorCoverage.held',
+  dense: 'oob.sectorCoverage.dense',
+};
+
+function sectorCoverageLabel(tier: SectorCoverageTier): string {
+  return t(SECTOR_COVERAGE_KEYS[tier]);
 }
 
 function groupFormationsByCorps(formations: FormationView[]): Map<string, FormationView[]> {
@@ -626,6 +630,7 @@ export function OOBSidebar() {
                           loadedGameState.formations,
                           loadedGameState.corpsFrontSectors ?? [],
                         );
+                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
                         const owner = loadedGameState.formations.find((f) => f.id === sector.corps_id);
                         const ownerName = owner
                           ? getLocalizedFormationName(owner, locale)
@@ -668,7 +673,7 @@ export function OOBSidebar() {
                                 {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
                                 {sectorAssignment.overrideIds.length > 0 && ` + ${t('oob.sectorDirectedCount', { count: sectorAssignment.overrideIds.length.toString() })}`}
                                 {' \u00B7 '}{t('oob.sectorFrontSegments', { count: sector.length_edges.toString() })}
-                                {' \u00B7 '}{sectorCoverageLabel(sector.density)}
+                                {' \u00B7 '}{sectorCoverageLabel(coverageTier)}
                               </div>
                             </div>
                           </button>

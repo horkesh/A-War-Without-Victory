@@ -127,4 +127,23 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
+
+  it('does not label zero-formation sectors as held coverage in OOB', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      density: 0.35,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+
+    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('No coverage');
+    expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+  });
 });

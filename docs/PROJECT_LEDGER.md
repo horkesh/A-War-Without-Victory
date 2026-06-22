@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): align sector coverage labels with current formations
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** OOB sector rows and Corps Detail sector rows now derive coverage labels from the same current sector assignment projection used by Corps Front. If a sector has no current frontline, reserve, or command-directed brigade, it displays uncovered coverage even when its geometric density field is non-zero. The broader next-polish queue is now tracked in `docs/plans/2026-06-22-sector-truth-and-command-surface-polish-plan.md`.
+
+**Verification:** Red/green focused tests reproduced OOB and Corps Detail showing `Dense coverage` for a zero-formation sector, then passed after the shared helper fix: `node node_modules\vitest\vitest.mjs run tests\ui\oob_drilldown_routing.test.ts tests\ui\corps_detail_sector_truth.test.ts --pool=forks --reporter=dot` passed 4/4. Adjacent command-surface pack passed 24/24. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed and the temporary evidence folder was removed after cleanup verification. Startup snapshot audit found 70 zero-assignment sectors in `data/derived/startup/apr_1992_initial_save.json` (RBiH 35, HRHB 21, RS 14), confirming the UI must describe uncovered slices honestly while a deeper sector-builder audit remains a separate planned lane. Report: `docs/40_reports/implemented/20260622_SECTOR_COVERAGE_TRUTH_ALIGNMENT.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): harden surface truth and routing polish
 
 **Type:** UI/read-model/store-route/test/docs polish.

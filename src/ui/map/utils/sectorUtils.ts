@@ -64,6 +64,18 @@ export interface SectorFormationAssignment {
   allCurrentIds: string[];
 }
 
+export type SectorCoverageTier = 'uncovered' | 'thin' | 'held' | 'dense';
+
+export function getSectorCoverageTier(
+  density: number,
+  assignment: Pick<SectorFormationAssignment, 'allCurrentIds'>,
+): SectorCoverageTier {
+  if (assignment.allCurrentIds.length === 0 || density <= 0) return 'uncovered';
+  if (density < 0.12) return 'thin';
+  if (density < 0.28) return 'held';
+  return 'dense';
+}
+
 /**
  * Collect the friendly-side OSIDs for a given sector.
  * For each edge in the sector, finds the OSID on the sector's faction side.

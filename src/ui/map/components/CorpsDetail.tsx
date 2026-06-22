@@ -26,9 +26,16 @@ import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
 import { t } from '../i18n';
-import { buildSectorFormationAssignment, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
+import { buildSectorFormationAssignment, getSectorCoverageTier, resolveCurrentSectorForFormation, type SectorCoverageTier } from '../utils/sectorUtils';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
+
+const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> = {
+  uncovered: 'oob.sectorCoverage.uncovered',
+  thin: 'oob.sectorCoverage.thin',
+  held: 'oob.sectorCoverage.held',
+  dense: 'oob.sectorCoverage.dense',
+};
 
 interface CorpsDetailProps {
   railSlot: 'primary' | 'secondary';
@@ -358,6 +365,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
                 const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
+                const coverageTier = getSectorCoverageTier(s.density, sectorAssignment);
                 return (
                 <button
                   key={s.sector_id}
@@ -388,7 +396,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <span className="text-text-primary">{sectorEff.totalEffectiveness.toLocaleString()}</span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
-                      {t('oob.sectorCoverage.label')}: {s.density <= 0 ? t('oob.sectorCoverage.uncovered') : s.density < 0.12 ? t('oob.sectorCoverage.thin') : s.density < 0.28 ? t('oob.sectorCoverage.held') : t('oob.sectorCoverage.dense')}
+                      {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}
                     </div>
                     {s.sector_stance && (
                       <div className="text-[9px] uppercase text-text-secondary opacity-70">
