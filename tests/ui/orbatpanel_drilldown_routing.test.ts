@@ -42,6 +42,21 @@ function makeState(): LoadedGameState {
         location_osid: 'op:sarajevo:centar_1',
         sectorOverrideId: 'sector_south',
       },
+      {
+        id: 'rbih_destroyed_brigade',
+        faction: 'RBiH',
+        name: 'Destroyed Brigade',
+        kind: 'brigade',
+        readiness: 'destroyed',
+        status: 'destroyed',
+        cohesion: 0,
+        fatigue: 100,
+        createdTurn: 0,
+        tags: [],
+        personnel: 800,
+        corps_id: 'rbih_1_corps',
+        location_osid: 'op:sarajevo:centar_1',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -100,7 +115,11 @@ afterEach(() => {
 
 describe('OrbatPanel drilldown routing', () => {
   it('routes brigade clicks to the current sector plus formation field inspection', () => {
-    render(React.createElement(OrbatPanel));
+    const { container } = render(React.createElement(OrbatPanel));
+
+    expect(container.textContent).toMatch(/1[,.]200/);
+    expect(container.textContent).not.toMatch(/2[,.]000/);
+    expect(container.textContent).not.toContain('Destroyed Brigade');
 
     fireEvent.click(screen.getByRole('button', { name: /1st Brigade/i }));
 

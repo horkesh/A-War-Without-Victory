@@ -287,6 +287,88 @@ describe('Tactical map render smoke', () => {
     expect(byId.get('attacking_nonparticipant')).toBe(false);
   });
 
+  it('buildFormationsGeoJSON hides non-fielded brigades from tactical counters', () => {
+    const state = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      controlBySettlement: { 'op:sarajevo': 'RBiH', 'op:pale': 'RS' },
+      formations: [
+        {
+          id: 'active_brigade',
+          faction: 'RBiH',
+          name: 'Active Brigade',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+        },
+        {
+          id: 'destroyed_brigade',
+          faction: 'RBiH',
+          name: 'Destroyed Brigade',
+          kind: 'brigade',
+          readiness: 'destroyed',
+          cohesion: 0,
+          fatigue: 100,
+          status: 'destroyed',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+        },
+        {
+          id: 'forming_brigade',
+          faction: 'RBiH',
+          name: 'Forming Brigade',
+          kind: 'brigade',
+          readiness: 'forming',
+          cohesion: 30,
+          fatigue: 0,
+          status: 'forming',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:pale',
+        },
+        {
+          id: 'active_operational_group',
+          faction: 'RBiH',
+          name: 'Active Operational Group',
+          kind: 'operational_group',
+          readiness: 'ready',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+        },
+        {
+          id: 'destroyed_operational_group',
+          faction: 'RBiH',
+          name: 'Destroyed Operational Group',
+          kind: 'operational_group',
+          readiness: 'destroyed',
+          cohesion: 0,
+          fatigue: 100,
+          status: 'destroyed',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+        },
+      ],
+    } as unknown as LoadedGameState;
+
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const ids = buildFormationsGeoJSON(state, controlledGeo).features.map((feature) => feature.properties.id);
+
+    expect(ids).toEqual(['active_brigade', 'active_operational_group']);
+  });
+
   it('generateThreatAssessment keeps player-facing language on friendly fronts', () => {
     const state = {
       formations: [

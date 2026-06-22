@@ -1544,6 +1544,8 @@ After EVERY scenario run, the orchestrator:
     Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
+1. **[2026-06-22] Fielded tactical-unit truth is active-status truth**
+   Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, and sector assignment projections; terminal/forming brigades and operational groups need lifecycle copy, not active field affordances.
 1. **[2026-06-22] Pending foundational decisions are not filed history**
    Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex unlocks, and Dilemma Spine faced state should wait for `event_decision_log` or a non-pending event.
 1. **[2026-06-06] Desk consequence receipts route by filed surface**

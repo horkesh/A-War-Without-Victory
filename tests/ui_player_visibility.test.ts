@@ -10,6 +10,7 @@ import {
   findPlayerFacingOperationByKey,
   getPlayerFacingFaction,
   filterPlayerVisibleMapFormations,
+  isFieldedTacticalFormation,
 } from '../src/ui/shared/playerVisibility.js';
 import {
   getPlayerSafeBrigadeName,
@@ -54,6 +55,14 @@ describe('player visibility helpers', () => {
     expect(filterPlayerFacingFormations(state).map((f) => f.id)).toEqual(['arbih_3rd_corps']);
     expect(filterPlayerFacingSectors(state).map((s) => s.sector_id)).toEqual(['s_1']);
     expect(filterPlayerFacingOperations(state).map((o) => o.name)).toEqual(['Op Tuzla']);
+  });
+
+  it('treats lightweight statusless tactical formation records as fielded-compatible', () => {
+    expect(isFieldedTacticalFormation({ kind: 'brigade' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'operational_group' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'ACTIVE' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'destroyed' })).toBe(false);
+    expect(isFieldedTacticalFormation({ kind: 'corps', status: 'active' })).toBe(false);
   });
 
   it('filters operation history and movement logs to player-owned formations only', () => {

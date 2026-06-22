@@ -21,6 +21,20 @@ export function filterPlayerFacingFormations(state: LoadedGameState | null | und
   return getPlayerVisibleFactions(state.formations, resolvePlayerFacingFaction(state));
 }
 
+export function isFieldedBrigade(formation: { kind?: unknown; status?: unknown } | null | undefined): boolean {
+  return formation?.kind === 'brigade' && isActiveFormationStatus(formation);
+}
+
+export function isFieldedTacticalFormation(formation: { kind?: unknown; status?: unknown } | null | undefined): boolean {
+  return (formation?.kind === 'brigade' || formation?.kind === 'operational_group' || formation?.kind === 'og')
+    && isActiveFormationStatus(formation);
+}
+
+function isActiveFormationStatus(formation: { status?: unknown } | null | undefined): boolean {
+  if (formation?.status == null) return true;
+  return String(formation.status).toLowerCase() === 'active';
+}
+
 export function filterPlayerFacingSectors(state: LoadedGameState | null | undefined): SectorView[] {
   if (!state?.corpsFrontSectors) return [];
   return getPlayerVisibleFactions(state.corpsFrontSectors, resolvePlayerFacingFaction(state));

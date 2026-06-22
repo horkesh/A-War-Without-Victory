@@ -2,6 +2,7 @@
  * Shared sector utilities for map visualization.
  * Used by Tooltip (Phase A), sector fill (Phase B), brigade sync (Phase C), density mode (Phase E).
  */
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 const FACTION_SUFFIXES = [':RS', ':RBiH', ':HRHB'] as const;
 
@@ -53,6 +54,7 @@ interface FormationSectorView {
   id: string;
   faction?: string;
   kind?: string;
+  status?: string;
   corps_id?: string;
   sectorOverrideId?: string;
 }
@@ -184,6 +186,10 @@ export function buildSectorFormationAssignment(
   allSectors: readonly SectorView[] | undefined = [sector],
 ): SectorFormationAssignment {
   const formationById = new Map((formations ?? []).map((formation) => [formation.id, formation]));
+  const isKnownNonFielded = (formationId: string): boolean => {
+    const formation = formationById.get(formationId);
+    return formation != null && !isFieldedTacticalFormation(formation);
+  };
   const isOverriddenAway = (formationId: string): boolean => {
     const formation = formationById.get(formationId);
     if (!formation?.sectorOverrideId || formation.sectorOverrideId === sector.sector_id) return false;
@@ -191,14 +197,16 @@ export function buildSectorFormationAssignment(
   };
 
   const frontlineIds = [...(sector.assigned_brigade_ids ?? [])]
+    .filter((id) => !isKnownNonFielded(id))
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
   const reserveIds = [...(sector.reserve_brigade_ids ?? [])]
+    .filter((id) => !isKnownNonFielded(id))
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
   const rosterIds = new Set([...frontlineIds, ...reserveIds]);
   const overrideIds = (formations ?? [])
-    .filter((formation) => formation.kind === undefined || formation.kind === 'brigade')
+    .filter((formation) => formation.kind === undefined || isFieldedTacticalFormation(formation))
     .filter((formation) => isValidOverrideSector(formation, sector))
     .map((formation) => formation.id)
     .filter((id) => !rosterIds.has(id))

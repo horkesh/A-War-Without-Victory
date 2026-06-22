@@ -10,7 +10,7 @@ import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationPhaseLabel } fr
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
-import { filterPlayerFacingOperations, findPlayerFacingSectorById } from '../../shared/playerVisibility';
+import { filterPlayerFacingOperations, findPlayerFacingSectorById, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { formatPosture, toTitleCase, turnToDateString } from '../utils/formatters';
@@ -237,7 +237,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   // Unresolved brigades: could not be placed into any sector for this corps this turn (Codex #6: unresolved is honest)
   const unresolvedFormations = (loadedGameState.unresolvedSectorBrigades ?? [])
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
-    .filter((f): f is NonNullable<typeof f> => f != null && f.corps_id === sector.corps_id);
+    .filter((f): f is NonNullable<typeof f> => f != null && f.corps_id === sector.corps_id && isFieldedTacticalFormation(f));
 
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
@@ -277,7 +277,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
       kind: 'field-formation-in-sector',
       formationId,
       sectorId: selectedSectorId,
-      corpsId: selectedCorpsId,
+      corpsId: selectedCorpsId ?? sector.corps_id,
     });
   };
 

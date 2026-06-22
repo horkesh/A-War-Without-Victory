@@ -42,6 +42,20 @@ function makeState(): LoadedGameState {
         tags: [],
         corps_id: 'rbih_1_corps',
       },
+      {
+        id: 'rbih_destroyed_brigade',
+        name: 'Destroyed Brigade',
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'destroyed',
+        readiness: 'destroyed',
+        personnel: 900,
+        fatigue: 100,
+        cohesion: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1_corps',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -59,7 +73,19 @@ function makeState(): LoadedGameState {
     pressureWarning: false,
     latestTurnSummary: null,
     turnSummaries: [],
-  } as LoadedGameState;
+    corpsFrontSectors: [
+      {
+        sector_id: 'sector:rbih_1_corps:0',
+        display_name: 'Corps front',
+        faction: 'RBiH',
+        corps_id: 'rbih_1_corps',
+        assigned_brigade_ids: ['rbih_1_brigade'],
+        reserve_brigade_ids: [],
+        length_edges: 1,
+        density: 0.2,
+      },
+    ],
+  } as unknown as LoadedGameState;
 }
 
 describe('command drilldown routing', () => {
@@ -86,5 +112,49 @@ describe('command drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'formation' });
+  });
+
+  it('filters non-fielded brigades from CorpsDetail ORBAT and active totals', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/1[,.]200/);
+    expect(container.textContent).not.toMatch(/2[,.]100/);
+
+    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+
+    expect(container.textContent).toContain('1st Brigade');
+    expect(container.textContent).not.toContain('Destroyed Brigade');
+  });
+
+  it('routes CorpsDetail sector rows through field inspection and clears stale shell context', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+      codexOpen: true,
+      chronicleOpen: true,
+      focusedAftermathTurn: 3,
+      focusedOperationHistoryId: 'stale-op',
+    });
+
+    render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    fireEvent.click(screen.getByTestId('corps-detail-sector-row'));
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsId).toBe('rbih_1_corps');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:rbih_1_corps:0');
+    expect(store.codexOpen).toBe(false);
+    expect(store.chronicleOpen).toBe(false);
+    expect(store.focusedAftermathTurn).toBeNull();
+    expect(store.focusedOperationHistoryId).toBeNull();
+    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
 });

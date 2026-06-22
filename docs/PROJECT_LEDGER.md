@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): align fielded brigade truth and routing
+
+**Type:** UI/read-model/routing/i18n/test/docs polish.
+
+**Fix:** Tactical-map counters, OOB reserve groups, Corps Detail, ORBAT, Corps Front unresolved rows, and sector assignment projections now use the same active-fielded tactical-formation boundary, preventing destroyed/forming/non-fielded brigades and operational groups from showing as active field strength while preserving active operational groups and statusless lightweight projection records as field units. Brigade rows render terminal lifecycle badges instead of falling back to active. Formation Detail no longer exposes sector assignment controls for non-fielded brigades. Generic Presidential Inbox `decision_room` handoffs open the Decision Room, desk-owned `sit:*` Situation rows return to the Desk, and Corps Front/Corps Detail drilldowns preserve command context through shared field inspection.
+
+**Verification:** Focused red/green pack `node node_modules\vitest\vitest.mjs run tests\ui_map_sector_lookup.test.ts tests\ui_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\ui\brigade_row_supply_labels.test.ts tests\ui\oob_drilldown_routing.test.ts tests\ui\orbatpanel_drilldown_routing.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\command_drilldown_routing.test.ts tests\ui\warroom_shell_ownership.test.ts --pool=forks --reporter=dot` passed 80/80, including the code-review follow-up cases for statusless projection records and `sit:*` Desk ownership. `npm.cmd run typecheck` passed. `npm.cmd run qa:first-hour:browser` passed after preserving Desk-owned opening/empty exceptions. `npm.cmd run qa:live-surface:browser` passed the owner drilldown and setup/foundational proof paths. `npm.cmd run qa:player-journeys` passed 267/267. Temporary browser evidence folders were removed. Report: `docs/40_reports/implemented/20260622_FIELDED_BRIGADE_TRUTH_AND_ROUTING.md`.
+
+**Scope/determinism:** UI/read-model/routing/i18n/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): harden surface truth and pending-history provenance
 
 **Type:** UI/read-model/test/docs polish.

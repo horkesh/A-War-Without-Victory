@@ -121,3 +121,31 @@
 **Acceptance:** Current-sector counts, OOB operation cards, setup-control summaries, fired-event wrappers, and Dilemma Spine state all represent the player's actual authored history rather than setup or pending bookkeeping.
 
 **Evidence:** Focused red/green pack passed 116/116 and `npm.cmd run typecheck` passed. `npm.cmd run qa:first-hour:browser` passed with all faction foundational flows resolved, turn-zero Records/AAR provenance counts at zero, receipt checks true, raw first-hour labels absent, and server cleanup verified. `npm.cmd run qa:live-surface:browser` passed with RBiH/RS owner drilldowns, Ops Planning modal reachability, setup-provenance record-card count at zero, war-start foundational flow proof, and server cleanup verified. `npm.cmd run qa:player-journeys` passed 263/263. Temporary browser evidence folders were removed.
+
+### Task 7: Fielded Brigade Truth And Routing
+
+**Status:** IMPLEMENTED 2026-06-22 in report `docs/40_reports/implemented/20260622_FIELDED_BRIGADE_TRUTH_AND_ROUTING.md`.
+
+**Files:**
+- Modified: `src/ui/shared/playerVisibility.ts`
+- Modified: `src/ui/map/map/builders/buildFormationsGeoJSON.ts`
+- Modified: `src/ui/map/utils/sectorUtils.ts`
+- Modified: `src/ui/map/components/BrigadeRow.tsx`
+- Modified: `src/ui/map/components/OOBSidebar.tsx`
+- Modified: `src/ui/map/components/CorpsDetail.tsx`
+- Modified: `src/ui/map/components/OrbatPanel.tsx`
+- Modified: `src/ui/map/components/CorpsFrontPanel.tsx`
+- Modified: `src/ui/map/components/FormationDetail.tsx`
+- Modified: `src/ui/map/App.tsx`
+- Tests: `tests/ui_map_render_smoke.test.ts`, `tests/ui/brigade_row_supply_labels.test.ts`, `tests/ui/oob_drilldown_routing.test.ts`, `tests/ui/orbatpanel_drilldown_routing.test.ts`, `tests/ui/formation_detail_parity.test.ts`, `tests/ui/corps_front_panel_routing.test.ts`, `tests/ui/command_drilldown_routing.test.ts`, `tests/ui/warroom_shell_ownership.test.ts`
+
+**Steps:**
+1. Add a shared fielded-brigade boundary for command surfaces.
+2. Filter tactical counters, OOB reserve groups, Corps Detail, ORBAT, Corps Front unresolved rows, and sector projections through that boundary.
+3. Render terminal brigade lifecycle badges explicitly.
+4. Hide Formation Detail sector assignment controls for non-fielded brigades.
+5. Route generic Decision Room inbox handoffs to the Decision Room and normalize Corps Front/Corps Detail field drilldowns through shared inspection.
+
+**Acceptance:** Destroyed/forming/non-fielded brigades and operational groups do not appear as active field counters, active field-unit counts are consistent across OOB/Corps/ORBAT/Army HQ-adjacent views, terminal lifecycle is visible when a row is rendered, and command drilldowns preserve owner context.
+
+**Evidence:** Focused red/green pack passed 80/80 and `npm.cmd run typecheck` passed, including code-review follow-up coverage for statusless lightweight sector projection records and `sit:*` Situation row Desk ownership. `npm.cmd run qa:first-hour:browser` passed after preserving the Desk-owned `opening-brief:desk` and `empty:desk` exceptions. `npm.cmd run qa:live-surface:browser` passed the owner drilldown and setup/foundational proof paths. `npm.cmd run qa:player-journeys` passed 267/267. Temporary browser evidence folders were removed after verification.

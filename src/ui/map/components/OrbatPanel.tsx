@@ -10,6 +10,7 @@ import type { CorpsFrontSectorView } from '../data/types';
 import { t } from '../i18n';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 
 export function OrbatPanel() {
@@ -32,7 +33,7 @@ export function OrbatPanel() {
     const brigades = useMemo(() => {
         if (!loadedGameState || !selectedOrbatCorpsId) return [];
         return loadedGameState.formations
-            .filter((f) => f.kind === 'brigade' && f.corps_id === selectedOrbatCorpsId)
+            .filter((f) => f.corps_id === selectedOrbatCorpsId && isFieldedTacticalFormation(f))
             .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
     }, [loadedGameState, selectedOrbatCorpsId]);
 

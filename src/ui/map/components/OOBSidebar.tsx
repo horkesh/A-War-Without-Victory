@@ -19,7 +19,7 @@ import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCor
 import { formatRank } from '../utils/officerCharacter';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
-import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 import { t, useLocale } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
@@ -128,7 +128,7 @@ export function OOBSidebar() {
     const map = new Map<string, FormationView[]>();
     if (!loadedGameState || !loadedGameState.formations || !playerFaction) return map;
     for (const formation of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
-      if (formation.kind !== 'brigade') continue;
+      if (!isFieldedTacticalFormation(formation)) continue;
       const isReserve = !formation.corps_id || isSectorAssignmentExemptCorpsId(formation.corps_id);
       if (!isReserve) continue;
       const list = map.get(formation.faction) ?? [];
@@ -146,7 +146,7 @@ export function OOBSidebar() {
     const map = new Map<string, FormationView[]>();
     const reserveIds = new Set(Array.from(reserveByFaction.values()).flatMap((formations) => formations.map((f) => f.id)));
     for (const f of getPlayerVisibleFactions(loadedGameState.formations, playerFaction)) {
-      if (f.kind !== 'brigade') continue;
+      if (!isFieldedTacticalFormation(f)) continue;
       if (reserveIds.has(f.id)) continue;
       const list = map.get(f.faction) ?? [];
       list.push(f);

@@ -1477,8 +1477,10 @@ function App() {
         openWarroomDecisionRoomFromField('opportunity', itemId);
       } else if (itemId.startsWith('officer:')) {
         openWarroomDecisionRoomFromField('command', 'pushback:player-army-co');
-      } else {
+      } else if (itemId === 'opening-brief:desk' || itemId === 'empty:desk' || itemId.startsWith('sit:')) {
         openWarroomDeskFromField();
+      } else {
+        openWarroomDecisionRoomFromField('all', itemId);
       }
     }
     if (action === 'peace_plan_modal') {

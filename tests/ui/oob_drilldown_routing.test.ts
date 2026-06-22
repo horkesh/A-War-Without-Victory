@@ -40,6 +40,20 @@ function makeState(): LoadedGameState {
         personnel: 800,
         corps_id: 'vrs_main_staff',
       },
+      {
+        id: 'vrs_destroyed_guard_bde',
+        faction: 'RS',
+        name: 'Destroyed Guard Brigade',
+        kind: 'brigade',
+        readiness: 'destroyed',
+        status: 'destroyed',
+        cohesion: 0,
+        fatigue: 100,
+        createdTurn: 0,
+        tags: [],
+        personnel: 600,
+        corps_id: 'vrs_main_staff',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -98,6 +112,7 @@ describe('OOBSidebar drilldown routing', () => {
 
     expect(container.textContent).toContain('Reserve HQ / Main Staff VRS');
     expect(container.textContent).toContain('Guard Brigade');
+    expect(container.textContent).not.toContain('Destroyed Guard Brigade');
     const reserveButton = screen.getByRole('button', { name: /Guard Brigade/i });
     expect(reserveButton.getAttribute('data-testid')).toBe('oob-hq-reserve-brigade');
     expect(reserveButton.getAttribute('data-formation-id')).toBe('vrs_guard_bde');

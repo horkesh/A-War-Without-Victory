@@ -50,4 +50,20 @@ describe('BrigadeRow supply labels', () => {
     expect(cutoffRow.getAttribute('title')).not.toMatch(/\bCUTOFF\b|\bcutoff\b/);
     expect(screen.queryByLabelText('cutoff')).toBeNull();
   });
+
+  it('renders terminal lifecycle badges instead of falling back to active', () => {
+    const { rerender } = render(React.createElement(BrigadeRow, {
+      formation: makeFormation({ status: 'destroyed', readiness: 'destroyed' }),
+    }));
+
+    expect(screen.getByText('DESTROYED')).toBeTruthy();
+    expect(screen.queryByText('ACTIVE')).toBeNull();
+
+    rerender(React.createElement(BrigadeRow, {
+      formation: makeFormation({ status: 'collapsed', readiness: 'destroyed' }),
+    }));
+
+    expect(screen.getByText('COLLAPSED')).toBeTruthy();
+    expect(screen.queryByText('ACTIVE')).toBeNull();
+  });
 });

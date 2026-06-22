@@ -237,6 +237,21 @@ describe('Formation Detail parity display', () => {
     expect(assignBrigadeToSector).not.toHaveBeenCalled();
   });
 
+  it('does not expose sector assignment controls for non-fielded brigades', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? { ...formation, status: 'destroyed', readiness: 'destroyed', sectorOverrideId: 'sector_south' }
+      : formation);
+    useGameStore.setState({ loadedGameState: state });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    expect(view.container.textContent).not.toContain('Sector assignment');
+    expect(screen.queryByText('Clear override')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Southern line/i })).toBeNull();
+  });
+
   it('presents a player override sector as the active assignment instead of the stale roster sector', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'

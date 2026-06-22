@@ -4,7 +4,7 @@ import { buildOsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
-import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
+import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import type { Locale } from '../../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
@@ -83,7 +83,7 @@ export function buildFormationsGeoJSON(
   // Pre-filter physical units to simplify counting and main loop
   const visibleFormations = filterPlayerVisibleMapFormations(state);
   const physicalUnits = visibleFormations.filter(f =>
-    f.kind !== 'corps' && f.kind !== 'corps_asset' && f.kind !== 'army_hq'
+    isFieldedTacticalFormation(f)
   );
   const activeOperationFormationIds = new Set<string>();
   for (const operation of state.activeOperations ?? []) {

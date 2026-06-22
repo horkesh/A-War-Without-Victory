@@ -4,6 +4,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { CorpsFrontPanel } from '../../src/ui/map/components/CorpsFrontPanel.js';
+import { derivePanelRailState } from '../../src/ui/map/components/panelRail.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
@@ -115,6 +116,24 @@ describe('CorpsFrontPanel field routing', () => {
       focusedAftermathTurn: null,
       focusedOperationHistoryId: null,
     });
+  });
+
+  it('preserves corps context when a bare sector inspection drills into a brigade', () => {
+    useGameStore.setState({
+      selectedCorpsId: null,
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByTestId('corps-front-brigade-row'));
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
+    expect(store.selectedFormationId).toBe('arbih_101_brigade');
+    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
   it('does not describe an uncovered sector as a force-balance advantage', () => {

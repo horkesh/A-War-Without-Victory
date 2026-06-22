@@ -209,6 +209,9 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(handler).toContain("openWarroomDecisionRoomFromField('opportunity', itemId);");
         expect(handler).toContain("if (itemId.startsWith('officer:'))");
         expect(handler).toContain("openWarroomDecisionRoomFromField('command', 'pushback:player-army-co');");
+        expect(handler).toContain("itemId === 'opening-brief:desk' || itemId === 'empty:desk' || itemId.startsWith('sit:')");
+        expect(handler).toContain('openWarroomDeskFromField();');
+        expect(handler).toContain("openWarroomDecisionRoomFromField('all', itemId);");
         expect(handler.indexOf("if (itemId.startsWith('opportunity:'))")).toBeLessThan(
             handler.indexOf("if (itemId.startsWith('officer:'))"),
         );

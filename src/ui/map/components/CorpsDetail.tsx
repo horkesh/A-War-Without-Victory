@@ -21,7 +21,7 @@ import {
 } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
-import { filterPlayerFacingOperations } from '../../shared/playerVisibility';
+import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
@@ -68,7 +68,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
   const subordinates = useMemo(
     () => loadedGameState?.formations.filter(
-      (f) => f.corps_id === selectedCorpsId && f.kind === 'brigade'
+      (f) => f.corps_id === selectedCorpsId && isFieldedTacticalFormation(f)
     ) ?? [],
     [loadedGameState?.formations, selectedCorpsId]
   );
@@ -153,6 +153,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     inspectOnField(useGameStore.getState(), {
       kind: 'field-formation-in-corps',
       formationId,
+      corpsId: selectedCorpsId,
+    });
+  };
+
+  const inspectSectorInCorps = (sectorId: string) => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-sector-in-corps',
+      sectorId,
       corpsId: selectedCorpsId,
     });
   };
@@ -377,14 +385,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
                   data-reserve-brigade-count={sectorAssignment.reserveIds.length}
                   data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
-                  onClick={() => useGameStore.setState({
-                    selectedArmyId,
-                    selectedCorpsId,
-                    selectedCorpsFrontSectorId: s.sector_id,
-                    selectedFormationId: null,
-                    selectedOperationKey: null,
-                    selectedOsid: null,
-                  })}
+                  onClick={() => inspectSectorInCorps(s.sector_id)}
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
                   <div className="min-w-0">

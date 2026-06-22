@@ -28,6 +28,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 import { buildSectorFormationAssignment } from '../utils/sectorUtils';
+import { isFieldedBrigade } from '../../shared/playerVisibility';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -179,6 +180,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   }
 
   const isBrigade = formation.kind === 'brigade';
+  const isFieldedSelectedBrigade = isFieldedBrigade(formation);
   const formationName = getLocalizedFormationName(formation, locale);
 
   // Home-distance helpers
@@ -951,7 +953,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             )}
 
             {/* Layer 3: Sector picker (brigades only, same corps) */}
-            {isBrigade && sameSectorList.length > 0 && (
+            {isFieldedSelectedBrigade && sameSectorList.length > 0 && (
               <div className="pt-2 border-t border-panel-border space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70">{t('formationDetail.sectorAssignment')}</span>
