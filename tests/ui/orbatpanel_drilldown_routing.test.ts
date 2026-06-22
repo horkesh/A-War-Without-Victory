@@ -40,6 +40,7 @@ function makeState(): LoadedGameState {
         personnel: 1200,
         corps_id: 'rbih_1_corps',
         location_osid: 'op:sarajevo:centar_1',
+        sectorOverrideId: 'sector_south',
       },
     ],
     militiaPools: [],
@@ -59,7 +60,28 @@ function makeState(): LoadedGameState {
     latestTurnSummary: null,
     turnSummaries: [],
     player_faction: 'RBiH',
-    corpsFrontSectors: [],
+    corpsFrontSectors: [
+      {
+        sector_id: 'sector_north',
+        display_name: 'North Line',
+        faction: 'RBiH',
+        corps_id: 'rbih_1_corps',
+        assigned_brigade_ids: ['rbih_1_brigade'],
+        reserve_brigade_ids: [],
+        length_edges: 2,
+        density: 0.2,
+      },
+      {
+        sector_id: 'sector_south',
+        display_name: 'South Line',
+        faction: 'RBiH',
+        corps_id: 'rbih_1_corps',
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: [],
+        length_edges: 2,
+        density: 0.2,
+      },
+    ],
   } as unknown as LoadedGameState;
 }
 
@@ -87,5 +109,13 @@ describe('OrbatPanel drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'formation' });
+  });
+
+  it('highlights the override sector on brigade hover instead of stale roster membership', () => {
+    render(React.createElement(OrbatPanel));
+
+    fireEvent.mouseEnter(screen.getByRole('button', { name: /1st Brigade/i }));
+
+    expect(useGameStore.getState().hoveredSectorId).toBe('sector_south');
   });
 });

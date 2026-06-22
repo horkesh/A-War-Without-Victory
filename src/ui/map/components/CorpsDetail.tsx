@@ -26,6 +26,7 @@ import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
 import { t } from '../i18n';
+import { buildSectorFormationAssignment, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -72,14 +73,12 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
   const sectorIdByBrigadeId = useMemo(() => {
     const map = new Map<string, string>();
-    for (const sector of corpsSectors) {
-      for (const brigadeId of sector.assigned_brigade_ids) map.set(brigadeId, sector.sector_id);
-      for (const brigadeId of sector.reserve_brigade_ids) {
-        if (!map.has(brigadeId)) map.set(brigadeId, sector.sector_id);
-      }
+    for (const brigade of subordinates) {
+      const sector = resolveCurrentSectorForFormation(brigade, corpsSectors);
+      if (sector) map.set(brigade.id, sector.sector_id);
     }
     return map;
-  }, [corpsSectors]);
+  }, [corpsSectors, subordinates]);
 
   useEffect(() => {
     setActiveTab('overview');
@@ -352,7 +351,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               <div className="text-text-secondary italic text-xs">{t('corpsDetail.noSectorsAssigned')}</div>
             ) : (
               corpsSectors.map((s) => {
-                const sectorBrigadeIds = new Set([...s.assigned_brigade_ids, ...s.reserve_brigade_ids]);
+                const sectorAssignment = buildSectorFormationAssignment(s, subordinates, corpsSectors);
+                const sectorBrigadeIds = new Set(sectorAssignment.allCurrentIds);
                 const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
                 const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
@@ -373,8 +373,9 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <div className="min-w-0">
                     <div className="text-text-primary text-[11px] font-medium truncate">{s.display_name}</div>
                     <div className="text-text-secondary text-[10px] tabular-nums">
-                      {t('oob.sectorLineCount', { count: s.assigned_brigade_ids.length.toString() })}
-                      {s.reserve_brigade_ids.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: s.reserve_brigade_ids.length.toString() })}`}
+                      {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
+                      {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
+                      {sectorAssignment.overrideIds.length > 0 && ` + ${t('oob.sectorDirectedCount', { count: sectorAssignment.overrideIds.length.toString() })}`}
                       {' · '}{t('oob.sectorFrontSegments', { count: s.length_edges.toString() })}
                       {' · '}{t('corpsDetail.personnelCount', { count: sectorPers.toLocaleString() })}
                     </div>

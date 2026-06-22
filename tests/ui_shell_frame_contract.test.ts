@@ -36,8 +36,9 @@ describe('tactical shell frame contract', () => {
   it('prevents hidden flip-card faces from reserving vertical layout height', () => {
     const flipCard = read('src/ui/map/components/army_hq/FlipCard.tsx');
 
-    expect(flipCard).toContain("isFlipped ? 'absolute inset-0 pointer-events-none' : 'relative'");
-    expect(flipCard).toContain("isFlipped ? 'relative overflow-y-auto' : 'absolute inset-0 overflow-hidden pointer-events-none'");
+    expect(flipCard).toContain("isFlipped ? 'hidden' : 'relative'");
+    expect(flipCard).toContain("isFlipped ? 'relative overflow-y-auto' : 'hidden'");
+    expect(flipCard).not.toContain("absolute inset-0 overflow-hidden pointer-events-none");
     expect(flipCard).not.toContain("className=\"relative grid");
     expect(flipCard).not.toContain("gridArea: '1/1'");
   });

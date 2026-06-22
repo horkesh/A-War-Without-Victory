@@ -26,6 +26,7 @@ function loadedState(): LoadedGameState {
         tags: [],
         corps_id: 'corps_alpha',
         location_osid: 'sarajevo_1',
+        sectorOverrideId: 'sector_south',
       },
       {
         id: 'brigade_bravo',
@@ -68,6 +69,25 @@ function loadedState(): LoadedGameState {
         sub_segment_count: 1,
         length_edges: 1,
         assigned_brigade_ids: ['brigade_alpha'],
+        reserve_brigade_ids: [],
+        density: 1,
+        threat_ratio: 1,
+        defensive_power: 10,
+        intel_confidence: 1,
+        offensive_signs: false,
+      },
+      {
+        sector_id: 'sector_south',
+        corps_id: 'corps_alpha',
+        corps_name: 'Alpha Corps',
+        display_name: 'South Sector',
+        faction: 'RBiH',
+        opposing_factions: ['RS'],
+        edge_ids: ['edge_2'],
+        territory_osids: ['sarajevo_2'],
+        sub_segment_count: 1,
+        length_edges: 1,
+        assigned_brigade_ids: [],
         reserve_brigade_ids: [],
         density: 1,
         threat_ratio: 1,
@@ -136,7 +156,7 @@ describe('direct tactical map click routing', () => {
     expect(resolveMapFormationInspectionTarget('brigade_alpha', null, loadedState())).toEqual({
       kind: 'field-formation-in-sector',
       formationId: 'brigade_alpha',
-      sectorId: 'sector_alpha',
+      sectorId: 'sector_south',
     });
   });
 

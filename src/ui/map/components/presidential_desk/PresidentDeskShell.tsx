@@ -21,7 +21,7 @@ export interface PresidentDeskShellProps {
   onOpenMap: () => void;
   onOpenRecords: () => void;
   onOpenDecisionRecords?: (recordId?: string) => void;
-  onOpenChronicle?: () => void;
+  onOpenChronicle?: (recordId?: string) => void;
   onClose?: () => void;
   /** Open the presidential command-surface card strip directly (accessibility). */
   onOpenCommandSurface?: () => void;

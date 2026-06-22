@@ -207,6 +207,86 @@ describe('Tactical map render smoke', () => {
     }
   });
 
+  it('buildFormationsGeoJSON derives operation membership from active operation participants, not posture', () => {
+    const state = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: {
+        'op:sarajevo': 'RBiH',
+        'op:pale': 'RS',
+      },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'defending_participant',
+          faction: 'RBiH',
+          name: 'Defending Participant',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          posture: 'defend',
+        },
+        {
+          id: 'attacking_nonparticipant',
+          faction: 'RBiH',
+          name: 'Attacking Nonparticipant',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:pale',
+          posture: 'attack',
+        },
+      ],
+      activeOperations: [
+        {
+          corps_id: 'corps_alpha',
+          operation_name: 'op_alpha',
+          operation_display_name: 'Operation Alpha',
+          faction: 'RBiH',
+          type: 'sector_attack',
+          phase: 'execution',
+          started_turn: 1,
+          participating_brigades: ['defending_participant'],
+          objectives_count: 1,
+          objectives_captured: 0,
+          attacks: 0,
+          weekly_log_length: 0,
+        },
+      ],
+    } as unknown as LoadedGameState;
+
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const byId = new Map(buildFormationsGeoJSON(state, controlledGeo).features.map((feature) => [feature.properties.id, feature.properties.is_in_operation]));
+
+    expect(byId.get('defending_participant')).toBe(true);
+    expect(byId.get('attacking_nonparticipant')).toBe(false);
+  });
+
   it('generateThreatAssessment keeps player-facing language on friendly fronts', () => {
     const state = {
       formations: [

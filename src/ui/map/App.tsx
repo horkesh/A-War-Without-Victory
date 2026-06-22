@@ -93,7 +93,7 @@ import type { InboxItem } from './data/inboxItems';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
-import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
+import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
@@ -1193,6 +1193,11 @@ function App() {
       setSummaryOpen(false);
       return;
     }
+    if (item.navigationTarget.kind === 'inbox') {
+      openInboxHome();
+      setSummaryOpen(false);
+      return;
+    }
     openPresidentialDecisionRoomNavigationTarget(item.navigationTarget, useGameStore.getState());
     leaveWarroomForGame();
     setSummaryOpen(false);
@@ -1212,6 +1217,11 @@ function App() {
     if (target.kind === 'enclave-dashboard') {
       setEnclaveDashboardOpen(true);
       leaveWarroomForGame();
+      setSummaryOpen(false);
+      return;
+    }
+    if (target.kind === 'inbox') {
+      openInboxHome();
       setSummaryOpen(false);
       return;
     }
@@ -1495,13 +1505,9 @@ function App() {
   const openInboxHome = () => {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
-    setAppScreen('game');
     setSummaryOpen(false);
     setIsDecisionHistoryOpen(false);
-    gs.setCodexOpen(false);
-    gs.setChronicleOpen(false);
-    gs.setArmyHQOpen(false);
-    gs.setIsOperationsPanelOpen(false);
+    openWarroomDeskFromField();
     gs.setSelectedOsid(null);
     gs.setSelectedFormationId(null);
     gs.setSelectedCorpsId(null);
@@ -2010,8 +2016,12 @@ function App() {
                 openArmyHQDecisionConsequenceRecord(useGameStore.getState(), recordId);
                 leaveWarroomForGame();
               }}
-              onOpenChronicle={() => {
-                openChronicle(useGameStore.getState());
+              onOpenChronicle={(recordId) => {
+                if (recordId) {
+                  openChronicleDecisionRecord(useGameStore.getState(), recordId);
+                } else {
+                  openChronicle(useGameStore.getState());
+                }
                 leaveWarroomForGame();
               }}
               onClose={() => {

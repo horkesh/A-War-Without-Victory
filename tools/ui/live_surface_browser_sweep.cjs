@@ -290,6 +290,10 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function quoteCssAttributeValue(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
 function commandLineIncludesWorktreeRoot(commandLine) {
   const normalizedCommandLine = commandLine.toLowerCase().replace(/\//g, '\\');
   const normalizedRoot = ROOT.toLowerCase().replace(/\//g, '\\');
@@ -1437,6 +1441,12 @@ async function runArchiveInboxDrilldown(page, summary) {
   await activateVisibleControl(page, '[data-testid="records-subtab-decisions"]');
   await waitForVisibleSelector(page, '[data-testid="decision-consequence-records-panel"]');
   if (await visibleSelectorCount(page, '[data-testid="decision-consequence-record"][data-record-target="chronicle"]') > 0) {
+    const chronicleDecisionRecordId = await getVisibleSelectorAttribute(
+      page,
+      '[data-testid="decision-consequence-record"][data-record-target="chronicle"]',
+      'data-record-id',
+      'Decision consequence Chronicle record id',
+    );
     await clickFirstVisibleWithinSelector(
       page,
       '[data-testid="decision-consequence-record"][data-record-target="chronicle"]',
@@ -1444,9 +1454,14 @@ async function runArchiveInboxDrilldown(page, summary) {
       'Decision consequence Chronicle route',
     );
     await waitForVisibleSelector(page, '[data-testid="chronicle-overlay"]');
+    await waitForVisibleSelector(
+      page,
+      `[data-focused-chronicle-decision-record-id="${quoteCssAttributeValue(chronicleDecisionRecordId)}"]`,
+    );
     await assertSingleShellSurface(page, 'Chronicle');
     await captureEvidence(page, summary, 'archive_records_decision_to_chronicle');
     summary.evidence.archiveRecordsDecisionToChronicleDrilldown = true;
+    summary.evidence.archiveRecordsDecisionToChronicleRecordId = chronicleDecisionRecordId;
   } else {
     await captureEvidence(page, summary, 'archive_records_decision_missing_chronicle_target');
     throw new Error('Records decision archive did not expose a Chronicle route target');

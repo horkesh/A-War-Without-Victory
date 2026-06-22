@@ -19,7 +19,7 @@ import {
   queryPreferredFrontFeatureNearPoint,
 } from './useMapInteractions';
 import { useGameStore } from '../store/gameStore';
-import { collectSectorFriendlyOsids, buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
+import { collectSectorFriendlyOsids, buildOsidToSectorMap, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { buildCorpsColorMap } from './builders/buildCorpsFrontLinesGeoJSON';
 import { buildOsidDisplayNameMap, getOsidDisplayName } from '../utils/osidDisplayName';
 import { loadOperationalPoliticalControl, loadOperationalSettlements, loadOsidAdjacency, loadSidToOsidMapping, loadTerrainScalars, loadCensusSettlements } from '../data/DataLoader';
@@ -1089,8 +1089,9 @@ export function MapContainer() {
         },
         onFormationHover: (id, point) => {
           if (id) {
+            const formation = loadedGameState?.formations.find((candidate) => candidate.id === id);
             setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-            setHoveredSectorId(getSectorIdForFormation(id, loadedGameState?.corpsFrontSectors));
+            setHoveredSectorId(resolveCurrentSectorForFormation(formation, loadedGameState?.corpsFrontSectors)?.sector_id ?? null);
           } else {
             clearTooltipTarget();
             setHoveredSectorId(null);

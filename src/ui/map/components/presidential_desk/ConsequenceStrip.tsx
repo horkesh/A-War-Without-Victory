@@ -9,7 +9,7 @@ export interface ConsequenceStripProps {
   state: LoadedGameState | null;
   onOpenRecords: () => void;
   onOpenDecisionRecords?: (recordId?: string) => void;
-  onOpenChronicle: () => void;
+  onOpenChronicle: (recordId?: string) => void;
 }
 
 const FAMILY_LABEL_KEYS: Record<DecisionConsequenceRecord['familyId'], MessageKey> = {
@@ -35,6 +35,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
   const displacement = latestSummary?.displacement_total ?? 0;
   const notableEvents = latestSummary?.notable_events?.length ?? 0;
   const decisionRecords = buildDecisionConsequenceLedger(state, 2);
+  const decisionRecordCount = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).length;
 
   return (
     <section
@@ -73,7 +74,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
           <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.decisions')}</div>
-          <div className="mt-1 text-[16px] font-bold text-text-primary">{decisionRecords.length}</div>
+          <div className="mt-1 text-[16px] font-bold text-text-primary">{decisionRecordCount}</div>
         </div>
       </div>
       {decisionRecords.length > 0 && (
@@ -90,7 +91,7 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
               data-record-id={record.id}
               data-record-target={record.recordTarget}
               data-family-id={record.familyId}
-              onClick={record.recordTarget === 'chronicle' ? onOpenChronicle : () => {
+              onClick={record.recordTarget === 'chronicle' ? () => onOpenChronicle(record.id) : () => {
                 if (onOpenDecisionRecords) {
                   onOpenDecisionRecords(record.id);
                 } else {

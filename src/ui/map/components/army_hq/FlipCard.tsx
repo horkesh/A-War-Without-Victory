@@ -22,14 +22,14 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
                 }}
             >
                 <div
-                    className={isFlipped ? 'absolute inset-0 pointer-events-none' : 'relative'}
+                    className={isFlipped ? 'hidden' : 'relative'}
                     style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
                     aria-hidden={isFlipped}
                 >
                     {front}
                 </div>
                 <div
-                    className={`${isFlipped ? 'relative overflow-y-auto' : 'absolute inset-0 overflow-hidden pointer-events-none'}`}
+                    className={isFlipped ? 'relative overflow-y-auto' : 'hidden'}
                     style={{
                         backfaceVisibility: 'hidden',
                         WebkitBackfaceVisibility: 'hidden',

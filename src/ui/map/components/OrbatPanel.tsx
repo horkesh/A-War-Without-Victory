@@ -9,6 +9,7 @@ import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import type { CorpsFrontSectorView } from '../data/types';
 import { t } from '../i18n';
 import { inspectOnField } from '../utils/shellNavigation';
+import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 
 
 export function OrbatPanel() {
@@ -54,14 +55,12 @@ export function OrbatPanel() {
 
     const sectorIdByBrigadeId = useMemo(() => {
         const map = new Map<string, string>();
-        for (const sector of corpsSectors) {
-            for (const brigadeId of sector.assigned_brigade_ids) map.set(brigadeId, sector.sector_id);
-            for (const brigadeId of sector.reserve_brigade_ids) {
-                if (!map.has(brigadeId)) map.set(brigadeId, sector.sector_id);
-            }
+        for (const brigade of brigades) {
+            const sector = resolveCurrentSectorForFormation(brigade, corpsSectors);
+            if (sector) map.set(brigade.id, sector.sector_id);
         }
         return map;
-    }, [corpsSectors]);
+    }, [brigades, corpsSectors]);
 
     useEffect(() => {
         if (!selectedOrbatCorpsId) return;

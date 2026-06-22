@@ -20,6 +20,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
+import { buildSectorFormationAssignment } from '../../utils/sectorUtils';
 
 interface SectorsSectionProps {
     corpsId: string;
@@ -64,11 +65,23 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
     critical: 'text-red-500',
 };
 
-function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector: CorpsFrontSectorView; sectorBattles: TurnBattle[]; formationMap: Map<string, FormationView> }) {
+function SectorExpandedDetail({
+    sector,
+    sectors,
+    sectorBattles,
+    formationMap,
+}: {
+    sector: CorpsFrontSectorView;
+    sectors: CorpsFrontSectorView[];
+    sectorBattles: TurnBattle[];
+    formationMap: Map<string, FormationView>;
+}) {
     const [locale] = useLocale();
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-    const frontIds = sector.assigned_brigade_ids;
-    const reserveIds = sector.reserve_brigade_ids;
+    const sectorAssignment = buildSectorFormationAssignment(sector, [...formationMap.values()], sectors);
+    const frontIds = sectorAssignment.frontlineIds;
+    const reserveIds = sectorAssignment.reserveIds;
+    const overrideIds = sectorAssignment.overrideIds;
 
     const threatRatio = sector.threat_ratio;
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
@@ -175,6 +188,42 @@ function SectorExpandedDetail({ sector, sectorBattles, formationMap }: { sector:
                                             @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </span>
                                     )}
+                                    <button
+                                        type="button"
+                                        data-testid="army-hq-sector-brigade-inspect"
+                                        data-formation-id={b.id}
+                                        data-sector-id={sector.sector_id}
+                                        aria-label={t('sectorsSection.inspectFormationOnField', { formation: getLocalizedFormationName(b, locale) })}
+                                        onClick={() => inspectOnField(useGameStore.getState(), {
+                                            kind: 'field-formation-in-sector',
+                                            formationId: b.id,
+                                            sectorId: sector.sector_id,
+                                        })}
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                    >
+                                        {t('sectorsSection.inspect')}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {overrideIds.length > 0 && (
+                <div>
+                    <div className="text-[10px] font-bold uppercase text-accent-gold tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.commandDirected', { count: overrideIds.length })}</div>
+                    <div className="space-y-1.5">
+                        {overrideIds.map((id) => {
+                            const b = formationMap.get(id);
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            return (
+                                <div key={id} className="flex items-center gap-3 text-text-secondary">
+                                    <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
+                                    <span className="tabular-nums w-12 text-right shrink-0">
+                                        {formatPersonnel(b.personnel ?? 0)}
+                                    </span>
+                                    <span className="text-[9px] uppercase tracking-wide text-accent-gold shrink-0">{t('sectorsSection.overrideBadge')}</span>
                                     <button
                                         type="button"
                                         data-testid="army-hq-sector-brigade-inspect"
@@ -306,6 +355,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const hasBattle = battleCount > 0;
                         const isExpanded = effectiveExpandedId === sector.sector_id;
                         const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
+                        const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
 
                         return (
                             <div
@@ -336,11 +386,12 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                         </div>
                                         <div className="text-[10px] text-text-secondary tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
                                             {t('sectorsSection.summaryLine', {
-                                                front: sector.assigned_brigade_ids.length,
-                                                reserveSegment: sector.reserve_brigade_ids.length > 0 ? t('sectorsSection.reserveSegment', { count: sector.reserve_brigade_ids.length }) : '',
+                                                front: sectorAssignment.frontlineIds.length,
+                                                reserveSegment: sectorAssignment.reserveIds.length > 0 ? t('sectorsSection.reserveSegment', { count: sectorAssignment.reserveIds.length }) : '',
                                                 segments: sector.length_edges,
                                                 density: sector.density.toFixed(2),
                                             })}
+                                            {sectorAssignment.overrideIds.length > 0 && ` // ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
                                         </div>
                                     </button>
                                     <button
@@ -361,6 +412,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                 </div>
                                 {isExpanded && <SectorExpandedDetail
                                     sector={sector}
+                                    sectors={sectors}
                                     sectorBattles={factionBattles.filter((b) => sectorOsids.has(b.osid))}
                                     formationMap={formationMap}
                                 />}

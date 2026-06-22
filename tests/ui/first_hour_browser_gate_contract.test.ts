@@ -183,6 +183,8 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("chronicleRecordTarget === 'decision'");
     expect(tool).toContain('records-content');
     expect(tool).toContain('decision-consequence-open-chronicle');
+    expect(tool).toContain('data-focused-chronicle-decision-record-id');
+    expect(tool).toContain('archiveRecordsDecisionToChronicleRecordId');
     expect(tool).not.toContain('skipped:no-chronicle-target');
     expect(tool).toContain('presidential-inbox');
     expect(tool).toContain('president-desk-shell');

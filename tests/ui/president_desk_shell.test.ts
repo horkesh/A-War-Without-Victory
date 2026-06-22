@@ -236,8 +236,47 @@ describe('PresidentDeskShell', () => {
     fireEvent.click(screen.getByText('Cabinet crisis response'));
     fireEvent.click(screen.getByText('Patron defiance supply cut'));
 
-    expect(onOpenChronicle).toHaveBeenCalledOnce();
+    expect(onOpenChronicle).toHaveBeenCalledWith('event:cabinet-crisis');
     expect(onOpenDecisionRecords).toHaveBeenCalledWith('patron-defiance:RS:9:0.25:0.5');
     expect(onOpenRecords).not.toHaveBeenCalled();
+  });
+
+  it('counts all filed decision consequences while rendering only the latest rows', () => {
+    renderDesk({
+      state: makeState({
+        firedEvents: [
+          {
+            id: 'oldest',
+            turn: 6,
+            title: 'Oldest decision',
+            narrative: 'Recorded.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Recorded.' }],
+            isDecision: true,
+          },
+          {
+            id: 'middle',
+            turn: 7,
+            title: 'Middle decision',
+            narrative: 'Recorded.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Recorded.' }],
+            isDecision: true,
+          },
+          {
+            id: 'newest',
+            turn: 8,
+            title: 'Newest decision',
+            narrative: 'Recorded.',
+            category: 'political',
+            effects: [{ kind: 'authority', description: 'Recorded.' }],
+            isDecision: true,
+          },
+        ],
+      }),
+    });
+
+    expect(screen.getByText('Decisions').parentElement?.textContent).toContain('3');
+    expect(screen.getAllByTestId('desk-consequence-row')).toHaveLength(2);
   });
 });

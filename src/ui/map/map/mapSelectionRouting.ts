@@ -1,6 +1,6 @@
 import type { LoadedGameState } from '../data/types';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
-import { buildOsidToSectorMap, getSectorIdForFormation } from '../utils/sectorUtils';
+import { buildOsidToSectorMap, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 
 type MapSelectionProperties = Record<string, unknown> | null | undefined;
 
@@ -55,7 +55,8 @@ export function resolveMapFormationInspectionTarget(
   const formation = state?.formations.find((candidate) => candidate.id === formationId);
   const sectorId =
     stringProperty(properties, 'sector_id')
-    ?? getSectorIdForFormation(formationId, state?.corpsFrontSectors);
+    ?? resolveCurrentSectorForFormation(formation, state?.corpsFrontSectors)?.sector_id
+    ?? null;
 
   if (sectorId) {
     return { kind: 'field-formation-in-sector', formationId, sectorId };

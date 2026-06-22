@@ -268,6 +268,14 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Assigned command');
   });
 
+  it('labels brigade lifecycle state separately from force readiness', () => {
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Lifecycle:');
+    expect(copy).not.toContain('Readiness:Ready');
+  });
+
   it('uses player-facing effectiveness modifier labels', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_hq_guard_brigade' });
 

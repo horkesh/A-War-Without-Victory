@@ -180,7 +180,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toContain('}, [appScreen, activeEventDecisionId, isDecisionHistoryOpen]);');
     });
 
-    it('returns aftermath inbox handoffs to the visible game-shell inbox', () => {
+    it('returns presidential inbox handoffs to the Desk owner instead of the map inbox rail', () => {
         const app = read('src/ui/map/App.tsx');
         const inboxStart = app.indexOf('const openInboxHome = () => {');
         const inboxEnd = app.indexOf('\n  useEffect(() => {', inboxStart);
@@ -189,11 +189,8 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(inboxEnd).toBeGreaterThan(inboxStart);
 
         const inboxRoute = app.slice(inboxStart, inboxEnd);
-        expect(inboxRoute).toContain("setAppScreen('game');");
-        expect(inboxRoute).toContain('gs.setCodexOpen(false);');
-        expect(inboxRoute).toContain('gs.setChronicleOpen(false);');
-        expect(inboxRoute).toContain('gs.setArmyHQOpen(false);');
-        expect(inboxRoute).toContain('gs.setIsOperationsPanelOpen(false);');
+        expect(inboxRoute).toContain('openWarroomDeskFromField();');
+        expect(inboxRoute).not.toContain("setAppScreen('game');");
         expect(inboxRoute).toContain('gs.setFocusedAftermathTurn(null);');
         expect(inboxRoute).toContain('gs.setFocusedOperationHistoryId(null);');
         expect(inboxRoute).toContain('gs.setFocusedDecisionConsequenceId(null);');

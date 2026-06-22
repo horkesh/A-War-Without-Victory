@@ -3,7 +3,7 @@ import type { LoadedGameState } from '../../data/types';
 import { buildOsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
-import { getSectorIdForFormation } from '../../utils/sectorUtils';
+import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
 import { filterPlayerVisibleMapFormations } from '../../../shared/playerVisibility';
 import type { Locale } from '../../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
@@ -85,6 +85,13 @@ export function buildFormationsGeoJSON(
   const physicalUnits = visibleFormations.filter(f =>
     f.kind !== 'corps' && f.kind !== 'corps_asset' && f.kind !== 'army_hq'
   );
+  const activeOperationFormationIds = new Set<string>();
+  for (const operation of state.activeOperations ?? []) {
+    if (operation.phase === 'recovery') continue;
+    for (const id of operation.participating_brigades ?? []) {
+      activeOperationFormationIds.add(id);
+    }
+  }
 
   // Count units per OSID for radial spacing
   const countsPerOsid = new Map<string, number>();
@@ -156,12 +163,12 @@ export function buildFormationsGeoJSON(
         personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
         posture: formation.posture ?? null,
-        sector_id: getSectorIdForFormation(formation.id, state.corpsFrontSectors),
+        sector_id: resolveCurrentSectorForFormation(formation, state.corpsFrontSectors)?.sector_id ?? null,
         assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
         is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
         home_distance_mult: typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
         supply_state: deriveSupplyState({ status: formation.status, fatigue: formation.fatigue ?? 0, cohesion: formation.cohesion ?? 50 }),
-        is_in_operation: !!(formation.posture === 'attack' || formation.posture === 'assault'),
+        is_in_operation: activeOperationFormationIds.has(formation.id),
         is_disrupted: (formation.disrupted_turns ?? 0) > 0,
         movement_stance: formation.movementStance ?? null,
         is_stack_top: stackIndex === 0,
