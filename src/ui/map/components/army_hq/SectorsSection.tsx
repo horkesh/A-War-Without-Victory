@@ -20,7 +20,7 @@ import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
-import { buildSectorFormationAssignment } from '../../utils/sectorUtils';
+import { buildSectorFormationAssignment, getSectorCoverageTier } from '../../utils/sectorUtils';
 
 interface SectorsSectionProps {
     corpsId: string;
@@ -359,12 +359,18 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const isExpanded = effectiveExpandedId === sector.sector_id;
                         const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
                         const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
+                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
 
                         return (
                             <div
                                 key={sector.sector_id}
                                 data-testid="army-hq-sector-row"
                                 data-sector-id={sector.sector_id}
+                                data-coverage-tier={coverageTier}
+                                data-current-brigade-count={sectorAssignment.allCurrentIds.length}
+                                data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
+                                data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                                data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                                 className="border border-panel-border/50 bg-panel-card rounded-md"
                             >
                                 <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'}`}>

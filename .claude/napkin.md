@@ -1518,6 +1518,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
+1. **[2026-06-23] Same-faction sector edge ownership is singular**
+   Do instead: Pin startup contracts so no `{faction}::{edge}` is owned by multiple sectors; canonicalize duplicates in `buildCorpsFrontSectors(...)` after side-coverage recovery with deterministic brigade-count, regional-affinity, spatial-distance, edge-count, and sector-id tie-breaks.
 1. **[2026-06-05] Reuse sector construction indexes and reachable OSID sets**
    Do instead: Build per-corps sector formation scan packets and source-side reachable OSID sets inside the current `buildFactionSectors(...)` call, pass them read-only, and keep direct-call fallback scans. Do not share mutable sector packets or caches across turns/passes.
 1. **[2026-06-05] Reuse sector active-combat scans at pass boundary**
@@ -1540,8 +1542,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: `assignCrossCorpsEnclaveDefenders(...)` may rescue a brigade into another same-faction corps sector only when the brigade's current location is already on that sector's frontline or inside its territory. Same-component fallback alone is false sector truth.
 9. **[2026-03-08] Phase I/II terminology fully removed — Peace/War only**
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
-10. **[2026-03-05] Takeover displacement off-by-one FIXED**
-    Do instead: `processDisplacementTakeover` uses `currentTurn === warStartTurn + 1`. `runTurn()` increments turn BEFORE phases.
 
 ## Player Shell Discipline
 1. **[2026-06-22] Missing command-surface data is unreported, not favorable**

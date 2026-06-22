@@ -180,3 +180,25 @@
 **Acceptance:** Formation, corps, ORBAT, Corps Front, and Decision Room surfaces no longer convert missing data into favorable/default command truth, and display ordering/labels match the player-visible locale.
 
 **Evidence:** Focused proof passed 60/60 after the editable CorpsCard missing-stance branch was pinned, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 271/271, `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified, and `git diff --check` passed.
+
+### Task 9: Army HQ Sector Truth Hardening
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_ARMY_HQ_SECTOR_TRUTH_HARDENING.md`.
+
+**Files:**
+- Modified: `src/sim/combat/corps_front_sectors.ts`
+- Modified: `data/derived/startup/apr_1992_initial_save.json`
+- Modified: `src/ui/map/components/army_hq/SectorsSection.tsx`
+- Test: `tests/startup_snapshot_contract.test.ts`
+- Test: `tests/ui/army_hq_sector_truth.test.ts`
+
+**Steps:**
+1. Verify the scout finding that Army HQ sector rows lacked the same current-assignment proof hooks as OOB/Corps Detail.
+2. Add Army HQ row attributes for current, frontline, reserve, command-directed, and coverage-tier assignment truth.
+3. Audit the baked startup snapshot for duplicate same-faction sector edge ownership.
+4. Add startup contracts for duplicate-free same-faction edge ownership and HVO Bosnian Posavina command ownership.
+5. Canonicalize duplicate same-faction edge ownership in the sector builder, regenerate the startup artifact, and verify builder freshness.
+
+**Acceptance:** Army HQ sector rows can be live-proven against current assignment truth, and the April 1992 baked startup sector set contains no same-faction duplicate edge claims; the Bosnian Posavina HVO frontage belongs to `hvo_northwest_bosnia` rather than Central Bosnia.
+
+**Evidence:** Startup sanity reported `{ sectors: 160, duplicates: 0, central: null, northwest: 17 }`. Focused engine/startup/UI proof passed 20/20, `npm.cmd run desktop:startup-snapshot:check` passed, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 271/271, `npm.cmd run qa:first-hour:browser` passed with cleanup verified, `npm.cmd run qa:live-surface:browser` passed with `armyHqSectorAssignmentTruthLiveProof: { rows: 19, zeroCurrentRows: 6, badZeroRows: [] }`, `npm.cmd run ci:structural-fingerprint:check` passed with expected fingerprint `f282883abbab76cf`, `npm.cmd run test:baselines` reported all scenarios match, and `git diff --check` passed.

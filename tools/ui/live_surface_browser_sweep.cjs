@@ -1283,6 +1283,37 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   await waitForVisibleSelector(page, '#army-hq-tabpanel-briefing');
   await selectArmyHqCorpsWithSectorBrigadeInspect(page, summary);
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id]');
+  await waitForVisibleSelector(page, '[data-testid="army-hq-sector-row"][data-sector-id][data-coverage-tier][data-current-brigade-count][data-frontline-brigade-count][data-reserve-brigade-count][data-command-directed-brigade-count]');
+  const armyHqSectorTruth = await page.evaluate(() => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const rows = Array.from(document.querySelectorAll('[data-testid="army-hq-sector-row"][data-sector-id]'))
+      .filter(isVisible);
+    const zeroCurrentRows = rows.filter((row) => row.getAttribute('data-current-brigade-count') === '0');
+    const badZeroRows = zeroCurrentRows
+      .filter((row) => row.getAttribute('data-coverage-tier') !== 'uncovered')
+      .map((row) => ({
+        sectorId: row.getAttribute('data-sector-id'),
+        coverageTier: row.getAttribute('data-coverage-tier'),
+        current: row.getAttribute('data-current-brigade-count'),
+      }));
+    return {
+      rows: rows.length,
+      zeroCurrentRows: zeroCurrentRows.length,
+      badZeroRows,
+    };
+  });
+  if (armyHqSectorTruth.badZeroRows.length > 0) {
+    throw new Error(`Army HQ zero-current sector rows must render as uncovered: ${JSON.stringify(armyHqSectorTruth.badZeroRows)}`);
+  }
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-frontage"][data-front-segments]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-inspect"][data-sector-id]');
   await waitForVisibleSelector(page, '[data-testid="army-hq-sector-brigade-inspect"][data-formation-id][data-sector-id]');
@@ -1311,6 +1342,7 @@ async function runArmyHqSectorFrontSegmentLiveProof(page, summary) {
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Army HQ Sector Front Segment Live Proof', text);
   summary.evidence.armyHqSectorFrontSegmentLiveProof = true;
+  summary.evidence.armyHqSectorAssignmentTruthLiveProof = armyHqSectorTruth;
   summary.evidence.armyHqSectorBrigadeInspectOnFieldLiveProof = true;
   summary.evidence.armyHqSectorInspectOnFieldLiveProof = true;
 }

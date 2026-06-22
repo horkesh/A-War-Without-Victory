@@ -188,6 +188,44 @@ test('baked April 1992 startup active formations resolve their command parents',
     assert.strictEqual(state.military.formations.vrs_main_staff?.kind, 'army_hq');
 }, 120_000);
 
+test('baked April 1992 startup sectors do not duplicate same-faction edge ownership', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const ownerByFactionEdge = new Map<string, string>();
+    const duplicates: string[] = [];
+
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        for (const edgeId of sector.edge_ids ?? []) {
+            const key = `${sector.faction}::${edgeId}`;
+            const existing = ownerByFactionEdge.get(key);
+            if (existing && existing !== sector.sector_id) {
+                duplicates.push(`${key} => ${existing} / ${sector.sector_id}`);
+            } else {
+                ownerByFactionEdge.set(key, sector.sector_id);
+            }
+        }
+    }
+
+    assert.deepStrictEqual(duplicates.sort(), []);
+}, 120_000);
+
+test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central Bosnia', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const samplePosavinaEdge = 'op:bosanski_brod:brod__op:bosanski_brod:donja_vrela';
+    const owners = Object.values(state.military.corps_front_sectors ?? {})
+        .filter((sector) => sector.faction === 'HRHB' && (sector.edge_ids ?? []).includes(samplePosavinaEdge))
+        .map((sector) => ({
+            sector_id: sector.sector_id,
+            corps_id: sector.corps_id,
+        }));
+
+    assert.deepStrictEqual(owners, [
+        {
+            sector_id: 'sector:hvo_northwest_bosnia:0',
+            corps_id: 'hvo_northwest_bosnia',
+        },
+    ]);
+}, 120_000);
+
 test('baked April 1992 startup keeps turn-zero brigade exceptions explicit', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
     const brigades = Object.values(state.military.formations)
