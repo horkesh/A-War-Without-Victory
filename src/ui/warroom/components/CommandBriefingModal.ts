@@ -1,5 +1,7 @@
 import type { GameState } from '../../../state/game_state.js';
 import { toCommandBriefingView } from '../../shared/command_briefing_views.js';
+import { resolveCommandBriefingHeadline, resolveCommandBriefingItemCopy } from '../../map/data/commandBriefingCopy.js';
+import { t } from '../../map/i18n/index.js';
 import { getPlayerFaction, turnToDateString } from './warroom_utils.js';
 import { getWarroomFactionIdentity } from './warroom_identity.js';
 
@@ -39,21 +41,21 @@ export class CommandBriefingModal {
         if (!isWar) {
             container.innerHTML = `
                 <div style="font-family: 'Courier New', Courier, monospace; color: #111;">
-                    <h2 style="border-bottom: 2px solid #111; padding-bottom: 10px;">COMMAND BRIEFING: PRE-WAR SITUATION</h2>
-                    <p style="font-weight: bold; margin-bottom: 20px;">CLASSIFICATION: SECRET</p>
+                    <h2 style="border-bottom: 2px solid #111; padding-bottom: 10px;">${escapeHtml(t('commandBriefing.modal.preWarTitle'))}</h2>
+                    <p style="font-weight: bold; margin-bottom: 20px;">${escapeHtml(t('commandBriefing.modal.classificationSecret'))}</p>
 
                     <div style="margin-bottom: 20px;">
-                        <h3 style="background: #333; color: #fff; padding: 5px;">> URGENT MATTERS</h3>
+                        <h3 style="background: #333; color: #fff; padding: 5px;">${escapeHtml(t('commandBriefing.modal.urgentMatters'))}</h3>
                         <ul>
-                            <li>Political tensions are rising. Maintain organizational penetration.</li>
-                            <li>Ensure key municipalities are secured before hostilities erupt.</li>
-                            <li>Monitor opponent paramilitaries assembling near the borders.</li>
+                            <li>${escapeHtml(t('commandBriefing.modal.preWarUrgent.0'))}</li>
+                            <li>${escapeHtml(t('commandBriefing.modal.preWarUrgent.1'))}</li>
+                            <li>${escapeHtml(t('commandBriefing.modal.preWarUrgent.2'))}</li>
                         </ul>
                     </div>
 
                     <div style="margin-bottom: 20px;">
-                        <h3 style="background: #333; color: #fff; padding: 5px;">> LOGISTICS & SUPPLY</h3>
-                        <p>Awaiting authorization for widespread mobilization. Supply caches remain sealed.</p>
+                        <h3 style="background: #333; color: #fff; padding: 5px;">${escapeHtml(t('commandBriefing.modal.logisticsSupply'))}</h3>
+                        <p>${escapeHtml(t('commandBriefing.modal.preWarSupply'))}</p>
                     </div>
                 </div>
             `;
@@ -68,35 +70,36 @@ export class CommandBriefingModal {
         const items = briefing?.items ?? [];
         const itemsHtml = items.length > 0
             ? items.map((item) => {
+                const copy = resolveCommandBriefingItemCopy(item);
                 const tone = item.severity === 'critical'
                     ? 'font-weight: bold;'
                     : item.severity === 'warning'
                         ? 'font-style: italic;'
                         : '';
-                const detail = item.detail ? ` <span>${escapeHtml(item.detail)}</span>` : '';
-                return `<li style="${tone}">${escapeHtml(item.title)}.${detail}</li>`;
+                const detail = copy.detail ? ` <span>${escapeHtml(copy.detail)}</span>` : '';
+                return `<li style="${tone}">${escapeHtml(copy.title)}.${detail}</li>`;
             }).join('')
-            : '<li>No command briefing packet is available yet. Advance the turn to generate the first staff summary.</li>';
+            : `<li>${escapeHtml(t('commandBriefing.modal.noPacket'))}</li>`;
 
         container.innerHTML = `
             <div style="font-family: 'Courier New', Courier, monospace; color: #111;">
-                <h2 style="border-bottom: 2px solid #111; padding-bottom: 10px;">COMMAND BRIEFING: ${escapeHtml(currentDate)}</h2>
-                <p style="font-weight: bold; margin-bottom: 20px;">CLASSIFICATION: TOP SECRET / EYES ONLY</p>
+                <h2 style="border-bottom: 2px solid #111; padding-bottom: 10px;">${escapeHtml(t('commandBriefing.modal.titleWithDate', { date: currentDate }))}</h2>
+                <p style="font-weight: bold; margin-bottom: 20px;">${escapeHtml(t('commandBriefing.modal.classificationTopSecret'))}</p>
 
                 <div style="margin-bottom: 20px;">
-                    <h3 style="background: #333; color: #fff; padding: 5px;">> COMMAND SUMMARY</h3>
-                    <p>${escapeHtml(briefing?.headline ?? 'No current command briefing is available.')}</p>
+                    <h3 style="background: #333; color: #fff; padding: 5px;">${escapeHtml(t('commandBriefing.modal.commandSummary'))}</h3>
+                    <p>${escapeHtml(briefing ? resolveCommandBriefingHeadline(briefing) : t('commandBriefing.headline.none'))}</p>
                 </div>
 
                 <div style="margin-bottom: 20px;">
-                    <h3 style="background: #333; color: #fff; padding: 5px;">> WHAT MATTERS NOW</h3>
+                    <h3 style="background: #333; color: #fff; padding: 5px;">${escapeHtml(t('commandBriefing.modal.whatMatters'))}</h3>
                     <ul style="line-height: 1.55; margin: 0; padding-left: 18px;">
                         ${itemsHtml}
                     </ul>
                 </div>
 
                 <div style="margin-top: 40px; border-top: 1px dashed #666; padding-top: 10px; font-size: 12px; text-align: right;">
-                    Generated by ${escapeHtml(identity.commandBriefLabel)}
+                    ${escapeHtml(t('commandBriefing.modal.generatedBy', { label: identity.commandBriefLabel }))}
                 </div>
             </div>
         `;

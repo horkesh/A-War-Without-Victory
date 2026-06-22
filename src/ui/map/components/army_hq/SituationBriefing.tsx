@@ -1,4 +1,5 @@
 import type { CommandBriefingItemView, CommandBriefingTargetView } from '../../data/types.js';
+import { resolveCommandBriefingItemCopy } from '../../data/commandBriefingCopy';
 import { t, type MessageKey } from '../../i18n';
 
 export type BriefingItem = CommandBriefingItemView;
@@ -77,6 +78,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
             ) : (
                 <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 px-4 py-3">
                     {items.map((item) => {
+                        const copy = resolveCommandBriefingItemCopy(item);
                         const dotColor =
                             item.severity === 'critical'
                                 ? 'bg-red-500'
@@ -91,7 +93,7 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                     : 'border-panel-border hover:border-panel-border';
                         const target = enrichTargetWithItemContext(item);
                         const hasTarget = target.type !== 'none';
-                        const targetLabel = item.actionChipLabel ?? target.label ?? fallbackTargetLabel(target.type);
+                        const targetLabel = copy.actionChipLabel ?? target.label ?? fallbackTargetLabel(target.type);
 
                         return (
                             <button
@@ -105,11 +107,11 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
                                     <div className="min-w-0 flex-1">
                                         <div className="text-[11px] text-text-primary leading-snug font-semibold">
-                                            {item.title}
+                                            {copy.title}
                                         </div>
-                                        {item.detail && (
+                                        {copy.detail && (
                                             <div className="text-[10px] text-text-secondary leading-snug mt-0.5">
-                                                {item.detail}
+                                                {copy.detail}
                                             </div>
                                         )}
                                     </div>

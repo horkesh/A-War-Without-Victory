@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest Command Briefing fallback localization:** [implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md](implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md) - Saved command briefing fallback strings remain compatibility payloads, but the tactical banner, Army HQ Situation Briefing, Presidential Decision Room briefing cards, and legacy Warroom briefing modal now resolve known generated rows through EN/BCS display keys.
+
 **Latest Decision copy and drilldown polish:** [implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md](implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md) - Army HQ sector/operation brigade rows now expose field-inspection controls, Decision Room operation/sector actions have precise labels, Warroom priority docket hooks are inspectable, Records labels the AAR tab as latest-turn scope, and generated receipt/read-model copy localizes across decision consequences, pushback, blockers, event effects, overlays, and fired-event wrappers.
 
 **Latest Chronicle FEEL generated-copy localization:** [implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md](implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md) - Generated Chronicle/FEEL scaffolding now renders through EN/BCS keys for combat, cost, displacement, formations, AARs, officer spotlights, endgame comparison chrome, consequence receipts, war-weariness, refugee-flow, Sarajevo-siege, generals' digest, and patron-defiance receipts while authored content remains data-owned.
@@ -948,5 +950,13 @@ Chronicle Wrapped canonical slides, causality slide chrome, Chronicle chapter su
 Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_STRUCTURED_METADATA.md`
 
 Command briefing views now carry typed category/subject/copy-token metadata, Chief of Staff briefing consumes metadata instead of parsing English titles, low-cohesion warning items feed the CoS alert path, and Force Readiness recommendations use typed ids with legacy fallback compatibility.
+
+---
+
+# 2026-06-22 Command Briefing Fallback Localization
+
+Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md`
+
+Known generated command briefing rows now resolve at display time through EN/BCS keys across the tactical banner, Army HQ Situation Briefing, Presidential Decision Room cards, and legacy Warroom briefing modal while retaining saved English fallback text for compatibility.
 
 ---

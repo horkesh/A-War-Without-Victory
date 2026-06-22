@@ -377,6 +377,52 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.actionLabel).not.toBe('Review Plan');
   });
 
+  it('localizes command briefing collector fallback titles and details in BCS mode', () => {
+    setLocale('bcs');
+    const state = makeState({
+      commandBriefing: {
+        headline: '2 items of note.',
+        criticalCount: 0,
+        pendingCount: 2,
+        items: [
+          {
+            id: 'mil-disrupted',
+            kind: 'military',
+            category: 'military',
+            briefingCategory: 'disrupted_brigades',
+            severity: 'warning',
+            title: '4 brigades disrupted',
+            detail: '4 brigades are disrupted and combat-ineffective.',
+            target: { type: 'none' },
+          },
+          {
+            id: 'cmd-order-interpretations',
+            kind: 'command',
+            category: 'command',
+            briefingCategory: 'order_interpretations',
+            severity: 'warning',
+            title: '2 order interpretations pending',
+            detail: 'Army command has proposed an autonomous operation. Review before advancing.',
+            actionLabel: 'Review Interpretations',
+            target: { type: 'officer_events', officerFocus: 'interpretations', label: 'Officer interpretations' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const copy = view.cards.map((card) => `${card.title} ${card.explanation} ${card.actionLabel} ${card.evidence.join(' ')}`).join('\n');
+
+    expect(copy).toContain('4 brigade su dezorganizovane');
+    expect(copy).toContain('4 brigade su dezorganizovane i borbeno neefikasne.');
+    expect(copy).toContain('2 tumačenja naredbi na čekanju');
+    expect(copy).toContain('Komanda armije predložila je autonomnu operaciju. Pregledajte prije nastavka poteza.');
+    expect(copy).toContain('Pregledaj tumačenja');
+    expect(copy).not.toContain('4 brigades disrupted');
+    expect(copy).not.toContain('Army command has proposed an autonomous operation');
+    expect(copy).not.toContain('Review Interpretations');
+  });
+
   it('groups source handoffs by existing inspection surface without creating a new owner', () => {
     const state = makeState({
       presidentialReviewQueue: {

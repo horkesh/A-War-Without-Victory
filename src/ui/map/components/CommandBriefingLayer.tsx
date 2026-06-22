@@ -4,6 +4,7 @@ import type { ArmyHQTab } from '../../shared/shellHandoff';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../i18n';
 import { inspectOnField, openArmyHQBriefingForCorps, openArmyHQTab } from '../utils/shellNavigation';
+import { resolveCommandBriefingHeadline, resolveCommandBriefingItemCopy } from '../data/commandBriefingCopy';
 
 interface CommandBriefingLayerProps {
   onOpenSummary: (focus?: SummaryFocusSection) => void;
@@ -120,7 +121,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
             {commandBriefing.items.length}
           </span>
           <span className="text-[10px] font-mono font-semibold text-text-primary">
-            {commandBriefing.headline}
+            {resolveCommandBriefingHeadline(commandBriefing)}
           </span>
           <button
             type="button"
@@ -133,26 +134,29 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
         </div>
         {/* Item cards — taller, severity-colored */}
         <div className="flex flex-col gap-2.5 max-h-[38vh] overflow-y-auto pr-1">
-          {commandBriefing.items.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleOpenItem(item)}
-              className={`flex items-center gap-2.5 px-3.5 py-3 rounded-md border-l-[3px] ${SEVERITY_BORDER[item.severity]} ${SEVERITY_BG[item.severity]} hover:brightness-125 transition-all group min-h-[2.75rem]`}
-            >
-              <span className={`w-2 h-2 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]} ${item.severity === 'critical' ? 'animate-pulse' : ''}`} />
-              <div className="flex flex-col items-start gap-0.5">
-                <span className={`text-[12px] font-semibold leading-tight ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
-                  {item.title}
-                </span>
-                {item.actionLabel && (
-                  <span className="text-[9px] font-mono uppercase text-accent-gold/60 group-hover:text-accent-gold transition-colors">
-                    {item.actionLabel}
+          {commandBriefing.items.map((item) => {
+            const copy = resolveCommandBriefingItemCopy(item);
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleOpenItem(item)}
+                className={`flex items-center gap-2.5 px-3.5 py-3 rounded-md border-l-[3px] ${SEVERITY_BORDER[item.severity]} ${SEVERITY_BG[item.severity]} hover:brightness-125 transition-all group min-h-[2.75rem]`}
+              >
+                <span className={`w-2 h-2 rounded-full shrink-0 ${SEVERITY_DOT[item.severity]} ${item.severity === 'critical' ? 'animate-pulse' : ''}`} />
+                <div className="flex flex-col items-start gap-0.5">
+                  <span className={`text-[12px] font-semibold leading-tight ${SEVERITY_TEXT[item.severity]} group-hover:text-white transition-colors`}>
+                    {copy.title}
                   </span>
-                )}
-              </div>
-            </button>
-          ))}
+                  {copy.actionLabel && (
+                    <span className="text-[9px] font-mono uppercase text-accent-gold/60 group-hover:text-accent-gold transition-colors">
+                      {copy.actionLabel}
+                    </span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
       {/* CSS animation for critical pulse */}

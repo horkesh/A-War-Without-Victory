@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
@@ -11,9 +11,14 @@ import { FactionOverviewPanel } from '../src/ui/warroom/components/FactionOvervi
 import { fallbackWarHeadline } from '../src/ui/warroom/content/war_headline_templates.js';
 import { setLastTurnReport } from '../src/ui/warroom/data/warroom_state.js';
 import { turnToDateString } from '../src/ui/warroom/components/warroom_utils.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
 import type { GameState } from '../src/state/game_state.js';
 
 describe('warroom player visibility', () => {
+  afterEach(() => {
+    setLocale('en');
+  });
+
   it('extractWarData exposes contacted enemies as abstract front-contact summaries', () => {
     const state = {
       meta: { turn: 4, phase: 'war' },
@@ -331,11 +336,53 @@ describe('warroom player visibility', () => {
     const panel = new CommandBriefingModal(state).render();
     const text = panel.textContent ?? '';
 
-    expect(text).toContain('2 items for your review.');
+    expect(text).toContain('1 critical item requires attention.');
     expect(text).toContain('Commander requests acknowledgement');
     expect(text).toContain('Pending officer decision remains unresolved.');
     expect(text).toContain('Gorazde under prolonged siege');
     expect(text).not.toContain('No command briefing packet is available yet.');
+  });
+
+  it('warroom command briefing localizes known collector rows in BCS mode', () => {
+    setLocale('bcs');
+    const state = {
+      meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        last_briefing: {
+          turn: 9,
+          faction: 'RBiH',
+          headline: '1 critical item requires attention.',
+          criticalCount: 1,
+          warningCount: 0,
+          items: [{
+            id: 'dip-peace-plan',
+            section: 'diplomatic',
+            severity: 'critical',
+            title: 'Peace plan requires response',
+            detail: 'A peace plan has been proposed. Your response is required.',
+            actionLabel: 'Review Plan',
+            target: { kind: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+          }],
+        },
+      },
+      political: {},
+    } as unknown as GameState;
+
+    const panel = new CommandBriefingModal(state).render();
+    const text = panel.textContent ?? '';
+
+    expect(text).toContain('KOMANDNI BRIFING');
+    expect(text).toContain('1 kritična stavka zahtijeva pažnju.');
+    expect(text).toContain('Mirovni plan zahtijeva odgovor');
+    expect(text).toContain('Predložen je mirovni plan. Vaš odgovor je potreban.');
+    expect(text).not.toContain('COMMAND SUMMARY');
+    expect(text).not.toContain('Peace plan requires response');
+    expect(text).not.toContain('Review Plan');
   });
 
   it('warroom reports use generic player-safe authorship instead of fake specific headquarters', () => {

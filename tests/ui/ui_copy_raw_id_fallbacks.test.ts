@@ -7,10 +7,12 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { AutonomyPanel } from '../../src/ui/map/components/AutonomyPanel.js';
 import { ChiefOfStaffBriefing, generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
 import { CommandTopBar } from '../../src/ui/map/components/plan_ui/CommandTopBar.js';
+import { CommandBriefingLayer } from '../../src/ui/map/components/CommandBriefingLayer.js';
 import { WarroomShellLayer } from '../../src/ui/map/components/warroom/WarroomShellLayer.js';
 import { makeMockLoadedGameState } from '../../src/ui/map/__mocks__/loadedGameState.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import type { CommandBriefingItemView } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -38,6 +40,7 @@ describe('UI copy raw-id fallbacks', () => {
 
   afterEach(() => {
     cleanup();
+    setLocale('en');
     delete (window as unknown as { awwv?: unknown }).awwv;
     vi.unstubAllGlobals();
   });
@@ -138,6 +141,48 @@ describe('UI copy raw-id fallbacks', () => {
     const hotspot = await screen.findByRole('button', { name: 'Desk Radio Channel Internal' });
     expect(hotspot.getAttribute('title')).toBe('Desk Radio Channel Internal');
     expect(hotspot.getAttribute('title')).not.toBe('desk_radio_channel_internal');
+  });
+
+  it('CommandBriefingLayer localizes saved collector fallback copy in BCS mode', () => {
+    setLocale('bcs');
+    storeState = {
+      devMode: false,
+      loadedGameState: {
+        turn: 1,
+        commandBriefing: {
+          headline: '1 critical item requires attention.',
+          criticalCount: 1,
+          pendingCount: 1,
+          items: [{
+            id: 'dip-peace-plan',
+            kind: 'diplomatic',
+            category: 'diplomatic',
+            briefingCategory: 'peace_plan',
+            severity: 'critical',
+            title: 'Peace plan requires response',
+            detail: 'A peace plan has been proposed. Your response is required.',
+            actionLabel: 'Review Plan',
+            target: { type: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+          }],
+        },
+      },
+      setArmyHQExpandedCorpsId: vi.fn(),
+    };
+
+    const { container } = render(createElement(CommandBriefingLayer, {
+      onOpenSummary: vi.fn(),
+      onOpenEnclaves: vi.fn(),
+      onOpenPeacePlan: vi.fn(),
+    }));
+
+    const copy = container.textContent ?? '';
+    expect(copy).toContain('1 kritična stavka zahtijeva pažnju.');
+    expect(copy).toContain('Mirovni plan zahtijeva odgovor');
+    expect(copy).toContain('Pregledaj plan');
+    expect(copy).not.toContain('1 critical item requires attention');
+    expect(copy).not.toContain('Peace plan requires response');
+    expect(copy).not.toContain('A peace plan has been proposed');
+    expect(copy).not.toContain('Review Plan');
   });
 
   it('AutonomyPanel formats current and proposed proposal values without exposing slug payload values', async () => {

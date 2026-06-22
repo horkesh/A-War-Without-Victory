@@ -24,8 +24,10 @@ import {
     SituationBriefing,
     type BriefingItem,
 } from '../../src/ui/map/components/army_hq/SituationBriefing';
+import { setLocale } from '../../src/ui/map/i18n/index';
 
 afterEach(() => {
+    setLocale('en');
     cleanup();
 });
 
@@ -138,6 +140,46 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
 
         expect(container.textContent).toContain('Supply ledger');
         expect(container.textContent).not.toContain('-> CORPS');
+    });
+
+    it('localizes collector fallback copy in BCS mode', () => {
+        setLocale('bcs');
+        const items: BriefingItem[] = [
+            makeItem({
+                id: 'mil-active-ops',
+                severity: 'info',
+                kind: 'military',
+                category: 'military',
+                briefingCategory: 'active_operations',
+                title: '2 active operations',
+                detail: '2 corps-level operations in progress.',
+                target: { type: 'none' },
+            }),
+            makeItem({
+                id: 'log-supply',
+                severity: 'warning',
+                kind: 'military',
+                category: 'logistics',
+                briefingCategory: 'supply',
+                title: 'Supply lines under strain',
+                detail: '5 adequate, 2 strained, 0 critical; 0 cut corridors, 1 brittle corridor.',
+                actionLabel: 'Review Supply',
+                actionChipLabel: 'Supply ledger',
+                target: { type: 'summary', summaryFocus: 'support', label: 'Supply ledger' },
+            }),
+        ];
+
+        const { container } = render(createElement(SituationBriefing, { items, onNavigate: () => undefined }));
+        const copy = container.textContent ?? '';
+
+        expect(copy).toContain('2 aktivne operacije');
+        expect(copy).toContain('2 operacije na nivou korpusa su u toku.');
+        expect(copy).toContain('Linije snabdijevanja pod pritiskom');
+        expect(copy).toContain('5 dovoljno, 2 pod pritiskom, 0 kritično; 0 presječenih koridora, 1 krhak koridor.');
+        expect(copy).toContain('Pregledaj snabdijevanje');
+        expect(copy).not.toContain('2 active operations');
+        expect(copy).not.toContain('Supply lines under strain');
+        expect(copy).not.toContain('Supply ledger');
     });
 
     it('emits operation, sector, and settlement field targets when action chips are clicked', () => {

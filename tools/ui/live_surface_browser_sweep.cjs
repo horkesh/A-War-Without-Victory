@@ -47,6 +47,14 @@ const BCS_ENGLISH_LEAK_TOKENS = [
   { label: 'Officer morale EN relief', pattern: /\bOfficer morale\s+-?\d+\s+if relieved\b/i },
   { label: 'Enemy offensive fallback', pattern: /\bEnemy offensive threatens corps integrity\b/i },
   { label: 'Hold defensive fallback', pattern: /\bHold defensive positions and absorb the offensive;\s*request reinforcement from Army HQ\b/i },
+  { label: 'Command briefing EN no activity', pattern: /\bNo significant activity to report\b/i },
+  { label: 'Command briefing EN review headline', pattern: /\b\d+\s+items?\s+for your review\b/i },
+  { label: 'Command briefing EN critical headline', pattern: /\b\d+\s+critical\s+items?\s+requires?\s+attention\b/i },
+  { label: 'Command briefing EN supply fallback', pattern: /\bSupply lines critically exposed\b/i },
+  { label: 'Command briefing EN peace plan fallback', pattern: /\bPeace plan requires response\b/i },
+  { label: 'Command briefing EN patron fallback', pattern: /\bPatron override imminent\b/i },
+  { label: 'Command briefing EN action fallback', pattern: /\bReview\s+(?:Supply|Plan|Officers)\b/i },
+  { label: 'Command briefing EN modal fallback', pattern: /\bNo command briefing packet is available yet\b/i },
 ];
 
 const LIVE_SURFACES = [

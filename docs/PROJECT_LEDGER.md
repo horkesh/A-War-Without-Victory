@@ -22168,3 +22168,11 @@ Prepared the Vitezovi OOB identity decision after dispatching Pyrrhic historian,
 Verification: docs-only review; `git diff --check` passed.
 
 Determinism/scope: documentation and process synchronization only; no OOB source data, simulation logic, scenario data, save schema, generated artifacts, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, or persisted output ordering changed. Decision packet: `docs/40_reports/proposals/20260619_VITEZOVI_IDENTITY_MODELING_DECISION.md`.
+
+## 2026-06-22 - Command Briefing fallback localization
+
+Closed the command briefing fallback-string display lane. `collect_briefing.ts` can still persist English fallback strings for compatibility, but the tactical command briefing banner, Army HQ Situation Briefing, Presidential Decision Room briefing cards, and legacy Warroom command briefing modal now resolve known generated briefing rows through EN/BCS display keys. The BCS live-surface browser guard now includes command briefing English fallback phrases so this class is caught outside component tests.
+
+Verification: TDD red proof failed before implementation on the intended BCS command briefing leak tests. Focused green proof passed 77/77. Expanded command/UI proof passed 148/148. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 250/250. BCS live browser proof `$env:AWWV_UI_LOCALE='bcs'; $env:AWWV_LIVE_SURFACE_BROWSER_LOCALE='bcs'; npm.cmd run qa:live-surface:browser` passed and wrote evidence to `.tmp_live_surface_browser_sweep/live_surface_browser_sweep.json`. `npm.cmd run desktop:map:build` passed with existing Vite warnings.
+
+Determinism/scope: UI/read-model/i18n/test/docs polish only; no simulation logic, event mechanics, scenario data, command briefing persistence shape, save schema, calibration floor, structural fingerprint, golden manifests, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md`.

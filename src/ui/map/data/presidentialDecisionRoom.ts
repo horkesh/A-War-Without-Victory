@@ -9,6 +9,7 @@ import {
 } from './turnAftermath';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
+import { resolveCommandBriefingItemCopy } from './commandBriefingCopy';
 import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
@@ -386,7 +387,7 @@ function compareCandidates(a: CandidateCard, b: CandidateCard): number {
   return strictCompare(a.id, b.id);
 }
 
-function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCard, 'actionLabel' | 'navigationTarget'> {
+function actionForBriefingItem(item: CommandBriefingItemView, localizedActionLabel?: string): Pick<CandidateCard, 'actionLabel' | 'navigationTarget'> {
   if (item.target.type === 'corps' && item.target.corpsId) {
     return {
       actionLabel: t('decisionRoom.action.inspectCorps'),
@@ -396,7 +397,7 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
   if (item.target.type === 'operation') {
     if (item.target.operationKey) {
       return {
-        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectOperation'),
+        actionLabel: localizedActionLabel ?? item.actionLabel ?? t('decisionRoom.action.inspectOperation'),
         navigationTarget: { kind: 'field', target: { kind: 'field-operation', operationKey: item.target.operationKey } },
       };
     }
@@ -410,7 +411,7 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
     if (item.target.sectorId) {
       const corpsId = item.target.corpsId ?? item.corpsId;
       return {
-        actionLabel: item.actionLabel ?? t('decisionRoom.action.inspectSector'),
+        actionLabel: localizedActionLabel ?? item.actionLabel ?? t('decisionRoom.action.inspectSector'),
         navigationTarget: {
           kind: 'field',
           target: corpsId
@@ -426,36 +427,36 @@ function actionForBriefingItem(item: CommandBriefingItemView): Pick<CandidateCar
   }
   if (item.target.type === 'settlement' && item.target.osid) {
     return {
-      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
+      actionLabel: localizedActionLabel ?? item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
       navigationTarget: { kind: 'field', target: { kind: 'field-settlement', osid: item.target.osid } },
     };
   }
   if (item.target.type === 'summary') {
     return {
-      actionLabel: t('decisionRoom.action.warSummary'),
+      actionLabel: localizedActionLabel ?? t('decisionRoom.action.warSummary'),
       navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
     };
   }
   if (item.target.type === 'officer_events') {
     return {
-      actionLabel: t('decisionRoom.action.personnel'),
+      actionLabel: localizedActionLabel ?? t('decisionRoom.action.personnel'),
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
     };
   }
   if (item.target.type === 'peace_plan') {
     return {
-      actionLabel: t('decisionRoom.action.reviewPlan'),
+      actionLabel: localizedActionLabel ?? t('decisionRoom.action.reviewPlan'),
       navigationTarget: { kind: 'inbox' },
     };
   }
   if (item.target.type === 'enclaves') {
     return {
-      actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewEnclaves'),
+      actionLabel: localizedActionLabel ?? item.actionLabel ?? t('decisionRoom.action.reviewEnclaves'),
       navigationTarget: { kind: 'enclave-dashboard' },
     };
   }
   return {
-    actionLabel: item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
+    actionLabel: localizedActionLabel ?? item.actionLabel ?? t('decisionRoom.action.reviewBriefing'),
     navigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
   };
 }
@@ -771,7 +772,8 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
   });
 
   for (const item of items.slice(0, 4)) {
-    const action = actionForBriefingItem(item);
+    const copy = resolveCommandBriefingItemCopy(item);
+    const action = actionForBriefingItem(item, copy.actionLabel);
     // NOTE: briefing items do NOT carry a stop-op directive. The sim briefing target
     // (collect_briefing.ts) never emits a per-operation (corpsId, opName) pair, and the
     // shared `toTargetView` collapses targets to corps/enclave/settlement/none — so a
@@ -782,8 +784,8 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
       id: `briefing:${item.id}`,
       category: 'briefing',
       severity: item.severity === 'critical' ? 'critical' : item.severity === 'warning' ? 'warning' : 'info',
-      title: item.title,
-      explanation: item.detail,
+      title: copy.title,
+      explanation: copy.detail,
       sourceOwner: t('decisionRoom.card.briefing.sourceOwner'),
       sourceLabel: briefingKindLabel(item.kind),
       actionLabel: action.actionLabel,
