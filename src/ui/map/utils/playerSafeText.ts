@@ -86,6 +86,7 @@ export function getPlayerSafeOperationPhaseLabel(
 const FORMATION_READINESS_LABELS: Record<string, string> = {
     active: 'Active',
     ready: 'Ready',
+    forming: 'Forming',
     mobilizing: 'Mobilizing',
     degraded: 'Degraded',
     refitting: 'Refitting',

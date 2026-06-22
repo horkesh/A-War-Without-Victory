@@ -170,6 +170,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             selectedFormationId: null,
             selectedOperationKey: null,
           })}
+          aria-label={t('corpsDetail.closePanel')}
+          title={t('corpsDetail.closePanel')}
           className="text-text-secondary hover:text-interactive text-sm leading-none shrink-0 ml-2"
         >
           ✕

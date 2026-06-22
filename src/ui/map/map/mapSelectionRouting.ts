@@ -59,7 +59,12 @@ export function resolveMapFormationInspectionTarget(
     ?? null;
 
   if (sectorId) {
-    return { kind: 'field-formation-in-sector', formationId, sectorId };
+    return {
+      kind: 'field-formation-in-sector',
+      formationId,
+      sectorId,
+      corpsId: findSectorCorpsId(sectorId, state),
+    };
   }
 
   const corpsId =

@@ -615,6 +615,30 @@ async function getVisibleSelectorAttribute(page, selector, attribute, descriptio
   return value;
 }
 
+async function waitForVisibleSelectorAttribute(page, selector, attribute, expected, description = selector) {
+  await page.waitForFunction(
+    (targetSelector, attr, expectedValue) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      return Array.from(document.querySelectorAll(targetSelector))
+        .filter(isVisible)
+        .some((target) => target.getAttribute(attr) === expectedValue);
+    },
+    { timeout: 30000 },
+    selector,
+    attribute,
+    expected,
+  );
+}
+
 async function clickVisibleSelectorAt(page, selector, index, description = selector) {
   const clicked = await page.evaluate((targetSelector, targetIndex) => {
     const isVisible = (el) => {
@@ -811,6 +835,20 @@ async function clickFirstSectorWithVisibleFormation(page, summary) {
 
   const sectorCount = await visibleSelectorCount(page, sectorSelector);
   for (let index = 0; index < sectorCount; index += 1) {
+    const sectorId = await page.evaluate((targetSelector, targetIndex) => {
+      const isVisible = (el) => {
+        if (!(el instanceof HTMLElement)) return false;
+        const rect = el.getBoundingClientRect();
+        const style = window.getComputedStyle(el);
+        return rect.width > 0
+          && rect.height > 0
+          && style.display !== 'none'
+          && style.visibility !== 'hidden'
+          && Number(style.opacity || '1') > 0;
+      };
+      const target = Array.from(document.querySelectorAll(targetSelector)).filter(isVisible)[targetIndex];
+      return target instanceof HTMLElement ? target.getAttribute('data-sector-id') : null;
+    }, sectorSelector, index);
     await clickVisibleSelectorAt(page, sectorSelector, index, 'OOB sector button');
     const selected = await page.waitForFunction(
       (targetSelector, targetIndex) => {
@@ -837,7 +875,8 @@ async function clickFirstSectorWithVisibleFormation(page, summary) {
     await waitForVisibleSelector(page, '#sector-intel-panel-forces');
     if (await visibleSelectorCount(page, '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]') > 0) {
       summary.evidence.ownerJourneySectorIndex = index;
-      return;
+      summary.evidence.ownerJourneySectorId = sectorId;
+      return sectorId;
     }
   }
 
@@ -1226,7 +1265,16 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await resetToWarMap(page);
   await waitForVisibleSelector(page, '[data-testid="tactical-map"]');
   await ensureExpanded(page, '[data-testid="oob-section-sectors-toggle"]');
-  await clickFirstSectorWithVisibleFormation(page, summary);
+  const sectorId = await clickFirstSectorWithVisibleFormation(page, summary);
+  if (sectorId) {
+    await waitForVisibleSelectorAttribute(
+      page,
+      '[data-testid="corps-front-panel"]',
+      'data-sector-id',
+      sectorId,
+      'Corps Front panel',
+    );
+  }
   await waitForVisibleSelector(page, '#sector-intel-tab-overview');
   await activateVisibleControl(page, '#sector-intel-tab-overview');
   await waitForVisibleSelector(page, '#sector-intel-panel-overview');
@@ -1238,8 +1286,20 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await waitForVisibleSelector(page, '#sector-intel-panel-ops');
   await activateVisibleControl(page, '#sector-intel-tab-forces');
   await waitForVisibleSelector(page, '#sector-intel-panel-forces');
+  const formationId = await getVisibleSelectorAttribute(
+    page,
+    '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]',
+    'data-formation-id',
+    'Corps Front brigade row',
+  );
+  const locationOsid = await getVisibleSelectorAttribute(
+    page,
+    '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]',
+    'data-location-osid',
+    'Corps Front brigade row',
+  );
   await clickFirstVisibleSelector(page, '[data-testid="corps-front-brigade-row"][data-formation-id][data-location-osid]', 'Corps Front brigade row with a settlement location');
-  await waitForVisibleSelector(page, '[data-testid="formation-detail-panel"]');
+  await waitForVisibleSelectorAttribute(page, '[data-testid="formation-detail-panel"]', 'data-formation-id', formationId, 'formation detail panel');
   await activateVisibleControl(page, '#formation-detail-tab-record');
   await waitForVisibleSelector(page, '#formation-detail-tab-record[aria-selected="true"]');
   await activateVisibleControl(page, '#formation-detail-tab-orders');
@@ -1249,10 +1309,15 @@ async function runOwnerJourneyDrilldown(page, summary) {
   await activateVisibleControl(page, '#formation-detail-tab-overview');
   await waitForVisibleSelector(page, '#formation-detail-tab-overview[aria-selected="true"]');
   await waitForVisibleSelector(page, '[data-testid="formation-location-link"][data-osid]');
+  await waitForVisibleSelectorAttribute(page, '[data-testid="formation-location-link"][data-osid]', 'data-osid', locationOsid, 'formation location link');
   await activateVisibleControl(page, '[data-testid="formation-location-link"][data-osid]');
+  await waitForVisibleSelectorAttribute(page, '[data-testid="settlement-detail-panel"]', 'data-osid', locationOsid, 'settlement detail panel');
   await waitForVisibleSelector(page, '#settlement-tab-overview');
+  await waitForVisibleSelector(page, '[data-testid="settlement-panel-overview"]');
   await activateVisibleControl(page, '#settlement-tab-municipality');
+  await waitForVisibleSelector(page, '[data-testid="settlement-panel-municipality"]');
   await activateVisibleControl(page, '#settlement-tab-timeline');
+  await waitForVisibleSelector(page, '[data-testid="settlement-panel-timeline"]');
   await captureEvidence(page, summary, 'owner_journey_settlement_detail');
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');

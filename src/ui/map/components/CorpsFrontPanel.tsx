@@ -271,6 +271,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   return (
     <div
+      data-testid="corps-front-panel"
+      data-sector-id={sector.sector_id}
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >

@@ -17,6 +17,7 @@ import type { EventDefinition } from '../../../sim/events/event_types';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import { t, type MessageKey } from '../i18n';
+import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 
 const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: MessageKey[] }> = {
     RBiH: {
@@ -201,7 +202,20 @@ function OpeningBrief({
     );
 }
 
-function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
+function hasFiledRecord(state: ReturnType<typeof useGameStore.getState>['loadedGameState']): boolean {
+    if (!state) return false;
+    if ((state.turnSummaries ?? []).some(shouldNarrateTerritorySummary)) return true;
+    if ((state.operationHistory ?? []).length > 0) return true;
+    if ((state.reserveRequestHistory ?? []).length > 0) return true;
+    if ((state.peacePlanHistory ?? []).length > 0) return true;
+    if ((state.convoyDecisionHistory ?? []).length > 0) return true;
+    if ((state.paramilitaryDecisionHistory ?? []).length > 0) return true;
+    if ((state.officerDecisionHistory ?? []).length > 0) return true;
+    if ((state.operationOpportunityRecords ?? []).length > 0) return true;
+    return false;
+}
+
+function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void; recordFiled: boolean }) {
     return (
         <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2" data-testid="presidential-inbox-quiet-capsule">
             <div className="flex items-start justify-between gap-3">
@@ -237,7 +251,7 @@ function QuietInboxCapsule({ onOpenDesk }: { onOpenDesk: () => void }) {
                         {t('inbox.chronicle')}
                     </div>
                     <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
-                        {t('inbox.latestRecordFiled')}
+                        {t(recordFiled ? 'inbox.latestRecordFiled' : 'inbox.noRecordFiledYet')}
                     </div>
                 </div>
             </div>
@@ -263,6 +277,8 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
 
     const actionableItems = items.filter(i => i.type !== 'situation');
     const situationItems = items.filter(i => i.type === 'situation');
+    const openingBriefPending = !briefDismissed && playerFaction && state?.turn === 0;
+    const recordFiled = hasFiledRecord(state);
 
     return (
         <div
@@ -289,7 +305,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-2.5 py-2 space-y-2">
                 {/* Opening brief (first turn only) */}
-                {!briefDismissed && playerFaction && (
+                {openingBriefPending && (
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}
@@ -311,8 +327,11 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
                 )}
 
                 {/* Empty state */}
-                {actionableItems.length === 0 && briefDismissed && (
-                    <QuietInboxCapsule onOpenDesk={() => onAction('decision_room', 'empty:desk')} />
+                {actionableItems.length === 0 && !openingBriefPending && (
+                    <QuietInboxCapsule
+                        recordFiled={recordFiled}
+                        onOpenDesk={() => onAction('decision_room', 'empty:desk')}
+                    />
                 )}
 
                 {/* Situation divider + items */}

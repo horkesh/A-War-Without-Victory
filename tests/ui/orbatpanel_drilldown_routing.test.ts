@@ -99,7 +99,7 @@ afterEach(() => {
 });
 
 describe('OrbatPanel drilldown routing', () => {
-  it('routes brigade clicks to corps plus formation field inspection', () => {
+  it('routes brigade clicks to the current sector plus formation field inspection', () => {
     render(React.createElement(OrbatPanel));
 
     fireEvent.click(screen.getByRole('button', { name: /1st Brigade/i }));
@@ -107,8 +107,9 @@ describe('OrbatPanel drilldown routing', () => {
     const store = useGameStore.getState();
     expect(store.selectedOrbatCorpsId).toBeNull();
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector_south');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
   it('highlights the override sector on brigade hover instead of stale roster membership', () => {

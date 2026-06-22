@@ -207,7 +207,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const sectors = loadedGameState.corpsFrontSectors ?? [];
   const automaticSector = isBrigade && formation.corps_id
     ? sectors.find(s => s.corps_id === formation.corps_id &&
-        (s.assigned_brigade_ids.includes(formation.id) || s.reserve_brigade_ids.includes(formation.id)))
+        (
+          s.assigned_brigade_ids.includes(formation.id)
+          || s.reserve_brigade_ids.includes(formation.id)
+          || (s.rear_brigade_ids ?? []).includes(formation.id)
+        ))
     : null;
   const sameSectorList = isBrigade && formation.corps_id
     ? sectors.filter(s => s.corps_id === formation.corps_id)
@@ -228,6 +232,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   return (
     <div
       data-testid="formation-detail-panel"
+      data-formation-id={formation.id}
       className={`panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl overflow-hidden ${prestigeRingClass}`}
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >
@@ -254,6 +259,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSelectedFormationId(null)}
+            aria-label={t('formationDetail.closePanel')}
+            title={t('formationDetail.closePanel')}
             className="text-text-secondary hover:text-interactive text-sm leading-none p-1 rounded hover:bg-white/10"
           >
             ✕
@@ -324,6 +331,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       kind: 'field-formation-in-sector',
                       formationId: selectedFormationId,
                       sectorId: currentSector.sector_id,
+                      corpsId: currentSector.corps_id ?? formation.corps_id ?? null,
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
                     title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}
@@ -345,11 +353,30 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                           ? t('formationDetail.override')
                           : currentSector.assigned_brigade_ids.includes(formation.id)
                             ? t('formationDetail.frontline')
-                            : t('formationDetail.reserve')}
+                            : (currentSector.rear_brigade_ids ?? []).includes(formation.id)
+                              ? t('formationDetail.rearSupport')
+                              : t('formationDetail.reserve')}
                       </span>
                       <div className="w-1.5 h-1.5 rounded-full bg-accent-gold/40 group-hover:bg-accent-gold transition-colors" />
                     </div>
                   </button>
+                );
+              }
+              if (isBrigade) {
+                return (
+                  <div className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded-md text-[11px]">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-text-secondary uppercase font-bold tracking-tighter">
+                        {t('formationDetail.sector')}
+                      </span>
+                      <span className="text-text-secondary italic">
+                        {t('formationDetail.noActiveSector')}
+                      </span>
+                    </div>
+                    <div className="mt-0.5 text-[10px] text-text-secondary/80">
+                      {t('formationDetail.noActiveSectorHelp')}
+                    </div>
+                  </div>
                 );
               }
               if (formation.kind === 'corps' || formation.kind === 'corps_asset') {

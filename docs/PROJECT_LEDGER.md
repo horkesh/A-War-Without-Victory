@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-22] fix(ui): harden general surface drilldowns and PMTiles browser gate
+
+**Type:** UI/read-model/browser-QA/test/docs cleanup plus tracked temp-fixture removal.
+
+**Fix:** Sector/brigade/formation/settlement drilldowns now preserve exact field identity across OOB, Corps Front, Formation Detail, Settlement Detail, and ORBAT paths. Formation Detail now handles rear/support brigades, no-active-sector brigades, and forming lifecycle labels explicitly; OOB/ORBAT rows show clearer command/sector context; the Presidential Inbox opening brief is turn-zero-only and its quiet capsule no longer claims a filed record before one exists; live-surface browser proof asserts exact sector/formation/settlement ids; PMTiles protocol registration is shared for the browser lifetime so map teardown cannot produce unsupported `pmtiles://` console errors in CI. Tracked `data/scenarios/_tmp*` sweep fixtures were removed from the repo.
+
+**Verification:** `npm.cmd run typecheck` passed. Focused startup/formation/routing pack `node node_modules\vitest\vitest.mjs run tests\startup_snapshot_contract.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\map_click_routing_contract.test.ts tests\ui\first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` passed 35/35. Inbox regression pack `node node_modules\vitest\vitest.mjs run tests\ui\inbox_dedup.test.ts --pool=forks --reporter=dot` passed 10/10. `npm.cmd run qa:live-surface:browser` passed after the PMTiles fix with dev-server cleanup verified. `npm.cmd run qa:player-journeys` passed 254/254. Report: `docs/40_reports/implemented/20260622_GENERAL_SURFACE_POLISH_TEMP_CLEANUP_PMTILES_CI.md`.
+
+**Scope/determinism:** UI/read-model/browser-QA/test/docs cleanup plus tracked temp-fixture removal only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): localize Chronicle FEEL generated copy
 
 **Type:** UI/read-model/i18n/test/docs polish.

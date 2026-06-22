@@ -123,6 +123,21 @@ function makeFormationDetailState(): LoadedGameState {
           },
         ],
       },
+      {
+        id: 'rbih_rear_brigade',
+        faction: 'RBiH',
+        name: 'Rear Brigade',
+        kind: 'brigade',
+        readiness: 'forming',
+        cohesion: 55,
+        fatigue: 1,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        personnel: 900,
+        posture: 'defend',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -172,6 +187,7 @@ function makeFormationDetailState(): LoadedGameState {
         length_edges: 1,
         assigned_brigade_ids: [],
         reserve_brigade_ids: [],
+        rear_brigade_ids: ['rbih_rear_brigade'],
         density: 1,
         threat_ratio: 1,
         defensive_power: 10,
@@ -274,6 +290,18 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('Lifecycle:');
     expect(copy).not.toContain('Readiness:Ready');
+  });
+
+  it('labels rear sector ownership distinctly and recognizes forming readiness', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_rear_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Southern line');
+    expect(copy).toContain('Rear/support');
+    expect(copy).toContain('Lifecycle:Forming');
+    expect(copy).not.toContain('Readiness pending');
   });
 
   it('uses player-facing effectiveness modifier labels', () => {

@@ -188,6 +188,51 @@ test('baked April 1992 startup active formations resolve their command parents',
     assert.strictEqual(state.military.formations.vrs_main_staff?.kind, 'army_hq');
 }, 120_000);
 
+test('baked April 1992 startup keeps turn-zero brigade exceptions explicit', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const brigades = Object.values(state.military.formations)
+        .filter((formation) => formation.kind === 'brigade');
+
+    const activeMissingParent = brigades
+        .filter((formation) => formation.status === 'active' && (!formation.corps_id || !state.military.formations[formation.corps_id]))
+        .map((formation) => formation.id)
+        .sort();
+    const activeMissingLocation = brigades
+        .filter((formation) => formation.status === 'active' && !formation.location_osid && !formation.home_osid && !formation.hq_sid)
+        .map((formation) => formation.id)
+        .sort();
+    const activeNoSector = brigades
+        .filter((formation) => {
+            const persisted = formation as typeof formation & {
+                assignment?: { sector_id?: string | null };
+                sector_id?: string | null;
+                sectorOverrideId?: string | null;
+            };
+            return persisted.status === 'active'
+                && !persisted.assignment?.sector_id
+                && !persisted.sector_id
+                && !persisted.sectorOverrideId;
+        })
+        .map((formation) => formation.id)
+        .sort();
+    const activeForming = brigades
+        .filter((formation) => formation.status === 'active' && String(formation.readiness ?? '').toLowerCase() === 'forming')
+        .map((formation) => formation.id)
+        .sort();
+
+    assert.deepStrictEqual(activeMissingParent, []);
+    assert.deepStrictEqual(activeMissingLocation, []);
+    assert.deepStrictEqual(activeNoSector, [
+        'hrhb_travnik_brigade',
+        'rs_1st_guards_motorized',
+        'rs_65th_protection_motorized_regiment',
+    ]);
+    assert.deepStrictEqual(activeForming, [
+        'hvo_posusje_brigade',
+        'hvo_rama_brigade',
+    ]);
+}, 120_000);
+
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {
     resetSrkStranglePostureGate();
     const prev = process.env.AWWV_SRK_STRANGLE_POSTURE;

@@ -9,8 +9,8 @@ import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import type { CorpsFrontSectorView } from '../data/types';
 import { t } from '../i18n';
 import { inspectOnField } from '../utils/shellNavigation';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
-
 
 export function OrbatPanel() {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -62,6 +62,15 @@ export function OrbatPanel() {
         return map;
     }, [brigades, corpsSectors]);
 
+    const sectorByBrigadeId = useMemo(() => {
+        const map = new Map<string, ReturnType<typeof resolveCurrentSectorForFormation>>();
+        for (const brigade of brigades) {
+            const sector = resolveCurrentSectorForFormation(brigade, corpsSectors);
+            if (sector) map.set(brigade.id, sector);
+        }
+        return map;
+    }, [brigades, corpsSectors]);
+
     useEffect(() => {
         if (!selectedOrbatCorpsId) return;
         setHoveredCorpsId(selectedOrbatCorpsId);
@@ -82,7 +91,6 @@ export function OrbatPanel() {
             className="panel-power-on weathered-panel flex flex-col rounded-lg shadow-xl overflow-hidden paper-grain relative"
             style={{ ...LEFT_DETAIL_PANEL_STYLE, width: '24rem' }}
         >
-            {/* Panel Header */}
             <div className="bg-panel-header border-b border-panel-border px-4 py-3 flex items-center justify-between shrink-0 relative z-10">
                 <div className="flex flex-col">
                     <span className="text-[10px] uppercase text-text-secondary tracking-widest font-bold">{t('orbat.orderOfBattle')}</span>
@@ -95,20 +103,19 @@ export function OrbatPanel() {
                     onClick={() => setSelectedOrbatCorpsId(null)}
                     className="w-8 h-8 flex items-center justify-center rounded border border-panel-border bg-panel-bg hover:bg-panel-hover text-text-secondary transition-colors"
                     title={t('orbat.closePanel')}
+                    aria-label={t('orbat.closePanel')}
                 >
                     &times;
                 </button>
             </div>
 
             <div className="flex-1 overflow-auto p-4 space-y-4">
-                {/* Commander Section */}
                 {commander ? (
                     <OfficerProfile officer={commander} label={t('formationDetail.corpsCommander')} />
                 ) : commanderDisplay && (
                     <CommanderDisplayPanel display={commanderDisplay} label={t('formationDetail.corpsCommander')} />
                 )}
 
-                {/* Corps Stats */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 bg-black/10 rounded border border-panel-border/30">
                         <div className="text-[9px] uppercase text-text-secondary font-semibold">{t('orbat.totalPersonnel')}</div>
@@ -120,52 +127,64 @@ export function OrbatPanel() {
                     </div>
                 </div>
 
-                {/* Brigades List */}
                 <div className="space-y-1">
                     <div className="text-[10px] uppercase text-text-secondary tracking-wider font-bold mb-2 pb-1 border-b border-panel-border/30">
                         {t('orbat.subordinateBrigades')}
                     </div>
                     <div className="divide-y divide-panel-border/30">
-                        {brigades.map((b) => (
-                            <BrigadeRow
-                                key={b.id}
-                                formation={b}
-                                compact
-                                onClick={() => {
-                                    inspectOnField(useGameStore.getState(), {
-                                        kind: 'field-formation-in-corps',
-                                        formationId: b.id,
-                                        corpsId: corps.id,
-                                    });
-                                    // R12: ORBAT-map sync — fly to brigade location and flash it
-                                    const osid = b.location_osid;
-                                    if (osid) {
-                                        panToOsid?.(osid);
-                                        setFlashOsid(osid);
-                                    }
-                                }}
-                                onHoverChange={(hovered, e) => {
-                                    const osids = hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : [];
-                                    setHoveredOsids(osids);
-                                    setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(b.id) ?? null) : null);
-                                    if (hovered) {
-                                        setTooltipTargetWithPosition(
-                                            { type: 'formation', id: b.id },
-                                            e ? { x: e.clientX, y: e.clientY } : undefined
-                                        );
-                                        // R12: brief flash on hover
-                                        if (b.location_osid) setFlashOsid(b.location_osid);
-                                    } else {
-                                        clearTooltipTarget();
-                                    }
-                                }}
-                            />
-                        ))}
+                        {brigades.map((b) => {
+                            const sector = sectorByBrigadeId.get(b.id) ?? null;
+                            return (
+                                <div key={b.id} className="py-1">
+                                    <BrigadeRow
+                                        formation={b}
+                                        compact
+                                        onClick={() => {
+                                            inspectOnField(useGameStore.getState(), sector
+                                                ? {
+                                                    kind: 'field-formation-in-sector',
+                                                    formationId: b.id,
+                                                    sectorId: sector.sector_id,
+                                                    corpsId: corps.id,
+                                                }
+                                                : {
+                                                    kind: 'field-formation-in-corps',
+                                                    formationId: b.id,
+                                                    corpsId: corps.id,
+                                                });
+                                            const osid = b.location_osid;
+                                            if (osid) {
+                                                panToOsid?.(osid);
+                                                setFlashOsid(osid);
+                                            }
+                                        }}
+                                        onHoverChange={(hovered, e) => {
+                                            const osids = hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : [];
+                                            setHoveredOsids(osids);
+                                            setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(b.id) ?? null) : null);
+                                            if (hovered) {
+                                                setTooltipTargetWithPosition(
+                                                    { type: 'formation', id: b.id },
+                                                    e ? { x: e.clientX, y: e.clientY } : undefined
+                                                );
+                                                if (b.location_osid) setFlashOsid(b.location_osid);
+                                            } else {
+                                                clearTooltipTarget();
+                                            }
+                                        }}
+                                    />
+                                    <div className="mt-0.5 px-2 text-[9px] uppercase tracking-wide text-text-secondary/80">
+                                        {sector
+                                            ? t('orbat.currentSector', { sector: getPlayerFacingSectorName(sector.sector_id, corpsSectors) })
+                                            : t('orbat.noCurrentSector')}
+                                    </div>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             </div>
 
-            {/* Visual Polish Footer */}
             <div className="px-4 py-2 bg-black/40 border-t border-panel-border flex justify-between items-center shrink-0">
                 <span className="text-[9px] font-mono text-text-secondary uppercase">
                     {corpsSectors.length > 0

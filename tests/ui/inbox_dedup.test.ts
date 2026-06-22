@@ -189,6 +189,35 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('Read later')).toBeNull();
     });
 
+    it('does not show the opening brief for a later loaded turn', () => {
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ player_faction: 'RBiH', turn: 12 }),
+            openingBriefDismissed: false,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.queryByTestId('presidential-inbox-opening-brief-open-desk')).toBeNull();
+        expect(screen.queryByText('Presidential Brief')).toBeNull();
+    });
+
+    it('does not claim a latest record exists in an empty quiet inbox', () => {
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({ turn: 0, turnSummaries: [], operationHistory: [] }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByTestId('presidential-inbox-quiet-capsule')).toBeTruthy();
+        expect(screen.getByText('No record filed yet.')).toBeTruthy();
+        expect(screen.queryByText('Latest turn record is filed below.')).toBeNull();
+    });
+
     it('renders intelligence notifications with an explicit dismiss command', () => {
         const onAction = vi.fn();
         useGameStore.setState({

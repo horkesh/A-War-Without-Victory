@@ -344,7 +344,11 @@ export function SettlementDetailContent({
   ];
 
   return (
-    <div className={isPanel ? 'min-w-0' : 'min-w-[240px] max-w-[320px]'}>
+    <div
+      className={isPanel ? 'min-w-0' : 'min-w-[240px] max-w-[320px]'}
+      data-testid={isPanel ? 'settlement-detail-panel' : undefined}
+      data-osid={isPanel ? osid : undefined}
+    >
       {/* Strategic Tags */}
       <div className="flex flex-wrap gap-1 mb-2">
         {isStrategic && (
@@ -391,7 +395,10 @@ export function SettlementDetailContent({
         </div>
       )}
 
-      <div className={isPanel ? 'space-y-2.5 p-4' : 'space-y-2.5'}>
+      <div
+        className={isPanel ? 'space-y-2.5 p-4' : 'space-y-2.5'}
+        data-testid={isPanel ? `settlement-panel-${activeTab}` : undefined}
+      >
         {(!isPanel || activeTab === 'overview') && municipality && (
           <div className="flex justify-between items-center text-[11px]">
             <span className="text-text-secondary">{t('settlement.municipality')}</span>

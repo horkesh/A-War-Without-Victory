@@ -7,7 +7,6 @@
 import { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Protocol } from 'pmtiles';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { PathLayer, PolygonLayer, TextLayer } from '@deck.gl/layers';
 import { PathStyleExtension, type PathStyleExtensionProps } from '@deck.gl/extensions';
@@ -19,6 +18,7 @@ import { buildOsidCentroidLookup } from '../../map/builders/geojsonLookup';
 import { buildCorpsFrontLinesGeoJSON } from '../../map/builders/buildCorpsFrontLinesGeoJSON';
 import { buildBezierCurve, buildArrowheadTriangle } from '../../map/builders/arrowGeometry';
 import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
+import { ensurePmtilesProtocol } from '../../map/pmtilesProtocol';
 import styleJson from '../../map/awwv_map_style.json';
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
@@ -93,9 +93,8 @@ export function OpsMap({
     useEffect(() => {
         if (!mapContainerRef.current || !loadedGameState) return;
 
-        const pmtilesProtocol = new Protocol();
         const origin = window.location.origin;
-        try { maplibregl.addProtocol('pmtiles', pmtilesProtocol.tile); } catch { /* already registered */ }
+        ensurePmtilesProtocol();
         const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
         const map = new maplibregl.Map({

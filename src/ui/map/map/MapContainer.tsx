@@ -1,10 +1,8 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { Protocol } from 'pmtiles';
 import type {
   AddLayerObject,
-  AddProtocolAction,
   CanvasSourceSpecification,
   FilterSpecification,
   GeoJSONSource,
@@ -51,6 +49,7 @@ import { StackExpansionOverlay } from '../components/StackExpansionOverlay';
 import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
+import { ensurePmtilesProtocol } from './pmtilesProtocol';
 import { useIPC } from '../desktop/useIPC';
 import { stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
 import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
@@ -719,23 +718,8 @@ export function MapContainer() {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const pmtilesProtocol = new Protocol();
     const origin = window.location.origin;
-    console.log('[PMTiles] registering protocol, origin:', origin);
-    // Use tilev4 (native MapLibre v4 async handler) and surface errors
-    const tileHandler: AddProtocolAction = async (params, abortController) => {
-      if (params.type === 'json') console.log('[PMTiles] source metadata request:', params.url);
-      try {
-        return await pmtilesProtocol.tilev4(params, abortController);
-      } catch (e) {
-        // Suppress AbortError (normal during pan/zoom — tiles get cancelled)
-        if (e instanceof Error && e.name === 'AbortError') throw e;
-        console.error('[PMTiles] tile error', params.url, e);
-        throw e;
-      }
-    };
-    try { maplibregl.removeProtocol('pmtiles'); } catch { /* not registered yet */ }
-    maplibregl.addProtocol('pmtiles', tileHandler);
+    ensurePmtilesProtocol();
 
     const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
 
@@ -995,7 +979,6 @@ export function MapContainer() {
       useGameStore.getState().setPanToCenter(null);
       useGameStore.getState().setPanToOsid(null);
       setMapReady(false);
-      maplibregl.removeProtocol('pmtiles');
     };
   }, []);
 

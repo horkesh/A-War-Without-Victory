@@ -12,6 +12,7 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
   getPlayerSafeOperationPhaseLabel,
+  getPlayerSafeDisplayLabel,
 } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
@@ -631,6 +632,10 @@ export function OOBSidebar() {
                           loadedGameState.formations,
                           loadedGameState.corpsFrontSectors ?? [],
                         );
+                        const owner = loadedGameState.formations.find((f) => f.id === sector.corps_id);
+                        const ownerName = owner
+                          ? getLocalizedFormationName(owner, locale)
+                          : getPlayerSafeDisplayLabel(sector.corps_id, t('formationDetail.corps'));
                         return (
                           <button
                             key={sector.sector_id}
@@ -660,6 +665,9 @@ export function OOBSidebar() {
                                 {sector.combat_strength_class && (
                                   <SectorStrengthBadge strengthClass={sector.combat_strength_class} />
                                 )}
+                              </div>
+                              <div className="text-text-secondary/80 text-[10px] truncate">
+                                {t('oob.sectorOwner', { corps: ownerName })}
                               </div>
                               <div className="text-text-secondary text-[10px] tabular-nums">
                                 {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}

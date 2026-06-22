@@ -1,8 +1,8 @@
 import maplibregl from 'maplibre-gl';
-import { Protocol } from 'pmtiles';
 import bezier from '@turf/bezier-spline';
 import { lineString } from '@turf/helpers';
 import { rewritePmtilesUrls } from '../../map/rewritePmtilesUrls';
+import { ensurePmtilesProtocol } from '../../map/pmtilesProtocol';
 import { loadOperationalSettlements } from '../../data/DataLoader';
 import { buildControlGeoJSON } from '../../map/builders/buildControlGeoJSON';
 import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSON';
@@ -49,19 +49,8 @@ export class OpsMapRenderer {
     constructor(container: HTMLElement, controlBySettlement?: Record<string, string | null>, playerFaction?: string) {
         this.playerFaction = playerFaction ?? null;
         this.mapReady = new Promise(resolve => { this.resolveMapReady = resolve; });
-        // Register PMTiles protocol (same as main MapContainer)
-        const pmtilesProtocol = new Protocol();
         const origin = window.location.origin;
-        const tileHandler: Parameters<typeof maplibregl.addProtocol>[1] = async (params, abortController) => {
-            try {
-                return await pmtilesProtocol.tilev4(params, abortController);
-            } catch (e) {
-                console.error('[OpsMap PMTiles] tile error', params.url, e);
-                throw e;
-            }
-        };
-        // addProtocol is idempotent — safe to call if already registered
-        try { maplibregl.addProtocol('pmtiles', tileHandler); } catch { /* already registered */ }
+        ensurePmtilesProtocol();
 
         const style = rewritePmtilesUrls(
             JSON.parse(JSON.stringify(styleJson)) as Record<string, unknown>,

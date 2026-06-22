@@ -602,6 +602,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         isOperationsPanelOpen: false,
         selectedFormationId: target.formationId,
         selectedCorpsFrontSectorId: target.sectorId,
+        selectedCorpsId: target.corpsId ?? null,
       });
       return;
     }
