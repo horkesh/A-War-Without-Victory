@@ -20,6 +20,7 @@ import { findPlayerFacingOperationByKey } from '../../shared/playerVisibility';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t } from '../i18n';
+import { getPlayerSafeOperationName } from '../utils/playerSafeText';
 
 interface CommanderSelectionModalProps {
     isOpen: boolean;
@@ -31,13 +32,18 @@ function getAvailabilityStatus(
     officer: NamedOfficerView,
     targetCorpsId: string,
     corpsNameById: Map<string, string>,
+    operationNameByRaw: Map<string, string>,
 ): { available: boolean; reason?: string } {
     if (officer.status === 'kia') return { available: false, reason: t('commanderSelect.reason.kia') };
     if (officer.status === 'captured') return { available: false, reason: t('commanderSelect.reason.captured') };
     if (officer.status === 'retired') return { available: false, reason: t('commanderSelect.reason.retired') };
     if (officer.rank === 'army_commander') return { available: false, reason: t('commanderSelect.reason.armyHq') };
     if (officer.enclave_lock) return { available: false, reason: t('commanderSelect.reason.enclaveLocked') };
-    if (officer.assigned_operation) return { available: false, reason: t('commanderSelect.reason.assigned', { operation: officer.assigned_operation }) };
+    if (officer.assigned_operation) {
+        const operation = operationNameByRaw.get(officer.assigned_operation)
+            ?? getPlayerSafeOperationName(officer.assigned_operation, targetCorpsId);
+        return { available: false, reason: t('commanderSelect.reason.assigned', { operation }) };
+    }
     if (officer.assigned_corps_id && officer.assigned_corps_id !== targetCorpsId && !officer.acting_commander) {
         return { available: false, reason: t('commanderSelect.reason.corpsCommander', { corps: corpsNameById.get(officer.assigned_corps_id) ?? t('commanderSelect.anotherCorps') }) };
     }
@@ -80,13 +86,18 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                 .filter((f) => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq')
                 .map((f) => [f.id, f.name]),
         );
+        const operationNameByRaw = new Map(
+            (loadedGameState.operations ?? [])
+                .filter((candidate) => candidate.corps_id === context.corpsId)
+                .map((candidate) => [candidate.name, candidate.display_name]),
+        );
 
         const factionOfficers = (namedOfficerData ?? []).filter((o) => o.faction === faction);
         const avail: Array<{ officer: NamedOfficerView; fit: ReturnType<typeof getRegionalFit> }> = [];
         const unavail: Array<{ officer: NamedOfficerView; reason: string }> = [];
 
         for (const officer of factionOfficers) {
-            const status = getAvailabilityStatus(officer, context.corpsId, corpsNameById);
+            const status = getAvailabilityStatus(officer, context.corpsId, corpsNameById, operationNameByRaw);
             if (status.available) {
                 avail.push({ officer, fit: getRegionalFit(officer, context.corpsId) });
             } else {
@@ -109,6 +120,8 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
     }, [loadedGameState, context]);
 
     if (!context) return null;
+    const operationDisplayName = operation?.display_name
+        ?? getPlayerSafeOperationName(context.operationName, context.corpsId);
 
     return (
         <Modal
@@ -123,7 +136,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                 <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80">
                     <div id="commander-selection-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">{t('commanderSelect.title')}</div>
                     <div className="text-sm font-bold mt-0.5">
-                        {operation?.name ?? context.operationName} - {corpsName}
+                        {operationDisplayName} - {corpsName}
                     </div>
                 </div>
 

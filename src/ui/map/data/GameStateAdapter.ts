@@ -72,6 +72,7 @@ import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDistanceFromHistory } from './distanceFromHistory.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
+import { getEliteCommanderForFormationId } from './eliteCommanderSidecar.js';
 import {
     deriveFactionSupplyConditionFromFlatOsidState,
     deriveFactionSupplyConditionFromOsidReport,
@@ -868,6 +869,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
                 notableMoments: Array.isArray(warStory?.notable_moments) ? warStory.notable_moments : undefined,
                 officer_quality: typeof f.officer_quality === 'number' && Number.isFinite(f.officer_quality) ? f.officer_quality : undefined,
+                eliteCommander: getEliteCommanderForFormationId(id),
                 combatSummary,
                 morale: typeof f.morale === 'number' ? f.morale : undefined,
                 entrenchment_turns: typeof f.entrenchment_turns === 'number' ? f.entrenchment_turns : undefined,

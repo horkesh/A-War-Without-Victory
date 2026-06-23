@@ -71,6 +71,13 @@ function makeFormationDetailState(): LoadedGameState {
         homeDistanceMult: 0.7,
         personnel: 1200,
         posture: 'defend',
+        eliteCommander: {
+          name: 'Dzevad Rado',
+          competence: 4,
+          aggressiveness: 3,
+          defensive_skill: 3,
+          origin: 'military',
+        },
       },
       {
         id: 'rbih_moving_brigade',
@@ -503,6 +510,20 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('General Staff ARBiH');
     expect(copy).not.toContain('Assigned command');
+  });
+
+  it('shows elite brigade commander identity without raw sidecar origin ids', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_hq_guard_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Elite commander');
+    expect(copy).toContain('Dzevad Rado');
+    expect(copy).toContain('Command 4');
+    expect(copy).toContain('Tempo 3');
+    expect(copy).toContain('Defense 3');
+    expect(copy).not.toMatch(/\borigin\b|\bmilitary\b/i);
   });
 
   it('labels brigade lifecycle state separately from force readiness', () => {

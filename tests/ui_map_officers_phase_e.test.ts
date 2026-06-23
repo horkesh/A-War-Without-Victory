@@ -103,4 +103,74 @@ describe('Officers Phase E — parseGameState officer mapping', () => {
         expect(formation).toBeDefined();
         expect(formation?.officer_quality).toBe(0.45);
     });
+
+    it('attaches elite commander sidecar identity from OOB without requiring save-state mutation', () => {
+        const state = {
+  meta: { turn: 12, phase: 'war' },
+  brigade_aor: {},
+  military: {
+    formations: {
+                arbih_guards_brigade: {
+                    id: 'arbih_guards_brigade',
+                    faction: 'RBiH',
+                    name: 'Guards Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    cohesion: 55,
+                    fatigue: 0,
+                    status: 'active',
+                    created_turn: 12,
+                    tags: [],
+                    officer_quality: 0.35,
+                },
+                hrhb_vitezovi_brigade_vitez: {
+                    id: 'hrhb_vitezovi_brigade_vitez',
+                    faction: 'HRHB',
+                    name: '"Vitezovi" Brigade (Vitez)',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    cohesion: 55,
+                    fatigue: 0,
+                    status: 'active',
+                    created_turn: 0,
+                    tags: [],
+                },
+                rs_65th_protection_motorized_regiment: {
+                    id: 'rs_65th_protection_motorized_regiment',
+                    faction: 'RS',
+                    name: '65th Protection Motorized Regiment',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    cohesion: 70,
+                    fatigue: 0,
+                    status: 'active',
+                    created_turn: 0,
+                    tags: [],
+                },
+            },
+    militia_pools: {},
+  } as any,
+  political: {
+    political_controllers: {},
+    control_events: []
+  } as any,
+  displacement: {} as any,
+};
+
+        const result = parseGameState(state);
+        const guards = result.formations.find((f) => f.id === 'arbih_guards_brigade');
+        const vitezovi = result.formations.find((f) => f.id === 'hrhb_vitezovi_brigade_vitez');
+        const protection = result.formations.find((f) => f.id === 'rs_65th_protection_motorized_regiment');
+
+        expect(guards?.eliteCommander).toEqual({
+            name: 'Dževad Rađo',
+            competence: 4,
+            aggressiveness: 3,
+            defensive_skill: 3,
+        });
+        expect(vitezovi?.eliteCommander).toBeUndefined();
+        expect(protection?.eliteCommander?.name).toBe('Milomir Savčić');
+        expect(JSON.stringify(protection?.eliteCommander)).not.toContain('war_crimes_record');
+        expect(JSON.stringify(protection?.eliteCommander)).not.toContain('Srebrenica');
+    });
 });

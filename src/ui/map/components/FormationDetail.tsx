@@ -12,6 +12,7 @@ import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/of
 import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
+import { EliteCommanderSummary } from './EliteCommanderSummary';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar } from './TabBar';
@@ -467,11 +468,21 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               }
               if (isBrigade && formation.officer_quality != null) {
                 return (
-                  <div className="pt-2 border-t border-panel-border flex items-center justify-between text-xs">
-                    <span className="text-text-secondary">{t('formationDetail.officerCadreQuality')}</span>
-                    <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
-                      {Math.round(formation.officer_quality * 100)}%
-                    </span>
+                  <div className="pt-2 border-t border-panel-border space-y-2">
+                    <EliteCommanderSummary commander={formation.eliteCommander} />
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-text-secondary">{t('formationDetail.officerCadreQuality')}</span>
+                      <span className="text-text-primary font-mono bg-black/30 px-1.5 py-0.5 rounded border border-panel-border/50">
+                        {Math.round(formation.officer_quality * 100)}%
+                      </span>
+                    </div>
+                  </div>
+                );
+              }
+              if (isBrigade && formation.eliteCommander) {
+                return (
+                  <div className="pt-2 border-t border-panel-border">
+                    <EliteCommanderSummary commander={formation.eliteCommander} />
                   </div>
                 );
               }

@@ -9,7 +9,8 @@
  * Contracts:
  *   T1 — renders nothing when message is null/undefined/empty
  *   T2 — renders an alert region with aria-live=assertive when message present
- *   T3 — renders the message text verbatim
+ *   T3 — renders safe messages verbatim
+ *   T3c — redacts raw filesystem load paths before display
  *   T4 — dismiss button click invokes onDismiss callback
  *   T5 — Escape key invokes onDismiss callback
  *   T6 — pure / deterministic: same message yields byte-identical HTML
@@ -56,9 +57,9 @@ describe('LoadErrorToast — save-load error toast', () => {
     expect(html).toContain('data-testid="load-error-toast"');
   });
 
-  it('T3 — renders the message text verbatim', () => {
+  it('T3 — renders safe messages verbatim', () => {
     const onDismiss = vi.fn();
-    const message = 'Failed to load: missing scenario file at path /tmp/foo.json';
+    const message = 'Save file could not be loaded.';
     const html = renderToStaticMarkup(
       createElement(LoadErrorToast, { message, onDismiss, positioning: 'static' }),
     );
@@ -81,6 +82,23 @@ describe('LoadErrorToast — save-load error toast', () => {
 
     expect(html).toContain('Presidential decisions are still unsigned');
     expect(html).not.toContain('pending_required_decisions');
+  });
+
+  it('T3c - redacts raw filesystem load paths before rendering player-facing copy', () => {
+    const onDismiss = vi.fn();
+    const message = "Failed to load save file. ENOENT: no such file or directory, open 'C:\\Users\\User\\data\\derived\\operational\\operational_settlements.geojson'";
+    const html = renderToStaticMarkup(
+      createElement(LoadErrorToast, {
+        message,
+        onDismiss,
+        positioning: 'static',
+      }),
+    );
+
+    expect(html).toContain('Required game data could not be found');
+    expect(html).not.toContain('ENOENT');
+    expect(html).not.toContain('C:\\');
+    expect(html).not.toContain('operational_settlements.geojson');
   });
 
   it('T4 — dismiss button click invokes onDismiss callback', () => {

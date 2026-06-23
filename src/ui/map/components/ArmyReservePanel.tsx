@@ -26,6 +26,7 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
 import { turnToDateString } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
+import { EliteCommanderSummary } from './EliteCommanderSummary';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -212,6 +213,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             )}
                                         </div>
 
+                                        {brigade.eliteCommander && (
+                                            <EliteCommanderSummary commander={brigade.eliteCommander} compact />
+                                        )}
+
                                         {/* Personnel bar */}
                                         <div className="space-y-0.5">
                                             <div className="flex justify-between text-[10px] text-text-secondary">
@@ -281,6 +286,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <div className="text-[10px] text-text-secondary truncate">
                                             {getCorpsName(ls.loaned_to_corps ?? 'unknown')}
                                         </div>
+                                        {brigade.eliteCommander && (
+                                            <div className="mt-1">
+                                                <EliteCommanderSummary commander={brigade.eliteCommander} compact />
+                                            </div>
+                                        )}
                                     </div>
                                 );
                             })}

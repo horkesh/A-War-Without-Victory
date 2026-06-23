@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**PLAYER-FACING LOAD ERRORS MUST NOT EXPOSE PATHS (2026-06-23).** Packaged failures can include raw `ENOENT` and absolute derived-data paths. Do instead: keep raw diagnostic detail internal, but render through `getPlayerFacingErrorCopy(...)` so banners/toasts say to reinstall or verify files without leaking `C:\...`, `/tmp/...`, or derived filenames.
+
+**ELITE COMMANDER DISPLAY IS A UI-ONLY SIDECAR (2026-06-23).** OOB source rows may have commander identity even when startup/save state intentionally does not seat an officer. Do instead: project display-safe fields from `eliteCommanderSidecar` into Formation Detail, Army HQ ORBAT, and Army Reserve; omit source-only/sensitive fields and do not use the sidecar to mutate scenarios, saves, or calibration truth.
+
 **MISSING OFFICER RATINGS ARE UNREPORTED, NOT BAD COMMANDERS (2026-06-23).** Absent competence/aggression/defense/reliability data can reach UI read-models. Do instead: preserve it as unreported, render neutral `Unreported` / `Profile Unreported`, sort missing commander-selection ratings below reported ratings, use neutral presentation-only prep assumptions for missing aggressiveness, and do not synthesize compliance modifiers without political-reliability data.
 
 **SETUP AFTERMATH MUST BE QUIET EVERYWHERE (2026-06-23).** Setup-control/turn-zero summaries can carry battles, displacement, formations, supply, and signals as provenance. Do instead: gate every Turn Aftermath summary read through the narrated-summary boundary when `shouldNarrateTerritorySummary(...)` is false; only pending player actions may remain visible.

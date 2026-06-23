@@ -598,6 +598,13 @@ describe('GUI audit label discipline', () => {
       campaignKia: 12,
       campaignWia: 34,
       campaignMia: 5,
+      eliteCommander: {
+        name: 'Dzevad Rado',
+        competence: 4,
+        aggressiveness: 3,
+        defensive_skill: 3,
+        origin: 'military',
+      },
     } as unknown as FormationView;
 
     useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
@@ -606,7 +613,13 @@ describe('GUI audit label discipline', () => {
     fireEvent.click(screen.getAllByRole('button', { name: /101st Brigade/i })[0]);
 
     expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
+    expect(container.textContent).toContain('Elite commander');
+    expect(container.textContent).toContain('Dzevad Rado');
+    expect(container.textContent).toContain('Command 4');
+    expect(container.textContent).toContain('Tempo 3');
+    expect(container.textContent).toContain('Defense 3');
     expect(container.textContent).not.toMatch(/\bKIA\b|\bWIA\b|\bMIA\b/);
+    expect(container.textContent).not.toMatch(/\borigin\b|\bmilitary\b/i);
   });
 
   it('renders Army HQ equipment condition fractions as operational equipment counts', () => {

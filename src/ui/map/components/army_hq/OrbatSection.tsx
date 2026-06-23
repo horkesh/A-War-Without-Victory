@@ -15,6 +15,7 @@ import { sortRecentEngagements } from '../../utils/recentEngagements';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
+import { EliteCommanderSummary } from '../EliteCommanderSummary';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { compareLocalizedFormationNames, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
@@ -160,6 +161,10 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                     </div>
                 )}
             </div>
+
+            {b.eliteCommander && (
+                <EliteCommanderSummary commander={b.eliteCommander} compact />
+            )}
 
             {/* Equipment */}
             {comp && (comp.tanks > 0 || comp.artillery > 0) && (

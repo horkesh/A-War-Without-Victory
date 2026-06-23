@@ -130,6 +130,13 @@ export interface OfficerCombatRecordView {
     };
 }
 
+export interface EliteCommanderView {
+    name: string;
+    competence?: number;
+    aggressiveness?: number;
+    defensive_skill?: number;
+}
+
 export interface FormationView {
     id: string;
     faction: string;
@@ -163,6 +170,8 @@ export interface FormationView {
     notableMoments?: Array<{ turn: number; description: string }>;
     /** Brigade officer quality [0.05, 0.90] (Officers Phase E). */
     officer_quality?: number;
+    /** UI-only elite commander sidecar from OOB source rows; not persisted in save state. */
+    eliteCommander?: EliteCommanderView;
     /** True when brigade is in its home municipality (blocks attack/assault orders). */
     home_defense_active?: boolean;
     /** BFS hops from home_osid to current location_osid (from home_distance_cache). */

@@ -22,4 +22,21 @@ describe('playerFacingErrorCopy', () => {
       'The requested action could not be completed.',
     );
   });
+
+  it('redacts filesystem load failures before they reach player-facing surfaces', () => {
+    const raw = "Failed to load save file. ENOENT: no such file or directory, open 'C:\\Users\\User\\data\\derived\\operational\\operational_settlements.geojson'";
+    const copy = playerFacingErrorCopy(raw);
+
+    expect(copy).toBe('Required game data could not be found. Reinstall or verify the game files.');
+    expect(copy).not.toContain('ENOENT');
+    expect(copy).not.toContain('C:\\');
+    expect(copy).not.toContain('operational_settlements.geojson');
+  });
+
+  it('redacts absolute data paths even when the message is not an ENOENT', () => {
+    const copy = playerFacingErrorCopy('Failed to load: missing scenario file at path /tmp/foo.json');
+
+    expect(copy).toBe('Required game data could not be found. Reinstall or verify the game files.');
+    expect(copy).not.toContain('/tmp/foo.json');
+  });
 });
