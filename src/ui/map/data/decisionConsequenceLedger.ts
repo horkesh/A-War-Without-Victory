@@ -14,6 +14,7 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { t, type MessageKey } from '../i18n/index.js';
+import { playerFactionMatch } from './playerFactionMatch.js';
 
 export interface DecisionConsequenceCopyToken {
   key: MessageKey;
@@ -471,6 +472,24 @@ function playerFactionFromState(state: LoadedGameState): string | null {
   return typeof rawPlayerFaction === 'string' ? rawPlayerFaction : null;
 }
 
+function hasRawPlayerFiledDecision(
+  state: LoadedGameState,
+  eventId: string,
+  playerFaction: string | null,
+): boolean {
+  const rawLog = state.rawGameState?.military?.event_decision_log;
+  if (!Array.isArray(rawLog)) return true;
+  return rawLog.some((entry: {
+    event_id?: unknown;
+    decision_source?: unknown;
+    faction?: string | null;
+  }) => (
+    entry.event_id === eventId
+    && entry.decision_source === 'player'
+    && playerFactionMatch(entry.faction, playerFaction)
+  ));
+}
+
 function finiteReceiptNumber(value: unknown): number | null {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
@@ -550,9 +569,11 @@ export function buildDecisionConsequenceLedger(
 
   const records: DecisionConsequenceRecord[] = [];
   const formationDisplayMaps = buildFormationDisplayMaps(state.formations);
+  const playerFaction = playerFactionFromState(state);
 
   for (const event of state.firedEvents ?? []) {
     if (!event.isDecision) continue;
+    if (!hasRawPlayerFiledDecision(state, event.id, playerFaction)) continue;
     records.push({
       id: `event:${event.id}`,
       turn: event.turn,
@@ -673,7 +694,6 @@ export function buildDecisionConsequenceLedger(
     });
   }
 
-  const playerFaction = playerFactionFromState(state);
   const patronCuts = Array.isArray(state.rawGameState?.military?.patron_defiance_supply_cuts)
     ? state.rawGameState.military.patron_defiance_supply_cuts
     : [];

@@ -77,12 +77,13 @@ interface OperationHistoryEntry {
     objectives_logged_captured?: string[];
 }
 
-/** Ethnicity label for faction key. */
-function ethnicLabel(key: string): string {
-    if (key === 'RBiH' || key === 'Bosniak') return 'Bosniak';
-    if (key === 'RS' || key === 'Serb') return 'Serb';
-    if (key === 'HRHB' || key === 'Croat') return 'Croat';
-    return key;
+/** People label for faction or ethnicity key. */
+function peopleLabel(key: string): string {
+    if (key === 'RBiH' || key === 'Bosniak') return t('settlement.ethnicity.bosniaks');
+    if (key === 'RS' || key === 'Serb') return t('settlement.ethnicity.serbs');
+    if (key === 'HRHB' || key === 'Croat') return t('settlement.ethnicity.croats');
+    if (key === 'Other') return t('settlement.ethnicity.others');
+    return t('settlementTimeline.ethnicity.unknown');
 }
 
 /** Faction display name. */
@@ -357,11 +358,20 @@ export function buildSettlementTimeline(
     for (const phases of phasesByEth.values()) {
         for (const phase of phases) {
             if (phase.displaced > 0) {
-                const span = phase.endTurn > phase.startTurn ? ` (over ${phase.endTurn - phase.startTurn + 1} weeks)` : '';
+                const weeks = phase.endTurn - phase.startTurn + 1;
                 events.push({
                     turn: phase.startTurn,
                     type: 'displacement',
-                    title: `${phase.displaced.toLocaleString()} ${ethnicLabel(phase.eth)}s displaced${span}`,
+                    title: t(
+                        weeks > 1
+                            ? 'settlementTimeline.displacement.displacedOverWeeks'
+                            : 'settlementTimeline.displacement.displaced',
+                        {
+                            count: phase.displaced.toLocaleString(),
+                            people: peopleLabel(phase.eth),
+                            weeks,
+                        },
+                    ),
                     population: phase.displaced,
                     ethnicity: phase.eth,
                 });
@@ -369,12 +379,15 @@ export function buildSettlementTimeline(
             const dead = phase.killed + phase.fled;
             if (dead > 0) {
                 const parts: string[] = [];
-                if (phase.killed > 0) parts.push(`${phase.killed} killed`);
-                if (phase.fled > 0) parts.push(`${phase.fled} fled abroad`);
+                if (phase.killed > 0) parts.push(t('settlementTimeline.displacement.killed', { count: phase.killed }));
+                if (phase.fled > 0) parts.push(t('settlementTimeline.displacement.fledAbroad', { count: phase.fled }));
                 events.push({
                     turn: phase.startTurn,
                     type: 'civilian_killed',
-                    title: `${dead.toLocaleString()} ${ethnicLabel(phase.eth)} civilians lost`,
+                    title: t('settlementTimeline.displacement.civiliansLost', {
+                        count: dead.toLocaleString(),
+                        people: peopleLabel(phase.eth),
+                    }),
                     detail: parts.join(', '),
                     population: dead,
                     ethnicity: phase.eth,
@@ -394,8 +407,8 @@ export function buildSettlementTimeline(
                 turn: op.started_turn,
                 type: 'operation_target',
                 faction: op.faction,
-                title: `${opName} launched`,
-                detail: `${factionName(op.faction)} targeting this area`,
+                title: t('settlementTimeline.operation.launched', { operation: opName }),
+                detail: t('settlementTimeline.operation.targetingArea', { faction: factionName(op.faction) }),
             });
         }
         if (captured && EVENT_OWNED_FALL_OSIDS.has(osid)) {
@@ -403,8 +416,8 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${opName} — operation context recorded`,
-                detail: 'Control change is owned by the historical event receipt.',
+                title: t('settlementTimeline.operation.contextRecorded', { operation: opName }),
+                detail: t('settlementTimeline.operation.contextRecordedDetail'),
                 outcome: op.outcome,
             });
         } else if (captured && loggedCaptured) {
@@ -412,7 +425,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${opName} — objective captured`,
+                title: t('settlementTimeline.operation.objectiveCaptured', { operation: opName }),
                 outcome: op.outcome,
             });
         } else if (captured) {
@@ -420,7 +433,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${opName} - objective held at operation close`,
+                title: t('settlementTimeline.operation.objectiveHeldAtClose', { operation: opName }),
                 outcome: op.outcome,
             });
         } else if (targeted && op.ended_turn > 0) {
@@ -428,7 +441,7 @@ export function buildSettlementTimeline(
                 turn: op.ended_turn,
                 type: 'operation_resolved',
                 faction: op.faction,
-                title: `${opName} — objective not taken`,
+                title: t('settlementTimeline.operation.objectiveNotTaken', { operation: opName }),
                 outcome: op.outcome,
             });
         }
@@ -469,8 +482,11 @@ export function buildSettlementTimeline(
                         events.push({
                             turn: d.turn,
                             type: 'ethnic_shift',
-                            title: `Ethnic majority shifted`,
-                            detail: `${preWarMajority.eth} → ${curMajority.eth}`,
+                            title: t('settlementTimeline.ethnicShift.title'),
+                            detail: t('settlementTimeline.ethnicShift.detail', {
+                                from: peopleLabel(preWarMajority.eth),
+                                to: peopleLabel(curMajority.eth),
+                            }),
                         });
                         shiftDetected = true;
                     }

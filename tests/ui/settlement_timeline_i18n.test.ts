@@ -169,4 +169,49 @@ describe('SettlementTimeline localization', () => {
     expect(container.textContent).toContain('Unknown force attacked ARBiH');
     expect(container.textContent).not.toMatch(/raw_unknown_force|raw_mechanism_id|raw_attacker_force|raw_battle_outcome/);
   });
+
+  it('localizes displacement operation and ethnic-shift rows in BCS mode without English fragments', () => {
+    setLocale('bcs');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [
+        { turn: 6, origin_osid: 'op:test:test_1', ethnicity: 'Bosniak', displaced: 40, killed: 3, fled_abroad: 2, settled: 0 },
+        { turn: 7, origin_osid: 'op:test:test_1', ethnicity: 'Bosniak', displaced: 60, killed: 0, fled_abroad: 0, settled: 0 },
+      ],
+      [],
+      [{
+        operation_name: 'operation_raw_id',
+        operation_display_name: 'Operacija Proboj',
+        corps_id: 'arbih_1st_corps',
+        faction: 'RBiH',
+        started_turn: 5,
+        ended_turn: 8,
+        outcome: 'victory',
+        objectives_targeted: ['op:test:test_1'],
+        objectives_captured: ['op:test:test_1'],
+      }],
+      [],
+      [],
+      [],
+      [],
+      { bosniaks: 140, serbs: 120, croats: 0, others: 0 },
+      null,
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('Operacija Proboj pokrenuta');
+    expect(copy).toContain('ARBiH cilja ovo podrucje');
+    expect(copy).toContain('Operacija Proboj - cilj drzan na kraju operacije');
+    expect(copy).toContain('100 raseljenih: Bosnjaci tokom 2 sedmice');
+    expect(copy).toContain('5 civila izgubljeno: Bosnjaci');
+    expect(copy).toContain('3 ubijeno, 2 izbjeglo u inostranstvo');
+    expect(copy).toContain('Etnicka vecina promijenjena');
+    expect(copy).toContain('Bosnjaci -> Srbi');
+    expect(copy).not.toMatch(/launched|targeting this area|objective held|displaced|over \d+ weeks|killed|fled abroad|civilians lost|Ethnic majority shifted/);
+    expect(copy).not.toContain('operation_raw_id');
+  });
 });

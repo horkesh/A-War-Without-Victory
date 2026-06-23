@@ -61,6 +61,29 @@ describe('decision consequence trail', () => {
     expect(JSON.stringify(ledger)).not.toMatch(/pending_required_decisions|_/);
   });
 
+  it('filters fired decision consequences to player-authored decisions for the loaded faction', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RBiH',
+      rawGameState: {
+        meta: { player_faction: 'RBiH' },
+        military: {
+          event_decision_log: [
+            { event_id: 'rbih_state_identity', response_id: 'civic', faction: 'RBiH', decision_source: 'player', turn: 0 },
+            { event_id: 'rs_strategic_goals', response_id: 'adopt_goals', faction: 'RS', decision_source: 'player', turn: 0 },
+            { event_id: 'hrhb_political_goal', response_id: 'historical_default', faction: 'HRHB', decision_source: 'bot_ai_default', turn: 0 },
+          ],
+        },
+      } as any,
+      firedEvents: [
+        { id: 'rbih_state_identity', turn: 0, title: 'What Is Bosnia?', narrative: '', category: 'political', effects: [], isDecision: true },
+        { id: 'rs_strategic_goals', turn: 0, title: 'Six Strategic Goals', narrative: '', category: 'political', effects: [], isDecision: true },
+        { id: 'hrhb_political_goal', turn: 0, title: 'Croat Political Goal', narrative: '', category: 'political', effects: [], isDecision: true },
+      ],
+    }), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['event:rbih_state_identity']);
+  });
+
   it('sanitizes raw authored event effect descriptions before filing consequence records', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       firedEvents: [

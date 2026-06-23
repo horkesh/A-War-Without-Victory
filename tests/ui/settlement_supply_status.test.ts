@@ -6,8 +6,12 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { SettlementDetailContent } from '../../src/ui/map/components/SettlementDetailContent.js';
 import { buildOsidSupplyExplanation } from '../../src/ui/map/data/osidSupplyExplanation.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
-afterEach(() => cleanup());
+afterEach(() => {
+  cleanup();
+  setLocale('en');
+});
 
 const BASE_PROPS = {
   osid: 'op:test:a',
@@ -112,5 +116,46 @@ describe('SettlementDetailContent supply status surface', () => {
     }));
 
     expect(screen.getByText(/101st Brigade stationed at settlement/i)).toBeTruthy();
+  });
+
+  it('uses recent control events when full control history is absent', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      recentControlEvents: [{ turn: 4, from: 'RBiH', to: 'RS', mechanism: 'combat' }],
+    }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Timeline/i }));
+
+    expect(screen.getByText('VRS took control')).toBeTruthy();
+    expect(screen.queryByText('No recorded events at this settlement.')).toBeNull();
+  });
+
+  it('renders localized ethnicity and terrain labels instead of raw data labels', () => {
+    setLocale('bcs');
+
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_name: 'Testmun',
+          population_total: 100,
+          population_bosniaks: 45,
+          population_serbs: 35,
+          population_croats: 15,
+          population_others: 5,
+          zone_type: 'rural_dense',
+          terrain_friction_index: 0.4,
+        },
+      },
+    }));
+
+    const panel = screen.getByTestId('settlement-detail-panel');
+    expect(panel.textContent).toContain('Bosnjaci');
+    expect(panel.textContent).toContain('Srbi');
+    expect(panel.textContent).toContain('Hrvati');
+    expect(panel.textContent).toContain('Ostali');
+    expect(panel.textContent).toContain('Gusto naseljeno ruralno podrucje');
+    expect(panel.textContent).toContain('Odbrana +30%');
+    expect(panel.textContent).not.toMatch(/Bosniak|Serb|Croat|Other|Rural Dense|\+30% Def|rural_dense/);
   });
 });

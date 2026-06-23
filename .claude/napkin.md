@@ -76,7 +76,7 @@
 
 **TOOLTIP PLAYER COPY (2026-06-20).** Formation/front tooltips are normal play surfaces, not staff shorthand overlays. Do instead: map posture, order, density, pressure, readiness, defense preview, and contact copy through `tooltip.*` labels; keep raw posture ids, `AoR`, `THIN/DENSE`, `Active Def.`, and `reactive` out of normal tooltip copy.
 
-**SETTLEMENT TIMELINE CONTROL/BATTLE/MOVEMENT COPY (2026-06-20).** Timeline control, battle, and brigade movement rows are localized player records, not English string assembly. Do instead: route start-control, control-change, mechanism, battle title/detail/outcome, capture suffix, and movement arrived/departed copy through `settlementTimeline.*` i18n keys; unknown factions/outcomes should use neutral fallback copy instead of raw ids.
+**SETTLEMENT TIMELINE GENERATED COPY (2026-06-20; updated 2026-06-23).** Timeline control, battle, movement, displacement, operation-context, and ethnic-shift rows are localized player records, not English string assembly. Do instead: route generated rows through `settlementTimeline.*` i18n keys, preserve authored operation display names, merge `recentControlEvents` when full history is absent, and use neutral fallbacks for unknown factions/outcomes/groups instead of raw ids.
 
 **EVENT / ORDER / RESERVE LABEL COPY (2026-06-20).** Event effects, staged orders, and reserve requests are player command copy, not enum displays. Do instead: map known effect kinds, staged order types/targets, posture names, and reserve purpose/reason ids through localized/player-safe labels; unknowns should become neutral recorded-effect/request copy, not raw ids.
 
@@ -1556,8 +1556,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, sector assignment projections, Force Readiness, settlement/tooltip unit lists, Personnel totals, Supply drain, Ops commander strength, Game Over standings, and map stack overlays; `status: active` plus `readiness: forming` is not fielded, hidden enemy units stay hidden from stacks, and missing adapter lifecycle should be `unreported`.
 1. **[2026-06-23] Opening brief is a turn-zero visible surface**
    Do instead: Gate event-decision auto-launch only on `shouldShowOpeningBrief(...)`, not a raw dismissed flag; later-turn loads must not hide pending decisions behind an invisible opening brief.
-1. **[2026-06-22] Pending foundational decisions are not filed history**
-   Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex unlocks, and Dilemma Spine faced state should wait for `event_decision_log` or a non-pending event.
+1. **[2026-06-22] Pending, bot, and foreign decisions are not player-filed history**
+   Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex response atoms, Dilemma Spine faced state, and filed decision receipts should require `event_decision_log.decision_source === 'player'` plus loaded-player-faction ownership, or a non-decision event.
 1. **[2026-06-06] Desk consequence receipts route by filed surface**
    Do instead: Use `recordTarget` from the shared decision consequence ledger for receipt actions: `chronicle` opens Chronicle, `records` opens Army HQ Records. Localize the route chrome; do not add another archive surface for the same receipt.
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

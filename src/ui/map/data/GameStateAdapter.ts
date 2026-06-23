@@ -2299,15 +2299,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             : deriveHistoricalComparison(state);
     }
 
-    // Phase 3 Thread 1: project player/bot decisions as `${event_id}:${response_id}`
+    // Phase 3 Thread 1: project player-authored decisions as `${event_id}:${response_id}`
     // for codex RESPONSE: condition atoms. Set membership (.has) is order-independent,
     // so iteration order of the source array does not affect resolver output.
     const decisionResponsesSet = new Set<string>(
-        (state.military?.event_decision_log ?? []).map(
-            (d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`,
-        ),
+        (state.military?.event_decision_log ?? [])
+            .filter((d: { decision_source?: string; faction?: string | null }) => (
+                d.decision_source === 'player' && playerFactionMatch(d.faction, playerFaction)
+            ))
+            .map((d: { event_id: string; response_id: string }) => `${d.event_id}:${d.response_id}`),
     );
-    const firedEventsView = deriveFiredEvents(state);
+    const firedEventsView = deriveFiredEvents(state, playerFaction);
     // Phase 3 Thread 2 "the dilemma spine": pure projection of the seven keystone
     // dilemmas from already-derived UI fields (firedEvents, decisionResponses,
     // raw causality substrate). Always present (full not-yet-faced backbone on
@@ -2429,7 +2431,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         strategicDimensions: deriveStrategicDimensions(state),
         negotiatingCapital: deriveNegotiatingCapital(state),
         eventFlags: state.military?.event_flags ?? undefined,
-        // Phase 3 Thread 1: project player/bot decisions as `${event_id}:${response_id}`
+        // Phase 3 Thread 1: project player-authored decisions as `${event_id}:${response_id}`
         // for codex RESPONSE: condition atoms. Set membership (.has) is order-independent,
         // so iteration order of the source array does not affect resolver output.
         decisionResponses: decisionResponsesSet,
@@ -2964,30 +2966,44 @@ function getStaticEventDisplayInfo(eventId: string): StaticEventDisplayInfo | nu
     return STATIC_EVENT_DISPLAY_CATALOG.get(eventId) ?? null;
 }
 
-function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
+function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGameState['firedEvents'] {
     const firedIds = state.military?.fired_event_ids as string[] | undefined;
     const decisionLog = (state.military?.event_decision_log ?? []) as Array<{
         event_id?: string;
         response_id?: string;
         turn?: number;
         decision_source?: string;
+        faction?: string | null;
     }>;
     const pendingDecisionIds = new Set<string>(
-        ((state.military?.pending_event_decisions ?? []) as Array<{ event_id?: unknown }>)
+        ((state.military?.pending_event_decisions ?? []) as Array<{ event_id?: unknown; faction?: string | null }>)
+            .filter((decision) => playerFactionMatch(decision.faction, playerFaction))
             .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
             .filter(Boolean),
     );
+    const playerDecisionLog = decisionLog.filter((decision) => (
+        decision.decision_source === 'player' && playerFactionMatch(decision.faction, playerFaction)
+    ));
     const recordedDecisionIds = new Set<string>(
+        playerDecisionLog
+            .map((decision) => typeof decision.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
+    const nonPlayerDecisionIds = new Set<string>(
         decisionLog
+            .filter((decision) => !(
+                decision.decision_source === 'player' && playerFactionMatch(decision.faction, playerFaction)
+            ))
             .map((decision) => typeof decision.event_id === 'string' ? decision.event_id : '')
             .filter(Boolean),
     );
     const orderedIds: string[] = [];
     for (const id of firedIds ?? []) {
         if (pendingDecisionIds.has(id) && !recordedDecisionIds.has(id)) continue;
+        if (nonPlayerDecisionIds.has(id) && !recordedDecisionIds.has(id)) continue;
         if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
     }
-    for (const decision of decisionLog) {
+    for (const decision of playerDecisionLog) {
         const id = decision.event_id;
         if (typeof id === 'string' && id.trim() && !orderedIds.includes(id)) orderedIds.push(id);
     }
@@ -3012,7 +3028,7 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
         }
     }
     const decisionInfo = new Map<string, { turn: number; responseId: string; source: string }>();
-    for (const decision of decisionLog) {
+    for (const decision of playerDecisionLog) {
         if (typeof decision.event_id !== 'string' || typeof decision.response_id !== 'string') continue;
         const turn = typeof decision.turn === 'number' ? decision.turn : 0;
         const source = typeof decision.decision_source === 'string' ? decision.decision_source : 'recorded';
