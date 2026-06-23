@@ -5,7 +5,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
-import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
+import { SelectionPanel, resolveSelectionPanelMunicipalityId } from '../../src/ui/map/components/SelectionPanel.js';
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
 import { CorpsCard } from '../../src/ui/map/components/CorpsCard.js';
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
@@ -167,6 +167,41 @@ describe('GUI audit label discipline', () => {
 
     expect(selection.container.textContent).not.toMatch(/Phase E|weapons shipment|staff priority|croatian support package|local support/i);
     expect(screen.queryByText(/Phase E/)).toBeNull();
+  });
+
+  it('targets settlement support by metadata municipality and keeps the assigned panel rail', () => {
+    const state = makeState({
+      player_faction: 'RBiH',
+      controlBySettlement: { 'op:legacy_slug:actual_cell': 'RBiH' },
+    });
+    const properties = {
+      'op:legacy_slug:actual_cell': {
+        osid: 'op:legacy_slug:actual_cell',
+        settlement_name: 'Actual Cell',
+        mun1990_id: 'actual_municipality',
+        mun1990_name: 'Actual Municipality',
+        population_total: 1000,
+      },
+    };
+
+    expect(resolveSelectionPanelMunicipalityId('op:legacy_slug:actual_cell', properties)).toBe('actual_municipality');
+
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedOsid: 'op:legacy_slug:actual_cell',
+      osidDisplayNames: { 'op:legacy_slug:actual_cell': 'Actual Cell' },
+      osidPropertiesMap: properties,
+    });
+
+    const selection = render(createElement(SelectionPanel, { railSlot: 'secondary' }));
+    const panel = selection.container.querySelector('[data-testid="selection-panel"]') as HTMLElement | null;
+    const localSupport = selection.container.querySelector('[data-testid="settlement-local-support"]');
+
+    expect(panel?.getAttribute('data-rail-slot')).toBe('secondary');
+    expect(panel?.style.right).toBe('25.5rem');
+    expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
+    expect(selection.container.textContent).toContain('Actual Municipality');
+    expect(selection.container.textContent).not.toContain('Legacy Slug');
   });
 
   it('renames the opportunity pulse reserve-crisis metric instead of exposing T3 internals', () => {
@@ -571,6 +606,7 @@ describe('GUI audit label discipline', () => {
       fatigue: 4,
       morale: 60,
       createdTurn: 0,
+      entrenchment_turns: 1.5,
       composition: {
         infantry: 1200,
         tanks: 10,
@@ -619,7 +655,11 @@ describe('GUI audit label discipline', () => {
 
     expect(orbatContainer.textContent).toContain('8/10');
     expect(orbatContainer.textContent).toContain('3/5');
+    expect(orbatContainer.textContent).toContain('8/10 operational');
+    expect(orbatContainer.textContent).toContain('3/5 operational');
+    expect(orbatContainer.textContent).toContain('1.5 turns');
     expect(orbatContainer.textContent).not.toContain('1/10');
+    expect(orbatContainer.textContent).not.toMatch(/\bOP\b|\b1\.5T\b/);
   });
 
   it('renders Army HQ sector length as front segments instead of kilometers', () => {
@@ -743,6 +783,7 @@ describe('GUI audit label discipline', () => {
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
     expect(store.armyHQOpen).toBe(false);
 
     cleanup();
@@ -757,6 +798,7 @@ describe('GUI audit label discipline', () => {
     store = useGameStore.getState();
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
     expect(store.armyHQOpen).toBe(false);
   });
 
@@ -871,9 +913,31 @@ describe('GUI audit label discipline', () => {
     expect(enMessages['sectorsSection.fatShort']).not.toMatch(/\bFAT\b/);
     expect(enMessages['sectorsSection.persShort']).not.toMatch(/\bPERS\b/);
     expect(enMessages['sectorsSection.personnelLosses']).not.toMatch(/\bPERS\b/);
+    expect(enMessages['armyHqCorps.orbat']).toBe('Order of battle');
+    expect(enMessages['orbat.loc']).toBe('Location');
+    expect(enMessages['orbat.homeDef']).toBe('Home defense');
+    expect(enMessages['orbat.title']).toBe('Order of battle');
+    expect(enMessages['orbat.turnsShort']).not.toMatch(/\bT\b/);
+    expect(enMessages['orbat.operationalCount']).not.toMatch(/\bOP\b/);
+    expect(enMessages['operationsSection.operationalOrbat']).not.toMatch(/\bORBAT\b/);
+    expect(enMessages['corpsCard.orbat']).toBe('Order of battle');
+    expect(enMessages['sectorsSection.stance.activeDefense']).toBe('Active defense');
+    expect(enMessages['corpsFront.tab.forces']).toBe('Order of battle');
+    expect(enMessages['formationDetail.overridePermanentHelp']).not.toMatch(/frontline position/i);
+    expect(enMessages['formationDetail.overridePermanentHelp']).toMatch(/sector command responsibility/i);
     expect(bcsMessages['situation.operationalSitrep']).not.toMatch(/\bSITREP\b/);
     expect(bcsMessages['decisionRoom.category.operational']).not.toMatch(/\bSITREP\b/);
     expect(bcsMessages['warroom.status.category.operational']).not.toMatch(/\bSITREP\b/);
+    expect(bcsMessages['armyHqCorps.orbat']).not.toMatch(/\bORBAT\b/);
+    expect(bcsMessages['orbat.loc']).not.toMatch(/\bLOK\b/);
+    expect(bcsMessages['orbat.homeDef']).not.toMatch(/\bDOM ODB\b/);
+    expect(bcsMessages['orbat.title']).not.toMatch(/\bORBAT\b/);
+    expect(bcsMessages['orbat.turnsShort']).not.toMatch(/\bT\b/);
+    expect(bcsMessages['orbat.operationalCount']).not.toMatch(/\bOP\b/);
+    expect(bcsMessages['operationsSection.operationalOrbat']).not.toMatch(/\bORBAT\b/);
+    expect(bcsMessages['corpsCard.orbat']).not.toMatch(/\bORBAT\b/i);
+    expect(bcsMessages['sectorsSection.stance.activeDefense']).not.toMatch(/\bAKT ODB\b/);
+    expect(bcsMessages['corpsFront.tab.forces']).not.toMatch(/\bORBAT\b/);
     expect(bcsMessages['corpsFront.opsec']).not.toMatch(/\bOPSEC\b/);
     expect(bcsMessages['situation.opsecActive']).not.toMatch(/\bOPSEC\b/);
     expect(bcsMessages['presidentialToolbar.auth']).not.toMatch(/\bAUTH\b/);

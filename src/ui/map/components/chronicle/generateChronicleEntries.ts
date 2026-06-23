@@ -47,6 +47,7 @@ import { t, type MessageKey } from '../../i18n/index.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
 import type { GameState } from '../../../../state/game_state.js';
 import { turnToDateString } from '../../utils/formatters.js';
+import { playerFactionMatch } from '../../data/playerFactionMatch.js';
 
 import {
     getPlayerSafeDisplacementGroupLabel,
@@ -432,14 +433,98 @@ function buildConsequenceReceiptEntries(
     return entries;
 }
 
-function collectDecisionEventIds(state: any): Set<string> {
+type RawDecisionLogEntry = {
+    event_id?: unknown;
+    decision_source?: unknown;
+    faction?: string | null;
+};
+
+function collectDecisionEventIds(
+    state: any,
+    eventCatalog: ReadonlyMap<string, EventDefinition> | undefined,
+): Set<string> {
     const ids = new Set<string>();
     for (const event of Array.isArray(state?.firedEvents) ? state.firedEvents : []) {
         if (event?.isDecision === true && typeof event.id === 'string') {
             ids.add(event.id);
         }
     }
+    if (eventCatalog) {
+        for (const [id, def] of eventCatalog.entries()) {
+            if (Array.isArray(def.response_options) && def.response_options.length > 0) {
+                ids.add(id);
+            }
+        }
+    }
+    for (const entry of rawDecisionLog(state) ?? []) {
+        if (typeof entry.event_id === 'string' && entry.event_id) {
+            ids.add(entry.event_id);
+        }
+    }
+    for (const decision of collectPendingEventDecisions(state)) {
+        if (typeof decision.event_id === 'string' && decision.event_id) {
+            ids.add(decision.event_id);
+        }
+    }
     return ids;
+}
+
+function rawDecisionLog(state: any): RawDecisionLogEntry[] | null {
+    const rawLog = state?.rawGameState?.military?.event_decision_log;
+    if (Array.isArray(rawLog)) return rawLog as RawDecisionLogEntry[];
+    const stateLog = state?.military?.event_decision_log;
+    return Array.isArray(stateLog) ? stateLog as RawDecisionLogEntry[] : null;
+}
+
+function collectPendingEventDecisions(state: any): Array<{ event_id?: unknown }> {
+    const decisions: Array<{ event_id?: unknown }> = [];
+    for (const source of [
+        state?.pendingEventDecisions,
+        state?.rawGameState?.military?.pending_event_decisions,
+    ]) {
+        if (Array.isArray(source)) decisions.push(...source);
+    }
+    return decisions;
+}
+
+function hasPendingDecisionEvent(state: any, eventId: string): boolean {
+    return collectPendingEventDecisions(state).some((decision) => decision.event_id === eventId);
+}
+
+function playerFactionFromState(state: any): string | null {
+    if (typeof state?.player_faction === 'string') return state.player_faction;
+    const rawPlayerFaction = state?.rawGameState?.meta?.player_faction;
+    return typeof rawPlayerFaction === 'string' ? rawPlayerFaction : null;
+}
+
+function hasPlayerFiledDecision(
+    log: RawDecisionLogEntry[] | null,
+    eventId: string,
+    playerFaction: string | null,
+): boolean {
+    if (!log) return false;
+    return log.some((entry) => (
+        entry.event_id === eventId
+        && entry.decision_source === 'player'
+        && playerFactionMatch(entry.faction, playerFaction)
+    ));
+}
+
+function shouldSuppressTurnSummaryDecisionEvent(
+    state: any,
+    eventId: string,
+    playerFaction: string | null,
+    decisionEventIds: ReadonlySet<string>,
+): boolean {
+    if (!decisionEventIds.has(eventId)) return false;
+
+    const ledgerWillRenderPlayerDecision = Array.isArray(state?.firedEvents)
+        && state.firedEvents.some((event: any) => event?.id === eventId && event?.isDecision === true);
+    if (ledgerWillRenderPlayerDecision) return true;
+
+    const log = rawDecisionLog(state);
+    if (!log) return hasPendingDecisionEvent(state, eventId);
+    return !hasPlayerFiledDecision(log, eventId, playerFaction);
 }
 
 export function generateChronicleEntries(
@@ -452,8 +537,8 @@ export function generateChronicleEntries(
 
     const turnSummaries = Array.isArray(state.turnSummaries) ? state.turnSummaries : [];
     const entries: ChronicleEntry[] = [];
-    const playerFaction = typeof state.player_faction === 'string' ? state.player_faction : null;
-    const decisionEventIds = collectDecisionEventIds(state);
+    const playerFaction = playerFactionFromState(state);
+    const decisionEventIds = collectDecisionEventIds(state, eventCatalog);
 
     for (const summary of turnSummaries) {
         const turn = summary.turn;
@@ -485,7 +570,7 @@ export function generateChronicleEntries(
         if (Array.isArray(summary.events_fired)) {
             for (const event of summary.events_fired) {
                 const id = event.id || '';
-                if (decisionEventIds.has(id)) continue;
+                if (shouldSuppressTurnSummaryDecisionEvent(state, id, playerFaction, decisionEventIds)) continue;
                 const title = getPlayerSafeDisplayLabel(event.text, 'Recorded event');
 
                 if (isDiplomaticEvent(id)) {

@@ -109,7 +109,7 @@ describe('command drilldown routing', () => {
     useGameStore.setState(useGameStore.getInitialState());
   });
 
-  it('keeps CorpsDetail ORBAT brigade clicks inside the corps formation route', () => {
+  it('keeps CorpsDetail order-of-battle brigade clicks inside the corps formation route', () => {
     useGameStore.setState({
       loadedGameState: makeState(),
       selectedArmyId: 'RBiH',
@@ -118,7 +118,7 @@ describe('command drilldown routing', () => {
 
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     const brigadeRow = container.querySelector('[data-formation-id="rbih_1_brigade"]');
     expect(brigadeRow).toBeTruthy();
     fireEvent.click(brigadeRow as Element);
@@ -129,7 +129,7 @@ describe('command drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'formation' });
   });
 
-  it('filters non-fielded brigades from CorpsDetail ORBAT and active totals', () => {
+  it('filters non-fielded brigades from CorpsDetail order of battle and active totals', () => {
     useGameStore.setState({
       loadedGameState: makeState(),
       selectedArmyId: 'RBiH',
@@ -141,7 +141,7 @@ describe('command drilldown routing', () => {
     expect(container.textContent).toMatch(/1[,.]200/);
     expect(container.textContent).not.toMatch(/2[,.]100/);
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
 
     expect(container.textContent).toContain('1st Brigade');
     expect(container.textContent).not.toContain('Destroyed Brigade');

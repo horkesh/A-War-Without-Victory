@@ -192,7 +192,7 @@ export function PersonnelContent() {
                                             onClick={() => {
                                                 inspectOnField(useGameStore.getState(), command.kind === 'army_hq'
                                                     ? { kind: 'field-formation-in-army-reserve', formationId: b.id, armyHqId: command.id }
-                                                    : { kind: 'field-formation-in-corps', formationId: b.id, corpsId: command.id });
+                                                    : { kind: 'field-formation-in-corps', formationId: b.id, corpsId: command.id, osid: b.location_osid ?? null });
                                             }}
                                         >
                                             <span className="text-text-secondary truncate mr-2">{getLocalizedFormationName(b, locale)}</span>

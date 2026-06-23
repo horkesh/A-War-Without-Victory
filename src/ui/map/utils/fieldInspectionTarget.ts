@@ -4,7 +4,7 @@ export type FieldInspectionTarget =
   | { kind: 'field-sector-in-corps'; sectorId: string; corpsId: string; osid?: string | null }
   | { kind: 'field-formation'; formationId: string }
   | { kind: 'field-formation-at-settlement'; formationId: string; osid: string }
-  | { kind: 'field-formation-in-sector'; formationId: string; sectorId: string; corpsId?: string | null }
-  | { kind: 'field-formation-in-corps'; formationId: string; corpsId: string }
+  | { kind: 'field-formation-in-sector'; formationId: string; sectorId: string; corpsId?: string | null; osid?: string | null }
+  | { kind: 'field-formation-in-corps'; formationId: string; corpsId: string; osid?: string | null }
   | { kind: 'field-formation-in-army-reserve'; formationId: string; armyHqId: string }
   | { kind: 'field-operation'; operationKey: string };

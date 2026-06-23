@@ -178,4 +178,58 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).not.toContain('//');
     expect(container.textContent).not.toContain('RES //');
   });
+
+  it('uses command-directed brigades in collapsed and expanded sector density', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:covered',
+      display_name: 'Main front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      length_edges: 4,
+      density: 0,
+      combat_strength_class: 'thin',
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'directed_brigade',
+        faction: 'RBiH',
+        name: 'Directed Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+        sectorOverrideId: 'sector:arbih_1st_corps:covered',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+    const row = screen.getByTestId('army-hq-sector-row');
+
+    expect(row.getAttribute('data-current-brigade-count')).toBe('1');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-command-directed-brigade-count')).toBe('1');
+    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('1 command-directed');
+    expect(container.textContent).toContain('density 0.25');
+    expect(container.textContent).toContain('Brigades per front segment: 0.25');
+    expect(container.textContent).toContain('Troop density: 0.25');
+  });
 });

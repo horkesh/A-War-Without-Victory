@@ -29,6 +29,7 @@ describe('gameStore field inspection routes', () => {
       kind: 'field-formation-in-sector',
       formationId: 'brigade_alpha',
       sectorId: 'sector_alpha',
+      osid: 'sarajevo_1',
     })).toBe(true);
 
     expect(useGameStore.getState()).toMatchObject({
@@ -38,6 +39,7 @@ describe('gameStore field inspection routes', () => {
       isOperationsPanelOpen: false,
       selectedFormationId: 'brigade_alpha',
       selectedCorpsFrontSectorId: 'sector_alpha',
+      selectedOsid: 'sarajevo_1',
       selectedOperationKey: null,
       operationTargetOsids: [],
       focusedAftermathTurn: null,

@@ -1,6 +1,7 @@
 import { afterEach, describe, it, expect } from 'vitest';
 import { generateChronicleEntries } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
 import { setLocale } from '../src/ui/map/i18n/index.js';
+import type { EventDefinition } from '../src/sim/events/event_types.js';
 
 afterEach(() => {
     setLocale('en');
@@ -26,6 +27,28 @@ function makeTurnSummary(turn: number, overrides: Record<string, any> = {}) {
         supply_transitions: [],
         ...overrides,
     };
+}
+
+function makeDecisionCatalogEntry(id: string, title: string): EventDefinition {
+    return {
+        id,
+        title,
+        trigger: { turn_min: 1, phase: 'war' },
+        effect: { kind: 'narrative', text: 'noop' },
+        response_options: [{ id: 'historical_default', label: 'Historical default', effects: [] }],
+    } as unknown as EventDefinition;
+}
+
+function buildDecisionEventDef(id: string): EventDefinition {
+    return {
+        id,
+        title: id,
+        trigger: { turn_min: 1, phase: 'war' },
+        effect: { kind: 'narrative', text: 'noop' },
+        family: 'test',
+        source_tier: 'synthetic',
+        response_options: [{ id: 'accept', label: 'Accept', effects: [] }],
+    } as unknown as EventDefinition;
 }
 
 describe('generateChronicleEntries', () => {
@@ -79,6 +102,199 @@ describe('generateChronicleEntries', () => {
         expect(political.length).toBeGreaterThan(0);
         expect(political[0].headline).toBe(true);
         expect(political[0].title).toBe('The Assembly Speaks');
+    });
+
+    it('does not render bot or foreign decision events as generic Chronicle politics', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 5,
+            turnSummaries: [makeTurnSummary(5, {
+                events_fired: [{ id: 'hrhb_political_goal', text: 'Croat leadership chooses its political line' }],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RBiH' },
+                military: {
+                    event_decision_log: [{
+                        event_id: 'hrhb_political_goal',
+                        response_id: 'historical_default',
+                        decision_source: 'bot_ai_default',
+                        faction: 'HRHB',
+                        turn: 5,
+                    }],
+                },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['hrhb_political_goal', makeDecisionCatalogEntry('hrhb_political_goal', 'Croat leadership chooses its political line')],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries.find((entry) => entry.title === 'Croat leadership chooses its political line')).toBeUndefined();
+        expect(entries.filter((entry) => entry.type === 'political')).toHaveLength(0);
+    });
+
+    it('keeps non-decision turn-summary events visible when a catalog is present', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 5,
+            turnSummaries: [makeTurnSummary(5, {
+                events_fired: [{ id: 'front_pressure_report', text: 'Front pressure report filed' }],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RBiH' },
+                military: { event_decision_log: [] },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['front_pressure_report', {
+                id: 'front_pressure_report',
+                title: 'Front pressure report filed',
+                trigger: { turn_min: 1, phase: 'war' },
+                effect: { kind: 'narrative', text: 'noop' },
+            } as unknown as EventDefinition],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries).toContainEqual(expect.objectContaining({
+            type: 'political',
+            title: 'Front pressure report filed',
+        }));
+    });
+
+    it('does not render pending unanswered decision fired IDs as generic Chronicle events', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 5,
+            turnSummaries: [makeTurnSummary(5, {
+                events_fired: [
+                    { id: 'rbih_state_identity', text: 'What Is Bosnia?' },
+                    { id: 'barracks_seized', text: 'Barracks seized' },
+                ],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RBiH' },
+                military: {
+                    fired_event_ids: ['rbih_state_identity'],
+                    pending_event_decisions: [{
+                        event_id: 'rbih_state_identity',
+                        faction: 'RBiH',
+                        requires_player_response: true,
+                    }],
+                    event_decision_log: [],
+                },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['rbih_state_identity', buildDecisionEventDef('rbih_state_identity')],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries.some(e => e.title === 'What Is Bosnia?')).toBe(false);
+        expect(entries.some(e => e.title === 'Barracks seized')).toBe(true);
+    });
+
+    it('does not render bot or foreign decision log rows as generic Chronicle events', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 6,
+            turnSummaries: [makeTurnSummary(6, {
+                events_fired: [
+                    { id: 'rs_strategic_goals', text: 'The Assembly Speaks' },
+                    { id: 'hrhb_political_goal', text: 'Herceg-Bosna Declares Its Goal' },
+                    { id: 'market_shelling', text: 'Market shelling reported' },
+                ],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RBiH' },
+                military: {
+                    event_decision_log: [
+                        {
+                            event_id: 'rs_strategic_goals',
+                            response_id: 'all_six',
+                            faction: 'RS',
+                            decision_source: 'bot_ai_default',
+                            turn: 6,
+                        },
+                        {
+                            event_id: 'hrhb_political_goal',
+                            response_id: 'croat_republic',
+                            faction: 'HRHB',
+                            decision_source: 'player',
+                            turn: 6,
+                        },
+                    ],
+                },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['rs_strategic_goals', buildDecisionEventDef('rs_strategic_goals')],
+            ['hrhb_political_goal', buildDecisionEventDef('hrhb_political_goal')],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries.some(e => e.title === 'The Assembly Speaks')).toBe(false);
+        expect(entries.some(e => e.title === 'Herceg-Bosna Declares Its Goal')).toBe(false);
+        expect(entries.some(e => e.title === 'Market shelling reported')).toBe(true);
+    });
+
+    it('renders a decision fired ID from turn summaries when the loaded player filed the matching decision row', () => {
+        const state = {
+            player_faction: 'RS',
+            turn: 7,
+            turnSummaries: [makeTurnSummary(7, {
+                events_fired: [{ id: 'rs_strategic_goals', text: 'The Assembly Speaks' }],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RS' },
+                military: {
+                    event_decision_log: [{
+                        event_id: 'rs_strategic_goals',
+                        response_id: 'all_six',
+                        faction: 'RS',
+                        decision_source: 'player',
+                        turn: 7,
+                    }],
+                },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['rs_strategic_goals', buildDecisionEventDef('rs_strategic_goals')],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries).toContainEqual(expect.objectContaining({
+            turn: 7,
+            type: 'political',
+            title: 'The Assembly Speaks',
+        }));
+    });
+
+    it('keeps legacy no-log turn-summary decision IDs when no ownership substrate exists', () => {
+        const state = {
+            player_faction: 'RS',
+            turn: 7,
+            turnSummaries: [makeTurnSummary(7, {
+                events_fired: [{ id: 'rs_strategic_goals', text: 'The Assembly Speaks' }],
+            })],
+            rawGameState: {
+                meta: { player_faction: 'RS' },
+                military: {
+                    fired_event_ids: ['rs_strategic_goals'],
+                },
+            },
+        };
+        const catalog = new Map<string, EventDefinition>([
+            ['rs_strategic_goals', buildDecisionEventDef('rs_strategic_goals')],
+        ]);
+
+        const entries = generateChronicleEntries(state as any, catalog);
+
+        expect(entries.some(e => e.title === 'The Assembly Speaks')).toBe(true);
     });
 
     it('filters minor battles (no territory flip, low casualties)', () => {

@@ -1,6 +1,6 @@
 /**
  * Corps detail panel. Shows when a corps is selected via header click.
- * Tabs: Overview · ORBAT · Sectors · Ops · Orders
+ * Tabs: Overview · order of battle · Sectors · Ops · Orders
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
@@ -136,7 +136,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
   const tabs = [
     { id: 'overview' as const, label: t('settlement.tab.overview') },
-    { id: 'orbat'    as const, label: 'ORBAT',   count: subordinates.length },
+    { id: 'orbat'    as const, label: t('orbat.title'), count: subordinates.length },
     { id: 'sectors'  as const, label: t('sectorsSection.title'), count: corpsSectors.length },
     { id: 'ops'      as const, label: t('corpsDetail.opsSnapshot'), count: corpsOps.length },
     { id: 'orders'   as const, label: t('corpsDetail.orders') },

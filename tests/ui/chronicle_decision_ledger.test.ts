@@ -131,6 +131,7 @@ describe('Chronicle decision ledger integration', () => {
       player_faction: 'RS',
       turnSummaries: [{ turn: 44, battles: [], events_fired: [], displacement_total: 0 }],
       rawGameState: {
+        meta: { player_faction: 'RS' },
         military: {
           patron_defiance_supply_cuts: [
             { faction: 'RS', turn: 44, cut_fraction: 0.35, support_after: 0.45 },
@@ -190,6 +191,7 @@ describe('Chronicle decision ledger integration', () => {
       player_faction: 'RBiH',
       turnSummaries: [{ turn: firedTurn, battles: [], events_fired: [], displacement_total: 0 }],
       rawGameState: {
+        meta: { player_faction: 'RBiH' },
         military: {
           fired_event_ids: ['cabinet_crisis', 'cabinet_aftershock'],
           closed_event_ids: [],

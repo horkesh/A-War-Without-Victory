@@ -755,10 +755,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const f = formationsRecord[id];
             const tags = (f.tags as string[]) ?? [];
 
-            let municipalityId: string | undefined;
+            let taggedMunicipalityId: string | undefined;
             for (const tag of tags) {
                 if (tag.startsWith('mun:')) {
-                    municipalityId = tag.slice(4);
+                    taggedMunicipalityId = tag.slice(4);
                     break;
                 }
             }
@@ -766,6 +766,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const ops = asLooseRecord(f.ops);
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
             const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
+            const home_osid = typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined;
+            const origin_mun = typeof f.origin_mun === 'string' && f.origin_mun.trim().length > 0 ? f.origin_mun.trim() : undefined;
+            const homeOsidMun = home_osid?.split(':')[1]?.trim() || undefined;
+            const municipalityId = origin_mun ?? homeOsidMun ?? taggedMunicipalityId;
             const supply_state = location_osid != null ? supplyStateByOsidView?.[location_osid] : undefined;
             const aorSettlementIds = brigadeAorByFormationId[id];
             const personnel = typeof f.personnel === 'number' ? f.personnel : undefined;
@@ -855,7 +859,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 fatigue: typeof ops?.fatigue === 'number' && Number.isFinite(ops.fatigue) ? ops.fatigue : 0,
                 status: typeof f.status === 'string' ? f.status : 'unreported',
                 createdTurn: typeof f.created_turn === 'number' && Number.isFinite(f.created_turn) ? f.created_turn : 0,
-                home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
+                home_osid,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, supply_state, movementStatus, movementStance,
                 homeHops, homeDistanceMult, homeIsElite, sectorOverrideId, assigned_sub_segment_id,

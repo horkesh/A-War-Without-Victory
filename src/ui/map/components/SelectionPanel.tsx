@@ -4,7 +4,7 @@ import { SettlementDetailContent } from './SettlementDetailContent';
 import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
 import { useEffect, useState } from 'react';
-import { getRightPanelStyle, getPanelRailStyle } from './panelRail';
+import { getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
@@ -24,6 +24,31 @@ import { getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 interface SelectionPanelProps {
   railSlot?: 'primary' | 'secondary';
+}
+
+type SettlementPropertiesForMunicipality = {
+  mun1990_id?: string | number | null;
+  mun_id?: string | number | null;
+  mun_code?: string | number | null;
+  mun?: string | number | null;
+};
+
+function normalizeMunicipalityId(value: string | number | null | undefined): string | null {
+  if (typeof value !== 'string' && typeof value !== 'number') return null;
+  const normalized = String(value).trim();
+  return normalized.length > 0 ? normalized : null;
+}
+
+export function resolveSelectionPanelMunicipalityId(
+  selectedOsid: string,
+  osidPropertiesMap: Record<string, SettlementPropertiesForMunicipality> | undefined,
+): string | null {
+  const props = osidPropertiesMap?.[selectedOsid];
+  return normalizeMunicipalityId(props?.mun1990_id)
+    ?? normalizeMunicipalityId(props?.mun_id)
+    ?? normalizeMunicipalityId(props?.mun_code)
+    ?? normalizeMunicipalityId(props?.mun)
+    ?? normalizeMunicipalityId(selectedOsid.split(':')[1]);
 }
 
 export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) {
@@ -64,7 +89,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const playerFacingFormations = filterPlayerFacingFormations(loadedGameState);
   const formations = getFormationsAtOsid(playerFacingFormations, selectedOsid);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
-  const selectedMunId = selectedOsid.split(':')[1] ?? null;
+  const selectedMunId = resolveSelectionPanelMunicipalityId(selectedOsid, osidPropertiesMap);
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
   const supportType = playerFaction ? getMunicipalitySupportTypeForFaction(playerFaction) : null;
@@ -235,8 +260,10 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
 
   return (
     <div
+      data-testid="selection-panel"
+      data-rail-slot={railSlot}
       className="panel-power-on weathered-panel panel-slide-in-right flex flex-col rounded-lg shadow-xl"
-      style={{ ...getRightPanelStyle('20rem'), direction: 'ltr' }}
+      style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
     >
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
         <div className="flex items-center gap-2">
@@ -297,7 +324,11 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           supplyStateByOsid={loadedGameState?.supplyStateByOsid}
         />
         {playerFaction && selectedMunId && (
-          <div className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5">
+          <div
+            data-testid="settlement-local-support"
+            data-target-mun-id={selectedMunId}
+            className="mt-3 rounded border border-panel-border bg-panel-card p-2.5 space-y-1.5"
+          >
             <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
               {t('selection.localSupport')}
             </div>

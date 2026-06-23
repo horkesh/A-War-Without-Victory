@@ -90,7 +90,8 @@ function SectorExpandedDetail({
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
     const hasCurrentFieldedLine = sectorAssignment.allCurrentIds.length > 0;
-    const projectedDensity = computeCurrentFrontDensity(sector, frontIds.length);
+    const projectedLineCount = frontIds.length + overrideIds.length;
+    const projectedDensity = computeCurrentFrontDensity(sector, projectedLineCount);
 
     const threatRatio = sector.threat_ratio;
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
@@ -162,6 +163,7 @@ function SectorExpandedDetail({
                                                 formationId: b.id,
                                                 sectorId: sector.sector_id,
                                                 corpsId: sector.corps_id,
+                                                osid: b.location_osid ?? null,
                                             })}
                                             className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                         >
@@ -209,6 +211,7 @@ function SectorExpandedDetail({
                                             formationId: b.id,
                                             sectorId: sector.sector_id,
                                             corpsId: sector.corps_id,
+                                            osid: b.location_osid ?? null,
                                         })}
                                         className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
@@ -246,6 +249,7 @@ function SectorExpandedDetail({
                                             formationId: b.id,
                                             sectorId: sector.sector_id,
                                             corpsId: sector.corps_id,
+                                            osid: b.location_osid ?? null,
                                         })}
                                         className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
@@ -280,7 +284,7 @@ function SectorExpandedDetail({
 
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
-                <span>{t('sectorsSection.bdePerFrontSegment', { value: sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '-' })}</span>
+                <span>{t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
                 <span>{t('sectorsSection.troopDensity', { value: projectedDensity })}</span>
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
             </div>

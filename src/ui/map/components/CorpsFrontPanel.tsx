@@ -409,7 +409,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         <div className="shrink-0 border-b border-neutral-300 bg-neutral-100/80 relative z-10 flex flex-wrap gap-0" role="tablist" aria-label={t('corpsFront.sections')}>
           {([
             ['overview', t('corpsFront.tab.overview')],
-            ['forces', 'ORBAT'],
+            ['forces', t('corpsFront.tab.forces')],
             ['logistics', t('corpsFront.tab.logistics')],
             ['ops', t('corpsFront.tab.opsSnapshot')],
           ] as const).map(([tabId, label]) => (

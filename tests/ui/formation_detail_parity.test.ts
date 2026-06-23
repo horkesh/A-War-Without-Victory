@@ -387,6 +387,16 @@ describe('Formation Detail parity display', () => {
     expect(northButton.textContent ?? '').not.toContain('2 current brigades');
   });
 
+  it('describes sector overrides as command responsibility rather than physical movement orders', () => {
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('sector command responsibility');
+    expect(copy).toContain('physical movement remains governed by field orders');
+    expect(copy).not.toMatch(/new frontline position/i);
+  });
+
   it('exposes sector picker proof hooks for zero-current options', () => {
     const state = makeFormationDetailState();
     state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(ui): tighten Chronicle provenance and command drilldowns
+
+**Type:** UI/read-model/routing/i18n/test/docs polish.
+
+**Fix:** Chronicle generated turn-summary entries now suppress foreign, bot, and unanswered decision events unless the player actually filed the decision, while preserving non-decision catalog events and legacy no-log summaries. Army HQ, Corps Detail, Corps Front, OOB corps cards, and ORBAT surfaces use player-facing order-of-battle copy instead of compact `ORBAT` labels. Army HQ sector expanded density now counts command-directed brigades the same way the collapsed sector row does. Army HQ sector/ORBAT/Operations/Personnel inspect controls forward known brigade OSIDs through the shared field-inspection route. SelectionPanel support targeting resolves municipality ids from settlement metadata before OSID parsing, and formation home municipality projection prefers authoritative origin/home fields before legacy tags.
+
+**Verification:** Focused Chronicle/command pack passed 123/123; follow-up label/routing pack passed 36/36. `npm.cmd run typecheck` passed. `git diff --check` passed. Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH new game, war-start splash, foundational War Begins screen, blocking Presidential Inbox decision, updated order-of-battle labels, Army HQ sector inspection handoff, and no visible runtime errors. `npm.cmd run qa:player-journeys` passed 289/289. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. Temporary browser evidence folders were removed and the manual dev server was stopped. Report: `docs/40_reports/implemented/20260623_CHRONICLE_AND_COMMAND_DRILLDOWN_FOLLOWUP.md`.
+
+**Scope/determinism:** UI/read-model/routing/i18n/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. Elite commander sidecar display and Hrvoje Vukcic/pocket lifecycle remain separate deferred lanes.
+
+---
+
 ## [2026-06-23] fix(ui): close command-surface follow-up polish
 
 **Type:** UI/read-model/accessibility/i18n/test/docs polish.

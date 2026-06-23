@@ -341,11 +341,13 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                                 formationId: b.id,
                                                 corpsId,
                                                 sectorId: sector.sector_id,
+                                                osid: b.location_osid ?? null,
                                             }
                                             : {
                                                 kind: 'field-formation-in-corps',
                                                 formationId: b.id,
                                                 corpsId,
+                                                osid: b.location_osid ?? null,
                                             });
                                     }}
                                     className="mr-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"

@@ -141,6 +141,7 @@ describe('direct tactical map click routing', () => {
       formationId: 'brigade_alpha',
       sectorId: 'sector_alpha',
       corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
     });
 
     expect(resolveMapFormationInspectionTarget('brigade_bravo', {
@@ -159,6 +160,7 @@ describe('direct tactical map click routing', () => {
       formationId: 'brigade_alpha',
       sectorId: 'sector_south',
       corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
     });
   });
 

@@ -260,6 +260,7 @@ function BrigadeStatusRow({ brig, corpsId }: { brig: FormationView; corpsId: str
                     kind: 'field-formation-in-corps',
                     formationId: brig.id,
                     corpsId,
+                    osid: brig.location_osid ?? null,
                 })}
                 className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
             >

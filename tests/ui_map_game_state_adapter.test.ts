@@ -146,6 +146,45 @@ test('parseGameState treats phase_ii as war for formation location_osid', () => 
     assert.deepStrictEqual(parsed.formations[0].aorSettlementIds, ['op:mun:xyz']);
 });
 
+test('parseGameState derives formation home municipality from authoritative origin and home fields before tags', () => {
+    const parsed = parseGameState({
+        meta: { turn: 5, phase: 'war' },
+        military: {
+            formations: {
+                origin_first: {
+                    faction: 'RBiH',
+                    name: 'Origin First',
+                    kind: 'brigade',
+                    tags: ['mun:stale_tag'],
+                    origin_mun: 'actual_origin',
+                    home_osid: 'op:home_from_osid:cell',
+                },
+                home_osid_first: {
+                    faction: 'RBiH',
+                    name: 'Home Osid First',
+                    kind: 'brigade',
+                    tags: ['mun:stale_tag'],
+                    home_osid: 'op:home_from_osid:cell',
+                },
+                tag_fallback: {
+                    faction: 'RBiH',
+                    name: 'Tag Fallback',
+                    kind: 'brigade',
+                    tags: ['mun:tag_home'],
+                },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const byId = new Map(parsed.formations.map((formation) => [formation.id, formation]));
+    assert.strictEqual(byId.get('origin_first')?.municipalityId, 'actual_origin');
+    assert.strictEqual(byId.get('home_osid_first')?.municipalityId, 'home_from_osid');
+    assert.strictEqual(byId.get('tag_fallback')?.municipalityId, 'tag_home');
+});
+
 test('parseGameState accepts formations as array', () => {
     const parsed = parseGameState({
   meta: { turn: 1, phase: 'war' },
