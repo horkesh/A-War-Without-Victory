@@ -14,14 +14,16 @@ import { FrontVisitSection } from './FrontVisitSection';
 import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 function OfficerQualityChip({ label, value }: { label: string; value: number }) {
+    const reported = Number.isFinite(value);
+    const displayValue = reported ? value.toFixed(1) : t('corpsFront.unreported');
     return (
         <span
             className="inline-flex items-center gap-1 rounded border border-panel-border/50 bg-black/20 px-1.5 py-0.5"
-            title={`${label}: ${value.toFixed(1)}`}
+            title={`${label}: ${displayValue}`}
         >
             <span className="text-[8px] uppercase tracking-[0.12em] text-text-secondary">{label}</span>
             <span className="font-mono text-[10px] font-bold tabular-nums" style={{ color: getRatingColor(value) }}>
-                {value.toFixed(1)}
+                {displayValue}
             </span>
         </span>
     );

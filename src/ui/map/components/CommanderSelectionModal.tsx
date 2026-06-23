@@ -54,6 +54,14 @@ function getRegionalFit(officer: NamedOfficerView, targetCorpsId: string): { lab
     return { label: t('commanderSelect.fit.outOfRegion'), color: 'text-red-300', penalty: t('commanderSelect.penalty.competenceMinus2') };
 }
 
+function sortableOfficerRating(value: number): number {
+    return Number.isFinite(value) ? value : -1;
+}
+
+function preparationAggressiveness(value: number): number {
+    return Number.isFinite(value) ? value : 3;
+}
+
 export function CommanderSelectionModal({ isOpen, onClose, onSelect }: CommanderSelectionModalProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.commanderSelectionContext);
@@ -89,7 +97,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
         avail.sort((a, b) => {
             if (a.fit.label === t('commanderSelect.fit.homeCorps') && b.fit.label !== t('commanderSelect.fit.homeCorps')) return -1;
             if (b.fit.label === t('commanderSelect.fit.homeCorps') && a.fit.label !== t('commanderSelect.fit.homeCorps')) return 1;
-            return b.officer.competence - a.officer.competence;
+            return sortableOfficerRating(b.officer.competence) - sortableOfficerRating(a.officer.competence);
         });
 
         return {
@@ -121,7 +129,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
 
                 <div className="flex-1 overflow-y-auto p-3 space-y-2">
                     {availableOfficers.map(({ officer, fit }) => {
-                        const prepEst = getPreparationMaxTurns(officer.aggressiveness);
+                        const prepEst = getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness));
                         const personality = getPersonalitySummary(officer.competence, officer.aggressiveness);
                         return (
                             <button

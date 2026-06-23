@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**MISSING OFFICER RATINGS ARE UNREPORTED, NOT BAD COMMANDERS (2026-06-23).** Absent competence/aggression/defense/reliability data can reach UI read-models. Do instead: preserve it as unreported, render neutral `Unreported` / `Profile Unreported`, sort missing commander-selection ratings below reported ratings, use neutral presentation-only prep assumptions for missing aggressiveness, and do not synthesize compliance modifiers without political-reliability data.
+
 **SETUP AFTERMATH MUST BE QUIET EVERYWHERE (2026-06-23).** Setup-control/turn-zero summaries can carry battles, displacement, formations, supply, and signals as provenance. Do instead: gate every Turn Aftermath summary read through the narrated-summary boundary when `shouldNarrateTerritorySummary(...)` is false; only pending player actions may remain visible.
 
 **CODEX RUPTURE TOKENS ARE SREBRENICA-ONLY (2026-06-23).** Zepa and general grave-cost sections are event-cost/human-cost findings, not rupture findings. Do instead: reserve `{cost_rupture_findings}` for `rupture_srebrenica_genocide_1995`; use `{cost_findings}` for Zepa and general cost dockets in every locale.

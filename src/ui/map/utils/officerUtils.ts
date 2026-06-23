@@ -49,8 +49,12 @@ function compareOpeningOfficer(a: NamedOfficerView, b: NamedOfficerView): number
     const tierA = POOL_TIER_ORDER[a.pool_tier ?? ''] ?? 99;
     const tierB = POOL_TIER_ORDER[b.pool_tier ?? ''] ?? 99;
     if (tierA !== tierB) return tierA - tierB;
-    if (a.competence !== b.competence) return b.competence - a.competence;
-    if (a.defensive_skill !== b.defensive_skill) return b.defensive_skill - a.defensive_skill;
+    const competenceA = Number.isFinite(a.competence) ? a.competence : -1;
+    const competenceB = Number.isFinite(b.competence) ? b.competence : -1;
+    if (competenceA !== competenceB) return competenceB - competenceA;
+    const defenseA = Number.isFinite(a.defensive_skill) ? a.defensive_skill : -1;
+    const defenseB = Number.isFinite(b.defensive_skill) ? b.defensive_skill : -1;
+    if (defenseA !== defenseB) return defenseB - defenseA;
     return strictCompare(a.id, b.id);
 }
 

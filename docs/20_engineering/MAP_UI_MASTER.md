@@ -904,6 +904,7 @@ When `loadedGameState.namedOfficerData` is present:
 
 - **Shared component:** `OfficerProfile.tsx` renders all officer displays consistently across 6+ panels. Props: `officer` (NamedOfficerView), `label` (context string), optional `compact` (show 2 stats instead of 3), `emphasis` (which stat in compact mode), `className`.
 - **Character utilities:** `utils/officerCharacter.ts` provides:
+  - Missing/non-finite officer ratings are display-unreported: helpers render `Unreported` / neutral color and `getArchetype(...)` renders `Profile Unreported` instead of converting absent source data into poor-trait labels.
   - `getArchetype(officer)` — derived character label from stat profile (e.g., "Master Strategist", "Reckless Attacker", "Paper Commander")
   - `getCompetenceLabel/getAggressionLabel/getDefenseLabel(1-5)` — descriptive stat labels (Inept → Exceptional, Passive → Relentless, Exposed → Ironclad)
   - `getOriginDisplay(origin)` — origin badge with faction-appropriate color (JNA=blue, Militia=orange, etc.)

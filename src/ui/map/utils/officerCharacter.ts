@@ -28,14 +28,27 @@ const DEFENSE_LABELS: Record<number, string> = {
     5: 'Ironclad',
 };
 
-export function getCompetenceLabel(value: number): string {
-    return COMPETENCE_LABELS[Math.round(Math.max(1, Math.min(5, value)))] ?? 'Unknown';
+function normalizedRating(value: number | null | undefined, max = 5): number | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return Math.round(Math.max(1, Math.min(max, value)));
 }
-export function getAggressionLabel(value: number): string {
-    return AGGRESSION_LABELS[Math.round(Math.max(1, Math.min(5, value)))] ?? 'Unknown';
+
+function normalizedPipCount(value: number | null | undefined, max = 5): number | null {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return null;
+    return Math.round(Math.max(0, Math.min(max, value)));
 }
-export function getDefenseLabel(value: number): string {
-    return DEFENSE_LABELS[Math.round(Math.max(1, Math.min(5, value)))] ?? 'Unknown';
+
+export function getCompetenceLabel(value: number | null | undefined): string {
+    const rating = normalizedRating(value);
+    return rating == null ? 'Unreported' : COMPETENCE_LABELS[rating] ?? 'Unreported';
+}
+export function getAggressionLabel(value: number | null | undefined): string {
+    const rating = normalizedRating(value);
+    return rating == null ? 'Unreported' : AGGRESSION_LABELS[rating] ?? 'Unreported';
+}
+export function getDefenseLabel(value: number | null | undefined): string {
+    const rating = normalizedRating(value);
+    return rating == null ? 'Unreported' : DEFENSE_LABELS[rating] ?? 'Unreported';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -135,6 +148,8 @@ export function getArchetype(officer: NamedOfficerView): string {
     const a = officer.aggressiveness;
     const d = officer.defensive_skill;
 
+    if (![c, a, d].every(Number.isFinite)) return 'Profile Unreported';
+
     // Exceptional all-rounders
     if (c >= 5 && a >= 4 && d >= 4) return 'Master Strategist';
     if (c >= 4 && a >= 4 && d >= 4) return 'Complete Commander';
@@ -168,7 +183,8 @@ export function getArchetype(officer: NamedOfficerView): string {
 // Pip rating (visual ●○ representation)
 // ═══════════════════════════════════════════════════════════════════════════
 
-export function getRatingColor(value: number): string {
+export function getRatingColor(value: number | null | undefined): string {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return 'text-text-secondary';
     if (value >= 5) return 'text-accent-gold';
     if (value >= 4) return 'text-green-400';
     if (value >= 3) return 'text-text-primary';
@@ -176,8 +192,9 @@ export function getRatingColor(value: number): string {
     return 'text-red-400';
 }
 
-export function formatPips(value: number, max = 5): string {
-    const filled = Math.round(Math.max(0, Math.min(max, value)));
+export function formatPips(value: number | null | undefined, max = 5): string {
+    const filled = normalizedPipCount(value, max);
+    if (filled == null) return 'Unreported';
     return '●'.repeat(filled) + '○'.repeat(max - filled) + ` ${filled}/${max}`;
 }
 
@@ -210,12 +227,14 @@ const RELIABILITY_LABELS: Record<number, string> = {
     5: 'Steadfast',
 };
 
-export function getReliabilityLabel(value: number): string {
-    return RELIABILITY_LABELS[Math.round(Math.max(1, Math.min(5, value)))] ?? 'Unknown';
+export function getReliabilityLabel(value: number | null | undefined): string {
+    const rating = normalizedRating(value);
+    return rating == null ? 'Unreported' : RELIABILITY_LABELS[rating] ?? 'Unreported';
 }
 
 /** Formatted compliance modifier: e.g. '−0.20', '+0.10', '±0.00' */
 export function getComplianceModifierText(politicalReliability: number): string {
+    if (!Number.isFinite(politicalReliability)) return 'Unreported';
     const mod = (politicalReliability - 3) * 0.10;
     if (Math.abs(mod) < 0.001) return '±0.00';
     return mod > 0 ? `+${mod.toFixed(2)}` : `−${Math.abs(mod).toFixed(2)}`;
@@ -226,6 +245,7 @@ export function getComplianceModifierText(politicalReliability: number): string 
  * e.g., +0.20, -0.25, 0.00
  */
 export function getComplianceModifierTextFromValue(modifier: number): string {
+    if (!Number.isFinite(modifier)) return 'Unreported';
     const sign = modifier >= 0 ? '+' : '';
     return `${sign}${modifier.toFixed(2)}`;
 }
@@ -242,6 +262,7 @@ export function getComplianceModifierColor(modifier: number): string {
 
 /** One-line personality summary from competence x aggressiveness quadrant. */
 export function getPersonalitySummary(comp: number, agg: number): string {
+    if (!Number.isFinite(comp) || !Number.isFinite(agg)) return 'Profile unreported';
     if (comp >= 4 && agg >= 4) return 'Fast prep, accepts risk';
     if (comp >= 4 && agg <= 2) return 'Thorough prep, demands intel';
     if (comp <= 2 && agg >= 4) return 'Reckless, attacks blind';

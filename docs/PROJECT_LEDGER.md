@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(ui): keep missing officer ratings unreported
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** The UI adapter now preserves absent officer `competence`, `aggressiveness`, `defensive_skill`, and `political_reliability` as unreported values instead of coercing them to `0`. Shared officer display helpers render non-finite ratings as `Unreported` / `Profile Unreported`, keep rating color neutral, and suppress synthesized compliance modifiers when political reliability is absent. Operation Briefing normalizes unreported commander ratings before recommendation-explanation derivation. Commander-picking surfaces sort missing competence below reported competence and use neutral prep-time assumptions for unreported aggressiveness. Army HQ operation cards display 1-5 officer ratings directly instead of percent-scaled values, and Personnel quality chips render missing ratings as unreported. This prevents Army HQ, Corps Detail, Formation Detail, ORBAT, officer dossiers, commander-selection, and operation-briefing surfaces from turning missing source data into invented poor commander profiles, unstable ordering, or `NaN` copy.
+
+**Verification:** Focused officer/read-model pack passed 70/70. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 522 tests. `npm.cmd run qa:live-surface:browser` passed after stopping sweep-owned processes from an earlier local 5-minute timeout and rerunning with a longer timeout. Live in-app browser inspection on `http://127.0.0.1:3003/` found Army HQ loaded with zero console errors and no visible `NaN` or invented poor-trait fallback copy. Report: `docs/40_reports/implemented/20260623_OFFICER_RATING_UNREPORTED_TRUTH.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario source data, OOB source rows, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-23] test(ci): repair sector/OOB CI proof coverage
 
 **Type:** Test/docs CI repair.

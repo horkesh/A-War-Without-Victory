@@ -1686,15 +1686,19 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             if (!id) continue;
             const os = rawOfficers[id];
             const status = projectedOfficerStatus(data, os, turn);
+            const competence = finiteNumber(data.competence, Number.NaN);
+            const aggressiveness = finiteNumber(data.aggressiveness, Number.NaN);
+            const defensiveSkill = finiteNumber(data.defensive_skill, Number.NaN);
+            const politicalReliability = finiteNumber(data.political_reliability, Number.NaN);
             officerList.push({
                 id,
                 name: getPlayerSafeOfficerName(typeof data.name === 'string' ? data.name : null),
                 faction: typeof data.faction === 'string' ? data.faction : '',
                 rank: typeof data.rank === 'string' ? data.rank : 'corps_commander',
-                competence: finiteNumber(data.competence, 0),
-                aggressiveness: finiteNumber(data.aggressiveness, 0),
-                defensive_skill: finiteNumber(data.defensive_skill, 0),
-                political_reliability: finiteNumber(data.political_reliability, 0),
+                competence,
+                aggressiveness,
+                defensive_skill: defensiveSkill,
+                political_reliability: politicalReliability,
                 home_corps_id: typeof data.home_corps_id === 'string' ? data.home_corps_id : undefined,
                 compatible_corps_ids: Array.isArray(data.compatible_corps_ids) ? (data.compatible_corps_ids as string[]).filter(s => typeof s === 'string') : undefined,
                 available_from_turn: typeof data.available_from_turn === 'number' && Number.isFinite(data.available_from_turn) ? data.available_from_turn : undefined,
@@ -1739,7 +1743,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     Number(state.meta.turn) <= Number(os.cowed_until_turn),
                 cowed_until_turn: typeof os?.cowed_until_turn === 'number' ? os.cowed_until_turn : undefined,
                 effective_compliance_modifier: (() => {
-                    const pol_rel = Number(data.political_reliability ?? 3);
+                    if (!Number.isFinite(politicalReliability)) return undefined;
+                    const pol_rel = politicalReliability;
                     const baseMod = (pol_rel - 3) * 0.10;
                     const warlordEndWeek = state.military?.war_timeline?.officer_config?.['RBiH']?.warlord_friction_end_week;
                     const isWarlordActive =

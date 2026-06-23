@@ -294,4 +294,24 @@ describe('OfficerDossierPanel renders read-only dossier', () => {
         );
         expect(compact).not.toContain('Combat Record');
     });
+
+    it('OfficerProfile renders missing officer ratings as unreported, not invented poor traits', () => {
+        const officer = {
+            ...OFFICER_ZERO_STATE,
+            competence: Number.NaN,
+            aggressiveness: Number.NaN,
+            defensive_skill: Number.NaN,
+            political_reliability: Number.NaN,
+        };
+        const html = renderToStaticMarkup(
+            React.createElement(OfficerProfile, { officer, label: 'TEST' }),
+        );
+
+        expect(html).toContain('Profile Unreported');
+        expect(html).toContain('Unreported');
+        expect(html).not.toContain('Inept');
+        expect(html).not.toContain('Passive');
+        expect(html).not.toContain('Exposed');
+        expect(html).not.toContain('Defiant');
+    });
 });

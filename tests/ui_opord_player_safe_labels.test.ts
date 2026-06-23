@@ -84,6 +84,22 @@ describe('buildOpordDisplayModel', () => {
             new URL('../src/ui/map/components/CommanderSelectionModal.tsx', import.meta.url),
             'utf8',
         );
+        const commanderPhaseSource = readFileSync(
+            new URL('../src/ui/map/components/ops_modal/CommanderPhase.tsx', import.meta.url),
+            'utf8',
+        );
+        const officerUtilsSource = readFileSync(
+            new URL('../src/ui/map/utils/officerUtils.ts', import.meta.url),
+            'utf8',
+        );
+        const operationsSectionSource = readFileSync(
+            new URL('../src/ui/map/components/army_hq/OperationsSection.tsx', import.meta.url),
+            'utf8',
+        );
+        const personnelContentSource = readFileSync(
+            new URL('../src/ui/map/components/army_hq/PersonnelContent.tsx', import.meta.url),
+            'utf8',
+        );
 
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(faction)');
         expect(oobSource).toContain('getPlayerSafeMilitaryFactionName(op.faction)');
@@ -112,6 +128,18 @@ describe('buildOpordDisplayModel', () => {
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
         expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');
         expect(commanderSelectionSource).not.toContain('operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName)');
+        expect(briefingSource).toContain('finiteCommanderRating(commander?.aggressiveness, 3)');
+        expect(briefingSource).toContain('finiteCommanderRating(commander?.competence, 3)');
+        expect(briefingSource).not.toContain('commander?.competence ??');
+        expect(commanderSelectionSource).toContain('sortableOfficerRating(b.officer.competence) - sortableOfficerRating(a.officer.competence)');
+        expect(commanderSelectionSource).toContain('getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness))');
+        expect(commanderPhaseSource).toContain('sortableOfficerRating(b.officer.competence) - sortableOfficerRating(a.officer.competence)');
+        expect(commanderPhaseSource).toContain('getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness))');
+        expect(officerUtilsSource).toContain('Number.isFinite(a.competence) ? a.competence : -1');
+        expect(operationsSectionSource).toContain("return 'Profile unreported'");
+        expect(operationsSectionSource).toContain('formatOfficerRating(cmdOfficer.competence)');
+        expect(operationsSectionSource).not.toContain('(cmdOfficer.competence * 100).toFixed(0)');
+        expect(personnelContentSource).toContain("const displayValue = reported ? value.toFixed(1) : t('corpsFront.unreported')");
     });
 });
 

@@ -56,6 +56,10 @@ function AssessmentBadge({ assessment }: { assessment?: string }) {
     }
 }
 
+function finiteCommanderRating(value: number | null | undefined, fallback: number): number {
+    return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
+}
+
 /**
  * Shown on executing/recovery ops that were force-launched AND lack a commander_assessment_at_launch
  * snapshot (i.e. operations launched before this feature was added). Legacy fallback only.
@@ -382,8 +386,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             intelConf,
             supplyReady,
             forceRatio,
-            commander?.aggressiveness ?? 3,
-            commander?.competence ?? 0.5,
+            finiteCommanderRating(commander?.aggressiveness, 3),
+            finiteCommanderRating(commander?.competence, 3),
             assessment as 'launch' | 'postpone' | 'abort',
             postponements,
         );

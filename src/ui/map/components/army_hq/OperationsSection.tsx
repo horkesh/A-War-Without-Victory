@@ -216,16 +216,24 @@ function getCommanderPersonality(officer: NamedOfficerView): string {
     const aggr = officer.aggressiveness;
     const parts: string[] = [];
 
-    if (comp >= 0.7) parts.push(t('operationsSection.personality.highlyCompetent'));
-    else if (comp >= 0.4) parts.push(t('operationsSection.personality.capable'));
+    if (!Number.isFinite(comp) || !Number.isFinite(aggr)) return 'Profile unreported';
+
+    if (comp >= 4) parts.push(t('operationsSection.personality.highlyCompetent'));
+    else if (comp >= 3) parts.push(t('operationsSection.personality.capable'));
     else parts.push(t('operationsSection.personality.green'));
 
-    if (aggr >= 0.7) parts.push(t('operationsSection.personality.aggressive'));
-    else if (aggr >= 0.4) parts.push(t('operationsSection.personality.balanced'));
+    if (aggr >= 4) parts.push(t('operationsSection.personality.aggressive'));
+    else if (aggr >= 3) parts.push(t('operationsSection.personality.balanced'));
     else parts.push(t('operationsSection.personality.cautious'));
 
-    if (officer.defensive_skill >= 0.7) parts.push(t('operationsSection.personality.defensiveSpecialist'));
+    if (Number.isFinite(officer.defensive_skill) && officer.defensive_skill >= 4) {
+        parts.push(t('operationsSection.personality.defensiveSpecialist'));
+    }
     return parts.join(' / ');
+}
+
+function formatOfficerRating(value: number): string {
+    return Number.isFinite(value) ? value.toFixed(1) : 'Unreported';
 }
 
 /** Brigade status row within operation ORBAT. */
@@ -390,9 +398,9 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             {getCommanderPersonality(cmdOfficer)}
                         </div>
                         <div className="flex gap-4 text-[9px] text-text-secondary/50 uppercase tabular-nums">
-                            <span>{t('operationsSection.comp')} <b className="text-text-secondary">{(cmdOfficer.competence * 100).toFixed(0)}</b></span>
-                            <span>{t('operationsSection.aggr')} <b className="text-text-secondary">{(cmdOfficer.aggressiveness * 100).toFixed(0)}</b></span>
-                            <span>{t('operationsSection.def')} <b className="text-text-secondary">{(cmdOfficer.defensive_skill * 100).toFixed(0)}</b></span>
+                            <span>{t('operationsSection.comp')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.competence)}</b></span>
+                            <span>{t('operationsSection.aggr')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.aggressiveness)}</b></span>
+                            <span>{t('operationsSection.def')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.defensive_skill)}</b></span>
                             {cmdOfficer.operations_commanded != null && cmdOfficer.operations_commanded > 0 && (
                                 <span>{t('operationsSection.opsShort')} <b className="text-text-secondary">{cmdOfficer.operations_commanded}</b></span>
                             )}

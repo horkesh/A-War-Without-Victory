@@ -67,6 +67,14 @@ function localizeRegionalFit(label: string): string {
     return label;
 }
 
+function sortableOfficerRating(value: number): number {
+    return Number.isFinite(value) ? value : -1;
+}
+
+function preparationAggressiveness(value: number): number {
+    return Number.isFinite(value) ? value : 3;
+}
+
 export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
     const corpsId = useGameStore((s) => s.opsPlanningCorpsId);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -123,7 +131,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
             const aHome = a.fit.label === 'HOME CORPS' ? 0 : a.fit.label === 'COMPATIBLE' ? 1 : 2;
             const bHome = b.fit.label === 'HOME CORPS' ? 0 : b.fit.label === 'COMPATIBLE' ? 1 : 2;
             if (aHome !== bHome) return aHome - bHome;
-            return b.officer.competence - a.officer.competence;
+            return sortableOfficerRating(b.officer.competence) - sortableOfficerRating(a.officer.competence);
         });
 
         return {
@@ -204,7 +212,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     )}
                     <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                         {availableOfficers.map(({ officer, fit }) => {
-                            const prepTurns = getPreparationMaxTurns(officer.aggressiveness);
+                            const prepTurns = getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness));
                             return (
                                 <button
                                     key={officer.id}

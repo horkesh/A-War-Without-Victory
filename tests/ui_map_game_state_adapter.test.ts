@@ -55,6 +55,32 @@ test('parseGameState preserves meta.player_faction in LoadedGameState', () => {
     assert.strictEqual(parsed.player_faction, 'RS');
 });
 
+test('parseGameState keeps absent officer ratings unreported instead of inventing poor traits', () => {
+    const parsed = parseGameState({
+        meta: { turn: 1, phase: 'war', player_faction: 'RS' },
+        military: {
+            formations: {},
+            named_officer_data: [
+                { id: 'off_unrated', name: 'Unrated Officer', faction: 'RS', rank: 'corps_commander', origin: 'jna' },
+            ],
+            named_officers: {
+                off_unrated: { status: 'active' },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const officer = parsed.namedOfficerData?.find((entry) => entry.id === 'off_unrated');
+    assert.ok(officer);
+    assert.ok(Number.isNaN(officer.competence));
+    assert.ok(Number.isNaN(officer.aggressiveness));
+    assert.ok(Number.isNaN(officer.defensive_skill));
+    assert.ok(Number.isNaN(officer.political_reliability));
+    assert.strictEqual(officer.effective_compliance_modifier, undefined);
+});
+
 test('parseGameState scopes pending event decisions and review queue to player faction', () => {
     const parsed = parseGameState({
         meta: { turn: 1, phase: 'war', player_faction: 'RBiH' },
