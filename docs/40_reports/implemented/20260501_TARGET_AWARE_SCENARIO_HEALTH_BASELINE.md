@@ -1,5 +1,7 @@
 # Target-Aware Scenario Health Baseline (apr1994 / apr1995 / oct1995)
 
+**2026-06-18+ supersession:** Western late-1995 content findings remain historical context, but the Drina enclave fall finding is superseded. Srebrenica/Zepa fall control receipts are event-owned, not missing scripted-operation content. Future Drina work should verify event receipt/canon guards, not add or tune Krivaja/Stupcanica as fall-delivery operations.
+
 **Date:** 2026-05-01
 **Predecessors:**
 - `docs/40_reports/implemented/20260430_SCENARIO_PAINTED_CONTROL_TARGET_TOOL.md` (target tool + workflow)
@@ -14,7 +16,7 @@
 
 **The engine is healthy.** Determinism and causality hold across all three runs. The painted-target gap at oct1995 (63.2% area-weighted) is **dominated by missing scenario content** — the late-1995 territorial reversals (Operation Storm, HV-HVO Maestral/Mistral, ARBiH 5th Corps liberation, VRS Krivaja-95, VRS Stupčanica-95) are not present in the codebase. Without them, no organic engine mechanism can produce the historical late-war reversal, and the simulation freezes the territorial outcome at roughly the early/mid-1994 state.
 
-**The dominant residual is missing scripted ops, not engine health.** Three of six major mismatch families (Krajina collapse, Herzegovina southwest HVO push, Drina enclave fall) are in the same family — Family 1, "healthy engine + missing scenario content". One family (Herzegovina south persistent RS overgain + Goražde 1/2) is already documented in `20260430_DRINA_HERZEGOVINA_OVERGAIN_ROOT_CAUSE_PLAN.md` as a four-owner structural calibration residual. One detector finding (156w "intel system may be broken") is a Family-1 side-effect: a window with no scripted offensives produces no offensive_signs.
+**The dominant residual was content/composition, not engine health.** Krajina collapse and Herzegovina southwest HVO push remain useful western late-war content findings. Drina enclave fall no longer belongs to the scripted-op bucket: Srebrenica/Zepa fall receipts are event-owned.
 
 **Recommended next product-building lane:** a single scripted-ops packet adding the four late-1995 historical operations turn-gated ≥170, owned by `/operations-expert` + `/historian`. No engine code change, no global retune, clean owner.
 
@@ -100,7 +102,7 @@
 
 2. **HERZEGOVINA southwest** (6 OSIDs painted=HRHB but sim=RS in Glamoč, Kupres, Livno, Titov Drvar). Cause: no HVO Operation Cincar (Sep 1994) or Mistral 1995. `HRHB_PRE_PLANNED` contains only Operation Jackal (Stolac sweep). Zero HVO triggered ops in the codebase.
 
-3. **DRINA enclave fall** (Srebrenica + Žepa OSIDs painted=RS but sim=RBiH). Cause: no Operation Krivaja-95 (Srebrenica July 1995) or Operation Stupčanica-95 (Žepa July 1995). Existing `Operation Cerska-Kamenica` (triggered_operations.ts) targets Cerska/Kamenica pocket OSIDs only, not srebrenica_2 / zepa_2 town cores. Engine is canon-mute on these — no comment indicating intentional deferral.
+3. **DRINA enclave fall (superseded 2026-06-18+):** this report classified Srebrenica + Zepa as missing Operation Krivaja-95 / Stupcanica-95 scripted-op content. Current policy supersedes that classification. Srebrenica/Zepa fall receipts are event-owned; future Drina work should verify event receipt/canon guards and rupture observation, not tune operations as fall-delivery mechanisms.
 
 **Persistent pattern from prior packet (Family 2):** Bileća/Gacko/Trebinje/Nevesinje/Foča/Kalinovik HERZEGOVINA south falls to RBiH despite painted target showing them held by RS. This is the documented four-owner structural residual from `20260430_DRINA_HERZEGOVINA_OVERGAIN_ROOT_CAUSE_PLAN.md` — late-war calibration residual, not engine health.
 
@@ -152,8 +154,8 @@ The decline from apr1994 88.4% → oct1995 63.2% is **not** a slow drift but a s
 
 1. **ARBiH 5th Corps "Sana" / "Una-Sana" liberation** (Aug-Sep 1995). Triggered turn ≥170; primary_corps `arbih_5th_corps`; objectives include Bihać corridor relief, Krupa, Ključ, Sanski Most.
 2. **HV-HVO joint Operation Mistral / Maestral / Sana** (Sep-Oct 1995). Triggered turn ≥170; primary_corps probably `hvo_main_staff`; objectives include Mrkonjić Grad, Šipovo, Drvar, Bosansko Grahovo.
-3. **VRS Operation Krivaja-95** (Srebrenica fall, July 1995). Triggered turn ≥165; primary_corps `vrs_drina`; objective `op:srebrenica:srebrenica_2` and adjacent enclave OSIDs.
-4. **VRS Operation Stupčanica-95** (Žepa fall, July 1995). Triggered turn ≥168; primary_corps `vrs_drina`; objective `op:rogatica:zepa_2`.
+3. **VRS Operation Krivaja-95** (Srebrenica July 1995). Superseded as fall-delivery content; operation context only unless a later Section 6-reviewed design changes receipt ownership.
+4. **VRS Operation Stupcanica-95** (Zepa July 1995). Superseded as fall-delivery content; operation context only unless a later Section 6-reviewed design changes receipt ownership.
 
 **Why this packet:**
 - Three of six major mismatch families resolve in this single owner.

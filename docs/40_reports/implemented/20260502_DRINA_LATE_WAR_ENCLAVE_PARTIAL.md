@@ -1,5 +1,7 @@
 # P0 Sensitive-History Late-War Enclave Operations + VRS Drina Delivery MEGA-LANE — PARTIAL CLOSE
 
+**2026-06-18+ supersession:** This report is historical. Current policy: `srebrenica_falls_1995` and `zepa_falls_1995` own the Srebrenica/Zepa control-change receipts through event effects. `srebrenica_genocide_1995` observes the resulting Srebrenica controller plus enclave/turn predicates. Do not use this report to calibrate Krivaja-95/Stupcanica-95 as fall-delivery operations, and do not treat the fall events as pressure-only narratives.
+
 **Date:** 2026-05-02
 **Status:** CLOSED PARTIAL — Phase 4b shipped (`9ff4f352`); acceptance criterion FAILED; six handoffs to successor lanes.
 **Single behavioral commit:** Phase 4b `9ff4f352` (`feat(combat): scope estimateForceRatio defender aggregation to enclave when objectives are enclave-interior`)
@@ -77,7 +79,7 @@ Clean per lane brief.
 | **Operation Krivaja-95 (t168)** | failure | planning_invalidated | **0.0838** | 0.0838 | **0 (UNCHANGED)** | 0 | 2 | 5 srebrenica enclave OSIDs |
 | **Operation Stupčanica-95 (t172)** | failure | planning_invalidated | **0.282** | 0.0475 | **+0.234 (~6×)** | 0 | 3 | 1 zepa enclave OSID |
 
-**Acceptance check (PRIMARY — FAILED):** All 7 Srebrenica/Žepa OSIDs still RBiH at t188 (BYTE-IDENTICAL to n1610). Rupture `srebrenica_genocide_1995` NOT fired (`negotiation.rupture_consequences = empty`). Narrative events DID fire: `srebrenica_falls_1995` t162, `zepa_falls_1995` t164 — but these are pressure-only narratives, do NOT flip controllers per `/historian` Phase 1 audit.
+**Historical acceptance check (superseded 2026-06-18+):** All 7 Srebrenica/Zepa OSIDs still RBiH at t188 (BYTE-IDENTICAL to n1610). Rupture `srebrenica_genocide_1995` NOT fired (`negotiation.rupture_consequences = empty`). The old conclusion treated `srebrenica_falls_1995` and `zepa_falls_1995` as pressure-only narratives. That conclusion is no longer current: those event rows now own the fall control receipts through `control_change` effects, and Krivaja-95/Stupcanica-95 are chronology/AAR context, not receipt delivery owners.
 
 ### Audits (all clean at audit layer)
 

@@ -296,3 +296,24 @@
 **Acceptance:** Persisted April 1992 startup sector truth audits clean without mutation from rebuilt diagnostics; the audit CLI exits green when saved truth is clean while still printing `rebuilt_ok: false` diagnostics; uncovered friendly tooltip sectors show `No friendly line` instead of density/threat; Formation Detail sector picker buttons expose stable sector/current/frontline proof attributes and singular/plural brigade labels.
 
 **Evidence:** Focused proof `node node_modules\vitest\vitest.mjs run tests\startup_snapshot_contract.test.ts -t "sector truth audits clean" --pool=forks --reporter=dot` passed 1/1, `node node_modules\vitest\vitest.mjs run tests\ui_map_tooltip_player_visibility.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 25/25, and `npm.cmd run sim:scenario:audit-sectors -- --save data/derived/startup/apr_1992_initial_save.json` reported saved counts all zero with `ok: true` and retained rebuilt diagnostic `reserve_only_live_sectors: 1` / `rebuilt_ok: false`. Broader proof passed: `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run typecheck`, `npm.cmd run test:baselines`, `npm.cmd run ci:structural-fingerprint:check`, `npm.cmd run qa:player-journeys` 278/278, `npm.cmd run qa:first-hour:browser`, and `npm.cmd run qa:live-surface:browser`. Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH new-game war-start splash, opening identity brief, Decision Room -> President's Desk decision routing, the foundational decision modal, and Army HQ opening commander/summary surfaces.
+
+### Task 13: Sector Density And Stale Drina Doc Hygiene
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_SECTOR_DENSITY_AND_STALE_DRINA_DOC_HYGIENE.md`.
+
+**Files:**
+- Modified: `src/ui/map/components/army_hq/SectorsSection.tsx`
+- Modified: `src/ui/map/i18n/messages.en.ts`
+- Modified: `src/ui/map/i18n/messages.bcs.ts`
+- Modified: historical Drina/Krivaja/Stupcanica reports, collapse proposal packets, and old event-system plans
+- Tests: `tests/ui/army_hq_sector_truth.test.ts`, `tests/ui/formation_detail_parity.test.ts`
+
+**Steps:**
+1. Verify Pyrrhic UI scout findings with red tests.
+2. Make Army HQ displayed density derive from current frontline assignment truth.
+3. Make Formation Detail sector-picker visible copy say current brigade counts.
+4. Add supersession notes to stale historical reports/plans that still route Srebrenica/Zepa into operation-delivery calibration.
+
+**Acceptance:** Army HQ rows do not mix current assignment counts with saved density, Formation Detail sector options are visibly current, and historical reports cannot send future agents back into Drina/Krivaja fall-delivery calibration.
+
+**Evidence:** Red proof failed on saved `density 0.42`/`Troop density: 0.42` leakage and visible `1 brigade` / `0 brigades` sector-picker copy. Green proof `node node_modules\vitest\vitest.mjs run tests\ui\army_hq_sector_truth.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 19/19; expanded focused proof with `tests\ui\gui_audit_label_discipline.test.ts` passed 40/40; `npm.cmd run typecheck`, `npm.cmd run qa:player-journeys` 278/278, `npm.cmd run qa:live-surface:browser`, targeted stale-language sweep, and `git diff --check` passed. Live browser evidence included `armyHqSectorAssignmentTruthLiveProof: { rows: 19, zeroCurrentRows: 6, badZeroRows: [] }` and server cleanup verified.

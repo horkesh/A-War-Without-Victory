@@ -1,6 +1,6 @@
 # Late-1995 Scripted Operations Packet (Krivaja-95 / Stupčanica-95 / Mistral 2 / Sana)
 
-**2026-06-18 supersession:** The original Krivaja/Stupcanica fall-delivery framing in this report is historical. Current canon and implementation require `srebrenica_falls_1995` / `zepa_falls_1995` event receipts before the corresponding operation-context rows can trigger; Srebrenica/Zepa control remains event-owned.
+**2026-06-18+ supersession:** The original Krivaja/Stupcanica fall-delivery framing in this report is historical. Current canon and implementation require `srebrenica_falls_1995` / `zepa_falls_1995` event receipts before the corresponding operation-context rows can trigger; Srebrenica/Zepa control remains event-owned. Krivaja-95 and Stupcanica-95 are operation-health / chronology / AAR context only. Do not schedule vrs_drina rescue, defender-power bypasses, recovery-window changes, or operation-execution fixes to make these operations flip Srebrenica/Zepa. Western late-1995 operation-health work for Sana/Mistral remains separate from Srebrenica/Zepa event receipt ownership.
 
 **Date:** 2026-05-01
 **Predecessors:**
@@ -146,9 +146,9 @@ This is **not a packet defect** — it is the engine state at fire time interact
 
 **Family 1B — Herzegovina southwest (Mistral) — UNCHANGED:** Operation Mistral 2 is now defined and fires; territorial flip pending Owner B fix.
 
-**Family 1C — Drina enclaves (Krivaja/Stupčanica) — PARTIALLY ADDRESSED:**
-- Stupčanica-95 fires correctly; flip pending Owner B fix.
-- Krivaja-95 is blocked by Owner A (vrs_drina brigade attrition); will fire correctly once vrs_drina rescue ships.
+**Family 1C — Drina enclaves (Krivaja/Stupčanica) — SUPERSEDED FOR FALL DELIVERY 2026-06-18+:**
+- Stupcanica-95 and Krivaja-95 may remain useful operation-health, chronology, and AAR context.
+- They are not Srebrenica/Zepa fall-delivery blockers. The fall receipts are event-owned through `srebrenica_falls_1995` and `zepa_falls_1995`.
 
 **Family 2 — Herzegovina south persistent RS overgain + Goražde 1/2 — UNCHANGED:** Documented stop-at-plan in prior packet. Not in this packet's scope.
 
@@ -156,14 +156,15 @@ This is **not a packet defect** — it is the engine state at fire time interact
 
 **No new engine bugs surfaced.** The new ops match the existing Cerska-Kamenica execution shape exactly. The engine substrate (determinism, causality, date-awareness) holds across all three target dates.
 
-### Owner A summary (separate packet)
+### Owner A summary (separate packet, superseded for Srebrenica/Zepa fall delivery)
 - File: out-of-scope (engine code change to op execution AI, OR upstream vrs_drina rescue per prior packet)
-- Required sign-off: prior 20260430 packet's roadmap (formation-expert + operations-expert + sector-expert + qa-engineer)
+- Current routing: do not pursue this owner to make Krivaja-95 deliver the Srebrenica fall. Any vrs_drina or operation-execution work must be scoped as operation-health/AAR/context only, with Srebrenica/Zepa fall receipts left event-owned.
 
 ### Owner B summary (separate packet)
 - File: probably `src/sim/combat/operation_preparation.ts` + `attack_resolution_osid.ts` (late-war scripted-op execution-stage AI)
 - Required sign-off: `/operations-expert` (lead) + `/qa-engineer` (cross-faction calibration sweep)
-- Indicator that this is the right owner: existing Cerska-Kamenica from t40 also produces 0 captures with `attempts=0` despite fitting all the same op-infrastructure rules my four new ops follow.
+- Current routing: valid for western late-war operation-health work such as Sana/Mistral. Do not use it as a Srebrenica/Zepa fall-delivery lane.
+- Indicator that this is the right owner for non-sensitive western operation health: existing Cerska-Kamenica from t40 also produces 0 captures with `attempts=0` despite fitting all the same op-infrastructure rules my four new ops follow.
 
 ---
 
@@ -205,8 +206,8 @@ This is documented in the catalog comment block above the new ops.
 
 ## 10. Items explicitly NOT fixed (this packet)
 
-1. **Owner A (Krivaja-95 brigade attrition):** vrs_drina structural collapse — separate Family-2 packet, four sign-offs required (prior packet's roadmap).
-2. **Owner B (late-war scripted-op execution / capture delivery):** Stupčanica + Mistral complete with no AAR attacks; Sana reaches recovery with 7 final-save attempts and 0 captures. Separate engine packet, `/operations-expert` + `/qa-engineer` sign-off.
+1. **Owner A (Krivaja-95 brigade attrition):** superseded as a Srebrenica fall-delivery lane; any future work is operation-health/AAR/context only unless a new Section 6-reviewed design explicitly changes receipt ownership.
+2. **Owner B (late-war scripted-op execution / capture delivery):** valid for western late-war operation health such as Mistral/Sana; not a Srebrenica/Zepa fall-delivery lane.
 3. **Cincar 1994:** apr1995 Glamoč proper, Kupres muni — out of scope per user prompt.
 4. **Sensitive-history consequences for Krivaja-95 + Stupčanica-95:** atrocity / narrative / scoring mechanics — out of scope; territorial control only.
 5. **Hardcoded `'RS'` faction in `assignOperationCommander` call:** engine code, out of scope. Documented in op comment block.
@@ -216,14 +217,7 @@ This is documented in the catalog comment block above the new ops.
 
 ## 11. Recommended next packet
 
-**Owner B (late-war scripted-op execution / capture delivery) is the highest-priority follow-up.** Without it, the four new ops sit as infrastructure but cannot deliver territorial captures. Diagnostic entry points: first examine why Cerska-Kamenica (already in catalog at t40), Stupčanica, and Mistral produce 0 AAR attacks despite infrastructure being correct; then compare Sana, which reaches recovery with 7 final-save attempts and 0 captures. The shared fix may live in operation directive generation, attack eligibility/reachability, execution-window length, or AAR/attempt accounting, but the next packet must prove the exact owner before changing code.
-
-Owner A (vrs_drina rescue) is the prior packet's roadmap and remains stop-at-plan. It unblocks Krivaja-95 specifically.
-
-When Owner A + B are both addressed, the four new ops in this packet should deliver the territorial flips that close Family-1 gaps:
-- Krajina from 60% → ~95% area-weighted (Sana captures Krupa rear, Petrovac, Sanski Most, Ključ).
-- Herzegovina southwest from 42.9% → higher (Mistral 2 captures Drvar, Bosansko Grahovo, Šipovo, Mrkonjić Grad).
-- Drina enclaves (Krivaja/Stupčanica) territorially flip Srebrenica enclave + Žepa to RS.
+**2026-06-18+ replacement:** Owner B remains a valid operation-health follow-up for western late-war work such as Sana and Mistral. Krivaja-95 and Stupcanica-95 are not Srebrenica/Zepa fall-delivery blockers. Do not schedule vrs_drina rescue, defender-power bypasses, recovery-window changes, or operation-execution fixes to make these operations flip Srebrenica/Zepa. The correct Srebrenica/Zepa lane is event-receipt hygiene plus rupture observation of the resulting control state.
 
 ---
 

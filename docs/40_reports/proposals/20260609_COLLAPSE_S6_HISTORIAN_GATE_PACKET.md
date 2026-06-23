@@ -76,7 +76,7 @@ The authoritative Žepa OSID is **`op:rogatica:zepa_2`** — confirmed by `ENCLA
 
 `docs/10_canon/SENSITIVE_HISTORY_DESIGN_GATE.md` §1 (Ring 1 — Modeled mechanically):
 
-> - **Enclaves** (`src/sim/combat/enclave_resilience.ts`) — Sarajevo, Bihać, Srebrenica, Žepa, Goražde, and HRHB pockets have explicit OSIDs, resilience caps, supply-linked decay/growth, and garrison mechanics. Enclaves fall when control flips through combat.
+> - **Enclaves** (`src/sim/combat/enclave_resilience.ts`) — Sarajevo, Bihać, Srebrenica, Žepa, Goražde, and HRHB pockets have explicit OSIDs, resilience caps, supply-linked decay/growth, and garrison mechanics. Enclaves fall through the accepted event-owned control receipt path or other Section 6-approved modeled-war path; Krivaja/Stupcanica operation delivery is not the Srebrenica/Zepa receipt owner.
 
 > - **Rupture consequence** — exactly one: `srebrenica_genocide_1995`, fired when the Srebrenica OSID falls to RS in the 1995 timeframe with enclave formed flag set. Propagates `genocide_condemnation` flag. Locked, idempotent, permanent.
 

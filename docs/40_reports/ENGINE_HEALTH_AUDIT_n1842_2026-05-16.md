@@ -2,6 +2,8 @@
 
 > **Superseded correction (2026-06-18):** this audit predates the event-owned Srebrenica/Zepa receipt correction. Any language below that frames Srebrenica/Žepa as open because Krivaja-95/Stupčanica-95 operation delivery did not capture objectives is historical diagnostic context only. Current canon: `srebrenica_falls_1995` and `zepa_falls_1995` own the fall `control_change` receipts, and `srebrenica_genocide_1995` observes the resulting Srebrenica control state at turn >=160.
 
+> **Sector-audit supersession (2026-06-23):** Sector audit policy changed. Persisted saved-sector truth is the release gate. Rebuilt-sector reserve-only findings are diagnostics and must not mutate or fail the saved-sector audit unless a separate sector-builder/calibration lane intentionally changes production truth.
+
 **Run:** `apr1992_definitive_188w__210e69404d054959__w188_n1842`
 **Hash:** `a0111273f26f907d`
 **Scenario:** `apr1992_definitive_188w` (war start, 188 weeks, smart bots, player_choice recruitment)

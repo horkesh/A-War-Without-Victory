@@ -350,12 +350,12 @@ describe('Formation Detail parity display', () => {
 
     const southButton = screen.getByRole('button', { name: /Southern line/i });
     const northButton = screen.getByRole('button', { name: /Northern line/i });
-    expect(southButton.textContent ?? '').toContain('1 brigade');
-    expect(southButton.textContent ?? '').not.toContain('1 brigades');
+    expect(southButton.textContent ?? '').toContain('1 current brigade');
+    expect(southButton.textContent ?? '').not.toContain('1 current brigades');
     expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
-    expect(northButton.textContent ?? '').toContain('1 brigade');
-    expect(northButton.textContent ?? '').not.toContain('1 brigades');
-    expect(northButton.textContent ?? '').not.toContain('2 brigades');
+    expect(northButton.textContent ?? '').toContain('1 current brigade');
+    expect(northButton.textContent ?? '').not.toContain('1 current brigades');
+    expect(northButton.textContent ?? '').not.toContain('2 current brigades');
   });
 
   it('exposes sector picker proof hooks for zero-current options', () => {
@@ -373,7 +373,7 @@ describe('Formation Detail parity display', () => {
     expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
     expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
     expect(southButton?.getAttribute('aria-label')).toContain('Southern line');
-    expect(southButton?.textContent ?? '').toContain('0 brigades');
+    expect(southButton?.textContent ?? '').toContain('0 current brigades');
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {

@@ -90,6 +90,7 @@ function SectorExpandedDetail({
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
     const hasCurrentFieldedLine = sectorAssignment.allCurrentIds.length > 0;
+    const projectedDensity = computeCurrentFrontDensity(sector, frontIds.length);
 
     const threatRatio = sector.threat_ratio;
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
@@ -280,11 +281,15 @@ function SectorExpandedDetail({
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
                 <span>{t('sectorsSection.bdePerFrontSegment', { value: sector.length_edges > 0 ? (frontIds.length / sector.length_edges).toFixed(2) : '-' })}</span>
-                <span>{t('sectorsSection.troopDensity', { value: sector.density.toFixed(2) })}</span>
+                <span>{t('sectorsSection.troopDensity', { value: projectedDensity })}</span>
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
             </div>
         </div>
     );
+}
+
+function computeCurrentFrontDensity(sector: CorpsFrontSectorView, frontlineCount: number): string {
+    return sector.length_edges > 0 ? (frontlineCount / sector.length_edges).toFixed(2) : '0.00';
 }
 
 function compareText(a: string, b: string): number {
@@ -368,6 +373,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
                         const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
                         const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
+                        const projectedDensity = computeCurrentFrontDensity(sector, sectorAssignment.frontlineIds.length);
 
                         return (
                             <div
@@ -406,7 +412,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 front: sectorAssignment.frontlineIds.length,
                                                 reserveSegment: sectorAssignment.reserveIds.length > 0 ? t('sectorsSection.reserveSegment', { count: sectorAssignment.reserveIds.length }) : '',
                                                 segments: sector.length_edges,
-                                                density: sector.density.toFixed(2),
+                                                density: projectedDensity,
                                             })}
                                             {sectorAssignment.overrideIds.length > 0 && ` // ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
                                         </div>

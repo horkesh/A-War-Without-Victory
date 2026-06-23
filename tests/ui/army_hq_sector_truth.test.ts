@@ -85,6 +85,10 @@ describe('Army HQ sector truth', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
     expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('density 0.00');
+    expect(container.textContent).toContain('Troop density: 0.00');
+    expect(container.textContent).not.toContain('density 0.42');
+    expect(container.textContent).not.toContain('Troop density: 0.42');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
     expect(container.textContent).not.toMatch(/current:\s*Defend/i);
     expect(container.textContent).not.toMatch(/Class\s*Adequate|Adequate/i);

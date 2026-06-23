@@ -1,5 +1,7 @@
 # v0.7.0 Event Flag Wiring — Implementation Plan
 
+**Historical plan:** Do not execute directly. Current governance lives in `docs/plans/COMMAND_BOARD.md` and `docs/plans/MASTER_ROADMAP.md`. Srebrenica/Zepa fall receipts are event-owned under the current Section 6 policy; do not infer a scripted-op or wholesale event-rebuild lane from this file.
+
 **Date:** 2026-03-23
 **Status:** COMPLETE — all phases implemented (2026-03-25). Phases 1-5 shipped. Zero orphan flags remain.
 **Scope:** Wire ~25 orphan flags to downstream event conditions and engine systems

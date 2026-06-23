@@ -91,7 +91,7 @@ The documented residual (`phase3d_collapse_resolution.ts:151–157`): `getEdgeCa
 
 ### B.3 Rupture-timing invariant
 
-`srebrenica_genocide_1995` records iff `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` AND `turn ≥ 160` (current event-owned receipt floor; IV-a measured the actual recorded_turn = 162, both ON and OFF). Collapse **never flips `political_controllers`** (3D writes only `collapse_damage` + `capacity_modifiers`). The only INDIRECT risk is acceleration of a defender's fall via a degraded `supply_mult` — but G1 zeroes that for every enclave OSID, so Srebrenica/Žepa fall on their existing event/triggered-op timing, unchanged. G2 asserts: rupture records, at recorded_turn ≥ 160, Žepa falls, Goražde/Bihać/Sarajevo/Teočak held. **Must be GREEN on every territory-moving run.**
+`srebrenica_genocide_1995` records iff `political_controllers['op:srebrenica:srebrenica_2'] === 'RS'` AND `turn ≥ 160` (current event-owned receipt floor; IV-a measured the actual recorded_turn = 162, both ON and OFF). Collapse **never flips `political_controllers`** (3D writes only `collapse_damage` + `capacity_modifiers`). The only INDIRECT risk is acceleration of a defender's fall via a degraded `supply_mult` — but G1 zeroes that for every enclave OSID, so Srebrenica/Zepa fall on their event-owned receipt timing. Triggered operations may provide chronology/AAR context only and must not be treated as fall-delivery mechanisms. G2 asserts: rupture records, at recorded_turn ≥ 160, Zepa falls, Gorazde/Bihac/Sarajevo/Teocak held. **Must be GREEN on every territory-moving run.**
 
 ---
 

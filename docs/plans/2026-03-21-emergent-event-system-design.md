@@ -1,5 +1,7 @@
 # Emergent Event System — Design Document
 
+**Historical plan:** Do not execute directly. Current governance lives in `docs/plans/COMMAND_BOARD.md` and `docs/plans/MASTER_ROADMAP.md`. Srebrenica/Zepa fall receipts are event-owned under the current Section 6 policy; do not infer a scripted-op or wholesale event-rebuild lane from this file.
+
 **Date:** 2026-03-21
 **Status:** SUPERSEDED for implementation details by `docs/plans/2026-05-24-event-system-presidential-core-upgrade-plan.md`
 **Scope:** v0.6.0 (infrastructure + 1992 events), v0.6.x (full event set), command autonomy backlog v0.7+
