@@ -13,6 +13,7 @@ import {
   getPlayerSafeMunicipalityName,
   getPlayerSafeOperationPhaseLabel,
   getPlayerSafeDisplayLabel,
+  getPlayerSafeSectorStrengthLabel,
 } from '../utils/playerSafeText';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
@@ -66,9 +67,10 @@ const STRENGTH_BADGE_STYLES: Record<string, string> = {
 
 function SectorStrengthBadge({ strengthClass }: { strengthClass: string }) {
   const style = STRENGTH_BADGE_STYLES[strengthClass] ?? 'text-text-secondary';
+  const label = getPlayerSafeSectorStrengthLabel(strengthClass);
   return (
     <span className={`text-[9px] uppercase tracking-tight shrink-0 ${style}`}>
-      {strengthClass}
+      {label}
     </span>
   );
 }

@@ -65,6 +65,13 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
     critical: 'text-red-500',
 };
 
+const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
+type SectorStanceType = typeof SECTOR_STANCES[number];
+
+function normalizeSectorStance(stance: string | null | undefined): SectorStanceType | null {
+    return SECTOR_STANCES.includes(stance as SectorStanceType) ? stance as SectorStanceType : null;
+}
+
 function SectorExpandedDetail({
     sector,
     sectors,
@@ -82,11 +89,12 @@ function SectorExpandedDetail({
     const frontIds = sectorAssignment.frontlineIds;
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
+    const hasCurrentFieldedLine = sectorAssignment.allCurrentIds.length > 0;
 
     const threatRatio = sector.threat_ratio;
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
     const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
-    const currentStance = sector.sector_stance ?? 'defend';
+    const currentStance = normalizeSectorStance(sector.sector_stance);
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -102,7 +110,7 @@ function SectorExpandedDetail({
                         {t('sectorsSection.threat')} <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
                 )}
-                {stanceHint !== null && stanceHint !== currentStance && (
+                {stanceHint !== null && currentStance !== null && stanceHint !== currentStance && (
                     <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
                         {t('sectorsSection.recommend', {
                             stance: getPlayerSafeSectorStanceLabel(stanceHint),
@@ -112,7 +120,7 @@ function SectorExpandedDetail({
                 )}
             </div>
 
-            {sector.combat_strength_class && (
+            {hasCurrentFieldedLine && sector.combat_strength_class && (
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-text-secondary/60 uppercase tracking-wider border-t border-panel-border/30 pt-2">
                     <span>{t('sectorsSection.class')} <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{getPlayerSafeSectorStrengthLabel(sector.combat_strength_class)}</span></span>
                     {sector.combat_defense_per_edge != null && <span>{t('sectorsSection.defPerEdge')} <span className="font-bold text-text-secondary">{Math.round(sector.combat_defense_per_edge)}</span></span>}

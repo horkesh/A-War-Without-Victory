@@ -1,4 +1,5 @@
 import type { FormationView } from '../data/types';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 /**
  * Formations at a given OSID (location or AoR).
@@ -9,6 +10,6 @@ export function getFormationsAtOsid(
 ): FormationView[] {
   if (!formations) return [];
   return formations.filter(
-    (f) => f.location_osid === osid || f.aorSettlementIds?.includes(osid)
+    (f) => isFieldedTacticalFormation(f) && (f.location_osid === osid || f.aorSettlementIds?.includes(osid))
   );
 }

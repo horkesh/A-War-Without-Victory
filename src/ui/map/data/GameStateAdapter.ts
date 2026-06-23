@@ -840,9 +840,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 faction: (f.faction as string) ?? '',
                 name: getPlayerSafeDisplayLabel(typeof f.name === 'string' ? f.name : id, 'Formation'),
                 kind: ((f.kind as string) === 'corps_asset' && (id.endsWith('_staff') || id.endsWith('_general_staff'))) ? 'army_hq' : ((f.kind as string) ?? 'brigade'),
-                readiness: (f.readiness as string) ?? 'active',
-                cohesion: (f.cohesion as number) ?? 100, fatigue: (ops?.fatigue as number) ?? 0,
-                status: (f.status as string) ?? 'active', createdTurn: (f.created_turn as number) ?? 0,
+                readiness: typeof f.readiness === 'string' ? f.readiness : 'unreported',
+                cohesion: typeof f.cohesion === 'number' && Number.isFinite(f.cohesion) ? f.cohesion : 0,
+                fatigue: typeof ops?.fatigue === 'number' && Number.isFinite(ops.fatigue) ? ops.fatigue : 0,
+                status: typeof f.status === 'string' ? f.status : 'unreported',
+                createdTurn: typeof f.created_turn === 'number' && Number.isFinite(f.created_turn) ? f.created_turn : 0,
                 home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
@@ -1032,7 +1034,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (!hasHq && hasCorps) {
             formations.push({
                 id: hqDef.id, faction, name: hqDef.name, kind: 'army_hq',
-                readiness: 'active', cohesion: 100, fatigue: 0, status: 'active', createdTurn: 0,
+                readiness: 'unreported', cohesion: 0, fatigue: 0, status: 'unreported', createdTurn: 0, tags: ['compatibility_synthesized'],
             } as FormationView);
         }
     }

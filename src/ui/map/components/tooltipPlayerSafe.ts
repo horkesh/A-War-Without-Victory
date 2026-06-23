@@ -4,7 +4,7 @@ import type {
   FrontEdgeView,
   LoadedGameState,
 } from '../data/types';
-import { getPlayerFacingFaction, filterPlayerVisibleMapFormations } from '../../shared/playerVisibility';
+import { getPlayerFacingFaction, filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { t, type Locale, type MessageKey } from '../i18n';
@@ -75,7 +75,7 @@ export function getPlayerSafeSettlementTooltipFormations(
   if (!state?.formations) return [];
   const playerFaction = getPlayerFacingFaction(state);
   return state.formations
-    .filter((formation) => formation.location_osid === osid && isOwnFormation(formation, playerFaction))
+    .filter((formation) => isFieldedTacticalFormation(formation) && formation.location_osid === osid && isOwnFormation(formation, playerFaction))
     .map((formation) => ({
       id: formation.id,
       name: getLocalizedFormationName(formation, locale),
@@ -184,7 +184,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     fogOfWar: args.fogOfWar,
     formations: args.formations ?? [],
   } as LoadedGameState);
-  const formationsOnEdge = visibleFormations.filter((formation) => (
+  const formationsOnEdge = visibleFormations.filter((formation) => isFieldedTacticalFormation(formation) && (
     formation.aorSettlementIds?.includes(edge?.a ?? '') || formation.aorSettlementIds?.includes(edge?.b ?? '')
   ));
   const ownFormations = formationsOnEdge.filter((formation) => isOwnFormation(formation, args.playerFaction));

@@ -35,6 +35,7 @@ function makeState(): LoadedGameState {
         status: 'active',
         cohesion: 70,
         fatigue: 5,
+        morale: 64,
         createdTurn: 0,
         tags: [],
         personnel: 1200,
@@ -239,6 +240,8 @@ describe('CorpsFrontPanel field routing', () => {
       combat_personnel: 0,
       combat_offensive_power: 0,
       combat_defensive_power: 0,
+      combat_defense_per_edge: 900,
+      combat_strength_class: 'adequate',
       defensive_power: 0,
     }] as LoadedGameState['corpsFrontSectors'];
     useGameStore.setState({
@@ -251,6 +254,37 @@ describe('CorpsFrontPanel field routing', () => {
 
     expect(container.textContent).toMatch(/No friendly line/i);
     expect(container.textContent).not.toMatch(/SUPERIOR|clear advantage/i);
+    expect(container.textContent).not.toMatch(/Adequate|Strong|Fortress/i);
+  });
+
+  it('does not invent a defensive stance when sector stance is unreported', () => {
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Sector Stance:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Sector Stance:\s*Defend/i);
+  });
+
+  it('uses current field assignment metrics when sector combat metrics are stale or absent', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      combat_personnel: 0,
+      combat_morale_avg: undefined,
+      combat_cohesion_avg: undefined,
+      combat_fatigue_avg: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toContain('70');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('5');
   });
 
   it('includes command-directed brigades in Corps Front logistics manpower', () => {

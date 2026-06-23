@@ -25,6 +25,7 @@ import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
+import { getFormationsAtOsid } from '../src/ui/map/utils/formationAtOsid.js';
 
 describe('player visibility helpers', () => {
   it('normalizes player faction and rejects unknown values', () => {
@@ -57,12 +58,23 @@ describe('player visibility helpers', () => {
     expect(filterPlayerFacingOperations(state).map((o) => o.name)).toEqual(['Op Tuzla']);
   });
 
-  it('treats lightweight statusless tactical formation records as fielded-compatible', () => {
+  it('only treats active, non-forming tactical records as fielded while preserving lightweight projection records', () => {
     expect(isFieldedTacticalFormation({ kind: 'brigade' })).toBe(true);
     expect(isFieldedTacticalFormation({ kind: 'operational_group' })).toBe(true);
-    expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'ACTIVE' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'ACTIVE', readiness: 'ready' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'active', readiness: 'forming' })).toBe(false);
     expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'destroyed' })).toBe(false);
     expect(isFieldedTacticalFormation({ kind: 'corps', status: 'active' })).toBe(false);
+  });
+
+  it('does not expose forming or destroyed formations as stationed field units', () => {
+    const formations = [
+      { id: 'fielded', faction: 'RBiH', name: 'Fielded', kind: 'brigade', readiness: 'ready', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
+      { id: 'forming', faction: 'RBiH', name: 'Forming', kind: 'brigade', readiness: 'forming', cohesion: 40, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
+      { id: 'destroyed', faction: 'RBiH', name: 'Destroyed', kind: 'brigade', readiness: 'destroyed', cohesion: 0, fatigue: 0, status: 'destroyed', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
+    ] as LoadedGameState['formations'];
+
+    expect(getFormationsAtOsid(formations, 'op:tuzla').map((formation) => formation.id)).toEqual(['fielded']);
   });
 
   it('filters operation history and movement logs to player-owned formations only', () => {
@@ -210,6 +222,26 @@ describe('player visibility helpers', () => {
     } as unknown as LoadedGameState;
 
     expect(filterPlayerVisibleMapFormations(state).map((f) => f.id)).toEqual(['arbih_1', 'rs_1', 'hrhb_1']);
+  });
+
+  it('parseGameState keeps missing lifecycle unreported instead of active/perfect', () => {
+    const parsed = parseGameState({
+      meta: { turn: 1, phase: 'war' },
+      military: {
+        formations: {
+          b1: { id: 'b1', faction: 'RBiH', name: 'B1', kind: 'brigade', tags: [] },
+        },
+      },
+      political: { political_controllers: {} },
+    } as any);
+
+    expect(parsed.formations[0]).toMatchObject({
+      readiness: 'unreported',
+      status: 'unreported',
+      cohesion: 0,
+      fatigue: 0,
+    });
+    expect(isFieldedTacticalFormation(parsed.formations[0])).toBe(false);
   });
 
   it('formation geojson excludes enemy formations outside fog visibility', () => {

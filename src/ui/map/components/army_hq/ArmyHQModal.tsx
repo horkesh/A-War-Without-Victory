@@ -32,6 +32,7 @@ import { RecordsContent } from './RecordsContent';
 import { RootErrorBoundary } from '../RootErrorBoundary';
 import { PersonnelContent } from './PersonnelContent';
 import { Z } from '../../../shared/zIndex';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import type { CorpsFrontSectorView, FormationView, NamedOfficerView, OperationView } from '../../data/types';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
@@ -172,7 +173,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         if (!open || !state || !faction) return null;
 
         const formations = state.formations.filter((f) => f.faction === faction);
-        const brigades = formations.filter((f) => f.kind === 'brigade' && f.status === 'active');
+        const brigades = formations.filter((f) => isFieldedTacticalFormation(f));
         const corpsFormations = formations.filter((f) => f.kind === 'corps' || f.kind === 'corps_asset');
         const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
         const sectors = (state.corpsFrontSectors ?? []).filter((s) => s.faction === faction);

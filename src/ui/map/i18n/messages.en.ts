@@ -3261,7 +3261,7 @@ export const enMessages = {
     'situation.offensiveSigns': ' · Offensive signs detected',
     'situation.emptyOpsec': 'No sectors are currently under an operational-security screen.',
     'situation.flaggedHealth': 'Flagged operation health ({flagged} of {total} active operations)',
-    'situation.operationHealthLine': 'Supply {supply}% · Failures {failures}',
+    'situation.operationHealthLine': 'Supply {supply} · Failures {failures}',
     'situation.diplomacy': 'Diplomacy',
     // Patron activity-art caption ("Car 4" §4.12 patron-relations still). Decorative
     // image (aria-hidden, empty alt); this is the screen-readable lane description.

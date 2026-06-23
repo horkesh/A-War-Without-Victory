@@ -329,7 +329,7 @@ describe('Tactical map render smoke', () => {
           readiness: 'forming',
           cohesion: 30,
           fatigue: 0,
-          status: 'forming',
+          status: 'active',
           createdTurn: 1,
           tags: [],
           location_osid: 'op:pale',

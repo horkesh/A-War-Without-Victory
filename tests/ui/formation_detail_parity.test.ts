@@ -252,6 +252,18 @@ describe('Formation Detail parity display', () => {
     expect(screen.queryByRole('button', { name: /Southern line/i })).toBeNull();
   });
 
+  it('does not expose sector assignment controls for active-but-forming brigades', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_rear_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    expect(view.container.textContent).not.toContain('Sector assignment');
+    expect(screen.queryByText('Clear override')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Northern line/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Southern line/i })).toBeNull();
+  });
+
   it('renders corps posture and exhaustion without brigade defaults or double scaling', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_1st_corps'
@@ -338,8 +350,8 @@ describe('Formation Detail parity display', () => {
 
     const southButton = screen.getByRole('button', { name: /Southern line/i });
     const northButton = screen.getByRole('button', { name: /Northern line/i });
-    expect(southButton.textContent ?? '').toContain('2 brigades');
-    expect(southButton.textContent ?? '').not.toMatch(/\b0b\b|\b1b\b/);
+    expect(southButton.textContent ?? '').toContain('1 brigade');
+    expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
     expect(northButton.textContent ?? '').toContain('1 brigade');
     expect(northButton.textContent ?? '').not.toContain('2 brigades');
   });

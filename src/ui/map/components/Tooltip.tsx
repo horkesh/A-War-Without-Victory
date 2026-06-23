@@ -5,7 +5,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { stripFactionSuffix } from '../utils/sectorUtils';
+import { buildSectorFormationAssignment, stripFactionSuffix } from '../utils/sectorUtils';
 import { FACTION_COLORS } from '../utils/theme';
 import { Z } from '../../shared/zIndex';
 import { SettlementDetailContent } from './SettlementDetailContent';
@@ -16,7 +16,7 @@ import {
   buildPlayerSafeFrontTooltipModel,
   getPlayerSafeSettlementTooltipFormations,
 } from './tooltipPlayerSafe';
-import { getPlayerFacingFaction } from '../../shared/playerVisibility';
+import { filterPlayerFacingSectors, getPlayerFacingFaction, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSettlementName,
@@ -322,7 +322,8 @@ function DefensePreviewContent({
     );
     if (!sector) return null;
 
-    const brigadeIds = [...(sector.assigned_brigade_ids ?? []), ...(sector.reserve_brigade_ids ?? [])];
+    const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
+    const brigadeIds = sectorAssignment.allCurrentIds;
     const munFromOsid = (o: string | undefined): string | undefined => o?.split(':')[1];
     const targetMun = munFromOsid(osid);
 
@@ -332,7 +333,7 @@ function DefensePreviewContent({
 
     for (const bid of brigadeIds) {
       const f = formationMap.get(bid);
-      if (!f || !f.location_osid || !f.personnel || f.personnel <= 0) continue;
+      if (!f || !isFieldedTacticalFormation(f) || !f.location_osid || !f.personnel || f.personnel <= 0) continue;
       const atOsid = f.location_osid === osid;
       const isHome = !!(munFromOsid(f.home_osid) && munFromOsid(f.home_osid) === targetMun);
       if (atOsid) physicalCount++;
@@ -342,7 +343,7 @@ function DefensePreviewContent({
 
     return {
       sector_id: sector.sector_id,
-      stance: sector.sector_stance ?? 'defend',
+      stance: sector.sector_stance ?? null,
       physicalCount,
       reactiveCount,
       brigades: brigades.sort((a, b) => (a.atOsid === b.atOsid ? 0 : a.atOsid ? -1 : 1)),
@@ -358,7 +359,7 @@ function DefensePreviewContent({
     active_defense: 'tooltip.stance.activeDefense',
     screening: 'tooltip.stance.screening',
   };
-  const stanceLabel = t(STANCE_LABEL_KEY[info.stance] ?? 'tooltip.stance.review');
+  const stanceLabel = info.stance ? t(STANCE_LABEL_KEY[info.stance] ?? 'tooltip.stance.review') : t('tooltip.stance.review');
 
   return (
     <div className="mt-2 pt-2 border-t border-panel-border/40">
@@ -450,7 +451,7 @@ export const Tooltip = React.memo(function Tooltip() {
           {mapMode === 'defense' && (
             <DefensePreviewContent
               osid={delayedTarget.id}
-              sectors={loadedGameState?.corpsFrontSectors}
+              sectors={filterPlayerFacingSectors(loadedGameState)}
               formations={(loadedGameState?.formations ?? []).filter((formation) => formation.faction === playerFaction)}
             />
           )}

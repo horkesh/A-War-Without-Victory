@@ -167,4 +167,13 @@ describe('OOBSidebar drilldown routing', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
+
+  it('renders player-safe sector strength labels instead of raw enum values', () => {
+    const { container } = render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+
+    expect(container.textContent).toContain('Adequate');
+    expect(container.textContent).not.toMatch(/\badequate\b/);
+  });
 });

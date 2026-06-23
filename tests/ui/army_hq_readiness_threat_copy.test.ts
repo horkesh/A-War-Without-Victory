@@ -1,4 +1,5 @@
 import { createElement } from 'react';
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ForceReadiness, generateForceReadiness, readinessGradeLabel, type CorpsReadiness } from '../../src/ui/map/components/army_hq/ForceReadiness.js';
@@ -155,7 +156,7 @@ describe('Army HQ readiness and threat copy', () => {
     it('generates typed ForceReadiness recommendation ids instead of using English strings as control flow', () => {
         const items = generateForceReadiness([
             { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
-            { id: 'brigade_1', name: '1st Brigade', kind: 'brigade', faction: 'RBiH', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
+            { id: 'brigade_1', name: '1st Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
         ] as any, [], 'RBiH', new Set(['corps_1']));
 
         expect(items).toHaveLength(1);
@@ -165,6 +166,24 @@ describe('Army HQ readiness and threat copy', () => {
         const html = bcsMarkup(createElement(ForceReadiness, { items }));
         expect(html).toContain('Pojacati prednje sektore');
         expect(html).not.toContain('Reinforce front sectors');
+    });
+
+    it('excludes active-but-forming brigades from ForceReadiness combat counts', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'fielded', name: 'Fielded Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
+            { id: 'forming', name: 'Forming Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'forming', status: 'active', corps_id: 'corps_1', personnel: 900, fatigue: 0, cohesion: 50 },
+        ] as any, [], 'RBiH', new Set());
+
+        expect(items[0]?.totalBrigades).toBe(1);
+        expect(items[0]?.avgCohesion).toBe(80);
+    });
+
+    it('uses the shared fielded tactical boundary for Army HQ modal brigade lists', () => {
+        const source = readFileSync('src/ui/map/components/army_hq/ArmyHQModal.tsx', 'utf8');
+
+        expect(source).toContain('isFieldedTacticalFormation(f)');
+        expect(source).not.toContain("f.kind === 'brigade' && f.status === 'active'");
     });
 
     it('generates BCS threat copy without English intel prose or raw sector ids', () => {

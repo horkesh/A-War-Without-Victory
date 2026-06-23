@@ -75,8 +75,10 @@ describe('player-safe tooltip models', () => {
     const state = {
       player_faction: 'RBiH',
       formations: [
-        { id: 'own_bde', name: '2nd Tuzla Brigade', faction: 'RBiH', kind: 'brigade', location_osid: 'op:tuzla', personnel: 1800 },
-        { id: 'enemy_bde', name: '1st Krajina Motorized', faction: 'RS', kind: 'brigade', location_osid: 'op:tuzla', personnel: 2200 },
+        { id: 'own_bde', name: '2nd Tuzla Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', readiness: 'ready', location_osid: 'op:tuzla', personnel: 1800 },
+        { id: 'own_forming_bde', name: 'Forming Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', readiness: 'forming', location_osid: 'op:tuzla', personnel: 900 },
+        { id: 'own_destroyed_bde', name: 'Destroyed Brigade', faction: 'RBiH', kind: 'brigade', status: 'destroyed', readiness: 'destroyed', location_osid: 'op:tuzla', personnel: 200 },
+        { id: 'enemy_bde', name: '1st Krajina Motorized', faction: 'RS', kind: 'brigade', status: 'active', readiness: 'ready', location_osid: 'op:tuzla', personnel: 2200 },
       ],
     } as unknown as LoadedGameState;
 
@@ -90,7 +92,7 @@ describe('player-safe tooltip models', () => {
         name: '2nd Tuzla Brigade',
         faction: 'RBiH',
         kind: 'brigade',
-        readiness: 'active',
+        readiness: 'ready',
         cohesion: 80,
         fatigue: 0,
         status: 'active',
@@ -105,7 +107,7 @@ describe('player-safe tooltip models', () => {
         name: '1st Krajina Motorized',
         faction: 'RS',
         kind: 'brigade',
-        readiness: 'active',
+        readiness: 'ready',
         cohesion: 80,
         fatigue: 0,
         status: 'active',
@@ -120,7 +122,7 @@ describe('player-safe tooltip models', () => {
         name: 'Drina Brigade',
         faction: 'RS',
         kind: 'brigade',
-        readiness: 'active',
+        readiness: 'ready',
         cohesion: 80,
         fatigue: 0,
         status: 'active',
@@ -164,6 +166,53 @@ describe('player-safe tooltip models', () => {
     expect(model.densityLabel).toBe('Reinforced');
     expect(model.ownFormationLabels).toEqual(['2nd Tuzla Brigade - Defending']);
     expect(model.enemyContactSummary).toBe('1 enemy contact observed');
+  });
+
+  it('excludes forming own formations from front tooltip line summaries', () => {
+    const formations = [
+      {
+        id: 'own_fielded',
+        name: 'Fielded Brigade',
+        faction: 'RBiH',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 80,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 1,
+        tags: [],
+        location_osid: 'op:tuzla',
+        aorSettlementIds: ['op:tuzla', 'op:doboj'],
+        posture: 'defend',
+      },
+      {
+        id: 'own_forming',
+        name: 'Forming Brigade',
+        faction: 'RBiH',
+        kind: 'brigade',
+        readiness: 'forming',
+        cohesion: 40,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 1,
+        tags: [],
+        location_osid: 'op:tuzla',
+        aorSettlementIds: ['op:tuzla', 'op:doboj'],
+        posture: 'defend',
+      },
+    ] satisfies FormationView[];
+
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations,
+      fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.ownFormationLabels).toEqual(['Fielded Brigade - Defending']);
   });
 
   it('localizes formation posture labels in tooltip models', () => {
@@ -214,5 +263,7 @@ describe('player-safe tooltip models', () => {
     expect(playerCopy).not.toContain('DENSE');
     expect(playerCopy).not.toContain('Active Def.');
     expect(playerCopy).not.toMatch(/>\s*reactive\s*</i);
+    expect(tooltipSource).toContain('filterPlayerFacingSectors(loadedGameState)');
+    expect(tooltipSource).not.toContain('sectors={loadedGameState?.corpsFrontSectors}');
   });
 });

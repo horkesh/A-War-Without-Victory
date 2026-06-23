@@ -59,6 +59,8 @@ describe('War Summary OPSEC reconciliation', () => {
         expect(screen.getByText('Flagged operation health (2 of 5 active operations)')).toBeTruthy();
         expect(screen.getByText('Una Push')).toBeTruthy();
         expect(screen.getByText('Vrbas Hold')).toBeTruthy();
+        expect(screen.getByText('Supply N/A · Failures 0')).toBeTruthy();
+        expect(screen.queryByText('Supply 0% · Failures 0')).toBeNull();
     });
 
     it('localizes OPSEC labels and health counts in BCS mode', () => {

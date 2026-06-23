@@ -77,7 +77,19 @@ function FuzzyIntel({
   return <span className="truncate">{value}</span>;
 }
 
+function averageFinite(values: Array<number | undefined>): number | undefined {
+  const finite = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+  if (finite.length === 0) return undefined;
+  return finite.reduce((sum, value) => sum + value, 0) / finite.length;
+}
 
+function hasPositiveMetric(value: number | undefined | null): boolean {
+  return typeof value === 'number' && Number.isFinite(value) && value > 0;
+}
+
+function hasFiniteMetric(value: number | undefined | null): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
+}
 
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 type SectorStanceType = typeof SECTOR_STANCES[number];
@@ -244,6 +256,23 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const overridePersonnel = overrideFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel + overridePersonnel;
   const hasFriendlyLine = assignedFormations.length + reserveFormations.length + overrideFormations.length > 0;
+  const currentSectorFormations = [...assignedFormations, ...reserveFormations, ...overrideFormations];
+  const displayStrengthClass = hasFriendlyLine ? sector.combat_strength_class : undefined;
+  const displayCombatPersonnel = hasPositiveMetric(sector.combat_personnel) || totalSectorPersonnel <= 0
+    ? sector.combat_personnel
+    : totalSectorPersonnel;
+  const displayMoraleAvg = hasFiniteMetric(sector.combat_morale_avg)
+    ? sector.combat_morale_avg
+    : averageFinite(currentSectorFormations.map((formation) => formation.morale));
+  const displayCohesionAvg = hasFiniteMetric(sector.combat_cohesion_avg)
+    ? sector.combat_cohesion_avg
+    : averageFinite(currentSectorFormations.map((formation) => formation.cohesion));
+  const displayFatigueAvg = hasFiniteMetric(sector.combat_fatigue_avg)
+    ? sector.combat_fatigue_avg
+    : averageFinite(currentSectorFormations.map((formation) => formation.fatigue));
+  const displayOffensivePower = hasFriendlyLine ? sector.combat_offensive_power : undefined;
+  const displayDefensivePower = hasFriendlyLine ? (sector.combat_defensive_power ?? sector.defensive_power) : undefined;
+  const displayDefensePerEdge = hasFriendlyLine ? sector.combat_defense_per_edge : undefined;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
   const operationSupplyReadinessValues = relatedOperations
     .map((op) => op.supply_readiness)
@@ -252,9 +281,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     ? operationSupplyReadinessValues.reduce((sum, readiness) => sum + readiness, 0) / operationSupplyReadinessValues.length
     : null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
-  const currentSectorStance = (sector.sector_stance ?? 'defend') as SectorStanceType;
+  const currentSectorStance = SECTOR_STANCES.includes(sector.sector_stance as SectorStanceType)
+    ? (sector.sector_stance as SectorStanceType)
+    : null;
   const currentStanceSource = sector.stance_source ?? 'bot';
-  const sectorStanceLabel = stanceLabel(currentSectorStance);
+  const sectorStanceLabel = currentSectorStance ? stanceLabel(currentSectorStance) : t('corpsFront.unreported');
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
   const metadataDate = loadedGameState.metadata?.date?.trim();
@@ -409,32 +440,32 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         {sector.intel_confidence < 0.3 ? (
                           <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
                         ) : (
-                          <StrengthBadge strengthClass={sector.combat_strength_class} />
+                          <StrengthBadge strengthClass={displayStrengthClass} />
                         )}
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('armyReserve.personnel')}</span>
-                      <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={sector.combat_personnel} confidence={sector.intel_confidence} />
+                      <div className="font-medium tabular-nums" data-testid="corps-front-combat-personnel">
+                        <FuzzyIntel value={displayCombatPersonnel} confidence={sector.intel_confidence} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((sector.combat_offensive_power ?? 0) / 1000).toFixed(1) })}>
+                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayOffensivePower ?? 0) / 1000).toFixed(1) })}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.offensivePower')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={sector.combat_offensive_power} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayOffensivePower} confidence={sector.intel_confidence} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((sector.combat_defensive_power ?? sector.defensive_power ?? 0) / 1000).toFixed(1) })}>
+                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayDefensivePower ?? 0) / 1000).toFixed(1) })}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defensivePower')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={sector.combat_defensive_power ?? sector.defensive_power} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayDefensivePower} confidence={sector.intel_confidence} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defPerEdge')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={sector.combat_defense_per_edge} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayDefensePerEdge} confidence={sector.intel_confidence} />
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -458,20 +489,29 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="grid grid-cols-3 gap-x-3 gap-y-1.5">
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.morale')}</span>
-                      <div className={`font-medium tabular-nums ${(sector.combat_morale_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_morale_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
-                        <FuzzyIntel value={sector.combat_morale_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      <div
+                        className={`font-medium tabular-nums ${(displayMoraleAvg ?? 50) < 25 ? 'text-red-600' : (displayMoraleAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
+                        data-testid="corps-front-combat-morale"
+                      >
+                        <FuzzyIntel value={displayMoraleAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.cohesion')}</span>
-                      <div className={`font-medium tabular-nums ${(sector.combat_cohesion_avg ?? 50) < 25 ? 'text-red-600' : (sector.combat_cohesion_avg ?? 50) < 50 ? 'text-amber-600' : ''}`}>
-                        <FuzzyIntel value={sector.combat_cohesion_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      <div
+                        className={`font-medium tabular-nums ${(displayCohesionAvg ?? 50) < 25 ? 'text-red-600' : (displayCohesionAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
+                        data-testid="corps-front-combat-cohesion"
+                      >
+                        <FuzzyIntel value={displayCohesionAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.fatigue')}</span>
-                      <div className={`font-medium tabular-nums ${(sector.combat_fatigue_avg ?? 0) > 20 ? 'text-red-600' : (sector.combat_fatigue_avg ?? 0) > 10 ? 'text-amber-600' : ''}`}>
-                        <FuzzyIntel value={sector.combat_fatigue_avg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                      <div
+                        className={`font-medium tabular-nums ${(displayFatigueAvg ?? 0) > 20 ? 'text-red-600' : (displayFatigueAvg ?? 0) > 10 ? 'text-amber-600' : ''}`}
+                        data-testid="corps-front-combat-fatigue"
+                      >
+                        <FuzzyIntel value={displayFatigueAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                   </div>

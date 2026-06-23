@@ -10,13 +10,12 @@
  * Slot-stable, placeholder-first contract (Soundscape packet §5):
  * - Cue IDs are the stable public contract; nothing here is referenced by call
  *   sites — the bus looks cues up by ID.
- * - NO binary audio exists in the repo yet (0 of 32 slots). Therefore this map
- *   is intentionally EMPTY: there are no real files to `import`, and Rollup
- *   would fail the build if we imported a non-existent path. Each cue stays a
- *   silent no-op via its manifest `assetStatus: 'missing_placeholder'`.
- * - When a binary lands, add ONE static import + ONE map entry (see the
- *   commented template below), and flip that cue's `assetStatus` to
- *   `'provided'` in `sound_manifest.ts`. No call-site or schema change.
+ * - The priority-1 UI feedback set has committed CC0 `.ogg` binaries and static
+ *   imports below. Ambient, music, and stinger slots remain placeholders until
+ *   their separate approval/content lane lands binaries.
+ * - When another binary lands, add ONE static import + ONE map entry, and flip
+ *   that cue's `assetStatus` to `'provided'` in `sound_manifest.ts`. No
+ *   call-site or schema change.
  *
  * Determinism: pure module. No network, no `Date.now`, no `Math.random`. Static
  * imports are resolved by the bundler at build time.

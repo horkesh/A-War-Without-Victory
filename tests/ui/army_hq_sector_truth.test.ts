@@ -86,5 +86,7 @@ describe('Army HQ sector truth', () => {
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
     expect(container.textContent).toContain('0 on line');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+    expect(container.textContent).not.toMatch(/current:\s*Defend/i);
+    expect(container.textContent).not.toMatch(/Class\s*Adequate|Adequate/i);
   });
 });

@@ -202,3 +202,42 @@
 **Acceptance:** Army HQ sector rows can be live-proven against current assignment truth, and the April 1992 baked startup sector set contains no same-faction duplicate edge claims; the Bosnian Posavina HVO frontage belongs to `hvo_northwest_bosnia` rather than Central Bosnia.
 
 **Evidence:** Startup sanity reported `{ sectors: 160, duplicates: 0, central: null, northwest: 17 }`. Focused engine/startup/UI proof passed 20/20, `npm.cmd run desktop:startup-snapshot:check` passed, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 271/271, `npm.cmd run qa:first-hour:browser` passed with cleanup verified, `npm.cmd run qa:live-surface:browser` passed with `armyHqSectorAssignmentTruthLiveProof: { rows: 19, zeroCurrentRows: 6, badZeroRows: [] }`, `npm.cmd run ci:structural-fingerprint:check` passed with expected fingerprint `f282883abbab76cf`, `npm.cmd run test:baselines` reported all scenarios match, and `git diff --check` passed.
+
+### Task 10: Command Surface Deep Polish Continuation
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_COMMAND_SURFACE_DEEP_POLISH.md`.
+
+**Files:**
+- Modified: `src/ui/shared/playerVisibility.ts`
+- Modified: `src/ui/map/data/GameStateAdapter.ts`
+- Modified: `src/ui/map/components/OOBSidebar.tsx`
+- Modified: `src/ui/map/components/CorpsFrontPanel.tsx`
+- Modified: `src/ui/map/components/army_hq/SectorsSection.tsx`
+- Modified: `src/ui/map/components/Tooltip.tsx`
+- Modified: `src/ui/map/components/tooltipPlayerSafe.ts`
+- Modified: `src/ui/map/utils/formationAtOsid.ts`
+- Modified: `src/ui/map/components/SituationTab.tsx`
+- Modified: `src/ui/map/components/army_hq/ForceReadiness.tsx`
+- Modified: `src/ui/map/utils/combatEffectiveness.ts`
+- Modified: `src/ui/map/i18n/messages.en.ts`
+- Modified: `src/ui/map/i18n/messages.bcs.ts`
+- Tests: `tests/ui_player_visibility.test.ts`
+- Tests: `tests/ui_map_tooltip_player_visibility.test.ts`
+- Tests: `tests/ui_map_render_smoke.test.ts`
+- Tests: `tests/ui/oob_drilldown_routing.test.ts`
+- Tests: `tests/ui/corps_front_panel_routing.test.ts`
+- Tests: `tests/ui/army_hq_sector_truth.test.ts`
+- Tests: `tests/ui/war_summary_opsec_reconciliation.test.ts`
+- Tests: `tests/ui/army_hq_readiness_threat_copy.test.ts`
+
+**Steps:**
+1. Verify Pyrrhic UI/formation scout findings against the current diff and affected surfaces.
+2. Tighten the fielded tactical formation boundary so active-but-forming units do not render as fielded counters, stationed units, sector assignments, Force Readiness contributors, or effectiveness contributors.
+3. Keep missing lifecycle from the adapter and synthesized compatibility HQs as unreported, not active/perfect.
+4. Remove residual invented sector stance defaults in Corps Front, Army HQ Sectors, and defense tooltips.
+5. Route OOB sector strength through player-safe labels and route defense preview brigade counts through current sector assignment truth.
+6. Render unassessed Situation OPSEC supply as unassessed instead of `0%`.
+
+**Acceptance:** Forming/destroyed/unreported tactical formations no longer appear as normal fielded units; sector stance remains unreported when absent; OOB, Corps Front, Army HQ, settlement detail/tooltips, defense preview, Force Readiness, and Situation OPSEC all obey the same player-truth policy.
+
+**Evidence:** Focused proof `node node_modules\vitest\vitest.mjs run tests\ui_player_visibility.test.ts tests\ui_map_sector_lookup.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\ui\oob_drilldown_routing.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\army_hq_sector_truth.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 82/82 after reviewer follow-up, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 273/273, `npm.cmd run qa:first-hour:browser` passed with dev-server cleanup verified, `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified, `git diff --check` passed, and temporary browser evidence folders were removed.

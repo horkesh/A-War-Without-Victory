@@ -6,6 +6,7 @@
  * All data comes from formations already in LoadedGameState — no adapter changes.
  */
 import type { FormationView, OperationView } from '../../data/types';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t, type MessageKey } from '../../i18n';
 
@@ -78,7 +79,7 @@ export function generateForceReadiness(
     threatCorpsIds: Set<string>,
 ): CorpsReadiness[] {
     const brigades = formations.filter(f =>
-        f.kind === 'brigade' && f.status === 'active' && f.faction === faction,
+        f.faction === faction && isFieldedTacticalFormation(f),
     );
     const corpsFormations = formations.filter(f =>
         (f.kind === 'corps' || f.kind === 'corps_asset') && f.faction === faction,

@@ -21,18 +21,25 @@ export function filterPlayerFacingFormations(state: LoadedGameState | null | und
   return getPlayerVisibleFactions(state.formations, resolvePlayerFacingFaction(state));
 }
 
-export function isFieldedBrigade(formation: { kind?: unknown; status?: unknown } | null | undefined): boolean {
+export function isFieldedBrigade(formation: { kind?: unknown; status?: unknown; readiness?: unknown } | null | undefined): boolean {
   return formation?.kind === 'brigade' && isActiveFormationStatus(formation);
 }
 
-export function isFieldedTacticalFormation(formation: { kind?: unknown; status?: unknown } | null | undefined): boolean {
+export function isFieldedTacticalFormation(formation: { kind?: unknown; status?: unknown; readiness?: unknown } | null | undefined): boolean {
   return (formation?.kind === 'brigade' || formation?.kind === 'operational_group' || formation?.kind === 'og')
-    && isActiveFormationStatus(formation);
+    && isActiveFormationStatus(formation)
+    && isReadyForFieldDisplay(formation);
 }
 
-function isActiveFormationStatus(formation: { status?: unknown } | null | undefined): boolean {
-  if (formation?.status == null) return true;
+function isActiveFormationStatus(formation: { status?: unknown; readiness?: unknown } | null | undefined): boolean {
+  if (formation?.status == null) return formation?.readiness == null;
   return String(formation.status).toLowerCase() === 'active';
+}
+
+function isReadyForFieldDisplay(formation: { readiness?: unknown } | null | undefined): boolean {
+  if (formation?.readiness == null) return true;
+  const readiness = String(formation.readiness).toLowerCase();
+  return readiness !== 'forming' && readiness !== 'unreported' && readiness !== 'destroyed';
 }
 
 export function filterPlayerFacingSectors(state: LoadedGameState | null | undefined): SectorView[] {

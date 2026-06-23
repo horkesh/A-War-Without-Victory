@@ -494,7 +494,12 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
               <div key={`${operation.corps_id}|${operation.name}`} className="flex items-center justify-between gap-2 text-text-secondary">
                 <span>{operation.display_name}</span>
                 <span className="text-right">
-                  {t('situation.operationHealthLine', { supply: Math.round((operation.supply_readiness ?? 0) * 100), failures: operation.failure_count ?? 0 })}
+                  {t('situation.operationHealthLine', {
+                    supply: typeof operation.supply_readiness === 'number' && Number.isFinite(operation.supply_readiness)
+                      ? `${Math.round(operation.supply_readiness * 100)}%`
+                      : t('operationsPanel.na'),
+                    failures: operation.failure_count ?? 0,
+                  })}
                 </span>
               </div>
             ))}

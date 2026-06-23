@@ -3119,7 +3119,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'situation.offensiveSigns': ' · Uočeni ofanzivni znači',
     'situation.emptyOpsec': 'Nijedan sektor trenutno ne provodi sigurnost operacija.',
     'situation.flaggedHealth': 'Označeno zdravlje operacija ({flagged} od {total} aktivnih operacija)',
-    'situation.operationHealthLine': 'Zalihe {supply}% · Neuspjesi {failures}',
+    'situation.operationHealthLine': 'Zalihe {supply} · Neuspjesi {failures}',
     'situation.diplomacy': 'Diplomatija',
     'situation.patronArtCaption': 'Susret s inozemnim patronom frakcije.',
     'situation.emptyCapital': 'Diplomatski kapital nije dostupan u ovom prikazu.',

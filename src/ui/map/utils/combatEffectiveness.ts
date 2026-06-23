@@ -12,6 +12,7 @@
  * can project. Higher = stronger. Typical brigade: 300-1500.
  */
 import type { FormationView } from '../data/types';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 // --- Constants matching sim/combat/combat_math.ts ---
 const EXPERIENCE_BASE = 0.6;
@@ -135,7 +136,7 @@ export interface AggregateEffectiveness {
 }
 
 export function aggregateEffectiveness(formations: FormationView[]): AggregateEffectiveness {
-    const brigades = formations.filter((f) => f.kind === 'brigade' && f.status === 'active');
+    const brigades = formations.filter((f) => isFieldedTacticalFormation(f));
     let totalEff = 0;
     let totalPers = 0;
     let ineffective = 0;

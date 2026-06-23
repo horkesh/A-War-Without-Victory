@@ -28,7 +28,7 @@ import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 import { buildSectorFormationAssignment } from '../utils/sectorUtils';
-import { isFieldedBrigade } from '../../shared/playerVisibility';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 
 /** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
@@ -180,7 +180,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   }
 
   const isBrigade = formation.kind === 'brigade';
-  const isFieldedSelectedBrigade = isFieldedBrigade(formation);
+  const isFieldedSelectedBrigade = formation.kind === 'brigade' && isFieldedTacticalFormation(formation);
   const postureValue = (() => {
     if (isBrigade) return getPlayerSafeFormationPostureLabel(formation.posture);
     if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
