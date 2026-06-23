@@ -324,7 +324,11 @@ export function OperationsPanel() {
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    aria-label={t('operationsPanel.operationCardAria', { name: op.display_name, phase: op.phase, brigades: op.participating_brigade_count })}
+                    aria-label={t('operationsPanel.operationCardAria', {
+                      name: op.display_name,
+                      phase: getPlayerSafeOperationPhaseLabel(op.phase),
+                      brigades: op.participating_brigade_count,
+                    })}
                     ref={(el) => {
                       operationCardRefs.current[index] = el;
                     }}

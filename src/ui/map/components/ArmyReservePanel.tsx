@@ -183,20 +183,23 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                 const ls = brigade.eliteLoanState!;
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : 0;
                                 return (
-                                    <button
+                                    <div
                                         key={brigade.id}
-                                        type="button"
-                                        className="w-full text-left bg-black/20 border border-panel-border/40 rounded p-1.5 space-y-1 hover:bg-panel-hover transition-colors cursor-pointer"
-                                        onClick={() => inspectOnField(useGameStore.getState(), {
-                                            kind: 'field-formation-in-army-reserve',
-                                            formationId: brigade.id,
-                                            armyHqId: armyHq.id,
-                                        })}
+                                        className="w-full bg-black/20 border border-panel-border/40 rounded p-1.5 space-y-1 transition-colors"
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span className="text-text-primary font-semibold truncate">
+                                            <button
+                                                type="button"
+                                                onClick={() => inspectOnField(useGameStore.getState(), {
+                                                    kind: 'field-formation-in-army-reserve',
+                                                    formationId: brigade.id,
+                                                    armyHqId: armyHq.id,
+                                                })}
+                                                className="min-w-0 truncate text-left text-text-primary font-semibold transition-colors hover:text-accent-gold"
+                                                aria-label={t('armyReserve.inspectBrigadeAria', { name: getLocalizedFormationName(brigade, locale) })}
+                                            >
                                                 {getLocalizedFormationName(brigade, locale)}
-                                            </span>
+                                            </button>
                                             {ls.permanently_degraded ? (
                                                 <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
                                             ) : ls.on_loan ? (
@@ -229,7 +232,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 </span>
                                                 <button
                                                     type="button"
-                                                    onClick={(e) => { e.stopPropagation(); void handleRecall(brigade.id); }}
+                                                    onClick={() => { void handleRecall(brigade.id); }}
                                                     className="px-2 py-0.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[10px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
                                                 >
                                                     {t('armyReserve.terminate')}
@@ -241,7 +244,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 {t('armyReserve.base', { base: getOsidDisplayName(ls.base_osid, osidDisplayNames) })}
                                             </div>
                                         )}
-                                    </button>
+                                    </div>
                                 );
                             })}
                         </div>

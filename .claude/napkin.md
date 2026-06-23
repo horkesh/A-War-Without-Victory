@@ -1546,6 +1546,8 @@ After EVERY scenario run, the orchestrator:
 ## Player Shell Discipline
 1. **[2026-06-22] Missing command-surface data is unreported, not favorable**
    Do instead: Preserve absent posture/stance/lifecycle/supply readiness as unreported/recorded/unassessed; never default corps/army rows to hold, balanced, active, or 0% unless the read-model explicitly says so. Sort formation lists by localized display names with deterministic id fallback.
+1. **[2026-06-23] Brigade supply display is explicit supply truth**
+   Do instead: Render brigade supply dots from player-visible supply state only; absent supply is unreported. Never infer strained/critical supply from fatigue, cohesion, or generic formation status.
 1. **[2026-06-23] Fielded tactical-unit truth is status plus readiness truth**
    Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, sector assignment projections, Force Readiness, and settlement/tooltip unit lists; `status: active` plus `readiness: forming` is not fielded, and missing adapter lifecycle should be `unreported`.
 1. **[2026-06-22] Pending foundational decisions are not filed history**

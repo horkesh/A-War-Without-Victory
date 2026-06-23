@@ -715,6 +715,15 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         brigadeSectorOverrideRaw && typeof brigadeSectorOverrideRaw === 'object' && !Array.isArray(brigadeSectorOverrideRaw)
             ? brigadeSectorOverrideRaw
             : undefined;
+    const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
+    const playerFaction = rawPlayerFaction;
+    const rawSupplyStateByOsid = state.supply_state_by_osid;
+    const supplyStateByOsidView = deriveSupplyStateByOsidView(
+        rawSupplyStateByOsid,
+        state.political.last_supply_state_by_osid as Record<string, unknown> | undefined,
+        state.political.political_controllers as Record<string, string | null | undefined> | undefined,
+        playerFaction,
+    );
 
     // GAP 2 fix: build a reverse map from brigade ID → canonical sub_segment_id from
     // corps_front_sectors sub_segment truth. This ensures the adapter reads canonical
@@ -757,6 +766,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const ops = asLooseRecord(f.ops);
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
             const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
+            const supply_state = location_osid != null ? supplyStateByOsidView?.[location_osid] : undefined;
             const aorSettlementIds = brigadeAorByFormationId[id];
             const personnel = typeof f.personnel === 'number' ? f.personnel : undefined;
             const posture = typeof f.posture === 'string' && f.posture ? f.posture : undefined;
@@ -847,7 +857,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 createdTurn: typeof f.created_turn === 'number' && Number.isFinite(f.created_turn) ? f.created_turn : 0,
                 home_osid: typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined,
                 tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
-                personnel, posture, home_defense_active, corps_id, movementStatus, movementStance,
+                personnel, posture, home_defense_active, corps_id, supply_state, movementStatus, movementStance,
                 homeHops, homeDistanceMult, homeIsElite, sectorOverrideId, assigned_sub_segment_id,
                 narrativeArc,
                 warNarrative: typeof warStory?.narrative === 'string' ? warStory.narrative : undefined,
@@ -1491,7 +1501,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (Object.keys(out).length > 0) warPhaseSupplyPressure = out;
     }
 
-    const rawSupplyStateByOsid = state.supply_state_by_osid;
     let warPhaseSupplyCondition: LoadedGameState['warPhaseSupplyCondition'] | undefined;
     const rawSupplyCondition = state.political.war_supply_condition;
     if (rawSupplyCondition && typeof rawSupplyCondition === 'object' && !Array.isArray(rawSupplyCondition)) {
@@ -1758,9 +1767,6 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     const rbih_hrhb_war_earliest_turn = typeof meta?.rbih_hrhb_war_earliest_turn === 'number' ? meta.rbih_hrhb_war_earliest_turn : undefined;
     const war_alliance_rbih_hrhb = typeof state.political.war_alliance_rbih_hrhb === 'number' ? state.political.war_alliance_rbih_hrhb : undefined;
-    const rawPlayerFaction = (meta?.player_faction as string | null | undefined) ?? null;
-    const playerFaction = rawPlayerFaction;
-
     // Single pass: derive fogOfWar + sectorIntel from sector_intel records
     let fogOfWar: FogOfWarView | undefined;
     const sectorIntelRecords: LoadedGameState['sectorIntel'] = [];
@@ -2383,12 +2389,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         battlesByOsid: deriveBattlesByOsid(state),
         movementsByOsid: deriveMovementsByOsid(state),
         supplyTransitionsByOsid: deriveSupplyTransitionsByOsid(state),
-        supplyStateByOsid: deriveSupplyStateByOsidView(
-            rawSupplyStateByOsid,
-            state.political.last_supply_state_by_osid as Record<string, unknown> | undefined,
-            state.political.political_controllers as Record<string, string | null | undefined> | undefined,
-            playerFaction,
-        ),
+        supplyStateByOsid: supplyStateByOsidView,
         supplySummaryByFaction: playerFaction
             ? scopeToPlayerFaction(deriveSupplySummaryByFaction(state), playerFaction)
             : deriveSupplySummaryByFaction(state),

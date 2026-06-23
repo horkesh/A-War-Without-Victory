@@ -135,11 +135,11 @@ export function PresidentDeskShell({
           </button>
           <button
             type="button"
-            onClick={onAdvance}
-            data-testid="desk-action-advance-clearance"
+            onClick={blocked && onOpenCommandSurface ? onOpenCommandSurface : onAdvance}
+            data-testid={blocked ? 'desk-action-review-blockers' : 'desk-action-advance-clearance'}
             className="border border-red-300/45 bg-red-500/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-red-100 transition-colors hover:bg-red-500/20"
           >
-            {t('desk.action.advanceClearance')}
+            {blocked ? t('desk.action.reviewBlockers') : t('desk.action.advanceClearance')}
           </button>
           <button
             type="button"

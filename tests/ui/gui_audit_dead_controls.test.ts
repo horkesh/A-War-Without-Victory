@@ -14,6 +14,7 @@ import {
     shouldShowOrderOverrideControl,
 } from '../../src/ui/map/components/army_hq/OrderInterpretationPanel.js';
 import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
+import { ArmyReservePanel } from '../../src/ui/map/components/ArmyReservePanel.js';
 import { PresidentialAttentionPanel } from '../../src/ui/map/components/army_hq/PresidentialAttentionPanel.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -299,5 +300,65 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(sidebarSource).not.toContain('corpsStanceOverrides');
         expect(sidebarSource).not.toContain('setCorpsStance(');
         expect(sidebarSource).not.toContain('onStanceChange={(next) => setCorpsStance(corpsId, next)}');
+    });
+
+    it('keeps Army Reserve recall controls separate from row inspection buttons', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: makeState({
+                formations: [
+                    {
+                        id: 'arbih_army_hq',
+                        faction: 'RBiH',
+                        name: 'RBiH Main Staff',
+                        kind: 'army_hq',
+                        status: 'active',
+                        readiness: 'ready',
+                        cohesion: 70,
+                        fatigue: 0,
+                        createdTurn: 0,
+                        tags: [],
+                    },
+                    {
+                        id: 'arbih_elite_1',
+                        faction: 'RBiH',
+                        name: '1st Elite Brigade',
+                        kind: 'brigade',
+                        status: 'active',
+                        readiness: 'ready',
+                        cohesion: 70,
+                        fatigue: 0,
+                        createdTurn: 0,
+                        tags: [],
+                        personnel: 1800,
+                        eliteLoanState: {
+                            on_loan: true,
+                            loaned_to_corps: 'arbih_1st_corps',
+                            turns_deployed: 3,
+                            base_osid: 'op:sarajevo:center',
+                        },
+                    },
+                    {
+                        id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        name: '1st Corps',
+                        kind: 'corps',
+                        status: 'active',
+                        readiness: 'ready',
+                        cohesion: 70,
+                        fatigue: 0,
+                        createdTurn: 0,
+                        tags: [],
+                    },
+                ] as LoadedGameState['formations'],
+            }),
+            selectedArmyHqId: 'arbih_army_hq',
+        });
+
+        const { container } = render(createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+        expect(container.querySelector('button button')).toBeNull();
+        expect(screen.getByRole('button', { name: /Inspect 1st Elite Brigade/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Terminate' })).toBeTruthy();
     });
 });

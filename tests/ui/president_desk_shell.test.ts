@@ -252,6 +252,39 @@ describe('PresidentDeskShell', () => {
     expect(screen.queryByText('Ready')).toBeNull();
   });
 
+  it('routes the blocked advance action to command review instead of advance clearance', () => {
+    const onAdvance = vi.fn();
+    const onOpenCommandSurface = vi.fn();
+    renderDesk({
+      onAdvance,
+      onOpenCommandSurface,
+      state: makeState({
+        pendingCounterOffers: [
+          {
+            id: 'HRHB_001',
+            author: 'HRHB',
+            parentOfferId: 'owen_stoltenberg',
+            planId: 'owen_stoltenberg',
+            planName: 'Owen-Stoltenberg Plan',
+            chainDepth: 1,
+            createdTurn: 70,
+            response: 'conditional_accept',
+            proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+            institutionalModel: 'union_3_republics',
+            sourceCitation: 'BB1 p.49',
+            rider: 'withdraw territorial concessions',
+          },
+        ],
+      }),
+    });
+
+    expect(screen.queryByTestId('desk-action-advance-clearance')).toBeNull();
+    fireEvent.click(screen.getByTestId('desk-action-review-blockers'));
+
+    expect(onOpenCommandSurface).toHaveBeenCalledOnce();
+    expect(onAdvance).not.toHaveBeenCalled();
+  });
+
   it('routes desk consequence rows to their filed surface', () => {
     const onOpenRecords = vi.fn();
     const onOpenDecisionRecords = vi.fn();

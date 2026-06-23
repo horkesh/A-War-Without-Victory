@@ -38,26 +38,27 @@ export interface BrigadeRowProps {
   onHoverChange?: (hovered: boolean, e?: React.MouseEvent) => void;
 }
 
-type SupplyState = 'supplied' | 'strained' | 'cutoff';
+type SupplyState = 'adequate' | 'strained' | 'critical' | 'unreported';
 
 function getSupplyState(formation: FormationView): SupplyState {
-  const status = formation.status.toLowerCase();
-  const cohesion = formation.cohesion ?? 0;
-  if (status.includes('cut') || status.includes('isolated')) return 'cutoff';
-  if (formation.fatigue >= 30 || cohesion < 35) return 'strained';
-  return 'supplied';
+  if (formation.supply_state === 'adequate') return 'adequate';
+  if (formation.supply_state === 'strained') return 'strained';
+  if (formation.supply_state === 'critical') return 'critical';
+  return 'unreported';
 }
 
 const SUPPLY_DOT_CLASS: Record<SupplyState, string> = {
-  supplied: 'text-faction-rbih',
+  adequate: 'text-faction-rbih',
   strained: 'text-accent-gold',
-  cutoff: 'text-faction-rs',
+  critical: 'text-faction-rs',
+  unreported: 'text-text-secondary',
 };
 
 const SUPPLY_LABEL_KEY: Record<SupplyState, MessageKey> = {
-  supplied: 'brigadeRow.supply.supplied',
+  adequate: 'brigadeRow.supply.supplied',
   strained: 'brigadeRow.supply.strained',
-  cutoff: 'brigadeRow.supply.cutoff',
+  critical: 'brigadeRow.supply.critical',
+  unreported: 'brigadeRow.supply.unreported',
 };
 
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {

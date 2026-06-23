@@ -252,6 +252,8 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(statusSource).toContain('aria-controls="warroom-priority-docket-panel"');
         expect(statusSource).toContain('role="region"');
         expect(statusSource).toContain("aria-label={t('warroom.priorityDocketAria')}");
+        expect(statusSource).toContain("if (category === 'command') return t('warroom.status.category.command')");
+        expect(statusSource).toContain("if (category === 'counter_offer') return t('warroom.status.category.counterOffer')");
         expect(source).toContain('<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"');
         expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
     });

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(ui): close command-surface follow-up polish
+
+**Type:** UI/read-model/accessibility/i18n/test/docs polish.
+
+**Fix:** Brigade rows now render supply dots from explicit player-visible supply state rather than inferring supply from fatigue, cohesion, or formation status; missing supply is `Supply unreported`, and explicit critical supply is labeled as such. Warroom status/advance review rows label `command` and `counter_offer` categories instead of falling back to `Memory`. Blocked President Desk advance action now reads `Review Advance Blockers` and routes to the command surface review path. OperationsPanel operation-card accessible names use player-safe phase labels. Army Reserve inspect and recall actions are separate sibling controls, eliminating nested buttons and ambiguous click ownership.
+
+**Verification:** Focused proof `npm.cmd exec -- vitest run tests/ui_map_game_state_adapter.test.ts tests/ui/brigade_row_supply_labels.test.ts tests/ui/oob_operations_panel.test.ts tests/ui/gui_audit_dead_controls.test.ts tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/president_desk_shell.test.ts tests/ui/warroom_shell_accessibility.test.ts --pool=forks --reporter=dot` passed 94/94. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 277/277. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof on `http://127.0.0.1:3003/?dev=1` verified RS faction start, war-start identity brief, Begin flow, Desk blocked-action copy, Army HQ/command surface, zero console errors, and zero nested buttons. Report: `docs/40_reports/implemented/20260623_COMMAND_SURFACE_FOLLOWUP_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/accessibility/i18n/test/docs polish only; no simulation logic, scenario source data, event mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-22] fix(ui): align fielded brigade truth and routing
 
 **Type:** UI/read-model/routing/i18n/test/docs polish.

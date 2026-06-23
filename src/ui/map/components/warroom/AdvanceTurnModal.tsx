@@ -66,10 +66,12 @@ function statusClass(status: PreAdvanceCommandReviewStatus): string {
 
 function categoryLabel(category: PreAdvanceCommandReviewItem['category']): string {
   if (category === 'decision') return t('decisionRoom.category.decision');
+  if (category === 'counter_offer') return t('warroom.status.category.counterOffer');
   if (category === 'opportunity') return t('decisionRoom.category.opportunity');
   if (category === 'operational') return t('decisionRoom.category.operational');
   if (category === 'turn') return t('decisionRoom.category.turn');
   if (category === 'briefing') return t('decisionRoom.category.briefing');
+  if (category === 'command') return t('warroom.status.category.command');
   if (category === 'cost') return t('decisionRoom.category.cost');
   return t('decisionRoom.category.memory');
 }

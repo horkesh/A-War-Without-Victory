@@ -241,3 +241,32 @@
 **Acceptance:** Forming/destroyed/unreported tactical formations no longer appear as normal fielded units; sector stance remains unreported when absent; OOB, Corps Front, Army HQ, settlement detail/tooltips, defense preview, Force Readiness, and Situation OPSEC all obey the same player-truth policy.
 
 **Evidence:** Focused proof `node node_modules\vitest\vitest.mjs run tests\ui_player_visibility.test.ts tests\ui_map_sector_lookup.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_render_smoke.test.ts tests\ui\oob_drilldown_routing.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\army_hq_sector_truth.test.ts tests\ui\war_summary_opsec_reconciliation.test.ts tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 82/82 after reviewer follow-up, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 273/273, `npm.cmd run qa:first-hour:browser` passed with dev-server cleanup verified, `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified, `git diff --check` passed, and temporary browser evidence folders were removed.
+
+### Task 11: Command Surface Follow-Up Polish
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_COMMAND_SURFACE_FOLLOWUP_POLISH.md`.
+
+**Files:**
+- Modified: `src/ui/map/data/GameStateAdapter.ts`
+- Modified: `src/ui/map/data/types.ts`
+- Modified: `src/ui/map/components/BrigadeRow.tsx`
+- Modified: `src/ui/map/components/OperationsPanel.tsx`
+- Modified: `src/ui/map/components/ArmyReservePanel.tsx`
+- Modified: `src/ui/map/components/presidential_desk/PresidentDeskShell.tsx`
+- Modified: `src/ui/map/components/warroom/WarroomStatusBar.tsx`
+- Modified: `src/ui/map/components/warroom/AdvanceTurnModal.tsx`
+- Modified: `src/ui/map/i18n/messages.en.ts`
+- Modified: `src/ui/map/i18n/messages.bcs.ts`
+- Tests: `tests/ui_map_game_state_adapter.test.ts`, `tests/ui/brigade_row_supply_labels.test.ts`, `tests/ui/oob_operations_panel.test.ts`, `tests/ui/gui_audit_dead_controls.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `tests/ui/president_desk_shell.test.ts`, `tests/ui/warroom_shell_accessibility.test.ts`
+
+**Steps:**
+1. Carry player-visible supply state onto formation rows instead of inferring supply from fatigue, cohesion, or status.
+2. Label unknown brigade supply as unreported and explicit critical supply as critical.
+3. Localize Warroom/advance-review `command` and `counter_offer` categories.
+4. Make blocked President Desk advance action open as `Review Advance Blockers`.
+5. Render OperationsPanel accessible operation phases with player-safe phase labels.
+6. Split Army Reserve inspection and recall actions into sibling controls with no nested buttons.
+
+**Acceptance:** Command surfaces no longer invent supply truth, Warroom review rows do not fall back to `Memory`, blocked advance copy names the blocker-review action, operations cards expose player-safe accessible names, and Army Reserve rows keep inspect/terminate actions separately reachable.
+
+**Evidence:** Focused proof passed 94/94, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 277/277, `npm.cmd run qa:first-hour:browser` passed, `npm.cmd run qa:live-surface:browser` passed, and a manual in-app browser pass on `http://127.0.0.1:3003/?dev=1` verified RS start -> war-start identity brief -> Begin -> Desk blocked-action copy and Army HQ/command surface with zero console errors and zero nested buttons.

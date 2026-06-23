@@ -147,6 +147,48 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
+  it('advance modal labels command and counter-offer review rows without Memory fallbacks', () => {
+    setLoadedState(makeState({
+      pendingCounterOffers: [
+        {
+          id: 'HRHB_001',
+          author: 'HRHB',
+          parentOfferId: 'owen_stoltenberg',
+          planId: 'owen_stoltenberg',
+          planName: 'Owen-Stoltenberg Plan',
+          chainDepth: 1,
+          createdTurn: 70,
+          response: 'conditional_accept',
+          proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+          institutionalModel: 'union_3_republics',
+          sourceCitation: 'BB1 p.49',
+          rider: 'withdraw territorial concessions',
+        },
+      ],
+      pendingReserveRequests: [
+        {
+          request_id: 'reserve_named',
+          faction: 'RS',
+          corps_id: 'vrs_drina',
+          reason: 'sector_threat',
+          priority: 90,
+          severityBand: 'critical',
+          description: 'Drina Corps requests reserve reinforcement.',
+          travel_hops: 1,
+          suggested_brigade_id: 'elite_1',
+          turn_requested: 40,
+        },
+      ],
+    }));
+    useGameStore.setState({ advanceTurnPending: true });
+
+    const { container } = render(createElement(AdvanceTurnModal, { onReviewPriorities: vi.fn() }));
+
+    expect(container.textContent).toContain('Counter');
+    expect(container.textContent).toContain('Command');
+    expect(container.textContent).not.toContain('Memory');
+  });
+
   it('Warroom status dock does not duplicate the command-dock Advance control', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({

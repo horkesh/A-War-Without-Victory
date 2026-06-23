@@ -302,6 +302,37 @@ test('parseGameState derives player-scoped live supply condition from flat OSID 
     });
 });
 
+test('parseGameState maps player-visible OSID supply state onto formations at assessed locations', () => {
+    const parsed = parseGameState({
+  meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+  military: {
+            formations: {
+                own_assessed: { faction: 'RBiH', name: 'Own assessed', kind: 'brigade', readiness: 'ready', cohesion: 70, fatigue: 0, status: 'active', created_turn: 1, tags: [], location_osid: 'op:a:1' },
+                own_unassessed: { faction: 'RBiH', name: 'Own unassessed', kind: 'brigade', readiness: 'ready', cohesion: 70, fatigue: 0, status: 'active', created_turn: 1, tags: [], location_osid: 'op:a:2' },
+                enemy_assessed: { faction: 'RS', name: 'Enemy assessed', kind: 'brigade', readiness: 'ready', cohesion: 70, fatigue: 0, status: 'active', created_turn: 1, tags: [], location_osid: 'op:b:1' },
+            },
+            militia_pools: {},
+        } as any,
+  political: {
+            political_controllers: {
+                'op:a:1': 'RBiH',
+                'op:a:2': 'RBiH',
+                'op:b:1': 'RS',
+            },
+            last_supply_state_by_osid: {
+                'op:a:1': 'strained',
+                'op:b:1': 'critical',
+            },
+        } as any,
+  displacement: {} as any,
+});
+
+    assert.deepEqual(parsed.supplyStateByOsid, { 'op:a:1': 'strained' });
+    assert.strictEqual(parsed.formations.find((formation) => formation.id === 'own_assessed')?.supply_state, 'strained');
+    assert.strictEqual(parsed.formations.find((formation) => formation.id === 'own_unassessed')?.supply_state, undefined);
+    assert.strictEqual(parsed.formations.find((formation) => formation.id === 'enemy_assessed')?.supply_state, undefined);
+});
+
 test('parseGameState derives per-OSID political authority and legitimacy metrics', () => {
     const parsed = parseGameState({
   meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },

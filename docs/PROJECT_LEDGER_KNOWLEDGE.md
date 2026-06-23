@@ -1,3 +1,7 @@
+## 2026-06-23 - Brigade supply display truth
+
+**Brigade supply dots must come from player-visible supply state, not inferred readiness symptoms:** fatigue, cohesion, and status can be consequences or separate readiness signals, but they are not supply assessment truth. Durable rule: project explicit supply state onto formation views when available, scope it to player-visible supply assessments, render missing supply as unreported, and never infer `strained` or `critical` from fatigue/cohesion thresholds in command surfaces. Applied in `[2026-06-23] command-surface follow-up polish`; report `docs/40_reports/implemented/20260623_COMMAND_SURFACE_FOLLOWUP_POLISH.md`.
+
 ## 2026-06-22 - Chronicle FEEL generated-copy boundary
 
 **Chronicle/FEEL helper prose is UI copy unless it is authored scenario data:** generated combat/cost/displacement/formation rows, AAR scaffolding, officer spotlight framing, endgame comparison chrome, consequence-receipt wrappers, war-weariness/refugee/Sarajevo/generals-digest beats, and patron-defiance receipts must not live as English literals in read-model helpers. Durable rule: keep authored event titles, option labels, operation names, officer names, settlement names, and historical comparison note text data-owned/verbatim, but route generated sentence frames through explicit EN/BCS `chronicle.generated.*` keys and pin BCS sentinels. Applied in `[2026-06-22] Chronicle FEEL generated-copy localization`; report `docs/40_reports/implemented/20260622_CHRONICLE_FEEL_GENERATED_COPY_LOCALIZATION.md`.

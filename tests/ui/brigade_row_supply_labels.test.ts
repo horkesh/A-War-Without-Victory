@@ -29,26 +29,44 @@ describe('BrigadeRow supply labels', () => {
     setLocale('en');
   });
 
-  it('renders localized supply copy instead of raw supply state ids', () => {
+  it('keeps supply unreported when no explicit supply state exists', () => {
     const { rerender } = render(React.createElement(BrigadeRow, {
       formation: makeFormation({ cohesion: 62, fatigue: 35 }),
     }));
 
-    const strainedRow = screen.getByRole('button');
-    expect(strainedRow.getAttribute('title')).toBe('Supply: Supply strained | Fatigue: 35 | Cohesion: 62%');
-    expect(screen.getByLabelText('Supply strained')).toBeTruthy();
-    expect(strainedRow.getAttribute('title')).not.toMatch(/\bSTRAINED\b/);
-    expect(screen.queryByLabelText('strained')).toBeNull();
+    const fatiguedRow = screen.getByRole('button');
+    expect(fatiguedRow.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: 35 | Cohesion: 62%');
+    expect(screen.getByLabelText('Supply unreported')).toBeTruthy();
+    expect(screen.queryByLabelText('Supply strained')).toBeNull();
 
     rerender(React.createElement(BrigadeRow, {
-      formation: makeFormation({ cohesion: 68, fatigue: 8, status: 'isolated' }),
+      formation: makeFormation({ cohesion: 25, fatigue: 8 }),
     }));
 
-    const cutoffRow = screen.getByRole('button');
-    expect(cutoffRow.getAttribute('title')).toBe('Supply: Cut off | Fatigue: 8 | Cohesion: 68%');
-    expect(screen.getByLabelText('Cut off')).toBeTruthy();
-    expect(cutoffRow.getAttribute('title')).not.toMatch(/\bCUTOFF\b|\bcutoff\b/);
-    expect(screen.queryByLabelText('cutoff')).toBeNull();
+    const lowCohesionRow = screen.getByRole('button');
+    expect(lowCohesionRow.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: 8 | Cohesion: 25%');
+    expect(screen.getByLabelText('Supply unreported')).toBeTruthy();
+    expect(screen.queryByLabelText('Supply strained')).toBeNull();
+  });
+
+  it('renders localized supply copy only from explicit supply state fields', () => {
+    const { rerender } = render(React.createElement(BrigadeRow, {
+      formation: makeFormation({ supply_state: 'strained' }),
+    }));
+
+    const strainedRow = screen.getByRole('button');
+    expect(strainedRow.getAttribute('title')).toBe('Supply: Supply strained | Fatigue: 5 | Cohesion: 70%');
+    expect(screen.getByLabelText('Supply strained')).toBeTruthy();
+    expect(strainedRow.getAttribute('title')).not.toMatch(/\bSTRAINED\b/);
+
+    rerender(React.createElement(BrigadeRow, {
+      formation: makeFormation({ supply_state: 'critical' }),
+    }));
+
+    const criticalRow = screen.getByRole('button');
+    expect(criticalRow.getAttribute('title')).toBe('Supply: Critical supply | Fatigue: 5 | Cohesion: 70%');
+    expect(screen.getByLabelText('Critical supply')).toBeTruthy();
+    expect(criticalRow.getAttribute('title')).not.toMatch(/\bCRITICAL\b/);
   });
 
   it('renders terminal lifecycle badges instead of falling back to active', () => {

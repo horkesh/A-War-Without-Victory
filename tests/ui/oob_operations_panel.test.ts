@@ -184,6 +184,17 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('Turn 6');
   });
 
+  it('uses player-facing operation phase labels in operation-card accessible names', () => {
+    render(createElement(OperationsPanel));
+
+    expect(screen.getByRole('option', {
+      name: 'Operation Breakthrough, In execution, 1 brigades',
+    })).toBeTruthy();
+    expect(screen.queryByRole('option', {
+      name: 'Operation Breakthrough, execution, 1 brigades',
+    })).toBeNull();
+  });
+
   it('routes allocated brigade clicks through corps-preserving field inspection', () => {
     render(createElement(OperationsPanel));
 
