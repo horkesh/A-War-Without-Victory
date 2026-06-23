@@ -14,6 +14,7 @@ import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { DiplomacyOverview } from './DiplomacyOverview';
 import { filterPlayerFacingOperations, getPlayerFacingFaction } from '../../shared/playerVisibility';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import {
   getPlayerSafeCorridorLabel,
   getPlayerSafeEnclaveName,
@@ -472,7 +473,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             {activeOpsecSectors.map((sector) => (
               <div key={sector.sector_id} className="rounded border border-panel-border bg-panel-bg/60 p-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-text-primary">{sector.display_name}</span>
+                  <span className="text-text-primary">{getPlayerFacingSectorName(sector.sector_id, [sector])}</span>
                   <span className="text-[10px] uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
                 </div>
                 <div className="text-text-secondary">

@@ -65,6 +65,7 @@ export interface SectorFormationAssignment {
   reserveIds: string[];
   rearIds: string[];
   overrideIds: string[];
+  lineHoldingIds: string[];
   allCurrentIds: string[];
 }
 
@@ -72,9 +73,9 @@ export type SectorCoverageTier = 'uncovered' | 'thin' | 'held' | 'dense';
 
 export function getSectorCoverageTier(
   density: number,
-  assignment: Pick<SectorFormationAssignment, 'allCurrentIds'>,
+  assignment: Pick<SectorFormationAssignment, 'lineHoldingIds'>,
 ): SectorCoverageTier {
-  if (assignment.allCurrentIds.length === 0 || density <= 0) return 'uncovered';
+  if (assignment.lineHoldingIds.length === 0 || density <= 0) return 'uncovered';
   if (density < 0.12) return 'thin';
   if (density < 0.28) return 'held';
   return 'dense';
@@ -219,6 +220,7 @@ export function buildSectorFormationAssignment(
     .map((formation) => formation.id)
     .filter((id) => !rosterIds.has(id))
     .sort(compareStableText);
+  const lineHoldingIds = [...new Set([...frontlineIds, ...overrideIds])].sort(compareStableText);
   const allCurrentIds = [...new Set([...frontlineIds, ...reserveIds, ...overrideIds])].sort(compareStableText);
-  return { frontlineIds, reserveIds, rearIds, overrideIds, allCurrentIds };
+  return { frontlineIds, reserveIds, rearIds, overrideIds, lineHoldingIds, allCurrentIds };
 }

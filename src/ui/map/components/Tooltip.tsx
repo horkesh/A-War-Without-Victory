@@ -330,7 +330,7 @@ function DefensePreviewContent({
     if (!sector) return null;
 
     const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
-    const brigadeIds = sectorAssignment.allCurrentIds;
+    const brigadeIds = sectorAssignment.lineHoldingIds;
     const munFromOsid = (o: string | undefined): string | undefined => o?.split(':')[1];
     const targetMun = munFromOsid(osid);
 

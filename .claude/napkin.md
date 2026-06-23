@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**RESERVE MEMBERSHIP IS NOT FRIENDLY-LINE TRUTH (2026-06-23).** Sector assignments can include reserve/member brigades for navigation and command context. Do instead: use `lineHoldingIds` for Corps Front line presence, displayed combat strength, threat, force balance, defense previews, own-front tooltip truth, and coverage tier; use `allCurrentIds` only when reserve membership is intentionally part of the surface.
+
+**RAW SECTOR IDS MUST FALL BACK, NOT BECOME LABELS (2026-06-23).** Values like `sector:arbih_1st_corps:0` and underscore-heavy generated names are routing/debug truth. Do instead: route sector labels through `getPlayerFacingSectorName(...)`; if a display name still looks internal, render neutral fallback copy rather than humanizing the id.
+
 **PLAYER-FACING LOAD ERRORS MUST NOT EXPOSE PATHS (2026-06-23).** Packaged failures can include raw `ENOENT` and absolute derived-data paths. Do instead: keep raw diagnostic detail internal, but render through `getPlayerFacingErrorCopy(...)` so banners/toasts say to reinstall or verify files without leaking `C:\...`, `/tmp/...`, or derived filenames.
 
 **ELITE COMMANDER DISPLAY IS A UI-ONLY SIDECAR (2026-06-23).** OOB source rows may have commander identity even when startup/save state intentionally does not seat an officer. Do instead: project display-safe fields from `eliteCommanderSidecar` into Formation Detail, Army HQ ORBAT, and Army Reserve; omit source-only/sensitive fields and do not use the sidecar to mutate scenarios, saves, or calibration truth.

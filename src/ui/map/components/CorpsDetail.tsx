@@ -28,6 +28,7 @@ import { inspectOnField } from '../utils/shellNavigation';
 import { t, useLocale } from '../i18n';
 import { buildSectorFormationAssignment, getSectorCoverageTier, resolveCurrentSectorForFormation, type SectorCoverageTier } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 type CorpsTab = 'overview' | 'orbat' | 'sectors' | 'ops' | 'orders';
 
@@ -383,6 +384,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
                 const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
                 const coverageTier = getSectorCoverageTier(s.density, sectorAssignment);
+                const sectorLabel = getPlayerFacingSectorName(s.sector_id, [s]);
                 return (
                 <button
                   key={s.sector_id}
@@ -399,7 +401,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
                   <div className="min-w-0">
-                    <div className="text-text-primary text-[11px] font-medium truncate">{s.display_name}</div>
+                    <div className="text-text-primary text-[11px] font-medium truncate">{sectorLabel}</div>
                     <div className="text-text-secondary text-[10px] tabular-nums">
                       {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                       {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}

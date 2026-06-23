@@ -11,6 +11,7 @@ import { buildSectorFormationAssignment } from '../utils/sectorUtils';
 import { t, type Locale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 export interface PlayerSafeFormationTooltipModel {
   classification: 'own' | 'enemy_contact';
@@ -190,7 +191,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
       .filter((formation) => isOwnFormation(formation, args.playerFaction) && isFieldedTacticalFormation(formation))
       .map((formation) => formation.id),
   );
-  const ownSectorHasCurrentLine = (sectorAssignment?.allCurrentIds ?? []).some((id) => fieldedFormationIds.has(id));
+  const ownSectorHasCurrentLine = (sectorAssignment?.lineHoldingIds ?? []).some((id) => fieldedFormationIds.has(id));
   const visibleFormations = filterPlayerVisibleMapFormations({
     player_faction: args.playerFaction,
     fogOfWar: args.fogOfWar,
@@ -208,7 +209,7 @@ export function buildPlayerSafeFrontTooltipModel(args: {
 
   return {
     title: t('tooltip.frontTitle', { sideA, sideB }, locale),
-    sectorName: ownSector ? ownSector.display_name : null,
+    sectorName: ownSector ? getPlayerFacingSectorName(ownSector.sector_id, [ownSector]) : null,
     sectorStatusLine: ownSector && !ownSectorHasCurrentLine ? t('tooltip.noFriendlyLine', undefined, locale) : null,
     pressureLine,
     densityValue: ownSector && ownSectorHasCurrentLine ? ownSector.density : null,

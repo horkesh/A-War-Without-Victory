@@ -337,6 +337,52 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Adequate|Strong|Fortress/i);
   });
 
+  it('does not describe reserve-only sectors as a friendly front line', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: ['arbih_101_brigade'],
+      rear_brigade_ids: [],
+      threat_ratio: 0.3,
+      combat_personnel: 1200,
+      combat_offensive_power: 600,
+      combat_defensive_power: 1200,
+      combat_defense_per_edge: 900,
+      combat_strength_class: 'adequate',
+      defensive_power: 1200,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/No friendly line/i);
+    expect(container.textContent).not.toMatch(/SUPERIOR|clear advantage/i);
+    expect(container.textContent).not.toMatch(/Adequate|Strong|Fortress/i);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Total manpower\s*1[,.]200/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*100%/i);
+  });
+
+  it('sanitizes raw sector labels in Corps Front', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      display_name: 'sector:arbih_1st_corps:0',
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toContain('Assigned sector');
+    expect(container.textContent).not.toMatch(/sector:|arbih_1st_corps|1st Corps 0/i);
+  });
+
   it('does not invent a defensive stance when sector stance is unreported', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 

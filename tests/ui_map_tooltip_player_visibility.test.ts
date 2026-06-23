@@ -251,6 +251,90 @@ describe('player-safe tooltip models', () => {
     expect(model.threatSummary).toBeNull();
   });
 
+  it('does not treat reserve-only own sectors as a friendly front line', () => {
+    const formations = [{
+      id: 'own_reserve',
+      name: 'Reserve Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      readiness: 'ready',
+      status: 'active',
+      cohesion: 70,
+      fatigue: 0,
+      createdTurn: 1,
+      tags: [],
+      location_osid: 'op:tuzla',
+      aorSettlementIds: ['op:tuzla', 'op:doboj'],
+      posture: 'reserve',
+    }] satisfies FormationView[];
+
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations,
+      fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [{
+        sector_id: 'sector_reserve_only',
+        corps_id: 'arbih_2nd_corps',
+        corps_name: '2nd Corps',
+        faction: 'RBiH',
+        display_name: 'Reserve-only front',
+        opposing_factions: ['RS'],
+        edge_ids: ['op:tuzla::op:doboj'],
+        sub_segment_count: 1,
+        length_edges: 3,
+        density: 1.25,
+        threat_ratio: 0.5,
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: ['own_reserve'],
+        defensive_power: 1,
+        offensive_signs: false,
+        intel_confidence: 0.6,
+        combat_strength_class: 'adequate',
+      }],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.sectorStatusLine).toBe('No friendly line');
+    expect(model.densityValue).toBeNull();
+    expect(model.densityLabel).toBeNull();
+    expect(model.threatSummary).toBeNull();
+  });
+
+  it('sanitizes raw sector names in front tooltip models', () => {
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations: [],
+      fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [{
+        sector_id: 'sector:arbih_2nd_corps:0',
+        corps_id: 'arbih_2nd_corps',
+        corps_name: '2nd Corps',
+        faction: 'RBiH',
+        display_name: 'sector:arbih_2nd_corps:0',
+        opposing_factions: ['RS'],
+        edge_ids: ['op:tuzla::op:doboj'],
+        sub_segment_count: 1,
+        length_edges: 3,
+        density: 1.25,
+        threat_ratio: 0.5,
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: [],
+        defensive_power: 1,
+        offensive_signs: false,
+        intel_confidence: 0.6,
+        combat_strength_class: 'adequate',
+      }],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.sectorName).toBe('Assigned sector');
+    expect(model.sectorName).not.toMatch(/sector:|arbih|2nd Corps 0/i);
+  });
+
   it('localizes formation posture labels in tooltip models', () => {
     const formations = [
       {

@@ -1,6 +1,7 @@
 import type { LoadedGameState } from '../../data/types';
 import { t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { getPlayerFacingSectorName } from '../../../shared/playerFacingLabels';
 
 interface SectorIntelRecordView {
     friendly_sector_id: string;
@@ -74,7 +75,7 @@ export function generateThreatAssessment(
                 sector.corps_id,
                 'Field Command',
             ),
-            sectorName: sector.display_name,
+            sectorName: getPlayerFacingSectorName(sector.sector_id, [sector]),
         });
     }
 

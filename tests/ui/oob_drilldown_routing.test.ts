@@ -171,6 +171,21 @@ describe('OOBSidebar drilldown routing', () => {
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 
+  it('sanitizes raw sector labels in OOB sector rows', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      display_name: 'sector_vrs_main_staff_north',
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    expect(container.textContent).toContain('Assigned sector');
+    expect(container.textContent).not.toMatch(/sector_vrs|vrs_main_staff|Main Staff North/i);
+  });
+
   it('shows rear support in OOB without treating it as live line coverage', () => {
     const state = makeState();
     state.corpsFrontSectors = [{

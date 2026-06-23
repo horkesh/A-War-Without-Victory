@@ -20,7 +20,7 @@ import {
   filterPlayerFacingSectors,
   resolvePlayerFacingFaction,
 } from '../../shared/playerVisibility';
-import { getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
+import { getPlayerFacingSectorName, getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
 
 interface SelectionPanelProps {
   railSlot?: 'primary' | 'secondary';
@@ -135,7 +135,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     if (!sectorId) return { sectorName: null, sectorFaction: null, sectorId: null, sectorCorpsId: null };
     const sector = sectors.find((s) => s.sector_id === sectorId);
     return {
-      sectorName: sector?.display_name ?? null,
+      sectorName: sector ? getPlayerFacingSectorName(sector.sector_id, [sector]) : null,
       sectorFaction: sector?.faction ?? null,
       sectorId,
       sectorCorpsId: sector?.corps_id ?? null,

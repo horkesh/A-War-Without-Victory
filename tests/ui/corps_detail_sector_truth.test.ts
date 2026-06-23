@@ -91,6 +91,21 @@ describe('CorpsDetail sector truth', () => {
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 
+  it('sanitizes raw sector labels in Corps Detail sector rows', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      display_name: 'sector:arbih_1st_corps:uncovered',
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    expect(container.textContent).toContain('Assigned sector');
+    expect(container.textContent).not.toMatch(/sector:|arbih_1st_corps|1st Corps Uncovered/i);
+  });
+
   it('shows rear support without upgrading a sector to held coverage', () => {
     const state = makeState();
     state.formations = [

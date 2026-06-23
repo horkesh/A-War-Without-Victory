@@ -42,14 +42,7 @@ export function getPlayerFacingSectorName(
   const displayName = sectors.find((sector) => sector.sector_id === sectorId)?.display_name?.trim();
   if (!displayName) return fallback;
   if (!displayName.includes('_') && !displayName.includes(':')) return displayName;
-  const cleaned = displayName
-    .replace(/^sector[:_]/i, '')
-    .replace(/[:_]+/g, ' ')
-    .replace(/\b(ar?bih|rbih|vrs|rs|hrhb|hvo)\b/gi, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (!cleaned) return fallback;
-  return cleaned.replace(/\b\w/g, (char) => char.toUpperCase());
+  return fallback;
 }
 
 export function getPlayerFacingFaction(source: PlayerFactionSource): PlayerFacingFaction | null {

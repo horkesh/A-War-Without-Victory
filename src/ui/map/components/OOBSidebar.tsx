@@ -19,7 +19,7 @@ import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
 import { inspectOnField } from '../utils/shellNavigation';
-import { getPlayerFacingFaction, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
+import { getPlayerFacingFaction, getPlayerFacingSectorName, getPlayerVisibleFactions } from '../../shared/playerFacingLabels';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { isSectorAssignmentExemptCorpsId } from '../../../sim/combat/corps_front_sectors_constants.js';
 import { t, useLocale } from '../i18n';
@@ -637,6 +637,7 @@ export function OOBSidebar() {
                         const ownerName = owner
                           ? getLocalizedFormationName(owner, locale)
                           : getPlayerSafeDisplayLabel(sector.corps_id, t('formationDetail.corps'));
+                        const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
                         return (
                           <button
                             key={sector.sector_id}
@@ -668,7 +669,7 @@ export function OOBSidebar() {
                             />
                             <div className="min-w-0 flex-1">
                               <div className="text-text-primary truncate text-[11px] flex items-center gap-1.5">
-                                <span className="truncate">{sector.display_name}</span>
+                                <span className="truncate">{sectorLabel}</span>
                                 {sector.combat_strength_class && (
                                   <SectorStrengthBadge strengthClass={sector.combat_strength_class} />
                                 )}

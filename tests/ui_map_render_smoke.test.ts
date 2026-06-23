@@ -493,6 +493,12 @@ describe('Tactical map render smoke', () => {
     expect(getAssignedCommandLabel('arbih_5th_corps', new Map())).toBe('Assigned command');
   });
 
+  it('player-facing sector labels do not derive visible copy from raw ids', () => {
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector:arbih_3rd:0' }], 'Assigned sector')).toBe('Assigned sector');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'sector_arbih_3rd_0' }], 'Assigned sector')).toBe('Assigned sector');
+    expect(getPlayerFacingSectorName('sector:arbih_3rd:0', [{ sector_id: 'sector:arbih_3rd:0', display_name: 'arbih_3rd_corps - Ozren' }], 'Assigned sector')).toBe('Assigned sector');
+  });
+
   it('player-safe text helpers replace internal fallback ids with neutral labels', () => {
     expect(getPlayerSafeCorpsName('arbih_3rd_corps', 'arbih_3rd_corps')).toBe('3rd Corps');
     expect(getPlayerSafeCorpsName('vrs_1st_krajina', 'vrs_1st_krajina')).toBe('1st Krajina');

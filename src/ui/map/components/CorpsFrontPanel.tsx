@@ -16,6 +16,7 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { formatPosture, toTitleCase, turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
+import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({
@@ -258,6 +259,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const overrideFormations = sectorAssignment.overrideIds
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
+  const lineHoldingFormations = sectorAssignment.lineHoldingIds
+    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .filter((f): f is NonNullable<typeof f> => f != null);
 
   // Unresolved brigades: could not be placed into any sector for this corps this turn (Codex #6: unresolved is honest)
   const unresolvedFormations = (loadedGameState.unresolvedSectorBrigades ?? [])
@@ -268,21 +272,24 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const overridePersonnel = overrideFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const totalSectorPersonnel = assignedPersonnel + reservePersonnel + overridePersonnel;
-  const hasFriendlyLine = assignedFormations.length + reserveFormations.length + overrideFormations.length > 0;
-  const currentSectorFormations = [...assignedFormations, ...reserveFormations, ...overrideFormations];
+  const hasFriendlyLine = lineHoldingFormations.length > 0;
+  const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
   const displayStrengthClass = hasFriendlyLine ? sector.combat_strength_class : undefined;
-  const displayCombatPersonnel = hasPositiveMetric(sector.combat_personnel) || totalSectorPersonnel <= 0
+  const lineHoldingPersonnel = lineHoldingFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const displayCombatPersonnel = !hasFriendlyLine
+    ? undefined
+    : hasPositiveMetric(sector.combat_personnel) || lineHoldingPersonnel <= 0
     ? sector.combat_personnel
-    : totalSectorPersonnel;
+    : lineHoldingPersonnel;
   const displayMoraleAvg = hasFiniteMetric(sector.combat_morale_avg)
     ? sector.combat_morale_avg
-    : averageFinite(currentSectorFormations.map((formation) => formation.morale));
+    : averageFinite(lineHoldingFormations.map((formation) => formation.morale));
   const displayCohesionAvg = hasFiniteMetric(sector.combat_cohesion_avg)
     ? sector.combat_cohesion_avg
-    : averageFinite(currentSectorFormations.map((formation) => formation.cohesion));
+    : averageFinite(lineHoldingFormations.map((formation) => formation.cohesion));
   const displayFatigueAvg = hasFiniteMetric(sector.combat_fatigue_avg)
     ? sector.combat_fatigue_avg
-    : averageFinite(currentSectorFormations.map((formation) => formation.fatigue));
+    : averageFinite(lineHoldingFormations.map((formation) => formation.fatigue));
   const displayOffensivePower = hasFriendlyLine ? sector.combat_offensive_power : undefined;
   const displayDefensivePower = hasFriendlyLine ? (sector.combat_defensive_power ?? sector.defensive_power) : undefined;
   const displayDefensePerEdge = hasFriendlyLine ? sector.combat_defense_per_edge : undefined;
@@ -386,7 +393,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             <div className="flex flex-col">
               <span className="text-[9px] uppercase tracking-wider text-neutral-500 font-bold mb-0.5">{t('corpsFront.subject')}</span>
               <span className="font-bold text-[14px] uppercase tracking-wide">
-                {sector.display_name}
+                {sectorLabel}
               </span>
             </div>
             <div className="flex flex-col items-end text-[9px] text-neutral-500">
