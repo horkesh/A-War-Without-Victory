@@ -30,7 +30,9 @@
 - Live browser sweep now branches on disabled Draft New Directive state instead of treating bridge-unavailable browser proof as a failure.
 
 ## Scenario Results
-- No calibration scenario was run for this packet.
+- Initial post-merge GitHub Event System CI correctly caught stale golden hashes after `hq_osid` entered deterministic save serialization.
+- `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed `data/derived/scenario/baselines/manifest.json`, and the follow-up `npm.cmd run test:baselines` passed.
+- Manifest drift was limited to `final_save.json` and `run_summary.json` hashes for `noop_4w`, `baseline_ops_4w`, and `apr1992_52w`; `control_delta.json`, `formation_delta.json`, `activity_summary.json`, `end_report.md`, `watched_operations.json`, and `weekly_report.jsonl` stayed byte-identical.
 - Startup snapshot was regenerated and checked because `hq_osid` changes deterministic startup serialization.
 - Srebrenica/Zepa fall ownership remains event-owned; this packet does not touch fall delivery, scripted operations, or sensitive-history event mechanics.
 
@@ -58,6 +60,6 @@
 | `tests/**` | Adds regression coverage for command anchors, routing, receipts, controls, browser bridge discipline, and startup snapshot. |
 
 ## Next Steps
-- Keep packaging paused until the active polish plan is merged and GitHub is green.
+- Keep packaging paused until the active polish plan remains merged and GitHub is green on the reblessed head.
 - Keep Vitezovi/OOB identity work separate from this command-anchor packet.
 - Continue broad UI/player-truth sweeps, especially command surfaces that mix desktop-owned actions with browser/dev inspection.
