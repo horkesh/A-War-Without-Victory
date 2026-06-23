@@ -351,9 +351,29 @@ describe('Formation Detail parity display', () => {
     const southButton = screen.getByRole('button', { name: /Southern line/i });
     const northButton = screen.getByRole('button', { name: /Northern line/i });
     expect(southButton.textContent ?? '').toContain('1 brigade');
+    expect(southButton.textContent ?? '').not.toContain('1 brigades');
     expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
     expect(northButton.textContent ?? '').toContain('1 brigade');
+    expect(northButton.textContent ?? '').not.toContain('1 brigades');
     expect(northButton.textContent ?? '').not.toContain('2 brigades');
+  });
+
+  it('exposes sector picker proof hooks for zero-current options', () => {
+    const state = makeFormationDetailState();
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
+      ? { ...sector, assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: [] }
+      : sector);
+    useGameStore.setState({ loadedGameState: state });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const southButton = view.container.querySelector('[data-testid="formation-detail-sector-option"][data-sector-id="sector_south"]');
+    expect(southButton).not.toBeNull();
+    expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(southButton?.getAttribute('aria-label')).toContain('Southern line');
+    expect(southButton?.textContent ?? '').toContain('0 brigades');
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {

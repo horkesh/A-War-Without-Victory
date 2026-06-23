@@ -215,6 +215,42 @@ describe('player-safe tooltip models', () => {
     expect(model.ownFormationLabels).toEqual(['Fielded Brigade - Defending']);
   });
 
+  it('does not show favorable density or threat for own sectors with no current fielded formations', () => {
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations: [],
+      fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [{
+        sector_id: 'sector_uncovered',
+        corps_id: 'arbih_2nd_corps',
+        corps_name: '2nd Corps',
+        faction: 'RBiH',
+        display_name: 'Uncovered front',
+        opposing_factions: ['RS'],
+        edge_ids: ['op:tuzla::op:doboj'],
+        sub_segment_count: 1,
+        length_edges: 3,
+        density: 1.25,
+        threat_ratio: 0.5,
+        assigned_brigade_ids: ['stale_brigade'],
+        reserve_brigade_ids: [],
+        defensive_power: 1,
+        offensive_signs: false,
+        intel_confidence: 0.6,
+        combat_strength_class: 'adequate',
+      }],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.sectorName).toBe('Uncovered front');
+    expect(model.sectorStatusLine).toBe('No friendly line');
+    expect(model.densityValue).toBeNull();
+    expect(model.densityLabel).toBeNull();
+    expect(model.threatSummary).toBeNull();
+  });
+
   it('localizes formation posture labels in tooltip models', () => {
     const formations = [
       {
@@ -259,6 +295,7 @@ describe('player-safe tooltip models', () => {
     expect(playerCopy).not.toContain('AoR:');
     expect(playerCopy).not.toContain('Order:');
     expect(playerCopy).not.toContain('Status:');
+    expect(tooltipSource).not.toContain(' edges');
     expect(playerCopy).not.toContain('THIN');
     expect(playerCopy).not.toContain('DENSE');
     expect(playerCopy).not.toContain('Active Def.');

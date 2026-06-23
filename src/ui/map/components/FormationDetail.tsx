@@ -985,11 +985,23 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   {sameSectorList.map(sector => {
                     const isCurrentOverride = sectorOverrideId === sector.sector_id;
                     const isCurrentAutomatic = !sectorOverrideId && automaticSector?.sector_id === sector.sector_id;
+                    const sectorAssignment = sectorAssignmentById.get(sector.sector_id);
+                    const currentBrigadeCount = sectorAssignment?.allCurrentIds.length ?? 0;
+                    const frontlineBrigadeCount = sectorAssignment?.frontlineIds.length ?? 0;
+                    const sectorLabel = safeSectorLabel(sector.sector_id, sameSectorList);
                     return (
                       <button
                         key={sector.sector_id}
                         type="button"
                         disabled={isCurrentOverride || isCurrentAutomatic}
+                        data-testid="formation-detail-sector-option"
+                        data-sector-id={sector.sector_id}
+                        data-current-brigade-count={currentBrigadeCount}
+                        data-frontline-brigade-count={frontlineBrigadeCount}
+                        aria-label={t('formationDetail.sectorOptionAria', {
+                          sector: sectorLabel,
+                          count: currentBrigadeCount,
+                        })}
                         onClick={() => {
                           if (isCurrentAutomatic) return;
                           void assignBrigadeToSectorOverrideAction(
@@ -1007,7 +1019,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold truncate">{safeSectorLabel(sector.sector_id, sameSectorList)}</span>
+                          <span className="font-semibold truncate">{sectorLabel}</span>
                           <div className="flex items-center gap-1.5 shrink-0 ml-2">
                             {isCurrentOverride && (
                               <span className="text-[9px] bg-accent-gold/20 text-accent-gold px-1 rounded border border-accent-gold/30 font-bold uppercase">{t('formationDetail.override')}</span>
@@ -1016,8 +1028,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                               <span className="text-[9px] text-text-secondary italic">{t('formationDetail.current')}</span>
                             )}
                             <span className="text-[10px] text-text-secondary">
-                              {t('formationDetail.sectorBrigadeCount', {
-                                count: sectorAssignmentById.get(sector.sector_id)?.allCurrentIds.length ?? 0,
+                              {t(currentBrigadeCount === 1 ? 'formationDetail.sectorBrigadeCount.one' : 'formationDetail.sectorBrigadeCount.many', {
+                                count: currentBrigadeCount,
                               })}
                             </span>
                           </div>

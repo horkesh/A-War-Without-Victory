@@ -250,7 +250,9 @@ function FrontTooltipContent({
     playerFaction,
     locale,
   });
-  const persistenceLine = sector ? `${sector.edge_ids.length} edges` : '—';
+  const persistenceLine = sector
+    ? t('tooltip.frontSegments', { count: sector.length_edges ?? sector.edge_ids.length }, locale)
+    : '—';
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
@@ -271,6 +273,11 @@ function FrontTooltipContent({
         <span>{t('tooltip.pressure')}</span>{' '}
         <span className="text-text-primary">{model.pressureLine}</span>
       </div>
+      {model.sectorStatusLine && (
+        <div className="text-[11px] text-amber-300 mb-1">
+          {model.sectorStatusLine}
+        </div>
+      )}
       {model.densityValue != null && model.densityLabel && (
         <div className="text-[11px] text-text-secondary mb-1">
           <span>{t('tooltip.density')}</span>{' '}

@@ -1518,6 +1518,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
+1. **[2026-06-23] Sector rebuild diagnostics must be isolated**
+   Do instead: clone saved and rebuilt states before `buildCorpsFrontSectors(...)`; use persisted saved-sector truth as the release gate and treat rebuilt reserve-only fixes as calibration/sector-builder work unless baseline and structural gates are intentionally re-floored.
 1. **[2026-06-23] Same-faction sector edge ownership is singular**
    Do instead: Pin startup contracts so no `{faction}::{edge}` is owned by multiple sectors; canonicalize duplicates in `buildCorpsFrontSectors(...)` after side-coverage recovery with deterministic brigade-count, regional-affinity, spatial-distance, edge-count, and sector-id tie-breaks.
 1. **[2026-06-05] Reuse sector construction indexes and reachable OSID sets**

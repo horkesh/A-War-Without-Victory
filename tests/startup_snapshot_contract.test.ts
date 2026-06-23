@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { test } from 'vitest';
 
+import { loadOperationalEdges } from '../src/data/operational_data.js';
 import { startNewCampaign } from '../src/desktop/desktop_sim.js';
 import {
     buildStartupSnapshotPayload,
@@ -10,6 +11,8 @@ import {
     loadStartupSnapshotState,
     validateStartupSnapshot,
 } from '../src/scenario/startup_snapshot.js';
+import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import { auditSectorTruth } from '../src/sim/combat/sector_truth_audit.js';
 import {
     isSrkStranglePostureEnabled,
     resetSrkStranglePostureGate,
@@ -206,6 +209,36 @@ test('baked April 1992 startup sectors do not duplicate same-faction edge owners
     }
 
     assert.deepStrictEqual(duplicates.sort(), []);
+}, 120_000);
+
+test('baked April 1992 startup sector truth audits clean without rebuilt-state mutation', async () => {
+    const savedState = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const rebuiltState = deserializeState(serializeState(savedState));
+    const edges = await loadOperationalEdges();
+
+    const savedAudit = auditSectorTruth(
+        savedState,
+        Object.values(savedState.military.corps_front_sectors ?? {}),
+        edges,
+    );
+    const rebuiltSectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
+    const rebuiltAudit = auditSectorTruth(rebuiltState, rebuiltSectors, edges);
+    const releaseGateCounts = {
+        reserve_only_live_sectors: 0,
+        stale_density_sectors: 0,
+        same_corps_front_overlaps: 0,
+        untruthful_assigned_brigades: 0,
+        edge_front_mismatches: 0,
+        unresolved_sector_brigades: 0,
+        active_formations_in_enemy_territory: 0,
+    };
+
+    assert.deepStrictEqual(savedAudit.counts, releaseGateCounts);
+    assert.strictEqual(
+        rebuiltAudit.counts.untruthful_assigned_brigades,
+        0,
+        'rebuilt sector diagnostics must not mutate saved-state brigade locations before the saved audit runs',
+    );
 }, 120_000);
 
 test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central Bosnia', async () => {

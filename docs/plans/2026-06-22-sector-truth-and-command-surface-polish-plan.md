@@ -270,3 +270,29 @@
 **Acceptance:** Command surfaces no longer invent supply truth, Warroom review rows do not fall back to `Memory`, blocked advance copy names the blocker-review action, operations cards expose player-safe accessible names, and Army Reserve rows keep inspect/terminate actions separately reachable.
 
 **Evidence:** Focused proof passed 94/94, `npm.cmd run typecheck` passed, `npm.cmd run qa:player-journeys` passed 277/277, `npm.cmd run qa:first-hour:browser` passed, `npm.cmd run qa:live-surface:browser` passed, and a manual in-app browser pass on `http://127.0.0.1:3003/?dev=1` verified RS start -> war-start identity brief -> Begin -> Desk blocked-action copy and Army HQ/command surface with zero console errors and zero nested buttons.
+
+### Task 12: Sector Audit Isolation And Tooltip Picker Proof
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_SECTOR_AUDIT_TOOLTIP_PICKER_PROOF.md`.
+
+**Files:**
+- Modified: `tools/scenario_runner/audit_sector_truth.ts`
+- Modified: `src/ui/map/components/tooltipPlayerSafe.ts`
+- Modified: `src/ui/map/components/Tooltip.tsx`
+- Modified: `src/ui/map/components/FormationDetail.tsx`
+- Modified: `src/ui/map/i18n/messages.en.ts`
+- Modified: `src/ui/map/i18n/messages.bcs.ts`
+- Tests: `tests/startup_snapshot_contract.test.ts`
+- Tests: `tests/ui_map_tooltip_player_visibility.test.ts`
+- Tests: `tests/ui/formation_detail_parity.test.ts`
+
+**Steps:**
+1. Verify the sector-audit false-positive path where rebuilding sectors mutates formation locations before the saved-sector audit runs.
+2. Isolate saved and rebuilt audit state so persisted startup truth is the release gate while rebuilt-sector findings remain visible diagnostics.
+3. Keep rebuilt reserve-only sector repair out of production code because the direct engine-side promotion candidate drifted startup, baseline, and structural fingerprints.
+4. Hide favorable front-density/threat copy on own front tooltips when no current fielded friendly formation exists on that sector.
+5. Add live-proof hooks and plural-safe labels to Formation Detail sector options.
+
+**Acceptance:** Persisted April 1992 startup sector truth audits clean without mutation from rebuilt diagnostics; the audit CLI exits green when saved truth is clean while still printing `rebuilt_ok: false` diagnostics; uncovered friendly tooltip sectors show `No friendly line` instead of density/threat; Formation Detail sector picker buttons expose stable sector/current/frontline proof attributes and singular/plural brigade labels.
+
+**Evidence:** Focused proof `node node_modules\vitest\vitest.mjs run tests\startup_snapshot_contract.test.ts -t "sector truth audits clean" --pool=forks --reporter=dot` passed 1/1, `node node_modules\vitest\vitest.mjs run tests\ui_map_tooltip_player_visibility.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 25/25, and `npm.cmd run sim:scenario:audit-sectors -- --save data/derived/startup/apr_1992_initial_save.json` reported saved counts all zero with `ok: true` and retained rebuilt diagnostic `reserve_only_live_sectors: 1` / `rebuilt_ok: false`. Broader proof passed: `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run typecheck`, `npm.cmd run test:baselines`, `npm.cmd run ci:structural-fingerprint:check`, `npm.cmd run qa:player-journeys` 278/278, `npm.cmd run qa:first-hour:browser`, and `npm.cmd run qa:live-surface:browser`. Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH new-game war-start splash, opening identity brief, Decision Room -> President's Desk decision routing, the foundational decision modal, and Army HQ opening commander/summary surfaces.

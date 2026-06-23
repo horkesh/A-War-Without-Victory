@@ -7,6 +7,7 @@ import type {
 import { getPlayerFacingFaction, filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
+import { buildSectorFormationAssignment } from '../utils/sectorUtils';
 import { t, type Locale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
@@ -27,6 +28,7 @@ export interface PlayerSafeFormationTooltipModel {
 export interface PlayerSafeFrontTooltipModel {
   title: string;
   sectorName: string | null;
+  sectorStatusLine: string | null;
   pressureLine: string;
   densityValue: number | null;
   densityLabel: string | null;
@@ -179,6 +181,16 @@ export function buildPlayerSafeFrontTooltipModel(args: {
         t('tooltip.pressure.balanced', undefined, locale);
 
   const sector = args.corpsFrontSectors?.find((entry) => entry.edge_ids.includes(args.edgeId));
+  const ownSector = sector?.faction === args.playerFaction ? sector : null;
+  const sectorAssignment = ownSector
+    ? buildSectorFormationAssignment(ownSector, args.formations ?? [], args.corpsFrontSectors ?? [])
+    : null;
+  const fieldedFormationIds = new Set(
+    (args.formations ?? [])
+      .filter((formation) => isOwnFormation(formation, args.playerFaction) && isFieldedTacticalFormation(formation))
+      .map((formation) => formation.id),
+  );
+  const ownSectorHasCurrentLine = (sectorAssignment?.allCurrentIds ?? []).some((id) => fieldedFormationIds.has(id));
   const visibleFormations = filterPlayerVisibleMapFormations({
     player_faction: args.playerFaction,
     fogOfWar: args.fogOfWar,
@@ -196,11 +208,12 @@ export function buildPlayerSafeFrontTooltipModel(args: {
 
   return {
     title: t('tooltip.frontTitle', { sideA, sideB }, locale),
-    sectorName: sector?.faction === args.playerFaction ? sector.display_name : null,
+    sectorName: ownSector ? ownSector.display_name : null,
+    sectorStatusLine: ownSector && !ownSectorHasCurrentLine ? t('tooltip.noFriendlyLine', undefined, locale) : null,
     pressureLine,
-    densityValue: sector?.faction === args.playerFaction ? sector.density : null,
-    densityLabel: sector?.faction === args.playerFaction ? getDensityLabel(sector.density, locale) : null,
-    threatSummary: sector?.faction === args.playerFaction ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : null,
+    densityValue: ownSector && ownSectorHasCurrentLine ? ownSector.density : null,
+    densityLabel: ownSector && ownSectorHasCurrentLine ? getDensityLabel(ownSector.density, locale) : null,
+    threatSummary: ownSector && ownSectorHasCurrentLine ? getPlayerSafeThreatPresentation(ownSector.threat_ratio).summary : null,
     ownFormationLabels,
     enemyContactSummary: enemyContacts.length > 0
       ? t(enemyContacts.length === 1 ? 'tooltip.enemyContact.one' : 'tooltip.enemyContact.many', { count: enemyContacts.length }, locale)

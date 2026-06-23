@@ -26,11 +26,13 @@ async function main(): Promise<void> {
     const { savePath } = parseArgs();
     const resolvedSavePath = path.resolve(process.cwd(), savePath);
     const state = JSON.parse(fs.readFileSync(resolvedSavePath, 'utf8')) as GameState;
+    const savedState = JSON.parse(JSON.stringify(state)) as GameState;
+    const rebuiltState = JSON.parse(JSON.stringify(state)) as GameState;
     const edges = await loadOperationalEdges();
-    const savedSectors = Object.values(state.military?.corps_front_sectors ?? {});
-    const rebuiltSectors = Object.values(buildCorpsFrontSectors(state, edges, null));
-    const savedAudit = auditSectorTruth(state, savedSectors, edges);
-    const rebuiltAudit = auditSectorTruth(state, rebuiltSectors, edges);
+    const savedSectors = Object.values(savedState.military?.corps_front_sectors ?? {});
+    const rebuiltSectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
+    const savedAudit = auditSectorTruth(savedState, savedSectors, edges);
+    const rebuiltAudit = auditSectorTruth(rebuiltState, rebuiltSectors, edges);
 
     process.stdout.write(JSON.stringify({
         save: resolvedSavePath,
@@ -39,7 +41,8 @@ async function main(): Promise<void> {
         saved_unresolved: (state.military?.unresolved_sector_brigades ?? []).length,
         saved_counts: savedAudit.counts,
         rebuilt_counts: rebuiltAudit.counts,
-        ok: savedAudit.ok && rebuiltAudit.ok,
+        ok: savedAudit.ok,
+        rebuilt_ok: rebuiltAudit.ok,
     }, null, 2) + '\n');
 
     if (!savedAudit.ok || !rebuiltAudit.ok) {
@@ -47,6 +50,8 @@ async function main(): Promise<void> {
             saved_issues: savedAudit.issues,
             rebuilt_issues: rebuiltAudit.issues,
         }, null, 2) + '\n');
+    }
+    if (!savedAudit.ok) {
         process.exitCode = 1;
     }
 }
