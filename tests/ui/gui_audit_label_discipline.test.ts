@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
 import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
@@ -202,6 +202,34 @@ describe('GUI audit label discipline', () => {
     expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
     expect(selection.container.textContent).toContain('Actual Municipality');
     expect(selection.container.textContent).not.toContain('Legacy Slug');
+    expect(screen.getByRole('button', { name: /Close settlement info/i })).toBeTruthy();
+  });
+
+  it('resets settlement detail tabs to overview when selecting a different settlement', async () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        controlBySettlement: {
+          'op:first': 'RBiH',
+          'op:second': 'RBiH',
+        },
+      }),
+      selectedOsid: 'op:first',
+      osidDisplayNames: { 'op:first': 'First Settlement', 'op:second': 'Second Settlement' },
+      osidPropertiesMap: {
+        'op:first': { osid: 'op:first', settlement_name: 'First Settlement', mun1990_name: 'First Municipality', population_total: 1000 },
+        'op:second': { osid: 'op:second', settlement_name: 'Second Settlement', mun1990_name: 'Second Municipality', population_total: 1000 },
+      },
+    });
+
+    render(createElement(SelectionPanel));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Timeline/i }));
+    expect(screen.getByRole('tab', { name: /Timeline/i }).getAttribute('aria-selected')).toBe('true');
+
+    useGameStore.setState({ selectedOsid: 'op:second' });
+
+    await waitFor(() => expect(screen.getByRole('tab', { name: /Overview/i }).getAttribute('aria-selected')).toBe('true'));
+    expect(screen.getByText('Second Settlement')).toBeTruthy();
   });
 
   it('renames the opportunity pulse reserve-crisis metric instead of exposing T3 internals', () => {

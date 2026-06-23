@@ -4,7 +4,7 @@
  * When displacementByMun is provided, shows current population and change.
  * Panel variant uses horizontal tabs (Overview | Municipality | Timeline).
  */
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getByOsid } from '../utils/osidLookup';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
@@ -386,6 +386,10 @@ export function SettlementDetailContent({
 
   type SettlementTabId = 'overview' | 'municipality' | 'timeline';
   const [activeTab, setActiveTab] = useState<SettlementTabId>('overview');
+
+  useEffect(() => {
+    setActiveTab('overview');
+  }, [osid]);
 
   const settlementTabs: { id: SettlementTabId; label: string }[] = [
     { id: 'overview', label: t('settlement.tab.overview') },

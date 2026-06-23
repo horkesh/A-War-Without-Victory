@@ -180,6 +180,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         const operations = (state.operations ?? []).filter((op) =>
             corpsFormations.some(c => c.id === op.corps_id)
         );
+        const executingOperations = operations.filter((op) => op.phase === 'execution');
 
         const cbs = state.controlBySettlement ?? {};
         let factionArea = 0;
@@ -222,7 +223,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         );
 
         return {
-            formations, brigades, corpsFormations, totalPersonnel, sectors, operations,
+            formations, brigades, corpsFormations, totalPersonnel, sectors, operations, executingOperations,
             sectorsByCorps, opsByCorps, readinessByCorps,
             territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
@@ -576,9 +577,9 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                                 </div>
                                             </div>
                                             <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.04] px-2 py-1.5">
-                                                <div className="text-[8px] uppercase tracking-[0.18em] text-emerald-300/70 font-bold">{t('armyHq.activeOps')}</div>
+                                                <div className="text-[8px] uppercase tracking-[0.18em] text-emerald-300/70 font-bold">{t('armyHq.executingOps')}</div>
                                                 <div className="text-[16px] font-bold text-emerald-300 tabular-nums leading-tight">
-                                                    {data.operations.length}
+                                                    {data.executingOperations.length}
                                                 </div>
                                             </div>
                                         </div>

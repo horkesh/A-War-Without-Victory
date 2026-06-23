@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { sortRecentEngagements } from '../utils/recentEngagements';
@@ -155,6 +155,10 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const setSelectedFormationId = useGameStore((s) => s.setSelectedFormationId);
   const addStagedOrder = useGameStore((s) => s.addStagedOrder);
   const setLoadError = useGameStore((s) => s.setLoadError);
+
+  useEffect(() => {
+    setActiveTab('overview');
+  }, [selectedFormationId]);
 
   if (operationsPanelOpen || !selectedFormationId) return null;
 
@@ -324,7 +328,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   onClick={() => {
                     inspectOnField(useGameStore.getState(), isArmyHq
                       ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id }
-                      : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id });
+                      : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id, osid: formation.location_osid });
                   }}
                   className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-blue/10 transition-colors group"
                 >
@@ -352,6 +356,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       formationId: selectedFormationId,
                       sectorId: currentSector.sector_id,
                       corpsId: currentSector.corps_id ?? formation.corps_id ?? null,
+                      osid: formation.location_osid,
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
                     title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}

@@ -279,8 +279,11 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           </span>
         </div>
         <button
+          type="button"
           onClick={() => setSelectedOsid(null)}
-          className="text-text-secondary hover:text-interactive text-sm leading-none"
+          aria-label={t('selection.close')}
+          title={t('selection.close')}
+          className="kbd-focus text-text-secondary hover:text-interactive text-sm leading-none rounded"
         >
           ✕
         </button>

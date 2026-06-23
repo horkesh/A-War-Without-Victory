@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormationDetail } from '../../src/ui/map/components/FormationDetail.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -264,6 +264,35 @@ describe('Formation Detail parity display', () => {
     fireEvent.click(screen.getByRole('button', { name: /Northern line/i }));
 
     expect(assignBrigadeToSector).not.toHaveBeenCalled();
+  });
+
+  it('resets to overview when the selected formation changes', async () => {
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    expect(screen.getByRole('tab', { name: 'Orders' }).getAttribute('aria-selected')).toBe('true');
+
+    useGameStore.setState({ selectedFormationId: 'rbih_record_brigade' });
+
+    await waitFor(() => expect(screen.getByRole('tab', { name: 'Overview' }).getAttribute('aria-selected')).toBe('true'));
+    expect(screen.getByText('Record Brigade')).toBeTruthy();
+  });
+
+  it('preserves settlement context when drilling into parent corps or sector', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? { ...formation, location_osid: 'op:sarajevo:dobrinja_1' }
+      : formation);
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('button', { name: /1st Corps/i }));
+    expect(useGameStore.getState().selectedOsid).toBe('op:sarajevo:dobrinja_1');
+
+    useGameStore.setState({ selectedFormationId: 'rbih_heroic_brigade', selectedOsid: null });
+    fireEvent.click(screen.getByRole('button', { name: /Northern line/i }));
+    expect(useGameStore.getState().selectedOsid).toBe('op:sarajevo:dobrinja_1');
   });
 
   it('does not expose sector assignment controls for non-fielded brigades', () => {

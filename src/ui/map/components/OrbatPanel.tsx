@@ -151,11 +151,13 @@ export function OrbatPanel() {
                                                     formationId: b.id,
                                                     sectorId: sector.sector_id,
                                                     corpsId: corps.id,
+                                                    osid: b.location_osid,
                                                 }
                                                 : {
                                                     kind: 'field-formation-in-corps',
                                                     formationId: b.id,
                                                     corpsId: corps.id,
+                                                    osid: b.location_osid,
                                                 });
                                             const osid = b.location_osid;
                                             if (osid) {

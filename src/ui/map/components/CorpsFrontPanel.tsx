@@ -295,7 +295,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     : null;
   const currentStanceSource = sector.stance_source ?? 'bot';
   const sectorStanceLabel = currentSectorStance ? stanceLabel(currentSectorStance) : t('corpsFront.unreported');
-  const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, sector.logistics_priority ?? 1));
+  const hasReportedLogisticsPriority = typeof sector.logistics_priority === 'number' && Number.isFinite(sector.logistics_priority);
+  const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, hasReportedLogisticsPriority ? sector.logistics_priority! : 1));
+  const hasReportedOpsec = typeof sector.opsec_active === 'boolean';
+  const opsecActive = sector.opsec_active === true;
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
   const metadataDate = loadedGameState.metadata?.date?.trim();
   const displayDate = metadataDate && metadataDate !== 'UNKNOWN'
@@ -309,9 +312,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   };
 
   const toggleOpsec = async () => {
-    const result = await ipc.stageOpsecToggle(sector.sector_id, !(sector.opsec_active ?? false));
+    const result = await ipc.stageOpsecToggle(sector.sector_id, !opsecActive);
     setSectorActionMessage(result.ok
-      ? t((sector.opsec_active ?? false) ? 'corpsFront.opsecDisabled' : 'corpsFront.opsecEnabled')
+      ? t(opsecActive ? 'corpsFront.opsecDisabled' : 'corpsFront.opsecEnabled')
       : (result.error ?? t('corpsFront.opsecToggleFailed')));
   };
 
@@ -321,6 +324,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
       formationId,
       sectorId: selectedSectorId,
       corpsId: selectedCorpsId ?? sector.corps_id,
+      osid: loadedGameState.formations.find((f) => f.id === formationId)?.location_osid,
     });
   };
 
@@ -341,7 +345,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             {t('corpsFront.title')}
           </span>
-          {sector.opsec_active && (
+          {opsecActive && (
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-500/50 text-amber-400">
               {t('corpsFront.opsec')}
             </span>
@@ -392,8 +396,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
             <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
             <div>
               <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
-              <span className={sector.opsec_active ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
-                {sector.opsec_active ? t('corpsFront.active') : t('corpsFront.inactive')}
+              <span className={opsecActive ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
+                {hasReportedOpsec ? (opsecActive ? t('corpsFront.active') : t('corpsFront.inactive')) : t('corpsFront.unreported')}
               </span>
             </div>
             <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
@@ -548,8 +552,15 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>
                     <span className="font-medium" title={logisticsPriorityTitle}>
-                      {effectiveLogisticsPriority.toFixed(1)}x{effectiveLogisticsPriority === 1 ? ` (${t('corpsFront.neutral')})` : ''}
+                      {hasReportedLogisticsPriority
+                        ? `${effectiveLogisticsPriority.toFixed(1)}x${effectiveLogisticsPriority === 1 ? ` (${t('corpsFront.neutral')})` : ''}`
+                        : t('corpsFront.unreported')}
                     </span>
+                    {!hasReportedLogisticsPriority && (
+                      <span className="mt-0.5 text-[8px] leading-tight text-neutral-500 normal-case">
+                        {t('corpsFront.logisticsPriorityUnreported')}
+                      </span>
+                    )}
                   </div>
                   <div className="flex flex-col col-span-2">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.linkedSettlements')}</span>
@@ -579,7 +590,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     onClick={() => void toggleOpsec()}
                     className="kbd-focus w-full rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 px-2 py-1 text-[10px] font-bold uppercase"
                   >
-                    {sector.opsec_active ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
+                    {opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
                   </button>
                   {sectorActionMessage && (
                     <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>

@@ -128,6 +128,7 @@ describe('OrbatPanel drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
     expect(store.selectedCorpsFrontSectorId).toBe('sector_south');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
+    expect(store.selectedOsid).toBe('op:sarajevo:centar_1');
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 

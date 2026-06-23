@@ -361,4 +361,28 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.getByRole('button', { name: /Inspect 1st Elite Brigade/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Terminate' })).toBeTruthy();
     });
+
+    it('counts only executing operations in the Army HQ summary operations chip', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            loadedGameState: makeState({
+                formations: [
+                    { id: 'corps_1', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active', cohesion: 70, fatigue: 0 },
+                    { id: 'brig_1', name: '1st Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', readiness: 'ready', corps_id: 'corps_1', personnel: 1200, cohesion: 60, fatigue: 10 },
+                ] as LoadedGameState['formations'],
+                operations: [
+                    { name: 'Planning Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'planning' },
+                    { name: 'Executing Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'execution' },
+                    { name: 'Recovery Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'recovery' },
+                ] as LoadedGameState['operations'],
+            }),
+            armyHQOpen: true,
+            selectedArmyId: 'RBiH',
+        });
+
+        const { container } = render(createElement(ArmyHQModal));
+
+        expect(container.textContent).toMatch(/Executing Operations\s*1/i);
+        expect(container.textContent).not.toMatch(/Active Operations\s*3/i);
+    });
 });

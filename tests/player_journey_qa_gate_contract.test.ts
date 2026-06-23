@@ -15,6 +15,7 @@ describe('player journey QA gate contract', () => {
     expect(script).toContain('tests/ui/onboarding_track_d_consolidation.test.ts');
     expect(script).toContain('tests/ui/gamestore_load_reset.test.ts');
     expect(script).toContain('tests/ui_map_selection_store.test.ts');
+    expect(script).toContain('tests/ui_map_game_state_adapter.test.ts');
     expect(script).toContain('tests/ui_map_battle_casualty_truth.test.ts');
     expect(script).toContain('tests/deck_click_selection_priority.test.ts');
     expect(script).toContain('tests/ui/gui_audit_dead_controls.test.ts');
@@ -30,5 +31,6 @@ describe('player journey QA gate contract', () => {
     expect(script).toContain('tests/ui/presidential_decision_room.test.ts');
     expect(script).toContain('tests/ui/oob_operations_panel.test.ts');
     expect(script).toContain('tests/ui/commander_read_model_surfaces.test.ts');
+    expect(script).toContain('tests/ui/army_hq_sector_truth.test.ts');
   });
 });

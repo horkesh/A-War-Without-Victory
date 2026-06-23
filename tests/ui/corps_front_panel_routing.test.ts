@@ -143,6 +143,7 @@ describe('CorpsFrontPanel field routing', () => {
       selectedCorpsId: 'arbih_1st_corps',
       selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
       selectedFormationId: 'arbih_101_brigade',
+      selectedOsid: 'op:sarajevo:dobrinja_1',
       codexOpen: false,
       chronicleOpen: false,
       focusedAftermathTurn: null,
@@ -165,6 +166,7 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
@@ -190,6 +192,46 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedFormationId).toBe('arbih_unresolved_brigade');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
+  });
+
+  it('keeps missing logistics priority and operational security unreported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      logistics_priority: undefined,
+      opsec_active: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Operational security:\s*Unreported/i);
+    expect(container.textContent).toMatch(/Supply Priority\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Supply Priority\s*1\.0x\s*\(neutral\)/i);
+  });
+
+  it('preserves explicit neutral logistics priority and inactive operational security', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      logistics_priority: 1,
+      opsec_active: false,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Operational security:\s*Inactive/i);
+    expect(container.textContent).toMatch(/Supply Priority\s*1\.0x\s*\(neutral\)/i);
   });
 
   it('does not treat unassessed operation supply readiness as zero percent', () => {
