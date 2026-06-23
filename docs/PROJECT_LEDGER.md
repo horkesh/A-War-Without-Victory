@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] test(ci): repair sector/OOB CI proof coverage
+
+**Type:** Test/docs CI repair.
+
+**Fix:** The sector brigade status fixture now uses the canonical `brigade` formation kind instead of the non-schema `infantry` value, so the new fielded-formation boundary is tested against valid state. The VRS operation proof scenario now reads weekly operation diagnostics for the 4-week proof window, requiring RS attack attempts, resolved battles, and objective captures during live play instead of depending on a completed operation AAR within the same short window.
+
+**Verification:** The repaired CI pair passed 5/5. `npm.cmd run typecheck` passed. `npm.cmd run desktop:startup-snapshot:check` passed. `npm.cmd run ci:structural-fingerprint:check` passed with `b9f5a40aa0a1726e`. `npm.cmd run test:baselines` passed. `npm.cmd run test:vitest:fast` passed 1100 files / 10463 tests.
+
+**Scope/determinism:** Test-only fix-forward for the red GitHub runs on `17624566f`. No simulation behavior, startup snapshot, structural fingerprint, baseline manifest, save schema, generated calibration artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-23] fix(sim/ui): enforce sector OOB startup truth
 
 **Type:** Simulation/read-model/UI/test/docs calibration-safe hardening.

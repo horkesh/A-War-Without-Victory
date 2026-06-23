@@ -33,7 +33,7 @@ function makeFormation(overrides: Partial<FormationState> = {}): FormationState 
         id: 'brig_1',
         faction: 'RS',
         name: 'Test Brigade',
-        kind: 'infantry',
+        kind: 'brigade',
         status: 'active',
         personnel: 2000,
         cohesion: 80,
