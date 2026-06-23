@@ -41,6 +41,7 @@ import {
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
 import { turnToDateString } from '../utils/formatters.js';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Outcome Class & Condemnation Helpers (exported for testing)
@@ -360,7 +361,7 @@ export function VerdictScreen() {
     const factionBrigades: Record<string, number> = {};
     const factionPersonnel: Record<string, number> = {};
     for (const f of formations) {
-        if (f.kind === 'brigade' && f.status === 'active') {
+        if (isFieldedTacticalFormation(f)) {
             factionBrigades[f.faction] = (factionBrigades[f.faction] ?? 0) + 1;
             factionPersonnel[f.faction] = (factionPersonnel[f.faction] ?? 0) + (f.personnel ?? 0);
         }

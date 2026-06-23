@@ -2368,6 +2368,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'oob.army': 'Armija',
     'oob.noFormations': 'Nema formacija.',
     'oob.viewArmySummary': 'Vidi sažetak armije za {faction}',
+    'oob.expandFaction': 'Proširi borbeni poredak za {faction}',
+    'oob.collapseFaction': 'Sažmi borbeni poredak za {faction}',
     'oob.co': 'KO:',
     'oob.serviceRecordPending': 'Službeni zapis čeka pregled štaba.',
     'oob.style': 'Stil:',

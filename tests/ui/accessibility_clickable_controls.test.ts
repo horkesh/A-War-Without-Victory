@@ -46,6 +46,10 @@ function hasSpaceKeyHandler(tag: string): boolean {
   return /onKey(?:Down|Up|Press)=/.test(tag) && /['"](?: |Space|Spacebar)['"]|\.key\s*===\s*['"](?: |Space|Spacebar)['"]/.test(tag);
 }
 
+function hasOobFactionRoleButtonWithNestedButton(source: string): boolean {
+  return /<div\b(?=[^>]*role=["']button["'])[^>]*>[\s\S]{0,2000}<button\b/.test(source);
+}
+
 describe('accessibility P0 clickable controls', () => {
   it('does not use onClick on non-interactive JSX elements', () => {
     const offenders: string[] = [];
@@ -77,5 +81,9 @@ describe('accessibility P0 clickable controls', () => {
     }
 
     expect(offenders).toEqual([]);
+  });
+
+  it('keeps OOB faction accordion and army-summary actions as sibling controls', () => {
+    expect(hasOobFactionRoleButtonWithNestedButton(readComponent('OOBSidebar.tsx'))).toBe(false);
   });
 });

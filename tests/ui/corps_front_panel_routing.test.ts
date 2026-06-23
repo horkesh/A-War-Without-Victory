@@ -136,7 +136,7 @@ describe('CorpsFrontPanel field routing', () => {
   it('routes brigade rows through field inspection and clears stale shell context', () => {
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     fireEvent.click(screen.getByTestId('corps-front-brigade-row'));
 
     expect(useGameStore.getState()).toMatchObject({
@@ -158,7 +158,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     fireEvent.click(screen.getByTestId('corps-front-brigade-row'));
 
     const store = useGameStore.getState();
@@ -179,7 +179,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     const unresolvedRow = screen.getByTestId('corps-front-brigade-row-unresolved');
     expect(unresolvedRow.getAttribute('data-testid')).toBe('corps-front-brigade-row-unresolved');
     expect(unresolvedRow.getAttribute('data-formation-id')).toBe('arbih_unresolved_brigade');
@@ -310,7 +310,7 @@ describe('CorpsFrontPanel field routing', () => {
     expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toContain('70');
     expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('5');
 
-    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     expect(screen.getByTestId('corps-front-brigade-row').textContent).toMatch(/1[,.]200/);
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));

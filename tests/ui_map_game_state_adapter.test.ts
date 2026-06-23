@@ -258,6 +258,8 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
                 corps_id: 'rbih_corps',
                 name: '1st Brigade',
                 kind: 'brigade',
+                status: 'active',
+                readiness: 'ready',
                 location_osid: 'op:gorazde:gorazde_2',
                 entrenchment_turns: 4,
                 dig_in_progress: 0.6,
@@ -270,6 +272,8 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
                 corps_id: 'rbih_corps',
                 name: '2nd Brigade',
                 kind: 'brigade',
+                status: 'active',
+                readiness: 'ready',
                 location_osid: 'op:gorazde:gorazde_3',
                 entrenchment_turns: 2,
                 dig_in_progress: 0.2,
@@ -331,6 +335,122 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.4);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInCount, 1);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 2);
+});
+
+test('parseGameState keeps missing sector stance unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            formations: {},
+            militia_pools: {},
+            corps_front_sectors: {
+                rbih_sector_1: {
+                    sector_id: 'rbih_sector_1',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.corpsFrontSectors?.[0]?.sector_stance, undefined);
+    assert.equal(parsed.corpsFrontSectors?.[0]?.stance_source, undefined);
+});
+
+test('parseGameState derives sector entrenchment from current fielded assignment truth', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            brigade_sector_override: {
+                stale_away: 'rbih_sector_2',
+                override_in: 'rbih_sector_1',
+            },
+            formations: {
+                stale_away: {
+                    id: 'stale_away',
+                    name: 'Stale Away',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    readiness: 'ready',
+                    cohesion: 70,
+                    fatigue: 0,
+                    created_turn: 0,
+                    entrenchment_turns: 10,
+                    dig_in_progress: 1,
+                    posture: 'dig_in',
+                },
+                override_in: {
+                    id: 'override_in',
+                    name: 'Override In',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    readiness: 'ready',
+                    cohesion: 70,
+                    fatigue: 0,
+                    created_turn: 0,
+                    entrenchment_turns: 4,
+                    dig_in_progress: 0.5,
+                    posture: 'dig_in',
+                },
+                forming: {
+                    id: 'forming',
+                    name: 'Forming',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    readiness: 'forming',
+                    cohesion: 30,
+                    fatigue: 0,
+                    created_turn: 0,
+                    entrenchment_turns: 20,
+                    dig_in_progress: 1,
+                    posture: 'dig_in',
+                },
+            },
+            militia_pools: {},
+            corps_front_sectors: {
+                rbih_sector_1: {
+                    sector_id: 'rbih_sector_1',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: ['stale_away', 'forming'],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+                rbih_sector_2: {
+                    sector_id: 'rbih_sector_2',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: ['override_in'],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgEntrenchment, 4);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.5);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInCount, 1);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 1);
 });
 
 test('parseGameState hides non-player enclave resilience when no player-owned enclave exists', () => {

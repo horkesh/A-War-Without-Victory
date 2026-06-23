@@ -1,5 +1,11 @@
 # Napkin Runbook
 
+**STATIONED UNITS ARE PHYSICAL PRESENCE, NOT AOR COVERAGE (2026-06-23).** Settlement unit lists answer "what is physically here." Do instead: use `getFormationsAtOsid(...)` for fielded formations whose `location_osid` equals the settlement; use `getFormationsCoveringOsid(...)` only when a surface explicitly asks for coverage/AoR support.
+
+**SECTOR UI MUST NOT INVENT FAVORABLE STANCE OR ASSIGNMENT TRUTH (2026-06-23).** Missing sector stance/source is unreported, and saved sector rosters can be stale after overrides. Do instead: keep absent `sector_stance` / `stance_source` undefined in the adapter, and derive entrenchment/coverage summaries from `buildSectorFormationAssignment(...)` plus the shared fielded tactical boundary.
+
+**OOB ACCORDIONS NEED SIBLING CONTROLS (2026-06-23).** A faction header has two actions: open army summary and expand/collapse. Do instead: render them as sibling `<button>` controls with explicit accessible labels; never put a nested button inside a `role="button"` row.
+
 **HQ INSPECT LINKS SHOULD CARRY LOCATION CONTEXT (2026-06-23).** Army HQ and ORBAT surfaces often know `location_osid` even when the target is a corps/sector drilldown. Do instead: include `osid` on `field-formation-in-sector` / `field-formation-in-corps` targets where available so the map lands with settlement context instead of a bare formation/corps route.
 
 **CHRONICLE DECISION HISTORY NEEDS FILED-PLAYER PROVENANCE (2026-06-23).** Turn summaries can list decision event ids for bot, foreign, or pending decisions. Do instead: suppress generated turn-summary decision rows unless a matching player-filed decision exists; keep non-decision events visible and preserve legacy no-log behavior only when no pending/log evidence exists.

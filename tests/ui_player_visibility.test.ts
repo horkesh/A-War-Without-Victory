@@ -25,7 +25,7 @@ import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
 import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOperationArrowsGeoJSON.js';
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
-import { getFormationsAtOsid } from '../src/ui/map/utils/formationAtOsid.js';
+import { getFormationsAtOsid, getFormationsCoveringOsid } from '../src/ui/map/utils/formationAtOsid.js';
 import { getPlayerVisibleFormationStack } from '../src/ui/map/utils/visibleFormationStack.js';
 
 describe('player visibility helpers', () => {
@@ -71,11 +71,13 @@ describe('player visibility helpers', () => {
   it('does not expose forming or destroyed formations as stationed field units', () => {
     const formations = [
       { id: 'fielded', faction: 'RBiH', name: 'Fielded', kind: 'brigade', readiness: 'ready', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
+      { id: 'covering', faction: 'RBiH', name: 'Covering', kind: 'brigade', readiness: 'ready', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:gradacac', aorSettlementIds: ['op:tuzla'] },
       { id: 'forming', faction: 'RBiH', name: 'Forming', kind: 'brigade', readiness: 'forming', cohesion: 40, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
       { id: 'destroyed', faction: 'RBiH', name: 'Destroyed', kind: 'brigade', readiness: 'destroyed', cohesion: 0, fatigue: 0, status: 'destroyed', createdTurn: 1, tags: [], location_osid: 'op:tuzla' },
     ] as LoadedGameState['formations'];
 
     expect(getFormationsAtOsid(formations, 'op:tuzla').map((formation) => formation.id)).toEqual(['fielded']);
+    expect(getFormationsCoveringOsid(formations, 'op:tuzla').map((formation) => formation.id)).toEqual(['fielded', 'covering']);
   });
 
   it('filters operation history and movement logs to player-owned formations only', () => {

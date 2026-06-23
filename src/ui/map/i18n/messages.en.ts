@@ -2493,6 +2493,8 @@ export const enMessages = {
     'oob.army': 'Army',
     'oob.noFormations': 'No formations.',
     'oob.viewArmySummary': 'View {faction} army summary',
+    'oob.expandFaction': 'Expand {faction} order of battle',
+    'oob.collapseFaction': 'Collapse {faction} order of battle',
     'oob.co': 'CO:',
     'oob.serviceRecordPending': 'Service record pending staff review.',
     'oob.style': 'Style:',

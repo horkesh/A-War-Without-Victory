@@ -334,61 +334,58 @@ export function OOBSidebar() {
                           <img src={getArmyCrest(faction)} alt="" className="w-3.5 h-3.5 object-contain opacity-70" />
                         )}
                       </div>
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        onClick={() => toggle(faction)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            toggle(faction);
-                          }
-                        }}
-                        className="w-full flex items-center justify-between px-2 py-1 rounded font-mono text-[11px] font-medium bg-panel-card border border-panel-border text-left hover:bg-panel-hover transition-colors cursor-pointer group/faction"
-                      >
-                        <div className="flex flex-col gap-0.5 min-w-0">
-                          <div className="flex items-center gap-1.5">
+                      <div className="w-full flex items-stretch justify-between gap-1 rounded font-mono text-[11px] font-medium bg-panel-card border border-panel-border text-left group/faction">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedArmyId(faction)}
+                          className="flex flex-1 flex-col gap-0.5 min-w-0 px-2 py-1 text-left hover:bg-panel-hover transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold"
+                          title={t('oob.viewArmySummary', { faction: getPlayerSafeMilitaryFactionName(faction) })}
+                        >
+                          <span className="flex items-center gap-1.5">
                             {getArmyCrest(faction) && (
                               <img src={getArmyCrest(faction)} alt="" className="w-4.5 h-4.5 object-contain" />
                             )}
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); setSelectedArmyId(faction); }}
-                              className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} hover:underline truncate`}
-                              title={t('oob.viewArmySummary', { faction: getPlayerSafeMilitaryFactionName(faction) })}
-                            >
+                            <span className={`${FACTION_COLORS[faction] ?? 'text-text-primary'} truncate`}>
                               {getArmyName(faction) ? `${getArmyName(faction)} / ${getPlayerSafeMilitaryFactionName(faction)}` : getPlayerSafeMilitaryFactionName(faction)}
-                            </button>
-                          </div>
+                            </span>
+                          </span>
                           {(() => {
                             const commander = getFactionArmyCommander(faction, loadedGameState);
                             if (commander) {
                               return (
-                                <div className="text-[9px] text-text-secondary pl-6">
-                                  <div>{t('oob.co')}</div>
-                                  <div className="text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</div>
-                                  <div className="mt-0.5 leading-snug text-text-secondary">
+                                <span className="block text-[9px] text-text-secondary pl-6">
+                                  <span className="block">{t('oob.co')}</span>
+                                  <span className="block text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</span>
+                                  <span className="block mt-0.5 leading-snug text-text-secondary">
                                     {commander.bio_short ?? t('oob.serviceRecordPending')}
-                                  </div>
+                                  </span>
                                   {commander.command_style && (
-                                    <div className="mt-0.5 text-[8px] uppercase tracking-wide text-text-secondary/80">
+                                    <span className="block mt-0.5 text-[8px] uppercase tracking-wide text-text-secondary/80">
                                       {t('oob.style')} <span className="normal-case tracking-normal text-text-secondary">{commander.command_style}</span>
-                                    </div>
+                                    </span>
                                   )}
-                                </div>
+                                </span>
                               );
                             }
                             return null;
                           })()}
-                        </div>
-                        <div className="flex items-center gap-1.5">
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggle(faction)}
+                          className="flex shrink-0 items-center gap-1.5 px-2 py-1 text-left hover:bg-panel-hover transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold"
+                          aria-expanded={!isCollapsed}
+                          aria-label={isCollapsed
+                            ? t('oob.expandFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })
+                            : t('oob.collapseFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })}
+                        >
                           <span className="text-text-secondary tabular-nums text-[9px]">{t('oob.formationCount', { count: formations.length + reserves.length })}</span>
                           <span
                             className="text-text-secondary group-hover/faction:text-text-primary transition-colors"
                           >
                             {isCollapsed ? '\u25B6' : '\u25BC'}
                           </span>
-                        </div>
+                        </button>
                       </div>
                       {!isCollapsed && (
                         <>

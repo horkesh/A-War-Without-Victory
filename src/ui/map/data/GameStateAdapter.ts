@@ -49,6 +49,7 @@ import { t } from '../i18n/index.js';
 import { turnToDateString } from '../utils/formatters.js';
 import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
+import { buildSectorFormationAssignment } from '../utils/sectorUtils.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
@@ -2131,8 +2132,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     }, 0) / edgeIds.length
                     : 1,
                 opsec_active: opsecSectorSet.has(sectorId),
-                sector_stance: typeof s.sector_stance === 'string' ? s.sector_stance as CorpsFrontSectorView['sector_stance'] : 'defend',
-                stance_source: typeof s.stance_source === 'string' ? s.stance_source as CorpsFrontSectorView['stance_source'] : 'bot',
+                sector_stance: typeof s.sector_stance === 'string' ? s.sector_stance as CorpsFrontSectorView['sector_stance'] : undefined,
+                stance_source: typeof s.stance_source === 'string' ? s.stance_source as CorpsFrontSectorView['stance_source'] : undefined,
                 sub_segments: subSegments.map((ss: any) => ({
                     sub_segment_id: ss.sub_segment_id ?? '',
                     edge_ids: Array.isArray(ss.edge_ids) ? ss.edge_ids : [],
@@ -2168,7 +2169,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         const formationsById = new Map(formations.map((formation) => [formation.id, formation]));
         const out: NonNullable<LoadedGameState['sectorEntrenchmentSummary']> = {};
         for (const sector of corpsFrontSectors) {
-            const assigned = sector.assigned_brigade_ids
+            const assignment = buildSectorFormationAssignment(sector, formations, corpsFrontSectors);
+            const assigned = [...new Set([...assignment.frontlineIds, ...assignment.overrideIds])]
                 .map((formationId) => formationsById.get(formationId))
                 .filter((formation): formation is FormationView => Boolean(formation));
             if (assigned.length === 0) continue;

@@ -259,6 +259,24 @@ describe('VerdictScreen mount — fallback', () => {
         expect(h).toContain('Final Standings'); expect(h).toContain('Stalemate');
         expect(h).not.toMatch(/\bOSID\b/i);
     });
+
+    it('FallbackGameOver counts only fielded active brigades', () => {
+        storeState = {
+            loadedGameState: endgame({
+                gameVerdict: undefined,
+                formations: [
+                    { id: 'fielded', faction: 'RBiH', kind: 'brigade', status: 'active', readiness: 'ready', personnel: 900 },
+                    { id: 'forming', faction: 'RBiH', kind: 'brigade', status: 'active', readiness: 'forming', personnel: 800 },
+                    { id: 'destroyed', faction: 'RBiH', kind: 'brigade', status: 'destroyed', readiness: 'destroyed', personnel: 300 },
+                    { id: 'enemy', faction: 'RS', kind: 'brigade', status: 'active', readiness: 'ready', personnel: 700 },
+                ] as any,
+            }),
+        };
+        const h = render();
+        expect(h).toContain('1 active brigade');
+        expect(h).not.toContain('2 active brigades');
+        expect(h).not.toContain('2000 personnel');
+    });
 });
 
 // ── §6 Srebrenica rupture-receipt un-hold (#78) ──────────────────────────────
