@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
+import { sortRecentEngagements } from '../utils/recentEngagements';
 import { FACTION_COLORS_SUBTLE } from '../utils/theme';
 import { useIPC } from '../desktop/useIPC';
 import { assignBrigadeToSectorOverrideAction } from '../desktop/orderActions';
@@ -807,8 +808,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <div className="pt-2">
                     <div className="text-xs text-text-secondary mb-1">{t('formationDetail.recentEngagements')}</div>
                     <div className="space-y-1">
-                      {[...formation.recent_engagements]
-                        .sort((a, b) => a.turn - b.turn)
+                      {sortRecentEngagements(formation.recent_engagements)
                         .map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
                           <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>

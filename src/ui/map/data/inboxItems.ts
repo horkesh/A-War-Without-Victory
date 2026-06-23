@@ -282,7 +282,8 @@ export function deriveInboxItems(
         });
     }
 
-    const convoyDecisions = state.pendingConvoyDecisions ?? [];
+    const convoyDecisions = (state.pendingConvoyDecisions ?? [])
+        .filter((convoy) => playerFactionMatch(convoy.route_faction, playerFaction));
     for (const convoy of convoyDecisions) {
         items.push({
             id: `convoy:${convoy.id}`,

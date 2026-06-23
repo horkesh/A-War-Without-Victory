@@ -4165,6 +4165,7 @@ export const enMessages = {
     'decisionRoom.card.chronicle.explanation': 'Review campaign memory and cost markers from the archive.',
     'decisionRoom.card.chronicle.sourceLabel': 'Campaign memory',
     'decisionRoom.card.chronicle.evidence.recordedTurns': '{count} recorded turns',
+    'decisionRoom.card.chronicle.evidence.records': '{count} filed records',
     'decisionRoom.summary.withUrgent': '{count} {noun} / {urgentCount} urgent',
     'decisionRoom.summary.countOnly': '{count} {noun}',
     'decisionRoom.duplicateHeadline': '{label}: {headline}',

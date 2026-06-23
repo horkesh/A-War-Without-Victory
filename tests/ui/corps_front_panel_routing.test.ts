@@ -287,6 +287,37 @@ describe('CorpsFrontPanel field routing', () => {
     expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('5');
   });
 
+  it('does not redact friendly force truth when hostile intel confidence is low', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      intel_confidence: 0.1,
+      combat_personnel: 1200,
+      combat_morale_avg: 64,
+      combat_cohesion_avg: 70,
+      combat_fatigue_avg: 5,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toContain('70');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('5');
+
+    fireEvent.click(screen.getByRole('tab', { name: /ORBAT/i }));
+    expect(screen.getByTestId('corps-front-brigade-row').textContent).toMatch(/1[,.]200/);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Total manpower\s*1[,.]200/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*0%/i);
+  });
+
   it('includes command-directed brigades in Corps Front logistics manpower', () => {
     const state = makeState();
     state.formations = [

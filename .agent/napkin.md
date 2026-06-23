@@ -1,5 +1,7 @@
 # Napkin
 
+> **Historical file:** Do not use this as the active Codex runbook. Current repo execution guidance lives in `.claude/napkin.md` plus `docs/plans/COMMAND_BOARD.md`; this file is retained only for old-agent provenance.
+
 ## Corrections
 | Date | Source | What Went Wrong | What To Do Instead |
 |------|--------|-----------------|-------------------|

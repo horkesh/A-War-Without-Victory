@@ -424,7 +424,7 @@ export function ArmyHQCorpsCard({
                 {/* Corps Situation Assessment — Commander Explanation Surfaces Wave 1 */}
                 <CorpsSituationSection assessment={corps.situationAssessment} />
                 <CommanderSection corps={corps} gameState={gameState} operations={operations} />
-                <OrbatSection corpsId={corps.id} brigades={brigades} />
+                <OrbatSection corpsId={corps.id} brigades={brigades} sectors={sectors} />
                 <CombatRecordSection corpsId={corps.id} corps={corps} />
             </div>
         </div>

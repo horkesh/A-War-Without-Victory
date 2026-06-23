@@ -1,6 +1,6 @@
 # Engine Health Action Plan — n1842 Audit Follow-Up
 
-> **Superseded note (2026-06-18):** The H1 Krivaja/Stupcanica fall-delivery framing in this dated plan is superseded. Srebrenica/Zepa fall receipts are event-owned through `srebrenica_falls_1995` / `zepa_falls_1995` `control_change` effects; Krivaja/Stupcanica are operation-health/AAR context only. Do not use this plan to justify operation-delivery calibration for the Srebrenica/Zepa falls.
+> **Superseded note (updated 2026-06-23):** The H1 Krivaja/Stupcanica fall-delivery framing in this dated plan is superseded. Srebrenica/Zepa fall receipts are event-owned through `srebrenica_falls_1995` / `zepa_falls_1995` `control_change` effects; Krivaja/Stupcanica are operation-health/AAR context only. Do not use this plan to justify operation-delivery calibration, DELIV uplift, defender-power retuning, or sensitive-history watched-operation outcome work for the Srebrenica/Zepa falls.
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement remaining runtime tracks. Use `superpowers:systematic-debugging` for Tracks H1 + H4 + H5 (runtime defects). H2/H3 are closed report-only as of 2026-05-16.
 
@@ -254,7 +254,7 @@ This plan is DONE when:
 1. ⏳ H0 closes with a verdict on n1842's baseline status (accept / revert / escalate).
 2. ✅ H1's NO_LAUNCH_READINESS axis count drops from 13 → ≤8 in a fresh 188w run: n1844 has 5.
 3. ❌ H1's DELIV axis count rises from 6 → ≥10: n1844 remains 6.
-4. ✅/GATED H1 diagnostic outcome: current `n1931` watched-operation trace rows prove Krivaja-95/Stupčanica-95/Cerska-Kamenica all fail with honest `build_defender_power_too_high` predicates. Any future change that makes one deliverable remains sensitive-history sign-off work under Q-H1-KRIVAJA-OUTCOME.
+4. ✅ H1 diagnostic outcome: current `n1931` watched-operation trace rows prove Krivaja-95/Stupcanica-95/Cerska-Kamenica all fail with honest `build_defender_power_too_high` predicates. This is operation-health/AAR evidence only. The former Q-H1-KRIVAJA-OUTCOME fall-delivery gate is superseded because Srebrenica/Zepa fall receipts are event-owned.
 5. ✅ H2: `brigade_front_assignment` adapter status confirmed as compatibility-only/by-design; report-only closure linked.
 6. ✅ H3: Teslic drifter suspicion classified; two are not drifters and one is same-corps redeployment; report-only closure linked.
 7. ✅ H4: parent run confirms `supply_condition` appears in reports and live condition is used where available.
@@ -266,7 +266,7 @@ This plan is DONE when:
 
 ## Open design questions (must resolve before relevant track starts)
 
-1. **Q-H1-KRIVAJA-OUTCOME** (Track H1): If defender-aware launch-feasibility makes Krivaja-95 / Stupčanica-95 deliverable, is it sensitive-history sign-off-ready to let the sim deliver the enclave capture? OR should the engine deliberately fail the operation with an honest predicate (no rupture, no flip)? **Owner: user + `/historian` + `/canon-compliance-reviewer`.**
+1. **Q-H1-KRIVAJA-OUTCOME** (Track H1): SUPERSEDED 2026-06-23 as a fall-delivery lane. Srebrenica/Zepa fall receipts are event-owned; Krivaja-95 / Stupcanica-95 work may continue only as operation-health/AAR diagnostics unless a new Section 6-reviewed design explicitly reopens outcome authority.
 2. **Q-H4-AGGREGATE-SEMANTICS** (Track H4): RESOLVED by implementation. `war_supply_pressure` is cumulative legacy pressure; `war_supply_condition` is the live current-condition KPI.
 3. **Q-H5-RESERVE-OWNER** (Track H5): RESOLVED by implementation. Idle army-HQ/main-staff elites are sector-exempt until loaned; loaned elites are movement-owned until they reach the receiving corps sector/op staging.
 
@@ -287,7 +287,7 @@ Per [`2026-05-01-autonomous-parallel-workstreams-operating-plan.md`](2026-05-01-
 - **Orchestrator (Claude):** dispatches H0 first (gate); dispatches remaining runtime tracks H1/H4/H5 in parallel after H0 closes.
 - **Per-track owners:** named above per track.
 - **User retains:**
-  - Q-H1-KRIVAJA-OUTCOME (sensitive-history sign-off on any enclave delivery change).
+  - Q-H1-KRIVAJA-OUTCOME is superseded for enclave delivery; any future sensitive-history outcome authority needs a fresh Section 6 design, not this plan.
   - Final acceptance of n1842 as the new baseline if H0 confirms drift cause.
 
 ---
@@ -299,4 +299,4 @@ This plan integrates into [`MASTER_ROADMAP.md`](MASTER_ROADMAP.md):
 - Referenced from the `Path to v1.0` section as the post-n1842 engine-health cleanup lane.
 - A 2026-05-16 hardening board note line appended.
 
-**Status: UPDATED 2026-05-16. H2/H3 CLOSED report-only. H4/H5 VERIFIED in n1844. H1 blocker-surface VERIFIED in n1844, but DELIV uplift and sensitive-history watched-operation outcomes remain open. H0 needs formal baseline verdict; n1843/n1844 are evidence, not final baseline audit.**
+**Status: UPDATED 2026-06-23. H2/H3 CLOSED report-only. H4/H5 VERIFIED in n1844. H1 blocker-surface VERIFIED in n1844; former DELIV uplift and sensitive-history watched-operation fall-delivery outcomes are superseded because Srebrenica/Zepa receipts are event-owned. H0 needs formal baseline verdict; n1843/n1844 are evidence, not final baseline audit.**

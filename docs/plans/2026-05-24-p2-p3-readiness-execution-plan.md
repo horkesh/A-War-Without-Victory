@@ -6,7 +6,7 @@
 **Related command-board rows:** P2 Intel surprise / ambush depth; P2 Supply/logistics comprehension outside GUI branch; P2 Officer/OOB/source attribution and essay rosters; P2 Soundscape and high-value assets; P2 Telemetry/playtest diagnostics; P3 Packaging/signing/clean VM/store/press/trailer; P3 FORAWWV/open design decisions
 **Collision rules:** Work one lane and phase at a time. Do not cross into GUI/calibration ownership, operator-only proof, or canon decisions.
 **Phase covered:** Remaining P2/P3 executable prep.
-**Current next action:** Pick the highest-value non-colliding phase: Intel, Supply, Officer/OOB, Soundscape, Telemetry, Packaging/operator, or Canon decision prep.
+**Current next action:** Pick the highest-value non-colliding phase: Intel, Supply, Officer/OOB, Soundscape, Telemetry, or Canon decision prep. Packaging/operator work is support-only and paused until owner satisfaction with the live first-hour/command-map experience.
 
 ## Purpose
 

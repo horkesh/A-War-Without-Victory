@@ -318,7 +318,7 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
                 {
                     id: 'convoy_1',
                     target_enclave: 'Gorazde',
-                    route_faction: 'RS',
+                    route_faction: 'RBiH',
                     supply_amount: 25,
                 },
             ],
@@ -336,6 +336,30 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
         expect(convoyItems[0].subtitle).toContain('allow, block, or divert');
     });
 
+    it('does not surface foreign-route convoy decisions to the player inbox', () => {
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingConvoyDecisions: [
+                {
+                    id: 'convoy_foreign',
+                    target_enclave: 'Gorazde',
+                    route_faction: 'RS',
+                    supply_amount: 25,
+                },
+                {
+                    id: 'convoy_player',
+                    target_enclave: 'Bihac',
+                    route_faction: 'RBiH',
+                    supply_amount: 15,
+                },
+            ],
+        });
+
+        const convoyItems = deriveInboxItems(state, null).filter(i => i.type === 'convoy_decision');
+
+        expect(convoyItems.map((item) => item.id)).toEqual(['convoy:convoy_player']);
+    });
+
     it('localizes generated decision and situation inbox items in BCS mode', () => {
         setLocale('bcs');
         const state = makeStub({
@@ -349,7 +373,7 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
                 {
                     id: 'convoy_1',
                     target_enclave: 'Gorazde',
-                    route_faction: 'RS',
+                    route_faction: 'RBiH',
                     supply_amount: 25,
                 },
             ],

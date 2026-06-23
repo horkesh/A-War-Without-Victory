@@ -437,35 +437,31 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.strength')}</span>
                       <div className="font-medium">
-                        {sector.intel_confidence < 0.3 ? (
-                          <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
-                        ) : (
-                          <StrengthBadge strengthClass={displayStrengthClass} />
-                        )}
+                        <StrengthBadge strengthClass={displayStrengthClass} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('armyReserve.personnel')}</span>
                       <div className="font-medium tabular-nums" data-testid="corps-front-combat-personnel">
-                        <FuzzyIntel value={displayCombatPersonnel} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayCombatPersonnel} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayOffensivePower ?? 0) / 1000).toFixed(1) })}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.offensivePower')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={displayOffensivePower} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayOffensivePower} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayDefensivePower ?? 0) / 1000).toFixed(1) })}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defensivePower')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={displayDefensivePower} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayDefensivePower} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defPerEdge')}</span>
                       <div className="font-medium tabular-nums">
-                        <FuzzyIntel value={displayDefensePerEdge} confidence={sector.intel_confidence} />
+                        <FuzzyIntel value={displayDefensePerEdge} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -493,7 +489,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         className={`font-medium tabular-nums ${(displayMoraleAvg ?? 50) < 25 ? 'text-red-600' : (displayMoraleAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-morale"
                       >
-                        <FuzzyIntel value={displayMoraleAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                        <FuzzyIntel value={displayMoraleAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -502,7 +498,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         className={`font-medium tabular-nums ${(displayCohesionAvg ?? 50) < 25 ? 'text-red-600' : (displayCohesionAvg ?? 50) < 50 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-cohesion"
                       >
-                        <FuzzyIntel value={displayCohesionAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                        <FuzzyIntel value={displayCohesionAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                     <div className="flex flex-col">
@@ -511,7 +507,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         className={`font-medium tabular-nums ${(displayFatigueAvg ?? 0) > 20 ? 'text-red-600' : (displayFatigueAvg ?? 0) > 10 ? 'text-amber-600' : ''}`}
                         data-testid="corps-front-combat-fatigue"
                       >
-                        <FuzzyIntel value={displayFatigueAvg} confidence={sector.intel_confidence} fuzzyThreshold={0.4} redactThreshold={0.4} />
+                        <FuzzyIntel value={displayFatigueAvg} confidence={1} fuzzyThreshold={0.4} redactThreshold={0.4} />
                       </div>
                     </div>
                   </div>
@@ -522,7 +518,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="flex flex-col">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.frontLength')}</span>
                     <span className="font-medium">
-                      {sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.frontSegmentsCount', { count: sector.length_edges })}
+                      {t('corpsFront.frontSegmentsCount', { count: sector.length_edges })}
                     </span>
                     <span className="text-[9px] text-neutral-500">[{sector.sub_segment_count === 1 ? t('corpsFront.contiguous') : t('corpsFront.segments', { count: sector.sub_segment_count })}]</span>
                   </div>
@@ -627,7 +623,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 font-medium">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
-                            {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
+                            {f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—'}
                           </span>
                         </button>
                       ))}
@@ -661,7 +657,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 text-neutral-600 italic leading-none">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
-                            {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none px-1">{t('corpsFront.redShort')}</span> : (f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—')}
+                            {f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—'}
                           </span>
                         </button>
                       ))}
@@ -741,13 +737,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.totalManpower')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : totalSectorPersonnel.toLocaleString()}
+                    {totalSectorPersonnel.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.reserveRatio')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.5 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : `${Math.round(reserveRatio * 100)}%`}
+                    {Math.round(reserveRatio * 100)}%
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">

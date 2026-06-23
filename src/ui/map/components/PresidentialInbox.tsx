@@ -17,7 +17,7 @@ import type { EventDefinition } from '../../../sim/events/event_types';
 import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import { t, type MessageKey } from '../i18n';
-import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
+import { hasFiledRecord } from '../data/filedRecordTruth';
 
 const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: MessageKey[] }> = {
     RBiH: {
@@ -200,19 +200,6 @@ function OpeningBrief({
             </div>
         </div>
     );
-}
-
-function hasFiledRecord(state: ReturnType<typeof useGameStore.getState>['loadedGameState']): boolean {
-    if (!state) return false;
-    if ((state.turnSummaries ?? []).some(shouldNarrateTerritorySummary)) return true;
-    if ((state.operationHistory ?? []).length > 0) return true;
-    if ((state.reserveRequestHistory ?? []).length > 0) return true;
-    if ((state.peacePlanHistory ?? []).length > 0) return true;
-    if ((state.convoyDecisionHistory ?? []).length > 0) return true;
-    if ((state.paramilitaryDecisionHistory ?? []).length > 0) return true;
-    if ((state.officerDecisionHistory ?? []).length > 0) return true;
-    if ((state.operationOpportunityRecords ?? []).length > 0) return true;
-    return false;
 }
 
 function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void; recordFiled: boolean }) {

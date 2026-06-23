@@ -251,10 +251,14 @@ function paramilitaryRequestInstances(state: GameStateLike, playerFaction: strin
         });
 }
 
-function convoyDecisionInstances(state: GameStateLike): PlayerDecisionInstance[] {
+function convoyDecisionInstances(state: GameStateLike, playerFaction: string | null): PlayerDecisionInstance[] {
     const family = requiredFamily('convoy_decision');
     return arrayFrom(getMilitary(state).pending_convoy_decisions)
         .filter((item) => item.decision === undefined)
+        .filter((item) => {
+            const routeFaction = stringFrom(item.route_faction);
+            return !playerFaction || !routeFaction || routeFaction === playerFaction;
+        })
         .map((item, index) => instance(family, stringFrom(item.id) ?? `convoy:${index}`, true));
 }
 
@@ -342,7 +346,7 @@ function collectInstances(state: GameStateLike, playerFaction: string | null): P
         singletonInstance(state, 'peace_plan', negotiation.pending_peace_plan),
         singletonInstance(state, 'dayton_negotiation', negotiation.pending_dayton),
         paramilitaryRequestInstances(state, playerFaction),
-        convoyDecisionInstances(state),
+        convoyDecisionInstances(state, playerFaction),
         reserveRequestInstances(state, playerFaction),
         officerEventInstances(state, playerFaction),
         proposalReviewInstances(state, playerFaction, 'autonomy_proposal'),

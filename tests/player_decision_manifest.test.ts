@@ -90,6 +90,12 @@ describe('player decision manifest', () => {
                 },
                 pending_convoy_decisions: [
                     {
+                        id: 'convoy_gorazde',
+                        target_enclave: 'gorazde',
+                        route_faction: 'RBiH',
+                        supply_amount: 20,
+                    },
+                    {
                         id: 'convoy_srebrenica',
                         target_enclave: 'srebrenica',
                         route_faction: 'RS',
@@ -154,6 +160,30 @@ describe('player decision manifest', () => {
             'convoy_decision',
         ]);
         expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(5);
+    });
+
+    it('ignores unresolved convoy decisions owned by another route faction', () => {
+        const state: any = {
+            military: {
+                pending_convoy_decisions: [
+                    {
+                        id: 'convoy_foreign',
+                        target_enclave: 'srebrenica',
+                        route_faction: 'RS',
+                        supply_amount: 20,
+                    },
+                ],
+            },
+        };
+
+        const summary = summarizePlayerDecisions(state, 'RBiH');
+
+        expect(summary.families.find((family) => family.id === 'convoy_decision')).toMatchObject({
+            count: 0,
+            blockingCount: 0,
+        });
+        expect(listBlockingPlayerDecisions(state, 'RBiH')).toEqual([]);
+        expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(0);
     });
 
     it('filters faction-owned instances and only blocks unresolved required/modal decisions', () => {

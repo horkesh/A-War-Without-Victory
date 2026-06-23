@@ -4,6 +4,8 @@
 
 **Goal:** Prepare and harden repo-owned platform/release packaging work while clearly separating operator-only proof.
 
+> **Paused 2026-06-23:** Owner direction keeps installer/package work out of the active engineering queue until the live first-hour/command-map experience is satisfactory. This bank is retained as a support-only checklist for future reactivation; do not execute packaging lanes or refresh installer artifacts from this plan during command-surface polish.
+
 **Architecture:** Claude owns scripts, manifests, docs, deterministic packaging smoke support, and tests. Claude does not own certificates, real clean-VM proof, store uploads, SmartScreen reputation, native macOS signing/notarization, or public release publication unless the user supplies the environment and explicitly asks.
 
 **Tech Stack:** Electron/Vite/electron-builder, Node packaging smoke scripts, Vitest, release docs/templates.

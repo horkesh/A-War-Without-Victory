@@ -218,6 +218,35 @@ describe('Presidential Inbox officer event dedupe', () => {
         expect(screen.queryByText('Latest turn record is filed below.')).toBeNull();
     });
 
+    it('treats filed decision receipts as quiet-inbox records', () => {
+        const onAction = vi.fn();
+        useGameStore.setState({
+            loadedGameState: makeLoadedState({
+                turn: 0,
+                turnSummaries: [],
+                firedEvents: [
+                    {
+                        id: 'rbih_state_identity',
+                        title: 'What Is Bosnia?',
+                        turn: 0,
+                        narrative: 'Filed in the campaign record.',
+                        category: 'political',
+                        effects: [{ kind: 'decision', description: 'Recorded choice: Civic multi-ethnic republic' }],
+                        isDecision: true,
+                    },
+                ],
+            }),
+            openingBriefDismissed: true,
+            osidDisplayNames: null,
+        });
+
+        render(createElement(PresidentialInbox, { onAction }));
+
+        expect(screen.getByTestId('presidential-inbox-quiet-capsule')).toBeTruthy();
+        expect(screen.getByText('Latest turn record is filed below.')).toBeTruthy();
+        expect(screen.queryByText('No record filed yet.')).toBeNull();
+    });
+
     it('renders intelligence notifications with an explicit dismiss command', () => {
         const onAction = vi.fn();
         useGameStore.setState({

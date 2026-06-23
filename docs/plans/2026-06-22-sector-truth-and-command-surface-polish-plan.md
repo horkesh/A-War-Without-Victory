@@ -317,3 +317,39 @@
 **Acceptance:** Army HQ rows do not mix current assignment counts with saved density, Formation Detail sector options are visibly current, and historical reports cannot send future agents back into Drina/Krivaja fall-delivery calibration.
 
 **Evidence:** Red proof failed on saved `density 0.42`/`Troop density: 0.42` leakage and visible `1 brigade` / `0 brigades` sector-picker copy. Green proof `node node_modules\vitest\vitest.mjs run tests\ui\army_hq_sector_truth.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 19/19; expanded focused proof with `tests\ui\gui_audit_label_discipline.test.ts` passed 40/40; `npm.cmd run typecheck`, `npm.cmd run qa:player-journeys` 278/278, `npm.cmd run qa:live-surface:browser`, targeted stale-language sweep, and `git diff --check` passed. Live browser evidence included `armyHqSectorAssignmentTruthLiveProof: { rows: 19, zeroCurrentRows: 6, badZeroRows: [] }` and server cleanup verified.
+
+### Task 14: Command Drilldown And Decision Ownership Polish
+
+**Status:** IMPLEMENTED 2026-06-23 in report `docs/40_reports/implemented/20260623_COMMAND_DRILLDOWN_DECISION_OWNERSHIP_POLISH.md`.
+
+**Files:**
+- Modified: `src/ui/map/data/inboxItems.ts`
+- Modified: `src/ui/map/data/GameStateAdapter.ts`
+- Modified: `src/state/player_decision_manifest.ts`
+- Added: `src/ui/map/data/filedRecordTruth.ts`
+- Modified: `src/ui/map/components/PresidentialInbox.tsx`
+- Modified: `src/ui/map/data/presidentialDecisionRoom.ts`
+- Modified: `src/ui/map/components/OperationsPanel.tsx`
+- Modified: `src/ui/map/components/army_hq/OrbatSection.tsx`
+- Modified: `src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx`
+- Modified: `src/ui/map/components/CorpsFrontPanel.tsx`
+- Modified: `src/ui/map/components/CorpsDetail.tsx`
+- Modified: `src/ui/map/components/OrbatPanel.tsx`
+- Modified: `src/ui/map/components/FormationDetail.tsx`
+- Modified: `src/ui/shared/playerFacingLabels.ts`
+- Added: `src/ui/map/utils/recentEngagements.ts`
+- Modified: ADR-0007, H1, packaging-pause, `.agent` napkin, board, roadmap, and runbook docs
+- Tests: `tests/ui/inbox_items.test.ts`, `tests/player_decision_manifest.test.ts`, `tests/ui/presidential_decision_room.test.ts`, `tests/ui/inbox_dedup.test.ts`, `tests/ui/corps_front_panel_routing.test.ts`, `tests/ui/formation_detail_parity.test.ts`
+
+**Steps:**
+1. Scope unresolved Pyrrhic scout findings to player-owned decision routing, filed-record truth, ORBAT drilldown context, Corps Front friendly-force truth, and stale active-doc routing.
+2. Filter pending convoy decisions by player route faction across Inbox, Decision Room manifest, and desktop startup projection.
+3. Share filed-record truth across President's Desk quiet capsule and Decision Room Chronicle memory.
+4. Preserve sector context for Operations and Army HQ ORBAT brigade inspect actions, and sort recent engagements newest-first.
+5. Keep friendly force facts visible in Corps Front regardless of enemy intel confidence; leave operation supply uncertainty separately redacted.
+6. Render missing stance and raw corps/sector labels through player-safe command copy.
+7. Clarify ADR-0007 Phase C deletion, Srebrenica/Zepa event-owned receipt policy, packaging pause, and `.agent/napkin.md` historical status in active process docs.
+
+**Acceptance:** Foreign convoy choices cannot block or surface for the wrong player faction; filed decision receipts count as records even without a narrated turn summary; command drilldowns preserve current sector context; Corps Front does not hide the player's own force truth behind enemy intel confidence; recent battle records are newest-first; and active docs no longer route future work into retired Phase C, fall-delivery tuning, or packaging execution.
+
+**Evidence:** Focused red proof failed before implementation on foreign convoy routing, decision-receipt filed-record memory, Corps Front friendly-force redaction, and engagement ordering. Focused green proof `node node_modules\vitest\vitest.mjs run tests\ui\inbox_items.test.ts tests\player_decision_manifest.test.ts tests\ui\presidential_decision_room.test.ts tests\ui\inbox_dedup.test.ts tests\ui\corps_front_panel_routing.test.ts tests\ui\formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 129/129. `npm.cmd run typecheck` passed. Targeted active-doc stale-language sweep passed for ADR-0007 Phase C active-gate wording, H1 DELIV active wording, and packaging-active wording. `npm.cmd run qa:player-journeys` passed 282/282. `npm.cmd run qa:live-surface:browser` passed with `ok: true`, `serverPortCleanupVerified: true`, war-start/foundational flow proof, RBiH/RS owner journey proof, map context-menu proof, battle-marker proof, and `armyHqSectorAssignmentTruthLiveProof: { rows: 19, zeroCurrentRows: 6, badZeroRows: [] }`; temp evidence was removed. `git diff --check` passed with the existing CRLF normalization warning for `src/ui/shared/playerFacingLabels.ts`.

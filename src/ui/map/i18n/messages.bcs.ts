@@ -3969,6 +3969,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'decisionRoom.card.chronicle.explanation': 'Pregledajte pamćenje kampanje i oznake cijene iz arhive.',
     'decisionRoom.card.chronicle.sourceLabel': 'Pamćenje kampanje',
     'decisionRoom.card.chronicle.evidence.recordedTurns': '{count} zapisana poteza',
+    'decisionRoom.card.chronicle.evidence.records': '{count} arhiviranih zapisa',
     'decisionRoom.summary.withUrgent': '{count} {noun} / {urgentCount} hitno',
     'decisionRoom.summary.countOnly': '{count} {noun}',
     'decisionRoom.duplicateHeadline': '{label}: {headline}',

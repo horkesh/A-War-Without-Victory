@@ -215,7 +215,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
               {' · '}
-              <span>{corpsFormation.corpsStance ? formatPosture(corpsFormation.corpsStance) : 'Unknown'}</span>
+              <span>{corpsFormation.corpsStance ? formatPosture(corpsFormation.corpsStance) : t('armyHqCorps.stance.unreported')}</span>
               {corpsFormation.corpsExhaustion != null && (
                 <span>
                   {' · Exhaustion: '}
@@ -415,12 +415,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="text-[10px] text-text-secondary tabular-nums">
                       {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}
                     </div>
-                    {s.sector_stance && (
-                      <div className="text-[9px] uppercase text-text-secondary opacity-70">
-                        {formatPosture(s.sector_stance)}
-                        {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
-                      </div>
-                    )}
+                    <div className="text-[9px] uppercase text-text-secondary opacity-70">
+                      {s.sector_stance ? formatPosture(s.sector_stance) : t('armyHqCorps.stance.unreported')}
+                      {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
+                    </div>
                   </div>
                 </button>
                 );

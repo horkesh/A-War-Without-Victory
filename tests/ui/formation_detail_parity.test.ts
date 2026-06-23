@@ -104,7 +104,7 @@ function makeFormationDetailState(): LoadedGameState {
         posture: 'defend',
         recent_engagements: [
           {
-            turn: 6,
+            turn: 7,
             osid: 'op:test_sector:known',
             role: 'attacker',
             outcome: 'decisive_victory',
@@ -113,12 +113,21 @@ function makeFormationDetailState(): LoadedGameState {
             territory_flipped: true,
           },
           {
-            turn: 7,
+            turn: 9,
             osid: 'op:test_sector:unknown',
             role: 'defender',
             outcome: 'probe_failed_badly',
             casualties_taken: 5,
             casualties_inflicted: 8,
+            territory_flipped: false,
+          },
+          {
+            turn: 8,
+            osid: 'op:test_sector:middle',
+            role: 'attacker',
+            outcome: 'victory',
+            casualties_taken: 7,
+            casualties_inflicted: 11,
             territory_flipped: false,
           },
         ],
@@ -226,6 +235,17 @@ describe('Formation Detail parity display', () => {
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Blooded in combat');
     expect(copy).not.toMatch(/\bBloodied\b/);
+  });
+
+  it('shows recent engagements newest first', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_record_brigade' });
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy.indexOf('8 Jun 1992')).toBeLessThan(copy.indexOf('1 Jun 1992'));
+    expect(copy.indexOf('1 Jun 1992')).toBeLessThan(copy.indexOf('25 May 1992'));
   });
 
   it('does not persist an override when clicking the automatic current sector row', () => {

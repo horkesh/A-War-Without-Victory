@@ -1170,6 +1170,55 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.advanceReadiness.items.map((item) => item.id)).toContain('manifest:peace_plan');
   });
 
+  it('does not block advance for unresolved convoy decisions owned by another route faction', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        playerDecisionSummary: {
+          totalCount: 0,
+          blockingCount: 0,
+          families: [],
+        },
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_foreign',
+            target_enclave: 'Srebrenica',
+            route_faction: 'RS',
+            supply_amount: 20,
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.cards.map((card) => card.id)).not.toContain('manifest:convoy_decision');
+    expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('manifest:convoy_decision');
+  });
+
+  it('offers Chronicle memory when a filed decision receipt exists without a narrated turn record', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+        firedEvents: [
+          {
+            id: 'rbih_state_identity',
+            title: 'What Is Bosnia?',
+            turn: 0,
+            narrative: 'Filed in the campaign record.',
+            category: 'political',
+            effects: [{ kind: 'decision', description: 'Recorded choice: Civic multi-ethnic republic' }],
+            isDecision: true,
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    const chronicleCard = view.cards.find((card) => card.id === 'chronicle:review-memory');
+    expect(chronicleCard).toMatchObject({
+      category: 'memory',
+      navigationTarget: { kind: 'chronicle' },
+    });
+  });
+
   it('builds a deterministic priority dossier for the top card by default', () => {
     const state = makeState({
       presidentialReviewQueue: {

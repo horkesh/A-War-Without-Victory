@@ -1471,6 +1471,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 };
             })
             .filter((value): value is NonNullable<typeof value> => value !== null)
+            .filter((convoy) => !playerFaction || convoy.route_faction === playerFaction)
             .sort((a, b) => a.id.localeCompare(b.id))
         : undefined;
 

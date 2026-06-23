@@ -3,7 +3,7 @@
  * Warroom dark palette.
  */
 import { useMemo, useState } from 'react';
-import type { FormationView } from '../../data/types';
+import type { CorpsFrontSectorView, FormationView } from '../../data/types';
 import { useGameStore } from '../../store/gameStore';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getCohesionColor, OUTCOME_COLORS } from '../../utils/theme';
@@ -11,6 +11,8 @@ import { formatPersonnel, turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeFormationNarrativeArcLabel, getPlayerSafeFormationPostureLabel } from '../../utils/playerSafeText';
 import { getDecorationName } from '../../utils/decorationUtils';
 import { inspectOnField } from '../../utils/shellNavigation';
+import { sortRecentEngagements } from '../../utils/recentEngagements';
+import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { t, useLocale, type MessageKey } from '../../i18n';
@@ -19,6 +21,7 @@ import { compareLocalizedFormationNames, getLocalizedFormationName } from '../..
 interface OrbatSectionProps {
     corpsId: string;
     brigades: FormationView[];
+    sectors?: CorpsFrontSectorView[];
 }
 
 const STATUS_COLOR: Record<string, string> = {
@@ -86,7 +89,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const officerQuality = b.officer_quality;
     const comp = b.composition;
     const hist = b.brigade_history;
-    const engagements = b.recent_engagements ?? [];
+    const engagements = sortRecentEngagements(b.recent_engagements);
     const narrative = b.warNarrative;
     const arc = b.narrativeArc;
     const decorations = b.decorations;
@@ -243,7 +246,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     );
 }
 
-export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
+export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) {
     const [locale] = useLocale();
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const sorted = useMemo(() => [...brigades].sort((a, b) => compareLocalizedFormationNames(a, b, locale)), [brigades, locale]);
@@ -330,11 +333,21 @@ export function OrbatSection({ corpsId, brigades }: OrbatSectionProps) {
                                     data-formation-id={b.id}
                                     data-corps-id={corpsId}
                                     aria-label={t('orbat.inspectOnField', { formation: formationName })}
-                                    onClick={() => inspectOnField(useGameStore.getState(), {
-                                        kind: 'field-formation-in-corps',
-                                        formationId: b.id,
-                                        corpsId,
-                                    })}
+                                    onClick={() => {
+                                        const sector = resolveCurrentSectorForFormation(b, sectors);
+                                        inspectOnField(useGameStore.getState(), sector
+                                            ? {
+                                                kind: 'field-formation-in-sector',
+                                                formationId: b.id,
+                                                corpsId,
+                                                sectorId: sector.sector_id,
+                                            }
+                                            : {
+                                                kind: 'field-formation-in-corps',
+                                                formationId: b.id,
+                                                corpsId,
+                                            });
+                                    }}
                                     className="mr-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                 >
                                     {t('orbat.inspect')}

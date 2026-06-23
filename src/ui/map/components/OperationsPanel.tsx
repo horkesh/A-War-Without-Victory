@@ -20,6 +20,7 @@ import {
   getPlayerSafeOperationPhaseLabel,
 } from '../utils/playerSafeText';
 import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
+import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { t } from '../i18n';
 
 function compareOperations(a: OperationView, b: OperationView): number {
@@ -497,18 +498,25 @@ export function OperationsPanel() {
                     <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.allocatedAssets')}</div>
                     <div className="flex flex-wrap gap-1">
                       {selectedOperation.participating_brigade_ids.map(bId => {
-                        const bName = getPlayerSafeBrigadeName(
-                          loadedGameState.formations.find(f => f.id === bId)?.name ?? null,
-                        );
+                        const formation = loadedGameState.formations.find(f => f.id === bId) ?? null;
+                        const sector = resolveCurrentSectorForFormation(formation, loadedGameState.corpsFrontSectors);
+                        const bName = getPlayerSafeBrigadeName(formation?.name ?? null);
                         return (
                           <button
                             key={bId}
                             onClick={() => {
-                              inspectOnField(useGameStore.getState(), {
-                                kind: 'field-formation-in-corps',
-                                corpsId: selectedOperation.corps_id,
-                                formationId: bId,
-                              });
+                              inspectOnField(useGameStore.getState(), sector
+                                ? {
+                                    kind: 'field-formation-in-sector',
+                                    corpsId: selectedOperation.corps_id,
+                                    sectorId: sector.sector_id,
+                                    formationId: bId,
+                                  }
+                                : {
+                                    kind: 'field-formation-in-corps',
+                                    corpsId: selectedOperation.corps_id,
+                                    formationId: bId,
+                                  });
                             }}
                             className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
                           >

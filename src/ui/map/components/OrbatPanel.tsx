@@ -13,6 +13,7 @@ import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 
 export function OrbatPanel() {
     const [locale] = useLocale();
@@ -88,6 +89,7 @@ export function OrbatPanel() {
 
     const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
     const factionClass = FACTION_COLORS[corps.faction] ?? 'text-text-primary';
+    const corpsDisplayName = getPlayerSafeCorpsName(corps.name, corps.id);
 
     return (
         <div
@@ -98,7 +100,7 @@ export function OrbatPanel() {
                 <div className="flex flex-col">
                     <span className="text-[10px] uppercase text-text-secondary tracking-widest font-bold">{t('orbat.orderOfBattle')}</span>
                     <h2 className={`text-lg font-bold uppercase tracking-tight leading-tight ${factionClass}`}>
-                        {corps.name}
+                        {corpsDisplayName}
                     </h2>
                 </div>
                 <button
@@ -191,7 +193,7 @@ export function OrbatPanel() {
             <div className="px-4 py-2 bg-black/40 border-t border-panel-border flex justify-between items-center shrink-0">
                 <span className="text-[9px] font-mono text-text-secondary uppercase">
                     {corpsSectors.length > 0
-                        ? t('orbat.sectorSummary', { count: corpsSectors.length, sectors: corpsSectors.map((s) => s.display_name).join(', ') })
+                        ? t('orbat.sectorSummary', { count: corpsSectors.length, sectors: corpsSectors.map((s) => getPlayerFacingSectorName(s.sector_id, corpsSectors)).join(', ') })
                         : t('orbat.noActiveSectors')
                     }
                 </span>

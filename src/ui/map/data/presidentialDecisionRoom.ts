@@ -27,6 +27,7 @@ import {
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { countFiledDecisionRecords } from './filedRecordTruth';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -1398,7 +1399,9 @@ function countFiledTurnRecords(state: LoadedGameState): number {
 
 function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const turnCount = countFiledTurnRecords(state);
-  if (turnCount <= 0) return;
+  const decisionRecordCount = countFiledDecisionRecords(state);
+  const recordCount = turnCount + decisionRecordCount;
+  if (recordCount <= 0) return;
 
   cards.push({
     id: 'chronicle:review-memory',
@@ -1409,7 +1412,9 @@ function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void 
     sourceOwner: t('decisionRoom.source.chronicle'),
     sourceLabel: t('decisionRoom.card.chronicle.sourceLabel'),
     actionLabel: t('decisionRoom.action.showChronicle'),
-    evidence: [t('decisionRoom.card.chronicle.evidence.recordedTurns', { count: turnCount })],
+    evidence: [turnCount > 0
+      ? t('decisionRoom.card.chronicle.evidence.recordedTurns', { count: turnCount })
+      : t('decisionRoom.card.chronicle.evidence.records', { count: recordCount })],
     navigationTarget: { kind: 'chronicle' },
     urgencySort: -((state.latestTurnSummary?.turn ?? state.turn) ?? 0),
     sourceSort: 'chronicle',
