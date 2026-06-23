@@ -563,7 +563,7 @@ describe('Army HQ timing copy', () => {
 
     const copy = document.body.textContent ?? '';
     expect(copy).toContain('2 predmeta');
-    expect(copy).toContain('2 predsjednicka odgovora');
+    expect(copy).toContain('2 opcije odgovora');
     expect(copy).not.toMatch(/matters|response|responses|predmets/i);
   });
 });

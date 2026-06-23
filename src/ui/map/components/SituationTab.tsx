@@ -237,7 +237,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   // per-turn strangle field (last_contained_osids_by_faction.RS ∩ Sarajevo core)
   // off the raw GameState. Null when the posture is off / the core isn't strangled
   // → no indicator. The core HOLDING is the §6-correct outcome; read-model only.
-  const sarajevoSiege = deriveSarajevoSiegeStateFromGameState(state.rawGameState);
+  const sarajevoSiege = deriveSarajevoSiegeStateFromGameState(state.rawGameState, state.runtimeFeatureFlags);
   const siegePlayerFaction: SiegeFaction | null =
     playerFaction === 'RBiH' || playerFaction === 'RS' || playerFaction === 'HRHB'
       ? playerFaction

@@ -6,6 +6,7 @@ import type {
   DesktopBridgeClient,
   DesktopOkError,
   RecruitmentCatalogResult,
+  RuntimeFeatureFlags,
   StartNewCampaignPayload,
   StartNewCampaignResult,
 } from './types';
@@ -62,6 +63,10 @@ export function createDesktopBridgeClient(bridge: AwwvBridge | null): DesktopBri
     getCurrentGameState() {
       if (!bridge?.getCurrentGameState) return Promise.resolve(null);
       return bridge.getCurrentGameState();
+    },
+    getRuntimeFeatureFlags(): Promise<RuntimeFeatureFlags | null> {
+      if (!bridge?.getRuntimeFeatureFlags) return Promise.resolve(null);
+      return bridge.getRuntimeFeatureFlags();
     },
     subscribeGameStateUpdated(callback: (stateJson: unknown) => void) {
       return bridge?.subscribeGameStateUpdated?.(callback) ?? (() => {});

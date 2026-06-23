@@ -62,7 +62,14 @@ function munFromOsid(osid: string): string | undefined {
   return osid.split(':')[1];
 }
 
-function isSrkStranglePostureDisplayEnabled(): boolean {
+export interface SarajevoSiegeRuntimeOptions {
+  srkStranglePostureActive?: boolean;
+}
+
+function isSrkStranglePostureDisplayEnabled(options?: SarajevoSiegeRuntimeOptions): boolean {
+  if (typeof options?.srkStranglePostureActive === 'boolean') {
+    return options.srkStranglePostureActive;
+  }
   const raw = (globalThis as { process?: { env?: Record<string, string | undefined> } })
     .process?.env?.AWWV_SRK_STRANGLE_POSTURE;
   return raw !== 'false' && raw !== '0';
@@ -144,8 +151,9 @@ export function deriveSarajevoSiegeState(
  */
 export function deriveSarajevoSiegeStateFromGameState(
   state: GameState | undefined | null,
+  options?: SarajevoSiegeRuntimeOptions,
 ): SarajevoSiegeState | null {
-  if (!state || !isSrkStranglePostureDisplayEnabled()) return null;
+  if (!state || !isSrkStranglePostureDisplayEnabled(options)) return null;
   const siege = deriveSarajevoSiegeState(
     state.political?.last_contained_osids_by_faction?.RS,
   );

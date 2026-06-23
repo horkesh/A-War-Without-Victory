@@ -290,6 +290,8 @@ export interface GameStore {
   setPendingReplaySaveSequence: (sequence: ReadonlyArray<unknown> | null) => void;
   pendingReplaySaveManifest: ReplaySaveManifest | null;
   setPendingReplaySaveManifest: (manifest: ReplaySaveManifest | null) => void;
+  runtimeFeatureFlags: LoadedGameState['runtimeFeatureFlags'] | null;
+  setRuntimeFeatureFlags: (flags: LoadedGameState['runtimeFeatureFlags'] | null) => void;
   /** Last turn report from desktop (after advance-turn). Used for succession notifications. */
   lastTurnReport: LastTurnReport | null;
   setLastTurnReport: (report: LastTurnReport | null) => void;
@@ -765,6 +767,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setPendingReplaySaveSequence: (sequence) => set({ pendingReplaySaveSequence: sequence }),
   pendingReplaySaveManifest: null,
   setPendingReplaySaveManifest: (manifest) => set({ pendingReplaySaveManifest: manifest }),
+  runtimeFeatureFlags: null,
+  setRuntimeFeatureFlags: (flags) => set({ runtimeFeatureFlags: flags }),
 
   lastTurnReport: null,
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
@@ -834,6 +838,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
           state = parseGameState(json, {
             ...(pendingSequence ? { replaySaveSequence: pendingSequence } : {}),
             ...(pendingManifest ? { replaySaveManifest: pendingManifest } : {}),
+            ...(get().runtimeFeatureFlags ? { runtimeFeatureFlags: get().runtimeFeatureFlags ?? undefined } : {}),
           });
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);

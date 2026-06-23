@@ -14,6 +14,7 @@ import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js
 import { canonicalizeStartupState, createStateFromScenario } from '../scenario/scenario_runner.js';
 import { loadStartupSnapshotState } from '../scenario/startup_snapshot.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
+import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.js';
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
@@ -107,6 +108,16 @@ const OPENING_FOUNDATIONAL_EVENT_BY_FACTION: Record<'RBiH' | 'RS' | 'HRHB', stri
 /** April 1992 game start: initial recruitment capital and equipment for desktop recruitment UI (from apr1992_definitive_52w). */
 const NEW_GAME_RECRUITMENT_CAPITAL: Record<string, number> = { HRHB: 300, RBiH: 400, RS: 600 };
 const NEW_GAME_EQUIPMENT_POINTS: Record<string, number> = { HRHB: 350, RBiH: 100, RS: 800 };
+
+export interface DesktopRuntimeFeatureFlags {
+    srkStranglePostureActive: boolean;
+}
+
+export function getRuntimeFeatureFlags(): DesktopRuntimeFeatureFlags {
+    return {
+        srkStranglePostureActive: isSrkStranglePostureEnabled(),
+    };
+}
 
 function collectEventDefinitionEffects(def: EventDefinition): EventEffect[] {
     return [def.effect, ...(def.effects ?? [])];

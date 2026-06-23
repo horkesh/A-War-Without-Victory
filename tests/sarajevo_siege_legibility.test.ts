@@ -104,6 +104,22 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
     });
   });
 
+  it('returns null in the renderer when explicit runtime flags disable the SRK posture', () => {
+    const previousProcess = (globalThis as { process?: unknown }).process;
+    try {
+      // Electron tactical-map renderer runs with nodeIntegration=false, so
+      // `globalThis.process` is absent. The UI must honor the explicit runtime
+      // flag attached by the desktop bridge instead of defaulting the display ON.
+      delete (globalThis as { process?: unknown }).process;
+      expect(deriveSarajevoSiegeStateFromGameState(
+        rawStateWithStrangle(CORE_OSIDS),
+        { srkStranglePostureActive: false },
+      )).toBeNull();
+    } finally {
+      (globalThis as { process?: unknown }).process = previousProcess;
+    }
+  });
+
   it('returns null when serialized core containment no longer matches current RBiH-held core truth', () => {
     const controllers = Object.fromEntries(CORE_OSIDS.map((osid) => [osid, 'RS']));
     expect(deriveSarajevoSiegeStateFromGameState(rawStateWithStrangle(CORE_OSIDS, controllers))).toBeNull();
@@ -175,6 +191,21 @@ describe('Sarajevo-siege legibility (SRK strangle-not-capture, D2 task #41)', ()
     withSrkDisplayGate('0', () => {
       expect(buildSarajevoSiegeChronicleEntries(rawStateWithStrangle(CORE_OSIDS), 188, 'RBiH')).toEqual([]);
     });
+  });
+
+  it('chronicle: honors explicit runtime flags when renderer process env is unavailable', () => {
+    const previousProcess = (globalThis as { process?: unknown }).process;
+    try {
+      delete (globalThis as { process?: unknown }).process;
+      expect(buildSarajevoSiegeChronicleEntries(
+        rawStateWithStrangle(CORE_OSIDS),
+        188,
+        'RBiH',
+        { srkStranglePostureActive: false },
+      )).toEqual([]);
+    } finally {
+      (globalThis as { process?: unknown }).process = previousProcess;
+    }
   });
 
   it('is deterministic — identical state yields identical entries', () => {

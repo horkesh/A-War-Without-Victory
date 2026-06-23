@@ -590,6 +590,8 @@ export interface ParseGameStateOptions {
     replaySaveSequence?: ReadonlyArray<unknown>;
     /** Small per-frame replay summary manifest. Optional and additive. */
     replaySaveManifest?: import('../../../sim/replay/replay_manifest.js').ReplaySaveManifest;
+    /** Non-persisted runtime flags supplied by the desktop bridge. */
+    runtimeFeatureFlags?: LoadedGameState['runtimeFeatureFlags'];
 }
 
 /**
@@ -2349,6 +2351,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         formations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
+        runtimeFeatureFlags: options?.runtimeFeatureFlags,
         armyStance, casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,

@@ -70,4 +70,30 @@ describe('desktop persistence contract', () => {
     expect(handler).toContain("error: 'pending_required_decisions'");
     expect(handler).not.toContain('state.military.pending_event_decisions ?? []');
   });
+
+  it('runtime feature flags are bridged to the renderer without exposing process.env', () => {
+    const desktopSim = readFileSync(
+      resolve(process.cwd(), 'src/desktop/desktop_sim.ts'),
+      'utf8',
+    );
+    const electronMain = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+    const preload = readFileSync(
+      resolve(process.cwd(), 'src/desktop/preload.cjs'),
+      'utf8',
+    );
+    const useIpc = readFileSync(
+      resolve(process.cwd(), 'src/ui/map/desktop/useIPC.ts'),
+      'utf8',
+    );
+
+    expect(desktopSim).toContain('function getRuntimeFeatureFlags()');
+    expect(desktopSim).toContain('isSrkStranglePostureEnabled()');
+    expect(electronMain).toContain("registerIpcHandler('get-runtime-feature-flags'");
+    expect(electronMain).toContain('sim.getRuntimeFeatureFlags()');
+    expect(preload).toContain("getRuntimeFeatureFlags: () => ipcRenderer.invoke('get-runtime-feature-flags')");
+    expect(useIpc).toContain('getRuntimeFeatureFlags');
+  });
 });

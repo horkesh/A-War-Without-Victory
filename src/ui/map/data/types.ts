@@ -1050,6 +1050,10 @@ export interface LoadedGameState {
     recentControlEvents: RecentControlEventView[];
     /** Full control event history (all turns, all OSIDs) for timeline. */
     allControlEvents: Array<{ turn: number; settlementId: string; from: string | null; to: string | null; mechanism: string }>;
+    /** Non-persisted renderer/runtime feature flags supplied by desktop bridge. */
+    runtimeFeatureFlags?: {
+        srkStranglePostureActive?: boolean;
+    };
     /** Raw displacement event log for settlement timeline. */
     displacementEventLog: Array<{ turn: number; origin_osid?: string; dest_osid?: string; origin_mun?: string; ethnicity?: string; displaced: number; killed: number; fled_abroad: number; settled: number; caused_by?: string }>;
     /** Per-OSID battle records from all turn summaries, for settlement timeline. */

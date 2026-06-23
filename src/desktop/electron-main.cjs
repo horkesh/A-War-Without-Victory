@@ -1330,6 +1330,12 @@ async function resolveMapServerBaseUrl() {
 function registerProbeSafeIpcHandlers() {
   registerIpcHandler('get-current-game-state', async () => currentGameStateJson);
   registerIpcHandler('get-map-server-url', async () => resolveMapServerBaseUrl());
+  registerIpcHandler('get-runtime-feature-flags', async () => {
+    const sim = getDesktopSim();
+    return typeof sim.getRuntimeFeatureFlags === 'function'
+      ? sim.getRuntimeFeatureFlags()
+      : { srkStranglePostureActive: true };
+  });
 }
 
 function showScenarioDialog(win) {

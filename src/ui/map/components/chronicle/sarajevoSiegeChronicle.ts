@@ -38,6 +38,7 @@ import {
   deriveSarajevoSiegeStateFromGameState,
   sarajevoSiegeGloss,
   sarajevoSiegeTitle,
+  type SarajevoSiegeRuntimeOptions,
   type SiegeFaction,
 } from '../../data/sarajevoSiege.js';
 import type { ChronicleEntry } from './generateChronicleEntries.js';
@@ -61,8 +62,9 @@ export function buildSarajevoSiegeChronicleEntries(
   rawState: GameState | undefined,
   latestTurn: number,
   playerFaction: FactionId | string | null | undefined,
+  runtimeOptions?: SarajevoSiegeRuntimeOptions,
 ): ChronicleEntry[] {
-  const siege = deriveSarajevoSiegeStateFromGameState(rawState);
+  const siege = deriveSarajevoSiegeStateFromGameState(rawState, runtimeOptions);
   if (!siege) return [];
 
   const turn = Number.isFinite(latestTurn) ? latestTurn : 0;

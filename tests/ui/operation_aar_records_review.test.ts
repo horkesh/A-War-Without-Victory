@@ -496,7 +496,8 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(screen.getByRole('button', { name: /Turn Aftermath 0/i })).toBeTruthy();
         expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
-        expect(document.body.textContent ?? '').toContain('Quiet turn');
+        expect(document.body.textContent ?? '').toContain('No report yet');
+        expect(document.body.textContent ?? '').not.toContain('Quiet turn');
     });
 
     it('localizes the Records archive summary chrome', () => {

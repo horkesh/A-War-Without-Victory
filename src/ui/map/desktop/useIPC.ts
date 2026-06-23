@@ -192,6 +192,7 @@ interface WindowAwwv {
     startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
     advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
+    getRuntimeFeatureFlags: () => Promise<{ srkStranglePostureActive: boolean } | null>;
     subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
     subscribeTurnReportUpdated: (cb: (report: unknown) => void) => () => void;
     /**
@@ -433,6 +434,10 @@ export function useIPC() {
             getCurrentGameState: awwv
                 ? () => awwv.getCurrentGameState()
                 : (): Promise<string | null> => Promise.resolve(null),
+
+            getRuntimeFeatureFlags: awwv
+                ? () => awwv.getRuntimeFeatureFlags()
+                : (): Promise<{ srkStranglePostureActive: boolean } | null> => Promise.resolve(null),
 
             subscribeGameStateUpdated: awwv
                 ? (cb: (stateJson: string) => void) => awwv.subscribeGameStateUpdated(cb)

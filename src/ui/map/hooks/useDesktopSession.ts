@@ -39,6 +39,7 @@ export function useDesktopSession(): void {
     // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: stage sidecar before next loadSave().
     const setPendingReplaySaveSequence = useGameStore((s) => s.setPendingReplaySaveSequence);
     const setPendingReplaySaveManifest = useGameStore((s) => s.setPendingReplaySaveManifest);
+    const setRuntimeFeatureFlags = useGameStore((s) => s.setRuntimeFeatureFlags);
 
     useEffect(() => {
         if (typeof document !== 'undefined') {
@@ -48,9 +49,19 @@ export function useDesktopSession(): void {
 
         let active = true;
 
+        const refreshRuntimeFeatureFlags = async () => {
+            try {
+                const flags = await ipc.getRuntimeFeatureFlags();
+                if (active) setRuntimeFeatureFlags(flags ?? null);
+            } catch (_err) {
+                if (active) setRuntimeFeatureFlags(null);
+            }
+        };
+
         const applyStateJson = async (stateJson: string | null) => {
             if (!active || !stateJson) return;
             try {
+                await refreshRuntimeFeatureFlags();
                 await loadSave(stateJson);
                 const storeState = useGameStore.getState();
                 const nextState = storeState.loadedGameState;

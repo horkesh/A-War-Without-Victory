@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld('awwv', {
   subscribeReplaySequenceUpdated: (cb) => subscribe(replaySequenceUpdatedListeners, cb),
   subscribeReplayManifestUpdated: (cb) => subscribe(replayManifestUpdatedListeners, cb),
   getCurrentGameState: () => ipcRenderer.invoke('get-current-game-state'),
+  getRuntimeFeatureFlags: () => ipcRenderer.invoke('get-runtime-feature-flags'),
   openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),
   applyRecruitment: (brigadeId, equipmentClass) => ipcRenderer.invoke('apply-recruitment', { brigadeId, equipmentClass }),

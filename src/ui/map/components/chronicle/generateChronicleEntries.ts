@@ -693,6 +693,7 @@ export function generateChronicleEntries(
         state.rawGameState as GameState | undefined,
         latestTurn,
         playerFaction,
+        state.runtimeFeatureFlags,
     ));
 
     // Generals' digest surface (D2 task #42) — "what your generals did this week". A

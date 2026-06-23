@@ -42,10 +42,15 @@ export interface StartNewCampaignResult extends DesktopOkError {
     state?: unknown;
 }
 
+export interface RuntimeFeatureFlags {
+    srkStranglePostureActive: boolean;
+}
+
 export interface AwwvBridge {
     stageAttackOrder?(brigadeId: string, targetSettlementId: string): Promise<DesktopOkError>;
     queryCombatEstimate?(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState?(): Promise<unknown | null>;
+    getRuntimeFeatureFlags?(): Promise<RuntimeFeatureFlags | null>;
     subscribeGameStateUpdated?(callback: (stateJson: unknown) => void): () => void;
     subscribeTurnReportUpdated?(callback: (report: unknown) => void): () => void;
     advanceTurn?(payload?: unknown): Promise<AdvanceTurnResult>;
@@ -61,6 +66,7 @@ export interface DesktopBridgeClient {
     stageAttackOrder(brigadeId: string, targetSettlementId: string): Promise<DesktopOkError>;
     queryCombatEstimate(brigadeId: string, targetSettlementId: string): Promise<CombatEstimateResult>;
     getCurrentGameState(): Promise<unknown | null>;
+    getRuntimeFeatureFlags(): Promise<RuntimeFeatureFlags | null>;
     subscribeGameStateUpdated(callback: (stateJson: unknown) => void): () => void;
     subscribeTurnReportUpdated(callback: (report: unknown) => void): () => void;
     advanceTurn(payload?: unknown): Promise<AdvanceTurnResult>;

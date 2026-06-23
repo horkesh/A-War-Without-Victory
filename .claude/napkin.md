@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**ELECTRON RENDERER FLAGS NEED IPC, NOT `process.env` (2026-06-23).** Packaged renderer windows run with context isolation and no Node integration, so display code can miss runtime flags that the sim process honors. Do instead: expose renderer-visible runtime flags through desktop sim -> Electron main -> preload/bridge -> UI store and pass them explicitly into read-model helpers.
+
 **RESERVE MEMBERSHIP IS NOT FRIENDLY-LINE TRUTH (2026-06-23).** Sector assignments can include reserve/member brigades for navigation and command context. Do instead: use `lineHoldingIds` for Corps Front line presence, displayed combat strength, threat, force balance, defense previews, own-front tooltip truth, and coverage tier; use `allCurrentIds` only when reserve membership is intentionally part of the surface.
 
 **RAW SECTOR IDS MUST FALL BACK, NOT BECOME LABELS (2026-06-23).** Values like `sector:arbih_1st_corps:0` and underscore-heavy generated names are routing/debug truth. Do instead: route sector labels through `getPlayerFacingSectorName(...)`; if a display name still looks internal, render neutral fallback copy rather than humanizing the id.
