@@ -27,15 +27,19 @@ function fixtureInput(
         decision_source?: 'bot_political' | 'bot_v1' | 'bot_ai_default' | 'player';
         faction?: string | null;
     }>,
+    playerFaction = 'RBiH',
 ): DistanceFromHistoryInput {
     return {
         rawGameState: {
+            meta: {
+                player_faction: playerFaction,
+            },
             military: {
                 event_decision_log: decisions.map((d) => ({
                     event_id: d.event_id,
                     response_id: d.response_id,
-                    decision_source: d.decision_source ?? 'bot_ai_default',
-                    faction: d.faction ?? null,
+                    decision_source: d.decision_source ?? 'player',
+                    faction: d.faction ?? playerFaction,
                     turn: d.turn,
                 })),
             },
@@ -56,13 +60,13 @@ describe('buildDistanceFromHistory', () => {
         }
     });
 
-    test('counts matched + diverged + player-diverged; skips events with no historical default', () => {
+    test('counts loaded-player matched + diverged decisions; skips bot, foreign, and no-default events', () => {
         const view = buildDistanceFromHistory(
             fixtureInput([
-                // MATCHED — chose the historical default ('accept').
+                // SKIPPED (bot) — bot choices are not "Your War vs History".
                 { event_id: 'vance_owen_plan_1993', response_id: 'accept', turn: 39, decision_source: 'bot_political' },
-                // DIVERGED (bot) — chose other than the historical default ('back_down').
-                { event_id: 'karadzic_mladic_split_1995', response_id: 'purge', turn: 180, decision_source: 'bot_political' },
+                // SKIPPED (foreign player) — another faction's row is not this player's history.
+                { event_id: 'karadzic_mladic_split_1995', response_id: 'purge', turn: 180, decision_source: 'player', faction: 'RS' },
                 // DIVERGED + PLAYER-AUTHORED (default 'accept', chose 'reject').
                 {
                     event_id: 'contact_group_plan_1994',
@@ -71,31 +75,28 @@ describe('buildDistanceFromHistory', () => {
                     decision_source: 'player',
                     faction: 'RBiH',
                 },
+                // MATCHED — chose the historical default ('accept').
+                { event_id: 'vance_owen_plan_1993', response_id: 'accept', turn: 39, decision_source: 'player', faction: 'RBiH' },
                 // SKIPPED — arms_embargo_impact_1992 has no historical_default_response_id.
-                { event_id: 'arms_embargo_impact_1992', response_id: 'whatever', turn: 5, decision_source: 'player' },
+                { event_id: 'arms_embargo_impact_1992', response_id: 'whatever', turn: 5, decision_source: 'player', faction: 'RBiH' },
             ]),
         );
 
-        // arms_embargo_impact_1992 is skipped → 3 decided, not 4.
-        assert.strictEqual(view.totalDecided, 3);
+        // Bot, foreign, and no-default rows are skipped → 2 decided.
+        assert.strictEqual(view.totalDecided, 2);
         assert.strictEqual(view.matchedHistory, 1);
-        assert.strictEqual(view.diverged, 2);
-        // 2 / 3 → 67%.
-        assert.strictEqual(view.divergencePct, 67);
-        // Only the player-sourced divergence counts toward playerDiverged.
+        assert.strictEqual(view.diverged, 1);
+        assert.strictEqual(view.divergencePct, 50);
         assert.strictEqual(view.playerDiverged, 1);
 
-        // Divergences sorted by turn asc: contact_group (60) before karadzic (180).
-        assert.strictEqual(view.divergences.length, 2);
+        assert.strictEqual(view.divergences.length, 1);
         assert.strictEqual(view.divergences[0].eventId, 'contact_group_plan_1994');
         assert.strictEqual(view.divergences[0].source, 'player');
         assert.strictEqual(view.divergences[0].faction, 'RBiH');
-        assert.strictEqual(view.divergences[1].eventId, 'karadzic_mladic_split_1995');
-        assert.strictEqual(view.divergences[1].chosenResponseId, 'purge');
-        assert.strictEqual(view.divergences[1].historicalResponseId, 'back_down');
 
         // No divergent row is for the skipped no-default event.
         assert.ok(!view.divergences.some((d) => d.eventId === 'arms_embargo_impact_1992'));
+        assert.ok(!view.divergences.some((d) => d.eventId === 'karadzic_mladic_split_1995'));
     });
 
     test('resolves a readable title from the event catalog', () => {

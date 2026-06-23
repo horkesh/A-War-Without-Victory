@@ -34,6 +34,19 @@ import {
     getIntlStandingOpsHesitationMultiplier,
 } from '../combat/sector_offensive.js';
 
+function playerFactionFromState(state: GameState): FactionId | null {
+    const faction = state.meta?.player_faction;
+    return faction === 'RBiH' || faction === 'RS' || faction === 'HRHB' ? faction : null;
+}
+
+function isPlayerFiledDecisionForFaction(
+    entry: { decision_source?: string; faction?: FactionId | null },
+    playerFaction: FactionId | null,
+): boolean {
+    if (entry.decision_source !== 'player') return false;
+    return playerFaction === null || entry.faction === playerFaction;
+}
+
 // ---------------------------------------------------------------------------
 // Local type alias for decision-log entries.
 //
@@ -162,18 +175,20 @@ export function getCausalAncestors(
 // 3. getPlayerDecisionHistory
 // ===========================================================================
 
-/** Returns the player-sourced subset of `event_decision_log`, sorted by
+/** Returns the loaded player's subset of `event_decision_log`, sorted by
  *  turn ascending (tiebroken by event_id, then response_id, via
  *  `strictCompare` — deterministic). Empty array when the log is missing
- *  or empty. */
+ *  or empty. When older saves lack `meta.player_faction`, this preserves the
+ *  previous player-source-only behavior. */
 export function getPlayerDecisionHistory(
     state: GameState,
 ): readonly EventDecision[] {
     const log = state.military?.event_decision_log ?? [];
     if (log.length === 0) return [];
+    const playerFaction = playerFactionFromState(state);
     const filtered: EventDecision[] = [];
     for (const entry of log) {
-        if (entry.decision_source !== 'player') continue;
+        if (!isPlayerFiledDecisionForFaction(entry, playerFaction)) continue;
         filtered.push({
             event_id: entry.event_id,
             response_id: entry.response_id,
@@ -261,10 +276,11 @@ export function getBranchTagsActive(
     const firedIds = state.military?.fired_event_ids ?? [];
     if (firedIds.length === 0) return [];
     const decisionLog = state.military?.event_decision_log ?? [];
-    // Index decisions by event_id for chosen-option lookup. Last-wins for
+    // Index player-filed decisions for this faction by event_id for chosen-option lookup. Last-wins for
     // recurring events (matches F1 `decisionByEvent` semantics).
     const decisionByEvent = new Map<string, string>();
     for (const dec of decisionLog) {
+        if (!isPlayerFiledDecisionForFaction(dec, faction)) continue;
         decisionByEvent.set(dec.event_id, dec.response_id);
     }
     const prefix = faction.toLowerCase() + '_';

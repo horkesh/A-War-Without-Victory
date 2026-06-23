@@ -27,6 +27,7 @@
 
 import type { LoadedGameState } from './types.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { playerFactionMatch } from './playerFactionMatch.js';
 
 // Static, build-time-bundled keystone event definitions — used ONLY to resolve
 // human-readable branch labels (response-option `label`) for the spine. Mirrors
@@ -236,9 +237,9 @@ function resolveDecisionForEvent(
  * Project the keystone-dilemma spine against a loaded UI game state.
  *
  * `faced` is true when ANY keystone event id for the dilemma appears in the
- * fired-event set OR the player/bot recorded a response for it
+ * player-scoped fired-event set OR the player recorded a response for it
  * (`decisionResponses` carries `${event_id}:${response_id}`). `chosenResponseId`
- * + `decisionTurn` come from the raw event_decision_log entry for the dilemma's
+ * + `decisionTurn` come from the player-scoped event_decision_log entry for the dilemma's
  * decision event (last-wins). `chosenBranchLabel` resolves the canon
  * response-option label, falling back to neutral player-safe copy.
  *
@@ -254,23 +255,46 @@ export function buildDilemmaSpine(
     // so a dilemma that fired >20 events ago would wrongly read "Not yet faced"
     // on older/long-running saves (Codex P2, PR #82). Union both: the raw set is
     // authoritative; the view is a robustness fallback if rawGameState is absent.
-    const firedIds = new Set<string>(
-        (loaded?.rawGameState?.military?.fired_event_ids ?? []) as ReadonlyArray<string>,
-    );
-    for (const entry of loaded?.firedEvents ?? []) {
-        if (entry?.id) firedIds.add(entry.id);
-    }
-    const pendingDecisionIds = new Set<string>(
-        ((loaded?.rawGameState?.military?.pending_event_decisions ?? []) as ReadonlyArray<{ event_id?: unknown }>)
-            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
-            .filter(Boolean),
-    );
+    const playerFaction = typeof loaded?.rawGameState?.meta?.player_faction === 'string'
+        ? loaded.rawGameState.meta.player_faction
+        : null;
     const decisionResponses = loaded?.decisionResponses ?? null;
     const decisionLog = (loaded?.rawGameState?.military?.event_decision_log ?? []) as ReadonlyArray<{
         event_id: string;
         response_id: string;
         turn: number;
+        decision_source?: string;
+        faction?: string | null;
     }>;
+    const playerDecisionLog = decisionLog.filter((decision) => (
+        decision.decision_source === 'player' && playerFactionMatch(decision.faction, playerFaction)
+    ));
+    const loggedDecisionIds = new Set<string>(
+        decisionLog
+            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
+    const playerDecisionIds = new Set<string>(
+        playerDecisionLog
+            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
+    const pendingDecisionIds = new Set<string>(
+        ((loaded?.rawGameState?.military?.pending_event_decisions ?? []) as ReadonlyArray<{ event_id?: unknown; faction?: string | null }>)
+            .filter((decision) => playerFactionMatch(decision.faction, playerFaction))
+            .map((decision) => typeof decision?.event_id === 'string' ? decision.event_id : '')
+            .filter(Boolean),
+    );
+    const firedIds = new Set<string>();
+    for (const id of (loaded?.rawGameState?.military?.fired_event_ids ?? []) as ReadonlyArray<string>) {
+        if (typeof id !== 'string' || !id.trim()) continue;
+        if (pendingDecisionIds.has(id) && !playerDecisionIds.has(id)) continue;
+        if (loggedDecisionIds.has(id) && !playerDecisionIds.has(id)) continue;
+        firedIds.add(id);
+    }
+    for (const entry of loaded?.firedEvents ?? []) {
+        if (entry?.id) firedIds.add(entry.id);
+    }
 
     const views: DilemmaSpineView[] = DILEMMA_SPINE.map((def) => {
         // faced: any keystone event fired, OR any keystone event has a recorded
@@ -278,6 +302,7 @@ export function buildDilemmaSpine(
         const facedByFire = def.keystoneEventIds.some((id) => firedIds.has(id) && !pendingDecisionIds.has(id));
         const facedByResponse = decisionResponses
             ? def.keystoneEventIds.some((id) => {
+                if (loggedDecisionIds.has(id) && !playerDecisionIds.has(id)) return false;
                 for (const key of decisionResponses) {
                     const sep = key.indexOf(':');
                     if (sep > 0 && key.slice(0, sep) === id) return true;
@@ -287,7 +312,7 @@ export function buildDilemmaSpine(
             : false;
         const faced = facedByFire || facedByResponse;
 
-        const decision = resolveDecisionForEvent(decisionLog, def.decisionEventId);
+        const decision = resolveDecisionForEvent(playerDecisionLog, def.decisionEventId);
         const chosenResponseId = decision?.responseId ?? null;
         const decisionTurn = decision?.turn ?? null;
         let chosenBranchLabel: string | null = null;

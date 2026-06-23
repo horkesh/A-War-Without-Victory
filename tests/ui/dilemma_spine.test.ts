@@ -16,11 +16,13 @@ import war1995 from '../../data/scenarios/events/war_1995.json';
 /** Build a minimal LoadedGameState carrying only the fields buildDilemmaSpine
  *  reads (firedEvents, decisionResponses, rawGameState.military.event_decision_log). */
 function fixtureLoaded(opts: {
+    playerFaction?: string;
     firedIds?: string[];
     rawFiredIds?: string[];
     pendingIds?: string[];
-    decisions?: Array<{ event_id: string; response_id: string; turn: number }>;
+    decisions?: Array<{ event_id: string; response_id: string; turn: number; decision_source?: string; faction?: string | null }>;
 }): LoadedGameState {
+    const playerFaction = opts.playerFaction ?? 'RBiH';
     const firedEvents = (opts.firedIds ?? []).map((id) => ({
         id,
         turn: 0,
@@ -37,6 +39,9 @@ function fixtureLoaded(opts: {
         firedEvents,
         decisionResponses,
         rawGameState: {
+            meta: {
+                player_faction: playerFaction,
+            },
             military: {
                 // Authoritative uncapped fired set. Defaults to the view ids so existing
                 // cases stay realistic (the capped view is always a subset of this).
@@ -45,15 +50,15 @@ function fixtureLoaded(opts: {
                     event_id: id,
                     event_title: id,
                     turn_fired: 0,
-                    faction: 'RBiH',
+                    faction: playerFaction,
                     requires_player_response: true,
                     response_options: [{ id: 'historical', label: 'Historical', effects: [] }],
                 })),
                 event_decision_log: (opts.decisions ?? []).map((d) => ({
                     event_id: d.event_id,
                     response_id: d.response_id,
-                    decision_source: 'player',
-                    faction: null,
+                    decision_source: d.decision_source ?? 'player',
+                    faction: d.faction ?? playerFaction,
                     turn: d.turn,
                 })),
             },
@@ -170,6 +175,27 @@ describe('buildDilemmaSpine', () => {
         assert.strictEqual(rs.chosenResponseId, 'all_six');
         assert.strictEqual(rs.decisionTurn, 0);
         assert.strictEqual(rs.chosenBranchLabel, 'Adopt all six goals');
+    });
+
+    test('foreign or bot keystone decisions do not mark the loaded player dilemma as faced', () => {
+        const views = buildDilemmaSpine(
+            fixtureLoaded({
+                playerFaction: 'RBiH',
+                firedIds: [],
+                rawFiredIds: ['rs_strategic_goals', 'hrhb_political_goal'],
+                decisions: [
+                    { event_id: 'rs_strategic_goals', response_id: 'all_six', turn: 0, faction: 'RS' },
+                    { event_id: 'hrhb_political_goal', response_id: 'croat_republic', turn: 0, faction: 'HRHB', decision_source: 'bot_ai_default' },
+                ],
+            }),
+        );
+
+        const rs = byId(views, 'rs_six_strategic_goals');
+        const hrhb = byId(views, 'hrhb_alliance_or_republic');
+        assert.strictEqual(rs.faced, false);
+        assert.strictEqual(rs.chosenResponseId, null);
+        assert.strictEqual(hrhb.faced, false);
+        assert.strictEqual(hrhb.chosenResponseId, null);
     });
 
     test('unresolvable response id falls back to player-safe copy, not the raw response id', () => {

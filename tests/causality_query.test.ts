@@ -62,6 +62,7 @@ function buildEmptyState(): GameState {
 }
 
 function buildState(opts: {
+    playerFaction?: FactionId;
     turn?: number;
     fired?: string[];
     enabled?: string[];
@@ -102,7 +103,7 @@ function buildState(opts: {
         military.negotiation = { strategic_dimensions: strat };
     }
     return {
-        meta: { turn: opts.turn ?? 1 },
+        meta: { turn: opts.turn ?? 1, player_faction: opts.playerFaction },
         military,
     } as unknown as GameState;
 }
@@ -110,6 +111,7 @@ function buildState(opts: {
 // Synthetic R1-foundational chain: R1 → R6, R1 → R12, R6 → R12_child.
 function r1ChainState(): GameState {
     return buildState({
+        playerFaction: 'RS' as FactionId,
         turn: 12,
         fired: ['R1', 'R6', 'R12'],
         enabled: ['R6', 'R12', 'R12_child'],
@@ -205,6 +207,19 @@ describe('getPlayerDecisionHistory', () => {
         expect(history[0].turn).toBe(6);
         expect(history[1].turn).toBe(12);
     });
+
+    it('filters foreign player-source decisions when player_faction is known', () => {
+        const state = buildState({
+            playerFaction: 'RBiH' as FactionId,
+            decisions: [
+                { event_id: 'rbih_state_identity', response_id: 'civic', decision_source: 'player', faction: 'RBiH' as FactionId, turn: 1 },
+                { event_id: 'rs_strategic_goals', response_id: 'all_six', decision_source: 'player', faction: 'RS' as FactionId, turn: 2 },
+            ],
+        });
+
+        const history = getPlayerDecisionHistory(state);
+        expect(history.map((d) => d.event_id)).toEqual(['rbih_state_identity']);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -250,6 +265,7 @@ describe('getBranchTagsActive', () => {
 
     it('returns faction-prefixed branch tags from fired events chosen options', () => {
         const state = buildState({
+            playerFaction: 'RBiH' as FactionId,
             fired: ['rs_strategic_goals', 'rbih_state_identity'],
             decisions: [
                 { event_id: 'rs_strategic_goals', response_id: 'all_six', decision_source: 'bot_political', faction: 'RS' as FactionId, turn: 1 },
@@ -268,10 +284,34 @@ describe('getBranchTagsActive', () => {
         ]);
 
         const rsTags = getBranchTagsActive(state, 'RS' as FactionId, catalog);
-        expect(rsTags).toEqual(['rs_aggressive', 'rs_all_six']);
+        expect(rsTags).toEqual([]);
 
         const rbihTags = getBranchTagsActive(state, 'RBiH' as FactionId, catalog);
         expect(rbihTags).toEqual(['rbih_civic']);
+    });
+
+    it('keeps same-faction player branch tags while excluding foreign player decisions', () => {
+        const state = buildState({
+            playerFaction: 'RBiH' as FactionId,
+            fired: ['rs_strategic_goals', 'rbih_state_identity'],
+            decisions: [
+                { event_id: 'rs_strategic_goals', response_id: 'all_six', decision_source: 'player', faction: 'RS' as FactionId, turn: 1 },
+                { event_id: 'rbih_state_identity', response_id: 'civic', decision_source: 'player', faction: 'RBiH' as FactionId, turn: 2 },
+            ],
+        });
+        const catalog = new Map<string, EventDefinition>([
+            ['rs_strategic_goals', buildDef({
+                id: 'rs_strategic_goals',
+                options: [{ id: 'all_six', sets_flags: { rs_all_six: true } }],
+            })],
+            ['rbih_state_identity', buildDef({
+                id: 'rbih_state_identity',
+                options: [{ id: 'civic', sets_flags: { rbih_civic: true } }],
+            })],
+        ]);
+
+        expect(getBranchTagsActive(state, 'RBiH' as FactionId, catalog)).toEqual(['rbih_civic']);
+        expect(getBranchTagsActive(state, 'RS' as FactionId, catalog)).toEqual(['rs_all_six']);
     });
 });
 

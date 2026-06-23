@@ -1557,7 +1557,7 @@ After EVERY scenario run, the orchestrator:
 1. **[2026-06-23] Opening brief is a turn-zero visible surface**
    Do instead: Gate event-decision auto-launch only on `shouldShowOpeningBrief(...)`, not a raw dismissed flag; later-turn loads must not hide pending decisions behind an invisible opening brief.
 1. **[2026-06-22] Pending, bot, and foreign decisions are not player-filed history**
-   Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex response atoms, Dilemma Spine faced state, and filed decision receipts should require `event_decision_log.decision_source === 'player'` plus loaded-player-faction ownership, or a non-decision event.
+   Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex response atoms, Dilemma Spine faced state, filed decision receipts, branch tags, Decision History, and Distance from History should require `event_decision_log.decision_source === 'player'` plus loaded-player-faction ownership, or a non-decision event. Preserve raw fired-id compatibility only for legacy no-log cases.
 1. **[2026-06-06] Desk consequence receipts route by filed surface**
    Do instead: Use `recordTarget` from the shared decision consequence ledger for receipt actions: `chronicle` opens Chronicle, `records` opens Army HQ Records. Localize the route chrome; do not add another archive surface for the same receipt.
 1. **[2026-04-02] Player-facing operation documents must never print raw OSIDs**

@@ -29,6 +29,7 @@ interface DecisionInput {
     response_id: string;
     turn: number;
     decision_source?: 'player' | 'bot_political' | 'bot_v1' | 'bot_ai_default';
+    faction?: string | null;
 }
 
 /** Build a decision event def whose chosen option predicts `opensEvents`. */
@@ -81,12 +82,17 @@ function buildTargetDef(id: string, title?: string): EventDefinition {
 
 function buildState(opts: {
     decisions: DecisionInput[];
+    playerFaction?: string;
     firedEventIds?: string[];
     closedEventIds?: string[];
     lastFiredTurn?: Record<string, number>;
     causalityLog?: CausalityLogEntry[];
 }): GameState {
+    const playerFaction = opts.playerFaction ?? 'RBiH';
     return {
+        meta: {
+            player_faction: playerFaction,
+        },
         military: {
             fired_event_ids: opts.firedEventIds ?? [],
             enabled_event_ids: [],
@@ -96,7 +102,7 @@ function buildState(opts: {
                 event_id: d.event_id,
                 response_id: d.response_id,
                 decision_source: d.decision_source ?? 'player',
-                faction: 'RBiH',
+                faction: d.faction ?? playerFaction,
                 turn: d.turn,
             })),
             event_last_fired_turn: opts.lastFiredTurn ?? {},
@@ -282,6 +288,24 @@ describe('buildConsequenceReceipts', () => {
                 { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
+        expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
+    });
+
+    it('excludes foreign player decisions from the loaded player promise-to-receipt loop', () => {
+        const catalog = new Map<string, EventDefinition>([
+            ['E', buildEventDef('E', ['p'])],
+            ['p', buildTargetDef('p')],
+        ]);
+        const state = buildState({
+            playerFaction: 'RBiH',
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 1, faction: 'RS' }],
+            firedEventIds: ['E', 'p'],
+            lastFiredTurn: { p: 4 },
+            causalityLog: [
+                { turn: 4, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
+            ],
+        });
+
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
     });
 

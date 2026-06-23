@@ -39,6 +39,7 @@ import type {
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { t } from '../i18n/index.js';
+import { playerFactionMatch } from './playerFactionMatch.js';
 
 /** Realization status of a single predicted downstream event. */
 export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
@@ -76,9 +77,14 @@ export interface ConsequenceReceipt {
 
 /** Build a chosen-option lookup keyed by event_id. Last decision wins for
  *  recurring events (matches causality_query's decisionByEvent semantics). */
-function chosenResponseByEvent(state: GameState): Map<string, string> {
+function chosenResponseByEvent(
+    state: GameState,
+    playerFaction: string | null,
+): Map<string, string> {
     const out = new Map<string, string>();
     for (const dec of state.military?.event_decision_log ?? []) {
+        if (dec.decision_source !== 'player') continue;
+        if (!playerFactionMatch(dec.faction, playerFaction)) continue;
         out.set(dec.event_id, dec.response_id);
     }
     return out;
@@ -206,12 +212,13 @@ export function buildConsequenceReceipts(
     if (!catalog || catalog.size === 0 || decisionLog.length === 0) {
         return sortReceipts(patronReceipts);
     }
+    const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
 
     const firedIds = new Set(state.military?.fired_event_ids ?? []);
     const closedIds = new Set(state.military?.closed_event_ids ?? []);
     const lastFiredTurn = state.military?.event_last_fired_turn ?? {};
     const edges = enablesEdgeKeySet(state);
-    const chosenByEvent = chosenResponseByEvent(state);
+    const chosenByEvent = chosenResponseByEvent(state, playerFaction);
 
     const receipts: ConsequenceReceipt[] = [...patronReceipts];
 
@@ -219,6 +226,7 @@ export function buildConsequenceReceipts(
         // Only player decisions earn a receipt — bot choices are not the
         // player's promise→receipt loop.
         if (dec.decision_source !== 'player') continue;
+        if (!playerFactionMatch(dec.faction, playerFaction)) continue;
         // Last-wins: only score the decision that currently owns this event.
         if (chosenByEvent.get(dec.event_id) !== dec.response_id) continue;
 

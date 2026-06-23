@@ -26,6 +26,7 @@
 //     Zero hash / calibration impact.
 
 import { strictCompare } from '../../../state/validateGameState.js';
+import { playerFactionMatch } from './playerFactionMatch.js';
 
 // Static, build-time-bundled event catalog — used to resolve the historical
 // default response id and a readable title per event. Mirrors dilemmaSpine.ts,
@@ -152,6 +153,9 @@ const EVENT_HISTORY_MAP: ReadonlyMap<string, EventHistoryMeta> = buildEventHisto
  *  so the adapter call needs NO `as`-cast (strict-null escape-hatch ratchet). */
 export interface DistanceFromHistoryInput {
     rawGameState?: {
+        meta?: {
+            player_faction?: unknown;
+        };
         military?: {
             event_decision_log?: ReadonlyArray<{
                 event_id?: unknown;
@@ -187,7 +191,8 @@ function resolveResponseLabel(
 /**
  * Project the distance-from-history view against a loaded UI game state.
  *
- * Joins each resolved decision in `military.event_decision_log` against the
+ * Joins each player-filed decision for the loaded player faction in
+ * `military.event_decision_log` against the
  * module-load historical-default map. A decision counts toward `totalDecided`
  * only if its event has a historical default. It DIVERGED iff its chosen
  * `response_id` differs from that default.
@@ -207,6 +212,9 @@ export function buildDistanceFromHistory(
     if (!Array.isArray(rawLog) || rawLog.length === 0) {
         return emptyView();
     }
+    const playerFaction = typeof loaded?.rawGameState?.meta?.player_faction === 'string'
+        ? loaded.rawGameState.meta.player_faction
+        : null;
 
     // Last-wins per event: walk the ordered log forward, keep the last entry per
     // event_id. Iteration order of the source array fully determines output.
@@ -215,6 +223,8 @@ export function buildDistanceFromHistory(
         { responseId: string; turn: number; faction: string | null; source: string }
     >();
     for (const entry of rawLog) {
+        if (entry?.decision_source !== 'player') continue;
+        if (!playerFactionMatch(entry.faction, playerFaction)) continue;
         const eventId = typeof entry?.event_id === 'string' ? entry.event_id : undefined;
         const responseId = typeof entry?.response_id === 'string' ? entry.response_id : undefined;
         if (!eventId || !responseId) continue;
