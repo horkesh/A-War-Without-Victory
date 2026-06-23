@@ -636,6 +636,33 @@ describe('ops planning target discovery', () => {
         expect(screen.queryByText('Select Operations Commander')).toBeNull();
     });
 
+    it('excludes active-but-forming brigades from commander-phase corps strength', () => {
+        const state = makeState();
+        state.formations.push({
+            id: 'forming_brigade',
+            name: 'Forming Brigade',
+            kind: 'brigade',
+            corps_id: 'rs_1st_krajina',
+            faction: 'RS',
+            status: 'active',
+            readiness: 'forming',
+            personnel: 900,
+            cohesion: 40,
+            fatigue: 0,
+            createdTurn: 0,
+            tags: [],
+        } as FormationView);
+        useGameStore.setState({
+            loadedGameState: state,
+            opsPlanningCorpsId: 'rs_1st_krajina',
+        });
+
+        const { container } = render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
+
+        expect(container.textContent ?? '').toMatch(/1[,.]800 personnel/);
+        expect(container.textContent ?? '').not.toMatch(/2[,.]700 personnel/);
+    });
+
     it('renders CommanderPhase unavailable reasons without raw staff shorthand', () => {
         const state = makeState();
         useGameStore.setState({

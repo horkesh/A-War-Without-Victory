@@ -15,6 +15,7 @@ function makeGameOverState(): LoadedGameState {
         metadata: { turn: 65, date: 'May 1993' },
         formations: [
             { id: 'arbih_test_brigade', kind: 'brigade', status: 'active', faction: 'RBiH' },
+            { id: 'arbih_forming_brigade', kind: 'brigade', status: 'active', readiness: 'forming', faction: 'RBiH' },
             { id: 'vrs_test_brigade', kind: 'brigade', status: 'active', faction: 'RS' },
         ],
         militiaPools: [],
@@ -62,6 +63,7 @@ describe('GameOverModal localization', () => {
         expect(screen.getByText('Final Standings')).toBeTruthy();
         expect(screen.getByText('1 settlement controlled')).toBeTruthy();
         expect(screen.getAllByText('1 active brigades')).toHaveLength(2);
+        expect(screen.queryByText('2 active brigades')).toBeNull();
         expect(screen.getByText('Campaign lasted 65 weeks (1 years, 13 weeks)')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'New Game' })).toBeTruthy();
         expect(document.body.textContent ?? '').not.toMatch(/\bOSID\b/i);

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { shouldShowOpeningBrief } from '../../src/ui/map/data/openingBriefGate.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -53,6 +54,13 @@ describe('event decision modal auto-launch contract', () => {
     expect(autoLaunchEffect.indexOf('if (openingBriefPending) return;')).toBeLessThan(
       autoLaunchEffect.indexOf('selectNextPendingEventDecision'),
     );
+  });
+
+  it('does not let the opening brief gate hide pending decisions on later-turn loads', () => {
+    expect(shouldShowOpeningBrief({ turn: 0, player_faction: 'RBiH' } as any, false)).toBe(true);
+    expect(shouldShowOpeningBrief({ turn: 12, player_faction: 'RBiH' } as any, false)).toBe(false);
+    expect(shouldShowOpeningBrief({ turn: 0, player_faction: 'RBiH' } as any, true)).toBe(false);
+    expect(shouldShowOpeningBrief({ turn: 0, player_faction: null } as any, false)).toBe(false);
   });
 
   it('renders the selected pending event decision payload as the primary modal surface', () => {

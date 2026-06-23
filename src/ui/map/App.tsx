@@ -99,6 +99,7 @@ import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
+import { shouldShowOpeningBrief } from './data/openingBriefGate';
 import {
   applyRecruitmentAndSync,
   fetchRecruitmentCatalog,
@@ -833,7 +834,7 @@ function App() {
     Boolean(loadedGameState?.pendingDayton && !loadedGameState?.gameOver)
   );
   const tacticalChromeVisible = !presidentialBlockingSurfaceActive;
-  const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;
+  const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);
   const onboardingBlockingOverlayActive = (
     presidentialBlockingSurfaceActive ||
     openingBriefPending ||

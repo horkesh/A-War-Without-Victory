@@ -67,7 +67,7 @@ describe('Codex #347 (P2) — onboarding auto-mount edge cases (task #85)', () =
       expect(source).toContain('sidePickerOpen ||');
       expect(source).toContain('peaceWarTransitionActive ||');
       expect(source).toContain('activeEventDecisionId !== null ||');
-      expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+      expect(source).toContain('const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);');
       expect(source).toContain('chronicleOpen ||');
       expect(source).toContain('codexOpen ||');
       expect(source).toContain('const tacticalChromeVisible = !presidentialBlockingSurfaceActive;');

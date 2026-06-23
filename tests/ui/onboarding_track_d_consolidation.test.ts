@@ -67,7 +67,7 @@ describe('Track D onboarding consolidation', () => {
     // authored first choice or first desk handoff.
     expect(source).toContain("appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />");
     expect(source).toContain('activeEventDecisionId !== null ||');
-    expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+    expect(source).toContain('const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);');
     expect(source).toContain('chronicleOpen ||');
     expect(source).toContain('codexOpen ||');
 

@@ -74,7 +74,7 @@ describe('decision surface registry', () => {
       ownerSurface: 'decision_room',
     });
     expect(getDecisionSurface('operation_opportunity')).toMatchObject({
-      ownerShell: 'desk',
+      ownerShell: 'decision_room',
       resolverSurface: 'operation_opportunity_dossier',
       opensAs: 'shell_panel',
       inboxAction: 'decision_room',

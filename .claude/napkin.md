@@ -1553,7 +1553,9 @@ After EVERY scenario run, the orchestrator:
 1. **[2026-06-23] Brigade supply display is explicit supply truth**
    Do instead: Render brigade supply dots from player-visible supply state only; absent supply is unreported. Never infer strained/critical supply from fatigue, cohesion, or generic formation status.
 1. **[2026-06-23] Fielded tactical-unit truth is status plus readiness truth**
-   Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, sector assignment projections, Force Readiness, and settlement/tooltip unit lists; `status: active` plus `readiness: forming` is not fielded, and missing adapter lifecycle should be `unreported`.
+   Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, sector assignment projections, Force Readiness, settlement/tooltip unit lists, Personnel totals, Supply drain, Ops commander strength, Game Over standings, and map stack overlays; `status: active` plus `readiness: forming` is not fielded, hidden enemy units stay hidden from stacks, and missing adapter lifecycle should be `unreported`.
+1. **[2026-06-23] Opening brief is a turn-zero visible surface**
+   Do instead: Gate event-decision auto-launch only on `shouldShowOpeningBrief(...)`, not a raw dismissed flag; later-turn loads must not hide pending decisions behind an invisible opening brief.
 1. **[2026-06-22] Pending foundational decisions are not filed history**
    Do instead: Treat `fired_event_ids` as internal once-only gating while `pending_event_decisions` is unanswered; UI fired-event wrappers, Codex unlocks, and Dilemma Spine faced state should wait for `event_decision_log` or a non-pending event.
 1. **[2026-06-06] Desk consequence receipts route by filed surface**
@@ -1564,8 +1566,6 @@ After EVERY scenario run, the orchestrator:
    Do instead: Warroom may summarize command posture, but detailed formations, personnel rosters, reserve handling, and commander reassignment belong to Army HQ. If Warroom starts doing those things again, it is stealing ownership from the command shell.
 3. **[2026-04-02] Tactical map must always show the way back to Warroom**
    Do instead: If desktop IPC is available or the map is embedded, the mounted tactical toolbar must expose a visible `WARROOM` return affordance. A hidden bridge method in legacy code is not enough.
-4. **[2026-04-03] Missing roadmap priorities must become plans before code**
-   Do instead: If sector/frontline truth, UI density, shell cohesion, or product architecture simplification becomes a near-term priority, make sure there is an execution-grade Pyrrhic plan in `docs/plans/` before implementation starts.
 5. **[2026-04-03] Canonical and operational edge universes must be bridged explicitly**
    Do instead: When sector/frontline code consumes canonical settlement edges but sectors own OSID frontier edges, normalize edge IDs at the boundary. Never let mismatched geometry silently collapse activity or pressure to zero.
 6. **[2026-04-03] Windows-safe local CLIs are part of the repo contract**

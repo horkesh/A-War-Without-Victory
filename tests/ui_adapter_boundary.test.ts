@@ -147,7 +147,7 @@ describe('UI Adapter Boundary Discipline', () => {
    *    capture_provenance string is absent. Simplification requires the
    *    engine to always emit capture_provenance on operation AARs.
    */
-  it('derivePendingEventDecisions is a reference-identity passthrough of engine truth', () => {
+  it('derivePendingEventDecisions is a player-scoped reference-identity passthrough of engine truth', () => {
     // Behavioral proof: the adapter does not clone, coerce, or restructure
     // pending_event_decisions. Element references are preserved, which means
     // the UI and the engine are looking at the exact same object — no hidden
@@ -164,7 +164,7 @@ describe('UI Adapter Boundary Discipline', () => {
       ],
     };
     const rawState: any = {
-      meta: { turn: 42, phase: 'war' },
+      meta: { turn: 42, phase: 'war', player_faction: 'RBiH' },
       military: {
         formations: {},
         pending_event_decisions: [engineDecision],
@@ -179,6 +179,9 @@ describe('UI Adapter Boundary Discipline', () => {
     // Engine-only field that the adapter UI type omits is still present at
     // runtime — adapter only narrows the TS view, it does not strip fields.
     expect((parsed.pendingEventDecisions?.[0] as any).requires_player_response).toBe(true);
+
+    rawState.meta.player_faction = 'RS';
+    expect(parseGameState(rawState).pendingEventDecisions).toBeUndefined();
   });
 
   it('derivePendingEventDecisions collapses empty/missing arrays to undefined', () => {

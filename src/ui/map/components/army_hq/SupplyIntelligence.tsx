@@ -9,6 +9,7 @@
 import type { LoadedGameState, FormationView } from '../../data/types';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeEnclaveName } from '../../utils/playerSafeText';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 import {
     MAINTENANCE_DRAIN_PER_FORMATION,
@@ -62,7 +63,7 @@ export function computeSupplyBreakdown(
     const currentHeavy = reserves?.heavyMunitions ?? 0;
 
     const formations = state.formations?.filter(f =>
-        f.faction === faction && f.status === 'active',
+        f.faction === faction && isFieldedTacticalFormation(f),
     ) ?? [];
 
     const formationCount = formations.length;

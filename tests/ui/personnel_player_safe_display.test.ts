@@ -286,6 +286,28 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toContain('Future Commander');
   });
 
+  it('excludes active-but-forming brigades from personnel strength totals', () => {
+    const state = makeState();
+    state.formations.push({
+      id: 'vrs_forming_bde',
+      name: 'Forming Brigade',
+      faction: 'RS',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'forming',
+      corps_id: 'vrs_drina',
+      personnel: 700,
+    } as any);
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent ?? '').toMatch(/1[,.]800Total Personnel/);
+    expect(container.textContent).toContain('2Active Brigades');
+    expect(container.textContent ?? '').not.toMatch(/2[,.]500Total Personnel/);
+    expect(container.textContent).not.toContain('3Active Brigades');
+  });
+
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

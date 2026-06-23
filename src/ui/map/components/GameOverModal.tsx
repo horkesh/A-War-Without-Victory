@@ -16,6 +16,7 @@ import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, useLocale, type Locale, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
+import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 
 const OUTCOME_LABEL_KEYS: Record<string, { title: MessageKey; subtitle: MessageKey }> = {
     victory_RBiH: { title: 'gameOver.outcome.victory_RBiH.title', subtitle: 'gameOver.outcome.victory_RBiH.subtitle' },
@@ -65,7 +66,7 @@ export function GameOverModal() {
     const formations = loadedGameState.formations ?? [];
     const factionBrigades: Record<string, number> = {};
     for (const f of formations) {
-        if (f.kind === 'brigade' && f.status === 'active') {
+        if (isFieldedTacticalFormation(f)) {
             factionBrigades[f.faction] = (factionBrigades[f.faction] ?? 0) + 1;
         }
     }

@@ -26,6 +26,7 @@ import { buildOperationArrowsGeoJSON } from '../src/ui/map/map/builders/buildOpe
 import { buildFormationsGeoJSON } from '../src/ui/map/map/builders/buildFormationsGeoJSON.js';
 import { generateThreatAssessment } from '../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import { getFormationsAtOsid } from '../src/ui/map/utils/formationAtOsid.js';
+import { getPlayerVisibleFormationStack } from '../src/ui/map/utils/visibleFormationStack.js';
 
 describe('player visibility helpers', () => {
   it('normalizes player faction and rejects unknown values', () => {
@@ -274,6 +275,29 @@ describe('player visibility helpers', () => {
 
     const geo = buildFormationsGeoJSON(state, baseGeo as any);
     expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_seen', 'own_1']);
+  });
+
+  it('formation stack expansion only includes player-visible fielded units', () => {
+    const state = {
+      player_faction: 'RBiH',
+      fogOfWar: {
+        visibleEnemyOsids: ['op:shared_seen'],
+        visibleEnemySectorIds: [],
+      },
+      formations: [
+        { id: 'own_1', faction: 'RBiH', name: 'Own Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_hidden', personnel: 1200 },
+        { id: 'hidden_enemy', faction: 'RS', name: 'Hidden Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_hidden', personnel: 1000 },
+        { id: 'seen_enemy', faction: 'RS', name: 'Seen Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_seen', personnel: 1100 },
+        { id: 'forming_own', faction: 'RBiH', name: 'Forming Own', kind: 'brigade', readiness: 'forming', cohesion: 40, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_hidden', personnel: 300 },
+      ],
+    } as unknown as LoadedGameState;
+    const centroids = new Map<string, [number, number]>([
+      ['op:shared_hidden', [18, 44]],
+      ['op:shared_seen', [19, 44]],
+    ]);
+
+    expect(getPlayerVisibleFormationStack(state, 'op:shared_hidden', centroids).map((formation) => formation.id)).toEqual(['own_1']);
+    expect(getPlayerVisibleFormationStack(state, 'op:shared_seen', centroids).map((formation) => formation.id)).toEqual(['seen_enemy']);
   });
 
   it('selected operation lookup refuses to expose enemy operations selected by raw key', () => {

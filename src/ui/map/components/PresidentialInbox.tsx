@@ -18,6 +18,7 @@ import { DETAIL_PANEL_STYLE } from './panelRail';
 import { resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import { t, type MessageKey } from '../i18n';
 import { hasFiledRecord } from '../data/filedRecordTruth';
+import { shouldShowOpeningBrief } from '../data/openingBriefGate';
 
 const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: MessageKey[] }> = {
     RBiH: {
@@ -264,7 +265,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
 
     const actionableItems = items.filter(i => i.type !== 'situation');
     const situationItems = items.filter(i => i.type === 'situation');
-    const openingBriefPending = !briefDismissed && playerFaction && state?.turn === 0;
+    const openingBriefPending = shouldShowOpeningBrief(state, briefDismissed);
     const recordFiled = hasFiledRecord(state);
 
     return (
@@ -292,7 +293,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto px-2.5 py-2 space-y-2">
                 {/* Opening brief (first turn only) */}
-                {openingBriefPending && (
+                {openingBriefPending && playerFaction && (
                     <OpeningBrief
                         faction={playerFaction}
                         onDismiss={() => setBriefDismissed(true)}

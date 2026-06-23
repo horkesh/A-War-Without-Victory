@@ -417,7 +417,7 @@ describe('live campaign tutorial render', () => {
     // Codex #347 (P2) plus first-turn choreography: the mount gate excludes
     // presidential blockers and active command overlays such as Chronicle/Codex.
     expect(source).toContain("appScreen === 'game' && loadedGameState && !onboardingBlockingOverlayActive && <OnboardingOverlayWrapper />");
-    expect(source).toContain('const openingBriefPending = loadedGameState != null && playerFaction != null && !openingBriefDismissed;');
+    expect(source).toContain('const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);');
     expect(source).toContain('chronicleOpen ||');
     expect(source).toContain('codexOpen ||');
     // The legacy first-hover coachmark overlay stays retired — only the

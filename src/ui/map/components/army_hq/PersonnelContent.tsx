@@ -11,6 +11,7 @@ import { getLocalizedFormationName } from '../../data/formationNameLocalizations
 import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { inspectOnField } from '../../utils/shellNavigation';
 import { FrontVisitSection } from './FrontVisitSection';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 function OfficerQualityChip({ label, value }: { label: string; value: number }) {
     return (
@@ -35,7 +36,7 @@ export function PersonnelContent() {
         if (!state || !faction) return null;
 
         const formations = state.formations.filter(f => f.faction === faction);
-        const brigades = formations.filter(f => f.kind === 'brigade' && f.status === 'active');
+        const brigades = formations.filter(f => isFieldedTacticalFormation(f));
         const corpsFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset');
         const commandFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq');
         const commandNameById = new Map(commandFormations.map((command) => [command.id, getLocalizedFormationName(command, locale)]));

@@ -19,6 +19,7 @@ import { getPreparationMaxTurns } from '../../../../sim/combat/operation_prepara
 import { formatCorpsDisplayName } from '../../utils/formatters';
 import { getPlayerSafeMilitaryFactionName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 interface CommanderPhaseProps {
     onAdvance: () => void;
@@ -93,7 +94,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
         );
 
         const subordinates = loadedGameState.formations.filter(
-            (f) => f.corps_id === corpsId && f.kind === 'brigade' && f.status === 'active'
+            (f) => f.corps_id === corpsId && isFieldedTacticalFormation(f)
         );
         const totalPers = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
         const sectors = (loadedGameState.corpsFrontSectors ?? []).filter((s) => s.corps_id === corpsId);

@@ -675,7 +675,7 @@ describe('GUI audit label discipline', () => {
     expect(sectorRow?.getAttribute('data-sector-id')).toBe('sector:arbih_1st_corps:0');
     const frontage = container.querySelector('[data-testid="army-hq-sector-frontage"]');
     expect(frontage?.getAttribute('data-front-segments')).toBe('4');
-    expect(container.textContent).toMatch(/1 on line \/\/4 front segments \/\/ density 0\.25/i);
+    expect(container.textContent).toMatch(/1 on line; 4 front segments; density 0\.25/i);
     expect(container.textContent).toMatch(/Front segments: 4/i);
     expect(container.textContent).toMatch(/Brigades per front segment: 0\.25/i);
     expect(container.textContent).not.toMatch(/\bKM\b|per km|FRONTAGE/i);

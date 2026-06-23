@@ -13,7 +13,7 @@ export type DecisionSurfaceFamilyId =
   | 'situation';
 
 export type DecisionSurfaceSeverity = 'hard_block' | 'modal_required' | 'advisory' | 'info';
-export type DecisionSurfaceOwnerShell = 'desk' | 'army_hq' | 'tactical_map' | 'records' | 'chronicle';
+export type DecisionSurfaceOwnerShell = 'desk' | 'decision_room' | 'army_hq' | 'tactical_map' | 'records' | 'chronicle';
 export type DecisionSurfaceOpenMode = 'modal' | 'shell_panel' | 'records_link' | 'dismiss';
 export type DecisionSurfaceGatePolicy = PlayerDecisionGatePolicy | 'info';
 
@@ -344,7 +344,7 @@ export const DECISION_SURFACE_REGISTRY = {
     inboxType: 'operation_opportunity',
     playerLabel: 'Operation opportunity',
     severity: 'advisory',
-    ownerShell: 'desk',
+    ownerShell: 'decision_room',
     resolverSurface: 'operation_opportunity_dossier',
     opensAs: 'shell_panel',
     gatePolicy: 'advisory',

@@ -61,6 +61,7 @@ import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLa
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
 import { buildRefugeeColumnData, type RefugeeColumnDatum } from '../layers/buildRefugeeColumnOverlay';
+import { getPlayerVisibleFormationStack } from '../utils/visibleFormationStack';
 import {
   buildCorridorHeartbeatData,
   type CorridorHeartbeatDatum,
@@ -1037,11 +1038,7 @@ export function MapContainer() {
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
-            // Only trigger high-end radial expansion if there's actually a stack of selectable units (> 1)
-            const stackSize = loadedGameState.formations.filter(f =>
-              f.kind !== 'corps' && f.kind !== 'corps_asset' && f.kind !== 'army_hq' &&
-              resolveFormationLocationOsid(f, osidCentroidsRef.current) === osid
-            ).length;
+            const stackSize = getPlayerVisibleFormationStack(loadedGameState, osid, osidCentroidsRef.current).length;
 
             if (stackSize > 1) {
               setExpandedStackOsid(osid);
@@ -3472,10 +3469,7 @@ export function MapContainer() {
           osid={expandedStackOsid}
           anchorX={overlayAnchor.x}
           anchorY={overlayAnchor.y}
-          formations={loadedGameState.formations.filter(f =>
-            f.kind !== 'corps' && f.kind !== 'corps_asset' && f.kind !== 'army_hq' &&
-            resolveFormationLocationOsid(f, osidCentroidsRef.current) === expandedStackOsid
-          )}
+          formations={getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)}
           onClose={() => {
             setExpandedStackOsid(null);
             setOverlayAnchor(null);
