@@ -30,6 +30,8 @@ export interface InitialFormationRecord {
     tags?: string[];
     personnel?: number;
     hq_sid?: string;
+    /** Command-only operational HQ anchor for corps/army HQ drilldowns. */
+    hq_osid?: string;
     /** Operational settlement ID (OSID); set at creation or backfilled from canonical_to_operational_map. */
     location_osid?: string;
 }
@@ -105,6 +107,7 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
         const tags = Array.isArray(raw.tags) ? raw.tags.filter((t: unknown): t is string => typeof t === 'string') : undefined;
         const personnel = typeof raw.personnel === 'number' && Number.isFinite(raw.personnel) ? raw.personnel : undefined;
         const hq_sid = typeof raw.hq_sid === 'string' && raw.hq_sid.trim() ? raw.hq_sid.trim() : undefined;
+        const hq_osid = typeof raw.hq_osid === 'string' && raw.hq_osid.trim() ? raw.hq_osid.trim() : undefined;
         const location_osid = typeof raw.location_osid === 'string' && raw.location_osid.trim() ? raw.location_osid.trim() : undefined;
         const posture: BrigadePosture | undefined = typeof raw.posture === 'string' && CANONICAL_POSTURES.includes(raw.posture as BrigadePosture)
             ? raw.posture as BrigadePosture : undefined;
@@ -121,6 +124,7 @@ export async function loadInitialFormations(path: string): Promise<FormationStat
             ...(tags !== undefined && tags.length > 0 && { tags }),
             ...(personnel !== undefined && { personnel }),
             ...(hq_sid !== undefined && { hq_sid }),
+            ...(hq_osid !== undefined && { hq_osid }),
             ...(location_osid !== undefined && { location_osid }),
             ...(posture !== undefined && { posture }),
             ...(corps_id !== undefined && { corps_id })

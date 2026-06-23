@@ -184,7 +184,7 @@ export function createOobFormations(
         const isOpeningArmyHq = c.kind === 'army_hq' && c.available_from <= currentTurn;
         if (!isOpeningArmyHq && !factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[c.hq_mun];
-        const location_osid =
+        const hq_osid =
             c.hq_osid ?? (canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined);
         const formation: FormationState = {
             id: c.id as FormationId,
@@ -197,6 +197,7 @@ export function createOobFormations(
             kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
             personnel: 0,
             ...(hq_sid ? { hq_sid } : {}),
+            ...(hq_osid ? { hq_osid } : {}),
             // Corps/army HQ formations are command structures, not map entities.
             ...(c.initial_officer_quality != null ? { officer_quality: c.initial_officer_quality } : {}),
             ...(c.initial_cohesion != null ? { cohesion: c.initial_cohesion } : {}),

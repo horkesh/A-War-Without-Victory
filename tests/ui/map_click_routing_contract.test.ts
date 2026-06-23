@@ -42,6 +42,19 @@ function loadedState(): LoadedGameState {
         corps_id: 'corps_bravo',
         location_osid: 'tuzla_1',
       },
+      {
+        id: 'corps_alpha',
+        faction: 'RBiH',
+        name: 'Alpha Corps',
+        kind: 'corps_asset',
+        readiness: 'ready',
+        cohesion: 70,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        hq_osid: 'zenica_hq_1',
+      },
     ],
     militiaPools: [],
     controlBySettlement: {},
@@ -151,6 +164,7 @@ describe('direct tactical map click routing', () => {
       kind: 'field-formation-in-corps',
       formationId: 'brigade_bravo',
       corpsId: 'corps_bravo',
+      osid: 'tuzla_1',
     });
   });
 
@@ -161,6 +175,14 @@ describe('direct tactical map click routing', () => {
       sectorId: 'sector_south',
       corpsId: 'corps_alpha',
       osid: 'sarajevo_1',
+    });
+  });
+
+  it('uses command HQ anchors for command formations without tactical location_osid', () => {
+    expect(resolveMapFormationInspectionTarget('corps_alpha', null, loadedState())).toEqual({
+      kind: 'field-formation-at-settlement',
+      formationId: 'corps_alpha',
+      osid: 'zenica_hq_1',
     });
   });
 

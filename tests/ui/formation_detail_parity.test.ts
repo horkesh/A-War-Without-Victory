@@ -579,6 +579,58 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Unpacking');
   });
 
+  it('renders movement stance through a full player-facing label without a hardcoded march suffix', () => {
+    useGameStore.setState({ selectedFormationId: 'rbih_moving_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Movement stance: hold the line');
+    expect(copy).not.toMatch(/\bHold march\b|\bmarch\)/i);
+  });
+
+  it('disables formation command controls when the desktop command bridge is unavailable', () => {
+    delete (window as unknown as { awwv?: unknown }).awwv;
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => {
+      if (formation.id === 'rbih_hq_guard_brigade') {
+        return {
+          ...formation,
+          eliteLoanState: {
+            on_loan: true,
+            loaned_to_corps: 'rbih_1st_corps',
+            loan_start_turn: 1,
+            turns_deployed: 3,
+            in_cooldown: false,
+            permanently_degraded: false,
+            current_episode_id: 1,
+            base_osid: 'op:test:hq',
+          },
+        };
+      }
+      return formation.id === 'rbih_heroic_brigade'
+        ? { ...formation, sectorOverrideId: 'sector_south' }
+        : formation;
+    });
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedFormationId: 'rbih_hq_guard_brigade',
+    });
+
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    expect((screen.getByRole('button', { name: /Recall to Reserve/i }) as HTMLButtonElement).disabled).toBe(true);
+
+    useGameStore.setState({ selectedFormationId: 'rbih_heroic_brigade' });
+    cleanup();
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+    expect((screen.getByRole('button', { name: /Clear Override/i }) as HTMLButtonElement).disabled).toBe(true);
+    const southButton = screen.getAllByTestId('formation-detail-sector-option')
+      .find((button) => button.getAttribute('data-sector-id') === 'sector_north') as HTMLButtonElement | undefined;
+    expect(southButton?.disabled).toBe(true);
+  });
+
   it('uses shared combat labels and neutral fallback copy for recent engagement outcomes', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_record_brigade' });
 

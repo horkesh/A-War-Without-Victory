@@ -391,6 +391,64 @@ test('parseGameState keeps missing sector stance unreported', () => {
     assert.equal(parsed.corpsFrontSectors?.[0]?.stance_source, undefined);
 });
 
+test('parseGameState keeps missing sector logistics and opsec truth unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            formations: {},
+            militia_pools: {},
+            corps_front_sectors: {
+                rbih_sector_1: {
+                    sector_id: 'rbih_sector_1',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: ['a__b'],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.corpsFrontSectors?.[0]?.logistics_priority, undefined);
+    assert.equal(parsed.corpsFrontSectors?.[0]?.opsec_active, undefined);
+});
+
+test('parseGameState preserves explicit neutral sector logistics and inactive opsec truth', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            formations: {},
+            militia_pools: {},
+            logistics_priority: { RBiH: { a__b: 1 } },
+            opsec_sectors: [],
+            corps_front_sectors: {
+                rbih_sector_1: {
+                    sector_id: 'rbih_sector_1',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: ['a__b'],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.corpsFrontSectors?.[0]?.logistics_priority, 1);
+    assert.equal(parsed.corpsFrontSectors?.[0]?.opsec_active, false);
+});
+
 test('parseGameState derives sector entrenchment from current fielded assignment truth', () => {
     const parsed = parseGameState({
         meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },

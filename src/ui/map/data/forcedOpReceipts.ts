@@ -37,6 +37,7 @@ import type { GameState } from '../../../state/game_state.js';
 import type { OperationAAR } from '../../../sim/combat/operation_aar.js';
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeOperationName } from '../utils/playerSafeText.js';
+import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 
 /** One receipt: a single resolved operation that the president force-launched
  *  over the corps commander's objection. */
@@ -72,6 +73,16 @@ function tally(t: { killed?: number; wounded?: number } | undefined): number {
     return (t.killed ?? 0) + (t.wounded ?? 0);
 }
 
+function getPlayerFaction(state: GameState | null | undefined): string | null {
+    return typeof state?.meta?.player_faction === 'string' ? state.meta.player_faction : null;
+}
+
+function aarBelongsToPlayer(aar: OperationAAR, playerFaction: string | null): boolean {
+    if (!isCanonicalPlayerFaction(playerFaction)) return true;
+    const aarFaction = (aar as { faction?: unknown }).faction;
+    return typeof aarFaction !== 'string' || playerFactionMatch(aarFaction, playerFaction);
+}
+
 /**
  * Build the realized forced-op receipt list from the persisted AAR substrate.
  * Iterates `state.operation_history`, keeps only `force_launched === true`
@@ -86,10 +97,12 @@ export function buildForcedOpReceipts(
 ): ForcedOpReceipt[] {
     const aars = state?.operation_history;
     if (!aars || aars.length === 0) return [];
+    const playerFaction = getPlayerFaction(state);
 
     const out: ForcedOpReceipt[] = [];
     for (const aar of aars) {
         if (aar.force_launched !== true) continue;
+        if (!aarBelongsToPlayer(aar, playerFaction)) continue;
         out.push({
             id: aar.operation_id,
             opName: getPlayerSafeOperationName(aar.operation_name, aar.corps_id, 'Operation'),

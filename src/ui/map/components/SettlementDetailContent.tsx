@@ -793,49 +793,54 @@ export function SettlementDetailContent({
               )}
             </div>
             <div className="space-y-1">
-              {showFormations.map((f) => (
-                <div
-                  key={f.id}
-                  role={onFormationClick ? 'button' : undefined}
-                  tabIndex={onFormationClick ? 0 : undefined}
-                  onClick={onFormationClick ? () => onFormationClick(f.id) : undefined}
-                  onKeyDown={onFormationClick ? (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      onFormationClick(f.id);
-                    }
-                  } : undefined}
-                  className={`flex items-center gap-2 py-1 px-1.5 bg-black/10 rounded border border-white/5 transition-colors ${onFormationClick ? 'hover:border-white/20 hover:bg-black/20 cursor-pointer' : 'hover:border-white/10'}`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
-                  <div className="flex-1 min-w-0 flex flex-col gap-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
-                      {isPanel && f.readiness && (
-                        <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
-                          {getPlayerSafeFormationReadinessLabel(f.readiness)}
-                        </span>
+              {showFormations.map((f) => {
+                const rowContent = (
+                  <>
+                    <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
+                    <div className="flex-1 min-w-0 flex flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
+                        {isPanel && f.readiness && (
+                          <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
+                            {getPlayerSafeFormationReadinessLabel(f.readiness)}
+                          </span>
+                        )}
+                      </div>
+                      {isPanel && f.cohesion != null && Number.isFinite(f.cohesion) && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="flex-1 h-1 bg-black/30 rounded overflow-hidden max-w-[80px]">
+                            <div
+                              className="h-full bg-accent-gold/50 rounded"
+                              style={{ width: `${Math.min(100, Math.max(0, f.cohesion))}%` }}
+                            />
+                          </div>
+                          <span className="text-[8px] text-text-secondary font-mono tabular-nums">{Math.round(f.cohesion)}%</span>
+                        </div>
                       )}
                     </div>
-                    {isPanel && f.cohesion != null && Number.isFinite(f.cohesion) && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="flex-1 h-1 bg-black/30 rounded overflow-hidden max-w-[80px]">
-                          <div
-                            className="h-full bg-accent-gold/50 rounded"
-                            style={{ width: `${Math.min(100, Math.max(0, f.cohesion))}%` }}
-                          />
-                        </div>
-                        <span className="text-[8px] text-text-secondary font-mono tabular-nums">{Math.round(f.cohesion)}%</span>
-                      </div>
+                    {f.personnel != null && (
+                      <span className="text-[9px] text-text-secondary font-mono tabular-nums flex-shrink-0">
+                        {f.personnel > 1000 ? `${(f.personnel / 1000).toFixed(1)}k` : f.personnel}
+                      </span>
                     )}
+                  </>
+                );
+                const className = `w-full flex items-center gap-2 py-1 px-1.5 bg-black/10 rounded border border-white/5 transition-colors ${onFormationClick ? 'hover:border-white/20 hover:bg-black/20 cursor-pointer text-left' : 'hover:border-white/10'}`;
+                return onFormationClick ? (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => onFormationClick(f.id)}
+                    className={className}
+                  >
+                    {rowContent}
+                  </button>
+                ) : (
+                  <div key={f.id} className={className}>
+                    {rowContent}
                   </div>
-                  {f.personnel != null && (
-                    <span className="text-[9px] text-text-secondary font-mono tabular-nums flex-shrink-0">
-                      {f.personnel > 1000 ? `${(f.personnel / 1000).toFixed(1)}k` : f.personnel}
-                    </span>
-                  )}
-                </div>
-              ))}
+                );
+              })}
               {restCount > 0 && (
                 <div className="text-[9px] text-text-secondary text-right italic pt-0.5">{t('settlement.additionalUnits', { count: restCount })}</div>
               )}

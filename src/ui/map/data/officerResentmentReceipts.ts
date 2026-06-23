@@ -74,6 +74,24 @@
 
 import type { GameState } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
+
+function getPlayerFaction(state: GameState | null | undefined): string | null {
+    return typeof state?.meta?.player_faction === 'string' ? state.meta.player_faction : null;
+}
+
+function corpsFaction(state: GameState, corpsId: string, cmd?: unknown): string | null {
+    const commandFaction = (cmd as { faction?: unknown } | undefined)?.faction;
+    if (typeof commandFaction === 'string' && commandFaction.trim().length > 0) return commandFaction;
+    const formation = state.military?.formations?.[corpsId];
+    return typeof formation?.faction === 'string' && formation.faction.trim().length > 0 ? formation.faction : null;
+}
+
+function rowBelongsToPlayer(rowFaction: string | null, playerFaction: string | null): boolean {
+    return !isCanonicalPlayerFaction(playerFaction)
+        || rowFaction === null
+        || playerFactionMatch(rowFaction, playerFaction);
+}
 
 /**
  * Read-side set of `corps_id`s that ran a force-launched operation — active
@@ -86,13 +104,14 @@ import { strictCompare } from '../../../state/validateGameState.js';
  * since-RELIEVED overridden CO whose current `assigned_corps_id` was cleared (#282).
  * Deterministic: a sorted set, iteration-order-independent.
  */
-function forceLaunchedCorps(state: GameState): Set<string> {
+function forceLaunchedCorps(state: GameState, playerFaction: string | null): Set<string> {
     const out = new Set<string>();
 
     const corpsCommand = state.military?.corps_command;
     if (corpsCommand) {
         for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
             const cmd = corpsCommand[corpsId];
+            if (!rowBelongsToPlayer(corpsFaction(state, corpsId, cmd), playerFaction)) continue;
             const ops = cmd?.active_operations;
             if (!ops) continue;
             for (const op of ops) {
@@ -107,7 +126,11 @@ function forceLaunchedCorps(state: GameState): Set<string> {
     const aars = state.operation_history;
     if (aars) {
         for (const aar of aars) {
-            if (aar.force_launched === true && aar.corps_id) out.add(aar.corps_id);
+            const aarFaction = (aar as { faction?: unknown }).faction;
+            const rowFaction = typeof aarFaction === 'string' ? aarFaction : null;
+            if (aar.force_launched === true && aar.corps_id && rowBelongsToPlayer(rowFaction, playerFaction)) {
+                out.add(aar.corps_id);
+            }
         }
     }
 
@@ -158,10 +181,11 @@ export function buildOfficerResentmentReceipts(
     if (!officers) return [];
 
     const officerData = state?.military?.named_officer_data ?? [];
+    const playerFaction = getPlayerFaction(state);
     // Corps that ran a force-launched op (#303: keyed by corps, NOT op commander).
     // Used to drop order-interpretation-only overrides (#125) AND to recover the
     // corps for a since-relieved CO whose assigned_corps_id was cleared (#282).
-    const fLaunchedCorps = forceLaunchedCorps(state);
+    const fLaunchedCorps = forceLaunchedCorps(state, playerFaction);
 
     // Force-launched corps still claimed by a CURRENTLY-ASSIGNED overridden CO. The
     // remaining (orphaned) force-launched corps are candidates for recovering a

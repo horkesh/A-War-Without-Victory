@@ -278,7 +278,20 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         className="bg-black/15 border border-panel-border/30 rounded px-2 py-1.5"
                                     >
                                         <div className="flex items-center justify-between gap-2">
-                                            <span className="text-text-primary truncate">{getLocalizedFormationName(brigade, locale)}</span>
+                                            <button
+                                                type="button"
+                                                onClick={() => inspectOnField(useGameStore.getState(), {
+                                                    kind: 'field-formation-in-army-reserve',
+                                                    formationId: brigade.id,
+                                                    armyHqId: armyHq.id,
+                                                    osid: brigade.location_osid,
+                                                })}
+                                                className="min-w-0 truncate text-left text-text-primary transition-colors hover:text-accent-gold"
+                                                aria-label={t('armyReserve.inspectActiveLoanBrigadeAria', { name: getLocalizedFormationName(brigade, locale) })}
+                                                data-testid={`army-reserve-active-loan-inspect-${brigade.id}`}
+                                            >
+                                                {getLocalizedFormationName(brigade, locale)}
+                                            </button>
                                             <span className="text-[10px] text-text-secondary shrink-0">
                                                 {deployedDurationLabel(ls.turns_deployed)}
                                             </span>

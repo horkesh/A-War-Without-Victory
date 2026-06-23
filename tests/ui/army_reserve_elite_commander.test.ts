@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ArmyReservePanel } from '../../src/ui/map/components/ArmyReservePanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -50,6 +50,7 @@ function makeReserveState(onLoan: boolean): LoadedGameState {
         createdTurn: 12,
         tags: [],
         corps_id: 'arbih_general_staff',
+        location_osid: 'op:visoko:visoko_2',
         personnel: 480,
         eliteLoanState: {
           on_loan: onLoan,
@@ -116,6 +117,8 @@ describe('ArmyReservePanel elite commander identity', () => {
     expect(copy).toContain('Tempo 3');
     expect(copy).toContain('Defense 3');
     expect(copy).not.toMatch(/\borigin\b|\bmilitary\b/i);
+    expect(screen.getByRole('button', { name: /^Inspect Guards Brigade$/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Inspect active loan Guards Brigade$/i })).toBeNull();
   });
 
   it('shows elite commander identity in active loan snapshots', () => {
@@ -131,5 +134,24 @@ describe('ArmyReservePanel elite commander identity', () => {
     expect(copy).toContain('Active Loans (1)');
     expect(copy).toContain('Elite commander');
     expect(copy).toContain('Dzevad Rado');
+    expect(screen.getByRole('button', { name: /^Inspect active loan Guards Brigade$/i })).toBeTruthy();
+  });
+
+  it('lets active-loan snapshot rows inspect the loaned brigade with settlement context', () => {
+    useGameStore.setState({
+      loadedGameState: makeReserveState(true),
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+      selectedOsid: null,
+    });
+
+    const { getByTestId } = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    fireEvent.click(getByTestId('army-reserve-active-loan-inspect-arbih_guards_brigade'));
+
+    const state = useGameStore.getState();
+    expect(state.selectedFormationId).toBe('arbih_guards_brigade');
+    expect(state.selectedArmyHqId).toBe('arbih_general_staff');
+    expect(state.selectedOsid).toBe('op:visoko:visoko_2');
   });
 });

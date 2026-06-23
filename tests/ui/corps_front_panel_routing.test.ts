@@ -309,6 +309,16 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toContain('0%');
   });
 
+  it('disables Corps Front command controls when the desktop command bridge is unavailable', () => {
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect((screen.getByRole('button', { name: '0.5x' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '1.0x' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: '1.5x' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: /Tighten sector security/i }) as HTMLButtonElement).disabled).toBe(true);
+    expect(container.textContent).toContain('Desktop command bridge unavailable');
+  });
+
   it('does not describe an uncovered sector as a force-balance advantage', () => {
     const state = makeState();
     state.corpsFrontSectors = [{
@@ -367,6 +377,44 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Total manpower\s*1[,.]200/i);
     expect(container.textContent).toMatch(/Reserve ratio\s*100%/i);
+  });
+
+  it('includes rear support elements in Corps Front logistics manpower', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'arbih_rear_support',
+        faction: 'RBiH',
+        name: 'Rear Support Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        personnel: 500,
+        location_osid: 'op:sarajevo:centar_1',
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: ['arbih_rear_support'],
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Total manpower\s*500/i);
   });
 
   it('sanitizes raw sector labels in Corps Front', () => {
@@ -542,5 +590,84 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.chronicleOpen).toBe(false);
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
+  });
+
+  it('renders unknown commander assessment as unreported instead of title-cased enum copy', () => {
+    const state = makeState();
+    state.operations = ([{
+      ...state.operations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'assessment',
+      commander_assessment: 'wait_for_terrain_probe',
+    }] as unknown) as LoadedGameState['operations'];
+    state.activeOperations = ([{
+      ...state.activeOperations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'assessment',
+      commander_assessment: 'wait_for_terrain_probe',
+    }] as unknown) as LoadedGameState['activeOperations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toContain('Cdr Assessment: Unreported');
+    expect(container.textContent).not.toMatch(/Wait For Terrain Probe|wait_for_terrain_probe/i);
+  });
+
+  it('renders unknown operation prep phase as unreported instead of title-cased enum copy', () => {
+    const state = makeState();
+    state.operations = ([{
+      ...state.operations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'waiting_for_bridge_report',
+      commander_assessment: 'launch',
+    }] as unknown) as LoadedGameState['operations'];
+    state.activeOperations = ([{
+      ...state.activeOperations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'waiting_for_bridge_report',
+      commander_assessment: 'launch',
+    }] as unknown) as LoadedGameState['activeOperations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toMatch(/Waiting For Bridge Report|waiting_for_bridge_report/i);
+  });
+
+  it('renders unknown corps stance as unreported instead of title-cased enum copy', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_1st_corps'
+      ? { ...formation, corpsStance: 'wait_for_orders' }
+      : formation);
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Corps Stance:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Wait For Orders|wait_for_orders/i);
+  });
+
+  it('disables draft directive without the desktop command bridge', () => {
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    const directiveButton = screen.getByTestId('corps-front-draft-directive') as HTMLButtonElement;
+    expect(directiveButton.disabled).toBe(true);
   });
 });

@@ -44,6 +44,36 @@ test('baked April 1992 startup artifact matches canonical builder truth after ch
     );
 }, 120_000);
 
+test('baked April 1992 startup command formations preserve source HQ OSID anchors', async () => {
+    const baseDir = process.cwd();
+    const [state, rawCorps] = await Promise.all([
+        loadStartupSnapshotState(baseDir, 'apr_1992'),
+        readFile(resolve(baseDir, 'data/source/oob_corps.json'), 'utf8'),
+    ]);
+    const parsedCorps = JSON.parse(rawCorps) as { corps?: Array<{ id: string; hq_osid?: string }> };
+    const sourceRows = parsedCorps.corps ?? [];
+    const expectedAnchors = new Map(
+        sourceRows
+            .filter((row) => typeof row.hq_osid === 'string' && row.hq_osid.length > 0)
+            .map((row) => [row.id, row.hq_osid!]),
+    );
+    const issues: string[] = [];
+
+    for (const [id, expected] of [...expectedAnchors.entries()].sort((a, b) => a[0].localeCompare(b[0]))) {
+        const formation = state.military.formations[id];
+        if (!formation || formation.status !== 'active') continue;
+        if (formation.kind !== 'army_hq' && formation.kind !== 'corps_asset') continue;
+        if ((formation as { hq_osid?: string }).hq_osid !== expected) {
+            issues.push(`${id}:${(formation as { hq_osid?: string }).hq_osid ?? 'missing'}!=${expected}`);
+        }
+        if (formation.location_osid !== undefined) {
+            issues.push(`${id}:unexpected-location:${formation.location_osid}`);
+        }
+    }
+
+    assert.deepStrictEqual(issues, []);
+}, 120_000);
+
 test('baked April 1992 startup artifact stays in canonical loaded-save form', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
     const payload = serializeState(state);

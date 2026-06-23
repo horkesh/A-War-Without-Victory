@@ -61,6 +61,10 @@ export function resolveMapFormationInspectionTarget(
     stringProperty(properties, 'location_osid')
     ?? (typeof formation?.location_osid === 'string' && formation.location_osid.trim().length > 0
       ? formation.location_osid
+      : null)
+    ?? stringProperty(properties, 'hq_osid')
+    ?? (typeof formation?.hq_osid === 'string' && formation.hq_osid.trim().length > 0
+      ? formation.hq_osid
       : null);
 
   if (sectorId) {
@@ -77,7 +81,7 @@ export function resolveMapFormationInspectionTarget(
     stringProperty(properties, 'corps_id')
     ?? (typeof formation?.corps_id === 'string' && formation.corps_id.trim().length > 0 ? formation.corps_id : null);
   if (corpsId) {
-    return { kind: 'field-formation-in-corps', formationId, corpsId };
+    return { kind: 'field-formation-in-corps', formationId, corpsId, osid };
   }
 
   if (osid) {

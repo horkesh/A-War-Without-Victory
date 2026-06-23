@@ -375,4 +375,21 @@ describe('buildConsequenceReceipts', () => {
         expect(text).toContain('Materijalna podrska Beograda smanjena za 25%');
         expect(text).not.toMatch(/Patron defiance|Refused|materiel cut|front fell|refusal stands/i);
     });
+
+    it('filters patron-defiance receipts to the loaded player faction when ownership is known', () => {
+        const state = {
+            meta: { player_faction: 'RS' },
+            military: {
+                patron_defiance_supply_cuts: [
+                    { faction: 'RS', turn: 12, cut_fraction: 0.25, support_after: 0.55 },
+                    { faction: 'HRHB', turn: 12, cut_fraction: 0.2, support_after: 0.6 },
+                ],
+            },
+        } as unknown as GameState;
+
+        const receipts = buildConsequenceReceipts(state, undefined);
+
+        expect(receipts.map((receipt) => receipt.id)).toEqual(['patron_defiance::RS::12']);
+        expect(receipts.map((receipt) => receipt.predictedEventId)).toEqual(['patron_supply_cut_RS']);
+    });
 });

@@ -607,6 +607,23 @@ async function activateVisibleControl(page, selector, timeout = 30000) {
   if (!activated) throw new Error(`Visible control could not be activated: ${selector}`);
 }
 
+async function isVisibleButtonDisabled(page, selector, timeout = 30000) {
+  await waitForVisibleSelector(page, selector, timeout);
+  return page.evaluate((targetSelector) => {
+    const target = Array.from(document.querySelectorAll(targetSelector)).find((el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    });
+    return target instanceof HTMLButtonElement && target.disabled;
+  }, selector);
+}
+
 async function clickFirstVisibleSelector(page, selector, description = selector) {
   await page.waitForFunction(
     (targetSelector) => {
@@ -1384,15 +1401,25 @@ async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
   await waitForVisibleSelector(page, '#sector-intel-panel-logistics');
   await activateVisibleControl(page, '#sector-intel-tab-ops');
   await waitForVisibleSelector(page, '#sector-intel-panel-ops');
-  await activateVisibleControl(page, `[data-testid="corps-front-draft-directive"][data-origin-sector-id="${quoteCssAttributeValue(sectorId)}"]`);
-  await waitForVisibleSelector(page, '[data-testid="ops-planning-modal"][data-origin-sector-id]');
-  await waitForVisibleSelector(page, '[data-testid="ops-planning-phase-panel"][data-phase="commander"]');
-  for (const phase of ['commander', 'plan', 'g2_assessment', 'authorize']) {
-    await waitForVisibleSelector(page, `[data-testid="ops-planning-phase-${phase}"][data-phase="${phase}"]`);
+  const draftDirectiveSelector = `[data-testid="corps-front-draft-directive"][data-origin-sector-id="${quoteCssAttributeValue(sectorId)}"]`;
+  const draftDirectiveDisabled = await isVisibleButtonDisabled(page, draftDirectiveSelector);
+  if (draftDirectiveDisabled) {
+    await page.waitForFunction(
+      () => document.body.textContent?.includes('Desktop command bridge unavailable'),
+      { timeout: 15000 },
+    );
+    await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_bridge_unavailable'));
+  } else {
+    await activateVisibleControl(page, draftDirectiveSelector);
+    await waitForVisibleSelector(page, '[data-testid="ops-planning-modal"][data-origin-sector-id]');
+    await waitForVisibleSelector(page, '[data-testid="ops-planning-phase-panel"][data-phase="commander"]');
+    for (const phase of ['commander', 'plan', 'g2_assessment', 'authorize']) {
+      await waitForVisibleSelector(page, `[data-testid="ops-planning-phase-${phase}"][data-phase="${phase}"]`);
+    }
+    await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_modal'));
+    await activateVisibleControl(page, '[data-testid="ops-planning-close"]');
+    await page.waitForFunction(() => !document.querySelector('[data-testid="ops-planning-modal"]'), { timeout: 15000 });
   }
-  await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_modal'));
-  await activateVisibleControl(page, '[data-testid="ops-planning-close"]');
-  await page.waitForFunction(() => !document.querySelector('[data-testid="ops-planning-modal"]'), { timeout: 15000 });
   await activateVisibleControl(page, '#sector-intel-tab-forces');
   await waitForVisibleSelector(page, '#sector-intel-panel-forces');
   const formationId = await getVisibleSelectorAttribute(

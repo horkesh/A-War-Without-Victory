@@ -39,7 +39,7 @@ import type {
 import { strictCompare } from '../../../state/validateGameState.js';
 import { getPlayerSafeDisplayLabel } from '../utils/playerSafeText.js';
 import { t } from '../i18n/index.js';
-import { playerFactionMatch } from './playerFactionMatch.js';
+import { isCanonicalPlayerFaction, playerFactionMatch } from './playerFactionMatch.js';
 
 /** Realization status of a single predicted downstream event. */
 export type ConsequenceReceiptStatus = 'confirmed' | 'pending' | 'contradicted';
@@ -156,11 +156,12 @@ function patronLabelForFaction(factionId: string): string {
  * so the existing Turn-Aftermath "Consequences Realized This Turn" section surfaces
  * it via `receiptsRealizedOnTurn`. Wording is factual and never framed as a reward.
  */
-function buildPatronDefianceReceipts(state: GameState): ConsequenceReceipt[] {
+function buildPatronDefianceReceipts(state: GameState, playerFaction: string | null): ConsequenceReceipt[] {
     const cuts = state.military?.patron_defiance_supply_cuts ?? [];
     if (cuts.length === 0) return [];
     const out: ConsequenceReceipt[] = [];
     for (const cut of cuts) {
+        if (isCanonicalPlayerFaction(playerFaction) && !playerFactionMatch(cut.faction, playerFaction)) continue;
         const pct = Math.round(cut.cut_fraction * 100);
         const supportPct = Math.round(cut.support_after * 100);
         const patron = patronLabelForFaction(cut.faction);
@@ -206,14 +207,13 @@ export function buildConsequenceReceipts(
     // Patron-defiance receipts need no catalog and no event-decision log — they
     // project directly from the engine's realized-cut substrate. Gather them first
     // so they survive the event-causality early-returns below.
-    const patronReceipts = buildPatronDefianceReceipts(state);
+    const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
+    const patronReceipts = buildPatronDefianceReceipts(state, playerFaction);
 
     const decisionLog = state.military?.event_decision_log ?? [];
     if (!catalog || catalog.size === 0 || decisionLog.length === 0) {
         return sortReceipts(patronReceipts);
     }
-    const playerFaction = typeof state.meta?.player_faction === 'string' ? state.meta.player_faction : null;
-
     const firedIds = new Set(state.military?.fired_event_ids ?? []);
     const closedIds = new Set(state.military?.closed_event_ids ?? []);
     const lastFiredTurn = state.military?.event_last_fired_turn ?? {};

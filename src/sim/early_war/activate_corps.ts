@@ -89,7 +89,7 @@ export function activateCorpsForTurn(
         }
 
         const hq_sid = municipalityHqSettlement?.[c.hq_mun];
-        const location_osid =
+        const hq_osid =
             c.hq_osid ??
             (canonicalToOperational && hq_sid
                 ? resolveLocationOsid(hq_sid, canonicalToOperational)
@@ -105,7 +105,8 @@ export function activateCorpsForTurn(
             tags: [`mun:${c.hq_mun}`],
             kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
             personnel: 0,
-            ...(hq_sid ? { hq_sid } : {})
+            ...(hq_sid ? { hq_sid } : {}),
+            ...(hq_osid ? { hq_osid } : {})
             // Corps/army HQ formations are command structures, not map entities.
         };
         state.military.formations[c.id] = formation;

@@ -909,6 +909,8 @@ export interface FormationState {
     doctrine_state?: DoctrineState;
     /** HQ settlement for map placement and clickable icon. When set, icon is drawn at this settlement; when absent, fallback to municipality centroid. */
     hq_sid?: SettlementId;
+    /** Command-only operational HQ anchor for corps/army HQ drilldowns. Does not imply tactical field presence. */
+    hq_osid?: SettlementId;
     /** Operational settlement ID (OSID). Set at creation from hq_sid via canonical_to_operational_map. */
     location_osid?: SettlementId;
     // --- Brigade Operations System fields ---

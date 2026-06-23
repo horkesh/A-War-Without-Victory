@@ -13,7 +13,7 @@ import { useIPC } from '../desktop/useIPC';
 import { filterPlayerFacingOperations, findPlayerFacingSectorById, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
-import { formatPosture, toTitleCase, turnToDateString } from '../utils/formatters';
+import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
@@ -121,16 +121,19 @@ const COMMANDER_ASSESSMENT_LABELS: Record<string, string> = {
   launch: 'Recommends launch', postpone: 'Urges delay', abort: 'Advises abort',
 };
 function commanderAssessmentLabel(assessment: string): string {
-  return COMMANDER_ASSESSMENT_LABELS[assessment] ?? toTitleCase(assessment);
+  return COMMANDER_ASSESSMENT_LABELS[assessment] ?? t('corpsFront.unreported');
 }
 
-function stanceLabel(stance: SectorStanceType): string {
-  return t(STANCE_LABEL_KEYS[stance]);
+function stanceLabel(stance: string | null | undefined): string {
+  const key = (stance ?? '').trim();
+  return Object.prototype.hasOwnProperty.call(STANCE_LABEL_KEYS, key)
+    ? t(STANCE_LABEL_KEYS[key as SectorStanceType])
+    : t('corpsFront.unreported');
 }
 
 function prepLabel(subPhase: string): string {
   const key = PREP_LABEL_KEYS[subPhase];
-  return key ? t(key) : toTitleCase(subPhase);
+  return key ? t(key) : t('corpsFront.unreported');
 }
 
 function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed: number; maxTurns: number }) {
@@ -270,8 +273,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const rearPersonnel = rearFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
   const overridePersonnel = overrideFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const totalSectorPersonnel = assignedPersonnel + reservePersonnel + overridePersonnel;
+  const totalSectorPersonnel = assignedPersonnel + reservePersonnel + rearPersonnel + overridePersonnel;
   const hasFriendlyLine = lineHoldingFormations.length > 0;
   const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
   const displayStrengthClass = hasFriendlyLine ? sector.combat_strength_class : undefined;
@@ -301,11 +305,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     ? operationSupplyReadinessValues.reduce((sum, readiness) => sum + readiness, 0) / operationSupplyReadinessValues.length
     : null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
-  const currentSectorStance = SECTOR_STANCES.includes(sector.sector_stance as SectorStanceType)
-    ? (sector.sector_stance as SectorStanceType)
-    : null;
+  const currentSectorStance = sector.sector_stance ?? null;
   const currentStanceSource = sector.stance_source ?? 'bot';
-  const sectorStanceLabel = currentSectorStance ? stanceLabel(currentSectorStance) : t('corpsFront.unreported');
+  const sectorStanceLabel = stanceLabel(currentSectorStance);
   const hasReportedLogisticsPriority = typeof sector.logistics_priority === 'number' && Number.isFinite(sector.logistics_priority);
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, hasReportedLogisticsPriority ? sector.logistics_priority! : 1));
   const hasReportedOpsec = typeof sector.opsec_active === 'boolean';
@@ -403,7 +405,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">{t('corpsFront.faction')}:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
-            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {corpsStance === 'unknown' ? t('corpsFront.unreported') : formatPosture(corpsStance)}</div>
+            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {stanceLabel(corpsStance)}</div>
             <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
             <div>
               <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
@@ -588,9 +590,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <button
                           key={priority}
                           type="button"
+                          disabled={!ipc.isAvailable}
                           onClick={() => void issueLogisticsPriority(priority)}
                           title={priority === 1 ? t('corpsFront.neutralPriorityTitle', { title: logisticsPriorityTitle }) : logisticsPriorityTitle}
-                          className="kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 text-[10px] font-bold"
+                          className={`kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 text-[10px] font-bold ${ipc.isAvailable ? 'bg-neutral-200/50 hover:bg-neutral-300/60' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                         >
                           {priority.toFixed(1)}x
                         </button>
@@ -599,11 +602,15 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   </div>
                   <button
                     type="button"
+                    disabled={!ipc.isAvailable}
                     onClick={() => void toggleOpsec()}
-                    className="kbd-focus w-full rounded border border-neutral-400 bg-neutral-200/50 hover:bg-neutral-300/60 px-2 py-1 text-[10px] font-bold uppercase"
+                    className={`kbd-focus w-full rounded border border-neutral-400 px-2 py-1 text-[10px] font-bold uppercase ${ipc.isAvailable ? 'bg-neutral-200/50 hover:bg-neutral-300/60' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                   >
                     {opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
                   </button>
+                  {!ipc.isAvailable && (
+                    <div className="text-[10px] text-neutral-600 italic">{t('corpsFront.commandBridgeUnavailable')}</div>
+                  )}
                   {sectorActionMessage && (
                     <div className="text-[10px] text-neutral-600 italic">{sectorActionMessage}</div>
                   )}
@@ -932,15 +939,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     data-testid="corps-front-draft-directive"
                     data-corps-id={sector?.corps_id ?? ''}
                     data-origin-sector-id={sector?.sector_id ?? ''}
+                    disabled={!ipc.isAvailable}
                     onClick={() => {
-                      if (sector?.corps_id) {
+                      if (ipc.isAvailable && sector?.corps_id) {
                         setOpsPlanningContext(sector.corps_id, sector.sector_id);
                       }
                     }}
-                    className="kbd-focus w-full text-[10px] uppercase font-bold bg-neutral-200 hover:bg-neutral-300 text-neutral-800 py-2 border border-neutral-400 transition-colors"
+                    className={`kbd-focus w-full text-[10px] uppercase font-bold py-2 border border-neutral-400 transition-colors ${ipc.isAvailable ? 'bg-neutral-200 hover:bg-neutral-300 text-neutral-800' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                   >
                     {t('corpsFront.draftNewDirective')}
                   </button>
+                  {!ipc.isAvailable && (
+                    <div className="mt-1 text-[10px] text-neutral-600 italic">{t('corpsFront.commandBridgeUnavailable')}</div>
+                  )}
                 </div>
               </div>
             )}

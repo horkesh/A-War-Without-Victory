@@ -2,7 +2,7 @@
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createElement } from 'react';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SettlementDetailContent } from '../../src/ui/map/components/SettlementDetailContent.js';
 import { buildOsidSupplyExplanation } from '../../src/ui/map/data/osidSupplyExplanation.js';
@@ -157,5 +157,27 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(panel.textContent).toContain('Gusto naseljeno ruralno podrucje');
     expect(panel.textContent).toContain('Odbrana +30%');
     expect(panel.textContent).not.toMatch(/Bosniak|Serb|Croat|Other|Rural Dense|\+30% Def|rural_dense/);
+  });
+
+  it('renders stationed-unit drilldowns as native buttons when they are clickable', () => {
+    const onFormationClick = vi.fn();
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [{
+        id: 'bde_101',
+        faction: 'RBiH',
+        name: '101st Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 80,
+      }],
+      onFormationClick,
+    }));
+
+    const brigadeButton = screen.getByRole('button', { name: /101st Brigade/i });
+    expect(brigadeButton.tagName).toBe('BUTTON');
+
+    fireEvent.click(brigadeButton);
+    expect(onFormationClick).toHaveBeenCalledWith('bde_101');
   });
 });

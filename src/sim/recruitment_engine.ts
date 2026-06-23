@@ -675,7 +675,7 @@ export function runBotRecruitment(
             const isOpeningArmyHq = c.kind === 'army_hq' && c.available_from <= currentTurn;
             if (!isOpeningArmyHq && !factionHasPresenceInMun(state, c.faction, c.hq_mun, sidToMun)) continue;
             const hq_sid = resolveValidHqSid(state, c.faction, c.hq_mun, municipalityHqSettlement, sidToMun);
-            const location_osid =
+            const hq_osid =
                 c.hq_osid ?? resolveRecruitmentLocationOsid(hq_sid, options?.canonicalToOperational);
             state.military.formations[c.id] = {
                 id: c.id as FormationId,
@@ -688,6 +688,7 @@ export function runBotRecruitment(
                 kind: c.kind === 'army_hq' ? 'army_hq' : 'corps_asset',
                 personnel: 0,
                 ...(hq_sid ? { hq_sid } : {}),
+                ...(hq_osid ? { hq_osid } : {}),
                 // Corps/army HQ formations are command structures, not map entities.
                 // No location_osid — BFS seeding uses subordinate brigade positions.
             };

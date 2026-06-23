@@ -150,6 +150,7 @@ export interface FormationView {
     tags: string[];
     municipalityId?: string;
     hq_sid?: string;
+    hq_osid?: string;
     location_osid?: string;
     home_osid?: string;
     aorSettlementIds?: string[];

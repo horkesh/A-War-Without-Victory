@@ -349,6 +349,30 @@ describe('buildOfficerResentmentReceipts', () => {
         expect(buildOfficerResentmentReceipts(state)).toEqual([]);
     });
 
+    it('yields NO receipt for a foreign force-launched corps when player faction is known', () => {
+        const state = {
+            meta: { player_faction: 'RS' },
+            military: {
+                named_officers: {
+                    foreign_co: buildOfficerState('foreign_co', { override: true, overrideTurn: 12, corpsId: 'rbih_1_corps' }),
+                },
+                named_officer_data: [buildOfficerData('foreign_co', 'Gen. Foreign')],
+            },
+            operation_history: [
+                {
+                    operation_id: 'foreign_force',
+                    operation_name: 'Foreign Forced Op',
+                    corps_id: 'rbih_1_corps',
+                    faction: 'RBiH',
+                    force_launched: true,
+                    ended_turn: 12,
+                },
+            ],
+        } as unknown as GameState;
+
+        expect(buildOfficerResentmentReceipts(state)).toEqual([]);
+    });
+
     it('returns [] for bot/historical runs (no overrides anywhere)', () => {
         const state = buildState(
             {

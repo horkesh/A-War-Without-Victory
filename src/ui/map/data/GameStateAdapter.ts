@@ -769,6 +769,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             const ops = asLooseRecord(f.ops);
             const hq_sid = typeof f.hq_sid === 'string' && f.hq_sid ? f.hq_sid : undefined;
+            const hq_osid = typeof (f as { hq_osid?: string }).hq_osid === 'string' && (f as { hq_osid?: string }).hq_osid ? (f as { hq_osid?: string }).hq_osid : undefined;
             const location_osid = typeof (f as { location_osid?: string }).location_osid === 'string' && (f as { location_osid?: string }).location_osid ? (f as { location_osid?: string }).location_osid : undefined;
             const home_osid = typeof f.home_osid === 'string' && f.home_osid ? f.home_osid : undefined;
             const origin_mun = typeof f.origin_mun === 'string' && f.origin_mun.trim().length > 0 ? f.origin_mun.trim() : undefined;
@@ -864,7 +865,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 status: typeof f.status === 'string' ? f.status : 'unreported',
                 createdTurn: typeof f.created_turn === 'number' && Number.isFinite(f.created_turn) ? f.created_turn : 0,
                 home_osid,
-                tags, municipalityId, hq_sid, location_osid, aorSettlementIds,
+                tags, municipalityId, hq_sid, hq_osid, location_osid, aorSettlementIds,
                 personnel, posture, home_defense_active, corps_id, supply_state, movementStatus, movementStance,
                 homeHops, homeDistanceMult, homeIsElite, sectorOverrideId, assigned_sub_segment_id,
                 narrativeArc,
@@ -2049,6 +2050,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     let corpsFrontSectors: CorpsFrontSectorView[] | undefined;
     const rawSectors = state.military.corps_front_sectors as Record<string, Record<string, unknown>> | undefined;
+    const hasReportedOpsecSectors = Array.isArray(state.military.opsec_sectors)
+        || Array.isArray(state.opsec_sectors);
     const rawOpsecSectors: unknown[] = Array.isArray(state.military.opsec_sectors)
         ? state.military.opsec_sectors
         : Array.isArray(state.opsec_sectors)
@@ -2079,6 +2082,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             const assignedBrigadeIds = Array.isArray(s.assigned_brigade_ids) ? (s.assigned_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
             const reserveBrigadeIds = Array.isArray(s.reserve_brigade_ids) ? (s.reserve_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
             const rearBrigadeIds = Array.isArray(s.rear_brigade_ids) ? (s.rear_brigade_ids as string[]).filter(id => typeof id === 'string').sort((a, b) => a.localeCompare(b)) : [];
+            const factionPriorities = (state.military.logistics_priority as Record<string, Record<string, number>> | undefined)?.[faction];
+            const hasReportedLogisticsPriority = factionPriorities !== undefined;
 
             // Derive display_name from municipality slugs in friendly_osids
             const munCounts = new Map<string, number>();
@@ -2133,14 +2138,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 // New intel fields defaulting for backwards compatibility:
                 intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : 1.0,
                 offensive_signs: Boolean(s.offensive_signs),
-                logistics_priority: edgeIds.length > 0
+                logistics_priority: hasReportedLogisticsPriority && edgeIds.length > 0
                     ? edgeIds.reduce((sum, edgeId) => {
-                        const factionPriorities = (state.military.logistics_priority as Record<string, Record<string, number>> | undefined)?.[faction];
                         const value = factionPriorities?.[edgeId];
                         return sum + (typeof value === 'number' ? value : 1);
                     }, 0) / edgeIds.length
-                    : 1,
-                opsec_active: opsecSectorSet.has(sectorId),
+                    : undefined,
+                opsec_active: hasReportedOpsecSectors ? opsecSectorSet.has(sectorId) : undefined,
                 sector_stance: typeof s.sector_stance === 'string' ? s.sector_stance as CorpsFrontSectorView['sector_stance'] : undefined,
                 stance_source: typeof s.stance_source === 'string' ? s.stance_source as CorpsFrontSectorView['stance_source'] : undefined,
                 sub_segments: subSegments.map((ss: any) => ({
