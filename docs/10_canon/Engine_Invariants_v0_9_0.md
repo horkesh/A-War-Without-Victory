@@ -207,6 +207,8 @@ In War phase, brigade location is **location_osid** only; no settlement-level te
 
 **Formation location-in-control:** Every active formation with `location_osid` set must be in an OSID controlled by that formation's faction. Enforced by: pipeline step `displace-enemy-territory` (after attack resolution); scenario runner initial-state displacement after backfill; validation `validateBrigadeLocationControl`. OOB `home_osid` must be faction-controlled at scenario start.
 
+**Command HQ anchors:** Corps and army-level command formations may carry `hq_osid` as a map/read-model anchor. `hq_osid` is not tactical presence, does not satisfy brigade location, does not create control or stationed-unit truth, and must not be used by movement, combat, displacement, or formation-location validation. Use `location_osid` only for actual physical formation placement.
+
 ### 9.9 Determinism and Auditability
 
 Political control initialization and transitions must be:

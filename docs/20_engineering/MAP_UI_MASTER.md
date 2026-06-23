@@ -52,7 +52,7 @@ src/ui/map/
 │       ├── buildOperationTargetIconsGeoJSON.ts Op objective markers: points + crosshairs
 │       ├── formationIconId.ts                  Icon ID string from kind + faction
 │       ├── geojsonLookup.ts                    buildOsidCentroidLookup() helper
-│       ├── resolveFormationLocationOsid.ts     `location_osid`, then sorted `aorSettlementIds`, then `hq_sid`
+│       ├── resolveFormationLocationOsid.ts     marker anchor resolver: command `hq_osid`, then `location_osid`, then legacy fallbacks
 │       ├── generateFactionBorders.ts           Shared-edge faction boundary computation
 │       ├── buildFogOfWarGeoJSON.ts             Enemy-territory fog-of-war polygon fill from `LoadedGameState.fogOfWar`
 │       └── buildBattleMarkersGeoJSON.ts        Combat flip events → Point features (last 3 turns, age-based opacity)
@@ -498,6 +498,7 @@ interface FormationView {
   status: string;
   readiness: string;
   location_osid?: string;
+  hq_osid?: string;                 // command-only map anchor; not physical/tactical presence
   corps_id?: string;
   corpsStance?: string;
   corpsExhaustion?: number;

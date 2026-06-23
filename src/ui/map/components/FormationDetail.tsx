@@ -681,7 +681,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   {formatMovementStatusLabel(formation.movementStatus)}
                 </span>
                 {formation.movementStance && (
-                  <span className="text-text-secondary lowercase italic">({getPlayerSafeSectorStanceLabel(formation.movementStance)} march)</span>
+                  <span className="text-text-secondary italic">
+                    {t('formationDetail.movementStance', { stance: getPlayerSafeSectorStanceLabel(formation.movementStance) })}
+                  </span>
                 )}
               </div>
             )}
@@ -887,6 +889,11 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
         {/* ────────── ORDERS TAB ────────── */}
         {activeTab === 'orders' && (
           <>
+            {!ipc.isAvailable && (
+              <div className="text-[10px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
+                {t('formationDetail.commandBridgeUnavailable')}
+              </div>
+            )}
             {/* Elite loan status (elite brigades only) */}
             {formation.eliteLoanState && (
               <div className="space-y-2 pb-3 border-b border-panel-border">
@@ -914,8 +921,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     </div>
                     <button
                       type="button"
+                      disabled={!ipc.isAvailable}
                       onClick={() => void ipc.recallEliteBrigade(formation.id).then(r => { if (!r.ok) setLoadError(r.error ?? t('formationDetail.recallFailed')); })}
-                      className="w-full px-2 py-1.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[11px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
+                      className={`w-full px-2 py-1.5 border rounded text-[11px] font-bold transition-colors ${ipc.isAvailable ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30' : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'}`}
                     >
                       {t('formationDetail.recallToReserve')}
                     </button>
@@ -986,12 +994,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   {sectorOverrideId && (
                     <button
                       type="button"
+                      disabled={!ipc.isAvailable}
                       onClick={() => void assignBrigadeToSectorOverrideAction(
                         { ipc, addStagedOrder, setLoadError },
                         formation.id,
                         null
                       )}
-                      className="text-[10px] text-[#d45555] hover:underline"
+                      className={`text-[10px] ${ipc.isAvailable ? 'text-[#d45555] hover:underline' : 'text-text-secondary cursor-not-allowed'}`}
                     >
                       {t('formationDetail.clearOverride')}
                     </button>
@@ -1010,7 +1019,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <button
                         key={sector.sector_id}
                         type="button"
-                        disabled={isCurrentOverride || isCurrentAutomatic}
+                        disabled={!ipc.isAvailable || isCurrentOverride || isCurrentAutomatic}
                         data-testid="formation-detail-sector-option"
                         data-sector-id={sector.sector_id}
                         data-current-brigade-count={currentBrigadeCount}
@@ -1021,7 +1030,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                           count: currentBrigadeCount,
                         })}
                         onClick={() => {
-                          if (isCurrentAutomatic) return;
+                          if (!ipc.isAvailable || isCurrentAutomatic) return;
                           void assignBrigadeToSectorOverrideAction(
                             { ipc, addStagedOrder, setLoadError },
                             formation.id,
@@ -1029,7 +1038,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                           );
                         }}
                         className={`w-full text-left px-2 py-1.5 rounded border text-[11px] transition-colors ${
-                          isCurrentOverride
+                          !ipc.isAvailable
+                            ? 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'
+                            : isCurrentOverride
                             ? 'bg-accent-gold/10 border-accent-gold/50 text-accent-gold cursor-default'
                           : isCurrentAutomatic
                             ? 'bg-white/5 border-white/20 text-text-primary cursor-default'

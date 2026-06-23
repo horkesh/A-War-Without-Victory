@@ -97,6 +97,40 @@ describe('Pause Escape shortcuts', () => {
         expect(useGameStore.getState().pauseMenuOpen).toBe(true);
     });
 
+    it('clears an isolated Army Reserve panel before opening the pause menu', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            selectedArmyHqId: 'army_hq_1',
+            pauseMenuOpen: false,
+            armyHQOpen: false,
+        });
+        mountKeyboardShortcuts();
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+
+        expect(useGameStore.getState()).toMatchObject({
+            selectedArmyHqId: null,
+            pauseMenuOpen: false,
+        });
+    });
+
+    it('clears an isolated ORBAT panel before opening the pause menu', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            selectedOrbatCorpsId: 'corps_1',
+            pauseMenuOpen: false,
+            armyHQOpen: false,
+        });
+        mountKeyboardShortcuts();
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+
+        expect(useGameStore.getState()).toMatchObject({
+            selectedOrbatCorpsId: null,
+            pauseMenuOpen: false,
+        });
+    });
+
     it('leaves Escape to the Army HQ modal while it is active', () => {
         useGameStore.setState({
             ...useGameStore.getInitialState(),

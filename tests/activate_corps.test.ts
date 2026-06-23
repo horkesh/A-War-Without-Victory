@@ -23,23 +23,23 @@ import { CURRENT_SCHEMA_VERSION, type FormationState, type GameState } from '../
 
 /** RS corps (available_from: 0) */
 const RS_CORPS_OOB: OobCorps[] = [
-    { id: 'vrs_main_staff', faction: 'RS', name: 'Main Staff VRS', hq_mun: 'han_pijesak', kind: 'army_hq', available_from: 0 },
-    { id: 'vrs_1st_krajina', faction: 'RS', name: '1st Krajina Corps', hq_mun: 'banja_luka', kind: 'corps', available_from: 0 },
-    { id: 'vrs_drina', faction: 'RS', name: 'Drina Corps', hq_mun: 'vlasenica', kind: 'corps', available_from: 0 },
+    { id: 'vrs_main_staff', faction: 'RS', name: 'Main Staff VRS', hq_mun: 'han_pijesak', hq_osid: 'op:han_pijesak:han_pijesak_1', kind: 'army_hq', available_from: 0 },
+    { id: 'vrs_1st_krajina', faction: 'RS', name: '1st Krajina Corps', hq_mun: 'banja_luka', hq_osid: 'op:banja_luka:banja_luka_1', kind: 'corps', available_from: 0 },
+    { id: 'vrs_drina', faction: 'RS', name: 'Drina Corps', hq_mun: 'vlasenica', hq_osid: 'op:vlasenica:vlasenica_1', kind: 'corps', available_from: 0 },
 ];
 
 /** HRHB corps (available_from: 10) */
 const HRHB_CORPS_OOB: OobCorps[] = [
-    { id: 'hvo_main_staff', faction: 'HRHB', name: 'Main Staff HVO', hq_mun: 'mostar', kind: 'army_hq', available_from: 10 },
-    { id: 'hvo_southeast_herzegovina', faction: 'HRHB', name: 'Southeast Herzegovina OZ', hq_mun: 'mostar', kind: 'corps', available_from: 10 },
-    { id: 'hvo_central_bosnia', faction: 'HRHB', name: 'Central Bosnia OZ', hq_mun: 'vitez', kind: 'corps', available_from: 10 },
+    { id: 'hvo_main_staff', faction: 'HRHB', name: 'Main Staff HVO', hq_mun: 'mostar', hq_osid: 'op:mostar:mostar_1', kind: 'army_hq', available_from: 10 },
+    { id: 'hvo_southeast_herzegovina', faction: 'HRHB', name: 'Southeast Herzegovina OZ', hq_mun: 'mostar', hq_osid: 'op:mostar:mostar_1', kind: 'corps', available_from: 10 },
+    { id: 'hvo_central_bosnia', faction: 'HRHB', name: 'Central Bosnia OZ', hq_mun: 'vitez', hq_osid: 'op:vitez:vitez_1', kind: 'corps', available_from: 10 },
 ];
 
 /** RBiH corps (available_from: 24) */
 const ARBIH_CORPS_OOB: OobCorps[] = [
-    { id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff ARBiH', hq_mun: 'kakanj', kind: 'army_hq', available_from: 24 },
-    { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', hq_mun: 'centar_sarajevo', kind: 'corps', available_from: 24 },
-    { id: 'arbih_5th_corps', faction: 'RBiH', name: '5th Corps', hq_mun: 'bihac', kind: 'corps', available_from: 24 },
+    { id: 'arbih_general_staff', faction: 'RBiH', name: 'General Staff ARBiH', hq_mun: 'kakanj', hq_osid: 'op:kakanj:kakanj_1', kind: 'army_hq', available_from: 24 },
+    { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', hq_mun: 'centar_sarajevo', hq_osid: 'op:centar_sarajevo:centar_sarajevo_1', kind: 'corps', available_from: 24 },
+    { id: 'arbih_5th_corps', faction: 'RBiH', name: '5th Corps', hq_mun: 'bihac', hq_osid: 'op:bihac:bihac_1', kind: 'corps', available_from: 24 },
 ];
 
 const ALL_CORPS_OOB: OobCorps[] = [...RS_CORPS_OOB, ...HRHB_CORPS_OOB, ...ARBIH_CORPS_OOB];
@@ -268,14 +268,16 @@ describe('activateCorpsForTurn — bottom_up mode', () => {
         expect(seOz!.kind).toBe('corps_asset');
     });
 
-    it('corps/army_hq formations have no location_osid (command structures, not map entities)', () => {
+    it('corps/army_hq formations preserve command HQ anchors without tactical location_osid', () => {
         const state = makeBottomUpState(24);
         // Activate all corps
         activateCorpsForTurn(state, ALL_CORPS_OOB, 24);
 
-        for (const f of Object.values(state.military.formations!)) {
-            if (f.kind === 'corps_asset' || f.kind === 'army_hq') {
+        for (const c of ALL_CORPS_OOB) {
+            const f = state.military.formations![c.id];
+            if (f?.kind === 'corps_asset' || f?.kind === 'army_hq') {
                 expect(f.location_osid).toBeUndefined();
+                expect(f.hq_osid).toBe(c.hq_osid);
             }
         }
     });

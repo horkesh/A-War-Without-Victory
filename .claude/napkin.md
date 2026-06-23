@@ -1,5 +1,13 @@
 # Napkin Runbook
 
+**COMMAND HQ ANCHORS ARE NOT TACTICAL LOCATIONS (2026-06-23).** Corps and army_hq formations need map drilldown anchors without implying physical brigade-style presence. Do instead: use `hq_osid` for command-only anchors; reserve `location_osid` for actual formation placement, stationed-unit truth, movement/combat/displacement, and location-in-control validation.
+
+**BROWSER COMMAND CONTROLS MUST RESPECT THE DESKTOP BRIDGE (2026-06-23).** Browser/dev sessions can inspect but cannot execute Electron-owned commands. Do instead: render desktop-IPC controls disabled with bridge-unavailable copy and guard clicks; live browser sweeps should prove that disabled state instead of forcing the command modal.
+
+**FIELD INSPECTION CLEARS TRANSIENT MAP CHROME (2026-06-23).** Selection, hover, and tooltip state are independent. Do instead: `inspectOnField(...)` clears hovered OSIDs, hovered sector/corps ids, tooltip target, and tooltip position before opening the new inspection target.
+
+**RECEIPT READ MODELS SCOPE TO THE LOADED PLAYER (2026-06-23).** Turn Aftermath/read-model receipts can aggregate bot and foreign events. Do instead: scope patron defiance, force-launched AARs, and officer resentment rows by loaded player faction or corps ownership before rendering player receipt surfaces.
+
 **ELECTRON RENDERER FLAGS NEED IPC, NOT `process.env` (2026-06-23).** Packaged renderer windows run with context isolation and no Node integration, so display code can miss runtime flags that the sim process honors. Do instead: expose renderer-visible runtime flags through desktop sim -> Electron main -> preload/bridge -> UI store and pass them explicitly into read-model helpers.
 
 **RESERVE MEMBERSHIP IS NOT FRIENDLY-LINE TRUTH (2026-06-23).** Sector assignments can include reserve/member brigades for navigation and command context. Do instead: use `lineHoldingIds` for Corps Front line presence, displayed combat strength, threat, force balance, defense previews, own-front tooltip truth, and coverage tier; use `allCurrentIds` only when reserve membership is intentionally part of the surface.

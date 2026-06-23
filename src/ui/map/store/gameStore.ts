@@ -561,6 +561,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       chronicleOpen: false,
       opsPlanningModalOpen: false,
       operationTargetOsids: [] as string[],
+      hoveredOsids: [] as string[],
+      hoveredSectorId: null,
+      hoveredCorpsId: null,
+      tooltipTarget: null,
+      tooltipPosition: null,
     };
     if (target.kind === 'field-settlement') {
       set({ ...base, isOperationsPanelOpen: false, selectedOsid: target.osid });

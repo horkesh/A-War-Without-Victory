@@ -31,13 +31,14 @@ function buildAAR(
         objectives?: string[];
         commanderName?: string;
         assessment?: 'launch' | 'postpone' | 'abort';
+        faction?: string;
     } = {},
 ): OperationAAR {
     const aar = {
         operation_id: id,
         operation_name: opts.force ? `Operation ${id}` : `Routine ${id}`,
         corps_id: '1_corps',
-        faction: 'RBiH',
+        faction: opts.faction ?? 'RBiH',
         type: 'sector_attack',
         started_turn: (opts.endedTurn ?? 10) - 3,
         ended_turn: opts.endedTurn ?? 10,
@@ -66,8 +67,11 @@ function buildAAR(
     return aar;
 }
 
-function buildState(aars: OperationAAR[]): GameState {
-    return { operation_history: aars } as unknown as GameState;
+function buildState(aars: OperationAAR[], playerFaction?: string): GameState {
+    return {
+        ...(playerFaction ? { meta: { player_faction: playerFaction } } : {}),
+        operation_history: aars,
+    } as unknown as GameState;
 }
 
 describe('buildForcedOpReceipts', () => {
@@ -122,6 +126,14 @@ describe('buildForcedOpReceipts', () => {
 
     it('yields NO receipt for a normal (non-force) AAR', () => {
         const state = buildState([buildAAR('routine_push', { force: false })]);
+        expect(buildForcedOpReceipts(state)).toEqual([]);
+    });
+
+    it('yields NO receipt for a foreign force-launched AAR when player faction is known', () => {
+        const state = buildState([
+            buildAAR('foreign_force', { force: true, faction: 'RBiH' }),
+        ], 'RS');
+
         expect(buildForcedOpReceipts(state)).toEqual([]);
     });
 

@@ -17,6 +17,11 @@ describe('gameStore field inspection routes', () => {
       chronicleOpen: true,
       isOperationsPanelOpen: true,
       operationTargetOsids: ['target_osid'],
+      hoveredOsids: ['stale_hover_osid'],
+      hoveredSectorId: 'stale_sector',
+      hoveredCorpsId: 'stale_corps',
+      tooltipTarget: { type: 'osid', id: 'stale_hover_osid' },
+      tooltipPosition: { x: 25, y: 50 },
     });
   });
 
@@ -42,6 +47,11 @@ describe('gameStore field inspection routes', () => {
       selectedOsid: 'sarajevo_1',
       selectedOperationKey: null,
       operationTargetOsids: [],
+      hoveredOsids: [],
+      hoveredSectorId: null,
+      hoveredCorpsId: null,
+      tooltipTarget: null,
+      tooltipPosition: null,
       focusedAftermathTurn: null,
       focusedOperationHistoryId: null,
       focusedDecisionConsequenceId: null,
@@ -124,6 +134,23 @@ describe('gameStore field inspection routes', () => {
     expect(useGameStore.getState()).toMatchObject({
       isOperationsPanelOpen: false,
       selectedCorpsFrontSectorId: 'sector_alpha',
+      selectedCorpsId: 'corps_alpha',
+      selectedOsid: 'sarajevo_1',
+      selectedOperationKey: null,
+    });
+  });
+
+  it('preserves formation plus corps and settlement context atomically', () => {
+    inspectOnField(useGameStore.getState(), {
+      kind: 'field-formation-in-corps',
+      formationId: 'brigade_alpha',
+      corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
+    });
+
+    expect(useGameStore.getState()).toMatchObject({
+      isOperationsPanelOpen: false,
+      selectedFormationId: 'brigade_alpha',
       selectedCorpsId: 'corps_alpha',
       selectedOsid: 'sarajevo_1',
       selectedOperationKey: null,

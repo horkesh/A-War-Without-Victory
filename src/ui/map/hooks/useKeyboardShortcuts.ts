@@ -42,7 +42,15 @@ export function useKeyboardShortcuts(): void {
         // If Army HQ modal is open, let it handle its own Escape (level-up navigation)
         if (useGameStore.getState().armyHQOpen) return;
         const store = useGameStore.getState();
-        const hasSelection = store.selectedOsid || store.selectedFormationId || store.selectedCorpsFrontSectorId || store.selectedCorpsId || store.selectedArmyId || store.selectedOperationKey;
+        const hasSelection =
+          store.selectedOsid
+          || store.selectedFormationId
+          || store.selectedCorpsFrontSectorId
+          || store.selectedCorpsId
+          || store.selectedArmyId
+          || store.selectedArmyHqId
+          || store.selectedOrbatCorpsId
+          || store.selectedOperationKey;
         if (hasSelection) {
           // Clear selections first
           const { setHoveredOsids, clearTooltipTarget, setPendingAttackConfirmation, setOrderModeForFormation, setOperationTargetOsids } = store;
@@ -53,6 +61,7 @@ export function useKeyboardShortcuts(): void {
             selectedCorpsId: null,
             selectedArmyId: null,
             selectedArmyHqId: null,
+            selectedOrbatCorpsId: null,
             selectedOperationKey: null,
           });
           setHoveredOsids([]);
