@@ -616,6 +616,7 @@ export function buildDecisionConsequenceLedger(
   }
 
   for (const reserve of state.reserveRequestHistory ?? []) {
+    if (reserve.decided_by !== 'player') continue;
     records.push({
       id: `reserve:${reserve.request_id}`,
       turn: reserve.turn,
@@ -663,6 +664,7 @@ export function buildDecisionConsequenceLedger(
   }
 
   for (const convoy of state.convoyDecisionHistory ?? []) {
+    if (convoy.decided_by !== 'player') continue;
     records.push({
       id: `convoy:${convoy.id}`,
       turn: convoy.turn,

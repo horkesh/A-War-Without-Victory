@@ -69,6 +69,7 @@ describe('current sector assignment projection', () => {
       reserveIds: ['brigade_reserve'],
       rearIds: [],
       overrideIds: [],
+      lineHoldingIds: [],
       allCurrentIds: ['brigade_reserve'],
     });
     expect(buildSectorFormationAssignment(sectors[1], [formation], sectors)).toEqual({
@@ -76,6 +77,7 @@ describe('current sector assignment projection', () => {
       reserveIds: [],
       rearIds: [],
       overrideIds: ['brigade_alpha'],
+      lineHoldingIds: ['brigade_alpha'],
       allCurrentIds: ['brigade_alpha'],
     });
   });
@@ -115,6 +117,7 @@ describe('current sector assignment projection', () => {
       reserveIds: [],
       rearIds: ['rear_brigade'],
       overrideIds: [],
+      lineHoldingIds: [],
       allCurrentIds: [],
     });
   });

@@ -104,6 +104,39 @@ describe('AAR and tooltip friction labels', () => {
     expect(container.textContent).not.toMatch(/3x|3×|concentrated/);
   });
 
+  it('treats setup summaries as no report instead of rendering any AAR sections', () => {
+    const setupSummary = {
+      ...makeSummary(),
+      turn: 1,
+      mechanism: 'setup_control',
+      displacement_total: 1200,
+      formation_spawns: [
+        { formation_id: 'setup_bde', formation_name: 'Setup Brigade', faction: 'RBiH', kind: 'brigade' },
+      ],
+      supply_deltas: { RBiH: -5 },
+      notable_events: [
+        { kind: 'siege_formed', description: 'Setup signal should stay quiet.', osid: 'op:sarajevo:center' },
+      ],
+    } as unknown as TurnSummary;
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: setupSummary,
+        turnSummaries: [setupSummary],
+      },
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+    });
+
+    const { container } = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    expect(container.textContent).toContain('No report yet');
+    expect(container.textContent).not.toContain('Combat');
+    expect(container.textContent).not.toContain('Displacement');
+    expect(container.textContent).not.toContain('Setup Brigade');
+    expect(container.textContent).not.toContain('Setup signal should stay quiet');
+    expect(container.textContent).not.toContain('Tuzla');
+  });
+
   it('routes embedded AAR formation links through field inspection with battle context', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

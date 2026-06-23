@@ -166,7 +166,7 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         }));
 
         expect(screen.getByText(/desktop command bridge unavailable/i)).toBeTruthy();
-        expect(screen.getByText(/1 presidential response awaiting dossier review/i)).toBeTruthy();
+        expect(screen.getByText(/1 response option in dossier/i)).toBeTruthy();
         expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
     });
 

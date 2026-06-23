@@ -24,10 +24,5 @@ export function hasFiledRecord(state: LoadedGameState | null | undefined): boole
   if (countFiledTurnRecords(state) > 0) return true;
   if (countFiledDecisionRecords(state) > 0) return true;
   if ((state.operationHistory ?? []).length > 0) return true;
-  if ((state.reserveRequestHistory ?? []).length > 0) return true;
-  if ((state.peacePlanHistory ?? []).length > 0) return true;
-  if ((state.convoyDecisionHistory ?? []).length > 0) return true;
-  if ((state.paramilitaryDecisionHistory ?? []).length > 0) return true;
-  if ((state.officerDecisionHistory ?? []).length > 0) return true;
   return false;
 }

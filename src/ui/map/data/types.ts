@@ -1554,6 +1554,7 @@ export interface LoadedGameState {
     pendingCounterOffers?: Array<{
         id: string;
         author: 'RBiH' | 'RS' | 'HRHB' | 'PLAYER';
+        targetFaction?: 'RBiH' | 'RS' | 'HRHB';
         parentOfferId: string;
         planId: string;
         planName: string;

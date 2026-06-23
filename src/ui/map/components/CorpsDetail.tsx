@@ -153,10 +153,12 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   };
 
   const inspectFormationInCorps = (formationId: string) => {
+    const formation = loadedGameState.formations.find((item) => item.id === formationId);
     inspectOnField(useGameStore.getState(), {
       kind: 'field-formation-in-corps',
       formationId,
       corpsId: selectedCorpsId,
+      osid: formation?.location_osid ?? null,
     });
   };
 
@@ -379,7 +381,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             ) : (
               corpsSectors.map((s) => {
                 const sectorAssignment = buildSectorFormationAssignment(s, subordinates, corpsSectors);
-                const sectorBrigadeIds = new Set(sectorAssignment.allCurrentIds);
+                const sectorBrigadeIds = new Set(sectorAssignment.lineHoldingIds);
                 const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
                 const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);

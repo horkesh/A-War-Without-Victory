@@ -30,6 +30,8 @@ interface OfficerProfileProps {
     emphasis?: 'aggression' | 'defense';
     /** Show future/legal case records; keep false for live in-war command surfaces. */
     showWarCrimesRecord?: boolean;
+    /** Show pre-war service/origin badge. Hide on compact command surfaces where it reads like current allegiance. */
+    showOriginBadge?: boolean;
     /** Additional CSS classes on the root element (e.g. spacing). */
     className?: string;
 }
@@ -40,6 +42,7 @@ export function OfficerProfile({
     compact = false,
     emphasis = 'aggression',
     showWarCrimesRecord = false,
+    showOriginBadge = true,
     className,
 }: OfficerProfileProps) {
     const origin = getOriginDisplay(officer.origin);
@@ -51,12 +54,14 @@ export function OfficerProfile({
             {/* Header: label + origin badge */}
             <div className="flex items-center justify-between">
                 <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">{label}</div>
-                <span
-                    className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
-                    title={origin.label === 'JNA' ? t('officerProfile.jnaTitle') : undefined}
-                >
-                    {origin.label}
-                </span>
+                {showOriginBadge && (
+                    <span
+                        className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded bg-black/30 border border-panel-border/30 ${origin.color}`}
+                        title={origin.label === 'JNA' ? t('officerProfile.jnaTitle') : undefined}
+                    >
+                        {origin.label}
+                    </span>
+                )}
             </div>
 
             {/* Insignia + Name + archetype */}

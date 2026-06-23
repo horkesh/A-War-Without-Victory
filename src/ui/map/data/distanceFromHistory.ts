@@ -46,7 +46,7 @@ import consequences from '../../../../data/scenarios/events/consequences.json';
 export interface DistanceFromHistoryDivergence {
     /** Event whose chosen response differs from history. */
     eventId: string;
-    /** Readable event title (from the catalog) or the raw event id when absent. */
+    /** Readable event title (from the catalog) or a player-safe fallback when absent. */
     title: string;
     /** Player-facing label for the response the player/bot actually chose. */
     chosen: string;
@@ -96,7 +96,7 @@ interface RawEventRowForHistory {
 }
 
 /** Per-event historical-default + title metadata resolved from the catalog. */
-interface EventHistoryMeta {
+export interface EventHistoryMeta {
     historicalDefault: string;
     title: string;
     responseLabels: ReadonlyMap<string, string>;
@@ -104,6 +104,7 @@ interface EventHistoryMeta {
 
 const RECORDED_CHOICE_LABEL = 'Recorded choice';
 const HISTORICAL_DEFAULT_LABEL = 'Historical default';
+const RECORDED_DECISION_TITLE = 'Recorded decision';
 
 /**
  * Build an `event_id -> { historicalDefault, title }` lookup, restricted to
@@ -112,35 +113,45 @@ const HISTORICAL_DEFAULT_LABEL = 'Historical default';
  * malformed rows. Events without a historical default are intentionally absent
  * (a decision for such an event has nothing to diverge from and is skipped).
  */
+export function __TEST_buildEventHistoryMapFromRows(rows: readonly RawEventRowForHistory[]): ReadonlyMap<string, EventHistoryMeta> {
+    const out = new Map<string, EventHistoryMeta>();
+    for (const rawRow of rows) {
+        const eventId = typeof rawRow?.id === 'string' ? rawRow.id : undefined;
+        if (!eventId) continue;
+        const historicalDefault =
+            typeof rawRow.historical_default_response_id === 'string'
+                ? rawRow.historical_default_response_id.trim()
+                : '';
+        if (historicalDefault.length === 0) continue;
+        const title =
+            typeof rawRow.title === 'string' && rawRow.title.trim().length > 0
+                ? rawRow.title.trim()
+                : RECORDED_DECISION_TITLE;
+        const responseLabels = new Map<string, string>();
+        const options = Array.isArray(rawRow.response_options) ? rawRow.response_options : [];
+        for (const opt of options) {
+            const optId = typeof opt?.id === 'string' ? opt.id : undefined;
+            const label = typeof opt?.label === 'string' ? opt.label.trim() : '';
+            if (optId && label.length > 0) {
+                responseLabels.set(optId, label);
+            }
+        }
+        // First definition wins (catalog ids are unique; guard anyway).
+        if (!out.has(eventId)) {
+            out.set(eventId, { historicalDefault, title, responseLabels });
+        }
+    }
+    return out;
+}
+
 function buildEventHistoryMap(): ReadonlyMap<string, EventHistoryMeta> {
     const out = new Map<string, EventHistoryMeta>();
     const files: unknown[] = [war1992, war1992HrhbSummer, war1993, war1994, war1995, consequences];
     for (const file of files) {
         if (!Array.isArray(file)) continue;
-        for (const rawRow of file as RawEventRowForHistory[]) {
-            const eventId = typeof rawRow?.id === 'string' ? rawRow.id : undefined;
-            if (!eventId) continue;
-            const historicalDefault =
-                typeof rawRow.historical_default_response_id === 'string'
-                    ? rawRow.historical_default_response_id.trim()
-                    : '';
-            if (historicalDefault.length === 0) continue;
-            const title =
-                typeof rawRow.title === 'string' && rawRow.title.trim().length > 0
-                    ? rawRow.title.trim()
-                    : eventId;
-            const responseLabels = new Map<string, string>();
-            const options = Array.isArray(rawRow.response_options) ? rawRow.response_options : [];
-            for (const opt of options) {
-                const optId = typeof opt?.id === 'string' ? opt.id : undefined;
-                const label = typeof opt?.label === 'string' ? opt.label.trim() : '';
-                if (optId && label.length > 0) {
-                    responseLabels.set(optId, label);
-                }
-            }
-            // First definition wins (catalog ids are unique; guard anyway).
+        for (const [eventId, meta] of __TEST_buildEventHistoryMapFromRows(file as RawEventRowForHistory[])) {
             if (!out.has(eventId)) {
-                out.set(eventId, { historicalDefault, title, responseLabels });
+                out.set(eventId, meta);
             }
         }
     }

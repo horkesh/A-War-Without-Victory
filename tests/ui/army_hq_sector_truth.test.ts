@@ -86,9 +86,10 @@ describe('Army HQ sector truth', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
     expect(row.getAttribute('data-rear-brigade-count')).toBe('0');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
-    expect(container.textContent).toContain('0 on line');
-    expect(container.textContent).toContain('density 0.00');
-    expect(container.textContent).toContain('Troop density: 0.00');
+    expect(container.textContent).toContain('No friendly line');
+    expect(container.textContent).not.toContain('0 on line');
+    expect(container.textContent).not.toContain('density 0.00');
+    expect(container.textContent).not.toContain('Troop density: 0.00');
     expect(container.textContent).not.toContain('//');
     expect(container.textContent).not.toContain(' RES ');
     expect(container.textContent).not.toContain('density 0.42');
@@ -148,9 +149,10 @@ describe('Army HQ sector truth', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
     expect(row.getAttribute('data-rear-brigade-count')).toBe('1');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
-    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('No friendly line');
+    expect(container.textContent).not.toContain('0 on line');
     expect(container.textContent).toContain('1 rear/support');
-    expect(container.textContent).toContain('density 0.00');
+    expect(container.textContent).not.toContain('density 0.00');
     expect(container.textContent).not.toContain('density 0.42');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
   });
@@ -231,7 +233,7 @@ describe('Army HQ sector truth', () => {
       defaultOpen: true,
     }));
 
-    expect(container.textContent).toContain('1 on line');
+    expect(container.textContent).toContain('2 on line');
     expect(container.textContent).toContain('1 reserve');
     expect(container.textContent).toContain('4 front segments');
     expect(container.textContent).toContain('density 0.50');
@@ -288,10 +290,58 @@ describe('Army HQ sector truth', () => {
     expect(row.getAttribute('data-current-brigade-count')).toBe('1');
     expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('1');
-    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('1 on line');
     expect(container.textContent).toContain('1 command-directed');
     expect(container.textContent).toContain('density 0.25');
     expect(container.textContent).toContain('Brigades per front segment: 0.25');
     expect(container.textContent).toContain('Troop density: 0.25');
+  });
+
+  it('does not expose threat recommendations from low-confidence sector intelligence', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:uncertain',
+      display_name: 'Uncertain front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: ['front_brigade'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 1,
+      density: 1,
+      combat_strength_class: 'adequate',
+      sub_segments: [],
+      threat_ratio: 9999,
+      intel_confidence: 0.1,
+      offensive_signs: true,
+      sector_stance: 'screening',
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'front_brigade',
+        faction: 'RBiH',
+        name: 'Front Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    expect(container.textContent).toContain('Enemy picture unconfirmed');
+    expect(container.textContent).not.toMatch(/OFFENSIVE SIGNS|Recommend|overmatch/i);
   });
 });

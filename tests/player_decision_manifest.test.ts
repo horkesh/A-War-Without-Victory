@@ -186,6 +186,49 @@ describe('player decision manifest', () => {
         expect(countBlockingPlayerDecisions(state, 'RBiH')).toBe(0);
     });
 
+    it('does not treat ownerless pending rows as player-owned when a player faction is loaded', () => {
+        const state: any = {
+            meta: {
+                player_faction: 'RBiH',
+                pending_proposal_reviews: [
+                    {
+                        id: 'ownerless_proposal',
+                        turn: 1,
+                        domain: 'military',
+                        description: 'Ownerless proposal.',
+                        proposed_action: 'set_corps_stance',
+                    },
+                ],
+            },
+            pending_paramilitary_requests: [
+                { target_osid: 'ownerless_target', strength: 100 },
+            ],
+            military: {
+                pending_event_decisions: [
+                    {
+                        event_id: 'ownerless_event',
+                        event_title: 'Ownerless event',
+                        turn_fired: 1,
+                        requires_player_response: true,
+                        response_options: [],
+                    },
+                ],
+                pending_reserve_requests: [
+                    { request_id: 'ownerless_reserve', corps_id: 'unknown', reason: 'defensive_gap' },
+                ],
+                pending_officer_events: [
+                    { event_id: 'ownerless_officer', type: 'officer_available', acknowledged: false },
+                ],
+            },
+        };
+
+        const summary = summarizePlayerDecisions(state, 'RBiH');
+
+        expect(summary.totalCount).toBe(0);
+        expect(summary.blockingCount).toBe(0);
+        expect(listBlockingPlayerDecisions(state, 'RBiH')).toEqual([]);
+    });
+
     it('filters faction-owned instances and only blocks unresolved required/modal decisions', () => {
         const state: any = {
             meta: {

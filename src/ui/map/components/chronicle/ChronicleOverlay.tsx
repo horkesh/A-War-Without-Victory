@@ -15,6 +15,7 @@ import {
     formatChronicleBoundaryKind,
     formatChronicleChapterDateRange,
 } from '../../data/chronicleChapters.js';
+import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 import type { ChronicleEntry, ChronicleCardType } from './generateChronicleEntries.js';
 import type { ChronicleFilterId } from './ChronicleReviewFilters.js';
 import type { ChronicleChapter } from '../../data/chronicleChapters.js';
@@ -47,6 +48,45 @@ const CARD_STACK_GAP = 6;
 const RIBBON_HEIGHT = 24;
 /** Stem drop zone between ribbon and first card. */
 const STEM_TOP_MARGIN = 12;
+
+export interface ChronicleChromeTurnSummary {
+    turn: number;
+    territory_snapshot?: Partial<Record<string, number>>;
+    mechanism?: unknown;
+    provenance?: unknown;
+    source?: unknown;
+    summary_kind?: unknown;
+    kind?: unknown;
+    is_setup?: unknown;
+}
+
+export interface ChronicleChromeTurnRangeInput {
+    turnSummaries: readonly ChronicleChromeTurnSummary[];
+    entries: readonly Pick<ChronicleEntry, 'turn'>[];
+}
+
+export function getNarratedChronicleTurnSummaries(
+    turnSummaries: readonly ChronicleChromeTurnSummary[],
+): ChronicleChromeTurnSummary[] {
+    return turnSummaries
+        .filter((summary) => shouldNarrateTerritorySummary(summary))
+        .slice()
+        .sort((a, b) => a.turn - b.turn);
+}
+
+export function getChronicleChromeTurnRange(input: ChronicleChromeTurnRangeInput): { minTurn: number; maxTurn: number } {
+    const narratedSummaries = getNarratedChronicleTurnSummaries(input.turnSummaries);
+    const sourceTurns = narratedSummaries.length > 0
+        ? narratedSummaries.map((summary) => summary.turn)
+        : input.entries.map((entry) => entry.turn);
+    if (sourceTurns.length === 0) {
+        return { minTurn: 0, maxTurn: 0 };
+    }
+    return {
+        minTurn: Math.min(...sourceTurns),
+        maxTurn: Math.max(...sourceTurns),
+    };
+}
 
 const DOT_COLORS: Record<ChronicleCardType, string> = {
     combat: '#c04040',
@@ -261,6 +301,11 @@ export function ChronicleOverlay() {
         [state, eventCatalogFull]
     );
 
+    const narratedTurnSummaries = useMemo(
+        () => getNarratedChronicleTurnSummaries(turnSummaries),
+        [turnSummaries],
+    );
+
     const focusedChronicleEntry = useMemo(
         () => focusedChronicleDecisionRecordId
             ? allEntries.find(entry => entry.metadata?.decisionRecordId === focusedChronicleDecisionRecordId) ?? null
@@ -289,16 +334,11 @@ export function ChronicleOverlay() {
         return groups;
     }, [filteredEntries]);
 
-    // Compute turn range
-    const minTurn = useMemo(() => {
-        if (turnSummaries.length === 0) return 0;
-        return Math.min(...turnSummaries.map(s => s.turn));
-    }, [turnSummaries]);
-
-    const maxTurn = useMemo(() => {
-        if (turnSummaries.length === 0) return 0;
-        return Math.max(...turnSummaries.map(s => s.turn));
-    }, [turnSummaries]);
+    // Compute turn range from narrated summaries; setup-only saves fall back to generated entries.
+    const { minTurn, maxTurn } = useMemo(
+        () => getChronicleChromeTurnRange({ turnSummaries, entries: allEntries }),
+        [turnSummaries, allEntries],
+    );
 
     useEffect(() => {
         if (!open) return;
@@ -663,7 +703,7 @@ export function ChronicleOverlay() {
                             {/* Territory ribbon */}
                             <div className="sticky top-0 z-20 bg-black/80 backdrop-blur-sm border-b border-white/5">
                                 <ChronicleRibbon
-                                    turnSummaries={turnSummaries}
+                                    turnSummaries={narratedTurnSummaries}
                                     turnWidths={turnWidths}
                                     minTurn={minTurn}
                                     maxTurn={maxTurn}
@@ -774,7 +814,7 @@ export function ChronicleOverlay() {
             {/* Scrubber strip */}
             {allEntries.length > 0 && (
                 <ChronicleRibbonScrubber
-                    turnSummaries={turnSummaries}
+                    turnSummaries={narratedTurnSummaries}
                     minTurn={minTurn}
                     maxTurn={maxTurn}
                     viewportFraction={viewportFraction}

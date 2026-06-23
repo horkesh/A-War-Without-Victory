@@ -10,6 +10,7 @@ function makeLoadedGameState(): LoadedGameState {
     formations: [
       { id: 'arbih_3rd_corps', faction: 'RBiH', name: 'arbih_3rd_corps', kind: 'corps', readiness: 'ready', cohesion: 60, fatigue: 10, status: 'active', createdTurn: 0, tags: [] },
       { id: 'arbih_b1', faction: 'RBiH', name: 'Assigned brigade', kind: 'brigade', readiness: 'ready', cohesion: 62, fatigue: 8, status: 'active', createdTurn: 0, tags: [], personnel: 1200, corps_id: 'arbih_3rd_corps' },
+      { id: 'arbih_forming', faction: 'RBiH', name: 'Forming brigade', kind: 'brigade', readiness: 'forming', cohesion: 40, fatigue: 0, status: 'active', createdTurn: 4, tags: [], personnel: 900, corps_id: 'arbih_3rd_corps' },
       { id: 'rs_b1', faction: 'RS', name: 'Enemy Shock Brigade', kind: 'brigade', readiness: 'ready', cohesion: 70, fatigue: 4, status: 'active', createdTurn: 0, tags: [], personnel: 2400, corps_id: 'vrs_drinac' },
       { id: 'hrhb_b1', faction: 'HRHB', name: 'Western Battalion', kind: 'brigade', readiness: 'ready', cohesion: 58, fatigue: 7, status: 'active', createdTurn: 0, tags: [], personnel: 1800, corps_id: 'hvo_central' },
     ],
@@ -75,6 +76,14 @@ describe('ui army hq war summary visibility', () => {
     expect(model.areaPct.RBiH).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.RS).toBeGreaterThanOrEqual(0);
     expect(model.areaPct.HRHB).toBeGreaterThanOrEqual(0);
+  });
+
+  it('counts at-arms personnel only through the shared fielded tactical formation boundary', () => {
+    const model = buildWarSummaryOverviewModel(makeLoadedGameState());
+
+    expect(model.atArmsByFaction.RBiH).toBe(1200);
+    expect(model.mobilizedTotalByFaction.RBiH).toBe(1200);
+    expect(model.personnelByFaction.RBiH).toBe(1200);
   });
 
   // Cluster C — war exhaustion passthrough from state.warPhaseExhaustion

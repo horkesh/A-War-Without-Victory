@@ -27,6 +27,7 @@ import {
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
+import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { countFiledDecisionRecords } from './filedRecordTruth';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
@@ -597,7 +598,10 @@ function formatCounterOfferSplit(split: { RBiH: number; RS: number; HRHB: number
 }
 
 function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): void {
-  const offers = [...(state.pendingCounterOffers ?? [])].sort((a, b) => strictCompare(a.id, b.id));
+  const playerFaction = state.player_faction ?? null;
+  const offers = [...(state.pendingCounterOffers ?? [])]
+    .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
+    .sort((a, b) => strictCompare(a.id, b.id));
   for (const offer of offers) {
     const evidence = [
       formatCounterOfferSplit(offer.proposedSplit),
@@ -1018,7 +1022,7 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
       // cards do, so the title never leaks a raw corps id (e.g. arbih_1st_corps).
       title: t('decisionRoom.card.eliteDeploy.title', {
         corps:
-          state.formations?.find((f) => f.id === request.corps_id)?.name ?? request.corps_id,
+          getPlayerSafeCorpsName(state.formations?.find((f) => f.id === request.corps_id)?.name, request.corps_id),
       }),
       explanation: request.why_needed ?? request.description,
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
@@ -1977,7 +1981,7 @@ function buildNextLoopStep(cards: PresidentialDecisionRoomCard[]): PresidentialD
     fallbackHeadline: t('decisionRoom.loop.returnToBriefing'),
     fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.nextAction.many'),
     fallbackActionLabel: t('decisionRoom.action.briefing'),
-    fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    fallbackNavigationTarget: { kind: 'decision-room', lens: 'all' },
     nounKey: 'decisionRoom.noun.nextItem.many',
   });
 }
@@ -1999,7 +2003,7 @@ function buildLoopSteps(
       fallbackHeadline: t('decisionRoom.loop.openStrategicBriefing'),
       fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.briefCue.many'),
       fallbackActionLabel: t('decisionRoom.action.warSummary'),
-      fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
+      fallbackNavigationTarget: { kind: 'decision-room', lens: 'briefing' },
       nounKey: 'decisionRoom.noun.briefCue.many',
     }),
     buildCardLoopStep('inspect', t('decisionRoom.loop.inspect'), inspectNext, {
@@ -2012,7 +2016,7 @@ function buildLoopSteps(
       fallbackHeadline: t('decisionRoom.command.noPendingDecision'),
       fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.decision.many'),
       fallbackActionLabel: t('decisionRoom.action.reviewQueue'),
-      fallbackNavigationTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+      fallbackNavigationTarget: { kind: 'inbox' },
       nounKey: 'decisionRoom.noun.decision.many',
     }),
     {

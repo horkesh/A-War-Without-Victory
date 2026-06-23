@@ -3613,12 +3613,16 @@ function derivePendingCounterOffers(state: any): LoadedGameState['pendingCounter
         const split = delta.proposed_split ?? {};
         const planId = String(delta.plan_id ?? '');
         const id = String(offer.id ?? '');
+        const targetFaction = offer.target_faction ?? delta.target_faction;
         if (!id || !planId) continue;
         result.push({
             id,
             author: offer.author === 'PLAYER' || offer.author === 'RBiH' || offer.author === 'RS' || offer.author === 'HRHB'
                 ? offer.author
                 : 'PLAYER',
+            ...(targetFaction === 'RBiH' || targetFaction === 'RS' || targetFaction === 'HRHB'
+                ? { targetFaction }
+                : {}),
             parentOfferId: String(offer.parent_offer_id ?? ''),
             planId,
             planName: planNames[planId] ?? getPlayerSafeDisplayLabel(planId, 'Peace proposal'),

@@ -65,6 +65,8 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
     critical: 'text-red-500',
 };
 
+const THREAT_INTEL_CONFIDENCE_MIN = 0.4;
+
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
 type SectorStanceType = typeof SECTOR_STANCES[number];
 
@@ -89,30 +91,36 @@ function SectorExpandedDetail({
     const frontIds = sectorAssignment.frontlineIds;
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
-    const hasCurrentFieldedLine = sectorAssignment.allCurrentIds.length > 0;
-    const projectedLineCount = frontIds.length + overrideIds.length;
+    const projectedLineCount = sectorAssignment.lineHoldingIds.length;
+    const hasCurrentFieldedLine = projectedLineCount > 0;
     const projectedDensity = computeCurrentFrontDensity(sector, projectedLineCount);
 
     const threatRatio = sector.threat_ratio;
     const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
     const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
     const currentStance = normalizeSectorStance(sector.sector_stance);
+    const hasThreatIntel = sector.intel_confidence >= THREAT_INTEL_CONFIDENCE_MIN;
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
             <div className="space-y-2">
                 <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />
-                {sector.offensive_signs && (
+                {!hasThreatIntel && threatRatio > 0 && (
+                    <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
+                        {t('sectorsSection.threatUnconfirmed')}
+                    </div>
+                )}
+                {hasThreatIntel && sector.offensive_signs && (
                     <div className="flex items-center gap-2 text-[10px] text-red-400 font-bold animate-pulse">
                         <span className="text-red-500">!</span> {t('sectorsSection.offensiveSignsDetected', { threat: threatPresentation.label })}
                     </div>
                 )}
-                {!sector.offensive_signs && threatRatio > 0 && (
+                {hasThreatIntel && !sector.offensive_signs && threatRatio > 0 && (
                     <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
                         {t('sectorsSection.threat')} <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
                 )}
-                {stanceHint !== null && currentStance !== null && stanceHint !== currentStance && (
+                {hasThreatIntel && stanceHint !== null && currentStance !== null && stanceHint !== currentStance && (
                     <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
                         {t('sectorsSection.recommend', {
                             stance: getPlayerSafeSectorStanceLabel(stanceHint),
@@ -284,8 +292,12 @@ function SectorExpandedDetail({
 
             <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
-                <span>{t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
-                <span>{t('sectorsSection.troopDensity', { value: projectedDensity })}</span>
+                {hasCurrentFieldedLine && (
+                    <>
+                        <span>{t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
+                        <span>{t('sectorsSection.troopDensity', { value: projectedDensity })}</span>
+                    </>
+                )}
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
             </div>
         </div>
@@ -294,6 +306,26 @@ function SectorExpandedDetail({
 
 function computeCurrentFrontDensity(sector: CorpsFrontSectorView, frontlineCount: number): string {
     return sector.length_edges > 0 ? (frontlineCount / sector.length_edges).toFixed(2) : '0.00';
+}
+
+function sectorSummaryLine(
+    lineHoldingCount: number,
+    reserveCount: number,
+    frontSegmentCount: number,
+    projectedDensity: string,
+): string {
+    const lineSegment = lineHoldingCount > 0
+        ? t('sectorsSection.lineSegment', { count: lineHoldingCount })
+        : t('sectorsSection.noFriendlyLine');
+    const frontSegment = t(
+        frontSegmentCount === 1 ? 'sectorsSection.frontSegment.one' : 'sectorsSection.frontSegment.many',
+        { count: frontSegmentCount },
+    );
+    const densitySegment = lineHoldingCount > 0
+        ? t('sectorsSection.densitySegment', { density: projectedDensity })
+        : '';
+    const reserveSegment = reserveCount > 0 ? `; ${t('sectorsSection.reserveSegment', { count: reserveCount })}` : '';
+    return `${lineSegment}${reserveSegment}; ${frontSegment}${densitySegment}`;
 }
 
 function compareText(a: string, b: string): number {
@@ -379,7 +411,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
                         const projectedDensity = computeCurrentFrontDensity(
                             sector,
-                            sectorAssignment.frontlineIds.length + sectorAssignment.overrideIds.length,
+                            sectorAssignment.lineHoldingIds.length,
                         );
 
                         return (
@@ -416,12 +448,12 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                             )}
                                         </div>
                                         <div className="text-[10px] text-text-secondary tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
-                                            {t('sectorsSection.summaryLine', {
-                                                front: sectorAssignment.frontlineIds.length,
-                                                reserveSegment: sectorAssignment.reserveIds.length > 0 ? t('sectorsSection.reserveSegment', { count: sectorAssignment.reserveIds.length }) : '',
-                                                segments: sector.length_edges,
-                                                density: projectedDensity,
-                                            })}
+                                            {sectorSummaryLine(
+                                                sectorAssignment.lineHoldingIds.length,
+                                                sectorAssignment.reserveIds.length,
+                                                sector.length_edges,
+                                                projectedDensity,
+                                            )}
                                             {sectorAssignment.rearIds.length > 0 && `; ${t('sectorsSection.rearSupportSegment', { count: sectorAssignment.rearIds.length })}`}
                                             {sectorAssignment.overrideIds.length > 0 && `; ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
                                         </div>

@@ -130,9 +130,10 @@ export interface RuptureConsequenceView {
 export interface GhostEntryDecisionLogEntry {
     event_id: string;
     response_id: string;
-    /** Diagnostic only; not read by the section builder. */
+    /** Provenance owner; dynamic response sections only read player-authored rows. */
     decision_source?: string;
     faction?: FactionId | null;
+    player_faction?: FactionId | null;
     turn?: number;
 }
 
@@ -238,6 +239,10 @@ function eventFiredById(state: GhostEntryStateView, eventId: string): boolean {
  *  player_faction-specific state are tolerant of absence. */
 function playerFaction(state: GhostEntryStateView): FactionId {
     return state.meta?.player_faction ?? state.player_faction ?? 'RBiH';
+}
+
+function loadedPlayerFaction(state: GhostEntryStateView): FactionId | null {
+    return state.meta?.player_faction ?? state.player_faction ?? null;
 }
 
 // — Ghost 1: alliance_held —
@@ -852,12 +857,22 @@ const LOAD_BEARING_BY_EVENT: ReadonlyMap<string, LoadBearingSectionSpec> = new M
  * deterministically (array order is insertion/turn order, which is stable
  * across replays of identical input).
  */
+function isPlayerOwnedDecision(entry: GhostEntryDecisionLogEntry, loadedFaction: FactionId | null): boolean {
+    if (entry.decision_source !== 'player') return false;
+    if (loadedFaction == null) return true;
+    if (entry.player_faction != null && entry.player_faction !== loadedFaction) return false;
+    if (entry.faction != null && entry.faction !== loadedFaction) return false;
+    return true;
+}
+
 function firstResponseByEvent(
     log: readonly GhostEntryDecisionLogEntry[],
+    loadedFaction: FactionId | null,
 ): ReadonlyMap<string, string> {
     const out = new Map<string, string>();
     for (const entry of log) {
         if (!entry || typeof entry.event_id !== 'string' || typeof entry.response_id !== 'string') continue;
+        if (!isPlayerOwnedDecision(entry, loadedFaction)) continue;
         if (!LOAD_BEARING_BY_EVENT.has(entry.event_id)) continue;
         if (out.has(entry.event_id)) continue;
         out.set(entry.event_id, entry.response_id);
@@ -1037,7 +1052,7 @@ export function buildDynamicSections(input: BuilderInput): BuiltDynamicSection[]
     assertRingGuard(input.state);
 
     const log = input.state.military?.event_decision_log ?? [];
-    const chosenByEvent = firstResponseByEvent(log);
+    const chosenByEvent = firstResponseByEvent(log, loadedPlayerFaction(input.state));
 
     const emitted: BuiltDynamicSection[] = [];
     for (const spec of LOAD_BEARING_SECTIONS) {

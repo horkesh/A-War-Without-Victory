@@ -31,6 +31,7 @@ function makeState(): LoadedGameState {
             {
                 id: 'HRHB_001',
                 author: 'HRHB',
+                targetFaction: 'RBiH',
                 parentOfferId: 'owen_stoltenberg',
                 planId: 'owen_stoltenberg',
                 planName: 'Owen-Stoltenberg Plan',
@@ -79,5 +80,22 @@ describe('Presidential Decision Room counter-offer surface', () => {
         } finally {
             setLocale('en');
         }
+    });
+
+    it('does not expose counter-offers addressed to another player faction', () => {
+        const state = makeState();
+        state.pendingCounterOffers = [
+            {
+                ...state.pendingCounterOffers![0],
+                id: 'HRHB_FOREIGN',
+                targetFaction: 'RS',
+            },
+        ];
+
+        const view = buildPresidentialDecisionRoomView({ state });
+
+        expect(view.cards.find((entry) => entry.id === 'counter-offer:HRHB_FOREIGN')).toBeUndefined();
+        expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('counter-offer:HRHB_FOREIGN');
+        expect(view.metrics.urgentCount).toBe(0);
     });
 });

@@ -573,7 +573,7 @@ export function OOBSidebar() {
                               {op.display_name}
                             </div>
                             <div className="text-text-secondary text-[10px]">
-                              {op.corps_name} / {getPlayerSafeMilitaryFactionName(op.faction)}
+                              {getPlayerSafeCorpsName(op.corps_name, op.corps_id)} / {getPlayerSafeMilitaryFactionName(op.faction)}
                             </div>
                             <div className="flex items-center gap-2 text-[10px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
@@ -670,7 +670,7 @@ export function OOBSidebar() {
                             <div className="min-w-0 flex-1">
                               <div className="text-text-primary truncate text-[11px] flex items-center gap-1.5">
                                 <span className="truncate">{sectorLabel}</span>
-                                {sector.combat_strength_class && (
+                                {sectorAssignment.lineHoldingIds.length > 0 && sector.combat_strength_class && (
                                   <SectorStrengthBadge strengthClass={sector.combat_strength_class} />
                                 )}
                               </div>

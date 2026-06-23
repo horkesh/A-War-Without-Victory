@@ -2,6 +2,7 @@ import assert from 'node:assert';
 import { describe, test } from 'vitest';
 
 import {
+    __TEST_buildEventHistoryMapFromRows,
     buildDistanceFromHistory,
     type DistanceFromHistoryInput,
 } from '../../src/ui/map/data/distanceFromHistory.js';
@@ -150,6 +151,20 @@ describe('buildDistanceFromHistory', () => {
         assert.strictEqual(view.divergences[0].chosen, 'Recorded choice');
         assert.notStrictEqual(view.divergences[0].chosen, 'not_a_real_option');
         assert.strictEqual(view.divergences[0].chosenResponseId, 'not_a_real_option');
+    });
+
+    test('catalog rows with missing titles use player-safe display fallback, not raw event ids', () => {
+        const meta = __TEST_buildEventHistoryMapFromRows([
+            {
+                id: 'raw_internal_event_id_1993',
+                historical_default_response_id: 'accept',
+                response_options: [{ id: 'accept', label: 'Accept' }],
+            },
+        ]).get('raw_internal_event_id_1993');
+
+        assert.ok(meta);
+        assert.strictEqual(meta.title, 'Recorded decision');
+        assert.notStrictEqual(meta.title, 'raw_internal_event_id_1993');
     });
 
     test('all-matched run → zero divergence, 0%', () => {

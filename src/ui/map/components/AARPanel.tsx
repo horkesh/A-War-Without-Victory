@@ -342,8 +342,9 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
         inspectOnField(useGameStore.getState(), target);
     };
 
-    const summary: TurnSummary | null = loadedGameState.latestTurnSummary;
-    const narrateTerritory = shouldNarrateTerritorySummary(summary);
+    const rawSummary: TurnSummary | null = loadedGameState.latestTurnSummary;
+    const summary: TurnSummary | null = shouldNarrateTerritorySummary(rawSummary) ? rawSummary : null;
+    const narrateTerritory = summary != null;
     const formationNameById = new Map(
         (loadedGameState.formations ?? []).map((formation) => [formation.id, getLocalizedFormationName(formation, locale)] as const),
     );

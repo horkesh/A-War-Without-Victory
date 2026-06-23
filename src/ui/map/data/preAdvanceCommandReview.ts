@@ -75,13 +75,15 @@ function statusFor(
 
 function countBlockingDecisions(state: LoadedGameState | null): number {
   if (!state) return 0;
-  const counterOfferCount = state.pendingCounterOffers?.length ?? 0;
+  const playerFaction = state.player_faction ?? null;
+  const counterOfferCount = (state.pendingCounterOffers ?? [])
+    .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
+    .length;
   if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount + counterOfferCount;
   const eventDecisionCount = Math.max(
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
     (state.pendingEventDecisions ?? []).filter((decision) => playerFactionMatch(decision.faction, state.player_faction ?? null)).length,
   );
-  const playerFaction = state.player_faction ?? null;
   const paramilitaryRequestCount = playerFaction
     ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length
     : 0;

@@ -159,7 +159,7 @@ function playerFactionFor(state: GameStateLike, playerFaction?: string | null): 
 function matchesPlayerFaction(item: RawRecord, playerFaction: string | null): boolean {
     if (!playerFaction) return true;
     const faction = stringFrom(item.faction);
-    return !faction || faction === playerFaction;
+    return faction === playerFaction;
 }
 
 function isResolved(item: RawRecord): boolean {
@@ -257,7 +257,7 @@ function convoyDecisionInstances(state: GameStateLike, playerFaction: string | n
         .filter((item) => item.decision === undefined)
         .filter((item) => {
             const routeFaction = stringFrom(item.route_faction);
-            return !playerFaction || !routeFaction || routeFaction === playerFaction;
+            return !playerFaction || routeFaction === playerFaction;
         })
         .map((item, index) => instance(family, stringFrom(item.id) ?? `convoy:${index}`, true));
 }
@@ -316,7 +316,7 @@ function operationOpportunityFallbackInstances(
         .filter((item) => {
             if (!playerFaction) return true;
             const approver = stringFrom(item.approver_faction) ?? stringFrom(item.faction);
-            return !approver || approver === playerFaction;
+            return approver === playerFaction;
         })
         .filter((item) => {
             const proposalId = stringFrom(item.proposal_id);

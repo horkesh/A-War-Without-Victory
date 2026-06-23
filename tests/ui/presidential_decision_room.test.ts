@@ -393,6 +393,24 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('keeps quiet loop fallbacks on presidential surfaces instead of Army HQ primary routes', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+        commandBriefing: undefined,
+        operationalSitrep: undefined,
+      }),
+    });
+    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
+
+    expect(loopsById.brief.navigationTarget).toEqual({ kind: 'decision-room', lens: 'briefing' });
+    expect(loopsById.decide.navigationTarget).toEqual({ kind: 'inbox' });
+    expect(loopsById.next.navigationTarget.kind).toBe('decision-room');
+    expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-tab');
+    expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-records');
+  });
+
   it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
     const state = makeState({
       commandBriefing: {

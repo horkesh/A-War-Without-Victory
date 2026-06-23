@@ -38,7 +38,13 @@ interface MakeStateOptions {
     /** Top-level player_faction. */
     player_faction?: FactionId;
     /** Lifted onto state.military.event_decision_log. */
-    event_decision_log?: Array<{ event_id: string; response_id: string }>;
+    event_decision_log?: Array<{
+        event_id: string;
+        response_id: string;
+        decision_source?: string;
+        faction?: FactionId | null;
+        player_faction?: FactionId | null;
+    }>;
 }
 
 function makeState(options: MakeStateOptions = {}): GameState {
@@ -63,6 +69,10 @@ function makeState(options: MakeStateOptions = {}): GameState {
 
 function input(state: GameState, currentTurn: number): BuilderInput {
     return { state, currentTurn };
+}
+
+function playerDecision(event_id: string, response_id: string, faction: FactionId = 'RBiH' as FactionId) {
+    return { event_id, response_id, decision_source: 'player', faction };
 }
 
 function makeBreakdown(warCrimes: number) {
@@ -293,7 +303,7 @@ describe('LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE — T5: integration with CostLedge
 describe('A3 — buildDynamicSections surfaces load-bearing authored choices', () => {
     it('emits a RESPONSE-keyed section for a fired Vance-Owen acceptance', () => {
         const state = makeState({
-            event_decision_log: [{ event_id: 'vance_owen_plan_1993', response_id: 'accept' }],
+            event_decision_log: [playerDecision('vance_owen_plan_1993', 'accept')],
         });
         const sections = buildDynamicSections(input(state, 60));
         const vopp = sections.find((s) => s.target_essay_event_id === 'vance_owen_plan_1993');
@@ -306,7 +316,7 @@ describe('A3 — buildDynamicSections surfaces load-bearing authored choices', (
 
     it('keys the section on the ACTUAL recorded branch (reject vs accept)', () => {
         const rejected = makeState({
-            event_decision_log: [{ event_id: 'owen_stoltenberg_plan_1993', response_id: 'reject' }],
+            event_decision_log: [playerDecision('owen_stoltenberg_plan_1993', 'reject')],
         });
         const sections = buildDynamicSections(input(rejected, 80));
         const os = sections.find((s) => s.target_essay_event_id === 'owen_stoltenberg_plan_1993');
@@ -315,7 +325,7 @@ describe('A3 — buildDynamicSections surfaces load-bearing authored choices', (
 
     it('emits nothing for non-load-bearing decisions', () => {
         const state = makeState({
-            event_decision_log: [{ event_id: 'some_flavor_event_1993', response_id: 'noted' }],
+            event_decision_log: [playerDecision('some_flavor_event_1993', 'noted')],
         });
         expect(buildDynamicSections(input(state, 60))).toEqual([]);
     });
@@ -323,9 +333,9 @@ describe('A3 — buildDynamicSections surfaces load-bearing authored choices', (
     it('is deterministic and strictCompare-sorted across calls', () => {
         const state = makeState({
             event_decision_log: [
-                { event_id: 'owen_stoltenberg_plan_1993', response_id: 'accept' },
-                { event_id: 'vance_owen_plan_1993', response_id: 'accept' },
-                { event_id: 'london_conference_1992', response_id: 'accept_principles' },
+                playerDecision('owen_stoltenberg_plan_1993', 'accept'),
+                playerDecision('vance_owen_plan_1993', 'accept'),
+                playerDecision('london_conference_1992', 'accept_principles'),
             ],
         });
         const a = buildDynamicSections(input(state, 90)).map((s) => s.id);
@@ -337,14 +347,49 @@ describe('A3 — buildDynamicSections surfaces load-bearing authored choices', (
     it('uses only the FIRST recorded response per once-only event', () => {
         const state = makeState({
             event_decision_log: [
-                { event_id: 'vance_owen_plan_1993', response_id: 'accept' },
-                { event_id: 'vance_owen_plan_1993', response_id: 'reject' },
+                playerDecision('vance_owen_plan_1993', 'accept'),
+                playerDecision('vance_owen_plan_1993', 'reject'),
             ],
         });
         const sections = buildDynamicSections(input(state, 60))
             .filter((s) => s.target_essay_event_id === 'vance_owen_plan_1993');
         expect(sections).toHaveLength(1);
         expect(sections[0]?.conditional_on).toContain('RESPONSE:vance_owen_plan_1993:accept');
+    });
+
+    it('emits response sections only for player-authored decisions owned by the loaded player faction', () => {
+        const state = makeState({
+            player_faction: 'RBiH' as FactionId,
+            event_decision_log: [
+                {
+                    event_id: 'vance_owen_plan_1993',
+                    response_id: 'accept',
+                    decision_source: 'bot_political',
+                    faction: 'RBiH' as FactionId,
+                },
+                {
+                    event_id: 'owen_stoltenberg_plan_1993',
+                    response_id: 'accept',
+                    decision_source: 'player',
+                    faction: 'RS' as FactionId,
+                },
+                {
+                    event_id: 'london_conference_1992',
+                    response_id: 'accept_principles',
+                    decision_source: 'player',
+                    faction: 'RBiH' as FactionId,
+                },
+            ],
+        });
+
+        const sections = buildDynamicSections(input(state, 60));
+
+        expect(sections.map((section) => section.id)).toEqual([
+            'dynsec_london_conference_1992_accept_principles',
+        ]);
+        expect(sections[0]?.conditional_on).toEqual([
+            'RESPONSE:london_conference_1992:accept_principles',
+        ]);
     });
 });
 

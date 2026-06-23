@@ -4,6 +4,7 @@ import {
     deriveWarWeariness,
     type WarWearinessDescriptor,
 } from '../../data/warWeariness';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 export const WAR_SUMMARY_FACTIONS = ['RS', 'RBiH', 'HRHB'] as const;
 
@@ -54,7 +55,7 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
 
     const atArmsByFaction: Record<string, number> = {};
     for (const formation of state.formations) {
-        if (formation.status === 'destroyed' || formation.personnel == null) continue;
+        if (!isFieldedTacticalFormation(formation) || formation.personnel == null) continue;
         atArmsByFaction[formation.faction] = (atArmsByFaction[formation.faction] ?? 0) + formation.personnel;
     }
 

@@ -327,6 +327,35 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.blockingDecisionCount).toBe(4);
   });
 
+  it('does not count counter-offers addressed to another faction as pre-advance blockers', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+        pendingCounterOffers: [
+          {
+            id: 'HRHB_FOREIGN',
+            author: 'HRHB',
+            targetFaction: 'RS',
+            parentOfferId: 'owen_stoltenberg',
+            planId: 'owen_stoltenberg',
+            planName: 'Owen-Stoltenberg Plan',
+            chainDepth: 1,
+            createdTurn: 70,
+            response: 'conditional_accept',
+            proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+            institutionalModel: 'union_3_republics',
+            sourceCitation: 'BB1 p.49',
+            rider: 'withdraw territorial concessions',
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
+  });
+
   it('preserves Decision Room source targets in pre-advance review rows', () => {
     const state = makeState({
       presidentialReviewQueue: {

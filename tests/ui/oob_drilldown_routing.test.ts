@@ -214,6 +214,32 @@ describe('OOBSidebar drilldown routing', () => {
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 
+  it('does not show stale strength badges for reserve-only sectors', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: ['vrs_guard_bde'],
+      rear_brigade_ids: [],
+      density: 0.35,
+      combat_strength_class: 'adequate',
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    const row = screen.getByTestId('oob-sector-row');
+
+    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('1 held back');
+    expect(container.textContent).toContain('No coverage');
+    expect(container.textContent).not.toContain('Adequate');
+    expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('1');
+    expect(row.getAttribute('data-reserve-brigade-count')).toBe('1');
+  });
+
   it('renders player-safe sector strength labels instead of raw enum values', () => {
     const { container } = render(React.createElement(OOBSidebar));
 

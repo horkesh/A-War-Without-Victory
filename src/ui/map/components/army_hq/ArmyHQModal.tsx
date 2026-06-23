@@ -552,7 +552,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                             </div>
                                             {data.commander ? (
                                                 <>
-                                                    <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" />
+                                                    <OfficerProfile officer={data.commander} label="" compact={true} emphasis="defense" showOriginBadge={false} />
                                                     <OfficerMiniBio officer={data.commander} />
                                                 </>
                                             ) : (

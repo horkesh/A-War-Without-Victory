@@ -270,6 +270,29 @@ describe('decision consequence trail', () => {
     expect(ledger.map((record) => `${record.family} ${record.title} ${record.outcome} ${record.detail}`).join(' ')).not.toMatch(/_/);
   });
 
+  it('excludes army reserve decisions filed by army AI from player consequence receipts', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      reserveRequestHistory: [
+        {
+          request_id: 'reserve:ai_decision',
+          turn: 12,
+          faction: 'RS',
+          corps_id: 'vrs_drina_corps',
+          brigade_id: null,
+          outcome: 'declined',
+          reason: 'defensive_gap',
+          decided_by: 'army_ai',
+          purpose: 'defensive',
+          why_needed: 'AI filed this decision.',
+          how_to_use: '',
+        },
+      ],
+    } as Partial<LoadedGameState>));
+
+    expect(ledger.map((record) => record.id)).not.toContain('reserve:reserve:ai_decision');
+    expect(ledger.find((record) => record.familyId === 'army-reserve')).toBeUndefined();
+  });
+
   it('labels reserve-history enum reasons before rendering decision consequence details', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       formations: [
@@ -421,6 +444,25 @@ describe('decision consequence trail', () => {
       detail: 'Convoy to Srebrenica enclave allowed through VRS lines; aid delivered to ARBiH.',
     });
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
+  });
+
+  it('excludes bot convoy decisions from player consequence receipts', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      convoyDecisionHistory: [
+        {
+          id: 'convoy:64:srebrenica:RS',
+          turn: 64,
+          target_enclave: 'Srebrenica enclave',
+          route_faction: 'RS',
+          target_faction: 'RBiH',
+          supply_amount: 0.5,
+          decision: 'allow',
+          decided_by: 'bot',
+        },
+      ],
+    } as Partial<LoadedGameState>));
+
+    expect(ledger.find((record) => record.familyId === 'humanitarian-convoy')).toBeUndefined();
   });
 
   it('includes resolved paramilitary authorization decisions from persisted history', () => {

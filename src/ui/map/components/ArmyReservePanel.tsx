@@ -82,11 +82,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     const selectedFormationId = useGameStore((s) => s.selectedFormationId);
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const setLoadError = useGameStore((s) => s.setLoadError);
+    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const [historyOpen, setHistoryOpen] = useState(true);
 
     const hqId = selectedArmyHqId ?? selectedFormationId;
     if (!hqId || !loadedGameState) return null;
-    const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
 
     const armyHq = loadedGameState.formations.find(f => f.id === hqId);
     if (!armyHq || armyHq.kind !== 'army_hq') return null;
