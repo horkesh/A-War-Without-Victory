@@ -131,6 +131,19 @@ describe('OrbatPanel drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
+  it('gives brigade rows a readable command summary instead of collapsed DOM text', () => {
+    render(React.createElement(OrbatPanel));
+
+    const row = screen.getByRole('button', { name: /1st Brigade/i });
+    expect(row.getAttribute('aria-label')).toMatch(/1st Brigade/i);
+    expect(row.getAttribute('aria-label')).toMatch(/1[,.]200 personnel/i);
+    expect(row.getAttribute('aria-label')).toMatch(/Supply unreported/i);
+    expect(row.getAttribute('aria-label')).toMatch(/cohesion 70/i);
+    expect(row.getAttribute('aria-label')).toMatch(/fatigue 0/i);
+    expect(row.getAttribute('aria-label')).toMatch(/Active/i);
+    expect(row.textContent ?? '').not.toContain('1st Brigade1200ACTIVE');
+  });
+
   it('highlights the override sector on brigade hover instead of stale roster membership', () => {
     render(React.createElement(OrbatPanel));
 

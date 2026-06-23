@@ -373,7 +373,10 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
                         const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
                         const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
-                        const projectedDensity = computeCurrentFrontDensity(sector, sectorAssignment.frontlineIds.length);
+                        const projectedDensity = computeCurrentFrontDensity(
+                            sector,
+                            sectorAssignment.frontlineIds.length + sectorAssignment.overrideIds.length,
+                        );
 
                         return (
                             <div
@@ -414,7 +417,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 segments: sector.length_edges,
                                                 density: projectedDensity,
                                             })}
-                                            {sectorAssignment.overrideIds.length > 0 && ` // ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
+                                            {sectorAssignment.overrideIds.length > 0 && `; ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
                                         </div>
                                     </button>
                                     <button

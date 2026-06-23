@@ -243,6 +243,30 @@ describe('buildPreAdvanceCommandReviewView', () => {
     });
   });
 
+  it('does not count foreign pending event decisions in legacy fallback blocking counts', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: undefined,
+        pendingEventDecisions: [
+          {
+            event_id: 'rs_only',
+            event_title: 'RS Only',
+            turn_fired: 1,
+            faction: 'RS',
+            response_options: [{ id: 'a', label: 'A', effects: [] }],
+          },
+        ],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
+  });
+
   it('uses the manifest summary for blocking counts across modal and advisory decision families', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({

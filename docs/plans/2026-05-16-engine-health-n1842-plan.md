@@ -6,7 +6,7 @@
 
 **Goal:** Close the open engine-health gaps surfaced by the 2026-05-16 n1842 188w audit, in priority order, without duplicating existing operations-singularity / formation-life / force-quality work.
 
-**Architecture:** This plan **consumes** the n1842 evidence and **dispatches** to existing canonical owners where they exist. Where no owner exists (Track H5), it creates a new bounded lane. H2/H3 are closed report-only classifications. H4/H5 are verified in n1844. H1 is implemented and verified as blocker-surface work, but sensitive-history operation outcome remains open.
+**Architecture:** This plan **consumes** the n1842 evidence and **dispatches** to existing canonical owners where they exist. Where no owner exists (Track H5), it creates a new bounded lane. H2/H3 are closed report-only classifications. H4/H5 are verified in n1844. H1 is implemented and verified as blocker-surface work; the former sensitive-history operation-outcome follow-up is superseded because Srebrenica/Zepa fall receipts are event-owned.
 
 **Tech Stack:** TypeScript, scenario runner, Vitest, existing diagnostic tooling. No new dependencies.
 
@@ -19,7 +19,7 @@
 This plan does **not** supersede any existing plan. It **dispatches** through them:
 
 - [`2026-04-30-v09-formation-life-believability-plan.md`](2026-04-30-v09-formation-life-believability-plan.md) — owns Class D (drifted brigades) + Class U (arbih_guards_brigade fall-through). H5 remains a scoped subset; H3 was reclassified as report-only, not a bugfix lane.
-- [`2026-04-08-operations-system-a-plus-plan.md`](2026-04-08-operations-system-a-plus-plan.md) — owns operation-delivery work. Track H1 is the n1842-specific evidence push.
+- [`2026-04-08-operations-system-a-plus-plan.md`](2026-04-08-operations-system-a-plus-plan.md) — owns general operation-health work. Track H1 is the n1842-specific evidence push, not Srebrenica/Zepa fall-delivery authority.
 - [`2026-03-31-v08x-operations-singularity-plan.md`](2026-03-31-v08x-operations-singularity-plan.md) — predecessor for operation lifecycle canonicalization (CLOSED 2026-04-04).
 - [`../40_reports/audits/20260402_ENGINE_HEALTH_TRIAGE_AND_BLINDSPOTS.md`](../40_reports/audits/20260402_ENGINE_HEALTH_TRIAGE_AND_BLINDSPOTS.md) — origin of the P1 COMBAT-P14 + BRIEF-GAP-1 calls. Tracks H1 + H4 close those.
 
@@ -40,7 +40,7 @@ This plan does **not** supersede any existing plan. It **dispatches** through th
 | Severity | Definition | Tracks |
 |---|---|---|
 | **G** - Gate | Must close before treating n1842 as new baseline | H0 |
-| **P0** - High leverage | Largest single open gap; blocks late-war operation realism | H1 (blocker surface verified; sensitive-history outcome open) |
+| **P0** - High leverage | Largest single open gap; blocks late-war operation realism | H1 (blocker surface verified; fall-delivery superseded by event receipts) |
 | **P1** - Bounded fixes | Concrete bugs with named owners | H5 (verified in n1844) |
 | **R** - Report-only closure | Classification/audit completed; no runtime fix | H2, H3 |
 | **P2** - Diagnostic | Display/visibility surface | H4 (verified in n1844) |
@@ -52,13 +52,13 @@ This plan does **not** supersede any existing plan. It **dispatches** through th
 | Track | Theme | Severity | Owner agent(s) | Effort |
 |---:|---|---|---|---:|
 | **H0** | Variance check rerun (n1843) + hash drift audit | G | `/scenario-harness-engineer` | ~1d |
-| **H1** | Operation-delivery: launch-feasibility predictor consumes defender artillery/terrain/entrenchment | P0 - IMPLEMENTED, n1844 blocker-surface verified; sensitive-history outcome open | `/operations-expert` + `/corps-army-commander` + `/gameplay-programmer` | done |
+| **H1** | Operation-health: launch-feasibility predictor consumes defender artillery/terrain/entrenchment | P0 - IMPLEMENTED, n1844 blocker-surface verified; fall-delivery superseded | `/operations-expert` + `/corps-army-commander` + `/gameplay-programmer` | done |
 | **H2** | `brigade_front_assignment` adapter audit | R - CLOSED report-only | `/qa-engineer` + `/technical-architect` | closed |
 | **H3** | `vrs_1st_krajina` Teslic drifter classification | R - CLOSED report-only | `/formation-expert` | closed |
 | **H4** | Supply-pressure aggregate ceiling un-stuck via live `war_supply_condition` | P2 - VERIFIED in n1844 | `/qa-engineer` + `/ui-ux-developer` | done |
 | **H5** | Army-HQ elite loan deployment / `arbih_guards_brigade` fall-through | P1 - VERIFIED in n1844 | `/formation-expert` | done |
 
-**Remaining total:** H0 needs a formal parent baseline verdict. H1 needs follow-up sensitive-history operation outcome work; H4/H5 are verified in n1844.
+**Remaining total:** H0 needs a formal parent baseline verdict. H1 has no active Srebrenica/Zepa operation-outcome lane; operation-health/AAR diagnostics may continue without fall-delivery tuning. H4/H5 are verified in n1844.
 
 ---
 
@@ -95,9 +95,9 @@ This plan does **not** supersede any existing plan. It **dispatches** through th
 
 ---
 
-## Track H1 — Operation-delivery launch-feasibility predictor
+## Track H1 — Operation-health launch-feasibility predictor
 
-**Status:** IMPLEMENTED 2026-05-16 - VERIFIED FOR BLOCKER SURFACE IN n1844; SENSITIVE-HISTORY OUTCOME OPEN.
+**Status:** IMPLEMENTED 2026-05-16 - VERIFIED FOR BLOCKER SURFACE IN n1844; FORMER SENSITIVE-HISTORY OPERATION OUTCOME LANE SUPERSEDED.
 
 **Report:** [`../40_reports/implemented/20260516_OPERATION_LAUNCH_FEASIBILITY_BLOCKERS.md`](../40_reports/implemented/20260516_OPERATION_LAUNCH_FEASIBILITY_BLOCKERS.md)
 
@@ -119,25 +119,25 @@ This plan does **not** supersede any existing plan. It **dispatches** through th
 1. **Diagnose:** Why does Krivaja-95 (turn 170) report `planning_invalidated` with 0 attacks despite the SRK siege defender Phase 1+2 work (`32c128f8`, 2026-05-08/09)? The defender power increase from that work should have made the attacker→defender ratio more realistic but apparently the launch-feasibility check still doesn't gate on it.
 2. **TDD:** add tests asserting that an operation with `attacker_power < 1.5 × defender_power` returns `feasibility=NO_LAUNCH_READINESS` rather than progressing to attack.
 3. Implement defender-aware launch-feasibility check, mirroring the defender-power calculation already done by `computeDefenderPower()`.
-4. Rerun 188w. Acceptance: NO_LAUNCH_READINESS predicate count drops from 13 to ≤8; DELIV count rises from 6 to ≥10. Krivaja-95 either captures the enclave (sensitive-history sign-off required) OR fails with a `defender_power_too_high` predicate (honest, not silent).
-5. Sensitive-history sign-off on any Krivaja/Stupčanica behavior change required from user.
+4. Rerun 188w. Acceptance: NO_LAUNCH_READINESS predicate count drops from 13 to ≤8 and watched-operation blocker evidence is explicit. Do not use this plan to tune Krivaja/Stupcanica/Cerska-Kamenica into delivering Srebrenica/Zepa falls; those fall receipts are event-owned.
+5. Any future sensitive-history operation behavior change requires a fresh Section 6 design and sign-off before implementation.
 
 **Implemented decision:** `evaluateLaunchFeasibility(...)` is now a shared pure evaluator returning `feasible`, `ratio`, `attackerPower`, `defenderPower`, and typed `blocker`. It uses sorted attacker/defender inputs, `computeAttackerPower(...)`, and `rankDefendersByPower(...)`, with optional supply/terrain context. Organic launch/readiness and triggered-operation spawn paths now expose `defender_power_too_high` and `no_launch_readiness` instead of collapsing these cases into generic `planning_invalidated`. `operation_delivery_audit`, `opportunity_campaign_proof`, and `sensitive_history_status` diagnostics expose blockers. Opportunity spawn gating was deliberately not applied because current fixtures/catalog paths lack enough front-sector context; opportunity operations are caught at first planning tick.
 
 **Acceptance (Done Means):**
 - ✅ Launch-feasibility consumes defender_power; gating is defender-aware.
 - ✅ 188w rerun shows NO_LAUNCH_READINESS axes ≤ 8 (down from 13): n1844 has 5.
-- ❌ DELIV axes ≥ 10 (up from 6): n1844 remains at 6. This is now a follow-up operation-delivery improvement lane, not a blocker-surface defect.
-- ❌ At minimum 1 of {Krivaja-95, Stupčanica-95, Cerska-Kamenica} delivers a capture OR all 3 fail with `defender_power_too_high` predicate: n1844 sensitive-history diagnostic lists all three watched operations as missing, so follow-up must address watched-operation injection/AAR visibility.
+- ⚪ Former DELIV-axis uplift gate is superseded for Srebrenica/Zepa fall delivery; legacy counts may remain diagnostic for generic operation health.
+- ⚪ Former watched-operation capture gate is superseded for Srebrenica/Zepa fall delivery; diagnostics may still prove catalog, blocker, injection, and AAR visibility seams.
 - ⏳ Painted-target oct1995 area-weighted match improves OR is explicitly proven stable (drift in another direction is acceptable if accounted for).
 - ✅ Focused tests cover the defender-aware feasibility check and blocker diagnostics.
-- ⏳ Sensitive-history sign-off recorded if any enclave delivery changes.
+- ⏳ Fresh Section 6 sign-off recorded if any future sensitive-history operation behavior change is explicitly reopened.
 
-**n1844 verification:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1844` final hash `ccd3f9f770052614`. Operation delivery audit reports `NO-LAUNCH-READINESS` 5, `DEFENDER-POWER-HIGH` 9, and `DELIV` 6.
+**n1844 verification:** `runs/apr1992_definitive_188w__210e69404d054959__w188_n1844` final hash `ccd3f9f770052614`. Operation-health audit reports `NO-LAUNCH-READINESS` 5, `DEFENDER-POWER-HIGH` 9, and legacy delivered-axis count 6.
 
-**H1 visibility refresh 2026-05-21:** `docs/40_reports/audits/20260521_H1_WATCHED_OPERATION_VISIBILITY_PACKET.md` reran the evidence-first diagnostic on `runs/apr1992_definitive_188w__210e69404d054959__w188_n1922` (hash `7b57a8592f668137`). Follow-up implementation `docs/40_reports/implemented/20260521_WATCHED_OPERATION_LIFECYCLE_TRACE.md` now persists deterministic watched-operation trace rows plus `watched_operations.json`. Fresh trace-backed packet `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` ran `n1931` (hash `3099a5fabaa04d6b`, anchors 27/27) and proves Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are catalog-present runtime rows with no AAR; current blockers are `build_defender_power_too_high` for all three, with compact ratio/attacker/defender power inputs, defender rosters, per-defender raw/stacked power contributions, and per-defender modifier breakdowns, plus Krivaja `brigade_ineligible` on `rs_skelani_battalion`. Component review packet `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md` attributes the remaining active multipliers and classifies the next step as gated sensitive-history outcome work rather than autonomous tuning. In particular, Stupcanica's `1.15` per-brigade terrain bonus comes from a runtime tier-2 decoration defense bonus path, and tests deliberately protect that bonus as orthogonal defender power behavior.
+**H1 visibility refresh 2026-05-21:** `docs/40_reports/audits/20260521_H1_WATCHED_OPERATION_VISIBILITY_PACKET.md` reran the evidence-first diagnostic on `runs/apr1992_definitive_188w__210e69404d054959__w188_n1922` (hash `7b57a8592f668137`). Follow-up implementation `docs/40_reports/implemented/20260521_WATCHED_OPERATION_LIFECYCLE_TRACE.md` now persists deterministic watched-operation trace rows plus `watched_operations.json`. Fresh trace-backed packet `docs/40_reports/audits/20260521_H1_TRACE_BACKED_188W_PACKET.md` ran `n1931` (hash `3099a5fabaa04d6b`, anchors 27/27) and proves Cerska-Kamenica, Krivaja-95, and Stupcanica-95 are catalog-present runtime rows with no AAR; current blockers are `build_defender_power_too_high` for all three, with compact ratio/attacker/defender power inputs, defender rosters, per-defender raw/stacked power contributions, and per-defender modifier breakdowns, plus Krivaja `brigade_ineligible` on `rs_skelani_battalion`. Component review packet `docs/40_reports/audits/20260521_H1_DEFENDER_POWER_COMPONENT_REVIEW.md` attributes the remaining active multipliers and classifies any future operation-behavior change as requiring a fresh Section 6 design, not autonomous tuning. In particular, Stupcanica's `1.15` per-brigade terrain bonus comes from a runtime tier-2 decoration defense bonus path, and tests deliberately protect that bonus as orthogonal defender power behavior.
 
-**Effort:** diagnostic and blocker-surface implementation complete; sensitive-history outcome follow-up remains gated.
+**Effort:** diagnostic and blocker-surface implementation complete; Srebrenica/Zepa fall delivery is event-owned, not an open H1 operation-tuning lane.
 
 ---
 
@@ -236,14 +236,14 @@ This plan does **not** supersede any existing plan. It **dispatches** through th
 H0  Variance + hash drift audit ────────────┐  (GATE — must finish before n1842 is "the baseline")
                                             ↓
 PARALLEL after H0 closes:
-  H1  Operation-delivery predictor   ─┐   blocker surface verified; sensitive-history outcome open
+  H1  Operation-health predictor     ─┐   blocker surface verified; fall-delivery superseded
   H4  Supply pressure ceiling         ├─── verified in n1844
   H5  arbih_guards_brigade fix        ─┘   verified in n1844
                                             ↓
                                           v0.9.7+ baseline confirm
 ```
 
-**Calendar:** H2/H3 are closed report-only. H4/H5 are verified in n1844. H1 blocker-surface implementation is verified, but sensitive-history watched-operation outcome remains open. H0 still needs a formal baseline verdict.
+**Calendar:** H2/H3 are closed report-only. H4/H5 are verified in n1844. H1 blocker-surface implementation is verified; sensitive-history watched-operation fall delivery is superseded by event-owned receipts. H0 still needs a formal baseline verdict.
 
 ---
 
@@ -253,7 +253,7 @@ This plan is DONE when:
 
 1. ⏳ H0 closes with a verdict on n1842's baseline status (accept / revert / escalate).
 2. ✅ H1's NO_LAUNCH_READINESS axis count drops from 13 → ≤8 in a fresh 188w run: n1844 has 5.
-3. ❌ H1's DELIV axis count rises from 6 → ≥10: n1844 remains 6.
+3. ⚪ H1's former DELIV uplift gate is superseded for Srebrenica/Zepa fall delivery; legacy counts remain generic operation-health diagnostics only.
 4. ✅ H1 diagnostic outcome: current `n1931` watched-operation trace rows prove Krivaja-95/Stupcanica-95/Cerska-Kamenica all fail with honest `build_defender_power_too_high` predicates. This is operation-health/AAR evidence only. The former Q-H1-KRIVAJA-OUTCOME fall-delivery gate is superseded because Srebrenica/Zepa fall receipts are event-owned.
 5. ✅ H2: `brigade_front_assignment` adapter status confirmed as compatibility-only/by-design; report-only closure linked.
 6. ✅ H3: Teslic drifter suspicion classified; two are not drifters and one is same-corps redeployment; report-only closure linked.
@@ -275,7 +275,7 @@ This plan is DONE when:
 ## Risks / stop conditions
 
 - **R1** — H0 finds determinism regression (n1843 hash differs from n1842 even with identical config). All remaining runtime tracks pause; escalate to `/determinism-auditor`; do not commit changes from H1/H4/H5 until determinism restored.
-- **R2** — H1 makes Krivaja/Stupčanica deliver but the calibration painted-target match drops sharply at oct1995. Reassess H1; the defender-aware predictor may be too aggressive or require retuning.
+- **R2** — A future fresh Section 6 design explicitly reopens Krivaja/Stupcanica operation behavior and moves calibration painted-target match sharply at oct1995. Reassess the new design; this dated plan is not authority for that tuning.
 - **R3** — H5 fix accidentally exempts brigades that SHOULD be sector-assigned. Verify with 188w rerun that active brigade count in sector lists doesn't drop materially.
 
 ---

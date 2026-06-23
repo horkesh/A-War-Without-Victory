@@ -86,6 +86,18 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
   const isDisrupted = (formation.disrupted_turns ?? 0) > 0;
   const displayStatus = isDisrupted ? 'disrupted' : formation.status.toLowerCase();
   const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.recorded;
+  const statusLabel = t(badge.labelKey);
+  const personnelLabel = formation.personnel != null
+    ? t('brigadeRow.personnelAria', { personnel: formation.personnel.toLocaleString() })
+    : t('brigadeRow.personnelAria', { personnel: t('corpsFront.unreported') });
+  const rowAriaLabel = t('brigadeRow.ariaLabel', {
+    name: formationName,
+    personnel: personnelLabel,
+    supply: supplyLabel,
+    cohesion,
+    fatigue: fat,
+    status: toTitleCase(statusLabel.toLocaleLowerCase()),
+  });
 
   const containerClasses = [
     'flex items-center gap-1.5 font-mono text-xs border-b border-panel-border/50 last:border-b-0 px-2',
@@ -105,6 +117,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
       title={t('brigadeRow.title', { supply: supplyLabel, fatigue: fat, cohesion })}
+      aria-label={rowAriaLabel}
     >
       {/* Supply dot */}
       <span className={`shrink-0 text-[14px] leading-none ${supplyColor}`} aria-label={supplyLabel}>●</span>
@@ -152,7 +165,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
         className={`shrink-0 text-[8px] uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
         style={{ transform: 'rotate(-1.5deg)' }}
       >
-        {t(badge.labelKey)}
+        {statusLabel}
       </span>
     </button>
   );

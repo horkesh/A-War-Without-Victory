@@ -2,6 +2,8 @@ import assert from 'node:assert';
 import { test } from 'vitest';
 
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { deriveInboxItems } from '../src/ui/map/data/inboxItems.js';
+import { buildPresidentialDecisionRoomView } from '../src/ui/map/data/presidentialDecisionRoom.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 import { readFileSync } from 'node:fs';
@@ -51,6 +53,47 @@ test('parseGameState preserves meta.player_faction in LoadedGameState', () => {
   } as any,
 });
     assert.strictEqual(parsed.player_faction, 'RS');
+});
+
+test('parseGameState scopes pending event decisions and review queue to player faction', () => {
+    const parsed = parseGameState({
+        meta: { turn: 1, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+            pending_event_decisions: [
+                { event_id: 'rs_only', event_title: 'RS Only', turn_fired: 1, faction: 'RS', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+                { event_id: 'rbih_only', event_title: 'RBiH Only', turn_fired: 1, faction: 'RBiH', response_options: [{ id: 'b', label: 'B', effects: [] }] },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepStrictEqual(parsed.pendingEventDecisions?.map((decision) => decision.event_id), ['rbih_only']);
+    assert.strictEqual(parsed.presidentialReviewQueue?.eventDecisionCount, 1);
+    assert.deepStrictEqual(
+        deriveInboxItems(parsed, null)
+            .map((item) => item.id)
+            .filter((id) => id.startsWith('event:')),
+        ['event:rbih_only'],
+    );
+
+    const foreignOnly = parseGameState({
+        meta: { turn: 1, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+            pending_event_decisions: [
+                { event_id: 'rs_only', event_title: 'RS Only', turn_fired: 1, faction: 'RS', response_options: [{ id: 'a', label: 'A', effects: [] }] },
+            ],
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+    assert.strictEqual(foreignOnly.pendingEventDecisions, undefined);
+    assert.strictEqual(foreignOnly.presidentialReviewQueue, undefined);
+    assert.ok(!buildPresidentialDecisionRoomView({ state: foreignOnly }).cards.some((card) => card.id === 'review:pending'));
 });
 
 test('parseGameState extracts canonical front edge and pressure views', () => {

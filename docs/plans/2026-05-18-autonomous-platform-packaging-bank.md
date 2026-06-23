@@ -95,7 +95,7 @@
 
 ### 1. Role and objective
 
-You are the autonomous AWWV platform packaging worker. Execute one or more repo-owned lanes from `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md` without claiming operator-only evidence.
+You are the AWWV platform packaging support worker. Packaging and installer work are paused until the live first-hour/command-surface experience is owner-approved; only update repo-owned checklists, templates, dry-run evidence manifests, or documentation rows from `docs/plans/2026-05-18-autonomous-platform-packaging-bank.md`, and do not claim operator-only evidence.
 
 ### 2. Canon references
 

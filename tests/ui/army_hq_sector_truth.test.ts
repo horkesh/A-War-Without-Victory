@@ -87,10 +87,95 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('0 on line');
     expect(container.textContent).toContain('density 0.00');
     expect(container.textContent).toContain('Troop density: 0.00');
+    expect(container.textContent).not.toContain('//');
+    expect(container.textContent).not.toContain(' RES ');
     expect(container.textContent).not.toContain('density 0.42');
     expect(container.textContent).not.toContain('Troop density: 0.42');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
     expect(container.textContent).not.toMatch(/current:\s*Defend/i);
     expect(container.textContent).not.toMatch(/Class\s*Adequate|Adequate/i);
+  });
+
+  it('spells out reserve and directed sector summary counts for command scanning', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:covered',
+      display_name: 'Main front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      length_edges: 4,
+      density: 0,
+      combat_strength_class: 'thin',
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'front_brigade',
+        faction: 'RBiH',
+        name: 'Front Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+      {
+        id: 'reserve_brigade',
+        faction: 'RBiH',
+        name: 'Reserve Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+      {
+        id: 'directed_brigade',
+        faction: 'RBiH',
+        name: 'Directed Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+        sectorOverrideId: 'sector:arbih_1st_corps:covered',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...sector,
+      assigned_brigade_ids: ['front_brigade'],
+      reserve_brigade_ids: ['reserve_brigade'],
+    } as unknown as CorpsFrontSectorView];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: state.corpsFrontSectors!,
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    expect(container.textContent).toContain('1 on line');
+    expect(container.textContent).toContain('1 reserve');
+    expect(container.textContent).toContain('4 front segments');
+    expect(container.textContent).toContain('density 0.50');
+    expect(container.textContent).toContain('1 command-directed');
+    expect(container.textContent).not.toContain('//');
+    expect(container.textContent).not.toContain('RES //');
   });
 });

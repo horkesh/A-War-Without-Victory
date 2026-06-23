@@ -318,6 +318,28 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toMatch(/Reserve ratio\s*0%/i);
   });
 
+  it('does not collapse known friendly line strength to a dash when strength class is unreported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      combat_strength_class: undefined,
+      combat_personnel: 1200,
+      combat_offensive_power: 600,
+      combat_defensive_power: 1200,
+      combat_defense_per_edge: 1200,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Strength\s*Friendly line reported/i);
+    expect(container.textContent).not.toMatch(/Strength\s*—/i);
+  });
+
   it('includes command-directed brigades in Corps Front logistics manpower', () => {
     const state = makeState();
     state.formations = [

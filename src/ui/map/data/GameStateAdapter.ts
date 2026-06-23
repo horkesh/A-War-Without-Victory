@@ -2235,7 +2235,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         ? getOperationalSitrepView(gameState, playerFaction)
         : undefined;
     const pendingOfficerEvents = derivePendingOfficerEvents(state, playerFaction);
-    const pendingEventDecisions = derivePendingEventDecisions(state);
+    const pendingEventDecisions = derivePendingEventDecisions(state, playerFaction);
     const pendingEventNotifications = derivePendingEventNotifications(state);
     const pendingProposalReviews = derivePendingProposalReviews(state, playerFaction);
     const operationOpportunityProposals = deriveOperationOpportunityProposals(state, playerFaction);
@@ -3058,11 +3058,12 @@ function deriveFiredEvents(state: any): LoadedGameState['firedEvents'] {
  * adapter only exposes it under a UI-friendly property name. Empty arrays
  * collapse to undefined to match the rest of the LoadedGameState contract.
  */
-function derivePendingEventDecisions(state: any): LoadedGameState['pendingEventDecisions'] {
+function derivePendingEventDecisions(state: any, playerFaction: string | null): LoadedGameState['pendingEventDecisions'] {
     const pending = state.military?.pending_event_decisions as
         LoadedGameState['pendingEventDecisions'];
     if (!pending || pending.length === 0) return undefined;
-    return pending;
+    const scoped = pending.filter((decision) => playerFactionMatch(decision.faction, playerFaction));
+    return scoped.length > 0 ? scoped : undefined;
 }
 
 function derivePendingEventNotifications(state: any): LoadedGameState['pendingEventNotifications'] {

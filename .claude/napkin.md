@@ -1546,6 +1546,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 
 ## Player Shell Discipline
+1. **[2026-06-23] Player-scoped decision fixtures need ownership truth**
+   Do instead: When tests create pending event/convoy/officer decision rows, include `player_faction` and matching/non-matching row ownership explicitly; production Inbox/Desk/Decision Room/pre-advance surfaces scope by the player, so foreign-route fixtures should assert absence rather than expecting blockers.
 1. **[2026-06-22] Missing command-surface data is unreported, not favorable**
    Do instead: Preserve absent posture/stance/lifecycle/supply readiness as unreported/recorded/unassessed; never default corps/army rows to hold, balanced, active, or 0% unless the read-model explicitly says so. Sort formation lists by localized display names with deterministic id fallback.
 1. **[2026-06-23] Brigade supply display is explicit supply truth**

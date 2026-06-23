@@ -9,6 +9,7 @@ import {
   type PresidentialDecisionRoomSourceHandoff,
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
+import { playerFactionMatch } from './playerFactionMatch';
 import { t } from '../i18n';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
@@ -78,7 +79,7 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
   if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount + counterOfferCount;
   const eventDecisionCount = Math.max(
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
-    state.pendingEventDecisions?.length ?? 0,
+    (state.pendingEventDecisions ?? []).filter((decision) => playerFactionMatch(decision.faction, state.player_faction ?? null)).length,
   );
   const playerFaction = state.player_faction ?? null;
   const paramilitaryRequestCount = playerFaction

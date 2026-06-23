@@ -89,7 +89,7 @@ describe('derivePresidentialBlockers', () => {
         {
           id: 'convoy_1',
           target_enclave: 'srebrenica_enclave',
-          route_faction: 'RS',
+          route_faction: 'RBiH',
           supply_amount: 25,
         },
       ],
@@ -102,8 +102,23 @@ describe('derivePresidentialBlockers', () => {
       actionLabel: 'Review convoy',
     });
     expect(blockers[0].summary).toContain('A humanitarian convoy request needs your instruction');
-    expect(blockers[0].summary).not.toContain('RS route');
+    expect(blockers[0].summary).not.toContain('RBiH route');
     expect(blockers[0].summary).not.toContain('srebrenica_enclave');
+  });
+
+  it('does not block the player on foreign-route convoy decisions', () => {
+    const blockers = derivePresidentialBlockers(makeState({
+      pendingConvoyDecisions: [
+        {
+          id: 'convoy_foreign',
+          target_enclave: 'srebrenica_enclave',
+          route_faction: 'RS',
+          supply_amount: 25,
+        },
+      ],
+    }), null);
+
+    expect(blockers).toHaveLength(0);
   });
 
   it('uses registry action copy for paramilitary blockers', () => {
@@ -135,7 +150,7 @@ describe('derivePresidentialBlockers', () => {
           {
             id: 'convoy_1',
             target_enclave: 'srebrenica_enclave',
-            route_faction: 'RS',
+            route_faction: 'RBiH',
             supply_amount: 25,
           },
         ],

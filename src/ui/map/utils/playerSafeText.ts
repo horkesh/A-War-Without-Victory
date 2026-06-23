@@ -378,7 +378,8 @@ export function getPlayerSafeMunicipalityName(
     fallback = 'Target municipality',
 ): string {
     const humanized = humanizeIdentifierLabel(municipalityId);
-    return humanized || fallback;
+    if (!humanized) return fallback;
+    return humanized === humanized.toLocaleLowerCase() ? toTitleCase(humanized) : humanized;
 }
 
 export function getPlayerSafeCorridorLabel(

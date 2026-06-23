@@ -53,6 +53,7 @@ function makeFormationDetailState(): LoadedGameState {
         narrativeArc: 'bloodied',
         personnel: 1400,
         posture: 'defend',
+        municipalityId: 'vogosca',
         warNarrative: 'The brigade has been tested in hard fighting.',
       },
       {
@@ -235,6 +236,14 @@ describe('Formation Detail parity display', () => {
     const copy = view.container.textContent ?? '';
     expect(copy).toContain('Blooded in combat');
     expect(copy).not.toMatch(/\bBloodied\b/);
+  });
+
+  it('renders known municipality slugs as player-facing names', () => {
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Home municipality: Vogosca');
+    expect(copy).not.toContain('Home municipality: vogosca');
   });
 
   it('shows recent engagements newest first', () => {

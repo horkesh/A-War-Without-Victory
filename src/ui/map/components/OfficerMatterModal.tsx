@@ -18,6 +18,31 @@ function stripOfficerPrefix(itemId: string): string {
   return itemId.startsWith('officer:') ? itemId.slice('officer:'.length) : itemId;
 }
 
+function normalizeOfficerSubject(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  if (!trimmed) return null;
+  return trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || null;
+}
+
+function officerEventDedupeKey(event: NonNullable<LoadedGameState['pendingOfficerEvents']>[number]): string {
+  const subject =
+    normalizeOfficerSubject(event.officer_id)
+    ?? normalizeOfficerSubject(event.current_commander_id)
+    ?? normalizeOfficerSubject(event.officer_name)
+    ?? normalizeOfficerSubject(event.current_commander_name)
+    ?? normalizeOfficerSubject(event.event_id)
+    ?? 'unknown';
+  return `${event.type}:${subject}`;
+}
+
+function matchesOfficerMatterId(
+  event: NonNullable<LoadedGameState['pendingOfficerEvents']>[number],
+  rawId: string | null,
+): boolean {
+  if (!rawId) return false;
+  return event.event_id === rawId || officerEventDedupeKey(event) === rawId;
+}
+
 function officerEventTypeLabel(type: string): string {
   switch (type) {
     case 'order_pushback':
@@ -36,7 +61,7 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const rawId = itemId ? stripOfficerPrefix(itemId) : null;
-  const event = state?.pendingOfficerEvents?.find((entry) => entry.event_id === rawId) ?? state?.pendingOfficerEvents?.[0] ?? null;
+  const event = state?.pendingOfficerEvents?.find((entry) => matchesOfficerMatterId(entry, rawId)) ?? state?.pendingOfficerEvents?.[0] ?? null;
   const headerImage = getDecisionHeaderForFamily('officer_event');
 
   const acknowledge = async () => {

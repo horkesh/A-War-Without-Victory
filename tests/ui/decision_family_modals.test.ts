@@ -190,6 +190,57 @@ describe('decision family modals', () => {
     expect(container.textContent).not.toMatch(/order pushback|order_pushback|replacement suggested|replacement_suggested/i);
   });
 
+  it('opens the officer matter matching the Inbox dedupe id', async () => {
+    const acknowledgeOfficerEvent = vi.fn(async () => ({ ok: true }));
+    Object.defineProperty(window, 'awwv', {
+      value: { acknowledgeOfficerEvent },
+      configurable: true,
+    });
+    const onClose = vi.fn();
+    render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:replacement_suggested:second_officer',
+      state: makeState({
+        pendingOfficerEvents: [
+          {
+            event_id: 'evt-first',
+            type: 'replacement_suggested',
+            faction: 'RS',
+            turn: 1,
+            officer_id: 'first-officer',
+            officer_name: 'First Officer',
+            officer_competence: 4,
+            officer_aggressiveness: 3,
+            officer_defensive_skill: 4,
+            acknowledged: false,
+            reason: 'First matter.',
+          },
+          {
+            event_id: 'evt-second',
+            type: 'replacement_suggested',
+            faction: 'RS',
+            turn: 1,
+            officer_id: 'second-officer',
+            officer_name: 'Second Officer',
+            officer_competence: 4,
+            officer_aggressiveness: 3,
+            officer_defensive_skill: 4,
+            acknowledged: false,
+            reason: 'Second matter.',
+          },
+        ],
+      }),
+      onClose,
+      onOpenPersonnel: vi.fn(),
+    }));
+
+    expect(screen.getByText('Second Officer')).toBeTruthy();
+    expect(screen.queryByText('First Officer')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }));
+    await waitFor(() => expect(acknowledgeOfficerEvent).toHaveBeenCalledWith('evt-second'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
   it('requires intelligence briefs to be opened and acknowledged as a readable brief', () => {
     render(React.createElement(IntelligenceBriefModal, {
       notificationId: 'intel:intel-1',

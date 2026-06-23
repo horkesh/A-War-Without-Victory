@@ -18,14 +18,23 @@ import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 
 /** Strength class badge with color coding. */
-function StrengthBadge({ strengthClass }: { strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical' }) {
+function StrengthBadge({
+  strengthClass,
+  friendlyLineReported = false,
+}: {
+  strengthClass?: 'fortress' | 'strong' | 'adequate' | 'thin' | 'critical';
+  friendlyLineReported?: boolean;
+}) {
   switch (strengthClass) {
     case 'fortress': return <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.strength.fortress')}</span>;
     case 'strong': return <span className="text-green-600 font-semibold">{t('corpsFront.strength.strong')}</span>;
     case 'adequate': return <span className="text-amber-600 font-semibold">{t('corpsFront.strength.adequate')}</span>;
     case 'thin': return <span className="text-orange-600 font-semibold">{t('corpsFront.strength.thin')}</span>;
     case 'critical': return <span className="text-red-600 font-bold bg-red-100 px-1 rounded">{t('corpsFront.strength.critical')}</span>;
-    default: return <span className="text-neutral-400">—</span>;
+    default:
+      return friendlyLineReported
+        ? <span className="text-neutral-700 font-semibold">{t('corpsFront.strength.friendlyLineReported')}</span>
+        : <span className="text-neutral-400">—</span>;
   }
 }
 
@@ -437,7 +446,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.strength')}</span>
                       <div className="font-medium">
-                        <StrengthBadge strengthClass={displayStrengthClass} />
+                        <StrengthBadge strengthClass={displayStrengthClass} friendlyLineReported={hasFriendlyLine} />
                       </div>
                     </div>
                     <div className="flex flex-col">
