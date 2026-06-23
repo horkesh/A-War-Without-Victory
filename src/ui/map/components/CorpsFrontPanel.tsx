@@ -251,6 +251,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
 
+  const rearFormations = sectorAssignment.rearIds
+    .map((id) => loadedGameState.formations.find((f) => f.id === id))
+    .filter((f): f is NonNullable<typeof f> => f != null);
+
   const overrideFormations = sectorAssignment.overrideIds
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
@@ -539,6 +543,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.brigades')}</span>
                     <span className="font-medium">
                       {t('corpsFront.frontReserveBrigades', { front: sectorAssignment.frontlineIds.length, reserve: sectorAssignment.reserveIds.length })}
+                      {sectorAssignment.rearIds.length > 0 && `, ${t('corpsFront.rearSupportBrigades', { count: sectorAssignment.rearIds.length })}`}
                       {sectorAssignment.overrideIds.length > 0 && `, ${t('corpsFront.commandDirectedBrigades', { count: sectorAssignment.overrideIds.length })}`}
                     </span>
                   </div>
@@ -711,6 +716,38 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 font-medium text-amber-800">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-amber-700 text-[9px] uppercase tracking-wide shrink-0">{t('sectorsSection.overrideBadge')}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {rearFormations.length > 0 && (
+                  <div className="pt-2">
+                    <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
+                      {t('corpsFront.rearSupportElements', { count: rearFormations.length })}
+                    </div>
+                    <div className="space-y-[1px] max-h-[120px] overflow-auto opacity-80 hover:opacity-100 transition-opacity">
+                      {rearFormations.map((f) => (
+                        <button
+                          key={f.id}
+                          type="button"
+                          data-testid="corps-front-rear-brigade-row"
+                          data-formation-id={f.id}
+                          data-location-osid={f.location_osid ?? undefined}
+                          aria-label={t('corpsFront.rearSupportBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
+                          onClick={() => inspectSectorFormation(f.id)}
+                          onMouseEnter={() => {
+                            if (f.location_osid) setHoveredOsids([f.location_osid]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
+                          onMouseLeave={() => {
+                            setHoveredOsids([]);
+                            setHoveredSectorId(selectedSectorId);
+                          }}
+                        >
+                          <span className="truncate mr-2 text-neutral-600 italic leading-none">{getLocalizedFormationName(f, locale)}</span>
+                          <span className="text-neutral-400 text-[9px] uppercase tracking-wide shrink-0 leading-none">{t('formationDetail.rearSupport')}</span>
                         </button>
                       ))}
                     </div>

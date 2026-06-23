@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(sim/ui): enforce sector OOB startup truth
+
+**Type:** Simulation/read-model/UI/test/docs calibration-safe hardening.
+
+**Fix:** Sector roster membership now uses one shared active-fielded tactical-formation boundary, excluding forming/destroyed/non-fielded rows from startup sector buckets and read-model counts while preserving compatible active tactical rows. Sector assignment sync now requires a physical bucket claim: front units must sit on that sector front, reserve units in the one-hop reserve band, and rear/support units inside sector territory without being promoted to a fake front line. The previous reserve-candidate fallback that could convert a reserve-only sector into apparent front strength was removed. Rear/support buckets are exposed through shared sector read models and OOB, Corps Detail, Corps Front, Formation Detail, and Army HQ sector surfaces. The sector-truth audit keeps `reserve_only_live_sectors` as a visible diagnostic, but no longer treats it as a release failure because the honest state is "no friendly line", not invented front coverage.
+
+**Verification:** Focused sector/startup pack passed 124/124. UI parity pack passed 39/39. `npm.cmd run typecheck` passed. `npm.cmd run desktop:startup-snapshot:check` passed. Direct sector audit on `data/derived/startup/apr_1992_initial_save.json` reported saved counts with only `reserve_only_live_sectors: 1` and `ok: true`; rebuilt audit also reported `ok: true`. `npm.cmd run ci:structural-fingerprint:check` passed with `b9f5a40aa0a1726e`. `npm.cmd run test:baselines` passed after the manifest refresh.
+
+**Scope/determinism:** Startup artifact, 40w structural fingerprint, and baseline manifest were intentionally refreshed for the corrected sector/OOB truth. No event mechanics, Srebrenica/Zepa event ownership, save schema migration, player decision content, packaged installer artifact, randomness, or locale sorting changed. One reserve-only live sector remains an explicit diagnostic for future sector-builder/classification work, not a release blocker.
+
+---
+
 ## [2026-06-23] fix(ui): align canon content and field context
 
 **Type:** UI/read-model/content/test/docs polish.

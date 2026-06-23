@@ -48,6 +48,7 @@ interface SectorView {
   territory_osids?: string[];
   assigned_brigade_ids: string[];
   reserve_brigade_ids: string[];
+  rear_brigade_ids?: string[];
 }
 
 interface FormationSectorView {
@@ -62,6 +63,7 @@ interface FormationSectorView {
 export interface SectorFormationAssignment {
   frontlineIds: string[];
   reserveIds: string[];
+  rearIds: string[];
   overrideIds: string[];
   allCurrentIds: string[];
 }
@@ -132,7 +134,9 @@ export function getSectorIdForFormation(
 ): string | null {
   if (!corpsFrontSectors) return null;
   const sector = corpsFrontSectors.find(
-    s => s.assigned_brigade_ids.includes(formationId) || s.reserve_brigade_ids.includes(formationId)
+    s => s.assigned_brigade_ids.includes(formationId)
+      || s.reserve_brigade_ids.includes(formationId)
+      || (s.rear_brigade_ids ?? []).includes(formationId)
   );
   return sector?.sector_id ?? null;
 }
@@ -204,7 +208,11 @@ export function buildSectorFormationAssignment(
     .filter((id) => !isKnownNonFielded(id))
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
-  const rosterIds = new Set([...frontlineIds, ...reserveIds]);
+  const rearIds = [...(sector.rear_brigade_ids ?? [])]
+    .filter((id) => !isKnownNonFielded(id))
+    .filter((id) => !isOverriddenAway(id))
+    .sort(compareStableText);
+  const rosterIds = new Set([...frontlineIds, ...reserveIds, ...rearIds]);
   const overrideIds = (formations ?? [])
     .filter((formation) => formation.kind === undefined || isFieldedTacticalFormation(formation))
     .filter((formation) => isValidOverrideSector(formation, sector))
@@ -212,5 +220,5 @@ export function buildSectorFormationAssignment(
     .filter((id) => !rosterIds.has(id))
     .sort(compareStableText);
   const allCurrentIds = [...new Set([...frontlineIds, ...reserveIds, ...overrideIds])].sort(compareStableText);
-  return { frontlineIds, reserveIds, overrideIds, allCurrentIds };
+  return { frontlineIds, reserveIds, rearIds, overrideIds, allCurrentIds };
 }

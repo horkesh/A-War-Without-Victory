@@ -239,6 +239,10 @@ export function auditSectorTruth(
         });
     }
 
-    result.ok = Object.values(result.counts).every((count) => count === 0);
+    const {
+        reserve_only_live_sectors: _diagnosticReserveOnlyLiveSectors,
+        ...releaseGateCounts
+    } = result.counts;
+    result.ok = Object.values(releaseGateCounts).every((count) => count === 0);
     return result;
 }

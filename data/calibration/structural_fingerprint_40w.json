@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "f282883abbab76cf",
+  "fingerprint": "b9f5a40aa0a1726e",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
@@ -415,6 +415,12 @@
         "to": "RBiH"
       },
       {
+        "settlement_id": "op:kladanj:staric_2",
+        "municipality_id": "kladanj",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:kljuc:hadzici",
         "municipality_id": "kljuc",
         "from": "RBiH",
@@ -502,12 +508,6 @@
         "settlement_id": "op:odzak:potocani_2",
         "municipality_id": "odzak",
         "from": "HRHB",
-        "to": "RS"
-      },
-      {
-        "settlement_id": "op:olovo:gurdici_2",
-        "municipality_id": "olovo",
-        "from": "RBiH",
         "to": "RS"
       },
       {

@@ -318,32 +318,35 @@ describe('Wave 1: assertBrigadeReachability return value', () => {
 });
 
 describe('Wave 1: sector sync after dissolution', () => {
-    it('syncSectorAssignmentsToFormations writes sector assignment to all listed brigades (canonical contract)', () => {
+    it('syncSectorAssignmentsToFormations writes bucket-accurate sector assignment roles', () => {
         const ss1 = makeSubSeg('ss1', ['op:m:front_a'], ['op:m:enemy_1'], 2);
         const sector = makeSector(
             'sector:vrs_drina:0', 'vrs_drina', [ss1],
-            ['op:m:front_a'],
+            ['op:m:front_a', 'op:m:reserve_a'],
         );
         sector.assigned_brigade_ids = ['brig_active'];
         sector.reserve_brigade_ids = ['brig_reserve'];
 
         const formations: Record<FormationId, FormationState> = {
             brig_active: makeFormation({ id: 'brig_active', location_osid: 'op:m:front_a', status: 'active' }),
-            brig_reserve: makeFormation({ id: 'brig_reserve', location_osid: 'op:m:front_a', status: 'active' }),
+            brig_reserve: makeFormation({ id: 'brig_reserve', location_osid: 'op:m:reserve_a', status: 'active' }),
             brig_unassigned: makeFormation({ id: 'brig_unassigned', location_osid: 'op:m:front_a', status: 'active' }),
         };
 
         const sectorsRecord: Record<string, CorpsFrontSector> = {
             'sector:vrs_drina:0': sector,
         };
+        const adjacency = makeAdjacency([
+            ['op:m:front_a', 'op:m:reserve_a'],
+        ]);
 
-        syncSectorAssignmentsToFormations(sectorsRecord, formations);
+        syncSectorAssignmentsToFormations(sectorsRecord, formations, adjacency);
 
         expect(formations['brig_active']?.assignment).toEqual(
             expect.objectContaining({ kind: 'sector', role: 'front' })
         );
         expect(formations['brig_reserve']?.assignment).toEqual(
-            expect.objectContaining({ kind: 'sector', role: 'front' })
+            expect.objectContaining({ kind: 'sector', role: 'reserve' })
         );
         const unassignedAssignment = formations['brig_unassigned']?.assignment;
         expect(unassignedAssignment).toBeFalsy();

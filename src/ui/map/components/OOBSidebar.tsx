@@ -647,6 +647,7 @@ export function OOBSidebar() {
                             data-current-brigade-count={sectorAssignment.allCurrentIds.length}
                             data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
                             data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                            data-rear-brigade-count={sectorAssignment.rearIds.length}
                             data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                             data-selected={selectedCorpsFrontSectorId === sector.sector_id ? 'true' : 'false'}
                             onClick={() => inspectOnField(useGameStore.getState(), {
@@ -678,6 +679,7 @@ export function OOBSidebar() {
                               <div className="text-text-secondary text-[10px] tabular-nums">
                                 {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                                 {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
+                                {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}
                                 {sectorAssignment.overrideIds.length > 0 && ` + ${t('oob.sectorDirectedCount', { count: sectorAssignment.overrideIds.length.toString() })}`}
                                 {' \u00B7 '}{t('oob.sectorFrontSegments', { count: sector.length_edges.toString() })}
                                 {' \u00B7 '}{sectorCoverageLabel(coverageTier)}

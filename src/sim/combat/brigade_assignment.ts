@@ -28,6 +28,7 @@ import {
     DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
     DISSOLUTION_EQUIPMENT_TRANSFER_RATE,
 } from './brigade_dissolution.js';
+import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 
 const POCKET_BRIGADE_FORCE_DISSOLUTION_IDS = new Set<string>([
     'hrhb_105th_modrica_brigade',
@@ -246,8 +247,7 @@ function countActiveBrigadesByOsid(
 ): Map<string, number> {
     const counts = new Map<string, number>();
     for (const formation of Object.values(formations)) {
-        if (!formation || formation.status !== 'active') continue;
-        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        if (!isSectorRosterEligibleFormation(formation)) continue;
         const locationOsid = formation.location_osid;
         if (!locationOsid) continue;
         counts.set(locationOsid, (counts.get(locationOsid) ?? 0) + 1);
@@ -262,8 +262,7 @@ function countActiveEnemyPersonnelByOsid(
     const personnelByOsid = new Map<string, number>();
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const formation = formations[fid];
-        if (!formation || formation.faction === faction || formation.status !== 'active') continue;
-        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        if (!formation || formation.faction === faction || !isSectorRosterEligibleFormation(formation)) continue;
         const locationOsid = formation.location_osid;
         if (!locationOsid) continue;
         // Phase 0 (ADR-0005): enemy strength-at-OSID is a home-availability read — a brigade
@@ -422,8 +421,7 @@ export function classifyBrigadesByTerritory(
             const sectorId = playerOverrides[bid];
             if (!sectorId) continue;
             const f = formations[bid];
-            if (!f || f.faction !== faction || f.status !== 'active') continue;
-            if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+            if (!f || f.faction !== faction || !isSectorRosterEligibleFormation(f)) continue;
             const fCorpsId = getFormationCorpsId(f);
             if (!fCorpsId) continue;
             const sector = sectorById.get(sectorId);
@@ -490,8 +488,7 @@ export function classifyBrigadesByTerritory(
     for (const fid of sortedFormIds) {
         if (playerOverridden.has(fid)) continue;
         const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f || f.faction !== faction || !isSectorRosterEligibleFormation(f)) continue;
         if (!f.location_osid) continue;
         if (state && POCKET_BRIGADE_FORCE_DISSOLUTION_IDS.has(fid)) {
             dissolvePocketDestroyableBrigade(state, formations, fid);
@@ -1283,8 +1280,7 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
     for (const fid of formIds) {
         if (assigned.has(fid)) continue;
         const formation = formations[fid];
-        if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-        if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+        if (!formation || formation.faction !== faction || !isSectorRosterEligibleFormation(formation)) continue;
         const corpsId = getFormationCorpsId(formation);
         const isLoaned = !!formation.elite_loan_state?.on_loan && !!formation.elite_loan_state?.loaned_to_corps;
         if (isSectorAssignmentExemptCorpsId(corpsId) && !isLoaned) continue;
@@ -1504,8 +1500,7 @@ export function warnUnresolvedSectorAssignments(
     for (const fid of sortedFormIds) {
         if (allAssigned.has(fid)) continue;
         const f = formations[fid];
-        if (!f || f.faction !== faction || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!f || f.faction !== faction || !isSectorRosterEligibleFormation(f)) continue;
         const fCorpsId = getFormationCorpsId(f);
         const isLoaned = !!f.elite_loan_state?.on_loan && !!f.elite_loan_state?.loaned_to_corps;
         if (isSectorAssignmentExemptCorpsId(fCorpsId) && !isLoaned) continue;
@@ -2534,27 +2529,23 @@ export function syncSectorAssignmentsToFormations(
                 new Set<string>([...sector.territory_osids, ...frontSet]),
             )
             : null;
-        const assignmentRoleForClaim = (claim: 'front' | 'reserve' | 'territory'): 'front' | 'reserve' | 'rear' => (
-            claim === 'territory' ? 'rear' : claim
-        );
-
         for (const bid of sector.assigned_brigade_ids) {
             const f = formations[bid];
-            if (!f) continue;
+            if (!isSectorRosterEligibleFormation(f)) continue;
             const locationOsid = f.location_osid ?? '';
-            const assignedClaim = frontSet.has(locationOsid)
+            const physicalClaim = frontSet.has(locationOsid)
                 ? 'front'
                 : (oneHopBehind?.has(locationOsid))
                     ? 'reserve'
                     : sector.territory_osids.includes(locationOsid)
                         ? 'territory'
-                    : null;
-            if (!assignedClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: assignmentRoleForClaim(assignedClaim) };
+                        : null;
+            if (!physicalClaim) continue;
+            f.assignment = { kind: 'sector', sector_id: sid, role: physicalClaim === 'territory' ? 'rear' : physicalClaim };
         }
         for (const bid of sector.reserve_brigade_ids) {
             const f = formations[bid];
-            if (!f) continue;
+            if (!isSectorRosterEligibleFormation(f)) continue;
             const locationOsid = f.location_osid ?? '';
             const reserveClaim = frontSet.has(locationOsid)
                 ? 'front'
@@ -2562,15 +2553,13 @@ export function syncSectorAssignmentsToFormations(
                     ? 'reserve'
                     : sector.territory_osids.includes(locationOsid)
                         ? 'territory'
-                        : (oneHopBehind
-                            ? classifySectorPosition(locationOsid, frontSet, oneHopBehind)
-                            : 'reserve');
+                        : null;
             if (!reserveClaim) continue;
-            f.assignment = { kind: 'sector', sector_id: sid, role: assignmentRoleForClaim(reserveClaim) };
+            f.assignment = { kind: 'sector', sector_id: sid, role: reserveClaim === 'territory' ? 'rear' : 'reserve' };
         }
         for (const bid of sector.rear_brigade_ids ?? []) {
             const f = formations[bid];
-            if (!f) continue;
+            if (!isSectorRosterEligibleFormation(f)) continue;
             const locationOsid = f.location_osid ?? '';
             const rearClaim = frontSet.has(locationOsid)
                 ? 'front'
@@ -2578,12 +2567,9 @@ export function syncSectorAssignmentsToFormations(
                     ? 'reserve'
                     : sector.territory_osids.includes(locationOsid)
                         ? 'territory'
-                    : (oneHopBehind
-                        ? classifySectorPosition(locationOsid, frontSet, oneHopBehind)
-                        : null);
+                        : null;
             if (!rearClaim) continue;
-            const rearRole: 'front' | 'rear' = rearClaim === 'front' ? 'front' : 'rear';
-            f.assignment = { kind: 'sector', sector_id: sid, role: rearRole };
+            f.assignment = { kind: 'sector', sector_id: sid, role: 'rear' };
         }
     }
 }

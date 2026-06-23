@@ -80,6 +80,7 @@ function makeState(): LoadedGameState {
         corps_id: 'vrs_main_staff',
         assigned_brigade_ids: ['vrs_guard_bde'],
         reserve_brigade_ids: [],
+        rear_brigade_ids: [],
         length_edges: 2,
         density: 0.2,
         combat_strength_class: 'adequate',
@@ -149,6 +150,7 @@ describe('OOBSidebar drilldown routing', () => {
       ...state.corpsFrontSectors![0],
       assigned_brigade_ids: [],
       reserve_brigade_ids: [],
+      rear_brigade_ids: [],
       density: 0.35,
     }] as LoadedGameState['corpsFrontSectors'];
     useGameStore.setState({ loadedGameState: state });
@@ -165,6 +167,35 @@ describe('OOBSidebar drilldown routing', () => {
     expect(row.getAttribute('data-current-brigade-count')).toBe('0');
     expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-rear-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
+  });
+
+  it('shows rear support in OOB without treating it as live line coverage', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: ['vrs_guard_bde'],
+      density: 0.35,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    const row = screen.getByTestId('oob-sector-row');
+
+    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('1 rear/support');
+    expect(container.textContent).toContain('No coverage');
+    expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+    expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-rear-brigade-count')).toBe('1');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 

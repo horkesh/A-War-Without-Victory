@@ -440,7 +440,44 @@ describe('Formation Detail parity display', () => {
     expect(southButton).not.toBeNull();
     expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
     expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(southButton?.getAttribute('data-rear-brigade-count')).toBe('0');
     expect(southButton?.getAttribute('aria-label')).toContain('Southern line');
+    expect(southButton?.textContent ?? '').toContain('0 current brigades');
+  });
+
+  it('keeps rear support out of sector picker current counts', () => {
+    const state = makeFormationDetailState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'rbih_ready_rear_support',
+        faction: 'RBiH',
+        name: 'Ready Rear Support',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 62,
+        fatigue: 4,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        personnel: 1000,
+        posture: 'defend',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
+      ? { ...sector, assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: ['rbih_ready_rear_support'] }
+      : sector);
+    useGameStore.setState({ loadedGameState: state });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const southButton = view.container.querySelector('[data-testid="formation-detail-sector-option"][data-sector-id="sector_south"]');
+    expect(southButton).not.toBeNull();
+    expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(southButton?.getAttribute('data-rear-brigade-count')).toBe('1');
     expect(southButton?.textContent ?? '').toContain('0 current brigades');
   });
 

@@ -393,6 +393,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   data-current-brigade-count={sectorAssignment.allCurrentIds.length}
                   data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
                   data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                  data-rear-brigade-count={sectorAssignment.rearIds.length}
                   data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                   onClick={() => inspectSectorInCorps(s.sector_id)}
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
@@ -402,6 +403,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="text-text-secondary text-[10px] tabular-nums">
                       {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                       {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
+                      {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}
                       {sectorAssignment.overrideIds.length > 0 && ` + ${t('oob.sectorDirectedCount', { count: sectorAssignment.overrideIds.length.toString() })}`}
                       {' · '}{t('oob.sectorFrontSegments', { count: s.length_edges.toString() })}
                       {' · '}{t('corpsDetail.personnelCount', { count: sectorPers.toLocaleString() })}

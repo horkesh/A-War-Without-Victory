@@ -12,6 +12,7 @@ import type {
 } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getSectorComponent } from './sector_utils.js';
+import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 
 /**
  * Assert that every assigned/reserve brigade can physically reach its sector
@@ -66,12 +67,13 @@ export function assertBrigadeReachability(
 }
 
 /**
- * INVARIANT: No dissolved/inactive brigade may appear in any sector.
+ * INVARIANT: No non-fielded tactical formation may appear in any sector.
  *
- * Checks all assigned_brigade_ids and reserve_brigade_ids for:
+ * Checks all sector brigade buckets for:
  *   - Formation exists in formations record
  *   - f.status === 'active'
  *   - f.lifecycle_status is NOT 'destroyed' or 'disbanded'
+ *   - f.readiness is not forming/destroyed
  *
  * Logs violations as console.error. Sectors remain usable - downstream combat
  * logic may ignore inactive formations, but their presence in a sector is still
@@ -86,6 +88,7 @@ export function assertSectorBrigadesActive(
         const allBids = [
             ...sec.assigned_brigade_ids,
             ...(sec.reserve_brigade_ids ?? []),
+            ...(sec.rear_brigade_ids ?? []),
         ].sort(strictCompare);
         for (const bid of allBids) {
             const f = formations[bid];
@@ -95,14 +98,9 @@ export function assertSectorBrigadesActive(
                 );
                 continue;
             }
-            if (f.status !== 'active') {
+            if (!isSectorRosterEligibleFormation(f)) {
                 violations.push(
-                    `${bid} in ${sec.sector_id}: status='${f.status}' (expected 'active')`
-                );
-            } else if (f.lifecycle_status === 'destroyed' || f.lifecycle_status === 'disbanded') {
-                // Invariant: destroyed/disbanded must not have status='active'
-                violations.push(
-                    `${bid} in ${sec.sector_id}: status='active' but lifecycle_status='${f.lifecycle_status}'`
+                    `${bid} in ${sec.sector_id}: status='${f.status}', readiness='${f.readiness ?? 'active'}', lifecycle_status='${f.lifecycle_status ?? 'active'}' (expected fielded tactical formation)`
                 );
             }
         }

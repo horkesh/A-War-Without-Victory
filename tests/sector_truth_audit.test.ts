@@ -235,6 +235,46 @@ describe('auditSectorTruth', () => {
         expect(audit.ok).toBe(true);
     });
 
+    it('keeps reserve-only live sectors as a diagnostic without failing release truth', () => {
+        const edges: EdgeRecord[] = [
+            { a: 'op:front:a', b: 'op:enemy:a' } as EdgeRecord,
+            { a: 'op:front:a', b: 'op:rear:a' } as EdgeRecord,
+        ];
+        const state = makeState(
+            {
+                brig_reserve: makeFormation('brig_reserve', 'RS', 'corps_a', 'op:rear:a'),
+            },
+            [
+                { edge_id: 'op:front:a__op:enemy:a', a: 'op:front:a', b: 'op:enemy:a', side_a: 'RS', side_b: 'RBiH' },
+            ],
+            {
+                'op:front:a': 'RS',
+                'op:rear:a': 'RS',
+                'op:enemy:a': 'RBiH',
+            },
+        );
+
+        const sectors = [
+            makeSector(
+                'sector:corps_a:0',
+                'corps_a',
+                'RS',
+                ['op:front:a'],
+                ['op:enemy:a'],
+                ['op:front:a__op:enemy:a'],
+                ['op:front:a', 'op:rear:a'],
+                [],
+                ['brig_reserve'],
+            ),
+        ];
+
+        const audit = auditSectorTruth(state, sectors, edges);
+
+        expect(audit.counts.reserve_only_live_sectors).toBe(1);
+        expect(audit.counts.untruthful_assigned_brigades).toBe(0);
+        expect(audit.ok).toBe(true);
+    });
+
     it('does not flag same-corps sectors that share a seam osid but own disconnected hostile-side lines', () => {
         const edges: EdgeRecord[] = [
             { a: 'op:front:shared', b: 'op:enemy:left' } as EdgeRecord,

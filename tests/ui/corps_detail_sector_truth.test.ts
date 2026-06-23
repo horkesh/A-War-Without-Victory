@@ -51,6 +51,7 @@ function makeState(): LoadedGameState {
         corps_id: 'arbih_1st_corps',
         assigned_brigade_ids: [],
         reserve_brigade_ids: [],
+        rear_brigade_ids: [],
         length_edges: 3,
         density: 0.42,
         combat_strength_class: 'adequate',
@@ -86,6 +87,51 @@ describe('CorpsDetail sector truth', () => {
     expect(row.getAttribute('data-current-brigade-count')).toBe('0');
     expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-rear-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
+  });
+
+  it('shows rear support without upgrading a sector to held coverage', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'arbih_rear_brigade',
+        faction: 'RBiH',
+        name: 'Rear Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: ['arbih_rear_brigade'],
+      density: 0.55,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+    const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    const row = screen.getByTestId('corps-detail-sector-row');
+
+    expect(container.textContent).toContain('0 on line');
+    expect(container.textContent).toContain('1 rear/support');
+    expect(container.textContent).toContain('Coverage: No coverage');
+    expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);
+    expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-rear-brigade-count')).toBe('1');
     expect(row.getAttribute('data-command-directed-brigade-count')).toBe('0');
   });
 });

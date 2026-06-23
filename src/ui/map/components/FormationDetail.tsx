@@ -993,6 +993,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     const sectorAssignment = sectorAssignmentById.get(sector.sector_id);
                     const currentBrigadeCount = sectorAssignment?.allCurrentIds.length ?? 0;
                     const frontlineBrigadeCount = sectorAssignment?.frontlineIds.length ?? 0;
+                    const rearBrigadeCount = sectorAssignment?.rearIds.length ?? 0;
                     const sectorLabel = safeSectorLabel(sector.sector_id, sameSectorList);
                     return (
                       <button
@@ -1003,6 +1004,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         data-sector-id={sector.sector_id}
                         data-current-brigade-count={currentBrigadeCount}
                         data-frontline-brigade-count={frontlineBrigadeCount}
+                        data-rear-brigade-count={rearBrigadeCount}
                         aria-label={t('formationDetail.sectorOptionAria', {
                           sector: sectorLabel,
                           count: currentBrigadeCount,

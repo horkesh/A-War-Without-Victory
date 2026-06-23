@@ -391,6 +391,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                 data-current-brigade-count={sectorAssignment.allCurrentIds.length}
                                 data-frontline-brigade-count={sectorAssignment.frontlineIds.length}
                                 data-reserve-brigade-count={sectorAssignment.reserveIds.length}
+                                data-rear-brigade-count={sectorAssignment.rearIds.length}
                                 data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                                 className="border border-panel-border/50 bg-panel-card rounded-md"
                             >
@@ -421,6 +422,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 segments: sector.length_edges,
                                                 density: projectedDensity,
                                             })}
+                                            {sectorAssignment.rearIds.length > 0 && `; ${t('sectorsSection.rearSupportSegment', { count: sectorAssignment.rearIds.length })}`}
                                             {sectorAssignment.overrideIds.length > 0 && `; ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
                                         </div>
                                     </button>

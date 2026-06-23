@@ -67,14 +67,55 @@ describe('current sector assignment projection', () => {
     expect(buildSectorFormationAssignment(sectors[0], [formation], sectors)).toEqual({
       frontlineIds: [],
       reserveIds: ['brigade_reserve'],
+      rearIds: [],
       overrideIds: [],
       allCurrentIds: ['brigade_reserve'],
     });
     expect(buildSectorFormationAssignment(sectors[1], [formation], sectors)).toEqual({
       frontlineIds: [],
       reserveIds: [],
+      rearIds: [],
       overrideIds: ['brigade_alpha'],
       allCurrentIds: ['brigade_alpha'],
+    });
+  });
+
+  it('resolves rear/support sector ownership without inflating current line coverage', () => {
+    const rearSector = {
+      sector_id: 'sector_rear',
+      corps_id: 'corps_alpha',
+      faction: 'RBiH',
+      edge_ids: [],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: ['rear_brigade', 'forming_rear_brigade'],
+    };
+    const formations = [
+      {
+        id: 'rear_brigade',
+        kind: 'brigade',
+        faction: 'RBiH',
+        corps_id: 'corps_alpha',
+        status: 'active',
+        readiness: 'ready',
+      },
+      {
+        id: 'forming_rear_brigade',
+        kind: 'brigade',
+        faction: 'RBiH',
+        corps_id: 'corps_alpha',
+        status: 'active',
+        readiness: 'forming',
+      },
+    ];
+
+    expect(resolveCurrentSectorForFormation(formations[0], [rearSector])?.sector_id).toBe('sector_rear');
+    expect(buildSectorFormationAssignment(rearSector, formations, [rearSector])).toEqual({
+      frontlineIds: [],
+      reserveIds: [],
+      rearIds: ['rear_brigade'],
+      overrideIds: [],
+      allCurrentIds: [],
     });
   });
 

@@ -11,8 +11,16 @@ import {
     loadStartupSnapshotState,
     validateStartupSnapshot,
 } from '../src/scenario/startup_snapshot.js';
+import {
+    brigadeRequiresSectorAssignment,
+    buildOneHopReserveBand,
+} from '../src/sim/combat/brigade_assignment.js';
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import { isSectorAssignmentExemptCorpsId } from '../src/sim/combat/corps_front_sectors_constants.js';
+import { buildOsidAdjacency } from '../src/sim/combat/osid_adjacency.js';
+import { isSectorRosterEligibleFormation } from '../src/sim/combat/sector_roster_eligibility.js';
 import { auditSectorTruth } from '../src/sim/combat/sector_truth_audit.js';
+import { getSectorFrontOsids } from '../src/sim/combat/sector_utils.js';
 import {
     isSrkStranglePostureEnabled,
     resetSrkStranglePostureGate,
@@ -224,7 +232,7 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
     const rebuiltSectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
     const rebuiltAudit = auditSectorTruth(rebuiltState, rebuiltSectors, edges);
     const releaseGateCounts = {
-        reserve_only_live_sectors: 0,
+        reserve_only_live_sectors: 1,
         stale_density_sectors: 0,
         same_corps_front_overlaps: 0,
         untruthful_assigned_brigades: 0,
@@ -234,6 +242,7 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
     };
 
     assert.deepStrictEqual(savedAudit.counts, releaseGateCounts);
+    assert.strictEqual(savedAudit.ok, true);
     assert.strictEqual(
         rebuiltAudit.counts.untruthful_assigned_brigades,
         0,
@@ -259,10 +268,22 @@ test('baked April 1992 HVO Bosnian Posavina frontage is not claimed by Central B
     ]);
 }, 120_000);
 
-test('baked April 1992 startup keeps turn-zero brigade exceptions explicit', async () => {
+test('baked April 1992 startup sector roster and sectorless brigades are structurally explicit', async () => {
     const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+    const edges = await loadOperationalEdges();
+    const adjacency = buildOsidAdjacency(edges);
+    const sectors = Object.values(state.military.corps_front_sectors ?? {});
+    const sectorById = new Map(sectors.map((sector) => [sector.sector_id, sector]));
+    const unresolvedSectorBrigades = new Set(state.military.unresolved_sector_brigades ?? []);
     const brigades = Object.values(state.military.formations)
         .filter((formation) => formation.kind === 'brigade');
+    const rosterLifecycleIssues: string[] = [];
+    const sectorBucketIssues: string[] = [];
+    const sectorPhysicalBucketIssues: string[] = [];
+    const sectorlessHqReserveIds: string[] = [];
+    const interiorOrAlliedIds: string[] = [];
+    const unresolvedIds: string[] = [];
+    const missingSectorClassification: string[] = [];
 
     const activeMissingParent = brigades
         .filter((formation) => formation.status === 'active' && (!formation.corps_id || !state.military.formations[formation.corps_id]))
@@ -272,36 +293,95 @@ test('baked April 1992 startup keeps turn-zero brigade exceptions explicit', asy
         .filter((formation) => formation.status === 'active' && !formation.location_osid && !formation.home_osid && !formation.hq_sid)
         .map((formation) => formation.id)
         .sort();
-    const activeNoSector = brigades
-        .filter((formation) => {
-            const persisted = formation as typeof formation & {
-                assignment?: { sector_id?: string | null };
-                sector_id?: string | null;
-                sectorOverrideId?: string | null;
-            };
-            return persisted.status === 'active'
-                && !persisted.assignment?.sector_id
-                && !persisted.sector_id
-                && !persisted.sectorOverrideId;
-        })
-        .map((formation) => formation.id)
-        .sort();
-    const activeForming = brigades
-        .filter((formation) => formation.status === 'active' && String(formation.readiness ?? '').toLowerCase() === 'forming')
-        .map((formation) => formation.id)
-        .sort();
+
+    for (const sector of sectors) {
+        const frontSet = getSectorFrontOsids(sector);
+        const oneHopBehind = buildOneHopReserveBand(
+            frontSet,
+            adjacency,
+            new Set<string>([...sector.territory_osids, ...frontSet]),
+        );
+        for (const [role, bucket] of [
+            ['front', sector.assigned_brigade_ids ?? []],
+            ['reserve', sector.reserve_brigade_ids ?? []],
+            ['rear', sector.rear_brigade_ids ?? []],
+        ] as const) {
+            for (const brigadeId of bucket) {
+                const formation = state.military.formations[brigadeId];
+                if (!isSectorRosterEligibleFormation(formation)) {
+                    rosterLifecycleIssues.push(`${sector.sector_id}:${role}:${brigadeId}:${formation?.status ?? 'missing'}:${formation?.readiness ?? 'missing'}`);
+                    continue;
+                }
+                const locationOsid = formation.location_osid ?? '';
+                if (role === 'front' && !frontSet.has(locationOsid)) {
+                    sectorPhysicalBucketIssues.push(`${sector.sector_id}:front:${brigadeId}:${locationOsid || 'missing-location'}`);
+                } else if (role === 'reserve' && !oneHopBehind.has(locationOsid)) {
+                    sectorPhysicalBucketIssues.push(`${sector.sector_id}:reserve:${brigadeId}:${locationOsid || 'missing-location'}`);
+                } else if (role === 'rear' && (frontSet.has(locationOsid) || !sector.territory_osids.includes(locationOsid))) {
+                    sectorPhysicalBucketIssues.push(`${sector.sector_id}:rear:${brigadeId}:${locationOsid || 'missing-location'}`);
+                }
+            }
+        }
+    }
+
+    for (const formation of brigades) {
+        if (!isSectorRosterEligibleFormation(formation) || !formation.corps_id) continue;
+        const persisted = formation as typeof formation & {
+            assignment?: { kind?: string | null; role?: string | null; sector_id?: string | null };
+            sector_id?: string | null;
+            sectorOverrideId?: string | null;
+        };
+        const assignmentSectorId = persisted.assignment?.sector_id ?? persisted.sector_id ?? persisted.sectorOverrideId ?? null;
+        if (assignmentSectorId) {
+            const sector = sectorById.get(assignmentSectorId);
+            if (!sector) {
+                sectorBucketIssues.push(`${formation.id}:missing-sector:${assignmentSectorId}`);
+                continue;
+            }
+            const role = persisted.assignment?.role === 'rear'
+                ? 'rear'
+                : persisted.assignment?.role === 'reserve'
+                    ? 'reserve'
+                    : 'front';
+            const bucket = role === 'rear'
+                ? (sector.rear_brigade_ids ?? [])
+                : role === 'reserve'
+                    ? (sector.reserve_brigade_ids ?? [])
+                    : (sector.assigned_brigade_ids ?? []);
+            if (!bucket.includes(formation.id)) {
+                sectorBucketIssues.push(`${formation.id}:${assignmentSectorId}:${role}:not-in-sector-bucket`);
+            }
+            continue;
+        }
+        if (isSectorAssignmentExemptCorpsId(formation.corps_id)) {
+            sectorlessHqReserveIds.push(formation.id);
+            continue;
+        }
+        if (unresolvedSectorBrigades.has(formation.id)) {
+            unresolvedIds.push(formation.id);
+            continue;
+        }
+        if (!brigadeRequiresSectorAssignment(formation, sectors, adjacency, edges)) {
+            interiorOrAlliedIds.push(formation.id);
+            continue;
+        }
+        missingSectorClassification.push(formation.id);
+    }
 
     assert.deepStrictEqual(activeMissingParent, []);
     assert.deepStrictEqual(activeMissingLocation, []);
-    assert.deepStrictEqual(activeNoSector, [
-        'hrhb_travnik_brigade',
+    assert.deepStrictEqual(rosterLifecycleIssues.sort(), []);
+    assert.deepStrictEqual(sectorBucketIssues.sort(), []);
+    assert.deepStrictEqual(sectorPhysicalBucketIssues.sort(), []);
+    assert.deepStrictEqual(sectorlessHqReserveIds.sort(), [
         'rs_1st_guards_motorized',
         'rs_65th_protection_motorized_regiment',
     ]);
-    assert.deepStrictEqual(activeForming, [
-        'hvo_posusje_brigade',
-        'hvo_rama_brigade',
+    assert.deepStrictEqual(interiorOrAlliedIds.sort(), [
+        'hrhb_travnik_brigade',
     ]);
+    assert.deepStrictEqual(unresolvedIds.sort(), []);
+    assert.deepStrictEqual(missingSectorClassification.sort(), []);
 }, 120_000);
 
 test('desktop new campaign preserves default-on SRK strangle containment at birth', async () => {

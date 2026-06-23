@@ -1578,6 +1578,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Render brigade supply dots from player-visible supply state only; absent supply is unreported. Never infer strained/critical supply from fatigue, cohesion, or generic formation status.
 1. **[2026-06-23] Fielded tactical-unit truth is status plus readiness truth**
    Do instead: Use the shared fielded tactical-formation boundary for tactical counters, OOB/Corps/ORBAT active counts, sector assignment projections, Force Readiness, settlement/tooltip unit lists, Personnel totals, Supply drain, Ops commander strength, Game Over standings, and map stack overlays; `status: active` plus `readiness: forming` is not fielded, hidden enemy units stay hidden from stacks, and missing adapter lifecycle should be `unreported`.
+1. **[2026-06-23] Reserve-only sectors are diagnostics, not fake fronts**
+   Do instead: Keep sector buckets physically truthful. Front bucket requires a brigade on the sector front; reserve requires one-hop reserve band; rear/support requires sector territory. Do not promote reserve candidates into `assigned_brigade_ids` just to make a sector look staffed; surface `reserve_only_live_sectors` as an honest diagnostic.
 1. **[2026-06-23] Opening brief is a turn-zero visible surface**
    Do instead: Gate event-decision auto-launch only on `shouldShowOpeningBrief(...)`, not a raw dismissed flag; later-turn loads must not hide pending decisions behind an invisible opening brief.
 1. **[2026-06-22] Pending, bot, and foreign decisions are not player-filed history**

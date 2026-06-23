@@ -51,6 +51,7 @@ import { getCorpsArmyPriorities } from './bot_strategy.js';
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
 import { buildEdgeAdjacency as _buildEdgeAdjacency } from './sector_edge_adjacency.js';
 import { assertBrigadeReachability, assertSectorBrigadesActive } from './sector_assertions.js';
+import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
 import {
     mapOsidsToCorps,
     assignTerritoryVoronoi,
@@ -958,8 +959,7 @@ function collectUnresolvedSectorBrigades(
         .sort(strictCompare)
         .filter((formationId): formationId is FormationId => {
             const formation = formations[formationId];
-            if (!formation || formation.status !== 'active') return false;
-            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') return false;
+            if (!isSectorRosterEligibleFormation(formation)) return false;
             const corpsId = getFormationCorpsId(formation);
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
@@ -1470,6 +1470,12 @@ export function applyFinalSectorOwnerTruthPass(
             adjacency,
             state.political?.political_controllers,
         ));
+    _perfTime('applyFinalSectorOwnerTruthPass:sync-sector-assignments', () =>
+        syncSectorAssignmentsToFormations(
+            Object.fromEntries(sectorList.map((sector) => [sector.sector_id, sector])),
+            formations,
+            adjacency,
+        ));
 }
 
 function rescueAdjacentLiveOwnersForEmptyFrontSectors(
@@ -1614,6 +1620,8 @@ function normalizeFinalSectorBuckets(
             ])].sort(strictCompare);
 
             for (const brigadeId of allBrigades) {
+                const formation = formations[brigadeId];
+                if (!isSectorRosterEligibleFormation(formation)) continue;
                 const locationOsid = formations[brigadeId]?.location_osid;
                 if (!locationOsid) {
                     nextRear.push(brigadeId);
