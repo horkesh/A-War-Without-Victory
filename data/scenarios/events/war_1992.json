@@ -2,25 +2,25 @@
   {
     "id": "rs_strategic_goals",
     "title": "The Assembly Speaks",
-    "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. Your army commander has reviewed them. He warns the Assembly plainly: pursuing these goals — particularly the Drina corridor and Sarajevo — will require actions that constitute genocide. The Assembly awaits your decision.",
+    "narrative": "The National Assembly has convened. Six strategic goals for the Serb people in Bosnia have been drafted: state separation, the Posavina corridor, the Drina valley border, the Una-Neretva border, the division of Sarajevo, and access to the sea. General Ratko Mladic, commander of the VRS Main Staff, has reviewed them. He warns the Assembly plainly: pursuing these goals — particularly the Drina corridor and Sarajevo — will require actions that constitute genocide. The Assembly awaits your decision.",
     "localizations": {
       "bcs": {
         "title": "Skupstina govori",
-        "narrative": "Narodna skupstina se sastala. Nacrtano je sest strateskih ciljeva za srpski narod u Bosni: drzavno razdvajanje, posavski koridor, granica na Drini, granica Una-Neretva, podjela Sarajeva i izlaz na more. Komandant vojske ih je pregledao i skupstini jasno upozorio da ce njihovo ostvarenje, posebno na Drini i u Sarajevu, traziti radnje koje cine genocid. Skupstina ceka vasu odluku.",
-        "staff_assessment": "Skupstinski paket zadrzava historijski maksimalisticki kurs i daje jasan politicki okvir VRS-u, ali komandantovo upozorenje znaci da je cijena legitimnosti vec upisana u samu odluku.",
-        "source_note": "Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva i upozorenje komandanta pred skupstinom.",
+        "narrative": "Narodna skupstina se sastala. Nacrtano je sest strateskih ciljeva za srpski narod u Bosni: drzavno razdvajanje, posavski koridor, granica na Drini, granica Una-Neretva, podjela Sarajeva i izlaz na more. General Ratko Mladic, komandant Glavnog staba VRS-a, pregledao ih je i skupstini jasno upozorio da ce njihovo ostvarenje, posebno na Drini i u Sarajevu, traziti radnje koje cine genocid. Skupstina ceka vasu odluku.",
+        "staff_assessment": "Skupstinski paket zadrzava historijski maksimalisticki kurs i daje jasan politicki okvir VRS-u, ali upozorenje generala Ratka Mladica znaci da je cijena legitimnosti vec upisana u samu odluku.",
+        "source_note": "Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva i upozorenje generala Ratka Mladica pred skupstinom.",
         "response_options": {
           "all_six": {
             "label": "Usvojiti svih sest ciljeva",
-            "description": "Puna ofanzivna doktrina. Svi pravci su aktivni. Dolina Drine postaje objavljeni vojni cilj. Sarajevo ce biti podijeljeno. Upozorenje komandanta je zabiljezeno i zanemareno."
+            "description": "Puna ofanzivna doktrina. Svi pravci su aktivni. Dolina Drine postaje objavljeni vojni cilj. Sarajevo ce biti podijeljeno. Upozorenje generala Mladica je zabiljezeno i zanemareno."
           },
           "selective": {
             "label": "Usvojiti ciljeve selektivno",
-            "description": "Osigurati koridor i zastititi srpske zajednice. Dolina Drine - ograniciti operacije. Sarajevo - drzati u obrucu, ali ne razoriti. Upozorenje komandanta oblikuje strategiju."
+            "description": "Osigurati koridor i zastititi srpske zajednice. Dolina Drine - ograniciti operacije. Sarajevo - drzati u obrucu, ali ne razoriti. Upozorenje generala Mladica oblikuje strategiju."
           },
           "aggressive": {
             "label": "Provoditi ih maksimalnom silom",
-            "description": "Svih sest ciljeva najvecom zestinom. Komandant je upozorio na genocid. Culi ste ga. Nastavite ipak, i neka bude brzo. Svijet ce osuditi, ali svijet nije ovdje."
+            "description": "Svih sest ciljeva najvecom zestinom. General Mladic je upozorio na genocid. Culi ste ga. Nastavite ipak, i neka bude brzo. Svijet ce osuditi, ali svijet nije ovdje."
           }
         }
       }
@@ -56,7 +56,7 @@
         "id": "all_six",
         "branch_tag": "rs_all_six",
         "label": "Adopt all six goals",
-        "description": "Full offensive doctrine. All axes active. The Drina valley becomes a declared military objective. Sarajevo will be divided. Your commander's warning is noted and disregarded.",
+        "description": "Full offensive doctrine. All axes active. The Drina valley becomes a declared military objective. Sarajevo will be divided. General Mladic's warning is noted and disregarded.",
         "effects": [
           {
             "kind": "morale_change",
@@ -329,7 +329,7 @@
         "id": "selective",
         "branch_tag": "rs_selective",
         "label": "Adopt goals selectively",
-        "description": "Secure the corridor and protect Serb communities. The Drina valley — restrain operations. Sarajevo — encircle but do not destroy. Your commander's warning shapes the strategy.",
+        "description": "Secure the corridor and protect Serb communities. The Drina valley — restrain operations. Sarajevo — encircle but do not destroy. General Mladic's warning shapes the strategy.",
         "effects": [
           {
             "kind": "morale_change",
@@ -578,7 +578,7 @@
         "id": "aggressive",
         "branch_tag": "rs_aggressive",
         "label": "Pursue with maximum force",
-        "description": "All six goals at maximum intensity. Your commander warned of genocide. You heard him. Proceed anyway — and make it swift. The world will condemn you. But the world is not here.",
+        "description": "All six goals at maximum intensity. General Mladic warned of genocide. You heard him. Proceed anyway — and make it swift. The world will condemn you. But the world is not here.",
         "effects": [
           {
             "kind": "morale_change",

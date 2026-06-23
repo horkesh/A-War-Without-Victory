@@ -1,5 +1,13 @@
 # Napkin Runbook
 
+**SETUP AFTERMATH MUST BE QUIET EVERYWHERE (2026-06-23).** Setup-control/turn-zero summaries can carry battles, displacement, formations, supply, and signals as provenance. Do instead: gate every Turn Aftermath summary read through the narrated-summary boundary when `shouldNarrateTerritorySummary(...)` is false; only pending player actions may remain visible.
+
+**CODEX RUPTURE TOKENS ARE SREBRENICA-ONLY (2026-06-23).** Zepa and general grave-cost sections are event-cost/human-cost findings, not rupture findings. Do instead: reserve `{cost_rupture_findings}` for `rupture_srebrenica_genocide_1995`; use `{cost_findings}` for Zepa and general cost dockets in every locale.
+
+**ARMY-RESERVE DRILLDOWNS ALSO NEED OSID CONTEXT (2026-06-23).** HQ reserve brigade links often know `location_osid`. Do instead: pass optional `osid` through `field-formation-in-army-reserve` and set `selectedOsid` so reserve context does not drop the battlefield anchor.
+
+**MAP MARKER METADATA MUST NOT INFER SUPPLY (2026-06-23).** Fatigue/cohesion/status are not supply assessment truth. Do instead: omit marker `supply_state` unless backed by explicit player-visible formation supply data; do not derive it inside `buildFormationsGeoJSON`.
+
 **FIELD DRILLDOWNS SHOULD PRESERVE KNOWN SETTLEMENT CONTEXT (2026-06-23).** Formation drilldowns often know `location_osid`. Do instead: pass `osid` through `field-formation-in-corps` and `field-formation-in-sector` targets so the field route keeps `selectedOsid`; panning/flashing the OSID is not enough if selection state is cleared.
 
 **DETAIL PANELS MUST RESET ENTITY-LOCAL TABS ON ENTITY CHANGE (2026-06-23).** Formation/settlement detail tabs are local UI state, not global route context. Do instead: reset Formation Detail to Overview when `selectedFormationId` changes and Settlement Detail to Overview when `osid` changes, so a newly selected entity does not inherit stale Orders/Timeline context.

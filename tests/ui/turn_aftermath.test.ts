@@ -269,6 +269,51 @@ describe('buildTurnAftermathView', () => {
           notable_flips: [
             { osid: 'op:sarajevo:dobrinja', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'generic' },
           ],
+          battles: [{
+            osid: 'op:sarajevo:dobrinja',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            primary_attacker_id: 'arbih_setup',
+            primary_defender_id: 'rs_setup',
+            all_attacker_ids: ['arbih_setup'],
+            outcome: 'decisive_victory' as never,
+            attacker_casualties: 25,
+            defender_casualties: 40,
+            territory_flipped: true,
+            was_concentrated: false,
+          }],
+          displacement_total: 1200,
+          displacement_hotspot: 'sarajevo',
+          formation_spawns: [
+            { formation_id: 'arbih_setup_new', formation_name: 'Setup Brigade', faction: 'RBiH', kind: 'brigade' },
+          ],
+          formation_destructions: [
+            { formation_id: 'arbih_setup_lost', formation_name: 'Setup Lost Brigade', faction: 'RBiH' },
+          ],
+          supply_deltas: { RBiH: -12 },
+          heavy_munitions_deltas: { RBiH: -3 },
+          events_fired: [
+            { id: 'setup_event', text: 'Setup event should not be a turn signal.' },
+          ],
+          notable_events: [
+            { kind: 'siege_formed', description: 'Setup notable event should not be a turn signal.', osid: 'op:sarajevo:dobrinja' },
+          ],
+          decoration_awards: [
+            {
+              formation_id: 'arbih_setup',
+              formation_name: 'Setup Brigade',
+              faction: 'RBiH',
+              decoration: { tier: 'tier_1', awarded_turn: 0, reason: 'Setup-only award' },
+            },
+          ],
+          movements: [
+            {
+              formation_id: 'arbih_setup',
+              formation_name: 'Setup Brigade',
+              from_osid: 'op:sarajevo:old',
+              to_osid: 'op:sarajevo:dobrinja',
+            },
+          ],
         }),
       }),
       osidNameMap: { 'op:sarajevo:dobrinja': 'Dobrinja (Sarajevo)' },
@@ -281,6 +326,27 @@ describe('buildTurnAftermathView', () => {
     expect(view?.territory.notable).toEqual([]);
     expect(view?.headline).toBe('No territorial change this turn.');
     expect(view?.narrativeLine).toBe('A quiet week is still a week of depletion, waiting, and staff work.');
+    expect(view?.combat).toMatchObject({
+      battleCount: 0,
+      friendlyBattleCount: 0,
+      friendlyCasualties: 0,
+      opposingCasualties: 0,
+      territoryFlipsFromBattles: 0,
+    });
+    expect(view?.humanitarian).toEqual({ displacedThisTurn: 0, hotspotLabel: undefined });
+    expect(view?.formations).toEqual({ spawned: 0, destroyed: 0, ownSpawned: 0, ownDestroyed: 0 });
+    expect(view?.supply).toEqual({ ownSupplyDelta: 0, ownHeavyMunitionsDelta: 0 });
+    expect(view?.cost).toEqual({
+      friendlyMilitaryCasualties: 0,
+      theaterMilitaryCasualties: 0,
+      displacedThisTurn: 0,
+      ownFormationsDestroyed: 0,
+      ownSupplySpent: 0,
+      ownHeavyMunitionsSpent: 0,
+      severity: 'low',
+      reasons: ['No major costs recorded'],
+    });
+    expect(view?.signals).toEqual([]);
     expect(view?.judgment.memoryTone).toBe('quiet');
   });
 
@@ -294,6 +360,27 @@ describe('buildTurnAftermathView', () => {
           notable_flips: [
             { osid: 'op:sarajevo:dobrinja', mun_id: 'sarajevo', from: 'RS', to: 'RBiH', significance: 'generic' },
           ],
+          battles: [{
+            osid: 'op:sarajevo:dobrinja',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            primary_attacker_id: 'arbih_setup',
+            primary_defender_id: 'rs_setup',
+            all_attacker_ids: ['arbih_setup'],
+            outcome: 'decisive_victory' as never,
+            attacker_casualties: 25,
+            defender_casualties: 40,
+            territory_flipped: true,
+            was_concentrated: false,
+          }],
+          displacement_total: 1200,
+          formation_destructions: [
+            { formation_id: 'arbih_setup_lost', formation_name: 'Setup Lost Brigade', faction: 'RBiH' },
+          ],
+          supply_deltas: { RBiH: -12 },
+          events_fired: [
+            { id: 'setup_event', text: 'Setup event should not be a turn signal.' },
+          ],
           mechanism: 'setup_control',
         } as Partial<TurnSummary> & { mechanism: string }),
       }),
@@ -304,6 +391,17 @@ describe('buildTurnAftermathView', () => {
     expect(view?.territory.friendlyNet).toBe(0);
     expect(view?.territory.notable).toEqual([]);
     expect(view?.headline).toBe('No territorial change this turn.');
+    expect(view?.combat.battleCount).toBe(0);
+    expect(view?.humanitarian.displacedThisTurn).toBe(0);
+    expect(view?.cost).toMatchObject({
+      friendlyMilitaryCasualties: 0,
+      theaterMilitaryCasualties: 0,
+      displacedThisTurn: 0,
+      ownFormationsDestroyed: 0,
+      ownSupplySpent: 0,
+      severity: 'low',
+    });
+    expect(view?.signals).toEqual([]);
   });
 
   it('falls back to a quiet shell when the save has no latest turn summary yet', () => {

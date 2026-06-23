@@ -207,6 +207,52 @@ describe('Tactical map render smoke', () => {
     }
   });
 
+  it('buildFormationsGeoJSON does not infer unreported supply state from fatigue or cohesion', () => {
+    const state: LoadedGameState = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: { 'op:sarajevo': 'RBiH' },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'fatigued_brigade',
+          faction: 'RBiH',
+          name: 'Fatigued Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          cohesion: 20,
+          fatigue: 80,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          personnel: 1800,
+        },
+      ],
+    } as LoadedGameState;
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const feature = buildFormationsGeoJSON(state, controlledGeo).features[0];
+
+    expect(feature?.properties).toBeDefined();
+    expect(Object.prototype.hasOwnProperty.call(feature?.properties ?? {}, 'supply_state')).toBe(false);
+  });
+
   it('buildFormationsGeoJSON derives operation membership from active operation participants, not posture', () => {
     const state = {
       label: 'Turn 1',

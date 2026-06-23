@@ -568,6 +568,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
   const playerFaction = getPlayerFaction(input);
   const turn = summary?.turn ?? nextState.turn ?? input.lastTurnReport?.turn ?? 0;
   const narrateTerritory = shouldNarrateTerritorySummary(summary);
+  const narratedSummary = narrateTerritory ? summary : null;
   const friendlyNet = playerFaction && narrateTerritory ? (summary?.territory_net?.[playerFaction] ?? 0) : 0;
 
   const notable = (narrateTerritory ? (summary?.notable_flips ?? []) : []).map((flip): TurnAftermathFlipView => {
@@ -594,22 +595,22 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
   let friendlyBattleCount = 0;
   let friendlyCasualties = 0;
   let opposingCasualties = 0;
-  for (const battle of summary?.battles ?? []) {
+  for (const battle of narratedSummary?.battles ?? []) {
     const result = summarizeBattleForFaction(battle, playerFaction);
     if (!result.involved) continue;
     friendlyBattleCount += 1;
     friendlyCasualties += result.friendlyCasualties;
     opposingCasualties += result.opposingCasualties;
   }
-  const ownFormationsDestroyed = (summary?.formation_destructions ?? [])
+  const ownFormationsDestroyed = (narratedSummary?.formation_destructions ?? [])
     .filter((formation) => formation.faction === playerFaction).length;
   const cost = buildTurnCost({
-    summary,
+    summary: narratedSummary,
     playerFaction,
     friendlyMilitaryCasualties: friendlyCasualties,
     ownFormationsDestroyed,
   });
-  const signals = buildStrategicSignals(summary, input.osidNameMap ?? null);
+  const signals = buildStrategicSignals(narratedSummary, input.osidNameMap ?? null);
   const nextActions = input.includeNextActions === false
     ? emptyNextActions()
     : buildNextActions(nextState, input.osidNameMap ?? null);
@@ -628,25 +629,25 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
       notable,
     },
     combat: {
-      battleCount: summary?.battles.length ?? 0,
+      battleCount: narratedSummary?.battles.length ?? 0,
       friendlyBattleCount,
       friendlyCasualties,
       opposingCasualties,
-      territoryFlipsFromBattles: (summary?.battles ?? []).filter((battle) => battle.territory_flipped).length,
+      territoryFlipsFromBattles: (narratedSummary?.battles ?? []).filter((battle) => battle.territory_flipped).length,
     },
     humanitarian: {
-      displacedThisTurn: summary?.displacement_total ?? 0,
-      hotspotLabel: humanizeToken(summary?.displacement_hotspot),
+      displacedThisTurn: narratedSummary?.displacement_total ?? 0,
+      hotspotLabel: humanizeToken(narratedSummary?.displacement_hotspot),
     },
     formations: {
-      spawned: summary?.formation_spawns.length ?? 0,
-      destroyed: summary?.formation_destructions.length ?? 0,
-      ownSpawned: (summary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
+      spawned: narratedSummary?.formation_spawns.length ?? 0,
+      destroyed: narratedSummary?.formation_destructions.length ?? 0,
+      ownSpawned: (narratedSummary?.formation_spawns ?? []).filter((formation) => formation.faction === playerFaction).length,
       ownDestroyed: ownFormationsDestroyed,
     },
     supply: {
-      ownSupplyDelta: playerFaction ? (summary?.supply_deltas?.[playerFaction] ?? 0) : 0,
-      ownHeavyMunitionsDelta: playerFaction ? (summary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
+      ownSupplyDelta: playerFaction ? (narratedSummary?.supply_deltas?.[playerFaction] ?? 0) : 0,
+      ownHeavyMunitionsDelta: playerFaction ? (narratedSummary?.heavy_munitions_deltas?.[playerFaction] ?? 0) : 0,
     },
     cost,
     signals,

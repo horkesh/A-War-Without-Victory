@@ -623,6 +623,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         isOperationsPanelOpen: false,
         selectedFormationId: target.formationId,
         selectedArmyHqId: target.armyHqId,
+        selectedOsid: target.osid ?? null,
       });
       return;
     }

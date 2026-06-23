@@ -11,5 +11,5 @@ export function getPlayerVisibleFormationStack(
   return filterPlayerVisibleMapFormations(state).filter((formation) => (
     isFieldedTacticalFormation(formation)
     && resolveFormationLocationOsid(formation, centroidLookup) === osid
-  ));
+  )).sort((a, b) => a.id.localeCompare(b.id));
 }

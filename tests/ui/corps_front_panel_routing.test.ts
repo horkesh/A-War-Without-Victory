@@ -75,6 +75,28 @@ function makeState(): LoadedGameState {
     latestTurnSummary: null,
     turnSummaries: [],
     player_faction: 'RBiH',
+    operations: [
+      {
+        corps_id: 'arbih_1st_corps',
+        operation_name: 'Known Supply Operation',
+        name: 'Known Supply Operation',
+        display_name: 'Known Supply Operation',
+        faction: 'RBiH',
+        type: 'sector_attack',
+        phase: 'execution',
+        sector_id: 'sector:arbih_1st_corps:0',
+        started_turn: 0,
+        participating_brigade_ids: ['arbih_101_brigade'],
+        participating_brigade_count: 1,
+        objectives: ['op:sarajevo:dobrinja_1'],
+        current_objective_index: 0,
+        objectives_count: 1,
+        objectives_captured: 0,
+        attacks: 0,
+        weekly_log_length: 0,
+        supply_readiness: 0,
+      },
+    ],
     activeOperations: [
       {
         corps_id: 'arbih_1st_corps',
@@ -236,6 +258,22 @@ describe('CorpsFrontPanel field routing', () => {
 
   it('does not treat unassessed operation supply readiness as zero percent', () => {
     const state = makeState();
+    state.operations = [
+      {
+        corps_id: 'arbih_1st_corps',
+        name: 'Unassessed Supply Operation',
+        display_name: 'Unassessed Supply Operation',
+        faction: 'RBiH',
+        type: 'sector_attack',
+        phase: 'execution',
+        sector_id: 'sector:arbih_1st_corps:0',
+        started_turn: 0,
+        participating_brigade_ids: ['arbih_101_brigade'],
+        participating_brigade_count: 1,
+        objectives: ['op:sarajevo:dobrinja_1'],
+        current_objective_index: 0,
+      },
+    ] as LoadedGameState['operations'];
     state.activeOperations = [
       {
         corps_id: 'arbih_1st_corps',
@@ -442,5 +480,21 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toMatch(/Date:\s*1 Jun 1992/i);
     expect(container.textContent).toMatch(/Turn:\s*8/i);
     expect(container.textContent).not.toMatch(/Turn:\s*\d+\s+\w+\s+1991/i);
+  });
+
+  it('routes operation objective focus through settlement inspection and clears stale shell context', () => {
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Focus map on objective/i }));
+
+    const store = useGameStore.getState();
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
+    expect(store.selectedFormationId).toBeNull();
+    expect(store.selectedOperationKey).toBeNull();
+    expect(store.codexOpen).toBe(false);
+    expect(store.chronicleOpen).toBe(false);
+    expect(store.focusedAftermathTurn).toBeNull();
+    expect(store.focusedOperationHistoryId).toBeNull();
   });
 });

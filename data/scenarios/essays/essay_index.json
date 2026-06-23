@@ -4039,14 +4039,14 @@
             "generated": true,
             "dynamic_sections": [
                 {
-                    "id": "v091_zepa_rupture_finding",
+                    "id": "v091_zepa_event_cost_finding",
                     "insert_after_paragraph": 3,
-                    "condition": "GAME_OVER AND FINDING:rupture_zepa_falls_1995",
+                    "condition": "GAME_OVER AND FINDING:zepa_falls_1995",
                     "variant": "divergence",
-                    "content": "{cost_rupture_findings}\n\nSources: {cost_finding_sources}",
+                    "content": "{cost_findings}\n\nSources: {cost_finding_sources}",
                     "localizations": {
                         "bcs": {
-                            "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_rupture_findings} {cost_finding_sources}"
+                            "content": "Odstupanje u vasem ratu mijenja nacin na koji se ovaj historijski zapis cita. Uporedite kanonski dogadjaj s kampanjskim dokazima prije nego sto iz toga izvedete politicki ili vojni zakljucak.\n\nPodaci iz zavrsnog zapisa: {cost_findings} {cost_finding_sources}"
                         }
                     }
                 }

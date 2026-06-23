@@ -31,6 +31,8 @@ describe('EventDecisionModal presidential dossier', () => {
     rs_strategic_goals: [
       'Skupstina govori',
       'Narodna skupstina se sastala.',
+      'General Ratko Mladic',
+      'upozorenje generala Ratka Mladica',
       'Usvojiti svih sest ciljeva',
       'Skupstinski paket zadrzava historijski maksimalisticki kurs',
       'Presude Karadzicu i Mladicu dokumentuju sest strateskih ciljeva',
@@ -107,6 +109,38 @@ describe('EventDecisionModal presidential dossier', () => {
       expect(text).not.toContain(bcsExpectedCopy[eventId][0]);
       unmount();
     }
+  });
+
+  it('names General Ratko Mladic in the RS foundational decision without generic commander framing', () => {
+    const eventDef = firstHourCatalog.get('rs_strategic_goals');
+    expect(eventDef?.narrative).toContain('General Ratko Mladic, commander of the VRS Main Staff');
+    expect(eventDef?.narrative).not.toMatch(/Your army commander/i);
+    expect(JSON.stringify(eventDef?.response_options ?? [])).not.toMatch(/Your commander's warning|Your commander warned/i);
+
+    const { container, unmount } = render(React.createElement(EventDecisionModal, {
+      decision: buildCatalogBackedDecision('rs_strategic_goals'),
+      eventCatalog: firstHourCatalog,
+      onRespond: () => undefined,
+    }));
+
+    const englishText = container.textContent ?? '';
+    expect(englishText).toContain('General Ratko Mladic, commander of the VRS Main Staff');
+    expect(englishText).toContain("General Mladic's warning");
+    expect(englishText).not.toMatch(/Your army commander|Your commander's warning|Your commander warned/i);
+    unmount();
+
+    setLocale('bcs');
+    const bcsRender = render(React.createElement(EventDecisionModal, {
+      decision: buildCatalogBackedDecision('rs_strategic_goals'),
+      eventCatalog: firstHourCatalog,
+      onRespond: () => undefined,
+    }));
+    const bcsText = bcsRender.container.textContent ?? '';
+    expect(bcsText).toContain('General Ratko Mladic');
+    expect(bcsText).toContain('upozorenje generala Ratka Mladica');
+    expect(bcsText).toContain('General Mladic je upozorio na genocid');
+    expect(bcsText).not.toMatch(/Komandant vojske|Upozorenje komandanta|Komandant je upozorio/i);
+    bcsRender.unmount();
   });
 
   it('renders foundational decision modal chrome through BCS i18n', () => {

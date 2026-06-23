@@ -868,7 +868,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                             <button
                               type="button"
                               aria-label={t('corpsFront.focusObjectiveAria', { objective: getOsidDisplayName(objective, osidDisplayNames) })}
-                              onClick={() => panToOsid?.(objective)}
+                              onClick={() => {
+                                panToOsid?.(objective);
+                                inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: objective });
+                              }}
                               className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                             >
                               <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : getOsidDisplayName(objective, osidDisplayNames)}

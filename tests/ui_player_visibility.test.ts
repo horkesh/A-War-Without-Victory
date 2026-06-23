@@ -302,6 +302,21 @@ describe('player visibility helpers', () => {
     expect(getPlayerVisibleFormationStack(state, 'op:shared_seen', centroids).map((formation) => formation.id)).toEqual(['seen_enemy']);
   });
 
+  it('orders expanded visible formation stacks by the same deterministic id order as map markers', () => {
+    const state = {
+      player_faction: 'RBiH',
+      formations: [
+        { id: 'z_brigade', faction: 'RBiH', name: 'Z Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:stacked', personnel: 1200 },
+        { id: 'a_brigade', faction: 'RBiH', name: 'A Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:stacked', personnel: 1100 },
+      ],
+    } as unknown as LoadedGameState;
+    const centroids = new Map<string, [number, number]>([
+      ['op:stacked', [18, 44]],
+    ]);
+
+    expect(getPlayerVisibleFormationStack(state, 'op:stacked', centroids).map((formation) => formation.id)).toEqual(['a_brigade', 'z_brigade']);
+  });
+
   it('selected operation lookup refuses to expose enemy operations selected by raw key', () => {
     const state = {
       player_faction: 'RBiH',

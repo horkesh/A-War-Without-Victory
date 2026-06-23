@@ -245,7 +245,7 @@ describe('v0.9.1 vocab - authored findings breadth wave', () => {
 describe('v0.9.1 vocab - late-war findings breadth wave', () => {
     const zepaEssay = findEssay('essay_zepa_falls_1995');
     const federationEssay = findEssay('essay_federation_ground_offensive_1995');
-    const zepaRuptureSection = (zepaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_zepa_rupture_finding');
+    const zepaCostSection = (zepaEssay.dynamic_sections ?? []).find(s => s.id === 'v091_zepa_event_cost_finding');
     const federationHumanCostSection = (federationEssay.dynamic_sections ?? []).find(s => s.id === 'v091_federation_offensive_human_cost_findings');
 
     const costLedger: NonNullable<CodexRenderContext['costLedger']> = {
@@ -256,8 +256,8 @@ describe('v0.9.1 vocab - late-war findings breadth wave', () => {
         total_civilian_killed: 41000,
         findings: [
             {
-                id: 'rupture_zepa_falls_1995',
-                category: 'rupture',
+                id: 'zepa_falls_1995',
+                category: 'human_cost',
                 severity: 'grave',
                 faction: 'RS',
                 title: 'Zepa safe area collapse',
@@ -275,13 +275,17 @@ describe('v0.9.1 vocab - late-war findings breadth wave', () => {
         ],
     } as NonNullable<CodexRenderContext['costLedger']>;
 
-    it('adds a Zepa rupture finding section gated by the Zepa rupture id', () => {
-        expect(zepaRuptureSection).toBeDefined();
-        expect(zepaRuptureSection?.variant).toBe('divergence');
-        expect(zepaRuptureSection?.condition).toBe('GAME_OVER AND FINDING:rupture_zepa_falls_1995');
+    it('adds a Zepa event-cost finding section without treating Zepa as a rupture', () => {
+        expect(zepaCostSection).toBeDefined();
+        expect(zepaCostSection?.variant).toBe('divergence');
+        expect(zepaCostSection?.condition).toBe('GAME_OVER AND FINDING:zepa_falls_1995');
+        expect(zepaCostSection?.content).toContain('{cost_findings}');
+        expect(zepaCostSection?.localizations?.bcs?.content).toContain('{cost_findings}');
+        expect(JSON.stringify(zepaEssay.dynamic_sections ?? [])).not.toContain('rupture_zepa_falls_1995');
+        expect(JSON.stringify(zepaEssay.dynamic_sections ?? [])).not.toContain('{cost_rupture_findings}');
     });
 
-    it('renders Zepa rupture findings inside the Zepa essay', () => {
+    it('renders Zepa event-cost findings inside the Zepa essay', () => {
         const resolved = resolveCodexEssay(zepaEssay, {
             firedEventIds: new Set(['zepa_falls_1995']),
             gameOver: true,
@@ -659,6 +663,8 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         expect(srebrenicaSection).toBeDefined();
         expect(srebrenicaSection?.variant).toBe('divergence');
         expect(srebrenicaSection?.condition).toBe('GAME_OVER AND FINDING:rupture_srebrenica_genocide_1995');
+        expect(srebrenicaSection?.content).toContain('{cost_rupture_findings}');
+        expect(srebrenicaSection?.localizations?.bcs?.content).toContain('{cost_rupture_findings}');
     });
 
     it('renders the Srebrenica finding text and sources inside the historical essay', () => {
@@ -677,6 +683,9 @@ describe('v0.9.1 vocab — Cost Ledger findings in Codex essays', () => {
         expect(daytonSection).toBeDefined();
         expect(daytonSection?.variant).toBe('divergence');
         expect(daytonSection?.condition).toBe('GAME_OVER AND FINDING_SEVERITY:grave');
+        expect(daytonSection?.content).toContain('{cost_findings}');
+        expect(daytonSection?.localizations?.bcs?.content).toContain('{cost_findings}');
+        expect(JSON.stringify(daytonSection)).not.toContain('{cost_rupture_findings}');
     });
 
     it('adds a Vance-Owen early-peace finding section gated by the duration finding', () => {

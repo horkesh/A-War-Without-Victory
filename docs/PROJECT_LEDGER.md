@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(ui): align canon content and field context
+
+**Type:** UI/read-model/content/test/docs polish.
+
+**Fix:** Zepa Codex dynamic findings now use the event-cost path keyed to `zepa_falls_1995` instead of rupture vocabulary, while Srebrenica remains the single rupture-token path. The RS Six Strategic Goals foundational decision names General Ratko Mladic in English and BCS copy rather than generic commander framing. Turn Aftermath now suppresses setup-control/turn-zero summaries across combat, cost, signals, humanitarian, formation, and supply fields, not just territory. Army HQ reserve drilldowns preserve known settlement OSID context, Corps Front objective focus opens settlement inspection instead of pan-only behavior, formation GeoJSON no longer infers supply state from fatigue/cohesion/status, and expanded stack ordering matches marker id ordering.
+
+**Verification:** Focused canon/UI packet passed 201/201. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 43 files / 518 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed with extended local timeout after an earlier local timeout. Previous pushed `main` head `1c8c69f05771f94c7f8bd79da80058ea90051215` is green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint. Report: `docs/40_reports/implemented/20260623_CANON_CONTENT_AND_FIELD_CONTEXT_FOLLOWUP.md`.
+
+**Scope/determinism:** UI/read-model/content/test/docs polish only; no simulation logic, event evaluator mechanics, save schema, startup snapshot generation, generated calibration artifact, structural fingerprint, golden manifest, packaged installer artifact, randomness, locale sorting, or persisted output ordering changed. Rear/support sector read-model parity, forming-brigade startup roster policy, and explicit HQ-reserve classification remain the next systems/data packet from the Pyrrhic scout queue.
+
+---
+
 ## [2026-06-23] fix(ui): tighten Chronicle provenance and command drilldowns
 
 **Type:** UI/read-model/routing/i18n/test/docs polish.

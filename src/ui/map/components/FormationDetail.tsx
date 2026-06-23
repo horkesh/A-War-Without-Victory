@@ -327,7 +327,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   type="button"
                   onClick={() => {
                     inspectOnField(useGameStore.getState(), isArmyHq
-                      ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id }
+                      ? { kind: 'field-formation-in-army-reserve', formationId: formation.id, armyHqId: parent.id, osid: formation.location_osid }
                       : { kind: 'field-formation-in-corps', formationId: formation.id, corpsId: parent.id, osid: formation.location_osid });
                   }}
                   className="w-full text-left px-2 py-1.5 bg-accent-blue/5 border border-accent-blue/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-blue/10 transition-colors group"

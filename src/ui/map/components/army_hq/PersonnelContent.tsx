@@ -191,7 +191,7 @@ export function PersonnelContent() {
                                             className="flex w-full items-center justify-between text-[10px] py-0.5 text-left hover:text-amber-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-amber-400/70"
                                             onClick={() => {
                                                 inspectOnField(useGameStore.getState(), command.kind === 'army_hq'
-                                                    ? { kind: 'field-formation-in-army-reserve', formationId: b.id, armyHqId: command.id }
+                                                    ? { kind: 'field-formation-in-army-reserve', formationId: b.id, armyHqId: command.id, osid: b.location_osid ?? null }
                                                     : { kind: 'field-formation-in-corps', formationId: b.id, corpsId: command.id, osid: b.location_osid ?? null });
                                             }}
                                         >

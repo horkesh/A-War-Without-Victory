@@ -1,3 +1,11 @@
+## 2026-06-23 - Setup aftermath and field-context routing
+
+**Setup-control summaries must be quiet across the whole aftermath surface:** turn-zero/setup provenance is not only a territory problem. Durable rule: when `shouldNarrateTerritorySummary(...)` is false, route Turn Aftermath combat, humanitarian, formation, supply, cost, and strategic-signal reads through a null narrated summary; pending player actions may still show, but setup facts must not become fresh turn history.
+
+**Only Srebrenica uses rupture-cost tokens in Codex dynamic findings:** Zepa is event-owned/cost-owned, not a rupture finding. Durable rule: use `{cost_rupture_findings}` only on the Srebrenica rupture section keyed to `rupture_srebrenica_genocide_1995`; event-cost sections such as Zepa and general grave-cost dockets use `{cost_findings}` in every locale.
+
+**Reserve and objective drilldowns should inspect, not just pan:** field surfaces that know an OSID should preserve it through the shared field-inspection target. Durable rule: Army HQ reserve targets may carry optional `osid`, Corps Front objective controls should inspect the settlement as well as pan, and map marker metadata must not infer unreported supply state from fatigue or cohesion. Applied in `[2026-06-23] canon content and field context follow-up`; report `docs/40_reports/implemented/20260623_CANON_CONTENT_AND_FIELD_CONTEXT_FOLLOWUP.md`.
+
 ## 2026-06-23 - Brigade supply display truth
 
 **Brigade supply dots must come from player-visible supply state, not inferred readiness symptoms:** fatigue, cohesion, and status can be consequences or separate readiness signals, but they are not supply assessment truth. Durable rule: project explicit supply state onto formation views when available, scope it to player-visible supply assessments, render missing supply as unreported, and never infer `strained` or `critical` from fatigue/cohesion thresholds in command surfaces. Applied in `[2026-06-23] command-surface follow-up polish`; report `docs/40_reports/implemented/20260623_COMMAND_SURFACE_FOLLOWUP_POLISH.md`.

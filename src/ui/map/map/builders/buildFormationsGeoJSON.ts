@@ -32,8 +32,6 @@ export interface FormationMarkerProperties {
   is_home: boolean;
   /** Home-distance effectiveness multiplier [0.70–1.0]. 1.0 means full effectiveness / home turf. */
   home_distance_mult: number;
-  /** Derived supply state: 'supplied' | 'strained' | 'cutoff'. */
-  supply_state: 'supplied' | 'strained' | 'cutoff';
   /** True if brigade is participating in an active operation. */
   is_in_operation: boolean;
   /** True if brigade is disrupted (disrupted_turns > 0). */
@@ -59,13 +57,6 @@ function getFormationMarkerType(formation: { id: string; kind?: string | null; n
   if (unitType === 'mountain') return 'mountain';
   if (unitType === 'motorized' || unitType === 'mechanized' || unitType === 'armored') return 'motorized';
   return 'brigade';
-}
-
-function deriveSupplyState(formation: { status: string; fatigue: number; cohesion: number }): 'supplied' | 'strained' | 'cutoff' {
-  const status = formation.status.toLowerCase();
-  if (status.includes('cut') || status.includes('isolated')) return 'cutoff';
-  if (formation.fatigue >= 30 || formation.cohesion < 35) return 'strained';
-  return 'supplied';
 }
 
 // Tiny offset in degrees (approx 30m east, 20m south per unit) to create a 'fanned' stack effect
@@ -167,7 +158,6 @@ export function buildFormationsGeoJSON(
         assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
         is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
         home_distance_mult: typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
-        supply_state: deriveSupplyState({ status: formation.status, fatigue: formation.fatigue ?? 0, cohesion: formation.cohesion ?? 50 }),
         is_in_operation: activeOperationFormationIds.has(formation.id),
         is_disrupted: (formation.disrupted_turns ?? 0) > 0,
         movement_stance: formation.movementStance ?? null,

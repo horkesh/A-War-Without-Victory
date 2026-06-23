@@ -421,6 +421,7 @@ export function OOBSidebar() {
                                         kind: 'field-formation-in-army-reserve',
                                         formationId: b.id,
                                         armyHqId: hqId,
+                                        osid: b.location_osid ?? null,
                                       })}
                                     >
                                       {getLocalizedFormationName(b, locale)}

@@ -194,6 +194,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     kind: 'field-formation-in-army-reserve',
                                                     formationId: brigade.id,
                                                     armyHqId: armyHq.id,
+                                                    osid: brigade.location_osid,
                                                 })}
                                                 className="min-w-0 truncate text-left text-text-primary font-semibold transition-colors hover:text-accent-gold"
                                                 aria-label={t('armyReserve.inspectBrigadeAria', { name: getLocalizedFormationName(brigade, locale) })}
