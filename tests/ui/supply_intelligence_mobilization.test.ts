@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeSupplyBreakdown, getMobilizationInfo } from '../../src/ui/map/components/army_hq/SupplyIntelligence';
+import { computeSupplyBreakdown, getEnclaveStatuses, getMobilizationInfo } from '../../src/ui/map/components/army_hq/SupplyIntelligence';
 import type { LoadedGameState } from '../../src/ui/map/data/types';
 import {
     HEAVY_MAINTENANCE_PER_WEAPON,
@@ -68,5 +68,24 @@ describe('SupplyIntelligence mobilization info', () => {
             estimatedMaintenanceDrain: Math.round(MAINTENANCE_DRAIN_PER_FORMATION * 100) / 100,
             estimatedHeavyDrain: Math.round(6 * HEAVY_MAINTENANCE_PER_WEAPON * 100) / 100,
         });
+    });
+
+    it('keeps missing enclave supply unreported instead of inventing adequate supply', () => {
+        const state = {
+            player_faction: 'RBiH',
+            enclaveResilience: {
+                gorazde: {
+                    display_name: 'Gorazde',
+                    faction: 'RBiH',
+                    resilience: 18,
+                    isolation_turns: 0,
+                    hardening_active: false,
+                },
+            },
+        } as unknown as LoadedGameState;
+
+        expect(getEnclaveStatuses(state, 'RBiH')).toMatchObject([
+            { id: 'gorazde', supplyState: 'unreported' },
+        ]);
     });
 });

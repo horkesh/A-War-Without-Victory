@@ -270,12 +270,21 @@ function CommanderSelectionModalWrapper() {
 function OperationBriefingModalWrapper() {
   const ctx = useGameStore((s) => s.operationBriefingContext);
   const close = useGameStore((s) => s.setOperationBriefingContext);
+  const setLoadError = useGameStore((s) => s.setLoadError);
   const ipc = useIPC();
 
   if (!ctx) return <OperationBriefingModal isOpen={false} onClose={() => close(null)} />;
 
-  const handleDecision = (decision: 'launch' | 'postpone' | 'abort' | 'probe') => {
-    ipc.stageOperationDecision({ corpsId: ctx.corpsId, operationName: ctx.operationName, decision });
+  const handleDecision = async (decision: 'launch' | 'postpone' | 'abort' | 'probe') => {
+    if (!ipc.isAvailable) {
+      setLoadError(t('attention.bridgeUnavailableReadOnly'));
+      return;
+    }
+    const result = await ipc.stageOperationDecision({ corpsId: ctx.corpsId, operationName: ctx.operationName, decision });
+    if (!result.ok) {
+      setLoadError(result.error ?? t('attention.bridgeUnavailableReadOnly'));
+      return;
+    }
     close(null);
   };
 
@@ -290,6 +299,7 @@ function OperationBriefingModalWrapper() {
       onPostpone={() => handleDecision('postpone')}
       onAbort={() => handleDecision('abort')}
       onOrderProbe={() => handleDecision('probe')}
+      commandBridgeAvailable={ipc.isAvailable}
     />
   );
 }

@@ -89,8 +89,7 @@ function corpsFaction(state: GameState, corpsId: string, cmd?: unknown): string 
 
 function rowBelongsToPlayer(rowFaction: string | null, playerFaction: string | null): boolean {
     return !isCanonicalPlayerFaction(playerFaction)
-        || rowFaction === null
-        || playerFactionMatch(rowFaction, playerFaction);
+        || (rowFaction !== null && playerFactionMatch(rowFaction, playerFaction));
 }
 
 /**
@@ -126,9 +125,10 @@ function forceLaunchedCorps(state: GameState, playerFaction: string | null): Set
     const aars = state.operation_history;
     if (aars) {
         for (const aar of aars) {
+            if (aar.force_launched !== true || !aar.corps_id) continue;
             const aarFaction = (aar as { faction?: unknown }).faction;
-            const rowFaction = typeof aarFaction === 'string' ? aarFaction : null;
-            if (aar.force_launched === true && aar.corps_id && rowBelongsToPlayer(rowFaction, playerFaction)) {
+            const rowFaction = typeof aarFaction === 'string' ? aarFaction : corpsFaction(state, aar.corps_id);
+            if (rowBelongsToPlayer(rowFaction, playerFaction)) {
                 out.add(aar.corps_id);
             }
         }

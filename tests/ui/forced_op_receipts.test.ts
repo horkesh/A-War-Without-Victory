@@ -137,6 +137,13 @@ describe('buildForcedOpReceipts', () => {
         expect(buildForcedOpReceipts(state)).toEqual([]);
     });
 
+    it('does not treat missing AAR ownership as belonging to the loaded player', () => {
+        const aar = buildAAR('orphan_force', { force: true });
+        delete (aar as { faction?: string }).faction;
+
+        expect(buildForcedOpReceipts(buildState([aar], 'RBiH'))).toEqual([]);
+    });
+
     it('falls back to a generic commander label when commander_name is absent', () => {
         const aar = buildAAR('no_name', { force: true });
         delete (aar as { commander_name?: string }).commander_name;

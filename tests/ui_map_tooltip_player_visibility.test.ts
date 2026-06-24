@@ -168,6 +168,39 @@ describe('player-safe tooltip models', () => {
     expect(model.enemyContactSummary).toBe('1 enemy contact observed');
   });
 
+  it('does not count enemy AoR coverage as physical front-edge contact', () => {
+    const formations = [
+      {
+        id: 'enemy_covering',
+        name: 'Enemy Covering Brigade',
+        faction: 'RS',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 80,
+        fatigue: 0,
+        status: 'active',
+        createdTurn: 1,
+        tags: [],
+        location_osid: 'op:rear:assembly',
+        aorSettlementIds: ['op:tuzla', 'op:doboj'],
+        posture: 'attack',
+      },
+    ] satisfies FormationView[];
+
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations,
+      fogOfWar: undefined,
+      corpsFrontSectors: [],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.enemyContactSummary).toBeNull();
+  });
+
+
   it('excludes forming own formations from front tooltip line summaries', () => {
     const formations = [
       {

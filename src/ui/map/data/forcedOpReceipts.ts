@@ -80,7 +80,7 @@ function getPlayerFaction(state: GameState | null | undefined): string | null {
 function aarBelongsToPlayer(aar: OperationAAR, playerFaction: string | null): boolean {
     if (!isCanonicalPlayerFaction(playerFaction)) return true;
     const aarFaction = (aar as { faction?: unknown }).faction;
-    return typeof aarFaction !== 'string' || playerFactionMatch(aarFaction, playerFaction);
+    return typeof aarFaction === 'string' && playerFactionMatch(aarFaction, playerFaction);
 }
 
 /**

@@ -1582,6 +1582,7 @@ export const enMessages = {
     'common.close': 'Close',
     'common.none': 'None',
     'common.unknown': 'Unknown',
+    'map.attack.selectTarget': 'Select a settlement to stage an attack order.',
     'convoyDecision.allow': 'Allow Convoy',
     'convoyDecision.allowDetail': 'Let the aid column pass through this route.',
     'convoyDecision.block': 'Block Convoy',

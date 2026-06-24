@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 import { OperationsPanel } from '../../src/ui/map/components/OperationsPanel.js';
+import { OperationBriefingModal } from '../../src/ui/map/components/OperationBriefingModal.js';
 import { OOBSidebar } from '../../src/ui/map/components/OOBSidebar.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState, NamedOfficerView, OperationView } from '../../src/ui/map/data/types.js';
@@ -244,6 +245,35 @@ describe('OOB and operations panel operation labels', () => {
     expect(state.selectedOsid).toBe('op:test:objective');
     expect(state.isOperationsPanelOpen).toBe(false);
     expect(state.selectedOperationKey).toBeNull();
+  });
+
+  it('routes objective clicks through field inspection instead of pan-only focus', () => {
+    render(createElement(OperationsPanel));
+
+    fireEvent.click(screen.getByRole('option', { name: /Current objective: Objective Ridge/i }));
+
+    const state = useGameStore.getState();
+    expect(state.selectedOsid).toBe('op:test:objective');
+    expect(state.isOperationsPanelOpen).toBe(false);
+    expect(state.selectedOperationKey).toBeNull();
+  });
+
+  it('keeps operation briefing decisions read-only when the desktop bridge is unavailable', () => {
+    useGameStore.setState({
+      operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
+    });
+
+    render(createElement(OperationBriefingModal, {
+      isOpen: true,
+      onClose: () => {},
+      commandBridgeAvailable: false,
+    }));
+
+    expect(screen.getByText('Desktop command bridge unavailable. Decision controls are read-only in this browser view.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Launch Operation' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Order Probe' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Postpone' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Abort Operation' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('renders player-safe operation display names without the raw operation slug on OOB cards', () => {

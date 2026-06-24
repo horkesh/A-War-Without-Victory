@@ -68,6 +68,33 @@ describe('presidential command surface repurpose panels', () => {
     expect(html.indexOf('Alpha Enclave')).toBeLessThan(html.indexOf('Zulu Enclave'));
   });
 
+  it('keeps enclave airdrop controls read-only without the desktop command bridge', () => {
+    setLocale('en');
+
+    const html = renderToStaticMarkup(
+      React.createElement(EnclaveDashboard, {
+        open: true,
+        onClose: () => {},
+        state: baseState({
+          enclaveResilience: {
+            gorazde: {
+              display_name: 'Gorazde',
+              resilience: 18,
+              isolation_turns: 4,
+              hardening_active: false,
+              supply_state: undefined,
+              faction: 'RBiH',
+            },
+          },
+        }),
+      }),
+    );
+
+    expect(html).toContain('Unreported');
+    expect(html).toContain('disabled');
+    expect(html).toContain('Desktop command bridge unavailable');
+  });
+
   it('frames economy as War Footing and renders player-faction summary only', () => {
     setLocale('en');
 

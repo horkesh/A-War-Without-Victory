@@ -1541,6 +1541,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'common.close': 'Zatvori',
     'common.none': 'Nista',
     'common.unknown': 'Nepoznato',
+    'map.attack.selectTarget': 'Odaberite naselje za pripremu naredbe za napad.',
     'convoyDecision.allow': 'Dozvoli konvoj',
     'convoyDecision.allowDetail': 'Pusti kolonu pomoći kroz ovu rutu.',
     'convoyDecision.block': 'Blokiraj konvoj',

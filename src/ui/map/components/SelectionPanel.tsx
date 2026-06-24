@@ -238,8 +238,14 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
       }))
       : undefined;
 
+  const currentEthnicEvidence =
+    Boolean(departedByEthnicity && Object.keys(departedByEthnicity).length > 0)
+    || Boolean(selectedMunId && Object.values(loadedGameState?.displacementByMun?.[selectedMunId]?.arrivedByFaction ?? {}).some((value) => (
+      typeof value === 'number' && value > 0
+    )));
+
   const currentEthnic =
-    selectedOsid && osidPropertiesMap
+    selectedOsid && osidPropertiesMap && currentEthnicEvidence
       ? getCurrentEthnicForOsid(
         selectedOsid,
         osidPropertiesMap,

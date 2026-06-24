@@ -25,6 +25,7 @@ interface OperationBriefingModalProps {
     onPostpone?: () => void;
     onAbort?: () => void;
     onOrderProbe?: () => void;
+    commandBridgeAvailable?: boolean;
 }
 
 function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number; thresholdLabel?: string }) {
@@ -334,7 +335,7 @@ export function OperationConstraintContext({ assessment }: {
 // a force-launch / override-command-chain affordance. The override lives in the
 // Decision Room so presidential command stays single-surface.
 
-export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe }: OperationBriefingModalProps) {
+export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, onAbort, onOrderProbe, commandBridgeAvailable = true }: OperationBriefingModalProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
@@ -515,24 +516,31 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Action buttons */}
                 <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">
+                    {!commandBridgeAvailable && (
+                        <div className="basis-full text-[10px] text-neutral-500 italic">
+                            {t('attention.bridgeUnavailableReadOnly')}
+                        </div>
+                    )}
                     <button
                         type="button"
                         onClick={onLaunch}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors"
+                        disabled={!commandBridgeAvailable}
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {t('operationBriefing.launchOperation')}
                     </button>
                     <button
                         type="button"
                         onClick={onOrderProbe}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors"
+                        disabled={!commandBridgeAvailable}
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {t('operationBriefing.orderProbe')}
                     </button>
                     <button
                         type="button"
                         onClick={onPostpone}
-                        disabled={postponements >= 2}
+                        disabled={!commandBridgeAvailable || postponements >= 2}
                         className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
@@ -540,7 +548,8 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <button
                         type="button"
                         onClick={onAbort}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors"
+                        disabled={!commandBridgeAvailable}
+                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                         {t('operationBriefing.abortOperation')}
                     </button>

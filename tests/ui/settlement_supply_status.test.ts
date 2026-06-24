@@ -5,12 +5,15 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SettlementDetailContent } from '../../src/ui/map/components/SettlementDetailContent.js';
+import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
 import { buildOsidSupplyExplanation } from '../../src/ui/map/data/osidSupplyExplanation.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
+import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 afterEach(() => {
   cleanup();
   setLocale('en');
+  useGameStore.setState(useGameStore.getInitialState());
 });
 
 const BASE_PROPS = {
@@ -179,5 +182,50 @@ describe('SettlementDetailContent supply status surface', () => {
 
     fireEvent.click(brigadeButton);
     expect(onFormationClick).toHaveBeenCalledWith('bde_101');
+  });
+
+  it('does not synthesize current ethnic structure without departure evidence', () => {
+    useGameStore.setState({
+      selectedOsid: 'op:test:a',
+      osidDisplayNames: { 'op:test:a': 'Testograd' },
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 100,
+          population_bosniaks: 45,
+          population_serbs: 35,
+          population_croats: 15,
+          population_others: 5,
+        },
+      },
+      loadedGameState: {
+        label: 'test',
+        turn: 0,
+        phase: 'war',
+        player_faction: 'RBiH',
+        formations: [],
+        militiaPools: [],
+        controlBySettlement: { 'op:test:a': 'RBiH' },
+        statusBySettlement: {},
+        brigadeAorByFormationId: {},
+        attackOrders: [],
+        aorOrders: [],
+        recentControlEvents: [],
+        allControlEvents: [],
+        displacementEventLog: [],
+        battlesByOsid: {},
+        movementsByOsid: {},
+        supplyTransitionsByOsid: {},
+        historicalEventsByTurn: [],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as never,
+    });
+
+    render(createElement(SelectionPanel));
+
+    expect(screen.getByText('Pre-war ethnic structure')).toBeTruthy();
+    expect(screen.queryByText('Current ethnic structure')).toBeNull();
   });
 });

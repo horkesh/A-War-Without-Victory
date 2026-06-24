@@ -197,8 +197,11 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     fogOfWar: args.fogOfWar,
     formations: args.formations ?? [],
   } as LoadedGameState);
-  const formationsOnEdge = visibleFormations.filter((formation) => isFieldedTacticalFormation(formation) && (
-    formation.aorSettlementIds?.includes(edge?.a ?? '') || formation.aorSettlementIds?.includes(edge?.b ?? '')
+  const edgeEndpointSet = new Set([edge?.a, edge?.b].filter((osid): osid is string => typeof osid === 'string' && osid.length > 0));
+  const formationsOnEdge = visibleFormations.filter((formation) => (
+    isFieldedTacticalFormation(formation)
+    && typeof formation.location_osid === 'string'
+    && edgeEndpointSet.has(formation.location_osid)
   ));
   const formationById = new Map((args.formations ?? []).map((formation) => [formation.id, formation]));
   const ownLineHoldingFormations = sectorAssignment

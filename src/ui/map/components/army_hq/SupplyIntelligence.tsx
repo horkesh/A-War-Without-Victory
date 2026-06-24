@@ -42,7 +42,7 @@ export interface EnclaveStatus {
     resilience: number;
     maxResilience: number;
     siegeTurns: number;
-    supplyState: 'adequate' | 'strained' | 'critical';
+    supplyState: 'adequate' | 'strained' | 'critical' | 'unreported';
     faction: string | null;
 }
 
@@ -107,7 +107,7 @@ export function getEnclaveStatuses(
             resilience: Math.round(enc.resilience ?? 0),
             maxResilience: 50, // ENCLAVE_CONFIG max
             siegeTurns: Math.round(enc.isolation_turns ?? 0),
-            supplyState: (enc.supply_state as 'adequate' | 'strained' | 'critical') ?? 'adequate',
+            supplyState: enc.supply_state ?? 'unreported',
             faction: enc.faction ?? null,
         });
     }
@@ -133,16 +133,18 @@ export function getMobilizationInfo(
 
 // ── Component ────────────────────────────────────────────────────────────
 
-const SUPPLY_STATE_COLORS = {
-    adequate: 'bg-emerald-500',
-    strained: 'bg-amber-500',
-    critical: 'bg-red-500',
-} as const;
-
 const SUPPLY_STATE_TEXT = {
     adequate: 'text-emerald-400',
     strained: 'text-amber-400',
     critical: 'text-red-400',
+    unreported: 'text-text-secondary',
+} as const;
+
+const SUPPLY_STATE_LABEL = {
+    adequate: 'adequate',
+    strained: 'strained',
+    critical: 'critical',
+    unreported: 'unreported',
 } as const;
 
 interface SupplyIntelligenceProps {
@@ -201,7 +203,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
                                     <span className="text-[10px] text-text-secondary/60">·</span>
                                     <span className="text-[10px] text-text-secondary/60 tabular-nums w-12">{enc.siegeTurns}t siege</span>
                                     <span className={`text-[9px] font-bold uppercase ${SUPPLY_STATE_TEXT[enc.supplyState]}`}>
-                                        {enc.supplyState}
+                                        {SUPPLY_STATE_LABEL[enc.supplyState]}
                                     </span>
                                 </div>
                             );

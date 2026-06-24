@@ -612,7 +612,7 @@ export function OperationsPanel() {
                             ref={(el) => {
                               objectiveButtonRefs.current[index] = el;
                             }}
-                            onClick={() => panToOsid?.(obj)}
+                            onClick={() => inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: obj })}
                             onMouseEnter={() => setObjectiveHoverOsid(obj)}
                             onMouseLeave={() => setObjectiveHoverOsid(null)}
                             onFocus={() => setObjectiveHoverOsid(obj)}

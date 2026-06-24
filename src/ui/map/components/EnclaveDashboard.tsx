@@ -18,6 +18,8 @@ const SUPPLY_CLASSES: Record<'adequate' | 'strained' | 'critical', string> = {
   critical: 'text-red-400',
 };
 
+const SUPPLY_UNREPORTED_CLASS = 'text-text-secondary';
+
 const AIRDROP_LABEL_KEYS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_enough', MessageKey> = {
   receiving: 'enclave.airdrop.receiving',
   not_eligible: 'enclave.airdrop.notEligible',
@@ -86,6 +88,10 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
   }, [open, enclaves]);
 
   const stageAllocations = async () => {
+    if (!ipc.isAvailable) {
+      setActionMessage(t('formationDetail.commandBridgeUnavailable'));
+      return;
+    }
     const result = await ipc.stageAirdropAllocation(allocations);
     setActionMessage(result.ok ? t('enclave.airdropStaged') : (result.error ?? t('enclave.airdropFailed')));
   };
@@ -142,7 +148,9 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
             <button
               type="button"
               onClick={() => void stageAllocations()}
-              className="w-full rounded border border-panel-border px-2 py-1 text-[11px] text-text-primary hover:bg-panel-hover"
+              disabled={!ipc.isAvailable}
+              title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+              className="w-full rounded border border-panel-border px-2 py-1 text-[11px] text-text-primary hover:bg-panel-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('enclave.stageAirdropAllocation')}
             </button>
@@ -155,7 +163,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
           enclaves.map(([enclaveId, enclave]) => {
             const resiliencePct = Math.max(0, Math.min(100, (enclave.resilience / 30) * 100));
             const hardeningMarkerPct = (8 / 30) * 100;
-            const supplyState = enclave.supply_state ?? 'adequate';
+            const supplyState = enclave.supply_state;
             const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
             const risk = getEnclaveRisk(enclave);
             return (
@@ -199,7 +207,9 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   </div>
                   <div>
                     <div className="text-text-secondary">{t('enclave.supplyState')}</div>
-                    <div className={`font-mono uppercase ${SUPPLY_CLASSES[supplyState]}`}>{supplyState}</div>
+                    <div className={`font-mono uppercase ${supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}`}>
+                      {supplyState ?? t('corpsFront.unreported')}
+                    </div>
                   </div>
                   <div className="col-span-2">
                     <div className="text-text-secondary">{t('enclave.airdrop')}</div>
@@ -220,6 +230,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                         max={airdropBudget}
                         step={0.1}
                         value={(allocations[enclaveId] ?? 0).toFixed(1)}
+                        disabled={!ipc.isAvailable}
                         onChange={(event) => {
                           const value = Number(event.target.value);
                           setAllocations((prev) => ({
@@ -227,7 +238,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                             [enclaveId]: Number.isFinite(value) && value > 0 ? value : 0,
                           }));
                         }}
-                        className="w-full rounded border border-panel-border bg-panel-bg px-2 py-1 text-text-primary"
+                        className="w-full rounded border border-panel-border bg-panel-bg px-2 py-1 text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       />
                     </div>
                   )}

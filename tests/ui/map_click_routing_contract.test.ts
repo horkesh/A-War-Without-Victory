@@ -195,4 +195,14 @@ describe('direct tactical map click routing', () => {
     expect(source).not.toMatch(/setSelectedFormationId\(id\)/);
     expect(source).not.toMatch(/(?:\.|\b)setSelectedCorpsFrontSectorId\(sectorId\)/);
   });
+
+  it('rejects empty attack-mode clicks before creating an attack confirmation', () => {
+    const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
+
+    expect(source).toContain("if (!osid) {");
+    expect(source).toContain("setLoadError(t('map.attack.selectTarget'))");
+    expect(source.indexOf("setLoadError(t('map.attack.selectTarget'))")).toBeLessThan(
+      source.indexOf('setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid })'),
+    );
+  });
 });

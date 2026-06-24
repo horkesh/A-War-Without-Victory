@@ -1006,6 +1006,11 @@ export function MapContainer() {
         },
         onOsidClick: (osid) => {
           if (orderModeForFormation === 'attack' && selectedFormationId) {
+            if (!osid) {
+              setLoadError(t('map.attack.selectTarget'));
+              setOrderModeForFormation(null);
+              return;
+            }
             setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
             setOrderModeForFormation(null);
           } else if (orderModeForFormation === 'sector' && selectedFormationId) {

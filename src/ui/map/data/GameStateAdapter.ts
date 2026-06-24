@@ -430,7 +430,7 @@ function deriveEnclaveSupplyState(
     fallbackIsolationTurns: number,
     fallbackHardening: boolean,
     fallbackResilience: number,
-): 'adequate' | 'strained' | 'critical' {
+): 'adequate' | 'strained' | 'critical' | undefined {
     const enclave = ENCLAVE_UI_DEFINITIONS.find((entry) => entry.id === enclaveId);
     const factions = Array.isArray(rawSupplyStateByOsid?.factions) ? rawSupplyStateByOsid.factions as Array<Record<string, unknown>> : [];
     const factionEntry = enclave ? factions.find((entry) => entry.faction_id === enclave.faction) : undefined;
@@ -455,9 +455,9 @@ function deriveEnclaveSupplyState(
         if (strained >= critical && strained >= adequate) return 'strained';
         return 'adequate';
     }
-    if (fallbackIsolationTurns <= 0) return 'adequate';
-    if (fallbackHardening || fallbackResilience >= 8) return 'critical';
-    return 'strained';
+    if (fallbackHardening || fallbackResilience <= 8) return 'critical';
+    if (fallbackIsolationTurns > 0) return 'strained';
+    return undefined;
 }
 
 function normalizeSupplyState(value: unknown): 'adequate' | 'strained' | 'critical' | null {
