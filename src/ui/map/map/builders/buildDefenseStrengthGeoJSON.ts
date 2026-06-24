@@ -127,7 +127,9 @@ export function buildDefenseStrengthGeoJSON(
             });
         }
 
-        const stanceBonus = SECTOR_STANCE_REACTIVE_BONUS[sector.sector_stance ?? 'defend'] ?? 1.15;
+        const stanceBonus = sector.sector_stance
+            ? SECTOR_STANCE_REACTIVE_BONUS[sector.sector_stance] ?? 1.0
+            : 1.0;
 
         // For each friendly front OSID, compute defense strength
         for (const targetOsid of friendlyOsids) {

@@ -241,6 +241,7 @@ describe('OOB and operations panel operation labels', () => {
     const state = useGameStore.getState();
     expect(state.selectedCorpsId).toBe(CORPS_ID);
     expect(state.selectedFormationId).toBe('arbih_brigade');
+    expect(state.selectedOsid).toBe('op:test:objective');
     expect(state.isOperationsPanelOpen).toBe(false);
     expect(state.selectedOperationKey).toBeNull();
   });

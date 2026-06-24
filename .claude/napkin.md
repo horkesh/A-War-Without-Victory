@@ -48,6 +48,8 @@
 
 **OPERATION HEALTH MUST NOT DEFAULT MISSING SUPPLY TO STABLE (2026-06-23).** Missing `supply_readiness` is absent assessment truth, not green logistics. Do instead: render unassessed unless explicit failure counters justify strained/fragile.
 
+**DEFENSE-STRENGTH FILLS MUST NOT INVENT SECTOR STANCE (2026-06-23).** Missing `sector_stance` is unreported, not `defend`. Do instead: apply stance bonuses only for explicit stance values; absent stance uses neutral `1.0`.
+
 **CHRONICLE FEEL GENERATED COPY IS UI COPY (2026-06-22).** Chronicle helper prose is generated UI scaffolding unless it is authored scenario data. Do instead: route combat/cost/displacement/formation, AAR, officer spotlight, endgame chrome, receipt wrappers, war-weariness/refugee/Sarajevo/generals-digest, and patron-defiance frames through `chronicle.generated.*` keys; keep event titles/options, operation/officer/settlement names, and historical notes verbatim.
 
 **BCS PLURAL GRAMMAR NEEDS FULL MESSAGE KEYS (2026-06-21).** English-style `{plural}` suffix interpolation creates invalid BCS copy. Do instead: select explicit `.one` / `.many` i18n keys when creating player-facing copy tokens, especially command-strain, presidential attention, and briefing badges.

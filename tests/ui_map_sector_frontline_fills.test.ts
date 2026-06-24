@@ -71,6 +71,14 @@ const reserveFormation = {
   personnel: 2000,
 } satisfies FormationView;
 
+const lineFormation = {
+  ...reserveFormation,
+  id: 'own_line',
+  name: 'Line Brigade',
+  location_osid: 'op:tuzla:rear',
+  home_osid: 'op:tuzla:rear',
+} satisfies FormationView;
+
 describe('sector frontline map fills', () => {
   it('does not paint density for reserve-only sectors', () => {
     const density = (buildDensityGeoJSON as any)(
@@ -94,5 +102,30 @@ describe('sector frontline map fills', () => {
     );
 
     expect(defense.features).toHaveLength(0);
+  });
+
+  it('does not grant a defensive stance bonus when sector stance is unreported', () => {
+    const missingStance = buildDefenseStrengthGeoJSON(
+      controlGeoJson,
+      [makeSector({ assigned_brigade_ids: ['own_line'] })],
+      frontEdges,
+      [lineFormation],
+      { 'op:tuzla:front': 'RBiH', 'op:tuzla:rear': 'RBiH' },
+      new Map([['op:tuzla:rear', ['op:tuzla:front']]]),
+    );
+    const defensiveStance = buildDefenseStrengthGeoJSON(
+      controlGeoJson,
+      [makeSector({ assigned_brigade_ids: ['own_line'], sector_stance: 'defend' })],
+      frontEdges,
+      [lineFormation],
+      { 'op:tuzla:front': 'RBiH', 'op:tuzla:rear': 'RBiH' },
+      new Map([['op:tuzla:rear', ['op:tuzla:front']]]),
+    );
+
+    const missingStrength = missingStance.features[0]?.properties?.defense_strength;
+    const defensiveStrength = defensiveStance.features[0]?.properties?.defense_strength;
+
+    expect(missingStrength).toBeGreaterThan(0);
+    expect(defensiveStrength).toBeGreaterThan(missingStrength ?? 0);
   });
 });

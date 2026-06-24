@@ -510,17 +510,19 @@ export function OperationsPanel() {
                           <button
                             key={bId}
                             onClick={() => {
-                              inspectOnField(useGameStore.getState(), sector
+                                  inspectOnField(useGameStore.getState(), sector
                                 ? {
                                     kind: 'field-formation-in-sector',
                                     corpsId: selectedOperation.corps_id,
                                     sectorId: sector.sector_id,
                                     formationId: bId,
+                                    osid: formation?.location_osid ?? undefined,
                                   }
                                 : {
                                     kind: 'field-formation-in-corps',
                                     corpsId: selectedOperation.corps_id,
                                     formationId: bId,
+                                    osid: formation?.location_osid ?? undefined,
                                   });
                             }}
                             className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"

@@ -26,11 +26,14 @@
 ### Map Truth
 - Front tooltips now list own formations only from live line holders, not reserve/AoR-only membership.
 - Defense and density fill builders derive staffed frontline truth from `buildSectorFormationAssignment(...).lineHoldingIds` plus the shared fielded tactical-formation boundary.
+- Defense strength no longer grants a defensive stance bonus when `sector_stance` is unreported; missing stance is neutral.
 - Field-inspection routing clears expanded stack overlays along with hover/tooltip chrome.
 - OSID hover state is cleared when front-edge priority wins, preventing stale OSID tooltips under front-edge inspection.
+- Operations Panel allocated-brigade drilldowns now preserve the brigade's known settlement anchor.
 
 ## Verification
 - Focused pack: `.\vitest.cmd run tests\ui\turn_aftermath.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\army_reserve_hook_order.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_sector_frontline_fills.test.ts tests\ui\gamestore_field_inspection.test.ts tests\ui_map_interactions.test.ts --pool=forks --reporter=dot` passed 8 files / 101 tests.
+- Fix-forward blocker pack: `.\vitest.cmd run tests\ui_map_sector_frontline_fills.test.ts tests\ui\oob_operations_panel.test.ts --pool=forks --reporter=dot` passed 2 files / 16 tests.
 - `npm.cmd run typecheck` passed.
 - `git diff --check` passed.
 - `npm.cmd run qa:player-journeys` passed 43 files / 542 tests.
