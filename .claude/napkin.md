@@ -10,6 +10,10 @@
 
 **SREBRENICA/ZEPA FALL RECEIPTS ARE EVENT-OWNED (2026-06-24).** Krivaja/Stupcanica operations are chronology/prose/AAR context, not the fall mechanism. Do instead: guard `srebrenica_falls_1995` and `zepa_falls_1995` through `evaluateEvents` as `mechanism: "event"` political-control receipts; do not tune scripted operations to deliver the fall.
 
+**AVAILABLE_FROM IS NOT A STARTUP COMMAND HIDE GATE (2026-06-24).** Startup command formations can exist when the faction has HQ-municipality presence even if `OobCorps.available_from` is future. Do instead: keep startup command visibility separate from bottom-up `activateCorpsForTurn` phased activation; align OOB data when corps/brigade timing conflicts.
+
+**JNA PHANTOM ROWS ARE COMMAND CONTEXT, NOT FIELDED FORCE (2026-06-24).** JNA phantom subordinates can justify showing a JNA command node but are not brigades/personnel/counters/stationed units. Do instead: seed visible command rows from phantom context while keeping `isFieldedTacticalFormation(...)` as the strength boundary.
+
 **DIRECTIVE CARDS STAY VISIBLE WITHOUT IPC (2026-06-24).** Browser/dev review cannot stage Electron-owned directives, but hiding the card loses player context. Do instead: render DirectiveCard lever/target/cost read-only with bridge-unavailable copy and no active issue controls.
 
 **ARMY HQ GRADES REQUIRE GRADE-CRITICAL FIELDS (2026-06-24).** Missing personnel, fatigue, cohesion, morale, or officer-quality must not produce favorable readiness/effectiveness grades. Do instead: flag the affected corps/aggregate as incomplete/unreported while keeping numeric estimates only as context.

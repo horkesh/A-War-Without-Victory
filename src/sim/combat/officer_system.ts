@@ -919,6 +919,11 @@ export function validateOfficerData(raw: unknown): NamedOfficer[] {
             can_improve: o.can_improve === true,
             improvement_rate: typeof o.improvement_rate === 'number' ? o.improvement_rate : 0,
             pool_tier: (o.pool_tier as OfficerPoolTier) ?? 'tier_c',
+            bio_short: typeof o.bio_short === 'string' ? o.bio_short : undefined,
+            command_style: typeof o.command_style === 'string' ? o.command_style : undefined,
+            known_for: typeof o.known_for === 'string' ? o.known_for : undefined,
+            political_alignment_note: typeof o.political_alignment_note === 'string' ? o.political_alignment_note : undefined,
+            sensitive_history_note: typeof o.sensitive_history_note === 'string' ? o.sensitive_history_note : undefined,
             enclave_lock: parseEnclaveLock(o.enclave_lock, id),
             war_crimes_record: parseWarCrimesRecord(o.war_crimes_record),
         });

@@ -102,12 +102,15 @@ export function RecordsContent() {
 
             {/* Sub-tab selector */}
             <div className="flex gap-1.5 mb-4">
-                {SUB_TABS.map(({ id, labelKey }) => (
+                {SUB_TABS.map(({ id, labelKey }) => {
+                    const label = t(labelKey as MessageKey);
+                    return (
                     <button
                         key={id}
                         type="button"
                         data-testid={`records-subtab-${id}`}
                         data-selected={subTab === id ? 'true' : 'false'}
+                        aria-label={t('recordsContent.subtab.buttonAria', { label })}
                         onClick={() => setSubTab(id)}
                         className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.15em] rounded-md border transition-all ${
                             subTab === id
@@ -115,18 +118,20 @@ export function RecordsContent() {
                                 : 'bg-panel-card border-panel-border text-text-secondary hover:text-text-primary hover:bg-white/5'
                         }`}
                     >
-                        <span>{t(labelKey as MessageKey)}</span>
+                        <span>{label}</span>
                         <span aria-hidden="true" className="text-text-secondary/60">
                             {' · '}
                         </span>
                         <span
-                            aria-label={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}
+                            aria-hidden="true"
+                            title={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}
                             className="inline-flex min-w-[1.35rem] justify-center rounded border border-current/20 bg-black/20 px-1 tabular-nums opacity-80"
                         >
                             {archiveCounts[id]}
                         </span>
                     </button>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="mb-4 rounded-md border border-panel-border bg-panel-card px-3 py-2">

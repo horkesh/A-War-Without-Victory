@@ -106,6 +106,15 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(screen.queryByTestId('settlement-supply-status')).toBeNull();
   });
 
+  it('renders an explicit stationed-unit empty state for settlements with no physical units present', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [],
+    }));
+
+    expect(screen.getByTestId('settlement-stationed-units-empty').textContent).toContain('No fielded units physically reported here.');
+  });
+
   it('refreshes timeline rows when per-settlement movement data changes', () => {
     const { rerender } = render(createElement(SettlementDetailContent, { ...BASE_PROPS }));
     fireEvent.click(screen.getByRole('tab', { name: /Timeline/i }));

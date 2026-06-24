@@ -10,6 +10,7 @@
 import { useState, useEffect } from 'react';
 import type { LoadedGameState, SummaryFocusSection } from '../data/types';
 import { FACTION_COLORS } from '../utils/theme';
+import osidAreasData from '../../../../data/derived/operational/osid_areas.json';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
 import { DiplomacyOverview } from './DiplomacyOverview';
@@ -52,6 +53,7 @@ interface OsidAreasFile {
 /** Load osid_areas.json once (browser fetch). Cached in module scope. */
 let cachedAreas: OsidAreasFile | null = null;
 let areaLoadAttempted = false;
+const bundledOsidAreas = osidAreasData as OsidAreasFile;
 
 function useOsidAreas(): OsidAreasFile | null {
   const [areas, setAreas] = useState<OsidAreasFile | null>(cachedAreas);
@@ -195,7 +197,7 @@ function formatSitrepFrontLabel(label: string, osidDisplayNames: Record<string, 
 export function SituationTab({ state, focusSection }: { state: LoadedGameState; focusSection?: SummaryFocusSection }) {
   const ipc = useIPC();
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-  const osidAreas = useOsidAreas();
+  const osidAreas = useOsidAreas() ?? bundledOsidAreas;
   const playerFaction = getPlayerFacingFaction(state);
   const territoryPct = computeTerritoryPercentages(state.controlBySettlement, osidAreas ?? undefined);
   const sitrep = state.operationalSitrep;
@@ -270,7 +272,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           <div className="flex items-center justify-between">
             <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
             <span className="text-text-secondary tabular-nums">
-              {(sitrep?.territory.territoryPercent ?? territoryPct[playerFaction]).toFixed(1)}%
+              {(territoryPct[playerFaction] ?? sitrep?.territory.territoryPercent ?? 0).toFixed(1)}%
             </span>
           </div>
         ) : (

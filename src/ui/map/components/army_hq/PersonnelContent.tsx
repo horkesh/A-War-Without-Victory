@@ -9,6 +9,7 @@ import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
 import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
+import { getPlayerSafeMunicipalityName } from '../../utils/playerSafeText';
 import { inspectOnField } from '../../utils/shellNavigation';
 import { FrontVisitSection } from './FrontVisitSection';
 import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
@@ -156,7 +157,7 @@ export function PersonnelContent() {
                             <div className="grid grid-cols-2 gap-1.5">
                                 {data.mobilization.top_pools.map((pool) => (
                                     <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[10px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
-                                        <span className="text-text-secondary truncate">{formatPoolName(pool.mun_id)}</span>
+                                        <span className="text-text-secondary truncate">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
                                         <span className="text-text-primary tabular-nums font-mono shrink-0">{formatWholeNumber(pool.available)}</span>
                                     </div>
                                 ))}
@@ -257,14 +258,6 @@ export function PersonnelContent() {
             </div>
         </div>
     );
-}
-
-function formatPoolName(munId: string): string {
-    return munId
-        .split(/[_-]+/)
-        .filter(Boolean)
-        .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ');
 }
 
 function formatWholeNumber(value: number): string {

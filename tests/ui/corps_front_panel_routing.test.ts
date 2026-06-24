@@ -312,11 +312,86 @@ describe('CorpsFrontPanel field routing', () => {
   it('disables Corps Front command controls when the desktop command bridge is unavailable', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect((screen.getByRole('button', { name: '0.5x' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: '1.0x' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: '1.5x' }) as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getByRole('button', { name: /Tighten sector security/i }) as HTMLButtonElement).disabled).toBe(true);
+    const bridgeReason = 'Desktop command bridge unavailable. Open the packaged desktop shell to stage sector commands.';
+    for (const label of ['0.5x', '1.0x', '1.5x']) {
+      const button = screen.getByRole('button', { name: label }) as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+      expect(button.getAttribute('title')).toBe(bridgeReason);
+    }
+    const opsecButton = screen.getByRole('button', { name: /Tighten sector security/i }) as HTMLButtonElement;
+    expect(opsecButton.disabled).toBe(true);
+    expect(opsecButton.getAttribute('title')).toBe(bridgeReason);
     expect(container.textContent).toContain('Desktop command bridge unavailable');
+  });
+
+  it('does not invent standard-brigade equivalency when combat power is unreported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      combat_offensive_power: undefined,
+      combat_defensive_power: undefined,
+      defensive_power: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    state.formations = state.formations.filter((formation) => formation.kind === 'corps') as LoadedGameState['formations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.querySelectorAll('[title="Standard brigade equivalency unreported"]').length).toBe(2);
+    expect(container.innerHTML).not.toContain('0.0 Standard Brigades');
+  });
+
+  it('shows an empty Forces tab instead of a blank panel when no fielded forces are reported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+    }] as LoadedGameState['corpsFrontSectors'];
+    state.formations = state.formations.filter((formation) => formation.kind === 'corps') as LoadedGameState['formations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
+    expect(screen.getByTestId('corps-front-forces-empty').textContent).toContain('No fielded forces reported in this sector.');
+  });
+
+  it('shows stale sector roster ids without counting them as fielded Forces-tab brigades', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: ['missing_roster_bde'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+    }] as LoadedGameState['corpsFrontSectors'];
+    state.formations = state.formations.filter((formation) => formation.kind === 'corps') as LoadedGameState['formations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
+    expect(screen.queryByTestId('corps-front-brigade-row')).toBeNull();
+    const staleRoster = screen.getByTestId('corps-front-stale-roster');
+    expect(staleRoster.getAttribute('data-stale-roster-count')).toBe('1');
+    expect(staleRoster.textContent).toContain('missing_roster_bde');
+    expect(staleRoster.textContent).toContain('1 stale roster entry');
   });
 
   it('does not describe an uncovered sector as a force-balance advantage', () => {
@@ -697,5 +772,6 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
     const directiveButton = screen.getByTestId('corps-front-draft-directive') as HTMLButtonElement;
     expect(directiveButton.disabled).toBe(true);
+    expect(directiveButton.getAttribute('title')).toContain('Desktop command bridge unavailable');
   });
 });

@@ -265,6 +265,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const overrideFormations = sectorAssignment.overrideIds
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
+  const staleRosterIds = sectorAssignment.unresolvedRosterIds;
   const lineHoldingFormations = sectorAssignment.lineHoldingIds
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null);
@@ -325,6 +326,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const intelConfidence = hasReportedIntelConfidence ? sector.intel_confidence! : null;
   const hasReliableThreatIntel = intelConfidence != null && intelConfidence >= 0.4;
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
+  const commandBridgeUnavailable = t('corpsFront.commandBridgeUnavailable');
+  const offensivePowerTitle = typeof displayOffensivePower === 'number' && Number.isFinite(displayOffensivePower)
+    ? t('corpsFront.standardBrigadeEquivalency', { count: (displayOffensivePower / 1000).toFixed(1) })
+    : t('corpsFront.standardBrigadeEquivalencyUnreported');
+  const defensivePowerTitle = typeof displayDefensivePower === 'number' && Number.isFinite(displayDefensivePower)
+    ? t('corpsFront.standardBrigadeEquivalency', { count: (displayDefensivePower / 1000).toFixed(1) })
+    : t('corpsFront.standardBrigadeEquivalencyUnreported');
+  const hasAnyForceBucket = assignedFormations.length > 0
+    || reserveFormations.length > 0
+    || overrideFormations.length > 0
+    || rearFormations.length > 0
+    || unresolvedFormations.length > 0
+    || staleRosterIds.length > 0;
   const metadataDate = loadedGameState.metadata?.date?.trim();
   const displayDate = metadataDate && metadataDate !== 'UNKNOWN'
     ? metadataDate
@@ -484,13 +498,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <FuzzyIntel value={displayCombatPersonnel} confidence={1} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayOffensivePower ?? 0) / 1000).toFixed(1) })}>
+                    <div className="flex flex-col" title={offensivePowerTitle}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.offensivePower')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={displayOffensivePower} confidence={1} />
                       </div>
                     </div>
-                    <div className="flex flex-col" title={t('corpsFront.standardBrigadeEquivalency', { count: ((displayDefensivePower ?? 0) / 1000).toFixed(1) })}>
+                    <div className="flex flex-col" title={defensivePowerTitle}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defensivePower')}</span>
                       <div className="font-medium tabular-nums">
                         <FuzzyIntel value={displayDefensivePower} confidence={1} />
@@ -604,7 +618,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           type="button"
                           disabled={!ipc.isAvailable}
                           onClick={() => void issueLogisticsPriority(priority)}
-                          title={priority === 1 ? t('corpsFront.neutralPriorityTitle', { title: logisticsPriorityTitle }) : logisticsPriorityTitle}
+                          title={!ipc.isAvailable ? commandBridgeUnavailable : priority === 1 ? t('corpsFront.neutralPriorityTitle', { title: logisticsPriorityTitle }) : logisticsPriorityTitle}
                           className={`kbd-focus flex-1 px-2 py-1 rounded border border-neutral-400 text-[10px] font-bold ${ipc.isAvailable ? 'bg-neutral-200/50 hover:bg-neutral-300/60' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                         >
                           {priority.toFixed(1)}x
@@ -616,6 +630,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     type="button"
                     disabled={!ipc.isAvailable}
                     onClick={() => void toggleOpsec()}
+                    title={!ipc.isAvailable ? commandBridgeUnavailable : undefined}
+                    aria-label={!ipc.isAvailable ? `${opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')} - ${commandBridgeUnavailable}` : undefined}
                     className={`kbd-focus w-full rounded border border-neutral-400 px-2 py-1 text-[10px] font-bold uppercase ${ipc.isAvailable ? 'bg-neutral-200/50 hover:bg-neutral-300/60' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                   >
                     {opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
@@ -647,6 +663,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <div role="tabpanel" id="sector-intel-panel-forces" aria-labelledby="sector-intel-tab-forces" hidden={activeTab !== 'forces'} className="p-4 relative z-10">
             {activeTab === 'forces' && (
               <div className="p-4 relative z-10">
+                {!hasAnyForceBucket && (
+                  <div data-testid="corps-front-forces-empty" className="rounded border border-neutral-300 bg-neutral-100/80 px-3 py-2 text-[10px] italic text-neutral-600">
+                    {t('corpsFront.noFieldedForces')}
+                  </div>
+                )}
                 {assignedFormations.length > 0 && (
                   <div className="mb-4">
                     <div className="text-[9px] uppercase font-bold text-neutral-500 mb-2 border-b border-neutral-300 pb-1">
@@ -810,6 +831,21 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     </div>
                   </div>
                 )}
+                {staleRosterIds.length > 0 && (
+                  <div className="pt-2" data-testid="corps-front-stale-roster" data-stale-roster-count={staleRosterIds.length}>
+                    <div className="text-[9px] uppercase font-bold text-red-600 mb-1 border-b border-red-200 pb-1">
+                      {t(staleRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: staleRosterIds.length })}
+                    </div>
+                    <div className="text-[10px] text-neutral-600 italic">{t('corpsFront.staleRosterHelp')}</div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {staleRosterIds.map((id) => (
+                        <span key={id} className="rounded border border-red-200 bg-red-50 px-1.5 py-0.5 text-[9px] text-red-700 font-mono">
+                          {id}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -952,6 +988,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     data-corps-id={sector?.corps_id ?? ''}
                     data-origin-sector-id={sector?.sector_id ?? ''}
                     disabled={!ipc.isAvailable}
+                    title={!ipc.isAvailable ? commandBridgeUnavailable : undefined}
+                    aria-label={!ipc.isAvailable ? `${t('corpsFront.draftNewDirective')} - ${commandBridgeUnavailable}` : undefined}
                     onClick={() => {
                       if (ipc.isAvailable && sector?.corps_id) {
                         setOpsPlanningContext(sector.corps_id, sector.sector_id);

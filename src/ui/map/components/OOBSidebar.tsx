@@ -126,6 +126,36 @@ export function OOBSidebar() {
     return map;
   }, [loadedGameState?.formations, playerFaction]);
 
+  const phantomCommandFormationsByFaction = useMemo(() => {
+    const map = new Map<string, FormationView[]>();
+    if (!loadedGameState?.formations) return map;
+    const visibleFormations = getPlayerVisibleFactions(loadedGameState.formations, playerFaction);
+    const commandById = new Map<string, FormationView>();
+    for (const formation of visibleFormations) {
+      if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
+        commandById.set(formation.id, formation);
+      }
+    }
+    const phantomCommandIds = new Set<string>();
+    for (const formation of visibleFormations) {
+      if (formation.kind !== 'jna_phantom' && !formation.tags?.includes('jna_phantom')) continue;
+      if (formation.corps_id && commandById.has(formation.corps_id)) {
+        phantomCommandIds.add(formation.corps_id);
+      }
+    }
+    for (const commandId of phantomCommandIds) {
+      const formation = commandById.get(commandId);
+      if (!formation) continue;
+      const list = map.get(formation.faction) ?? [];
+      list.push(formation);
+      map.set(formation.faction, list);
+    }
+    for (const list of map.values()) {
+      list.sort((a, b) => compareLocalizedFormationNames(a, b, locale));
+    }
+    return map;
+  }, [loadedGameState?.formations, playerFaction, locale]);
+
   const reserveByFaction = useMemo(() => {
     const map = new Map<string, FormationView[]>();
     if (!loadedGameState || !loadedGameState.formations || !playerFaction) return map;
@@ -286,12 +316,13 @@ export function OOBSidebar() {
           />
           {expandedSections.army && (
             <div className="p-2 space-y-2">
-              {!armyByFaction || (armyByFaction.size === 0 && reserveByFaction.size === 0) ? (
+              {!armyByFaction || (armyByFaction.size === 0 && reserveByFaction.size === 0 && phantomCommandFormationsByFaction.size === 0) ? (
                 <div className="text-xs text-text-secondary italic">{t('oob.noFormations')}</div>
               ) : (
-                FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f))).map((faction, factionIndex) => {
+                FACTION_ORDER.filter((f) => f === playerFaction && (armyByFaction.has(f) || reserveByFaction.has(f) || phantomCommandFormationsByFaction.has(f))).map((faction, factionIndex) => {
                   const formations = armyByFaction.get(faction) ?? [];
                   const reserves = reserveByFaction.get(faction) ?? [];
+                  const phantomCommandFormations = phantomCommandFormationsByFaction.get(faction) ?? [];
                   const isCollapsed = collapsed[faction];
                   const byCorps = groupFormationsByCorps(formations, locale);
                   const reserveByCorps = groupFormationsByCorps(reserves, locale);
@@ -302,8 +333,12 @@ export function OOBSidebar() {
                       .map(f => f.id)
                   );
                   const hqEntries = Array.from(reserveByCorps.entries()).filter(([id]) => armyHqIds.has(id));
-                  const corpsEntries = Array.from(byCorps.entries())
-                    .filter(([id]) => !armyHqIds.has(id))
+                  const corpsEntriesById = new Map(Array.from(byCorps.entries()).filter(([id]) => !armyHqIds.has(id)));
+                  for (const command of phantomCommandFormations) {
+                    if (corpsEntriesById.has(command.id)) continue;
+                    corpsEntriesById.set(command.id, []);
+                  }
+                  const corpsEntries = Array.from(corpsEntriesById.entries())
                     .sort(([a], [b]) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
                   const FACTION_DIVIDER_BG: Record<string, string> = {

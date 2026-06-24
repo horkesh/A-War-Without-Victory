@@ -513,8 +513,9 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Archive Routes')).toBeTruthy();
         expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
         expect(screen.getByText('Chronicle Filed')).toBeTruthy();
-        expect(screen.getByRole('button', { name: /Turn Aftermath 1/i })).toBeTruthy();
-        expect(screen.getByRole('button', { name: /Decision Log 1/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'DECISION LOG' })).toBeTruthy();
+        expect(screen.getAllByTitle('1 records').length).toBeGreaterThanOrEqual(2);
     });
 
     it('does not narrate turn-0 territory provenance in the AAR tab', () => {
@@ -589,8 +590,10 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: /Turn Aftermath 0/i })).toBeTruthy();
-        expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'LATEST AFTER-ACTION REPORT' })).toBeTruthy();
+        expect(screen.queryByRole('button', { name: /Turn Aftermath 0/i })).toBeNull();
+        expect(screen.getAllByTitle('0 records').length).toBeGreaterThan(0);
         expect(document.body.textContent ?? '').toContain('No report yet');
         expect(document.body.textContent ?? '').not.toContain('Quiet turn');
     });
@@ -623,11 +626,12 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.queryByText('Archive Routes')).toBeNull();
     });
 
-    it('localizes Records subtab count accessible labels in BCS', () => {
+    it('localizes Records subtab count tooltips in BCS without polluting tab accessible names', () => {
         setLocale('bcs');
         render(createElement(RecordsContent));
 
-        expect(screen.getAllByLabelText(/\d+ zapisa/).length).toBeGreaterThan(0);
+        expect(document.querySelectorAll('[title$=" zapisa"]').length).toBeGreaterThan(0);
+        expect(screen.queryByRole('button', { name: /Posljedice poteza 0/i })).toBeNull();
         expect(document.body.innerHTML).not.toMatch(/aria-label="[^"]*records"/i);
     });
 
@@ -641,8 +645,9 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: /After-Action Report 0/i })).toBeTruthy();
-        expect(screen.getByRole('button', { name: /Operation History 1/i })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'LATEST AFTER-ACTION REPORT' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'OPERATION HISTORY' })).toBeTruthy();
+        expect(screen.getAllByTitle('1 records').length).toBeGreaterThan(0);
     });
 
     it('renders AAR unit-event labels without raw arc or decoration tier identifiers', () => {

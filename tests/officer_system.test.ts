@@ -640,6 +640,28 @@ describe('validateOfficerData', () => {
         const result = validateOfficerData(raw);
         assert.equal(result[0]!.casualty_vulnerability, 1.0);
     });
+
+    it('preserves authored mini-bio fields for UI command profiles', () => {
+        const raw = {
+            officers: [{
+                id: 'o1',
+                faction: 'RBiH',
+                bio_short: 'JNA-background officer leading the army command at scenario start.',
+                command_style: 'Assertive central command',
+                known_for: 'Opening army command',
+                political_alignment_note: 'Modeled as a regular army-command appointment.',
+                sensitive_history_note: 'Sensitive-history note remains informational.',
+            }],
+        };
+
+        const result = validateOfficerData(raw);
+
+        assert.equal(result[0]!.bio_short, 'JNA-background officer leading the army command at scenario start.');
+        assert.equal(result[0]!.command_style, 'Assertive central command');
+        assert.equal(result[0]!.known_for, 'Opening army command');
+        assert.equal(result[0]!.political_alignment_note, 'Modeled as a regular army-command appointment.');
+        assert.equal(result[0]!.sensitive_history_note, 'Sensitive-history note remains informational.');
+    });
 });
 
 // ═══════════════════════════════════════════════════════════════════════════

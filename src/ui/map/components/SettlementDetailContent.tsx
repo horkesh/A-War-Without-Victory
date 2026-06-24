@@ -848,6 +848,17 @@ export function SettlementDetailContent({
           </div>
         )}
 
+        {isPanel && activeTab === 'overview' && formationsAtOsid.length === 0 && (
+          <div data-testid="settlement-stationed-units-empty" className="pt-2 border-t border-panel-border/50">
+            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">
+              {t('settlement.stationedUnits')}
+            </div>
+            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-[11px] text-text-secondary italic">
+              {t('settlement.noStationedUnits')}
+            </div>
+          </div>
+        )}
+
         {/* Municipality-level population and displacement summary */}
         {isPanel && activeTab === 'municipality' && disp && (
           <div className="pt-2 space-y-2">

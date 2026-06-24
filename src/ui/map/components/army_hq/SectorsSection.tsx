@@ -110,6 +110,7 @@ function SectorExpandedDetail({
     const frontIds = sectorAssignment.frontlineIds;
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
+    const unresolvedRosterIds = sectorAssignment.unresolvedRosterIds;
     const projectedLineCount = sectorAssignment.lineHoldingIds.length;
     const hasCurrentFieldedLine = projectedLineCount > 0;
     const projectedDensity = computeCurrentFrontDensity(sector, projectedLineCount);
@@ -292,6 +293,24 @@ function SectorExpandedDetail({
                 </div>
             )}
 
+            {unresolvedRosterIds.length > 0 && (
+                <div data-testid="army-hq-sector-stale-roster" data-stale-roster-count={unresolvedRosterIds.length}>
+                    <div className="text-[10px] font-bold uppercase text-red-400 tracking-widest mb-1.5 border-b border-red-500/20 pb-0.5">
+                        {t(unresolvedRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: unresolvedRosterIds.length })}
+                    </div>
+                    <div className="text-[10px] text-text-secondary/70">
+                        {t('corpsFront.staleRosterHelp')}
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-1">
+                        {unresolvedRosterIds.map((id) => (
+                            <span key={id} className="rounded border border-red-500/25 bg-red-950/20 px-1.5 py-0.5 text-[9px] text-red-300 font-mono">
+                                {id}
+                            </span>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {sectorBattles.length > 0 && (
                 <div className="border-t border-panel-border/50 pt-3">
                     <div className="text-[10px] font-bold uppercase text-red-500/60 tracking-widest mb-1.5 border-b border-red-500/5 pb-0.5">{t('sectorsSection.recentEngagements', { count: sectorBattles.length })}</div>
@@ -451,6 +470,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                 data-reserve-brigade-count={sectorAssignment.reserveIds.length}
                                 data-rear-brigade-count={sectorAssignment.rearIds.length}
                                 data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
+                                data-stale-roster-count={sectorAssignment.unresolvedRosterIds.length}
                                 className="border border-panel-border/50 bg-panel-card rounded-md"
                             >
                                 <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'}`}>
@@ -482,6 +502,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                             )}
                                             {sectorAssignment.rearIds.length > 0 && `; ${t('sectorsSection.rearSupportSegment', { count: sectorAssignment.rearIds.length })}`}
                                             {sectorAssignment.overrideIds.length > 0 && `; ${t('sectorsSection.overrideSegment', { count: sectorAssignment.overrideIds.length })}`}
+                                            {sectorAssignment.unresolvedRosterIds.length > 0 && `; ${t(sectorAssignment.unresolvedRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: sectorAssignment.unresolvedRosterIds.length })}`}
                                         </div>
                                     </button>
                                     <button

@@ -308,6 +308,29 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toContain('3Active Brigades');
   });
 
+  it('uses the shared player-safe municipality display for mobilization pool names', () => {
+    const state = makeState();
+    state.mobilizationSummary = {
+      RS: {
+        faction: 'RS',
+        total_available: 2500,
+        total_committed: 300,
+        total_exhausted: 450,
+        strategic_reserve: 80,
+        exhaustion_pct: 32.5,
+        top_pools: [
+          { mun_id: 'BANJA_LUKA', available: 1500 },
+        ],
+      },
+    } as LoadedGameState['mobilizationSummary'];
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Banja Luka');
+    expect(container.textContent).not.toContain('BANJA LUKA');
+  });
+
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

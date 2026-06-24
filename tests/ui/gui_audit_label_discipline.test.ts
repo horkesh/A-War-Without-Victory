@@ -103,6 +103,13 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/Front contacts:\s*\d|thinly held:\s*\d|0\.75/);
   });
 
+  it('uses area-weighted territory in SituationTab instead of the legacy sitrep settlement share', () => {
+    render(createElement(SituationTab, { state: makeSitrepState() }));
+
+    expect(screen.getByText('0.1%')).toBeTruthy();
+    expect(screen.queryByText('50.0%')).toBeNull();
+  });
+
   it('renders operational SITREP token copy in BCS mode without English generated fallbacks', () => {
     setLocale('bcs');
     const state = makeSitrepState();

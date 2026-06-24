@@ -244,7 +244,9 @@ describe('UI copy raw-id fallbacks', () => {
     expect(formationSource).toContain('sanitizeHistoryMoment');
     expect(formationSource).not.toContain('m.description.replace');
 
-    expect(recordsSource).toContain("aria-label={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}");
+    expect(recordsSource).toContain("aria-label={t('recordsContent.subtab.buttonAria', { label })}");
+    expect(recordsSource).toContain("title={t('recordsContent.subtab.countAria', { count: archiveCounts[id] })}");
+    expect(recordsSource).toContain('aria-hidden="true"');
     expect(recordsSource).toContain("{' · '}");
 
     expect(chronicleSource).toContain("aria-label={t(count === 1 ? 'chronicle.entryCount.one' : 'chronicle.entryCount.many', { count })}");

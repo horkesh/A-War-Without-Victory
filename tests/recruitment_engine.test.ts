@@ -439,6 +439,33 @@ describe('runBotRecruitment', () => {
         assert.strictEqual(report.elective_recruited, 1);
     });
 
+    test('creates startup command formations from HQ presence even when corps available_from is future', () => {
+        const state = makeState({
+  meta: { turn: 0, seed: 'test' },
+  political: {
+    political_controllers: { s1: 'RBiH' }
+  } as any,
+});
+        const sidToMun = new Map([['s1', 'zenica']]);
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const corps: OobCorps[] = [{
+            id: 'arbih_future_corps',
+            faction: 'RBiH',
+            name: 'Future Corps',
+            hq_mun: 'zenica',
+            kind: 'corps',
+            available_from: 24,
+        }];
+
+        const report = runBotRecruitment(state, corps, [], resources, sidToMun, { zenica: 's1' });
+
+        assert.ok(state.military.formations!['arbih_future_corps']);
+        assert.strictEqual(state.military.formations!['arbih_future_corps'].kind, 'corps_asset');
+        assert.strictEqual(state.military.formations!['arbih_future_corps'].personnel, 0);
+        assert.strictEqual(report.elective_recruited, 0);
+        assert.strictEqual(report.mandatory_recruited, 0);
+    });
+
     test('respects per-faction elective recruit cap', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({

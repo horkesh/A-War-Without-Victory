@@ -132,6 +132,44 @@ describe('OOBSidebar drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
   });
 
+  it('renders command nodes even when their only subordinates are non-fielded phantom rows', () => {
+    const state = makeState();
+    state.formations = [
+      {
+        id: 'jna_herzegovina_command',
+        faction: 'RS',
+        name: 'JNA Herzegovina Command',
+        kind: 'corps_asset',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 80,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+      },
+      {
+        id: 'jna_phantom_1',
+        faction: 'RS',
+        name: 'JNA phantom battalion',
+        kind: 'jna_phantom',
+        readiness: 'ready',
+        status: 'active',
+        corps_id: 'jna_herzegovina_command',
+        personnel: 900,
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+
+    expect(container.textContent).toContain('JNA Herzegovina Command');
+    expect(container.textContent).toContain('0 brigades');
+    expect(container.textContent).not.toContain('JNA phantom battalion');
+    expect(container.textContent).not.toContain('No formations.');
+    expect(screen.getByRole('button', { name: /JNA Herzegovina Command/i })).toBeTruthy();
+  });
+
   it('routes sector rows with their corps context preserved', () => {
     render(React.createElement(OOBSidebar));
 

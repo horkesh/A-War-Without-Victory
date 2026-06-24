@@ -57,6 +57,17 @@ export interface NamedOfficer {
     /** Pool priority tier for succession ordering. */
     pool_tier: OfficerPoolTier;
 
+    /** Short authored service sketch for UI display only. */
+    bio_short?: string;
+    /** Authored command style note for UI display only. */
+    command_style?: string;
+    /** Authored notable command context for UI display only. */
+    known_for?: string;
+    /** Authored political-command context for UI display only. */
+    political_alignment_note?: string;
+    /** Optional neutral note for sensitive-history-adjacent context. */
+    sensitive_history_note?: string;
+
     /** War crimes record from ICTY or BiH State Court. Informational — does not affect gameplay. */
     war_crimes_record?: {
         /** Court that handled the case. */

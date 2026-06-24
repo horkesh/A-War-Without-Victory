@@ -99,6 +99,39 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).not.toMatch(/Class\s*Adequate|Adequate/i);
   });
 
+  it('shows stale sector roster ids without counting them as current fielded brigades', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:stale',
+      display_name: 'Stale roster front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: ['missing_bde'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 2,
+      density: 0,
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    useGameStore.setState({ loadedGameState: makeState(sector) });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+    const row = screen.getByTestId('army-hq-sector-row');
+
+    expect(row.getAttribute('data-current-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
+    expect(row.getAttribute('data-stale-roster-count')).toBe('1');
+    expect(screen.getByTestId('army-hq-sector-stale-roster').textContent).toContain('missing_bde');
+    expect(container.textContent).toContain('1 stale roster entry');
+  });
+
   it('keeps rear support separate from live line coverage in Army HQ', () => {
     const sector = {
       sector_id: 'sector:arbih_1st_corps:rear',
