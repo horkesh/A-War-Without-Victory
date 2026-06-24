@@ -122,7 +122,7 @@ export function CorpsCard({
   const corpsOsids = Array.from(
     new Set(
       brigades
-        .flatMap((brigade) => brigade.aorSettlementIds ?? (brigade.location_osid ? [brigade.location_osid] : []))
+        .flatMap((brigade) => (brigade.location_osid ? [brigade.location_osid] : []))
         .filter((osid): osid is string => typeof osid === 'string' && osid.length > 0)
         .sort((a, b) => a.localeCompare(b))
     )

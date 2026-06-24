@@ -33,6 +33,10 @@ function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
 }
 
+function maybeNum(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
 function str(v: unknown): string {
   return typeof v === 'string' ? v : '';
 }
@@ -238,7 +242,17 @@ export function SettlementDetailContent({
   // player's own settlements — no enemy supply truth is surfaced here.
   const supplyExplanation = buildOsidSupplyExplanation(getByOsid(supplyStateByOsid, osid));
   const settlementStatusLabel = getPlayerSafeSettlementStatusLabel(statusLabel);
-  const popOriginal = num(props.population_total) || (num(props.population_bosniaks) + num(props.population_serbs) + num(props.population_croats) + num(props.population_others));
+  const populationBosniaks = maybeNum(props.population_bosniaks);
+  const populationSerbs = maybeNum(props.population_serbs);
+  const populationCroats = maybeNum(props.population_croats);
+  const populationOthers = maybeNum(props.population_others);
+  const hasCompleteEthnicCensus = populationBosniaks != null
+    && populationSerbs != null
+    && populationCroats != null
+    && populationOthers != null;
+  const popOriginal = num(props.population_total) || (hasCompleteEthnicCensus
+    ? populationBosniaks + populationSerbs + populationCroats + populationOthers
+    : 0);
 
   const friction = typeof props.terrain_friction_index === 'number' ? props.terrain_friction_index : null;
   const terrain = getPlayerSafeTerrainLabel(str(props.terrain || props.zone_type), friction);
@@ -251,12 +265,14 @@ export function SettlementDetailContent({
     : friction != null && friction > 0.15 ? t('settlement.terrainDefenseModifier', { pct: 15 })
     : null;
 
-  const ethnic = [
-    { label: ethnicityOrFactionToNationLabel('Bosniak'), pct: popOriginal ? (num(props.population_bosniaks) / popOriginal) * 100 : 0 },
-    { label: ethnicityOrFactionToNationLabel('Serb'), pct: popOriginal ? (num(props.population_serbs) / popOriginal) * 100 : 0 },
-    { label: ethnicityOrFactionToNationLabel('Croat'), pct: popOriginal ? (num(props.population_croats) / popOriginal) * 100 : 0 },
-    { label: ethnicityOrFactionToNationLabel('Other'), pct: popOriginal ? (num(props.population_others) / popOriginal) * 100 : 0 },
-  ];
+  const ethnic = hasCompleteEthnicCensus
+    ? [
+      { label: ethnicityOrFactionToNationLabel('Bosniak'), pct: popOriginal ? (populationBosniaks / popOriginal) * 100 : 0 },
+      { label: ethnicityOrFactionToNationLabel('Serb'), pct: popOriginal ? (populationSerbs / popOriginal) * 100 : 0 },
+      { label: ethnicityOrFactionToNationLabel('Croat'), pct: popOriginal ? (populationCroats / popOriginal) * 100 : 0 },
+      { label: ethnicityOrFactionToNationLabel('Other'), pct: popOriginal ? (populationOthers / popOriginal) * 100 : 0 },
+    ]
+    : [];
 
   const munId = getMunIdForDisplacement(props);
   const disp = munId && displacementByMun?.[munId];
@@ -267,13 +283,20 @@ export function SettlementDetailContent({
     if (!munId || !osidPropertiesMap) return null;
     let bosniaks = 0, serbs = 0, croats = 0, others = 0;
     let curBosniaks = 0, curSerbs = 0, curCroats = 0, curOthers = 0;
+    let hasEthnicDepartureEvidence = false;
     for (const [osidKey, p] of Object.entries(osidPropertiesMap)) {
       if (String(p.mun1990_id ?? '').toLowerCase() !== munId) continue;
-      const b = num(p.population_bosniaks), s = num(p.population_serbs);
-      const c = num(p.population_croats), o = num(p.population_others);
+      const b = maybeNum(p.population_bosniaks);
+      const s = maybeNum(p.population_serbs);
+      const c = maybeNum(p.population_croats);
+      const o = maybeNum(p.population_others);
+      if (b == null || s == null || c == null || o == null) return null;
       bosniaks += b; serbs += s; croats += c; others += o;
       // Current: subtract per-ethnicity departures
       const dep = departedByOsid?.[osidKey] ?? {};
+      if (Object.values(dep).some((value) => maybeNum(value) != null && maybeNum(value)! > 0)) {
+        hasEthnicDepartureEvidence = true;
+      }
       curBosniaks += Math.max(0, b - num(dep['RBiH'] ?? dep['Bosniak']));
       curSerbs += Math.max(0, s - num(dep['RS'] ?? dep['Serb']));
       curCroats += Math.max(0, c - num(dep['HRHB'] ?? dep['Croat']));
@@ -289,7 +312,7 @@ export function SettlementDetailContent({
         { label: ethnicityOrFactionToNationLabel('Croat'), count: croats, pct: (croats / total) * 100 },
         { label: ethnicityOrFactionToNationLabel('Other'), count: others, pct: (others / total) * 100 },
       ],
-      current: curTotal > 0 ? [
+      current: hasEthnicDepartureEvidence && curTotal > 0 ? [
         { label: ethnicityOrFactionToNationLabel('Bosniak'), count: curBosniaks, pct: (curBosniaks / curTotal) * 100 },
         { label: ethnicityOrFactionToNationLabel('Serb'), count: curSerbs, pct: (curSerbs / curTotal) * 100 },
         { label: ethnicityOrFactionToNationLabel('Croat'), count: curCroats, pct: (curCroats / curTotal) * 100 },

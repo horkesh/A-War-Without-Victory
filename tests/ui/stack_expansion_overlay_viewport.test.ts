@@ -1,0 +1,79 @@
+// @vitest-environment jsdom
+
+import React, { createElement } from 'react';
+import { act, cleanup, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { StackExpansionOverlay } from '../../src/ui/map/components/StackExpansionOverlay.js';
+import type { FormationView } from '../../src/ui/map/data/types.js';
+
+function formations(): FormationView[] {
+  return [
+    {
+      id: 'a_brigade',
+      name: 'A Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      readiness: 'active',
+      status: 'active',
+      cohesion: 80,
+      fatigue: 0,
+      createdTurn: 1,
+      tags: [],
+      location_osid: 'op:stacked',
+    },
+    {
+      id: 'b_brigade',
+      name: 'B Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      readiness: 'active',
+      status: 'active',
+      cohesion: 80,
+      fatigue: 0,
+      createdTurn: 1,
+      tags: [],
+      location_osid: 'op:stacked',
+    },
+  ] as FormationView[];
+}
+
+describe('StackExpansionOverlay viewport behavior', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+    cleanup();
+  });
+
+  it('clamps the orbital origin away from viewport edges so fanned units remain selectable', () => {
+    vi.useFakeTimers();
+
+    render(createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 4,
+      anchorY: window.innerHeight + 500,
+      formations: formations(),
+      onClose: vi.fn(),
+      onSelect: vi.fn(),
+    }));
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    expect(screen.getByRole('button', { name: /Select A Brigade/i })).toBeTruthy();
+
+    const orbitalRoot = Array.from(document.body.querySelectorAll('div')).find((node) => {
+      const element = node as HTMLElement;
+      return element.className.includes('absolute pointer-events-none') && element.style.left !== '';
+    }) as HTMLElement | undefined;
+
+    expect(orbitalRoot).toBeTruthy();
+    expect(Number.parseFloat(orbitalRoot?.style.left ?? '0')).toBeGreaterThanOrEqual(180);
+    expect(Number.parseFloat(orbitalRoot?.style.top ?? '99999')).toBeLessThanOrEqual(window.innerHeight - 180);
+  });
+});

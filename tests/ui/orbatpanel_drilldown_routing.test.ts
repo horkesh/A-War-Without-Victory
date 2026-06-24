@@ -175,10 +175,20 @@ describe('OrbatPanel drilldown routing', () => {
   });
 
   it('highlights the override sector on brigade hover instead of stale roster membership', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_1_brigade'
+      ? {
+        ...formation,
+        aorSettlementIds: ['op:stale:aor_1', 'op:stale:aor_2'],
+      }
+      : formation) as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
     render(React.createElement(OrbatPanel));
 
     fireEvent.mouseEnter(screen.getByRole('button', { name: /1st Brigade/i }));
 
     expect(useGameStore.getState().hoveredSectorId).toBe('sector_south');
+    expect(useGameStore.getState().hoveredOsids).toEqual(['op:sarajevo:centar_1']);
   });
 });

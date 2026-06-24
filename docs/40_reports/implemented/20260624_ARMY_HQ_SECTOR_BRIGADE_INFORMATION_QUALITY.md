@@ -73,5 +73,5 @@ UI/read-model/test/docs polish plus deterministic startup artifact regeneration 
 
 ## Next Steps
 
-- Inspect GitHub checks/comments after push, then merge only after green.
-- Keep packaging and BCS-only work parked until owner satisfaction with live D2 player-polish surfaces.
+- Historical closeout is complete on `main`; packaging and BCS-only work remain parked until owner satisfaction with live D2 player-polish surfaces.
+- Current D2 polish follow-up is tracked in `docs/40_reports/implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md` and `docs/plans/2026-06-24-army-hq-sector-brigade-information-quality-sweep-plan.md`.

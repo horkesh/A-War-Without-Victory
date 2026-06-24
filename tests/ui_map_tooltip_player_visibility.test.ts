@@ -200,6 +200,34 @@ describe('player-safe tooltip models', () => {
     expect(model.enemyContactSummary).toBeNull();
   });
 
+  it('does not render missing front pressure as balanced pressure', () => {
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: {},
+      formations: [],
+      fogOfWar: undefined,
+      corpsFrontSectors: [],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.pressureLine).toBe('Pressure unreported');
+  });
+
+  it('keeps explicit zero front pressure as balanced', () => {
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla::op:doboj',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla::op:doboj', a: 'op:tuzla', b: 'op:doboj', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla::op:doboj': { value: 0, max_abs: 1 } },
+      formations: [],
+      fogOfWar: undefined,
+      corpsFrontSectors: [],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.pressureLine).toBe('Balanced');
+  });
+
 
   it('excludes forming own formations from front tooltip line summaries', () => {
     const formations = [

@@ -4,12 +4,25 @@ function num(v: unknown): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : 0;
 }
 
+function maybeNum(v: unknown): number | null {
+  return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+function getCompleteEthnicCensus(props: Record<string, unknown>): { bosniak: number; serb: number; croat: number; other: number } | null {
+  const bosniak = maybeNum(props.population_bosniaks);
+  const serb = maybeNum(props.population_serbs);
+  const croat = maybeNum(props.population_croats);
+  const other = maybeNum(props.population_others);
+  return bosniak == null || serb == null || croat == null || other == null
+    ? null
+    : { bosniak, serb, croat, other };
+}
+
 /** Majority ethnicity from population props: Bosniak, Serb, Croat, or Other. */
 export function getMajorityEthnic(props: Record<string, unknown>): string | null {
-  const bosniak = num(props.population_bosniaks);
-  const serb = num(props.population_serbs);
-  const croat = num(props.population_croats);
-  const other = num(props.population_others);
+  const complete = getCompleteEthnicCensus(props);
+  if (!complete) return null;
+  const { bosniak, serb, croat, other } = complete;
   const total = bosniak + serb + croat + other;
   if (total <= 0) return null;
   const max = Math.max(bosniak, serb, croat, other);
@@ -32,7 +45,7 @@ export type DepartedByOsid = Record<string, Partial<Record<string, number>>>;
 
 /**
  * Current ethnic composition (counts) for a single OSID.
- * Uses same logic as buildEthnicGeoJSON: base - departures + proportional arrivals.
+ * Uses the same complete-census rule as buildEthnicGeoJSON: partial census rows are unreported.
  */
 export function getCurrentEthnicForOsid(
   osid: string,
@@ -42,10 +55,13 @@ export function getCurrentEthnicForOsid(
 ): { Bosniak: number; Serb: number; Croat: number; Other: number } | null {
   if (!osidPropertiesMap?.[osid]) return null;
   const base = osidPropertiesMap[osid] ?? {};
-  const initB = num(base.population_bosniaks);
-  const initS = num(base.population_serbs);
-  const initC = num(base.population_croats);
-  const initO = num(base.population_others);
+  const complete = getCompleteEthnicCensus(base);
+  if (!complete) return null;
+
+  const initB = complete.bosniak;
+  const initS = complete.serb;
+  const initC = complete.croat;
+  const initO = complete.other;
   const munId = getMunIdForDisplacement(base);
   const dep = departedByOsid?.[osid] ?? {};
   const dispRaw = munId && displacementByMun ? displacementByMun[munId] : undefined;
@@ -62,9 +78,11 @@ export function getCurrentEthnicForOsid(
     for (const props of Object.values(osidPropertiesMap)) {
       const m = getMunIdForDisplacement(props as Record<string, unknown>);
       if (m !== munId) continue;
-      munB += num((props as Record<string, unknown>).population_bosniaks);
-      munS += num((props as Record<string, unknown>).population_serbs);
-      munC += num((props as Record<string, unknown>).population_croats);
+      const munComplete = getCompleteEthnicCensus(props as Record<string, unknown>);
+      if (!munComplete) continue;
+      munB += munComplete.bosniak;
+      munS += munComplete.serb;
+      munC += munComplete.croat;
     }
     const fracB = munB > 0 ? initB / munB : 0;
     const fracS = munS > 0 ? initS / munS : 0;
@@ -106,8 +124,7 @@ function getMunIdForDisplacement(props: Record<string, unknown>): string | null 
  * Build a FeatureCollection with majority_ethnic per OSID for the ethnic map mode.
  *
  * When departedByOsid is provided, computes per-ethnic-group current population at OSID
- * granularity (departures per-OSID, arrivals distributed from municipality level).
- * Falls back to municipality-level uniform ratio when OSID data is unavailable.
+ * granularity. Partial census rows render as unreported rather than zero-filled.
  */
 export function buildEthnicGeoJSON(
   baseGeoJson: FeatureCollection,
@@ -122,7 +139,6 @@ export function buildEthnicGeoJSON(
   const hasDisplacement = displacementByMun && Object.keys(displacementByMun).length > 0;
   const hasDepartures = departedByOsid && Object.keys(departedByOsid).length > 0;
 
-  // Pass 1: aggregate per-municipality initial ethnic totals (needed for arrival distribution)
   let munEthnicTotals: Record<string, { b: number; s: number; c: number; o: number }> | null = null;
   if (hasDisplacement && hasDepartures) {
     munEthnicTotals = {};
@@ -130,17 +146,18 @@ export function buildEthnicGeoJSON(
       const fProps = (feature.properties ?? {}) as GeoJsonProperties & { osid?: unknown };
       const fOsid = typeof fProps.osid === 'string' ? fProps.osid : '';
       const fBase = fOsid ? osidPropertiesMap[fOsid] ?? {} : {};
+      const complete = getCompleteEthnicCensus(fBase);
+      if (!complete) continue;
       const munId = getMunIdForDisplacement(fBase);
       if (!munId) continue;
       if (!munEthnicTotals[munId]) munEthnicTotals[munId] = { b: 0, s: 0, c: 0, o: 0 };
-      munEthnicTotals[munId].b += num(fBase.population_bosniaks);
-      munEthnicTotals[munId].s += num(fBase.population_serbs);
-      munEthnicTotals[munId].c += num(fBase.population_croats);
-      munEthnicTotals[munId].o += num(fBase.population_others);
+      munEthnicTotals[munId].b += complete.bosniak;
+      munEthnicTotals[munId].s += complete.serb;
+      munEthnicTotals[munId].c += complete.croat;
+      munEthnicTotals[munId].o += complete.other;
     }
   }
 
-  // Pass 2: compute per-OSID ethnic composition
   const features = baseGeoJson.features.map((feature) => {
     const props = (feature.properties ?? {}) as GeoJsonProperties & { osid?: unknown };
     const osid = typeof props.osid === 'string' ? props.osid : '';
@@ -148,68 +165,70 @@ export function buildEthnicGeoJSON(
     let majority_ethnic: string | null;
 
     if (hasDepartures && munEthnicTotals) {
-      // OSID-level per-ethnic computation
       const munId = getMunIdForDisplacement(base);
       const dep = departedByOsid?.[osid] ?? {};
       const disp = munId ? displacementByMun?.[munId] : undefined;
       const munTot = munId ? munEthnicTotals[munId] : undefined;
       const arr = disp?.arrivedByFaction ?? {};
+      const complete = getCompleteEthnicCensus(base);
 
-      const initB = num(base.population_bosniaks);
-      const initS = num(base.population_serbs);
-      const initC = num(base.population_croats);
-      const initO = num(base.population_others);
+      if (!complete) {
+        majority_ethnic = null;
+      } else {
+        const initB = complete.bosniak;
+        const initS = complete.serb;
+        const initC = complete.croat;
+        const initO = complete.other;
 
-      // Departures: OSID-level (faction → ethnic group)
-      const depB = num(dep['RBiH']);
-      const depS = num(dep['RS']);
-      const depC = num(dep['HRHB']);
+        const depB = num(dep['RBiH']);
+        const depS = num(dep['RS']);
+        const depC = num(dep['HRHB']);
 
-      // Arrivals: municipality-level distributed proportionally to this OSID's share
-      const arrBMun = num(arr['RBiH']);
-      const arrSMun = num(arr['RS']);
-      const arrCMun = num(arr['HRHB']);
-      const fracB = munTot && munTot.b > 0 ? initB / munTot.b : 0;
-      const fracS = munTot && munTot.s > 0 ? initS / munTot.s : 0;
-      const fracC = munTot && munTot.c > 0 ? initC / munTot.c : 0;
-      const arrB = Math.round(arrBMun * fracB);
-      const arrS = Math.round(arrSMun * fracS);
-      const arrC = Math.round(arrCMun * fracC);
+        const arrBMun = num(arr['RBiH']);
+        const arrSMun = num(arr['RS']);
+        const arrCMun = num(arr['HRHB']);
+        const fracB = munTot && munTot.b > 0 ? initB / munTot.b : 0;
+        const fracS = munTot && munTot.s > 0 ? initS / munTot.s : 0;
+        const fracC = munTot && munTot.c > 0 ? initC / munTot.c : 0;
+        const arrB = Math.round(arrBMun * fracB);
+        const arrS = Math.round(arrSMun * fracS);
+        const arrC = Math.round(arrCMun * fracC);
 
-      const curB = Math.max(0, initB - depB + arrB);
-      const curS = Math.max(0, initS - depS + arrS);
-      const curC = Math.max(0, initC - depC + arrC);
+        const curB = Math.max(0, initB - depB + arrB);
+        const curS = Math.max(0, initS - depS + arrS);
+        const curC = Math.max(0, initC - depC + arrC);
 
-      // Others: scale by this OSID's overall population ratio
-      const initTotal = initB + initS + initC + initO;
-      const curMainGroups = curB + curS + curC;
-      const initMainGroups = initB + initS + initC;
-      const othersRatio = initMainGroups > 0 && initTotal > 0
-        ? curMainGroups / initMainGroups
-        : (disp && disp.originalPopulation > 0
-          ? Math.max(0, disp.currentPopulation / disp.originalPopulation)
-          : 1);
-      const curO = Math.max(0, Math.round(initO * othersRatio));
+        const initTotal = initB + initS + initC + initO;
+        const curMainGroups = curB + curS + curC;
+        const initMainGroups = initB + initS + initC;
+        const othersRatio = initMainGroups > 0 && initTotal > 0
+          ? curMainGroups / initMainGroups
+          : (disp && disp.originalPopulation > 0
+            ? Math.max(0, disp.currentPopulation / disp.originalPopulation)
+            : 1);
+        const curO = Math.max(0, Math.round(initO * othersRatio));
 
-      majority_ethnic = getMajorityEthnic({
-        population_bosniaks: curB,
-        population_serbs: curS,
-        population_croats: curC,
-        population_others: curO,
-      });
+        majority_ethnic = getMajorityEthnic({
+          population_bosniaks: curB,
+          population_serbs: curS,
+          population_croats: curC,
+          population_others: curO,
+        });
+      }
     } else if (hasDisplacement) {
-      // Fallback: municipality-level uniform ratio (old behavior, for saves without origin_osid)
       const munId = getMunIdForDisplacement(base);
       const disp = munId ? displacementByMun?.[munId] : undefined;
       if (disp && disp.originalPopulation > 0 && Number.isFinite(disp.currentPopulation)) {
+        const complete = getCompleteEthnicCensus(base);
         const ratio = Math.max(0, disp.currentPopulation / disp.originalPopulation);
-        const scaled = {
-          population_bosniaks: Math.round(num(base.population_bosniaks) * ratio),
-          population_serbs: Math.round(num(base.population_serbs) * ratio),
-          population_croats: Math.round(num(base.population_croats) * ratio),
-          population_others: Math.round(num(base.population_others) * ratio),
-        };
-        majority_ethnic = getMajorityEthnic(scaled);
+        majority_ethnic = complete
+          ? getMajorityEthnic({
+            population_bosniaks: Math.round(complete.bosniak * ratio),
+            population_serbs: Math.round(complete.serb * ratio),
+            population_croats: Math.round(complete.croat * ratio),
+            population_others: Math.round(complete.other * ratio),
+          })
+          : null;
       } else {
         majority_ethnic = getMajorityEthnic(base);
       }

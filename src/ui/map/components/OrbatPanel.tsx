@@ -170,7 +170,7 @@ export function OrbatPanel() {
                                             }
                                         }}
                                         onHoverChange={(hovered, e) => {
-                                            const osids = hovered ? (b.aorSettlementIds ?? (b.location_osid ? [b.location_osid] : [])) : [];
+                                            const osids = hovered && b.location_osid ? [b.location_osid] : [];
                                             setHoveredOsids(osids);
                                             setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(b.id) ?? null) : null);
                                             if (hovered) {

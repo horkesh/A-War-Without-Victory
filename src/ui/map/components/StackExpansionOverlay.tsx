@@ -16,6 +16,14 @@ interface StackExpansionOverlayProps {
     onSelect: (id: string) => void;
 }
 
+const STACK_VIEWPORT_MARGIN = 180;
+
+function clampToViewport(value: number, viewportExtent: number): number {
+    const min = Math.min(STACK_VIEWPORT_MARGIN, Math.max(0, viewportExtent / 2));
+    const max = Math.max(min, viewportExtent - min);
+    return Math.min(Math.max(value, min), max);
+}
+
 /** Component to render a formation icon onto a canvas. */
 const FormationIconCanvas: React.FC<{ formation: FormationView; className?: string }> = ({ formation, className }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -77,6 +85,11 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
         }
     }, [total, isMounted, onClose]);
 
+    const viewportWidth = typeof window === 'undefined' ? anchorX : window.innerWidth;
+    const viewportHeight = typeof window === 'undefined' ? anchorY : window.innerHeight;
+    const clampedAnchorX = clampToViewport(anchorX, viewportWidth);
+    const clampedAnchorY = clampToViewport(anchorY, viewportHeight);
+
     return (
         <div
             className="fixed inset-0 flex items-center justify-center pointer-events-auto"
@@ -94,8 +107,8 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
             <div
                 className="absolute pointer-events-none"
                 style={{
-                    left: anchorX,
-                    top: anchorY,
+                    left: clampedAnchorX,
+                    top: clampedAnchorY,
                 }}
             >
                 {/* Central "Origin" indicator */}

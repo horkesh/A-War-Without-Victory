@@ -58,6 +58,17 @@ Fourth slice implemented locally before the broad browser/CI closeout packet:
 
 Fourth-slice local verification: focused red/green pack passed 5 files / 87 tests; post-copy focused proof passed 3 files / 37 tests; final `npm.cmd run typecheck -- --pretty false`, `npm.cmd run qa:player-journeys` 43 files / 588 tests, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser` (41 live steps, 0 errors), and `git diff --check` passed on the final tree. Manual in-app browser proof on `http://127.0.0.1:3003/?dev=1` verified RBiH start, the richer `WAR BEGINS: 6 APR 1992` foundation splash, no old command-authority copy or raw `TRANSFUSING`/`AUTHORIZE directive`/`DISCARD` labels, Army HQ Records zero-count turn-0 truth with no hostile-takeover leak, Command Access -> 1st Corps visible sector/brigade inspect controls, sector inspect opening `corps-front-panel`, and brigade inspect opening sector + formation detail panels with no console errors or malformed values.
 
+Fifth follow-up slice implemented locally on `codex/player-surface-edge-polish` after the Raman surface scout:
+
+- Formation Detail now treats missing tank/artillery condition components as unreported instead of dereferencing absent fields and crashing.
+- Tactical tooltips and expanded stack selectors clamp their anchors to the current viewport, so lower/right-edge interactions remain reachable.
+- Front-edge tooltips distinguish missing pressure from explicit zero pressure: absent pressure renders unreported, while recorded `0` remains balanced.
+- Army HQ sector detail no longer repeats projected density as both `Brigades per front segment` and `Troop density`.
+- ORBAT, Corps Detail, and CorpsCard hover now highlight reported physical `location_osid`, not stale AoR coverage.
+- Selected-settlement, municipality, current-ethnic readouts, and ethnic-map majority layers require complete census ethnicity fields and suppress partial rows instead of filling missing groups as zero.
+
+Fifth-slice focused proof so far: the new Raman tests failed before production fixes, then the combined focused pack passed 7 files / 83 tests; Peirce follow-up tests failed before production fixes, then passed 4 files / 51 tests. Final combined focused proof passed 11 files / 134 tests and `npm.cmd run typecheck -- --pretty false` passed after both packets. Broad gates passed locally after the final code/docs closeout: `npm.cmd run qa:player-journeys` passed 43 files / 594 tests, `npm.cmd run qa:first-hour:browser` passed, and `npm.cmd run qa:live-surface:browser` passed. Remaining closeout gates for this branch are `git diff --check`, GitHub inspection after push, merge to `main` only after green, and branch/worktree/temp cleanup.
+
 Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup removed the baseline comparison worktree and `data/derived/scenario/_baseline_tmp`; final browser evidence folders were recorded and are cleanup-owned. Only `.tmp_dev_server` may remain if it belongs to the active browser/dev server.
 
 ## Pyrrhic Roles

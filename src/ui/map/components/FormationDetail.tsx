@@ -137,6 +137,40 @@ function formatEffectivenessModifierLabel(key: string): string {
   return EFFECTIVENESS_MODIFIER_LABELS[key] ?? t('formationDetail.staffRecord');
 }
 
+type EquipmentConditionReport = {
+  operational?: number | null;
+  degraded?: number | null;
+  non_operational?: number | null;
+} | null | undefined;
+
+function isReportedEquipmentCondition(condition: EquipmentConditionReport): condition is {
+  operational: number;
+  degraded: number;
+  non_operational: number;
+} {
+  return Number.isFinite(condition?.operational)
+    && Number.isFinite(condition?.degraded)
+    && Number.isFinite(condition?.non_operational);
+}
+
+function EquipmentConditionBar({ condition }: { condition: EquipmentConditionReport }) {
+  if (!isReportedEquipmentCondition(condition)) {
+    return (
+      <span className="flex-1 text-[10px] italic text-text-secondary">
+        {t('formationDetail.conditionUnreported')}
+      </span>
+    );
+  }
+
+  return (
+    <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
+      <div style={{ width: `${condition.operational * 100}%` }} className="bg-[#55d48a]" />
+      <div style={{ width: `${condition.degraded * 100}%` }} className="bg-[#d4d455]" />
+      <div style={{ width: `${condition.non_operational * 100}%` }} className="bg-[#d45555]" />
+    </div>
+  );
+}
+
 /**
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
@@ -529,11 +563,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary w-16">{t('formationDetail.tanks')}</span>
                       <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: `${formation.composition.tank_condition.operational * 100}%` }} className="bg-[#55d48a]" />
-                          <div style={{ width: `${formation.composition.tank_condition.degraded * 100}%` }} className="bg-[#d4d455]" />
-                          <div style={{ width: `${formation.composition.tank_condition.non_operational * 100}%` }} className="bg-[#d45555]" />
-                        </div>
+                        <EquipmentConditionBar condition={formation.composition.tank_condition} />
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.tanks}</span>
                       </div>
                     </div>
@@ -542,11 +572,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary w-16">{t('formationDetail.artillery')}</span>
                       <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: `${formation.composition.artillery_condition.operational * 100}%` }} className="bg-[#55d48a]" />
-                          <div style={{ width: `${formation.composition.artillery_condition.degraded * 100}%` }} className="bg-[#d4d455]" />
-                          <div style={{ width: `${formation.composition.artillery_condition.non_operational * 100}%` }} className="bg-[#d45555]" />
-                        </div>
+                        <EquipmentConditionBar condition={formation.composition.artillery_condition} />
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.artillery}</span>
                       </div>
                     </div>

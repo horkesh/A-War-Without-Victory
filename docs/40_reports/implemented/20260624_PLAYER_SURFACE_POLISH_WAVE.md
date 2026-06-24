@@ -1,7 +1,7 @@
 # Player Surface Polish Wave
 
 **Date:** 2026-06-24
-**Result:** Local proof green; ready for commit/merge after final diff review.
+**Result:** Implemented and integrated; superseded by later Army HQ information-quality and 2026-06-25 edge-polish follow-up reports.
 
 ## Summary
 - Preserved missing command/readiness data as unreported across Force Readiness, Army HQ corps cards, Army Reserve, and ORBAT.
@@ -34,7 +34,7 @@
 - `npm.cmd run qa:first-hour:browser` passed and verified dev-server cleanup.
 - `npm.cmd run qa:live-surface:browser` passed and verified dev-server cleanup.
 - `git diff --check` passed; Git reported only the expected line-ending normalization warning for the touched supply builder.
-- Pending before merge/push: final diff review, commit/merge, branch cleanup, and GitHub green verification after push.
+- Historical branch closeout is complete; current follow-up closeout is tracked in `docs/40_reports/implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md`.
 
 ## Files Changed
 | File | Change |
@@ -54,4 +54,4 @@
 | `tests/**` | Focused regressions for the above player-truth contracts. |
 
 ## Next Steps
-- Commit, merge to `main`, push, delete the branch, and verify GitHub checks before considering this lane integrated.
+- Historical closeout is complete. Continue current D2 owner-playthrough polish from the active plan/report rather than reopening this branch.

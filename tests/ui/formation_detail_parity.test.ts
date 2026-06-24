@@ -561,6 +561,30 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Fatigue0');
   });
 
+  it('renders sparse equipment condition as unreported instead of crashing', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        composition: {
+          tanks: 3,
+          artillery: 2,
+          aa_systems: 0,
+        },
+      } as unknown as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('TO&E (Equipment)');
+    expect(copy).toContain('Tanks');
+    expect(copy).toContain('Artillery');
+    expect(copy).toContain('Condition unreported');
+    expect(copy).not.toMatch(/NaN|undefined|\[object Object\]/);
+  });
+
   it('labels rear sector ownership distinctly and recognizes forming readiness', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_rear_brigade' });
 

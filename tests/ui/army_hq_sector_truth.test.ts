@@ -332,7 +332,7 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('1 command-directed');
     expect(container.textContent).toContain('density 0.25');
     expect(container.textContent).toContain('Brigades per front segment: 0.25');
-    expect(container.textContent).toContain('Troop density: 0.25');
+    expect(container.textContent).not.toContain('Troop density: 0.25');
   });
 
   it('does not count lifecycle-free projection overrides as command-directed line force', () => {

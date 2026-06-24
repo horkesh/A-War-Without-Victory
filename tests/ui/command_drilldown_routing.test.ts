@@ -147,6 +147,33 @@ describe('command drilldown routing', () => {
     expect(container.textContent).not.toContain('Destroyed Brigade');
   });
 
+  it('highlights only physical brigade location on CorpsDetail order-of-battle hover', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => (
+      formation.id === 'rbih_1_brigade'
+        ? {
+          ...formation,
+          location_osid: 'op:real:front',
+          aorSettlementIds: ['op:stale:aor_1', 'op:stale:aor_2'],
+        }
+        : formation
+    ));
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
+    const brigadeRow = container.querySelector('[data-formation-id="rbih_1_brigade"]');
+    expect(brigadeRow).toBeTruthy();
+
+    fireEvent.mouseEnter(brigadeRow as Element);
+
+    expect(useGameStore.getState().hoveredOsids).toEqual(['op:real:front']);
+  });
+
   it('routes CorpsDetail sector rows through field inspection and clears stale shell context', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

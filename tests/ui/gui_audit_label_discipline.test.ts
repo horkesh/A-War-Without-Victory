@@ -476,6 +476,32 @@ describe('GUI audit label discipline', () => {
     expect(stanceSelect.textContent).toContain('Balanced');
   });
 
+  it('highlights only physical brigade locations on CorpsCard hover', () => {
+    const onHoverOsidsChange = vi.fn();
+    render(createElement(CorpsCard, {
+      corpsId: 'rbih_1_corps',
+      corpsName: '1st Corps',
+      faction: 'RBiH',
+      brigades: [
+        {
+          id: 'rbih_1_brigade',
+          name: '1st Brigade',
+          faction: 'RBiH',
+          kind: 'brigade',
+          status: 'active',
+          readiness: 'ready',
+          location_osid: 'op:real:front',
+          aorSettlementIds: ['op:stale:aor_1', 'op:stale:aor_2'],
+        } as FormationView,
+      ],
+      onHoverOsidsChange,
+    } as Parameters<typeof CorpsCard>[0]));
+
+    fireEvent.mouseEnter(screen.getAllByText('1st Corps')[0]);
+
+    expect(onHoverOsidsChange).toHaveBeenCalledWith(['op:real:front']);
+  });
+
   it('describes planning-only corps operations without saying the corps has no active operations', () => {
     const corps = {
       id: 'arbih_1st_corps',

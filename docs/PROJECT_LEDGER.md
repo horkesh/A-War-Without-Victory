@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-25] fix(ui): harden player-surface edge truth
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the next Raman/Peirce player-surface residuals on `codex/player-surface-edge-polish`. Formation Detail sparse tank/artillery condition now renders unreported instead of crashing; tactical tooltip and stack-expansion anchors clamp to the viewport; front-edge tooltips distinguish absent pressure from explicit zero pressure; Army HQ sector detail no longer repeats projected density; ORBAT, Corps Detail, and CorpsCard hover highlights use physical `location_osid` rather than stale AoR coverage; and selected-settlement, municipality, current-ethnic, and ethnic-map majority surfaces require complete census ethnicity fields before rendering instead of zero-filling partial rows.
+
+**Verification:** New tests failed before production fixes, then passed. Final combined focused proof passed 11 files / 134 tests with `node node_modules\vitest\vitest.mjs run tests\ui\formation_detail_parity.test.ts tests\ui\army_hq_sector_truth.test.ts tests\ui\aar_tooltip_friction_labels.test.ts tests\ui\stack_expansion_overlay_viewport.test.ts tests\ui\orbatpanel_drilldown_routing.test.ts tests\ui\settlement_supply_status.test.ts tests\ui_player_visibility.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui\command_drilldown_routing.test.ts tests\ui\gui_audit_label_discipline.test.ts tests\ui_map_ethnic_truth.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck -- --pretty false` passed. `npm.cmd run qa:player-journeys` passed 43 files / 594 tests. `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-25] docs: record main CI repair after local midnight
 
 **Type:** Docs-only ledger hygiene.

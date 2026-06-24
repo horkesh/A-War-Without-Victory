@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**PARTIAL ETHNIC CENSUS IS UNREPORTED (2026-06-25).** Bosniak/Serb/Croat/Other fields are a complete set. Do instead: suppress selected-settlement, municipality, current-ethnic, and ethnic-map majority readouts when any component is missing; never fill missing ethnic groups as zero.
+
+**HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
+
 **SECTOR INTEL ABSENCE IS NOT ZERO THREAT OR FULL CONFIDENCE (2026-06-24).** Missing density, threat ratio, defensive power, intel confidence, offensive signs, or morale are source gaps. Do instead: preserve absence through adapter/read-models, render unreported/redacted copy, skip density features without density, and use explicit `morale_reported` before coloring morale layers.
 
 **MAP PROJECTION ABSENCE IS UNREPORTED, NOT ZERO (2026-06-24).** Missing cohesion, threat intensity, battle rows, casualties, attacker counts, or morale are source gaps. Do instead: emit nullable/unreported projection fields and reported flags; do not use `0`, static/low-threat classes, one-attacker defaults, or cohesion-as-morale fallbacks.

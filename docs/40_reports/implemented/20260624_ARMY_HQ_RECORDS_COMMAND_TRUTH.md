@@ -1,7 +1,7 @@
 # Army HQ Records Command Truth
 
 **Date:** 2026-06-24
-**Result:** Fourth slice implemented locally; focused tests, typecheck, broad local browser gates, and manual in-app proof pass. GitHub/merge cleanup remains required before declaring the branch closed.
+**Result:** Fourth slice implemented, merged to `main`, repaired for CI, and verified green on GitHub at `a1ca62ee7`.
 
 ## Summary
 - Closed the next Army HQ/Records truth gaps found by the Pyrrhic scouts without touching simulation, calibration, startup artifacts, save schema, or packaging.
@@ -57,4 +57,4 @@
 UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, baseline manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
 
 ## Next Steps
-- Push, inspect GitHub failures/comments, merge only after green, then delete branch/worktree/temp evidence.
+- Historical closeout is complete. Current D2 polish follow-up is tracked in `docs/40_reports/implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md` and `docs/plans/2026-06-24-army-hq-sector-brigade-information-quality-sweep-plan.md`.

@@ -374,7 +374,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     formation={f}
                     onClick={() => inspectFormationInCorps(f.id)}
                     onHoverChange={(hovered, e) => {
-                      setHoveredOsids(hovered ? (f.aorSettlementIds ?? (f.location_osid ? [f.location_osid] : [])) : []);
+                      setHoveredOsids(hovered && f.location_osid ? [f.location_osid] : []);
                       setHoveredSectorId(hovered ? (sectorIdByBrigadeId.get(f.id) ?? null) : null);
                       if (hovered) {
                         setTooltipTargetWithPosition(

@@ -171,6 +171,52 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(panel.textContent).not.toMatch(/Bosniak|Serb|Croat|Other|Rural Dense|\+30% Def|rural_dense/);
   });
 
+  it('suppresses pre-war ethnic structure when census ethnicity fields are partial', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_name: 'Testmun',
+          population_total: 100,
+          population_bosniaks: 45,
+          population_serbs: 35,
+        },
+      },
+    }));
+
+    expect(screen.queryByText('Pre-war ethnic structure')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/Bosniaks\s*45|Serbs\s*35|Croats\s*0|Others\s*0/);
+  });
+
+  it('suppresses municipality ethnic structure when any included census row is partial', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 100,
+          population_bosniaks: 45,
+          population_serbs: 35,
+          population_croats: 15,
+          population_others: 5,
+        },
+        'op:test:b': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 80,
+          population_bosniaks: 20,
+          population_serbs: 60,
+        },
+      },
+    }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Municipality' }));
+
+    expect(screen.queryByText('Pre-war ethnic structure')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/Croats\s*15|Others\s*5/);
+  });
+
   it('renders stationed-unit drilldowns as native buttons when they are clickable', () => {
     const onFormationClick = vi.fn();
     render(createElement(SettlementDetailContent, {

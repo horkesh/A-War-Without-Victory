@@ -175,10 +175,12 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   const sideA = getPlayerSafeMilitaryFactionName(edge?.side_a, '?');
   const sideB = getPlayerSafeMilitaryFactionName(edge?.side_b, '?');
   const pressure = args.frontPressureByEdge?.[args.edgeId];
-  const pressureValue = pressure?.value ?? 0;
+  const pressureValue = pressure?.value;
   const pressureLine =
-    pressureValue > 0 ? t('tooltip.pressure.advantage', { value: `+${pressureValue.toFixed(1)}`, side: sideA }, locale) :
-      pressureValue < 0 ? t('tooltip.pressure.advantage', { value: pressureValue.toFixed(1), side: sideB }, locale) :
+    typeof pressureValue !== 'number' || !Number.isFinite(pressureValue)
+      ? t('tooltip.pressure.unreported', undefined, locale)
+      : pressureValue > 0 ? t('tooltip.pressure.advantage', { value: `+${pressureValue.toFixed(1)}`, side: sideA }, locale) :
+        pressureValue < 0 ? t('tooltip.pressure.advantage', { value: pressureValue.toFixed(1), side: sideB }, locale) :
         t('tooltip.pressure.balanced', undefined, locale);
 
   const sector = args.corpsFrontSectors?.find((entry) => entry.edge_ids.includes(args.edgeId));

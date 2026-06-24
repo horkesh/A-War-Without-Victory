@@ -333,7 +333,6 @@ function SectorExpandedDetail({
                 {hasCurrentFieldedLine && (
                     <>
                         <span>{t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
-                        <span>{t('sectorsSection.troopDensity', { value: projectedDensity })}</span>
                     </>
                 )}
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}

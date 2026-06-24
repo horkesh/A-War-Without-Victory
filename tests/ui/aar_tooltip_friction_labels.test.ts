@@ -237,6 +237,31 @@ describe('AAR and tooltip friction labels', () => {
     expect(document.body.textContent).not.toMatch(/3x|3×/);
   });
 
+  it('keeps battle tooltips inside the viewport near the lower-right edge', () => {
+    vi.useFakeTimers();
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+      tooltipTarget: { type: 'battle', id: 'op:tuzla:center' },
+      tooltipPosition: { x: window.innerWidth + 500, y: window.innerHeight + 500 },
+    });
+
+    render(createElement(Tooltip));
+
+    act(() => {
+      vi.advanceTimersByTime(301);
+    });
+
+    const tooltip = Array.from(document.body.querySelectorAll('div')).find((node) => {
+      const element = node as HTMLElement;
+      return element.style.position === 'fixed' && element.style.zIndex !== '';
+    }) as HTMLElement | undefined;
+
+    expect(tooltip).toBeTruthy();
+    expect(Number.parseFloat(tooltip?.style.left ?? '99999')).toBeLessThanOrEqual(window.innerWidth - 24);
+    expect(Number.parseFloat(tooltip?.style.top ?? '99999')).toBeLessThanOrEqual(window.innerHeight - 24);
+  });
+
   it('localizes the battle tooltip fallback when no battle row is available', () => {
     vi.useFakeTimers();
     setLocale('bcs');

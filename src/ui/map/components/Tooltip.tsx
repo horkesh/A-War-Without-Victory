@@ -26,6 +26,15 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 
 const TOOLTIP_DELAY_MS = 300;
 const TOOLTIP_OFFSET = 12;
+const TOOLTIP_VIEWPORT_MARGIN = 24;
+const TOOLTIP_MAX_WIDTH = 380;
+const TOOLTIP_MAX_HEIGHT = 520;
+
+function clampViewportCoordinate(value: number, viewportExtent: number, estimatedExtent: number): number {
+  const min = TOOLTIP_VIEWPORT_MARGIN;
+  const max = Math.max(min, viewportExtent - estimatedExtent - TOOLTIP_VIEWPORT_MARGIN);
+  return Math.min(Math.max(value, min), max);
+}
 
 const OUTCOME_LABEL_KEY: Record<string, MessageKey> = {
   decisive_victory: 'aar.outcome.decisive',
@@ -434,10 +443,13 @@ export const Tooltip = React.memo(function Tooltip() {
   if (!delayedTarget || !visible) return null;
 
   const position = tooltipPosition ?? { x: 24, y: 24 };
+  const viewportWidth = typeof window === 'undefined' ? 1280 : window.innerWidth;
+  const viewportHeight = typeof window === 'undefined' ? 720 : window.innerHeight;
   const style: React.CSSProperties = {
     position: 'fixed',
-    left: position.x + TOOLTIP_OFFSET,
-    top: position.y + TOOLTIP_OFFSET,
+    left: clampViewportCoordinate(position.x + TOOLTIP_OFFSET, viewportWidth, TOOLTIP_MAX_WIDTH),
+    top: clampViewportCoordinate(position.y + TOOLTIP_OFFSET, viewportHeight, TOOLTIP_MAX_HEIGHT),
+    maxWidth: TOOLTIP_MAX_WIDTH,
     zIndex: Z.TOOLTIP,
     pointerEvents: 'none',
   };
