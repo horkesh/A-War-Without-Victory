@@ -59,6 +59,10 @@ describe('Army HQ sector truth', () => {
       display_name: 'Remote front',
       faction: 'RBiH',
       corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      opposing_factions: ['RS'],
+      edge_ids: [],
+      sub_segment_count: 0,
       assigned_brigade_ids: [],
       reserve_brigade_ids: [],
       rear_brigade_ids: [],
@@ -69,7 +73,7 @@ describe('Army HQ sector truth', () => {
       threat_ratio: 9999,
       intel_confidence: 0.8,
       offensive_signs: false,
-    } as unknown as CorpsFrontSectorView;
+    } as CorpsFrontSectorView;
     useGameStore.setState({ loadedGameState: makeState(sector) });
 
     const { container } = render(React.createElement(SectorsSection, {

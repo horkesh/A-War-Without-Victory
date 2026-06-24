@@ -60,6 +60,8 @@ describe('current sector assignment projection', () => {
       kind: 'brigade',
       faction: 'RBiH',
       corps_id: 'corps_alpha',
+      status: 'active',
+      readiness: 'ready',
       sectorOverrideId: 'sector_south',
     };
 

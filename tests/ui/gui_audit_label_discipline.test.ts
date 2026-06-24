@@ -355,7 +355,7 @@ describe('GUI audit label discipline', () => {
       fatigue: 5,
       corpsStance: 'defensive',
       createdTurn: 0,
-    } as unknown as FormationView;
+    } as FormationView;
     const brigade = {
       id: 'arbih_101_brigade',
       faction: 'RBiH',

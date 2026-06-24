@@ -119,13 +119,8 @@ export class NewsTicker {
     }
 
     private getReceiptContext(gameState: GameState): TickerReceiptContext {
-        const military = gameState.military as unknown as {
-            fired_event_ids?: string[];
-            event_last_fired_turn?: Record<string, number>;
-        };
-        const political = gameState.political as unknown as {
-            rupture_consequences?: Array<{ id?: string }>;
-        };
+        const military = gameState.military;
+        const negotiation = gameState.military.negotiation;
         return {
             firedEventIds: [
                 ...new Set([
@@ -133,8 +128,8 @@ export class NewsTicker {
                     ...Object.keys(military.event_last_fired_turn ?? {}),
                 ]),
             ],
-            ruptureIds: Array.isArray(political.rupture_consequences)
-                ? political.rupture_consequences
+            ruptureIds: Array.isArray(negotiation?.rupture_consequences)
+                ? negotiation.rupture_consequences
                     .map((entry) => entry.id)
                     .filter((id): id is string => typeof id === 'string' && id.length > 0)
                 : [],
