@@ -14,6 +14,7 @@ import { filterPlayerFacingOperations, findPlayerFacingSectorById, isFieldedTact
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { turnToDateString } from '../utils/formatters';
+import { formatReportedPersonnel, sumReportedPersonnel } from '../utils/reportedMetrics';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
@@ -275,20 +276,36 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     .map((id) => loadedGameState.formations.find((f) => f.id === id))
     .filter((f): f is NonNullable<typeof f> => f != null && f.corps_id === sector.corps_id && isFieldedTacticalFormation(f));
 
-  const assignedPersonnel = assignedFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const reservePersonnel = reserveFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const rearPersonnel = rearFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const overridePersonnel = overrideFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-  const totalSectorPersonnel = assignedPersonnel + reservePersonnel + rearPersonnel + overridePersonnel;
+  const assignedPersonnel = sumReportedPersonnel(assignedFormations);
+  const reservePersonnel = sumReportedPersonnel(reserveFormations);
+  const rearPersonnel = sumReportedPersonnel(rearFormations);
+  const overridePersonnel = sumReportedPersonnel(overrideFormations);
+  const totalPersonnelSummary = {
+    reportedTotal: assignedPersonnel.reportedTotal + reservePersonnel.reportedTotal + rearPersonnel.reportedTotal + overridePersonnel.reportedTotal,
+    reportedCount: assignedPersonnel.reportedCount + reservePersonnel.reportedCount + rearPersonnel.reportedCount + overridePersonnel.reportedCount,
+    unreportedCount: assignedPersonnel.unreportedCount + reservePersonnel.unreportedCount + rearPersonnel.unreportedCount + overridePersonnel.unreportedCount,
+    totalCount: assignedPersonnel.totalCount + reservePersonnel.totalCount + rearPersonnel.totalCount + overridePersonnel.totalCount,
+  };
+  const totalSectorPersonnel = totalPersonnelSummary.reportedTotal;
+  const missingPersonnelReports = totalPersonnelSummary.unreportedCount;
+  const totalSectorPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
+    partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+    unreported: t('corpsFront.unreported'),
+  });
   const hasFriendlyLine = lineHoldingFormations.length > 0;
   const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
   const displayStrengthClass = hasFriendlyLine ? sector.combat_strength_class : undefined;
-  const lineHoldingPersonnel = lineHoldingFormations.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const lineHoldingPersonnel = sumReportedPersonnel(lineHoldingFormations);
   const displayCombatPersonnel = !hasFriendlyLine
     ? undefined
-    : hasPositiveMetric(sector.combat_personnel) || lineHoldingPersonnel <= 0
+    : hasPositiveMetric(sector.combat_personnel)
     ? sector.combat_personnel
-    : lineHoldingPersonnel;
+    : lineHoldingPersonnel.reportedTotal > 0 || lineHoldingPersonnel.totalCount > 0
+      ? formatReportedPersonnel(lineHoldingPersonnel, {
+        partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+        unreported: t('corpsFront.unreported'),
+      })
+      : sector.combat_personnel;
   const displayMoraleAvg = hasFiniteMetric(sector.combat_morale_avg)
     ? sector.combat_morale_avg
     : averageFinite(lineHoldingFormations.map((formation) => formation.morale));
@@ -307,7 +324,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         ? sector.defensive_power
         : undefined;
   const displayDefensePerEdge = hasFriendlyLine ? sector.combat_defense_per_edge : undefined;
-  const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
+  const reserveRatio = missingPersonnelReports > 0
+    ? null
+    : totalSectorPersonnel > 0
+      ? reservePersonnel.reportedTotal / totalSectorPersonnel
+      : 0;
   const operationSupplyReadinessValues = relatedOperations
     .map((op) => op.supply_readiness)
     .filter((readiness): readiness is number => typeof readiness === 'number' && Number.isFinite(readiness));
@@ -832,18 +853,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   </div>
                 )}
                 {staleRosterIds.length > 0 && (
-                  <div className="pt-2" data-testid="corps-front-stale-roster" data-stale-roster-count={staleRosterIds.length}>
+                  <div className="pt-2" data-testid="corps-front-stale-roster" data-stale-roster-count={staleRosterIds.length} data-stale-roster-ids={staleRosterIds.join(' ')}>
                     <div className="text-[9px] uppercase font-bold text-red-600 mb-1 border-b border-red-200 pb-1">
                       {t(staleRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: staleRosterIds.length })}
                     </div>
                     <div className="text-[10px] text-neutral-600 italic">{t('corpsFront.staleRosterHelp')}</div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {staleRosterIds.map((id) => (
-                        <span key={id} className="rounded border border-red-200 bg-red-50 px-1.5 py-0.5 text-[9px] text-red-700 font-mono">
-                          {id}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 )}
               </div>
@@ -856,13 +870,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.totalManpower')}</span>
                   <span className="font-medium">
-                    {totalSectorPersonnel.toLocaleString()}
+                    {totalSectorPersonnelLabel}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.reserveRatio')}</span>
                   <span className="font-medium">
-                    {Math.round(reserveRatio * 100)}%
+                    {reserveRatio == null ? t('corpsFront.unreported') : `${Math.round(reserveRatio * 100)}%`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">

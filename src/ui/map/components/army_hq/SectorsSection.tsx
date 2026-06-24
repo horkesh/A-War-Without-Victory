@@ -294,19 +294,16 @@ function SectorExpandedDetail({
             )}
 
             {unresolvedRosterIds.length > 0 && (
-                <div data-testid="army-hq-sector-stale-roster" data-stale-roster-count={unresolvedRosterIds.length}>
+                <div
+                    data-testid="army-hq-sector-stale-roster"
+                    data-stale-roster-count={unresolvedRosterIds.length}
+                    data-stale-roster-ids={unresolvedRosterIds.join(' ')}
+                >
                     <div className="text-[10px] font-bold uppercase text-red-400 tracking-widest mb-1.5 border-b border-red-500/20 pb-0.5">
                         {t(unresolvedRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: unresolvedRosterIds.length })}
                     </div>
                     <div className="text-[10px] text-text-secondary/70">
                         {t('corpsFront.staleRosterHelp')}
-                    </div>
-                    <div className="mt-1 flex flex-wrap gap-1">
-                        {unresolvedRosterIds.map((id) => (
-                            <span key={id} className="rounded border border-red-500/25 bg-red-950/20 px-1.5 py-0.5 text-[9px] text-red-300 font-mono">
-                                {id}
-                            </span>
-                        ))}
                     </div>
                 </div>
             )}

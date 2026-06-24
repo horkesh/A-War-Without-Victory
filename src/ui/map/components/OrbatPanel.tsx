@@ -14,6 +14,7 @@ import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { compareLocalizedFormationNames } from '../data/formationNameLocalizations';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { formatReportedPersonnel, sumReportedPersonnel } from '../utils/reportedMetrics';
 
 export function OrbatPanel() {
     const [locale] = useLocale();
@@ -87,7 +88,10 @@ export function OrbatPanel() {
 
     if (!corps) return null;
 
-    const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+    const totalPersonnel = formatReportedPersonnel(sumReportedPersonnel(brigades), {
+        partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+        unreported: t('orbat.metricUnreported'),
+    });
     const factionClass = FACTION_COLORS[corps.faction] ?? 'text-text-primary';
     const corpsDisplayName = getPlayerSafeCorpsName(corps.name, corps.id);
 
@@ -124,7 +128,7 @@ export function OrbatPanel() {
                 <div className="grid grid-cols-2 gap-3">
                     <div className="p-2 bg-black/10 rounded border border-panel-border/30">
                         <div className="text-[9px] uppercase text-text-secondary font-semibold">{t('orbat.totalPersonnel')}</div>
-                        <div className="text-sm font-mono text-text-primary">{totalPersonnel.toLocaleString()}</div>
+                        <div className="text-sm font-mono text-text-primary">{totalPersonnel}</div>
                     </div>
                     <div className="p-2 bg-black/10 rounded border border-panel-border/30">
                         <div className="text-[9px] uppercase text-text-secondary font-semibold">{t('orbat.brigades')}</div>

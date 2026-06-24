@@ -132,6 +132,33 @@ describe('OrbatPanel drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
+  it('renders partial personnel totals when ORBAT brigade reports are incomplete', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'rbih_unreported_brigade',
+        faction: 'RBiH',
+        name: 'Unreported Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1_corps',
+        location_osid: 'op:sarajevo:centar_1',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OrbatPanel));
+
+    expect(container.textContent).toMatch(/Total Personnel\s*Partial 1[,.]200/i);
+    expect(container.textContent).not.toMatch(/Total Personnel\s*1[,.]200\s*Brigades/i);
+  });
+
   it('gives brigade rows a readable command summary instead of collapsed DOM text', () => {
     render(React.createElement(OrbatPanel));
 

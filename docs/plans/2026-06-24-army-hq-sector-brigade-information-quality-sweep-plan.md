@@ -19,6 +19,7 @@ Completed and verified first substantial slice:
 - OOB sidebar renders JNA command nodes with only `jna_phantom` subordinates as `0 brigades` command rows without counting phantom force.
 - Personnel mobilization pool labels use the shared player-safe municipality formatter.
 - `OobCorps.available_from` is tested and documented as phased activation/OOB alignment, not a startup command-visibility gate.
+- FORAWWV addendum scope is limited to that tested activation contract. Panel sign-off basis for merge: systems/formation contract proof via `tests/recruitment_engine.test.ts`, canon/process review confirming no Section 6 or gameplay-canon change, and QA/process evidence recorded in this plan/report.
 - COMMAND_BOARD and MASTER_ROADMAP now park stale autonomous/product/telemetry/Fall-1995 lanes while this owner lane is active.
 
 Verification passed: `desktop:startup-snapshot:check`, focused 10-file / 183-test pack, `typecheck`, `qa:player-journeys` 43 files / 583 tests, `git diff --check`, and manual in-app browser proof for RBiH and RS.
@@ -33,7 +34,19 @@ Second slice implemented before the next push:
 
 Additional verification passed after the second slice: `typecheck`, expanded focused UI pack 8 files / 128 tests, `qa:player-journeys` 43 files / 583 tests, `qa:first-hour:browser`, `qa:live-surface:browser`, baseline regression after the narrow manifest re-bless, `git diff --check`, and temp evidence cleanup.
 
-Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup currently leaves only `.tmp_dev_server`, which belongs to the active browser/dev server.
+Third slice implemented locally before the next broad verification packet:
+
+- Shared fielded tactical-formation truth no longer counts records with both `status` and `readiness` missing as fielded force; explicit active rows still count unless readiness says forming/unreported/destroyed.
+- Corps Front, Army HQ sector detail, Corps Detail, Army HQ Corps Card, OOB Corps Card, and Personnel no longer coerce missing personnel/equipment-condition data into exact zeroes or fully operational counts. Reported values render as exact, mixed values render as `Partial`, and completely absent values render as `Unreported`.
+- Stale sector roster ids stay in diagnostic attributes (`data-stale-roster-ids`) while visible player copy shows only stale-record counts/help.
+- Personnel Main Staff rows label HQ reserve/security context, so Main Staff reserve brigades do not read as ordinary front-line corps strength.
+- Srebrenica/Zepa collapse comments and Lane V assertion messages now say the fall receipts are event-owned; Krivaja/Stupcanica remain chronology/AAR context only.
+- Lorentz (UI/modern-wargame scout) and Maxwell (canon/process scout) were closed after their reports were verified and absorbed. Maxwell found active canon clean; only archived/superseded grep hazards remain as historical docs.
+- Dirac (QA/process scout) found and closed the remaining sparse-data consistency gaps: lifecycle-free sector overrides no longer bypass fielded-force filtering, Corps Front combat-personnel fallback renders partial/unreported instead of exact totals, ORBAT total personnel renders partial/unreported, and the old Command Board statusless-projection compatibility sentence now carries the 2026-06-24 supersession rule.
+
+Third-slice local verification: focused red/green pack passed 6 files / 92 tests; adjacent command/OOB/Corps Detail pack passed 6 files / 34 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 586 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed; in-app browser proof covered RBiH war-start splash, foundational decision routing/lock, Army HQ Personnel, and 1st Corps command surface without error banners or visible raw diagnostic ids.
+
+Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup removed the baseline comparison worktree, browser evidence folders, and `data/derived/scenario/_baseline_tmp`; only `.tmp_dev_server` remains because it belongs to the active browser/dev server.
 
 ## Pyrrhic Roles
 

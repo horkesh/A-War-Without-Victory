@@ -30,6 +30,8 @@
 
 **ARMY HQ ORBAT SPARSE FIELDS ARE UNREPORTED (2026-06-24).** Missing brigade personnel, morale, cohesion, fatigue, entrenchment, status, or posture are source gaps, not zero strength or active readiness. Do instead: render neutral unreported copy/bars and never default unknown lifecycle/status to active-green.
 
+**COMMAND AGGREGATES MUST PRESERVE PARTIAL REPORTING (2026-06-24).** Missing brigade personnel or equipment condition can reach Army HQ, Corps Detail, ORBAT/OOB, Personnel, and Corps Front logistics/combat fallback. Do instead: use reported-metric helpers, show exact totals only when complete, `Partial` when mixed, `Unreported` when absent, and keep stale roster ids in diagnostic attributes rather than visible copy.
+
 **STACK EXPANSION IS PHYSICAL LOCATION ONLY (2026-06-24).** AoR coverage and HQ anchors are not physical unit stacks. Do instead: build expanded marker stacks from explicit `location_osid` only; keep AoR/HQ anchors for navigation-specific surfaces.
 
 **COMMAND HQ ANCHORS ARE NOT TACTICAL LOCATIONS (2026-06-23).** Corps and army_hq formations need map drilldown anchors without implying physical brigade-style presence. Do instead: use `hq_osid` for command-only anchors; reserve `location_osid` for actual formation placement, stationed-unit truth, movement/combat/displacement, and location-in-control validation.

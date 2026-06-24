@@ -13,6 +13,7 @@ import { getPlayerSafeMunicipalityName } from '../../utils/playerSafeText';
 import { inspectOnField } from '../../utils/shellNavigation';
 import { FrontVisitSection } from './FrontVisitSection';
 import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
+import { formatCompactReportedPersonnel, formatReportedPersonnel, sumReportedPersonnel } from '../../utils/reportedMetrics';
 
 function OfficerQualityChip({ label, value }: { label: string; value: number }) {
     const reported = Number.isFinite(value);
@@ -43,7 +44,11 @@ export function PersonnelContent() {
         const corpsFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset');
         const commandFormations = formations.filter(f => f.kind === 'corps' || f.kind === 'corps_asset' || f.kind === 'army_hq');
         const commandNameById = new Map(commandFormations.map((command) => [command.id, getLocalizedFormationName(command, locale)]));
-        const totalPersonnel = brigades.reduce((s, f) => s + (f.personnel ?? 0), 0);
+        const totalPersonnelSummary = sumReportedPersonnel(brigades);
+        const totalPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
+            partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+            unreported: t('corpsFront.unreported'),
+        });
         const officers = (state.namedOfficerData ?? []).filter(o => o.faction === faction);
         const activeOfficers = officers.filter(o => o.status === 'active');
         const reserveOfficers = officers.filter(o => o.status === 'reserve');
@@ -69,7 +74,7 @@ export function PersonnelContent() {
             corpsFormations,
             commandFormations,
             commandNameById,
-            totalPersonnel,
+            totalPersonnelLabel,
             activeOfficers,
             reserveOfficers,
             reserves,
@@ -132,7 +137,7 @@ export function PersonnelContent() {
                     {t('personnel.forceOverview')}
                 </div>
                 <div className="grid grid-cols-4 gap-3">
-                    <StatCard label={t('personnel.totalPersonnel')} value={data.totalPersonnel.toLocaleString()} />
+                    <StatCard label={t('personnel.totalPersonnel')} value={data.totalPersonnelLabel} />
                     <StatCard label={t('personnel.activeBrigades')} value={String(data.brigades.length)} />
                     <StatCard label={t('personnel.corps')} value={String(data.corpsFormations.length)} />
                     <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
@@ -174,14 +179,23 @@ export function PersonnelContent() {
                 <div className="space-y-2">
                     {data.commandFormations.map(command => {
                         const commandBrigades = data.brigadesByCorps.get(command.id) ?? [];
-                        const commandPers = commandBrigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+                        const commandPers = formatCompactReportedPersonnel(sumReportedPersonnel(commandBrigades), formatPersonnel, {
+                            partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+                            unreported: t('corpsFront.unreported'),
+                        });
                         const commandName = data.commandNameById.get(command.id) ?? getLocalizedFormationName(command, locale);
+                        const commandContext = command.kind === 'army_hq' ? t('personnel.mainStaffReserveSecurity') : null;
                         return (
                             <div key={command.id} className="border border-panel-border/50 rounded-md overflow-hidden">
                                 <div className="flex items-center justify-between px-3 py-2 bg-panel-bg">
                                     <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">{commandName}</span>
-                                    <span className="text-[10px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: commandBrigades.length, personnel: formatPersonnel(commandPers) })}</span>
+                                    <span className="text-[10px] text-text-secondary tabular-nums">{t('personnel.brigadeSummary', { count: commandBrigades.length, personnel: commandPers })}</span>
                                 </div>
+                                {commandContext && (
+                                    <div className="px-3 pt-1 text-[9px] uppercase tracking-[0.16em] text-text-secondary/70">
+                                        {commandContext}
+                                    </div>
+                                )}
                                 <div className="px-3 py-1.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
                                     {commandBrigades.map(b => (
                                         <button
@@ -198,8 +212,16 @@ export function PersonnelContent() {
                                                     : { kind: 'field-formation-in-corps', formationId: b.id, corpsId: command.id, osid: b.location_osid ?? null });
                                             }}
                                         >
-                                            <span className="text-text-secondary truncate mr-2">{getLocalizedFormationName(b, locale)}</span>
-                                            <span className="text-text-primary tabular-nums shrink-0">{formatPersonnel(b.personnel ?? 0)}</span>
+                                            <span className="text-text-secondary truncate mr-2">
+                                                {getLocalizedFormationName(b, locale)}
+                                                {commandContext ? <span className="ml-1 text-text-secondary/60">({commandContext})</span> : null}
+                                            </span>
+                                            <span className="text-text-primary tabular-nums shrink-0">
+                                                {formatCompactReportedPersonnel(sumReportedPersonnel([b]), formatPersonnel, {
+                                                    partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+                                                    unreported: t('corpsFront.unreported'),
+                                                })}
+                                            </span>
                                         </button>
                                     ))}
                                 </div>

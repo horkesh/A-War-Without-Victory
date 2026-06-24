@@ -696,6 +696,32 @@ describe('GUI audit label discipline', () => {
     expect(cardContainer.textContent).not.toContain('1/20');
     cleanup();
 
+    const partiallyReported = {
+      ...second,
+      composition: {
+        infantry: 1000,
+        tanks: 10,
+        artillery: 5,
+        aa_systems: 0,
+      },
+    } as unknown as FormationView;
+    const { container: partialContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [first, partiallyReported],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(partialContainer.textContent).toContain('Partial 8/20');
+    expect(partialContainer.textContent).toContain('Partial 3/10');
+    expect(partialContainer.textContent).not.toContain('18/20');
+    cleanup();
+
     useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
     const { container: orbatContainer } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [first] }));
 

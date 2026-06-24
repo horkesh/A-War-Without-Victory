@@ -32,7 +32,7 @@ export function isFieldedTacticalFormation(formation: { kind?: unknown; status?:
 }
 
 function isActiveFormationStatus(formation: { status?: unknown; readiness?: unknown } | null | undefined): boolean {
-  if (formation?.status == null) return formation?.readiness == null;
+  if (formation?.status == null) return false;
   return String(formation.status).toLowerCase() === 'active';
 }
 

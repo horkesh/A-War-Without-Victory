@@ -7,6 +7,13 @@ import { useMemo } from 'react';
 import type { FormationView, CorpsFrontSectorView, OperationView, LoadedGameState } from '../../data/types';
 import type { TurnBattle } from '../../../../state/turn_summary';
 import { formatCorpsDisplayName } from '../../utils/formatters';
+import {
+    addEquipmentCondition,
+    emptyEquipmentConditionSummary,
+    formatReportedPersonnel,
+    sumReportedPersonnel,
+    type EquipmentConditionSummary,
+} from '../../utils/reportedMetrics';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { Icon } from '../icons/Icon';
@@ -71,13 +78,6 @@ const READINESS_BORDER: Record<string, string> = {
     'UNREPORTED': '',
 };
 
-function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
-    const count = Math.max(0, total ?? 0);
-    const condition = operational ?? 1;
-    const operationalCount = condition <= 1 ? count * condition : condition;
-    return Math.min(count, Math.max(0, Math.round(operationalCount)));
-}
-
 function averageReported(values: ReadonlyArray<number | undefined | null>): number | null {
     const reported = values.filter((value): value is number => Number.isFinite(value));
     if (reported.length === 0) return null;
@@ -88,13 +88,23 @@ function roundConditionLabel(value: number | null): string {
     return value == null ? t('corpsFront.unreported') : String(Math.round(value));
 }
 
+function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+    const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
+    return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
+}
+
 export function ArmyHQCorpsCard({
     corps, brigades, sectors, operations, factionBattles, gameState,
     isExpanded, isCompressed, onToggleExpand,
     readinessGrade, hasThreat,
 }: ArmyHQCorpsCardProps) {
     const data = useMemo(() => {
-        const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+        const personnelSummary = sumReportedPersonnel(brigades);
+        const totalPersonnel = personnelSummary.reportedTotal;
+        const totalPersonnelLabel = formatReportedPersonnel(personnelSummary, {
+            partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+            unreported: t('corpsFront.unreported'),
+        });
         const avgCohesion = averageReported(brigades.map(b => b.cohesion));
         const avgFatigue = averageReported(brigades.map(b => b.fatigue));
         const eff = aggregateEffectiveness(brigades);
@@ -125,17 +135,13 @@ export function ArmyHQCorpsCard({
         const rawEquip = brigades.reduce((acc, b) => {
             const c = b.composition;
             if (!c) return acc;
-            acc.tanksOp += operationalEquipmentCount(c.tanks, c.tank_condition?.operational);
-            acc.tanksTotal += c.tanks ?? 0;
-            acc.artyOp += operationalEquipmentCount(c.artillery, c.artillery_condition?.operational);
-            acc.artyTotal += c.artillery ?? 0;
+            addEquipmentCondition(acc.tanks, c.tanks, c.tank_condition?.operational);
+            addEquipmentCondition(acc.arty, c.artillery, c.artillery_condition?.operational);
             return acc;
-        }, { tanksOp: 0, tanksTotal: 0, artyOp: 0, artyTotal: 0 });
+        }, { tanks: emptyEquipmentConditionSummary(), arty: emptyEquipmentConditionSummary() });
         const equipment = {
-            tanksOp: Math.round(rawEquip.tanksOp),
-            tanksTotal: Math.round(rawEquip.tanksTotal),
-            artyOp: Math.round(rawEquip.artyOp),
-            artyTotal: Math.round(rawEquip.artyTotal),
+            tanksLabel: formatEquipmentSummary(rawEquip.tanks),
+            artyLabel: formatEquipmentSummary(rawEquip.arty),
         };
 
         const strain = corps.commandStrain ?? 0;
@@ -151,7 +157,7 @@ export function ArmyHQCorpsCard({
         const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
+        return { totalPersonnel, totalPersonnelLabel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -274,13 +280,11 @@ export function ArmyHQCorpsCard({
                 <div className="flex items-center gap-4 mt-1.5 text-[12px]">
                     <span className="flex items-center gap-1">
                         <Icon name="tanks" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksOp}</span>
-                        <span className="text-text-secondary/60">/{data.equipment.tanksTotal}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.tanksLabel}</span>
                     </span>
                     <span className="flex items-center gap-1">
                         <Icon name="artillery" size={14} className="text-text-secondary" />
-                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.artyOp}</span>
-                        <span className="text-text-secondary/60">/{data.equipment.artyTotal}</span>
+                        <span className="text-text-primary font-bold tabular-nums">{data.equipment.artyLabel}</span>
                     </span>
                 </div>
 
@@ -290,7 +294,7 @@ export function ArmyHQCorpsCard({
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
                         <span className={`font-bold ${data.totalPersonnel >= 8000 ? 'text-emerald-400' : data.totalPersonnel >= 4000 ? 'text-accent-gold' : 'text-red-500'
                             }`}>
-                            {data.totalPersonnel.toLocaleString()}
+                            {data.totalPersonnelLabel}
                         </span>
                     </div>
                     <div className="flex flex-col">
@@ -404,7 +408,7 @@ export function ArmyHQCorpsCard({
                 </button>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3 text-[12px] tabular-nums font-mono text-text-secondary uppercase">
-                        <span><b className="text-text-primary">{data.totalPersonnel.toLocaleString()}</b> {t('armyHqCorps.personnelShort')}</span>
+                        <span><b className="text-text-primary">{data.totalPersonnelLabel}</b> {t('armyHqCorps.personnelShort')}</span>
                         <span><b className="text-text-primary">{brigades.length}</b> {t('armyHqCorps.brigadeShort')}</span>
                         <span><b className="text-text-primary">{sectors.length}</b> {t('armyHqCorps.sectorShort')}</span>
                     </div>

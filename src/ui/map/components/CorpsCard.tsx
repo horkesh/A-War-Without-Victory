@@ -6,6 +6,13 @@ import { FlipCard } from './army_hq/FlipCard';
 import { getPlayerSafeCorpsName, getPlayerSafeOperationPhaseLabel } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { t, type MessageKey } from '../i18n';
+import {
+  addEquipmentCondition,
+  emptyEquipmentConditionSummary,
+  formatReportedPersonnel,
+  sumReportedPersonnel,
+  type EquipmentConditionSummary,
+} from '../utils/reportedMetrics';
 
 const STANCE_ICON: Record<string, IconName> = {
   offensive: 'offensive', defensive: 'defensive', reorganize: 'reorganizing', balanced: 'balanced', unreported: 'balanced',
@@ -62,17 +69,21 @@ function getCohesionBarColor(cohesion: number): string {
   return 'bg-red-500';
 }
 
-function getEquipmentSummary(brigades: FormationView[]): { tanks: number; arty: number; tanksTotal: number; artyTotal: number } {
-  let tanks = 0, arty = 0, tanksTotal = 0, artyTotal = 0;
+function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+  const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
+  return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
+}
+
+function getEquipmentSummary(brigades: FormationView[]): { tanks: EquipmentConditionSummary; arty: EquipmentConditionSummary } {
+  const tanks = emptyEquipmentConditionSummary();
+  const arty = emptyEquipmentConditionSummary();
   for (const b of brigades) {
     if (b.composition) {
-      tanks += (b.composition.tanks ?? 0) * (b.composition.tank_condition?.operational ?? 1);
-      arty += (b.composition.artillery ?? 0) * (b.composition.artillery_condition?.operational ?? 1);
-      tanksTotal += b.composition.tanks ?? 0;
-      artyTotal += b.composition.artillery ?? 0;
+      addEquipmentCondition(tanks, b.composition.tanks, b.composition.tank_condition?.operational);
+      addEquipmentCondition(arty, b.composition.artillery, b.composition.artillery_condition?.operational);
     }
   }
-  return { tanks: Math.round(tanks), arty: Math.round(arty), tanksTotal, artyTotal };
+  return { tanks, arty };
 }
 
 export function CorpsCard({
@@ -98,7 +109,12 @@ export function CorpsCard({
   const [isFlipped, setIsFlipped] = useState(false);
   const displayName = getPlayerSafeCorpsName(corpsName, corpsId);
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
-  const totalPersonnel = brigades.reduce((s, b) => s + (b.personnel ?? 0), 0);
+  const totalPersonnelSummary = sumReportedPersonnel(brigades);
+  const totalPersonnel = totalPersonnelSummary.reportedTotal;
+  const totalPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
+    partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+    unreported: t('corpsFront.unreported'),
+  });
   const avgCohesion = getAvgCohesion(brigades);
   const equip = getEquipmentSummary(brigades);
   const stanceKey = stance ?? 'unreported';
@@ -133,7 +149,7 @@ export function CorpsCard({
         <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
           <span className="flex items-center gap-0.5">
             <Icon name="personnel" size={11} color={totalPersonnel >= 8000 ? '#34d399' : totalPersonnel >= 4000 ? '#fbbf24' : '#f87171'} />
-            <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnel.toLocaleString()}</span>
+            <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnelLabel}</span>
           </span>
           <span className="text-text-secondary">{brigades.length} brigades</span>
         </span>
@@ -168,22 +184,20 @@ export function CorpsCard({
         )}
 
         {/* R4: Labeled equipment summary row */}
-        {(equip.tanksTotal > 0 || equip.artyTotal > 0) && (
+        {(equip.tanks.total > 0 || equip.arty.total > 0) && (
           <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
-            {equip.tanksTotal > 0 && (
-              <span className="flex items-center gap-1" title={t('corpsCard.tanksTitle', { operational: equip.tanks, total: equip.tanksTotal })}>
+            {equip.tanks.total > 0 && (
+              <span className="flex items-center gap-1" title={t('corpsCard.tanksTitle', { operational: Math.round(equip.tanks.operational), total: Math.round(equip.tanks.total) })}>
                 <Icon name="tanks" size={13} />
                 <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.tanks')}</span>
-                <span className="text-text-primary font-semibold">{equip.tanks}</span>
-                <span className="text-text-secondary/50">/{equip.tanksTotal}</span>
+                <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.tanks)}</span>
               </span>
             )}
-            {equip.artyTotal > 0 && (
-              <span className="flex items-center gap-1" title={t('corpsCard.artilleryTitle', { operational: equip.arty, total: equip.artyTotal })}>
+            {equip.arty.total > 0 && (
+              <span className="flex items-center gap-1" title={t('corpsCard.artilleryTitle', { operational: Math.round(equip.arty.operational), total: Math.round(equip.arty.total) })}>
                 <Icon name="artillery" size={13} />
                 <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.arty')}</span>
-                <span className="text-text-primary font-semibold">{equip.arty}</span>
-                <span className="text-text-secondary/50">/{equip.artyTotal}</span>
+                <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.arty)}</span>
               </span>
             )}
           </div>
@@ -297,7 +311,7 @@ export function CorpsCard({
         <div className="pt-1 border-t border-panel-border/30">
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
             <span className="text-text-secondary">{t('corpsCard.personnel')}</span>
-            <span className="text-text-primary tabular-nums font-semibold">{totalPersonnel.toLocaleString()}</span>
+            <span className="text-text-primary tabular-nums font-semibold">{totalPersonnelLabel}</span>
             <span className="text-text-secondary">{t('corpsCard.brigades')}</span>
             <span className="text-text-primary tabular-nums font-semibold">{brigades.length}</span>
             <span className="text-text-secondary">{t('corpsCard.avgCohesion')}</span>

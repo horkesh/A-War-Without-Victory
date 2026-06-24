@@ -60,8 +60,8 @@ describe('player visibility helpers', () => {
   });
 
   it('only treats active, non-forming tactical records as fielded while preserving lightweight projection records', () => {
-    expect(isFieldedTacticalFormation({ kind: 'brigade' })).toBe(true);
-    expect(isFieldedTacticalFormation({ kind: 'operational_group' })).toBe(true);
+    expect(isFieldedTacticalFormation({ kind: 'brigade' })).toBe(false);
+    expect(isFieldedTacticalFormation({ kind: 'operational_group' })).toBe(false);
     expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'ACTIVE', readiness: 'ready' })).toBe(true);
     expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'active', readiness: 'forming' })).toBe(false);
     expect(isFieldedTacticalFormation({ kind: 'brigade', status: 'destroyed' })).toBe(false);

@@ -24,6 +24,13 @@ import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import { formatPosture } from '../utils/formatters';
+import {
+  addEquipmentCondition,
+  emptyEquipmentConditionSummary,
+  formatReportedPersonnel,
+  sumReportedPersonnel,
+  type EquipmentConditionSummary,
+} from '../utils/reportedMetrics';
 import { inspectOnField } from '../utils/shellNavigation';
 import { t, useLocale } from '../i18n';
 import { buildSectorFormationAssignment, getSectorCoverageTier, resolveCurrentSectorForFormation, type SectorCoverageTier } from '../utils/sectorUtils';
@@ -38,6 +45,11 @@ const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> 
   held: 'oob.sectorCoverage.held',
   dense: 'oob.sectorCoverage.dense',
 };
+
+function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+  const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
+  return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
+}
 
 interface CorpsDetailProps {
   railSlot: 'primary' | 'secondary';
@@ -130,7 +142,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     ? buildCorpsColorMap(loadedGameState.corpsFrontSectors)
     : {};
   const corpsColor = corpsColorMap[selectedCorpsId] ?? '#888';
-  const totalPersonnel = subordinates.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+  const totalPersonnelSummary = sumReportedPersonnel(subordinates);
+  const totalPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
+    partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+    unreported: t('corpsFront.unreported'),
+  });
   const corpsDisplayName = corpsFormation.name === corpsFormation.id
     ? getPlayerSafeCorpsName(null, corpsFormation.id)
     : corpsFormation.name;
@@ -244,7 +260,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             <div className="border-t border-panel-border pt-3 space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('corpsCard.personnel')}</span>
-                <span className="text-text-primary tabular-nums">{totalPersonnel.toLocaleString()}</span>
+                <span className="text-text-primary tabular-nums">{totalPersonnelLabel}</span>
               </div>
               {(() => {
                 const agg = aggregateEffectiveness(subordinates);
@@ -285,38 +301,40 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
             {/* Equipment aggregate */}
             {(() => {
-              let tanks = 0, tanksOp = 0, arty = 0, artyOp = 0, aa = 0;
+              const tanks = emptyEquipmentConditionSummary();
+              const arty = emptyEquipmentConditionSummary();
+              let aa = 0;
               for (const b of subordinates) {
                 const c = b.composition;
                 if (!c) continue;
-                tanks += c.tanks ?? 0;
-                tanksOp += Math.round((c.tanks ?? 0) * (c.tank_condition?.operational ?? 1));
-                arty += c.artillery ?? 0;
-                artyOp += Math.round((c.artillery ?? 0) * (c.artillery_condition?.operational ?? 1));
+                addEquipmentCondition(tanks, c.tanks, c.tank_condition?.operational);
+                addEquipmentCondition(arty, c.artillery, c.artillery_condition?.operational);
                 aa += c.aa_systems ?? 0;
               }
-              if (tanks === 0 && arty === 0 && aa === 0) return null;
-              const equipHealthColor = (op: number, total: number) => {
+              if (tanks.total === 0 && arty.total === 0 && aa === 0) return null;
+              const equipHealthColor = (summary: EquipmentConditionSummary) => {
+                const { operational, total, unreportedCount } = summary;
                 if (total === 0) return 'text-text-primary';
-                const pct = op / total;
+                if (unreportedCount > 0) return 'text-amber-300';
+                const pct = operational / total;
                 return pct > 0.8 ? 'text-emerald-400' : pct >= 0.5 ? 'text-amber-400' : 'text-red-400';
               };
               return (
                 <div className="border-t border-panel-border pt-3 space-y-1.5">
                   <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
-                  {tanks > 0 && (
+                  {tanks.total > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> {t('corpsCard.tanks')}</span>
                       <span className="tabular-nums">
-                        <span className={equipHealthColor(tanksOp, tanks)}>{tanksOp}</span><span className="text-text-secondary">/{tanks}</span>
+                        <span className={equipHealthColor(tanks)}>{formatEquipmentSummary(tanks)}</span>
                       </span>
                     </div>
                   )}
-                  {arty > 0 && (
+                  {arty.total > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary flex items-center gap-1"><Icon name="artillery" size={12} /> {t('formationDetail.artillery')}</span>
                       <span className="tabular-nums">
-                        <span className={equipHealthColor(artyOp, arty)}>{artyOp}</span><span className="text-text-secondary">/{arty}</span>
+                        <span className={equipHealthColor(arty)}>{formatEquipmentSummary(arty)}</span>
                       </span>
                     </div>
                   )}
@@ -384,7 +402,10 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 const sectorBrigadeIds = new Set(sectorAssignment.lineHoldingIds);
                 const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
-                const sectorPers = sectorBrigades.reduce((sum, b) => sum + (b.personnel ?? 0), 0);
+                const sectorPers = formatReportedPersonnel(sumReportedPersonnel(sectorBrigades), {
+                  partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+                  unreported: t('corpsFront.unreported'),
+                });
                 const coverageTier = getSectorCoverageTier(s.density, sectorAssignment);
                 const sectorLabel = getPlayerFacingSectorName(s.sector_id, [s]);
                 return (
@@ -410,7 +431,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}
                       {sectorAssignment.overrideIds.length > 0 && ` + ${t('oob.sectorDirectedCount', { count: sectorAssignment.overrideIds.length.toString() })}`}
                       {' · '}{t('oob.sectorFrontSegments', { count: s.length_edges.toString() })}
-                      {' · '}{t('corpsDetail.personnelCount', { count: sectorPers.toLocaleString() })}
+                      {' · '}{t('corpsDetail.personnelCount', { count: sectorPers })}
                     </div>
                   </div>
                   <div className="shrink-0 ml-2 text-right">

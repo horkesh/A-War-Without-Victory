@@ -1,3 +1,11 @@
+## 2026-06-24 - Sparse Army HQ aggregate and stale roster diagnostics
+
+**Missing command-surface personnel/equipment data is partial or unreported:** Army HQ, Corps Detail, Corps Front, ORBAT, OOB, and Personnel can receive brigade rows with absent personnel or absent equipment-condition fields. Durable rule: sum only reported personnel, render mixed reports as `Partial`, render no reported value as `Unreported`, and never default missing equipment condition to fully operational. Applied in `[2026-06-24] fix(ui): harden sparse Army HQ aggregates and stale roster diagnostics`; report `docs/40_reports/implemented/20260624_ARMY_HQ_SECTOR_BRIGADE_INFORMATION_QUALITY.md`.
+
+**Stale sector roster ids are diagnostics, not player copy:** saved sector roster ids can outlive current formation rows. Durable rule: expose stale roster counts/help visibly, keep raw ids in diagnostic attributes such as `data-stale-roster-ids`, and never print raw ids in normal Army HQ/Corps Front copy. Applied in `[2026-06-24] fix(ui): harden sparse Army HQ aggregates and stale roster diagnostics`; report `docs/40_reports/implemented/20260624_ARMY_HQ_SECTOR_BRIGADE_INFORMATION_QUALITY.md`.
+
+**Fielded tactical compatibility requires explicit lifecycle evidence:** a formation with both `status` and `readiness` missing is sparse/unreported, not fielded force. Durable rule: require explicit active status for fielded tactical rows and sector override projections, while allowing active rows with missing readiness unless readiness explicitly says forming, destroyed, or unreported. Applied in `[2026-06-24] fix(ui): harden sparse Army HQ aggregates and stale roster diagnostics`; report `docs/40_reports/implemented/20260624_ARMY_HQ_SECTOR_BRIGADE_INFORMATION_QUALITY.md`.
+
 ## 2026-06-24 - Chronicle and Warroom receipt boundaries
 
 **Decision consequence `recordTarget` is authoritative:** Records-target receipts are not Chronicle history just because they are decision consequences. Durable rule: Chronicle generated decision-ledger rows must include only `recordTarget === 'chronicle'`; Records-target receipts should route to Records and remain absent from Chronicle. Applied in `[2026-06-24] Chronicle and Warroom receipt-boundary follow-up`; report `docs/40_reports/implemented/20260624_ARMY_HQ_SECTOR_BRIGADE_INFORMATION_QUALITY.md`.

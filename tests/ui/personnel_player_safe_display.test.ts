@@ -368,4 +368,21 @@ describe('PersonnelContent player-facing display', () => {
       chronicleOpen: store.chronicleOpen,
     })).toBe(true);
   });
+
+  it('labels HQ reserve brigades and keeps unreported personnel out of exact totals', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'vrs_guard_bde'
+      ? { ...formation, personnel: undefined }
+      : formation) as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Main Staff reserve/security');
+    expect(container.textContent).toContain('1 brigades - Unreported');
+    const hqBrigadeLink = screen.getByRole('button', { name: /Guard Brigade/i });
+    expect(hqBrigadeLink.textContent).toContain('Main Staff reserve/security');
+    expect(hqBrigadeLink.textContent).toContain('Unreported');
+    expect(container.textContent).not.toContain('1 brigades - 0');
+  });
 });

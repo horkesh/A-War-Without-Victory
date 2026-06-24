@@ -222,7 +222,7 @@ export function buildSectorFormationAssignment(
   ].filter((id) => !formationById.has(id)))].sort(compareStableText);
   const rosterIds = new Set([...frontlineIds, ...reserveIds, ...rearIds]);
   const overrideIds = (formations ?? [])
-    .filter((formation) => formation.kind === undefined || isFieldedTacticalFormation(formation))
+    .filter((formation) => isFieldedTacticalFormation(formation))
     .filter((formation) => isValidOverrideSector(formation, sector))
     .map((formation) => formation.id)
     .filter((id) => !rosterIds.has(id))

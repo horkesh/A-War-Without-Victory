@@ -390,7 +390,8 @@ describe('CorpsFrontPanel field routing', () => {
     expect(screen.queryByTestId('corps-front-brigade-row')).toBeNull();
     const staleRoster = screen.getByTestId('corps-front-stale-roster');
     expect(staleRoster.getAttribute('data-stale-roster-count')).toBe('1');
-    expect(staleRoster.textContent).toContain('missing_roster_bde');
+    expect(staleRoster.getAttribute('data-stale-roster-ids')).toBe('missing_roster_bde');
+    expect(staleRoster.textContent).not.toContain('missing_roster_bde');
     expect(staleRoster.textContent).toContain('1 stale roster entry');
   });
 
@@ -490,6 +491,49 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Total manpower\s*500/i);
+  });
+
+  it('marks Corps Front logistics totals partial when any assigned personnel are unreported', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_101_brigade'
+      ? { ...formation, personnel: undefined }
+      : formation) as LoadedGameState['formations'];
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'arbih_rear_support',
+        faction: 'RBiH',
+        name: 'Rear Support Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        personnel: 500,
+        location_osid: 'op:sarajevo:centar_1',
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: ['arbih_101_brigade'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: ['arbih_rear_support'],
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Total manpower\s*Partial 500/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
   });
 
   it('sanitizes raw sector labels in Corps Front', () => {
@@ -660,6 +704,89 @@ describe('CorpsFrontPanel field routing', () => {
 
     expect(container.textContent).toContain('900');
     expect(container.textContent).not.toMatch(/Total manpower\s*0/i);
+  });
+
+  it('does not count lifecycle-free projection overrides as command-directed Corps Front force', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'projection_only_brigade',
+        faction: 'RBiH',
+        name: 'Projection Only Brigade',
+        kind: 'brigade',
+        cohesion: 70,
+        fatigue: 5,
+        morale: 60,
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+        sectorOverrideId: 'sector:arbih_1st_corps:0',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      combat_personnel: 0,
+      combat_offensive_power: 0,
+      combat_defensive_power: 0,
+      defensive_power: 0,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+
+    expect(container.textContent).not.toContain('900');
+    expect(container.textContent).toMatch(/Total manpower\s*0/i);
+  });
+
+  it('renders partial combat personnel when line-holder reports are incomplete', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations.map((formation) => (
+        formation.id === 'arbih_101_brigade' ? { ...formation, personnel: 500 } : formation
+      )),
+      {
+        id: 'arbih_unreported_line_brigade',
+        faction: 'RBiH',
+        name: 'Unreported Line Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        morale: 60,
+        createdTurn: 0,
+        tags: [],
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: ['arbih_101_brigade', 'arbih_unreported_line_brigade'],
+      reserve_brigade_ids: [],
+      combat_personnel: 0,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/Partial 500/i);
+    expect(container.textContent).not.toMatch(/Personnel\s*500\s*Offensive Power/i);
   });
 
   it('labels Corps Front metadata with a true turn number instead of a second date', () => {

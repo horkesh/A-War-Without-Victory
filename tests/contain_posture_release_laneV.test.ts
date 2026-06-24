@@ -144,8 +144,8 @@ test('RELEASE (srebrenica_fell): eastern enclaves DROP OUT of the contained set'
     const reach = reachWithIsolated([SREBRENICA_2, ZEPA_2]);
     const st = stateAtTurn(150, { srebrenica_fell: true });
     const contained = computeContainedOsidsForFaction(st, 'RS', reach);
-    assert.ok(!contained.includes(SREBRENICA_2), 'Srebrenica RELEASED → bot free to target → still falls');
-    assert.ok(!contained.includes(ZEPA_2), 'Žepa RELEASED → bot free to target → still falls');
+    assert.ok(!contained.includes(SREBRENICA_2), 'Srebrenica RELEASED → bot target gate open; event-owned fall receipt remains separate');
+    assert.ok(!contained.includes(ZEPA_2), 'Žepa RELEASED → bot target gate open; event-owned fall receipt remains separate');
 });
 
 test('RELEASE (turn ≥ 160 backstop): NOTHING is contained in the fall window', () => {
