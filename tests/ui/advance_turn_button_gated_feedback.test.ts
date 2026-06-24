@@ -98,6 +98,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     const button = screen.getByRole('button', { name: /resolve 2 pending decisions to continue/i });
     expect(button.getAttribute('title')).toContain('Resolve 2 pending decisions to continue');
+    expect(button.textContent).toContain('REVIEW BLOCKERS');
 
     fireEvent.click(button);
 

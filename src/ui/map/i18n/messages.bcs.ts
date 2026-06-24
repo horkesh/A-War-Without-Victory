@@ -1960,6 +1960,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'presidentialToolbar.tensionsRising': 'TENZIJE RASTU',
     'presidentialToolbar.advancing': 'NAPREDUJE...',
     'presidentialToolbar.advanceTurn': 'SLJEDEĆI POTEZ ->',
+    'presidentialToolbar.reviewBlockers': 'PREGLED BLOKADA',
     'presidentialToolbar.armyHqLabel': '{army} HQ [H]',
     'presidentialToolbar.army': 'Armija',
     'presidentialToolbar.visitArmyHq': 'Posjeti Armijski HQ [H]',

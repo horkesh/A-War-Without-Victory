@@ -14,6 +14,36 @@ export interface TickerEvent {
     text: string;
     /** Optional category for styling/filtering. */
     category?: 'international' | 'military' | 'political' | 'humanitarian' | 'bih_international' | 'world' | 'regional';
+    /** Live campaign event receipt required before this static historical row may be shown. */
+    requiresEventId?: string;
+    /** Live campaign rupture/cost receipt required before this static historical row may be shown. */
+    requiresRuptureId?: string;
+}
+
+export interface TickerReceiptContext {
+    firedEventIds?: readonly string[];
+    ruptureIds?: readonly string[];
+}
+
+const MAX_VISIBLE_EVENTS = 8;
+
+function hasReceipt(event: TickerEvent, context?: TickerReceiptContext): boolean {
+    if (event.requiresEventId && !context?.firedEventIds?.includes(event.requiresEventId)) return false;
+    if (event.requiresRuptureId && !context?.ruptureIds?.includes(event.requiresRuptureId)) return false;
+    return true;
+}
+
+export function getTickerEventsForTurn(absoluteTurn: number, context?: TickerReceiptContext): TickerEvent[] {
+    const eligible = PHASE0_TICKER_EVENTS.filter((event) =>
+        event.turn <= absoluteTurn && hasReceipt(event, context)
+    );
+
+    eligible.sort((a, b) => {
+        if (b.turn !== a.turn) return b.turn - a.turn;
+        return a.text < b.text ? -1 : a.text > b.text ? 1 : 0;
+    });
+
+    return eligible.slice(0, MAX_VISIBLE_EVENTS);
 }
 
 export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
@@ -363,9 +393,9 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 183, text: 'WINDOWS 95 HYPE BUILDS — MICROSOFT PREVIEWS NEW OPERATING SYSTEM', category: 'world' },
 
     // July 1995 (Turns 184-187)
-    { turn: 184, text: 'VRS OVERRUNS SREBRENICA SAFE AREA — DUTCH BATTALION UNABLE TO RESIST', category: 'military' },
-    { turn: 185, text: 'SREBRENICA MASSACRE — OVER 8000 BOSNIAK MEN AND BOYS EXECUTED', category: 'humanitarian' },
-    { turn: 186, text: 'VRS ATTACKS ZEPA SAFE AREA — ENCLAVE FALLS', category: 'military' },
+    { turn: 184, text: 'VRS OVERRUNS SREBRENICA SAFE AREA — DUTCH BATTALION UNABLE TO RESIST', category: 'military', requiresEventId: 'srebrenica_falls_1995' },
+    { turn: 185, text: 'SREBRENICA MASSACRE — OVER 8000 BOSNIAK MEN AND BOYS EXECUTED', category: 'humanitarian', requiresRuptureId: 'srebrenica_genocide_1995' },
+    { turn: 186, text: 'VRS ATTACKS ZEPA SAFE AREA — ENCLAVE FALLS', category: 'military', requiresEventId: 'zepa_falls_1995' },
     { turn: 186, text: 'MIGUEL INDURAIN WINS FIFTH CONSECUTIVE TOUR DE FRANCE', category: 'world' },
     { turn: 187, text: 'LONDON CONFERENCE — NATO DRAWS LINE AT GORAZDE', category: 'bih_international' },
 

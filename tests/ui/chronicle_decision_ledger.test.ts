@@ -34,7 +34,7 @@ function buildDecisionEventDef(): EventDefinition {
 }
 
 describe('Chronicle decision ledger integration', () => {
-  it('adds filed presidential decision consequences as Chronicle entries', () => {
+  it('keeps Records-target decision consequences out of Chronicle entries', () => {
     const entries = generateChronicleEntries({
       turn: 12,
       player_faction: 'RS',
@@ -56,17 +56,12 @@ describe('Chronicle decision ledger integration', () => {
       ],
     });
 
-    expect(entries).toContainEqual(expect.objectContaining({
+    expect(entries).not.toContainEqual(expect.objectContaining({
       id: 'decision-ledger-reserve:reserve:turn_12:vrs_drina_corps',
-      turn: 12,
-      type: 'military',
-      headline: false,
-      title: 'Reserve request accepted',
-      detail: expect.stringContaining('the reserve brigade assigned to this corps command'),
-      metadata: expect.objectContaining({
-        decisionRecordId: 'reserve:reserve:turn_12:vrs_drina_corps',
-      }),
     }));
+    expect(entries.some((entry) =>
+      entry.metadata?.decisionRecordId === 'reserve:reserve:turn_12:vrs_drina_corps'
+    )).toBe(false);
   });
 
   it('does not duplicate a decision event through both turn summary and decision ledger paths', () => {
@@ -125,7 +120,7 @@ describe('Chronicle decision ledger integration', () => {
     }));
   });
 
-  it('adds patron-defiance material receipts to the Chronicle decision ledger trail', () => {
+  it('keeps patron-defiance material receipts in Records instead of Chronicle', () => {
     const entries = generateChronicleEntries({
       turn: 44,
       player_faction: 'RS',
@@ -141,21 +136,16 @@ describe('Chronicle decision ledger integration', () => {
       },
     });
 
-    expect(entries).toContainEqual(expect.objectContaining({
+    expect(entries).not.toContainEqual(expect.objectContaining({
       id: 'decision-ledger-patron-defiance:RS:44:0.35:0.45',
-      turn: 44,
-      type: 'political',
-      headline: false,
-      title: 'Patron defiance supply cut',
-      detail: 'Serbia cut 35% of material support for VRS; support after cut 45%.',
-      metadata: expect.objectContaining({
-        decisionRecordId: 'patron-defiance:RS:44:0.35:0.45',
-      }),
     }));
+    expect(entries.some((entry) =>
+      entry.metadata?.decisionRecordId === 'patron-defiance:RS:44:0.35:0.45'
+    )).toBe(false);
     expect(entries.find((entry) => entry.id?.includes('HRHB'))).toBeUndefined();
   });
 
-  it('does not duplicate patron-defiance cuts when consequence receipts are available', () => {
+  it('does not backdoor patron-defiance Records receipts into Chronicle when consequence receipts are available', () => {
     const entries = generateChronicleEntries({
       turn: 44,
       player_faction: 'RS',
@@ -176,11 +166,7 @@ describe('Chronicle decision ledger integration', () => {
       || entry.id === 'decision-ledger-patron-defiance:RS:44:0.35:0.45'
     );
 
-    expect(patronEntries).toHaveLength(1);
-    expect(patronEntries[0]).toMatchObject({
-      id: 'decision-ledger-patron-defiance:RS:44:0.35:0.45',
-      title: 'Patron defiance supply cut',
-    });
+    expect(patronEntries).toHaveLength(0);
   });
 
   it('renders consequence receipt decision dates as calendar copy', () => {

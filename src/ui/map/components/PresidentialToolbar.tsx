@@ -507,7 +507,11 @@ export function PresidentialToolbar({
                                 : 'bg-amber-400/10 text-amber-400 border-amber-400/30 hover:bg-amber-400/20 hover:border-amber-400/50'
                         }`}
                     >
-                        {advancing ? t('presidentialToolbar.advancing') : t('presidentialToolbar.advanceTurn')}
+                        {advancing
+                            ? t('presidentialToolbar.advancing')
+                            : advanceBlocked
+                                ? t('presidentialToolbar.reviewBlockers')
+                                : t('presidentialToolbar.advanceTurn')}
                     </button>
                 </div>
             </div>

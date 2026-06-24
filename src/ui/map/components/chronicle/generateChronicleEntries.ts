@@ -379,18 +379,20 @@ function decisionRecordType(record: DecisionConsequenceRecord): ChronicleCardTyp
 }
 
 function buildDecisionLedgerEntries(state: any): ChronicleEntry[] {
-    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).map((record) => ({
-        id: `decision-ledger-${record.id}`,
-        turn: record.turn,
-        type: decisionRecordType(record),
-        headline: record.recordTarget === 'chronicle',
-        title: resolveDecisionConsequenceCopy(record, 'title'),
-        detail: resolveDecisionConsequenceCopy(record, 'detail'),
-        metadata: {
-            decisionRecordId: record.id,
-            imageUrl: getConsequenceStillForRecord(record),
-        },
-    }));
+    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+        .filter((record) => record.recordTarget === 'chronicle')
+        .map((record) => ({
+            id: `decision-ledger-${record.id}`,
+            turn: record.turn,
+            type: decisionRecordType(record),
+            headline: true,
+            title: resolveDecisionConsequenceCopy(record, 'title'),
+            detail: resolveDecisionConsequenceCopy(record, 'detail'),
+            metadata: {
+                decisionRecordId: record.id,
+                imageUrl: getConsequenceStillForRecord(record),
+            },
+        }));
 }
 
 /** Chronicle cards for CONFIRMED consequence receipts — the promise→receipt

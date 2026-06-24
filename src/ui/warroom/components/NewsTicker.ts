@@ -10,7 +10,7 @@
 import type { FactionId } from '../../../state/game_state.js';
 import { GameState } from '../../../state/game_state.js';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels.js';
-import { PHASE0_TICKER_EVENTS, TickerEvent } from '../content/ticker_events.js';
+import { getTickerEventsForTurn, TickerEvent, type TickerReceiptContext } from '../content/ticker_events.js';
 import { generateTickerWarEvents } from '../content/ticker_war_events.js';
 import { generateTurnEvents } from '../data/turn_event_generator.js';
 import { getPreviousSnapshot } from '../data/warroom_state.js';
@@ -19,9 +19,6 @@ import { getWarroomFactionIdentity } from './warroom_identity.js';
 
 /** Separator used between headlines in the scrolling ticker. */
 const HEADLINE_SEP = '  \u2022  ';
-
-/** Maximum number of historical events shown in the ticker at once. */
-const MAX_VISIBLE_EVENTS = 8;
 
 export class NewsTicker {
     private container: HTMLElement | null = null;
@@ -70,17 +67,9 @@ export class NewsTicker {
      * The scripted events are keyed to the Sep-1991 epoch (turn 0 = 1 Sep 1991).
      * toTickerTurn() maps the scenario-relative turn to the absolute epoch turn.
      */
-    private getEventsForTurn(turn: number): TickerEvent[] {
+    private getEventsForTurn(turn: number, context?: TickerReceiptContext): TickerEvent[] {
         const absoluteTurn = toTickerTurn(turn);
-        const eligible = PHASE0_TICKER_EVENTS.filter(e => e.turn <= absoluteTurn);
-
-        // Sort: most recent turn first, then alphabetical text for determinism
-        eligible.sort((a, b) => {
-            if (b.turn !== a.turn) return b.turn - a.turn;
-            return a.text < b.text ? -1 : a.text > b.text ? 1 : 0;
-        });
-
-        return eligible.slice(0, MAX_VISIBLE_EVENTS);
+        return getTickerEventsForTurn(absoluteTurn, context);
     }
 
     /**
@@ -129,6 +118,29 @@ export class NewsTicker {
         return generateTickerWarEvents(turnEvents, playerFaction);
     }
 
+    private getReceiptContext(gameState: GameState): TickerReceiptContext {
+        const military = gameState.military as unknown as {
+            fired_event_ids?: string[];
+            event_last_fired_turn?: Record<string, number>;
+        };
+        const political = gameState.political as unknown as {
+            rupture_consequences?: Array<{ id?: string }>;
+        };
+        return {
+            firedEventIds: [
+                ...new Set([
+                    ...(Array.isArray(military.fired_event_ids) ? military.fired_event_ids : []),
+                    ...Object.keys(military.event_last_fired_turn ?? {}),
+                ]),
+            ],
+            ruptureIds: Array.isArray(political.rupture_consequences)
+                ? political.rupture_consequences
+                    .map((entry) => entry.id)
+                    .filter((id): id is string => typeof id === 'string' && id.length > 0)
+                : [],
+        };
+    }
+
     /**
      * Generate news headlines for the current game state.
      *
@@ -137,7 +149,7 @@ export class NewsTicker {
      */
     private generateHeadlines(gameState: GameState): string {
         const turn = gameState.meta.turn;
-        const scriptedEvents = this.getEventsForTurn(turn);
+        const scriptedEvents = this.getEventsForTurn(turn, this.getReceiptContext(gameState));
         const warEvents = this.generateWarEvents(gameState);
 
         // If we have dynamic war events, they go first via buildTickerText interleaving

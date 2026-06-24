@@ -63,6 +63,7 @@ describe('GUI audit Batch E stale-state resets', () => {
 
         expect(panel).toContain('setShowAdvanced(nextShowAdvanced)');
         expect(panel).toMatch(/if \(!nextShowAdvanced\) \{[\s\S]*setActiveLens\('all'\)[\s\S]*\}/);
+        expect(panel).toMatch(/if \(!nextShowAdvanced\) \{[\s\S]*setActiveCardId\(null\)[\s\S]*\}/);
     });
 
     it('the Inbox home badge closes store-owned overlays before clearing selections', () => {

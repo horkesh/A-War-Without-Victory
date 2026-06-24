@@ -2001,6 +2001,7 @@ export const enMessages = {
     'presidentialToolbar.tensionsRising': 'TENSIONS RISING',
     'presidentialToolbar.advancing': 'ADVANCING...',
     'presidentialToolbar.advanceTurn': 'ADVANCE TURN ->',
+    'presidentialToolbar.reviewBlockers': 'REVIEW BLOCKERS',
     'presidentialToolbar.armyHqLabel': '{army} HQ [H]',
     'presidentialToolbar.army': 'Army',
     'presidentialToolbar.visitArmyHq': 'Visit Army HQ [H]',

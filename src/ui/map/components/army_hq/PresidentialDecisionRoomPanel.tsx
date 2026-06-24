@@ -551,6 +551,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
               if (!nextShowAdvanced) {
                 setActiveLens('all');
                 setActiveCommandCategoryId(null);
+                setActiveCardId(null);
               }
             }}
             className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"

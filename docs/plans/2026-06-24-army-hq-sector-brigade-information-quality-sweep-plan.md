@@ -23,7 +23,17 @@ Completed and verified first substantial slice:
 
 Verification passed: `desktop:startup-snapshot:check`, focused 10-file / 183-test pack, `typecheck`, `qa:player-journeys` 43 files / 583 tests, `git diff --check`, and manual in-app browser proof for RBiH and RS.
 
-Remaining closeout gates before declaring the whole sweep done: run formal browser gates (`qa:first-hour:browser`, `qa:live-surface:browser`), inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree.
+Second slice implemented before the next push:
+
+- Chronicle generated decision-ledger rows now respect `recordTarget`: Chronicle-target receipts render in Chronicle, while Records-target receipts stay in Records and cannot backdoor into Chronicle history.
+- Warroom historical ticker rows for Srebrenica fall, Srebrenica massacre, and Zepa fall now require the matching live event/rupture receipts before appearing, preserving the event-owned safe-area fall model.
+- The blocked turn-advance toolbar action now says `REVIEW BLOCKERS` while blocked instead of looking like a normal `ADVANCE TURN` command.
+- Hiding advanced Decision Room filters clears the active dossier/card selection with the lens/category state, preventing stale cards from remaining active off-screen.
+- The GitHub Event System CI baseline failure was reproduced locally and traced to preserved officer display metadata in `final_save.json`; `control_delta.json`, `formation_delta.json`, `activity_summary.json`, `end_report.md`, `watched_operations.json`, and `weekly_report.jsonl` stayed byte-identical. The baseline manifest was re-blessed only for `apr1992_52w` `final_save.json` and the hash-reporting `run_summary.json`.
+
+Additional verification passed after the second slice: `typecheck`, expanded focused UI pack 8 files / 128 tests, `qa:player-journeys` 43 files / 583 tests, `qa:first-hour:browser`, `qa:live-surface:browser`, baseline regression after the narrow manifest re-bless, `git diff --check`, and temp evidence cleanup.
+
+Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup currently leaves only `.tmp_dev_server`, which belongs to the active browser/dev server.
 
 ## Pyrrhic Roles
 
