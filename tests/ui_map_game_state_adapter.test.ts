@@ -1610,6 +1610,61 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
     );
 });
 
+test('parseGameState ignores stale and foreign operation opportunity reviews for player dossiers', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 176,
+            phase: 'war',
+            player_faction: 'RBiH',
+            pending_proposal_reviews: [
+                {
+                    id: 'PROP_176_stale',
+                    turn: 176,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: 'Resolved opportunity',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                    accepted: true,
+                    resolved_turn: 176,
+                },
+                {
+                    id: 'PROP_176_enemy',
+                    turn: 176,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Enemy opportunity',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+            ],
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [
+                {
+                    opportunity_id: 'sana_95',
+                    proposal_id: 'OPP_175_sana_95',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'eligible_pending_review',
+                    approver_faction: 'RBiH',
+                    last_axis_evaluation: [],
+                },
+            ],
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.operationOpportunityProposals?.length, 1);
+    const proposal = parsed.operationOpportunityProposals![0];
+    assert.equal(proposal.review_id, undefined);
+    assert.equal(proposal.recommendation, undefined);
+    assert.equal(proposal.proposed_action, undefined);
+});
+
 test('parseGameState exposes municipality support orders for the player faction UI', () => {
     const parsed = parseGameState({
   meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

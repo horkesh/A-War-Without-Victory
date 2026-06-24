@@ -27,6 +27,8 @@ function makeControlledGeoJson(): FeatureCollection {
     type: 'FeatureCollection',
     features: [
       square('op:home:brigade', 0, 0),
+      square('op:hq:anchor', 1, 0),
+      square('op:aor:coverage', 2, 0),
       square('op:sector:far', 10, 0),
       square('op:sector:near', 3, 0),
     ],
@@ -179,5 +181,26 @@ describe('sector staged order map feedback', () => {
     const movementArrow = arrows.features.find((feature) => feature.properties?.type === 'movement-staged');
 
     expect(movementArrow?.properties?.target_osid).toBe('op:sector:a');
+  });
+
+  it('does not render staged arrows or ghost paths from AoR/HQ-only anchors', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => ({
+      ...formation,
+      location_osid: undefined,
+      hq_osid: 'op:hq:anchor',
+      aorSettlementIds: ['op:aor:coverage'],
+    }));
+
+    const arrows = buildOrderArrowsGeoJSON(state, stagedOrders, makeControlledGeoJson());
+    const ghostPaths = buildGhostPathsGeoJSON(
+      state,
+      stagedOrders,
+      makeControlledGeoJson(),
+      'rbih_test_brigade',
+    );
+
+    expect(arrows.features.some((feature) => feature.properties?.type === 'movement-staged')).toBe(false);
+    expect(ghostPaths.features).toHaveLength(0);
   });
 });

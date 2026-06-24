@@ -261,6 +261,45 @@ describe('AAR and tooltip friction labels', () => {
     expect(document.body.textContent).not.toMatch(/Battle at|this position/);
   });
 
+  it('renders missing formation cohesion as unreported instead of zero', () => {
+    vi.useFakeTimers();
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        formations: [
+          {
+            id: 'own_sparse',
+            name: 'Sparse Brigade',
+            faction: 'RBiH',
+            kind: 'brigade',
+            readiness: 'ready',
+            status: 'active',
+            corps_id: 'arbih_2_corps',
+            personnel: 1200,
+            posture: 'defend',
+            location_osid: 'op:tuzla:center',
+            aorSettlementIds: ['op:tuzla:center'],
+            createdTurn: 1,
+            tags: [],
+          },
+          { id: 'arbih_2_corps', name: '2nd Corps', faction: 'RBiH', kind: 'corps', readiness: 'ready', status: 'active', createdTurn: 1, tags: [] },
+        ],
+        attackOrders: [],
+      },
+      tooltipTarget: { type: 'formation', id: 'own_sparse' },
+      tooltipPosition: { x: 1, y: 1 },
+    });
+
+    render(createElement(Tooltip));
+
+    act(() => {
+      vi.advanceTimersByTime(301);
+    });
+
+    expect(document.body.textContent).toMatch(/Cohesion:\s*Unreported/);
+    expect(document.body.textContent).not.toMatch(/Cohesion:\s*0\b/);
+  });
+
   it('uses localized friction and confidence labels in BCS', () => {
     setLocale('bcs');
     useGameStore.setState({

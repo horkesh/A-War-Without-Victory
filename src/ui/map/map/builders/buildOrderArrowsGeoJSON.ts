@@ -3,7 +3,7 @@ import type { LoadedGameState, CorpsFrontSectorView } from '../../data/types';
 import type { StagedOrder } from '../../store/gameStore';
 import { buildOsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
 import type { OsidCentroidLookup } from './geojsonLookup';
-import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
+import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { hashString, buildBezierCurve, buildArrowheadTriangle, getClosestPointOnSectorEdge } from './arrowGeometry';
 import { resolveSectorOrderTargetOsid } from './resolveSectorOrderTarget';
 
@@ -169,7 +169,7 @@ export function buildOrderArrowsGeoJSON(
   }
 
   for (const formation of [...state.formations].sort((a, b) => a.id.localeCompare(b.id))) {
-    sourceByBrigadeId.set(formation.id, resolveFormationLocationOsid(formation, centroidLookup));
+    sourceByBrigadeId.set(formation.id, resolveFormationPhysicalLocationOsid(formation, centroidLookup));
   }
 
   const features: OrderFeature[] = [];
@@ -184,7 +184,7 @@ export function buildOrderArrowsGeoJSON(
     for (const order of attackOrders) {
       const formation = formationById.get(order.brigadeId);
       if (formation?.faction !== playerFaction) continue;
-      const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+      const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationPhysicalLocationOsid(formation, centroidLookup);
       const sector = sectorByBrigade.get(order.brigadeId);
       const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
       pushArrow(features, 'attack', order.brigadeId, sourceOsid, order.targetSettlementId, centroidLookup, formation?.faction, sector, edgePoints);
@@ -195,7 +195,7 @@ export function buildOrderArrowsGeoJSON(
       for (const order of settlementOrders) {
         const formation = formationById.get(order.brigadeId);
         if (formation?.faction !== playerFaction) continue;
-        const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+        const sourceOsid = sourceByBrigadeId.get(order.brigadeId) ?? resolveFormationPhysicalLocationOsid(formation, centroidLookup);
         const sector = sectorByBrigade.get(order.brigadeId);
         const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
         const targets = [...order.targetSettlementIds].sort((a, b) => a.localeCompare(b));
@@ -212,7 +212,7 @@ export function buildOrderArrowsGeoJSON(
       if (order.type === 'posture') continue;
       const outputType = order.type === 'attack' ? 'attack-staged' : 'movement-staged';
       const formation = formationById.get(order.formationId);
-      const sourceOsid = sourceByBrigadeId.get(order.formationId) ?? resolveFormationLocationOsid(formation, centroidLookup);
+      const sourceOsid = sourceByBrigadeId.get(order.formationId) ?? resolveFormationPhysicalLocationOsid(formation, centroidLookup);
       const sector = sectorByBrigade.get(order.formationId);
       const edgePoints = sector ? edgePointsBySector.get(sector.sector_id) : undefined;
       const targetOsid = order.type === 'sector'

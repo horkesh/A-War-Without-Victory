@@ -299,6 +299,52 @@ describe('Tactical map render smoke', () => {
     expect(feature?.properties?.fatigue).toBeNull();
   });
 
+  it('buildFormationsGeoJSON does not substitute cohesion for missing morale', () => {
+    const state: LoadedGameState = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: { 'op:sarajevo': 'RBiH' },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'cohesion_only_brigade',
+          faction: 'RBiH',
+          name: 'Cohesion Only Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          personnel: 1800,
+          cohesion: 82,
+        },
+      ],
+    } as LoadedGameState;
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const feature = buildFormationsGeoJSON(state, controlledGeo).features[0];
+
+    expect(feature?.properties?.icon_id).toContain('__munreported');
+    expect(feature?.properties?.cohesion).toBe(82);
+    expect(feature?.properties?.morale).toBeNull();
+  });
+
   it('buildFormationsGeoJSON derives operation membership from active operation participants, not posture', () => {
     const state = {
       label: 'Turn 1',

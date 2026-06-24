@@ -81,6 +81,20 @@ describe('map battle and casualty truth gates', () => {
     expect(markers.features).toHaveLength(0);
   });
 
+  it('does not invent battle casualties or attacker counts when only a combat flip exists', () => {
+    const markers = buildBattleMarkersGeoJSON([
+      { settlementId: 'op:test:a', from: 'RS', to: 'RBiH', turn: 5, mechanism: 'combat', municipalityId: 'test' },
+    ], baseGeoJson(), 5, [], 5);
+
+    expect(markers.features).toHaveLength(1);
+    expect(markers.features[0].properties?.battle_reported).toBe(false);
+    expect(markers.features[0].properties?.casualties_reported).toBe(false);
+    expect(markers.features[0].properties?.attacker_casualties).toBeNull();
+    expect(markers.features[0].properties?.defender_casualties).toBeNull();
+    expect(markers.features[0].properties?.total_casualties).toBeNull();
+    expect(markers.features[0].properties?.attacker_count).toBeNull();
+  });
+
   it('does not render turn-zero or future casualty overlays', () => {
     const formations: FormationView[] = [
       {
@@ -112,5 +126,11 @@ describe('map battle and casualty truth gates', () => {
     expect(source).toContain('battleMarkerProbe');
     expect(source).toContain('data-battle-marker-count={battleMarkerProbe.count}');
     expect(source).toContain('data-battle-marker-osids={battleMarkerProbe.osids}');
+  });
+
+  it('coalesces nullable battle casualties only at the renderer radius boundary', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+
+    expect(source).toContain("['coalesce', ['get', 'total_casualties'], 0]");
   });
 });

@@ -876,7 +876,7 @@ export function buildForceableReadyPlans(
     if (!cc) continue;
     // Skip corps that don't belong to the player faction.
     const corpsFaction = corpsFactionById.get(corpsId) ?? null;
-    if (playerFaction && corpsFaction && corpsFaction !== playerFaction) continue;
+    if (playerFaction && corpsFaction !== playerFaction) continue;
     const cmdState = asRecord(cc.commander_state);
     const plan = asRecord(cmdState?.current_plan);
     if (!plan) continue;

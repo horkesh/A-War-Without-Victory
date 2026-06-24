@@ -1728,11 +1728,11 @@ export function MapContainer() {
                       paint: {
                         // Scale by casualties: base 4-10 + up to 6 more from total_casualties
                         'circle-radius': ['interpolate', ['linear'], ['zoom'], 6,
-                          ['+', 4, ['min', 6, ['/', ['get', 'total_casualties'], 200]]],
+                          ['+', 4, ['min', 6, ['/', ['coalesce', ['get', 'total_casualties'], 0], 200]]],
                           10,
-                          ['+', 7, ['min', 8, ['/', ['get', 'total_casualties'], 150]]],
+                          ['+', 7, ['min', 8, ['/', ['coalesce', ['get', 'total_casualties'], 0], 150]]],
                           14,
-                          ['+', 10, ['min', 10, ['/', ['get', 'total_casualties'], 100]]],
+                          ['+', 10, ['min', 10, ['/', ['coalesce', ['get', 'total_casualties'], 0], 100]]],
                         ],
                         // Color by outcome: green=attacker won, red=attacker lost, amber=stalemate, white=no data
                         'circle-color': ['match', ['get', 'outcome'],

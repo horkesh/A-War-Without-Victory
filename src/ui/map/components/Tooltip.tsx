@@ -151,8 +151,9 @@ function FormationTooltipContent({
     );
   }
 
-  const cohesion = Math.max(0, Math.min(100, model.cohesion ?? 0));
-  const filledSegments = Math.ceil(cohesion / 20);
+  const cohesionReported = typeof model.cohesion === 'number' && Number.isFinite(model.cohesion);
+  const cohesion = cohesionReported ? Math.max(0, Math.min(100, model.cohesion as number)) : null;
+  const filledSegments = cohesion == null ? 0 : Math.ceil(cohesion / 20);
 
   return (
     <div className="min-w-[220px] max-w-[300px]">
@@ -182,7 +183,9 @@ function FormationTooltipContent({
             />
           ))}
         </div>
-        <span className="tabular-nums">{Math.round(cohesion)}</span>
+        <span className={cohesion == null ? 'text-text-secondary italic' : 'tabular-nums'}>
+          {cohesion == null ? t('corpsFront.unreported') : Math.round(cohesion)}
+        </span>
       </div>
       {model.posture && (
         <div className="text-[11px] text-text-secondary mb-1">

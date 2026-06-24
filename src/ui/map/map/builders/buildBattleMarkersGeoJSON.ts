@@ -94,7 +94,8 @@ export function buildBattleMarkersGeoJSON(
     if (!centroid) continue;
 
     const battle = battleByOsid.get(osid);
-    const totalCasualties = battle ? battle.attacker_casualties + battle.defender_casualties : 0;
+    const totalCasualties = battle ? battle.attacker_casualties + battle.defender_casualties : null;
+    const battleReported = battle != null;
 
     features.push({
       type: 'Feature',
@@ -106,15 +107,17 @@ export function buildBattleMarkersGeoJSON(
         turn: event.turn,
         age: currentTurn - event.turn,
         // Enriched battle data for tooltip
+        battle_reported: battleReported,
         attacker_faction: battle?.attacker_faction ?? null,
         defender_faction: battle?.defender_faction ?? null,
         outcome: battle?.outcome ?? null,
-        attacker_casualties: battle?.attacker_casualties ?? 0,
-        defender_casualties: battle?.defender_casualties ?? 0,
+        casualties_reported: battleReported,
+        attacker_casualties: battle?.attacker_casualties ?? null,
+        defender_casualties: battle?.defender_casualties ?? null,
         total_casualties: totalCasualties,
         territory_flipped: battle?.territory_flipped ?? false,
         was_concentrated: battle?.was_concentrated ?? false,
-        attacker_count: battle?.all_attacker_ids?.length ?? 1,
+        attacker_count: battle?.all_attacker_ids?.length ?? null,
         primary_attacker_id: battle?.primary_attacker_id ?? null,
         primary_defender_id: battle?.primary_defender_id ?? null,
       },

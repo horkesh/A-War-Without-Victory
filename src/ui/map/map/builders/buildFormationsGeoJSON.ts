@@ -131,9 +131,7 @@ export function buildFormationsGeoJSON(
     const hQuant = 100; // Personnel pct not easily available per-unit yet
     const rawMorale = typeof formation.morale === 'number' && Number.isFinite(formation.morale)
       ? formation.morale
-      : typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion)
-        ? formation.cohesion
-        : null;
+      : null;
     const statusSuffix = rawMorale == null
       ? `__h${hQuant}__munreported`
       : `__h${hQuant}__m${Math.round(rawMorale / 10) * 10}`;

@@ -151,6 +151,31 @@ describe('buildForceableReadyPlans — proactive force-launch read-model', () =>
         expect(views.some((v) => v.corps_id === 'vrs_drina_corps')).toBe(false);
     });
 
+    it('EXCLUDES stale corps_command rows when player faction is known and no corps formation resolves', () => {
+        const state = {
+            meta: { player_faction: 'RBiH' },
+            military: {
+                formations: {
+                    arbih_1st_corps: { name: '1st Corps', faction: 'RBiH' },
+                },
+                named_officers: {},
+                corps_command: {
+                    stale_vrs_corps: {
+                        commander_state: {
+                            current_plan: {
+                                plan_id: 'stale_plan',
+                                status: 'ready',
+                                objective_description: 'Foreign stale operation',
+                            },
+                        },
+                    },
+                },
+            },
+        };
+
+        expect(buildForceableReadyPlans(state, ROSTER, [])).toEqual([]);
+    });
+
     it('is deterministic — sorted by corps id then plan id', () => {
         const state = {
             military: {

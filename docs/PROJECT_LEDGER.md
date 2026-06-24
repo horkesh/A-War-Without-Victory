@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): preserve map and command ownership truth
+
+**Type:** UI/read-model/map-projection/test/docs polish.
+
+**Fix:** Staged order arrows and ghost paths now require explicit physical formation locations rather than AoR/HQ anchors; formation marker morale no longer falls back to cohesion; operation opportunity dossiers ignore stale, resolved, or foreign review rows; proactive force-launch cards require resolved player-owned corps formation truth when the player faction is known; formation tooltips render missing cohesion as unreported; front-stability overlays expose missing threat intensity as unreported rather than low/static; battle-marker properties no longer invent zero casualties or one attacker when only a combat flip exists; and the battle-marker renderer coalesces nullable casualties only at the radius-sizing boundary.
+
+**Verification:** Focused red/green packet passed 7 files / 100 tests: `node node_modules\vitest\vitest.mjs run tests\ui_map_game_state_adapter.test.ts tests\ui\proactive_force_launch.test.ts tests\ui\sector_staged_order_map_feedback.test.ts tests\ui_map_render_smoke.test.ts tests\ui\aar_tooltip_friction_labels.test.ts tests\ui_map_front_stability.test.ts tests\ui_map_battle_casualty_truth.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 578 tests. `npm.cmd run qa:live-surface:browser` passed and verified dev-server cleanup; `.tmp_live_surface_browser_sweep` was removed. Report: `docs/40_reports/implemented/20260624_MAP_COMMAND_OWNERSHIP_TRUTH_NEXT.md`.
+
+**Scope/determinism:** UI/read-model/map-projection/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint artifact, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth
 
 **Type:** UI/read-model/routing/map/test/docs polish.

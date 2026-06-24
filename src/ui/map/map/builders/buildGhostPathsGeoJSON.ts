@@ -2,7 +2,7 @@ import type { Feature, FeatureCollection, LineString } from 'geojson';
 import type { LoadedGameState } from '../../data/types';
 import type { StagedOrder } from '../../store/gameStore';
 import { buildOsidCentroidLookup, resolveOsidKey } from './geojsonLookup';
-import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
+import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { hashString, buildBezierCurve } from './arrowGeometry';
 import { resolveSectorOrderTargetOsid } from './resolveSectorOrderTarget';
 
@@ -38,7 +38,7 @@ export function buildGhostPathsGeoJSON(
         const formation = formationById.get(order.formationId);
         if (!formation) continue;
 
-        const sourceOsid = resolveFormationLocationOsid(formation, centroidLookup);
+        const sourceOsid = resolveFormationPhysicalLocationOsid(formation, centroidLookup);
         if (!sourceOsid) continue;
 
         const targetOsid = resolveSectorOrderTargetOsid(order, state, centroidLookup, sourceOsid)

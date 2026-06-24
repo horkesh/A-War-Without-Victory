@@ -184,6 +184,12 @@ export function isOperationOpportunityReview(review: {
     return typeof review.proposed_action === 'string' && review.proposed_action.startsWith(REVIEW_ACTION_PREFIX);
 }
 
+function isLivePlayerOpportunityReview(review: RawRecord, playerFaction: string | null | undefined): boolean {
+    if (review.accepted != null || review.resolved_turn != null) return false;
+    const faction = typeof review.faction === 'string' ? review.faction : undefined;
+    return playerFactionMatch(faction, playerFaction);
+}
+
 export function deriveOperationOpportunityProposals(
     state: any,
     playerFaction: string | null | undefined,
@@ -199,7 +205,9 @@ export function deriveOperationOpportunityProposals(
         : [];
     for (const review of reviews) {
         const proposalId = getReviewProposalId(review);
-        if (proposalId) reviewByProposalId.set(proposalId, review);
+        if (!proposalId) continue;
+        if (!isLivePlayerOpportunityReview(review, playerFaction)) continue;
+        reviewByProposalId.set(proposalId, review);
     }
 
     const result: OperationOpportunityProposalView[] = [];

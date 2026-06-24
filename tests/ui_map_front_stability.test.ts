@@ -59,4 +59,27 @@ describe('buildFrontStabilityGeoJSON', () => {
     expect(result.features[0].properties.stability_class).toBe('support');
     expect(result.features[0].geometry).toEqual(input.features[0].geometry);
   });
+
+  it('does not treat missing threat intensity as low-threat static truth', () => {
+    const result = buildFrontStabilityGeoJSON({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {
+            lineType: 'front',
+            factionA: 'RBiH',
+            factionB: 'RS',
+            avg_entrenchment: 4,
+            brigade_count: 3,
+          },
+          geometry: { type: 'LineString', coordinates: [[0, 0], [1, 1]] },
+        },
+      ],
+    } as any);
+
+    expect(result.features[0].properties.stability_class).toBe('fluid');
+    expect(result.features[0].properties.stability_score).toBeNull();
+    expect(result.features[0].properties.threat_reported).toBe(false);
+  });
 });

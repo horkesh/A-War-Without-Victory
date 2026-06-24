@@ -1,3 +1,11 @@
+## 2026-06-24 - Map and command ownership truth
+
+**AoR/HQ anchors are not movement origins:** command anchors and area coverage can orient the player but are not physical unit presence. Durable rule: staged arrows, ghost paths, battle/movement origins, and tactical movement feedback must use explicit physical `location_osid`; reserve AoR and `hq_osid` are navigation context only. Applied in `[2026-06-24] fix(ui): preserve map and command ownership truth`; report `docs/40_reports/implemented/20260624_MAP_COMMAND_OWNERSHIP_TRUTH_NEXT.md`.
+
+**Marker/read-model absence is unreported, not a favorable zero:** missing morale, cohesion, threat, battle casualties, and attacker counts are source gaps. Durable rule: do not substitute cohesion for morale, missing cohesion for `0`, missing threat for low/static stability, or absent battle rows for zero casualties / one attacker. Coalesce nullable values only at pure renderer-sizing boundaries. Applied in `[2026-06-24] fix(ui): preserve map and command ownership truth`; report `docs/40_reports/implemented/20260624_MAP_COMMAND_OWNERSHIP_TRUTH_NEXT.md`.
+
+**Opportunity cards are live player-review owned:** raw proposal-review rows can be stale, resolved, or foreign. Durable rule: operation opportunity dossiers and proactive force-launch cards should require unresolved player-faction ownership and resolved corps formation ownership before presenting player action. Applied in `[2026-06-24] fix(ui): preserve map and command ownership truth`; report `docs/40_reports/implemented/20260624_MAP_COMMAND_OWNERSHIP_TRUTH_NEXT.md`.
+
 ## 2026-06-24 - Player surface blocker, ORBAT, and supply truth
 
 **Modal-required blockers are required even when visual severity is not `blocking`:** convoy, peace, and Dayton decisions can block advance while carrying non-blocking visual severity for card prioritization. Durable rule: Desk required counts and pre-advance fallback status/counts should derive from `derivePresidentialBlockers(...)`, not from `InboxItem.severity` alone. Applied in `[2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth`; report `docs/40_reports/implemented/20260624_PLAYER_SURFACE_POLISH_WAVE.md`.
