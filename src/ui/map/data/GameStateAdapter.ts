@@ -2142,12 +2142,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 assigned_brigade_ids: assignedBrigadeIds,
                 reserve_brigade_ids: reserveBrigadeIds,
                 rear_brigade_ids: rearBrigadeIds,
-                density: typeof s.density === 'number' ? s.density : 0,
-                threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : 0,
-                defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : 0,
-                // New intel fields defaulting for backwards compatibility:
-                intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : 1.0,
-                offensive_signs: Boolean(s.offensive_signs),
+                density: typeof s.density === 'number' ? s.density : undefined,
+                threat_ratio: typeof s.threat_ratio === 'number' ? s.threat_ratio : undefined,
+                defensive_power: typeof s.defensive_power === 'number' ? s.defensive_power : undefined,
+                intel_confidence: typeof s.intel_confidence === 'number' ? s.intel_confidence : undefined,
+                offensive_signs: typeof s.offensive_signs === 'boolean' ? s.offensive_signs : undefined,
                 logistics_priority: hasReportedLogisticsPriority && edgeIds.length > 0
                     ? edgeIds.reduce((sum, edgeId) => {
                         const value = factionPriorities?.[edgeId];

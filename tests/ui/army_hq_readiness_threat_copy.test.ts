@@ -97,13 +97,15 @@ describe('Army HQ readiness and threat copy', () => {
         const item: CorpsReadiness = {
             corpsId: 'corps_1',
             corpsName: '1st Corps',
-            grade: 'COMBAT READY',
+            grade: 'UNREPORTED',
             ineffectiveCount: 2,
             totalBrigades: 5,
             avgFatigue: 7,
             avgCohesion: 82,
             disruptedCount: 1,
             overextendedCount: 1,
+            incompleteAssessmentCount: 0,
+            missingAssessmentFields: [],
             activeOpName: 'Test Operation',
             activeOpBrigadeCount: 3,
             hasThreat: true,
@@ -156,7 +158,7 @@ describe('Army HQ readiness and threat copy', () => {
     it('generates typed ForceReadiness recommendation ids instead of using English strings as control flow', () => {
         const items = generateForceReadiness([
             { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
-            { id: 'brigade_1', name: '1st Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
+            { id: 'brigade_1', name: '1st Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80, morale: 65, officer_quality: 0.6 },
         ] as any, [], 'RBiH', new Set(['corps_1']));
 
         expect(items).toHaveLength(1);
@@ -171,7 +173,7 @@ describe('Army HQ readiness and threat copy', () => {
     it('excludes active-but-forming brigades from ForceReadiness combat counts', () => {
         const items = generateForceReadiness([
             { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
-            { id: 'fielded', name: 'Fielded Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80 },
+            { id: 'fielded', name: 'Fielded Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 4, cohesion: 80, morale: 65, officer_quality: 0.6 },
             { id: 'forming', name: 'Forming Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'forming', status: 'active', corps_id: 'corps_1', personnel: 900, fatigue: 0, cohesion: 50 },
         ] as any, [], 'RBiH', new Set());
 
@@ -179,36 +181,41 @@ describe('Army HQ readiness and threat copy', () => {
         expect(items[0]?.avgCohesion).toBe(80);
     });
 
-    it('does not average unreported condition fields as zero readiness', () => {
+    it('marks sparse grade-critical readiness fields as assessment incomplete', () => {
         const items = generateForceReadiness([
             { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
-            { id: 'reported', name: 'Reported Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 6, cohesion: 76 },
+            { id: 'reported', name: 'Reported Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 6, cohesion: 76, morale: 60, officer_quality: 0.6 },
             { id: 'unreported', name: 'Unreported Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200 },
         ] as any, [], 'RBiH', new Set());
 
         expect(items[0]?.avgFatigue).toBe(6);
         expect(items[0]?.avgCohesion).toBe(76);
-        expect(items[0]?.grade).toBe('COMBAT READY');
+        expect(items[0]?.grade).toBe('UNREPORTED');
+        expect(items[0]?.recommendationId).toBe('assessment_incomplete');
+        expect(items[0]?.incompleteAssessmentCount).toBe(1);
     });
 
     it('renders absent force-readiness condition data as unreported', () => {
         const item: CorpsReadiness = {
             corpsId: 'corps_1',
             corpsName: '1st Corps',
-            grade: 'COMBAT READY',
+            grade: 'UNREPORTED',
             ineffectiveCount: 0,
             totalBrigades: 1,
             avgFatigue: null,
             avgCohesion: null,
             disruptedCount: 0,
             overextendedCount: 0,
+            incompleteAssessmentCount: 1,
+            missingAssessmentFields: ['fatigue', 'cohesion'],
             hasThreat: false,
-            recommendationId: 'hold',
-            recommendation: 'Hold',
+            recommendationId: 'assessment_incomplete',
+            recommendation: 'Assessment incomplete',
         };
 
         const html = renderToStaticMarkup(createElement(ForceReadiness, { items: [item] }));
         expect(html).toContain('fatigue unreported');
+        expect(html).toContain('ASSESSMENT INCOMPLETE');
         expect(html).not.toContain('fatigue 0/30');
     });
 

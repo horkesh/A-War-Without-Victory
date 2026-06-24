@@ -57,6 +57,25 @@ function IntelBar({ value, label }: { value: number; label: string }) {
     );
 }
 
+function isReportedNumber(value: number | undefined | null): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+function reportedPersonnelLabel(value: number | undefined | null): string {
+    return isReportedNumber(value) ? formatPersonnel(value) : t('corpsFront.unreported');
+}
+
+function reportedCohesionLabel(value: number | undefined | null): { label: string; className: string } {
+    if (!isReportedNumber(value)) {
+        return { label: t('corpsFront.unreported'), className: 'text-text-secondary/60 italic' };
+    }
+    const cohesion = Math.round(value);
+    return {
+        label: `${cohesion}%`,
+        className: cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500',
+    };
+}
+
 const STRENGTH_CLASS_COLORS: Record<string, string> = {
     fortress: 'text-emerald-400',
     strong: 'text-emerald-400/80',
@@ -96,26 +115,29 @@ function SectorExpandedDetail({
     const projectedDensity = computeCurrentFrontDensity(sector, projectedLineCount);
 
     const threatRatio = sector.threat_ratio;
-    const threatPresentation = getPlayerSafeThreatPresentation(threatRatio);
-    const stanceHint = threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
+    const hasReportedThreat = isReportedNumber(threatRatio);
+    const threatPresentation = hasReportedThreat ? getPlayerSafeThreatPresentation(threatRatio) : null;
+    const stanceHint = !hasReportedThreat ? null : threatRatio > 1.5 ? 'fortify' : threatRatio > 1.0 ? 'defend' : null;
     const currentStance = normalizeSectorStance(sector.sector_stance);
-    const hasThreatIntel = sector.intel_confidence >= THREAT_INTEL_CONFIDENCE_MIN;
+    const hasThreatIntel = isReportedNumber(sector.intel_confidence) && sector.intel_confidence >= THREAT_INTEL_CONFIDENCE_MIN;
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
             <div className="space-y-2">
-                <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />
-                {!hasThreatIntel && threatRatio > 0 && (
+                {isReportedNumber(sector.intel_confidence)
+                    ? <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />
+                    : <div className="text-[10px] text-text-secondary/60">{t('corpsFront.unreported')}</div>}
+                {!hasThreatIntel && hasReportedThreat && threatRatio > 0 && (
                     <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
                         {t('sectorsSection.threatUnconfirmed')}
                     </div>
                 )}
                 {hasThreatIntel && sector.offensive_signs && (
                     <div className="flex items-center gap-2 text-[10px] text-red-400 font-bold animate-pulse">
-                        <span className="text-red-500">!</span> {t('sectorsSection.offensiveSignsDetected', { threat: threatPresentation.label })}
+                        <span className="text-red-500">!</span> {t('sectorsSection.offensiveSignsDetected', { threat: threatPresentation?.label ?? t('corpsFront.unreported') })}
                     </div>
                 )}
-                {hasThreatIntel && !sector.offensive_signs && threatRatio > 0 && (
+                {hasThreatIntel && !sector.offensive_signs && hasReportedThreat && threatRatio > 0 && threatPresentation && (
                     <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
                         {t('sectorsSection.threat')} <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
@@ -147,17 +169,17 @@ function SectorExpandedDetail({
                         {frontIds.map((id) => {
                             const b = formationMap.get(id);
                             if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
-                            const cohesion = Math.round(b.cohesion ?? 0);
+                            const cohesion = reportedCohesionLabel(b.cohesion);
                             const isDisrupted = (b.disrupted_turns ?? 0) > 0;
                             return (
                                 <div key={id}>
                                     <div className="flex items-center gap-3">
                                         <span className="truncate flex-1 min-w-0 text-text-secondary">{getLocalizedFormationName(b, locale)}</span>
                                         <span className="text-text-secondary tabular-nums w-12 text-right shrink-0">
-                                            {formatPersonnel(b.personnel ?? 0)}
+                                            {reportedPersonnelLabel(b.personnel)}
                                         </span>
-                                        <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500'}`}>
-                                            {cohesion}%
+                                        <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion.className}`}>
+                                            {cohesion.label}
                                         </span>
                                         {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">{t('sectorsSection.disrupted')}</span>}
                                         <button
@@ -201,7 +223,7 @@ function SectorExpandedDetail({
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
                                     <span className="tabular-nums w-12 text-right shrink-0">
-                                        {formatPersonnel(b.personnel ?? 0)}
+                                        {reportedPersonnelLabel(b.personnel)}
                                     </span>
                                     {b.location_osid && (
                                         <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
@@ -243,7 +265,7 @@ function SectorExpandedDetail({
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
                                     <span className="tabular-nums w-12 text-right shrink-0">
-                                        {formatPersonnel(b.personnel ?? 0)}
+                                        {reportedPersonnelLabel(b.personnel)}
                                     </span>
                                     <span className="text-[9px] uppercase tracking-wide text-accent-gold shrink-0">{t('sectorsSection.overrideBadge')}</span>
                                     <button
@@ -354,8 +376,12 @@ function pickDefaultSectorId(sectors: CorpsFrontSectorView[], factionBattles: Tu
         const aBattles = battleCounts.get(a.sector_id) ?? 0;
         const bBattles = battleCounts.get(b.sector_id) ?? 0;
         if (aBattles !== bBattles) return bBattles - aBattles;
-        if (a.threat_ratio !== b.threat_ratio) return b.threat_ratio - a.threat_ratio;
-        if (a.density !== b.density) return a.density - b.density;
+        const aThreat = isReportedNumber(a.threat_ratio) ? a.threat_ratio : -Infinity;
+        const bThreat = isReportedNumber(b.threat_ratio) ? b.threat_ratio : -Infinity;
+        if (aThreat !== bThreat) return bThreat - aThreat;
+        const aDensity = isReportedNumber(a.density) ? a.density : Infinity;
+        const bDensity = isReportedNumber(b.density) ? b.density : Infinity;
+        if (aDensity !== bDensity) return aDensity - bDensity;
         return compareText(a.sector_id, b.sector_id);
     })[0]?.sector_id ?? null;
 }

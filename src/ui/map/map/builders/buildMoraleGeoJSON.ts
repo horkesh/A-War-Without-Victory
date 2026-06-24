@@ -9,7 +9,8 @@ import { collectSectorFriendlyOsids } from '../../utils/sectorUtils';
 
 interface MoraleProperties {
   osid: string;
-  morale: number;
+  morale: number | null;
+  morale_reported: boolean;
   sector_id: string;
   faction: string;
 }
@@ -20,9 +21,11 @@ export function buildMoraleGeoJSON(
   frontEdgesOsid: FrontEdgeView[],
 ): FeatureCollection<Polygon | MultiPolygon, MoraleProperties> {
   // Build OSID → morale/sector lookup
-  const osidInfo = new Map<string, { morale: number; sector_id: string; faction: string }>();
+  const osidInfo = new Map<string, { morale: number | null; sector_id: string; faction: string }>();
   for (const sector of sectors) {
-    const morale = sector.combat_morale_avg ?? 50;
+    const morale = typeof sector.combat_morale_avg === 'number' && Number.isFinite(sector.combat_morale_avg)
+      ? sector.combat_morale_avg
+      : null;
     const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
     for (const osid of friendlyOsids) {
       osidInfo.set(osid, { morale, sector_id: sector.sector_id, faction: sector.faction });
@@ -40,7 +43,8 @@ export function buildMoraleGeoJSON(
       type: 'Feature',
       properties: {
         osid,
-        morale: Math.round(info.morale),
+        morale: info.morale == null ? null : Math.round(info.morale),
+        morale_reported: info.morale != null,
         sector_id: info.sector_id,
         faction: info.faction,
       },

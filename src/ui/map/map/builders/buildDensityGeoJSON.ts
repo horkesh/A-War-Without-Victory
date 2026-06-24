@@ -40,6 +40,7 @@ export function buildDensityGeoJSON(
       })
       : assignmentLineHoldingIds;
     if (lineHoldingIds.length === 0) continue;
+    if (typeof sector.density !== 'number' || !Number.isFinite(sector.density)) continue;
     const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
     for (const osid of friendlyOsids) {
       osidInfo.set(osid, { density: sector.density, sector_id: sector.sector_id, faction: sector.faction });

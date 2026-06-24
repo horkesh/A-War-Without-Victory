@@ -2667,12 +2667,17 @@ export function MapContainer() {
             source: OSID_MORALE_SOURCE_ID,
             paint: {
               'fill-color': [
-                'interpolate', ['linear'], ['get', 'morale'],
-                0, 'rgba(204, 34, 34, 0.45)',
-                25, 'rgba(204, 102, 34, 0.40)',
-                45, 'rgba(204, 170, 34, 0.35)',
-                65, 'rgba(136, 170, 34, 0.35)',
-                85, 'rgba(34, 136, 68, 0.35)',
+                'case',
+                ['==', ['get', 'morale_reported'], true],
+                [
+                  'interpolate', ['linear'], ['coalesce', ['get', 'morale'], 50],
+                  0, 'rgba(204, 34, 34, 0.45)',
+                  25, 'rgba(204, 102, 34, 0.40)',
+                  45, 'rgba(204, 170, 34, 0.35)',
+                  65, 'rgba(136, 170, 34, 0.35)',
+                  85, 'rgba(34, 136, 68, 0.35)',
+                ],
+                'rgba(160, 160, 160, 0.14)',
               ],
             },
           },

@@ -44,6 +44,7 @@ const COHESION_HEALTHY = 70;
 
 const GRADE_COLORS: Record<string, string> = {
     A: 'text-emerald-400', B: 'text-accent-gold', C: 'text-amber-500', D: 'text-red-500', F: 'text-red-600',
+    UNREPORTED: 'text-text-secondary',
 };
 
 const STANCE_LABEL_KEYS: Record<string, MessageKey> = {
@@ -67,6 +68,7 @@ const READINESS_BORDER: Record<string, string> = {
     'STRAINED': 'border-l-amber-500',
     'DEGRADED': 'border-l-red-500',
     'INEFFECTIVE': 'border-l-red-600',
+    'UNREPORTED': '',
 };
 
 function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
@@ -239,7 +241,7 @@ export function ArmyHQCorpsCard({
                     {readinessGrade && (
                         <>
                             <div className="w-1 h-3 border-l border-panel-border" />
-                            <span className={`font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : 'text-red-400'}`}>
+                            <span className={`font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : readinessGrade === 'UNREPORTED' ? 'text-text-secondary' : 'text-red-400'}`}>
                                 {readinessGradeLabel(readinessGrade)}
                             </span>
                         </>

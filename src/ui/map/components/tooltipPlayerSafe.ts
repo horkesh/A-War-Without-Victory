@@ -224,9 +224,9 @@ export function buildPlayerSafeFrontTooltipModel(args: {
     sectorName: ownSector ? getPlayerFacingSectorName(ownSector.sector_id, [ownSector]) : null,
     sectorStatusLine: ownSector && !ownSectorHasCurrentLine ? t('tooltip.noFriendlyLine', undefined, locale) : null,
     pressureLine,
-    densityValue: ownSector && ownSectorHasCurrentLine ? ownSector.density : null,
-    densityLabel: ownSector && ownSectorHasCurrentLine ? getDensityLabel(ownSector.density, locale) : null,
-    threatSummary: ownSector && ownSectorHasCurrentLine ? getPlayerSafeThreatPresentation(ownSector.threat_ratio).summary : null,
+    densityValue: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? ownSector.density : null,
+    densityLabel: ownSector && ownSectorHasCurrentLine && typeof ownSector.density === 'number' && Number.isFinite(ownSector.density) ? getDensityLabel(ownSector.density, locale) : null,
+    threatSummary: ownSector && ownSectorHasCurrentLine && typeof ownSector.threat_ratio === 'number' && Number.isFinite(ownSector.threat_ratio) ? getPlayerSafeThreatPresentation(ownSector.threat_ratio).summary : null,
     ownFormationLabels,
     enemyContactSummary: enemyContacts.length > 0
       ? t(enemyContacts.length === 1 ? 'tooltip.enemyContact.one' : 'tooltip.enemyContact.many', { count: enemyContacts.length }, locale)

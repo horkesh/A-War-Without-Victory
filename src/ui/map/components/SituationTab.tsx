@@ -220,7 +220,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
     .slice(0, 3);
   const activeOpsecSectors = [...(state.corpsFrontSectors ?? [])]
     .filter((sector) => sector.faction === playerFaction && sector.opsec_active)
-    .sort((a, b) => b.threat_ratio - a.threat_ratio || a.display_name.localeCompare(b.display_name));
+    .sort((a, b) => (b.threat_ratio ?? -Infinity) - (a.threat_ratio ?? -Infinity) || a.display_name.localeCompare(b.display_name));
   const focusedMode = !!focusSection && focusSection !== 'overview';
   const showSection = (section: SummaryFocusSection): boolean => !focusedMode || focusSection === section;
 
@@ -477,7 +477,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                   <span className="text-[10px] uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
                 </div>
                 <div className="text-text-secondary">
-                  Pressure {getPlayerSafeThreatPresentation(sector.threat_ratio).summary} · Intel {(sector.intel_confidence * 100).toFixed(0)}%
+                  Pressure {typeof sector.threat_ratio === 'number' && Number.isFinite(sector.threat_ratio) ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : t('corpsFront.unreported')} · Intel {typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence) ? `${(sector.intel_confidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}
                   {sector.offensive_signs ? ' · Offensive signs detected' : ''}
                 </div>
               </div>

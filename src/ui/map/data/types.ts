@@ -879,11 +879,11 @@ export interface CorpsFrontSectorView {
     assigned_brigade_ids: string[];
     reserve_brigade_ids: string[];
     rear_brigade_ids?: string[];
-    density: number;
-    threat_ratio: number;
-    defensive_power: number;
-    intel_confidence: number;
-    offensive_signs: boolean;
+    density?: number;
+    threat_ratio?: number;
+    defensive_power?: number;
+    intel_confidence?: number;
+    offensive_signs?: boolean;
     logistics_priority?: number;
     opsec_active?: boolean;
     /** Sector combat power rating — offensive power aggregate. */

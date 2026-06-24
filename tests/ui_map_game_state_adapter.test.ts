@@ -409,6 +409,56 @@ test('parseGameState keeps missing sector stance unreported', () => {
     assert.equal(parsed.corpsFrontSectors?.[0]?.stance_source, undefined);
 });
 
+test('parseGameState preserves missing sector tactical and intel metrics as unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        factions: [{ id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] }],
+        military: {
+            formations: {},
+            militia_pools: {},
+            corps_front_sectors: {
+                missing_metrics: {
+                    sector_id: 'missing_metrics',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                },
+                explicit_zero: {
+                    sector_id: 'explicit_zero',
+                    corps_id: 'arbih_3rd_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: [],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                    intel_confidence: 1,
+                    offensive_signs: false,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    const missing = parsed.corpsFrontSectors?.find((sector) => sector.sector_id === 'missing_metrics');
+    const explicit = parsed.corpsFrontSectors?.find((sector) => sector.sector_id === 'explicit_zero');
+
+    assert.equal(missing?.density, undefined);
+    assert.equal(missing?.threat_ratio, undefined);
+    assert.equal(missing?.defensive_power, undefined);
+    assert.equal(missing?.intel_confidence, undefined);
+    assert.equal(missing?.offensive_signs, undefined);
+
+    assert.equal(explicit?.density, 0);
+    assert.equal(explicit?.threat_ratio, 0);
+    assert.equal(explicit?.defensive_power, 0);
+    assert.equal(explicit?.intel_confidence, 1);
+    assert.equal(explicit?.offensive_signs, false);
+});
+
 test('parseGameState keeps missing sector logistics and opsec truth unreported', () => {
     const parsed = parseGameState({
         meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },

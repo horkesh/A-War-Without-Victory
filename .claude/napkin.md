@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**SECTOR INTEL ABSENCE IS NOT ZERO THREAT OR FULL CONFIDENCE (2026-06-24).** Missing density, threat ratio, defensive power, intel confidence, offensive signs, or morale are source gaps. Do instead: preserve absence through adapter/read-models, render unreported/redacted copy, skip density features without density, and use explicit `morale_reported` before coloring morale layers.
+
+**ARMY HQ GRADES REQUIRE GRADE-CRITICAL FIELDS (2026-06-24).** Missing personnel, fatigue, cohesion, morale, or officer-quality must not produce favorable readiness/effectiveness grades. Do instead: flag the affected corps/aggregate as incomplete/unreported while keeping numeric estimates only as context.
+
 **MODAL-REQUIRED BLOCKERS ARE REQUIRED EVEN IF CARD SEVERITY IS NORMAL (2026-06-24).** Convoy, peace, and Dayton decisions can block advance without `severity: blocking`. Do instead: derive Desk required counts and pre-advance fallback blocker status from `derivePresidentialBlockers(...)`, not `InboxItem.severity` alone.
 
 **ANSWERED CONVOY ROWS ARE NOT PENDING BLOCKERS (2026-06-24).** Staged convoy decisions remain in state until turn advance, but they are no longer actionable choices. Do instead: filter `pending_convoy_decisions` rows with a recorded `decision` before Inbox/Desk/blocker projection.

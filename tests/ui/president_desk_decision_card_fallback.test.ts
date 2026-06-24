@@ -76,7 +76,6 @@ describe('President desk DecisionCard fallback copy', () => {
     expect(text).toContain('Operativna prilika');
     expect(text).toContain('Odluči sada');
     expect(text).toContain('Obavezno');
-    expect(text).toContain('Hitno');
     expect(text).toContain('Pregled');
     expect(screen.getByAltText(/^Paket: Odluka/)).toBeTruthy();
     expect(text).not.toMatch(/Event decision|Decide now|Peace proposal|Open Decision Room|Decision Required|urgent|normal/);

@@ -12,8 +12,9 @@ import { t, type MessageKey } from '../../i18n';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
-export type ReadinessGrade = 'COMBAT READY' | 'ADEQUATE' | 'STRAINED' | 'DEGRADED' | 'INEFFECTIVE';
+export type ReadinessGrade = 'COMBAT READY' | 'ADEQUATE' | 'STRAINED' | 'DEGRADED' | 'INEFFECTIVE' | 'UNREPORTED';
 export type ForceReadinessRecommendationId =
+    | 'assessment_incomplete'
     | 'reorganize_immediately'
     | 'reorganize_two_turns'
     | 'reinforce_threat'
@@ -33,6 +34,8 @@ export interface CorpsReadiness {
     avgCohesion: number | null;
     disruptedCount: number;
     overextendedCount: number;  // brigades far from home
+    incompleteAssessmentCount: number;
+    missingAssessmentFields: string[];
     activeOpName?: string;
     activeOpBrigadeCount?: number;
     hasThreat: boolean;
@@ -51,12 +54,28 @@ function averageReported(values: ReadonlyArray<number | undefined | null>): numb
     return reported.reduce((sum, value) => sum + value, 0) / reported.length;
 }
 
+const ASSESSMENT_FIELDS = ['personnel', 'fatigue', 'cohesion', 'morale', 'officer_quality'] as const;
+
+function hasReportedNumber(value: number | undefined | null): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+function missingAssessmentFields(formation: FormationView): string[] {
+    const missing: string[] = [];
+    for (const field of ASSESSMENT_FIELDS) {
+        if (!hasReportedNumber(formation[field])) missing.push(field);
+    }
+    return missing;
+}
+
 export function computeReadinessGrade(
     ineffPct: number,
     avgFatigue: number,
     avgCohesion: number,
     disruptedCount: number,
+    incompleteAssessment: boolean = false,
 ): ReadinessGrade {
+    if (incompleteAssessment) return 'UNREPORTED';
     if (ineffPct > 0.5 || avgCohesion < 30) return 'INEFFECTIVE';
     if (ineffPct > 0.3 || avgFatigue > 20 || avgCohesion < 45) return 'DEGRADED';
     if (ineffPct > 0.15 || avgFatigue > 15 || disruptedCount > 3) return 'STRAINED';
@@ -69,6 +88,7 @@ function getRecommendationId(
     hasThreat: boolean,
     hasActiveOp: boolean,
 ): ForceReadinessRecommendationId {
+    if (grade === 'UNREPORTED') return 'assessment_incomplete';
     if (grade === 'INEFFECTIVE') return 'reorganize_immediately';
     if (grade === 'DEGRADED' && !hasThreat) return 'reorganize_two_turns';
     if (grade === 'DEGRADED' && hasThreat) return 'reinforce_threat';
@@ -106,6 +126,8 @@ export function generateForceReadiness(
                 avgCohesion: 0,
                 disruptedCount: 0,
                 overextendedCount: 0,
+                incompleteAssessmentCount: 0,
+                missingAssessmentFields: [],
                 hasThreat: threatCorpsIds.has(corps.id),
                 recommendationId: 'no_brigades',
                 recommendation: 'No brigades assigned',
@@ -113,6 +135,9 @@ export function generateForceReadiness(
             continue;
         }
 
+        const missingByBrigade = corpsBrigades.map(missingAssessmentFields);
+        const incompleteAssessmentCount = missingByBrigade.filter((missing) => missing.length > 0).length;
+        const missingAssessmentFieldSet = new Set(missingByBrigade.flat());
         const ineffectiveCount = corpsBrigades.filter(b => (b.personnel ?? 0) < PERSONNEL_INEFFECTIVE).length;
         const ineffPct = ineffectiveCount / corpsBrigades.length;
         const avgFatigue = averageReported(corpsBrigades.map(b => b.fatigue));
@@ -125,7 +150,7 @@ export function generateForceReadiness(
         );
         const hasThreat = threatCorpsIds.has(corps.id);
 
-        const grade = computeReadinessGrade(ineffPct, avgFatigue ?? 0, avgCohesion ?? 100, disruptedCount);
+        const grade = computeReadinessGrade(ineffPct, avgFatigue ?? 0, avgCohesion ?? 100, disruptedCount, incompleteAssessmentCount > 0);
         const recommendationId = getRecommendationId(grade, hasThreat, !!activeOp);
 
         result.push({
@@ -138,6 +163,8 @@ export function generateForceReadiness(
             avgCohesion: avgCohesion == null ? null : Math.round(avgCohesion),
             disruptedCount,
             overextendedCount,
+            incompleteAssessmentCount,
+            missingAssessmentFields: [...missingAssessmentFieldSet].sort(),
             activeOpName: activeOp?.name,
             activeOpBrigadeCount: activeOp?.participating_brigade_ids?.length,
             hasThreat,
@@ -157,6 +184,7 @@ const GRADE_COLORS: Record<ReadinessGrade, string> = {
     'STRAINED': 'text-amber-400',
     'DEGRADED': 'text-red-400',
     'INEFFECTIVE': 'text-red-500',
+    'UNREPORTED': 'text-text-secondary',
 };
 
 const GRADE_BORDERS: Record<ReadinessGrade, string> = {
@@ -165,6 +193,7 @@ const GRADE_BORDERS: Record<ReadinessGrade, string> = {
     'STRAINED': 'border-amber-500/40',
     'DEGRADED': 'border-red-500/40',
     'INEFFECTIVE': 'border-red-600/60',
+    'UNREPORTED': 'border-panel-border/50',
 };
 
 export const READINESS_GRADE_LABEL_KEYS: Record<ReadinessGrade, MessageKey> = {
@@ -173,9 +202,11 @@ export const READINESS_GRADE_LABEL_KEYS: Record<ReadinessGrade, MessageKey> = {
     'STRAINED': 'forceReadiness.grade.strained',
     'DEGRADED': 'forceReadiness.grade.degraded',
     'INEFFECTIVE': 'forceReadiness.grade.ineffective',
+    'UNREPORTED': 'forceReadiness.grade.unreported',
 };
 
 const RECOMMENDATION_LABEL_KEYS: Record<ForceReadinessRecommendationId, MessageKey> = {
+    assessment_incomplete: 'forceReadiness.recommendation.assessmentIncomplete',
     reorganize_immediately: 'forceReadiness.recommendation.reorganizeImmediately',
     reorganize_two_turns: 'forceReadiness.recommendation.reorganizeTwoTurns',
     reinforce_threat: 'forceReadiness.recommendation.reinforceThreat',
@@ -195,6 +226,7 @@ const LEGACY_RECOMMENDATION_IDS: Record<string, ForceReadinessRecommendationId> 
     'Reduce operations tempo': 'reduce_tempo',
     Hold: 'hold',
     'No brigades assigned': 'no_brigades',
+    'Assessment incomplete': 'assessment_incomplete',
 };
 
 export function readinessGradeLabel(grade: ReadinessGrade): string {
@@ -254,6 +286,9 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                 )}
                                 {item.overextendedCount > 0 && (
                                     <span>{t('forceReadiness.overextendedCount', { count: item.overextendedCount })}</span>
+                                )}
+                                {item.incompleteAssessmentCount > 0 && (
+                                    <span>{t('forceReadiness.assessmentIncompleteCount', { count: item.incompleteAssessmentCount })}</span>
                                 )}
                                 {item.activeOpName && (
                                     <span className="text-red-400">

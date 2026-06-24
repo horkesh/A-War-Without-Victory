@@ -40,7 +40,10 @@ function StrengthBadge({
 }
 
 /** Threat ratio badge with descriptive balance labels. */
-function ThreatBadge({ ratio }: { ratio: number }) {
+function ThreatBadge({ ratio }: { ratio: number | undefined | null }) {
+  if (typeof ratio !== 'number' || !Number.isFinite(ratio)) {
+    return <span className="text-neutral-500 italic">{t('corpsFront.unreported')}</span>;
+  }
   const { label, summary, toneClass } = getPlayerSafeThreatPresentation(ratio);
 
   return (
@@ -295,7 +298,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     ? sector.combat_fatigue_avg
     : averageFinite(lineHoldingFormations.map((formation) => formation.fatigue));
   const displayOffensivePower = hasFriendlyLine ? sector.combat_offensive_power : undefined;
-  const displayDefensivePower = hasFriendlyLine ? (sector.combat_defensive_power ?? sector.defensive_power) : undefined;
+  const displayDefensivePower = !hasFriendlyLine
+    ? undefined
+    : hasFiniteMetric(sector.combat_defensive_power)
+      ? sector.combat_defensive_power
+      : hasFiniteMetric(sector.defensive_power)
+        ? sector.defensive_power
+        : undefined;
   const displayDefensePerEdge = hasFriendlyLine ? sector.combat_defense_per_edge : undefined;
   const reserveRatio = totalSectorPersonnel > 0 ? reservePersonnel / totalSectorPersonnel : 0;
   const operationSupplyReadinessValues = relatedOperations
@@ -312,6 +321,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, hasReportedLogisticsPriority ? sector.logistics_priority! : 1));
   const hasReportedOpsec = typeof sector.opsec_active === 'boolean';
   const opsecActive = sector.opsec_active === true;
+  const hasReportedIntelConfidence = typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence);
+  const intelConfidence = hasReportedIntelConfidence ? sector.intel_confidence! : null;
+  const hasReliableThreatIntel = intelConfidence != null && intelConfidence >= 0.4;
   const logisticsPriorityTitle = t('corpsFront.logisticsPriorityTitle');
   const metadataDate = loadedGameState.metadata?.date?.trim();
   const displayDate = metadataDate && metadataDate !== 'UNKNOWN'
@@ -383,7 +395,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         </div>
 
         {/* Threat Warning Banner */}
-        {sector.offensive_signs && (
+        {sector.offensive_signs === true && (
           <div className="bg-red-600 text-white font-bold p-2 text-center text-[10px] sm:text-xs uppercase tracking-widest animate-pulse shadow-md relative z-10 border-y border-red-800">
             {t('corpsFront.offensiveDetected')}
           </div>
@@ -414,10 +426,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
               </span>
             </div>
             <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
-              <span><span className="font-bold text-neutral-800">{t('corpsFront.confidence')}:</span> {(sector.intel_confidence * 100).toFixed(0)}%</span>
-              {sector.intel_confidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">{t('corpsFront.low')}</span>}
-              {sector.intel_confidence >= 0.3 && sector.intel_confidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">{t('corpsFront.med')}</span>}
-              {sector.intel_confidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.high')}</span>}
+              <span><span className="font-bold text-neutral-800">{t('corpsFront.confidence')}:</span> {intelConfidence != null ? `${(intelConfidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}</span>
+              {intelConfidence != null && intelConfidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">{t('corpsFront.low')}</span>}
+              {intelConfidence != null && intelConfidence >= 0.3 && intelConfidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">{t('corpsFront.med')}</span>}
+              {intelConfidence != null && intelConfidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.high')}</span>}
             </div>
           </div>
         </div>
@@ -493,7 +505,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.forceBalance')}</span>
                       <div className="pt-0.5">
-                        {sector.intel_confidence < 0.4 ? (
+                        {!hasReliableThreatIntel ? (
                           <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>
                         ) : !hasFriendlyLine ? (
                           <span className="text-red-600 font-bold uppercase tracking-tight">{t('corpsFront.noFriendlyLine')}</span>
@@ -820,7 +832,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.opsSupplyReadiness')}</span>
                   <span className="font-medium">
-                    {sector.intel_confidence < 0.6 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
+                    {intelConfidence == null || intelConfidence < 0.6 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
                   </span>
                 </div>
                 {entrenchmentSummary && (
@@ -868,17 +880,17 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         </div>
 
                         <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
-                          <span>{sector.intel_confidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.display_name}</span>
+                          <span>{intelConfidence == null || intelConfidence < 0.2 ? <span className="bg-black text-black select-none">{t('corpsFront.opRedacted')}</span> : op.display_name}</span>
                           <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{getPlayerSafeOperationPhaseLabel(op.phase)}</span>
                         </div>
 
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">{t('corpsFront.forcesCommitted')}</div>
-                        <div className="text-[10px]">{sector.intel_confidence < 0.4 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.brigadeCount', { count: op.participating_brigade_count })}</div>
+                        <div className="text-[10px]">{intelConfidence == null || intelConfidence < 0.4 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.brigadeCount', { count: op.participating_brigade_count })}</div>
 
                         {op.supply_readiness != null && (
                           <>
                             <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">{t('corpsFront.supplyStatus')}</div>
-                            <div className="text-[10px]">{sector.intel_confidence < 0.7 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.readinessPct', { pct: Math.round(op.supply_readiness * 100) })}</div>
+                            <div className="text-[10px]">{intelConfidence == null || intelConfidence < 0.7 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.readinessPct', { pct: Math.round(op.supply_readiness * 100) })}</div>
                           </>
                         )}
 
@@ -925,7 +937,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                               }}
                               className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
                             >
-                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {sector.intel_confidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : getOsidDisplayName(objective, osidDisplayNames)}
+                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {intelConfidence == null || intelConfidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : getOsidDisplayName(objective, osidDisplayNames)}
                             </button>
                           </div>
                         )}

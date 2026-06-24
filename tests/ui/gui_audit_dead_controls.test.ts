@@ -176,8 +176,8 @@ describe('GUI audit Batch G dead/no-op controls', () => {
             loadedGameState: makeState({
                 formations: [
                     { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps', status: 'active', cohesion: 70, fatigue: 0 },
-                    { id: 'brig_1', name: '101st Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1800, cohesion: 42, fatigue: 25 },
-                    { id: 'brig_2', name: '102nd Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1700, cohesion: 44, fatigue: 23 },
+                    { id: 'brig_1', name: '101st Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1800, cohesion: 42, fatigue: 25, morale: 54, officer_quality: 0.58 },
+                    { id: 'brig_2', name: '102nd Brigade', faction: 'RBiH', kind: 'brigade', status: 'active', corps_id: 'arbih_1st_corps', personnel: 1700, cohesion: 44, fatigue: 23, morale: 56, officer_quality: 0.56 },
                 ] as LoadedGameState['formations'],
                 corpsFrontSectors: [
                     {

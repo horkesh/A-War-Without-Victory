@@ -3,6 +3,7 @@ import type { FeatureCollection, MultiPolygon, Polygon } from 'geojson';
 import type { CorpsFrontSectorView, FormationView, FrontEdgeView } from '../src/ui/map/data/types.js';
 import { buildDefenseStrengthGeoJSON } from '../src/ui/map/map/builders/buildDefenseStrengthGeoJSON.js';
 import { buildDensityGeoJSON } from '../src/ui/map/map/builders/buildDensityGeoJSON.js';
+import { buildMoraleGeoJSON } from '../src/ui/map/map/builders/buildMoraleGeoJSON.js';
 
 const controlGeoJson = {
   type: 'FeatureCollection',
@@ -127,5 +128,17 @@ describe('sector frontline map fills', () => {
 
     expect(missingStrength).toBeGreaterThan(0);
     expect(defensiveStrength).toBeGreaterThan(missingStrength ?? 0);
+  });
+
+  it('marks missing sector morale unreported instead of neutral', () => {
+    const morale = buildMoraleGeoJSON(
+      controlGeoJson,
+      [makeSector({ combat_morale_avg: undefined })],
+      frontEdges,
+    );
+
+    expect(morale.features).toHaveLength(1);
+    expect(morale.features[0]?.properties?.morale).toBeNull();
+    expect(morale.features[0]?.properties?.morale_reported).toBe(false);
   });
 });

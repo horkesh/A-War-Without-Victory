@@ -492,6 +492,34 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toMatch(/Reserve ratio\s*0%/i);
   });
 
+  it('keeps friendly force truth but treats missing hostile intel as unreported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      intel_confidence: undefined,
+      threat_ratio: undefined,
+      defensive_power: undefined,
+      combat_personnel: 1200,
+      combat_morale_avg: 64,
+      combat_cohesion_avg: 70,
+      combat_fatigue_avg: 5,
+      combat_defensive_power: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Confidence:\s*Unreported/i);
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
+    expect(container.textContent).toMatch(/Force Balance\s*Redacted/i);
+    expect(container.textContent).not.toMatch(/Balanced|Hostile pressure low|High/i);
+  });
+
   it('does not collapse known friendly line strength to a dash when strength class is unreported', () => {
     const state = makeState();
     state.corpsFrontSectors = [{
