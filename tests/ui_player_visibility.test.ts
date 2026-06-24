@@ -241,9 +241,9 @@ describe('player visibility helpers', () => {
     expect(parsed.formations[0]).toMatchObject({
       readiness: 'unreported',
       status: 'unreported',
-      cohesion: 0,
-      fatigue: 0,
     });
+    expect(parsed.formations[0]?.cohesion).toBeUndefined();
+    expect(parsed.formations[0]?.fatigue).toBeUndefined();
     expect(isFieldedTacticalFormation(parsed.formations[0])).toBe(false);
   });
 

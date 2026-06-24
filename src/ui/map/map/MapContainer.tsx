@@ -896,7 +896,6 @@ export function MapContainer() {
 
           const props = info?.object?.properties ?? formationFallback?.properties;
           if (!props) return;
-          inspectFormationFromMap(clickTarget.formationId, props);
           // Use pre-computed stack_count from GeoJSON feature properties
           const osid = props.location_osid as string | undefined;
           const stackCount = typeof props.stack_count === 'number' ? props.stack_count : 1;
@@ -904,6 +903,7 @@ export function MapContainer() {
             store.setExpandedStackOsid(osid);
             // overlayAnchor is derived by useEffect from expandedStackOsid
           } else {
+            inspectFormationFromMap(clickTarget.formationId, props);
             store.setExpandedStackOsid(null);
           }
         },
@@ -1049,7 +1049,6 @@ export function MapContainer() {
           }
         },
         onFormationClick: (id, props, point) => {
-          inspectFormationFromMap(id, props);
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
@@ -1059,9 +1058,12 @@ export function MapContainer() {
               setExpandedStackOsid(osid);
               setOverlayAnchor(point);
             } else {
+              inspectFormationFromMap(id, props);
               setExpandedStackOsid(null);
               setOverlayAnchor(null);
             }
+          } else {
+            inspectFormationFromMap(id, props);
           }
         },
         onFrontEdgeClick: (_edgeId, props) => {

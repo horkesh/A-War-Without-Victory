@@ -38,6 +38,29 @@ export interface InboxItem {
     priority: number;
 }
 
+const ADVANCE_BLOCKING_TYPES = new Set<InboxItemType>([
+    'event_decision',
+    'peace_plan',
+    'dayton_negotiation',
+    'convoy_decision',
+    'paramilitary_request',
+]);
+
+function opportunityProposalIdFromAction(action: string | null | undefined, fallbackId: string): string {
+    const prefix = 'OPPORTUNITY:';
+    return typeof action === 'string' && action.startsWith(prefix) && action.slice(prefix.length).trim()
+        ? action.slice(prefix.length).trim()
+        : fallbackId;
+}
+
+export function isAdvanceBlockingInboxItem(item: Pick<InboxItem, 'type'>): boolean {
+    return ADVANCE_BLOCKING_TYPES.has(item.type);
+}
+
+export function effectiveInboxSeverity(item: Pick<InboxItem, 'type' | 'severity'>): InboxSeverity {
+    return isAdvanceBlockingInboxItem(item) ? 'blocking' : item.severity;
+}
+
 function splitOpportunityDescription(description: string): { title: string; detail: string } {
     const trimmed = description.trim();
     if (!trimmed) return { title: t('inbox.item.operationOpportunity.titleFallback'), detail: t('inbox.item.operationOpportunity.detailFallback') };
@@ -222,8 +245,9 @@ export function deriveInboxItems(
             if (!playerFactionMatch(prop.faction, playerFaction)) continue;
             if (isOperationOpportunityReview(prop)) {
                 const { title, detail } = splitOpportunityDescription(prop.description || '');
+                const proposalId = opportunityProposalIdFromAction(prop.proposed_action, prop.id);
                 items.push({
-                    id: `opportunity:${prop.id}`,
+                    id: `opportunity:${proposalId}`,
                     type: 'operation_opportunity',
                     severity: 'normal',
                     title,
@@ -283,6 +307,7 @@ export function deriveInboxItems(
     }
 
     const convoyDecisions = (state.pendingConvoyDecisions ?? [])
+        .filter((convoy) => convoy.decision == null)
         .filter((convoy) => playerFactionMatch(convoy.route_faction, playerFaction));
     for (const convoy of convoyDecisions) {
         items.push({
@@ -436,7 +461,7 @@ export function countActionableItems(items: InboxItem[]): number {
  * Whether any items are blocking (turn can't advance).
  */
 export function hasBlockingItems(items: InboxItem[]): boolean {
-    return items.some(i => i.severity === 'blocking');
+    return items.some((item) => effectiveInboxSeverity(item) === 'blocking');
 }
 
 /**

@@ -253,6 +253,52 @@ describe('Tactical map render smoke', () => {
     expect(Object.prototype.hasOwnProperty.call(feature?.properties ?? {}, 'supply_state')).toBe(false);
   });
 
+  it('buildFormationsGeoJSON keeps missing condition fields unreported on marker properties', () => {
+    const state: LoadedGameState = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: { 'op:sarajevo': 'RBiH' },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'sparse_brigade',
+          faction: 'RBiH',
+          name: 'Sparse Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          personnel: 1800,
+        },
+      ],
+    } as LoadedGameState;
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const feature = buildFormationsGeoJSON(state, controlledGeo).features[0];
+
+    expect(feature?.properties?.icon_id).toContain('__munreported');
+    expect(feature?.properties?.cohesion).toBeNull();
+    expect(feature?.properties?.morale).toBeNull();
+    expect(feature?.properties?.fatigue).toBeNull();
+  });
+
   it('buildFormationsGeoJSON derives operation membership from active operation participants, not posture', () => {
     const state = {
       label: 'Turn 1',

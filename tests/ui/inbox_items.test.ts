@@ -13,7 +13,7 @@
  */
 
 import { describe, it, expect, afterEach } from 'vitest';
-import { deriveInboxItems, countActionableItems, hasBlockingItems, resolveEventQueueIndex } from '../../src/ui/map/data/inboxItems.js';
+import { deriveInboxItems, countActionableItems, effectiveInboxSeverity, hasBlockingItems, resolveEventQueueIndex } from '../../src/ui/map/data/inboxItems.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { EventDefinition } from '../../src/sim/events/event_types.js';
@@ -360,6 +360,26 @@ describe('deriveInboxItems - Dayton and convoy decisions', () => {
         expect(convoyItems.map((item) => item.id)).toEqual(['convoy:convoy_player']);
     });
 
+    it('does not surface already answered convoy decisions as pending blockers', () => {
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingConvoyDecisions: [
+                {
+                    id: 'convoy_answered',
+                    target_enclave: 'Gorazde',
+                    route_faction: 'RBiH',
+                    supply_amount: 25,
+                    decision: 'allow',
+                },
+            ],
+        });
+
+        const items = deriveInboxItems(state, null);
+
+        expect(items.filter(i => i.type === 'convoy_decision')).toHaveLength(0);
+        expect(hasBlockingItems(items)).toBe(false);
+    });
+
     it('localizes generated decision and situation inbox items in BCS mode', () => {
         setLocale('bcs');
         const state = makeStub({
@@ -650,7 +670,7 @@ describe('deriveInboxItems — autonomy proposals', () => {
         const items = deriveInboxItems(state, null);
         const opportunityItems = items.filter(i => i.type === 'operation_opportunity');
         expect(opportunityItems).toHaveLength(1);
-        expect(opportunityItems[0].id).toBe('opportunity:PROP_176_opportunity_0');
+        expect(opportunityItems[0].id).toBe('opportunity:OPP_175_sana_95');
         expect(opportunityItems[0].severity).toBe('normal');
         expect(opportunityItems[0].action).toBe('decision_room');
         expect(opportunityItems[0].title).toBe('Operation Sana');
@@ -890,6 +910,21 @@ describe('countActionableItems / hasBlockingItems', () => {
         const state = makeStub();
         const items = deriveInboxItems(state, null);
         expect(hasBlockingItems(items)).toBe(false);
+    });
+
+    it('treats modal-required convoy items as effective blockers without mutating source severity', () => {
+        const state = makeStub({
+            player_faction: 'RBiH',
+            pendingConvoyDecisions: [
+                { id: 'convoy_rbih', target_enclave: 'gorazde', route_faction: 'RBiH', supply_amount: 18 },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const convoy = items.find((item) => item.type === 'convoy_decision')!;
+
+        expect(convoy.severity).toBe('normal');
+        expect(effectiveInboxSeverity(convoy)).toBe('blocking');
+        expect(hasBlockingItems(items)).toBe(true);
     });
 });
 

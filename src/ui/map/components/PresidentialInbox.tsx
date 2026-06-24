@@ -11,7 +11,7 @@
  */
 
 import { useGameStore } from '../store/gameStore';
-import { deriveInboxItems, countActionableItems, hasBlockingItems } from '../data/inboxItems';
+import { deriveInboxItems, countActionableItems, effectiveInboxSeverity, hasBlockingItems } from '../data/inboxItems';
 import type { InboxItem, InboxSeverity } from '../data/inboxItems';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import { DETAIL_PANEL_STYLE } from './panelRail';
@@ -70,7 +70,8 @@ export function typeLabel(type: string): string {
 }
 
 function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) {
-    const style = SEVERITY_STYLES[item.severity];
+    const severity = effectiveInboxSeverity(item);
+    const style = SEVERITY_STYLES[severity];
     const cardTypeLabel = typeLabel(item.type);
     const severityLabel = style.labelKey ? t(style.labelKey) : '';
     const isActionable = item.action !== 'none';

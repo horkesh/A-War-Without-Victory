@@ -66,11 +66,12 @@ describe('current sector assignment projection', () => {
     expect(resolveCurrentSectorForFormation(formation, sectors)?.sector_id).toBe('sector_south');
     expect(buildSectorFormationAssignment(sectors[0], [formation], sectors)).toEqual({
       frontlineIds: [],
-      reserveIds: ['brigade_reserve'],
+      reserveIds: [],
       rearIds: [],
       overrideIds: [],
       lineHoldingIds: [],
-      allCurrentIds: ['brigade_reserve'],
+      allCurrentIds: [],
+      unresolvedRosterIds: ['brigade_reserve'],
     });
     expect(buildSectorFormationAssignment(sectors[1], [formation], sectors)).toEqual({
       frontlineIds: [],
@@ -79,6 +80,7 @@ describe('current sector assignment projection', () => {
       overrideIds: ['brigade_alpha'],
       lineHoldingIds: ['brigade_alpha'],
       allCurrentIds: ['brigade_alpha'],
+      unresolvedRosterIds: [],
     });
   });
 
@@ -119,6 +121,29 @@ describe('current sector assignment projection', () => {
       overrideIds: [],
       lineHoldingIds: [],
       allCurrentIds: [],
+      unresolvedRosterIds: [],
+    });
+  });
+
+  it('reports stale roster ids without counting them as live sector strength', () => {
+    const sector = {
+      sector_id: 'sector_with_stale_rows',
+      corps_id: 'corps_alpha',
+      faction: 'RBiH',
+      edge_ids: [],
+      assigned_brigade_ids: ['missing_front_brigade'],
+      reserve_brigade_ids: ['missing_reserve_brigade'],
+      rear_brigade_ids: ['missing_rear_brigade'],
+    };
+
+    expect(buildSectorFormationAssignment(sector, [], [sector])).toEqual({
+      frontlineIds: [],
+      reserveIds: [],
+      rearIds: [],
+      overrideIds: [],
+      lineHoldingIds: [],
+      allCurrentIds: [],
+      unresolvedRosterIds: ['missing_front_brigade', 'missing_rear_brigade', 'missing_reserve_brigade'],
     });
   });
 

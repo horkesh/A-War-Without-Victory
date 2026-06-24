@@ -30,6 +30,7 @@ import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { countFiledDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
+import { deriveInboxItems } from './inboxItems';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -182,6 +183,11 @@ export interface PresidentialDecisionRoomCard {
   evidence: string[];
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
   sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
+  /**
+   * Optional pending-item weight for compact grouped cards. A single visible
+   * card can represent several modal-required player decisions.
+   */
+  countWeight?: number;
   /** Optional War-Direction directive this card can ISSUE inline (additive). */
   directive?: PresidentialDecisionRoomDirective;
   sortKey: number;
@@ -540,9 +546,12 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
   });
 }
 
-function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]): void {
+function addManifestDecisionCards(
+  state: LoadedGameState,
+  osidNameMap: Record<string, string> | null,
+  cards: CandidateCard[],
+): void {
   const summary = state.playerDecisionSummary;
-  if (!summary || summary.blockingCount <= 0) return;
 
   const existingIds = new Set(cards.map((card) => card.id));
   const cardSpecs: Record<string, {
@@ -571,14 +580,11 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
     },
   };
 
-  for (const family of summary.families) {
-    const blockingCount = family.blockingCount ?? (family.gatePolicy === 'advisory' ? 0 : family.count);
-    if (blockingCount <= 0) continue;
-    if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
-    if (!isManifestModalFamilyId(family.id)) continue;
-    const spec = cardSpecs[family.id];
-    const id = `manifest:${family.id}`;
-    if (existingIds.has(id)) continue;
+  const pushManifestCard = (familyId: ManifestModalFamilyId, blockingCount: number): void => {
+    if (blockingCount <= 0) return;
+    const spec = cardSpecs[familyId];
+    const id = `manifest:${familyId}`;
+    if (existingIds.has(id)) return;
     cards.push({
       id,
       category: 'decision',
@@ -590,10 +596,32 @@ function addManifestDecisionCards(state: LoadedGameState, cards: CandidateCard[]
       actionLabel: t(spec.actionLabelKey),
       evidence: [t('decisionRoom.card.manifest.evidence.pendingItems', { count: blockingCount })],
       navigationTarget: { kind: 'inbox' },
+      countWeight: blockingCount,
       urgencySort: -1,
-      sourceSort: `manifest:${family.id}`,
+      sourceSort: `manifest:${familyId}`,
     });
     existingIds.add(id);
+  };
+
+  if (!summary) {
+    const counts = new Map<ManifestModalFamilyId, number>();
+    for (const item of deriveInboxItems(state, osidNameMap)) {
+      if (isManifestModalFamilyId(item.type)) {
+        counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
+      }
+    }
+    for (const [familyId, count] of counts) pushManifestCard(familyId, count);
+    return;
+  }
+
+  if (summary.blockingCount <= 0) return;
+
+  for (const family of summary.families) {
+    const blockingCount = family.blockingCount ?? (family.gatePolicy === 'advisory' ? 0 : family.count);
+    if (blockingCount <= 0) continue;
+    if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
+    if (!isManifestModalFamilyId(family.id)) continue;
+    pushManifestCard(family.id, blockingCount);
   }
 }
 
@@ -1478,6 +1506,7 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
         evidence: card.evidence,
         navigationTarget,
         ...(sourceHandoffTarget ? { sourceHandoffTarget } : {}),
+        ...(card.countWeight != null ? { countWeight: card.countWeight } : {}),
         ...(card.directive ? { directive: card.directive } : {}),
         sortKey: index,
       };
@@ -2153,7 +2182,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const candidates: CandidateCard[] = [];
   addReviewCard(state, candidates);
   addParamilitaryReviewCard(state, candidates);
-  addManifestDecisionCards(state, candidates);
+  addManifestDecisionCards(state, osidNameMap, candidates);
   addCounterOfferCards(state, candidates);
   addArmyCoPushbackCard(state, candidates);
   addOpportunityCards(state, candidates);

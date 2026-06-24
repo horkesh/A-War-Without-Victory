@@ -68,6 +68,18 @@ export interface PresidentialCommandCategoryCount {
   lens: PresidentialDecisionRoomLensId;
 }
 
+function categoryItemCount(cards: readonly PresidentialDecisionRoomCard[]): number {
+  return cards.reduce((sum, card) => sum + (card.countWeight ?? 1), 0);
+}
+
+function categoryUrgentCount(cards: readonly PresidentialDecisionRoomCard[]): number {
+  return cards.reduce((sum, card) => (
+    card.severity === 'blocking' || card.severity === 'critical'
+      ? sum + (card.countWeight ?? 1)
+      : sum
+  ), 0);
+}
+
 /**
  * The six owner-locked categories (design §9). Order is the canonical display
  * order and is intentionally a fixed literal (deterministic — no sort needed).
@@ -199,16 +211,15 @@ export function derivePresidentialCommandCategoryCounts(
   const cards = view.cards;
   return PRESIDENTIAL_COMMAND_CATEGORIES.map((category) => {
     const matched = cards.filter((card) => cardBelongsToPresidentialCommandCategory(card, category.id));
-    const urgentCount = matched.filter(
-      (card) => card.severity === 'blocking' || card.severity === 'critical',
-    ).length;
+    const count = categoryItemCount(matched);
+    const urgentCount = categoryUrgentCount(matched);
     return {
       id: category.id,
       title: category.title,
       blurb: category.blurb,
       role: category.role,
       roleLabel: category.roleLabel,
-      count: matched.length,
+      count,
       urgentCount,
       isUrgent: urgentCount > 0,
       lens: lensForCategory(category),

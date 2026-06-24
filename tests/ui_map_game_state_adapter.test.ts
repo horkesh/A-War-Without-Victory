@@ -55,6 +55,24 @@ test('parseGameState preserves meta.player_faction in LoadedGameState', () => {
     assert.strictEqual(parsed.player_faction, 'RS');
 });
 
+test('parseGameState preserves absent formation condition fields as unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 1, phase: 'war' },
+        military: {
+            formations: {
+                sparse: { faction: 'RBiH', name: 'Sparse Brigade', kind: 'brigade', readiness: 'active', status: 'active', created_turn: 1, tags: [] },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const sparse = parsed.formations.find((formation) => formation.id === 'sparse');
+    assert.strictEqual(sparse?.cohesion, undefined);
+    assert.strictEqual(sparse?.fatigue, undefined);
+});
+
 test('parseGameState keeps absent officer ratings unreported instead of inventing poor traits', () => {
     const parsed = parseGameState({
         meta: { turn: 1, phase: 'war', player_faction: 'RS' },

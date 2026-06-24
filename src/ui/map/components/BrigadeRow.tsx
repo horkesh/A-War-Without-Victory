@@ -65,15 +65,19 @@ const SUPPLY_LABEL_KEY: Record<SupplyState, MessageKey> = {
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
   const [locale] = useLocale();
   const formationName = getLocalizedFormationName(formation, locale);
-  const hasCohesion = Number.isFinite(formation.cohesion);
-  const hasFatigue = Number.isFinite(formation.fatigue);
-  const cohesion = hasCohesion ? Math.round(Math.max(0, Math.min(100, formation.cohesion))) : null;
+  const reportedCohesion = typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion)
+    ? formation.cohesion
+    : null;
+  const reportedFatigue = typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue)
+    ? formation.fatigue
+    : null;
+  const cohesion = reportedCohesion != null ? Math.round(Math.max(0, Math.min(100, reportedCohesion))) : null;
   const filledSegments = cohesion != null ? Math.ceil(cohesion / 20) : 0;
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
   const factionText = FACTION_COLORS[formation.faction] ?? 'text-text-primary';
   const supplyState = getSupplyState(formation);
   const rowClass = onClick ? 'cursor-pointer' : '';
-  const fat = hasFatigue ? Math.round(formation.fatigue) : null;
+  const fat = reportedFatigue != null ? Math.round(reportedFatigue) : null;
   const fatClass = fat == null ? 'text-text-secondary italic' : fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
   const supplyLabel = t(SUPPLY_LABEL_KEY[supplyState]);

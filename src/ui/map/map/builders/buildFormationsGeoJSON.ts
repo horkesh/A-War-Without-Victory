@@ -20,9 +20,9 @@ export interface FormationMarkerProperties {
   white_icon_id: string;
   status: string;
   readiness: string;
-  cohesion: number;
-  morale: number;
-  fatigue: number;
+  cohesion: number | null;
+  morale: number | null;
+  fatigue: number | null;
   personnel: number | null;
   location_osid: string;
   posture: string | null;
@@ -127,11 +127,16 @@ export function buildFormationsGeoJSON(
     const displayName = getLocalizedFormationName(formation, locale);
     const postureSuffix = formation.posture ? `__${formation.posture}` : '';
 
-    // Status Banners: quantize Health and Morale to 10% steps
+    // Status Banners: quantize Health and Morale to 10% steps when reported.
     const hQuant = 100; // Personnel pct not easily available per-unit yet
-    const rawMorale = formation.morale ?? formation.cohesion ?? 100;
-    const mQuant = Math.round(rawMorale / 10) * 10;
-    const statusSuffix = `__h${hQuant}__m${mQuant}`;
+    const rawMorale = typeof formation.morale === 'number' && Number.isFinite(formation.morale)
+      ? formation.morale
+      : typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion)
+        ? formation.cohesion
+        : null;
+    const statusSuffix = rawMorale == null
+      ? `__h${hQuant}__munreported`
+      : `__h${hQuant}__m${Math.round(rawMorale / 10) * 10}`;
 
     const icon_id = `${type}__${formation.faction}${postureSuffix}${statusSuffix}`;
 
@@ -148,9 +153,9 @@ export function buildFormationsGeoJSON(
         white_icon_id: `white__${icon_id}`,
         status: formation.status,
         readiness: formation.readiness,
-        cohesion: formation.cohesion,
-        morale: formation.morale ?? formation.cohesion ?? 50,
-        fatigue: formation.fatigue ?? 0,
+        cohesion: typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion) ? formation.cohesion : null,
+        morale: rawMorale,
+        fatigue: typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) ? formation.fatigue : null,
         personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
         posture: formation.posture ?? null,

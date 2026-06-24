@@ -199,6 +199,31 @@ describe('direct tactical map click routing', () => {
     expect(source).not.toMatch(/(?:\.|\b)setSelectedCorpsFrontSectorId\(sectorId\)/);
   });
 
+  it('opens the stack chooser before inspecting a formation from stacked counters', () => {
+    const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
+    const deckStackBranchStart = source.indexOf('const stackCount = typeof props.stack_count');
+    const deckStackBranchEnd = source.indexOf('map.addControl(deckOverlay)', deckStackBranchStart);
+    const deckStackBranch = source.slice(deckStackBranchStart, deckStackBranchEnd);
+
+    expect(deckStackBranchStart).toBeGreaterThan(-1);
+    expect(deckStackBranch).toContain('if (osid && stackCount > 1) {');
+    expect(deckStackBranch).toContain('store.setExpandedStackOsid(osid)');
+    expect(deckStackBranch.indexOf('store.setExpandedStackOsid(osid)')).toBeLessThan(
+      deckStackBranch.indexOf('inspectFormationFromMap(clickTarget.formationId, props)'),
+    );
+
+    const mapLibreHandlerStart = source.indexOf('onFormationClick: (id, props, point) => {');
+    const mapLibreHandlerEnd = source.indexOf('onFrontEdgeClick:', mapLibreHandlerStart);
+    const mapLibreHandler = source.slice(mapLibreHandlerStart, mapLibreHandlerEnd);
+
+    expect(mapLibreHandlerStart).toBeGreaterThan(-1);
+    expect(mapLibreHandler).toContain('if (stackSize > 1) {');
+    expect(mapLibreHandler).toContain('setExpandedStackOsid(osid)');
+    expect(mapLibreHandler.indexOf('setExpandedStackOsid(osid)')).toBeLessThan(
+      mapLibreHandler.indexOf('inspectFormationFromMap(id, props)'),
+    );
+  });
+
   it('rejects empty attack-mode clicks before creating an attack confirmation', () => {
     const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
 

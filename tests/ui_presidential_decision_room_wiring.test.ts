@@ -163,7 +163,9 @@ describe('Presidential Decision Room wiring', () => {
     const shell = read('../src/ui/map/components/presidential_desk/PresidentDeskShell.tsx');
 
     expect(shell).toContain("from '../../data/presidentialBlockers'");
-    expect(shell).toContain('derivePresidentialBlockers(state, osidNameMap).length > 0');
+    expect(shell).toContain('const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap)');
+    expect(shell).toContain("const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id))");
+    expect(shell).toContain("const blocked = advanceReview.status === 'blocked' || presidentialBlockers.length > 0");
     expect(shell).not.toContain('hasBlockingItems(items)');
   });
 

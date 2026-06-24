@@ -239,7 +239,7 @@ describe('buildTurnAftermathView', () => {
     expect(view?.nextActions.topItems.map((item) => item.id)).toEqual([
       'event:evt_a',
       'peace:vance',
-      'opportunity:PROP_12_opportunity_0',
+      'opportunity:OPP_12_una',
     ]);
   });
 

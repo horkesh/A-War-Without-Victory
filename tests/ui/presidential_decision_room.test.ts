@@ -1211,6 +1211,33 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('manifest:convoy_decision');
   });
 
+  it('falls back to pending modal blockers when player decision summary is absent', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_rbih',
+            target_enclave: 'Gorazde',
+            route_faction: 'RBiH',
+            supply_amount: 20,
+          },
+        ],
+        pendingDayton: {
+          territorialPackages: [],
+          institutionalPackages: [],
+          factionCapital: {},
+          patronOverride: {},
+        },
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.cards.map((card) => card.id)).toContain('manifest:convoy_decision');
+    expect(view.cards.map((card) => card.id)).toContain('manifest:dayton_negotiation');
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+  });
+
   it('offers Chronicle memory when a filed decision receipt exists without a narrated turn record', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({

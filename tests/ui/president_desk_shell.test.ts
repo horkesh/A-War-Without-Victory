@@ -277,7 +277,29 @@ describe('PresidentDeskShell', () => {
 
     expect(screen.getByText('Blocked')).toBeTruthy();
     expect(container.textContent).toMatch(/Required\s*1/);
+    expect(screen.getAllByText('Required').length).toBeGreaterThan(0);
     expect(screen.queryByText('No signatures required')).toBeNull();
+  });
+
+  it('does not keep answered convoy decisions as required desk signatures', () => {
+    const { container } = renderDesk({
+      state: makeState({
+        player_faction: 'RBiH',
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_answered',
+            target_enclave: 'gorazde',
+            route_faction: 'RBiH',
+            supply_amount: 18,
+            decision: 'allow',
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(screen.getByText('Ready')).toBeTruthy();
+    expect(container.textContent).not.toMatch(/Required\s*1/);
+    expect(screen.queryByTestId('desk-packet-item-convoy:convoy_answered')).toBeNull();
   });
 
   it('routes the blocked advance action to advance review instead of generic command cards', () => {

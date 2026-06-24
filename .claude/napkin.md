@@ -2,6 +2,10 @@
 
 **MODAL-REQUIRED BLOCKERS ARE REQUIRED EVEN IF CARD SEVERITY IS NORMAL (2026-06-24).** Convoy, peace, and Dayton decisions can block advance without `severity: blocking`. Do instead: derive Desk required counts and pre-advance fallback blocker status from `derivePresidentialBlockers(...)`, not `InboxItem.severity` alone.
 
+**ANSWERED CONVOY ROWS ARE NOT PENDING BLOCKERS (2026-06-24).** Staged convoy decisions remain in state until turn advance, but they are no longer actionable choices. Do instead: filter `pending_convoy_decisions` rows with a recorded `decision` before Inbox/Desk/blocker projection.
+
+**GROUPED DECISION ROOM CARDS NEED WEIGHTED COUNTS (2026-06-24).** A single manifest card can represent multiple modal blockers. Do instead: carry `countWeight` through Decision Room cards and sum it in category counts instead of counting wrapper cards.
+
 **PRIMARY SUPPLY FILL PREFERS LOCAL OSID TRUTH (2026-06-24).** Faction reserve/condition summaries are strategic fallbacks, not overrides for explicit local supply. Do instead: use `supplyStateByOsid[osid]` first for primary supply-map polygon class, then fall back to faction reserves/conditions/legacy pressure.
 
 **ARMY HQ ORBAT SPARSE FIELDS ARE UNREPORTED (2026-06-24).** Missing brigade personnel, morale, cohesion, fatigue, entrenchment, status, or posture are source gaps, not zero strength or active readiness. Do instead: render neutral unreported copy/bars and never default unknown lifecycle/status to active-green.
@@ -43,6 +47,8 @@
 **MISSING LOGISTICS/OPSEC TRUTH IS UNREPORTED (2026-06-23).** Corps Front command controls may stage a new logistics or OPSEC order, but absent read-model fields are not proof of neutral priority or inactive security. Do instead: render absent `logistics_priority` / `opsec_active` as unreported; preserve explicit `1.0` / `false` as neutral/inactive.
 
 **PARTIAL OPERATION READINESS AND PARTICIPANTS MUST STAY HONEST (2026-06-24).** `supply`, `cohesion`, and `intel` readiness dimensions report independently, and raw operation participant ids can go stale. Do instead: preserve missing readiness dimensions as unreported, count/click only resolved formation ids, and display unresolved raw participant ids as stale records.
+
+**STALE SECTOR ROSTER IDS ARE DIAGNOSTICS, NOT STRENGTH (2026-06-24).** Saved sector rosters can outlive the fielded formation rows they reference. Do instead: exclude unresolved ids from front/reserve/rear counts and expose them separately as `unresolvedRosterIds`.
 
 **MISSING OPERATION AAR GRADES ARE UNREPORTED (2026-06-24).** Completed operation AAR records may lack a grade. Do instead: preserve absent grade fields, render `Grade unreported`, suppress grade-factor rows, and never synthesize one-star `Unknown` verdicts.
 

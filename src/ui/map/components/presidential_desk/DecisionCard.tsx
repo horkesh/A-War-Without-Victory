@@ -1,4 +1,5 @@
 import type { InboxItem } from '../../data/inboxItems';
+import { effectiveInboxSeverity } from '../../data/inboxItems';
 import { getDecisionSurfaceForInboxType } from '../../data/decisionSurfaceRegistry';
 import { getPacketThumbnailForInboxType } from '../../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../../i18n';
@@ -73,9 +74,10 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
   const actionable = item.action !== 'none';
   const thumbnail = getPacketThumbnailForInboxType(item.type);
   const family = familyLabel(item);
+  const severity = effectiveInboxSeverity(item);
   return (
     <article
-      className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${SEVERITY_CLASS[item.severity]}`}
+      className={`rounded-sm border px-3 py-2.5 shadow-[0_12px_28px_rgba(0,0,0,0.22)] ${SEVERITY_CLASS[severity]}`}
       data-testid={`desk-card-${item.type}`}
       data-inbox-item-id={item.id}
       data-inbox-action={item.action}
@@ -90,8 +92,8 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[item.severity]}`}>
-              {severityLabel(item.severity)}
+            <span className={`border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[severity]}`}>
+              {severityLabel(severity)}
             </span>
             <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
               {family}

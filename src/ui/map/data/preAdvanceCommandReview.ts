@@ -112,7 +112,9 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
       decisionRoom.advanceReadiness.blockedByExistingSystems || blockingDecisionCount > 0,
       items.length,
     ),
-    headline: decisionRoom.advanceReadiness.headline,
+    headline: blockingDecisionCount > 0
+      ? t('decisionRoom.advance.reviewBeforeAdvance')
+      : decisionRoom.advanceReadiness.headline,
     canReviewPriorities: decisionRoom.hasPlayerFaction,
     blockingDecisionCount,
     items,

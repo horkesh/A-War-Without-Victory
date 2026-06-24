@@ -121,6 +121,22 @@ describe('derivePresidentialBlockers', () => {
     expect(blockers).toHaveLength(0);
   });
 
+  it('does not block the player on already answered convoy decisions', () => {
+    const blockers = derivePresidentialBlockers(makeState({
+      pendingConvoyDecisions: [
+        {
+          id: 'convoy_answered',
+          target_enclave: 'srebrenica_enclave',
+          route_faction: 'RBiH',
+          supply_amount: 25,
+          decision: 'allow',
+        },
+      ],
+    }), null);
+
+    expect(blockers).toHaveLength(0);
+  });
+
   it('uses registry action copy for paramilitary blockers', () => {
     const blockers = derivePresidentialBlockers(makeState({
       pendingParamilitaryRequests: [

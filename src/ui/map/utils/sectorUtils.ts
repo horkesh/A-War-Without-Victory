@@ -67,6 +67,7 @@ export interface SectorFormationAssignment {
   overrideIds: string[];
   lineHoldingIds: string[];
   allCurrentIds: string[];
+  unresolvedRosterIds: string[];
 }
 
 export type SectorCoverageTier = 'uncovered' | 'thin' | 'held' | 'dense';
@@ -191,9 +192,9 @@ export function buildSectorFormationAssignment(
   allSectors: readonly SectorView[] | undefined = [sector],
 ): SectorFormationAssignment {
   const formationById = new Map((formations ?? []).map((formation) => [formation.id, formation]));
-  const isKnownNonFielded = (formationId: string): boolean => {
+  const isResolvedFielded = (formationId: string): boolean => {
     const formation = formationById.get(formationId);
-    return formation != null && !isFieldedTacticalFormation(formation);
+    return formation != null && isFieldedTacticalFormation(formation);
   };
   const isOverriddenAway = (formationId: string): boolean => {
     const formation = formationById.get(formationId);
@@ -202,17 +203,22 @@ export function buildSectorFormationAssignment(
   };
 
   const frontlineIds = [...(sector.assigned_brigade_ids ?? [])]
-    .filter((id) => !isKnownNonFielded(id))
+    .filter(isResolvedFielded)
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
   const reserveIds = [...(sector.reserve_brigade_ids ?? [])]
-    .filter((id) => !isKnownNonFielded(id))
+    .filter(isResolvedFielded)
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
   const rearIds = [...(sector.rear_brigade_ids ?? [])]
-    .filter((id) => !isKnownNonFielded(id))
+    .filter(isResolvedFielded)
     .filter((id) => !isOverriddenAway(id))
     .sort(compareStableText);
+  const unresolvedRosterIds = [...new Set([
+    ...(sector.assigned_brigade_ids ?? []),
+    ...(sector.reserve_brigade_ids ?? []),
+    ...(sector.rear_brigade_ids ?? []),
+  ].filter((id) => !formationById.has(id)))].sort(compareStableText);
   const rosterIds = new Set([...frontlineIds, ...reserveIds, ...rearIds]);
   const overrideIds = (formations ?? [])
     .filter((formation) => formation.kind === undefined || isFieldedTacticalFormation(formation))
@@ -222,5 +228,5 @@ export function buildSectorFormationAssignment(
     .sort(compareStableText);
   const lineHoldingIds = [...new Set([...frontlineIds, ...overrideIds])].sort(compareStableText);
   const allCurrentIds = [...new Set([...frontlineIds, ...reserveIds, ...overrideIds])].sort(compareStableText);
-  return { frontlineIds, reserveIds, rearIds, overrideIds, lineHoldingIds, allCurrentIds };
+  return { frontlineIds, reserveIds, rearIds, overrideIds, lineHoldingIds, allCurrentIds, unresolvedRosterIds };
 }

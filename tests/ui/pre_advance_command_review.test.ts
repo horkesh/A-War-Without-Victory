@@ -294,6 +294,31 @@ describe('buildPreAdvanceCommandReviewView', () => {
 
     expect(view.blockingDecisionCount).toBe(1);
     expect(view.status).toBe('blocked');
+    expect(view.headline).toBe('Review before advance');
+  });
+
+  it('does not count answered convoy decisions as fallback blockers', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: undefined,
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_answered',
+            target_enclave: 'gorazde',
+            route_faction: 'RBiH',
+            supply_amount: 18,
+            decision: 'allow',
+          },
+        ],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
   });
 
   it('uses the manifest summary for blocking counts across modal and advisory decision families', () => {

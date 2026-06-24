@@ -180,6 +180,24 @@ describe('presidential command categories — count derivation', () => {
     expect(war.urgentCount).toBe(0);
   });
 
+  it('counts grouped modal-required decision families by represented pending items', () => {
+    const view = makeView([
+      makeCard({
+        id: 'manifest:convoy_decision',
+        category: 'decision',
+        severity: 'blocking',
+        countWeight: 3,
+      }),
+      makeCard({ id: 'counter-offer:d', category: 'counter_offer', severity: 'warning' }),
+    ]);
+    const byId = new Map(derivePresidentialCommandCategoryCounts(view).map((c) => [c.id, c]));
+
+    const diplomacy = byId.get('cat_diplomacy')!;
+    expect(diplomacy.count).toBe(4);
+    expect(diplomacy.urgentCount).toBe(3);
+    expect(diplomacy.isUrgent).toBe(true);
+  });
+
   it('uses the same exact predicate for command-card filtering and counts', () => {
     const cards = [
       makeCard({ id: 'supply:player-visibility', category: 'operational', severity: 'critical' }),

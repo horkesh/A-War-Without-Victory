@@ -143,8 +143,8 @@ export interface FormationView {
     name: string;
     kind: string;
     readiness: string;
-    cohesion: number;
-    fatigue: number;
+    cohesion?: number;
+    fatigue?: number;
     status: string;
     createdTurn: number;
     tags: string[];
