@@ -538,6 +538,29 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Readiness:Ready');
   });
 
+  it('renders unreported lifecycle and condition metrics without readiness-pending or zero fallbacks', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        readiness: 'unreported',
+        cohesion: undefined,
+        fatigue: undefined,
+      } as unknown as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('Lifecycle:Unreported');
+    expect(copy).toContain('CohesionUnreported');
+    expect(copy).toContain('FatigueUnreported');
+    expect(copy).not.toContain('Readiness pending');
+    expect(copy).not.toContain('Cohesion0');
+    expect(copy).not.toContain('Fatigue0');
+  });
+
   it('labels rear sector ownership distinctly and recognizes forming readiness', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_rear_brigade' });
 

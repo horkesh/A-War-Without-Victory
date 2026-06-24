@@ -817,6 +817,7 @@ describe('GUI audit label discipline', () => {
     let store = useGameStore.getState();
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedCorpsId).toBe('arbih_1st_corps');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
     expect(store.armyHQOpen).toBe(false);
 
     fireEvent.click(screen.getByRole('button', { name: /Inspect 101st Brigade on field/i }));

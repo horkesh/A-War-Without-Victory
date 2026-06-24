@@ -46,7 +46,7 @@ const stopOpDirective: PresidentialDecisionRoomDirective = {
 const authorizeDirective: PresidentialDecisionRoomDirective = {
   lever: 'authorize_op',
   cost: 0,
-  payload: { proposalId: 'proposal_alpha' },
+  payload: { reviewId: 'review_alpha', proposalId: 'proposal_alpha' },
 };
 
 const requestOpDirective: PresidentialDecisionRoomDirective = {
@@ -95,6 +95,7 @@ function installIpc(overrides: Record<string, unknown> = {}) {
     stageOperationForceLaunch: vi.fn(async () => ({ ok: true })),
     forceLaunchProposal: vi.fn(async () => ({ ok: true })),
     proactiveForceLaunchOp: vi.fn(async () => ({ ok: true })),
+    resolveOperationOpportunityDecision: vi.fn(async () => ({ ok: true })),
     stageCoReplacementOrder: vi.fn(async () => ({ ok: true })),
     approveReserveRequest: vi.fn(async () => ({ ok: true })),
     getFrontVisitAvailability: vi.fn(async () => ({
@@ -153,30 +154,39 @@ describe('DirectiveCard stop-op action host', () => {
   });
 
   it('shows the same receipt contract after authorizing an operation proposal', async () => {
-    const { acceptProposal } = installIpc();
+    const { acceptProposal, resolveOperationOpportunityDecision } = installIpc();
 
     render(React.createElement(DirectiveCard, { directive: authorizeDirective, gameState: baseGameState }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Authorize' }));
 
     await waitFor(() => {
-      expect(acceptProposal).toHaveBeenCalledWith('proposal_alpha');
+      expect(resolveOperationOpportunityDecision).toHaveBeenCalledWith({
+        reviewId: 'review_alpha',
+        proposalId: 'proposal_alpha',
+        decision: 'approve',
+      });
     });
+    expect(acceptProposal).not.toHaveBeenCalled();
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
   });
 
   it('shows a failure receipt when a directive IPC refuses the issue', async () => {
-    const acceptProposal = vi.fn(async () => ({ ok: false, error: 'proposal_expired' }));
-    installIpc({ acceptProposal });
+    const resolveOperationOpportunityDecision = vi.fn(async () => ({ ok: false, error: 'proposal_expired' }));
+    installIpc({ resolveOperationOpportunityDecision });
 
     render(React.createElement(DirectiveCard, { directive: authorizeDirective, gameState: baseGameState }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Authorize' }));
 
     await waitFor(() => {
-      expect(acceptProposal).toHaveBeenCalledWith('proposal_alpha');
+      expect(resolveOperationOpportunityDecision).toHaveBeenCalledWith({
+        reviewId: 'review_alpha',
+        proposalId: 'proposal_alpha',
+        decision: 'approve',
+      });
     });
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive was not staged: proposal_expired',

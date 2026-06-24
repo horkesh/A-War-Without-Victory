@@ -196,7 +196,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <div className="space-y-1.5">
                             {elites.map(brigade => {
                                 const ls = brigade.eliteLoanState!;
-                                const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : 0;
+                                const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : null;
                                 return (
                                     <div
                                         key={brigade.id}
@@ -237,11 +237,13 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 <span>{t('armyReserve.personnel')}</span>
                                                 <span>{brigade.personnel?.toLocaleString() ?? '—'}</span>
                                             </div>
-                                            <div className="h-1 bg-black/30 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full rounded-full transition-all"
-                                                    style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? '#55d48a' : pct >= 40 ? '#d4a855' : '#d45555' }}
-                                                />
+                                            <div className={`h-1 rounded-full overflow-hidden ${pct == null ? 'bg-panel-border/30' : 'bg-black/30'}`}>
+                                                {pct != null && (
+                                                    <div
+                                                        className="h-full rounded-full transition-all"
+                                                        style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? '#55d48a' : pct >= 40 ? '#d4a855' : '#d45555' }}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
 

@@ -361,6 +361,101 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Axis not held: Sanski Most')).toBeTruthy();
     });
 
+    it('renders missing operation AAR grade as unreported instead of synthesizing a one-star unknown result', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        grade: undefined,
+                    } as any,
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('Grade unreported');
+        expect(copy).not.toMatch(/1 stars|Unknown|★☆☆☆☆/);
+    });
+
+    it('uses fallback axis labels and explicit objective-chain copy when AAR axis data is sparse', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        objectives_targeted: [],
+                        objectives_captured: [],
+                        objectives_logged_captured: [],
+                        objectives_held_without_logged_capture: [],
+                        axis_summaries: [
+                            {
+                                axis_id: 'axis-raw',
+                                axis_name: 'sana_krupa_axis',
+                                objectives_targeted: [],
+                                objectives_captured: [],
+                                total_attacks: 2,
+                                casualties_suffered: { killed: 0, wounded: 0 },
+                                casualties_inflicted: { killed: 0, wounded: 0 },
+                            },
+                        ],
+                    } as any,
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('No objective chain recorded');
+        expect(copy).toContain('Axis 1');
+        expect(copy).toContain('Axis objective chain unreported | Attacks 2');
+        expect(copy).not.toMatch(/0\/0 objectives held|Held at end 0\/0|sana_krupa_axis/i);
+    });
+
+    it('renders active operation cards with unreported objective chains instead of 0/0 progress', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [],
+                activeOperations: [
+                    {
+                        corps_id: 'rs_1st_krajina',
+                        operation_name: 'recon_without_chain',
+                        operation_display_name: 'Recon Without Chain',
+                        faction: 'RS',
+                        type: 'sector_attack',
+                        phase: 'execution',
+                        started_turn: 12,
+                        participating_brigades: ['rs_bde_1'],
+                        commander_name: 'Field Commander',
+                        objectives_count: 0,
+                        objectives_captured: 0,
+                        attacks: 2,
+                        weekly_log_length: 0,
+                    },
+                ],
+            },
+        });
+
+        const view = render(createElement(RecordsContent));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('Objective chain unreported, 2 attacks');
+        expect(copy).not.toMatch(/0\/0 objectives held/i);
+        expect(copy).not.toMatch(/recon_without_chain/i);
+    });
+
     it('shows a clear completed-operation empty state in Records OPERATIONS history', () => {
         useGameStore.setState({
             loadedGameState: {

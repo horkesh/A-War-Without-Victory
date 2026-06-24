@@ -800,6 +800,46 @@ test('parseGameState adds player-facing display names for raw operation history 
     assert.equal(parsed.operationHistory?.[0]?.operation_name, 'probe_arbih_1st_corps_t12');
 });
 
+test('parseGameState preserves missing operation AAR grades as unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 45, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_1st_corps: { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
+            },
+            corps_command: {},
+        } as any,
+        operation_history: [
+            {
+                operation_id: 'op-aar-ungraded',
+                operation_name: 'Ungraded Operation',
+                corps_id: 'arbih_1st_corps',
+                faction: 'RBiH',
+                started_turn: 12,
+                ended_turn: 15,
+                outcome: 'partial',
+                objectives_targeted: [],
+                objectives_captured: [],
+                objectives_logged_captured: [],
+                objectives_held_without_logged_capture: [],
+                capture_provenance: 'no_objectives_held',
+                total_attacks: 1,
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                duration_turns: 3,
+                weekly_log: [],
+            },
+        ] as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.operationHistory?.[0]?.grade, undefined);
+    assert.notDeepEqual(parsed.operationHistory?.[0]?.grade, { stars: 1, verdict: 'Unknown', factors: {} });
+});
+
 test('parseGameState derives presidential review queue counts from pending military review owners', () => {
     const parsed = parseGameState({
         meta: { turn: 12, phase: 'war', player_faction: 'RBiH' },

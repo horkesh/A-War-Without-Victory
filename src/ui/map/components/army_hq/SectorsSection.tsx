@@ -464,11 +464,17 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                         data-sector-id={sector.sector_id}
                                         data-corps-id={corpsId}
                                         aria-label={t('sectorsSection.inspectOnField', { sector: sectorLabel })}
-                                        onClick={() => inspectOnField(useGameStore.getState(), {
-                                            kind: 'field-sector-in-corps',
-                                            sectorId: sector.sector_id,
-                                            corpsId,
-                                        })}
+                                        onClick={() => {
+                                            const anchorOsid = [...new Set(
+                                                (sector.sub_segments ?? []).flatMap((segment) => segment.friendly_osids ?? []),
+                                            )].sort()[0] ?? null;
+                                            inspectOnField(useGameStore.getState(), {
+                                                kind: 'field-sector-in-corps',
+                                                sectorId: sector.sector_id,
+                                                corpsId,
+                                                osid: anchorOsid,
+                                            });
+                                        }}
                                         className="ml-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
                                         {t('sectorsSection.inspect')}

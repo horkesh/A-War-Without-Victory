@@ -197,6 +197,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     if (formation.kind === 'army_hq') return t('formationDetail.commandPostureUnreported');
     return formation.posture ? getPlayerSafeFormationPostureLabel(formation.posture) : t('formationDetail.commandPostureUnreported');
   })();
+  const lifecycleValue = formation.readiness && formation.readiness !== 'unreported'
+    ? getPlayerSafeFormationReadinessLabel(formation.readiness)
+    : t('corpsFront.unreported');
   const formationName = getLocalizedFormationName(formation, locale);
 
   // Home-distance helpers
@@ -424,7 +427,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <span className="text-text-secondary">{t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{postureValue}</span>
               <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
-              <span className="text-text-primary">{getPlayerSafeFormationReadinessLabel(formation.readiness)}</span>
+              <span className="text-text-primary">{lifecycleValue}</span>
             </div>
 
             {/* Stranded (Isolated) indicator */}
@@ -574,7 +577,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
               <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
               <span className="text-text-primary tabular-nums flex items-center gap-1">
                 {(() => {
-                  const c = formation.cohesion;
+                  const c = Number.isFinite(formation.cohesion) ? formation.cohesion : null;
+                  if (c == null) return <span className="text-text-secondary text-[10px] italic">{t('corpsFront.unreported')}</span>;
                   const blocks = 10;
                   const filled = Math.round((c / 100) * blocks);
                   const color = c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555';
@@ -610,7 +614,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 </>
               )}
               <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
-              <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
+              <span className="text-text-primary tabular-nums">
+                {Number.isFinite(formation.fatigue) ? Math.round(formation.fatigue) : t('corpsFront.unreported')}
+              </span>
               {formation.personnel != null && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>

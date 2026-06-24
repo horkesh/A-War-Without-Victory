@@ -94,4 +94,24 @@ describe('BrigadeRow supply labels', () => {
     expect(screen.queryByText('ACTIVE')).toBeNull();
     expect(screen.queryByText('AWAITING_RECONSTITUTION')).toBeNull();
   });
+
+  it('renders unreported lifecycle and condition metrics without inventing zeroes', () => {
+    render(React.createElement(BrigadeRow, {
+      formation: makeFormation({
+        status: 'unreported',
+        readiness: 'unreported',
+        cohesion: undefined,
+        fatigue: undefined,
+      } as Partial<FormationView>),
+    }));
+
+    const row = screen.getByRole('button');
+    expect(screen.getByText('UNREPORTED')).toBeTruthy();
+    expect(row.getAttribute('title')).toBe('Supply: Supply unreported | Fatigue: Unreported | Cohesion: Unreported');
+    expect(row.getAttribute('aria-label')).toContain('cohesion Unreported');
+    expect(row.getAttribute('aria-label')).toContain('fatigue Unreported');
+    expect(row.getAttribute('title')).not.toContain('Cohesion: 0%');
+    expect(row.getAttribute('title')).not.toContain('Fatigue: 0');
+    expect(screen.queryByText('RECORDED')).toBeNull();
+  });
 });

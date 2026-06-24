@@ -36,6 +36,10 @@
 
 **PARTIAL OPERATION READINESS AND PARTICIPANTS MUST STAY HONEST (2026-06-24).** `supply`, `cohesion`, and `intel` readiness dimensions report independently, and raw operation participant ids can go stale. Do instead: preserve missing readiness dimensions as unreported, count/click only resolved formation ids, and display unresolved raw participant ids as stale records.
 
+**MISSING OPERATION AAR GRADES ARE UNREPORTED (2026-06-24).** Completed operation AAR records may lack a grade. Do instead: preserve absent grade fields, render `Grade unreported`, suppress grade-factor rows, and never synthesize one-star `Unknown` verdicts.
+
+**OPPORTUNITY AUTHORIZATION REQUIRES REVIEW IDS (2026-06-24).** Operation opportunities are review-owned decisions, not generic proposal accepts. Do instead: render authorize controls only when `review_id` and `proposal_id` are present, then call `resolveOperationOpportunityDecision({ reviewId, proposalId, decision: 'approve' })`.
+
 **OPERATION REVIEWS MUST NOT BECOME BACKDOOR DECISION SURFACES (2026-06-24).** Army HQ can review command decisions after launch, but active operation review is not a launch/postpone/abort/probe surface. Do instead: render decision controls only for planning-phase decision briefings or Presidential Decision Room ownership, and show execution/recovery reviews as read-only.
 
 **STATIONED UNITS ARE PHYSICAL PRESENCE, NOT AOR COVERAGE (2026-06-23).** Settlement unit lists answer "what is physically here." Do instead: use `getFormationsAtOsid(...)` for fielded formations whose `location_osid` equals the settlement; use `getFormationsCoveringOsid(...)` only when a surface explicitly asks for coverage/AoR support.

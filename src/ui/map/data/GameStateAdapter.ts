@@ -2657,7 +2657,7 @@ function deriveOperationHistory(state: any): LoadedGameState['operationHistory']
         const el = aar.equipment_lost as { tanks: number; artillery: number } ?? { tanks: 0, artillery: 0 };
         const ed = aar.equipment_destroyed as { tanks: number; artillery: number } ?? { tanks: 0, artillery: 0 };
         const ec = aar.equipment_captured as { tanks: number; artillery: number } ?? { tanks: 0, artillery: 0 };
-        const grade = aar.grade as { stars: number; verdict: string; factors: Record<string, number> } ?? { stars: 1, verdict: 'Unknown', factors: {} };
+        const grade = aar.grade as { stars: number; verdict: string; factors: Record<string, number> } | undefined;
         const objectivesTargeted = (aar.objectives_targeted ?? []) as string[];
         const objectivesCaptured = (aar.objectives_captured ?? []) as string[];
         const objectivesLoggedCaptured = Array.isArray(aar.objectives_logged_captured)

@@ -18,6 +18,7 @@ const STATUS_BADGE: Record<string, { class: string; labelKey: MessageKey }> = {
   collapsed: { class: 'text-red-500 border-red-500/60', labelKey: 'brigadeRow.status.collapsed' },
   inactive: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.inactive' },
   unavailable: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.unavailable' },
+  unreported: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.unreported' },
   recorded: { class: 'text-text-secondary border-text-secondary/30', labelKey: 'brigadeRow.status.recorded' },
 };
 
@@ -64,16 +65,20 @@ const SUPPLY_LABEL_KEY: Record<SupplyState, MessageKey> = {
 export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlighted = false, onClick, onHoverChange }: BrigadeRowProps) {
   const [locale] = useLocale();
   const formationName = getLocalizedFormationName(formation, locale);
-  const cohesion = Math.round(Math.max(0, Math.min(100, formation.cohesion ?? 0)));
-  const filledSegments = Math.ceil(cohesion / 20);
+  const hasCohesion = Number.isFinite(formation.cohesion);
+  const hasFatigue = Number.isFinite(formation.fatigue);
+  const cohesion = hasCohesion ? Math.round(Math.max(0, Math.min(100, formation.cohesion))) : null;
+  const filledSegments = cohesion != null ? Math.ceil(cohesion / 20) : 0;
   const bgFaction = FACTION_BG_SUBTLE[formation.faction] ?? 'bg-panel-border';
   const factionText = FACTION_COLORS[formation.faction] ?? 'text-text-primary';
   const supplyState = getSupplyState(formation);
   const rowClass = onClick ? 'cursor-pointer' : '';
-  const fat = Math.round(formation.fatigue);
-  const fatClass = fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
+  const fat = hasFatigue ? Math.round(formation.fatigue) : null;
+  const fatClass = fat == null ? 'text-text-secondary italic' : fat >= 50 ? 'text-faction-rs font-bold' : fat >= 30 ? 'text-accent-gold' : 'text-text-secondary';
   const supplyColor = SUPPLY_DOT_CLASS[supplyState];
   const supplyLabel = t(SUPPLY_LABEL_KEY[supplyState]);
+  const cohesionLabel = cohesion == null ? t('corpsFront.unreported') : `${cohesion}%`;
+  const fatigueLabel = fat == null ? t('corpsFront.unreported') : String(fat);
 
   // Stance-colored left stripe
   const stanceStripe = STANCE_STRIPE[formation.posture ?? ''] ?? 'border-l-transparent';
@@ -94,8 +99,8 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
     name: formationName,
     personnel: personnelLabel,
     supply: supplyLabel,
-    cohesion,
-    fatigue: fat,
+    cohesion: cohesionLabel,
+    fatigue: fatigueLabel,
     status: toTitleCase(statusLabel.toLocaleLowerCase()),
   });
 
@@ -116,7 +121,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       onMouseLeave={(e) => onHoverChange?.(false, e)}
       data-formation-id={formation.id}
       data-highlighted={highlighted ? 'true' : 'false'}
-      title={t('brigadeRow.title', { supply: supplyLabel, fatigue: fat, cohesion })}
+      title={t('brigadeRow.title', { supply: supplyLabel, fatigue: fatigueLabel, cohesion: cohesionLabel })}
       aria-label={rowAriaLabel}
     >
       {/* Supply dot */}
@@ -145,19 +150,23 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       )}
 
       {/* Cohesion bar */}
-      <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion })}>
-        {Array.from({ length: 5 }, (_, idx) => (
-          <span
-            key={idx}
-            className={`block h-1.5 w-2 rounded-sm ${idx < filledSegments ? bgFaction : 'bg-panel-card'}`}
-          />
-        ))}
+      <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion: cohesionLabel })}>
+        {cohesion == null ? (
+          <span className="text-[9px] italic text-text-secondary">{t('corpsFront.unreported')}</span>
+        ) : (
+          Array.from({ length: 5 }, (_, idx) => (
+            <span
+              key={idx}
+              className={`block h-1.5 w-2 rounded-sm ${idx < filledSegments ? bgFaction : 'bg-panel-card'}`}
+            />
+          ))
+        )}
       </div>
 
       {/* Fatigue */}
-      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fat })}>
+      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
         <Icon name="fatigue" size={8} />
-        {fat}
+        {fatigueLabel}
       </div>
 
       {/* Status badge — rubber stamp style */}

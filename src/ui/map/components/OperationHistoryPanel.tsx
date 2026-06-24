@@ -111,6 +111,12 @@ function formatGradeFactorLabel(key: string): string {
     return GRADE_FACTOR_LABEL[key] ?? 'Operational factor';
 }
 
+function formatGradeFactorValue(value: unknown): string {
+    if (typeof value === 'number' && Number.isFinite(value)) return value.toFixed(0);
+    if (typeof value === 'string' && value.trim()) return value;
+    return t('operationHistory.gradeFactorUnreported');
+}
+
 function formatNotableEventLabel(event: string): string {
     return NOTABLE_EVENT_LABEL_KEY[event] ? t(NOTABLE_EVENT_LABEL_KEY[event]) : t('operationHistory.weekly.notableFallback');
 }
@@ -209,6 +215,35 @@ function StarRating({ stars, verdict }: { stars: number; verdict: string }) {
     );
 }
 
+function getRecordedGrade(op: CompletedOp): CompletedOp['grade'] | null {
+    const grade = (op as { grade?: CompletedOp['grade'] | null }).grade;
+    if (!grade || !Number.isFinite(grade.stars) || typeof grade.verdict !== 'string' || !grade.verdict.trim()) {
+        return null;
+    }
+    return grade;
+}
+
+function getGradeFactors(grade: CompletedOp['grade'] | null): [string, unknown][] {
+    if (!grade?.factors || typeof grade.factors !== 'object') return [];
+    return Object.entries(grade.factors);
+}
+
+function formatObjectiveChainSummary(captured: number, targeted: number): string {
+    if (targeted <= 0) return t('operationHistory.noObjectiveChain');
+    return `${captured}/${targeted}`;
+}
+
+function isUnsafeRawLabel(value: string | null | undefined): boolean {
+    if (!value) return true;
+    return /(?:^cmd_|_t\d+\b|[a-z]{2,}_[a-z0-9_]+|[:|])/.test(value);
+}
+
+function formatAxisDisplayName(axisName: string | null | undefined, index: number): string {
+    const trimmed = axisName?.trim();
+    if (!trimmed || isUnsafeRawLabel(trimmed)) return t('operationHistory.axisFallback', { index: index + 1 });
+    return trimmed;
+}
+
 function CasualtyLine({ label, cas }: { label: string; cas: { killed: number; wounded: number } }) {
     const total = cas.killed + cas.wounded;
     if (total === 0) return null;
@@ -270,20 +305,23 @@ function OperationDeepReview({
     const suffered = totalCasualties(op.casualties_suffered);
     const inflicted = totalCasualties(op.casualties_inflicted);
     const provenance = CAPTURE_PROVENANCE_SUMMARY[op.capture_provenance ?? 'no_objectives_held'] ?? 'AAR record';
+    const grade = getRecordedGrade(op);
 
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/60 p-2.5 space-y-2">
             <div className="flex items-center justify-between gap-3">
                 <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('operationHistory.deepReview')}</div>
                 <div className="text-[10px] text-text-muted tabular-nums">
-                    {t('operationHistory.objectivesHeldCount', { captured: op.objectives_captured.length, targeted: op.objectives_targeted.length })}
+                    {op.objectives_targeted.length > 0
+                        ? t('operationHistory.objectivesHeldCount', { captured: op.objectives_captured.length, targeted: op.objectives_targeted.length })
+                        : t('operationHistory.noObjectiveChain')}
                 </div>
             </div>
             <div className="grid gap-1 text-[10px] text-text-secondary sm:grid-cols-2">
                 <span>{t('operationHistory.result', { outcome: formatOutcome(op.outcome) })}</span>
                 <span>{t('operationHistory.attacks', { count: op.total_attacks.toLocaleString() })}</span>
                 <span>{t('operationHistory.casualties', { suffered: suffered.toLocaleString(), inflicted: inflicted.toLocaleString() })}</span>
-                <span>{t('operationHistory.grade', { stars: op.grade.stars, verdict: op.grade.verdict })}</span>
+                <span>{grade ? t('operationHistory.grade', { stars: grade.stars, verdict: grade.verdict }) : t('operationHistory.gradeUnreported')}</span>
                 <span className="sm:col-span-2">{t('operationHistory.provenance', { provenance })}</span>
             </div>
             {op.objectives_targeted.length > 0 && (
@@ -337,11 +375,11 @@ function CompletedOpCard({
 }) {
     const [expanded, setExpanded] = useState(focused);
     const captured = new Set(op.objectives_captured);
-    const objRate = op.objectives_targeted.length > 0
-        ? `${op.objectives_captured.length}/${op.objectives_targeted.length}`
-        : '0/0';
+    const objRate = formatObjectiveChainSummary(op.objectives_captured.length, op.objectives_targeted.length);
     const captureProvenanceNotice = CAPTURE_PROVENANCE_LABEL[op.capture_provenance ?? 'no_objectives_held'];
     const dateRange = formatOperationDateRange(op.started_turn, op.ended_turn);
+    const grade = getRecordedGrade(op);
+    const gradeFactors = getGradeFactors(grade);
 
     useEffect(() => {
         if (focused) setExpanded(true);
@@ -376,7 +414,11 @@ function CompletedOpCard({
                         </div>
                     </div>
                     <div className="flex flex-col items-end shrink-0 gap-0.5">
-                        <StarRating stars={op.grade.stars} verdict={op.grade.verdict} />
+                        {grade ? (
+                            <StarRating stars={grade.stars} verdict={grade.verdict} />
+                        ) : (
+                            <span className="text-[9px] text-text-secondary font-mono uppercase">{t('operationHistory.gradeUnreported')}</span>
+                        )}
                         <span className={`text-[10px] font-mono ${OUTCOME_COLOR[op.outcome] ?? 'text-text-secondary'}`}>
                             {OUTCOME_LABEL[op.outcome] ?? t('operationHistory.outcomeUnreported')}
                         </span>
@@ -427,13 +469,15 @@ function CompletedOpCard({
                     )}
 
                     {/* Grade factors */}
-                    <div className="text-[9px] text-text-muted flex gap-3 flex-wrap">
-                        {Object.entries(op.grade.factors).map(([key, val]) => (
-                            <span key={key}>
-                                {formatGradeFactorLabel(key)}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : val}</span>
-                            </span>
-                        ))}
-                    </div>
+                    {gradeFactors.length > 0 && (
+                        <div className="text-[9px] text-text-muted flex gap-3 flex-wrap">
+                            {gradeFactors.map(([key, val]) => (
+                                <span key={key}>
+                                    {formatGradeFactorLabel(key)}: <span className="text-text-secondary tabular-nums">{formatGradeFactorValue(val)}</span>
+                                </span>
+                            ))}
+                        </div>
+                    )}
 
                     {/* Command Record — expanded provenance sentence */}
                     {(op.commander_assessment_at_launch != null || op.force_launched) && (
@@ -510,13 +554,15 @@ function CompletedOpCard({
                     {op.axis_summaries && op.axis_summaries.length > 0 && (
                         <div>
                             <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.axes')}</div>
-                            {op.axis_summaries.map(ax => {
+                            {op.axis_summaries.map((ax, index) => {
                                 const axisCaptured = new Set(ax.objectives_captured);
                                 return (
                                     <div key={ax.axis_id} className="text-[10px] border-l-2 border-panel-border/50 pl-2 mb-1">
-                                        <div className="text-text-primary font-semibold">{ax.axis_name}</div>
+                                        <div className="text-text-primary font-semibold">{formatAxisDisplayName(ax.axis_name, index)}</div>
                                         <div className="text-text-muted">
-                                            {t('operationHistory.axisMeta', { captured: ax.objectives_captured.length, targeted: ax.objectives_targeted.length, attacks: ax.total_attacks })}
+                                            {ax.objectives_targeted.length > 0
+                                                ? t('operationHistory.axisMeta', { captured: ax.objectives_captured.length, targeted: ax.objectives_targeted.length, attacks: ax.total_attacks })
+                                                : t('operationHistory.axisObjectiveChainUnreported', { attacks: ax.total_attacks })}
                                         </div>
                                         {ax.objectives_targeted.length > 0 && (
                                             <div className="mt-1 flex flex-wrap gap-1">
@@ -608,7 +654,7 @@ function CompletedOpCard({
 // --- Active operation card ---
 
 function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
-    const objRate = op.objectives_count > 0 ? `${op.objectives_captured}/${op.objectives_count}` : '0/0';
+    const objRate = formatObjectiveChainSummary(op.objectives_captured, op.objectives_count);
     return (
         <div className="border border-panel-border/50 rounded bg-panel-card/50 mb-2 px-3 py-2">
             <div className="flex items-start justify-between gap-2">
@@ -629,7 +675,9 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                         {getPlayerSafeOperationPhaseLabel(op.phase)}
                     </span>
                     <span className="text-[10px] text-text-muted tabular-nums">
-                        {t('operationHistory.activeProgress', { objectives: objRate, attacks: op.attacks })}
+                        {op.objectives_count > 0
+                            ? t('operationHistory.activeProgress', { objectives: objRate, attacks: op.attacks })
+                            : t('operationHistory.activeProgressNoObjectives', { attacks: op.attacks })}
                     </span>
                 </div>
             </div>

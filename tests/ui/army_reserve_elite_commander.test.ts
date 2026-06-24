@@ -154,4 +154,21 @@ describe('ArmyReservePanel elite commander identity', () => {
     expect(state.selectedArmyHqId).toBe('arbih_general_staff');
     expect(state.selectedOsid).toBe('op:visoko:visoko_2');
   });
+
+  it('renders missing reserve personnel as unreported instead of a critical red bar', () => {
+    const state = makeReserveState(false);
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_guards_brigade'
+      ? { ...formation, personnel: undefined } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+    });
+
+    const { container } = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    expect(container.textContent ?? '').toMatch(/Personnel\s*(?:—|â€”)/);
+    expect(container.innerHTML).not.toContain('#d45555');
+  });
 });

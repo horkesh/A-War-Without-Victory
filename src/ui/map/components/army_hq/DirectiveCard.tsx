@@ -402,9 +402,10 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     setImpossibleReason(null);
     try {
       if (directive.lever === 'authorize_op') {
+        const reviewId = typeof directive.payload.reviewId === 'string' ? directive.payload.reviewId : '';
         const proposalId = typeof directive.payload.proposalId === 'string' ? directive.payload.proposalId : '';
-        if (!proposalId) { setLoadError('Directive is missing its proposal context.'); return; }
-        const result = await ipc.acceptProposal(proposalId);
+        if (!reviewId || !proposalId) { setLoadError('Directive is missing its opportunity review context.'); return; }
+        const result = await ipc.resolveOperationOpportunityDecision({ reviewId, proposalId, decision: 'approve' });
         if (!result.ok) markFailed(result.error ?? 'Failed to authorize operation.');
         else { resetTransient(); markIssued(); }
         return;

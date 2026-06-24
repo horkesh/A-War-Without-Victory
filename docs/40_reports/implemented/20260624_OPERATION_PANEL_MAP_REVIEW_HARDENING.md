@@ -33,4 +33,5 @@
 
 ## Follow-Up Queue
 
-- Remaining scout findings still worth a later batch: BCS status-value localization, operation-history missing AAR grade, raw AAR axis labels, empty objective-chain `0/0`, and Decision Room opportunity recommendation copy sanitization.
+- Implemented follow-up: operation-history missing AAR grade, raw AAR axis labels, empty objective-chain `0/0`, Decision Room opportunity recommendation copy sanitization, review-aware opportunity authorization, sector inspect OSID anchoring, and neutral missing-condition presentation. Report: `docs/40_reports/implemented/20260624_OPERATION_HISTORY_DECISION_SECTOR_POLISH.md`.
+- Remaining later polish: BCS status-value localization remains intentionally deferred behind the user's current "not BCS-first" direction.

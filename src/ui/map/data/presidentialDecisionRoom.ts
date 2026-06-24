@@ -64,6 +64,14 @@ const PROPOSAL_DOMAIN_LABEL_KEYS: Record<string, MessageKey> = {
   diplomacy: 'decisionRoom.proposalDomain.diplomacy',
 };
 
+const OPPORTUNITY_RECOMMENDATION_LABEL_KEYS: Record<string, MessageKey> = {
+  approve: 'decisionRoom.card.opportunity.recommendation.approve',
+  delay: 'decisionRoom.card.opportunity.recommendation.delay',
+  redirect: 'decisionRoom.card.opportunity.recommendation.redirect',
+  under_resource: 'decisionRoom.card.opportunity.recommendation.underResource',
+  decline: 'decisionRoom.card.opportunity.recommendation.decline',
+};
+
 function reserveReasonLabel(reason: string | null | undefined): string {
   const key = (reason ?? '').trim();
   if (!key) return t('armyReserve.reason.unknown');
@@ -88,6 +96,12 @@ function proposalDomainLabel(domain: string | null | undefined): string {
   const key = (domain ?? '').trim();
   const messageKey = PROPOSAL_DOMAIN_LABEL_KEYS[key];
   return messageKey ? t(messageKey) : t('decisionRoom.proposalDomain.unknown');
+}
+
+function opportunityRecommendationCopy(recommendation: string | null | undefined): string | null {
+  const key = (recommendation ?? '').trim();
+  const messageKey = OPPORTUNITY_RECOMMENDATION_LABEL_KEYS[key];
+  return messageKey ? t(messageKey) : null;
 }
 
 /**
@@ -662,8 +676,8 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
     const canApprove = opportunity.available_actions.some(
       (action) => action.id === 'approve' && action.enabled,
     );
-    const directive: PresidentialDecisionRoomDirective | undefined = canApprove
-      ? { lever: 'authorize_op', cost: 0, payload: { proposalId: opportunity.proposal_id } }
+    const directive: PresidentialDecisionRoomDirective | undefined = canApprove && opportunity.review_id
+      ? { lever: 'authorize_op', cost: 0, payload: { reviewId: opportunity.review_id, proposalId: opportunity.proposal_id } }
       : undefined;
 
     cards.push({
@@ -673,7 +687,7 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
         ? 'critical'
         : 'warning',
       title: opportunity.display_name,
-      explanation: opportunity.recommendation ?? opportunity.description ?? t('decisionRoom.card.opportunity.fallbackExplanation'),
+      explanation: opportunityRecommendationCopy(opportunity.recommendation) ?? opportunity.description ?? t('decisionRoom.card.opportunity.fallbackExplanation'),
       sourceOwner: t('decisionRoom.card.opportunity.sourceOwner'),
       sourceLabel: t('decisionRoom.card.opportunity.sourceLabel'),
       actionLabel: t('decisionRoom.action.reviewDossier'),

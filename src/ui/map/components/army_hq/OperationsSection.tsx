@@ -235,6 +235,14 @@ function StarRating({ stars, verdict }: { stars: number; verdict: string }) {
     );
 }
 
+function getRecordedAarGrade(aar: CompletedOp | null | undefined): CompletedOp['grade'] | null {
+    const grade = aar?.grade;
+    if (!grade || !Number.isFinite(grade.stars) || typeof grade.verdict !== 'string' || !grade.verdict.trim()) {
+        return null;
+    }
+    return grade;
+}
+
 /** Compact personality descriptor from officer stats. */
 function getCommanderPersonality(officer: NamedOfficerView): string {
     const comp = officer.competence;
@@ -430,6 +438,7 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     const forceBalance = op.force_ratio_estimate != null
         ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
         : null;
+    const completedAarGrade = getRecordedAarGrade(completedAAR);
 
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -631,7 +640,11 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                         <div className="flex flex-col gap-1">
                             <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest">{t('operationsSection.afterActionAssessment')}</div>
                             <div className="flex items-center gap-3">
-                                <StarRating stars={completedAAR.grade.stars} verdict={completedAAR.grade.verdict} />
+                                {completedAarGrade ? (
+                                    <StarRating stars={completedAarGrade.stars} verdict={completedAarGrade.verdict} />
+                                ) : (
+                                    <span className="text-[9px] text-text-secondary font-mono uppercase">{t('operationHistory.gradeUnreported')}</span>
+                                )}
                                 <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border ${OUTCOME_COLOR[completedAAR.outcome] ?? 'text-text-secondary'} border-current/30 bg-current/5`}>
                                     {OUTCOME_LABEL_KEY[completedAAR.outcome] ? t(OUTCOME_LABEL_KEY[completedAAR.outcome]) : t('operationsSection.outcome.unreported')}
                                 </span>
@@ -645,9 +658,9 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     </div>
 
                     {/* Grade factors */}
-                    {Object.keys(completedAAR.grade.factors).length > 0 && (
+                    {completedAarGrade && Object.keys(completedAarGrade.factors).length > 0 && (
                         <div className="flex flex-wrap gap-2 px-1">
-                            {Object.entries(completedAAR.grade.factors).map(([key, val]) => (
+                            {Object.entries(completedAarGrade.factors).map(([key, val]) => (
                                 <span key={key} className="text-[8px] text-text-secondary/40 font-mono uppercase border border-panel-border/30 px-1.5 py-0.5 rounded">
                                     {GRADE_FACTOR_LABELS[key] ?? t('operationsSection.factor.other')}: <span className="text-text-secondary tabular-nums">{typeof val === 'number' ? val.toFixed(0) : String(val)}</span>
                                 </span>

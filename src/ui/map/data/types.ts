@@ -1255,7 +1255,7 @@ export interface LoadedGameState {
         equipment_lost: { tanks: number; artillery: number };
         equipment_destroyed: { tanks: number; artillery: number };
         equipment_captured: { tanks: number; artillery: number };
-        grade: { stars: number; verdict: string; factors: Record<string, number> };
+        grade?: { stars: number; verdict: string; factors: Record<string, number> };
         duration_turns: number;
         weekly_log: Array<{
             turn: number; phase: string; attacks_this_turn: number;

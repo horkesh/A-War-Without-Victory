@@ -1,3 +1,11 @@
+## 2026-06-24 - Operation history, Decision Room, and sector truth polish
+
+**Missing AAR grades are unreported, not poor results:** completed-operation records can legitimately lack `grade` data. Durable rule: preserve absent AAR grade fields through the adapter and render `Grade unreported`; do not synthesize one-star `Unknown` results or grade-factor rows. Applied in `[2026-06-24] fix(ui): harden operation history, decision, and sector truth`; report `docs/40_reports/implemented/20260624_OPERATION_HISTORY_DECISION_SECTOR_POLISH.md`.
+
+**Operation opportunity authorization is review-owned:** an operation opportunity approval needs the review id as well as the proposal id. Durable rule: Decision Room inline authorize controls must suppress themselves when `review_id` is missing and call `resolveOperationOpportunityDecision({ reviewId, proposalId, decision: 'approve' })`, not generic `acceptProposal(...)`. Applied in `[2026-06-24] fix(ui): harden operation history, decision, and sector truth`; report `docs/40_reports/implemented/20260624_OPERATION_HISTORY_DECISION_SECTOR_POLISH.md`.
+
+**Missing brigade condition fields are unreported, not zero readiness:** compact command rows can receive absent cohesion, fatigue, readiness, lifecycle, or reserve-personnel values. Durable rule: render these gaps as neutral unreported presentation and avoid zero bars, red fatigue, or bad lifecycle copy unless the read model explicitly reports the value. Applied in `[2026-06-24] fix(ui): harden operation history, decision, and sector truth`; report `docs/40_reports/implemented/20260624_OPERATION_HISTORY_DECISION_SECTOR_POLISH.md`.
+
 ## 2026-06-24 - Operation review and map context hardening
 
 **Operation command reviews are not decision levers:** Army HQ Operations and similar review paths can inspect command decisions after launch, but they must not expose launch/postpone/abort/probe controls for execution/recovery operations. Durable rule: action controls belong to planning-phase decision briefings or the Presidential Decision Room; active-operation reviews are read-only and close-only. Applied in `[2026-06-24] fix(ui): harden operation review, map context, and stale participant truth`; report `docs/40_reports/implemented/20260624_OPERATION_PANEL_MAP_REVIEW_HARDENING.md`.

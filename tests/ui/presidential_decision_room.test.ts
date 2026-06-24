@@ -1346,10 +1346,57 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(authorizeCard?.directive).toEqual({
       lever: 'authorize_op',
       cost: 0,
-      payload: { proposalId: 'opp_authorize' },
+      payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
     // A disabled approve action carries no directive (additive — undefined).
     expect(noActionCard?.directive).toBeUndefined();
+  });
+
+  it('does not expose authorize-op directives when the opportunity review id is missing', () => {
+    const state = makeState({
+      operationOpportunityProposals: [
+        makeOpportunity({
+          proposal_id: 'opp_missing_review',
+          review_id: undefined,
+          display_name: 'Missing Review Window',
+          expires_turn: 30,
+          available_actions: [{ id: 'approve', label: 'Authorize', enabled: true }],
+        }),
+      ],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'opportunity:opp_missing_review');
+
+    expect(card).toBeTruthy();
+    expect(card?.directive).toBeUndefined();
+  });
+
+  it('renders opportunity recommendation enums as staff copy instead of raw ids', () => {
+    const state = makeState({
+      operationOpportunityProposals: [
+        makeOpportunity({
+          proposal_id: 'opp_approve',
+          recommendation: 'approve',
+          description: 'Fallback staff detail.',
+        }),
+        makeOpportunity({
+          proposal_id: 'opp_under_resource',
+          display_name: 'Reduced Resources',
+          recommendation: 'under_resource',
+          description: 'Fallback staff detail.',
+        }),
+      ],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const approveCard = view.cards.find((entry) => entry.id === 'opportunity:opp_approve');
+    const underResourceCard = view.cards.find((entry) => entry.id === 'opportunity:opp_under_resource');
+
+    expect(approveCard?.explanation).toBe('Staff recommends authorization.');
+    expect(underResourceCard?.explanation).toBe('Staff recommends authorization with reduced resources.');
+    expect(approveCard?.explanation).not.toBe('approve');
+    expect(underResourceCard?.explanation).not.toBe('under_resource');
   });
 
   it('populates a stop-op directive (cost 25) for a player-faction executing operation', () => {
@@ -1407,7 +1454,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.activeDossier?.directive).toEqual({
       lever: 'authorize_op',
       cost: 0,
-      payload: { proposalId: 'opp_authorize' },
+      payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
   });
 
