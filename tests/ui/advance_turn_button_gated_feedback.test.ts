@@ -371,7 +371,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(screen.getByText('KODEKS')).toBeTruthy();
     expect(screen.getByText(/11 jan 1993/)).toBeTruthy();
     expect(screen.getByText(/SLJEDEĆI POTEZ/)).toBeTruthy();
-    expect(screen.getByRole('group', { name: 'Komandni autoritet: 4/8' })).toBeTruthy();
+    expect(screen.getByRole('group', { name: 'Ovlast: 4/8' })).toBeTruthy();
     expect(screen.getByTitle('Kampanjska hronika')).toBeTruthy();
     expect(screen.getAllByTitle('Posjeti Armijski HQ [H]').length).toBeGreaterThan(0);
     expect(screen.queryByText('CHRONICLE')).toBeNull();

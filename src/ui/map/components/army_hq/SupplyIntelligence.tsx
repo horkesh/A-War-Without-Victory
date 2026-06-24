@@ -63,8 +63,8 @@ export function computeSupplyBreakdown(
     const reserves = state.factionReserves?.[faction];
     const currentGeneralReported = Number.isFinite(reserves?.generalSupply);
     const currentHeavyReported = Number.isFinite(reserves?.heavyMunitions);
-    const currentGeneral = currentGeneralReported ? reserves!.generalSupply : null;
-    const currentHeavy = currentHeavyReported ? reserves!.heavyMunitions : null;
+    const currentGeneral = currentGeneralReported && reserves ? reserves.generalSupply : null;
+    const currentHeavy = currentHeavyReported && reserves ? reserves.heavyMunitions : null;
 
     const formations = state.formations?.filter(f =>
         f.faction === faction && isFieldedTacticalFormation(f),
