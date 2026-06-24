@@ -2442,6 +2442,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'strategicPosition.title': 'Strateški položaj',
     'strategicPosition.negotiatingCapital': 'Pregovarački kapital',
     'strategicPosition.weightedComposite': 'Ponderisani kompozit',
+    'strategicPosition.compositeUnreported': 'Kompozit nije prijavljen',
+    'strategicPosition.unreported': 'Nije prijavljeno',
     'strategicPosition.base': 'Baza:',
     'strategicPosition.events': 'Događaji:',
     'strategicPosition.effective': 'Efektivno:',

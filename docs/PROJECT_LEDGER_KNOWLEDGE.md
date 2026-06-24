@@ -1,3 +1,9 @@
+## 2026-06-24 - Contested bands and strategic position sparse truth
+
+**Contested-band pressure uses fielded tactical truth:** forming units, HQ rows, inactive records, and non-tactical formations are not adjacent combat pressure. Durable rule: contested-band adjacent-pressure overlays should count only `isFieldedTacticalFormation(...)` rows with explicit physical `location_osid`; recent combat flips remain separately valid contested evidence. Applied in `[2026-06-24] fix(ui): preserve contested band and strategic position truth`; report `docs/40_reports/implemented/20260624_CONTESTED_BAND_STRATEGIC_POSITION_TRUTH.md`.
+
+**Strategic Position absence is unreported, not neutral 50:** missing negotiating-capital or dimension rows are source gaps. Durable rule: render missing composite/dimension metrics as unreported and use zero-width neutral bars; only reported finite values should determine color, score, modifiers, and tooltip math. Applied in `[2026-06-24] fix(ui): preserve contested band and strategic position truth`; report `docs/40_reports/implemented/20260624_CONTESTED_BAND_STRATEGIC_POSITION_TRUTH.md`.
+
 ## 2026-06-24 - Map and command ownership truth
 
 **AoR/HQ anchors are not movement origins:** command anchors and area coverage can orient the player but are not physical unit presence. Durable rule: staged arrows, ghost paths, battle/movement origins, and tactical movement feedback must use explicit physical `location_osid`; reserve AoR and `hq_osid` are navigation context only. Applied in `[2026-06-24] fix(ui): preserve map and command ownership truth`; report `docs/40_reports/implemented/20260624_MAP_COMMAND_OWNERSHIP_TRUTH_NEXT.md`.

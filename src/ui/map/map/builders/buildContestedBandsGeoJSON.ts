@@ -1,5 +1,6 @@
 import type { Feature, FeatureCollection, GeoJsonProperties, MultiPolygon, Polygon } from 'geojson';
 import { strictCompare } from '../../../../state/validateGameState.js';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility.js';
 
 type PolygonFeature = Feature<Polygon | MultiPolygon, GeoJsonProperties>;
 
@@ -31,9 +32,11 @@ export interface ContestedBandFrontEdge {
 }
 
 export interface ContestedBandFormation {
+  kind?: string | null;
   faction?: string | null;
   location_osid?: string | null;
   personnel?: number | null;
+  readiness?: string | null;
   status?: string | null;
 }
 
@@ -112,8 +115,7 @@ export function buildContestedBandsGeoJSON(args: BuildContestedBandsArgs): Featu
     const osid = typeof formation.location_osid === 'string' ? formation.location_osid : '';
     const faction = typeof formation.faction === 'string' ? formation.faction : '';
     if (!osid || !faction) continue;
-    const status = typeof formation.status === 'string' ? formation.status.toLowerCase() : '';
-    if (status === 'destroyed' || status === 'inactive') continue;
+    if (!isFieldedTacticalFormation(formation)) continue;
     const key = `${osid}\0${faction}`;
     strengthByOsidFaction.set(key, (strengthByOsidFaction.get(key) ?? 0) + finitePositive(formation.personnel));
   }

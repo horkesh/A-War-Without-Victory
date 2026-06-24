@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): preserve contested band and strategic position truth
+
+**Type:** UI/read-model/map-projection/test/docs polish.
+
+**Fix:** Contested-band adjacent-pressure overlays now count only fielded tactical formations at explicit physical locations by using the shared fielded tactical boundary. Forming units, inactive/non-tactical rows, and command HQ records no longer create false adjacent pressure. Army HQ Strategic Position no longer defaults missing negotiating-capital or dimension rows to neutral `50`; missing composite and dimensions render as unreported while reported dimensions still display their actual values.
+
+**Verification:** Focused red/green packet passed 3 files / 30 tests: `node node_modules\vitest\vitest.mjs run tests\ui_map_contested_bands.test.ts tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui_player_visibility.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 579 tests. `npm.cmd run qa:live-surface:browser` passed and verified dev-server cleanup; `.tmp_live_surface_browser_sweep` was removed. Report: `docs/40_reports/implemented/20260624_CONTESTED_BAND_STRATEGIC_POSITION_TRUTH.md`.
+
+**Scope/determinism:** UI/read-model/map-projection/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint artifact, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] fix(ui): preserve map and command ownership truth
 
 **Type:** UI/read-model/map-projection/test/docs polish.

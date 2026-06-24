@@ -64,8 +64,8 @@ describe('buildContestedBandsGeoJSON', () => {
         { edge_id: 'op:test:alpha__op:test:beta', a: 'op:test:alpha', b: 'op:test:beta', side_a: 'RBiH', side_b: 'RS' },
       ],
       formations: [
-        { id: 'friendly', faction: 'RBiH', location_osid: 'op:test:alpha', personnel: 100 } as any,
-        { id: 'hostile', faction: 'RS', location_osid: 'op:test:beta', personnel: 61 } as any,
+        { id: 'friendly', faction: 'RBiH', kind: 'brigade', readiness: 'ready', status: 'active', location_osid: 'op:test:alpha', personnel: 100 } as any,
+        { id: 'hostile', faction: 'RS', kind: 'brigade', readiness: 'ready', status: 'active', location_osid: 'op:test:beta', personnel: 61 } as any,
       ],
     });
 
@@ -77,6 +77,26 @@ describe('buildContestedBandsGeoJSON', () => {
       contested_reason: 'adjacent_pressure',
     });
     expect(alpha?.properties.enemy_pressure_ratio).toBeCloseTo(0.61, 6);
+  });
+
+  it('does not count forming or non-tactical formations as adjacent pressure', () => {
+    const result = buildContestedBandsGeoJSON({
+      controlGeoJson: baseGeoJson,
+      currentTurn: 20,
+      recentControlEvents: [],
+      frontEdgesOsid: [
+        { edge_id: 'op:test:alpha__op:test:beta', a: 'op:test:alpha', b: 'op:test:beta', side_a: 'RBiH', side_b: 'RS' },
+      ],
+      formations: [
+        { id: 'friendly', faction: 'RBiH', kind: 'brigade', readiness: 'ready', status: 'active', location_osid: 'op:test:alpha', personnel: 100 } as any,
+        { id: 'forming_hostile', faction: 'RS', kind: 'brigade', readiness: 'forming', status: 'active', location_osid: 'op:test:beta', personnel: 500 } as any,
+        { id: 'hostile_hq', faction: 'RS', kind: 'army_hq', readiness: 'ready', status: 'active', location_osid: 'op:test:beta', personnel: 500 } as any,
+      ],
+    });
+
+    expect(result.features.map((feature) => feature.properties.osid)).toEqual(['op:test:beta']);
+    const alpha = result.features.find((feature) => feature.properties.osid === 'op:test:alpha');
+    expect(alpha).toBeUndefined();
   });
 
   it('returns contested polygons sorted by OSID, independent of source feature order', () => {

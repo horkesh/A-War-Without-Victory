@@ -2567,6 +2567,8 @@ export const enMessages = {
     'strategicPosition.title': 'Strategic Position',
     'strategicPosition.negotiatingCapital': 'Negotiating Capital',
     'strategicPosition.weightedComposite': 'Weighted Composite',
+    'strategicPosition.compositeUnreported': 'Composite unreported',
+    'strategicPosition.unreported': 'Unreported',
     'strategicPosition.base': 'Base:',
     'strategicPosition.events': 'Events:',
     'strategicPosition.effective': 'Effective:',

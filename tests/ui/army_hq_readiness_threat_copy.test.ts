@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { ForceReadiness, generateForceReadiness, readinessGradeLabel, type CorpsReadiness } from '../../src/ui/map/components/army_hq/ForceReadiness.js';
+import { StrategicPosition } from '../../src/ui/map/components/army_hq/StrategicPosition.js';
 import { ThreatAssessment } from '../../src/ui/map/components/army_hq/ThreatAssessment.js';
 import { generateThreatAssessment } from '../../src/ui/map/components/army_hq/generateThreatAssessment.js';
 import { t } from '../../src/ui/map/i18n/index.js';
@@ -93,6 +94,21 @@ afterEach(() => {
 });
 
 describe('Army HQ readiness and threat copy', () => {
+    it('renders sparse strategic position dimensions as unreported instead of neutral 50s', () => {
+        const html = renderToStaticMarkup(createElement(StrategicPosition, {
+            faction: 'RBiH',
+            dimensions: {
+                military_credibility: { base_value: 60, event_modifier: 5, effective_value: 65 },
+            },
+        }));
+
+        expect(html).toContain('Military Credibility');
+        expect(html).toContain('65');
+        expect(html).toContain('Unreported');
+        expect(html).toContain('Composite unreported');
+        expect(html).not.toContain('Weighted Composite');
+    });
+
     it('renders ForceReadiness labels through BCS copy instead of English staff labels', () => {
         const item: CorpsReadiness = {
             corpsId: 'corps_1',

@@ -60,6 +60,10 @@ function modifierDisplay(modifier: number): { text: string; color: string } | nu
     return { text: `${modifier}`, color: 'text-red-400' };
 }
 
+function finiteMetric(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 function formatWeight(w: number): string {
     return `${Math.round(w * 100)}%`;
 }
@@ -75,7 +79,7 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
     }
 
     const weights = FACTION_WEIGHTS[faction];
-    const score = compositeScore ?? 50;
+    const score = finiteMetric(compositeScore);
 
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg p-4">
@@ -89,18 +93,18 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                     <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/90">
                         {t('strategicPosition.negotiatingCapital')}
                     </span>
-                    <span className={`text-[13px] font-mono font-bold tabular-nums ${compositeGradeColor(score)}`}>
-                        {score}
+                    <span className={`text-[13px] font-mono font-bold ${score == null ? 'text-text-secondary italic' : `tabular-nums ${compositeGradeColor(score)}`}`}>
+                        {score == null ? t('strategicPosition.unreported') : score}
                     </span>
                 </div>
                 <div className="h-[6px] rounded-full bg-emerald-500/15 overflow-hidden">
                     <div
                         className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
-                        style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
+                        style={{ width: `${score == null ? 0 : Math.max(0, Math.min(100, score))}%` }}
                     />
                 </div>
                 <div className="text-[8px] text-text-secondary/50 mt-0.5 font-mono text-right">
-                    {t('strategicPosition.weightedComposite')}
+                    {score == null ? t('strategicPosition.compositeUnreported') : t('strategicPosition.weightedComposite')}
                 </div>
             </div>
 
@@ -108,10 +112,10 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
             <div className="space-y-2">
                 {DIMENSION_CONFIG.map(({ id, labelKey, color, bgColor }) => {
                     const dim = dimensions[id];
-                    const effective = dim?.effective_value ?? 50;
-                    const base = dim?.base_value ?? 50;
-                    const eventMod = dim?.event_modifier ?? 0;
-                    const mod = modifierDisplay(eventMod);
+                    const effective = finiteMetric(dim?.effective_value);
+                    const base = finiteMetric(dim?.base_value);
+                    const eventMod = finiteMetric(dim?.event_modifier);
+                    const mod = eventMod == null ? null : modifierDisplay(eventMod);
                     const weight = weights?.[id];
                     const isHovered = hoveredDim === id;
 
@@ -137,15 +141,15 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                                             {mod.text}
                                         </span>
                                     )}
-                                    <span className={`text-[11px] font-mono font-bold tabular-nums ${gradeColor(effective)}`}>
-                                        {Math.round(effective)}
+                                    <span className={`text-[11px] font-mono font-bold ${effective == null ? 'text-text-secondary italic' : `tabular-nums ${gradeColor(effective)}`}`}>
+                                        {effective == null ? t('strategicPosition.unreported') : Math.round(effective)}
                                     </span>
                                 </div>
                             </div>
                             <div className={`h-[4px] rounded-full ${bgColor} overflow-hidden`}>
                                 <div
                                     className={`h-full rounded-full ${color} transition-all duration-500`}
-                                    style={{ width: `${Math.max(0, Math.min(100, effective))}%` }}
+                                    style={{ width: `${effective == null ? 0 : Math.max(0, Math.min(100, effective))}%` }}
                                 />
                             </div>
 
@@ -153,9 +157,9 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                             {isHovered && (
                                 <div className="absolute z-50 left-0 top-full mt-1 bg-panel-bg border border-panel-border rounded px-2 py-1.5 shadow-lg whitespace-nowrap pointer-events-none">
                                     <div className="text-[9px] font-mono text-text-secondary space-y-0.5">
-                                        <div>{t('strategicPosition.base')} <span className="text-text-primary font-bold">{Math.round(base)}</span></div>
-                                        <div>{t('strategicPosition.events')} <span className={eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod >= 0 ? '+' : ''}{Math.round(eventMod)}</span></div>
-                                        <div>{t('strategicPosition.effective')} <span className={`font-bold ${gradeColor(effective)}`}>{Math.round(effective)}</span></div>
+                                        <div>{t('strategicPosition.base')} <span className="text-text-primary font-bold">{base == null ? t('strategicPosition.unreported') : Math.round(base)}</span></div>
+                                        <div>{t('strategicPosition.events')} <span className={eventMod == null ? 'text-text-secondary italic' : eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod == null ? t('strategicPosition.unreported') : `${eventMod >= 0 ? '+' : ''}${Math.round(eventMod)}`}</span></div>
+                                        <div>{t('strategicPosition.effective')} <span className={`font-bold ${effective == null ? 'text-text-secondary italic' : gradeColor(effective)}`}>{effective == null ? t('strategicPosition.unreported') : Math.round(effective)}</span></div>
                                         {weight != null && (
                                             <div className="border-t border-panel-border/50 pt-0.5 mt-0.5">
                                                 {t('strategicPosition.weight')} <span className="text-amber-400">{formatWeight(weight)}</span>

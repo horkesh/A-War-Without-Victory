@@ -4,6 +4,10 @@
 
 **MAP PROJECTION ABSENCE IS UNREPORTED, NOT ZERO (2026-06-24).** Missing cohesion, threat intensity, battle rows, casualties, attacker counts, or morale are source gaps. Do instead: emit nullable/unreported projection fields and reported flags; do not use `0`, static/low-threat classes, one-attacker defaults, or cohesion-as-morale fallbacks.
 
+**CONTESTED PRESSURE NEEDS FIELDED TACTICAL ROWS (2026-06-24).** Contested overlays can easily count command rows, forming brigades, or stale formation records as pressure. Do instead: use `isFieldedTacticalFormation(...)` plus explicit physical `location_osid` for adjacent-pressure overlays; keep recent combat flips as a separate contested reason.
+
+**STRATEGIC POSITION SPARSE DATA IS UNREPORTED (2026-06-24).** Missing negotiating-capital or strategic-dimension rows must not become neutral `50`. Do instead: render composite and dimension gaps as unreported, and only color/score/modifier finite reported values.
+
 **ARMY HQ GRADES REQUIRE GRADE-CRITICAL FIELDS (2026-06-24).** Missing personnel, fatigue, cohesion, morale, or officer-quality must not produce favorable readiness/effectiveness grades. Do instead: flag the affected corps/aggregate as incomplete/unreported while keeping numeric estimates only as context.
 
 **MODAL-REQUIRED BLOCKERS ARE REQUIRED EVEN IF CARD SEVERITY IS NORMAL (2026-06-24).** Convoy, peace, and Dayton decisions can block advance without `severity: blocking`. Do instead: derive Desk required counts and pre-advance fallback blocker status from `derivePresidentialBlockers(...)`, not `InboxItem.severity` alone.
