@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { SituationTab } from '../../src/ui/map/components/SituationTab.js';
 import { SelectionPanel, resolveSelectionPanelMunicipalityId } from '../../src/ui/map/components/SelectionPanel.js';
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
+import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
 import { CorpsCard } from '../../src/ui/map/components/CorpsCard.js';
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
@@ -762,6 +763,94 @@ describe('GUI audit label discipline', () => {
 
     expect(container.textContent).toContain('Unreported');
     expect(container.textContent).not.toMatch(/\b0\b/);
+  });
+
+  it('renders Army HQ modal aggregate personnel as exact, partial, or unreported from reported brigade rows', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      name: '1st Corps',
+      faction: 'RBiH',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      createdTurn: 0,
+      tags: [],
+    } as unknown as FormationView;
+    const reported = {
+      id: 'reported_brigade',
+      name: 'Reported Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      corps_id: corps.id,
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 5,
+      morale: 60,
+      createdTurn: 0,
+      tags: [],
+    } as unknown as FormationView;
+    const unreported = {
+      ...reported,
+      id: 'unreported_brigade',
+      name: 'Unreported Brigade',
+      personnel: undefined,
+    } as unknown as FormationView;
+
+    for (const [formations, expected, unexpected] of [
+      [[corps, reported], /1[,.]200/, /Partial|Unreported/i],
+      [[corps, reported, unreported], /Partial 1[,.]200/, /\b2[,.]400\b/],
+      [[corps, unreported], /Unreported/, /\b0\b|Partial/i],
+    ] as const) {
+      useGameStore.setState({
+        ...useGameStore.getInitialState(),
+        loadedGameState: makeState({ player_faction: 'RBiH', formations: formations as unknown as LoadedGameState['formations'] }),
+        armyHQOpen: true,
+        armyHQTab: 'briefing',
+        selectedArmyId: 'RBiH',
+      });
+
+      const { container } = render(createElement(ArmyHQModal));
+      const reporting = container.querySelector('[data-testid="army-hq-personnel-reporting"]');
+
+      expect(reporting).not.toBeNull();
+      expect(reporting!.textContent).toMatch(expected);
+      expect(reporting!.textContent).not.toMatch(unexpected);
+      cleanup();
+    }
+  });
+
+  it('renders missing ORBAT equipment condition as unreported instead of fully operational', () => {
+    const brigade = {
+      id: 'sparse_equipment_brigade',
+      name: 'Sparse Equipment Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 5,
+      morale: 60,
+      createdTurn: 0,
+      entrenchment_turns: 1,
+      composition: {
+        infantry: 1200,
+        tanks: 10,
+        artillery: 5,
+        aa_systems: 0,
+      },
+    } as unknown as FormationView;
+
+    useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
+    const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Sparse Equipment Brigade/i })[0]);
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toContain('10/10 operational');
+    expect(container.textContent).not.toContain('5/5 operational');
   });
 
   it('renders Army HQ sector length as front segments instead of kilometers', () => {

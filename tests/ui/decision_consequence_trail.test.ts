@@ -491,6 +491,36 @@ describe('decision consequence trail', () => {
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 
+  it('excludes paramilitary authorization decisions outside the loaded player faction', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RS',
+      rawGameState: { meta: { player_faction: 'RS' } } as any,
+      paramilitaryDecisionHistory: [
+        {
+          id: 'paramilitary:5:foreign',
+          turn: 5,
+          target_osid: 'D',
+          faction: 'HRHB',
+          strength: 150,
+          decision: 'allow',
+          estimated_civilian_risk: 12,
+        },
+        {
+          id: 'paramilitary:6:own',
+          turn: 6,
+          target_osid: 'E',
+          faction: 'RS',
+          strength: 120,
+          decision: 'deny',
+        },
+      ],
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['paramilitary:paramilitary:6:own']);
+    expect(ledger[0]?.detail).toContain('VRS');
+    expect(ledger.map((record) => record.detail).join(' ')).not.toContain('HVO');
+  });
+
   it('includes resolved officer personnel decisions from persisted history', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       officerDecisionHistory: [
@@ -545,6 +575,43 @@ describe('decision consequence trail', () => {
 
     expect(ledger[0]?.detail).toBe('Staff officer was directed to follow the presidential order for the command.');
     expect(ledger[0]?.detail).not.toMatch(/rbih_internal|internal corps|slug|_/i);
+  });
+
+  it('excludes officer personnel decisions outside the loaded player faction', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RBiH',
+      rawGameState: { meta: { player_faction: 'RBiH' } } as any,
+      officerDecisionHistory: [
+        {
+          id: 'officer:8:foreign:acknowledged',
+          turn: 8,
+          faction: 'RS',
+          event_id: 'evt-foreign',
+          event_type: 'replacement_suggested',
+          officer_id: 'foreign_officer',
+          officer_name: 'Foreign officer',
+          corps_id: 'vrs_drina_corps',
+          corps_name: 'Drina Corps',
+          decision: 'acknowledged',
+        },
+        {
+          id: 'officer:9:own:acknowledged',
+          turn: 9,
+          faction: 'RBiH',
+          event_id: 'evt-own',
+          event_type: 'replacement_suggested',
+          officer_id: 'own_officer',
+          officer_name: 'Staff officer',
+          corps_id: 'rbih_1st_corps',
+          corps_name: '1st Corps',
+          decision: 'acknowledged',
+        },
+      ],
+    } as Partial<LoadedGameState>), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['officer:officer:9:own:acknowledged']);
+    expect(ledger[0]?.detail).toContain('1st Corps');
+    expect(ledger.map((record) => record.detail).join(' ')).not.toContain('Drina Corps');
   });
 
   it('includes player-faction patron defiance material receipts from raw state', () => {

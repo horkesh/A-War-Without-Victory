@@ -46,7 +46,19 @@ Third slice implemented locally before the next broad verification packet:
 
 Third-slice local verification: focused red/green pack passed 6 files / 92 tests; adjacent command/OOB/Corps Detail pack passed 6 files / 34 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 586 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed; in-app browser proof covered RBiH war-start splash, foundational decision routing/lock, Army HQ Personnel, and 1st Corps command surface without error banners or visible raw diagnostic ids.
 
-Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup removed the baseline comparison worktree, browser evidence folders, and `data/derived/scenario/_baseline_tmp`; only `.tmp_dev_server` remains because it belongs to the active browser/dev server.
+Fourth slice implemented locally before the broad browser/CI closeout packet:
+
+- Army HQ modal chrome now uses reported personnel aggregation for total personnel, rendering exact, `Partial`, or `Unreported` instead of summing missing brigade rows as zero.
+- Expanded Army HQ ORBAT equipment rows no longer treat missing tank/artillery condition as fully operational; missing condition renders unreported while reported operational counts remain exact.
+- Supply Intelligence now distinguishes absent faction reserve records from explicit zero stockpiles. Missing general/heavy reserves render unreported and do not compute a false zero-stockpile runway.
+- Records archive operation counts now use the same player-facing operation-history filter as the operation-history panel, so foreign/bot rows do not inflate the tab summary.
+- Decision consequence ledger paramilitary and officer rows now explicitly gate to the loaded player faction, matching the rest of the player-owned consequence trail.
+- CommandTopBar now uses commander terminology instead of `Command Authority`, localizes discard/authorize/submitting labels, and removes the `TRANSFUSING...` debug placeholder from the player surface. The top toolbar authority gauge now presents the player-facing resource as `Authority` / Presidency intervention authority instead of leaking `Command Authority` / Level-3 override jargon into the war-start overlay.
+- Hubble (modern-wargame copy scout), Lovelace (records/ledger worker), and Godel (Army HQ aggregate worker) were closed after their reports were verified and absorbed.
+
+Fourth-slice local verification: focused red/green pack passed 5 files / 87 tests; post-copy focused proof passed 3 files / 37 tests; final `npm.cmd run typecheck -- --pretty false`, `npm.cmd run qa:player-journeys` 43 files / 588 tests, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser` (41 live steps, 0 errors), and `git diff --check` passed on the final tree. Manual in-app browser proof on `http://127.0.0.1:3003/?dev=1` verified RBiH start, the richer `WAR BEGINS: 6 APR 1992` foundation splash, no old command-authority copy or raw `TRANSFUSING`/`AUTHORIZE directive`/`DISCARD` labels, Army HQ Records zero-count turn-0 truth with no hostile-takeover leak, Command Access -> 1st Corps visible sector/brigade inspect controls, sector inspect opening `corps-front-panel`, and brigade inspect opening sector + formation detail panels with no console errors or malformed values.
+
+Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup removed the baseline comparison worktree and `data/derived/scenario/_baseline_tmp`; final browser evidence folders were recorded and are cleanup-owned. Only `.tmp_dev_server` may remain if it belongs to the active browser/dev server.
 
 ## Pyrrhic Roles
 

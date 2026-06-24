@@ -32,8 +32,8 @@ export function CommandTopBar({
     factionColor,
 }: CommandTopBarProps) {
     const commanderLabel = commanderId
-        ? ((commanderName ?? '').trim() || t('planUi.unassignedAuthority'))
-        : t('planUi.selectAuthority');
+        ? ((commanderName ?? '').trim() || t('planUi.unassignedCommander'))
+        : t('planUi.selectCommander');
 
     return (
         <div className="h-16 flex items-center justify-between px-6 bg-[#16191f]/90 border-b border-white/10 relative z-30 shadow-xl backdrop-blur-md" style={{ borderLeft: `3px solid ${factionColor ?? '#c4a35a'}` }}>
@@ -68,7 +68,7 @@ export function CommandTopBar({
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.commandAuthority')}</label>
+                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.operationsCommander')}</label>
                         <button
                             onClick={onCommanderClick}
                             className="h-[31px] min-w-[180px] bg-black/40 border border-white/10 rounded px-3 flex items-center justify-between hover:border-accent-gold transition-all group"
@@ -92,14 +92,14 @@ export function CommandTopBar({
                     onClick={onClose}
                     className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-white transition-colors"
                 >
-                    DISCARD
+                    {t('planUi.discardDirective')}
                 </button>
                 <button
                     disabled={isSubmitting}
                     onClick={onAuthorize}
                     className="px-6 py-2 bg-accent-gold text-black text-xs font-black uppercase tracking-widest rounded shadow-[0_0_20px_rgba(200,165,110,0.3)] hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:grayscale"
                 >
-                    {isSubmitting ? 'TRANSFUSING...' : 'AUTHORIZE directive'}
+                    {isSubmitting ? t('planUi.authorizingDirective') : t('planUi.authorizeDirective')}
                 </button>
             </div>
         </div>

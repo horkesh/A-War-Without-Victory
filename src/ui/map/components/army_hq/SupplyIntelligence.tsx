@@ -27,8 +27,10 @@ const PATRON_COMMITMENT: Record<string, number> = {
 // ── Types ────────────────────────────────────────────────────────────────
 
 export interface SupplyBreakdown {
-    currentGeneral: number;
-    currentHeavy: number;
+    currentGeneral: number | null;
+    currentHeavy: number | null;
+    currentGeneralReported: boolean;
+    currentHeavyReported: boolean;
     estimatedMaintenanceDrain: number;
     estimatedHeavyDrain: number;
     estimatedPatronAid: number;
@@ -59,8 +61,10 @@ export function computeSupplyBreakdown(
     faction: string,
 ): SupplyBreakdown {
     const reserves = state.factionReserves?.[faction];
-    const currentGeneral = reserves?.generalSupply ?? 0;
-    const currentHeavy = reserves?.heavyMunitions ?? 0;
+    const currentGeneralReported = Number.isFinite(reserves?.generalSupply);
+    const currentHeavyReported = Number.isFinite(reserves?.heavyMunitions);
+    const currentGeneral = currentGeneralReported ? reserves!.generalSupply : null;
+    const currentHeavy = currentHeavyReported ? reserves!.heavyMunitions : null;
 
     const formations = state.formations?.filter(f =>
         f.faction === faction && isFieldedTacticalFormation(f),
@@ -77,13 +81,15 @@ export function computeSupplyBreakdown(
     const estimatedHeavyDrain = totalHeavyWeapons * HEAVY_MAINTENANCE_PER_WEAPON;
     const estimatedPatronAid = (PATRON_COMMITMENT[faction] ?? 0.1) * PATRON_AID_SCALE * 0.01;
     const estimatedNetPerTurn = estimatedPatronAid - estimatedMaintenanceDrain;
-    const estimatedRunwayTurns = estimatedNetPerTurn < 0
+    const estimatedRunwayTurns = currentGeneral != null && estimatedNetPerTurn < 0
         ? Math.round(currentGeneral / Math.abs(estimatedNetPerTurn))
         : null;
 
     return {
-        currentGeneral: Math.round(currentGeneral * 10) / 10,
-        currentHeavy: Math.round(currentHeavy * 10) / 10,
+        currentGeneral: currentGeneral == null ? null : Math.round(currentGeneral * 10) / 10,
+        currentHeavy: currentHeavy == null ? null : Math.round(currentHeavy * 10) / 10,
+        currentGeneralReported,
+        currentHeavyReported,
         estimatedMaintenanceDrain: Math.round(estimatedMaintenanceDrain * 100) / 100,
         estimatedHeavyDrain: Math.round(estimatedHeavyDrain * 100) / 100,
         estimatedPatronAid: Math.round(estimatedPatronAid * 100) / 100,
@@ -155,6 +161,10 @@ interface SupplyIntelligenceProps {
 }
 
 export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentTurn }: SupplyIntelligenceProps) {
+    const currentGeneralLabel = breakdown.currentGeneralReported && breakdown.currentGeneral != null
+        ? String(breakdown.currentGeneral)
+        : 'Unreported';
+
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
             <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
@@ -165,7 +175,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
             <div className="mb-3">
                 <div className="flex items-baseline gap-3 mb-1">
                     <span className="text-[12px] text-text-primary font-bold">
-                        GENERAL SUPPLY: {breakdown.currentGeneral}
+                        GENERAL SUPPLY: {currentGeneralLabel}
                     </span>
                     <span className={`text-[11px] font-bold ${breakdown.estimatedNetPerTurn < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                         {breakdown.estimatedNetPerTurn >= 0 ? '▲' : '▼'} {breakdown.estimatedNetPerTurn}/turn

@@ -26,6 +26,7 @@ import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getArmyCrest, getArmyName } from '../../utils/factionAssets';
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { formatReportedPersonnel, sumReportedPersonnel } from '../../utils/reportedMetrics';
 import { t } from '../../i18n';
 import { WarSummaryContent } from './WarSummaryContent';
 import { RecordsContent } from './RecordsContent';
@@ -175,7 +176,11 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         const formations = state.formations.filter((f) => f.faction === faction);
         const brigades = formations.filter((f) => isFieldedTacticalFormation(f));
         const corpsFormations = formations.filter((f) => f.kind === 'corps' || f.kind === 'corps_asset');
-        const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
+        const totalPersonnelSummary = sumReportedPersonnel(brigades);
+        const totalPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
+            partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
+            unreported: t('corpsFront.unreported'),
+        });
         const sectors = (state.corpsFrontSectors ?? []).filter((s) => s.faction === faction);
         const operations = (state.operations ?? []).filter((op) =>
             corpsFormations.some(c => c.id === op.corps_id)
@@ -223,7 +228,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
         );
 
         return {
-            formations, brigades, corpsFormations, totalPersonnel, sectors, operations, executingOperations,
+            formations, brigades, corpsFormations, totalPersonnelLabel, sectors, operations, executingOperations,
             sectorsByCorps, opsByCorps, readinessByCorps,
             territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
@@ -443,6 +448,13 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                             </div>
                             <div className="text-[12px] font-bold text-text-primary tabular-nums">
                                 {turnToDateString(state.turn ?? 0)}
+                            </div>
+                            <div
+                                data-testid="army-hq-personnel-reporting"
+                                className="mt-0.5 text-[9px] uppercase tracking-[0.12em] text-text-secondary"
+                            >
+                                <span>{t('personnel.totalPersonnel')}</span>
+                                <span className="ml-1 font-bold text-text-primary tabular-nums">{data.totalPersonnelLabel}</span>
                             </div>
                         </div>
                         <button

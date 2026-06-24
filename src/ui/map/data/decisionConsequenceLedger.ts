@@ -681,6 +681,7 @@ export function buildDecisionConsequenceLedger(
   }
 
   for (const paramilitary of state.paramilitaryDecisionHistory ?? []) {
+    if (playerFaction && !playerFactionMatch(paramilitary.faction, playerFaction)) continue;
     records.push({
       id: `paramilitary:${paramilitary.id}`,
       turn: paramilitary.turn,
@@ -730,6 +731,7 @@ export function buildDecisionConsequenceLedger(
   }
 
   for (const officer of state.officerDecisionHistory ?? []) {
+    if (playerFaction && !playerFactionMatch(officer.faction, playerFaction)) continue;
     records.push({
       id: `officer:${officer.id}`,
       turn: officer.turn,

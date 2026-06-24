@@ -27,7 +27,11 @@ describe('GUI polish typography floor', () => {
     expect(toolbar).not.toContain('<span className="text-[8px] font-mono font-bold uppercase tracking-[0.12em] text-text-secondary">AUTH</span>');
     expect(enMessages).toContain("'presidentialToolbar.auth': 'Authority'");
     expect(enMessages).toContain("'toolbar.commandAuthority.label': 'Authority'");
+    expect(enMessages).toContain("'presidentialToolbar.commandAuthorityValue': 'Authority: {current}/{max}'");
+    expect(enMessages).toContain("'toolbar.commandAuthority.ariaLabel': 'Authority: {current}/{max}'");
     expect(enMessages).not.toContain("'presidentialToolbar.auth': 'AUTH'");
     expect(enMessages).not.toContain("'toolbar.commandAuthority.label': 'AUTH'");
+    expect(enMessages).not.toContain("'presidentialToolbar.commandAuthorityDescription': \"Command Authority");
+    expect(enMessages).not.toContain("'toolbar.commandAuthority.description': \"Command Authority");
   });
 });

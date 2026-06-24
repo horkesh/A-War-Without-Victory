@@ -650,6 +650,30 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getAllByTitle('1 records').length).toBeGreaterThan(0);
     });
 
+    it('counts only player-facing completed operations in the Records archive summary', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [
+                    makeLoadedState().operationHistory![0],
+                    {
+                        ...makeLoadedState().operationHistory![0],
+                        operation_id: 'foreign-op-aar',
+                        operation_name: 'Foreign operation',
+                        operation_display_name: 'Foreign Operation',
+                        corps_id: 'hrhb_main_corps',
+                        faction: 'HRHB',
+                    },
+                ],
+            },
+        });
+
+        render(createElement(RecordsContent));
+
+        const operationHistoryButton = screen.getByRole('button', { name: 'OPERATION HISTORY' });
+        expect(operationHistoryButton.querySelector('[title="1 records"]')).toBeTruthy();
+    });
+
     it('renders AAR unit-event labels without raw arc or decoration tier identifiers', () => {
         useGameStore.setState({
             armyHQRecordsSubTab: 'aar',

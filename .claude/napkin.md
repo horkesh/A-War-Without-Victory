@@ -32,6 +32,8 @@
 
 **COMMAND AGGREGATES MUST PRESERVE PARTIAL REPORTING (2026-06-24).** Missing brigade personnel or equipment condition can reach Army HQ, Corps Detail, ORBAT/OOB, Personnel, and Corps Front logistics/combat fallback. Do instead: use reported-metric helpers, show exact totals only when complete, `Partial` when mixed, `Unreported` when absent, and keep stale roster ids in diagnostic attributes rather than visible copy.
 
+**FACTION RESERVE ABSENCE IS NOT ZERO SUPPLY (2026-06-24).** Missing `factionReserves[faction]` is an absent stockpile report, not a depleted reserve. Do instead: carry reported flags through Supply Intelligence, render current supply/heavy reserves as unreported when absent, and compute depletion runway only from reported stockpiles; keep explicit zero as zero.
+
 **STACK EXPANSION IS PHYSICAL LOCATION ONLY (2026-06-24).** AoR coverage and HQ anchors are not physical unit stacks. Do instead: build expanded marker stacks from explicit `location_osid` only; keep AoR/HQ anchors for navigation-specific surfaces.
 
 **COMMAND HQ ANCHORS ARE NOT TACTICAL LOCATIONS (2026-06-23).** Corps and army_hq formations need map drilldown anchors without implying physical brigade-style presence. Do instead: use `hq_osid` for command-only anchors; reserve `location_osid` for actual formation placement, stationed-unit truth, movement/combat/displacement, and location-in-control validation.

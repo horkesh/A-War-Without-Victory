@@ -13,6 +13,7 @@ import { getDecorationName } from '../../utils/decorationUtils';
 import { inspectOnField } from '../../utils/shellNavigation';
 import { sortRecentEngagements } from '../../utils/recentEngagements';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
+import { addEquipmentCondition, emptyEquipmentConditionSummary } from '../../utils/reportedMetrics';
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { EliteCommanderSummary } from '../EliteCommanderSummary';
@@ -74,11 +75,17 @@ function reportedNonNegative(value: number | undefined): number | null {
         : null;
 }
 
-function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
-    const count = Math.max(0, total ?? 0);
-    const condition = operational ?? 1;
-    const operationalCount = condition <= 1 ? count * condition : condition;
-    return Math.min(count, Math.max(0, Math.round(operationalCount)));
+function formatOperationalEquipment(total: number | undefined, operational: number | undefined): { label: string; reported: boolean } | null {
+    const summary = addEquipmentCondition(emptyEquipmentConditionSummary(), total, operational);
+    if (summary.total <= 0) return null;
+    if (summary.unreportedCount > 0) return { label: t('orbat.metricUnreported'), reported: false };
+    return {
+        label: t('orbat.operationalCount', {
+            current: Math.round(summary.operational),
+            total: Math.round(summary.total),
+        }),
+        reported: true,
+    };
 }
 
 const ARC_BADGE_STYLE: Record<string, { bg: string; text: string }> = {
@@ -104,6 +111,8 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const personnel = reportedNonNegative(b.personnel);
     const officerQuality = b.officer_quality;
     const comp = b.composition;
+    const tankStatus = formatOperationalEquipment(comp?.tanks, comp?.tank_condition?.operational);
+    const artilleryStatus = formatOperationalEquipment(comp?.artillery, comp?.artillery_condition?.operational);
     const hist = b.brigade_history;
     const engagements = sortRecentEngagements(b.recent_engagements);
     const narrative = b.warNarrative;
@@ -186,20 +195,20 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
             )}
 
             {/* Equipment */}
-            {comp && (comp.tanks > 0 || comp.artillery > 0) && (
+            {(tankStatus || artilleryStatus) && (
                 <div className="space-y-1.5">
                     <div className="text-[9px] font-bold uppercase text-text-secondary/50 tracking-widest">{t('orbat.materialStatus')}</div>
                     <div className="grid grid-cols-2 gap-4">
-                        {comp.tanks > 0 && (
+                        {tankStatus && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.armour')}</span>
-                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: operationalEquipmentCount(comp.tanks, comp.tank_condition?.operational), total: Math.round(comp.tanks) })}</span>
+                                <span className={`${tankStatus.reported ? 'text-emerald-400' : 'text-text-secondary/60'} font-bold`}>{tankStatus.label}</span>
                             </div>
                         )}
-                        {comp.artillery > 0 && (
+                        {artilleryStatus && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.artillery')}</span>
-                                <span className="text-emerald-400 font-bold">{t('orbat.operationalCount', { current: operationalEquipmentCount(comp.artillery, comp.artillery_condition?.operational), total: Math.round(comp.artillery) })}</span>
+                                <span className={`${artilleryStatus.reported ? 'text-emerald-400' : 'text-text-secondary/60'} font-bold`}>{artilleryStatus.label}</span>
                             </div>
                         )}
                     </div>

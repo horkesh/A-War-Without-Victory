@@ -56,8 +56,33 @@ describe('UI copy raw-id fallbacks', () => {
       onCommanderClick: vi.fn(),
     }));
 
-    expect(screen.getByRole('button', { name: /Unassigned command authority/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Commander not assigned/i })).toBeTruthy();
     expect(container.textContent).not.toContain('officer_rbih_slug_001');
+  });
+
+  it('CommandTopBar localizes commander and action chrome without debug placeholders', () => {
+    setLocale('bcs');
+
+    const { container } = render(createElement(CommandTopBar, {
+      opName: 'Test direktiva',
+      onNameChange: vi.fn(),
+      onClose: vi.fn(),
+      sectorName: 'Centralni sektor',
+      commanderId: null,
+      commanderName: undefined,
+      onCommanderClick: vi.fn(),
+      onAuthorize: vi.fn(),
+      isSubmitting: true,
+    }));
+
+    expect(container.textContent).toContain('Operativni komandant');
+    expect(container.textContent).toContain('Izaberi komandanta');
+    expect(container.textContent).toContain('Odbaci direktivu');
+    expect(container.textContent).toContain('Autorizacija...');
+    expect(container.textContent).not.toContain('Command Authority');
+    expect(container.textContent).not.toContain('DISCARD');
+    expect(container.textContent).not.toContain('AUTHORIZE directive');
+    expect(container.textContent).not.toContain('TRANSFUSING');
   });
 
   it('ChiefOfStaffBriefing uses neutral corps copy when command-strain prose lacks a player-facing corps name', () => {

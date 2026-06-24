@@ -15,6 +15,7 @@ import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary }
 import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { openCodex } from '../../utils/shellNavigation';
+import { filterPlayerFacingOperationHistory } from '../../../shared/playerVisibility';
 
 const SUB_TABS = [
     { id: 'aftermath' as const, labelKey: 'recordsContent.tab.aftermath' },
@@ -35,7 +36,7 @@ export function RecordsContent() {
         const decisionRecords = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
         const decisionSummary = buildDecisionConsequenceLedgerSummary(decisionRecords);
         const aarCount = state?.latestTurnSummary && shouldNarrateTerritorySummary(state.latestTurnSummary) ? 1 : 0;
-        const operationCount = state?.operationHistory?.length ?? 0;
+        const operationCount = filterPlayerFacingOperationHistory(state).length;
         const opportunityCount = (state?.operationOpportunityRecords ?? []).filter((record) =>
             record.status !== 'eligible_pending_review' || record.response_turn != null
         ).length;
