@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-25] docs: record main CI repair after local midnight
+
+**Type:** Docs-only ledger hygiene.
+
+**Fix:** Recorded the local-date continuation for the June 24 Army HQ records and command truth follow-up after the Sarajevo clock crossed midnight during CI repair. The substantive code repair is commit `ee9a4e25b`: `SupplyIntelligence.tsx` no longer introduces strict-null non-null assertions when faction reserves are absent, and the BCS toolbar accessibility assertion now matches the intentional `Ovlast` authority vocabulary.
+
+**Verification:** Before the repair commit, `node node_modules\vitest\vitest.mjs run tests\strict_null_inventory_progress.test.ts tests\ui\advance_turn_button_gated_feedback.test.ts --pool=forks --reporter=dot` passed 2 files / 103 tests, `npm.cmd run typecheck -- --pretty false` passed, `npm.cmd run test:vitest:fast` passed 1111 files (1107 passed / 4 skipped) and 10659 tests (10625 passed / 34 skipped), and `git diff --check` passed.
+
+**Scope/determinism:** Ledger-only follow-up; no behavior, scenario, data, schema, calibration, baseline, structural-fingerprint, packaging, localization, randomness, timestamps, or persisted output changes.
+
+---
+
 ## [2026-06-24] fix(ui): harden sparse Army HQ aggregates and stale roster diagnostics
 
 **Type:** UI/read-model/test/docs polish.
