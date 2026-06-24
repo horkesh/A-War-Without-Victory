@@ -4,7 +4,7 @@
 
 **Updated:** 2026-06-18 roadmap/process reconciliation over the 2026-06-09 Pyrrhic panel re-grade and 2026-05-24 full pass.
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** 188w floor **658/712**, anchors **30/30**, Section 6 intact, schema **v36**, 40w structural fingerprint v2 **`f282883abbab76cf`**, and `engine-health-188w` REQUIRED/BLOCKING. The June 9 `649` / collapse-before-D2 framing below is historical lineage; the active road is **D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**.
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** 188w floor **658/712**, anchors **30/30**, Section 6 intact, schema **v36**, 40w structural fingerprint v2 **`b9f5a40aa0a1726e`**, and `engine-health-188w` REQUIRED/BLOCKING. The June 9 `649` / collapse-before-D2 framing below is historical lineage; the active road is **D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**.
 
 ---
 

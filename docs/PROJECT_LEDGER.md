@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): harden operation review, map context, and stale participant truth
+
+**Type:** UI/read-model/routing/test/docs polish.
+
+**Fix:** Operations Panel now shows stale operation participant evidence without creating fake brigade controls. Defense-mode settlement tooltips use canonical sector/front-edge truth instead of parsing only `::` edge ids, and settlement context-menu `View Sector` preserves the clicked settlement OSID through field inspection. Operation Briefing no longer exposes launch/postpone/abort/probe controls from execution/recovery command-review paths, and missing intel/supply readiness no longer becomes `0%` in recommendation rationale. Opportunity dossier resolve controls are hidden behind bridge-unavailable read-only copy when Electron IPC is unavailable. Active docs now name structural fingerprint `b9f5a40aa0a1726e` as current and mark the completed sector-truth plan as history-only.
+
+**Verification:** Focused proof passed 5 files / 125 tests: `node node_modules\vitest\vitest.mjs run tests\ui\army_hq_timing_copy.test.ts tests\ui\oob_operations_panel.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui\map_click_routing_contract.test.ts tests\command_authority_explanation_delegation.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 557 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. `git diff --check` passed. Temporary browser evidence folders were removed; `.tmp_dev_server` remains as the active dev-server workspace. Report: `docs/40_reports/implemented/20260624_OPERATION_PANEL_MAP_REVIEW_HARDENING.md`.
+
+**Scope/determinism:** UI/read-model/routing/test/docs polish only; no simulation logic, scenario source data, startup artifact, save schema, event evaluator mechanics, calibration floor, baseline manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] fix(ui): preserve operation readiness and displacement truth
 
 **Type:** UI/read-model/test/docs polish.

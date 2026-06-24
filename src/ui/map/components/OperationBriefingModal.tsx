@@ -379,12 +379,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
     const reportedIntelConf = operation.intel_confidence_at_assessment ?? operation.readiness?.intel;
     const reportedSupplyReady = operation.supply_readiness_at_assessment ?? operation.readiness?.supply;
-    const intelConf = reportedIntelConf ?? 0;
-    const supplyReady = reportedSupplyReady ?? 0;
     const forceRatio = operation.force_ratio_estimate;
     const forceBalance = forceRatio != null ? getPlayerSafeOperationBalancePresentation(forceRatio) : null;
     const assessment = operation.commander_assessment;
     const postponements = operation.postponement_count ?? 0;
+    const isDecisionReady = operation.phase === 'planning';
     const corpsLabel = getPlayerSafeCorpsName(
         operation.corps_name ?? null,
         operation.corps_id,
@@ -404,15 +403,15 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const recommendationExplanation = useMemo(() => {
         if (!assessment || assessment === 'launch') return null;
         return deriveRecommendationExplanation(
-            intelConf,
-            supplyReady,
+            reportedIntelConf,
+            reportedSupplyReady,
             forceRatio,
             finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.aggressiveness : undefined, 3),
             finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.competence : undefined, 3),
             assessment as 'launch' | 'postpone' | 'abort',
             postponements,
         );
-    }, [intelConf, supplyReady, forceRatio, assessment, postponements, commanderDisplay]);
+    }, [reportedIntelConf, reportedSupplyReady, forceRatio, assessment, postponements, commanderDisplay]);
 
     return (
         <Modal
@@ -538,43 +537,52 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Action buttons */}
                 <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">
-                    {!commandBridgeAvailable && (
+                    {!isDecisionReady && (
+                        <div className="basis-full text-[10px] text-neutral-500 italic">
+                            {t('operationBriefing.reviewReadOnly')}
+                        </div>
+                    )}
+                    {isDecisionReady && !commandBridgeAvailable && (
                         <div className="basis-full text-[10px] text-neutral-500 italic">
                             {t('attention.bridgeUnavailableReadOnly')}
                         </div>
                     )}
-                    <button
-                        type="button"
-                        onClick={onLaunch}
-                        disabled={!commandBridgeAvailable}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {t('operationBriefing.launchOperation')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onOrderProbe}
-                        disabled={!commandBridgeAvailable}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {t('operationBriefing.orderProbe')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onPostpone}
-                        disabled={!commandBridgeAvailable || postponements >= 2}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onAbort}
-                        disabled={!commandBridgeAvailable}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        {t('operationBriefing.abortOperation')}
-                    </button>
+                    {isDecisionReady && (
+                        <>
+                            <button
+                                type="button"
+                                onClick={onLaunch}
+                                disabled={!commandBridgeAvailable}
+                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {t('operationBriefing.launchOperation')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onOrderProbe}
+                                disabled={!commandBridgeAvailable}
+                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {t('operationBriefing.orderProbe')}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onPostpone}
+                                disabled={!commandBridgeAvailable || postponements >= 2}
+                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onAbort}
+                                disabled={!commandBridgeAvailable}
+                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {t('operationBriefing.abortOperation')}
+                            </button>
+                        </>
+                    )}
                     <div className="flex-1" />
                     <button
                         type="button"

@@ -467,6 +467,9 @@ describe('player-safe tooltip models', () => {
     expect(playerCopy).not.toContain('Active Def.');
     expect(playerCopy).not.toMatch(/>\s*reactive\s*</i);
     expect(tooltipSource).toContain('filterPlayerFacingSectors(loadedGameState)');
+    expect(tooltipSource).toContain('collectSectorFriendlyOsids(s, frontEdgesOsid).includes(osid)');
+    expect(tooltipSource).toContain('frontEdgesOsid={loadedGameState?.frontEdgesOsid}');
     expect(tooltipSource).not.toContain('sectors={loadedGameState?.corpsFrontSectors}');
+    expect(tooltipSource).not.toContain("eid.split('::')");
   });
 });

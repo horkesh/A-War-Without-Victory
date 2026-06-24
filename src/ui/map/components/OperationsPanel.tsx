@@ -381,6 +381,16 @@ export function OperationsPanel() {
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
                         {t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
                       </span>
+                      {(op.stale_participating_brigade_count ?? 0) > 0 && (
+                        <span className="px-1 py-0.5 rounded border border-amber-500/35 bg-amber-500/10 text-amber-200 tabular-nums">
+                          {t(
+                            op.stale_participating_brigade_count === 1
+                              ? 'operationsPanel.staleParticipant.one'
+                              : 'operationsPanel.staleParticipant.many',
+                            { count: op.stale_participating_brigade_count ?? 0 },
+                          )}
+                        </span>
+                      )}
                       <span className={`px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 tabular-nums ${
                         opSupplyPct == null ? 'text-text-secondary' : opSupplyPct < 30 ? 'text-red-300' : opSupplyPct < 70 ? 'text-amber-300' : 'text-green-300'
                       }`}>
@@ -524,40 +534,52 @@ export function OperationsPanel() {
                 })()}
 
                 {/* Participating Brigades */}
-                {selectedOperation.participating_brigade_ids && selectedOperation.participating_brigade_ids.length > 0 && (
+                {((selectedOperation.participating_brigade_ids?.length ?? 0) > 0 || (selectedOperation.stale_participating_brigade_count ?? 0) > 0) && (
                   <div className="pt-2 border-t border-panel-border">
                     <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.allocatedAssets')}</div>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedOperation.participating_brigade_ids.map(bId => {
-                        const formation = loadedGameState.formations.find(f => f.id === bId) ?? null;
-                        const sector = resolveCurrentSectorForFormation(formation, loadedGameState.corpsFrontSectors);
-                        const bName = getPlayerSafeBrigadeName(formation?.name ?? null);
-                        return (
-                          <button
-                            key={bId}
-                            onClick={() => {
-                                  inspectOnField(useGameStore.getState(), sector
-                                ? {
-                                    kind: 'field-formation-in-sector',
-                                    corpsId: selectedOperation.corps_id,
-                                    sectorId: sector.sector_id,
-                                    formationId: bId,
-                                    osid: formation?.location_osid ?? undefined,
-                                  }
-                                : {
-                                    kind: 'field-formation-in-corps',
-                                    corpsId: selectedOperation.corps_id,
-                                    formationId: bId,
-                                    osid: formation?.location_osid ?? undefined,
-                                  });
-                            }}
-                            className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
-                          >
-                            {bName}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {(selectedOperation.participating_brigade_ids?.length ?? 0) > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {selectedOperation.participating_brigade_ids?.map(bId => {
+                          const formation = loadedGameState.formations.find(f => f.id === bId) ?? null;
+                          const sector = resolveCurrentSectorForFormation(formation, loadedGameState.corpsFrontSectors);
+                          const bName = getPlayerSafeBrigadeName(formation?.name ?? null);
+                          return (
+                            <button
+                              key={bId}
+                              onClick={() => {
+                                    inspectOnField(useGameStore.getState(), sector
+                                  ? {
+                                      kind: 'field-formation-in-sector',
+                                      corpsId: selectedOperation.corps_id,
+                                      sectorId: sector.sector_id,
+                                      formationId: bId,
+                                      osid: formation?.location_osid ?? undefined,
+                                    }
+                                  : {
+                                      kind: 'field-formation-in-corps',
+                                      corpsId: selectedOperation.corps_id,
+                                      formationId: bId,
+                                      osid: formation?.location_osid ?? undefined,
+                                    });
+                              }}
+                              className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
+                            >
+                              {bName}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {(selectedOperation.stale_participating_brigade_count ?? 0) > 0 && (
+                      <div className="mt-1 text-[10px] text-amber-300/85 italic">
+                        {t(
+                          selectedOperation.stale_participating_brigade_count === 1
+                            ? 'operationsPanel.staleParticipant.one'
+                            : 'operationsPanel.staleParticipant.many',
+                          { count: selectedOperation.stale_participating_brigade_count ?? 0 },
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 

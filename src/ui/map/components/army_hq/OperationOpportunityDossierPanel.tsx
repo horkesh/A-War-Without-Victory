@@ -161,6 +161,7 @@ function DossierCard({
     proposal,
     backTheOfficer,
     busy,
+    commandBridgeAvailable,
     onResolve,
     onHighlightFootprint,
     onClearFootprint,
@@ -168,6 +169,7 @@ function DossierCard({
     proposal: OperationOpportunityProposalView;
     backTheOfficer?: BackTheOfficerView | null;
     busy: boolean;
+    commandBridgeAvailable: boolean;
     onResolve: (
         proposal: OperationOpportunityProposalView,
         decision: OpportunityUiDecision,
@@ -184,7 +186,8 @@ function DossierCard({
         proposal.optional_axes_total != null
             ? t('opportunity.optionalAxes', { green: proposal.optional_axes_green ?? 0, total: proposal.optional_axes_total })
             : null;
-    const canAct = Boolean(proposal.review_id && proposal.available_actions.some((action) => action.enabled));
+    const hasEnabledActions = Boolean(proposal.review_id && proposal.available_actions.some((action) => action.enabled));
+    const canAct = hasEnabledActions && commandBridgeAvailable;
     const footprintOsids = [
         ...proposal.objectives.map((objective) => objective.osid),
         ...proposal.staging.map((staging) => staging.osid),
@@ -366,6 +369,11 @@ function DossierCard({
                     ))}
                 </div>
             )}
+            {hasEnabledActions && !commandBridgeAvailable && (
+                <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-[10px] italic text-text-secondary">
+                    {t('attention.bridgeUnavailableReadOnly')}
+                </div>
+            )}
         </div>
     );
 }
@@ -452,6 +460,7 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
                         proposal={proposal}
                         backTheOfficer={matchBackTheOfficer(proposal)}
                         busy={busyProposalId === proposal.proposal_id}
+                        commandBridgeAvailable={ipc.isAvailable}
                         onResolve={(p, decision, options) => { void resolveProposal(p, decision, options); }}
                         onHighlightFootprint={(p) => {
                             setOperationTargetOsids([

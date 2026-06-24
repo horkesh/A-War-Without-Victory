@@ -224,6 +224,19 @@ describe('OOB and operations panel operation labels', () => {
     })).toBeNull();
   });
 
+  it('surfaces stale operation participant records without creating fake brigade controls', () => {
+    setOperationPatch({
+      stale_participating_brigade_count: 1,
+      stale_participating_brigade_ids: ['stale_missing_brigade'],
+    });
+
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('1 stale unit record');
+    expect(screen.getByRole('button', { name: '1st Brigade' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /stale_missing_brigade/i })).toBeNull();
+  });
+
   it('closes the operations panel when the close button is clicked', () => {
     render(createElement(OperationsPanel));
 
@@ -277,6 +290,7 @@ describe('OOB and operations panel operation labels', () => {
   });
 
   it('keeps operation briefing decisions read-only when the desktop bridge is unavailable', () => {
+    setOperationPatch({ phase: 'planning' });
     useGameStore.setState({
       operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
     });
@@ -292,6 +306,51 @@ describe('OOB and operations panel operation labels', () => {
     expect((screen.getByRole('button', { name: 'Order Probe' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Postpone' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Abort Operation' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('renders active operation command reviews as read-only instead of exposing decision controls', () => {
+    useGameStore.setState({
+      operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
+    });
+
+    const { container } = render(createElement(OperationBriefingModal, {
+      isOpen: true,
+      onClose: () => {},
+      onLaunch: () => { throw new Error('launch should stay hidden in review mode'); },
+      onPostpone: () => { throw new Error('postpone should stay hidden in review mode'); },
+      onAbort: () => { throw new Error('abort should stay hidden in review mode'); },
+      onOrderProbe: () => { throw new Error('probe should stay hidden in review mode'); },
+    }));
+
+    expect(container.textContent).toContain('Command decision review only');
+    expect(screen.queryByRole('button', { name: 'Launch Operation' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Order Probe' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Postpone' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Abort Operation' })).toBeNull();
+  });
+
+  it('does not turn unreported operation briefing readiness into zero-percent rationale', () => {
+    setOperationPatch({
+      phase: 'planning',
+      commander_assessment: 'postpone',
+      force_ratio_estimate: 2,
+      readiness: { cohesion: 0.7 },
+      intel_confidence_at_assessment: undefined,
+      supply_readiness_at_assessment: undefined,
+    });
+    useGameStore.setState({
+      operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
+    });
+
+    const { container } = render(createElement(OperationBriefingModal, {
+      isOpen: true,
+      onClose: () => {},
+    }));
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('Readiness reporting incomplete');
+    expect(container.textContent).not.toContain('Intelligence at 0%');
+    expect(container.textContent).not.toContain('Supply readiness at 0%');
   });
 
   it('shows explicit commander state in operation briefing when commander is absent or unresolved', () => {

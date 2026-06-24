@@ -1,3 +1,11 @@
+## 2026-06-24 - Operation review and map context hardening
+
+**Operation command reviews are not decision levers:** Army HQ Operations and similar review paths can inspect command decisions after launch, but they must not expose launch/postpone/abort/probe controls for execution/recovery operations. Durable rule: action controls belong to planning-phase decision briefings or the Presidential Decision Room; active-operation reviews are read-only and close-only. Applied in `[2026-06-24] fix(ui): harden operation review, map context, and stale participant truth`; report `docs/40_reports/implemented/20260624_OPERATION_PANEL_MAP_REVIEW_HARDENING.md`.
+
+**Unreported operation readiness must not score as zero in rationale:** readiness gauges and recommendation explanations must agree. Durable rule: nullable intel/supply inputs are omitted from blocker scoring and rendered as incomplete reporting, not `0%` intelligence or supply blockers. Applied in `[2026-06-24] fix(ui): harden operation review, map context, and stale participant truth`; report `docs/40_reports/implemented/20260624_OPERATION_PANEL_MAP_REVIEW_HARDENING.md`.
+
+**Map sector inspection should preserve settlement context:** context-menu and drilldown routes that know the clicked OSID should pass it through `field-sector-in-corps` instead of opening a bare sector. Durable rule: field inspection should keep the most specific known settlement anchor for player orientation. Applied in `[2026-06-24] fix(ui): harden operation review, map context, and stale participant truth`; report `docs/40_reports/implemented/20260624_OPERATION_PANEL_MAP_REVIEW_HARDENING.md`.
+
 ## 2026-06-24 - Operation readiness and displacement truth
 
 **Partial operation readiness is not zero readiness:** an operation can report supply, cohesion, or intel independently. Durable rule: preserve absent operation readiness dimensions as absent/unreported at the adapter boundary, and render unreported gauge rows instead of red `0%` bars. Applied in `[2026-06-24] fix(ui): preserve operation readiness and displacement truth`; report `docs/40_reports/implemented/20260624_PLAYER_TRUTH_READINESS_DISPLACEMENT.md`.

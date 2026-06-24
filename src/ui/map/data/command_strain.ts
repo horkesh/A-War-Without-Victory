@@ -1329,8 +1329,8 @@ export interface RecommendationExplanation {
  * @param postponements - postponement_count
  */
 export function deriveRecommendationExplanation(
-    intel: number,
-    supply: number,
+    intel: number | null | undefined,
+    supply: number | null | undefined,
     forceRatio: number | null | undefined,
     aggressiveness: number,
     competence: number,
@@ -1363,49 +1363,67 @@ export function deriveRecommendationExplanation(
     const reqForce = Math.max(1.0, 1.5 - aggressiveness * 0.10 + competence * 0.05);
     const goThreshold = 0.7 - aggressiveness * 0.08;
     const forceBalance = getPlayerSafeOperationBalancePresentation(forceRatio);
+    const hasIntel = typeof intel === 'number' && Number.isFinite(intel);
+    const hasSupply = typeof supply === 'number' && Number.isFinite(supply);
 
-    const confMet = intel >= reqConf ? 1.0 : intel / reqConf;
+    const confMet = hasIntel ? (intel >= reqConf ? 1.0 : intel / reqConf) : null;
     const forceMet = forceRatio >= reqForce ? 1.0 : forceRatio / reqForce;
 
     // Weighted contributions
-    const confContrib = confMet * 0.4;
+    const confContrib = confMet != null ? confMet * 0.4 : null;
     const forceContrib = forceMet * 0.3;
-    const supplyContrib = supply * 0.3;
+    const supplyContrib = hasSupply ? supply * 0.3 : null;
 
     // ── Identify main blocker (lowest factor as % of its weight) ────────
     // Factor "fullness" = contribution / weight — 1.0 means fully met
-    const factors: Array<{ name: 'intel' | 'force_ratio' | 'supply'; fullness: number; contrib: number; detail: string }> = [
-        {
+    const factors: Array<{ name: 'intel' | 'force_ratio' | 'supply'; fullness: number; contrib: number; detail: string }> = [];
+    if (confMet != null && confContrib != null) {
+        const reportedIntel = typeof intel === 'number' && Number.isFinite(intel) ? intel : 0;
+        factors.push({
             name: 'intel',
             fullness: confMet,
             contrib: confContrib,
-            detail: `Intelligence at ${Math.round(intel * 100)}%${reqConf > 0 ? ` (commander needs ${Math.round(reqConf * 100)}%)` : ''}`,
-        },
-        {
-            name: 'force_ratio',
-            fullness: forceMet,
-            contrib: forceContrib,
-            detail: forceRatio >= reqForce
-                ? `Force balance judged ${forceBalance.summary} and within the commander's launch standard`
-                : `Force balance judged ${forceBalance.summary} but still short of the commander's launch standard`,
-        },
-        {
+            detail: `Intelligence at ${Math.round(reportedIntel * 100)}%${reqConf > 0 ? ` (commander needs ${Math.round(reqConf * 100)}%)` : ''}`,
+        });
+    }
+    factors.push({
+        name: 'force_ratio',
+        fullness: forceMet,
+        contrib: forceContrib,
+        detail: forceRatio >= reqForce
+            ? `Force balance judged ${forceBalance.summary} and within the commander's launch standard`
+            : `Force balance judged ${forceBalance.summary} but still short of the commander's launch standard`,
+    });
+    if (hasSupply && supplyContrib != null) {
+        const reportedSupply = typeof supply === 'number' && Number.isFinite(supply) ? supply : 0;
+        factors.push({
             name: 'supply',
-            fullness: supply,
+            fullness: reportedSupply,
             contrib: supplyContrib,
-            detail: `Supply readiness at ${Math.round(supply * 100)}%`,
-        },
-    ];
+            detail: `Supply readiness at ${Math.round(reportedSupply * 100)}%`,
+        });
+    }
 
     // Sort by fullness ascending — worst factor first
     const sorted = [...factors].sort((a, b) => a.fullness - b.fullness);
     const worstFactor = sorted[0];
+    const missingReadiness = !hasIntel || !hasSupply;
 
     // ── Build explanation ────────────────────────────────────────────────
     if (assessment === 'postpone') {
         const reason = worstFactor.fullness < 1.0
             ? `${worstFactor.detail} — the main factor short of launch standard`
-            : 'Combined readiness falls slightly short of the launch threshold';
+            : missingReadiness
+                ? 'Readiness reporting incomplete; the commander recommends waiting until staff reporting improves'
+                : 'Combined readiness falls slightly short of the launch threshold';
+
+        if (worstFactor.fullness >= 1.0 && missingReadiness) {
+            return {
+                recommendationReason: reason,
+                mainBlocker: null,
+                wouldImproveIf: 'Complete intelligence and supply assessment before committing the operation',
+            };
+        }
 
         const improve = worstFactor.fullness < 1.0
             ? worstFactor.name === 'intel'

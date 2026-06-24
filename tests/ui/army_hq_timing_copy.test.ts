@@ -436,6 +436,28 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('not applicable');
   });
 
+  it('does not expose no-op opportunity resolution controls when the command bridge is unavailable', () => {
+    render(React.createElement(OperationOpportunityDossierPanel, {
+      gameState: makeGameState({
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          recommendation: 'approve',
+          available_actions: [
+            { id: 'approve', label: 'Authorize', enabled: true },
+            { id: 'delay', label: 'Delay', enabled: true },
+            { id: 'decline', label: 'Decline', enabled: true },
+          ],
+        })],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    expect(screen.getByText('Desktop command bridge unavailable. Decision controls are read-only in this browser view.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Authorize' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Delay' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Decline' })).toBeNull();
+  });
+
   it('localizes opportunity dossier labels in BCS without raw proposal enums', () => {
     setLocale('bcs');
 

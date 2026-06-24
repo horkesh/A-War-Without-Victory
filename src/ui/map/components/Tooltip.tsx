@@ -5,11 +5,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { buildSectorFormationAssignment, stripFactionSuffix } from '../utils/sectorUtils';
+import { buildSectorFormationAssignment, collectSectorFriendlyOsids, stripFactionSuffix } from '../utils/sectorUtils';
 import { FACTION_COLORS } from '../utils/theme';
 import { Z } from '../../shared/zIndex';
 import { SettlementDetailContent } from './SettlementDetailContent';
-import type { CorpsFrontSectorView, FormationView } from '../data/types';
+import type { CorpsFrontSectorView, FormationView, FrontEdgeView } from '../data/types';
 import type { TurnBattle } from '../../../state/turn_summary.js';
 import {
   buildPlayerSafeFormationTooltipModel,
@@ -310,22 +310,21 @@ function DefensePreviewContent({
   osid,
   sectors,
   formations,
+  frontEdgesOsid,
 }: {
   osid: string;
   sectors: CorpsFrontSectorView[] | undefined;
   formations: FormationView[] | undefined;
+  frontEdgesOsid: FrontEdgeView[] | undefined;
 }) {
   const [locale] = useLocale();
   const info = useMemo(() => {
     if (!sectors || !formations) return null;
     const formationMap = new Map(formations.map(f => [f.id, f]));
 
-    // Find the sector containing this OSID via edge_ids (format: "osidA::osidB")
     const sector = sectors.find(s =>
-      s.edge_ids?.some((eid: string) => {
-        const parts = eid.split('::');
-        return parts[0] === osid || parts[1] === osid;
-      })
+      collectSectorFriendlyOsids(s, frontEdgesOsid).includes(osid)
+        || Boolean(s.territory_osids?.includes(osid))
     );
     if (!sector) return null;
 
@@ -355,7 +354,7 @@ function DefensePreviewContent({
       reactiveCount,
       brigades: brigades.sort((a, b) => (a.atOsid === b.atOsid ? 0 : a.atOsid ? -1 : 1)),
     };
-  }, [osid, sectors, formations, locale]);
+  }, [osid, sectors, formations, frontEdgesOsid, locale]);
 
   if (!info) return null;
 
@@ -460,6 +459,7 @@ export const Tooltip = React.memo(function Tooltip() {
               osid={delayedTarget.id}
               sectors={filterPlayerFacingSectors(loadedGameState)}
               formations={(loadedGameState?.formations ?? []).filter((formation) => formation.faction === playerFaction)}
+              frontEdgesOsid={loadedGameState?.frontEdgesOsid}
             />
           )}
         </>

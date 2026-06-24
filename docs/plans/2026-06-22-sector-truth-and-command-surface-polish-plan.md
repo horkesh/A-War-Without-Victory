@@ -1,5 +1,7 @@
 # Sector Truth And Command Surface Polish Implementation Plan
 
+> **Closed:** This plan is fully implemented as of 2026-06-23 and retained as implementation history. Use `docs/plans/COMMAND_BOARD.md` for current dispatch, not this file.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Remove the next layer of first-hour command-surface confusion by making sector, brigade, corps, and decision-room surfaces tell the same player truth.
@@ -10,7 +12,7 @@
 
 ---
 
-## Current Recommended Queue
+## Implemented Queue
 
 ### Task 1: Sector Coverage Truth
 

@@ -222,9 +222,10 @@ function inspectFormationFromMap(formationId: string, properties?: Record<string
   inspectOnField(store, resolveMapFormationInspectionTarget(formationId, properties, store.loadedGameState));
 }
 
-function inspectSectorFromMap(sectorId: string, properties?: Record<string, unknown> | null) {
+function inspectSectorFromMap(sectorId: string, properties?: Record<string, unknown> | null, osid?: string | null) {
   const store = useGameStore.getState();
-  inspectOnField(store, resolveMapSectorInspectionTarget(sectorId, store.loadedGameState, properties));
+  const target = resolveMapSectorInspectionTarget(sectorId, store.loadedGameState, properties);
+  inspectOnField(store, target.kind === 'field-sector-in-corps' && osid ? { ...target, osid } : target);
 }
 
 function inspectSettlementFromMap(osid: string, sectorId?: string | null) {
@@ -689,7 +690,7 @@ export function MapContainer() {
             const osid = properties?.osid as string;
             const sectorId = osidToSector.get(osid ?? '');
             if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
-              inspectSectorFromMap(sectorId);
+              inspectSectorFromMap(sectorId, null, osid);
             }
           }
         },
