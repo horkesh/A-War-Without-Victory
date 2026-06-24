@@ -8,7 +8,8 @@
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
 import type { CorpsFrontSectorView, FrontEdgeView, FormationView } from '../../data/types';
-import { collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import { buildSectorFormationAssignment, collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 // ── Constants (mirror engine values from combat_math.ts) ────────────────────
 const REACTIVE_DISTANCE_BASE = 0.60;
@@ -105,8 +106,15 @@ export function buildDefenseStrengthGeoJSON(
         const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
         if (friendlyOsids.length === 0) continue;
 
-        // Collect sector brigades with their locations and power (personnel as proxy)
-        const sectorBrigadeIds = [...sector.assigned_brigade_ids, ...sector.reserve_brigade_ids];
+        // Collect live line holders with their locations and power (personnel as proxy).
+        // Reserve/rear membership is sector context, not staffed frontline truth.
+        const sectorBrigadeIds = buildSectorFormationAssignment(sector, formations, sectors)
+            .lineHoldingIds
+            .filter((id) => {
+                const formation = formationsById.get(id);
+                return formation != null && isFieldedTacticalFormation(formation);
+            });
+        if (sectorBrigadeIds.length === 0) continue;
         const sectorBrigades: { id: string; locationOsid: string; homeOsid: string; power: number }[] = [];
         for (const bid of sectorBrigadeIds) {
             const f = formationsById.get(bid);

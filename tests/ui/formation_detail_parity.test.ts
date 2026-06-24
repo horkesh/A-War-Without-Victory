@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FormationDetail } from '../../src/ui/map/components/FormationDetail.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import {
+  getPlayerSafeFormationPostureLabel,
+  getPlayerSafeSectorStanceLabel,
+} from '../../src/ui/map/utils/playerSafeText.js';
 
 function makeFormationDetailState(): LoadedGameState {
   return {
@@ -587,6 +591,36 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('Movement stance: hold the line');
     expect(copy).not.toMatch(/\bHold march\b|\bmarch\)/i);
+  });
+
+  it('recognizes canonical formation postures and sector stances as player-facing copy', () => {
+    const postureLabels = [
+      getPlayerSafeFormationPostureLabel('dig_in'),
+      getPlayerSafeFormationPostureLabel('counterattack'),
+      getPlayerSafeFormationPostureLabel('elastic_defense'),
+      getPlayerSafeFormationPostureLabel('defend_at_all_costs'),
+      getPlayerSafeFormationPostureLabel('assault'),
+    ];
+    const stanceLabels = [
+      getPlayerSafeSectorStanceLabel('defensive'),
+      getPlayerSafeSectorStanceLabel('balanced'),
+      getPlayerSafeSectorStanceLabel('offensive'),
+    ];
+
+    expect(postureLabels).toEqual([
+      'Digging in',
+      'Counterattacking',
+      'Elastic defense',
+      'Defending at all costs',
+      'Assaulting',
+    ]);
+    expect(stanceLabels).toEqual([
+      'defensive posture',
+      'balanced posture',
+      'offensive posture',
+    ]);
+    expect([...postureLabels, ...stanceLabels]).not.toContain('Posture pending');
+    expect([...postureLabels, ...stanceLabels]).not.toContain('review posture');
   });
 
   it('disables formation command controls when the desktop command bridge is unavailable', () => {

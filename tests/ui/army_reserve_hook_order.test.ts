@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ArmyReservePanel } from '../../src/ui/map/components/ArmyReservePanel.js';
@@ -40,12 +40,38 @@ function makeState(): LoadedGameState {
         personnel: 1000,
         corps_id: 'arbih_main_staff',
         eliteLoanState: {
-          on_loan: false,
+          on_loan: true,
+          loaned_to_corps: 'arbih_1st_corps',
+          loan_start_turn: 0,
           in_cooldown: false,
           permanently_degraded: false,
-          turns_deployed: 0,
+          turns_deployed: 2,
           base_osid: 'op:sarajevo:centar',
         },
+      },
+      {
+        id: 'arbih_1st_corps',
+        faction: 'RBiH',
+        name: '1st Corps',
+        kind: 'corps',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 75,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+      },
+    ],
+    pendingReserveRequests: [
+      {
+        request_id: 'reserve-request-1',
+        faction: 'RBiH',
+        corps_id: 'arbih_1st_corps',
+        reason: 'defensive_gap',
+        priority: 80,
+        travel_hops: 2,
+        severityBand: 'critical',
+        suggested_brigade_id: 'arbih_guard',
       },
     ],
     militiaPools: [],
@@ -91,5 +117,26 @@ describe('ArmyReservePanel hook order', () => {
     rerender(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
 
     expect(consoleError.mock.calls.flat().join('\n')).not.toMatch(/Rendered more hooks|Rendered fewer hooks|change in the order of Hooks/i);
+  });
+
+  it('renders reserve live action controls read-only when the desktop bridge is unavailable', () => {
+    delete (window as unknown as { awwv?: unknown }).awwv;
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      loadedGameState: makeState(),
+      selectedArmyHqId: 'arbih_main_staff',
+    });
+
+    const view = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+    const decline = screen.getByRole('button', { name: 'DECLINE' }) as HTMLButtonElement;
+    const terminate = screen.getByRole('button', { name: 'Terminate' }) as HTMLButtonElement;
+
+    expect(view.container.textContent).toContain('Desktop command bridge unavailable');
+    expect(decline.disabled).toBe(true);
+    expect(terminate.disabled).toBe(true);
+
+    fireEvent.click(decline);
+    fireEvent.click(terminate);
+    expect(useGameStore.getState().loadError).toBeNull();
   });
 });

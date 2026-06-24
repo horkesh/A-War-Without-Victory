@@ -302,6 +302,55 @@ describe('player-safe tooltip models', () => {
     expect(model.threatSummary).toBeNull();
   });
 
+  it('does not label reserve or AoR-only own formations as live line holders on front tooltips', () => {
+    const formations = [{
+      id: 'own_reserve',
+      name: 'Reserve Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      readiness: 'ready',
+      status: 'active',
+      cohesion: 70,
+      fatigue: 0,
+      createdTurn: 1,
+      tags: [],
+      location_osid: 'op:tuzla:rear',
+      aorSettlementIds: ['op:tuzla:front', 'op:doboj:front'],
+      posture: 'reserve',
+    }] satisfies FormationView[];
+
+    const model = buildPlayerSafeFrontTooltipModel({
+      edgeId: 'op:tuzla:front::op:doboj:front',
+      frontEdgesOsid: [{ edge_id: 'op:tuzla:front::op:doboj:front', a: 'op:tuzla:front', b: 'op:doboj:front', side_a: 'RBiH', side_b: 'RS' }],
+      frontPressureByEdge: { 'op:tuzla:front::op:doboj:front': { value: 0, max_abs: 1 } },
+      formations,
+      fogOfWar: { visibleEnemyOsids: [], visibleEnemySectorIds: [] },
+      corpsFrontSectors: [{
+        sector_id: 'sector_reserve_only',
+        corps_id: 'arbih_2nd_corps',
+        corps_name: '2nd Corps',
+        faction: 'RBiH',
+        display_name: 'Reserve-only front',
+        opposing_factions: ['RS'],
+        edge_ids: ['op:tuzla:front::op:doboj:front'],
+        sub_segment_count: 1,
+        length_edges: 3,
+        density: 1.25,
+        threat_ratio: 0.5,
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: ['own_reserve'],
+        defensive_power: 1,
+        offensive_signs: false,
+        intel_confidence: 0.6,
+        combat_strength_class: 'adequate',
+      }],
+      playerFaction: 'RBiH',
+    });
+
+    expect(model.ownFormationLabels).toEqual([]);
+    expect(model.sectorStatusLine).toBe('No friendly line');
+  });
+
   it('sanitizes raw sector names in front tooltip models', () => {
     const model = buildPlayerSafeFrontTooltipModel({
       edgeId: 'op:tuzla::op:doboj',

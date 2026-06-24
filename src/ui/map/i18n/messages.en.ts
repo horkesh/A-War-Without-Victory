@@ -1764,6 +1764,7 @@ export const enMessages = {
     'operationsPanel.health.fragile': 'Fragile',
     'operationsPanel.health.strained': 'Strained',
     'operationsPanel.health.stable': 'Stable',
+    'operationsPanel.health.unassessed': 'Unassessed',
     'operationsPanel.title': 'Field Ops Snapshot',
     'operationsPanel.subtitle': 'Army HQ owns command review. This panel stays map-facing.',
     'operationsPanel.hqReview': 'HQ Review',

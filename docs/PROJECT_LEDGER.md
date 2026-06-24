@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-23] fix(ui): harden Records, command, and map truth polish
+
+**Type:** UI/read-model/map-projection/test/docs polish.
+
+**Fix:** Turn Aftermath strategic signals now apply the player-filed decision boundary already used by Chronicle: pending, bot-authored, and foreign-faction decision events stay out of Records signals unless the loaded player filed the decision, while non-decision historical events remain visible. OperationsPanel close actually closes the panel, and missing operation supply readiness renders as `Unassessed` instead of `Stable`. Valid postures/stances such as `dig_in`, `counterattack`, `elastic_defense`, `defend_at_all_costs`, `assault`, `defensive`, `balanced`, and `offensive` resolve to player-facing copy. Army Reserve live action controls are disabled/guarded when the desktop bridge is unavailable. Front tooltips and defense/density fills now use current fielded line-holder truth rather than reserve/AoR-only sector membership, and field inspection clears expanded stack overlays plus stale hover chrome.
+
+**Verification:** Focused Records/command/map pack passed 8 files / 101 tests. `npm.cmd run typecheck` passed. `git diff --check` passed. `npm.cmd run qa:player-journeys` passed 43 files / 542 tests. `npm.cmd run qa:live-surface:browser` passed against `http://127.0.0.1:3003/?dev=1` after cleaning the orphaned sweep process from an earlier local timeout. `npm.cmd run qa:first-hour:browser` passed against the same live app. Report: `docs/40_reports/implemented/20260623_RECORDS_COMMAND_MAP_TRUTH_POLISH.md`.
+
+**Scope/determinism:** UI/read-model/map-projection/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-23] fix(ui): keep missing officer ratings unreported
 
 **Type:** UI/read-model/test/docs polish.

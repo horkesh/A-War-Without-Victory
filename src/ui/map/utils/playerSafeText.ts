@@ -105,8 +105,13 @@ export function getPlayerSafeFormationReadinessLabel(
 const FORMATION_POSTURE_LABELS: Record<string, string> = {
     hold: 'Holding',
     defend: 'Defending',
+    dig_in: 'Digging in',
     fortify: 'Fortifying',
     attack: 'Attacking',
+    counterattack: 'Counterattacking',
+    elastic_defense: 'Elastic defense',
+    defend_at_all_costs: 'Defending at all costs',
+    assault: 'Assaulting',
     offensive: 'Attacking',
     reserve: 'In reserve',
     rest: 'Resting',
@@ -139,6 +144,9 @@ export function getPlayerSafeFormationNarrativeArcLabel(
 }
 
 const SECTOR_STANCE_LABELS: Record<string, string> = {
+    defensive: 'defensive posture',
+    balanced: 'balanced posture',
+    offensive: 'offensive posture',
     hold: 'hold the line',
     defend: 'defend in depth',
     fortify: 'fortify the sector',

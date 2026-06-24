@@ -213,6 +213,11 @@ export function useMapInteractions(
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     // Suppress OSID tooltip when cursor is also over a front edge (front tooltip takes priority)
     if (e.point && queryPreferredFrontFeatureNearPoint(map, e.point, true)) {
+      if (hoverTimeout) {
+        clearTimeout(hoverTimeout);
+        hoverTimeout = undefined;
+      }
+      onOsidHover?.(null, null);
       return;
     }
     if (onOsidHover) {

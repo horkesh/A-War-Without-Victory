@@ -561,6 +561,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       chronicleOpen: false,
       opsPlanningModalOpen: false,
       operationTargetOsids: [] as string[],
+      expandedStackOsid: null,
       hoveredOsids: [] as string[],
       hoveredSectorId: null,
       hoveredCorpsId: null,

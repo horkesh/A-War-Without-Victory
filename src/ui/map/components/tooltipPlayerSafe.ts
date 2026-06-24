@@ -200,9 +200,18 @@ export function buildPlayerSafeFrontTooltipModel(args: {
   const formationsOnEdge = visibleFormations.filter((formation) => isFieldedTacticalFormation(formation) && (
     formation.aorSettlementIds?.includes(edge?.a ?? '') || formation.aorSettlementIds?.includes(edge?.b ?? '')
   ));
-  const ownFormations = formationsOnEdge.filter((formation) => isOwnFormation(formation, args.playerFaction));
+  const formationById = new Map((args.formations ?? []).map((formation) => [formation.id, formation]));
+  const ownLineHoldingFormations = sectorAssignment
+    ? sectorAssignment.lineHoldingIds
+      .map((id) => formationById.get(id))
+      .filter((formation): formation is FormationView => Boolean(
+        formation
+        && isOwnFormation(formation, args.playerFaction)
+        && isFieldedTacticalFormation(formation)
+      ))
+    : formationsOnEdge.filter((formation) => isOwnFormation(formation, args.playerFaction));
   const enemyContacts = formationsOnEdge.filter((formation) => !isOwnFormation(formation, args.playerFaction));
-  const ownFormationLabels = ownFormations.map((formation) => {
+  const ownFormationLabels = ownLineHoldingFormations.map((formation) => {
     const posture = getFormationPostureLabel(formation.posture, locale);
     return posture ? `${getLocalizedFormationName(formation, locale)} - ${posture}` : getLocalizedFormationName(formation, locale);
   });

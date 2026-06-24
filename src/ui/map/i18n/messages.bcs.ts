@@ -1723,6 +1723,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'operationsPanel.health.fragile': 'Krhko',
     'operationsPanel.health.strained': 'Napregnuto',
     'operationsPanel.health.stable': 'Stabilno',
+    'operationsPanel.health.unassessed': 'Neprocijenjeno',
     'operationsPanel.title': 'Terenski op. presjek',
     'operationsPanel.subtitle': 'Armijski HQ drži komandni pregled. Ovaj panel ostaje vezan za kartu.',
     'operationsPanel.hqReview': 'HQ pregled',

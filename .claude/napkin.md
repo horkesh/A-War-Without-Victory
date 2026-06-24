@@ -44,6 +44,10 @@
 
 **CHRONICLE DECISION HISTORY NEEDS FILED-PLAYER PROVENANCE (2026-06-23).** Turn summaries can list decision event ids for bot, foreign, or pending decisions. Do instead: suppress generated turn-summary decision rows unless a matching player-filed decision exists; keep non-decision events visible and preserve legacy no-log behavior only when no pending/log evidence exists.
 
+**RECORDS AFTERMATH SIGNALS NEED FILED-PLAYER PROVENANCE (2026-06-23).** `TurnSummary.events_fired` can carry pending, bot, or foreign decision-event ids. Do instead: render non-decision events normally, but require player-filed `event_decision_log` ownership before a decision-event row becomes a Records/Aftermath strategic signal.
+
+**OPERATION HEALTH MUST NOT DEFAULT MISSING SUPPLY TO STABLE (2026-06-23).** Missing `supply_readiness` is absent assessment truth, not green logistics. Do instead: render unassessed unless explicit failure counters justify strained/fragile.
+
 **CHRONICLE FEEL GENERATED COPY IS UI COPY (2026-06-22).** Chronicle helper prose is generated UI scaffolding unless it is authored scenario data. Do instead: route combat/cost/displacement/formation, AAR, officer spotlight, endgame chrome, receipt wrappers, war-weariness/refugee/Sarajevo/generals-digest, and patron-defiance frames through `chronicle.generated.*` keys; keep event titles/options, operation/officer/settlement names, and historical notes verbatim.
 
 **BCS PLURAL GRAMMAR NEEDS FULL MESSAGE KEYS (2026-06-21).** English-style `{plural}` suffix interpolation creates invalid BCS copy. Do instead: select explicit `.one` / `.many` i18n keys when creating player-facing copy tokens, especially command-strain, presidential attention, and briefing badges.

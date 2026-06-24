@@ -782,6 +782,73 @@ describe('buildTurnAftermathView', () => {
     });
   });
 
+  it('only renders decision-event signals when the loaded player filed the decision', () => {
+    const pendingDecision = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          events_fired: [
+            { id: 'hrhb_opening_decision', text: 'HRHB opening decision awaiting review.' },
+            { id: 'weather_window', text: 'A weather window opened.' },
+          ],
+        }),
+        pendingEventDecisions: [{
+          event_id: 'hrhb_opening_decision',
+          event_title: 'HRHB opening decision',
+          turn_fired: 12,
+          faction: 'RBiH',
+          response_options: [{ id: 'historical', label: 'Historical', effects: [] }],
+        }],
+      }),
+    });
+
+    expect(pendingDecision?.signals.map((signal) => signal.label)).toEqual(['A weather window opened.']);
+
+    const botDecision = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          events_fired: [
+            { id: 'rs_bot_decision', text: 'RS bot made a political decision.' },
+            { id: 'market_closure', text: 'Markets closed under shelling.' },
+          ],
+        }),
+        rawGameState: {
+          military: {
+            event_decision_log: [{
+              event_id: 'rs_bot_decision',
+              response_id: 'historical',
+              turn: 12,
+              faction: 'RS',
+              decision_source: 'bot_political',
+            }],
+          },
+        } as never,
+      }),
+    });
+
+    expect(botDecision?.signals.map((signal) => signal.label)).toEqual(['Markets closed under shelling.']);
+
+    const playerDecision = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          events_fired: [{ id: 'rbih_player_decision', text: 'Presidency adopted a filed decision.' }],
+        }),
+        rawGameState: {
+          military: {
+            event_decision_log: [{
+              event_id: 'rbih_player_decision',
+              response_id: 'historical',
+              turn: 12,
+              faction: 'RBiH',
+              decision_source: 'player',
+            }],
+          },
+        } as never,
+      }),
+    });
+
+    expect(playerDecision?.signals.map((signal) => signal.label)).toEqual(['Presidency adopted a filed decision.']);
+  });
+
   it('classifies campaign momentum from the visible aftermath archive', () => {
     const records = [
       buildTurnAftermathView({

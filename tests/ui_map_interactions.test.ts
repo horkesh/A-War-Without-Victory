@@ -673,7 +673,47 @@ describe('useMapInteractions', () => {
     });
 
     vi.advanceTimersByTime(300);
-    expect(onOsidHover).not.toHaveBeenCalled();
+    expect(onOsidHover).toHaveBeenCalledWith(null, null);
+    expect(onOsidHover).not.toHaveBeenCalledWith('op:test:a', { x: 10, y: 10 });
+    vi.useRealTimers();
+  });
+
+  it('clears stale OSID hover when selectable front priority wins during OSID hover', () => {
+    vi.useFakeTimers();
+    const layerHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onOsidHover = vi.fn();
+    const queryRenderedFeatures = vi.fn((geometry?: unknown) => {
+      if (Array.isArray(geometry) && Array.isArray(geometry[0])) {
+        return [{
+          layer: { id: 'sector-edge-hit-pos' },
+          properties: { edge_id: 'op:test:a__op:test:b:RS', sector_id: 'sector:test:0' },
+        }];
+      }
+      return [];
+    });
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'string' && handler) {
+          layerHandlers.set(`${event}:${layerOrHandler}`, handler);
+        }
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures,
+      setFilter: () => {},
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onOsidHover });
+    layerHandlers.get('mousemove:osid-control-fill')?.({
+      features: [{ layer: { id: 'osid-control-fill' }, properties: { osid: 'op:test:a' } }],
+      point: { x: 10, y: 10 },
+      originalEvent: { clientX: 10, clientY: 10 },
+    });
+
+    vi.advanceTimersByTime(300);
+    expect(onOsidHover).toHaveBeenCalledWith(null, null);
+    expect(onOsidHover).not.toHaveBeenCalledWith('op:test:a', { x: 10, y: 10 });
     vi.useRealTimers();
   });
 

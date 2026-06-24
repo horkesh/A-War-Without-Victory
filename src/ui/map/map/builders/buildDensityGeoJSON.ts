@@ -6,8 +6,9 @@
  * - Green (dense > 1.0)
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
-import type { CorpsFrontSectorView, FrontEdgeView } from '../../data/types';
-import { collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import type { CorpsFrontSectorView, FormationView, FrontEdgeView } from '../../data/types';
+import { buildSectorFormationAssignment, collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 
 interface DensityProperties {
   osid: string;
@@ -24,11 +25,21 @@ interface DensityProperties {
 export function buildDensityGeoJSON(
   controlGeoJson: FeatureCollection,
   sectors: CorpsFrontSectorView[],
-  frontEdgesOsid: FrontEdgeView[]
+  frontEdgesOsid: FrontEdgeView[],
+  formations: FormationView[] = []
 ): FeatureCollection<Polygon | MultiPolygon, DensityProperties> {
   // Build OSID → density/sector lookup
+  const formationsById = new Map(formations.map((formation) => [formation.id, formation]));
   const osidInfo = new Map<string, { density: number; sector_id: string; faction: string }>();
   for (const sector of sectors) {
+    const assignmentLineHoldingIds = buildSectorFormationAssignment(sector, formations, sectors).lineHoldingIds;
+    const lineHoldingIds = formations.length > 0
+      ? assignmentLineHoldingIds.filter((id) => {
+        const formation = formationsById.get(id);
+        return formation != null && isFieldedTacticalFormation(formation);
+      })
+      : assignmentLineHoldingIds;
+    if (lineHoldingIds.length === 0) continue;
     const friendlyOsids = collectSectorFriendlyOsids(sector, frontEdgesOsid);
     for (const osid of friendlyOsids) {
       osidInfo.set(osid, { density: sector.density, sector_id: sector.sector_id, faction: sector.faction });

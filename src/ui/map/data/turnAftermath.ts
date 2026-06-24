@@ -5,6 +5,7 @@ import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { t, type MessageKey } from '../i18n';
+import { playerFactionMatch } from './playerFactionMatch';
 
 export type TurnAftermathTone = 'gain' | 'loss' | 'mixed' | 'quiet';
 export type TurnAftermathCostSeverity = 'low' | 'moderate' | 'severe' | 'critical';
@@ -409,12 +410,15 @@ function buildTurnCost(input: {
 function buildStrategicSignals(
   summary: TurnSummary | null,
   osidNameMap: Record<string, string> | null,
+  state: LoadedGameState | null,
+  playerFaction: string | null,
 ): TurnAftermathSignalView[] {
   if (!summary) return [];
 
   const signals: TurnAftermathSignalView[] = [];
 
   for (const event of summary.events_fired) {
+    if (!shouldRenderTurnSummaryEventSignal(state, event.id, playerFaction)) continue;
     signals.push({
       id: `event:${event.id}`,
       kind: 'event',
@@ -484,6 +488,73 @@ function buildStrategicSignals(
   });
 
   return signals.slice(0, 12);
+}
+
+type TurnAftermathDecisionLogEntry = {
+  event_id?: unknown;
+  decision_source?: unknown;
+  faction?: string | null;
+};
+
+type TurnAftermathPendingDecision = {
+  event_id?: unknown;
+  faction?: string | null;
+};
+
+function rawTurnAftermathDecisionLog(state: LoadedGameState | null): TurnAftermathDecisionLogEntry[] | null {
+  const rawLog = (state?.rawGameState as any)?.military?.event_decision_log;
+  return Array.isArray(rawLog) ? rawLog as TurnAftermathDecisionLogEntry[] : null;
+}
+
+function collectTurnAftermathPendingDecisions(state: LoadedGameState | null): TurnAftermathPendingDecision[] {
+  const decisions: TurnAftermathPendingDecision[] = [];
+  if (Array.isArray(state?.pendingEventDecisions)) {
+    decisions.push(...state.pendingEventDecisions);
+  }
+  const rawPending = (state?.rawGameState as any)?.military?.pending_event_decisions;
+  if (Array.isArray(rawPending)) {
+    decisions.push(...rawPending as TurnAftermathPendingDecision[]);
+  }
+  return decisions;
+}
+
+function hasPendingTurnAftermathDecision(state: LoadedGameState | null, eventId: string): boolean {
+  return collectTurnAftermathPendingDecisions(state).some((decision) => decision.event_id === eventId);
+}
+
+function hasPlayerFiledTurnAftermathDecision(
+  log: readonly TurnAftermathDecisionLogEntry[],
+  eventId: string,
+  playerFaction: string | null,
+): boolean {
+  return log.some((entry) => (
+    entry.event_id === eventId
+    && entry.decision_source === 'player'
+    && playerFactionMatch(entry.faction, playerFaction)
+  ));
+}
+
+function isTurnAftermathDecisionEvent(state: LoadedGameState | null, eventId: string): boolean {
+  if (!eventId) return false;
+  if (hasPendingTurnAftermathDecision(state, eventId)) return true;
+  const log = rawTurnAftermathDecisionLog(state);
+  if (log?.some((entry) => entry.event_id === eventId)) return true;
+  return (state?.firedEvents ?? []).some((event) => event.id === eventId && event.isDecision === true);
+}
+
+function shouldRenderTurnSummaryEventSignal(
+  state: LoadedGameState | null,
+  eventId: string,
+  playerFaction: string | null,
+): boolean {
+  if (!isTurnAftermathDecisionEvent(state, eventId)) return true;
+
+  const log = rawTurnAftermathDecisionLog(state);
+  if (log) {
+    return hasPlayerFiledTurnAftermathDecision(log, eventId, playerFaction);
+  }
+  if (hasPendingTurnAftermathDecision(state, eventId)) return false;
+  return (state?.firedEvents ?? []).some((event) => event.id === eventId && event.isDecision === true);
 }
 
 function buildTurnJudgment(input: {
@@ -610,7 +681,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     friendlyMilitaryCasualties: friendlyCasualties,
     ownFormationsDestroyed,
   });
-  const signals = buildStrategicSignals(narratedSummary, input.osidNameMap ?? null);
+  const signals = buildStrategicSignals(narratedSummary, input.osidNameMap ?? null, nextState, playerFaction);
   const nextActions = input.includeNextActions === false
     ? emptyNextActions()
     : buildNextActions(nextState, input.osidNameMap ?? null);

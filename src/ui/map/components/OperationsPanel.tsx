@@ -32,11 +32,15 @@ function compareOperations(a: OperationView, b: OperationView): number {
 }
 
 function getOperationHealthSummary(operation: OperationView): { label: string; className: string } {
-  if ((operation.supply_readiness ?? 1) < 0.4 || (operation.consecutive_failures_on_current ?? 0) >= 2) {
+  const supplyReadiness = operation.supply_readiness;
+  if ((supplyReadiness != null && supplyReadiness < 0.4) || (operation.consecutive_failures_on_current ?? 0) >= 2) {
     return { label: t('operationsPanel.health.fragile'), className: 'text-red-300' };
   }
-  if ((operation.supply_readiness ?? 1) < 0.6 || (operation.failure_count ?? 0) > 0) {
+  if ((supplyReadiness != null && supplyReadiness < 0.6) || (operation.failure_count ?? 0) > 0) {
     return { label: t('operationsPanel.health.strained'), className: 'text-amber-300' };
+  }
+  if (supplyReadiness == null) {
+    return { label: t('operationsPanel.health.unassessed'), className: 'text-text-secondary' };
   }
   return { label: t('operationsPanel.health.stable'), className: 'text-green-300' };
 }
@@ -249,6 +253,7 @@ export function OperationsPanel() {
   };
 
   const close = () => {
+    setIsOpen(false);
     setSelectedOperationKey(null);
     setHoveredOsids([]);
     setOperationTargetOsids([]);

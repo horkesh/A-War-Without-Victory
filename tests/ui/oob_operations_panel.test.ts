@@ -52,6 +52,16 @@ function operation(): OperationView {
   };
 }
 
+function setOperationPatch(patch: Partial<OperationView>) {
+  useGameStore.setState({
+    loadedGameState: {
+      ...loadedState(),
+      operations: [{ ...operation(), ...patch }],
+    } as LoadedGameState,
+    selectedOperationKey: `${CORPS_ID}|${patch.name ?? RAW_OP_NAME}`,
+  });
+}
+
 function loadedState(): LoadedGameState {
   return {
     label: 'test',
@@ -193,6 +203,34 @@ describe('OOB and operations panel operation labels', () => {
     expect(screen.queryByRole('option', {
       name: 'Operation Breakthrough, execution, 1 brigades',
     })).toBeNull();
+  });
+
+  it('closes the operations panel when the close button is clicked', () => {
+    render(createElement(OperationsPanel));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close operations panel' }));
+
+    const state = useGameStore.getState();
+    expect(state.isOperationsPanelOpen).toBe(false);
+    expect(state.selectedOperationKey).toBeNull();
+  });
+
+  it('renders missing operation supply readiness as unassessed unless failures justify a warning', () => {
+    setOperationPatch({ supply_readiness: undefined, failure_count: undefined, consecutive_failures_on_current: undefined });
+    const view = render(createElement(OperationsPanel));
+
+    expect(view.container.textContent).toContain('Unassessed');
+    expect(view.container.textContent).not.toContain('Stable');
+
+    cleanup();
+    setOperationPatch({ supply_readiness: undefined, failure_count: 1, consecutive_failures_on_current: 0 });
+    const strainedView = render(createElement(OperationsPanel));
+    expect(strainedView.container.textContent).toContain('Strained');
+
+    cleanup();
+    setOperationPatch({ supply_readiness: undefined, failure_count: 1, consecutive_failures_on_current: 2 });
+    const fragileView = render(createElement(OperationsPanel));
+    expect(fragileView.container.textContent).toContain('Fragile');
   });
 
   it('routes allocated brigade clicks through corps-preserving field inspection', () => {

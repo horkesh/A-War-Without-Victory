@@ -109,6 +109,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     // Tracker data
     const tracker = loadedGameState.eliteBrigadeTracker ?? {};
     const activeLoans = elites.filter((brigade) => brigade.eliteLoanState?.on_loan);
+    const hasLiveReserveActions = activeLoans.length > 0 || pendingRequests.length > 0;
     const corpsNameById = loadedGameState.formations
         .filter((formation) => formation.kind === 'corps' || formation.kind === 'corps_asset')
         .map((formation) => ({ id: formation.id, name: getLocalizedFormationName(formation, locale) }));
@@ -128,6 +129,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         commandAuthorityCurrent === undefined || commandAuthorityCurrent >= ELITE_DEPLOY_COST;
 
     async function handleDecline(requestId: string) {
+        if (!ipc.isAvailable) {
+            setLoadError(t('formationDetail.commandBridgeUnavailable'));
+            return;
+        }
         const result = await ipc.declineReserveRequest(
             requestId,
             'Army CO declines at this time: reserve commitment risk outweighs expected gain.'
@@ -136,6 +141,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
     }
 
     async function handleRecall(brigadeId: string) {
+        if (!ipc.isAvailable) {
+            setLoadError(t('formationDetail.commandBridgeUnavailable'));
+            return;
+        }
         const result = await ipc.recallEliteBrigade(
             brigadeId,
             'Loan terminated by player; brigade ordered back to base reserve.'
@@ -166,6 +175,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
             </div>
 
             <div className="flex-1 overflow-y-auto p-2.5 space-y-3 text-[11px]">
+                {!ipc.isAvailable && hasLiveReserveActions && (
+                    <div className="text-[10px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
+                        {t('formationDetail.commandBridgeUnavailable')}
+                    </div>
+                )}
 
                 {/* ── Reserve Pool ─────────────────────────────────────── */}
                 <section>
@@ -238,8 +252,14 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                 </span>
                                                 <button
                                                     type="button"
+                                                    disabled={!ipc.isAvailable}
                                                     onClick={() => { void handleRecall(brigade.id); }}
-                                                    className="px-2 py-0.5 bg-[#d45555]/20 border border-[#d45555]/40 rounded text-[10px] text-[#d45555] font-bold hover:bg-[#d45555]/30 transition-colors"
+                                                    title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+                                                    className={`px-2 py-0.5 border rounded text-[10px] font-bold transition-colors ${
+                                                        ipc.isAvailable
+                                                            ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30'
+                                                            : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'
+                                                    }`}
                                                 >
                                                     {t('armyReserve.terminate')}
                                                 </button>
@@ -433,10 +453,16 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                     <div className="flex gap-1.5">
                                         <button
                                             type="button"
+                                            disabled={!ipc.isAvailable}
                                             onClick={() => {
                                                 void handleDecline(req.request_id);
                                             }}
-                                            className="px-2 py-1 bg-black/30 border border-panel-border/40 rounded text-[10px] text-text-secondary hover:text-text-primary hover:bg-white/5 transition-colors"
+                                            title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+                                            className={`px-2 py-1 border rounded text-[10px] transition-colors ${
+                                                ipc.isAvailable
+                                                    ? 'bg-black/30 border-panel-border/40 text-text-secondary hover:text-text-primary hover:bg-white/5'
+                                                    : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'
+                                            }`}
                                         >
                                             {t('armyReserve.decline')}
                                         </button>
