@@ -233,29 +233,53 @@ function getCommanderPersonality(officer: NamedOfficerView): string {
 }
 
 function formatOfficerRating(value: number): string {
-    return Number.isFinite(value) ? value.toFixed(1) : 'Unreported';
+    return Number.isFinite(value) ? value.toFixed(1) : t('operationsSection.metricUnreported');
+}
+
+function isReportedNumber(value: number | null | undefined): value is number {
+    return typeof value === 'number' && Number.isFinite(value);
+}
+
+function formatReportedInteger(value: number | null | undefined, options?: { locale?: boolean }): string {
+    if (!isReportedNumber(value)) return t('operationsSection.metricUnreported');
+    return options?.locale ? Math.round(value).toLocaleString() : String(Math.round(value));
+}
+
+function metricTone(value: number | null | undefined, good: number, caution: number): string {
+    if (!isReportedNumber(value)) return 'text-text-secondary/60 italic';
+    return value >= good ? 'text-emerald-400' : value >= caution ? 'text-accent-gold' : 'text-red-500';
+}
+
+function resolveOperationCommander(
+    commanderId: string | null | undefined,
+    officers: readonly NamedOfficerView[] | null | undefined,
+): { kind: 'assigned'; officer: NamedOfficerView } | { kind: 'unassigned' | 'unreported'; label: string } {
+    if (!commanderId) return { kind: 'unassigned', label: t('operationsSection.commanderUnassigned') };
+    const officer = officers?.find((o) => o.id === commanderId);
+    if (!officer) return { kind: 'unreported', label: t('operationsSection.commanderUnreported') };
+    return { kind: 'assigned', officer };
 }
 
 /** Brigade status row within operation ORBAT. */
 function BrigadeStatusRow({ brig, corpsId }: { brig: FormationView; corpsId: string }) {
-    const personnel = brig.personnel ?? 0;
+    const personnel = brig.personnel;
     const cohesion = brig.cohesion;
-    const morale = brig.morale ?? 0;
+    const morale = brig.morale;
     const isDisrupted = (brig.disrupted_turns ?? 0) > 0;
     const brigadeName = getPlayerSafeBrigadeName(brig.name);
 
-    const persColor = personnel >= 800 ? 'text-emerald-400' : personnel >= 400 ? 'text-accent-gold' : 'text-red-500';
-    const cohColor = cohesion >= 60 ? 'text-emerald-400' : cohesion >= 30 ? 'text-accent-gold' : 'text-red-500';
-    const morColor = morale >= 50 ? 'text-emerald-400' : morale >= 25 ? 'text-accent-gold' : 'text-red-500';
+    const persColor = metricTone(personnel, 800, 400);
+    const cohColor = metricTone(cohesion, 60, 30);
+    const morColor = metricTone(morale, 50, 25);
 
     return (
         <div className={`flex items-center gap-2 px-2 py-0.5 text-[10px] font-mono tabular-nums ${isDisrupted ? 'bg-red-500/5 border-l-2 border-red-500/40' : 'border-l-2 border-transparent'}`}>
             <span className={`flex-1 min-w-0 truncate font-bold uppercase tracking-tighter ${isDisrupted ? 'text-red-500' : 'text-text-secondary'}`}>
                 {brigadeName}
             </span>
-            <span className={`w-20 text-right ${persColor}`}>{personnel.toLocaleString()}</span>
-            <span className={`w-16 text-right ${cohColor}`}>{Math.round(cohesion)}</span>
-            <span className={`w-14 text-right ${morColor}`}>{Math.round(morale)}</span>
+            <span className={`w-20 text-right ${persColor}`}>{formatReportedInteger(personnel, { locale: true })}</span>
+            <span className={`w-16 text-right ${cohColor}`}>{formatReportedInteger(cohesion)}</span>
+            <span className={`w-14 text-right ${morColor}`}>{formatReportedInteger(morale)}</span>
             {isDisrupted && <span className="text-red-500 text-[8px] font-bold animate-pulse w-20 text-center">{t('operationsSection.disruptedShort')}</span>}
             {!isDisrupted && <span className="w-20" />}
             <button
@@ -365,9 +389,8 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
         return m;
     }, [gameState.formations]);
 
-    const cmdOfficer = useMemo(() => {
-        if (!op.commander_officer_id) return undefined;
-        return (gameState.namedOfficerData ?? []).find((o) => o.id === op.commander_officer_id);
+    const commanderDisplay = useMemo(() => {
+        return resolveOperationCommander(op.commander_officer_id, gameState.namedOfficerData);
     }, [op.commander_officer_id, gameState.namedOfficerData]);
 
     // Find matching completed operation AAR (for recovery phase or grade display)
@@ -386,29 +409,34 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     return (
         <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
             {/* Commander personality card */}
-            {cmdOfficer && (
+            {commanderDisplay.kind === 'assigned' ? (
                 <div className="flex items-start gap-4 px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                             <span className="text-[10px] text-text-secondary/60 uppercase">{t('operationsSection.operationCommander')}</span>
-                            <span className="text-[12px] font-bold text-text-primary uppercase tracking-wider">{cmdOfficer.name}</span>
-                            <span className="text-[9px] text-text-secondary/40 uppercase">{formatOfficerRank(cmdOfficer.rank)}</span>
+                            <span className="text-[12px] font-bold text-text-primary uppercase tracking-wider">{commanderDisplay.officer.name}</span>
+                            <span className="text-[9px] text-text-secondary/40 uppercase">{formatOfficerRank(commanderDisplay.officer.rank)}</span>
                         </div>
                         <div className="text-[9px] text-accent-gold/80 uppercase tracking-wider font-bold">
-                            {getCommanderPersonality(cmdOfficer)}
+                            {getCommanderPersonality(commanderDisplay.officer)}
                         </div>
                         <div className="flex gap-4 text-[9px] text-text-secondary/50 uppercase tabular-nums">
-                            <span>{t('operationsSection.comp')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.competence)}</b></span>
-                            <span>{t('operationsSection.aggr')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.aggressiveness)}</b></span>
-                            <span>{t('operationsSection.def')} <b className="text-text-secondary">{formatOfficerRating(cmdOfficer.defensive_skill)}</b></span>
-                            {cmdOfficer.operations_commanded != null && cmdOfficer.operations_commanded > 0 && (
-                                <span>{t('operationsSection.opsShort')} <b className="text-text-secondary">{cmdOfficer.operations_commanded}</b></span>
+                            <span>{t('operationsSection.comp')} <b className="text-text-secondary">{formatOfficerRating(commanderDisplay.officer.competence)}</b></span>
+                            <span>{t('operationsSection.aggr')} <b className="text-text-secondary">{formatOfficerRating(commanderDisplay.officer.aggressiveness)}</b></span>
+                            <span>{t('operationsSection.def')} <b className="text-text-secondary">{formatOfficerRating(commanderDisplay.officer.defensive_skill)}</b></span>
+                            {commanderDisplay.officer.operations_commanded != null && commanderDisplay.officer.operations_commanded > 0 && (
+                                <span>{t('operationsSection.opsShort')} <b className="text-text-secondary">{commanderDisplay.officer.operations_commanded}</b></span>
                             )}
-                            {cmdOfficer.battles > 0 && (
-                                <span>{t('operationsSection.battles')} <b className="text-text-secondary">{cmdOfficer.battles}</b> ({t('operationsSection.winsShort', { count: cmdOfficer.victories })})</span>
+                            {commanderDisplay.officer.battles > 0 && (
+                                <span>{t('operationsSection.battles')} <b className="text-text-secondary">{commanderDisplay.officer.battles}</b> ({t('operationsSection.winsShort', { count: commanderDisplay.officer.victories })})</span>
                             )}
                         </div>
                     </div>
+                </div>
+            ) : (
+                <div className="px-3 py-2.5 border border-panel-border/50 bg-panel-bg rounded-md">
+                    <div className="text-[10px] text-text-secondary/60 uppercase">{t('operationsSection.operationCommander')}</div>
+                    <div className="mt-1 text-[11px] text-text-secondary italic">{commanderDisplay.label}</div>
                 </div>
             )}
 
@@ -653,10 +681,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         const opKey = `${op.corps_id}|${op.name}`;
                         const badge = PHASE_BADGE[op.phase] ?? PHASE_BADGE.planning;
                         const momentum = op.momentum ?? 0;
-                        const cmdOfficer = op.commander_officer_id
-                            ? (gameState.namedOfficerData ?? []).find((o) => o.id === op.commander_officer_id)
-                            : undefined;
-                        const commander = cmdOfficer?.name;
+                        const commander = resolveOperationCommander(op.commander_officer_id, gameState.namedOfficerData);
                         const objectives = op.objectives ?? [];
                         const isExpanded = expandedOp === opKey;
 
@@ -712,11 +737,9 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 {t('operationsSection.momentum')} <b className="font-bold">{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</b>
                                             </span>
                                         )}
-                                        {commander && (
-                                            <span className="text-text-secondary/60 border-l border-panel-border/50 pl-4 ml-auto">
-                                                {t('operationsSection.commanderShort')} {commander.toUpperCase()}
-                                            </span>
-                                        )}
+                                        <span className="text-text-secondary/60 border-l border-panel-border/50 pl-4 ml-auto">
+                                            {t('operationsSection.commanderShort')} {commander.kind === 'assigned' ? commander.officer.name.toUpperCase() : commander.label}
+                                        </span>
                                     </div>
                                 </button>
                                 {isExpanded && (

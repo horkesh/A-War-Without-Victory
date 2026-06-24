@@ -1,7 +1,7 @@
 import type { Feature, FeatureCollection, Point } from 'geojson';
 import type { LoadedGameState } from '../../data/types';
 import { buildOsidCentroidLookup } from './geojsonLookup';
-import { resolveFormationLocationOsid } from './resolveFormationLocationOsid';
+import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
 import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../../shared/playerVisibility';
@@ -87,7 +87,7 @@ export function buildFormationsGeoJSON(
   // Count units per OSID for radial spacing
   const countsPerOsid = new Map<string, number>();
   for (const f of physicalUnits) {
-    const osid = resolveFormationLocationOsid(f, centroidLookup);
+    const osid = resolveFormationPhysicalLocationOsid(f, centroidLookup);
     if (osid) countsPerOsid.set(osid, (countsPerOsid.get(osid) || 0) + 1);
   }
 
@@ -96,7 +96,7 @@ export function buildFormationsGeoJSON(
   const features: Array<Feature<Point, FormationMarkerProperties>> = [];
 
   for (const formation of orderedFormations) {
-    const osid = resolveFormationLocationOsid(formation, centroidLookup);
+    const osid = resolveFormationPhysicalLocationOsid(formation, centroidLookup);
     if (!osid) continue;
 
     // If this OSID is currently expanded in the high-end overlay, hide the map-level icons

@@ -8,7 +8,7 @@ export function resolveFormationLocationOsid(
 ): string | null {
   if (!formation) return null;
 
-  const direct = resolveOsidKey(formation.location_osid, centroidLookup);
+  const direct = resolveFormationPhysicalLocationOsid(formation, centroidLookup);
   if (direct) return direct;
 
   const aorIds = Array.isArray(formation.aorSettlementIds)
@@ -19,5 +19,14 @@ export function resolveFormationLocationOsid(
     if (resolved) return resolved;
   }
 
-  return resolveOsidKey(formation.hq_sid, centroidLookup);
+  return resolveOsidKey(formation.hq_osid, centroidLookup)
+    ?? resolveOsidKey(formation.hq_sid, centroidLookup);
+}
+
+export function resolveFormationPhysicalLocationOsid(
+  formation: FormationView | undefined,
+  centroidLookup: OsidCentroidLookup,
+): string | null {
+  if (!formation) return null;
+  return resolveOsidKey(formation.location_osid, centroidLookup);
 }

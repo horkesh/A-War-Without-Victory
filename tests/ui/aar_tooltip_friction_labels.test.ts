@@ -137,6 +137,31 @@ describe('AAR and tooltip friction labels', () => {
     expect(container.textContent).not.toContain('Tuzla');
   });
 
+  it('renders unknown AAR notable event kinds with neutral fallback copy', () => {
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: {
+          ...makeSummary(),
+          notable_events: [
+            {
+              kind: 'rear_security_probe' as never,
+              description: 'Staff logged a rear-area security probe.',
+              faction: 'RBiH',
+            },
+          ],
+        },
+      },
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+    });
+
+    const { container } = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    expect(container.textContent).toContain('Notable development');
+    expect(container.textContent).toContain('Staff logged a rear-area security probe.');
+    expect(container.textContent).not.toMatch(/rear_security_probe/);
+  });
+
   it('routes embedded AAR formation links through field inspection with battle context', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

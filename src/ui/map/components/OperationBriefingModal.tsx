@@ -61,6 +61,16 @@ function finiteCommanderRating(value: number | null | undefined, fallback: numbe
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function resolveBriefingCommander(
+    operationCommanderId: string | null | undefined,
+    officers: readonly NamedOfficerView[] | null | undefined,
+): { kind: 'assigned'; officer: NamedOfficerView } | { kind: 'unassigned' | 'unreported'; label: string } {
+    if (!operationCommanderId) return { kind: 'unassigned', label: t('operationBriefing.commanderUnassigned') };
+    const officer = officers?.find((candidate) => candidate.id === operationCommanderId);
+    if (!officer) return { kind: 'unreported', label: t('operationBriefing.commanderUnreported') };
+    return { kind: 'assigned', officer };
+}
+
 /**
  * Shown on executing/recovery ops that were force-launched AND lack a commander_assessment_at_launch
  * snapshot (i.e. operations launched before this feature was added). Legacy fallback only.
@@ -339,22 +349,19 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     const context = useGameStore((s) => s.operationBriefingContext);
 
-    const { operation, commander, corpsStrain, corpsStrainLabel, situationAssessment } = useMemo(() => {
-        if (!loadedGameState || !context) return { operation: null, commander: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const, situationAssessment: undefined };
+    const { operation, commanderDisplay, corpsStrain, corpsStrainLabel, situationAssessment } = useMemo(() => {
+        if (!loadedGameState || !context) return { operation: null, commanderDisplay: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const, situationAssessment: undefined };
         const op = findPlayerFacingOperationByKey(
             loadedGameState,
             `${context.corpsId}|${context.operationName}`,
         );
-        let cdr: NamedOfficerView | null = null;
-        if (op?.commander_officer_id && loadedGameState.namedOfficerData) {
-            cdr = loadedGameState.namedOfficerData.find((o) => o.id === op.commander_officer_id) ?? null;
-        }
+        const cdr = op ? resolveBriefingCommander(op.commander_officer_id, loadedGameState.namedOfficerData) : null;
         // Look up command strain + situation assessment from the corps formation (derived on-read by adapter)
         const corpsFormation = loadedGameState.formations?.find(f => f.id === context.corpsId);
         const strain = corpsFormation?.commandStrain ?? 0;
         const strainLabel = corpsFormation?.commandStrainLabel ?? 'healthy';
         const sitAssessment = corpsFormation?.situationAssessment;
-        return { operation: op, commander: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
+        return { operation: op, commanderDisplay: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
     }, [loadedGameState, context]);
 
     if (!context || !operation) return null;
@@ -387,12 +394,12 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
             intelConf,
             supplyReady,
             forceRatio,
-            finiteCommanderRating(commander?.aggressiveness, 3),
-            finiteCommanderRating(commander?.competence, 3),
+            finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.aggressiveness : undefined, 3),
+            finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.competence : undefined, 3),
             assessment as 'launch' | 'postpone' | 'abort',
             postponements,
         );
-    }, [intelConf, supplyReady, forceRatio, assessment, postponements, commander]);
+    }, [intelConf, supplyReady, forceRatio, assessment, postponements, commanderDisplay]);
 
     return (
         <Modal
@@ -431,19 +438,23 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 )}
 
                 {/* Commander info */}
-                {commander && (
+                {commanderDisplay && (
                     <div className="px-4 py-2 border-b border-panel-border bg-panel-card/60">
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">{t('operationBriefing.opsCommander')}</div>
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <div className="text-[11px] font-bold">{formatRank(commander.rank)} {commander.name}</div>
-                                <div className="text-[9px] text-text-muted italic">{getArchetype(commander)}</div>
+                        {commanderDisplay.kind === 'assigned' ? (
+                            <div className="flex items-center gap-3">
+                                <div>
+                                    <div className="text-[11px] font-bold">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</div>
+                                    <div className="text-[9px] text-text-muted italic">{getArchetype(commanderDisplay.officer)}</div>
+                                </div>
+                                <div className="flex gap-2 text-[8px]">
+                                    <span className={`font-mono ${getRatingColor(commanderDisplay.officer.competence)}`}>{formatPips(commanderDisplay.officer.competence)}</span>
+                                    <span className={`font-mono ${getRatingColor(commanderDisplay.officer.aggressiveness)}`}>{formatPips(commanderDisplay.officer.aggressiveness)}</span>
+                                </div>
                             </div>
-                            <div className="flex gap-2 text-[8px]">
-                                <span className={`font-mono ${getRatingColor(commander.competence)}`}>{formatPips(commander.competence)}</span>
-                                <span className={`font-mono ${getRatingColor(commander.aggressiveness)}`}>{formatPips(commander.aggressiveness)}</span>
-                            </div>
-                        </div>
+                        ) : (
+                            <div className="text-[11px] italic text-text-secondary">{commanderDisplay.label}</div>
+                        )}
                     </div>
                 )}
 

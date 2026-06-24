@@ -415,6 +415,38 @@ describe('Tactical map render smoke', () => {
     expect(ids).toEqual(['active_brigade', 'active_operational_group']);
   });
 
+  it('buildFormationsGeoJSON does not place physical counters from AoR or HQ anchors', () => {
+    const state = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      controlBySettlement: { 'op:sarajevo': 'RBiH', 'op:pale': 'RS' },
+      formations: [
+        {
+          id: 'unlocated_brigade',
+          faction: 'RBiH',
+          name: 'Unlocated Brigade',
+          kind: 'brigade',
+          readiness: 'ready',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          aorSettlementIds: ['op:sarajevo'],
+          hq_sid: 'op:pale',
+          hq_osid: 'op:pale',
+        },
+      ],
+    } as unknown as LoadedGameState;
+
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const ids = buildFormationsGeoJSON(state, controlledGeo).features.map((feature) => feature.properties.id);
+
+    expect(ids).toEqual([]);
+  });
+
   it('generateThreatAssessment keeps player-facing language on friendly fronts', () => {
     const state = {
       formations: [

@@ -79,6 +79,10 @@ const NOTABLE_LABEL_KEY: Record<TurnNotableEvent['kind'], MessageKey> = {
     first_battle: 'aar.notable.firstBattle',
 };
 
+function notableEventLabel(kind: string): string {
+    return t(NOTABLE_LABEL_KEY[kind as TurnNotableEvent['kind']] ?? 'aar.notable.fallback');
+}
+
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
@@ -508,7 +512,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                     {summary.notable_events.map((e) => (
                                         <div key={e.kind + (e.faction ?? '') + (e.osid ?? '')} className="text-[11px] py-0.5 flex gap-2 items-start">
                                             <span className="text-accent-gold text-[9px] uppercase tracking-wide shrink-0 mt-0.5">
-                                                {NOTABLE_LABEL_KEY[e.kind] ? t(NOTABLE_LABEL_KEY[e.kind]) : e.kind}
+                                                {notableEventLabel(e.kind)}
                                             </span>
                                             <span className="text-text-secondary">{e.description}</span>
                                         </div>

@@ -77,10 +77,15 @@ function getOperationTempoLabel(tempo: string): string {
   }
 }
 
-function getOperationCommander(operation: OperationView, state: LoadedGameState): NamedOfficerView | null {
+function getOperationCommanderDisplay(
+  operation: OperationView,
+  state: LoadedGameState,
+): { kind: 'assigned'; officer: NamedOfficerView } | { kind: 'unassigned' | 'unreported'; label: string } {
   const commanderId = operation.commander_officer_id;
-  if (!commanderId) return null;
-  return state.namedOfficerData?.find((officer) => officer.id === commanderId) ?? null;
+  if (!commanderId) return { kind: 'unassigned', label: t('operationsPanel.commanderUnassigned') };
+  const officer = state.namedOfficerData?.find((candidate) => candidate.id === commanderId);
+  if (!officer) return { kind: 'unreported', label: t('operationsPanel.commanderUnreported') };
+  return { kind: 'assigned', officer };
 }
 
 export function OperationsPanel() {
@@ -488,11 +493,22 @@ export function OperationsPanel() {
 
                 {/* Commander */}
                 {(() => {
-                  const commander = getOperationCommander(selectedOperation, loadedGameState);
-                  if (!commander) return null;
+                  const commander = getOperationCommanderDisplay(selectedOperation, loadedGameState);
+                  if (commander.kind !== 'assigned') {
+                    return (
+                      <div className="pt-2 border-t border-panel-border">
+                        <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">
+                          {t('operationsPanel.operationCommander')}
+                        </div>
+                        <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-[11px] italic text-text-secondary">
+                          {commander.label}
+                        </div>
+                      </div>
+                    );
+                  }
                   return (
                     <div className="pt-2 border-t border-panel-border">
-                      <OfficerProfile officer={commander} label={t('operationsPanel.operationCommander')} />
+                      <OfficerProfile officer={commander.officer} label={t('operationsPanel.operationCommander')} />
                     </div>
                   );
                 })()}

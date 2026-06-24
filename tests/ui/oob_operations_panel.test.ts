@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 
 import { OperationsPanel } from '../../src/ui/map/components/OperationsPanel.js';
 import { OperationBriefingModal } from '../../src/ui/map/components/OperationBriefingModal.js';
+import { OperationsSection } from '../../src/ui/map/components/army_hq/OperationsSection.js';
 import { OOBSidebar } from '../../src/ui/map/components/OOBSidebar.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState, NamedOfficerView, OperationView } from '../../src/ui/map/data/types.js';
@@ -188,6 +189,22 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('Corps Commander');
   });
 
+  it('renders absent operation commanders as explicitly unassigned', () => {
+    setOperationPatch({ commander_officer_id: undefined });
+
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('Commander unassigned');
+  });
+
+  it('renders unresolved operation commander ids as explicitly unreported', () => {
+    setOperationPatch({ commander_officer_id: 'missing_commander' });
+
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('Commander record unreported');
+  });
+
   it('renders operation phase age as duration copy instead of raw turn labels', () => {
     const { container } = render(createElement(OperationsPanel));
 
@@ -274,6 +291,58 @@ describe('OOB and operations panel operation labels', () => {
     expect((screen.getByRole('button', { name: 'Order Probe' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Postpone' }) as HTMLButtonElement).disabled).toBe(true);
     expect((screen.getByRole('button', { name: 'Abort Operation' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('shows explicit commander state in operation briefing when commander is absent or unresolved', () => {
+    setOperationPatch({ commander_officer_id: undefined });
+    useGameStore.setState({
+      operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
+    });
+    const absent = render(createElement(OperationBriefingModal, {
+      isOpen: true,
+      onClose: () => {},
+    }));
+    expect(absent.container.textContent).toContain('Commander unassigned');
+
+    cleanup();
+    setOperationPatch({ commander_officer_id: 'missing_commander' });
+    useGameStore.setState({
+      operationBriefingContext: { corpsId: CORPS_ID, operationName: RAW_OP_NAME },
+    });
+    const unresolved = render(createElement(OperationBriefingModal, {
+      isOpen: true,
+      onClose: () => {},
+    }));
+    expect(unresolved.container.textContent).toContain('Commander record unreported');
+  });
+
+  it('renders Army HQ operation commanders and sparse brigade metrics as unreported instead of disappearing or zeroing', () => {
+    const sparseState = {
+      ...loadedState(),
+      formations: loadedState().formations.map((formation) => formation.id === 'arbih_brigade'
+        ? {
+            ...formation,
+            personnel: undefined,
+            cohesion: undefined,
+            morale: Number.NaN,
+          }
+        : formation),
+      operations: [{ ...operation(), commander_officer_id: 'missing_commander' }],
+    } as unknown as LoadedGameState;
+
+    const { container } = render(createElement(OperationsSection, {
+      corpsId: CORPS_ID,
+      operations: sparseState.operations ?? [],
+      gameState: sparseState,
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
+
+    expect(container.textContent).toContain('Commander record unreported');
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toContain('NaN');
+    expect(container.textContent).not.toContain(' 0 ');
   });
 
   it('renders player-safe operation display names without the raw operation slug on OOB cards', () => {

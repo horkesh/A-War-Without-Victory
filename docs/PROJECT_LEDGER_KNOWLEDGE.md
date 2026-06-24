@@ -3453,3 +3453,11 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 **Physical contact is not AoR coverage:** map front tooltips should describe enemy contact only from visible fielded formations physically at a front endpoint. AoR/coverage can support other intelligence surfaces, but it must not imply a unit is on that edge. Applied in `[2026-06-23] Player truth and command false-affordance batch`; report `docs/40_reports/implemented/20260623_PLAYER_TRUTH_COMMAND_FALSE_AFFORDANCE_BATCH.md`.
 
 **Player receipt ownership must be explicit or resolved:** missing faction metadata is not player ownership. Forced-operation and officer-resentment receipts should require explicit matching faction or a corps-owner resolution before surfacing under the loaded player. Applied in `[2026-06-23] Player truth and command false-affordance batch`; report `docs/40_reports/implemented/20260623_PLAYER_TRUTH_COMMAND_FALSE_AFFORDANCE_BATCH.md`.
+
+## 2026-06-24 - Residual player-truth polish rules
+
+**Physical tactical counters require physical location:** AoR coverage, sector membership, `hq_sid`, and command-only `hq_osid` anchors are not proof that a brigade is physically present at a settlement. Durable rule: tactical map formation counters must use explicit `location_osid`; keep broader fallback resolvers only for non-counter anchor/navigation consumers. Applied in `[2026-06-24] Player truth residual polish`; report `docs/40_reports/implemented/20260624_PLAYER_TRUTH_RESIDUAL_POLISH.md`.
+
+**Missing operation commanders are visible uncertainty:** absent `commander_officer_id` and stale commander ids must not disappear from operation surfaces. Durable rule: Operations Panel, Operation Briefing, and Army HQ Operations should render unassigned/unreported commander states, and sparse brigade metrics should render unreported instead of `0` or `NaN`. Applied in `[2026-06-24] Player truth residual polish`; report `docs/40_reports/implemented/20260624_PLAYER_TRUTH_RESIDUAL_POLISH.md`.
+
+**AAR unknown notable events use neutral copy:** unmapped `notable_events[].kind` values are data ids, not player copy. Durable rule: render a localized fallback label and the authored description, never the raw event kind. Applied in `[2026-06-24] Player truth residual polish`; report `docs/40_reports/implemented/20260624_PLAYER_TRUTH_RESIDUAL_POLISH.md`.
