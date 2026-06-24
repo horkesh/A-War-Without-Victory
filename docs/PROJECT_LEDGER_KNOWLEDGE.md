@@ -1,3 +1,7 @@
+## 2026-06-24 - Safe-area fall receipt ownership
+
+**Srebrenica and Zepa fall receipts are event-owned, not operation-delivered:** Krivaja/Stupcanica operation context is chronology/prose/AAR context, not the mechanism that flips the safe-area controller. Durable rule: guard `srebrenica_falls_1995` and `zepa_falls_1995` through `evaluateEvents` as event-owned `mechanism: "event"` political-control receipts, without requiring corps operations or operation history. Applied in `[2026-06-24] test(events): prove safe-area falls are event-owned receipts`; report `docs/40_reports/implemented/20260624_SAFE_AREA_EVENT_RECEIPT_PROOF.md`.
+
 ## 2026-06-24 - Contested bands and strategic position sparse truth
 
 **Contested-band pressure uses fielded tactical truth:** forming units, HQ rows, inactive records, and non-tactical formations are not adjacent combat pressure. Durable rule: contested-band adjacent-pressure overlays should count only `isFieldedTacticalFormation(...)` rows with explicit physical `location_osid`; recent combat flips remain separately valid contested evidence. Applied in `[2026-06-24] fix(ui): preserve contested band and strategic position truth`; report `docs/40_reports/implemented/20260624_CONTESTED_BAND_STRATEGIC_POSITION_TRUTH.md`.

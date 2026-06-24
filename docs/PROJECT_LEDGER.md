@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] test(events): prove safe-area falls are event-owned receipts
+
+**Type:** Test/docs guard.
+
+**Fix:** Added a focused evaluator guard proving `srebrenica_falls_1995` and `zepa_falls_1995` write their political-controller transitions through event-owned control receipts with `mechanism: "event"`, while corps operations and operation history remain absent. This preserves the owner directive that Srebrenica and Zepa fall through sensitive-history events, not through scripted/preordered Krivaja/Stupcanica operation delivery.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests\events_evaluate.test.ts --pool=forks --reporter=dot` passed 1 file / 32 tests. Report: `docs/40_reports/implemented/20260624_SAFE_AREA_EVENT_RECEIPT_PROOF.md`.
+
+**Scope/determinism:** Test/docs guard only; no simulation logic, event JSON, scenario source data, startup snapshot, save schema, generated calibration artifact, structural fingerprint artifact, baseline manifest, golden manifest, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] fix(ui): preserve contested band and strategic position truth
 
 **Type:** UI/read-model/map-projection/test/docs polish.

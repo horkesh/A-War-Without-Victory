@@ -12,6 +12,7 @@ import type { EventDefinition, Rng } from '../src/sim/events/event_types.js';
 import { triggerMatches } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 
 /** Deterministic RNG: same seed → same sequence (Mulberry32 + string hash). */
 function createRng(seed: string | number): Rng {
@@ -43,6 +44,59 @@ function minimalState(phase: 'peace' | 'war', turn: number): GameState {
         factions: [],
         displacement: {},
     } as unknown as GameState;
+}
+
+const SAFE_AREA_FALL_EVENTS = ['srebrenica_falls_1995', 'zepa_falls_1995'] as const;
+
+const SREBRENICA_FALL_OSIDS = [
+    'op:srebrenica:srebrenica_2',
+    'op:srebrenica:donji_potocari_2',
+    'op:srebrenica:milacevici',
+    'op:srebrenica:ljeskovik_2',
+    'op:srebrenica:sulice_2',
+    'op:srebrenica:bostahovine_2',
+    'op:srebrenica:luka_2',
+    'op:srebrenica:suceska',
+    'op:srebrenica:radovcici',
+    'op:srebrenica:brezovice_2',
+];
+
+const ZEPA_FALL_OSIDS = ['op:rogatica:zepa_2'];
+
+function loadedEventById(id: string): EventDefinition {
+    const event = loadEventDefinitions(0).find((def) => def.id === id);
+    assert.ok(event, `expected loaded event ${id}`);
+    return event;
+}
+
+function seedEventReadiness(state: GameState, event: EventDefinition): void {
+    assert.ok(event.pressure, `${event.id} should be a pressure-gated event`);
+    state.military.event_readiness ??= {};
+    state.military.event_readiness[event.id] = event.pressure.threshold;
+}
+
+function expectEventOwnedControl(
+    state: GameState,
+    expectedOsids: readonly string[],
+    turn: number,
+): void {
+    for (const osid of expectedOsids) {
+        assert.strictEqual(state.political.political_controllers?.[osid], 'RS');
+    }
+
+    const controlEvents = (state.political.control_events ?? []).filter(
+        (event) => expectedOsids.includes(event.settlement_id) && event.turn === turn,
+    );
+    assert.strictEqual(controlEvents.length, expectedOsids.length);
+    assert.deepStrictEqual(
+        controlEvents.map((event) => event.settlement_id).sort(strictCompare),
+        [...expectedOsids].sort(strictCompare),
+    );
+    assert.ok(controlEvents.every((event) => event.mechanism === 'event'));
+    assert.ok(controlEvents.every((event) => event.from === 'RBiH'));
+    assert.ok(controlEvents.every((event) => event.to === 'RS'));
+    assert.ok(controlEvents.every((event) => !('operation_id' in event)));
+    assert.ok(controlEvents.every((event) => !('operation_name' in event)));
 }
 
 /** Test event definitions (inline, not from JSON files). */
@@ -348,6 +402,53 @@ test('compareEventCandidates: loaded catalog preserves current stable priority-o
     const canonicalIds = [...loaded].sort(compareEventCandidates).map((event) => event.id);
 
     assert.deepStrictEqual(canonicalIds, currentEffectiveIds);
+});
+
+test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receipts without operations', () => {
+    const srebrenica = loadedEventById('srebrenica_falls_1995');
+    const zepa = loadedEventById('zepa_falls_1995');
+    const state = minimalState('war', 160);
+    state.military.event_flags = {
+        srebrenica_enclave_formed: true,
+        srebrenica_demilitarized: true,
+    };
+    state.political.political_controllers = Object.fromEntries(
+        [...SREBRENICA_FALL_OSIDS, ...ZEPA_FALL_OSIDS].map((osid) => [osid, 'RBiH']),
+    );
+    state.political.control_events = [];
+
+    assert.strictEqual(state.military.corps_command, undefined);
+    assert.strictEqual(state.operation_history, undefined);
+
+    seedEventReadiness(state, srebrenica);
+    const srebrenicaResult = evaluateEvents(
+        state,
+        createRng('safe-area-falls'),
+        160,
+        [srebrenica, zepa],
+    );
+
+    assert.deepStrictEqual(srebrenicaResult.fired.map((event) => event.id), ['srebrenica_falls_1995']);
+    assert.ok(state.military.fired_event_ids.includes('srebrenica_falls_1995'));
+    assert.strictEqual(state.military.event_flags.srebrenica_fell, true);
+    expectEventOwnedControl(state, SREBRENICA_FALL_OSIDS, 160);
+    assert.strictEqual(state.military.corps_command, undefined);
+    assert.strictEqual(state.operation_history, undefined);
+
+    state.meta.turn = 161;
+    seedEventReadiness(state, zepa);
+    const zepaResult = evaluateEvents(
+        state,
+        createRng('safe-area-falls'),
+        161,
+        [srebrenica, zepa],
+    );
+
+    assert.deepStrictEqual(zepaResult.fired.map((event) => event.id), ['zepa_falls_1995']);
+    assert.ok(state.military.fired_event_ids.includes('zepa_falls_1995'));
+    expectEventOwnedControl(state, ZEPA_FALL_OSIDS, 161);
+    assert.strictEqual(state.military.corps_command, undefined);
+    assert.strictEqual(state.operation_history, undefined);
 });
 
 test('evaluateEvents: recurrence cooldown-blocked event is excluded before overflow accounting', () => {
