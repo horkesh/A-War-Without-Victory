@@ -161,7 +161,7 @@ describe('Army-HQ raw enum + faction-slug resolution (QA Batch F)', () => {
         // Identified-hostiles chips resolve RS/RBiH/HRHB → VRS/ARBiH/HVO.
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(f)');
         // Corps stance no longer renders the bare enum.
-        expect(sectorPanelSource).toContain('formatPosture(corpsStance)');
+        expect(sectorPanelSource).toContain('stanceLabel(corpsStance)');
         // Commander recommendation no longer renders the raw launch/postpone/abort enum.
         expect(sectorPanelSource).toContain('commanderAssessmentLabel(op.commander_assessment)');
         expect(sectorPanelSource).toContain("launch: 'Recommends launch'");

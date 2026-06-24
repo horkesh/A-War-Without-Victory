@@ -502,7 +502,7 @@ type TurnAftermathPendingDecision = {
 };
 
 function rawTurnAftermathDecisionLog(state: LoadedGameState | null): TurnAftermathDecisionLogEntry[] | null {
-  const rawLog = (state?.rawGameState as any)?.military?.event_decision_log;
+  const rawLog = state?.rawGameState?.military?.event_decision_log;
   return Array.isArray(rawLog) ? rawLog as TurnAftermathDecisionLogEntry[] : null;
 }
 
@@ -511,7 +511,7 @@ function collectTurnAftermathPendingDecisions(state: LoadedGameState | null): Tu
   if (Array.isArray(state?.pendingEventDecisions)) {
     decisions.push(...state.pendingEventDecisions);
   }
-  const rawPending = (state?.rawGameState as any)?.military?.pending_event_decisions;
+  const rawPending = state?.rawGameState?.military?.pending_event_decisions;
   if (Array.isArray(rawPending)) {
     decisions.push(...rawPending as TurnAftermathPendingDecision[]);
   }

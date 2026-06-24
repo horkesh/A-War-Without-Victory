@@ -81,7 +81,7 @@ const lineFormation = {
 
 describe('sector frontline map fills', () => {
   it('does not paint density for reserve-only sectors', () => {
-    const density = (buildDensityGeoJSON as any)(
+    const density = buildDensityGeoJSON(
       controlGeoJson,
       [makeSector({ reserve_brigade_ids: ['own_reserve'] })],
       frontEdges,

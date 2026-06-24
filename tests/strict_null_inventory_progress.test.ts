@@ -642,14 +642,20 @@ describe('strict null inventory progress', () => {
             // behavior change). No new type-escape casts (uses sorted localeCompare, the
             // 'strained'|'cracking'|'collapsing' literals, and the WarWearinessBand alias).
             // 516→517 / state 176→177.
-            optional_fields_game_state: 517,
+            // Command-anchor polish (#records-command): +1 optional field
+            // `FormationState.hq_osid` (command-only operational HQ anchor for corps/army HQ
+            // drilldowns). sim domain; display/drilldown metadata only. It does not imply
+            // tactical field presence and is absent-safe via existing location fallback, so
+            // calibration stays byte-identical when unset. 517->518 / sim 330->331. No new
+            // type-escape casts.
+            optional_fields_game_state: 518,
         });
-        expect(current.optional_field_domains.total).toBe(517);
+        expect(current.optional_field_domains.total).toBe(518);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 330,
+            sim: 331,
             state: 177,
             ui_adapter: 0,
             unknown: 0,

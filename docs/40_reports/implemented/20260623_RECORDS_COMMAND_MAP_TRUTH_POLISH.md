@@ -34,6 +34,7 @@
 ## Verification
 - Focused pack: `.\vitest.cmd run tests\ui\turn_aftermath.test.ts tests\ui\oob_operations_panel.test.ts tests\ui\formation_detail_parity.test.ts tests\ui\army_reserve_hook_order.test.ts tests\ui_map_tooltip_player_visibility.test.ts tests\ui_map_sector_frontline_fills.test.ts tests\ui\gamestore_field_inspection.test.ts tests\ui_map_interactions.test.ts --pool=forks --reporter=dot` passed 8 files / 101 tests.
 - Fix-forward blocker pack: `.\vitest.cmd run tests\ui_map_sector_frontline_fills.test.ts tests\ui\oob_operations_panel.test.ts --pool=forks --reporter=dot` passed 2 files / 16 tests.
+- CI-fast fix-forward pack: `.\vitest.cmd run tests\strict_null_inventory_progress.test.ts tests\ui_opord_player_safe_labels.test.ts tests\ui_map_sector_frontline_fills.test.ts --pool=forks --reporter=dot` passed 3 files / 101 tests after removing the new Turn Aftermath `as any` casts, updating the stale OPORD label guard, and documenting the command-anchor `FormationState.hq_osid` optional-field ratchet.
 - `npm.cmd run typecheck` passed.
 - `git diff --check` passed.
 - `npm.cmd run qa:player-journeys` passed 43 files / 542 tests.
