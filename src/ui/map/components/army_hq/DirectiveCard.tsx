@@ -302,8 +302,42 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     setReceipt(null);
   }, [directive]);
 
-  // Browser/headless: render inert (mirror FrontVisitSection).
-  if (!ipc.isAvailable) return null;
+  const tgt = targetLabel(directive, gameState, osidDisplayNames);
+
+  // Browser/headless: render the directive as read-only instead of disappearing.
+  // The player can still understand what the command card represents, while the
+  // desktop-only command controls remain unavailable.
+  if (!ipc.isAvailable) {
+    return (
+      <section
+        className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
+        aria-label={t('directive.sectionAria')}
+      >
+        <div className="px-3 py-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
+                {t('directive.issueDirective')}
+              </div>
+              <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
+                {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
+              </div>
+            </div>
+            <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-300">
+              {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
+            </span>
+          </div>
+          <div
+            role="status"
+            aria-label={t('directive.bridgeUnavailable.aria')}
+            className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[10px] text-text-secondary"
+          >
+            {t('attention.bridgeUnavailableReadOnly')}
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   const resetTransient = () => {
     setPendingObjection(null);
@@ -524,8 +558,6 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       setBusy(false);
     }
   };
-
-  const tgt = targetLabel(directive, gameState, osidDisplayNames);
 
   // §9 act-layer dossier header: a 16:9 period still chosen by the directive's
   // lever (reusing the existing consequence_stills art via the shared resolver).

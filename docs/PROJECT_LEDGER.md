@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): keep directive cards visible in browser read-only mode
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** DirectiveCard no longer returns `null` when the desktop command bridge is unavailable. Browser/dev review keeps the directive context, target caption, command-authority cost, and bridge-unavailable read-only notice visible while omitting desktop-only command buttons.
+
+**Verification:** Red/green focused proof: `node node_modules\vitest\vitest.mjs run tests\ui\directive_card_stop_op_action.test.ts --pool=forks --reporter=dot` failed before the production change because no accessible read-only status rendered, then passed 1 file / 26 tests after the fix. Expanded Decision Room proof passed 3 files / 79 tests: `node node_modules\vitest\vitest.mjs run tests\ui\directive_card_stop_op_action.test.ts tests\ui\presidential_decision_room_request_force.test.ts tests\ui\presidential_decision_room.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:live-surface:browser` passed and verified dev-server cleanup; `.tmp_live_surface_browser_sweep` was removed. Report: `docs/40_reports/implemented/20260624_DIRECTIVE_CARD_BROWSER_READONLY.md`.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint artifact, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] test(events): prove safe-area falls are event-owned receipts
 
 **Type:** Test/docs guard.

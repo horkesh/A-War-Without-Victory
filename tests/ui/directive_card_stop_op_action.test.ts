@@ -122,6 +122,16 @@ afterEach(() => {
 });
 
 describe('DirectiveCard stop-op action host', () => {
+  it('renders directive context as read-only when the desktop bridge is unavailable', () => {
+    render(React.createElement(DirectiveCard, { directive: requestOpDirective, gameState: baseGameState }));
+
+    expect(screen.getByRole('status', { name: 'Directive controls unavailable' }).textContent).toContain(
+      'Desktop command bridge unavailable. Decision controls are read-only in this browser view.',
+    );
+    expect(screen.getByText(/Direct corps to objective/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Issue (25)' })).toBeNull();
+  });
+
   it('stages a halt directive and shows a next-turn receipt', async () => {
     const { stageOpHaltOrder } = installIpc();
 

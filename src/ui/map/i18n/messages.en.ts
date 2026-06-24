@@ -4724,6 +4724,7 @@ export const enMessages = {
     'directive.issueDirective': 'Issue directive',
     'directive.costFree': 'Free',
     'directive.costAuthority': '{cost} authority',
+    'directive.bridgeUnavailable.aria': 'Directive controls unavailable',
     'directive.cannotIssue.aria': 'Directive cannot be issued',
     'directive.cannotIssue.heading': 'Cannot issue',
     'directive.cannotIssue.body': 'This corps cannot mount that operation — {reason}. No command authority was spent.',

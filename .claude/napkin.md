@@ -10,6 +10,8 @@
 
 **SREBRENICA/ZEPA FALL RECEIPTS ARE EVENT-OWNED (2026-06-24).** Krivaja/Stupcanica operations are chronology/prose/AAR context, not the fall mechanism. Do instead: guard `srebrenica_falls_1995` and `zepa_falls_1995` through `evaluateEvents` as `mechanism: "event"` political-control receipts; do not tune scripted operations to deliver the fall.
 
+**DIRECTIVE CARDS STAY VISIBLE WITHOUT IPC (2026-06-24).** Browser/dev review cannot stage Electron-owned directives, but hiding the card loses player context. Do instead: render DirectiveCard lever/target/cost read-only with bridge-unavailable copy and no active issue controls.
+
 **ARMY HQ GRADES REQUIRE GRADE-CRITICAL FIELDS (2026-06-24).** Missing personnel, fatigue, cohesion, morale, or officer-quality must not produce favorable readiness/effectiveness grades. Do instead: flag the affected corps/aggregate as incomplete/unreported while keeping numeric estimates only as context.
 
 **MODAL-REQUIRED BLOCKERS ARE REQUIRED EVEN IF CARD SEVERITY IS NORMAL (2026-06-24).** Convoy, peace, and Dayton decisions can block advance without `severity: blocking`. Do instead: derive Desk required counts and pre-advance fallback blocker status from `derivePresidentialBlockers(...)`, not `InboxItem.severity` alone.

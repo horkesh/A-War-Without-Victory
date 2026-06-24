@@ -1,3 +1,7 @@
+## 2026-06-24 - Directive Card browser bridge boundary
+
+**Directive cards should stay visible when desktop commands are unavailable:** browser/dev mode can inspect player decisions but cannot stage Electron-owned directives. Durable rule: render DirectiveCard context read-only with bridge-unavailable copy, and omit/disable command buttons rather than hiding the card or exposing dead controls. Applied in `[2026-06-24] fix(ui): keep directive cards visible in browser read-only mode`; report `docs/40_reports/implemented/20260624_DIRECTIVE_CARD_BROWSER_READONLY.md`.
+
 ## 2026-06-24 - Safe-area fall receipt ownership
 
 **Srebrenica and Zepa fall receipts are event-owned, not operation-delivered:** Krivaja/Stupcanica operation context is chronology/prose/AAR context, not the mechanism that flips the safe-area controller. Durable rule: guard `srebrenica_falls_1995` and `zepa_falls_1995` through `evaluateEvents` as event-owned `mechanism: "event"` political-control receipts, without requiring corps operations or operation history. Applied in `[2026-06-24] test(events): prove safe-area falls are event-owned receipts`; report `docs/40_reports/implemented/20260624_SAFE_AREA_EVENT_RECEIPT_PROOF.md`.

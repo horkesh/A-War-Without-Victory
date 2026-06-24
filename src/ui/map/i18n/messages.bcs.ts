@@ -4790,6 +4790,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'directive.issueDirective': 'Izdaj direktivu',
     'directive.costFree': 'Besplatno',
     'directive.costAuthority': '{cost} vlasti',
+    'directive.bridgeUnavailable.aria': 'Kontrole direktive nisu dostupne',
     'directive.cannotIssue.aria': 'Direktiva se ne može izdati',
     'directive.cannotIssue.heading': 'Nije moguće izdati',
     'directive.cannotIssue.body': 'Ovaj korpus ne može izvesti tu operaciju — {reason}. Nije potrošena komandna vlast.',
