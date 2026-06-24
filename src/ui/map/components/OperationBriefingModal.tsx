@@ -28,7 +28,18 @@ interface OperationBriefingModalProps {
     commandBridgeAvailable?: boolean;
 }
 
-function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number; thresholdLabel?: string }) {
+function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: number | null | undefined; thresholdLabel?: string }) {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return (
+            <div className="mb-2">
+                <div className="flex justify-between text-[9px] mb-0.5">
+                    <span className="uppercase font-bold text-neutral-600">{label}</span>
+                    <span className="text-neutral-500 italic">{t('operationsSection.metricUnreported')}</span>
+                </div>
+                <div className="h-2 bg-panel-border rounded-sm overflow-hidden opacity-50" />
+            </div>
+        );
+    }
     const pct = Math.round(Math.max(0, Math.min(1, value)) * 100);
     const color = pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
     return (
@@ -366,8 +377,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
     if (!context || !operation) return null;
 
-    const intelConf = operation.intel_confidence_at_assessment ?? operation.readiness?.intel ?? 0;
-    const supplyReady = operation.supply_readiness_at_assessment ?? operation.readiness?.supply ?? 0;
+    const reportedIntelConf = operation.intel_confidence_at_assessment ?? operation.readiness?.intel;
+    const reportedSupplyReady = operation.supply_readiness_at_assessment ?? operation.readiness?.supply;
+    const intelConf = reportedIntelConf ?? 0;
+    const supplyReady = reportedSupplyReady ?? 0;
     const forceRatio = operation.force_ratio_estimate;
     const forceBalance = forceRatio != null ? getPlayerSafeOperationBalancePresentation(forceRatio) : null;
     const assessment = operation.commander_assessment;
@@ -460,11 +473,9 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Readiness gauges */}
                 <div className="px-4 py-3 space-y-1">
-                    <ReadinessBar label={t('operationBriefing.intelligence')} value={intelConf} />
-                    <ReadinessBar label={t('operationBriefing.supply')} value={supplyReady} />
-                    {operation.readiness?.cohesion != null && (
-                        <ReadinessBar label={t('operationBriefing.forceCohesion')} value={operation.readiness.cohesion} />
-                    )}
+                    <ReadinessBar label={t('operationBriefing.intelligence')} value={reportedIntelConf} />
+                    <ReadinessBar label={t('operationBriefing.supply')} value={reportedSupplyReady} />
+                    <ReadinessBar label={t('operationBriefing.forceCohesion')} value={operation.readiness?.cohesion} />
 
                     {forceBalance && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-panel-border">

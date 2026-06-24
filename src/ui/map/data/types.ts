@@ -953,14 +953,16 @@ export interface OperationView {
     phase_started_turn?: number;
     participating_brigade_count: number;
     participating_brigade_ids?: string[];
+    stale_participating_brigade_count?: number;
+    stale_participating_brigade_ids?: string[];
     started_turn: number;
     supply_readiness?: number;
     avg_cohesion?: number;
     avg_personnel_pct?: number;
     readiness?: {
-        supply: number;
-        cohesion: number;
-        intel: number;
+        supply?: number;
+        cohesion?: number;
+        intel?: number;
     };
     min_attack_outcome?: 'decisive_victory' | 'victory' | 'costly_victory' | 'stalemate' | 'repulsed';
     tempo?: 'methodical' | 'standard' | 'all_out';

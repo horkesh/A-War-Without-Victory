@@ -34,6 +34,8 @@
 
 **MISSING LOGISTICS/OPSEC TRUTH IS UNREPORTED (2026-06-23).** Corps Front command controls may stage a new logistics or OPSEC order, but absent read-model fields are not proof of neutral priority or inactive security. Do instead: render absent `logistics_priority` / `opsec_active` as unreported; preserve explicit `1.0` / `false` as neutral/inactive.
 
+**PARTIAL OPERATION READINESS AND PARTICIPANTS MUST STAY HONEST (2026-06-24).** `supply`, `cohesion`, and `intel` readiness dimensions report independently, and raw operation participant ids can go stale. Do instead: preserve missing readiness dimensions as unreported, count/click only resolved formation ids, and display unresolved raw participant ids as stale records.
+
 **STATIONED UNITS ARE PHYSICAL PRESENCE, NOT AOR COVERAGE (2026-06-23).** Settlement unit lists answer "what is physically here." Do instead: use `getFormationsAtOsid(...)` for fielded formations whose `location_osid` equals the settlement; use `getFormationsCoveringOsid(...)` only when a surface explicitly asks for coverage/AoR support.
 
 **SECTOR UI MUST NOT INVENT FAVORABLE STANCE OR ASSIGNMENT TRUTH (2026-06-23).** Missing sector stance/source is unreported, and saved sector rosters can be stale after overrides. Do instead: keep absent `sector_stance` / `stance_source` undefined in the adapter, and derive entrenchment/coverage summaries from `buildSectorFormationAssignment(...)` plus the shared fielded tactical boundary.

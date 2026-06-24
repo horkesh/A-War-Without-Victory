@@ -45,6 +45,16 @@ function getOperationHealthSummary(operation: OperationView): { label: string; c
   return { label: t('operationsPanel.health.stable'), className: 'text-green-300' };
 }
 
+function formatReadinessValue(value: number | null | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${Math.round(value * 100)}%`
+    : t('operationsPanel.na');
+}
+
+function isReportedReadinessValue(value: number | null | undefined): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
 function getOperationOutcomeThresholdLabel(outcome: string): string {
   switch (outcome) {
     case 'decisive_victory':
@@ -589,14 +599,16 @@ export function OperationsPanel() {
                           [t('operationsPanel.supply'), readiness.supply],
                           [t('operationsPanel.cohesion'), readiness.cohesion],
                           [t('operationsPanel.intel'), readiness.intel],
-                        ] as Array<[string, number]>).map(([label, value]) => (
+                        ] as Array<[string, number | undefined]>).map(([label, value]) => (
                           <div key={label} className="space-y-0.5">
                             <div className="flex items-center justify-between text-[10px]">
                               <span className="text-text-secondary">{label}</span>
-                              <span className="text-text-primary tabular-nums">{Math.round(value * 100)}%</span>
+                              <span className={`tabular-nums ${isReportedReadinessValue(value) ? 'text-text-primary' : 'text-text-secondary italic'}`}>{formatReadinessValue(value)}</span>
                             </div>
                             <div className="h-1.5 rounded bg-panel-bg overflow-hidden">
-                              <div className={`h-full ${readinessTone(value)}`} style={{ width: `${Math.round(value * 100)}%` }} />
+                              {isReportedReadinessValue(value) && (
+                                <div className={`h-full ${readinessTone(value)}`} style={{ width: `${Math.round(value * 100)}%` }} />
+                              )}
                             </div>
                           </div>
                         ))}

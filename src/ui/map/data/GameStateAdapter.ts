@@ -1188,9 +1188,17 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     ? (op.participating_brigades as string[]).filter((id): id is string => typeof id === 'string').sort(strictCompare)
                     : undefined;
                 const participatingSet = participatingBrigadeIds ? new Set(participatingBrigadeIds) : null;
-                const participatingFormations = participatingSet
+                const rawParticipatingFormations = participatingSet
                     ? formations.filter((f) => participatingSet.has(f.id))
                     : [];
+                const resolvedParticipatingIds = rawParticipatingFormations.map((f) => f.id).sort(strictCompare);
+                const resolvedParticipatingSet = new Set(resolvedParticipatingIds);
+                const staleParticipatingIds = participatingBrigadeIds
+                    ? participatingBrigadeIds.filter((id) => !resolvedParticipatingSet.has(id)).sort(strictCompare)
+                    : [];
+                const participatingFormations = rawParticipatingFormations
+                    .slice()
+                    .sort((a, b) => strictCompare(a.id, b.id));
                 const avgCohesion = participatingFormations.length > 0
                     ? participatingFormations.reduce((sum, formation) => sum + finiteNumber(formation.cohesion, 0), 0) / participatingFormations.length
                     : undefined;
@@ -1234,17 +1242,19 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     failure_count: typeof op.failure_count === 'number' ? op.failure_count : undefined,
                     consecutive_failures_on_current: typeof op.consecutive_failures_on_current === 'number' ? op.consecutive_failures_on_current : undefined,
                     phase_started_turn: typeof op.phase_started_turn === 'number' ? op.phase_started_turn : undefined,
-                    participating_brigade_count: participatingBrigadeIds?.length ?? 0,
-                    participating_brigade_ids: participatingBrigadeIds,
+                    participating_brigade_count: resolvedParticipatingIds.length,
+                    participating_brigade_ids: resolvedParticipatingIds.length > 0 ? resolvedParticipatingIds : undefined,
+                    stale_participating_brigade_count: staleParticipatingIds.length > 0 ? staleParticipatingIds.length : undefined,
+                    stale_participating_brigade_ids: staleParticipatingIds.length > 0 ? staleParticipatingIds : undefined,
                     started_turn: typeof op.started_turn === 'number' ? op.started_turn : turn,
                     supply_readiness: supplyReadiness,
                     avg_cohesion: avgCohesion,
                     avg_personnel_pct: avgPersonnelPct,
                     readiness: supplyReadiness != null || avgCohesion != null || intelReadiness != null
                         ? {
-                            supply: supplyReadiness ?? 0,
-                            cohesion: avgCohesion != null ? Math.max(0, Math.min(1, avgCohesion / 100)) : 0,
-                            intel: intelReadiness ?? 0,
+                            ...(supplyReadiness != null ? { supply: supplyReadiness } : {}),
+                            ...(avgCohesion != null ? { cohesion: Math.max(0, Math.min(1, avgCohesion / 100)) } : {}),
+                            ...(intelReadiness != null ? { intel: intelReadiness } : {}),
                         }
                         : undefined,
                     min_attack_outcome: typeof op.min_attack_outcome === 'string' ? op.min_attack_outcome as OperationView['min_attack_outcome'] : undefined,

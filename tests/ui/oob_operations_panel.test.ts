@@ -8,6 +8,7 @@ import { OperationsPanel } from '../../src/ui/map/components/OperationsPanel.js'
 import { OperationBriefingModal } from '../../src/ui/map/components/OperationBriefingModal.js';
 import { OperationsSection } from '../../src/ui/map/components/army_hq/OperationsSection.js';
 import { OOBSidebar } from '../../src/ui/map/components/OOBSidebar.js';
+import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState, NamedOfficerView, OperationView } from '../../src/ui/map/data/types.js';
 
@@ -343,6 +344,100 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).toContain('Unreported');
     expect(container.textContent).not.toContain('NaN');
     expect(container.textContent).not.toContain(' 0 ');
+  });
+
+  it('preserves partial operation readiness and marks stale participants in the adapter', () => {
+    const loaded = parseGameState({
+      meta: {
+        turn: 8,
+        phase: 'war',
+        player_faction: 'RBiH',
+      },
+      political: {
+        political_controllers: {},
+        initial_political_controllers: {},
+      },
+      military: {
+        formations: {
+          [CORPS_ID]: {
+            id: CORPS_ID,
+            faction: 'RBiH',
+            name: '3rd Corps',
+            kind: 'corps',
+            readiness: 'ready',
+            status: 'active',
+          },
+          arbih_brigade: {
+            id: 'arbih_brigade',
+            faction: 'RBiH',
+            name: '1st Brigade',
+            kind: 'brigade',
+            readiness: 'ready',
+            status: 'active',
+            corps_id: CORPS_ID,
+            personnel: 1200,
+            cohesion: 70,
+          },
+        },
+        corps_command: {
+          [CORPS_ID]: {
+            active_operations: [
+              {
+                name: RAW_OP_NAME,
+                type: 'sector_attack',
+                phase: 'planning',
+                participating_brigades: ['arbih_brigade', 'stale_missing_brigade'],
+                supply_readiness: 0.62,
+                started_turn: 4,
+              },
+            ],
+          },
+        },
+        sector_intel: {},
+      },
+    });
+
+    expect(loaded.operations?.[0]).toEqual(expect.objectContaining({
+      participating_brigade_count: 1,
+      participating_brigade_ids: ['arbih_brigade'],
+      stale_participating_brigade_count: 1,
+      stale_participating_brigade_ids: ['stale_missing_brigade'],
+      readiness: {
+        supply: 0.62,
+        cohesion: 0.7,
+      },
+    }));
+    expect(loaded.operations?.[0].readiness).not.toHaveProperty('intel');
+  });
+
+  it('renders partial readiness as unreported dimensions instead of red zeroes', () => {
+    const sparseState = {
+      ...loadedState(),
+      operations: [{
+        ...operation(),
+        phase: 'planning',
+        readiness: {
+          supply: 0.62,
+          cohesion: 0.7,
+        },
+        stale_participating_brigade_count: 1,
+        stale_participating_brigade_ids: ['stale_missing_brigade'],
+      }],
+    } as unknown as LoadedGameState;
+
+    const { container } = render(createElement(OperationsSection, {
+      corpsId: CORPS_ID,
+      operations: sparseState.operations ?? [],
+      gameState: sparseState,
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Breakthrough/i }));
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('1 stale unit record');
+    expect(container.textContent).toMatch(/UNITS:\s*1/i);
+    expect(container.textContent).not.toContain('Intel0%');
   });
 
   it('renders player-safe operation display names without the raw operation slug on OOB cards', () => {

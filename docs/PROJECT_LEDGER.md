@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): preserve operation readiness and displacement truth
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** AAR displacement breakdown rows now render civilian displacement groups through the shared player-safe displacement helper instead of using military faction labels. The operation adapter now preserves partial readiness dimensions rather than filling missing supply/cohesion/intel with `0`, and resolved operation participant ids are separated from stale raw participant ids so stale records do not inflate active/clickable brigade counts. Army HQ Operations, Operations Panel, and Operation Briefing render missing readiness dimensions as unreported rather than red zero bars, and Army HQ Operations surfaces stale participant record counts explicitly.
+
+**Verification:** Focused proof passed 2 files / 29 tests, expanded command-surface proof passed 5 files / 73 tests, and the repaired OPORD player-safe guard passed 7/7: `node node_modules\vitest\vitest.mjs run tests\ui_opord_player_safe_labels.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 554 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. `git diff --check` passed. Temporary browser evidence folders were removed; `.tmp_dev_server` remains as the active dev-server workspace. Report: `docs/40_reports/implemented/20260624_PLAYER_TRUTH_READINESS_DISPLACEMENT.md`.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-23] fix(ui): harden Records, command, and map truth polish
 
 **Type:** UI/read-model/map-projection/test/docs polish.

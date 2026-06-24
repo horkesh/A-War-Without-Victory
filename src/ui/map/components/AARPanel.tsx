@@ -10,6 +10,7 @@ import { formatTurnLabel, toTitleCase } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import {
     getPlayerSafeBrigadeName,
+    getPlayerSafeDisplacementGroupLabel,
     getPlayerSafeFormationNarrativeArcLabel,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText';
@@ -124,6 +125,17 @@ function FactionTag({ faction }: { faction: string }) {
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
             {getPlayerSafeMilitaryFactionName(faction)}
+        </span>
+    );
+}
+
+function DisplacementGroupTag({ group }: { group: string }) {
+    return (
+        <span
+            className="text-[9px] font-mono px-1 rounded border"
+            style={{ color: FACTION_COLOR[group] ?? '#aaa', borderColor: `${FACTION_COLOR[group] ?? '#555'}44` }}
+        >
+            {getPlayerSafeDisplacementGroupLabel(group)}
         </span>
     );
 }
@@ -497,7 +509,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
                                             .sort(([a], [b]) => a.localeCompare(b))
                                             .map(([eth, count]) => (
                                                 <div key={eth} className="flex justify-between">
-                                                    <FactionTag faction={eth} />
+                                                    <DisplacementGroupTag group={eth} />
                                                     <span className="tabular-nums text-text-secondary">{count?.toLocaleString()}</span>
                                                 </div>
                                             ))

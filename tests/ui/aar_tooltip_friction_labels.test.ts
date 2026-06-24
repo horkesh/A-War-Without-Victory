@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, act } from '@testing-library/react';
+import { cleanup, render, screen, act, fireEvent } from '@testing-library/react';
 import { createElement } from 'react';
 
 import { AARPanel } from '../../src/ui/map/components/AARPanel.js';
@@ -160,6 +160,34 @@ describe('AAR and tooltip friction labels', () => {
     expect(container.textContent).toContain('Notable development');
     expect(container.textContent).toContain('Staff logged a rear-area security probe.');
     expect(container.textContent).not.toMatch(/rear_security_probe/);
+  });
+
+  it('labels AAR displacement groups as civilians instead of military forces', () => {
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: {
+          ...makeSummary(),
+          displacement_total: 1300,
+          displacement_by_ethnicity: {
+            RBiH: 1000,
+            RS: 250,
+            HRHB: 50,
+          },
+        },
+      },
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+    });
+
+    const { container } = render(createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Displacement/i }));
+
+    expect(container.textContent).toContain('Bosniaks');
+    expect(container.textContent).toContain('Serbs');
+    expect(container.textContent).toContain('Croats');
+    const displacementText = container.textContent?.split('Displacement')[1] ?? '';
+    expect(displacementText).not.toMatch(/ARBiH|VRS|HVO/);
   });
 
   it('routes embedded AAR formation links through field inspection with battle context', () => {

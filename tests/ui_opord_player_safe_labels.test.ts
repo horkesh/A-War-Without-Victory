@@ -128,8 +128,12 @@ describe('buildOpordDisplayModel', () => {
         expect(authorizeSource).not.toContain('loadedGameState.operations ?? []).find');
         expect(commanderSelectionSource).toContain('findPlayerFacingOperationByKey');
         expect(commanderSelectionSource).not.toContain('operations?.find((o) => o.corps_id === context.corpsId && o.name === context.operationName)');
-        expect(briefingSource).toContain('finiteCommanderRating(commander?.aggressiveness, 3)');
-        expect(briefingSource).toContain('finiteCommanderRating(commander?.competence, 3)');
+        expect(briefingSource).toContain(
+            "finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.aggressiveness : undefined, 3)",
+        );
+        expect(briefingSource).toContain(
+            "finiteCommanderRating(commanderDisplay?.kind === 'assigned' ? commanderDisplay.officer.competence : undefined, 3)",
+        );
         expect(briefingSource).not.toContain('commander?.competence ??');
         expect(commanderSelectionSource).toContain('sortableOfficerRating(b.officer.competence) - sortableOfficerRating(a.officer.competence)');
         expect(commanderSelectionSource).toContain('getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness))');
@@ -137,8 +141,8 @@ describe('buildOpordDisplayModel', () => {
         expect(commanderPhaseSource).toContain('getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness))');
         expect(officerUtilsSource).toContain('Number.isFinite(a.competence) ? a.competence : -1');
         expect(operationsSectionSource).toContain("return 'Profile unreported'");
-        expect(operationsSectionSource).toContain('formatOfficerRating(cmdOfficer.competence)');
-        expect(operationsSectionSource).not.toContain('(cmdOfficer.competence * 100).toFixed(0)');
+        expect(operationsSectionSource).toContain('formatOfficerRating(commanderDisplay.officer.competence)');
+        expect(operationsSectionSource).not.toContain('(commanderDisplay.officer.competence * 100).toFixed(0)');
         expect(personnelContentSource).toContain("const displayValue = reported ? value.toFixed(1) : t('corpsFront.unreported')");
     });
 });

@@ -182,7 +182,16 @@ function formatWeeklyNotableEvent(event: string): string {
     return isUnsafeRawLabel(event) ? t('operationHistory.weekly.notableFallback') : safeFallbackLabel(event, t('operationHistory.weekly.notableFallback'));
 }
 
-function ReadinessBar({ label, value }: { label: string; value: number }) {
+function ReadinessBar({ label, value }: { label: string; value: number | null | undefined }) {
+    if (!isReportedNumber(value)) {
+        return (
+            <div className="flex items-center gap-3 font-mono">
+                <span className="text-text-secondary/60 w-24 shrink-0 text-[9px] uppercase tracking-tighter">{label}</span>
+                <div className="flex-1 h-1 bg-panel-card border border-panel-border/50 opacity-50" />
+                <span className="text-[10px] tabular-nums w-20 text-right italic text-text-secondary/60">{t('operationsSection.metricUnreported')}</span>
+            </div>
+        );
+    }
     const pct = Math.round(Math.max(0, Math.min(100, value * 100)));
     const colorClass = pct >= 70 ? 'bg-emerald-400' : pct >= 40 ? 'bg-accent-gold' : 'bg-red-500';
     const textClass = pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-accent-gold' : 'text-red-500';
@@ -196,6 +205,22 @@ function ReadinessBar({ label, value }: { label: string; value: number }) {
             <span className={`text-[10px] tabular-nums w-8 text-right font-bold ${textClass}`}>{pct}%</span>
         </div>
     );
+}
+
+function readinessValues(readiness: OperationView['readiness']): number[] {
+    if (!readiness) return [];
+    return [readiness.supply, readiness.cohesion, readiness.intel].filter(isReportedNumber);
+}
+
+function formatReadinessTitle(readiness: OperationView['readiness']): string {
+    const format = (value: number | null | undefined) => (
+        isReportedNumber(value) ? `${Math.round(value * 100)}%` : t('operationsSection.metricUnreported')
+    );
+    return t('operationsSection.readinessTitle', {
+        supply: format(readiness?.supply),
+        cohesion: format(readiness?.cohesion),
+        intel: format(readiness?.intel),
+    });
 }
 
 function StarRating({ stars, verdict }: { stars: number; verdict: string }) {
@@ -565,6 +590,16 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                     </div>
                 </div>
             )}
+            {(op.stale_participating_brigade_count ?? 0) > 0 && (
+                <div className="text-[10px] text-amber-300/80 italic">
+                    {t(
+                        op.stale_participating_brigade_count === 1
+                            ? 'operationsSection.staleParticipant.one'
+                            : 'operationsSection.staleParticipant.many',
+                        { count: op.stale_participating_brigade_count ?? 0 },
+                    )}
+                </div>
+            )}
 
             {/* Execution stats */}
             {op.phase === 'execution' && (
@@ -699,16 +734,14 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                             </span>
                                             {op.readiness && (
                                                 <span className={`inline-block w-2 h-2 rounded-full ${
-                                                    Math.min(op.readiness.supply, op.readiness.cohesion, op.readiness.intel) < 0.4
+                                                    readinessValues(op.readiness).length === 0
+                                                        ? 'bg-text-secondary/50'
+                                                        : Math.min(...readinessValues(op.readiness)) < 0.4
                                                         ? 'bg-red-500'
-                                                        : Math.min(op.readiness.supply, op.readiness.cohesion, op.readiness.intel) < 0.7
+                                                        : Math.min(...readinessValues(op.readiness)) < 0.7
                                                             ? 'bg-amber-400'
                                                             : 'bg-emerald-400'
-                                                }`} title={t('operationsSection.readinessTitle', {
-                                                    supply: Math.round(op.readiness.supply * 100),
-                                                    cohesion: Math.round(op.readiness.cohesion * 100),
-                                                    intel: Math.round(op.readiness.intel * 100),
-                                                })} />
+                                                }`} title={formatReadinessTitle(op.readiness)} />
                                             )}
                                             <span className="text-[14px] font-bold text-text-primary uppercase font-mono tracking-wider"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
