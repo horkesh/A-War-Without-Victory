@@ -199,7 +199,6 @@ export function OrbatPanel() {
                         : t('orbat.noActiveSectors')
                     }
                 </span>
-                <span className="text-[9px] font-mono text-accent-gold/50 uppercase">{t('orbat.version')}</span>
             </div>
         </div>
     );

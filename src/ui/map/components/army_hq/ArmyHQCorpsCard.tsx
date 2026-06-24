@@ -76,6 +76,16 @@ function operationalEquipmentCount(total: number | undefined, operational: numbe
     return Math.min(count, Math.max(0, Math.round(operationalCount)));
 }
 
+function averageReported(values: ReadonlyArray<number | undefined | null>): number | null {
+    const reported = values.filter((value): value is number => Number.isFinite(value));
+    if (reported.length === 0) return null;
+    return reported.reduce((sum, value) => sum + value, 0) / reported.length;
+}
+
+function roundConditionLabel(value: number | null): string {
+    return value == null ? t('corpsFront.unreported') : String(Math.round(value));
+}
+
 export function ArmyHQCorpsCard({
     corps, brigades, sectors, operations, factionBattles, gameState,
     isExpanded, isCompressed, onToggleExpand,
@@ -83,12 +93,8 @@ export function ArmyHQCorpsCard({
 }: ArmyHQCorpsCardProps) {
     const data = useMemo(() => {
         const totalPersonnel = brigades.reduce((sum, f) => sum + (f.personnel ?? 0), 0);
-        const avgCohesion = brigades.length > 0
-            ? brigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / brigades.length
-            : 100;
-        const avgFatigue = brigades.length > 0
-            ? brigades.reduce((s, b) => s + (b.fatigue ?? 0), 0) / brigades.length
-            : 0;
+        const avgCohesion = averageReported(brigades.map(b => b.cohesion));
+        const avgFatigue = averageReported(brigades.map(b => b.fatigue));
         const eff = aggregateEffectiveness(brigades);
         const commander = getFormationCommander(corps, gameState);
         const commanderDisplay = resolveCorpsCommanderDisplay(corps.id, corps.faction, gameState);
@@ -147,7 +153,7 @@ export function ArmyHQCorpsCard({
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
-    const isCritical = data.avgCohesion < COHESION_CRITICAL;
+    const isCritical = data.avgCohesion != null && data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commanderDisplay;
     const displayCommanderName = data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.unreported;
@@ -177,8 +183,10 @@ export function ArmyHQCorpsCard({
                 </div>
                 {/* Thin cohesion bar */}
                 <div className="h-[1px] bg-white/5">
-                    <div className={`h-full ${data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400/60' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold/60' : 'bg-red-500/60'}`}
-                        style={{ width: `${Math.min(100, data.avgCohesion)}%` }} />
+                    <div
+                        className={`h-full ${data.avgCohesion == null ? 'bg-panel-border/40' : data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400/60' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold/60' : 'bg-red-500/60'}`}
+                        style={{ width: `${data.avgCohesion == null ? 100 : Math.min(100, data.avgCohesion)}%` }}
+                    />
                 </div>
             </button>
         );
@@ -254,8 +262,8 @@ export function ArmyHQCorpsCard({
                 {readinessGrade && (
                     <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary/80 font-mono">
                         {t('armyHqCorps.readinessVitals', {
-                            fatigue: Math.round(data.avgFatigue),
-                            cohesion: Math.round(data.avgCohesion),
+                            fatigue: roundConditionLabel(data.avgFatigue),
+                            cohesion: roundConditionLabel(data.avgCohesion),
                         })}
                     </div>
                 )}
@@ -360,11 +368,11 @@ export function ArmyHQCorpsCard({
 
             {/* Health stripe: cohesion (green/amber/red) + fatigue (blue) */}
             <div className="flex h-[4px] bg-panel-bg w-full">
-                <div className={`h-full transition-all duration-500 ${data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
+                <div className={`h-full transition-all duration-500 ${data.avgCohesion == null ? 'bg-panel-border/40' : data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
                     }`}
-                    style={{ width: `${Math.min(70, data.avgCohesion * 0.7)}%` }} />
+                    style={{ width: `${data.avgCohesion == null ? 70 : Math.min(70, data.avgCohesion * 0.7)}%` }} />
                 <div className="h-full bg-blue-500/60 transition-all duration-500"
-                    style={{ width: `${Math.min(30, ((data.avgFatigue ?? 0) / 30) * 30)}%` }} />
+                    style={{ width: `${data.avgFatigue == null ? 0 : Math.min(30, (data.avgFatigue / 30) * 30)}%` }} />
             </div>
         </button>
     );

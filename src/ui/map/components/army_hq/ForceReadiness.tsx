@@ -29,8 +29,8 @@ export interface CorpsReadiness {
     grade: ReadinessGrade;
     ineffectiveCount: number;
     totalBrigades: number;
-    avgFatigue: number;
-    avgCohesion: number;
+    avgFatigue: number | null;
+    avgCohesion: number | null;
     disruptedCount: number;
     overextendedCount: number;  // brigades far from home
     activeOpName?: string;
@@ -44,6 +44,12 @@ export interface CorpsReadiness {
 
 const PERSONNEL_INEFFECTIVE = 400;
 const FATIGUE_MAX = 30;
+
+function averageReported(values: ReadonlyArray<number | undefined | null>): number | null {
+    const reported = values.filter((value): value is number => Number.isFinite(value));
+    if (reported.length === 0) return null;
+    return reported.reduce((sum, value) => sum + value, 0) / reported.length;
+}
 
 export function computeReadinessGrade(
     ineffPct: number,
@@ -109,8 +115,8 @@ export function generateForceReadiness(
 
         const ineffectiveCount = corpsBrigades.filter(b => (b.personnel ?? 0) < PERSONNEL_INEFFECTIVE).length;
         const ineffPct = ineffectiveCount / corpsBrigades.length;
-        const avgFatigue = corpsBrigades.reduce((s, b) => s + (b.fatigue ?? 0), 0) / corpsBrigades.length;
-        const avgCohesion = corpsBrigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / corpsBrigades.length;
+        const avgFatigue = averageReported(corpsBrigades.map(b => b.fatigue));
+        const avgCohesion = averageReported(corpsBrigades.map(b => b.cohesion));
         const disruptedCount = corpsBrigades.filter(b => (b.disrupted_turns ?? 0) > 0).length;
         const overextendedCount = corpsBrigades.filter(b => (b.homeHops ?? 0) >= 7).length;
 
@@ -119,7 +125,7 @@ export function generateForceReadiness(
         );
         const hasThreat = threatCorpsIds.has(corps.id);
 
-        const grade = computeReadinessGrade(ineffPct, avgFatigue, avgCohesion, disruptedCount);
+        const grade = computeReadinessGrade(ineffPct, avgFatigue ?? 0, avgCohesion ?? 100, disruptedCount);
         const recommendationId = getRecommendationId(grade, hasThreat, !!activeOp);
 
         result.push({
@@ -128,8 +134,8 @@ export function generateForceReadiness(
             grade,
             ineffectiveCount,
             totalBrigades: corpsBrigades.length,
-            avgFatigue: Math.round(avgFatigue * 10) / 10,
-            avgCohesion: Math.round(avgCohesion),
+            avgFatigue: avgFatigue == null ? null : Math.round(avgFatigue * 10) / 10,
+            avgCohesion: avgCohesion == null ? null : Math.round(avgCohesion),
             disruptedCount,
             overextendedCount,
             activeOpName: activeOp?.name,
@@ -201,6 +207,11 @@ function recommendationLabel(item: CorpsReadiness): string {
     return t('forceReadiness.recommendation.recorded', { recommendation: item.recommendation });
 }
 
+function fatigueLabel(item: CorpsReadiness): string {
+    if (item.avgFatigue == null) return t('forceReadiness.fatigueUnreported');
+    return t('forceReadiness.fatigue', { value: item.avgFatigue, max: FATIGUE_MAX });
+}
+
 interface ForceReadinessProps {
     items: CorpsReadiness[];
     onCorpsClick?: (corpsId: string) => void;
@@ -237,7 +248,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                 {item.ineffectiveCount > 0 && (
                                     <span>{t('forceReadiness.ineffectiveCount', { count: item.ineffectiveCount })}</span>
                                 )}
-                                <span>{t('forceReadiness.fatigue', { value: item.avgFatigue, max: FATIGUE_MAX })}</span>
+                                <span>{fatigueLabel(item)}</span>
                                 {item.disruptedCount > 0 && (
                                     <span>{t('forceReadiness.disruptedCount', { count: item.disruptedCount })}</span>
                                 )}

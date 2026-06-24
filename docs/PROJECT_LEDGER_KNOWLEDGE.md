@@ -1,3 +1,11 @@
+## 2026-06-24 - Player surface blocker, ORBAT, and supply truth
+
+**Modal-required blockers are required even when visual severity is not `blocking`:** convoy, peace, and Dayton decisions can block advance while carrying non-blocking visual severity for card prioritization. Durable rule: Desk required counts and pre-advance fallback status/counts should derive from `derivePresidentialBlockers(...)`, not from `InboxItem.severity` alone. Applied in `[2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth`; report `docs/40_reports/implemented/20260624_PLAYER_SURFACE_POLISH_WAVE.md`.
+
+**Primary supply fill should prefer local OSID truth:** faction reserve/condition summaries are strategic fallbacks, not substitutes for explicit local supply state. Durable rule: when `supplyStateByOsid[osid]` exists, primary supply-map polygon fill uses that class before faction reserves, faction conditions, or legacy pressure. Applied in `[2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth`; report `docs/40_reports/implemented/20260624_PLAYER_SURFACE_POLISH_WAVE.md`.
+
+**Army HQ ORBAT sparse brigade fields are unreported, not zero or active:** missing personnel, morale, cohesion, fatigue, entrenchment, status, and posture are source gaps. Durable rule: compact and expanded ORBAT rows render missing values as neutral unreported presentation and never default unknown lifecycle/status to active-green. Applied in `[2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth`; report `docs/40_reports/implemented/20260624_PLAYER_SURFACE_POLISH_WAVE.md`.
+
 ## 2026-06-24 - Operation history, Decision Room, and sector truth polish
 
 **Missing AAR grades are unreported, not poor results:** completed-operation records can legitimately lack `grade` data. Durable rule: preserve absent AAR grade fields through the adapter and render `Grade unreported`; do not synthesize one-star `Unknown` results or grade-factor rows. Applied in `[2026-06-24] fix(ui): harden operation history, decision, and sector truth`; report `docs/40_reports/implemented/20260624_OPERATION_HISTORY_DECISION_SECTOR_POLISH.md`.

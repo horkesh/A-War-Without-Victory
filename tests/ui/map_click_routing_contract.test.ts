@@ -193,7 +193,9 @@ describe('direct tactical map click routing', () => {
     expect(source).toContain('inspectSectorFromMap(sectorId, props)');
     expect(source).toContain('inspectSectorFromMap(sectorId, null, osid)');
     expect(source).toContain('inspectSettlementFromMap(osid, osidToSector.get(osid))');
+    expect(source).toContain("kind: 'field-formation-in-corps'");
     expect(source).not.toMatch(/setSelectedFormationId\(id\)/);
+    expect(source).not.toMatch(/contextMenu[\s\S]{0,1200}setSelectedCorpsId\(corpsId\)/);
     expect(source).not.toMatch(/(?:\.|\b)setSelectedCorpsFrontSectorId\(sectorId\)/);
   });
 

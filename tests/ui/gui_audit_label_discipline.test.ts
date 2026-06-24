@@ -703,6 +703,34 @@ describe('GUI audit label discipline', () => {
     expect(orbatContainer.textContent).not.toMatch(/\bOP\b|\b1\.5T\b/);
   });
 
+  it('renders sparse ORBAT brigade metrics as unreported instead of zero or active-green', () => {
+    const brigade = {
+      id: 'sparse_brigade',
+      name: 'Sparse Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      location_osid: 'op:sarajevo:dobrinja_1',
+    } as unknown as FormationView;
+
+    useGameStore.setState({
+      armyHQExpandedSections: { 'orbat-arbih_1st_corps': true },
+      osidDisplayNames: { 'op:sarajevo:dobrinja_1': 'Dobrinja' },
+    });
+
+    const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
+
+    expect(container.textContent).toContain('--');
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toMatch(/\b0\b/);
+    const posture = Array.from(container.querySelectorAll('span')).find((node) => node.textContent === 'Unreported');
+    expect(posture?.className).toContain('text-text-secondary/50');
+
+    fireEvent.click(screen.getAllByRole('button', { name: /Sparse Brigade/i })[0]);
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toMatch(/\b0\b/);
+  });
+
   it('renders Army HQ sector length as front segments instead of kilometers', () => {
     const brigade = {
       id: 'arbih_101_brigade',

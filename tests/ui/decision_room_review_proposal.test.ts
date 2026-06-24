@@ -122,6 +122,38 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
     expect(proposalIds).toEqual(['proposal_player']);
   });
 
+  it('does not emit generic review_proposal cards for operation-opportunity reviews', () => {
+    const state = makeState({
+      player_faction: 'RBiH',
+      pendingProposalReviews: [
+        {
+          id: 'live_window',
+          turn: 24,
+          faction: 'RBiH',
+          domain: 'ops',
+          description: 'Operation opportunity should stay in the opportunity lane.',
+          proposed_action: 'OPPORTUNITY:live_window',
+          proposed_value: 'approve',
+        },
+        {
+          id: 'proposal_player',
+          turn: 24,
+          faction: 'RBiH',
+          domain: 'military',
+          description: 'Player proposal needs review.',
+        },
+      ],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const proposalIds = view.cards
+      .filter((c) => c.directive?.lever === 'review_proposal')
+      .map((c) => c.directive?.payload.proposalId);
+
+    expect(proposalIds).toEqual(['proposal_player']);
+    expect(proposalIds).not.toContain('live_window');
+  });
+
   it('emits no review_proposal cards when there are no pending proposals', () => {
     const view = buildPresidentialDecisionRoomView({ state: makeState({ pendingProposalReviews: [] }) });
     expect(view.cards.some((c) => c.directive?.lever === 'review_proposal')).toBe(false);

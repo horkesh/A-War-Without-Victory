@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-24] fix(ui): harden player surface blocker, ORBAT, and supply truth
+
+**Type:** UI/read-model/routing/map/test/docs polish.
+
+**Fix:** Force Readiness and Army HQ corps cards now average only reported brigade condition values and render missing fatigue/cohesion as unreported. Army Reserve no longer treats missing command authority as affordable and labels no-suggested-brigade requests as staff-selection pending; ORBAT removes the stale `AWWV v0.6.0-TAC` footer. Decision Room no longer emits generic proposal-review cards for operation-opportunity reviews. President's Desk blocked advance opens the Advance review modal rather than the generic command-card strip, ready advance no longer uses red blocker styling, and modal-required convoy/peace/Dayton blockers count as required Desk signatures and pre-advance blockers even when `playerDecisionSummary` is absent. Tactical stack expansion uses physical `location_osid` only; map formation context-menu `View Corps` preserves field inspection context; primary supply fill now prefers explicit OSID supply truth over faction reserve summaries; sparse Army HQ ORBAT brigade rows render missing personnel, morale, cohesion, fatigue, entrenchment, status, and posture as unreported/neutral instead of zero or active-green.
+
+**Verification:** Focused proof passed 10 files / 104 tests: `node node_modules\vitest\vitest.mjs run tests\ui\army_hq_readiness_threat_copy.test.ts tests\ui\army_reserve_hook_order.test.ts tests\ui\orbatpanel_drilldown_routing.test.ts tests\ui\decision_room_review_proposal.test.ts tests\ui\map_click_routing_contract.test.ts tests\ui_player_visibility.test.ts tests\ui\president_desk_shell.test.ts tests\ui\supply_fallbacks.test.ts tests\ui\pre_advance_command_review.test.ts tests\ui\gui_audit_label_discipline.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 566 tests. `npm.cmd run qa:first-hour:browser` passed and verified dev-server cleanup. `npm.cmd run qa:live-surface:browser` passed and verified dev-server cleanup. `git diff --check` passed with only Git's line-ending normalization warning for the touched supply builder. Report: `docs/40_reports/implemented/20260624_PLAYER_SURFACE_POLISH_WAVE.md`.
+
+**Scope/determinism:** UI/read-model/routing/map/test/docs polish only; no simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, generated calibration artifact, structural fingerprint, baseline manifest, golden manifest, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-24] fix(ui): harden operation history, decision, and sector truth
 
 **Type:** UI/read-model/routing/test/docs polish.

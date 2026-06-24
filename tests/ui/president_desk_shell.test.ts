@@ -103,6 +103,14 @@ describe('PresidentDeskShell', () => {
     expect(container.querySelector('[data-testid="desk-consequence-open-records"]')).toBeTruthy();
   });
 
+  it('renders the ready advance action as an advance-control, not a blocked warning', () => {
+    renderDesk();
+
+    const action = screen.getByTestId('desk-action-advance-clearance');
+    expect(action.className).toContain('text-accent-gold');
+    expect(action.className).not.toContain('text-red-100');
+  });
+
   it('can close when rendered as a warroom overlay', () => {
     const onClose = vi.fn();
     renderDesk({ onClose });
@@ -252,11 +260,33 @@ describe('PresidentDeskShell', () => {
     expect(screen.queryByText('Ready')).toBeNull();
   });
 
-  it('routes the blocked advance action to command review instead of advance clearance', () => {
+  it('counts modal-required convoy decisions as required desk signatures', () => {
+    const { container } = renderDesk({
+      state: makeState({
+        player_faction: 'RBiH',
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_rbih',
+            target_enclave: 'gorazde',
+            route_faction: 'RBiH',
+            supply_amount: 18,
+          },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(screen.getByText('Blocked')).toBeTruthy();
+    expect(container.textContent).toMatch(/Required\s*1/);
+    expect(screen.queryByText('No signatures required')).toBeNull();
+  });
+
+  it('routes the blocked advance action to advance review instead of generic command cards', () => {
     const onAdvance = vi.fn();
+    const onReviewAdvance = vi.fn();
     const onOpenCommandSurface = vi.fn();
     renderDesk({
       onAdvance,
+      onReviewAdvance,
       onOpenCommandSurface,
       state: makeState({
         pendingCounterOffers: [
@@ -281,7 +311,8 @@ describe('PresidentDeskShell', () => {
     expect(screen.queryByTestId('desk-action-advance-clearance')).toBeNull();
     fireEvent.click(screen.getByTestId('desk-action-review-blockers'));
 
-    expect(onOpenCommandSurface).toHaveBeenCalledOnce();
+    expect(onReviewAdvance).toHaveBeenCalledOnce();
+    expect(onOpenCommandSurface).not.toHaveBeenCalled();
     expect(onAdvance).not.toHaveBeenCalled();
   });
 

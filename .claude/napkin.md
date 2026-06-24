@@ -1,5 +1,13 @@
 # Napkin Runbook
 
+**MODAL-REQUIRED BLOCKERS ARE REQUIRED EVEN IF CARD SEVERITY IS NORMAL (2026-06-24).** Convoy, peace, and Dayton decisions can block advance without `severity: blocking`. Do instead: derive Desk required counts and pre-advance fallback blocker status from `derivePresidentialBlockers(...)`, not `InboxItem.severity` alone.
+
+**PRIMARY SUPPLY FILL PREFERS LOCAL OSID TRUTH (2026-06-24).** Faction reserve/condition summaries are strategic fallbacks, not overrides for explicit local supply. Do instead: use `supplyStateByOsid[osid]` first for primary supply-map polygon class, then fall back to faction reserves/conditions/legacy pressure.
+
+**ARMY HQ ORBAT SPARSE FIELDS ARE UNREPORTED (2026-06-24).** Missing brigade personnel, morale, cohesion, fatigue, entrenchment, status, or posture are source gaps, not zero strength or active readiness. Do instead: render neutral unreported copy/bars and never default unknown lifecycle/status to active-green.
+
+**STACK EXPANSION IS PHYSICAL LOCATION ONLY (2026-06-24).** AoR coverage and HQ anchors are not physical unit stacks. Do instead: build expanded marker stacks from explicit `location_osid` only; keep AoR/HQ anchors for navigation-specific surfaces.
+
 **COMMAND HQ ANCHORS ARE NOT TACTICAL LOCATIONS (2026-06-23).** Corps and army_hq formations need map drilldown anchors without implying physical brigade-style presence. Do instead: use `hq_osid` for command-only anchors; reserve `location_osid` for actual formation placement, stationed-unit truth, movement/combat/displacement, and location-in-control validation.
 
 **BROWSER COMMAND CONTROLS MUST RESPECT THE DESKTOP BRIDGE (2026-06-23).** Browser/dev sessions can inspect but cannot execute Electron-owned commands. Do instead: render desktop-IPC controls disabled with bridge-unavailable copy and guard clicks; live browser sweeps should prove that disabled state instead of forcing the command modal.

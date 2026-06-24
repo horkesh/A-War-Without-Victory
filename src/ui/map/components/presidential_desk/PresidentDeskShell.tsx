@@ -23,6 +23,8 @@ export interface PresidentDeskShellProps {
   onOpenDecisionRecords?: (recordId?: string) => void;
   onOpenChronicle?: (recordId?: string) => void;
   onClose?: () => void;
+  /** Open the advance-turn review modal; blocked state explains blockers there. */
+  onReviewAdvance?: () => void;
   /** Open the presidential command-surface card strip directly (accessibility). */
   onOpenCommandSurface?: () => void;
 }
@@ -46,13 +48,16 @@ export function PresidentDeskShell({
   onOpenDecisionRecords,
   onOpenChronicle,
   onClose,
+  onReviewAdvance,
   onOpenCommandSurface,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
   const actionableCount = countActionableItems(items);
   const advanceReview = buildPreAdvanceCommandReviewView({ state, osidNameMap });
-  const blocked = advanceReview.status === 'blocked' || derivePresidentialBlockers(state, osidNameMap).length > 0;
+  const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap);
+  const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id));
+  const blocked = advanceReview.status === 'blocked' || presidentialBlockers.length > 0;
 
   useEffect(() => {
     if (onClose) shellRef.current?.focus();
@@ -91,7 +96,7 @@ export function PresidentDeskShell({
       </div>
 
       <div className="pointer-events-auto self-start border border-panel-border/80 bg-panel-bg/92 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)] backdrop-blur-md">
-        <DeskPacket items={items} onAction={onAction} />
+        <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
       </div>
 
       <aside className="pointer-events-auto self-start border border-panel-border/80 bg-panel-bg/90 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)] backdrop-blur-md">
@@ -135,9 +140,14 @@ export function PresidentDeskShell({
           </button>
           <button
             type="button"
-            onClick={blocked && onOpenCommandSurface ? onOpenCommandSurface : onAdvance}
+            onClick={blocked && onReviewAdvance ? onReviewAdvance : onAdvance}
             data-testid={blocked ? 'desk-action-review-blockers' : 'desk-action-advance-clearance'}
-            className="border border-red-300/45 bg-red-500/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-red-100 transition-colors hover:bg-red-500/20"
+            className={[
+              'border px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] transition-colors',
+              blocked
+                ? 'border-red-300/45 bg-red-500/12 text-red-100 hover:bg-red-500/20'
+                : 'border-accent-gold/50 bg-accent-gold/14 text-accent-gold hover:bg-accent-gold/22',
+            ].join(' ')}
           >
             {blocked ? t('desk.action.reviewBlockers') : t('desk.action.advanceClearance')}
           </button>

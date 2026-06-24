@@ -130,6 +130,19 @@ describe('supply UI fallbacks', () => {
     expect(geo.features[0]?.properties?.supply_class).toBe('adequate');
   });
 
+  it('buildSupplyGeoJSON prefers explicit OSID supply truth over faction reserves', () => {
+    const geo = buildSupplyGeoJSON(
+      controlGeoJson,
+      { 'op:test:a': 'RBiH' },
+      { RBiH: { generalSupply: 100, heavyMunitions: 100 } },
+      undefined,
+      undefined,
+      { 'op:test:a': 'critical' },
+    );
+
+    expect(geo.features[0]?.properties?.supply_class).toBe('critical');
+  });
+
   it('buildSupplyGeoJSON falls back per controller when live condition is partial', () => {
     const geo = buildSupplyGeoJSON(
       controlGeoJson,

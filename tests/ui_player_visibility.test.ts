@@ -291,11 +291,14 @@ describe('player visibility helpers', () => {
         { id: 'hidden_enemy', faction: 'RS', name: 'Hidden Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_hidden', personnel: 1000 },
         { id: 'seen_enemy', faction: 'RS', name: 'Seen Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_seen', personnel: 1100 },
         { id: 'forming_own', faction: 'RBiH', name: 'Forming Own', kind: 'brigade', readiness: 'forming', cohesion: 40, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:shared_hidden', personnel: 300 },
+        { id: 'aor_only', faction: 'RBiH', name: 'AoR Only', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:rear', aorSettlementIds: ['op:shared_hidden'], personnel: 900 },
+        { id: 'hq_anchor', faction: 'RBiH', name: 'HQ Anchor', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], hq_osid: 'op:shared_hidden', personnel: 900 },
       ],
     } as unknown as LoadedGameState;
     const centroids = new Map<string, [number, number]>([
       ['op:shared_hidden', [18, 44]],
       ['op:shared_seen', [19, 44]],
+      ['op:rear', [20, 44]],
     ]);
 
     expect(getPlayerVisibleFormationStack(state, 'op:shared_hidden', centroids).map((formation) => formation.id)).toEqual(['own_1']);

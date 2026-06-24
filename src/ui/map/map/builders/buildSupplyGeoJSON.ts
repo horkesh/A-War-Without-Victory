@@ -6,12 +6,13 @@
  *   critical  (reserve < 20)         → red
  *   unknown   (no controller / supply disabled) → grey
  *
- * Prefers Phase A-E factionReserves (general_supply_reserve, 0–100).
- * Falls back to legacy warPhaseSupplyPressure when reserves not present.
+ * Prefers explicit per-OSID supply state when present.
+ * Falls back to faction reserves/conditions, then legacy warPhaseSupplyPressure.
  */
 import type { FeatureCollection, Feature, Polygon, MultiPolygon } from 'geojson';
 
 export type OsidSupplyClass = 'adequate' | 'strained' | 'critical' | 'unknown';
+type ExplicitOsidSupplyClass = Exclude<OsidSupplyClass, 'unknown'>;
 
 // Thresholds matching supply_reserve_constants.ts
 const RESERVE_ADEQUATE = 50;
@@ -36,6 +37,12 @@ function legacyPressureToClass(pressure: number): OsidSupplyClass {
   return 'adequate';
 }
 
+function localStateToPressure(supplyClass: ExplicitOsidSupplyClass): number {
+  if (supplyClass === 'adequate') return 100;
+  if (supplyClass === 'strained') return 55;
+  return 15;
+}
+
 /**
  * Build supply-colored features from osid-control GeoJSON.
  * @param controlGeoJson        Existing control GeoJSON (from buildControlGeoJSON)
@@ -43,13 +50,15 @@ function legacyPressureToClass(pressure: number): OsidSupplyClass {
  * @param factionReserves       Phase A-E per-faction reserve levels (preferred)
  * @param warPhaseSupplyPressure Legacy faction → pressure fallback
  * @param warPhaseSupplyCondition Live faction → condition fallback (higher is better)
+ * @param supplyStateByOsid     Explicit OSID → supply state projection (preferred)
  */
 export function buildSupplyGeoJSON(
   controlGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
   factionReserves: Record<string, { generalSupply: number; heavyMunitions: number }> | undefined,
   warPhaseSupplyPressure?: Record<string, number>,
-  warPhaseSupplyCondition?: Record<string, number>
+  warPhaseSupplyCondition?: Record<string, number>,
+  supplyStateByOsid?: Partial<Record<string, ExplicitOsidSupplyClass>>
 ): FeatureCollection<Polygon | MultiPolygon, SupplyProperties> {
   const features: Feature<Polygon | MultiPolygon, SupplyProperties>[] = [];
 
@@ -61,7 +70,11 @@ export function buildSupplyGeoJSON(
     let supply_class: OsidSupplyClass = 'unknown';
     let supply_pressure = 0;
 
-    if (controller) {
+    const localSupply = supplyStateByOsid?.[osid];
+    if (localSupply) {
+      supply_class = localSupply;
+      supply_pressure = localStateToPressure(localSupply);
+    } else if (controller) {
       const res = factionReserves?.[controller];
       if (res != null && isFinite(res.generalSupply)) {
         supply_pressure = res.generalSupply;

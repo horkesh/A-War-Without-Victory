@@ -673,8 +673,17 @@ export function MapContainer() {
         },
         {
           id: 'corps', label: t('map.context.viewCorps'), icon: '\u2694', action: () => {
+            const id = properties?.id as string;
             const corpsId = properties?.corps_id as string;
-            if (corpsId) useGameStore.getState().setSelectedCorpsId(corpsId);
+            const osid = properties?.location_osid as string | undefined;
+            if (id && corpsId) {
+              inspectOnField(useGameStore.getState(), {
+                kind: 'field-formation-in-corps',
+                formationId: id,
+                corpsId,
+                osid,
+              });
+            }
           }
         },
       ];
@@ -2845,7 +2854,8 @@ export function MapContainer() {
         loadedGameState.controlBySettlement,
         loadedGameState.factionReserves,
         loadedGameState.warPhaseSupplyPressure,
-        loadedGameState.warPhaseSupplyCondition
+        loadedGameState.warPhaseSupplyCondition,
+        loadedGameState.supplyStateByOsid
       );
       const supplyReachGeoJson = buildSupplyReachGeoJSON({
         controlGeoJson,

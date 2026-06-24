@@ -29,6 +29,7 @@ import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { countFiledDecisionRecords } from './filedRecordTruth';
+import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -911,7 +912,7 @@ function addProposalReviewDirectiveCards(state: LoadedGameState, cards: Candidat
 
   const reviews = [...(state.pendingProposalReviews ?? [])].sort((a, b) =>
     strictCompare(a.id, b.id),
-  ).filter((review) => review.faction === playerFaction);
+  ).filter((review) => review.faction === playerFaction && !isOperationOpportunityReview(review));
 
   for (const review of reviews) {
     cards.push({

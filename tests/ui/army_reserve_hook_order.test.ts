@@ -139,4 +139,22 @@ describe('ArmyReservePanel hook order', () => {
     fireEvent.click(terminate);
     expect(useGameStore.getState().loadError).toBeNull();
   });
+
+  it('renders missing reserve authority and missing suggested brigade as unreported staff truth', () => {
+    const state = makeState();
+    delete (state.pendingReserveRequests![0]! as { suggested_brigade_id?: string }).suggested_brigade_id;
+    delete state.commandAuthority;
+
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_main_staff',
+    });
+
+    const view = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    expect(view.container.textContent).toContain('Staff has not named a reserve brigade yet');
+    expect(view.container.textContent).toContain('Command authority unreported');
+    expect(view.container.textContent).not.toContain('Insufficient command authority');
+  });
 });

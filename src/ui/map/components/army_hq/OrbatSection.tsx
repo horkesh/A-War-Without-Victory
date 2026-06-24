@@ -30,6 +30,7 @@ const STATUS_COLOR: Record<string, string> = {
     disrupted: 'text-red-500',
     forming: 'text-amber-500',
     reserve: 'text-blue-400',
+    unreported: 'text-text-secondary/50',
 };
 
 const ENGAGEMENT_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
@@ -47,16 +48,30 @@ function engagementOutcomeLabel(outcome: string): string {
 }
 
 /** Inline bar — fraction 0..1, fixed width. */
-function MiniBar({ value, max, color, width = 60 }: { value: number; max: number; color: string; width?: number }) {
-    const pct = max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
+function MiniBar({ value, max, color, width = 60 }: { value: number | null; max: number; color: string; width?: number }) {
+    const pct = value != null && max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
     return (
         <div className="flex items-center gap-1.5">
             <div className="relative bg-panel-bg border border-panel-border/40" style={{ width, height: 6 }}>
                 <div className="absolute inset-y-0 left-0" style={{ width: `${pct * 100}%`, backgroundColor: color }} />
             </div>
-            <span className="text-[10px] tabular-nums" style={{ color }}>{Math.round(value)}</span>
+            <span className="text-[10px] tabular-nums" style={{ color }}>
+                {value == null ? t('orbat.metricUnreported') : Math.round(value)}
+            </span>
         </div>
     );
+}
+
+function reportedPercent(value: number | undefined): number | null {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? Math.round(Math.max(0, Math.min(100, value)))
+        : null;
+}
+
+function reportedNonNegative(value: number | undefined): number | null {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? Math.max(0, value)
+        : null;
 }
 
 function operationalEquipmentCount(total: number | undefined, operational: number | undefined): number {
@@ -83,10 +98,10 @@ const DECORATION_TIER_STYLE: Record<string, string> = {
 
 function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-    const morale = Math.round(b.morale ?? 0);
-    const cohesion = Math.round(Math.max(0, Math.min(100, b.cohesion ?? 0)));
-    const entrenchment = b.entrenchment_turns ?? 0;
-    const personnel = b.personnel ?? 0;
+    const morale = reportedPercent(b.morale);
+    const cohesion = reportedPercent(b.cohesion);
+    const entrenchment = reportedNonNegative(b.entrenchment_turns);
+    const personnel = reportedNonNegative(b.personnel);
     const officerQuality = b.officer_quality;
     const comp = b.composition;
     const hist = b.brigade_history;
@@ -96,8 +111,8 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const decorations = b.decorations;
     const locationOsid = b.location_osid;
     const homeOsid = b.home_osid;
-    const cohesionColor = getCohesionColor(cohesion);
-    const moraleColor = morale < 30 ? '#c24040' : morale < 50 ? '#c4a35a' : '#4a9a55';
+    const cohesionColor = cohesion == null ? '#8a8170' : getCohesionColor(cohesion);
+    const moraleColor = morale == null ? '#8a8170' : morale < 30 ? '#c24040' : morale < 50 ? '#c4a35a' : '#4a9a55';
     const totalCampaignCasualties = (b.campaignKia ?? 0) + (b.campaignWia ?? 0) + (b.campaignMia ?? 0);
 
     return (
@@ -128,7 +143,9 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 uppercase tracking-tight">
                 <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] text-text-secondary/50">{t('orbat.personnel')}</span>
-                    <span className="text-text-secondary font-bold">{formatPersonnel(personnel)}</span>
+                    <span className="text-text-secondary font-bold">
+                        {personnel == null ? t('orbat.metricUnreported') : formatPersonnel(personnel)}
+                    </span>
                 </div>
                 <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] text-text-secondary/50">{t('orbat.morale')}</span>
@@ -140,7 +157,9 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                 </div>
                 <div className="flex flex-col gap-0.5">
                     <span className="text-[9px] text-text-secondary/50">{t('orbat.entrench')}</span>
-                    <span className="text-text-secondary">{t('orbat.turnsShort', { value: entrenchment.toFixed(1) })}</span>
+                    <span className="text-text-secondary">
+                        {entrenchment == null ? t('orbat.metricUnreported') : t('orbat.turnsShort', { value: entrenchment.toFixed(1) })}
+                    </span>
                 </div>
                 {officerQuality != null && (
                     <div className="flex flex-col gap-0.5">
@@ -276,14 +295,21 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                 </div>
 
                 {sorted.map((b) => {
-                    const cohesion = Math.round(Math.max(0, Math.min(100, b.cohesion ?? 0)));
-                    const fatigue = Math.round(b.fatigue ?? 0);
-                    const personnel = b.personnel ?? 0;
+                    const cohesion = reportedPercent(b.cohesion);
+                    const fatigue = reportedPercent(b.fatigue);
+                    const personnel = reportedNonNegative(b.personnel);
                     const isDisrupted = (b.disrupted_turns ?? 0) > 0;
-                    const status = isDisrupted ? 'disrupted' : b.status;
-                    const statusColor = STATUS_COLOR[status] ?? STATUS_COLOR.active;
-                    const cohesionColor = getCohesionColor(cohesion);
-                    const filledSegments = Math.ceil(cohesion / 20);
+                    const status = isDisrupted ? 'disrupted' : b.status ?? 'unreported';
+                    const statusColor = STATUS_COLOR[status] ?? STATUS_COLOR.unreported;
+                    const cohesionColor = cohesion == null ? '#8a8170' : getCohesionColor(cohesion);
+                    const filledSegments = cohesion == null ? 0 : Math.ceil(cohesion / 20);
+                    const fatigueClass = fatigue == null
+                        ? 'text-text-secondary/50'
+                        : fatigue >= 20
+                            ? 'text-red-500 underline'
+                            : fatigue >= 10
+                                ? 'text-amber-500'
+                                : 'text-text-secondary/60';
                     const isExpanded = expandedId === b.id;
                     const formationName = getLocalizedFormationName(b, locale);
 
@@ -307,7 +333,7 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
 
                                     {/* Personnel */}
                                     <span className="text-[11px] tabular-nums text-text-secondary w-16 text-right shrink-0">
-                                        {formatPersonnel(personnel)}
+                                        {personnel == null ? t('orbat.metricUnreportedShort') : formatPersonnel(personnel)}
                                     </span>
 
                                     {/* Cohesion segments */}
@@ -322,14 +348,13 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                     </div>
 
                                     {/* Fatigue */}
-                                    <span className={`text-[11px] tabular-nums w-10 text-right shrink-0 font-bold ${fatigue >= 20 ? 'text-red-500 underline' : fatigue >= 10 ? 'text-amber-500' : 'text-text-secondary/60'
-                                        }`}>
-                                        {fatigue}
+                                    <span className={`text-[11px] tabular-nums w-10 text-right shrink-0 font-bold ${fatigueClass}`}>
+                                        {fatigue == null ? t('orbat.metricUnreportedShort') : fatigue}
                                     </span>
 
                                     {/* Status posture */}
                                     <span className={`text-[10px] font-bold uppercase w-14 text-right shrink-0 ${statusColor}`}>
-                                        {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, 'Pending')}
+                                        {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, t('orbat.postureUnreported'))}
                                     </span>
                                 </button>
                                 <button

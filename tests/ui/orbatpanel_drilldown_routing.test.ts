@@ -135,6 +135,8 @@ describe('OrbatPanel drilldown routing', () => {
   it('gives brigade rows a readable command summary instead of collapsed DOM text', () => {
     render(React.createElement(OrbatPanel));
 
+    expect(document.body.textContent).not.toContain('AWWV v0.6.0-TAC');
+
     const row = screen.getByRole('button', { name: /1st Brigade/i });
     expect(row.getAttribute('aria-label')).toMatch(/1st Brigade/i);
     expect(row.getAttribute('aria-label')).toMatch(/1[,.]200 personnel/i);

@@ -179,6 +179,39 @@ describe('Army HQ readiness and threat copy', () => {
         expect(items[0]?.avgCohesion).toBe(80);
     });
 
+    it('does not average unreported condition fields as zero readiness', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'reported', name: 'Reported Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200, fatigue: 6, cohesion: 76 },
+            { id: 'unreported', name: 'Unreported Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 1200 },
+        ] as any, [], 'RBiH', new Set());
+
+        expect(items[0]?.avgFatigue).toBe(6);
+        expect(items[0]?.avgCohesion).toBe(76);
+        expect(items[0]?.grade).toBe('COMBAT READY');
+    });
+
+    it('renders absent force-readiness condition data as unreported', () => {
+        const item: CorpsReadiness = {
+            corpsId: 'corps_1',
+            corpsName: '1st Corps',
+            grade: 'COMBAT READY',
+            ineffectiveCount: 0,
+            totalBrigades: 1,
+            avgFatigue: null,
+            avgCohesion: null,
+            disruptedCount: 0,
+            overextendedCount: 0,
+            hasThreat: false,
+            recommendationId: 'hold',
+            recommendation: 'Hold',
+        };
+
+        const html = renderToStaticMarkup(createElement(ForceReadiness, { items: [item] }));
+        expect(html).toContain('fatigue unreported');
+        expect(html).not.toContain('fatigue 0/30');
+    });
+
     it('uses the shared fielded tactical boundary for Army HQ modal brigade lists', () => {
         const source = readFileSync('src/ui/map/components/army_hq/ArmyHQModal.tsx', 'utf8');
 

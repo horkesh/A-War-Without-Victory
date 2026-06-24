@@ -5,11 +5,12 @@ import { DecisionCard } from './DecisionCard';
 export interface DeskPacketProps {
   items: InboxItem[];
   onAction: (action: InboxItem['action'], itemId: string) => void;
+  requiredItemIds?: ReadonlySet<string>;
 }
 
-export function DeskPacket({ items, onAction }: DeskPacketProps) {
-  const blockers = items.filter((item) => item.severity === 'blocking');
-  const otherDecisions = items.filter((item) => item.severity !== 'blocking' && item.type !== 'situation');
+export function DeskPacket({ items, onAction, requiredItemIds }: DeskPacketProps) {
+  const blockers = items.filter((item) => item.severity === 'blocking' || requiredItemIds?.has(item.id));
+  const otherDecisions = items.filter((item) => !blockers.includes(item) && item.type !== 'situation');
 
   return (
     <section className="min-h-0" aria-label={t('desk.packet.ariaLabel')}>

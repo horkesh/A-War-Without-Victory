@@ -10,6 +10,7 @@ import {
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
 import { playerFactionMatch } from './playerFactionMatch';
+import { derivePresidentialBlockers } from './presidentialBlockers';
 import { t } from '../i18n';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
@@ -76,10 +77,11 @@ function statusFor(
 function countBlockingDecisions(state: LoadedGameState | null): number {
   if (!state) return 0;
   const playerFaction = state.player_faction ?? null;
+  const presidentialBlockerCount = derivePresidentialBlockers(state, null).length;
   const counterOfferCount = (state.pendingCounterOffers ?? [])
     .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
     .length;
-  if (state.playerDecisionSummary) return state.playerDecisionSummary.blockingCount + counterOfferCount;
+  if (state.playerDecisionSummary) return Math.max(state.playerDecisionSummary.blockingCount, presidentialBlockerCount) + counterOfferCount;
   const eventDecisionCount = Math.max(
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
     (state.pendingEventDecisions ?? []).filter((decision) => playerFactionMatch(decision.faction, state.player_faction ?? null)).length,
@@ -87,7 +89,7 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
   const paramilitaryRequestCount = playerFaction
     ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length
     : 0;
-  return eventDecisionCount + paramilitaryRequestCount + counterOfferCount;
+  return Math.max(eventDecisionCount + paramilitaryRequestCount, presidentialBlockerCount) + counterOfferCount;
 }
 
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
@@ -107,7 +109,7 @@ export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewI
   return {
     status: statusFor(
       input.state != null && decisionRoom.hasPlayerFaction,
-      decisionRoom.advanceReadiness.blockedByExistingSystems,
+      decisionRoom.advanceReadiness.blockedByExistingSystems || blockingDecisionCount > 0,
       items.length,
     ),
     headline: decisionRoom.advanceReadiness.headline,

@@ -2040,6 +2040,7 @@ function App() {
               onClose={() => {
                 closeWarroomDesk();
               }}
+              onReviewAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
               onOpenCommandSurface={() => openCommandStrip(null)}
             />
           )}

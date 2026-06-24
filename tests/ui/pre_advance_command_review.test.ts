@@ -267,6 +267,35 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('clear');
   });
 
+  it('counts player convoy decisions as fallback blockers when the manifest summary is absent', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: undefined,
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_rbih',
+            target_enclave: 'gorazde',
+            route_faction: 'RBiH',
+            supply_amount: 18,
+          },
+          {
+            id: 'convoy_rs',
+            target_enclave: 'srebrenica',
+            route_faction: 'RS',
+            supply_amount: 12,
+          },
+        ],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(1);
+    expect(view.status).toBe('blocked');
+  });
+
   it('uses the manifest summary for blocking counts across modal and advisory decision families', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
