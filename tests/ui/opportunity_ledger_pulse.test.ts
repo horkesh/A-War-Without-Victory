@@ -123,6 +123,26 @@ describe('buildOpportunityLedgerPulse', () => {
     expect(pulse.lifetime_axes.optional_total).toBe(3);
   });
 
+  it('excludes unreported axis counts from lifetime axis counters', () => {
+    const records = [
+      record({
+        proposal_id: 'p1', opportunity_id: 'o1', display_name: 'Op One', status: 'approved',
+        required_axes_total: 4,
+        optional_axes_total: 2,
+      }),
+      record({
+        proposal_id: 'p2', opportunity_id: 'o2', display_name: 'Op Two', status: 'approved',
+        required_axes_green: 2, required_axes_total: 3,
+        optional_axes_green: 1, optional_axes_total: 1,
+      }),
+    ];
+    const pulse = buildOpportunityLedgerPulse(makeState(records));
+    expect(pulse.lifetime_axes.required_green).toBe(2);
+    expect(pulse.lifetime_axes.required_total).toBe(3);
+    expect(pulse.lifetime_axes.optional_green).toBe(1);
+    expect(pulse.lifetime_axes.optional_total).toBe(1);
+  });
+
   it('computes total_decisions excluding pending and produces a non-empty headline', () => {
     const records = [
       record({ proposal_id: 'p1', opportunity_id: 'o1', display_name: 'Op One', status: 'eligible_pending_review' }),

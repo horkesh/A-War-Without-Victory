@@ -96,3 +96,19 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, ev
 ## Closeout
 
 - Sparse-operation branch Event System CI passed, then the branch fast-forwarded into `main` at `82eb67bb2`. Remote `main` run status is the authoritative post-push closeout record.
+
+## Operation Opportunity Axis Sparse-Readiness Follow-Up
+
+- Operation opportunity prerequisite axes now preserve missing `green` readiness as `unreported` instead of treating it as a blocked/strained axis.
+- Required/optional green counts stay undefined when any counted axis lacks a reported boolean, so dossier summaries and Presidential Decision Room evidence render `Required axes unreported` / `Optional axes unreported` instead of `0/N`.
+- Historical opportunity ledger rows use the same sparse-count contract, and opportunity ledger pulse lifetime counters exclude records whose axis readiness was unreported instead of converting them to green-count zero.
+- EN/BCS i18n keys were added for the unreported opportunity-axis state and summary/evidence copy.
+
+### Opportunity Axis Verification So Far
+
+- Red/green focused proof passed: `node node_modules\vitest\vitest.mjs run tests/ui_map_game_state_adapter.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/army_hq_timing_copy.test.ts tests/ui/opportunity_ledger_pulse.test.ts --pool=forks --reporter=dot` (4 files / 116 tests).
+- `npm.cmd run typecheck` passed.
+
+### Opportunity Axis Scope
+
+UI/read-model/i18n/test/docs polish only. No simulation logic, opportunity generation, scenario data, event evaluator mechanics, startup snapshot, save schema, baseline manifest, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed.

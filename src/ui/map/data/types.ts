@@ -772,13 +772,13 @@ export interface OperationOpportunitySummaryView {
     didNotLaunchCount: number;
 }
 
-export type OperationOpportunityAxisState = 'ready' | 'blocked' | 'strained' | 'not_applicable';
+export type OperationOpportunityAxisState = 'ready' | 'blocked' | 'strained' | 'not_applicable' | 'unreported';
 
 export interface OperationOpportunityPrerequisiteAxisView {
     axis: string;
     label: string;
     mode: string;
-    green: boolean;
+    green?: boolean;
     state: OperationOpportunityAxisState;
     reason: string;
 }

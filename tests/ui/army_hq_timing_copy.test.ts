@@ -470,6 +470,34 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('not applicable');
   });
 
+  it('renders sparse opportunity axis readiness as unreported', () => {
+    render(React.createElement(OperationOpportunityDossierPanel, {
+      gameState: makeGameState({
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          required_axes_green: undefined,
+          required_axes_total: 2,
+          optional_axes_green: undefined,
+          optional_axes_total: 1,
+          prerequisite_axes: [
+            { axis: 'axis_north', label: 'Northern Axis', mode: 'required', green: undefined, state: 'unreported', reason: '' },
+            { axis: 'axis_south', label: 'Southern Axis', mode: 'optional', green: undefined, state: 'unreported', reason: '' },
+          ],
+        })],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('Required axes unreported');
+    expect(copy).toContain('Optional axes unreported');
+    expect(copy).toContain('Unreported');
+    expect(copy).not.toContain('0/2 required');
+    expect(copy).not.toContain('0/1 optional');
+    expect(copy).not.toContain('Blocked');
+    expect(copy).not.toContain('Strained');
+  });
+
   it('does not expose no-op opportunity resolution controls when the command bridge is unavailable', () => {
     render(React.createElement(OperationOpportunityDossierPanel, {
       gameState: makeGameState({

@@ -4,6 +4,8 @@
 
 **Missing ops-planning brigade condition is unknown, not healthy:** ops modal candidates can lack personnel, composition, cohesion, or fatigue. Durable rule: render missing fields as `Unreported`, avoid combat-ineffective/healthy/fresh conclusions without reported data, and rank unknown condition below reported tired-but-known brigades in auto-propose scoring. Applied in `[2026-06-25] Sparse operation lifecycle and Corps Front forces truth follow-up`; report `docs/40_reports/implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md`.
 
+**Opportunity axis readiness needs reported booleans:** operation opportunity axis rows can carry a total axis list without a reported `green` boolean. Durable rule: preserve `green` as optional in UI read-models, mark missing axis readiness as `unreported`, keep green counts undefined until every counted axis has a boolean, and exclude unreported counts from lifetime pulse totals. Applied in `[2026-06-25] Operation opportunity axis sparse-readiness follow-up`; report `docs/40_reports/implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md`.
+
 ## 2026-06-24 - Sparse Army HQ aggregate and stale roster diagnostics
 
 **Missing command-surface personnel/equipment data is partial or unreported:** Army HQ, Corps Detail, Corps Front, ORBAT, OOB, and Personnel can receive brigade rows with absent personnel or absent equipment-condition fields. Durable rule: sum only reported personnel, render mixed reports as `Partial`, render no reported value as `Unreported`, and never default missing equipment condition to fully operational. Applied in `[2026-06-24] fix(ui): harden sparse Army HQ aggregates and stale roster diagnostics`; report `docs/40_reports/implemented/20260624_ARMY_HQ_SECTOR_BRIGADE_INFORMATION_QUALITY.md`.

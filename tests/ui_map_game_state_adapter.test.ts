@@ -1655,6 +1655,58 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
     );
 });
 
+test('parseGameState keeps sparse operation opportunity axes unreported', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 176,
+            phase: 'war',
+            player_faction: 'RBiH',
+            pending_proposal_reviews: [{
+                id: 'PROP_176_opportunity_0',
+                turn: 176,
+                faction: 'RBiH',
+                domain: 'ops',
+                description: 'Operation Sana - staff recommendation: approve',
+                proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                current_value: 'pending_review',
+                proposed_value: 'approve',
+            }],
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [{
+                opportunity_id: 'sana_95',
+                proposal_id: 'OPP_175_sana_95',
+                eligibility_turn: 175,
+                expires_turn: 199,
+                status: 'eligible_pending_review',
+                approver_faction: 'RBiH',
+                last_axis_evaluation: [
+                    { axis: 'date_window', mode: 'required', green: true, reason: 'window open' },
+                    { axis: 'corps_readiness', mode: 'required', reason: 'staff report missing' },
+                    { axis: 'enemy_weakness', mode: 'optional', reason: 'staff report missing' },
+                ],
+            }],
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    const proposal = parsed.operationOpportunityProposals?.[0];
+    assert.ok(proposal);
+    assert.equal(proposal.required_axes_green, undefined);
+    assert.equal(proposal.required_axes_total, 2);
+    assert.equal(proposal.optional_axes_green, undefined);
+    assert.equal(proposal.optional_axes_total, 1);
+    assert.deepEqual(
+        proposal.prerequisite_axes.map((axis) => [axis.axis, axis.state, axis.green]),
+        [
+            ['date_window', 'ready', true],
+            ['corps_readiness', 'unreported', undefined],
+            ['enemy_weakness', 'unreported', undefined],
+        ],
+    );
+});
+
 test('parseGameState ignores stale and foreign operation opportunity reviews for player dossiers', () => {
     const parsed = parseGameState({
         meta: {

@@ -19,6 +19,7 @@ const AXIS_STYLES: Record<OperationOpportunityAxisState, string> = {
     blocked: 'border-red-500/30 bg-red-500/10 text-red-300',
     strained: 'border-amber-500/30 bg-amber-500/10 text-amber-300',
     not_applicable: 'border-panel-border bg-panel-bg text-text-secondary',
+    unreported: 'border-panel-border bg-panel-bg text-text-secondary',
 };
 
 const TRAIT_STYLES: Record<OperationOpportunityProposalView['force_quality_traits'][number]['band'], string> = {
@@ -46,6 +47,7 @@ const AXIS_STATE_KEYS: Record<OperationOpportunityAxisState, MessageKey> = {
     blocked: 'opportunity.axis.blocked',
     strained: 'opportunity.axis.strained',
     not_applicable: 'opportunity.axis.notApplicable',
+    unreported: 'opportunity.axis.unreported',
 };
 
 const TRAIT_BAND_KEYS: Record<OperationOpportunityProposalView['force_quality_traits'][number]['band'], MessageKey> = {
@@ -98,6 +100,16 @@ function formatBackTheOfficerFraming(view: BackTheOfficerView): string {
 
 function recommendationLabel(recommendation: string): string {
     return knownLabel(recommendation, OPPORTUNITY_RECOMMENDATION_KEYS, 'opportunity.recommendation.review');
+}
+
+function opportunityAxisSummary(
+    kind: 'required' | 'optional',
+    green: number | undefined,
+    total: number | undefined,
+): string | null {
+    if (total == null) return kind === 'required' ? t('opportunity.noRequiredAxes') : null;
+    if (green == null) return t(kind === 'required' ? 'opportunity.requiredAxesUnreported' : 'opportunity.optionalAxesUnreported');
+    return t(kind === 'required' ? 'opportunity.requiredAxes' : 'opportunity.optionalAxes', { green, total });
 }
 
 function actionButtonClass(actionId: OpportunityUiDecision): string {
@@ -178,14 +190,8 @@ function DossierCard({
     onHighlightFootprint: (proposal: OperationOpportunityProposalView) => void;
     onClearFootprint: () => void;
 }) {
-    const requiredSummary =
-        proposal.required_axes_total != null
-            ? t('opportunity.requiredAxes', { green: proposal.required_axes_green ?? 0, total: proposal.required_axes_total })
-            : t('opportunity.noRequiredAxes');
-    const optionalSummary =
-        proposal.optional_axes_total != null
-            ? t('opportunity.optionalAxes', { green: proposal.optional_axes_green ?? 0, total: proposal.optional_axes_total })
-            : null;
+    const requiredSummary = opportunityAxisSummary('required', proposal.required_axes_green, proposal.required_axes_total);
+    const optionalSummary = opportunityAxisSummary('optional', proposal.optional_axes_green, proposal.optional_axes_total);
     const hasEnabledActions = Boolean(proposal.review_id && proposal.available_actions.some((action) => action.enabled));
     const canAct = hasEnabledActions && commandBridgeAvailable;
     const footprintOsids = [

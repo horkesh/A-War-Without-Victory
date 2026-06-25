@@ -128,13 +128,13 @@ export function buildOpportunityLedgerPulse(state: LoadedGameState | null | unde
             }
         }
 
-        if (typeof record.required_axes_total === 'number') {
+        if (typeof record.required_axes_total === 'number' && typeof record.required_axes_green === 'number') {
             requiredTotal += record.required_axes_total;
-            requiredGreen += record.required_axes_green ?? 0;
+            requiredGreen += record.required_axes_green;
         }
-        if (typeof record.optional_axes_total === 'number') {
+        if (typeof record.optional_axes_total === 'number' && typeof record.optional_axes_green === 'number') {
             optionalTotal += record.optional_axes_total;
-            optionalGreen += record.optional_axes_green ?? 0;
+            optionalGreen += record.optional_axes_green;
         }
     }
 

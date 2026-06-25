@@ -2,6 +2,8 @@
 
 **SPARSE OPERATION LIFECYCLE IS UNREPORTED (2026-06-25).** Missing operation phase, axis status, objective index, prep timing, or brigade condition fields are absent staff records, not execution/healthy/zero truth. Do instead: preserve missing lifecycle fields through adapters/read-models, render `Status pending` / `Unreported`, hide current-objective/progress claims, and rank unknown brigade readiness below reported tired-but-known brigades.
 
+**OPPORTUNITY AXIS READINESS NEEDS REPORTED BOOLEANS (2026-06-25).** Missing `last_axis_evaluation[*].green` is unreported, not a failed axis. Do instead: keep green counts undefined until every counted axis reports a boolean, render opportunity axes as unreported, and exclude unreported records from lifetime green/total pulse counters.
+
 **PARTIAL ETHNIC CENSUS IS UNREPORTED (2026-06-25).** Bosniak/Serb/Croat/Other fields are a complete set. Do instead: suppress selected-settlement, municipality, current-ethnic, and ethnic-map majority readouts when any component is missing; never fill missing ethnic groups as zero.
 
 **FORMATION ANCHORS SPLIT PHYSICAL FROM NAVIGATION (2026-06-25).** `location_osid` is physical presence; AoR/HQ anchors are navigation context. Do instead: use `resolveFormationPhysicalLocationOsid` for counters, stacks, hover, arrows, ghost paths, and selected-settlement truth; use `resolveFormationNavigationAnchor` only for panning/focus.

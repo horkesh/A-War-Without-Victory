@@ -976,6 +976,27 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.evidence.join('\n')).not.toMatch(/\bExpires\s+T\d+\b/);
   });
 
+  it('renders sparse operation opportunity axis readiness as unreported evidence', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        operationOpportunityProposals: [makeOpportunity({
+          proposal_id: 'opp_sparse',
+          required_axes_green: undefined,
+          required_axes_total: 2,
+          optional_axes_green: undefined,
+          optional_axes_total: 1,
+        })],
+      }),
+    });
+
+    const card = view.cards.find((entry) => entry.id === 'opportunity:opp_sparse');
+    const evidence = card?.evidence.join('\n') ?? '';
+    expect(evidence).toContain('Required axes unreported');
+    expect(evidence).toContain('Optional axes unreported');
+    expect(evidence).not.toContain('0/2 required axes');
+    expect(evidence).not.toContain('0/1 optional axes');
+  });
+
   it('dates hard-turn source labels with calendar copy instead of raw turns', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({

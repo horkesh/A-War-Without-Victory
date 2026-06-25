@@ -683,10 +683,14 @@ function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): vo
   for (const opportunity of opportunities) {
     const expires = opportunity.expires_turn ?? LARGE_SORT;
     const required = opportunity.required_axes_total != null
-      ? t('decisionRoom.card.opportunity.evidence.requiredAxes', { green: opportunity.required_axes_green ?? 0, total: opportunity.required_axes_total })
+      ? opportunity.required_axes_green == null
+        ? t('decisionRoom.card.opportunity.evidence.requiredAxesUnreported')
+        : t('decisionRoom.card.opportunity.evidence.requiredAxes', { green: opportunity.required_axes_green, total: opportunity.required_axes_total })
       : null;
     const optional = opportunity.optional_axes_total != null
-      ? t('decisionRoom.card.opportunity.evidence.optionalAxes', { green: opportunity.optional_axes_green ?? 0, total: opportunity.optional_axes_total })
+      ? opportunity.optional_axes_green == null
+        ? t('decisionRoom.card.opportunity.evidence.optionalAxesUnreported')
+        : t('decisionRoom.card.opportunity.evidence.optionalAxes', { green: opportunity.optional_axes_green, total: opportunity.optional_axes_total })
       : null;
     const evidence = [
       opportunity.expires_turn != null

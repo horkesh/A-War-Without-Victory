@@ -40,21 +40,25 @@ function axisCounts(proposal: RawRecord | undefined): Pick<OperationOpportunityR
         : [];
     let requiredGreen = 0;
     let requiredTotal = 0;
+    let requiredReported = 0;
     let optionalGreen = 0;
     let optionalTotal = 0;
+    let optionalReported = 0;
     for (const axis of axes) {
         if (axis.mode === 'required') {
             requiredTotal++;
+            if (typeof axis.green === 'boolean') requiredReported++;
             if (axis.green === true) requiredGreen++;
         } else if (axis.mode === 'optional') {
             optionalTotal++;
+            if (typeof axis.green === 'boolean') optionalReported++;
             if (axis.green === true) optionalGreen++;
         }
     }
     return {
-        required_axes_green: requiredTotal > 0 ? requiredGreen : undefined,
+        required_axes_green: requiredTotal > 0 && requiredReported === requiredTotal ? requiredGreen : undefined,
         required_axes_total: requiredTotal > 0 ? requiredTotal : undefined,
-        optional_axes_green: optionalTotal > 0 ? optionalGreen : undefined,
+        optional_axes_green: optionalTotal > 0 && optionalReported === optionalTotal ? optionalGreen : undefined,
         optional_axes_total: optionalTotal > 0 ? optionalTotal : undefined,
     };
 }
