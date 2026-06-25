@@ -140,9 +140,19 @@ function prepLabel(subPhase: string): string {
   return key ? t(key) : t('corpsFront.unreported');
 }
 
-function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed: number; maxTurns: number }) {
+function formatForcePersonnel(personnel: number | null | undefined): string {
+  return personnel != null ? t('corpsFront.pax', { count: personnel.toLocaleString() }) : t('corpsFront.unreported');
+}
+
+function forcePersonnelAria(personnel: number | null | undefined): string {
+  return `, ${t('armyReserve.personnel')} ${personnel != null ? personnel.toLocaleString() : t('corpsFront.unreported')}`;
+}
+
+function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase: string; turnsElapsed?: number; maxTurns?: number }) {
   const idx = PREP_SUB_PHASES.indexOf(subPhase as typeof PREP_SUB_PHASES[number]);
-  const timeProgress = maxTurns > 0 ? Math.min(1, turnsElapsed / maxTurns) : 0;
+  const hasTiming = typeof turnsElapsed === 'number' && Number.isFinite(turnsElapsed)
+    && typeof maxTurns === 'number' && Number.isFinite(maxTurns);
+  const timeProgress = hasTiming && maxTurns > 0 ? Math.min(1, turnsElapsed / maxTurns) : 0;
   return (
     <div>
       <div className="flex gap-0.5 mb-0.5">
@@ -156,7 +166,7 @@ function PreparationProgressBar({ subPhase, turnsElapsed, maxTurns }: { subPhase
       </div>
       <div className="flex justify-between text-[8px] text-neutral-500">
         <span className="uppercase font-bold">{prepLabel(subPhase)}</span>
-        <span>{t('corpsFront.prep.cycle', { elapsed: turnsElapsed.toString(), max: maxTurns.toString(), pct: Math.round(timeProgress * 100).toString() })}</span>
+        <span>{hasTiming ? t('corpsFront.prep.cycle', { elapsed: turnsElapsed.toString(), max: maxTurns.toString(), pct: Math.round(timeProgress * 100).toString() }) : t('corpsFront.prep.timingUnreported')}</span>
       </div>
     </div>
   );
@@ -702,7 +712,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
-                          aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
@@ -716,7 +726,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 font-medium">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-500 text-[10px] tabular-nums shrink-0">
-                            {f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—'}
+                            {formatForcePersonnel(f.personnel)}
                           </span>
                         </button>
                       ))}
@@ -736,7 +746,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
-                          aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
@@ -750,7 +760,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         >
                           <span className="truncate mr-2 text-neutral-600 italic leading-none">{getLocalizedFormationName(f, locale)}</span>
                           <span className="text-neutral-400 text-[9px] tabular-nums shrink-0 leading-none">
-                            {f.personnel != null ? t('corpsFront.pax', { count: f.personnel.toLocaleString() }) : '—'}
+                            {formatForcePersonnel(f.personnel)}
                           </span>
                         </button>
                       ))}
@@ -770,7 +780,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
-                          aria-label={t('corpsFront.commandDirectedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.commandDirectedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center bg-amber-100/50 hover:bg-amber-200/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
@@ -783,7 +793,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           }}
                         >
                           <span className="truncate mr-2 font-medium text-amber-800">{getLocalizedFormationName(f, locale)}</span>
-                          <span className="text-amber-700 text-[9px] uppercase tracking-wide shrink-0">{t('sectorsSection.overrideBadge')}</span>
+                          <span className="text-amber-700 text-[9px] uppercase tracking-wide shrink-0">{t('sectorsSection.overrideBadge')} · {formatForcePersonnel(f.personnel)}</span>
                         </button>
                       ))}
                     </div>
@@ -802,7 +812,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-rear-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
-                          aria-label={t('corpsFront.rearSupportBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: f.personnel != null ? `, ${t('armyReserve.personnel')} ${f.personnel.toLocaleString()}` : '' })}
+                          aria-label={t('corpsFront.rearSupportBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
                           onMouseEnter={() => {
@@ -815,7 +825,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           }}
                         >
                           <span className="truncate mr-2 text-neutral-600 italic leading-none">{getLocalizedFormationName(f, locale)}</span>
-                          <span className="text-neutral-400 text-[9px] uppercase tracking-wide shrink-0 leading-none">{t('formationDetail.rearSupport')}</span>
+                          <span className="text-neutral-400 text-[9px] uppercase tracking-wide shrink-0 leading-none">{t('formationDetail.rearSupport')} · {formatForcePersonnel(f.personnel)}</span>
                         </button>
                       ))}
                     </div>
@@ -947,7 +957,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         {op.preparation_sub_phase && op.phase === 'planning' && (
                           <div className="mt-2 pt-2 border-t border-neutral-200 border-dashed">
                             <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">{t('corpsFront.preparation')}</div>
-                            <PreparationProgressBar subPhase={op.preparation_sub_phase} turnsElapsed={op.preparation_turns_elapsed ?? 0} maxTurns={op.preparation_max_turns ?? 8} />
+                            <PreparationProgressBar subPhase={op.preparation_sub_phase} turnsElapsed={op.preparation_turns_elapsed} maxTurns={op.preparation_max_turns} />
                             {op.commander_assessment && (
                               <div className={`text-[9px] mt-1 font-bold uppercase ${op.commander_assessment === 'launch' ? 'text-green-700' : op.commander_assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
                                 {t('corpsFront.cdrAssessment', { assessment: commanderAssessmentLabel(op.commander_assessment) })}

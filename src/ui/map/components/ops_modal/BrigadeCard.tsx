@@ -1,6 +1,6 @@
 /**
  * Brigade card for the ops planning tray.
- * NO CHECKBOXES — click the card to toggle assignment.
+ * NO CHECKBOXES - click the card to toggle assignment.
  */
 import { memo, useCallback } from 'react';
 import type { FormationView } from '../../data/types';
@@ -24,14 +24,16 @@ function getMarchColor(turns: number | null): string {
 }
 
 // WP2c: Verbal cohesion descriptor
-function getCohesionLabel(coh: number): { text: string; color: string } {
+function getCohesionLabel(coh: number | null): { text: string; color: string } {
+    if (coh == null) return { text: t('operationsSection.metricUnreported'), color: 'text-text-secondary' };
     if (coh >= 70) return { text: t('opsModal.strong'), color: 'text-green-400' };
     if (coh >= 40) return { text: t('opsModal.adequate'), color: 'text-amber-400' };
     return { text: t('peace.critical').toUpperCase(), color: 'text-red-400' };
 }
 
 // WP2d: Fatigue descriptor
-function getFatigueLabel(fat: number): { text: string; color: string } {
+function getFatigueLabel(fat: number | null): { text: string; color: string } {
+    if (fat == null) return { text: t('operationsSection.metricUnreported'), color: 'text-text-secondary' };
     if (fat <= 2) return { text: t('opsModal.fresh'), color: 'text-green-400' };
     if (fat <= 5) return { text: t('opsModal.tired'), color: 'text-amber-400' };
     return { text: t('oob.exhausted').toUpperCase(), color: 'text-red-400' };
@@ -52,6 +54,18 @@ function formatInteger(value: number, locale: Locale): string {
     return value.toLocaleString(locale === 'bcs' ? 'bs-BA' : 'en-US');
 }
 
+function formatOptionalInteger(value: number | null | undefined, locale: Locale): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? formatInteger(value, locale)
+        : t('operationsSection.metricUnreported', undefined, locale);
+}
+
+function formatOptionalMetric(value: number | null | undefined, locale: Locale): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? String(Math.round(value))
+        : t('operationsSection.metricUnreported', undefined, locale);
+}
+
 function formatMarchTurns(turns: number, locale: Locale): string {
     return t(turns === 1 ? 'opsModal.march.turn.one' : 'opsModal.march.turn.many', { count: turns }, locale);
 }
@@ -69,24 +83,24 @@ function formatMarchDisplay(turns: number, locale: Locale): string {
 export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAutoProposed, marchTurns, factionColor, onToggle }: BrigadeCardProps) {
     const [locale] = useLocale();
     const brigadeName = getLocalizedFormationName(brigade, locale);
-    const personnel = brigade.personnel ?? 0;
-    const personnelLabel = formatInteger(personnel, locale);
-    const isCombatIneffective = personnel < 400;
+    const personnel = typeof brigade.personnel === 'number' && Number.isFinite(brigade.personnel) ? brigade.personnel : null;
+    const personnelLabel = formatOptionalInteger(personnel, locale);
+    const isCombatIneffective = personnel != null && personnel < 400;
     const isDisrupted = !!brigade.disrupted_turns;
     const isUnavailable = isCombatIneffective || isDisrupted;
-    const tanks = brigade.composition?.tanks ?? 0;
-    const arty = brigade.composition?.artillery ?? 0;
-    const cohesion = brigade.cohesion ?? 50;
-    const fatigue = brigade.fatigue ?? 0;
-    const cohLabel = getCohesionLabel(cohesion);
-    const fatLabel = getFatigueLabel(fatigue);
+    const reportedTanks = typeof brigade.composition?.tanks === 'number' && Number.isFinite(brigade.composition.tanks) ? brigade.composition.tanks : null;
+    const reportedArty = typeof brigade.composition?.artillery === 'number' && Number.isFinite(brigade.composition.artillery) ? brigade.composition.artillery : null;
+    const reportedCohesion = typeof brigade.cohesion === 'number' && Number.isFinite(brigade.cohesion) ? brigade.cohesion : null;
+    const reportedFatigue = typeof brigade.fatigue === 'number' && Number.isFinite(brigade.fatigue) ? brigade.fatigue : null;
+    const cohLabel = getCohesionLabel(reportedCohesion);
+    const fatLabel = getFatigueLabel(reportedFatigue);
     const unitTypeKey = UNIT_TYPE_LABEL_KEYS[getFormationUnitType(brigade)] ?? null;
     const unitType = unitTypeKey ? t(unitTypeKey, undefined, locale) : null;
-    const title = [
+    const reportedTitle = [
         brigadeName,
         t('opsModal.brigadeTooltip.personnel', { count: personnelLabel }, locale),
-        `${t('opsModal.brigadeTooltip.tanks', { count: tanks }, locale)} · ${t('opsModal.brigadeTooltip.artillery', { count: arty }, locale)}`,
-        `${t('opsModal.brigadeTooltip.cohesion', { value: Math.round(cohesion) }, locale)} · ${t('opsModal.brigadeTooltip.fatigue', { value: Math.round(fatigue) }, locale)}`,
+        `${t('opsModal.brigadeTooltip.tanks', { count: formatOptionalInteger(reportedTanks, locale) }, locale)} | ${t('opsModal.brigadeTooltip.artillery', { count: formatOptionalInteger(reportedArty, locale) }, locale)}`,
+        `${t('opsModal.brigadeTooltip.cohesion', { value: formatOptionalMetric(reportedCohesion, locale) }, locale)} | ${t('opsModal.brigadeTooltip.fatigue', { value: formatOptionalMetric(reportedFatigue, locale) }, locale)}`,
         t('opsModal.brigadeTooltip.march', { value: formatMarchTooltip(marchTurns, locale) }, locale),
     ].join('\n');
 
@@ -96,7 +110,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             onClick={isUnavailable ? undefined : () => onToggle(brigade.id)}
             disabled={isUnavailable}
             // WP2f: title attribute on card
-            title={title}
+            title={reportedTitle}
             className={`
                 relative w-[160px] min-w-[160px] h-[140px] rounded-md border p-2.5 text-left transition-all
                 ${isUnavailable
@@ -146,29 +160,31 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                 {personnelLabel}
             </div>
 
-            {/* WP2a: Equipment labels — always show both, spelled out */}
+            {/* WP2a: Equipment labels - always show both, spelled out */}
             <div className="flex gap-2 mt-1.5 text-[9px] text-text-secondary">
-                <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{tanks}</span></span>
+                <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedTanks, locale)}</span></span>
                 <span className="text-text-secondary/30">&middot;</span>
-                <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{arty}</span></span>
+                <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedArty, locale)}</span></span>
             </div>
 
             {/* Cohesion bar */}
             <div className="mt-1.5">
                 <div className="h-1 bg-[rgba(180,160,130,0.08)] rounded-full overflow-hidden">
-                    <div
-                        className="h-full rounded-full transition-all"
-                        style={{
-                            width: `${Math.min(100, Math.max(0, cohesion))}%`,
-                            backgroundColor: cohesion >= 70 ? '#4a9a55' : cohesion >= 40 ? '#c4a35a' : '#c24040',
-                        }}
-                    />
+                    {reportedCohesion != null && (
+                        <div
+                            className="h-full rounded-full transition-all"
+                            style={{
+                                width: `${Math.min(100, Math.max(0, reportedCohesion))}%`,
+                                backgroundColor: reportedCohesion >= 70 ? '#4a9a55' : reportedCohesion >= 40 ? '#c4a35a' : '#c24040',
+                            }}
+                        />
+                    )}
                 </div>
-                {/* WP2b: Cohesion/Fatigue readability — 9px, full opacity */}
+                {/* WP2b: Cohesion/Fatigue readability - 9px, full opacity */}
                 {/* WP2c/2d: Verbal descriptors with colors */}
                 <div className="flex justify-between text-[9px] text-text-secondary mt-0.5">
-                    <span>{t('tacticalCard.cohShort').toUpperCase()} {Math.round(cohesion)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
-                    <span>{t('tacticalCard.fatShort').toUpperCase()} {Math.round(fatigue)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
+                    <span>{t('tacticalCard.cohShort').toUpperCase()} {formatOptionalMetric(reportedCohesion, locale)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
+                    <span>{t('tacticalCard.fatShort').toUpperCase()} {formatOptionalMetric(reportedFatigue, locale)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
                 </div>
             </div>
 

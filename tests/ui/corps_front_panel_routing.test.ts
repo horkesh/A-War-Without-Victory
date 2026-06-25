@@ -536,6 +536,78 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
   });
 
+  it('labels missing Forces-tab personnel as unreported in visible rows and accessible names', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations.map((formation) => formation.id === 'arbih_101_brigade'
+        ? { ...formation, personnel: undefined }
+        : formation),
+      {
+        id: 'arbih_reserve_brigade',
+        faction: 'RBiH',
+        name: 'Reserve Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+      },
+      {
+        id: 'arbih_directed_brigade',
+        faction: 'RBiH',
+        name: 'Directed Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+        sectorOverrideId: 'sector:arbih_1st_corps:0',
+      },
+      {
+        id: 'arbih_rear_support',
+        faction: 'RBiH',
+        name: 'Rear Support Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 5,
+        createdTurn: 0,
+        tags: [],
+        location_osid: 'op:sarajevo:centar_1',
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: ['arbih_101_brigade'],
+      reserve_brigade_ids: ['arbih_reserve_brigade'],
+      rear_brigade_ids: ['arbih_rear_support'],
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
+    expect(container.textContent).not.toContain('—');
+    for (const name of ['101st Brigade', 'Reserve Brigade', 'Directed Brigade', 'Rear Support Brigade']) {
+      expect(container.textContent).toMatch(new RegExp(`${name}[\\s\\S]*Unreported`, 'i'));
+      expect(screen.getByRole('button', { name: new RegExp(`${name}.*Personnel Unreported`, 'i') })).toBeTruthy();
+    }
+  });
+
   it('sanitizes raw sector labels in Corps Front', () => {
     const state = makeState();
     state.corpsFrontSectors = [{
@@ -874,6 +946,36 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
     expect(container.textContent).toContain('Unreported');
     expect(container.textContent).not.toMatch(/Waiting For Bridge Report|waiting_for_bridge_report/i);
+  });
+
+  it('does not invent an 0 of 8 preparation cycle when operation timing is unreported', () => {
+    const state = makeState();
+    state.operations = ([{
+      ...state.operations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'intel_gathering',
+      preparation_turns_elapsed: undefined,
+      preparation_max_turns: undefined,
+    }] as unknown) as LoadedGameState['operations'];
+    state.activeOperations = ([{
+      ...state.activeOperations![0],
+      phase: 'planning',
+      preparation_sub_phase: 'intel_gathering',
+      preparation_turns_elapsed: undefined,
+      preparation_max_turns: undefined,
+    }] as unknown) as LoadedGameState['activeOperations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toContain('Preparation timing unreported');
+    expect(container.textContent).not.toContain('0/8');
+    expect(container.textContent).not.toContain('Cycle 0 of 8 (0%)');
   });
 
   it('keeps player-owned operation identity and force count visible under low hostile intel', () => {

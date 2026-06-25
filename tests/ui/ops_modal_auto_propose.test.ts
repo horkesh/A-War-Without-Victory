@@ -85,6 +85,18 @@ describe('autoProposeBrigades', () => {
         const result = autoProposeBrigades(brigades, ['obj_1'], makeLookup(), 12);
         expect(result[0].brigadeId).toBe('strong');
     });
+
+    it('does not treat missing fatigue and cohesion as fresh healthy readiness', () => {
+        const brigades = [
+            makeBrigade('reported_tired', 1500, 'osid_a', { cohesion: 70, fatigue: 20 }),
+            makeBrigade('unreported_condition', 1500, 'osid_a', { cohesion: undefined, fatigue: undefined }),
+        ];
+
+        const result = autoProposeBrigades(brigades, ['obj_1'], makeLookup(), 12);
+
+        expect(result.map((entry) => entry.brigadeId)).toEqual(['reported_tired', 'unreported_condition']);
+        expect(result[0].score).toBeGreaterThan(result[1].score);
+    });
 });
 
 describe('estimateMarchTurns', () => {

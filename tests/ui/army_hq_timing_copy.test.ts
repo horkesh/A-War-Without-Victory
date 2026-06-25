@@ -374,6 +374,40 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('DELAYS');
   });
 
+  it('renders sparse operation objective and axis lifecycle fields as unreported, not active progress', () => {
+    storeState.osidDisplayNames = { 'op:ridge:ridge_1': 'Ridge One', 'op:ridge:ridge_2': 'Ridge Two' };
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [makeOperation({
+        phase: 'planning',
+        phase_unreported: true,
+        current_objective_index: undefined,
+        momentum: undefined,
+        objectives: ['op:ridge:ridge_1', 'op:ridge:ridge_2'],
+        axes: ([{
+          axis_id: 'axis_sparse',
+          name: 'Sparse axis',
+          assigned_brigades: [],
+          objectives: ['op:ridge:ridge_1', 'op:ridge:ridge_2'],
+        }] as unknown) as OperationView['axes'],
+      } as Partial<OperationView>)],
+      gameState: makeGameState(),
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('Status pending');
+    expect(copy).toContain('Objective progress unreported');
+    expect(copy).toContain('Status unreported');
+    expect(copy).toContain('Momentum Unreported');
+    expect(copy).not.toContain('In execution');
+    expect(copy).not.toContain('Primary objective');
+    expect(copy).not.toContain('Obj. 1 / 2');
+    expect(copy).not.toContain('Momentum +0.0');
+  });
+
   it('renders command friction and stabilization cooldown timing as calendar dates', () => {
     const { container } = render(React.createElement(CommandRelationshipSection, {
       corpsId: 'arbih_3rd_corps',

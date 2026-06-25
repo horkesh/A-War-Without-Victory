@@ -64,9 +64,9 @@ export function autoProposeBrigades(
         const arty = b.composition?.artillery ?? 0;
         const combatPowerScore = Math.min(1, (pers + tanks * 50 + arty * 30) / 5000);
 
-        const coh = (b.cohesion ?? 50) / 100;
-        const fat = (b.fatigue ?? 0) / 30;
-        const readinessScore = coh * (1 - Math.min(1, fat));
+        const coh = typeof b.cohesion === 'number' && Number.isFinite(b.cohesion) ? b.cohesion / 100 : null;
+        const fat = typeof b.fatigue === 'number' && Number.isFinite(b.fatigue) ? b.fatigue / 30 : null;
+        const readinessScore = coh == null || fat == null ? 0 : coh * (1 - Math.min(1, fat));
 
         const totalScore = proximityScore * 0.5 + combatPowerScore * 0.3 + readinessScore * 0.2;
 

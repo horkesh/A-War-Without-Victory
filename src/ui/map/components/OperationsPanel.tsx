@@ -98,6 +98,12 @@ function getOperationCommanderDisplay(
   return { kind: 'assigned', officer };
 }
 
+function operationPhaseLabel(operation: OperationView): string {
+  return operation.phase_unreported
+    ? getPlayerSafeOperationPhaseLabel(null)
+    : getPlayerSafeOperationPhaseLabel(operation.phase);
+}
+
 export function OperationsPanel() {
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
@@ -213,9 +219,9 @@ export function OperationsPanel() {
   }
 
   const selectedObjectiveCount = selectedOperation?.objectives?.length ?? 0;
-  const selectedObjectiveIndex = selectedOperation?.current_objective_index ?? 0;
+  const selectedObjectiveIndex = selectedOperation?.current_objective_index;
   const objectiveProgress =
-    selectedObjectiveCount > 0
+    selectedObjectiveCount > 0 && selectedObjectiveIndex != null
       ? Math.max(0, Math.min(1, (selectedObjectiveIndex + 1) / selectedObjectiveCount))
       : 0;
 
@@ -229,6 +235,7 @@ export function OperationsPanel() {
     ? Math.round(selectedOperation.supply_readiness * 100)
     : null;
   const phaseTurnCount = selectedOperation
+    && !selectedOperation.phase_unreported
     ? Math.max(1, loadedGameState.turn - (selectedOperation.phase_started_turn ?? selectedOperation.started_turn) + 1)
     : null;
   const readiness = selectedOperation?.readiness;
@@ -338,7 +345,7 @@ export function OperationsPanel() {
                 const phaseBadgeClass = getOperationPhaseBadgeClass(op.phase);
                 const health = getOperationHealthSummary(op);
                 const opSupplyPct = op.supply_readiness != null ? Math.round(op.supply_readiness * 100) : null;
-                const opPhaseTurn = Math.max(1, loadedGameState.turn - (op.phase_started_turn ?? op.started_turn) + 1);
+                const opPhaseTurn = op.phase_unreported ? null : Math.max(1, loadedGameState.turn - (op.phase_started_turn ?? op.started_turn) + 1);
                 return (
                   <button
                     key={id}
@@ -347,7 +354,7 @@ export function OperationsPanel() {
                     aria-selected={selected}
                     aria-label={t('operationsPanel.operationCardAria', {
                       name: op.display_name,
-                      phase: getPlayerSafeOperationPhaseLabel(op.phase),
+                      phase: operationPhaseLabel(op),
                       brigades: op.participating_brigade_count,
                     })}
                     ref={(el) => {
@@ -368,16 +375,18 @@ export function OperationsPanel() {
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2">
                       <span className={`px-1 py-0.5 rounded text-white text-[10px] uppercase font-semibold ${phaseBadgeClass}`}>
-                        {getPlayerSafeOperationPhaseLabel(op.phase)}
+                        {operationPhaseLabel(op)}
                       </span>
                       <span className={`text-[10px] uppercase tracking-wide ${health.className}`}>
                         {health.label}
                       </span>
                     </div>
                     <div className="mt-1 flex flex-wrap items-center gap-1 text-[9px]">
-                      <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
-                        {t('operationsPanel.phaseAge', { count: opPhaseTurn })}
-                      </span>
+                      {opPhaseTurn != null && (
+                        <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
+                          {t('operationsPanel.phaseAge', { count: opPhaseTurn })}
+                        </span>
+                      )}
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
                         {t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
                       </span>
@@ -416,6 +425,7 @@ export function OperationsPanel() {
 
 
                 {/* Phase timeline */}
+                {!selectedOperation.phase_unreported ? (
                 <div className="flex flex-wrap gap-1 pt-1 border-t border-panel-border">
                   {OPERATION_PHASE_TIMELINE.map((phase) => {
                     const active = selectedOperation.phase === phase;
@@ -430,6 +440,11 @@ export function OperationsPanel() {
                     );
                   })}
                 </div>
+                ) : (
+                  <div className="pt-1 border-t border-panel-border text-[10px] uppercase tracking-wide text-text-secondary italic">
+                    {operationPhaseLabel(selectedOperation)}
+                  </div>
+                )}
 
                 {/* Metrics */}
                 <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-panel-border">
@@ -440,7 +455,7 @@ export function OperationsPanel() {
                   <div>
                     <span className="text-text-secondary">{t('operationsPanel.phase')} </span>
                     <span className="text-text-primary">
-                      {getPlayerSafeOperationPhaseLabel(selectedOperation.phase)}{phaseTurnCount != null ? ` - ${t('operationsPanel.phaseAge', { count: phaseTurnCount })}` : ''}
+                      {operationPhaseLabel(selectedOperation)}{phaseTurnCount != null ? ` - ${t('operationsPanel.phaseAge', { count: phaseTurnCount })}` : ''}
                     </span>
                   </div>
                   <div>
@@ -590,7 +605,7 @@ export function OperationsPanel() {
                     <div className="flex items-center justify-between text-[10px]">
                       <span className="text-text-secondary">{t('operationsPanel.objectiveProgress')}</span>
                       <span className="text-text-primary tabular-nums">
-                        {selectedObjectiveCount > 0 ? `${Math.min(selectedObjectiveIndex + 1, selectedObjectiveCount)}/${selectedObjectiveCount}` : '—'}
+                        {selectedObjectiveCount > 0 && selectedObjectiveIndex != null ? `${Math.min(selectedObjectiveIndex + 1, selectedObjectiveCount)}/${selectedObjectiveCount}` : '—'}
                       </span>
                     </div>
                     <div className="h-1.5 rounded bg-panel-bg overflow-hidden">
@@ -649,8 +664,8 @@ export function OperationsPanel() {
                       aria-label={t('operationsPanel.objectivesAria')}
                     >
                       {selectedOperation.objectives.map((obj, index) => {
-                        const isDone = index < selectedObjectiveIndex;
-                        const isCurrent = index === selectedObjectiveIndex;
+                        const isDone = selectedObjectiveIndex != null && index < selectedObjectiveIndex;
+                        const isCurrent = selectedObjectiveIndex != null && index === selectedObjectiveIndex;
                         const objectiveName = getOsidDisplayName(obj, osidDisplayNames);
                         return (
                           <button

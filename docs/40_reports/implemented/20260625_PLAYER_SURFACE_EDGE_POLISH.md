@@ -1,7 +1,7 @@
 # Player Surface Edge Polish
 
 **Date:** 2026-06-25
-**Status:** Implemented on `main`; field-routing/accessibility follow-up merged green at `86191c7a7`; Corps Front / Formation Detail truth-parity follow-up fast-forwarded locally onto `main` at `1860bdf05` with main GitHub closeout pending.
+**Status:** Implemented on `main` through the Corps Front / Formation Detail truth-parity follow-up at `1860bdf05`; sparse operation lifecycle follow-up implemented locally on `codex/operation-sparse-truth-polish` with merge/GitHub closeout pending.
 
 ## Summary
 
@@ -73,9 +73,26 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 
 ### Next Scout Queue
 
-- Corps Front Forces-tab brigade rows should align missing personnel truth with Army HQ sector rows: visible and accessible row copy should say `Unreported` instead of omitting personnel or rendering a dash.
-- Operation sparse-lifecycle truth needs the next larger slice: `GameStateAdapter` currently promotes missing operation phase/axis status to execution/executing, ops-planning brigade cards score missing combat data as zero/healthy, opportunity axis-readiness counts default missing values to zero, and Corps Front planning progress can invent a `0/8` preparation cycle.
+- Operation opportunity axis-readiness counts still need a focused sparse-data pass: missing required/optional axis readiness should not default to green or zero without explicit proposal evidence.
+
+## Sparse Operation Lifecycle / Corps Front Forces Follow-Up
+
+- Corps Front Forces-tab rows now render missing assigned, reserve, command-directed, and rear/support brigade personnel as visible and accessible `Unreported` copy instead of omitting the value or showing a dash.
+- Corps Front preparation progress no longer invents `Cycle 0 of 8 (0%)` when timing records are absent; it renders `Preparation timing unreported`.
+- `GameStateAdapter` now preserves sparse operation lifecycle truth: missing or invalid operation phase projects as `phase_unreported`, and sparse axis objective/status/momentum/staging fields remain absent rather than becoming `planning`, `executing`, `0`, or index `0` claims.
+- OperationsPanel and Army HQ Operations render sparse operation records as `Status pending`, suppress false phase/current-objective/progress claims, and show unreported objective/axis/momentum fields without crashing.
+- Ops modal brigade cards no longer treat missing personnel/composition/cohesion/fatigue as zero, fresh, healthy, or combat ineffective; auto-propose scoring no longer ranks unknown-condition brigades as healthy.
+
+### Sparse Operation Verification So Far
+
+- Focused red/green proof passed: `node node_modules\vitest\vitest.mjs run tests/ui/corps_front_panel_routing.test.ts tests/ui/ops_brigade_card_i18n.test.ts tests/ui/ops_modal_auto_propose.test.ts tests/ui/oob_operations_panel.test.ts tests/ui/army_hq_timing_copy.test.ts tests/ui_map_game_state_adapter.test.ts --pool=forks --reporter=dot` (6 files / 129 tests).
+- `npm.cmd run typecheck` passed.
+- Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH war-start splash, foundational decision modal, Army HQ load, OOB sector drilldown, Corps Front sector intelligence, Operations accordion, and Order of Battle controls with no browser console errors. Sparse sector intel rendered `Unreported` for missing stance, operational security, and confidence.
+
+### Sparse Operation Scope
+
+UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, baseline manifest, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed.
 
 ## Closeout
 
-- Push `main`, inspect GitHub failures/comments until green, then delete the feature branch/worktree/temp evidence.
+- Push the sparse operation lifecycle branch, inspect GitHub failures/comments until green, merge to `main`, then delete the feature branch/worktree/temp evidence.

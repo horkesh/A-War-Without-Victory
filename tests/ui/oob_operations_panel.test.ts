@@ -224,6 +224,26 @@ describe('OOB and operations panel operation labels', () => {
     })).toBeNull();
   });
 
+  it('renders sparse operation lifecycle as status pending without fake objective or momentum progress', () => {
+    setOperationPatch({
+      phase: 'planning',
+      phase_unreported: true,
+      current_objective_index: undefined,
+      momentum: undefined,
+      objectives: ['op:test:objective', 'op:test:second'],
+    } as Partial<OperationView>);
+
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('Status pending');
+    expect(container.textContent).toContain('Momentum: —');
+    expect(container.textContent).toContain('Objective Progress—');
+    expect(container.textContent).not.toContain('In execution');
+    expect(container.textContent).not.toContain('Objective Progress1/2');
+    expect(container.textContent).not.toContain('Momentum 0');
+    expect(screen.queryByText('Schwerpunkt')).toBeNull();
+  });
+
   it('surfaces stale operation participant records without creating fake brigade controls', () => {
     setOperationPatch({
       stale_participating_brigade_count: 1,

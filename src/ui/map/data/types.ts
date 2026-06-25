@@ -943,6 +943,8 @@ export interface OperationView {
     display_name: string;
     type: string;
     phase: 'planning' | 'execution' | 'recovery';
+    /** True when the source operation omitted or carried an invalid phase; `phase` is only a render bucket. */
+    phase_unreported?: boolean;
     sector_id?: string;
     staging_osid?: string;
     objectives?: string[];
@@ -976,9 +978,9 @@ export interface OperationView {
         name: string;
         assigned_brigades: string[];
         objectives: string[];
-        current_objective_index: number;
-        status: 'executing' | 'stalled' | 'complete';
-        momentum: number;
+        current_objective_index?: number;
+        status?: 'executing' | 'stalled' | 'complete';
+        momentum?: number;
         staging_osid?: string;
     }>;
     /** Operation commander officer ID (if assigned). */

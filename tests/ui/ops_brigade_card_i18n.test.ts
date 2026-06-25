@@ -73,6 +73,36 @@ describe('ops modal BrigadeCard i18n', () => {
     expect(screen.getByText('1 turn march')).toBeTruthy();
   });
 
+  it('renders missing BrigadeCard strength fields as unreported instead of zero or healthy defaults', () => {
+    setLocale('en');
+    render(React.createElement(BrigadeCard, {
+      brigade: makeBrigade({
+        personnel: undefined,
+        composition: undefined,
+        cohesion: undefined,
+        fatigue: undefined,
+      }),
+      isAssigned: false,
+      isAutoProposed: false,
+      marchTurns: null,
+      factionColor: '#4a9a55',
+      onToggle: vi.fn(),
+    }));
+
+    const card = screen.getByRole('button', { name: /1st Test Mechanized Brigade/i });
+    expect((card as HTMLButtonElement).disabled).toBe(false);
+    expect(card.getAttribute('title')).toContain('Personnel: Unreported');
+    expect(card.getAttribute('title')).toContain('Tanks: Unreported');
+    expect(card.getAttribute('title')).toContain('Cohesion: Unreported');
+    expect(card.getAttribute('title')).toContain('Fatigue: Unreported');
+    expect(card.getAttribute('title')).not.toContain('Personnel: 0');
+    expect(card.getAttribute('title')).not.toContain('Cohesion: 50');
+    expect(card.getAttribute('title')).not.toContain('Fatigue: 0');
+    expect(card.textContent).toContain('Unreported');
+    expect(card.textContent).not.toContain('COMBAT INEFFECTIVE');
+    expect(card.textContent).not.toMatch(/\bFRESH\b/i);
+  });
+
   it('renders BrigadeCard and BrigadeTray copy through localized BCS labels', () => {
     setLocale('bcs');
 

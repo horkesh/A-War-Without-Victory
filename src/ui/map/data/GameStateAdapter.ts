@@ -133,6 +133,17 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function readOperationPhase(value: unknown): { phase: OperationView['phase']; unreported: boolean } {
+    if (value === 'planning' || value === 'execution' || value === 'recovery') {
+        return { phase: value, unreported: false };
+    }
+    return { phase: 'planning', unreported: true };
+}
+
+function readAxisStatus(value: unknown): 'executing' | 'stalled' | 'complete' | undefined {
+    return value === 'executing' || value === 'stalled' || value === 'complete' ? value : undefined;
+}
+
 function projectedOfficerStatus(data: Record<string, unknown>, os: Record<string, unknown> | undefined, turn: number): string {
     if (typeof os?.status === 'string') return os.status;
     const availableFrom = typeof data.available_from_turn === 'number' && Number.isFinite(data.available_from_turn)
@@ -1219,6 +1230,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     }, 0)
                     : undefined;
                 const supplyReadiness = typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined;
+                const operationPhase = readOperationPhase(op.phase);
                 operations.push({
                     corps_id: fv.id,
                     corps_name: fv.name,
@@ -1233,7 +1245,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     // mutate the engine op.name (determinism preserved).
                     display_name: getPlayerSafeOperationName(op.name as string, fv.id),
                     type: (op.type as string) ?? 'sector_attack',
-                    phase: (op.phase as 'planning' | 'execution' | 'recovery') ?? 'execution',
+                    phase: operationPhase.phase,
+                    ...(operationPhase.unreported ? { phase_unreported: true } : {}),
                     sector_id: typeof op.sector_id === 'string' ? op.sector_id : undefined,
                     staging_osid: typeof op.staging_osid === 'string' ? op.staging_osid : undefined,
                     objectives: Array.isArray(op.objectives) ? (op.objectives as string[]).filter(o => typeof o === 'string') : undefined,
@@ -1269,10 +1282,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         name: String(a.name ?? ''),
                         assigned_brigades: Array.isArray(a.assigned_brigades) ? (a.assigned_brigades as string[]).filter(s => typeof s === 'string') : [],
                         objectives: Array.isArray(a.objectives) ? (a.objectives as string[]).filter(s => typeof s === 'string') : [],
-                        current_objective_index: typeof a.current_objective_index === 'number' ? a.current_objective_index : 0,
-                        status: (a.status as 'executing' | 'stalled' | 'complete') ?? 'executing',
-                        momentum: typeof a.momentum === 'number' ? a.momentum : 0,
-                        staging_osid: typeof a.staging_osid === 'string' ? a.staging_osid : undefined,
+                        ...(typeof a.current_objective_index === 'number' ? { current_objective_index: a.current_objective_index } : {}),
+                        ...(readAxisStatus(a.status) ? { status: readAxisStatus(a.status) } : {}),
+                        ...(typeof a.momentum === 'number' ? { momentum: a.momentum } : {}),
+                        ...(typeof a.staging_osid === 'string' ? { staging_osid: a.staging_osid } : {}),
                     })) : undefined,
                     commander_officer_id: typeof op.commander_officer_id === 'string' ? op.commander_officer_id : undefined,
                     preparation_sub_phase: typeof op.preparation_sub_phase === 'string' ? op.preparation_sub_phase as OperationView['preparation_sub_phase'] : undefined,

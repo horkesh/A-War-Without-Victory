@@ -782,6 +782,51 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
     assert.equal(operation?.avg_personnel_pct, 0.7);
 });
 
+test('parseGameState flags sparse operation lifecycle fields instead of inventing execution progress', () => {
+    const parsed = parseGameState({
+        meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                rbih_corps: { id: 'rbih_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
+                b1: { id: 'b1', faction: 'RBiH', corps_id: 'rbih_corps', name: '1st Brigade', kind: 'brigade', cohesion: 80, personnel: 2000, tags: [] },
+            },
+            corps_command: {
+                rbih_corps: {
+                    active_operations: [{
+                        name: 'Sparse Op',
+                        type: 'sector_attack',
+                        participating_brigades: ['b1'],
+                        objectives: ['op:one', 'op:two'],
+                        axes: [{
+                            axis_id: 'axis_sparse',
+                            name: 'Axis Sparse',
+                            assigned_brigades: ['b1'],
+                            objectives: ['op:one', 'op:two'],
+                        }],
+                        started_turn: 14,
+                    }],
+                },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const operation = parsed.operations?.[0];
+    assert.ok(operation);
+    assert.equal(operation?.phase_unreported, true);
+    assert.equal(operation?.phase, 'planning');
+    assert.equal(operation?.current_objective_index, undefined);
+    assert.equal(operation?.momentum, undefined);
+    assert.deepEqual(operation?.axes?.[0], {
+        axis_id: 'axis_sparse',
+        name: 'Axis Sparse',
+        assigned_brigades: ['b1'],
+        objectives: ['op:one', 'op:two'],
+    });
+});
+
 test('parseGameState scopes player-facing operations, operation history, active operations, and reserve requests', () => {
     const parsed = parseGameState({
   meta: { turn: 9, phase: 'war', player_faction: 'RBiH' },

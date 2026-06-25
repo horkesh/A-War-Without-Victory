@@ -293,6 +293,12 @@ function resolveOperationCommander(
     return { kind: 'assigned', officer };
 }
 
+function operationPhaseLabel(op: OperationView): string {
+    return op.phase_unreported
+        ? getPlayerSafeOperationPhaseLabel(null)
+        : getPlayerSafeOperationPhaseLabel(op.phase);
+}
+
 /** Brigade status row within operation ORBAT. */
 function BrigadeStatusRow({ brig, corpsId }: { brig: FormationView; corpsId: string }) {
     const personnel = brig.personnel;
@@ -533,10 +539,13 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
             {objectives.length > 0 && (
                 <div className="space-y-2">
                         <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest border-b border-panel-border/30 pb-1">{t('operationsSection.strategicObjectiveListing', { count: objectives.length })}</div>
+                    {op.current_objective_index == null && (
+                        <div className="px-2 text-[10px] italic text-text-secondary/60">{t('operationsSection.objectiveProgressUnreported')}</div>
+                    )}
                     <div className="grid gap-1">
                         {objectives.map((obj, i) => {
-                            const isCurrent = i === (op.current_objective_index ?? 0);
-                            const isComplete = i < (op.current_objective_index ?? 0);
+                            const isCurrent = op.current_objective_index != null && i === op.current_objective_index;
+                            const isComplete = op.current_objective_index != null && i < op.current_objective_index;
                             return (
                                 <div key={i} className={`flex items-center gap-3 px-2 py-1 ${isCurrent ? 'bg-panel-bg border-l-2 border-amber-400' : ''}`}>
                                     <span className={`w-4 text-center ${isCurrent ? 'text-amber-400 font-bold' : isComplete ? 'text-text-secondary/60' : 'text-white/10'}`}>
@@ -562,14 +571,18 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
                             <div key={axis.axis_id} className="px-3 py-2 border border-panel-border/50 bg-panel-card rounded-md">
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="font-bold text-text-primary uppercase tracking-wider">{safeFallbackLabel(axis.name, t('operationsSection.axisUnreported'))}</span>
-                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border border-current bg-current/5 ${AXIS_STATUS_COLOR[axis.status] ?? 'text-text-secondary/60'}`}>
-                                        {AXIS_STATUS_LABELS[axis.status] ?? t('operationsSection.statusUnreported')}
+                                    <span className={`text-[10px] font-bold uppercase px-2 py-0.5 border border-current bg-current/5 ${axis.status ? AXIS_STATUS_COLOR[axis.status] : 'text-text-secondary/60'}`}>
+                                        {axis.status ? AXIS_STATUS_LABELS[axis.status] : t('operationsSection.statusUnreported')}
                                     </span>
                                 </div>
                                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-text-secondary text-[10px] uppercase">
                                     <span className="flex items-center gap-2"><b className="text-text-secondary">{axis.assigned_brigades.length}</b> {t('operationsSection.unitsDeployed')}</span>
-                                    <span className="flex items-center gap-2">{t('operationsSection.objShort')} <b className="text-text-secondary">{axis.current_objective_index + 1} / {axis.objectives.length}</b></span>
-                                    <span className={`flex items-center gap-2 ${axis.momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>{t('operationsSection.momShort')} <b className="text-current font-bold">{axis.momentum > 0 ? '+' : ''}{axis.momentum.toFixed(1)}</b></span>
+                                    <span className="flex items-center gap-2">
+                                        {t('operationsSection.objShort')} <b className="text-text-secondary">{axis.current_objective_index != null ? `${axis.current_objective_index + 1} / ${axis.objectives.length}` : t('operationsSection.metricUnreported')}</b>
+                                    </span>
+                                    <span className={`flex items-center gap-2 ${axis.momentum == null ? 'text-text-secondary/60 italic' : axis.momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>
+                                        {t('operationsSection.momShort')} <b className="text-current font-bold">{axis.momentum != null ? `${axis.momentum > 0 ? '+' : ''}${axis.momentum.toFixed(1)}` : t('operationsSection.metricUnreported')}</b>
+                                    </span>
                                 </div>
                             </div>
                         ))}
@@ -729,7 +742,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                     {operations.map((op) => {
                         const opKey = `${op.corps_id}|${op.name}`;
                         const badge = PHASE_BADGE[op.phase] ?? PHASE_BADGE.planning;
-                        const momentum = op.momentum ?? 0;
+                        const momentum = op.momentum;
                         const commander = resolveOperationCommander(op.commander_officer_id, gameState.namedOfficerData);
                         const objectives = op.objectives ?? [];
                         const isExpanded = expandedOp === opKey;
@@ -772,14 +785,14 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                                                 />
                                             )}
                                             <span className={`text-[9px] font-bold uppercase px-2 py-0.5 border leading-none tracking-widest ${badge.bg} ${badge.border} ${badge.text}`}>
-                                                {getPlayerSafeOperationPhaseLabel(op.phase)}
+                                                {operationPhaseLabel(op)}
                                             </span>
                                         </div>
                                     </div>
                                     <div className="text-[10px] tabular-nums font-mono flex flex-wrap gap-x-6 gap-y-1 ml-5 uppercase tracking-tighter">
                                         <span className="text-text-secondary">{t('operationsSection.units')} <b className="text-text-secondary">{op.participating_brigade_count}</b></span>
                                         <span className="text-text-secondary">{t('operationsSection.objectives')} <b className="text-text-secondary">{objectives.length}</b></span>
-                                        {op.phase === 'execution' && (
+                                        {op.phase === 'execution' && momentum != null && (
                                             <span className={`flex items-center gap-2 ${momentum >= 0 ? 'text-emerald-400' : 'text-red-500'}`}>
                                                 {t('operationsSection.momentum')} <b className="font-bold">{momentum > 0 ? '+' : ''}{momentum.toFixed(1)}</b>
                                             </span>
