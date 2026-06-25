@@ -932,7 +932,12 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   relatedOperations.map((op) => {
                     const phaseBg = getOperationPhaseBadgeClass(op.phase);
                     const operationId = getOperationId(op);
-                    const objective = op.objectives?.[op.current_objective_index ?? 0] ?? op.objectives?.[0];
+                    const currentObjectiveIndex = typeof op.current_objective_index === 'number'
+                      ? op.current_objective_index
+                      : null;
+                    const objective = currentObjectiveIndex != null && currentObjectiveIndex >= 0
+                      ? op.objectives?.[currentObjectiveIndex]
+                      : undefined;
                     const forceBalance = op.force_ratio_estimate != null
                       ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
                       : null;

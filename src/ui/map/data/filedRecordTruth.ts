@@ -19,6 +19,12 @@ export function countFiledDecisionRecords(state: LoadedGameState | null | undefi
   return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).length;
 }
 
+export function countFiledChronicleDecisionRecords(state: LoadedGameState | null | undefined): number {
+  return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+    .filter((record) => record.recordTarget === 'chronicle')
+    .length;
+}
+
 export function hasFiledRecord(state: LoadedGameState | null | undefined): boolean {
   if (!state) return false;
   if (countFiledTurnRecords(state) > 0) return true;

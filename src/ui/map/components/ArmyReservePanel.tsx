@@ -118,6 +118,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         return getPlayerFacingCorpsName(corpsId, corpsNameById, 'Assigned command');
     }
 
+    function loanedCorpsLabel(corpsId: string | null | undefined): string {
+        return corpsId ? getCorpsName(corpsId) : t('armyReserve.assignedCommandUnreported');
+    }
+
     // ELITE-DEPLOY presidential command-authority cost (scan-only). Releasing an elite
     // formation from the strategic reserve debits ELITE_DEPLOY_COST (charged server-side
     // in approveReserveRequest). The APPROVE action — the elite-deploy lever — is issued
@@ -199,6 +203,8 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <div className="space-y-1.5">
                             {elites.map(brigade => {
                                 const ls = brigade.eliteLoanState!;
+                                const brigadeName = getLocalizedFormationName(brigade, locale);
+                                const loanedToCorps = loanedCorpsLabel(ls.loaned_to_corps);
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : null;
                                 return (
                                     <div
@@ -215,9 +221,9 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     osid: brigade.location_osid,
                                                 })}
                                                 className="min-w-0 truncate text-left text-text-primary font-semibold transition-colors hover:text-accent-gold"
-                                                aria-label={t('armyReserve.inspectBrigadeAria', { name: getLocalizedFormationName(brigade, locale) })}
+                                                aria-label={t('armyReserve.inspectBrigadeAria', { name: brigadeName })}
                                             >
-                                                {getLocalizedFormationName(brigade, locale)}
+                                                {brigadeName}
                                             </button>
                                             {ls.permanently_degraded ? (
                                                 <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
@@ -238,7 +244,11 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         <div className="space-y-0.5">
                                             <div className="flex justify-between text-[10px] text-text-secondary">
                                                 <span>{t('armyReserve.personnel')}</span>
+                                                {brigade.personnel == null ? (
+                                                    <span className="italic text-text-secondary/80">{t('armyReserve.personnelUnreported')}</span>
+                                                ) : (
                                                 <span>{brigade.personnel?.toLocaleString() ?? '—'}</span>
+                                                )}
                                             </div>
                                             <div className={`h-1 rounded-full overflow-hidden ${pct == null ? 'bg-panel-border/30' : 'bg-black/30'}`}>
                                                 {pct != null && (
@@ -253,12 +263,13 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         {ls.on_loan && (
                                             <div className="flex items-center justify-between pt-0.5">
                                                 <span className="text-text-secondary">
-                                                    → {getCorpsName(ls.loaned_to_corps!)} ({deployedDurationLabel(ls.turns_deployed)})
+                                                    → {loanedToCorps} ({deployedDurationLabel(ls.turns_deployed)})
                                                 </span>
                                                 <button
                                                     type="button"
                                                     disabled={!ipc.isAvailable}
                                                     onClick={() => { void handleRecall(brigade.id); }}
+                                                    aria-label={t('armyReserve.recallBrigadeAria', { name: brigadeName, corps: loanedToCorps })}
                                                     title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
                                                     className={`px-2 py-0.5 border rounded text-[10px] font-bold transition-colors ${
                                                         ipc.isAvailable
@@ -297,6 +308,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
                             {activeLoans.map((brigade) => {
                                 const ls = brigade.eliteLoanState!;
+                                const brigadeName = getLocalizedFormationName(brigade, locale);
                                 return (
                                     <div
                                         key={brigade.id}
@@ -312,17 +324,17 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                                     osid: brigade.location_osid,
                                                 })}
                                                 className="min-w-0 truncate text-left text-text-primary transition-colors hover:text-accent-gold"
-                                                aria-label={t('armyReserve.inspectActiveLoanBrigadeAria', { name: getLocalizedFormationName(brigade, locale) })}
+                                                aria-label={t('armyReserve.inspectActiveLoanBrigadeAria', { name: brigadeName })}
                                                 data-testid={`army-reserve-active-loan-inspect-${brigade.id}`}
                                             >
-                                                {getLocalizedFormationName(brigade, locale)}
+                                                {brigadeName}
                                             </button>
                                             <span className="text-[10px] text-text-secondary shrink-0">
                                                 {deployedDurationLabel(ls.turns_deployed)}
                                             </span>
                                         </div>
                                         <div className="text-[10px] text-text-secondary truncate">
-                                            {getCorpsName(ls.loaned_to_corps ?? 'unknown')}
+                                            {loanedCorpsLabel(ls.loaned_to_corps)}
                                         </div>
                                         {brigade.eliteCommander && (
                                             <div className="mt-1">
@@ -358,11 +370,12 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                 const causeCopy = getArmyReserveRequestCauseCopy(req);
                                 const evidenceCopy = getArmyReserveRequestEvidenceCopy(req);
                                 const provenanceCopy = getArmyReserveRequestProvenanceCopy(req);
+                                const requestCorpsName = getCorpsName(req.corps_id);
                                 return (
                                     <div key={req.request_id ?? idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
-                                            <div className="text-text-primary font-semibold">{getCorpsName(req.corps_id)}</div>
+                                            <div className="text-text-primary font-semibold">{requestCorpsName}</div>
                                             <div className="text-[10px] text-text-secondary mt-1">
                                                 {severityCopy.detail}
                                             </div>
@@ -469,6 +482,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                             onClick={() => {
                                                 void handleDecline(req.request_id);
                                             }}
+                                            aria-label={t('armyReserve.declineRequestAria', { corps: requestCorpsName })}
                                             title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
                                             className={`px-2 py-1 border rounded text-[10px] transition-colors ${
                                                 ipc.isAvailable
@@ -492,13 +506,20 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                         <button
                             type="button"
                             onClick={() => setHistoryOpen(o => !o)}
+                            aria-expanded={historyOpen}
+                            aria-controls={`army-reserve-campaign-history-${armyHq.id}`}
+                            aria-label={t(historyOpen ? 'armyReserve.collapseCampaignHistoryAria' : 'armyReserve.expandCampaignHistoryAria')}
                             className="flex items-center gap-1.5 text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 hover:opacity-100 transition-opacity mb-2"
                         >
                             <span>{historyOpen ? '▾' : '▸'}</span>
                             {t('armyReserve.campaignHistory')}
                         </button>
                         {historyOpen && (
-                            <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                            <div
+                                id={`army-reserve-campaign-history-${armyHq.id}`}
+                                data-testid="army-reserve-campaign-history-detail"
+                                className="space-y-3 max-h-64 overflow-y-auto pr-1"
+                            >
                                 {elites.filter(b => (tracker[b.id]?.total_loans ?? 0) > 0).map(brigade => {
                                     const brigadeTracker = tracker[brigade.id]!;
                                     return (

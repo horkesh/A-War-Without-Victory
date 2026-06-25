@@ -1285,6 +1285,30 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('does not offer Chronicle memory for Records-only decision receipts', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+        reserveRequestHistory: [{
+          request_id: 'reserve-record-1',
+          turn: 12,
+          faction: 'RBiH',
+          corps_id: 'arbih_1st_corps',
+          brigade_id: null,
+          outcome: 'declined',
+          reason: 'defensive_gap',
+          decided_by: 'player',
+          purpose: 'defensive',
+          why_needed: 'Reserve requested for a defensive gap.',
+          how_to_use: 'Hold the sector line.',
+        }],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.cards.some((card) => card.id === 'chronicle:review-memory')).toBe(false);
+  });
+
   it('builds a deterministic priority dossier for the top card by default', () => {
     const state = makeState({
       presidentialReviewQueue: {

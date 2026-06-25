@@ -938,6 +938,26 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.focusedOperationHistoryId).toBeNull();
   });
 
+  it('does not focus the first operation objective when current objective is unreported', () => {
+    const state = makeState();
+    state.operations = ([{
+      ...state.operations![0],
+      current_objective_index: undefined,
+      objectives: ['op:sarajevo:dobrinja_1', 'op:sarajevo:centar_1'],
+    }] as unknown) as LoadedGameState['operations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+
+    expect(screen.queryByRole('button', { name: /Focus map on objective/i })).toBeNull();
+  });
+
   it('renders unknown commander assessment as unreported instead of title-cased enum copy', () => {
     const state = makeState();
     state.operations = ([{

@@ -360,7 +360,7 @@ describe('GUI audit Batch G dead/no-op controls', () => {
 
         expect(container.querySelector('button button')).toBeNull();
         expect(screen.getByRole('button', { name: /Inspect 1st Elite Brigade/i })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Terminate' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Recall 1st Elite Brigade from 1st Corps' })).toBeTruthy();
     });
 
     it('counts only executing operations in the Army HQ summary operations chip', () => {

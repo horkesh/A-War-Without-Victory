@@ -782,6 +782,37 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toMatch(/unit_citation/i);
     });
 
+    it('keeps missing ORBAT campaign casualty fields unreported instead of coercing them to zero', () => {
+        const brigade: FormationView = {
+            id: 'rbih_partial_losses_brigade',
+            faction: 'RBiH',
+            name: 'Partial Losses Brigade',
+            kind: 'brigade',
+            readiness: 'ready',
+            cohesion: 64,
+            fatigue: 3,
+            status: 'active',
+            createdTurn: 0,
+            tags: [],
+            narrativeArc: 'bloodied',
+            personnel: 1100,
+            posture: 'defend',
+            campaignKia: 7,
+            campaignWia: undefined,
+            campaignMia: undefined,
+        };
+        useGameStore.setState({
+            armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
+        });
+
+        const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
+        fireEvent.click(screen.getAllByRole('button', { name: /Partial Losses Brigade/i })[0]);
+        const copy = view.container.textContent ?? '';
+
+        expect(copy).toContain('7 killed / Unreported wounded / Unreported missing or captured');
+        expect(copy).not.toContain('7 killed / 0 wounded / 0 missing or captured');
+    });
+
     it('opens the focused completed operation row when routed from Chronicle', () => {
         useGameStore.setState({
             armyHQRecordsSubTab: 'ops',

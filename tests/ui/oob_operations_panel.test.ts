@@ -542,6 +542,26 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('0/1');
   });
 
+  it('does not invent OOB current-objective progress when the operation omits the current index', () => {
+    useGameStore.setState({
+      loadedGameState: {
+        ...loadedState(),
+        operations: [{
+          ...operation(),
+          current_objective_index: undefined,
+          objectives: ['op:test:objective', 'op:test:second'],
+        }],
+      } as LoadedGameState,
+    });
+
+    const { container } = render(createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+
+    expect(container.textContent).toContain('Objective progress unreported');
+    expect(container.textContent).not.toContain('1/2');
+  });
+
   it('opens the operation drilldown when an OOB operation row is clicked', () => {
     useGameStore.setState({
       isOperationsPanelOpen: false,

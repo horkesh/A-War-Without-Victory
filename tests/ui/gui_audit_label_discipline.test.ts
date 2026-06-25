@@ -210,6 +210,8 @@ describe('GUI audit label discipline', () => {
     expect(panel?.style.right).toBe('25.5rem');
     expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
     expect(selection.container.textContent).toContain('Actual Municipality');
+    expect(selection.container.textContent).toContain('Desktop command bridge unavailable. Local support orders are read-only in this browser view.');
+    expect(screen.getByRole('button', { name: /Stage/i }).getAttribute('aria-describedby')).toBe('settlement-local-support-unavailable');
     expect(selection.container.textContent).not.toContain('Legacy Slug');
     expect(screen.getByRole('button', { name: /Close settlement info/i })).toBeTruthy();
   });
