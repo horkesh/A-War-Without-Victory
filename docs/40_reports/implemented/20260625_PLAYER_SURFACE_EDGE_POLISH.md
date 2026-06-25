@@ -1,7 +1,7 @@
 # Player Surface Edge Polish
 
 **Date:** 2026-06-25
-**Status:** Implemented on `main` through the Corps Front / Formation Detail truth-parity follow-up at `1860bdf05`; sparse operation lifecycle follow-up implemented locally on `codex/operation-sparse-truth-polish` with merge/GitHub closeout pending.
+**Status:** Implemented on `main` through sparse operation lifecycle follow-up commit `82eb67bb2`; branch Event System CI passed before local fast-forward integration.
 
 ## Summary
 
@@ -69,7 +69,7 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 - Generated `.tmp_first_hour_browser_gate` and `.tmp_live_surface_browser_sweep` evidence folders were removed after inspection; `.tmp_dev_server` remains as the active local dev-server marker.
 - `git diff --check` passed.
 - Branch Event System CI passed on `codex/corps-front-truth-parity`.
-- Main GitHub inspection and branch cleanup remain pending.
+- Main GitHub inspection passed for the truth-parity branch before this sparse-operation follow-up.
 
 ### Next Scout Queue
 
@@ -95,4 +95,4 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario data, ev
 
 ## Closeout
 
-- Push the sparse operation lifecycle branch, inspect GitHub failures/comments until green, merge to `main`, then delete the feature branch/worktree/temp evidence.
+- Sparse-operation branch Event System CI passed, then the branch fast-forwarded into `main` at `82eb67bb2`. Remote `main` run status is the authoritative post-push closeout record.
