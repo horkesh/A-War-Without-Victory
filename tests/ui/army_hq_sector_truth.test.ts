@@ -83,8 +83,15 @@ describe('Army HQ sector truth', () => {
       defaultOpen: true,
     }));
     const row = screen.getByTestId('army-hq-sector-row');
+    const toggle = screen.getByTestId('army-hq-sector-toggle');
 
     expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.getAttribute('aria-controls')).toBe('army-hq-sector-detail-sector:arbih_1st_corps:uncovered');
+    expect(toggle.getAttribute('aria-label')).toMatch(/Collapse sector details for Remote front/i);
+    expect(`${toggle.getAttribute('aria-label')} ${toggle.getAttribute('title')}`).not.toMatch(/sector:|arbih_1st_corps/i);
+    expect(screen.getByTestId('army-hq-sector-detail').getAttribute('id')).toBe('army-hq-sector-detail-sector:arbih_1st_corps:uncovered');
+    expect(container.querySelector('button button')).toBeNull();
     expect(row.getAttribute('data-current-brigade-count')).toBe('0');
     expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('0');

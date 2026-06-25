@@ -321,12 +321,22 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                 : 'text-text-secondary/60';
                     const isExpanded = expandedId === b.id;
                     const formationName = getLocalizedFormationName(b, locale);
+                    const detailId = `army-hq-formation-detail-${b.id}`;
+                    const toggleLabel = isExpanded
+                        ? t('orbat.collapseFormationAria', { formation: formationName })
+                        : t('orbat.expandFormationAria', { formation: formationName });
 
                     return (
                         <div key={b.id} className={`border border-panel-border/30 mb-[1px] ${isExpanded ? 'bg-panel-bg' : ''}`}>
                             <div className={`flex items-center transition-all ${isExpanded ? '' : 'hover:bg-panel-bg'}`}>
                                 <button
                                     type="button"
+                                    data-testid="army-hq-formation-toggle"
+                                    data-formation-id={b.id}
+                                    aria-expanded={isExpanded}
+                                    aria-controls={detailId}
+                                    aria-label={toggleLabel}
+                                    title={toggleLabel}
                                     onClick={() => setExpandedId(isExpanded ? null : b.id)}
                                     className="min-w-0 flex flex-1 items-center gap-3 px-4 py-2 text-left"
                                 >
@@ -394,7 +404,11 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                     {t('orbat.inspect')}
                                 </button>
                             </div>
-                            {isExpanded && <BrigadeExpandedDetail b={b} />}
+                            {isExpanded && (
+                                <div id={detailId} data-testid="army-hq-formation-detail">
+                                    <BrigadeExpandedDetail b={b} />
+                                </div>
+                            )}
                         </div>
                     );
                 })}

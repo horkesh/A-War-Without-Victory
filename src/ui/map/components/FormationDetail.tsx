@@ -1055,7 +1055,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         data-current-brigade-count={currentBrigadeCount}
                         data-frontline-brigade-count={frontlineBrigadeCount}
                         data-rear-brigade-count={rearBrigadeCount}
-                        aria-label={t('formationDetail.sectorOptionAria', {
+                        aria-label={t(currentBrigadeCount === 1 ? 'formationDetail.sectorOptionAria.one' : 'formationDetail.sectorOptionAria.many', {
                           sector: sectorLabel,
                           count: currentBrigadeCount,
                         })}

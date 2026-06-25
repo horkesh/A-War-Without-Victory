@@ -887,7 +887,17 @@ describe('GUI audit label discipline', () => {
     useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
     const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
 
-    fireEvent.click(screen.getAllByRole('button', { name: /101st Brigade/i })[0]);
+    const toggle = screen.getByTestId('army-hq-formation-toggle');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBe('army-hq-formation-detail-arbih_101_brigade');
+    expect(toggle.getAttribute('aria-label')).toMatch(/Expand formation details for 101st Brigade/i);
+
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.getAttribute('aria-label')).toMatch(/Collapse formation details for 101st Brigade/i);
+    expect(screen.getByTestId('army-hq-formation-detail').getAttribute('id')).toBe('army-hq-formation-detail-arbih_101_brigade');
+    expect(screen.getByTestId('army-hq-formation-inspect').getAttribute('aria-label')).toBe('Inspect 101st Brigade on field');
+    expect(container.querySelector('button button')).toBeNull();
 
     expect(container.textContent).toMatch(/12 killed \/ 34 wounded \/ 5 missing or captured/i);
     expect(container.textContent).toContain('Elite commander');
