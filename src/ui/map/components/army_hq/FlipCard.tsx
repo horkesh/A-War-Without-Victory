@@ -21,6 +21,8 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
                     className={isFlipped ? 'hidden' : 'relative'}
                     style={{ pointerEvents: isFlipped ? 'none' : 'auto' }}
                     aria-hidden={isFlipped}
+                    hidden={isFlipped}
+                    tabIndex={isFlipped ? -1 : undefined}
                 >
                     {front}
                 </div>
@@ -31,6 +33,8 @@ export function FlipCard({ isFlipped, front, back, className }: FlipCardProps) {
                         maxHeight: '70vh',
                     }}
                     aria-hidden={!isFlipped}
+                    hidden={!isFlipped}
+                    tabIndex={isFlipped ? undefined : -1}
                 >
                     {back}
                 </div>

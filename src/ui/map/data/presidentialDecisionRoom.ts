@@ -31,6 +31,8 @@ import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { deriveInboxItems } from './inboxItems';
+import { isRequiredPendingEventDecision } from './eventDecisionRouting';
+import { playerFactionMatch } from './playerFactionMatch';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -387,10 +389,19 @@ function pluralize(value: number, singular: string, plural = `${singular}s`): st
   return value === 1 ? singular : plural;
 }
 
-function toDecisionSeverity(state: LoadedGameState): PresidentialDecisionRoomSeverity {
+function countReviewRequiredEventDecisions(state: LoadedGameState): number {
+  const liveRequiredCount = (state.pendingEventDecisions ?? []).filter((decision) =>
+    playerFactionMatch(decision.faction, state.player_faction ?? null)
+    && isRequiredPendingEventDecision(decision)
+  ).length;
+  if (Array.isArray(state.pendingEventDecisions)) return liveRequiredCount;
+  return Math.max(state.presidentialReviewQueue?.eventDecisionCount ?? 0, liveRequiredCount);
+}
+
+function toDecisionSeverity(state: LoadedGameState, requiredEventDecisionCount = countReviewRequiredEventDecisions(state)): PresidentialDecisionRoomSeverity {
   const queue = state.presidentialReviewQueue;
   if (!queue) return 'info';
-  if (queue.eventDecisionCount > 0) return 'blocking';
+  if (requiredEventDecisionCount > 0) return 'blocking';
   if (queue.criticalCount > 0) return 'critical';
   return 'warning';
 }
@@ -489,27 +500,65 @@ function actionForBriefingItem(item: CommandBriefingItemView, localizedActionLab
 function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const queue = state.presidentialReviewQueue;
   if (!queue || queue.pendingCount <= 0) return;
+  const eventDecisionCount = countReviewRequiredEventDecisions(state);
+  const pendingCount = eventDecisionCount
+    + queue.commandInterpretationCount
+    + queue.personnelDirectiveCount
+    + queue.operationOpportunityCount;
+  if (pendingCount <= 0) return;
+  const evidencePendingCount = Array.isArray(state.pendingEventDecisions)
+    ? pendingCount
+    : queue.pendingCount;
 
-  const evidence: string[] = [t('decisionRoom.card.review.evidence.pending', { count: queue.pendingCount })];
-  if (queue.eventDecisionCount > 0) evidence.push(t('decisionRoom.card.review.evidence.eventDecision', { count: queue.eventDecisionCount }));
+  const evidence: string[] = [t('decisionRoom.card.review.evidence.pending', { count: evidencePendingCount })];
+  if (eventDecisionCount > 0) evidence.push(t('decisionRoom.card.review.evidence.eventDecision', { count: eventDecisionCount }));
   if (queue.commandInterpretationCount > 0) evidence.push(t('decisionRoom.card.review.evidence.commandReaction', { count: queue.commandInterpretationCount }));
   if (queue.personnelDirectiveCount > 0) evidence.push(t('decisionRoom.card.review.evidence.personnel', { count: queue.personnelDirectiveCount }));
   if (queue.operationOpportunityCount > 0) evidence.push(t('decisionRoom.card.review.evidence.opDossier', { count: queue.operationOpportunityCount }));
 
+  const route = eventDecisionCount > 0
+    ? {
+      sourceLabel: t('inbox.title'),
+      actionLabel: t('decisionRoom.action.openInbox'),
+      navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
+      sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
+    }
+    : queue.commandInterpretationCount > 0
+      ? {
+        sourceLabel: t('decisionRoom.card.pushback.sourceOwner'),
+        actionLabel: t('decisionRoom.action.reviewPushback'),
+        navigationTarget: { kind: 'decision-room', lens: 'command', cardId: 'pushback:player-army-co' } as PresidentialDecisionRoomNavigationTarget,
+        sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' } as PresidentialDecisionRoomNavigationTarget,
+      }
+      : queue.personnelDirectiveCount > 0
+        ? {
+          sourceLabel: t('decisionRoom.action.personnel'),
+          actionLabel: t('decisionRoom.action.personnel'),
+          navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' } as PresidentialDecisionRoomNavigationTarget,
+          sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
+        }
+        : {
+          sourceLabel: t('inbox.title'),
+          actionLabel: t('decisionRoom.action.openInbox'),
+          navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
+          sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
+        };
+
   cards.push({
     id: 'review:pending',
     category: 'decision',
-    severity: toDecisionSeverity(state),
+    severity: toDecisionSeverity(state, eventDecisionCount),
     title: t('decisionRoom.card.review.title'),
-    explanation: queue.eventDecisionCount > 0
+    explanation: eventDecisionCount > 0
       ? t('decisionRoom.card.review.explanation.blocking')
       : t('decisionRoom.card.review.explanation.openWork'),
     sourceOwner: t('decisionRoom.card.review.sourceOwner'),
-    sourceLabel: t('inbox.title'),
-    actionLabel: t('decisionRoom.action.openInbox'),
+    sourceLabel: route.sourceLabel,
+    actionLabel: route.actionLabel,
     evidence,
-    navigationTarget: { kind: 'inbox' },
-    urgencySort: queue.eventDecisionCount > 0 ? 0 : 10,
+    navigationTarget: route.navigationTarget,
+    ...(route.sourceHandoffTarget ? { sourceHandoffTarget: route.sourceHandoffTarget } : {}),
+    urgencySort: eventDecisionCount > 0 ? 0 : 10,
     sourceSort: 'review',
   });
 }

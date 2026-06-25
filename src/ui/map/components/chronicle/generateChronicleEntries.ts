@@ -280,6 +280,22 @@ function getOperationDisplayName(op: any): string {
     );
 }
 
+function operationObjectiveSummary(op: any): {
+    heldAtClose: number;
+    loggedCaptured: number;
+    hasLoggedCaptureField: boolean;
+    detail: string;
+} {
+    const targeted = Array.isArray(op.objectives_targeted) ? op.objectives_targeted.length : 0;
+    const heldAtClose = Array.isArray(op.objectives_captured) ? op.objectives_captured.length : 0;
+    const hasLoggedCaptureField = Array.isArray(op.objectives_logged_captured);
+    const loggedCaptured = hasLoggedCaptureField ? op.objectives_logged_captured.length : heldAtClose;
+    const detail = hasLoggedCaptureField && loggedCaptured !== heldAtClose
+        ? t('chronicle.generated.operation.objectivesCapturedHeld', { logged: loggedCaptured, targeted, held: heldAtClose })
+        : t('chronicle.generated.operation.objectivesHeld', { captured: heldAtClose, targeted });
+    return { heldAtClose, loggedCaptured, hasLoggedCaptureField, detail };
+}
+
 function buildOperationHistoryEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
     if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
 
@@ -287,24 +303,26 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
     for (const op of state.operationHistory) {
         if (op?.faction !== playerFaction) continue;
 
-        const targeted = Array.isArray(op.objectives_targeted) ? op.objectives_targeted.length : 0;
-        const captured = Array.isArray(op.objectives_captured) ? op.objectives_captured.length : 0;
+        const objectives = operationObjectiveSummary(op);
         const attacks = Number(op.total_attacks ?? 0);
         const suffered = sumCasualties(op.casualties_suffered);
         const inflicted = sumCasualties(op.casualties_inflicted);
         const stars = Number(op.grade?.stars ?? 0);
         const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
         const operationName = getOperationDisplayName(op);
+        const headline = objectives.loggedCaptured > 0
+            || (!objectives.hasLoggedCaptureField && objectives.heldAtClose > 0)
+            || (objectives.heldAtClose === 0 && (outcome === 'success' || outcome === 'partial'));
 
         entries.push({
             id: typeof op.operation_id === 'string' ? `operation-aar-${op.operation_id}` : undefined,
             turn: Number(op.ended_turn ?? state.turn ?? 0),
             type: 'military',
-            headline: captured > 0 || outcome === 'success' || outcome === 'partial',
+            headline,
             title: t('chronicle.generated.operation.concludedTitle', { operationName }),
             detail: [
                 formatOperationOutcome(outcome),
-                t('chronicle.generated.operation.objectivesHeld', { captured, targeted }),
+                objectives.detail,
                 t(attacks === 1 ? 'chronicle.generated.operation.attacks.one' : 'chronicle.generated.operation.attacks.many', { count: attacks }),
                 t('chronicle.generated.operation.casualtyExchange', { suffered, inflicted }),
                 t(stars === 1 ? 'chronicle.generated.operation.stars.one' : 'chronicle.generated.operation.stars.many', { count: stars }),
@@ -338,23 +356,25 @@ function buildOfficerSpotlightEntries(state: any, playerFaction: string | null):
             ? op.commander_rank.trim()
             : undefined;
         const displayName = commanderRank ? `${commanderRank} ${commanderName}` : commanderName;
-        const targeted = Array.isArray(op.objectives_targeted) ? op.objectives_targeted.length : 0;
-        const captured = Array.isArray(op.objectives_captured) ? op.objectives_captured.length : 0;
+        const objectives = operationObjectiveSummary(op);
         const attacks = Number(op.total_attacks ?? 0);
         const stars = Number(op.grade?.stars ?? 0);
         const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
         const operationName = getOperationDisplayName(op);
+        const headline = objectives.loggedCaptured > 0
+            || (!objectives.hasLoggedCaptureField && objectives.heldAtClose > 0)
+            || (objectives.heldAtClose === 0 && (outcome === 'success' || outcome === 'partial'));
 
         entries.push({
             id: typeof op.operation_id === 'string' ? `officer-week-${op.operation_id}` : undefined,
             turn: Number(op.ended_turn ?? state.turn ?? 0),
             type: 'personnel',
-            headline: captured > 0 || outcome === 'success' || outcome === 'partial',
+            headline,
             title: t('chronicle.generated.officer.title', { displayName }),
             detail: [
                 operationName,
                 formatOperationOutcome(outcome),
-                t('chronicle.generated.operation.objectivesHeld', { captured, targeted }),
+                objectives.detail,
                 t(attacks === 1 ? 'chronicle.generated.operation.attacks.one' : 'chronicle.generated.operation.attacks.many', { count: attacks }),
                 t(stars === 1 ? 'chronicle.generated.operation.stars.one' : 'chronicle.generated.operation.stars.many', { count: stars }),
             ].join(' | '),

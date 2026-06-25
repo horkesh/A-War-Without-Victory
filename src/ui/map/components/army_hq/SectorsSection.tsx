@@ -76,6 +76,10 @@ function reportedCohesionLabel(value: number | undefined | null): { label: strin
     };
 }
 
+function partialAggregateLabel(value: number, formatter: (reported: number) => string = (reported) => String(Math.round(reported))): string {
+    return t('corpsFront.partialEquipment', { value: formatter(value) });
+}
+
 const STRENGTH_CLASS_COLORS: Record<string, string> = {
     fortress: 'text-emerald-400',
     strong: 'text-emerald-400/80',
@@ -111,6 +115,14 @@ function SectorExpandedDetail({
     const reserveIds = sectorAssignment.reserveIds;
     const overrideIds = sectorAssignment.overrideIds;
     const unresolvedRosterIds = sectorAssignment.unresolvedRosterIds;
+    const frontFormations = frontIds
+        .map((id) => formationMap.get(id))
+        .filter((formation): formation is FormationView => Boolean(formation));
+    const hasPartialLineReports = frontFormations.some((formation) => (
+        !isReportedNumber(formation.personnel)
+        || !isReportedNumber(formation.cohesion)
+        || !isReportedNumber(formation.fatigue)
+    ));
     const projectedLineCount = sectorAssignment.lineHoldingIds.length;
     const hasCurrentFieldedLine = projectedLineCount > 0;
     const projectedDensity = computeCurrentFrontDensity(sector, projectedLineCount);
@@ -157,9 +169,15 @@ function SectorExpandedDetail({
                 <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-text-secondary/60 uppercase tracking-wider border-t border-panel-border/30 pt-2">
                     <span>{t('sectorsSection.class')} <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{getPlayerSafeSectorStrengthLabel(sector.combat_strength_class)}</span></span>
                     {sector.combat_defense_per_edge != null && <span>{t('sectorsSection.defPerEdge')} <span className="font-bold text-text-secondary">{Math.round(sector.combat_defense_per_edge)}</span></span>}
-                    {sector.combat_morale_avg != null && <span>{t('sectorsSection.morShort')} <span className={`font-bold ${sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_morale_avg)}</span></span>}
-                    {sector.combat_fatigue_avg != null && <span>{t('sectorsSection.fatShort')} <span className={`font-bold ${sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-500'}`}>{Math.round(sector.combat_fatigue_avg)}</span></span>}
-                    {sector.combat_personnel != null && <span>{t('sectorsSection.persShort')} <span className="font-bold text-text-secondary">{formatPersonnel(sector.combat_personnel)}</span></span>}
+                    {sector.combat_morale_avg != null && (
+                        <span>{t('sectorsSection.morShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-500'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_morale_avg) : Math.round(sector.combat_morale_avg)}</span></span>
+                    )}
+                    {sector.combat_fatigue_avg != null && (
+                        <span>{t('sectorsSection.fatShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-500'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_fatigue_avg) : Math.round(sector.combat_fatigue_avg)}</span></span>
+                    )}
+                    {sector.combat_personnel != null && (
+                        <span>{t('sectorsSection.persShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : 'text-text-secondary'}`}>{hasPartialLineReports ? t('corpsFront.partialPersonnel', { personnel: formatPersonnel(sector.combat_personnel) }) : formatPersonnel(sector.combat_personnel)}</span></span>
+                    )}
                 </div>
             )}
 

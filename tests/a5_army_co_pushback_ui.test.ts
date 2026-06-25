@@ -377,4 +377,41 @@ describe('ArmyCoPushbackPanel', () => {
         expect(row.textContent).toContain('Halilovic');
         expect(row.textContent).toContain('pushes back');
     });
+
+    it('T11 - renders unreported commander copy when warning source lacks a displayable officer name', () => {
+        const officers: ArmyCoOfficerInput[] = [
+            makeOfficer({
+                id: 'unnamed',
+                name: '',
+                faction: 'RS',
+                rank: 'army_commander',
+                stubbornness: 5,
+            }),
+        ];
+        const events: ArmyCoPendingEventInput[] = [
+            {
+                event_id: 'army:RS:autonomous:30',
+                type: 'army_co_proposes_op',
+                faction: 'RS',
+                turn: 30,
+                officer_id: 'unnamed',
+                officer_name: '',
+                reason: 'Autonomous operation proposed without a named source.',
+                overridable: true,
+            },
+        ];
+        const { getByTestId } = render(
+            createElement(ArmyCoPushbackPanel, {
+                currentTurn: 30,
+                officers,
+                pendingOfficerEvents: events,
+                decisionTraces: {},
+                playerFaction: 'RS',
+            }),
+        );
+
+        const warning = getByTestId('army-co-pushback-warning-unnamed');
+        expect(warning.textContent).toContain('Commander record unreported');
+        expect(warning.textContent).not.toMatch(/Unknown commander/i);
+    });
 });

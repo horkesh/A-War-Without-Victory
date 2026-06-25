@@ -679,6 +679,44 @@ describe('generateChronicleEntries', () => {
         expect(spotlight?.metadata?.operationAarId).toBe('op-vitez-relief');
     });
 
+    it('does not promote final-held-only operation objectives as captured Chronicle achievements', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turn: 24,
+            turnSummaries: [makeTurnSummary(24)],
+            operationHistory: [{
+                operation_id: 'op-final-held',
+                operation_name: 'Final Held Probe',
+                corps_id: 'arbih_3rd_corps',
+                faction: 'RBiH',
+                started_turn: 20,
+                ended_turn: 24,
+                outcome: 'partial',
+                commander_name: 'Enver Hadzihasanovic',
+                commander_rank: 'General',
+                objectives_targeted: ['op:vitez:vitez_1', 'op:vitez:vitez_2'],
+                objectives_captured: ['op:vitez:vitez_1'],
+                objectives_logged_captured: [],
+                objectives_held_without_logged_capture: ['op:vitez:vitez_1'],
+                total_attacks: 4,
+                casualties_suffered: { killed: 20, wounded: 50 },
+                casualties_inflicted: { killed: 35, wounded: 90 },
+                grade: { stars: 3, verdict: 'costly partial success', factors: {} },
+                weekly_log: [],
+            }],
+        };
+
+        const entries = generateChronicleEntries(state as any);
+        const operation = entries.find(e => e.id === 'operation-aar-op-final-held');
+        const spotlight = entries.find(e => e.id === 'officer-week-op-final-held');
+
+        expect(operation?.headline).toBe(false);
+        expect(spotlight?.headline).toBe(false);
+        expect(operation?.detail).toContain('0/2 objectives captured in execution; 1 held at close');
+        expect(spotlight?.detail).toContain('0/2 objectives captured in execution; 1 held at close');
+        expect(operation?.detail).not.toContain('1/2 objectives held at close');
+    });
+
     it('keeps generated Chronicle scaffolding localized in BCS mode while preserving names', () => {
         setLocale('bcs');
         const state = {

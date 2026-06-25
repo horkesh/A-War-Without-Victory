@@ -784,6 +784,46 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toMatch(/unit_citation/i);
     });
 
+    it('labels turn-zero ORBAT engagement rows as setup records', () => {
+        const brigade: FormationView = {
+            id: 'rbih_setup_engagement_brigade',
+            faction: 'RBiH',
+            name: 'Setup Engagement Brigade',
+            kind: 'brigade',
+            readiness: 'ready',
+            cohesion: 64,
+            fatigue: 3,
+            status: 'active',
+            createdTurn: 0,
+            tags: [],
+            narrativeArc: 'bloodied',
+            personnel: 1100,
+            posture: 'defend',
+            recent_engagements: [
+                {
+                    turn: 0,
+                    osid: 'op:sarajevo:dobrinja_1',
+                    outcome: 'victory',
+                    role: 'defender',
+                    casualties_taken: 0,
+                    territory_flipped: false,
+                },
+            ],
+        };
+        useGameStore.setState({
+            armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
+            osidDisplayNames: { 'op:sarajevo:dobrinja_1': 'Dobrinja' },
+        });
+
+        const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
+        fireEvent.click(screen.getAllByRole('button', { name: /Setup Engagement Brigade/i })[0]);
+        const copy = view.container.textContent ?? '';
+
+        expect(copy).toContain('Setup record');
+        expect(copy).toContain('Dobrinja');
+        expect(copy).not.toContain('6 Apr 1992');
+    });
+
     it('keeps missing ORBAT campaign casualty fields unreported instead of coercing them to zero', () => {
         const brigade: FormationView = {
             id: 'rbih_partial_losses_brigade',

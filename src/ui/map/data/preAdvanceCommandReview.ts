@@ -83,13 +83,13 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
     .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
     .length;
   if (state.playerDecisionSummary) return Math.max(state.playerDecisionSummary.blockingCount, presidentialBlockerCount) + counterOfferCount;
-  const eventDecisionCount = Math.max(
-    state.presidentialReviewQueue?.eventDecisionCount ?? 0,
-    (state.pendingEventDecisions ?? []).filter((decision) =>
+  const liveRequiredEventDecisionCount = (state.pendingEventDecisions ?? []).filter((decision) =>
       playerFactionMatch(decision.faction, state.player_faction ?? null)
       && isRequiredPendingEventDecision(decision)
-    ).length,
-  );
+    ).length;
+  const eventDecisionCount = Array.isArray(state.pendingEventDecisions)
+    ? liveRequiredEventDecisionCount
+    : Math.max(state.presidentialReviewQueue?.eventDecisionCount ?? 0, liveRequiredEventDecisionCount);
   const paramilitaryRequestCount = playerFaction
     ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length
     : 0;
