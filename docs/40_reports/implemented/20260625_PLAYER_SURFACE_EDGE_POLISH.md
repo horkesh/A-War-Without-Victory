@@ -1,7 +1,7 @@
 # Player Surface Edge Polish
 
 **Date:** 2026-06-25
-**Status:** Implemented on `main`; field-routing/accessibility follow-up merged green at `86191c7a7`; Corps Front / Formation Detail truth-parity follow-up in progress on `codex/corps-front-truth-parity`.
+**Status:** Implemented on `main`; field-routing/accessibility follow-up merged green at `86191c7a7`; Corps Front / Formation Detail truth-parity follow-up fast-forwarded locally onto `main` at `1860bdf05` with main GitHub closeout pending.
 
 ## Summary
 
@@ -67,7 +67,9 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 - `npm.cmd run qa:first-hour:browser` passed with dev-server cleanup verified.
 - `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified.
 - Generated `.tmp_first_hour_browser_gate` and `.tmp_live_surface_browser_sweep` evidence folders were removed after inspection; `.tmp_dev_server` remains as the active local dev-server marker.
-- Diff check, GitHub inspection, merge, and branch cleanup remain pending for this active branch.
+- `git diff --check` passed.
+- Branch Event System CI passed on `codex/corps-front-truth-parity`.
+- Main GitHub inspection and branch cleanup remain pending.
 
 ### Next Scout Queue
 
@@ -76,5 +78,4 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 
 ## Closeout
 
-- For the active `codex/corps-front-truth-parity` branch, run final combined verification after docs.
-- Push branch, inspect GitHub failures/comments, merge to `main` only after green, then delete the branch/worktree/temp evidence.
+- Push `main`, inspect GitHub failures/comments until green, then delete the feature branch/worktree/temp evidence.
