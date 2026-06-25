@@ -301,7 +301,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
-    expect(container.textContent).toMatch(/Ops Supply Readiness\s*—/);
+    expect(container.textContent).toMatch(/Ops Supply Readiness\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*0%/);
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
@@ -314,6 +314,101 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toContain('0%');
+  });
+
+  it('renders partial line-holder condition reports as unreported instead of exact averages', () => {
+    const state = makeState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'arbih_sparse_line_brigade',
+        faction: 'RBiH',
+        name: 'Sparse Line Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        personnel: 900,
+        location_osid: 'op:sarajevo:dobrinja_1',
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: ['arbih_101_brigade', 'arbih_sparse_line_brigade'],
+      combat_morale_avg: 64,
+      combat_cohesion_avg: 70,
+      combat_fatigue_avg: 5,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('Unreported');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('Unreported');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('Unreported');
+  });
+
+  it('preserves explicit zero condition and supply readiness reports', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_101_brigade'
+      ? { ...formation, morale: 0, cohesion: 0, fatigue: 0 }
+      : formation);
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      combat_morale_avg: 0,
+      combat_cohesion_avg: 0,
+      combat_fatigue_avg: 0,
+      opsec_active: false,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Operational security:\s*Inactive/i);
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('0');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('0');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('0');
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Ops Supply Readiness\s*0%/i);
+  });
+
+  it('renders partial operation supply readiness as unreported instead of an exact average', () => {
+    const state = makeState();
+    state.operations = [
+      {
+        ...state.operations![0],
+        name: 'Reported Supply Operation',
+        display_name: 'Reported Supply Operation',
+        supply_readiness: 0.8,
+      },
+      {
+        ...state.operations![0],
+        name: 'Sparse Supply Operation',
+        display_name: 'Sparse Supply Operation',
+        supply_readiness: undefined,
+      },
+    ] as LoadedGameState['operations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Ops Supply Readiness\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*80%/i);
   });
 
   it('disables Corps Front command controls when the desktop command bridge is unavailable', () => {

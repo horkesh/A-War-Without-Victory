@@ -1,5 +1,5 @@
 import type { LoadedGameState } from '../../data/types';
-import { buildDecisionConsequenceLedger, resolveDecisionConsequenceCopy } from '../../data/decisionConsequenceLedger';
+import { buildDecisionConsequenceLedger, buildDecisionConsequenceLedgerSummary, resolveDecisionConsequenceCopy } from '../../data/decisionConsequenceLedger';
 import { getConsequenceStillForRecord } from '../../data/presidentialDeskAssets';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { t, type MessageKey } from '../../i18n';
@@ -36,7 +36,9 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
   const displacement = filedSummary?.displacement_total ?? 0;
   const notableEvents = filedSummary?.notable_events?.length ?? 0;
   const decisionRecords = buildDecisionConsequenceLedger(state, 2);
-  const decisionRecordCount = buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).length;
+  const decisionRecordCount = buildDecisionConsequenceLedgerSummary(
+    buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER),
+  ).recordsRouteCount;
   const latestFiledTurn = filedSummary?.turn ?? decisionRecords[0]?.turn ?? null;
 
   return (

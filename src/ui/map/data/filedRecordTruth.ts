@@ -1,6 +1,7 @@
 import type { LoadedGameState } from './types';
 import { buildDecisionConsequenceLedger } from './decisionConsequenceLedger';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
+import { filterPlayerFacingOperationHistory } from '../../shared/playerVisibility';
 
 export function countFiledTurnRecords(state: LoadedGameState | null | undefined): number {
   if (!state) return 0;
@@ -16,7 +17,9 @@ export function countFiledTurnRecords(state: LoadedGameState | null | undefined)
 }
 
 export function countFiledDecisionRecords(state: LoadedGameState | null | undefined): number {
-  return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER).length;
+  return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+    .filter((record) => record.recordTarget !== 'chronicle')
+    .length;
 }
 
 export function countFiledChronicleDecisionRecords(state: LoadedGameState | null | undefined): number {
@@ -29,6 +32,7 @@ export function hasFiledRecord(state: LoadedGameState | null | undefined): boole
   if (!state) return false;
   if (countFiledTurnRecords(state) > 0) return true;
   if (countFiledDecisionRecords(state) > 0) return true;
-  if ((state.operationHistory ?? []).length > 0) return true;
+  if (countFiledChronicleDecisionRecords(state) > 0) return true;
+  if (filterPlayerFacingOperationHistory(state).length > 0) return true;
   return false;
 }

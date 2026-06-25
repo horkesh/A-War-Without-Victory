@@ -591,18 +591,19 @@ export function useMapInteractions(
     safeOn('click', layerId, handleFrontEdgeClick);
   }
 
+  const handleBattleMouseMove = (e: MapLayerMouseEvent) => {
+    map.getCanvas().style.cursor = 'pointer';
+    const osid = e.features?.[0]?.properties?.osid as string | undefined;
+    const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
+    if (osid) onBattleHover?.(osid, point);
+  };
+  const handleBattleMouseLeave = () => {
+    map.getCanvas().style.cursor = '';
+    onBattleHover?.(null, null);
+  };
+
   // Battle markers hover
   if (onBattleHover) {
-    const handleBattleMouseMove = (e: MapLayerMouseEvent) => {
-      map.getCanvas().style.cursor = 'pointer';
-      const osid = e.features?.[0]?.properties?.osid as string | undefined;
-      const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
-      if (osid) onBattleHover(osid, point);
-    };
-    const handleBattleMouseLeave = () => {
-      map.getCanvas().style.cursor = '';
-      onBattleHover(null, null);
-    };
     safeOn('mousemove', 'battle-markers-pulse', handleBattleMouseMove);
     safeOn('mouseleave', 'battle-markers-pulse', handleBattleMouseLeave);
   }
@@ -642,6 +643,10 @@ export function useMapInteractions(
     }
     for (const layerId of sectorHitLayers) {
       safeOff('click', layerId, handleFrontEdgeClick);
+    }
+    if (onBattleHover) {
+      safeOff('mousemove', 'battle-markers-pulse', handleBattleMouseMove);
+      safeOff('mouseleave', 'battle-markers-pulse', handleBattleMouseLeave);
     }
     setHoverHighlight(null, null);
   };

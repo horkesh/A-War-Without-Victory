@@ -376,7 +376,7 @@ describe('PresidentDeskShell', () => {
     expect(onOpenRecords).not.toHaveBeenCalled();
   });
 
-  it('counts all filed decision consequences while rendering only the latest rows', () => {
+  it('counts Records-routed decision consequences while rendering only the latest rows', () => {
     renderDesk({
       state: makeState({
         firedEvents: [
@@ -408,10 +408,17 @@ describe('PresidentDeskShell', () => {
             isDecision: true,
           },
         ],
+        rawGameState: {
+          military: {
+            patron_defiance_supply_cuts: [
+              { faction: 'RS', turn: 9, cut_fraction: 0.25, support_after: 0.5 },
+            ],
+          },
+        } as any,
       }),
     });
 
-    expect(screen.getByText('Decisions').parentElement?.textContent).toContain('3');
+    expect(screen.getByText('Decisions').parentElement?.textContent).toContain('1');
     expect(screen.getAllByTestId('desk-consequence-row')).toHaveLength(2);
   });
 });

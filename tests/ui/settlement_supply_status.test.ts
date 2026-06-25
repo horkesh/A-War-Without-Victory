@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { SettlementDetailContent } from '../../src/ui/map/components/SettlementDetailContent.js';
 import { SelectionPanel } from '../../src/ui/map/components/SelectionPanel.js';
+import { derivePanelRailState } from '../../src/ui/map/components/panelRail.js';
 import { buildOsidSupplyExplanation } from '../../src/ui/map/data/osidSupplyExplanation.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
@@ -237,6 +238,71 @@ describe('SettlementDetailContent supply status surface', () => {
 
     fireEvent.click(brigadeButton);
     expect(onFormationClick).toHaveBeenCalledWith('bde_101');
+  });
+
+  it('preserves sector context when a settlement stationed unit is clicked from the live panel', () => {
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      selectedOsid: 'op:test:a',
+      osidDisplayNames: { 'op:test:a': 'Testograd' },
+      osidPropertiesMap: { 'op:test:a': { mun1990_id: 'testmun', mun1990_name: 'Testmun' } },
+      loadedGameState: {
+        label: 'Turn 4',
+        turn: 4,
+        phase: 'war',
+        formations: [
+          {
+            id: 'brigade_alpha',
+            name: 'Alpha Brigade',
+            faction: 'RBiH',
+            kind: 'brigade',
+            status: 'active',
+            readiness: 'ready',
+            location_osid: 'op:test:a',
+            corps_id: 'corps_alpha',
+          },
+        ],
+        militiaPools: [],
+        controlBySettlement: { 'op:test:a': 'RBiH' },
+        statusBySettlement: {},
+        brigadeAorByFormationId: {},
+        attackOrders: [],
+        aorOrders: [],
+        recentControlEvents: [],
+        allControlEvents: [],
+        displacementEventLog: [],
+        battlesByOsid: {},
+        movementsByOsid: {},
+        supplyTransitionsByOsid: {},
+        historicalEventsByTurn: [],
+        pressureWarning: false,
+        latestTurnSummary: null,
+        turnSummaries: [],
+        player_faction: 'RBiH',
+        corpsFrontSectors: [
+          {
+            sector_id: 'sector_alpha',
+            display_name: 'Alpha Sector',
+            corps_id: 'corps_alpha',
+            faction: 'RBiH',
+            edge_ids: [],
+            assigned_brigade_ids: ['brigade_alpha'],
+            reserve_brigade_ids: [],
+          },
+        ],
+        frontEdgesOsid: [],
+      } as any,
+    });
+
+    render(createElement(SelectionPanel));
+    fireEvent.click(screen.getByRole('button', { name: /Alpha Brigade/i }));
+
+    const store = useGameStore.getState();
+    expect(store.selectedFormationId).toBe('brigade_alpha');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector_alpha');
+    expect(store.selectedCorpsId).toBe('corps_alpha');
+    expect(store.selectedOsid).toBe('op:test:a');
+    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
 
   it('does not synthesize current ethnic structure without departure evidence', () => {

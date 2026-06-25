@@ -515,7 +515,9 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Chronicle Filed')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'DECISION LOG' })).toBeTruthy();
-        expect(screen.getAllByTitle('1 records').length).toBeGreaterThanOrEqual(2);
+        const archiveSummaryCopy = screen.getByTestId('records-archive-summary').textContent ?? '';
+        expect(archiveSummaryCopy).toMatch(/Decisions\s*0/);
+        expect(archiveSummaryCopy).toMatch(/Chronicle Filed\s*1/);
     });
 
     it('does not narrate turn-0 territory provenance in the AAR tab', () => {

@@ -95,6 +95,19 @@ Seventh scout wave merged through PR #446 on `codex/p3-player-surface-truth-swee
 
 Seventh-slice verification passed: focused red/green pack passed 8 files / 184 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 616 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational decision routing/unblock, Army HQ, Personnel, command-card/sector inspect labels, Corps Detail/Corps Front routing, disabled sector-command bridge-unavailable copy, and console health with only the expected browser-fallback warning. GitHub PR #446 was green across Event System validation, desktop release check, desktop packaged runtime probe, engine-health-188w, scenario anchors, scenarios, structural fingerprint, test, typecheck, and full-suite; PR comments/reviews were empty; the clean PR merged to `main` at `ecf1cb4e0`. Local/remote branch refs were deleted/pruned, no extra worktrees remained, and Sagan, Feynman, Heisenberg, Hegel, and Carver were closed after report absorption.
 
+Eighth P4 player-polish batch closeout candidate on `codex/p4-player-polish-batch`:
+
+- Life-lessons process comments from stale merged PR reviews were reconciled into the indexed topic files, restoring the 280-entry count.
+- Filed-record truth now counts only player-facing operation history, and Records/Desk decision-count summaries separate Records-routed receipts from Chronicle-routed receipts.
+- Personnel sparse reserve/mobilization fields now render `Unreported` instead of crashing or inventing zero/NaN values, while explicit zero remains exact.
+- Settlement stationed-unit clicks and embedded AAR formation links now route through the shared field-inspection resolver, preserving sector/corps/OSID context.
+- Operation-opportunity consequence receipts sanitize raw executed operation slugs before filing Records copy.
+- Corps Front condition and operation-supply aggregates now render `Unreported` for partial source reports instead of exact-looking averages; explicit zero remains exact.
+- Tactical battle-marker hover listeners now unregister with the same handler references used for registration, avoiding duplicate hover behavior after remounts.
+- Mill/Noether, Wegener/Ada, Meitner/Curie, Popper, and Euler scout/implementation reports were absorbed and closed.
+
+Eighth-slice local proof: focused red/green work covered each changed surface and the final combined focused pack passed 9 files / 159 tests with `npm.cmd exec -- vitest run tests/ui/filed_record_truth.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/president_desk_shell.test.ts tests/ui/personnel_player_safe_display.test.ts tests/ui/settlement_supply_status.test.ts tests/ui/aar_panel_drilldown_routing.test.ts tests/ui/decision_consequence_trail.test.ts tests/ui/corps_front_panel_routing.test.ts tests/ui_map_interactions.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck -- --pretty false` passed. `npm.cmd run qa:player-journeys` passed 43 files / 619 tests. `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser` passed with evidence captured before temp cleanup. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, the war-start splash, the `WAR BEGINS: 6 APR 1992` identity brief, the foundational `What Is Bosnia?` Desk packet, Desk decision count truth, Army HQ command/OOB commander data, clickable top-level nav labels, and no sampled raw command slug leak. Remaining closeout gates before merge are final diff check, commit/push, GitHub green, then branch/worktree cleanup.
+
 ## Pyrrhic Roles
 
 - **Orchestrator:** keep the lane scoped, update board/roadmap/ledger, merge and clean branch/worktree after verification.

@@ -179,6 +179,31 @@ describe('decision consequence trail', () => {
     });
   });
 
+  it('sanitizes raw executed operation names before filing opportunity receipts', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      operationOpportunityRecords: [
+        {
+          proposal_id: 'p1',
+          opportunity_id: 'corridor_push',
+          display_name: 'Northern corridor push',
+          status: 'approved',
+          response: 'approve',
+          response_turn: 10,
+          executed_op_name: 'cmd_arbih_1st_corps_t12',
+          executed_op_aar_id: 'aar-1',
+          exit_class: 'partial_success',
+        },
+      ],
+    }));
+
+    const record = ledger[0];
+    const resolvedDetail = resolveDecisionConsequenceCopy(record, 'detail');
+
+    expect(record.detail).toContain('Command');
+    expect(resolvedDetail).toContain('Command');
+    expect(`${record.detail} ${resolvedDetail}`).not.toMatch(/cmd_|_t12|operation_name/i);
+  });
+
   it('includes army reserve request decisions from the persisted reserve history using authored formation names', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       formations: [

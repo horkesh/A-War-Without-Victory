@@ -31,6 +31,18 @@ function OfficerQualityChip({ label, value }: { label: string; value: number }) 
     );
 }
 
+function formatReportedWhole(value: unknown): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? formatWholeNumber(value)
+        : t('corpsFront.unreported');
+}
+
+function formatReportedPercent(value: unknown): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? `${value.toFixed(1)}%`
+        : t('corpsFront.unreported');
+}
+
 export function PersonnelContent() {
     const [locale] = useLocale();
     const state = useGameStore((s) => s.loadedGameState);
@@ -128,11 +140,11 @@ export function PersonnelContent() {
                     />
                     <DossierCard
                         label={t('personnel.dossier.mobilizationStrain')}
-                        value={data.mobilization ? `${data.mobilization.exhaustion_pct.toFixed(1)}%` : '-'}
+                        value={data.mobilization ? formatReportedPercent(data.mobilization.exhaustion_pct) : t('corpsFront.unreported')}
                         detail={data.mobilization
-                            ? t('personnel.dossier.mobilizationStrainDetail', { exhausted: formatWholeNumber(data.mobilization.total_exhausted) })
+                            ? t('personnel.dossier.mobilizationStrainDetail', { exhausted: formatReportedWhole(data.mobilization.total_exhausted) })
                             : t('personnel.dossier.mobilizationStrainUnknown')}
-                        tone={data.mobilization && data.mobilization.exhaustion_pct >= 30 ? 'warning' : 'neutral'}
+                        tone={data.mobilization && typeof data.mobilization.exhaustion_pct === 'number' && data.mobilization.exhaustion_pct >= 30 ? 'warning' : 'neutral'}
                     />
                 </div>
             </div>
@@ -145,7 +157,7 @@ export function PersonnelContent() {
                     <StatCard label={t('personnel.totalPersonnel')} value={data.totalPersonnelLabel} />
                     <StatCard label={t('personnel.activeBrigades')} value={String(data.brigades.length)} />
                     <StatCard label={t('personnel.corps')} value={String(data.corpsFormations.length)} />
-                    <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? Math.round(data.reserves.generalSupply ?? 0).toString() : '-'} />
+                    <StatCard label={t('personnel.supplyReserve')} value={data.reserves ? formatReportedWhole(data.reserves.generalSupply) : t('corpsFront.unreported')} />
                 </div>
             </div>
 
@@ -155,11 +167,11 @@ export function PersonnelContent() {
                         {t('personnel.mobilization')}
                     </div>
                     <div className="grid grid-cols-5 gap-3">
-                        <StatCard label={t('personnel.mobilization.availablePool')} value={formatWholeNumber(data.mobilization.total_available)} />
-                        <StatCard label={t('personnel.mobilization.committed')} value={formatWholeNumber(data.mobilization.total_committed)} />
-                        <StatCard label={t('personnel.mobilization.exhausted')} value={formatWholeNumber(data.mobilization.total_exhausted)} />
-                        <StatCard label={t('personnel.mobilization.strategicReserve')} value={formatWholeNumber(data.mobilization.strategic_reserve)} />
-                        <StatCard label={t('personnel.mobilization.exhaustion')} value={`${data.mobilization.exhaustion_pct.toFixed(1)}%`} />
+                        <StatCard label={t('personnel.mobilization.availablePool')} value={formatReportedWhole(data.mobilization.total_available)} />
+                        <StatCard label={t('personnel.mobilization.committed')} value={formatReportedWhole(data.mobilization.total_committed)} />
+                        <StatCard label={t('personnel.mobilization.exhausted')} value={formatReportedWhole(data.mobilization.total_exhausted)} />
+                        <StatCard label={t('personnel.mobilization.strategicReserve')} value={formatReportedWhole(data.mobilization.strategic_reserve)} />
+                        <StatCard label={t('personnel.mobilization.exhaustion')} value={formatReportedPercent(data.mobilization.exhaustion_pct)} />
                     </div>
                     {data.mobilization.top_pools.length > 0 && (
                         <div className="mt-3 pt-2 border-t border-panel-border/50">
@@ -168,7 +180,7 @@ export function PersonnelContent() {
                                 {data.mobilization.top_pools.map((pool) => (
                                     <div key={pool.mun_id} className="flex items-center justify-between gap-3 text-[10px] px-2 py-1 rounded-sm bg-panel-bg border border-panel-border/40">
                                         <span className="text-text-secondary truncate">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
-                                        <span className="text-text-primary tabular-nums font-mono shrink-0">{formatWholeNumber(pool.available)}</span>
+                                        <span className="text-text-primary tabular-nums font-mono shrink-0">{formatReportedWhole(pool.available)}</span>
                                     </div>
                                 ))}
                             </div>

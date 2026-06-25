@@ -367,6 +367,69 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).not.toContain('BANJA LUKA');
   });
 
+  it('renders sparse supply reserves and mobilization fields as unreported instead of invented zeroes', () => {
+    const state = makeState();
+    state.factionReserves = {
+      RS: { heavyMunitions: 42 } as any,
+    };
+    state.mobilizationSummary = {
+      RS: {
+        faction: 'RS',
+        total_available: 2500,
+        total_committed: undefined,
+        total_exhausted: 450,
+        strategic_reserve: undefined,
+        exhaustion_pct: undefined,
+        top_pools: [
+          { mun_id: 'BANJA_LUKA', available: undefined },
+        ],
+      } as any,
+    };
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('UnreportedSupply Reserve');
+    expect(copy).toContain('UnreportedCommitted');
+    expect(copy).toContain('UnreportedStrategic Reserve');
+    expect(copy).toContain('UnreportedExhaustion');
+    expect(copy).toContain('Banja Luka');
+    expect(copy).not.toContain('0Supply Reserve');
+    expect(copy).not.toContain('NaN');
+    expect(copy).not.toContain('undefined');
+  });
+
+  it('keeps explicit zero supply and mobilization values as reported zeroes', () => {
+    const state = makeState();
+    state.factionReserves = {
+      RS: { generalSupply: 0, heavyMunitions: 42 },
+    };
+    state.mobilizationSummary = {
+      RS: {
+        faction: 'RS',
+        total_available: 0,
+        total_committed: 0,
+        total_exhausted: 0,
+        strategic_reserve: 0,
+        exhaustion_pct: 0,
+        top_pools: [
+          { mun_id: 'BANJA_LUKA', available: 0 },
+        ],
+      },
+    } as LoadedGameState['mobilizationSummary'];
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('0Supply Reserve');
+    expect(copy).toContain('0Committed');
+    expect(copy).toContain('0Strategic Reserve');
+    expect(copy).toContain('0.0%Exhaustion');
+    expect(copy).not.toContain('UnreportedSupply Reserve');
+  });
+
   it('renders HQ-assigned brigades and routes them to Army HQ drilldown', () => {
     useGameStore.setState({
       loadedGameState: makeState(),

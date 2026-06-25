@@ -50,6 +50,39 @@ describe('useMapInteractions', () => {
     expect(sectorOff.length).toBe(3);
   });
 
+  it('cleans up battle marker hover listeners with their registered handlers', () => {
+    const onCalls: Array<[string, string, (e: MapLayerMouseEvent) => void]> = [];
+    const offCalls: Array<[string, string, (e: MapLayerMouseEvent) => void]> = [];
+    const noop = () => {};
+    const mockMap = {
+      on: (event: string, layerIdOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerIdOrHandler === 'string' && handler) {
+          onCalls.push([event, layerIdOrHandler, handler]);
+        }
+      },
+      off: (event: string, layerIdOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerIdOrHandler === 'string' && handler) {
+          offCalls.push([event, layerIdOrHandler, handler]);
+        }
+      },
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: noop, removeEventListener: noop }),
+      setFilter: noop,
+    };
+
+    const cleanup = useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], {
+      onBattleHover: noop,
+    });
+
+    const battleOn = onCalls.filter(([, layer]) => layer === 'battle-markers-pulse');
+    expect(battleOn.map(([event]) => event).sort()).toEqual(['mouseleave', 'mousemove']);
+
+    cleanup!();
+
+    const battleOff = offCalls.filter(([, layer]) => layer === 'battle-markers-pulse');
+    expect(battleOff).toHaveLength(2);
+    expect(battleOff).toEqual(expect.arrayContaining(battleOn));
+  });
+
   it('selects a sector when the top front-line hit is the white highlight layer without edge_id', () => {
     const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
     const onFrontEdgeClick = vi.fn();
