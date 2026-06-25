@@ -189,7 +189,7 @@ function OpeningBrief({
                     }}
                     className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
                 >
-                    {t('inbox.openDecisionRoom')}
+                    {t('inbox.openDesk')}
                 </button>
                 <button
                     type="button"
@@ -232,7 +232,7 @@ function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void
                         {t('inbox.decisionRoom')}
                     </div>
                     <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
-                        {t('inbox.openDecisionRoom')}
+                        {t('inbox.openDesk')}
                     </div>
                 </button>
                 <div className="rounded border border-panel-border/80 bg-black/10 px-2 py-2">

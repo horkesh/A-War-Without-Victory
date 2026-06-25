@@ -134,6 +134,10 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function hasFiniteNumber(record: Record<string, unknown>, key: string): boolean {
+    return typeof record[key] === 'number' && Number.isFinite(record[key]);
+}
+
 function readOperationPhase(value: unknown): { phase: OperationView['phase']; unreported: boolean } {
     if (value === 'planning' || value === 'execution' || value === 'recovery') {
         return { phase: value, unreported: false };
@@ -983,6 +987,20 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     const bf = finiteNumber(bh.battles_fought);
                     const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
                     const battlesFromEngagements = bf > 0 ? bf : engs.length;
+                    const derivedFromEngagements = bf === 0 && engs.length > 0;
+                    const reportedFields = new Set<string>();
+                    if (hasFiniteNumber(bh, 'battles_fought') || derivedFromEngagements) reportedFields.add('battles_fought');
+                    if (hasFiniteNumber(bh, 'victories') || derivedFromEngagements) reportedFields.add('victories');
+                    if (hasFiniteNumber(bh, 'defeats') || derivedFromEngagements) reportedFields.add('defeats');
+                    if (hasFiniteNumber(bh, 'stalemates') || derivedFromEngagements) reportedFields.add('stalemates');
+                    if (hasFiniteNumber(bh, 'total_casualties_taken') || derivedFromEngagements) reportedFields.add('total_casualties_taken');
+                    if (hasFiniteNumber(bh, 'total_casualties_inflicted') || derivedFromEngagements) reportedFields.add('total_casualties_inflicted');
+                    if (hasFiniteNumber(bh, 'battles_as_attacker') || derivedFromEngagements) reportedFields.add('battles_as_attacker');
+                    if (hasFiniteNumber(bh, 'battles_as_defender') || derivedFromEngagements) reportedFields.add('battles_as_defender');
+                    if (hasFiniteNumber(bh, 'total_osids_captured') || derivedFromEngagements) reportedFields.add('total_osids_captured');
+                    if (hasFiniteNumber(bh, 'total_osids_lost') || derivedFromEngagements) reportedFields.add('total_osids_lost');
+                    if (hasFiniteNumber(bh, 'peak_personnel')) reportedFields.add('peak_aggregate_personnel');
+                    if (hasFiniteNumber(bh, 'nadir_personnel')) reportedFields.add('nadir_aggregate_personnel');
                     let vic = finiteNumber(bh.victories);
                     let defeats = finiteNumber(bh.defeats);
                     let stalemates = finiteNumber(bh.stalemates);
@@ -1031,24 +1049,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         most_casualties_brigade_id: null,
                         most_victories_brigade_id: null,
                         reportedFields: [
-                            'active_brigade_count',
-                            'battles_as_attacker',
-                            'battles_as_defender',
-                            'battles_fought',
-                            'brigade_count',
-                            'casualty_exchange_ratio',
-                            'current_personnel',
-                            'defeats',
-                            'nadir_aggregate_personnel',
-                            'peak_aggregate_personnel',
-                            'stalemates',
-                            'total_casualties_inflicted',
-                            'total_casualties_taken',
-                            'total_osids_captured',
-                            'total_osids_lost',
-                            'victories',
-                            'win_rate',
-                        ],
+                            ...reportedFields,
+                            ...(reportedFields.has('victories') || derivedFromEngagements ? ['win_rate'] : []),
+                            ...(reportedFields.has('total_casualties_taken') && reportedFields.has('total_casualties_inflicted')
+                                ? ['casualty_exchange_ratio']
+                                : []),
+                        ].sort((a, b) => a.localeCompare(b)),
                     };
                 }
             }
@@ -1090,7 +1096,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         if (!hasHq && hasCorps) {
             formations.push({
                 id: hqDef.id, faction, name: hqDef.name, kind: 'army_hq',
-                readiness: 'unreported', cohesion: 0, fatigue: 0, status: 'unreported', createdTurn: 0, tags: ['compatibility_synthesized'],
+                readiness: 'unreported', status: 'unreported', createdTurn: 0, tags: ['compatibility_synthesized'],
             } as FormationView);
         }
     }

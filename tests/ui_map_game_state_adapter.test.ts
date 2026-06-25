@@ -100,6 +100,61 @@ test('parseGameState records which combat summary fields were source-reported', 
     assert.strictEqual(corps?.combatSummary?.total_casualties_taken, 0);
 });
 
+test('parseGameState keeps sparse brigade history combat fields unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war' },
+        military: {
+            formations: {
+                sparse_brigade: {
+                    faction: 'RBiH',
+                    name: 'Sparse Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                    brigade_history: { battles_fought: 3 },
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const brigade = parsed.formations.find((formation) => formation.id === 'sparse_brigade');
+    assert.deepStrictEqual(brigade?.combatSummary?.reportedFields, ['battles_fought']);
+    assert.strictEqual(brigade?.combatSummary?.total_casualties_taken, 0);
+    assert.strictEqual(brigade?.combatSummary?.win_rate, 0);
+});
+
+test('parseGameState does not synthesize zero condition metrics for compatibility Army HQ rows', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_1st_corps: {
+                    faction: 'RBiH',
+                    name: '1st Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const hq = parsed.formations.find((formation) => formation.id === 'arbih_general_staff');
+    assert.strictEqual(hq?.kind, 'army_hq');
+    assert.strictEqual(hq?.cohesion, undefined);
+    assert.strictEqual(hq?.fatigue, undefined);
+});
+
 test('parseGameState keeps absent officer ratings unreported instead of inventing poor traits', () => {
     const parsed = parseGameState({
         meta: { turn: 1, phase: 'war', player_faction: 'RS' },

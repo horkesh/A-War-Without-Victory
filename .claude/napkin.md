@@ -2,6 +2,8 @@
 
 **ADVISORY EVENT DECISIONS ARE NOT MODAL BLOCKERS (2026-06-25).** Pending event-decision rows can be advisory. Do instead: block, auto-open EventDecisionModal, count review-queue event decisions, and render Army HQ required-decision rows only when `requires_player_response === true`; route advisory rows through Decision Room.
 
+**FALLBACK BLOCKER COUNTS USE REQUIRED-EVENT ROUTING (2026-06-25).** Legacy/fallback pre-advance paths can run without `playerDecisionSummary`. Do instead: apply `isRequiredPendingEventDecision(...)` plus player-faction scope before counting `pending_event_decisions`; advisory rows never block advance.
+
 **PROPOSAL REVIEW IDS MUST MATCH DECISION ROOM CARDS (2026-06-25).** Autonomy/proposal reviews should not route to stale read-only panels or missing dossiers. Do instead: use `command:review-proposal:*` for autonomy reviews and require live operation-opportunity dossiers before rendering opportunity inbox cards.
 
 **SPARSE COMBAT/READINESS RECORDS ARE UNREPORTED (2026-06-25).** Missing combat-summary fields, morale/officer-quality, personnel, or cohesion are source gaps, not zero casualties, failed brigades, or depleted cohesion. Do instead: carry reported-field provenance, render `Unreported`, and count ineffective units only from reported personnel.
@@ -19,6 +21,10 @@
 **FORMATION ANCHORS SPLIT PHYSICAL FROM NAVIGATION (2026-06-25).** `location_osid` is physical presence; AoR/HQ anchors are navigation context. Do instead: use `resolveFormationPhysicalLocationOsid` for counters, stacks, hover, arrows, ghost paths, and selected-settlement truth; use `resolveFormationNavigationAnchor` only for panning/focus.
 
 **FORMATION RECORDS MUST NOT INVENT ZEROES (2026-06-25).** Missing brigade combat/loss data means headquarters lacks a record, not that the unit has confirmed zero combat or casualties. Do instead: render missing campaign KIA/WIA/MIA as `Unreported`, show an honest no-record state when `combatSummary` is absent, and use shared sector-assignment projection for active sector ownership.
+
+**BRIGADE HISTORY REPORTEDFIELDS ARE SOURCE TRUTH (2026-06-25).** A `brigade_history` row with only `battles_fought` does not prove zero wins, losses, casualties, territory movement, brigade counts, win rate, or exchange ratio. Do instead: synthesize the panel object but include only reported or engagement-derived fields in `reportedFields`.
+
+**TURN-ZERO FORMATION HISTORY IS SETUP PROVENANCE (2026-06-25).** Setup notable moments can otherwise read as impossible campaign captures before play. Do instead: label turn-zero Formation Detail moments as setup records with neutral initial-deployment copy.
 
 **HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
 

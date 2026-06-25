@@ -11,6 +11,7 @@ import {
 import type { LoadedGameState } from './types';
 import { playerFactionMatch } from './playerFactionMatch';
 import { derivePresidentialBlockers } from './presidentialBlockers';
+import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { t } from '../i18n';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
@@ -84,7 +85,10 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
   if (state.playerDecisionSummary) return Math.max(state.playerDecisionSummary.blockingCount, presidentialBlockerCount) + counterOfferCount;
   const eventDecisionCount = Math.max(
     state.presidentialReviewQueue?.eventDecisionCount ?? 0,
-    (state.pendingEventDecisions ?? []).filter((decision) => playerFactionMatch(decision.faction, state.player_faction ?? null)).length,
+    (state.pendingEventDecisions ?? []).filter((decision) =>
+      playerFactionMatch(decision.faction, state.player_faction ?? null)
+      && isRequiredPendingEventDecision(decision)
+    ).length,
   );
   const paramilitaryRequestCount = playerFaction
     ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length

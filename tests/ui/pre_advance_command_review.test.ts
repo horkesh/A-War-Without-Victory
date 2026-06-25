@@ -267,6 +267,31 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('clear');
   });
 
+  it('does not count advisory player event decisions in legacy fallback blocking counts', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: undefined,
+        pendingEventDecisions: [
+          {
+            event_id: 'advisory_rbih',
+            event_title: 'Advisory RBiH',
+            turn_fired: 1,
+            faction: 'RBiH',
+            requires_player_response: false,
+            response_options: [{ id: 'a', label: 'A', effects: [] }],
+          },
+        ],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
+  });
+
   it('counts player convoy decisions as fallback blockers when the manifest summary is absent', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({

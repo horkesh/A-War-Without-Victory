@@ -129,10 +129,11 @@ function loadedState(): LoadedGameState {
 
 describe('direct tactical map click routing', () => {
   it('routes sector clicks with known corps context through the compound sector target', () => {
-    expect(resolveMapSectorInspectionTarget('sector_alpha', loadedState())).toEqual({
+    expect(resolveMapSectorInspectionTarget('sector_alpha', loadedState(), { osid: 'sarajevo_1' })).toEqual({
       kind: 'field-sector-in-corps',
       sectorId: 'sector_alpha',
       corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
     });
   });
 

@@ -28,7 +28,7 @@ Svaki potez je jedna sedmica realnog vremena. U svakom potezu:
 
 1. **PROČITAJTE BRIFING** — gore desno otvara se panel „Presidential Inbox" sa brifingom vašeg načelnika štaba (tri ključne tačke). Govori vam šta strateški položaj vaše frakcije zahtijeva.
 2. **INSPEKTIRAJTE** — lijevi panel „Command" pokazuje vašu situaciju. Procenat teritorije, izloženi frontalni sektori, gubici, stanje saveza, međunarodni pritisak. Pročitajte.
-3. **ODLUČITE** — otvorite dugmad na alatnoj traci: `SUMMARY` (statistika rata), `RECORDS` (Štab Armije), `OPS` (operacije), `EVENTS` (dnevnik događaja), `CODEX` (historijski eseji), `INBOX` (čekajuće odluke). Decision Room (otvara se iz Army HQ → tab „Briefing") je mjesto gdje žive svi izbori koji čekaju vašu odluku.
+3. **ODLUČITE** — otvorite dugmad na alatnoj traci: `SUMMARY` (statistika rata), `RECORDS` (Štab Armije), `OPS` (operacije), `EVENTS` (dnevnik događaja), `CODEX` (historijski eseji), `INBOX` (čekajuće odluke). Decision Room je centralna soba za odluke; President's Desk / Inbox vas vodi do predsjedničkih potpisa, a Army HQ daje štabni kontekst i detalje.
 4. **IZVRŠITE** — promijenite stavove korpusa (Defensive / Balanced / Offensive / Reorganize), odobrite ili odbijte operacije koje predlaže štab, prihvatite ili odbijte mirovne planove, riješite paravojne incidente.
 5. **ADVANCE TURN** (dugme gore desno). Simulacija se kreće jednu sedmicu naprijed. Vaši botovi, botovi neprijateljskih frakcija, mehanizam — svi se pomijeraju zajedno.
 6. **PROČITAJTE POSLJEDICE** — modal „Turn Aftermath" iskače sa onim što se promijenilo: vođene bitke, izgubljeno/dobijeno tlo, gubici, ishod komandnih odluka.
@@ -113,7 +113,7 @@ Komandanti vaših korpusa također automatski generišu vlastite prijedloge oper
 
 ## 6. Decision Room
 
-Otvara se kroz Army HQ → tab BRIEFING. Ovo je centralno sučelje za sve što zahtijeva vašu pažnju.
+Otvara se kroz predsjedničke akcije na Desk/Inbox površinama i kroz povezane stavke u Army HQ kada štab daje izvorni kontekst. Ovo je centralno sučelje za sve što zahtijeva vašu pažnju.
 
 Prikazuje **heartbeat petlje proizvoda** — osam kartica u redu:
 - **BRIEF** — šta vaš štab izvještava.
@@ -162,7 +162,7 @@ I **trake komandne petlje** ispod:
 
 ## 9. Kada zapnete
 
-- **„Ne znam šta da radim ovog poteza."** Otvorite Decision Room (Army HQ → tab Briefing). Heartbeat strateških prioriteta vam pokazuje.
+- **„Ne znam šta da radim ovog poteza."** Otvorite Decision Room iz predsjedničke trake/Desk površine; Army HQ ostaje najbolji izvor štabnih detalja. Heartbeat strateških prioriteta vam pokazuje.
 - **„Ne znam kako da napravim operaciju."** Kliknite korpus u panelu Command → tab Ops Snapshot → „Prepare Operation in HQ" → faza Commander → faza Plan → kliknite „Suggest Plan" → pregled → napredujete kroz faze.
 - **„Ne znam šta ovaj termin znači."** (Još nema rječnika u igri.) Dok se ne pojavi, odjeljak 7 ovog vodiča pokriva najčešći žargon. Codex eseji objašnjavaju historijski kontekst.
 - **„Mapa je previše udaljena."** Kontrole mape dolje desno: + / – zumiranje, dugme za centriranje.

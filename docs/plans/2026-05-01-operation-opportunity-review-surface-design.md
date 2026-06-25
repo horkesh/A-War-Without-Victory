@@ -19,7 +19,7 @@
 
 The late-war opportunity model says historical operations should surface as proposals, not calendar-forced scripts. The force-quality contract says ARBiH/VRS trajectories should change operation readiness and delivery, not silently flip territory.
 
-This doc defines the missing player-facing bridge: how an operation opportunity becomes a readable, actionable Army HQ dossier that the player can approve, delay, redirect, under-resource, or decline.
+This doc defined the original player-facing bridge. It is superseded for action ownership by the June 2026 Decision Room routing work: the Presidential Decision Room owns the authorization action, while Army HQ remains the source/detail handoff for staff evidence, corps context, and operation records.
 
 The goal is not to make a new combat path or a new free-form planner. The goal is to make the existing command shell show the player why an opportunity exists, what the staff thinks, what institutional traits matter, and what decision is being made.
 
@@ -31,8 +31,8 @@ Implemented:
 
 - adapter DTO `LoadedGameState.operationOpportunityProposals`
 - pending-review preservation of `proposed_action`, `current_value`, and `proposed_value`
-- Presidential Inbox routing for `OPPORTUNITY:<proposal_id>` rows to Army HQ briefing
-- Army HQ briefing dossier cards with prerequisite chips, recommendation, expiry, Authorize, Delay, Under-resource, and Decline
+- Presidential Inbox routing for live `OPPORTUNITY:<proposal_id>` rows to Decision Room dossiers
+- Army HQ briefing/source handoff cards with prerequisite chips, recommendation, expiry, and operation-record context
 - dedicated decision IPC that writes `opportunity_decision` / `opportunity_decision_options` onto the pending review row for war-pipeline consumption
 - persisted `last_force_quality_traits` on opportunity proposals and player-safe trait bands in the Army HQ dossier
 - persisted `last_footprint` and `redirect_variants` snapshots on opportunity proposals
@@ -47,7 +47,7 @@ Still planned:
 
 ## Architecture Decision
 
-The canonical review surface is **Army HQ**, with a map-linked dossier.
+The canonical action surface is the **Presidential Decision Room**, with Army HQ as the source/detail handoff for map-linked staff evidence.
 
 | Candidate surface | Verdict | Reason |
 |---|---|---|
@@ -55,11 +55,12 @@ The canonical review surface is **Army HQ**, with a map-linked dossier.
 | Map-local `OperationsPanel` | Snapshot only | It already frames itself as "Field Ops Snapshot" and hands deep review back to HQ. It should highlight selected opportunity targets, not own authorization. |
 | `OpsPlanningModal` | Reuse after approval / redirect | It is excellent for drafting a player-authored corps operation, but an opportunity is a staff dossier first. It should be entered only for redirect/edit variants, not for every opportunity. |
 | `OperationBriefingModal` | Reuse after op creation | It owns launch/postpone/probe/abort after a `CorpsOperation` exists. Opportunity review happens before that lifecycle. |
-| Army HQ modal | Primary owner | It already owns command review, corps cards, operations section, proposal attention, officer context, records, and player-safe command language. |
+| Army HQ modal | Source/detail owner | It owns command review, corps cards, operations section, proposal attention, officer context, records, and player-safe command language; authorization action routes through the Decision Room. |
+| Presidential Decision Room | Primary action owner | It owns player authorization/review cards and keeps opportunity decisions aligned with the rest of the presidential queue. |
 
 The product rule is:
 
-> Opportunity review belongs to Army HQ. The tactical map can visualize the footprint, and the existing operation lifecycle executes the result, but the strategic authorization choice is an HQ command decision.
+> Opportunity authorization belongs to the Presidential Decision Room. Army HQ supplies the staff dossier and tactical handoff; the tactical map can visualize the footprint, and the existing operation lifecycle executes the result.
 
 ## Existing Seams To Reuse
 
@@ -79,8 +80,8 @@ The product rule is:
 
 1. The opportunity evaluator produces a deterministic eligible proposal.
 2. The adapter exposes a player-safe `OperationOpportunityProposalView`.
-3. Army HQ shows an attention item and an Opportunities queue count.
-4. Opening the dossier focuses the relevant corps, highlights objectives/staging on the map, and presents staff evidence.
+3. Decision Room shows the actionable opportunity card; Army HQ shows source/detail handoffs and Opportunities context.
+4. Opening the Decision Room dossier can hand off to Army HQ to focus the relevant corps, highlight objectives/staging on the map, and present staff evidence.
 5. The player chooses one of five responses:
    - **Approve:** authorize conversion into the existing `CorpsOperation` lifecycle.
    - **Delay:** keep the opportunity pending until a deterministic re-evaluation turn.

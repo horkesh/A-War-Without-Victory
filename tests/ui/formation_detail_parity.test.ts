@@ -597,6 +597,24 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Fatigue0');
   });
 
+  it('renders missing morale and personnel as unreported detail rows', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        morale: undefined,
+        personnel: undefined,
+      } as unknown as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('MoraleUnreported');
+    expect(copy).toContain('PersonnelUnreported');
+  });
+
   it('does not synthesize zero combat or loss records when brigade records are absent', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
@@ -622,6 +640,30 @@ describe('Formation Detail parity display', () => {
     expect(copy).toContain('No brigade combat record has reached headquarters.');
     expect(copy).not.toMatch(/Killed0|Wounded0|Missing or captured0/);
     expect(copy).not.toMatch(/Battles\s*0|Win Rate\s*0\.0%|Men Lost\s*0/i);
+  });
+
+  it('setup-labels turn-zero captured territory history instead of narrating it as campaign history', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        notableMoments: [
+          { turn: 0, description: 'Captured op:test:before_start before play began.' },
+          { turn: 3, description: 'Held the line after staff review.' },
+        ],
+      } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Setup record:');
+    expect(copy).toContain('Initial deployment record before player command.');
+    expect(copy).toContain('Held the line after staff review.');
+    expect(copy).not.toContain('Captured');
+    expect(copy).not.toContain('before play began');
   });
 
   it('renders sparse equipment condition as unreported instead of crashing', () => {

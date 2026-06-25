@@ -25,10 +25,11 @@ export function resolveMapSectorInspectionTarget(
   properties?: MapSelectionProperties,
 ): FieldInspectionTarget {
   const corpsId = stringProperty(properties, 'corps_id') ?? findSectorCorpsId(sectorId, state);
+  const osid = stringProperty(properties, 'osid');
   if (corpsId) {
-    return { kind: 'field-sector-in-corps', sectorId, corpsId };
+    return { kind: 'field-sector-in-corps', sectorId, corpsId, ...(osid ? { osid } : {}) };
   }
-  return { kind: 'field-sector', sectorId };
+  return { kind: 'field-sector', sectorId, ...(osid ? { osid } : {}) };
 }
 
 export function resolveMapSettlementInspectionTarget(

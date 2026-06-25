@@ -35,7 +35,8 @@ import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
 type DetailTab = 'overview' | 'record' | 'orders';
 
 function formatHistoryMomentDate(turn: number): string {
-  if (!Number.isFinite(turn) || turn <= 0) return t('formationDetail.undated');
+  if (!Number.isFinite(turn)) return t('formationDetail.undated');
+  if (turn <= 0) return t('formationDetail.setupRecord');
   return turnToDateString(turn);
 }
 
@@ -609,18 +610,24 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
+              {formation.morale == null && (
+                <>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> {t('formationDetail.morale')}</span>
+                  <span className="text-text-secondary tabular-nums">{t('corpsFront.unreported')}</span>
+                </>
+              )}
               <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
               <span className="text-text-primary tabular-nums">
                 {typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue)
                   ? Math.round(formation.fatigue)
                   : t('corpsFront.unreported')}
               </span>
-              {formation.personnel != null && (
-                <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
-                  <span className="text-text-primary tabular-nums">{t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })}</span>
-                </>
-              )}
+              <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
+              <span className="text-text-primary tabular-nums">
+                {formation.personnel != null
+                  ? t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })
+                  : t('corpsFront.unreported')}
+              </span>
               {formation.kind === 'brigade' && (() => {
                 const eff = computeBrigadeEffectiveness(formation);
                 if (eff.missingFields.length > 0) {
@@ -897,7 +904,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       .map((m, i) => (
                       <div key={i} className="text-[11px] text-text-secondary break-words">
                         <span className="text-text-primary">{formatHistoryMomentDate(m.turn)}:</span>{' '}
-                        {sanitizeHistoryMoment(m.description, osidDisplayNames)}
+                        {m.turn <= 0
+                          ? t('formationDetail.initialDeploymentRecord')
+                          : sanitizeHistoryMoment(m.description, osidDisplayNames)}
                       </div>
                     ))}
                   </div>
