@@ -1,7 +1,7 @@
 # Player Surface Edge Polish
 
 **Date:** 2026-06-25
-**Status:** Implemented on `main`; follow-up implemented locally on `codex/field-routing-accessibility-polish`; final diff/GitHub/merge cleanup pending.
+**Status:** Implemented on `main`; field-routing/accessibility follow-up merged green at `86191c7a7`; Corps Front / Formation Detail truth-parity follow-up in progress on `codex/corps-front-truth-parity`.
 
 ## Summary
 
@@ -52,7 +52,29 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 - `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified; generated evidence folders were removed after inspection.
 - `git diff --check` passed.
 
+## Corps Front / Formation Detail Truth-Parity Follow-Up
+
+- Corps Detail now renders corps and sector stance through player-safe stance vocabulary instead of generic enum title-casing; unknown stance values remain `UNREPORTED`.
+- Formation Detail now resolves active sector ownership through the shared current-sector projection, so a valid player sector override no longer displays as stale roster ownership.
+- Formation Detail no longer synthesizes zero campaign losses or a zeroed combat summary when brigade records are absent; missing loss fields render `Unreported`, and the record tab shows an honest no-record state.
+- Corps Front now treats operation identity and participating brigade count as player-owned command records while preserving intel gating for hostile/objective/supply details.
+
+### Truth-Parity Verification So Far
+
+- Focused proof: `node .\node_modules\vitest\vitest.mjs run tests/ui/formation_detail_parity.test.ts tests/ui/corps_detail_sector_truth.test.ts tests/ui/corps_front_panel_routing.test.ts --reporter=dot` passed 3 files / 69 tests.
+- `npm.cmd run typecheck -- --pretty false` passed.
+- `npm.cmd run qa:player-journeys` passed 43 files / 596 tests.
+- `npm.cmd run qa:first-hour:browser` passed with dev-server cleanup verified.
+- `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified.
+- Generated `.tmp_first_hour_browser_gate` and `.tmp_live_surface_browser_sweep` evidence folders were removed after inspection; `.tmp_dev_server` remains as the active local dev-server marker.
+- Diff check, GitHub inspection, merge, and branch cleanup remain pending for this active branch.
+
+### Next Scout Queue
+
+- Corps Front Forces-tab brigade rows should align missing personnel truth with Army HQ sector rows: visible and accessible row copy should say `Unreported` instead of omitting personnel or rendering a dash.
+- Operation sparse-lifecycle truth needs the next larger slice: `GameStateAdapter` currently promotes missing operation phase/axis status to execution/executing, ops-planning brigade cards score missing combat data as zero/healthy, opportunity axis-readiness counts default missing values to zero, and Corps Front planning progress can invent a `0/8` preparation cycle.
+
 ## Closeout
 
-- Run final combined verification after docs.
+- For the active `codex/corps-front-truth-parity` branch, run final combined verification after docs.
 - Push branch, inspect GitHub failures/comments, merge to `main` only after green, then delete the branch/worktree/temp evidence.

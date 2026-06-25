@@ -29,33 +29,8 @@ import {
 import { t, useLocale, type MessageKey } from '../i18n';
 import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
-import { buildSectorFormationAssignment } from '../utils/sectorUtils';
+import { buildSectorFormationAssignment, resolveCurrentSectorForFormation } from '../utils/sectorUtils';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
-
-
-/** Zero combat summary for brigades that have not yet been in combat (so Combat Record always shows). */
-const ZERO_BRIGADE_COMBAT_SUMMARY: NonNullable<FormationView['combatSummary']> = {
-  battles_fought: 0,
-  victories: 0,
-  defeats: 0,
-  stalemates: 0,
-  battles_as_attacker: 0,
-  battles_as_defender: 0,
-  total_casualties_taken: 0,
-  total_casualties_inflicted: 0,
-  total_osids_captured: 0,
-  total_osids_lost: 0,
-  win_rate: 0,
-  casualty_exchange_ratio: 0,
-  current_personnel: 0,
-  peak_aggregate_personnel: 0,
-  nadir_aggregate_personnel: 0,
-  arc_distribution: {},
-  brigade_count: 1,
-  active_brigade_count: 1,
-  most_casualties_brigade_id: null,
-  most_victories_brigade_id: null,
-};
 
 type DetailTab = 'overview' | 'record' | 'orders';
 
@@ -135,6 +110,10 @@ const EFFECTIVENESS_MODIFIER_LABELS: Record<string, string> = {
 
 function formatEffectivenessModifierLabel(key: string): string {
   return EFFECTIVENESS_MODIFIER_LABELS[key] ?? t('formationDetail.staffRecord');
+}
+
+function formatOptionalInteger(value: number | null | undefined): string {
+  return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
 }
 
 type EquipmentConditionReport = {
@@ -261,23 +240,14 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
   // Sector helpers
   const sectors = loadedGameState.corpsFrontSectors ?? [];
-  const automaticSector = isBrigade && formation.corps_id
-    ? sectors.find(s => s.corps_id === formation.corps_id &&
-        (
-          s.assigned_brigade_ids.includes(formation.id)
-          || s.reserve_brigade_ids.includes(formation.id)
-          || (s.rear_brigade_ids ?? []).includes(formation.id)
-        ))
-    : null;
   const sameSectorList = isBrigade && formation.corps_id
     ? sectors.filter(s => s.corps_id === formation.corps_id)
     : [];
   const sectorOverrideId = formation.sectorOverrideId;
-  const overrideSector = isBrigade && formation.corps_id && sectorOverrideId
-    ? sectors.find(s => s.corps_id === formation.corps_id && s.sector_id === sectorOverrideId)
+  const currentSector = isBrigade && formation.corps_id
+    ? resolveCurrentSectorForFormation(formation, sectors)
     : null;
-  const currentSector = overrideSector ?? automaticSector;
-  const currentSectorIsOverride = Boolean(overrideSector);
+  const currentSectorIsOverride = Boolean(sectorOverrideId && currentSector?.sector_id === sectorOverrideId);
   const sectorAssignmentById = new Map(
     sameSectorList.map((sector) => [
       sector.sector_id,
@@ -787,19 +757,19 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d45555' }}>
-                      {(formation.campaignKia ?? 0).toLocaleString()}
+                      {formatOptionalInteger(formation.campaignKia)}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
                     <div className="text-sm font-mono font-bold" style={{ color: '#d4d455' }}>
-                      {(formation.campaignWia ?? 0).toLocaleString()}
+                      {formatOptionalInteger(formation.campaignWia)}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
                     <div className="text-sm font-mono font-bold text-text-secondary">
-                      {(formation.campaignMia ?? 0).toLocaleString()}
+                      {formatOptionalInteger(formation.campaignMia)}
                     </div>
                   </div>
                 </div>
@@ -823,7 +793,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {isBrigade && (
               <div className="space-y-2">
-                <CombatSummaryPanel summary={formation.combatSummary ?? ZERO_BRIGADE_COMBAT_SUMMARY} compact noTopBorder />
+                {formation.combatSummary ? (
+                  <CombatSummaryPanel summary={formation.combatSummary} compact noTopBorder />
+                ) : (
+                  <div className="pt-2 mb-3 text-[11px]">
+                    <div className="text-text-secondary font-semibold mb-1.5 text-[10px] uppercase tracking-wide">
+                      {t('combatRecord.emptyTitle')}
+                    </div>
+                    <div className="text-text-secondary italic">{t('formationDetail.combatRecordUnavailable')}</div>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-1">
                   {formation.brigade_history && (
                     <>
@@ -1049,7 +1028,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 <div className="space-y-1">
                   {sameSectorList.map(sector => {
                     const isCurrentOverride = sectorOverrideId === sector.sector_id;
-                    const isCurrentAutomatic = !sectorOverrideId && automaticSector?.sector_id === sector.sector_id;
+                    const isCurrentAutomatic = !currentSectorIsOverride && currentSector?.sector_id === sector.sector_id;
                     const sectorAssignment = sectorAssignmentById.get(sector.sector_id);
                     const currentBrigadeCount = sectorAssignment?.allCurrentIds.length ?? 0;
                     const frontlineBrigadeCount = sectorAssignment?.frontlineIds.length ?? 0;

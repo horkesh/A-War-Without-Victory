@@ -4,6 +4,8 @@
 
 **FORMATION ANCHORS SPLIT PHYSICAL FROM NAVIGATION (2026-06-25).** `location_osid` is physical presence; AoR/HQ anchors are navigation context. Do instead: use `resolveFormationPhysicalLocationOsid` for counters, stacks, hover, arrows, ghost paths, and selected-settlement truth; use `resolveFormationNavigationAnchor` only for panning/focus.
 
+**FORMATION RECORDS MUST NOT INVENT ZEROES (2026-06-25).** Missing brigade combat/loss data means headquarters lacks a record, not that the unit has confirmed zero combat or casualties. Do instead: render missing campaign KIA/WIA/MIA as `Unreported`, show an honest no-record state when `combatSummary` is absent, and use shared sector-assignment projection for active sector ownership.
+
 **HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
 
 **SECTOR INTEL ABSENCE IS NOT ZERO THREAT OR FULL CONFIDENCE (2026-06-24).** Missing density, threat ratio, defensive power, intel confidence, offensive signs, or morale are source gaps. Do instead: preserve absence through adapter/read-models, render unreported/redacted copy, skip density features without density, and use explicit `morale_reported` before coloring morale layers.

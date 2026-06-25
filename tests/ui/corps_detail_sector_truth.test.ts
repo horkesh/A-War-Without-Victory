@@ -194,4 +194,47 @@ describe('CorpsDetail sector truth', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('1');
     expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
   });
+
+  it('uses player-safe stance vocabulary for corps and sector stances', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_1st_corps'
+      ? { ...formation, corpsStance: 'offensive' }
+      : formation);
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      sector_stance: 'defend',
+      stance_source: 'player',
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    expect(container.textContent).toContain('offensive posture');
+    expect(container.textContent).not.toMatch(/\bOffensive\b/);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    expect(container.textContent).toContain('defend in depth');
+    expect(container.textContent).not.toMatch(/\bDefend\b/);
+  });
+
+  it('does not expose raw unknown stance enum copy', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_1st_corps'
+      ? { ...formation, corpsStance: 'wait_for_weather' }
+      : formation);
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      sector_stance: 'probe_then_pause',
+    }] as unknown as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    expect(container.textContent).toContain('UNREPORTED');
+    expect(container.textContent).not.toMatch(/Wait For Weather|wait_for_weather/i);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
+    expect(container.textContent).toContain('UNREPORTED');
+    expect(container.textContent).not.toMatch(/Probe Then Pause|probe_then_pause/i);
+  });
 });

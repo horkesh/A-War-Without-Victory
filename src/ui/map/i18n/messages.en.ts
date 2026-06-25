@@ -1926,6 +1926,7 @@ export const enMessages = {
     'formationDetail.homeMunicipality': 'Home municipality:',
     'formationDetail.narrativeArc': 'Narrative Arc',
     'formationDetail.campaignLosses': 'Campaign Losses',
+    'formationDetail.combatRecordUnavailable': 'No brigade combat record has reached headquarters.',
     'formationDetail.kia': 'Killed',
     'formationDetail.wia': 'Wounded',
     'formationDetail.miaPow': 'Missing or captured',

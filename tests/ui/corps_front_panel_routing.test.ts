@@ -876,6 +876,26 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Waiting For Bridge Report|waiting_for_bridge_report/i);
   });
 
+  it('keeps player-owned operation identity and force count visible under low hostile intel', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      intel_confidence: 0.1,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toContain('Known Supply Operation');
+    expect(container.textContent).toMatch(/1\s+Brigades/i);
+    expect(container.textContent).not.toContain('OP REDACTED');
+  });
+
   it('renders unknown corps stance as unreported instead of title-cased enum copy', () => {
     const state = makeState();
     state.formations = state.formations.map((formation) => formation.id === 'arbih_1st_corps'

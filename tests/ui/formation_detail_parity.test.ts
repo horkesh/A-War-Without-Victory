@@ -382,6 +382,40 @@ describe('Formation Detail parity display', () => {
     expect(northButton.textContent ?? '').not.toContain('Current');
   });
 
+  it('uses shared sector assignment projection for current sector ownership', () => {
+    const state = makeFormationDetailState();
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'rbih_override_brigade',
+        faction: 'RBiH',
+        name: 'Override Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        cohesion: 62,
+        fatigue: 4,
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'rbih_1st_corps',
+        personnel: 1000,
+        posture: 'defend',
+        sectorOverrideId: 'sector_south',
+      },
+    ] as LoadedGameState['formations'];
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_north'
+      ? { ...sector, assigned_brigade_ids: ['rbih_heroic_brigade', 'rbih_override_brigade'] }
+      : sector);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_override_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Southern line');
+    expect(copy).toContain('Override');
+    expect(copy).not.toContain('Northern line');
+  });
+
   it('uses projected current brigade counts in the sector assignment picker', () => {
     const state = makeFormationDetailState();
     state.formations = [
@@ -559,6 +593,33 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Readiness pending');
     expect(copy).not.toContain('Cohesion0');
     expect(copy).not.toContain('Fatigue0');
+  });
+
+  it('does not synthesize zero combat or loss records when brigade records are absent', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        campaignKia: undefined,
+        campaignWia: undefined,
+        campaignMia: undefined,
+        combatSummary: undefined,
+      } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Campaign Losses');
+    expect(copy).toContain('KilledUnreported');
+    expect(copy).toContain('WoundedUnreported');
+    expect(copy).toContain('Missing or capturedUnreported');
+    expect(copy).toContain('No combat record');
+    expect(copy).toContain('No brigade combat record has reached headquarters.');
+    expect(copy).not.toMatch(/Killed0|Wounded0|Missing or captured0/);
+    expect(copy).not.toMatch(/Battles\s*0|Win Rate\s*0\.0%|Men Lost\s*0/i);
   });
 
   it('renders sparse equipment condition as unreported instead of crashing', () => {

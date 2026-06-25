@@ -1885,6 +1885,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'formationDetail.homeMunicipality': 'Matična općina:',
     'formationDetail.narrativeArc': 'Narativni luk',
     'formationDetail.campaignLosses': 'Kampanjski gubici',
+    'formationDetail.combatRecordUnavailable': 'Borbeni zapis brigade nije stigao u komandu.',
     'formationDetail.kia': 'Poginuli',
     'formationDetail.wia': 'Ranjeni',
     'formationDetail.miaPow': 'Nestali ili zarobljeni',

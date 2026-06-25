@@ -18,12 +18,12 @@ import {
   getPlayerSafeCorpsName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeOperationPhaseLabel,
+  getPlayerSafeSectorStanceLabel,
 } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
-import { formatPosture } from '../utils/formatters';
 import {
   addEquipmentCondition,
   emptyEquipmentConditionSummary,
@@ -49,6 +49,10 @@ const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> 
 function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
   const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
   return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
+}
+
+function formatCorpsDetailStance(stance: string | null | undefined): string {
+  return getPlayerSafeSectorStanceLabel(stance, t('armyHqCorps.stance.unreported'));
 }
 
 interface CorpsDetailProps {
@@ -234,7 +238,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
               {' · '}
-              <span>{corpsFormation.corpsStance ? formatPosture(corpsFormation.corpsStance) : t('armyHqCorps.stance.unreported')}</span>
+              <span>{formatCorpsDetailStance(corpsFormation.corpsStance)}</span>
               {corpsFormation.corpsExhaustion != null && (
                 <span>
                   {' · Exhaustion: '}
@@ -443,7 +447,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}
                     </div>
                     <div className="text-[9px] uppercase text-text-secondary opacity-70">
-                      {s.sector_stance ? formatPosture(s.sector_stance) : t('armyHqCorps.stance.unreported')}
+                      {formatCorpsDetailStance(s.sector_stance)}
                       {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
                     </div>
                   </div>
