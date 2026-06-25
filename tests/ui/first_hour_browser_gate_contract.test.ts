@@ -338,7 +338,8 @@ describe('browser QA CI wiring contract', () => {
     const fullSuiteJobStart = workflow.indexOf('  full-suite:');
     const structuralFingerprintStart = workflow.indexOf('  structural-fingerprint:');
     const fullSuiteJob = workflow.slice(fullSuiteJobStart, structuralFingerprintStart);
-    expect(fullSuiteJob).toContain('lfs: true');
+    expect(fullSuiteJob).not.toContain('lfs: true');
+    expect(read('.github/workflows/README.md')).toContain('does not eager-fetch Git LFS before path');
     expect(workflow).toContain('name: First-hour browser gate');
     expect(workflow).toContain('run: npm run qa:first-hour:browser');
     expect(workflow).toContain('name: Live surface browser gate');

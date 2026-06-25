@@ -22820,3 +22820,5 @@ Verification: GitHub Baseline Regression on `main` at `8ba90f7f4` failed in the 
 ## 2026-06-25 - Full-suite LFS checkout guard repair
 
 Fixed the next GitHub Full Suite + Structural Fingerprint failure on `main` at `d6842cf75`: the `full-suite` job failed during `actions/checkout` because `lfs: true` tried to fetch Git LFS objects before the always-report path detector could run, and GitHub reported the repository had exceeded its LFS budget. The full-suite checkout no longer eager-fetches LFS; the required check can now reach path detection and report the actual relevant test/browser gate result instead of failing during checkout setup. The workflow README now documents this guard. No runtime, simulation, scenario, calibration, player UI, Srebrenica/Zepa event ownership, or packaging behavior changed.
+
+Follow-up repair: the next Full Suite run reached Vitest and failed the browser-gate contract test because it still asserted `lfs: true`. The contract now pins the new guard by asserting full-suite does not eager-fetch LFS and that the workflow README documents the reason.
