@@ -8,7 +8,7 @@ import { formatPersonnel } from '../../utils/formatters';
 import { getRatingColor } from '../../utils/officerCharacter';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { getLocalizedFormationName } from '../../data/formationNameLocalizations';
-import { resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
+import { resolveCorpsCommanderDisplay, resolveOpeningCorpsCommanderOfficer } from '../../utils/officerUtils';
 import { getPlayerSafeMunicipalityName } from '../../utils/playerSafeText';
 import { inspectOnField } from '../../utils/shellNavigation';
 import { FrontVisitSection } from './FrontVisitSection';
@@ -51,7 +51,12 @@ export function PersonnelContent() {
         });
         const officers = (state.namedOfficerData ?? []).filter(o => o.faction === faction);
         const activeOfficers = officers.filter(o => o.status === 'active');
-        const reserveOfficers = officers.filter(o => o.status === 'reserve');
+        const openingCommanderOfficerIds = new Set(
+            corpsFormations
+                .map((corps) => resolveOpeningCorpsCommanderOfficer(corps.id, corps.faction, state)?.id)
+                .filter((id): id is string => Boolean(id)),
+        );
+        const reserveOfficers = officers.filter(o => o.status === 'reserve' && !openingCommanderOfficerIds.has(o.id));
         const reserves = state.factionReserves?.[faction];
         const mobilization = state.mobilizationSummary?.[faction];
         const commanderVacancies = corpsFormations

@@ -379,6 +379,18 @@ function safeSectorLabel(sectorId: string, sectors: CorpsFrontSectorView[]): str
     return isUnsafeRawLabel(label) ? t('sectorsSection.assignedSector') : label;
 }
 
+function pickSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | null {
+    const seen = new Set<string>();
+    for (const segment of sector.sub_segments ?? []) {
+        for (const osid of segment.friendly_osids ?? []) {
+            if (seen.has(osid)) continue;
+            seen.add(osid);
+            return osid;
+        }
+    }
+    return null;
+}
+
 function pickDefaultSectorId(sectors: CorpsFrontSectorView[], factionBattles: TurnBattle[], sectorOsidSets: Map<string, Set<string>>): string | null {
     if (sectors.length === 0) return null;
     const battleCounts = new Map<string, number>();
@@ -508,14 +520,11 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                         data-corps-id={corpsId}
                                         aria-label={t('sectorsSection.inspectOnField', { sector: sectorLabel })}
                                         onClick={() => {
-                                            const anchorOsid = [...new Set(
-                                                (sector.sub_segments ?? []).flatMap((segment) => segment.friendly_osids ?? []),
-                                            )].sort()[0] ?? null;
                                             inspectOnField(useGameStore.getState(), {
                                                 kind: 'field-sector-in-corps',
                                                 sectorId: sector.sector_id,
                                                 corpsId,
-                                                osid: anchorOsid,
+                                                osid: pickSectorInspectAnchorOsid(sector),
                                             });
                                         }}
                                         className="ml-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"

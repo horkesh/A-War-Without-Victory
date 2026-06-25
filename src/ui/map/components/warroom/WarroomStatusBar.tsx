@@ -154,7 +154,7 @@ function PriorityDocketPanel({
           type="button"
           onClick={onOpenBoard}
           disabled={!canReviewPriorities}
-          aria-label={t('warroom.openDecisionRoom')}
+          aria-label={docket.openBoardLabel}
           className="rounded border border-amber-700/60 bg-amber-950/45 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.11em] text-amber-300 transition-colors hover:bg-amber-900/45 disabled:cursor-default disabled:border-neutral-700 disabled:bg-neutral-950/45 disabled:text-neutral-500"
         >
           {docket.openBoardLabel}

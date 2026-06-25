@@ -215,6 +215,8 @@ describe('ADVANCE_TURN gated feedback', () => {
 
     expect(screen.getByText('Review before advance')).toBeTruthy();
     expect(screen.getByText('1 advance item / 1 urgent / 2 pending')).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open Decision Room' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: "Open President's Desk" })).toBeNull();
     expect(screen.getByRole('button', { name: 'Review Warroom priorities: 1 turn review item, 1 urgent, 2 pending' }).getAttribute('aria-expanded')).toBe('true');
     expect(onReviewPriorities).not.toHaveBeenCalled();
     expect(useGameStore.getState().advanceTurnPending).toBe(false);

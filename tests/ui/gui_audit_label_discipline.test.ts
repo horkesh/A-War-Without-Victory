@@ -1263,6 +1263,54 @@ describe('GUI audit label discipline', () => {
     expect(store.armyHQOpen).toBe(false);
   });
 
+  it('keeps Army HQ sector inspect anchored to the first authored friendly segment', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:0',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      display_name: 'Sarajevo front',
+      edge_ids: ['edge-1', 'edge-2'],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      length_edges: 2,
+      sub_segment_count: 2,
+      defensive_power: 1200,
+      density: 0.5,
+      threat_ratio: 1.1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+      sub_segments: [
+        { sub_segment_id: 's1', friendly_osids: ['op:sector:z_authored_first'], enemy_osids: [] },
+        { sub_segment_id: 's2', friendly_osids: ['op:sector:a_lexicographic_first'], enemy_osids: [] },
+      ],
+    } as unknown as CorpsFrontSectorView;
+
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [] }),
+      armyHQExpandedSections: { 'sec-arbih_1st_corps': true },
+      osidDisplayNames: {
+        'op:sector:z_authored_first': 'Authored First',
+        'op:sector:a_lexicographic_first': 'Lexicographic First',
+      },
+    });
+
+    render(createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Inspect Sarajevo front on field/i }));
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
+    expect(store.selectedOsid).toBe('op:sector:z_authored_first');
+    expect(store.selectedOsid).not.toBe('op:sector:a_lexicographic_first');
+  });
+
   it('renders Situation pressure and security copy without telemetry labels', () => {
     const state = makeState({
       internationalVisibilityPressure: {

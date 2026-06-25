@@ -81,11 +81,6 @@ const CANVAS_ASPECT = CANVAS_W / CANVAS_H;
  * overlay commands stay inside the React shell and never enter the shared
  * handoff union.
  *
- * Returns undefined for regions that intentionally navigate to the game view
- * (tactical map) without opening a specific panel — the undefined return value
- * propagates to onNavigate, which calls warroomCommandStaysInRoom(undefined) → false
- * → setAppScreen('game'), showing the map.
- *
  * War Map regions use an explicit local command; unknown regions are a no-op.
  * All other known hotspots are explicitly mapped by the shared route table.
  *

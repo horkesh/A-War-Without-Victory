@@ -21,8 +21,8 @@
  * keeps only the command-strip id→asset map (`COMMAND_CARD_DESK_ASSET`) and the
  * thin `resolveCommandCardArt` wrapper.
  *
- * No new art is added — step 2 reuses the desk assets that already ship for the
- * decision modals. The id→asset map (`COMMAND_CARD_DESK_ASSET`) is an explicit,
+ * faction-specific command-card overrides now ship for category and action ids; step 2 reuses
+ * the desk assets as the fallback for unmapped or future ids. The id-to-asset map (`COMMAND_CARD_DESK_ASSET`) is an explicit,
  * editable data structure so the owner can re-map any card later.
  *
  * Pure presentation: no engine/state touch, no Math.random/Date.now.

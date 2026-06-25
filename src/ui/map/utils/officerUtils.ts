@@ -34,6 +34,10 @@ function assignedCorpsFor(state: LoadedGameState, officer: NamedOfficerView): st
     return state.namedOfficerStateById?.[officer.id]?.assigned_corps_id ?? officer.assigned_corps_id ?? null;
 }
 
+function assignedOperationFor(officer: NamedOfficerView): string | null {
+    return officer.assigned_operation ?? null;
+}
+
 function isOfficerAvailableForTurn(state: LoadedGameState, officer: NamedOfficerView): boolean {
     const turn = state.turn ?? 0;
     if (officer.available_from_turn != null && officer.available_from_turn > turn) return false;
@@ -63,6 +67,23 @@ function isOpeningCorpsMatch(officer: NamedOfficerView, corpsId: string): boolea
         || (officer.is_historical_start === true && officer.historical_corps_id === corpsId);
 }
 
+export function resolveOpeningCorpsCommanderOfficer(
+    corpsId: string,
+    faction: string,
+    loadedGameState: LoadedGameState,
+): NamedOfficerView | null {
+    return (loadedGameState.namedOfficerData ?? [])
+        .filter((officer) =>
+            officer.faction === faction
+            && officer.rank === 'corps_commander'
+            && isOfficerAvailableForTurn(loadedGameState, officer)
+            && !assignedCorpsFor(loadedGameState, officer)
+            && !assignedOperationFor(officer)
+            && isOpeningCorpsMatch(officer, corpsId)
+        )
+        .sort(compareOpeningOfficer)[0] ?? null;
+}
+
 export function resolveCorpsCommanderDisplay(
     corpsId: string,
     faction: string,
@@ -80,15 +101,7 @@ export function resolveCorpsCommanderDisplay(
         return { name: SYNTHETIC_COMMAND_LABELS[corpsId], acting: false, source: 'synthetic' };
     }
 
-    const openingCandidate = officers
-        .filter((officer) =>
-            officer.faction === faction
-            && officer.rank === 'corps_commander'
-            && isOfficerAvailableForTurn(loadedGameState, officer)
-            && !assignedCorpsFor(loadedGameState, officer)
-            && isOpeningCorpsMatch(officer, corpsId)
-        )
-        .sort(compareOpeningOfficer)[0];
+    const openingCandidate = resolveOpeningCorpsCommanderOfficer(corpsId, faction, loadedGameState);
 
     if (!openingCandidate) return null;
     return { name: openingCandidate.name, acting: true, source: 'opening_read_model' };

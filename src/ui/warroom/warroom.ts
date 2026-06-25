@@ -222,7 +222,7 @@ class WarroomApp {
         this.gameState = mockState;
 
         if (params?.turn === 30) {
-            this.gameState.meta.scenario_start_date = { year: 1992, month: 4, day: 1 };
+            this.gameState.meta.scenario_start_date = { year: 1992, month: 3, day: 6 };
         }
 
         setScenarioStartDate(this.gameState.meta.scenario_start_date);

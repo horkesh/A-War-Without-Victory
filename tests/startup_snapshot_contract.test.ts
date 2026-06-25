@@ -21,6 +21,7 @@ import { buildOsidAdjacency } from '../src/sim/combat/osid_adjacency.js';
 import { isSectorRosterEligibleFormation } from '../src/sim/combat/sector_roster_eligibility.js';
 import { auditSectorTruth } from '../src/sim/combat/sector_truth_audit.js';
 import { getSectorFrontOsids } from '../src/sim/combat/sector_utils.js';
+import { getSeasonalModifiers } from '../src/sim/combat/seasonal_effects.js';
 import {
     isSrkStranglePostureEnabled,
     resetSrkStranglePostureGate,
@@ -28,6 +29,7 @@ import {
 import { computeSrkStrangleOsids } from '../src/sim/combat/srk_strangle.js';
 import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import { turnToISODate } from '../src/ui/map/utils/formatters.js';
 import { resolveCorpsCommanderDisplay } from '../src/ui/map/utils/officerUtils.js';
 
 test('baked April 1992 startup artifact matches canonical builder truth after checkout normalization', async () => {
@@ -83,6 +85,30 @@ test('baked April 1992 startup artifact stays in canonical loaded-save form', as
         payload,
         'baked startup artifact should already be in canonical save/load form',
     );
+});
+
+test('baked April 1992 startup date uses the engine 0-indexed April anchor', async () => {
+    const state = await loadStartupSnapshotState(process.cwd(), 'apr_1992');
+
+    assert.deepStrictEqual(
+        state.meta.scenario_start_date,
+        { year: 1992, month: 3, day: 6 },
+        'scenario_start_date.month is 0-indexed, so month=3 is April',
+    );
+    assert.strictEqual(turnToISODate(0), '1992-04-06');
+    assert.strictEqual(getSeasonalModifiers(0, state.meta.scenario_start_date).season_label, 'spring');
+    assert.strictEqual(getSeasonalModifiers(0, state.meta.scenario_start_date).attack_share_mult, 1);
+});
+
+test('browser fallback April startup uses the same 0-indexed calendar anchor', async () => {
+    const source = await readFile(resolve(process.cwd(), 'src', 'ui', 'warroom', 'warroom.ts'), 'utf8');
+
+    assert.match(
+        source,
+        /this\.gameState\.meta\.scenario_start_date = \{ year: 1992, month: 3, day: 6 \};/,
+        'legacy browser fallback must not drift from the baked April 6 1992 war-start anchor',
+    );
+    assert.doesNotMatch(source, /scenario_start_date = \{ year: 1992, month: 4, day: 1 \};/);
 });
 
 test('desktop new campaign consumes the baked April 1992 startup artifact path', async () => {

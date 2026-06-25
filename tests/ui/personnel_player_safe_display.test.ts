@@ -6,6 +6,7 @@ import { PersonnelContent } from '../../src/ui/map/components/army_hq/PersonnelC
 import { derivePanelRailState, shouldRenderTacticalDetailRails } from '../../src/ui/map/components/panelRail.js';
 import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { resolveCorpsCommanderDisplay } from '../../src/ui/map/utils/officerUtils.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeState(): LoadedGameState {
@@ -268,6 +269,41 @@ describe('PersonnelContent player-facing display', () => {
     expect(container.textContent).toContain('Command vacancies1No active commander: Empty Corps');
     expect(container.textContent).not.toContain('Command vacancies3');
     expect(container.textContent).not.toContain('No active commander: JNA Herzegovina Command, Drina Corps, Empty Corps');
+  });
+
+  it('does not list opening read-model commanders as generic reserve officers', () => {
+    useGameStore.setState({ loadedGameState: makeOpeningCommanderState(), selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+
+    expect(container.textContent).toContain('Command vacancies1No active commander: Empty Corps');
+    expect(container.textContent).toContain('OFFICER ROSTER (0 active, 0 reserve)');
+    expect(container.textContent).not.toContain('Reserve officersAvailable: Svetozar Andric');
+    expect(container.textContent).not.toContain('Reserve PoolSvetozar Andric');
+  });
+
+  it('skips operation-assigned officers when projecting opening corps commanders', () => {
+    const state = makeOpeningCommanderState() as LoadedGameState & { namedOfficerData: NonNullable<LoadedGameState['namedOfficerData']> };
+    state.namedOfficerData.unshift({
+      id: 'vrs_operation_commander',
+      name: 'Operation Commander',
+      faction: 'RS',
+      status: 'reserve',
+      rank: 'corps_commander',
+      home_corps_id: 'vrs_drina',
+      assigned_operation: 'Operation Drina',
+      competence: 5,
+      aggressiveness: 3,
+      defensive_skill: 5,
+      political_reliability: 3,
+      pool_tier: 'starter',
+    } as NonNullable<LoadedGameState['namedOfficerData']>[number]);
+
+    expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', state)).toEqual({
+      name: 'Svetozar Andric',
+      acting: true,
+      source: 'opening_read_model',
+    });
   });
 
   it('does not count future officers with no mutable state in the turn-0 roster', () => {

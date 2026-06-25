@@ -27,6 +27,8 @@ describe('presidential desk assets', () => {
     expect(getPacketThumbnailForInboxType('convoy_decision')).toContain('packet_thumb_convoy');
     expect(getPacketThumbnailForInboxType('intelligence_notification')).toContain('packet_thumb_intelligence');
     expect(getPacketThumbnailForInboxType('situation')).toContain('packet_thumb_event_decision');
+    expect(getPacketThumbnailForInboxType('operation_opportunity')).toContain('consequence_reserve_deployment');
+    expect(getPacketThumbnailForInboxType('operation_opportunity')).not.toContain('packet_thumb_officer_matter');
     expect(getPacketThumbnailForInboxType('operation_opportunity')).not.toContain('packet_thumb_reserve_request');
   });
 
@@ -47,5 +49,13 @@ describe('presidential desk assets', () => {
 
   it('exposes the presidential desk background asset', () => {
     expect(PRESIDENTIAL_DESK_BACKGROUND).toContain('hq_presidential_desk_1992');
+  });
+
+  it('keeps command-card comments aligned with shipped override art', async () => {
+    const { readFile } = await import('node:fs/promises');
+    const source = await readFile('src/ui/map/components/warroom/CommandCard.tsx', 'utf8');
+
+    expect(source).toContain('faction-specific command-card overrides');
+    expect(source).not.toContain('No new art is added');
   });
 });

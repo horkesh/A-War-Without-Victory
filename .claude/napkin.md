@@ -1,5 +1,11 @@
 # Napkin Runbook
 
+**SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
+
+**OPENING COMMANDER PROJECTION IS NOT RESERVE AVAILABILITY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state. Do instead: exclude projected opening commanders from Personnel reserve pools and skip operation-assigned officers when resolving opening command display.
+
+**SECTOR INSPECT ANCHORS PRESERVE AUTHORED ORDER (2026-06-25).** Multi-segment sector navigation should not sort OSIDs into an arbitrary lexicographic anchor. Do instead: choose the first authored friendly segment OSID for field inspect; reserve sorting for explicit display lists.
+
 **ADVISORY EVENT DECISIONS ARE NOT MODAL BLOCKERS (2026-06-25).** Pending event-decision rows can be advisory. Do instead: block, auto-open EventDecisionModal, count review-queue event decisions, and render Army HQ required-decision rows only when `requires_player_response === true`; route advisory rows through Decision Room.
 
 **FALLBACK BLOCKER COUNTS USE REQUIRED-EVENT ROUTING (2026-06-25).** Legacy/fallback pre-advance paths can run without `playerDecisionSummary`. Do instead: apply `isRequiredPendingEventDecision(...)` plus player-faction scope before counting `pending_event_decisions`; advisory rows never block advance.

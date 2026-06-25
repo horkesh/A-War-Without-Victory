@@ -55,6 +55,24 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(regionToShellHandoff('wall_flag_area')).toEqual({ kind: 'warroom-overlay', surface: 'faction' });
     });
 
+    it('keeps unknown Warroom hotspots as a no-op instead of leaving the room', () => {
+        const app = read('src/ui/map/App.tsx');
+        const navigateStart = app.indexOf('onNavigate={(command) => {');
+        const navigateEnd = app.indexOf('\n            }}', navigateStart);
+
+        expect(regionToShellHandoff('unknown_region')).toBeUndefined();
+        expect(navigateStart).toBeGreaterThanOrEqual(0);
+        expect(navigateEnd).toBeGreaterThan(navigateStart);
+        expect(app.slice(navigateStart, navigateEnd)).toContain('if (!command) return;');
+    });
+
+    it('documents Warroom map hotspots separately from unknown no-op regions', () => {
+        const source = read('src/ui/map/components/warroom/WarroomShellLayer.tsx');
+
+        expect(source).toContain('War Map regions use an explicit local command; unknown regions are a no-op.');
+        expect(source).not.toContain('intentionally navigate to the game view');
+    });
+
     it('keeps event decisions as the exclusive presidential modal owner', () => {
         const app = read('src/ui/map/App.tsx');
 
