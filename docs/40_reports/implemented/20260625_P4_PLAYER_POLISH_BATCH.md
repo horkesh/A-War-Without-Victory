@@ -29,6 +29,8 @@ Additional local gates passed:
 - `npm.cmd run qa:first-hour:browser`
 - `npm.cmd run qa:live-surface:browser`; the final evidence recorded `mapContextMenuLiveProof.clickedAction: "deselect"` and dev-server port cleanup.
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, war-start splash, `WAR BEGINS: 6 APR 1992` identity brief, foundational `What Is Bosnia?` Desk packet, Desk decision count truth, Army HQ command/OOB commander data, clickable top-level nav labels, and no sampled raw command slug leak.
+- PR #447 merged to `main` at `df5251b94`; post-merge GitHub checks passed across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint.
+- Local/remote branch refs were deleted/pruned and the worktree audit returned one clean `main` worktree.
 
 ## Pyrrhic Team
 
@@ -39,6 +41,9 @@ Absorbed and closed scout/implementation reports:
 - Meitner/Curie
 - Popper
 - Euler
+- Nietzsche
+- Pascal
+- Copernicus
 
 ## Scope And Determinism
 
