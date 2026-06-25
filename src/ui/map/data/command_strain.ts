@@ -166,6 +166,14 @@ export function getCommandStrainLabel(score: number): CommandStrainLabel {
     return 'healthy';
 }
 
+export function normalizeCommandStrainLabel(
+    score: number | null | undefined,
+    label: CommandStrainLabel | null | undefined,
+): CommandStrainLabel {
+    if (label) return label;
+    return getCommandStrainLabel(typeof score === 'number' && Number.isFinite(score) ? score : 0);
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Order Interpretation Preview — Wave 5 / Wave 1 Category Extension
 // ═══════════════════════════════════════════════════════════════════════════

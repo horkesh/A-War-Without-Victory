@@ -39,7 +39,7 @@ import { buildOperationTargetPointsGeoJSON, buildOperationTargetCrosshairsGeoJSO
 import { buildOperationArrowsGeoJSON } from './builders/buildOperationArrowsGeoJSON';
 import { buildFormationsGeoJSON } from './builders/buildFormationsGeoJSON';
 import { buildOsidCentroidLookup } from './builders/geojsonLookup';
-import { resolveFormationLocationOsid } from './builders/resolveFormationLocationOsid';
+import { resolveFormationNavigationAnchor } from './builders/resolveFormationLocationOsid';
 import { ensureFormationIcons, ensureTacticalIcons } from './formationIcons';
 import { buildFogOfWarGeoJSON } from './builders/buildFogOfWarGeoJSON';
 import { buildEnclaveGeoJSON } from './builders/buildEnclaveGeoJSON';
@@ -3134,8 +3134,33 @@ export function MapContainer() {
     const lookup = osidCentroidsRef.current;
     if (!mapReady || !map || lookup.size === 0) return;
 
+    // Prefer pan to a selected formation/navigation anchor or settlement before broad command bounds.
+    let targetOsid: string | null = null;
+    if (selectedFormationId && loadedGameState) {
+      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
+      if (formation) {
+        targetOsid = resolveFormationNavigationAnchor(formation, lookup)?.osid ?? null;
+      }
+    }
+    if (!targetOsid && selectedOsid) targetOsid = selectedOsid;
+
+    if (targetOsid) {
+      const center = lookup.get(targetOsid);
+      if (center && lastPanTargetRef.current !== targetOsid) {
+        lastPanTargetRef.current = targetOsid;
+        map.easeTo({ center, duration: 450, essential: true });
+      }
+      return;
+    }
+
     // When corps is selected from sidebar, zoom to fit all corps sectors.
-    if (selectedCorpsId && loadedGameState?.corpsFrontSectors && loadedGameState?.frontEdgesOsid) {
+    if (
+      selectedCorpsId
+      && !selectedFormationId
+      && !selectedCorpsFrontSectorId
+      && loadedGameState?.corpsFrontSectors
+      && loadedGameState?.frontEdgesOsid
+    ) {
       const corpsPanKey = `corps:${selectedCorpsId}`;
       if (lastPanTargetRef.current !== corpsPanKey) {
         const corpsSectors = loadedGameState.corpsFrontSectors.filter(s => s.corps_id === selectedCorpsId);
@@ -3187,25 +3212,6 @@ export function MapContainer() {
             map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, maxZoom: 10, duration: 450 });
           }
         }
-      }
-      return;
-    }
-
-    // Prefer pan to formation or settlement when one is selected.
-    let targetOsid: string | null = null;
-    if (selectedFormationId && loadedGameState) {
-      const formation = loadedGameState.formations.find((f) => f.id === selectedFormationId);
-      if (formation) {
-        targetOsid = resolveFormationLocationOsid(formation, lookup) ?? null;
-      }
-    }
-    if (!targetOsid && selectedOsid) targetOsid = selectedOsid;
-
-    if (targetOsid) {
-      const center = lookup.get(targetOsid);
-      if (center && lastPanTargetRef.current !== targetOsid) {
-        lastPanTargetRef.current = targetOsid;
-        map.easeTo({ center, duration: 450, essential: true });
       }
       return;
     }

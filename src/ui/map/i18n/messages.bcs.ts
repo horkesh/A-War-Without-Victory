@@ -815,6 +815,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'commanderSelect.noOfficers': 'Nema oficira za ovu frakciju.',
     'commanderSelect.backToDraft': 'Nazad na nacrt',
     'stackExpansion.closeAria': 'Zatvori snop formacija',
+    'stackExpansion.dialogAria': 'Snop formacija',
     'stackExpansion.selectAria': 'Izaberi {name}',
     'stackExpansion.dismissAria': 'Odbaci proširenje snopa formacija',
     'stackExpansion.dismiss': 'Odbaci proširenje',

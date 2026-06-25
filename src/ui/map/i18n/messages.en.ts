@@ -836,6 +836,7 @@ export const enMessages = {
     'commanderSelect.noOfficers': 'No officers found for this faction.',
     'commanderSelect.backToDraft': 'Back to Draft',
     'stackExpansion.closeAria': 'Close formation stack',
+    'stackExpansion.dialogAria': 'Formation stack',
     'stackExpansion.selectAria': 'Select {name}',
     'stackExpansion.dismissAria': 'Dismiss formation stack expansion',
     'stackExpansion.dismiss': 'Dismiss Expansion',

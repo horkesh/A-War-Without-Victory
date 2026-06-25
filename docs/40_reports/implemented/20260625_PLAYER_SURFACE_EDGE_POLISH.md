@@ -1,7 +1,7 @@
 # Player Surface Edge Polish
 
 **Date:** 2026-06-25
-**Status:** Implemented locally on `codex/player-surface-edge-polish`; final diff/GitHub/merge cleanup pending.
+**Status:** Implemented on `main`; follow-up implemented locally on `codex/field-routing-accessibility-polish`; final diff/GitHub/merge cleanup pending.
 
 ## Summary
 
@@ -39,9 +39,18 @@ UI/read-model/i18n/test/docs polish only. No simulation logic, scenario source d
 
 ## Parked Follow-Up
 
-- Formation selection routing and pan helpers still need a separate contract review where AoR/HQ anchors can look like physical settlement routing.
-- StackExpansionOverlay keyboard/modal semantics should be improved in a dedicated accessibility packet.
-- Missing command-strain labels should be proven not to default to healthy in adjacent command surfaces.
+- Closed by the `codex/field-routing-accessibility-polish` follow-up: formation selection routing now keeps AoR/HQ anchors out of physical `FieldInspectionTarget.osid` selection while retaining them for navigation panning; StackExpansionOverlay now renders as a modal dialog with initial focus, Escape handling, Tab trap, and focus restoration; and Army HQ / Operation Briefing command-strain consumers derive labels from numeric strain when read-model labels are absent.
+
+## Follow-Up Verification
+
+- Red/green routing proof: command formations with `hq_osid` but no `location_osid` no longer select an HQ settlement; physical map builders remain pinned to `resolveFormationPhysicalLocationOsid`; navigation anchors resolve `location -> AoR -> HQ`.
+- Red/green accessibility proof: StackExpansionOverlay now exposes `role="dialog"`, `aria-modal="true"`, localized accessible name, initial focus, deterministic Tab wrapping, Escape close with propagation stopped, and focus restoration.
+- Red/green command-strain proof: positive numeric strain with missing read-model label derives `strained` / `compromised`; explicit zero remains healthy/silent.
+- Focused proof: `node .\node_modules\vitest\vitest.mjs run tests/ui/map_click_routing_contract.test.ts tests/ui/command_strain_interpretation.test.ts tests/ui/stack_expansion_overlay_viewport.test.ts --reporter=dot` passed 3 files / 72 tests, including formation/sector pan precedence over broad corps bounds.
+- `npm.cmd run typecheck -- --pretty false` passed.
+- `npm.cmd run qa:player-journeys` passed 43 files / 594 tests.
+- `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified; generated evidence folders were removed after inspection.
+- `git diff --check` passed.
 
 ## Closeout
 

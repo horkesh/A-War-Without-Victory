@@ -2,6 +2,8 @@
 
 **PARTIAL ETHNIC CENSUS IS UNREPORTED (2026-06-25).** Bosniak/Serb/Croat/Other fields are a complete set. Do instead: suppress selected-settlement, municipality, current-ethnic, and ethnic-map majority readouts when any component is missing; never fill missing ethnic groups as zero.
 
+**FORMATION ANCHORS SPLIT PHYSICAL FROM NAVIGATION (2026-06-25).** `location_osid` is physical presence; AoR/HQ anchors are navigation context. Do instead: use `resolveFormationPhysicalLocationOsid` for counters, stacks, hover, arrows, ghost paths, and selected-settlement truth; use `resolveFormationNavigationAnchor` only for panning/focus.
+
 **HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
 
 **SECTOR INTEL ABSENCE IS NOT ZERO THREAT OR FULL CONFIDENCE (2026-06-24).** Missing density, threat ratio, defensive power, intel confidence, offensive signs, or morale are source gaps. Do instead: preserve absence through adapter/read-models, render unreported/redacted copy, skip density features without density, and use explicit `morale_reported` before coloring morale layers.

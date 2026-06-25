@@ -11,7 +11,7 @@ import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { getPlayerSafeBrigadeName, getPlayerSafeOperationPhaseLabel } from '../../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../../shared/playerSafeOperationBalance';
 import { CollapsibleSection } from './CollapsibleSection';
-import { deriveOperationOutcomeCategory } from '../../data/command_strain';
+import { deriveOperationOutcomeCategory, normalizeCommandStrainLabel } from '../../data/command_strain';
 import { EmptyState } from '../EmptyState';
 import { t, type MessageKey } from '../../i18n';
 import { inspectOnField } from '../../utils/shellNavigation';
@@ -696,7 +696,8 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     );
 }
 
-export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel = 'healthy', defaultOpen = false }: OperationsSectionProps) {
+export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel, defaultOpen = false }: OperationsSectionProps) {
+    const normalizedCommandStrainLabel = normalizeCommandStrainLabel(commandStrain, commandStrainLabel);
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
@@ -720,7 +721,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                         Silence = healthy: no notice at strain 0. */}
                     {commandStrain > 0 && (
                         <p className={`text-[9px] font-mono italic ${
-                            commandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
+                            normalizedCommandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
                         }`}>
                             {t('operationsSection.commandStrainNotice')}
                         </p>

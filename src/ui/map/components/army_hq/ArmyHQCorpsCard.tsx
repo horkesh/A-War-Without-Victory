@@ -25,7 +25,7 @@ import { OperationsSection } from './OperationsSection';
 import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
-import { deriveCorpsDelegationSummary } from '../../data/command_strain';
+import { deriveCorpsDelegationSummary, normalizeCommandStrainLabel } from '../../data/command_strain';
 import { t, type MessageKey } from '../../i18n';
 
 import { readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
@@ -145,7 +145,7 @@ export function ArmyHQCorpsCard({
         };
 
         const strain = corps.commandStrain ?? 0;
-        const strainLabel = corps.commandStrainLabel ?? 'healthy';
+        const strainLabel = normalizeCommandStrainLabel(strain, corps.commandStrainLabel);
         const frictionTypes = corps.activeFrictionTypes ?? [];
         const frictionEvents = corps.frictionEvents ?? [];
         const stabilizationAvailable = corps.stabilizationAvailable ?? false;

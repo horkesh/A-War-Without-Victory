@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import React, { createElement } from 'react';
-import { act, cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { StackExpansionOverlay } from '../../src/ui/map/components/StackExpansionOverlay.js';
@@ -75,5 +75,54 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(orbitalRoot).toBeTruthy();
     expect(Number.parseFloat(orbitalRoot?.style.left ?? '0')).toBeGreaterThanOrEqual(180);
     expect(Number.parseFloat(orbitalRoot?.style.top ?? '99999')).toBeLessThanOrEqual(window.innerHeight - 180);
+  });
+
+  it('behaves as a modal dialog with focus trap, escape handling, and focus restoration', () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    const onOuterEscape = vi.fn();
+    const returnFocus = document.createElement('button');
+    returnFocus.textContent = 'Return target';
+    document.body.appendChild(returnFocus);
+    returnFocus.focus();
+
+    render(createElement('div', { onKeyDown: (event: React.KeyboardEvent) => {
+      if (event.key === 'Escape') onOuterEscape();
+    } }, createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 300,
+      anchorY: 300,
+      formations: formations(),
+      onClose,
+      onSelect: vi.fn(),
+    })));
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    const dialog = screen.getByRole('dialog', { name: /formation stack/i });
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    expect(screen.getByRole('button', { name: /Select A Brigade/i })).toBe(document.activeElement);
+
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: /Select B Brigade/i })).toBe(document.activeElement);
+
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: /Dismiss/i })).toBe(document.activeElement);
+
+    fireEvent.keyDown(dialog, { key: 'Tab' });
+    expect(screen.getByRole('button', { name: /Select A Brigade/i })).toBe(document.activeElement);
+
+    fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
+    expect(screen.getByRole('button', { name: /Dismiss/i })).toBe(document.activeElement);
+
+    fireEvent.keyDown(dialog, { key: 'Escape' });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onOuterEscape).not.toHaveBeenCalled();
+
+    cleanup();
+    expect(document.activeElement).toBe(returnFocus);
+    returnFocus.remove();
   });
 });

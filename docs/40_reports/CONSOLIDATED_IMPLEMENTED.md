@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest player-surface edge / field-routing accessibility polish:** [implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md](implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md) - The June 25 player-surface edge lane now also closes formation routing anchor truth, StackExpansionOverlay modal keyboard semantics, and command-strain label normalization. Physical presence remains `location_osid` only; AoR/HQ anchors are navigation context, not selected-settlement truth.
+
 **Latest Command Briefing fallback localization:** [implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md](implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md) - Saved command briefing fallback strings remain compatibility payloads, but the tactical banner, Army HQ Situation Briefing, Presidential Decision Room briefing cards, and legacy Warroom briefing modal now resolve known generated rows through EN/BCS display keys.
 
 **Latest Decision copy and drilldown polish:** [implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md](implemented/20260622_DECISION_COPY_DRILLDOWN_POLISH.md) - Army HQ sector/operation brigade rows now expose field-inspection controls, Decision Room operation/sector actions have precise labels, Warroom priority docket hooks are inspectable, Records labels the AAR tab as latest-turn scope, and generated receipt/read-model copy localizes across decision consequences, pushback, blockers, event effects, overlays, and fired-event wrappers.

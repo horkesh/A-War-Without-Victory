@@ -69,12 +69,62 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
 }) => {
     const [locale] = useLocale();
     const [isMounted, setIsMounted] = useState(false);
+    const dialogRef = useRef<HTMLDivElement>(null);
+    const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
     /* Animation states */
     useEffect(() => {
         const t = setTimeout(() => setIsMounted(true), 20);
         return () => clearTimeout(t);
     }, []);
+
+    useEffect(() => {
+        previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        const focusTimer = window.setTimeout(() => {
+            const firstButton = dialogRef.current?.querySelector<HTMLButtonElement>('[data-stack-focusable="true"]');
+            firstButton?.focus();
+        }, 0);
+        return () => {
+            window.clearTimeout(focusTimer);
+            previouslyFocusedRef.current?.focus();
+        };
+    }, []);
+
+    const handleDialogKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            onClose();
+            return;
+        }
+        if (event.key !== 'Tab') return;
+
+        const focusable = Array.from(
+            dialogRef.current?.querySelectorAll<HTMLElement>(
+                '[data-stack-focusable="true"]',
+            ) ?? [],
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        const active = document.activeElement;
+        const activeIndex = focusable.indexOf(active as HTMLElement);
+
+        if (event.shiftKey && active === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && active === last) {
+            event.preventDefault();
+            first.focus();
+        } else {
+            event.preventDefault();
+            const fallbackIndex = event.shiftKey ? focusable.length : -1;
+            const currentIndex = activeIndex >= 0 ? activeIndex : fallbackIndex;
+            const nextIndex = event.shiftKey ? currentIndex - 1 : currentIndex + 1;
+            focusable[Math.max(0, Math.min(focusable.length - 1, nextIndex))]?.focus();
+        }
+    };
 
     const total = formations.length;
 
@@ -92,8 +142,14 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
 
     return (
         <div
+            ref={dialogRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('stackExpansion.dialogAria')}
+            tabIndex={-1}
             className="fixed inset-0 flex items-center justify-center pointer-events-auto"
             style={{ perspective: '1000px', zIndex: Z.MODAL }}
+            onKeyDown={handleDialogKeyDown}
         >
             {/* Backdrop with blur & darken */}
             <button
@@ -101,6 +157,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                 className={`absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md transition-opacity duration-500 ease-out ${isMounted ? 'opacity-100' : 'opacity-0'}`}
                 onClick={onClose}
                 aria-label={t('stackExpansion.closeAria')}
+                tabIndex={-1}
             />
 
             {/* Orbital content */}
@@ -148,6 +205,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                     onSelect(f.id);
                                 }}
                                 aria-label={t('stackExpansion.selectAria', { name })}
+                                data-stack-focusable="true"
                             >
                                 {/* Shield Glow */}
                                 <div
@@ -180,6 +238,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                         }}
                         onClick={onClose}
                         aria-label={t('stackExpansion.dismissAria')}
+                        data-stack-focusable="true"
                     >
                         <div className="bg-black/80 border border-white/20 hover:border-accent-gold/50 px-3 py-1 rounded-full text-[9px] text-white/60 tracking-widest font-bold uppercase transition-all hover:scale-105 active:scale-95 whitespace-nowrap shadow-2xl">
                             {t('stackExpansion.dismiss')}

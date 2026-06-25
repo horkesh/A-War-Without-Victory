@@ -9,7 +9,11 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { deriveOrderInterpretation, deriveInterventionRisk } from '../../src/ui/map/data/command_strain.js';
+import {
+    deriveOrderInterpretation,
+    deriveInterventionRisk,
+    normalizeCommandStrainLabel,
+} from '../../src/ui/map/data/command_strain.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Category classification
@@ -140,6 +144,19 @@ describe('Wave 1: deriveOrderInterpretation — category classification', () => 
         expect(r.categoryLabel).toBe('CAUTION-DRIVEN');
     });
 
+});
+
+describe('command strain label normalization', () => {
+    it('derives a non-healthy label when numeric strain is present but the read model omitted the label', () => {
+        expect(normalizeCommandStrainLabel(1, undefined)).toBe('strained');
+        expect(normalizeCommandStrainLabel(5, null)).toBe('strained');
+        expect(normalizeCommandStrainLabel(6, undefined)).toBe('compromised');
+    });
+
+    it('preserves explicit healthy and zero-strain silence', () => {
+        expect(normalizeCommandStrainLabel(0, undefined)).toBe('healthy');
+        expect(normalizeCommandStrainLabel(3, 'healthy')).toBe('healthy');
+    });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

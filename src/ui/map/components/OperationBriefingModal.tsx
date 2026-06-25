@@ -13,7 +13,7 @@ import { OrderInterpretationSection } from './army_hq/OrderInterpretationSection
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { t, type MessageKey } from '../i18n';
-import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext } from '../data/command_strain';
+import { deriveOperationOutcomeCategory, deriveRecommendationExplanation, deriveDelegationContext, normalizeCommandStrainLabel } from '../data/command_strain';
 import type { CommandCopyToken, RecommendationExplanation, ReadinessTrend, DelegationContext } from '../data/command_strain';
 import { FORCE_LAUNCH_COST } from '../utils/commandAuthority';
 
@@ -370,7 +370,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         // Look up command strain + situation assessment from the corps formation (derived on-read by adapter)
         const corpsFormation = loadedGameState.formations?.find(f => f.id === context.corpsId);
         const strain = corpsFormation?.commandStrain ?? 0;
-        const strainLabel = corpsFormation?.commandStrainLabel ?? 'healthy';
+        const strainLabel = normalizeCommandStrainLabel(strain, corpsFormation?.commandStrainLabel);
         const sitAssessment = corpsFormation?.situationAssessment;
         return { operation: op, commanderDisplay: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
     }, [loadedGameState, context]);

@@ -2,10 +2,15 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import {
+  resolveFormationNavigationAnchor,
+  resolveFormationPhysicalLocationOsid,
+} from '../../src/ui/map/map/builders/resolveFormationLocationOsid.js';
+import {
   resolveMapFormationInspectionTarget,
   resolveMapSectorInspectionTarget,
   resolveMapSettlementInspectionTarget,
 } from '../../src/ui/map/map/mapSelectionRouting.js';
+import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function loadedState(): LoadedGameState {
   return {
@@ -54,6 +59,7 @@ function loadedState(): LoadedGameState {
         createdTurn: 0,
         tags: [],
         hq_osid: 'zenica_hq_1',
+        aorSettlementIds: ['zavidovici_1', 'banovici_1'],
       },
     ],
     militiaPools: [],
@@ -178,18 +184,78 @@ describe('direct tactical map click routing', () => {
     });
   });
 
-  it('uses command HQ anchors for command formations without tactical location_osid', () => {
+  it('keeps command HQ anchors out of physical formation routing', () => {
     expect(resolveMapFormationInspectionTarget('corps_alpha', null, loadedState())).toEqual({
-      kind: 'field-formation-at-settlement',
+      kind: 'field-formation-in-corps',
       formationId: 'corps_alpha',
-      osid: 'zenica_hq_1',
+      corpsId: 'corps_alpha',
+      osid: null,
     });
+
+    expect(resolveMapFormationInspectionTarget('corps_alpha', {
+      hq_osid: 'zenica_hq_1',
+    }, loadedState())).toEqual({
+      kind: 'field-formation-in-corps',
+      formationId: 'corps_alpha',
+      corpsId: 'corps_alpha',
+      osid: null,
+    });
+  });
+
+  it('separates physical formation locations from navigation anchors', () => {
+    const centroidLookup = new Map<string, [number, number]>([
+      ['sarajevo_1', [18.4, 43.8]],
+      ['banovici_1', [18.5, 44.4]],
+      ['zavidovici_1', [18.2, 44.4]],
+      ['zenica_hq_1', [17.9, 44.2]],
+    ]);
+    const state = loadedState();
+    const brigade = state.formations.find((formation) => formation.id === 'brigade_alpha');
+    const command = state.formations.find((formation) => formation.id === 'corps_alpha');
+
+    expect(resolveFormationPhysicalLocationOsid(brigade, centroidLookup)).toBe('sarajevo_1');
+    expect(resolveFormationNavigationAnchor(brigade, centroidLookup)).toEqual({ osid: 'sarajevo_1', source: 'location' });
+
+    expect(resolveFormationPhysicalLocationOsid(command, centroidLookup)).toBeNull();
+    expect(resolveFormationNavigationAnchor(command, centroidLookup)).toEqual({ osid: 'banovici_1', source: 'aor' });
+
+    expect(resolveFormationNavigationAnchor({
+      ...command!,
+      aorSettlementIds: ['missing_aor'],
+    }, centroidLookup)).toEqual({ osid: 'zenica_hq_1', source: 'hq' });
+  });
+
+  it('does not set selectedOsid when inspecting a command-only formation anchor', () => {
+    const store = useGameStore.getState();
+
+    store.inspectOnFieldTarget({
+      kind: 'field-formation-in-corps',
+      formationId: 'corps_alpha',
+      corpsId: 'corps_alpha',
+      osid: null,
+    });
+
+    const afterCommandInspect = useGameStore.getState();
+    expect(afterCommandInspect.selectedFormationId).toBe('corps_alpha');
+    expect(afterCommandInspect.selectedCorpsId).toBe('corps_alpha');
+    expect(afterCommandInspect.selectedOsid).toBeNull();
+
+    store.inspectOnFieldTarget({
+      kind: 'field-formation-in-sector',
+      formationId: 'brigade_alpha',
+      sectorId: 'sector_alpha',
+      corpsId: 'corps_alpha',
+      osid: 'sarajevo_1',
+    });
+
+    expect(useGameStore.getState().selectedOsid).toBe('sarajevo_1');
   });
 
   it('keeps MapContainer direct clicks on the field inspection route', () => {
     const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
 
     expect(source).toContain('inspectFormationFromMap(id, props)');
+    expect(source).toContain('resolveFormationNavigationAnchor(formation, lookup)');
     expect(source).toContain('inspectSectorFromMap(sectorId, props)');
     expect(source).toContain('inspectSectorFromMap(sectorId, null, osid)');
     expect(source).toContain('inspectSettlementFromMap(osid, osidToSector.get(osid))');
@@ -197,6 +263,31 @@ describe('direct tactical map click routing', () => {
     expect(source).not.toMatch(/setSelectedFormationId\(id\)/);
     expect(source).not.toMatch(/contextMenu[\s\S]{0,1200}setSelectedCorpsId\(corpsId\)/);
     expect(source).not.toMatch(/(?:\.|\b)setSelectedCorpsFrontSectorId\(sectorId\)/);
+  });
+
+  it('lets selected formations and sectors pan before broad corps bounds', () => {
+    const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
+    const formationPanIndex = source.indexOf('resolveFormationNavigationAnchor(formation, lookup)');
+    const corpsPanIndex = source.indexOf('const corpsPanKey = `corps:${selectedCorpsId}`');
+
+    expect(formationPanIndex).toBeGreaterThan(-1);
+    expect(corpsPanIndex).toBeGreaterThan(-1);
+    expect(formationPanIndex).toBeLessThan(corpsPanIndex);
+    expect(source).toMatch(/if \(\s*selectedCorpsId\s*&& !selectedFormationId\s*&& !selectedCorpsFrontSectorId/);
+  });
+
+  it('keeps physical map builders on physical formation locations only', () => {
+    const builderPaths = [
+      '../../src/ui/map/map/builders/buildFormationsGeoJSON.ts',
+      '../../src/ui/map/map/builders/buildOrderArrowsGeoJSON.ts',
+      '../../src/ui/map/map/builders/buildGhostPathsGeoJSON.ts',
+    ];
+
+    for (const builderPath of builderPaths) {
+      const source = readFileSync(new URL(builderPath, import.meta.url), 'utf8');
+      expect(source).toContain('resolveFormationPhysicalLocationOsid');
+      expect(source).not.toContain('resolveFormationNavigationAnchor');
+    }
   });
 
   it('opens the stack chooser before inspecting a formation from stacked counters', () => {
