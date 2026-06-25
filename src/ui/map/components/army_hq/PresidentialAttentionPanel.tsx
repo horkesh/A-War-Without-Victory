@@ -6,6 +6,7 @@ import { getArmyReserveAttentionSummary } from '../../utils/armyReserveSeverity'
 import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
+import { isRequiredPendingEventDecision } from '../../data/eventDecisionRouting';
 import { OperationOpportunityDossierPanel } from './OperationOpportunityDossierPanel';
 import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 
@@ -43,6 +44,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         () =>
             [...(gameState.pendingEventDecisions ?? [])]
                 .filter((decision) => decision.faction === playerFaction)
+                .filter(isRequiredPendingEventDecision)
                 .sort((a, b) => a.turn_fired - b.turn_fired || a.event_id.localeCompare(b.event_id)),
         [gameState.pendingEventDecisions, playerFaction],
     );

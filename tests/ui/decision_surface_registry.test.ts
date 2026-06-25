@@ -83,6 +83,19 @@ describe('decision surface registry', () => {
     });
   });
 
+  it('routes autonomy proposal review to the presidential Decision Room instead of the read-only autonomy panel', () => {
+    expect(PLAYER_DECISION_FAMILIES.find((family) => family.id === 'autonomy_proposal')).toMatchObject({
+      ownerSurface: 'decision_room',
+    });
+    expect(getDecisionSurface('autonomy_proposal')).toMatchObject({
+      ownerShell: 'decision_room',
+      resolverSurface: 'proposal_review_dossier',
+      opensAs: 'shell_panel',
+      inboxAction: 'decision_room',
+      actionLabel: 'Open Decision Room',
+    });
+  });
+
   it('exposes no raw resolver labels or implementation ids in player copy', () => {
     for (const surface of Object.values(DECISION_SURFACE_REGISTRY)) {
       expect(surface.playerLabel).not.toMatch(/_/);

@@ -16,6 +16,7 @@ import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
+import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getActiveLocale, t, type MessageKey } from '../i18n';
 
@@ -53,7 +54,8 @@ function opportunityProposalIdFromAction(action: string | null | undefined, fall
         : fallbackId;
 }
 
-export function isAdvanceBlockingInboxItem(item: Pick<InboxItem, 'type'>): boolean {
+export function isAdvanceBlockingInboxItem(item: Pick<InboxItem, 'type' | 'severity'>): boolean {
+    if (item.type === 'event_decision') return item.severity === 'blocking';
     return ADVANCE_BLOCKING_TYPES.has(item.type);
 }
 
@@ -194,18 +196,19 @@ export function deriveInboxItems(
     const intelligenceSurface = getDecisionSurface('intelligence_notification');
     const situationSurface = getDecisionSurface('situation');
 
-    // 1. Pending event decisions (BLOCKING — turn won't advance)
+    // 1. Pending event decisions. Only required rows block and auto-open.
     const eventDecisions = state.pendingEventDecisions;
     if (eventDecisions) {
         for (const evt of eventDecisions) {
             if (!playerFactionMatch(evt.faction, playerFaction)) continue;
+            const required = isRequiredPendingEventDecision(evt);
             items.push({
                 id: `event:${evt.event_id}`,
                 type: 'event_decision',
-                severity: 'blocking',
+                severity: required ? 'blocking' : 'normal',
                 title: localizedEventTitle(evt.event_id, evt.event_title, eventCatalog),
                 subtitle: t('inbox.item.eventDecision.subtitle', { date: turnToDateString(evt.turn_fired) }),
-                action: eventSurface.inboxAction,
+                action: required ? eventSurface.inboxAction : 'decision_room',
                 priority: 10,
             });
         }
@@ -246,6 +249,9 @@ export function deriveInboxItems(
             if (isOperationOpportunityReview(prop)) {
                 const { title, detail } = splitOpportunityDescription(prop.description || '');
                 const proposalId = opportunityProposalIdFromAction(prop.proposed_action, prop.id);
+                const hasDecisionRoomDossier = (state.operationOpportunityProposals ?? [])
+                    .some((proposal) => proposal.proposal_id === proposalId || proposal.review_id === prop.id);
+                if (!hasDecisionRoomDossier) continue;
                 items.push({
                     id: `opportunity:${proposalId}`,
                     type: 'operation_opportunity',
@@ -258,7 +264,7 @@ export function deriveInboxItems(
                 continue;
             }
             items.push({
-                id: `proposal:${prop.id}`,
+                id: `command:review-proposal:${prop.id}`,
                 type: 'autonomy_proposal',
                 severity: 'normal',
                 title: t('inbox.item.autonomyProposal.title'),

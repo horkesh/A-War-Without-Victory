@@ -74,6 +74,8 @@ function makeFormationDetailState(): LoadedGameState {
         corps_id: 'rbih_general_staff',
         homeDistanceMult: 0.7,
         personnel: 1200,
+        morale: 58,
+        officer_quality: 0.64,
         posture: 'defend',
         eliteCommander: {
           name: 'Dzevad Rado',

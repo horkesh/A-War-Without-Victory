@@ -89,6 +89,17 @@ describe('event decision modal auto-launch contract', () => {
     expect(app).not.toContain('lastAutoLaunchTurn');
   });
 
+  it('auto-launch selector ignores advisory event decisions', () => {
+    const app = readApp();
+    const selectorBlock = app.slice(
+      app.indexOf('function selectNextPendingEventDecision'),
+      app.indexOf('/**', app.indexOf('function selectNextPendingEventDecision')),
+    );
+
+    expect(selectorBlock).toContain('isRequiredPendingEventDecision');
+    expect(selectorBlock).toContain('.filter(isRequiredPendingEventDecision)');
+  });
+
   it('keeps the modal open unless IPC accepts the response', () => {
     const app = readApp();
     const modalRenderBlock = app.slice(

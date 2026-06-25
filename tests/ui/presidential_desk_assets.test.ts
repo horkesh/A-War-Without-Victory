@@ -27,6 +27,7 @@ describe('presidential desk assets', () => {
     expect(getPacketThumbnailForInboxType('convoy_decision')).toContain('packet_thumb_convoy');
     expect(getPacketThumbnailForInboxType('intelligence_notification')).toContain('packet_thumb_intelligence');
     expect(getPacketThumbnailForInboxType('situation')).toContain('packet_thumb_event_decision');
+    expect(getPacketThumbnailForInboxType('operation_opportunity')).not.toContain('packet_thumb_reserve_request');
   });
 
   it('maps decision families to modal header assets', () => {

@@ -2,12 +2,12 @@
  * Focused tests for deriveInboxItems — presidential inbox item derivation.
  *
  * Covers:
- *  - Event decisions produce blocking inbox items
+ *  - Required event decisions produce blocking inbox items
  *  - Peace plans produce urgent inbox items with correct planName
  *  - Reserve requests produce army_reserve action items
  *  - Officer events produce army_hq_personnel action items
- *  - Autonomy proposals produce autonomy_panel action items from pendingProposalReviews
- *  - Operation opportunities route to Army HQ dossiers, not the generic autonomy panel
+ *  - Autonomy proposals produce Decision Room action items from pendingProposalReviews
+ *  - Operation opportunities route to Decision Room dossiers, not dangling proposal reviews
  *  - Opening brief appears when openingBriefDismissed is false and player_faction is set
  *  - Empty state returns only date marker
  */
@@ -53,6 +53,26 @@ function makeStub(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
     } as LoadedGameState;
 }
 
+function makeOpportunityDossier(
+    proposalId: string,
+    reviewId: string,
+): NonNullable<LoadedGameState['operationOpportunityProposals']>[number] {
+    return {
+        proposal_id: proposalId,
+        opportunity_id: proposalId.toLowerCase(),
+        display_name: 'Operation Opportunity',
+        faction: 'RBiH',
+        status: 'eligible_pending_review',
+        review_id: reviewId,
+        prerequisite_axes: [],
+        force_quality_traits: [],
+        objectives: [],
+        staging: [],
+        redirect_variants: [],
+        available_actions: [],
+    };
+}
+
 // ---------------------------------------------------------------------------
 // 1. Event decisions
 // ---------------------------------------------------------------------------
@@ -65,6 +85,7 @@ describe('deriveInboxItems — event decisions', () => {
                     event_title: 'Srebrenica Crisis',
                     turn_fired: 5,
                     faction: 'RBiH',
+                    requires_player_response: true,
                     response_options: [
                         { id: 'opt_a', label: 'Accept', effects: [] },
                         { id: 'opt_b', label: 'Reject', effects: [] },
@@ -80,6 +101,32 @@ describe('deriveInboxItems — event decisions', () => {
         expect(eventItems[0].id).toBe('event:evt_1');
         expect(eventItems[0].title).toBe('Srebrenica Crisis');
         expect(hasBlockingItems(items)).toBe(true);
+    });
+
+    it('routes advisory event decisions through Decision Room without blocking or auto-opening the modal', () => {
+        const state = makeStub({
+            pendingEventDecisions: [
+                {
+                    event_id: 'evt_advisory',
+                    event_title: 'Staff Advisory',
+                    turn_fired: 5,
+                    faction: 'RBiH',
+                    requires_player_response: false,
+                    response_options: [],
+                },
+            ],
+        });
+        const items = deriveInboxItems(state, null);
+        const eventItems = items.filter(i => i.type === 'event_decision');
+
+        expect(eventItems).toHaveLength(1);
+        expect(eventItems[0]).toMatchObject({
+            id: 'event:evt_advisory',
+            severity: 'normal',
+            action: 'decision_room',
+            title: 'Staff Advisory',
+        });
+        expect(hasBlockingItems(items)).toBe(false);
     });
 
     it('labels pending event timing with a calendar date instead of raw turn copy', () => {
@@ -234,11 +281,11 @@ describe('deriveInboxItems — event decisions', () => {
         const itemIds = deriveInboxItems(state, null).map(i => i.id);
 
         expect(itemIds).toContain('event:evt_rs');
-        expect(itemIds).toContain('proposal:PROP_rs');
+        expect(itemIds).toContain('command:review-proposal:PROP_rs');
         expect(itemIds).toContain('reserve:reserve_rs');
         expect(itemIds).toContain('officer:officer_available:rs_officer');
         expect(itemIds).not.toContain('event:evt_rbih');
-        expect(itemIds).not.toContain('proposal:PROP_rbih');
+        expect(itemIds).not.toContain('command:review-proposal:PROP_rbih');
         expect(itemIds).not.toContain('reserve:reserve_rbih');
         expect(itemIds).not.toContain('officer:officer_available:rbih_officer');
     });
@@ -644,12 +691,12 @@ describe('deriveInboxItems — autonomy proposals', () => {
         const items = deriveInboxItems(state, null);
         const proposalItems = items.filter(i => i.type === 'autonomy_proposal');
         expect(proposalItems).toHaveLength(2);
-        expect(proposalItems[0].id).toBe('proposal:PROP_5_ops_0');
+        expect(proposalItems[0].id).toBe('command:review-proposal:PROP_5_ops_0');
         expect(proposalItems[0].severity).toBe('normal');
-        expect(proposalItems[0].action).toBe('autonomy_panel');
+        expect(proposalItems[0].action).toBe('decision_room');
         expect(proposalItems[0].title).toBe('Command Proposal');
         expect(proposalItems[0].subtitle).toBe('Launch operation Corridor');
-        expect(proposalItems[1].id).toBe('proposal:PROP_5_ops_1');
+        expect(proposalItems[1].id).toBe('command:review-proposal:PROP_5_ops_1');
     });
 
     it('routes OPPORTUNITY proposals to the presidential Decision Room', () => {
@@ -666,6 +713,29 @@ describe('deriveInboxItems — autonomy proposals', () => {
                     proposed_value: 'approve',
                 },
             ],
+            operationOpportunityProposals: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    display_name: 'Operation Sana',
+                    faction: 'RBiH',
+                    status: 'eligible_pending_review',
+                    review_id: 'PROP_176_opportunity_0',
+                    description: 'Operation Sana - staff recommendation: approve',
+                    recommendation: 'approve',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    required_axes_green: 1,
+                    required_axes_total: 1,
+                    optional_axes_green: 0,
+                    optional_axes_total: 0,
+                    prerequisite_axes: [],
+                    force_quality_traits: [],
+                    objectives: [],
+                    staging: [],
+                    redirect_variants: [],
+                    available_actions: [],
+                },
+            ],
         });
         const items = deriveInboxItems(state, null);
         const opportunityItems = items.filter(i => i.type === 'operation_opportunity');
@@ -676,6 +746,29 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(opportunityItems[0].title).toBe('Operation Sana');
         expect(opportunityItems[0].subtitle).toBe('Staff recommends authorization.');
         expect(opportunityItems[0].subtitle).not.toContain('approve');
+        expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
+    });
+
+    it('suppresses operation-opportunity inbox rows when no Decision Room dossier exists', () => {
+        const state = makeStub({
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_176_opportunity_0',
+                    turn: 176,
+                    faction: 'RBiH',
+                    domain: 'ops',
+                    description: 'Operation Sana - staff recommendation: approve',
+                    proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                    current_value: 'pending_review',
+                    proposed_value: 'approve',
+                },
+            ],
+            operationOpportunityProposals: [],
+        });
+
+        const items = deriveInboxItems(state, null);
+
+        expect(items.filter(i => i.type === 'operation_opportunity')).toHaveLength(0);
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
     });
 
@@ -695,6 +788,9 @@ describe('deriveInboxItems — autonomy proposals', () => {
                     proposed_value: 'approve',
                 },
                 { id: 'PROP_5_military_0', turn: 5, faction: 'RBiH', domain: 'military', description: '' },
+            ],
+            operationOpportunityProposals: [
+                makeOpportunityDossier('OPP_175_sana_95', 'PROP_176_opportunity_0'),
             ],
         });
         const items = deriveInboxItems(state, null);
@@ -731,6 +827,9 @@ describe('deriveInboxItems — autonomy proposals', () => {
                     domain: 'military',
                     description: 'Reinforce 1st Corps sector',
                 },
+            ],
+            operationOpportunityProposals: [
+                makeOpportunityDossier('OPP_177_corridor', 'PROP_177_opportunity_0'),
             ],
         });
 

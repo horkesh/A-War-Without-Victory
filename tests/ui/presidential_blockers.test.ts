@@ -38,6 +38,7 @@ describe('derivePresidentialBlockers', () => {
           event_title: 'Cabinet Decision',
           faction: 'RBiH',
           turn_fired: 5,
+          requires_player_response: true,
           response_options: [],
         },
       ],
@@ -81,6 +82,23 @@ describe('derivePresidentialBlockers', () => {
       action: 'peace_plan_modal',
       actionLabel: 'Review proposal',
     });
+  });
+
+  it('does not treat advisory event decisions as presidential blockers', () => {
+    const blockers = derivePresidentialBlockers(makeState({
+      pendingEventDecisions: [
+        {
+          event_id: 'evt_advisory',
+          event_title: 'Advisory Brief',
+          faction: 'RBiH',
+          turn_fired: 5,
+          requires_player_response: false,
+          response_options: [],
+        },
+      ],
+    }), null);
+
+    expect(blockers).toHaveLength(0);
   });
 
   it('keeps convoy blockers player-facing and avoids raw faction/enclave ids', () => {

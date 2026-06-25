@@ -90,6 +90,7 @@ import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { LoadedGameState, SummaryFocusSection } from './data/types';
 import type { InboxItem } from './data/inboxItems';
+import { isRequiredPendingEventDecision } from './data/eventDecisionRouting';
 import type { PreAdvanceCommandReviewItem } from './data/preAdvanceCommandReview';
 import type { PresidentialDecisionRoomNavigationTarget } from './data/presidentialDecisionRoom';
 import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
@@ -202,6 +203,7 @@ function selectNextPendingEventDecision(
   if (!playerFaction) return null;
   const playerDecisions = (decisions ?? [])
     .filter((decision) => decision.faction === playerFaction)
+    .filter(isRequiredPendingEventDecision)
     .filter((decision) => decision.event_id !== excludedEventId)
     .sort(comparePendingEventDecisionPriority);
   return playerDecisions[0] ?? null;
@@ -1486,6 +1488,8 @@ function App() {
     if (action === 'decision_room') {
       if (itemId.startsWith('opportunity:')) {
         openWarroomDecisionRoomFromField('opportunity', itemId);
+      } else if (itemId.startsWith('command:review-proposal:')) {
+        openWarroomDecisionRoomFromField('command', itemId);
       } else if (itemId.startsWith('officer:')) {
         openWarroomDecisionRoomFromField('command', 'pushback:player-army-co');
       } else if (itemId === 'opening-brief:desk' || itemId === 'empty:desk' || itemId.startsWith('sit:')) {

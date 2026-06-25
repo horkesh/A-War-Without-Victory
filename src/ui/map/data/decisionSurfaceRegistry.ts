@@ -26,6 +26,7 @@ export type DecisionResolverSurface =
   | 'reserve_request_modal'
   | 'officer_matter_modal'
   | 'operation_opportunity_dossier'
+  | 'proposal_review_dossier'
   | 'autonomy_panel'
   | 'counter_offer_modal'
   | 'intelligence_brief_modal'
@@ -328,12 +329,12 @@ export const DECISION_SURFACE_REGISTRY = {
     inboxType: 'autonomy_proposal',
     playerLabel: 'Command proposal',
     severity: 'advisory',
-    ownerShell: 'desk',
-    resolverSurface: 'autonomy_panel',
+    ownerShell: 'decision_room',
+    resolverSurface: 'proposal_review_dossier',
     opensAs: 'shell_panel',
     gatePolicy: 'advisory',
-    inboxAction: 'autonomy_panel',
-    actionLabel: 'Review proposal',
+    inboxAction: 'decision_room',
+    actionLabel: 'Open Decision Room',
     sourceLabel: 'Political channel',
     copySanitizer: (raw) => rawCopy(raw, 'Command proposal', 'A proposal requires presidential review.'),
     resolveAction: 'Resolve proposal',

@@ -37,6 +37,9 @@ function blockerSummary(item: InboxItem): string {
 }
 
 function isPresidentialBlocker(item: InboxItem): item is InboxItem & { type: PresidentialBlockerType } {
+  if (item.type === 'event_decision') {
+    return item.severity === 'blocking';
+  }
   return BLOCKING_TYPES.has(item.type);
 }
 

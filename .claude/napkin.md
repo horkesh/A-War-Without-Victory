@@ -1,5 +1,9 @@
 # Napkin Runbook
 
+**ADVISORY EVENT DECISIONS ARE NOT MODAL BLOCKERS (2026-06-25).** Pending event-decision rows can be advisory. Do instead: block, auto-open EventDecisionModal, count review-queue event decisions, and render Army HQ required-decision rows only when `requires_player_response === true`; route advisory rows through Decision Room.
+
+**PROPOSAL REVIEW IDS MUST MATCH DECISION ROOM CARDS (2026-06-25).** Autonomy/proposal reviews should not route to stale read-only panels or missing dossiers. Do instead: use `command:review-proposal:*` for autonomy reviews and require live operation-opportunity dossiers before rendering opportunity inbox cards.
+
 **SPARSE COMBAT/READINESS RECORDS ARE UNREPORTED (2026-06-25).** Missing combat-summary fields, morale/officer-quality, personnel, or cohesion are source gaps, not zero casualties, failed brigades, or depleted cohesion. Do instead: carry reported-field provenance, render `Unreported`, and count ineffective units only from reported personnel.
 
 **SPARSE OPERATION LIFECYCLE IS UNREPORTED (2026-06-25).** Missing operation phase, axis status, objective index, prep timing, or brigade condition fields are absent staff records, not execution/healthy/zero truth. Do instead: preserve missing lifecycle fields through adapters/read-models, render `Status pending` / `Unreported`, hide current-objective/progress claims, and rank unknown brigade readiness below reported tired-but-known brigades.

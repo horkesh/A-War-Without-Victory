@@ -72,6 +72,7 @@ import { buildDilemmaSpine } from './dilemmaSpine.js';
 import { buildDistanceFromHistory } from './distanceFromHistory.js';
 import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
+import { isRequiredPendingEventDecision } from './eventDecisionRouting.js';
 import { getEliteCommanderForFormationId } from './eliteCommanderSidecar.js';
 import {
     deriveFactionSupplyConditionFromFlatOsidState,
@@ -3164,7 +3165,7 @@ function derivePresidentialReviewQueue({
     pendingEventDecisions: LoadedGameState['pendingEventDecisions'];
     operationOpportunityProposals: LoadedGameState['operationOpportunityProposals'];
 }): LoadedGameState['presidentialReviewQueue'] {
-    const eventDecisionCount = pendingEventDecisions?.length ?? 0;
+    const eventDecisionCount = (pendingEventDecisions ?? []).filter(isRequiredPendingEventDecision).length;
     const commandInterpretationCount = (pendingOfficerEvents ?? []).filter((event) =>
         event.type === 'order_modified'
         || event.type === 'order_pushback'

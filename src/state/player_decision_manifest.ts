@@ -111,7 +111,7 @@ export const PLAYER_DECISION_FAMILIES: readonly PlayerDecisionFamilyDefinition[]
         id: 'autonomy_proposal',
         statePath: 'meta.pending_proposal_reviews',
         inboxType: 'autonomy_proposal',
-        ownerSurface: 'autonomy_panel',
+        ownerSurface: 'decision_room',
         resolver: 'resolve-autonomy-proposal',
         gatePolicy: 'advisory',
     },

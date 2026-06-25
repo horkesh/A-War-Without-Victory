@@ -604,6 +604,7 @@ describe('Army HQ timing copy', () => {
             event_title: 'Cabinet crisis',
             faction: 'RBiH',
             turn_fired: 14,
+            requires_player_response: true,
             response_options: [{ id: 'hold_line', label: 'Hold the line', effects: [] }],
           },
         ],
@@ -615,6 +616,28 @@ describe('Army HQ timing copy', () => {
     expect(copy).toContain(turnToDateString(14));
     expect(copy).not.toContain('Pending since week 14');
     expect(copy).not.toMatch(/\bweek 14\b/i);
+  });
+
+  it('does not render advisory event decisions as required presidential decisions in Army HQ', () => {
+    render(React.createElement(PresidentialAttentionPanel, {
+      gameState: makeGameState({
+        pendingEventDecisions: [
+          {
+            event_id: 'evt_advisory',
+            event_title: 'Staff advisory',
+            faction: 'RBiH',
+            turn_fired: 14,
+            requires_player_response: false,
+            response_options: [],
+          },
+        ],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).not.toContain('Decision Required');
+    expect(copy).not.toContain('Staff advisory');
   });
 
   it('renders presidential attention counts through BCS one/many keys', () => {
@@ -635,6 +658,7 @@ describe('Army HQ timing copy', () => {
             event_title: 'Cabinet crisis',
             faction: 'RBiH',
             turn_fired: 14,
+            requires_player_response: true,
             response_options: [
               { id: 'hold_line', label: 'Hold the line', effects: [] },
               { id: 'seek_compromise', label: 'Seek compromise', effects: [] },
@@ -646,7 +670,7 @@ describe('Army HQ timing copy', () => {
     }));
 
     const copy = document.body.textContent ?? '';
-    expect(copy).toContain('2 predmeta');
+    expect(copy).toContain('2 predsjedničkih ili komandnih pregleda');
     expect(copy).toContain('2 opcije odgovora');
     expect(copy).not.toMatch(/matters|response|responses|predmets/i);
   });

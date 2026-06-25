@@ -47,7 +47,7 @@ const PACKET_THUMBNAILS: Partial<Record<InboxItemType, string>> = {
   event_decision: packetThumbEventDecision,
   intelligence_notification: packetThumbIntelligence,
   officer_event: packetThumbOfficerMatter,
-  operation_opportunity: packetThumbReserveRequest,
+  operation_opportunity: packetThumbOfficerMatter,
   paramilitary_request: packetThumbParamilitary,
   peace_plan: packetThumbPeacePlan,
   reserve_request: packetThumbReserveRequest,

@@ -160,6 +160,7 @@ describe('GUI audit Batch G dead/no-op controls', () => {
                     event_title: 'Cabinet request',
                     faction: 'RBiH',
                     turn_fired: 12,
+                    requires_player_response: true,
                     response_options: [{ id: 'accept', label: 'Accept', effects: [] }],
                 }],
             }),

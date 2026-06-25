@@ -127,7 +127,7 @@ describe('buildTurnAftermathView', () => {
         heavy_munitions_deltas: { RBiH: 2 },
       }),
       pendingEventDecisions: [
-        { event_id: 'evt_a', event_title: 'Convoy Decision', turn_fired: 12, faction: 'RBiH', response_options: [{ id: 'yes', label: 'Yes', effects: [] }] },
+        { event_id: 'evt_a', event_title: 'Convoy Decision', turn_fired: 12, faction: 'RBiH', requires_player_response: true, response_options: [{ id: 'yes', label: 'Yes', effects: [] }] },
       ],
       pendingPeacePlan: {
         planId: 'vance',
@@ -146,6 +146,23 @@ describe('buildTurnAftermathView', () => {
           domain: 'ops',
           description: 'Operation Una - staff recommendation: delay',
           proposed_action: 'OPPORTUNITY:OPP_12_una',
+        },
+      ],
+      operationOpportunityProposals: [
+        {
+          proposal_id: 'OPP_12_una',
+          opportunity_id: 'una_window',
+          display_name: 'Operation Una',
+          faction: 'RBiH',
+          status: 'eligible_pending_review',
+          review_id: 'PROP_12_opportunity_0',
+          proposed_action: 'OPPORTUNITY:OPP_12_una',
+          prerequisite_axes: [],
+          force_quality_traits: [],
+          objectives: [],
+          staging: [],
+          redirect_variants: [],
+          available_actions: [],
         },
       ],
       pendingReserveRequests: [

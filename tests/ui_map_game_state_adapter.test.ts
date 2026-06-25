@@ -132,8 +132,9 @@ test('parseGameState scopes pending event decisions and review queue to player f
         military: {
             formations: {},
             pending_event_decisions: [
-                { event_id: 'rs_only', event_title: 'RS Only', turn_fired: 1, faction: 'RS', response_options: [{ id: 'a', label: 'A', effects: [] }] },
-                { event_id: 'rbih_only', event_title: 'RBiH Only', turn_fired: 1, faction: 'RBiH', response_options: [{ id: 'b', label: 'B', effects: [] }] },
+                { event_id: 'rs_only', event_title: 'RS Only', turn_fired: 1, faction: 'RS', requires_player_response: true, response_options: [{ id: 'a', label: 'A', effects: [] }] },
+                { event_id: 'rbih_required', event_title: 'RBiH Required', turn_fired: 1, faction: 'RBiH', requires_player_response: true, response_options: [{ id: 'b', label: 'B', effects: [] }] },
+                { event_id: 'rbih_advisory', event_title: 'RBiH Advisory', turn_fired: 1, faction: 'RBiH', requires_player_response: false, response_options: [] },
             ],
         } as any,
         political: {
@@ -141,13 +142,13 @@ test('parseGameState scopes pending event decisions and review queue to player f
         } as any,
     });
 
-    assert.deepStrictEqual(parsed.pendingEventDecisions?.map((decision) => decision.event_id), ['rbih_only']);
+    assert.deepStrictEqual(parsed.pendingEventDecisions?.map((decision) => decision.event_id), ['rbih_required', 'rbih_advisory']);
     assert.strictEqual(parsed.presidentialReviewQueue?.eventDecisionCount, 1);
     assert.deepStrictEqual(
         deriveInboxItems(parsed, null)
             .map((item) => item.id)
             .filter((id) => id.startsWith('event:')),
-        ['event:rbih_only'],
+        ['event:rbih_required', 'event:rbih_advisory'],
     );
 
     const foreignOnly = parseGameState({
@@ -1027,6 +1028,7 @@ test('parseGameState derives presidential review queue counts from pending milit
                     event_title: 'Foreign envoy demands response',
                     turn_fired: 12,
                     faction: 'RBiH',
+                    requires_player_response: true,
                     response_options: [
                         { id: 'accept', label: 'Accept', effects: [] },
                     ],
