@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-25] fix(i18n): restore sparse truth BCS parity
+
+**Type:** i18n/test/CI repair.
+
+**Fix:** Added the missing BCS entries for sparse operation objective progress and Corps Front preparation timing so the operation sparse-truth and opportunity sparse-truth UI packets satisfy the i18n parity gate on `main`.
+
+**Verification:** `node node_modules\vitest\vitest.mjs run tests/ui_i18n.test.ts tests/ui_map_game_state_adapter.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/army_hq_timing_copy.test.ts tests/ui/opportunity_ledger_pulse.test.ts --pool=forks --reporter=dot` passed 5 files / 129 tests.
+
+**Scope/determinism:** Localization/test repair only; no simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, calibration, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaging artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-25] fix(ui): harden player-surface edge truth
 
 **Type:** UI/read-model/i18n/test/docs polish.
