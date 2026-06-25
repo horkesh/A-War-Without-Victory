@@ -1,7 +1,8 @@
 # Command Surface Sparse Follow-up
 
 Date: 2026-06-25
-Branch: `codex/command-surface-sparse-followup`
+Branch: `codex/command-surface-sparse-followup` (merged to `main`; local and remote branch refs deleted)
+Closeout head: `6f1282f18`
 
 ## Summary
 
@@ -29,6 +30,7 @@ This packet closes the next Pyrrhic scout findings from the command-surface and 
 - Broad player-journey proof: `npm.cmd run qa:player-journeys` (43 files / 613 tests).
 - Browser proof: `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser`.
 - Hygiene proof: `git diff --check` passed; generated browser evidence folders were removed after inspection.
+- GitHub proof: `main` at `6f1282f18` is green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint. Full Suite passed full Vitest, first-hour browser gate, and live-surface browser gate after the PMTiles LFS-pointer fallback repair.
 
 ## Scope
 

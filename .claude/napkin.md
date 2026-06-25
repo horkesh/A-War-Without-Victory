@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**CI BROWSER GATES MUST SURVIVE LFS POINTER CHECKOUTS (2026-06-25).** GitHub can check out PMTiles as Git LFS pointer stubs when LFS bandwidth is exhausted. Do instead: keep browser gates mandatory, detect PMTiles pointer files in the gate launcher, set `VITE_AWWV_DISABLE_PMTILES=1`, and strip PMTiles basemap sources only for that proof run; real dev/Electron sessions with tile binaries must keep using PMTiles.
+
 **SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
 
 **OPENING COMMANDER PROJECTION IS NOT RESERVE AVAILABILITY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state. Do instead: exclude projected opening commanders from Personnel reserve pools and skip operation-assigned officers when resolving opening command display.
