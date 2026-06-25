@@ -841,29 +841,34 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             // Extract combat summary if present (corps/army_hq); brigades get a fallback below.
             const rawCS = asLooseRecord(f.combat_summary);
+            const reportedCombatSummaryFields = rawCS
+                ? Object.keys(rawCS).filter((key) => rawCS[key] != null)
+                : [];
             let combatSummary = rawCS && typeof rawCS.battles_fought === 'number' ? {
-                battles_fought: finiteNumber(rawCS.battles_fought),
-                victories: finiteNumber(rawCS.victories),
-                defeats: finiteNumber(rawCS.defeats),
-                stalemates: finiteNumber(rawCS.stalemates),
-                battles_as_attacker: finiteNumber(rawCS.battles_as_attacker),
-                battles_as_defender: finiteNumber(rawCS.battles_as_defender),
-                total_casualties_taken: finiteNumber(rawCS.total_casualties_taken),
-                total_casualties_inflicted: finiteNumber(rawCS.total_casualties_inflicted),
-                total_osids_captured: finiteNumber(rawCS.total_osids_captured),
-                total_osids_lost: finiteNumber(rawCS.total_osids_lost),
-                win_rate: finiteNumber(rawCS.win_rate),
-                casualty_exchange_ratio: finiteNumber(rawCS.casualty_exchange_ratio),
-                current_personnel: finiteNumber(rawCS.current_personnel),
-                peak_aggregate_personnel: finiteNumber(rawCS.peak_aggregate_personnel),
-                nadir_aggregate_personnel: finiteNumber(rawCS.nadir_aggregate_personnel),
-                arc_distribution: (rawCS.arc_distribution != null && typeof rawCS.arc_distribution === 'object' && !Array.isArray(rawCS.arc_distribution))
-                    ? rawCS.arc_distribution as Record<string, number> : {},
-                brigade_count: finiteNumber(rawCS.brigade_count),
-                active_brigade_count: finiteNumber(rawCS.active_brigade_count),
-                most_casualties_brigade_id: typeof rawCS.most_casualties_brigade_id === 'string' ? rawCS.most_casualties_brigade_id : null,
-                most_victories_brigade_id: typeof rawCS.most_victories_brigade_id === 'string' ? rawCS.most_victories_brigade_id : null,
-            } : undefined;
+                    battles_fought: finiteNumber(rawCS.battles_fought),
+                    victories: finiteNumber(rawCS.victories),
+                    defeats: finiteNumber(rawCS.defeats),
+                    stalemates: finiteNumber(rawCS.stalemates),
+                    battles_as_attacker: finiteNumber(rawCS.battles_as_attacker),
+                    battles_as_defender: finiteNumber(rawCS.battles_as_defender),
+                    total_casualties_taken: finiteNumber(rawCS.total_casualties_taken),
+                    total_casualties_inflicted: finiteNumber(rawCS.total_casualties_inflicted),
+                    total_osids_captured: finiteNumber(rawCS.total_osids_captured),
+                    total_osids_lost: finiteNumber(rawCS.total_osids_lost),
+                    win_rate: finiteNumber(rawCS.win_rate),
+                    casualty_exchange_ratio: finiteNumber(rawCS.casualty_exchange_ratio),
+                    current_personnel: finiteNumber(rawCS.current_personnel),
+                    peak_aggregate_personnel: finiteNumber(rawCS.peak_aggregate_personnel),
+                    nadir_aggregate_personnel: finiteNumber(rawCS.nadir_aggregate_personnel),
+                    arc_distribution: (rawCS.arc_distribution != null && typeof rawCS.arc_distribution === 'object' && !Array.isArray(rawCS.arc_distribution))
+                        ? rawCS.arc_distribution as Record<string, number> : {},
+                    brigade_count: finiteNumber(rawCS.brigade_count),
+                    active_brigade_count: finiteNumber(rawCS.active_brigade_count),
+                    most_casualties_brigade_id: typeof rawCS.most_casualties_brigade_id === 'string' ? rawCS.most_casualties_brigade_id : null,
+                    most_victories_brigade_id: typeof rawCS.most_victories_brigade_id === 'string' ? rawCS.most_victories_brigade_id : null,
+                    reportedFields: reportedCombatSummaryFields.sort((a, b) => a.localeCompare(b)),
+                }
+                : undefined;
 
             const fv: FormationView = {
                 id,
@@ -1024,6 +1029,25 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         active_brigade_count: 1,
                         most_casualties_brigade_id: null,
                         most_victories_brigade_id: null,
+                        reportedFields: [
+                            'active_brigade_count',
+                            'battles_as_attacker',
+                            'battles_as_defender',
+                            'battles_fought',
+                            'brigade_count',
+                            'casualty_exchange_ratio',
+                            'current_personnel',
+                            'defeats',
+                            'nadir_aggregate_personnel',
+                            'peak_aggregate_personnel',
+                            'stalemates',
+                            'total_casualties_inflicted',
+                            'total_casualties_taken',
+                            'total_osids_captured',
+                            'total_osids_lost',
+                            'victories',
+                            'win_rate',
+                        ],
                     };
                 }
             }

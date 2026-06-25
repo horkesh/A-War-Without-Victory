@@ -58,12 +58,16 @@ export interface CorpsCardProps {
   activeOperationPhase?: string;
 }
 
-function getAvgCohesion(brigades: FormationView[]): number {
-  if (brigades.length === 0) return 0;
-  return brigades.reduce((s, b) => s + (b.cohesion ?? 0), 0) / brigades.length;
+function getAvgCohesion(brigades: FormationView[]): number | null {
+  const reported = brigades
+    .map((b) => b.cohesion)
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+  if (reported.length === 0) return null;
+  return reported.reduce((sum, value) => sum + value, 0) / reported.length;
 }
 
-function getCohesionBarColor(cohesion: number): string {
+function getCohesionBarColor(cohesion: number | null): string {
+  if (cohesion == null) return 'bg-panel-border';
   if (cohesion >= 70) return 'bg-emerald-500';
   if (cohesion >= 40) return 'bg-amber-400';
   return 'bg-red-500';
@@ -157,7 +161,7 @@ export function CorpsCard({
 
       {/* Corps health bar — average cohesion */}
       <div className="h-[2px] bg-panel-border/50">
-        <div className={`h-full ${getCohesionBarColor(avgCohesion)} transition-all`} style={{ width: `${Math.min(100, avgCohesion)}%` }} />
+        <div className={`h-full ${getCohesionBarColor(avgCohesion)} transition-all`} style={{ width: `${avgCohesion == null ? 100 : Math.min(100, avgCohesion)}%` }} />
       </div>
 
       {/* Clickable body area — flips the card */}
@@ -315,8 +319,8 @@ export function CorpsCard({
             <span className="text-text-secondary">{t('corpsCard.brigades')}</span>
             <span className="text-text-primary tabular-nums font-semibold">{brigades.length}</span>
             <span className="text-text-secondary">{t('corpsCard.avgCohesion')}</span>
-            <span className={`tabular-nums font-semibold ${avgCohesion >= 70 ? 'text-emerald-400' : avgCohesion >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
-              {Math.round(avgCohesion)}%
+            <span className={`tabular-nums font-semibold ${avgCohesion == null ? 'text-text-secondary' : avgCohesion >= 70 ? 'text-emerald-400' : avgCohesion >= 40 ? 'text-amber-400' : 'text-red-400'}`}>
+              {avgCohesion == null ? t('corpsFront.unreported') : `${Math.round(avgCohesion)}%`}
             </span>
           </div>
         </div>

@@ -138,7 +138,9 @@ export function generateForceReadiness(
         const missingByBrigade = corpsBrigades.map(missingAssessmentFields);
         const incompleteAssessmentCount = missingByBrigade.filter((missing) => missing.length > 0).length;
         const missingAssessmentFieldSet = new Set(missingByBrigade.flat());
-        const ineffectiveCount = corpsBrigades.filter(b => (b.personnel ?? 0) < PERSONNEL_INEFFECTIVE).length;
+        const ineffectiveCount = corpsBrigades.filter(
+            (b) => typeof b.personnel === 'number' && Number.isFinite(b.personnel) && b.personnel < PERSONNEL_INEFFECTIVE,
+        ).length;
         const ineffPct = ineffectiveCount / corpsBrigades.length;
         const avgFatigue = averageReported(corpsBrigades.map(b => b.fatigue));
         const avgCohesion = averageReported(corpsBrigades.map(b => b.cohesion));

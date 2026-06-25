@@ -211,6 +211,17 @@ describe('Army HQ readiness and threat copy', () => {
         expect(items[0]?.incompleteAssessmentCount).toBe(1);
     });
 
+    it('does not classify missing personnel as an ineffective brigade', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'unreported_personnel', name: 'Sparse Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', fatigue: 6, cohesion: 76, morale: 60, officer_quality: 0.6 },
+        ] as any, [], 'RBiH', new Set());
+
+        expect(items[0]?.grade).toBe('UNREPORTED');
+        expect(items[0]?.ineffectiveCount).toBe(0);
+        expect(items[0]?.incompleteAssessmentCount).toBe(1);
+    });
+
     it('renders absent force-readiness condition data as unreported', () => {
         const item: CorpsReadiness = {
             corpsId: 'corps_1',

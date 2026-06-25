@@ -40,4 +40,12 @@ describe('combat effectiveness sparse data', () => {
         expect(aggregate.incompleteCount).toBe(1);
         expect(aggregate.missingFields).toEqual(['cohesion', 'fatigue', 'morale', 'officer_quality']);
     });
+
+    it('does not count missing personnel as an exact ineffective brigade', () => {
+        const aggregate = aggregateEffectiveness([brigade({ personnel: undefined })]);
+
+        expect(aggregate.grade).toBe('UNREPORTED');
+        expect(aggregate.ineffectiveCount).toBe(0);
+        expect(aggregate.missingFields).toContain('personnel');
+    });
 });

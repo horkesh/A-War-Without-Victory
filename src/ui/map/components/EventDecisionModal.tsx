@@ -581,6 +581,7 @@ function ResponseButton({
 }) {
     const historical = isHistoricalOption(option, decision);
     const staffRecommended = !historical && isStaffRecommendedOption(option, decision);
+    const historicalDescription = `${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote.replace(/[.。]+$/u, '') })}` : ''}`;
     return (
         <div className="rounded border border-panel-border bg-panel-card/90 p-3">
             <button
@@ -598,7 +599,7 @@ function ResponseButton({
                     {historical && (
                         <span
                             className="rounded-sm border border-accent-gold/60 bg-accent-gold/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold"
-                            title={`${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote })}` : ''}`}
+                            title={historicalDescription}
                         >
                             {t('eventDecision.historicalDefault')}
                         </span>
@@ -615,7 +616,7 @@ function ResponseButton({
             </button>
             {historical && (
                 <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
-                    {t('eventDecision.historicalDefaultDescription')}{sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote })}` : ''}
+                    {historicalDescription}
                 </p>
             )}
             {staffRecommended && (

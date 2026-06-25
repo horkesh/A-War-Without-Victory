@@ -30,9 +30,20 @@ function resolveName(id: string | null, formations?: FormationView[]): string | 
     return getPlayerSafeBrigadeName(formation?.name ?? null);
 }
 
+function hasReported(summary: NonNullable<FormationView['combatSummary']>, field: string): boolean {
+    return !summary.reportedFields || summary.reportedFields.includes(field);
+}
+
+function unreported(): string {
+    return t('corpsFront.unreported');
+}
+
 export function CombatSummaryPanel({ summary, formations, onSelectFormation, compact, noTopBorder }: CombatSummaryPanelProps) {
-    const territoryNet = summary.total_osids_captured - summary.total_osids_lost;
-    const territorySign = territoryNet > 0 ? '+' : territoryNet < 0 ? '' : '±';
+    const hasBattleRoleBreakdown = hasReported(summary, 'battles_as_attacker') && hasReported(summary, 'battles_as_defender');
+    const hasRecordBreakdown = hasReported(summary, 'victories') && hasReported(summary, 'defeats') && hasReported(summary, 'stalemates');
+    const hasTerritoryBreakdown = hasReported(summary, 'total_osids_captured') && hasReported(summary, 'total_osids_lost');
+    const territoryNet = hasTerritoryBreakdown ? summary.total_osids_captured - summary.total_osids_lost : null;
+    const territorySign = territoryNet == null ? '' : territoryNet > 0 ? '+' : territoryNet < 0 ? '' : '+/-';
 
     return (
         <div className={`pt-2 mb-3 text-[11px] ${noTopBorder ? '' : 'border-t border-panel-border'}`}>
@@ -46,25 +57,29 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                     <span className="text-text-secondary">{t('combatRecord.battles')}</span>
                     <span className="text-text-primary tabular-nums">
                         {summary.battles_fought}
-                        <span className="text-text-secondary ml-1">
-                            ({t('combatRecord.battleRoleBreakdown', {
-                                attacker: summary.battles_as_attacker,
-                                defender: summary.battles_as_defender,
-                            })})
-                        </span>
+                        {hasBattleRoleBreakdown && (
+                            <span className="text-text-secondary ml-1">
+                                ({t('combatRecord.battleRoleBreakdown', {
+                                    attacker: summary.battles_as_attacker,
+                                    defender: summary.battles_as_defender,
+                                })})
+                            </span>
+                        )}
                     </span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('combatRecord.winRate')}</span>
                     <span className="text-text-primary tabular-nums">
-                        {(summary.win_rate * 100).toFixed(1)}%
-                        <span className="text-text-secondary ml-1">
-                            {t('combatRecord.recordBreakdown', {
-                                wins: summary.victories,
-                                losses: summary.defeats,
-                                stalemates: summary.stalemates,
-                            })}
-                        </span>
+                        {hasReported(summary, 'win_rate') ? `${(summary.win_rate * 100).toFixed(1)}%` : unreported()}
+                        {hasRecordBreakdown && (
+                            <span className="text-text-secondary ml-1">
+                                {t('combatRecord.recordBreakdown', {
+                                    wins: summary.victories,
+                                    losses: summary.defeats,
+                                    stalemates: summary.stalemates,
+                                })}
+                            </span>
+                        )}
                     </span>
                 </div>
             </div>
@@ -73,16 +88,20 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
             <div className="mt-1.5 space-y-0.5">
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('combatRecord.menLost')}</span>
-                    <span className="text-red-400 tabular-nums">{summary.total_casualties_taken.toLocaleString()}</span>
+                    <span className="text-red-400 tabular-nums">
+                        {hasReported(summary, 'total_casualties_taken') ? summary.total_casualties_taken.toLocaleString() : unreported()}
+                    </span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('combatRecord.casualtiesInflicted')}</span>
-                    <span className="text-green-400 tabular-nums">{summary.total_casualties_inflicted.toLocaleString()}</span>
+                    <span className="text-green-400 tabular-nums">
+                        {hasReported(summary, 'total_casualties_inflicted') ? summary.total_casualties_inflicted.toLocaleString() : unreported()}
+                    </span>
                 </div>
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('combatRecord.exchangeRatio')}</span>
                     <span className="text-text-primary tabular-nums">
-                        {summary.casualty_exchange_ratio.toFixed(2)}:1
+                        {hasReported(summary, 'casualty_exchange_ratio') ? `${summary.casualty_exchange_ratio.toFixed(2)}:1` : unreported()}
                     </span>
                 </div>
             </div>
@@ -91,14 +110,18 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
             <div className="mt-1.5">
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('combatRecord.groundWonLost')}</span>
-                    <span className={`tabular-nums ${territoryNet > 0 ? 'text-green-400' : territoryNet < 0 ? 'text-red-400' : 'text-text-primary'}`}>
-                        {territorySign}{territoryNet}
-                        <span className="text-text-secondary ml-1">
-                            ({t('combatRecord.groundWonLostCount', {
-                                won: summary.total_osids_captured,
-                                lost: summary.total_osids_lost,
-                            })})
-                        </span>
+                    <span className={`tabular-nums ${territoryNet == null ? 'text-text-secondary' : territoryNet > 0 ? 'text-green-400' : territoryNet < 0 ? 'text-red-400' : 'text-text-primary'}`}>
+                        {territoryNet == null ? unreported() : (
+                            <>
+                                {territorySign}{territoryNet}
+                                <span className="text-text-secondary ml-1">
+                                    ({t('combatRecord.groundWonLostCount', {
+                                        won: summary.total_osids_captured,
+                                        lost: summary.total_osids_lost,
+                                    })})
+                                </span>
+                            </>
+                        )}
                     </span>
                 </div>
             </div>
@@ -108,13 +131,15 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                 <div className="flex justify-between">
                     <span className="text-text-secondary">{t('opsPlanning.phase.brigades')}</span>
                     <span className="text-text-primary tabular-nums">
-                        {t('combatRecord.brigadeBreakdown', {
-                            active: summary.active_brigade_count,
-                            total: summary.brigade_count,
-                        })}
+                        {hasReported(summary, 'active_brigade_count') && hasReported(summary, 'brigade_count')
+                            ? t('combatRecord.brigadeBreakdown', {
+                                active: summary.active_brigade_count,
+                                total: summary.brigade_count,
+                            })
+                            : unreported()}
                     </span>
                 </div>
-                {summary.peak_aggregate_personnel > 0 && (
+                {hasReported(summary, 'peak_aggregate_personnel') && hasReported(summary, 'current_personnel') && summary.peak_aggregate_personnel > 0 && (
                     <div className="flex justify-between">
                         <span className="text-text-secondary">{t('combatRecord.peakPersonnel')}</span>
                         <span className="text-text-primary tabular-nums">{Math.max(summary.peak_aggregate_personnel, summary.current_personnel).toLocaleString()}</span>
@@ -130,7 +155,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                         .sort(([a], [b]) => a.localeCompare(b))
                         .map(([arc, count], i) => (
                             <span key={arc}>
-                                {i > 0 && <span className="text-text-secondary"> · </span>}
+                                {i > 0 && <span className="text-text-secondary"> Â· </span>}
                                 <span className={ARC_COLORS[arc] ?? 'text-text-primary'}>
                                     {count} {getPlayerSafeFormationNarrativeArcLabel(arc)}
                                 </span>
@@ -147,7 +172,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                         {summary.most_victories_brigade_id && (
                             <div className="flex justify-between items-center text-xs p-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded">
                                 <div className="flex items-center gap-1.5">
-                                    <span className="text-accent-gold" title={t('combatRecord.mostVictoriousBrigade')}>⭐</span>
+                                    <span className="text-accent-gold" title={t('combatRecord.mostVictoriousBrigade')}>â­</span>
                                     <div className="flex flex-col">
                                         <span className="text-[9px] uppercase tracking-wide text-text-secondary">{t('combatRecord.wallOfValor')}</span>
                                         <button
@@ -165,7 +190,7 @@ export function CombatSummaryPanel({ summary, formations, onSelectFormation, com
                         {summary.most_casualties_brigade_id && (
                             <div className="flex justify-between items-center text-xs p-1.5 bg-[#d45555]/5 border border-[#d45555]/20 rounded">
                                 <div className="flex items-center gap-1.5">
-                                    <span className="text-[#d45555]" title={t('combatRecord.highestCasualtiesBrigade')}>🩸</span>
+                                    <span className="text-[#d45555]" title={t('combatRecord.highestCasualtiesBrigade')}>ðŸ©¸</span>
                                     <div className="flex flex-col">
                                         <span className="text-[9px] uppercase tracking-wide text-text-secondary">{t('combatRecord.bleedingEdge')}</span>
                                         <button

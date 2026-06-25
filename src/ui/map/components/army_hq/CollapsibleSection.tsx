@@ -26,6 +26,7 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
                 type="button"
                 onClick={() => toggle(sectionKey)}
                 aria-label={ariaLabel}
+                aria-expanded={expanded}
                 className="w-full flex items-center justify-between px-4 py-2 hover:bg-panel-bg transition-colors group"
             >
                 <div className="flex items-center gap-2.5">
@@ -39,8 +40,8 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
                         </span>
                     )}
                 </div>
-                <span className={`text-[10px] text-text-secondary/60 transition-transform duration-200 group-hover:text-text-secondary ${expanded ? 'rotate-90' : 'rotate-0'}`}>
-                    ▶
+                <span className="text-[10px] text-text-secondary/60 transition-colors duration-200 group-hover:text-text-secondary">
+                    {expanded ? 'v' : '>'}
                 </span>
             </button>
             {expanded && (

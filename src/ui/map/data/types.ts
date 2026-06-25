@@ -237,6 +237,8 @@ export interface FormationView {
         active_brigade_count: number;
         most_casualties_brigade_id: string | null;
         most_victories_brigade_id: string | null;
+        /** Source fields explicitly reported; absent on fully synthesized legacy summaries. */
+        reportedFields?: string[];
     };
     morale?: number;
     entrenchment_turns?: number;

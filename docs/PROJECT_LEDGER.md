@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-25] fix(ui): preserve sparse combat and readiness truth
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** Sparse combat summaries now carry reported-field provenance and render missing casualty, win-rate, exchange-ratio, territory, brigade-count, and peak-personnel fields as unreported instead of exact zeroes. Brigade/corps/sector effectiveness and Force Readiness no longer classify missing personnel, morale, or officer-quality as precise combat values. OOB corps cohesion now renders unreported when no subordinate reports cohesion. Army HQ collapsible section buttons expose truthful `aria-expanded` state and visible expanded/collapsed glyphs. Event decision historical-default source notes no longer double-punctuate.
+
+**Verification:** Focused proof passed 6 files / 111 tests with `node node_modules\vitest\vitest.mjs run tests/ui_map_game_state_adapter.test.ts tests/ui/combat_effectiveness_sparse_data.test.ts tests/ui/army_hq_readiness_threat_copy.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/corps_detail_sector_truth.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck -- --pretty false` passed.
+
+**Scope/determinism:** UI/read-model/test/docs polish only; no simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, calibration, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaging artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-25] fix(i18n): restore sparse truth BCS parity
 
 **Type:** i18n/test/CI repair.

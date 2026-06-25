@@ -9,6 +9,7 @@ import { SelectionPanel, resolveSelectionPanelMunicipalityId } from '../../src/u
 import { CombatSummaryPanel } from '../../src/ui/map/components/CombatSummaryPanel.js';
 import { ArmyHQModal } from '../../src/ui/map/components/army_hq/ArmyHQModal.js';
 import { CorpsCard } from '../../src/ui/map/components/CorpsCard.js';
+import { FormationDetail } from '../../src/ui/map/components/FormationDetail.js';
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CombatRecordSection } from '../../src/ui/map/components/army_hq/CombatRecordSection.js';
 import { CollapsibleSection } from '../../src/ui/map/components/army_hq/CollapsibleSection.js';
@@ -343,6 +344,70 @@ describe('GUI audit label discipline', () => {
     expect(corpsContainer.textContent).not.toMatch(/\bcap\b|captured/i);
   });
 
+  it('does not turn sparse combat summary fields into exact zero outcomes', () => {
+    const combatSummary = {
+      battles_fought: 2,
+      battles_as_attacker: 0,
+      battles_as_defender: 0,
+      victories: 0,
+      defeats: 0,
+      stalemates: 0,
+      win_rate: 0,
+      total_casualties_taken: 0,
+      total_casualties_inflicted: 0,
+      casualty_exchange_ratio: 0,
+      total_osids_captured: 0,
+      total_osids_lost: 0,
+      brigade_count: 0,
+      active_brigade_count: 0,
+      peak_aggregate_personnel: 0,
+      nadir_aggregate_personnel: 0,
+      current_personnel: 0,
+      arc_distribution: {},
+      most_victories_brigade_id: null,
+      most_casualties_brigade_id: null,
+      reportedFields: ['battles_fought'],
+    };
+
+    const { container } = render(createElement(CombatSummaryPanel, {
+      summary: combatSummary,
+    }));
+
+    expect(container.textContent).toContain('Battles2');
+    expect(container.textContent).toContain('Win RateUnreported');
+    expect(container.textContent).toContain('Men lostUnreported');
+    expect(container.textContent).toContain('Casualties InflictedUnreported');
+    expect(container.textContent).toContain('Exchange RatioUnreported');
+    expect(container.textContent).toContain('Ground Won/LostUnreported');
+    expect(container.textContent).toContain('BrigadesUnreported');
+    expect(container.textContent).not.toMatch(/0\.0%|0\.00:1|0 won \/ 0 lost|0 active brigades \/ 0 total/i);
+  });
+
+  it('renders brigade effectiveness unreported when grade-critical inputs are incomplete', () => {
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      cohesion: 70,
+      fatigue: 4,
+      createdTurn: 0,
+      tags: [],
+    } as FormationView;
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [brigade] }),
+      selectedFormationId: brigade.id,
+    });
+
+    const { container } = render(createElement(FormationDetail, { railSlot: 'primary' }));
+
+    expect(container.textContent).toContain('EffectivenessUnreported');
+    expect(container.textContent).not.toMatch(/Effectiveness\d/);
+  });
+
   it('keeps Army HQ corps cards free of stance and count shorthand', () => {
     const corps = {
       id: 'arbih_1st_corps',
@@ -474,6 +539,33 @@ describe('GUI audit label discipline', () => {
     expect(stanceSelect.value).toBe('unreported');
     expect(stanceSelect.textContent).toContain('Unreported');
     expect(stanceSelect.textContent).toContain('Balanced');
+  });
+
+  it('does not render missing OOB corps cohesion as depleted zero percent', () => {
+    const { container } = render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [{
+        id: 'arbih_101_brigade',
+        name: '101st Brigade',
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        readiness: 'ready',
+        personnel: 1200,
+        fatigue: 4,
+        createdTurn: 0,
+        tags: [],
+      } as FormationView],
+      faction: 'RBiH',
+    } as Parameters<typeof CorpsCard>[0]));
+
+    const flipTarget = container.querySelector('[role="button"]');
+    expect(flipTarget).toBeTruthy();
+    fireEvent.click(flipTarget!);
+
+    expect(container.textContent).toContain('Avg CohesionUnreported');
+    expect(container.textContent).not.toContain('Avg Cohesion0%');
   });
 
   it('highlights only physical brigade locations on CorpsCard hover', () => {
@@ -611,8 +703,12 @@ describe('GUI audit label discipline', () => {
     }));
 
     const sectionToggle = screen.getByRole('button', { name: 'Expand Combat record section' });
+    expect(sectionToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(sectionToggle.textContent).toContain('>');
     fireEvent.click(sectionToggle);
-    expect(screen.getByRole('button', { name: 'Collapse Combat record section' })).toBeTruthy();
+    const collapseToggle = screen.getByRole('button', { name: 'Collapse Combat record section' });
+    expect(collapseToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(collapseToggle.textContent).toContain('v');
   });
 
   it('spells out Army HQ ORBAT campaign losses', () => {

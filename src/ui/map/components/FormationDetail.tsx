@@ -621,14 +621,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   <span className="text-text-primary tabular-nums">{t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })}</span>
                 </>
               )}
-              {formation.kind === 'brigade'
-                && formation.personnel != null
-                && typeof formation.cohesion === 'number'
-                && Number.isFinite(formation.cohesion)
-                && typeof formation.fatigue === 'number'
-                && Number.isFinite(formation.fatigue)
-                && (() => {
+              {formation.kind === 'brigade' && (() => {
                 const eff = computeBrigadeEffectiveness(formation);
+                if (eff.missingFields.length > 0) {
+                  return (
+                    <>
+                      <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
+                      <span className="text-text-secondary tabular-nums">{t('corpsFront.unreported')}</span>
+                    </>
+                  );
+                }
                 const color = eff.value >= 600 ? '#56d364' : eff.value >= 300 ? '#e8a838' : '#f47068';
                 // Find the worst modifier to highlight
                 const mods = eff.modifiers;

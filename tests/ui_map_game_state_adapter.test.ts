@@ -73,6 +73,33 @@ test('parseGameState preserves absent formation condition fields as unreported',
     assert.strictEqual(sparse?.fatigue, undefined);
 });
 
+test('parseGameState records which combat summary fields were source-reported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war' },
+        military: {
+            formations: {
+                corps_1: {
+                    faction: 'RBiH',
+                    name: '1st Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                    combat_summary: { battles_fought: 2 },
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const corps = parsed.formations.find((formation) => formation.id === 'corps_1');
+    assert.deepStrictEqual(corps?.combatSummary?.reportedFields, ['battles_fought']);
+    assert.strictEqual(corps?.combatSummary?.total_casualties_taken, 0);
+});
+
 test('parseGameState keeps absent officer ratings unreported instead of inventing poor traits', () => {
     const parsed = parseGameState({
         meta: { turn: 1, phase: 'war', player_faction: 'RS' },

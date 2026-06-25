@@ -170,7 +170,7 @@ export function aggregateEffectiveness(formations: FormationView[]): AggregateEf
         const eff = computeBrigadeEffectiveness(b);
         totalEff += eff.value;
         totalPers += eff.personnel;
-        if (eff.personnel < 400) ineffective++;
+        if (reportedNumber(b.personnel) && eff.personnel < 400) ineffective++;
         if ((b.disrupted_turns ?? 0) > 0) disrupted++;
         if (eff.missingFields.length > 0) {
             incompleteCount++;

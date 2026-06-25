@@ -269,16 +269,18 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               {(() => {
                 const agg = aggregateEffectiveness(subordinates);
                 if (agg.brigadeCount === 0) return null;
-                const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : '#f47068';
+                const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : agg.grade === 'UNREPORTED' ? '#9ca3af' : '#f47068';
                 return (
                   <div className="flex justify-between">
                     <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('corpsDetail.combatEff')}</span>
                     <span className="tabular-nums">
-                      <span className="text-text-primary">{agg.totalEffectiveness.toLocaleString()}</span>
+                      <span className="text-text-primary">
+                        {agg.grade === 'UNREPORTED' ? t('corpsFront.unreported') : agg.totalEffectiveness.toLocaleString()}
+                      </span>
                       <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
                         {agg.grade}
                       </span>
-                      {agg.ineffectiveCount > 0 && (
+                      {agg.grade !== 'UNREPORTED' && agg.ineffectiveCount > 0 && (
                         <span className="text-[9px] text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
                       )}
                     </span>
@@ -441,7 +443,9 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   <div className="shrink-0 ml-2 text-right">
                     <div className="text-[10px] tabular-nums">
                       <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
-                      <span className="text-text-primary">{sectorEff.totalEffectiveness.toLocaleString()}</span>
+                      <span className="text-text-primary">
+                        {sectorEff.grade === 'UNREPORTED' ? t('corpsFront.unreported') : sectorEff.totalEffectiveness.toLocaleString()}
+                      </span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
                       {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}

@@ -356,6 +356,31 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText(/historically attested choice/)).toBeNull();
   });
 
+  it('does not double-punctuate historical default source notes', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'source_punctuation_review',
+        event_title: 'Source Punctuation Review',
+        turn_fired: 0,
+        faction: 'RBiH',
+        source_note: 'ICTY source packet.',
+        historical_default_response_id: 'historical',
+        response_options: [
+          {
+            id: 'historical',
+            label: 'Historical line',
+            historical_marker: 'historical_default',
+            effects: [],
+          },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    expect(container.textContent).toContain('Source: ICTY source packet.');
+    expect(container.textContent).not.toContain('source packet..');
+  });
+
     it('renders future-consequence cards only for response options that include branch metadata', () => {
         render(React.createElement(EventDecisionModal, {
       decision: {

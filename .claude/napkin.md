@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**SPARSE COMBAT/READINESS RECORDS ARE UNREPORTED (2026-06-25).** Missing combat-summary fields, morale/officer-quality, personnel, or cohesion are source gaps, not zero casualties, failed brigades, or depleted cohesion. Do instead: carry reported-field provenance, render `Unreported`, and count ineffective units only from reported personnel.
+
 **SPARSE OPERATION LIFECYCLE IS UNREPORTED (2026-06-25).** Missing operation phase, axis status, objective index, prep timing, or brigade condition fields are absent staff records, not execution/healthy/zero truth. Do instead: preserve missing lifecycle fields through adapters/read-models, render `Status pending` / `Unreported`, hide current-objective/progress claims, and rank unknown brigade readiness below reported tired-but-known brigades.
 
 **OPPORTUNITY AXIS READINESS NEEDS REPORTED BOOLEANS (2026-06-25).** Missing `last_axis_evaluation[*].green` is unreported, not a failed axis. Do instead: keep green counts undefined until every counted axis reports a boolean, render opportunity axes as unreported, and exclude unreported records from lifetime green/total pulse counters.
