@@ -1,8 +1,8 @@
 # Player Surface Truth Sweep
 
 **Date:** 2026-06-25
-**Branch:** `codex/p3-player-surface-truth-sweep`
-**Status:** Local implementation complete; GitHub closeout pending.
+**Branch:** `codex/p3-player-surface-truth-sweep` -> PR #446 -> `main`
+**Status:** Merged to `main` at `ecf1cb4e0`; GitHub green; branch cleanup complete.
 
 ## Summary
 
@@ -36,11 +36,16 @@ Additional local proof passed:
 
 Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational decision routing and unblock after the historical default, Army HQ opening, Personnel tab, command-card/sector inspect labels, Corps Detail/Corps Front routing from the live map, disabled sector-command bridge-unavailable copy, and console health with only the expected browser-fallback warning.
 
+GitHub closeout passed on PR #446 before merge: Event System validation, desktop release check, desktop packaged runtime probe, engine-health-188w, scenario anchors, scenarios, structural fingerprint, test, typecheck, and full-suite were green; PR comments and reviews were empty; merge state was clean. PR #446 merged to `main` at `ecf1cb4e0` on 2026-06-25, and the local/remote `codex/p3-player-surface-truth-sweep` branch refs were removed.
+
 ## Scope / Determinism
 
 UI/read-model/accessibility/test/docs polish only. No simulation logic, scenario source data, event evaluator mechanics, startup snapshot, save schema, calibration floor, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
 
-## Pending Closeout
+## Closeout
 
-- GitHub checks green after push/PR
-- Merge to `main`, delete local/remote branch, and confirm no extra worktrees/subagents remain open
+- PR #446 merged to `main` at `ecf1cb4e0`.
+- GitHub checks were green before merge.
+- Local and remote feature-branch refs were deleted/pruned.
+- Known Sagan, Feynman, Heisenberg, Hegel, and Carver subagents were closed after their reports were absorbed.
+- Final worktree audit showed one clean `main` worktree.

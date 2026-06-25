@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE 2026-06-24.
+**Status:** ACTIVE rolling D2 polish plan; latest player-surface truth packet closed 2026-06-25.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -84,7 +84,7 @@ Sixth-slice verification passed: focused UI/shell pack passed 8 files / 137 test
 
 Sixth-slice closeout completed: PR #445 merged to `main` at `ae0010b0f`, docs closeout pushed at `55c6360bc`, GitHub push workflows were green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint, local/remote `codex/p2-command-surface-ergonomics` refs were pruned, and no extra worktrees or open PRs remained.
 
-Seventh scout wave implemented locally on `codex/p3-player-surface-truth-sweep` before broad gates:
+Seventh scout wave merged through PR #446 on `codex/p3-player-surface-truth-sweep`:
 
 - Army Reserve elite/reserve rows now use stable brigade/corps names in action labels, expose recall/decline controls with specific aria copy, render missing reserve personnel and missing loaned-command fields as unreported, and expose campaign history as a stateful disclosure control.
 - Presidential Decision Room Chronicle memory now counts only Chronicle-target decision receipts. Records-only receipts still file in Records but cannot create a false Chronicle review card.
@@ -93,7 +93,7 @@ Seventh scout wave implemented locally on `codex/p3-player-surface-truth-sweep` 
 - Settlement local-support controls now explain browser read-only/desktop-bridge unavailable state with visible copy and `aria-describedby`.
 - Sagan, Feynman, and Heisenberg scout reports were absorbed into this batch; remaining non-blocking findings stay in the next scout queue rather than reopening packaging or Srebrenica/Zepa operation-delivery calibration.
 
-Seventh-slice local verification passed: focused red/green pack passed 8 files / 184 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 616 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational decision routing/unblock, Army HQ, Personnel, command-card/sector inspect labels, Corps Detail/Corps Front routing, disabled sector-command bridge-unavailable copy, and console health with only the expected browser-fallback warning.
+Seventh-slice verification passed: focused red/green pack passed 8 files / 184 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 616 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational decision routing/unblock, Army HQ, Personnel, command-card/sector inspect labels, Corps Detail/Corps Front routing, disabled sector-command bridge-unavailable copy, and console health with only the expected browser-fallback warning. GitHub PR #446 was green across Event System validation, desktop release check, desktop packaged runtime probe, engine-health-188w, scenario anchors, scenarios, structural fingerprint, test, typecheck, and full-suite; PR comments/reviews were empty; the clean PR merged to `main` at `ecf1cb4e0`. Local/remote branch refs were deleted/pruned, no extra worktrees remained, and Sagan, Feynman, Heisenberg, Hegel, and Carver were closed after report absorption.
 
 ## Pyrrhic Roles
 
