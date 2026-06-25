@@ -1832,7 +1832,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'formationDetail.aaSys': 'AA sistemi',
     'formationDetail.undated': 'Bez datuma',
     'formationDetail.setupRecord': 'Početni zapis',
-    'formationDetail.initialDeploymentRecord': 'Početni raspored prije igračevog zapovijedanja.',
+    'formationDetail.initialDeploymentRecord': 'Početni raspored prije igračevog komandovanja.',
     'formationDetail.campaignHistory': 'Historija kampanje',
     'formationDetail.participant': 'ucesnik',
     'formationDetail.staffRecord': 'stabski zapis',
