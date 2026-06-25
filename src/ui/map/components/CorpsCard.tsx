@@ -12,6 +12,7 @@ import {
   formatReportedPersonnel,
   sumReportedPersonnel,
   type EquipmentConditionSummary,
+  type ReportedMetricSummary,
 } from '../utils/reportedMetrics';
 
 const STANCE_ICON: Record<string, IconName> = {
@@ -90,6 +91,22 @@ function getEquipmentSummary(brigades: FormationView[]): { tanks: EquipmentCondi
   return { tanks, arty };
 }
 
+function getPersonnelTone(summary: ReportedMetricSummary): { textClass: string; iconColor: string; state: string; colorState: string } {
+  if (summary.totalCount === 0 || summary.reportedCount === 0) {
+    return { textClass: 'text-text-secondary', iconColor: '#94a3b8', state: 'unreported', colorState: 'neutral' };
+  }
+  if (summary.unreportedCount > 0) {
+    return { textClass: 'text-amber-400', iconColor: '#fbbf24', state: 'partial', colorState: 'partial' };
+  }
+  if (summary.reportedTotal >= 8000) {
+    return { textClass: 'text-emerald-400', iconColor: '#34d399', state: 'complete-strong', colorState: 'complete-strong' };
+  }
+  if (summary.reportedTotal >= 4000) {
+    return { textClass: 'text-amber-400', iconColor: '#fbbf24', state: 'complete-moderate', colorState: 'complete-moderate' };
+  }
+  return { textClass: 'text-red-400', iconColor: '#f87171', state: 'complete-thin', colorState: 'complete-thin' };
+}
+
 export function CorpsCard({
   corpsId,
   corpsName,
@@ -114,11 +131,11 @@ export function CorpsCard({
   const displayName = getPlayerSafeCorpsName(corpsName, corpsId);
   const factionClass = FACTION_COLORS[faction] ?? 'text-text-primary';
   const totalPersonnelSummary = sumReportedPersonnel(brigades);
-  const totalPersonnel = totalPersonnelSummary.reportedTotal;
   const totalPersonnelLabel = formatReportedPersonnel(totalPersonnelSummary, {
     partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
     unreported: t('corpsFront.unreported'),
   });
+  const personnelTone = getPersonnelTone(totalPersonnelSummary);
   const avgCohesion = getAvgCohesion(brigades);
   const equip = getEquipmentSummary(brigades);
   const stanceKey = stance ?? 'unreported';
@@ -152,8 +169,16 @@ export function CorpsCard({
         <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
         <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
           <span className="flex items-center gap-0.5">
-            <Icon name="personnel" size={11} color={totalPersonnel >= 8000 ? '#34d399' : totalPersonnel >= 4000 ? '#fbbf24' : '#f87171'} />
-            <span className={totalPersonnel >= 8000 ? 'text-emerald-400' : totalPersonnel >= 4000 ? 'text-amber-400' : 'text-red-400'}>{totalPersonnelLabel}</span>
+            <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
+              <Icon name="personnel" size={11} color={personnelTone.iconColor} />
+            </span>
+            <span
+              data-testid="corps-card-personnel"
+              data-report-state={personnelTone.state}
+              className={personnelTone.textClass}
+            >
+              {totalPersonnelLabel}
+            </span>
           </span>
           <span className="text-text-secondary">{brigades.length} brigades</span>
         </span>

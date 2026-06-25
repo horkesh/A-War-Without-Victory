@@ -119,18 +119,18 @@ export function generateForceReadiness(
             result.push({
                 corpsId: corps.id,
                 corpsName: getPlayerSafeCorpsName(corps.name, corps.id),
-                grade: 'INEFFECTIVE',
+                grade: 'UNREPORTED',
                 ineffectiveCount: 0,
                 totalBrigades: 0,
-                avgFatigue: 0,
-                avgCohesion: 0,
+                avgFatigue: null,
+                avgCohesion: null,
                 disruptedCount: 0,
                 overextendedCount: 0,
                 incompleteAssessmentCount: 0,
                 missingAssessmentFields: [],
                 hasThreat: threatCorpsIds.has(corps.id),
-                recommendationId: 'no_brigades',
-                recommendation: 'No brigades assigned',
+                recommendationId: 'assessment_incomplete',
+                recommendation: t(RECOMMENDATION_LABEL_KEYS.assessment_incomplete),
             });
             continue;
         }

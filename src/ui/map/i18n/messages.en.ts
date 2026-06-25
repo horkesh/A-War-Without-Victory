@@ -1063,6 +1063,8 @@ export const enMessages = {
     'commandRelationship.error.stabilize': 'Failed to stabilize command relationship.',
     'commandRelationship.titleWithLabel': 'Command Relationship - {label}',
     'commandRelationship.title': 'Command Relationship',
+    'commandRelationship.commandStrainMetric': 'Command strain',
+    'commandRelationship.corpsExhaustionMetric': 'Corps exhaustion',
     'commandRelationship.strain': 'Strain: {label}',
     'commandRelationship.activeOperations': 'Active operations: {label}',
     'commandRelationship.recovery': 'Recovery:',

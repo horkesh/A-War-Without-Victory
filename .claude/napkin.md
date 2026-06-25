@@ -6,6 +6,10 @@
 
 **SPARSE COMBAT/READINESS RECORDS ARE UNREPORTED (2026-06-25).** Missing combat-summary fields, morale/officer-quality, personnel, or cohesion are source gaps, not zero casualties, failed brigades, or depleted cohesion. Do instead: carry reported-field provenance, render `Unreported`, and count ineffective units only from reported personnel.
 
+**ZERO FIELDED BRIGADES ARE UNREPORTED (2026-06-25).** A corps with no fielded tactical brigades lacks a force assessment; it is not proven ineffective with 0 fatigue/cohesion. Do instead: render Force Readiness as `UNREPORTED` with null condition metrics while preserving explicit zeroes on reported fielded brigades.
+
+**MISSING COMMAND METRICS ARE NOT HEALTHY SILENCE (2026-06-25).** Absent command strain or corps exhaustion is an incomplete staff record, not healthy command relationship or 0 exhaustion. Do instead: render missing command relationship metrics as `Unreported`; reserve healthy silence for reported zero values with no other signals.
+
 **SPARSE OPERATION LIFECYCLE IS UNREPORTED (2026-06-25).** Missing operation phase, axis status, objective index, prep timing, or brigade condition fields are absent staff records, not execution/healthy/zero truth. Do instead: preserve missing lifecycle fields through adapters/read-models, render `Status pending` / `Unreported`, hide current-objective/progress claims, and rank unknown brigade readiness below reported tired-but-known brigades.
 
 **OPPORTUNITY AXIS READINESS NEEDS REPORTED BOOLEANS (2026-06-25).** Missing `last_axis_evaluation[*].green` is unreported, not a failed axis. Do instead: keep green counts undefined until every counted axis reports a boolean, render opportunity axes as unreported, and exclude unreported records from lifetime green/total pulse counters.

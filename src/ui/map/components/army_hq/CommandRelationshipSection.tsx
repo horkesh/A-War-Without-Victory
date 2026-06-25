@@ -49,13 +49,13 @@ const FACTION_WAR_EXHAUSTION_ELEVATED = 30;
 
 interface CommandRelationshipSectionProps {
     corpsId: string;
-    commandStrain: number;
-    commandStrainLabel: 'healthy' | 'strained' | 'compromised';
+    commandStrain?: number;
+    commandStrainLabel?: 'healthy' | 'strained' | 'compromised';
     recoveryForecast?: string | null;
     recoveryForecastToken?: CommandCopyToken | null;
     frictionEvents: FrictionEventView[];
     /** Corps exhaustion (0-100) — Wave 6: exhaustion above threshold contributes to strain. */
-    corpsExhaustion: number;
+    corpsExhaustion?: number;
     /**
      * Faction-level war exhaustion from GameState.political.war_exhaustion[faction]
      * (0-100 accumulator; engine tempo throttle fires at 30, saturates at 80).
@@ -93,7 +93,12 @@ export function CommandRelationshipSection({
 
     const unresolvedEvents = frictionEvents.filter(e => !e.resolved);
     const unresolvedCount = unresolvedEvents.length;
-    const exhaustionContributing = isExhaustionContributingToStrain(corpsExhaustion);
+    const commandStrainReported = typeof commandStrain === 'number' && Number.isFinite(commandStrain);
+    const corpsExhaustionReported = typeof corpsExhaustion === 'number' && Number.isFinite(corpsExhaustion);
+    const reportedCommandStrain = commandStrainReported ? commandStrain : 0;
+    const reportedCorpsExhaustion = corpsExhaustionReported ? corpsExhaustion : 0;
+    const hasUnreportedCommandMetrics = !commandStrainReported || !corpsExhaustionReported;
+    const exhaustionContributing = corpsExhaustionReported && isExhaustionContributingToStrain(reportedCorpsExhaustion);
     const factionExhaustionElevated =
         typeof factionWarExhaustion === 'number'
         && factionWarExhaustion >= FACTION_WAR_EXHAUSTION_ELEVATED;
@@ -103,16 +108,17 @@ export function CommandRelationshipSection({
     // Silence = healthy: nothing to show when strain is 0, no unresolved friction,
     // no delegation notice, and faction war strain below the engine's tempo-throttle floor.
     if (
-        commandStrain === 0
+        reportedCommandStrain === 0
         && unresolvedCount === 0
         && delegationSummaryLabel === null
         && !factionExhaustionElevated
+        && !hasUnreportedCommandMetrics
     ) return null;
 
-    const isCompromised = commandStrain >= COMPROMISED_THRESHOLD;
+    const isCompromised = reportedCommandStrain >= COMPROMISED_THRESHOLD;
     const strainColor = isCompromised ? 'text-red-400' : 'text-amber-400';
     const strainBg = isCompromised ? 'bg-red-900/20 border-red-500/30' : 'bg-amber-900/20 border-amber-500/30';
-    const labelText = isCompromised ? t('commandRelationship.compromised') : commandStrain > 0 ? t('commandRelationship.strained') : t('commandRelationship.healthy');
+    const labelText = isCompromised ? t('commandRelationship.compromised') : reportedCommandStrain > 0 ? t('commandRelationship.strained') : t('commandRelationship.healthy');
 
     const hasCooldown = typeof stabilizationCooldownUntil === 'number' && currentTurn < stabilizationCooldownUntil;
     const cooldownDate =
@@ -150,7 +156,7 @@ export function CommandRelationshipSection({
     };
 
     // ── Title with inline strain indicator ───────────────────────────────
-    const sectionTitle = commandStrain > 0
+    const sectionTitle = reportedCommandStrain > 0
         ? t('commandRelationship.titleWithLabel', { label: labelText })
         : t('commandRelationship.title');
 
@@ -162,13 +168,30 @@ export function CommandRelationshipSection({
         >
             <div className="flex flex-col gap-2">
                 {/* 1. Strain status row — only when strain > 0 */}
-                {commandStrain > 0 && (
+                {hasUnreportedCommandMetrics && (
+                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[10px] font-mono" data-testid="command-relationship-unreported">
+                        {!commandStrainReported && (
+                            <>
+                                <span className="text-text-secondary/60 uppercase tracking-wider">{t('commandRelationship.commandStrainMetric')}</span>
+                                <span className="text-text-secondary">{t('corpsFront.unreported')}</span>
+                            </>
+                        )}
+                        {!corpsExhaustionReported && (
+                            <>
+                                <span className="text-text-secondary/60 uppercase tracking-wider">{t('commandRelationship.corpsExhaustionMetric')}</span>
+                                <span className="text-text-secondary">{t('corpsFront.unreported')}</span>
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {reportedCommandStrain > 0 && (
                     <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-bold tracking-wider uppercase ${strainColor}`}>
                             {t('commandRelationship.strain', { label: labelText })}
                         </span>
                         <span className={`text-[10px] font-bold tabular-nums font-mono px-1.5 py-0.5 border ${strainBg} ${strainColor}`}>
-                            {commandStrain}
+                            {reportedCommandStrain}
                         </span>
                     </div>
                 )}
@@ -185,7 +208,7 @@ export function CommandRelationshipSection({
                 )}
 
                 {/* 2. Recovery forecast — only when strain > 0 and forecast available */}
-                {commandStrain > 0 && recoveryForecast && (
+                {reportedCommandStrain > 0 && recoveryForecast && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
                         <span className="text-[10px] text-text-secondary font-mono">
@@ -195,11 +218,11 @@ export function CommandRelationshipSection({
                 )}
 
                 {/* 2b. Exhaustion pressure note — Wave 6: when corps exhaustion contributes to strain */}
-                {commandStrain > 0 && exhaustionContributing && (
+                {reportedCommandStrain > 0 && exhaustionContributing && (
                     <div className="flex items-center gap-1.5">
                         <span className="text-[9px] text-amber-500/70 shrink-0">▲</span>
                         <span className="text-[10px] text-text-secondary font-mono">
-                            {t('commandRelationship.corpsExhaustion', { value: Math.round(corpsExhaustion) })}
+                            {t('commandRelationship.corpsExhaustion', { value: Math.round(reportedCorpsExhaustion) })}
                         </span>
                     </div>
                 )}
@@ -265,7 +288,7 @@ export function CommandRelationshipSection({
                 )}
 
                 {/* 5. Stabilize button — only when friction events exist (stabilization resolves friction, not exhaustion) */}
-                {commandStrain > 0 && unresolvedCount > 0 && (
+                {reportedCommandStrain > 0 && unresolvedCount > 0 && (
                     <div className="flex flex-col gap-1 pt-1 border-t border-panel-border/50">
                         <button
                             type="button"

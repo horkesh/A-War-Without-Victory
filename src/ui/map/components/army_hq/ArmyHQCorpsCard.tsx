@@ -13,6 +13,7 @@ import {
     formatReportedPersonnel,
     sumReportedPersonnel,
     type EquipmentConditionSummary,
+    type ReportedMetricSummary,
 } from '../../utils/reportedMetrics';
 import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
 import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
@@ -78,6 +79,22 @@ const READINESS_BORDER: Record<string, string> = {
     'UNREPORTED': '',
 };
 
+function getPersonnelTone(summary: ReportedMetricSummary): { textClass: string; iconColor: string; state: string } {
+    if (summary.totalCount === 0 || summary.reportedCount === 0) {
+        return { textClass: 'text-text-secondary', iconColor: '#94a3b8', state: 'unreported' };
+    }
+    if (summary.unreportedCount > 0) {
+        return { textClass: 'text-amber-400', iconColor: '#fbbf24', state: 'partial' };
+    }
+    if (summary.reportedTotal >= 8000) {
+        return { textClass: 'text-emerald-400', iconColor: '#34d399', state: 'complete-strong' };
+    }
+    if (summary.reportedTotal >= 4000) {
+        return { textClass: 'text-accent-gold', iconColor: '#fbbf24', state: 'complete-moderate' };
+    }
+    return { textClass: 'text-red-500', iconColor: '#f87171', state: 'complete-thin' };
+}
+
 function averageReported(values: ReadonlyArray<number | undefined | null>): number | null {
     const reported = values.filter((value): value is number => Number.isFinite(value));
     if (reported.length === 0) return null;
@@ -105,6 +122,7 @@ export function ArmyHQCorpsCard({
             partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
             unreported: t('corpsFront.unreported'),
         });
+        const personnelTone = getPersonnelTone(personnelSummary);
         const avgCohesion = averageReported(brigades.map(b => b.cohesion));
         const avgFatigue = averageReported(brigades.map(b => b.fatigue));
         const eff = aggregateEffectiveness(brigades);
@@ -144,8 +162,9 @@ export function ArmyHQCorpsCard({
             artyLabel: formatEquipmentSummary(rawEquip.arty),
         };
 
-        const strain = corps.commandStrain ?? 0;
-        const strainLabel = normalizeCommandStrainLabel(strain, corps.commandStrainLabel);
+        const strain = corps.commandStrain;
+        const displayedStrain = typeof strain === 'number' && Number.isFinite(strain) ? strain : 0;
+        const strainLabel = normalizeCommandStrainLabel(displayedStrain, corps.commandStrainLabel);
         const frictionTypes = corps.activeFrictionTypes ?? [];
         const frictionEvents = corps.frictionEvents ?? [];
         const stabilizationAvailable = corps.stabilizationAvailable ?? false;
@@ -157,7 +176,7 @@ export function ArmyHQCorpsCard({
         const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, totalPersonnelLabel, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
+        return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -292,8 +311,11 @@ export function ArmyHQCorpsCard({
                 <div className="flex items-center gap-4 mt-3 text-[12px] tabular-nums font-mono">
                     <div className="flex flex-col">
                         <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
-                        <span className={`font-bold ${data.totalPersonnel >= 8000 ? 'text-emerald-400' : data.totalPersonnel >= 4000 ? 'text-accent-gold' : 'text-red-500'
-                            }`}>
+                        <span
+                            data-testid="army-hq-corps-card-personnel"
+                            data-report-state={data.personnelTone.state}
+                            className={`font-bold ${data.personnelTone.textClass}`}
+                        >
                             {data.totalPersonnelLabel}
                         </span>
                     </div>
@@ -330,7 +352,7 @@ export function ArmyHQCorpsCard({
                 )}
 
                 {/* Command Strain indicator — only when strain > 0 */}
-                {data.strain > 0 && (
+                {data.displayedStrain > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                         <div
                             className={`px-2 py-0.5 text-[9px] font-bold tracking-widest border ${
@@ -359,7 +381,7 @@ export function ArmyHQCorpsCard({
                     </div>
                 )}
                 {/* Warlord friction dot — shown even when strain = 0, signals "flip to see" */}
-                {data.strain === 0 && data.frictionTypes.length > 0 && (
+                {data.displayedStrain === 0 && data.frictionTypes.length > 0 && (
                     <div className="mt-2.5">
                         <div
                             className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
@@ -418,7 +440,7 @@ export function ArmyHQCorpsCard({
             {/* Sections wrapper */}
             <div className="flex flex-col gap-[1px] bg-panel-bg">
                 <SectorsSection corpsId={corps.id} sectors={sectors} factionBattles={factionBattles} defaultOpen={sectors.length > 0} />
-                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.strain} commandStrainLabel={data.strainLabel} defaultOpen={operations.length > 0} />
+                <OperationsSection corpsId={corps.id} operations={operations} gameState={gameState} commandStrain={data.displayedStrain} commandStrainLabel={data.strainLabel} defaultOpen={operations.length > 0} />
                 {/* Command Relationship — consolidated surface (strain + friction + stabilize) */}
                 <CommandRelationshipSection
                     corpsId={corps.id}
@@ -427,7 +449,7 @@ export function ArmyHQCorpsCard({
                     recoveryForecast={data.recoveryForecast}
                     recoveryForecastToken={data.recoveryForecastToken}
                     frictionEvents={data.frictionEvents}
-                    corpsExhaustion={corps.corpsExhaustion ?? 0}
+                    corpsExhaustion={corps.corpsExhaustion}
                     factionWarExhaustion={gameState.warPhaseExhaustion?.[corps.faction]}
                     delegationSummary={data.delegationSummary}
                     stabilizationAvailable={data.stabilizationAvailable}

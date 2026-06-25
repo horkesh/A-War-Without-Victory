@@ -1038,6 +1038,8 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'commandRelationship.error.stabilize': 'Nije uspjela stabilizacija komandnog odnosa.',
     'commandRelationship.titleWithLabel': 'Komandni odnos - {label}',
     'commandRelationship.title': 'Komandni odnos',
+    'commandRelationship.commandStrainMetric': 'Komandni pritisak',
+    'commandRelationship.corpsExhaustionMetric': 'Iscrpljenost korpusa',
     'commandRelationship.strain': 'Pritisak: {label}',
     'commandRelationship.activeOperations': 'Aktivne operacije: {label}',
     'commandRelationship.recovery': 'Oporavak:',

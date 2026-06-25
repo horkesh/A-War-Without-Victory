@@ -197,6 +197,45 @@ describe('Army HQ readiness and threat copy', () => {
         expect(items[0]?.avgCohesion).toBe(80);
     });
 
+    it('renders zero fielded brigades as unreported instead of ineffective zero readiness', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'forming', name: 'Forming Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'forming', status: 'active', corps_id: 'corps_1', personnel: 900, fatigue: 0, cohesion: 0, morale: 0, officer_quality: 0 },
+        ] as any, [], 'RBiH', new Set());
+
+        expect(items).toHaveLength(1);
+        expect(items[0]?.grade).toBe('UNREPORTED');
+        expect(items[0]?.totalBrigades).toBe(0);
+        expect(items[0]?.avgFatigue).toBeNull();
+        expect(items[0]?.avgCohesion).toBeNull();
+        expect(items[0]?.ineffectiveCount).toBe(0);
+
+        const html = renderToStaticMarkup(createElement(ForceReadiness, { items }));
+        expect(html).toContain('ASSESSMENT INCOMPLETE');
+        expect(html).toContain('fatigue unreported');
+        expect(html).not.toContain('INEFFECTIVE');
+        expect(html).not.toContain('fatigue 0/30');
+    });
+
+    it('preserves explicit reported zero readiness for a fielded brigade', () => {
+        const items = generateForceReadiness([
+            { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },
+            { id: 'fielded_zero', name: 'Fielded Zero Brigade', kind: 'brigade', faction: 'RBiH', readiness: 'ready', status: 'active', corps_id: 'corps_1', personnel: 0, fatigue: 0, cohesion: 0, morale: 0, officer_quality: 0 },
+        ] as any, [], 'RBiH', new Set());
+
+        expect(items).toHaveLength(1);
+        expect(items[0]?.grade).toBe('INEFFECTIVE');
+        expect(items[0]?.totalBrigades).toBe(1);
+        expect(items[0]?.ineffectiveCount).toBe(1);
+        expect(items[0]?.avgFatigue).toBe(0);
+        expect(items[0]?.avgCohesion).toBe(0);
+
+        const html = renderToStaticMarkup(createElement(ForceReadiness, { items }));
+        expect(html).toContain('INEFFECTIVE');
+        expect(html).toContain('fatigue 0/30');
+        expect(html).not.toContain('fatigue unreported');
+    });
+
     it('marks sparse grade-critical readiness fields as assessment incomplete', () => {
         const items = generateForceReadiness([
             { id: 'corps_1', name: '1st Corps', kind: 'corps', faction: 'RBiH' },

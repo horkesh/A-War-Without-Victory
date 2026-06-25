@@ -568,6 +568,153 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toContain('Avg Cohesion0%');
   });
 
+  it('renders missing command strain and corps exhaustion as unreported instead of healthy silence', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      corpsStance: 'defensive',
+      createdTurn: 0,
+      tags: [],
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps] });
+
+    const { container } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: true,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('Command Relationship');
+    expect(container.textContent).toContain('Command strainUnreported');
+    expect(container.textContent).toContain('Corps exhaustionUnreported');
+    expect(container.textContent).not.toContain('Command Relationship - Healthy');
+    expect(container.textContent).not.toContain('Corps exhaustion (0%)');
+  });
+
+  it('uses neutral, partial, and threshold strength colors for corps personnel reports', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      corpsStance: 'defensive',
+      createdTurn: 0,
+      tags: [],
+    } as unknown as FormationView;
+    const reportedStrong = {
+      id: 'reported_strong',
+      name: 'Reported Strong Brigade',
+      faction: 'RBiH',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 8200,
+      createdTurn: 0,
+      tags: [],
+    } as FormationView;
+    const reportedPartial = {
+      ...reportedStrong,
+      id: 'reported_partial',
+      name: 'Reported Partial Brigade',
+      personnel: 4200,
+    } as FormationView;
+    const unreported = {
+      ...reportedStrong,
+      id: 'unreported_personnel',
+      name: 'Unreported Brigade',
+      personnel: undefined,
+    } as FormationView;
+
+    const { container: unreportedContainer } = render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [unreported],
+      faction: 'RBiH',
+    } as Parameters<typeof CorpsCard>[0]));
+    expect(unreportedContainer.querySelector('[data-testid="corps-card-personnel"]')?.className).toContain('text-text-secondary');
+    expect(unreportedContainer.querySelector('[data-testid="corps-card-personnel-icon"]')?.getAttribute('data-color')).toBe('neutral');
+    expect(unreportedContainer.textContent).toContain('Unreported');
+    cleanup();
+
+    const { container: armyUnreportedContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [unreported],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState: makeState({ formations: [corps, unreported] }),
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+    expect(armyUnreportedContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.className).toContain('text-text-secondary');
+    expect(armyUnreportedContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.getAttribute('data-report-state')).toBe('unreported');
+    cleanup();
+
+    const { container: partialContainer } = render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [reportedPartial, unreported],
+      faction: 'RBiH',
+    } as Parameters<typeof CorpsCard>[0]));
+    expect(partialContainer.querySelector('[data-testid="corps-card-personnel"]')?.className).toContain('text-amber-400');
+    expect(partialContainer.querySelector('[data-testid="corps-card-personnel-icon"]')?.getAttribute('data-color')).toBe('partial');
+    expect(partialContainer.textContent).toMatch(/Partial 4[,.]200/);
+    cleanup();
+
+    const { container: armyPartialContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [reportedPartial, unreported],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState: makeState({ formations: [corps, reportedPartial, unreported] }),
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+    expect(armyPartialContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.className).toContain('text-amber-400');
+    expect(armyPartialContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.getAttribute('data-report-state')).toBe('partial');
+    cleanup();
+
+    const { container: completeContainer } = render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [reportedStrong],
+      faction: 'RBiH',
+    } as Parameters<typeof CorpsCard>[0]));
+    expect(completeContainer.querySelector('[data-testid="corps-card-personnel"]')?.className).toContain('text-emerald-400');
+    expect(completeContainer.querySelector('[data-testid="corps-card-personnel-icon"]')?.getAttribute('data-color')).toBe('complete-strong');
+    expect(completeContainer.textContent).toMatch(/8[,.]200/);
+    cleanup();
+
+    const { container: armyCompleteContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [reportedStrong],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState: makeState({ formations: [corps, reportedStrong] }),
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+    expect(armyCompleteContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.className).toContain('text-emerald-400');
+    expect(armyCompleteContainer.querySelector('[data-testid="army-hq-corps-card-personnel"]')?.getAttribute('data-report-state')).toBe('complete-strong');
+  });
+
   it('highlights only physical brigade locations on CorpsCard hover', () => {
     const onHoverOsidsChange = vi.fn();
     render(createElement(CorpsCard, {
