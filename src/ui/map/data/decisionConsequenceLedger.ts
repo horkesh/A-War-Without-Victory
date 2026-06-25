@@ -10,6 +10,7 @@ import type {
 } from './types';
 import {
     getPlayerSafeCorpsName,
+    getPlayerSafeOperationName,
     getPlayerSafeRecordDetail,
     getPlayerSafeMilitaryFactionName,
 } from '../utils/playerSafeText.js';
@@ -117,9 +118,17 @@ function operationResultLabel(value: string | undefined): string {
 }
 
 function opportunityDetail(record: OperationOpportunityRecordView): string {
-  const operation = record.executed_op_name ?? 'No operation launched';
+  const operation = record.executed_op_name
+    ? getPlayerSafeOperationName(record.executed_op_name, null, 'Operation')
+    : 'No operation launched';
   const result = humanizeToken(record.exit_class ?? record.aar_outcome).toLowerCase();
   return result ? `${operation}: ${result}` : operation;
+}
+
+function opportunityOperationTokenName(record: OperationOpportunityRecordView): string {
+  return record.executed_op_name
+    ? getPlayerSafeOperationName(record.executed_op_name, null, t('decisionConsequences.detail.operation.noLaunch'))
+    : t('decisionConsequences.detail.operation.noLaunch');
 }
 
 function reserveOutcome(record: ReserveRequestDecisionRecordView): string {
@@ -592,6 +601,7 @@ export function buildDecisionConsequenceLedger(
 
   for (const opportunity of state.operationOpportunityRecords ?? []) {
     if (!opportunity.response_turn && opportunity.status === 'eligible_pending_review') continue;
+    if (playerFaction && !playerFactionMatch(opportunity.faction, playerFaction)) continue;
     records.push({
       id: `opportunity:${opportunity.proposal_id}`,
       turn: opportunity.response_turn ?? opportunity.eligibility_turn ?? state.turn,
@@ -603,7 +613,7 @@ export function buildDecisionConsequenceLedger(
       detail: opportunityDetail(opportunity),
       detailToken: opportunityDetail(opportunity).trim()
         ? (() => {
-            const operation = opportunity.executed_op_name ?? t('decisionConsequences.detail.operation.noLaunch');
+            const operation = opportunityOperationTokenName(opportunity);
             const result = operationResultLabel(opportunity.exit_class ?? opportunity.aar_outcome);
             const token: DecisionConsequenceCopyToken = result
               ? { key: 'decisionConsequences.detail.operation', params: { operation, result } }

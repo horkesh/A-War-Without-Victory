@@ -8,6 +8,7 @@ import { getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
 import { getCurrentEthnicForOsid } from '../map/builders/buildEthnicGeoJSON';
+import { resolveMapFormationInspectionTarget } from '../map/mapSelectionRouting';
 import { getPlayerSafeMunicipalityName } from '../utils/playerSafeText';
 import { getLocalizedMunicipalitySupportLabel, getMunicipalitySupportTypeForFaction } from '../utils/municipalitySupportLabels';
 import { t, useLocale } from '../i18n';
@@ -323,7 +324,10 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           brigadeCountByFaction={Object.keys(brigadeCountByFaction).length > 0 ? brigadeCountByFaction : undefined}
           pendingOrders={pendingOrders}
           militiaPools={militiaPoolsProp}
-          onFormationClick={(formationId) => inspectOnField(useGameStore.getState(), { kind: 'field-formation-at-settlement', formationId, osid: selectedOsid })}
+          onFormationClick={(formationId) => inspectOnField(
+            useGameStore.getState(),
+            resolveMapFormationInspectionTarget(formationId, { location_osid: selectedOsid }, loadedGameState),
+          )}
           onSectorClick={(sectorId) => inspectOnField(useGameStore.getState(), sectorInfo.sectorCorpsId
             ? { kind: 'field-sector-in-corps', sectorId, corpsId: sectorInfo.sectorCorpsId, osid: selectedOsid }
             : { kind: 'field-sector', sectorId, osid: selectedOsid })}

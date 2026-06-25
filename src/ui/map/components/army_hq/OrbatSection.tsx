@@ -184,7 +184,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                         <span className="text-text-secondary">{(officerQuality * 100).toFixed(0)}%</span>
                     </div>
                 )}
-                {totalCampaignCasualties > 0 && (
+                {reportedCampaignCasualties.length > 0 && (
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] text-text-secondary/50">{t('orbat.campaignLosses')}</span>
                         <span className="text-red-500 font-bold">

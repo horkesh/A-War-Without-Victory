@@ -292,4 +292,35 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).toContain('Adequate');
     expect(container.textContent).not.toMatch(/\badequate\b/);
   });
+
+  it('renders sparse mobilization reports as unreported without hiding explicit zeroes', () => {
+    const state = makeState();
+    state.mobilizationSummary = {
+      RS: {
+        total_available: 0,
+        total_committed: undefined,
+        total_exhausted: 0,
+        exhaustion_pct: undefined,
+        strategic_reserve: undefined,
+        top_pools: [
+          { mun_id: 'op:sarajevo:dobrinja_1', available: undefined },
+          { mun_id: 'op:sarajevo:ilidza_1', available: 0 },
+        ],
+      },
+    } as any;
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(OOBSidebar));
+    fireEvent.click(screen.getByTestId('oob-section-mobilization-toggle'));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('Available0');
+    expect(copy).toContain('CommittedUnreported');
+    expect(copy).toContain('Exhausted0');
+    expect(copy).toContain('Exhaustion:Unreported');
+    expect(copy).toContain('Strategic reserveUnreported');
+    expect(copy).toContain('Dobrinja 1Unreported');
+    expect(copy).toContain('Ilidza 10');
+    expect(copy).not.toMatch(/NaN|undefined/);
+  });
 });

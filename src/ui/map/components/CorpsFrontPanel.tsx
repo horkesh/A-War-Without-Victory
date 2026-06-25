@@ -91,9 +91,10 @@ function FuzzyIntel({
   return <span className="truncate">{value}</span>;
 }
 
-function averageFinite(values: Array<number | undefined>): number | undefined {
+function averageComplete(values: Array<number | undefined | null>): number | undefined {
+  if (values.length === 0) return undefined;
   const finite = values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
-  if (finite.length === 0) return undefined;
+  if (finite.length !== values.length) return undefined;
   return finite.reduce((sum, value) => sum + value, 0) / finite.length;
 }
 
@@ -103,6 +104,13 @@ function hasPositiveMetric(value: number | undefined | null): boolean {
 
 function hasFiniteMetric(value: number | undefined | null): boolean {
   return typeof value === 'number' && Number.isFinite(value);
+}
+
+function hasCompleteFormationMetricReport<T extends 'morale' | 'cohesion' | 'fatigue'>(
+  formations: Array<Partial<Record<T, number | undefined | null>>>,
+  metric: T,
+): boolean {
+  return formations.length > 0 && formations.every((formation) => hasFiniteMetric(formation[metric]));
 }
 
 const SECTOR_STANCES = ['fortify', 'defend', 'elastic', 'active_defense', 'screening'] as const;
@@ -316,15 +324,27 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         unreported: t('corpsFront.unreported'),
       })
       : sector.combat_personnel;
-  const displayMoraleAvg = hasFiniteMetric(sector.combat_morale_avg)
-    ? sector.combat_morale_avg
-    : averageFinite(lineHoldingFormations.map((formation) => formation.morale));
-  const displayCohesionAvg = hasFiniteMetric(sector.combat_cohesion_avg)
-    ? sector.combat_cohesion_avg
-    : averageFinite(lineHoldingFormations.map((formation) => formation.cohesion));
-  const displayFatigueAvg = hasFiniteMetric(sector.combat_fatigue_avg)
-    ? sector.combat_fatigue_avg
-    : averageFinite(lineHoldingFormations.map((formation) => formation.fatigue));
+  const hasCompleteLineMorale = hasCompleteFormationMetricReport(lineHoldingFormations, 'morale');
+  const hasCompleteLineCohesion = hasCompleteFormationMetricReport(lineHoldingFormations, 'cohesion');
+  const hasCompleteLineFatigue = hasCompleteFormationMetricReport(lineHoldingFormations, 'fatigue');
+  const lineMoraleAvg = hasCompleteLineMorale ? averageComplete(lineHoldingFormations.map((formation) => formation.morale)) : undefined;
+  const lineCohesionAvg = hasCompleteLineCohesion ? averageComplete(lineHoldingFormations.map((formation) => formation.cohesion)) : undefined;
+  const lineFatigueAvg = hasCompleteLineFatigue ? averageComplete(lineHoldingFormations.map((formation) => formation.fatigue)) : undefined;
+  const displayMoraleAvg = !hasCompleteLineMorale || lineMoraleAvg == null
+    ? undefined
+    : hasFiniteMetric(sector.combat_morale_avg)
+      ? sector.combat_morale_avg
+      : lineMoraleAvg;
+  const displayCohesionAvg = !hasCompleteLineCohesion || lineCohesionAvg == null
+    ? undefined
+    : hasFiniteMetric(sector.combat_cohesion_avg)
+      ? sector.combat_cohesion_avg
+      : lineCohesionAvg;
+  const displayFatigueAvg = !hasCompleteLineFatigue || lineFatigueAvg == null
+    ? undefined
+    : hasFiniteMetric(sector.combat_fatigue_avg)
+      ? sector.combat_fatigue_avg
+      : lineFatigueAvg;
   const displayOffensivePower = hasFriendlyLine ? sector.combat_offensive_power : undefined;
   const displayDefensivePower = !hasFriendlyLine
     ? undefined
@@ -339,12 +359,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     : totalSectorPersonnel > 0
       ? reservePersonnel.reportedTotal / totalSectorPersonnel
       : 0;
-  const operationSupplyReadinessValues = relatedOperations
-    .map((op) => op.supply_readiness)
-    .filter((readiness): readiness is number => typeof readiness === 'number' && Number.isFinite(readiness));
-  const avgOperationSupply = operationSupplyReadinessValues.length > 0
-    ? operationSupplyReadinessValues.reduce((sum, readiness) => sum + readiness, 0) / operationSupplyReadinessValues.length
-    : null;
+  const avgOperationSupply = averageComplete(relatedOperations.map((op) => op.supply_readiness)) ?? null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
   const currentSectorStance = sector.sector_stance ?? null;
   const currentStanceSource = sector.stance_source ?? 'bot';
@@ -896,7 +911,11 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.opsSupplyReadiness')}</span>
                   <span className="font-medium">
-                    {intelConfidence == null || intelConfidence < 0.6 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : (avgOperationSupply != null ? `${Math.round(avgOperationSupply * 100)}%` : '—')}
+                    {avgOperationSupply == null
+                      ? t('corpsFront.unreported')
+                      : intelConfidence == null || intelConfidence < 0.6
+                        ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span>
+                        : `${Math.round(avgOperationSupply * 100)}%`}
                   </span>
                 </div>
                 {entrenchmentSummary && (

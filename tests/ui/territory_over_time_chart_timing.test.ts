@@ -24,7 +24,27 @@ describe('TerritoryOverTimeChart timing labels', () => {
             loadedGameState: {
                 player_faction: null,
                 turnSummaries: [
-                    makeTurnSummary(0, 0.5, 0.35, 0.15),
+                    makeTurnSummary(12, 0.52, 0.33, 0.15),
+                    makeTurnSummary(24, 0.54, 0.31, 0.15),
+                    makeTurnSummary(36, 0.56, 0.29, 0.15),
+                ],
+            } as any,
+        });
+
+        const { container } = render(createElement(TerritoryOverTimeChart));
+        const text = container.textContent ?? '';
+
+        expect(text).toContain('Jun 1992');
+        expect(text).not.toMatch(/\bT\d+\b/);
+    });
+
+    it('ignores setup territory snapshots when plotting Records history', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                player_faction: null,
+                turnSummaries: [
+                    { ...makeTurnSummary(0, 0.8, 0.1, 0.1), mechanism: 'setup_control' },
+                    { ...makeTurnSummary(1, 0.75, 0.15, 0.1), summary_kind: 'scenario_start' },
                     makeTurnSummary(12, 0.52, 0.33, 0.15),
                     makeTurnSummary(24, 0.54, 0.31, 0.15),
                 ],
@@ -34,7 +54,8 @@ describe('TerritoryOverTimeChart timing labels', () => {
         const { container } = render(createElement(TerritoryOverTimeChart));
         const text = container.textContent ?? '';
 
-        expect(text).toContain('Apr 1992');
-        expect(text).not.toMatch(/\bT\d+\b/);
+        expect(text).toContain('Jun 1992');
+        expect(text).toContain('Sep 1992');
+        expect(text).not.toContain('Apr 1992');
     });
 });

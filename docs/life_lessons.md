@@ -1,6 +1,6 @@
 # Life Lessons — Index
 
-> Last restructured: 2026-04-11. 278 lessons across 9 topic files.
+> Last restructured: 2026-04-11. 280 lessons across 9 topic files.
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 

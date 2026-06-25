@@ -443,6 +443,18 @@
 - **Right approach**: the CI gate is the backstop (it caught all three), but a local full-suite run is cheaper than a CI round-trip. In the dispatch prompt, for any shared-surface change, explicitly instruct: "grep tests for the host component/predicate (e.g. `ChronicleOverlay`, `contain_posture`, the registry name) and run them ALL, not just your new file; for sim-touching changes also run `test:baselines`."
 - **Do instead**: when scoping a dispatch that adds to a shared render/aggregation/registry surface, name the full test set the builder must run. Don't rely on "I added a passing test" — a passing NEW test says nothing about the EXISTING tests that share the surface. Pairs with the calibration "golden manifest vs structural fingerprint" lesson (same shape: the narrow check passes, the broad check catches the interaction).
 
+### [Testing] Default-on flags feeding shared predicates need every consumer and purity assertion checked (2026-06-14)
+- **Context**: Flipping `AWWV_SRK_STRANGLE_POSTURE` default-on made the shared `isContainSuppressionActiveFor('RS')` predicate true even when Lane-V flags were off, breaking another flag family's purity tests. The local SRK-focused suite and 40w fingerprint missed it; the broader `contain_posture_release_laneA` tests caught it in CI.
+- **Do instead**: When activating a flag that writes a shared field or feeds a shared predicate, grep every consumer and every other flag's default-state assertions before pushing. Update isolation tests explicitly, or add override setup so a default-on feature does not invalidate unrelated purity claims.
+
+### [Process] Contaminated test runs require rerunning every failed file clean (2026-06-14)
+- **Context**: A local full-suite run mixed real failures with ENOENT noise from running `desktop:map:build` concurrently with Vitest. Rerunning one representative failed file passed, but two genuine `contain_posture` failures remained and then failed CI.
+- **Do instead**: Do not run `desktop:map:build` concurrently with full Vitest. If a concurrency artifact contaminates a run, rerun every distinct failed file in isolation; never clear the whole failure set from one representative pass.
+
+### [Process] Large parallel dispatch is valid when tasks are substantial and isolated (2026-06-14)
+- **Context**: The 2026-06-12 worktree-builder stall pattern was a warning against dispatching tiny surgical specs, not against all agents. The next large soul-systems batch dispatched three substantial isolated lanes (warroom art, RS goals, HRHB events); all completed cleanly, opened PRs, and reported evidence.
+- **Do instead**: Keep small, fully-diagnosed fixes with the orchestrator. Use parallel agents for genuinely substantial, isolated lanes with clear file ownership, mandatory proof, and parent-side verification of landed edits.
+
 ### [Process] A "fill the gaps" surface must be gated to only fill gaps (2026-06-15)
 - **Context**: The #441 generals' digest fired on every turn, but its D2-P4 purpose was to fill silent turns. Gating it to emit only on turns with no other substantive chronicle entry both fixed displacement and made the feature match its design.
 - **Do instead**: Any surface whose job is "fill dead air" must compute gaps from real content first and emit only into those gaps; an unconditional per-turn version will compete with the content it was meant to complement.

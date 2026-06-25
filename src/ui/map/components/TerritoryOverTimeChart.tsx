@@ -15,6 +15,7 @@ import React, { useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { turnToDateString } from '../utils/formatters';
 import { FACTION_HEX_COLORS } from '../utils/theme';
+import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 
 interface TerritoryDataPoint {
   turn: number;
@@ -38,7 +39,7 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
   const territoryHistory = useMemo<TerritoryDataPoint[]>(() => {
     if (!loadedGameState?.turnSummaries) return [];
     return loadedGameState.turnSummaries
-      .filter((s) => s.territory_snapshot && Object.keys(s.territory_snapshot).length > 0)
+      .filter((s) => shouldNarrateTerritorySummary(s) && s.territory_snapshot && Object.keys(s.territory_snapshot).length > 0)
       .map((s) => ({
         turn: s.turn,
         RS: (s.territory_snapshot?.RS ?? 0) * 100,

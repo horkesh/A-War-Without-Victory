@@ -515,7 +515,9 @@ describe('Army HQ Records operation AAR review', () => {
         expect(screen.getByText('Chronicle Filed')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'DECISION LOG' })).toBeTruthy();
-        expect(screen.getAllByTitle('1 records').length).toBeGreaterThanOrEqual(2);
+        const archiveSummaryCopy = screen.getByTestId('records-archive-summary').textContent ?? '';
+        expect(archiveSummaryCopy).toMatch(/Decisions\s*0/);
+        expect(archiveSummaryCopy).toMatch(/Chronicle Filed\s*1/);
     });
 
     it('does not narrate turn-0 territory provenance in the AAR tab', () => {
@@ -811,6 +813,36 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(copy).toContain('7 killed / Unreported wounded / Unreported missing or captured');
         expect(copy).not.toContain('7 killed / 0 wounded / 0 missing or captured');
+    });
+
+    it('keeps partial zero ORBAT campaign casualty records visible', () => {
+        const brigade: FormationView = {
+            id: 'rbih_partial_zero_losses_brigade',
+            faction: 'RBiH',
+            name: 'Partial Zero Losses Brigade',
+            kind: 'brigade',
+            readiness: 'ready',
+            cohesion: 64,
+            fatigue: 3,
+            status: 'active',
+            createdTurn: 0,
+            tags: [],
+            narrativeArc: 'bloodied',
+            personnel: 1100,
+            posture: 'defend',
+            campaignKia: 0,
+            campaignWia: undefined,
+            campaignMia: undefined,
+        };
+        useGameStore.setState({
+            armyHQExpandedSections: { 'orbat-rbih_1st_corps': true },
+        });
+
+        const view = render(createElement(OrbatSection, { corpsId: 'rbih_1st_corps', brigades: [brigade] }));
+        fireEvent.click(screen.getAllByRole('button', { name: /Partial Zero Losses Brigade/i })[0]);
+        const copy = view.container.textContent ?? '';
+
+        expect(copy).toContain('0 killed / Unreported wounded / Unreported missing or captured');
     });
 
     it('opens the focused completed operation row when routed from Chronicle', () => {

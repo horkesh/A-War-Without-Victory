@@ -44,7 +44,7 @@ export function RecordsContent() {
             aftermath: aftermathCount,
             aar: aarCount,
             ops: operationCount,
-            decisions: decisionSummary.total,
+            decisions: decisionSummary.recordsRouteCount,
             opportunities: opportunityCount,
             decisionSummary,
         };

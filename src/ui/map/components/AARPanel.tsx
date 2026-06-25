@@ -21,6 +21,7 @@ import { shouldNarrateTerritorySummary } from '../data/territorySummaryGuard';
 import { getDecorationName } from '../utils/decorationUtils';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import { inspectOnField } from '../utils/shellNavigation';
+import { resolveMapFormationInspectionTarget } from '../map/mapSelectionRouting';
 
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
@@ -349,7 +350,7 @@ export function AARPanel({ isOpen, onClose, embedded }: AARPanelProps) {
         const formation = loadedGameState.formations.find((candidate) => candidate.id === formationId);
         let target: FieldInspectionTarget;
         if (osid) {
-            target = { kind: 'field-formation-at-settlement', formationId, osid };
+            target = resolveMapFormationInspectionTarget(formationId, { location_osid: osid }, loadedGameState);
         } else if (formation?.corps_id) {
             target = { kind: 'field-formation-in-corps', formationId, corpsId: formation.corps_id };
         } else {
