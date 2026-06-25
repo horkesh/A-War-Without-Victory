@@ -159,7 +159,9 @@ describe('CorpsFrontPanel field routing', () => {
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
-    fireEvent.click(screen.getByTestId('corps-front-brigade-row'));
+    const brigadeRow = screen.getByTestId('corps-front-brigade-row');
+    expect(brigadeRow.getAttribute('data-corps-front-row-kind')).toBe('frontline');
+    fireEvent.click(brigadeRow);
 
     expect(useGameStore.getState()).toMatchObject({
       selectedCorpsId: 'arbih_1st_corps',
@@ -206,6 +208,7 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     const unresolvedRow = screen.getByTestId('corps-front-brigade-row-unresolved');
     expect(unresolvedRow.getAttribute('data-testid')).toBe('corps-front-brigade-row-unresolved');
+    expect(unresolvedRow.getAttribute('data-corps-front-row-kind')).toBe('unresolved');
     expect(unresolvedRow.getAttribute('data-formation-id')).toBe('arbih_unresolved_brigade');
     expect(unresolvedRow.getAttribute('data-location-osid')).toBe('op:sarajevo:dobrinja_1');
     fireEvent.click(unresolvedRow);
@@ -300,6 +303,10 @@ describe('CorpsFrontPanel field routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Ops Supply Readiness\s*—/);
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*0%/);
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toMatch(/Supply Status\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Supply Status\s*0%/i);
   });
 
   it('preserves explicit zero operation supply readiness', () => {
@@ -606,6 +613,10 @@ describe('CorpsFrontPanel field routing', () => {
       expect(container.textContent).toMatch(new RegExp(`${name}[\\s\\S]*Unreported`, 'i'));
       expect(screen.getByRole('button', { name: new RegExp(`${name}.*Personnel Unreported`, 'i') })).toBeTruthy();
     }
+    expect(screen.getByRole('button', { name: /Assigned brigade 101st Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('frontline');
+    expect(screen.getByRole('button', { name: /Reserve brigade Reserve Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('reserve');
+    expect(screen.getByRole('button', { name: /Command-directed brigade Directed Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('command-directed');
+    expect(screen.getByRole('button', { name: /Rear\/support brigade Rear Support Brigade/i }).getAttribute('data-corps-front-row-kind')).toBe('rear-support');
   });
 
   it('sanitizes raw sector labels in Corps Front', () => {
@@ -709,6 +720,39 @@ describe('CorpsFrontPanel field routing', () => {
     expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
     expect(container.textContent).toMatch(/Force Balance\s*Redacted/i);
     expect(container.textContent).not.toMatch(/Balanced|Hostile pressure low|High/i);
+  });
+
+  it('renders missing Corps Front overview metrics as unreported instead of dash placeholders', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_101_brigade'
+      ? { ...formation, personnel: undefined, morale: undefined, cohesion: undefined, fatigue: undefined }
+      : formation) as LoadedGameState['formations'];
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      combat_personnel: undefined,
+      combat_offensive_power: undefined,
+      combat_defensive_power: undefined,
+      defensive_power: undefined,
+      combat_defense_per_edge: undefined,
+      combat_morale_avg: undefined,
+      combat_cohesion_avg: undefined,
+      combat_fatigue_avg: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-offensive-power').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-defensive-power').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-defense-per-edge').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('Unreported');
   });
 
   it('does not collapse known friendly line strength to a dash when strength class is unreported', () => {

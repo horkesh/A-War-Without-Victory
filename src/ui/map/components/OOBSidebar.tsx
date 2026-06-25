@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CorpsCard } from './CorpsCard';
 import { FACTION_COLORS } from '../utils/theme';
-import type { FormationView, OperationView } from '../data/types';
+import type { CorpsFrontSectorView, FormationView, OperationView } from '../data/types';
 import { SituationTab } from './SituationTab';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { AccordionHeader } from './AccordionHeader';
@@ -37,6 +37,14 @@ const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> 
 
 function sectorCoverageLabel(tier: SectorCoverageTier): string {
   return t(SECTOR_COVERAGE_KEYS[tier]);
+}
+
+function pickOobSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | undefined {
+  for (const segment of sector.sub_segments ?? []) {
+    const osid = segment.friendly_osids?.[0] ?? segment.enemy_osids?.[0];
+    if (osid) return osid;
+  }
+  return undefined;
 }
 
 function groupFormationsByCorps(formations: FormationView[], locale: ReturnType<typeof useLocale>[0]): Map<string, FormationView[]> {
@@ -673,6 +681,10 @@ export function OOBSidebar() {
                           ? getLocalizedFormationName(owner, locale)
                           : getPlayerSafeDisplayLabel(sector.corps_id, t('formationDetail.corps'));
                         const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
+                        const inspectSectorLabel = t('oob.inspectSectorOnField', {
+                          sector: sectorLabel,
+                          corps: ownerName,
+                        });
                         return (
                           <button
                             key={sector.sector_id}
@@ -686,10 +698,13 @@ export function OOBSidebar() {
                             data-rear-brigade-count={sectorAssignment.rearIds.length}
                             data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
                             data-selected={selectedCorpsFrontSectorId === sector.sector_id ? 'true' : 'false'}
+                            aria-label={inspectSectorLabel}
+                            title={inspectSectorLabel}
                             onClick={() => inspectOnField(useGameStore.getState(), {
                               kind: 'field-sector-in-corps',
                               sectorId: sector.sector_id,
                               corpsId: sector.corps_id,
+                              osid: pickOobSectorInspectAnchorOsid(sector),
                             })}
                             className={`w-full flex items-center gap-1.5 px-2 py-1 rounded border transition-colors text-left ${selectedCorpsFrontSectorId === sector.sector_id
                               ? 'border-accent-gold bg-panel-active'

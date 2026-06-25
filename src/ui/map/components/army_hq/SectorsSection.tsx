@@ -466,6 +466,10 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                             sector,
                             sectorAssignment.lineHoldingIds.length,
                         );
+                        const detailId = `army-hq-sector-detail-${sector.sector_id}`;
+                        const toggleLabel = isExpanded
+                            ? t('sectorsSection.collapseSectorAria', { sector: sectorLabel })
+                            : t('sectorsSection.expandSectorAria', { sector: sectorLabel });
 
                         return (
                             <div
@@ -484,13 +488,19 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                 <div className={`flex items-center justify-between px-3 py-2.5 transition-colors ${isExpanded ? 'bg-panel-bg' : 'hover:bg-panel-bg'}`}>
                                     <button
                                         type="button"
+                                        data-testid="army-hq-sector-toggle"
+                                        aria-expanded={isExpanded}
+                                        aria-controls={detailId}
+                                        aria-label={toggleLabel}
+                                        title={toggleLabel}
                                         onClick={() => setExpandedId(isExpanded ? null : sector.sector_id)}
                                         className="min-w-0 text-left flex-1"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <span className={`text-[9px] text-text-secondary/60 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}>
-                                                {'>'}
-                                            </span>
+                                            <span
+                                                aria-hidden="true"
+                                                className={`block h-0 w-0 border-y-[4px] border-y-transparent border-l-[6px] border-l-text-secondary/60 transition-transform duration-150 ${isExpanded ? 'rotate-90' : ''}`}
+                                            />
                                             <span className="text-[12px] font-bold text-text-primary uppercase font-mono truncate"
                                                 style={{ fontFamily: 'IBM Plex Sans Condensed, sans-serif' }}>
                                                 {sectorLabel}
@@ -532,12 +542,16 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                         {t('sectorsSection.inspect')}
                                     </button>
                                 </div>
-                                {isExpanded && <SectorExpandedDetail
-                                    sector={sector}
-                                    sectors={sectors}
-                                    sectorBattles={factionBattles.filter((b) => sectorOsids.has(b.osid))}
-                                    formationMap={formationMap}
-                                />}
+                                {isExpanded && (
+                                    <div id={detailId} data-testid="army-hq-sector-detail">
+                                        <SectorExpandedDetail
+                                            sector={sector}
+                                            sectors={sectors}
+                                            sectorBattles={factionBattles.filter((b) => sectorOsids.has(b.osid))}
+                                            formationMap={formationMap}
+                                        />
+                                    </div>
+                                )}
                             </div>
                         );
                     })}

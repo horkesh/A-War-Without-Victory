@@ -67,9 +67,22 @@ Fifth follow-up slice implemented locally on `codex/player-surface-edge-polish` 
 - ORBAT, Corps Detail, and CorpsCard hover now highlight reported physical `location_osid`, not stale AoR coverage.
 - Selected-settlement, municipality, current-ethnic readouts, and ethnic-map majority layers require complete census ethnicity fields and suppress partial rows instead of filling missing groups as zero.
 
-Fifth-slice focused proof so far: the new Raman tests failed before production fixes, then the combined focused pack passed 7 files / 83 tests; Peirce follow-up tests failed before production fixes, then passed 4 files / 51 tests. Final combined focused proof passed 11 files / 134 tests and `npm.cmd run typecheck -- --pretty false` passed after both packets. Broad gates passed locally after the final code/docs closeout: `npm.cmd run qa:player-journeys` passed 43 files / 594 tests, `npm.cmd run qa:first-hour:browser` passed, and `npm.cmd run qa:live-surface:browser` passed. Remaining closeout gates for this branch are `git diff --check`, GitHub inspection after push, merge to `main` only after green, and branch/worktree/temp cleanup.
+Fifth-slice focused proof so far: the new Raman tests failed before production fixes, then the combined focused pack passed 7 files / 83 tests; Peirce follow-up tests failed before production fixes, then passed 4 files / 51 tests. Final combined focused proof passed 11 files / 134 tests and `npm.cmd run typecheck -- --pretty false` passed after both packets. Broad gates passed locally after the final code/docs closeout: `npm.cmd run qa:player-journeys` passed 43 files / 594 tests, `npm.cmd run qa:first-hour:browser` passed, and `npm.cmd run qa:live-surface:browser` passed.
 
-Remaining closeout gates before declaring the whole sweep done: inspect any new GitHub failures/comments after push, merge to `main` only after green, and delete the branch/worktree/temp evidence. Local temp cleanup removed the baseline comparison worktree and `data/derived/scenario/_baseline_tmp`; final browser evidence folders were recorded and are cleanup-owned. Only `.tmp_dev_server` may remain if it belongs to the active browser/dev server.
+Sixth command-surface ergonomics slice implemented locally on `codex/p2-command-surface-ergonomics` after Schrodinger/Halley scouts:
+
+- Army HQ sector rows now expose explicit disclosure controls with `army-hq-sector-toggle`, truthful `aria-expanded`, stable detail `aria-controls`, matching detail ids, player-facing aria/title copy, and rendered sibling-control guards.
+- OOB sector rows now carry player-facing inspect aria/title copy and preserve the first authored friendly sector OSID when routing through shared field inspection.
+- Army HQ ORBAT formation rows now expose `army-hq-formation-toggle`, matching detail ids, player-facing expand/collapse aria/title copy, and sibling inspect controls.
+- Corps Front force rows now expose `data-corps-front-row-kind` for frontline, reserve, command-directed, rear/support, and unresolved rows; missing overview metrics and Ops Snapshot supply readiness render `Unreported` instead of dash/omission.
+- Formation Detail sector-picker aria copy now uses singular/plural current-brigade grammar.
+- The shared `FlipCard` no longer uses rotated 3D faces that broke hit-testing in the Army HQ modal; inactive faces are hidden and cannot intercept pointer events.
+- Live browser proof caught the flip-card blocker and then verified fresh RBiH start, war-start splash, OOB sector labels/routes, Army HQ sector toggles, Army HQ ORBAT opening, Formation Detail, and Corps Front Forces rows.
+- Schrodinger and Halley were closed after their reports were absorbed.
+
+Sixth-slice verification passed: focused UI/shell pack passed 8 files / 137 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 613 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Browser-gate evidence folders were removed after verification; only `.tmp_dev_server` may remain if it belongs to the active browser/dev server.
+
+Remaining closeout gates before declaring this sixth branch done: update COMMAND_BOARD, MASTER_ROADMAP, PROJECT_LEDGER, and implemented report; inspect any new GitHub failures/comments after push; merge to `main` only after green; delete the branch/worktree/temp evidence.
 
 ## Pyrrhic Roles
 

@@ -73,7 +73,7 @@ function FuzzyIntel({
     return <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>;
   }
 
-  if (value == null) return <span className="text-neutral-400">—</span>;
+  if (value == null) return <span className="text-neutral-500 italic">{t('corpsFront.unreported')}</span>;
 
   if (confidence < fuzzyThreshold && typeof value === 'number') {
     const variance = (1 - confidence) * 0.4; // up to 40% variance at low confidence
@@ -531,19 +531,19 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     </div>
                     <div className="flex flex-col" title={offensivePowerTitle}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.offensivePower')}</span>
-                      <div className="font-medium tabular-nums">
+                      <div className="font-medium tabular-nums" data-testid="corps-front-combat-offensive-power">
                         <FuzzyIntel value={displayOffensivePower} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col" title={defensivePowerTitle}>
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defensivePower')}</span>
-                      <div className="font-medium tabular-nums">
+                      <div className="font-medium tabular-nums" data-testid="corps-front-combat-defensive-power">
                         <FuzzyIntel value={displayDefensivePower} confidence={1} />
                       </div>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.defPerEdge')}</span>
-                      <div className="font-medium tabular-nums">
+                      <div className="font-medium tabular-nums" data-testid="corps-front-combat-defense-per-edge">
                         <FuzzyIntel value={displayDefensePerEdge} confidence={1} />
                       </div>
                     </div>
@@ -712,6 +712,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
+                          data-corps-front-row-kind="frontline"
                           aria-label={t('corpsFront.assignedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center bg-neutral-200/40 hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
@@ -746,6 +747,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
+                          data-corps-front-row-kind="reserve"
                           aria-label={t('corpsFront.reserveBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
@@ -780,6 +782,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
+                          data-corps-front-row-kind="command-directed"
                           aria-label={t('corpsFront.commandDirectedBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center bg-amber-100/50 hover:bg-amber-200/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
@@ -812,6 +815,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           data-testid="corps-front-rear-brigade-row"
                           data-formation-id={f.id}
                           data-location-osid={f.location_osid ?? undefined}
+                          data-corps-front-row-kind="rear-support"
                           aria-label={t('corpsFront.rearSupportBrigadeAria', { name: getLocalizedFormationName(f, locale), personnel: forcePersonnelAria(f.personnel) })}
                           className="kbd-focus w-full flex justify-between items-center hover:bg-neutral-300/50 transition-colors text-left px-1 py-0.5 rounded"
                           onClick={() => inspectSectorFormation(f.id)}
@@ -947,12 +951,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">{t('corpsFront.forcesCommitted')}</div>
                         <div className="text-[10px]">{t('corpsFront.brigadeCount', { count: op.participating_brigade_count })}</div>
 
-                        {op.supply_readiness != null && (
-                          <>
-                            <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">{t('corpsFront.supplyStatus')}</div>
-                            <div className="text-[10px]">{intelConfidence == null || intelConfidence < 0.7 ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span> : t('corpsFront.readinessPct', { pct: Math.round(op.supply_readiness * 100) })}</div>
-                          </>
-                        )}
+                        <div className="text-[9px] uppercase font-bold text-neutral-500 mt-2 mb-0.5">{t('corpsFront.supplyStatus')}</div>
+                        <div className="text-[10px]">
+                          {op.supply_readiness == null
+                            ? t('corpsFront.unreported')
+                            : intelConfidence == null || intelConfidence < 0.7
+                              ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span>
+                              : t('corpsFront.readinessPct', { pct: Math.round(op.supply_readiness * 100) })}
+                        </div>
 
                         {op.preparation_sub_phase && op.phase === 'planning' && (
                           <div className="mt-2 pt-2 border-t border-neutral-200 border-dashed">

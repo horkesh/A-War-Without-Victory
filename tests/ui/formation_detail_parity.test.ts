@@ -457,9 +457,11 @@ describe('Formation Detail parity display', () => {
     const northButton = screen.getByRole('button', { name: /Northern line/i });
     expect(southButton.textContent ?? '').toContain('1 current brigade');
     expect(southButton.textContent ?? '').not.toContain('1 current brigades');
+    expect(southButton.getAttribute('aria-label')).toBe('Southern line, 1 current brigade');
     expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
     expect(northButton.textContent ?? '').toContain('1 current brigade');
     expect(northButton.textContent ?? '').not.toContain('1 current brigades');
+    expect(northButton.getAttribute('aria-label')).toBe('Northern line, 1 current brigade');
     expect(northButton.textContent ?? '').not.toContain('2 current brigades');
   });
 

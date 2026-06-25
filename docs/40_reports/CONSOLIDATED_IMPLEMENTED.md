@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command-surface ergonomics / hit-test polish:** [implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md](implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md) - Army HQ sector and ORBAT disclosure controls now expose stable aria/detail contracts, OOB sector drilldowns preserve authored OSID anchors, Corps Front rows expose force-bucket provenance and unreported truth, Formation Detail sector-picker aria grammar is singular/plural safe, and the shared flip-card no longer intercepts clicks in Army HQ.
+
 **Latest player-surface edge / field-routing accessibility polish:** [implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md](implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md) - The June 25 player-surface edge lane now also closes formation routing anchor truth, StackExpansionOverlay modal keyboard semantics, and command-strain label normalization. Physical presence remains `location_osid` only; AoR/HQ anchors are navigation context, not selected-settlement truth.
 
 **Latest Command Briefing fallback localization:** [implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md](implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md) - Saved command briefing fallback strings remain compatibility payloads, but the tactical banner, Army HQ Situation Briefing, Presidential Decision Room briefing cards, and legacy Warroom briefing modal now resolve known generated rows through EN/BCS display keys.

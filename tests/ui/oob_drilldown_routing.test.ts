@@ -84,6 +84,7 @@ function makeState(): LoadedGameState {
         length_edges: 2,
         density: 0.2,
         combat_strength_class: 'adequate',
+        sub_segments: [{ sub_segment_id: 'north-1', friendly_osids: ['op:sarajevo:dobrinja_1'], enemy_osids: [] }],
       },
     ],
   } as unknown as LoadedGameState;
@@ -174,11 +175,16 @@ describe('OOBSidebar drilldown routing', () => {
     render(React.createElement(OOBSidebar));
 
     fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
-    fireEvent.click(screen.getByTestId('oob-sector-row'));
+    const sectorRow = screen.getByTestId('oob-sector-row');
+    expect(sectorRow.getAttribute('aria-label')).toBe('Inspect Northern Line on field under Main Staff VRS');
+    expect(sectorRow.getAttribute('title')).toBe('Inspect Northern Line on field under Main Staff VRS');
+    expect(`${sectorRow.getAttribute('aria-label')} ${sectorRow.getAttribute('title')}`).not.toMatch(/sector_vrs|vrs_main_staff|op:sarajevo/i);
+    fireEvent.click(sectorRow);
 
     const store = useGameStore.getState();
     expect(store.selectedCorpsId).toBe('vrs_main_staff');
     expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
+    expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
 
