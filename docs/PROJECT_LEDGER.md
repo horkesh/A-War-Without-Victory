@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P4 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, and P4 report with the verified PR #447 closeout: merge to `main` at `df5251b94`, green post-merge GitHub runs, deleted/pruned branch refs, one clean `main` worktree, absorbed P4 agents, and cleaned temporary browser evidence. This is a status and governance update only.
+
+**Verification:** `gh run list --branch main --limit 10` showed PR #447 post-merge `main` checks green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint. `git status --short --branch` showed clean `main...origin/main` before the docs-only edit, `git worktree list` showed a single `main` worktree, and `git diff --check` passed for the closeout docs.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. `FORAWWV.md` was not edited.
+
+---
+
 ## [2026-06-25] fix(ui): continue P4 player-polish batch
 
 **Type:** UI/read-model/test/docs polish.
