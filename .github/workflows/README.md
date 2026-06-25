@@ -56,7 +56,11 @@ populate `/home/runner/.cache/puppeteer` from `npm install` alone. The
 `full-suite` checkout deliberately does not eager-fetch Git LFS before path
 detection, so the required always-report check can still reach its skip decision
 when repository LFS bandwidth is exhausted. Browser/map gates remain inside
-`full-suite` for relevant code-contract changes.
+`full-suite` for relevant code-contract changes. If checkout provides LFS pointer
+stubs instead of PMTiles binaries, the browser-gate launcher sets
+`VITE_AWWV_DISABLE_PMTILES=1` for that proof run only; the tactical map then
+boots without PMTiles basemap sources while preserving the player-flow, routing,
+console-error, and surface-polish assertions.
 
 Path sets (a changed file matching ANY entry => heavy steps run):
 

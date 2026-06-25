@@ -4,6 +4,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
+const { resolveBrowserGateEnv } = require('./browser_gate_pmtiles_env.cjs');
 
 const ROOT = process.cwd();
 const PORT = Number(process.env.AWWV_LIVE_SURFACE_BROWSER_PORT || 3239);
@@ -401,7 +402,7 @@ function startDevServer() {
   ], {
     cwd: ROOT,
     stdio: ['ignore', 'pipe', 'pipe'],
-    env: { ...process.env, BROWSER: 'none' },
+    env: resolveBrowserGateEnv(ROOT, 'live-surface-browser-sweep'),
     windowsHide: true,
   });
 

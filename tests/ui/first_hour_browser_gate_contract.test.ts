@@ -18,6 +18,7 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('.tmp_first_hour_browser_gate');
     expect(tool).toContain('consoleMessages');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
     expect(tool).toContain('President of the Presidency of the Republic of Bosnia and Herzegovina');
@@ -71,6 +72,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('.tmp_live_surface_browser_sweep');
     expect(tool).toContain('consoleMessages');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
     expect(tool).toContain('Civic multi-ethnic republic');
@@ -254,6 +256,8 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-war-map"');
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-records"');
     expect(read('src/ui/map/map/MapContainer.tsx')).toContain('data-testid="tactical-map"');
+    expect(read('src/ui/map/map/MapContainer.tsx')).toContain('VITE_AWWV_DISABLE_PMTILES');
+    expect(read('src/ui/map/map/MapContainer.tsx')).toContain('stripPmtilesSourcesForCiFallback');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-close"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-essay-row"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-essay-id={essay.id}');
@@ -346,6 +350,8 @@ describe('browser QA CI wiring contract', () => {
     expect(workflow).toContain('run: npm run qa:live-surface:browser');
     expect(workflow).toContain('name: Install Puppeteer Chrome for browser gates');
     expect(workflow).toContain('run: npx puppeteer browsers install chrome');
+    expect(read('tools/ui/browser_gate_pmtiles_env.cjs')).toContain('VITE_AWWV_DISABLE_PMTILES');
+    expect(read('tools/ui/browser_gate_pmtiles_env.cjs')).toContain('version https://git-lfs.github.com/spec/v1');
 
     const fullSuiteStart = workflow.indexOf('name: Full vitest suite');
     const chromeInstallStart = workflow.indexOf('name: Install Puppeteer Chrome for browser gates');

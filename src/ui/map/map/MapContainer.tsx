@@ -281,6 +281,36 @@ function safeHasLayer(
     return false;
   }
 }
+
+function stripPmtilesSourcesForCiFallback(
+  style: maplibregl.StyleSpecification,
+): maplibregl.StyleSpecification {
+  const sources = style.sources ?? {};
+  const pmtilesSourceIds = new Set(
+    Object.entries(sources)
+      .filter(([, source]) => {
+        const url = (source as { url?: unknown }).url;
+        return typeof url === 'string' && url.startsWith('pmtiles://');
+      })
+      .map(([sourceId]) => sourceId),
+  );
+  if (pmtilesSourceIds.size === 0) return style;
+
+  return {
+    ...style,
+    sources: Object.fromEntries(
+      Object.entries(sources).filter(([sourceId]) => !pmtilesSourceIds.has(sourceId)),
+    ),
+    layers: (style.layers ?? []).filter((layer) => {
+      const sourceId = (layer as { source?: unknown }).source;
+      return typeof sourceId !== 'string' || !pmtilesSourceIds.has(sourceId);
+    }),
+  };
+}
+
+function shouldUseTilelessCiFallback(): boolean {
+  return import.meta.env.VITE_AWWV_DISABLE_PMTILES === '1';
+}
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const OSID_MORALE_FILL_LAYER_ID = 'osid-morale-fill';
 const OSID_MORALE_SOURCE_ID = 'osid-morale';
@@ -730,9 +760,13 @@ export function MapContainer() {
     if (!containerRef.current) return;
 
     const origin = window.location.origin;
-    ensurePmtilesProtocol();
+    const tilelessCiFallback = shouldUseTilelessCiFallback();
+    if (!tilelessCiFallback) ensurePmtilesProtocol();
 
-    const style = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
+    const rewrittenStyle = rewritePmtilesUrls(styleJson as Record<string, unknown>, origin) as maplibregl.StyleSpecification;
+    const style = tilelessCiFallback
+      ? stripPmtilesSourcesForCiFallback(rewrittenStyle)
+      : rewrittenStyle;
 
     let initCancelled = false;
     const init = async () => {
