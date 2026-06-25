@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-25] fix(ui): continue player-surface truth sweep
+
+**Type:** UI/read-model/accessibility/test/docs polish.
+
+**Fix:** Started the next owner-playthrough truth packet on `codex/p3-player-surface-truth-sweep`. Army Reserve action labels and campaign-history disclosure now expose specific accessible state, missing reserve personnel and missing loaned-command fields render unreported, Decision Room Chronicle memory counts only Chronicle-target receipts, OOB/Corps Detail/Corps Front sparse operation rows no longer invent first-objective progress or green zero momentum, Army HQ ORBAT partial campaign-casualty rows preserve missing fields as unreported, and Settlement local-support controls explain browser read-only/desktop-bridge unavailable state.
+
+**Verification:** Focused proof passed 8 files / 184 tests with `npm.cmd exec -- vitest run tests/ui/army_reserve_hook_order.test.ts tests/ui/army_reserve_elite_commander.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/oob_operations_panel.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/corps_front_panel_routing.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/gui_audit_label_discipline.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck -- --pretty false`, `git diff --check`, `npm.cmd run qa:player-journeys` (43 files / 616 tests), `npm.cmd run qa:first-hour:browser`, and `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof covered fresh RBiH start, war-start/identity splash, foundational decision routing/unblock, Army HQ/Personnel, Corps Detail/Corps Front routing, bridge-unavailable copy, and console health with only the expected browser-fallback warning. GitHub green, merge, and branch cleanup are still pending for this branch.
+
+**Scope/determinism:** UI/read-model/accessibility/test/docs polish only; no simulation logic, scenario data, event evaluator mechanics, startup snapshot, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-25] fix(ui): harden command-surface ergonomics and hit-testing
 
 **Type:** UI/read-model/accessibility/test/docs polish.

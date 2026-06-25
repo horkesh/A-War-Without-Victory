@@ -28,7 +28,7 @@ import {
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
-import { countFiledDecisionRecords } from './filedRecordTruth';
+import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
 import { deriveInboxItems } from './inboxItems';
 
@@ -1450,7 +1450,7 @@ function countFiledTurnRecords(state: LoadedGameState): number {
 
 function addChronicleCard(state: LoadedGameState, cards: CandidateCard[]): void {
   const turnCount = countFiledTurnRecords(state);
-  const decisionRecordCount = countFiledDecisionRecords(state);
+  const decisionRecordCount = countFiledChronicleDecisionRecords(state);
   const recordCount = turnCount + decisionRecordCount;
   if (recordCount <= 0) return;
 

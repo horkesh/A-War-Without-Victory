@@ -231,4 +231,25 @@ describe('command drilldown routing', () => {
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
   });
+
+  it('renders missing CorpsDetail operation momentum as unreported instead of green zero', () => {
+    const state = makeState();
+    state.operations = [{
+      ...state.operations![0],
+      phase: 'execution',
+      momentum: undefined,
+    }] as LoadedGameState['operations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toContain('0.0');
+  });
 });

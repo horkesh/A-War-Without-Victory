@@ -128,8 +128,8 @@ describe('ArmyReservePanel hook order', () => {
     });
 
     const view = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
-    const decline = screen.getByRole('button', { name: 'DECLINE' }) as HTMLButtonElement;
-    const terminate = screen.getByRole('button', { name: 'Terminate' }) as HTMLButtonElement;
+    const decline = screen.getByRole('button', { name: 'Decline reserve request for 1st Corps' }) as HTMLButtonElement;
+    const terminate = screen.getByRole('button', { name: 'Recall Guard Brigade from 1st Corps' }) as HTMLButtonElement;
 
     expect(view.container.textContent).toContain('Desktop command bridge unavailable');
     expect(decline.disabled).toBe(true);

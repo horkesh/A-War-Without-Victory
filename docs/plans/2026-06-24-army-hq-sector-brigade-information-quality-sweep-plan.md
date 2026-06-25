@@ -82,7 +82,18 @@ Sixth command-surface ergonomics slice implemented locally on `codex/p2-command-
 
 Sixth-slice verification passed: focused UI/shell pack passed 8 files / 137 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 613 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Browser-gate evidence folders were removed after verification; only `.tmp_dev_server` may remain if it belongs to the active browser/dev server.
 
-Remaining closeout gates before declaring this sixth branch done: update COMMAND_BOARD, MASTER_ROADMAP, PROJECT_LEDGER, and implemented report; inspect any new GitHub failures/comments after push; merge to `main` only after green; delete the branch/worktree/temp evidence.
+Sixth-slice closeout completed: PR #445 merged to `main` at `ae0010b0f`, docs closeout pushed at `55c6360bc`, GitHub push workflows were green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint, local/remote `codex/p2-command-surface-ergonomics` refs were pruned, and no extra worktrees or open PRs remained.
+
+Seventh scout wave implemented locally on `codex/p3-player-surface-truth-sweep` before broad gates:
+
+- Army Reserve elite/reserve rows now use stable brigade/corps names in action labels, expose recall/decline controls with specific aria copy, render missing reserve personnel and missing loaned-command fields as unreported, and expose campaign history as a stateful disclosure control.
+- Presidential Decision Room Chronicle memory now counts only Chronicle-target decision receipts. Records-only receipts still file in Records but cannot create a false Chronicle review card.
+- OOB operations, Corps Detail, and Corps Front no longer invent first-objective progress or green zero momentum when sparse operation state omits `current_objective_index` or `momentum`.
+- Expanded Army HQ ORBAT campaign-loss rows now preserve partial casualty provenance: reported killed/wounded/missing values render exactly, while missing fields render `Unreported` instead of `0`.
+- Settlement local-support controls now explain browser read-only/desktop-bridge unavailable state with visible copy and `aria-describedby`.
+- Sagan, Feynman, and Heisenberg scout reports were absorbed into this batch; remaining non-blocking findings stay in the next scout queue rather than reopening packaging or Srebrenica/Zepa operation-delivery calibration.
+
+Seventh-slice local verification passed: focused red/green pack passed 8 files / 184 tests; `npm.cmd run typecheck -- --pretty false` passed; `git diff --check` passed; `npm.cmd run qa:player-journeys` passed 43 files / 616 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational decision routing/unblock, Army HQ, Personnel, command-card/sector inspect labels, Corps Detail/Corps Front routing, disabled sector-command bridge-unavailable copy, and console health with only the expected browser-fallback warning.
 
 ## Pyrrhic Roles
 

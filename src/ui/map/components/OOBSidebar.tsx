@@ -601,8 +601,9 @@ export function OOBSidebar() {
                       {ops.map((op) => {
                         const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
                         const objTotal = op.objectives?.length ?? 0;
-                        const objCurrent = op.current_objective_index ?? 0;
-                        const objDisplayCurrent = objTotal > 0 ? Math.min(objTotal, Math.max(1, objCurrent + 1)) : 0;
+                        const objDisplayCurrent = objTotal > 0 && typeof op.current_objective_index === 'number'
+                          ? Math.min(objTotal, Math.max(1, op.current_objective_index + 1))
+                          : null;
                         const opKey = `${op.corps_id}|${op.name}`;
                         const isSelected = selectedOperationKey === opKey;
                         return (
@@ -627,7 +628,13 @@ export function OOBSidebar() {
                               )}
                             </div>
                             <div className="text-[10px] tabular-nums flex items-center gap-1 flex-wrap">
-                              {objTotal > 0 && <span className="text-text-secondary">{t('operationsPanel.objShort')} {objDisplayCurrent}/{objTotal}</span>}
+                              {objTotal > 0 && (
+                                <span className="text-text-secondary">
+                                  {objDisplayCurrent == null
+                                    ? t('operationsSection.objectiveProgressUnreported')
+                                    : `${t('operationsPanel.objShort')} ${objDisplayCurrent}/${objTotal}`}
+                                </span>
+                              )}
                               <span className="text-text-secondary">{objTotal > 0 ? ' - ' : ''}{t('operationsPanel.supply')} </span>
                               {op.supply_readiness != null ? (
                                 <span className={op.supply_readiness < 0.3 ? 'text-red-400 font-semibold' : op.supply_readiness < 0.7 ? 'text-amber-400' : 'text-green-400'}>

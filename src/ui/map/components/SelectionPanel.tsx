@@ -95,6 +95,13 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const supportType = playerFaction ? getMunicipalitySupportTypeForFaction(playerFaction) : null;
   const supportLabel = getLocalizedMunicipalitySupportLabel(supportType);
   const canStageSupport = Boolean(ipc.isAvailable && playerFaction && selectedMunId && supportType);
+  const localSupportUnavailableReason = canStageSupport
+    ? null
+    : !ipc.isAvailable
+      ? t('selection.commandBridgeUnavailable')
+      : !supportType
+        ? t('selection.localSupportUnavailable')
+        : null;
   const formationsForDetail = formations.map((f) => ({
     id: f.id,
     name: getLocalizedFormationName(f, locale),
@@ -353,6 +360,8 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
               type="button"
               onClick={() => void handleStageSupport()}
               disabled={!canStageSupport}
+              aria-describedby={localSupportUnavailableReason ? 'settlement-local-support-unavailable' : undefined}
+              title={localSupportUnavailableReason ?? undefined}
               className="px-3 py-1 text-[10px] font-mono uppercase tracking-wide bg-panel-bg hover:bg-panel-hover text-text-primary border border-panel-border rounded transition-all disabled:opacity-50"
             >
               {t('selection.stageSupport', { label: supportLabel })}
@@ -360,6 +369,11 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
             <div className="text-[11px] text-text-secondary">
               {t('selection.targetMunicipality', { municipality: getPlayerSafeMunicipalityName(selectedMunId) })}
             </div>
+            {localSupportUnavailableReason && (
+              <div id="settlement-local-support-unavailable" className="text-[11px] text-amber-300/85">
+                {localSupportUnavailableReason}
+              </div>
+            )}
             {supportMessage && <div className="text-[11px] text-text-secondary">{supportMessage}</div>}
           </div>
         )}

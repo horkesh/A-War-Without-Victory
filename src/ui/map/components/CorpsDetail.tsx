@@ -482,7 +482,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   : 'bg-neutral-600/60 text-white';
                 const opKey = getOperationId(op);
                 const isSelected = selectedOperationKey === opKey;
-                const momentum = op.momentum ?? 0;
+                const momentum = typeof op.momentum === 'number' ? op.momentum : null;
 
                 return (
                   <button
@@ -508,20 +508,26 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <div className="mt-2 space-y-1">
                         <div className="flex justify-between text-[10px] text-text-secondary">
                           <span>{t('operationsPanel.momentum')}</span>
-                          <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
-                            {momentum > 0 ? '+' : ''}{momentum.toFixed(1)}
-                          </span>
+                          {momentum == null ? (
+                            <span className="italic text-text-secondary/80">{t('operationsSection.metricUnreported')}</span>
+                          ) : (
+                            <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
+                              {momentum > 0 ? '+' : ''}{momentum.toFixed(1)}
+                            </span>
+                          )}
                         </div>
-                        <div className="h-1.5 w-full bg-black/50 rounded overflow-hidden relative">
-                          <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-panel-border/50 z-10" />
-                          <div
-                            className={`h-full transition-all duration-500 ${momentum >= 0 ? 'bg-[#55d48a]' : 'bg-[#d45555]'}`}
-                            style={{
-                              width: `${Math.abs(momentum) * 50}%`,
-                              marginLeft: momentum >= 0 ? '50%' : `${50 - Math.abs(momentum) * 50}%`,
-                            }}
-                          />
-                        </div>
+                        {momentum != null && (
+                          <div className="h-1.5 w-full bg-black/50 rounded overflow-hidden relative">
+                            <div className="absolute left-1/2 top-0 bottom-0 w-[1px] bg-panel-border/50 z-10" />
+                            <div
+                              className={`h-full transition-all duration-500 ${momentum >= 0 ? 'bg-[#55d48a]' : 'bg-[#d45555]'}`}
+                              style={{
+                                width: `${Math.abs(momentum) * 50}%`,
+                                marginLeft: momentum >= 0 ? '50%' : `${50 - Math.abs(momentum) * 50}%`,
+                              }}
+                            />
+                          </div>
+                        )}
                       </div>
                     )}
 

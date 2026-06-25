@@ -75,6 +75,12 @@ function reportedNonNegative(value: number | undefined): number | null {
         : null;
 }
 
+function formatCampaignLossValue(value: number | undefined): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? Math.max(0, Math.round(value)).toLocaleString()
+        : t('orbat.metricUnreported');
+}
+
 function formatOperationalEquipment(total: number | undefined, operational: number | undefined): { label: string; reported: boolean } | null {
     const summary = addEquipmentCondition(emptyEquipmentConditionSummary(), total, operational);
     if (summary.total <= 0) return null;
@@ -122,7 +128,9 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const homeOsid = b.home_osid;
     const cohesionColor = cohesion == null ? '#8a8170' : getCohesionColor(cohesion);
     const moraleColor = morale == null ? '#8a8170' : morale < 30 ? '#c24040' : morale < 50 ? '#c4a35a' : '#4a9a55';
-    const totalCampaignCasualties = (b.campaignKia ?? 0) + (b.campaignWia ?? 0) + (b.campaignMia ?? 0);
+    const reportedCampaignCasualties = [b.campaignKia, b.campaignWia, b.campaignMia]
+        .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+    const totalCampaignCasualties = reportedCampaignCasualties.reduce((sum, value) => sum + Math.max(0, value), 0);
 
     return (
         <div className="px-4 py-3 space-y-3 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -181,9 +189,9 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                         <span className="text-[9px] text-text-secondary/50">{t('orbat.campaignLosses')}</span>
                         <span className="text-red-500 font-bold">
                             {t('orbat.campaignLossBreakdown', {
-                                killed: b.campaignKia ?? 0,
-                                wounded: b.campaignWia ?? 0,
-                                missing: b.campaignMia ?? 0,
+                                killed: formatCampaignLossValue(b.campaignKia),
+                                wounded: formatCampaignLossValue(b.campaignWia),
+                                missing: formatCampaignLossValue(b.campaignMia),
                             })}
                         </span>
                     </div>

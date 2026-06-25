@@ -168,7 +168,74 @@ describe('ArmyReservePanel elite commander identity', () => {
 
     const { container } = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
 
-    expect(container.textContent ?? '').toMatch(/Personnel\s*(?:—|â€”)/);
+    expect(container.textContent ?? '').toMatch(/Personnel\s*Unreported/);
     expect(container.innerHTML).not.toContain('#d45555');
+  });
+
+  it('renders missing loaned command as unreported in the visible reserve-pool row', () => {
+    const state = makeReserveState(true);
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_guards_brigade'
+      ? {
+          ...formation,
+          eliteLoanState: {
+            ...formation.eliteLoanState!,
+            loaned_to_corps: null,
+          },
+        } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+    });
+
+    const { container } = render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    expect(container.textContent ?? '').toContain('Assigned command unreported');
+    expect(screen.getByRole('button', { name: 'Recall Guards Brigade from Assigned command unreported' })).toBeTruthy();
+    expect(container.textContent ?? '').not.toContain('Assigned command (');
+  });
+
+  it('exposes campaign history as a stateful disclosure control', () => {
+    const state = makeReserveState(false);
+    state.eliteBrigadeTracker = {
+      arbih_guards_brigade: {
+        total_loans: 1,
+        total_turns_deployed: 4,
+        total_battles: 1,
+        total_casualties_taken: 3,
+        total_osids_captured: 0,
+        episodes: [{
+          episode_id: 1,
+          corps_id: 'arbih_1st_corps',
+          reason: 'defensive_gap',
+          loan_start_turn: 12,
+          loan_end_turn: 15,
+          recall_reason: 'op_complete',
+          travel_hops: 0,
+          personnel_start: 1200,
+          casualties_taken: 3,
+          battles_fought: 1,
+          osids_captured: 0,
+        }],
+      },
+    };
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+    });
+
+    render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    const toggle = screen.getByRole('button', { name: 'Collapse campaign history' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const detailId = toggle.getAttribute('aria-controls');
+    expect(detailId).toBeTruthy();
+    expect(document.getElementById(detailId!)).toBeTruthy();
+
+    fireEvent.click(toggle);
+
+    expect(screen.getByRole('button', { name: 'Expand campaign history' }).getAttribute('aria-expanded')).toBe('false');
   });
 });
