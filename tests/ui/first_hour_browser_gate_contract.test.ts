@@ -114,7 +114,9 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('runMapContextMenuLiveProof');
     expect(tool).toContain('mapContextMenuLiveProof');
     expect(tool).toContain('map_context_menu_live_proof');
+    expect(tool).toContain('map_context_menu_action_live_proof');
     expect(tool).toContain('map-context-menu-action-');
+    expect(tool).toContain('map-context-menu-action-deselect');
     expect(tool).toContain('dom-contextmenu');
     expect(tool).toContain('dev-seam');
     expect(tool).toContain('runRecordsAarFormationLinkLiveProof');

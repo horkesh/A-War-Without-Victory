@@ -99,6 +99,7 @@ export function generateWrappedSlides(
     const playerFactionLabel = getFactionDisplayLabel(playerFaction);
     const currentTurn: number = state?.turn ?? 0;
     const phase: string = state?.phase ?? 'unknown';
+    const narratedTurnSummaries = turnSummaries.filter((s: any) => shouldNarrateTerritorySummary(s));
 
     // --- Slide 1: your_war ---
     slides.push({
@@ -112,11 +113,10 @@ export function generateWrappedSlides(
     });
 
     // --- Slide 2: the_opening ---
-    const earlyTurns = turnSummaries.filter((s: any) => (s?.turn ?? 0) <= 8);
+    const earlyTurns = narratedTurnSummaries.filter((s: any) => (s?.turn ?? 0) <= 8);
     let earlyGains = 0;
     let earlyLosses = 0;
     for (const s of earlyTurns) {
-        if (!shouldNarrateTerritorySummary(s)) continue;
         const net = s?.territory_net ?? {};
         const factionNet = net[playerFaction] ?? 0;
         if (factionNet > 0) earlyGains += factionNet;
@@ -136,7 +136,7 @@ export function generateWrappedSlides(
     // --- Slide 3: bloodiest_week ---
     let bloodiestTurn = 0;
     let bloodiestCasualties = 0;
-    for (const s of turnSummaries) {
+    for (const s of narratedTurnSummaries) {
         let turnCasualties = 0;
         if (Array.isArray(s?.battles)) {
             for (const b of s.battles) {
@@ -190,8 +190,7 @@ export function generateWrappedSlides(
     let peakTerritory = 0;
     let totalGained = 0;
     let runningTerritory = 0;
-    for (const s of turnSummaries) {
-        if (!shouldNarrateTerritorySummary(s)) continue;
+    for (const s of narratedTurnSummaries) {
         const net = s?.territory_net ?? {};
         const factionNet = net[playerFaction] ?? 0;
         if (factionNet > 0) totalGained += factionNet;
@@ -200,7 +199,7 @@ export function generateWrappedSlides(
     }
     const totalFormations = formations.filter((f: any) => f?.faction === playerFaction).length;
     let opsLaunched = 0;
-    for (const s of turnSummaries) {
+    for (const s of narratedTurnSummaries) {
         if (Array.isArray(s?.notable_events)) {
             for (const e of s.notable_events) {
                 const text = (e?.text ?? e?.id ?? '').toLowerCase();
@@ -223,7 +222,7 @@ export function generateWrappedSlides(
     // --- Slide 6: what_it_cost ---
     let totalCasualties = 0;
     let totalDisplaced = 0;
-    for (const s of turnSummaries) {
+    for (const s of narratedTurnSummaries) {
         if (Array.isArray(s?.battles)) {
             for (const b of s.battles) {
                 totalCasualties += (b?.attacker_casualties ?? 0) + (b?.defender_casualties ?? 0);

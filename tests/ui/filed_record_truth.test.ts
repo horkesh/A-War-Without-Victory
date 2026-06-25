@@ -130,4 +130,25 @@ describe('filed record truth', () => {
     expect(countFiledChronicleDecisionRecords(state)).toBe(1);
     expect(hasFiledRecord(state)).toBe(true);
   });
+
+  it('does not treat foreign operation opportunity receipts as player-filed records', () => {
+    const state = makeState({
+      player_faction: 'RBiH',
+      operationOpportunityRecords: [
+        {
+          proposal_id: 'foreign-p1',
+          opportunity_id: 'foreign_push',
+          display_name: 'Foreign corridor push',
+          faction: 'RS',
+          status: 'approved',
+          response: 'approve',
+          response_turn: 10,
+          executed_op_name: 'Foreign operation',
+        },
+      ],
+    } as Partial<LoadedGameState>);
+
+    expect(countFiledDecisionRecords(state)).toBe(0);
+    expect(hasFiledRecord(state)).toBe(false);
+  });
 });

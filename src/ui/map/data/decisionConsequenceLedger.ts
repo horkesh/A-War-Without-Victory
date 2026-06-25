@@ -601,6 +601,7 @@ export function buildDecisionConsequenceLedger(
 
   for (const opportunity of state.operationOpportunityRecords ?? []) {
     if (!opportunity.response_turn && opportunity.status === 'eligible_pending_review') continue;
+    if (playerFaction && !playerFactionMatch(opportunity.faction, playerFaction)) continue;
     records.push({
       id: `opportunity:${opportunity.proposal_id}`,
       turn: opportunity.response_turn ?? opportunity.eligibility_turn ?? state.turn,

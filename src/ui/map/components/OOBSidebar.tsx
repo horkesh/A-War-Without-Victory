@@ -39,6 +39,18 @@ function sectorCoverageLabel(tier: SectorCoverageTier): string {
   return t(SECTOR_COVERAGE_KEYS[tier]);
 }
 
+function formatReportedWhole(value: number | null | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? Math.max(0, Math.round(value)).toLocaleString()
+    : t('orbat.metricUnreported');
+}
+
+function formatReportedPercent(value: number | null | undefined): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${Math.max(0, value).toFixed(1)}%`
+    : t('orbat.metricUnreported');
+}
+
 function pickOobSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | undefined {
   for (const segment of sector.sub_segments ?? []) {
     const osid = segment.friendly_osids?.[0] ?? segment.enemy_osids?.[0];
@@ -535,6 +547,7 @@ export function OOBSidebar() {
             count={mobilizationSummary ? Object.keys(mobilizationSummary).length : undefined}
             expanded={expandedSections.mobilization}
             onToggle={() => toggleSection('mobilization')}
+            testId="oob-section-mobilization-toggle"
           />
           {expandedSections.mobilization && (
             <div className="p-2 space-y-1.5 text-[11px]">
@@ -550,24 +563,24 @@ export function OOBSidebar() {
                       </div>
                       <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
                         <span className="text-text-secondary">{t('oob.available')}</span>
-                        <span className="text-text-primary tabular-nums">{summary.total_available.toLocaleString()}</span>
+                        <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.total_available)}</span>
                         <span className="text-text-secondary">{t('oob.committed')}</span>
-                        <span className="text-text-primary tabular-nums">{summary.total_committed.toLocaleString()}</span>
+                        <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.total_committed)}</span>
                         <span className="text-text-secondary">{t('oob.exhausted')}</span>
-                        <span className="text-text-primary tabular-nums">{summary.total_exhausted.toLocaleString()}</span>
+                        <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.total_exhausted)}</span>
                         <span className="text-text-secondary">{t('corpsDetail.exhaustion')}</span>
-                        <span className="text-text-primary tabular-nums">{summary.exhaustion_pct.toFixed(1)}%</span>
+                        <span className="text-text-primary tabular-nums">{formatReportedPercent(summary.exhaustion_pct)}</span>
                         <span className="text-text-secondary">{t('oob.strategicReserve')}</span>
-                        <span className="text-text-primary tabular-nums">{summary.strategic_reserve.toLocaleString()}</span>
+                        <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.strategic_reserve)}</span>
                       </div>
-                      {summary.top_pools.length > 0 && (
+                      {Array.isArray(summary.top_pools) && summary.top_pools.length > 0 && (
                         <div className="pt-1 border-t border-panel-border/50">
                           <div className="text-[10px] uppercase tracking-wide text-text-secondary mb-1">{t('oob.topPools')}</div>
                           <div className="space-y-1">
                             {summary.top_pools.map((pool) => (
                               <div key={`${faction}-${pool.mun_id}`} className="flex items-center justify-between text-[11px]">
                                 <span className="text-text-secondary">{getPlayerSafeMunicipalityName(pool.mun_id)}</span>
-                                <span className="text-text-primary tabular-nums">{pool.available.toLocaleString()}</span>
+                                <span className="text-text-primary tabular-nums">{formatReportedWhole(pool.available)}</span>
                               </div>
                             ))}
                           </div>

@@ -13,6 +13,7 @@ Implemented scope:
 - Sanitized operation-opportunity consequence receipt copy so raw executed-operation slugs are not filed into Records-facing text.
 - Made Corps Front condition and operation-supply aggregates require complete reported source metrics before showing exact averages; partial source data renders `Unreported`, while explicit zero remains exact.
 - Fixed tactical battle-marker hover cleanup so remounts unregister the same handler references that were registered.
+- Absorbed the CI-wait scout follow-up: sparse OOB mobilization now renders `Unreported`, Corps Detail is pinned against `Obj 0/0` operation progress, partial-zero ORBAT campaign casualty rows stay visible, Chronicle Wrapped and the Records territory chart ignore setup/prologue summaries, operation-opportunity receipts are directly scoped to the loaded player faction, and the live browser context-menu proof now clicks the deterministic Deselect action instead of only opening the menu shell.
 
 ## Verification
 
@@ -23,9 +24,10 @@ Focused red/green proof covered each changed behavior. Final combined focused pr
 Additional local gates passed:
 
 - `npm.cmd run typecheck -- --pretty false`
-- `npm.cmd run qa:player-journeys` passed 43 files / 619 tests.
+- Scout follow-up focused pack passed 8 files / 79 tests: `npm.cmd exec -- vitest run tests/ui/oob_drilldown_routing.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/chronicle_wrapped_setup_provenance.test.ts tests/ui/territory_over_time_chart_timing.test.ts tests/ui/decision_consequence_trail.test.ts tests/ui/filed_record_truth.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot`.
+- `npm.cmd run qa:player-journeys` passed 43 files / 621 tests after the scout follow-up.
 - `npm.cmd run qa:first-hour:browser`
-- `npm.cmd run qa:live-surface:browser`
+- `npm.cmd run qa:live-surface:browser`; the final evidence recorded `mapContextMenuLiveProof.clickedAction: "deselect"` and dev-server port cleanup.
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, war-start splash, `WAR BEGINS: 6 APR 1992` identity brief, foundational `What Is Bosnia?` Desk packet, Desk decision count truth, Army HQ command/OOB commander data, clickable top-level nav labels, and no sampled raw command slug leak.
 
 ## Pyrrhic Team

@@ -1555,8 +1555,14 @@ async function runMapContextMenuLiveProof(page, summary) {
     throw new Error('Map context menu opened without visible actions');
   }
   await captureEvidence(page, summary, 'map_context_menu_live_proof');
-  await page.keyboard.press('Escape');
-  summary.evidence.mapContextMenuLiveProof = { actions: actionCount, activationMethod };
+  if (await visibleSelectorCount(page, '[data-testid="map-context-menu-action-deselect"]') === 0) {
+    await captureEvidence(page, summary, 'map_context_menu_missing_deselect_action');
+    throw new Error('Map context menu did not expose the deterministic Deselect action');
+  }
+  await clickFirstVisibleSelector(page, '[data-testid="map-context-menu-action-deselect"]', 'map context Deselect action');
+  await page.waitForFunction(() => !document.querySelector('[data-testid="map-context-menu"]'), { timeout: 10000 });
+  await captureEvidence(page, summary, 'map_context_menu_action_live_proof');
+  summary.evidence.mapContextMenuLiveProof = { actions: actionCount, activationMethod, clickedAction: 'deselect' };
 }
 
 async function runBattleMarkerLiveProof(page, summary) {

@@ -204,6 +204,37 @@ describe('decision consequence trail', () => {
     expect(`${record.detail} ${resolvedDetail}`).not.toMatch(/cmd_|_t12|operation_name/i);
   });
 
+  it('filters operation opportunity receipts to the loaded player faction', () => {
+    const ledger = buildDecisionConsequenceLedger(makeState({
+      player_faction: 'RBiH',
+      operationOpportunityRecords: [
+        {
+          proposal_id: 'foreign-p1',
+          opportunity_id: 'foreign_push',
+          display_name: 'Foreign corridor push',
+          faction: 'RS',
+          status: 'approved',
+          response: 'approve',
+          response_turn: 10,
+          executed_op_name: 'Foreign operation',
+        },
+        {
+          proposal_id: 'player-p1',
+          opportunity_id: 'player_push',
+          display_name: 'Player corridor push',
+          faction: 'RBiH',
+          status: 'approved',
+          response: 'approve',
+          response_turn: 11,
+          executed_op_name: 'Player operation',
+        },
+      ],
+    }), 10);
+
+    expect(ledger.map((record) => record.id)).toEqual(['opportunity:player-p1']);
+    expect(JSON.stringify(ledger)).not.toContain('Foreign corridor push');
+  });
+
   it('includes army reserve request decisions from the persisted reserve history using authored formation names', () => {
     const ledger = buildDecisionConsequenceLedger(makeState({
       formations: [
