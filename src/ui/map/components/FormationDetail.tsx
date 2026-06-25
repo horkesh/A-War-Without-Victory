@@ -40,6 +40,12 @@ function formatHistoryMomentDate(turn: number): string {
   return turnToDateString(turn);
 }
 
+function formatEngagementTurnLabel(turn: number): string {
+  if (!Number.isFinite(turn)) return t('formationDetail.undated');
+  if (turn <= 0) return t('formationDetail.setupRecord');
+  return turnToDateString(turn);
+}
+
 const ENGAGEMENT_ROLE_LABELS: Record<string, string> = {
   attacker: 'attacker',
   defender: 'defender',
@@ -857,7 +863,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       {sortRecentEngagements(formation.recent_engagements)
                         .map((engagement, idx) => (
                         <div key={`${engagement.turn}-${engagement.osid}-${engagement.role}-${idx}`} className="text-[11px] leading-4 border-l-2 pl-1.5 border-panel-border/30">
-                          <span className="text-text-secondary">{turnToDateString(engagement.turn)} </span>
+                          <span className="text-text-secondary">{formatEngagementTurnLabel(engagement.turn)} </span>
                           <span className="text-text-primary">{formatEngagementOutcomeLabel(engagement.outcome)}</span>
                           <span className="text-text-secondary"> {t('formationDetail.asRoleAt', { role: formatEngagementRole(engagement.role) })} </span>
                           <span className="font-mono text-text-primary">{getOsidDisplayName(engagement.osid, osidDisplayNames)}</span>

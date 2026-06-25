@@ -292,6 +292,30 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('clear');
   });
 
+  it('does not let stale review queue event counts invent fallback blockers', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        presidentialReviewQueue: {
+          pendingCount: 1,
+          criticalCount: 1,
+          eventDecisionCount: 1,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+        pendingEventDecisions: [],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
+    expect(view.items.map((item) => item.id)).not.toContain('review:pending');
+  });
+
   it('counts player convoy decisions as fallback blockers when the manifest summary is absent', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({

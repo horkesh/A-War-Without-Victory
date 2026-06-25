@@ -511,6 +511,7 @@ export const enMessages = {
     'chronicle.generated.endgame.srebrenicaGhostDetail': 'Srebrenica enclave survived in your war; the historical July 1995 catastrophe never arrived.',
     'chronicle.generated.operation.concludedTitle': '{operationName} concluded',
     'chronicle.generated.operation.objectivesHeld': '{captured}/{targeted} objectives held at close',
+    'chronicle.generated.operation.objectivesCapturedHeld': '{logged}/{targeted} objectives captured in execution; {held} held at close',
     'chronicle.generated.operation.attacks.one': '{count} attack',
     'chronicle.generated.operation.attacks.many': '{count} attacks',
     'chronicle.generated.operation.casualtyExchange': '{suffered} suffered / {inflicted} inflicted',

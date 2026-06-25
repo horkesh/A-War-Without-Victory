@@ -144,6 +144,73 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('1 stale roster entry');
   });
 
+  it('marks sector combat aggregates as partial when any line holder lacks reported metrics', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:partial',
+      display_name: 'Partial reports front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: ['reported_brigade', 'sparse_brigade'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 2,
+      density: 1,
+      combat_strength_class: 'strong',
+      combat_defense_per_edge: 400,
+      combat_morale_avg: 70,
+      combat_fatigue_avg: 4,
+      combat_personnel: 1200,
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'reported_brigade',
+        faction: 'RBiH',
+        name: 'Reported Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 4,
+        personnel: 1200,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+      {
+        id: 'sparse_brigade',
+        faction: 'RBiH',
+        name: 'Sparse Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      } as any,
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    const copy = container.textContent ?? '';
+    expect(copy).toMatch(/Morale:\s*Partial 70/i);
+    expect(copy).toMatch(/Fatigue:\s*Partial 4/i);
+    expect(copy).toMatch(/Personnel:\s*Partial 1\.2k/i);
+    expect(copy).toContain('Unreported');
+    expect(copy).not.toMatch(/MOR\s*70\s*FAT\s*4\s*PERS\s*1\.2k/i);
+  });
+
   it('keeps rear support separate from live line coverage in Army HQ', () => {
     const sector = {
       sector_id: 'sector:arbih_1st_corps:rear',

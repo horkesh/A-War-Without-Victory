@@ -512,6 +512,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'chronicle.generated.endgame.srebrenicaGhostDetail': 'Srebrenicka enklava je prezivjela u vasem ratu; historijska katastrofa iz jula 1995. nikad nije stigla.',
     'chronicle.generated.operation.concludedTitle': '{operationName} zakljucena',
     'chronicle.generated.operation.objectivesHeld': '{captured}/{targeted} ciljeva drzano na kraju',
+    'chronicle.generated.operation.objectivesCapturedHeld': '{logged}/{targeted} ciljeva zauzeto u provedbi; {held} drzano na kraju',
     'chronicle.generated.operation.attacks.one': '{count} napad',
     'chronicle.generated.operation.attacks.many': '{count} napada',
     'chronicle.generated.operation.casualtyExchange': '{suffered} pretrpljeno / {inflicted} naneseno',

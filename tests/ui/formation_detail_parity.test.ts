@@ -270,6 +270,36 @@ describe('Formation Detail parity display', () => {
     expect(copy.indexOf('1 Jun 1992')).toBeLessThan(copy.indexOf('25 May 1992'));
   });
 
+  it('labels turn-zero recent engagements as setup records, not campaign combat dates', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_record_brigade'
+      ? {
+          ...formation,
+          recent_engagements: [
+            {
+              turn: 0,
+              osid: 'op:test_sector:known',
+              role: 'defender',
+              outcome: 'victory',
+              casualties_taken: 0,
+              casualties_inflicted: 0,
+              territory_flipped: false,
+            },
+          ],
+        }
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_record_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Setup record');
+    expect(copy).toContain('Known');
+    expect(copy).not.toContain('6 Apr 1992');
+  });
+
   it('does not persist an override when clicking the automatic current sector row', () => {
     render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 

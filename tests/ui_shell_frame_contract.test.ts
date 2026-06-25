@@ -40,6 +40,10 @@ describe('tactical shell frame contract', () => {
     expect(flipCard).toContain("isFlipped ? 'relative overflow-y-auto' : 'hidden'");
     expect(flipCard).toContain("pointerEvents: isFlipped ? 'none' : 'auto'");
     expect(flipCard).toContain("pointerEvents: isFlipped ? 'auto' : 'none'");
+    expect(flipCard).toContain('hidden={isFlipped}');
+    expect(flipCard).toContain('hidden={!isFlipped}');
+    expect(flipCard).toContain('tabIndex={isFlipped ? -1 : undefined}');
+    expect(flipCard).toContain('tabIndex={isFlipped ? undefined : -1}');
     expect(flipCard).not.toContain('rotateY');
     expect(flipCard).not.toContain('preserve-3d');
     expect(flipCard).not.toContain("absolute inset-0 overflow-hidden pointer-events-none");

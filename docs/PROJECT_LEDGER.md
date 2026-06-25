@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): continue P5 player-polish batch
+
+**Type:** UI/read-model/accessibility/test/docs polish.
+
+**Fix:** Continued the D2 owner-playthrough polish lane on `codex/p5-player-polish-batch`. Army CO pushback warnings now show `Commander record unreported` for unnamed sources; Army HQ flip-card inactive faces use native `hidden` plus existing focus/pointer guards; command-only presidential review aggregates route to the Decision Room command card instead of the Desk inbox; Chronicle generated operation/officer entries distinguish logged captures from final-held objectives; Army HQ sector aggregate morale/fatigue/personnel marks partial line-holder reports as `Partial`; Formation Detail and Army HQ ORBAT label turn-zero recent engagements as setup records; and pre-advance fallback blocking trusts live required event-decision rows over stale queue counts when that live source exists.
+
+**Verification:** Focused red/green proof passed 8 files / 180 tests with `npm.cmd exec -- vitest run tests/a5_army_co_pushback_ui.test.ts tests/ui_shell_frame_contract.test.ts tests/ui/presidential_decision_room.test.ts tests/chronicle_entries.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui/pre_advance_command_review.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 625 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed after rerun with a longer local timeout. Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, identity brief, `Begin`, foundational Desk decision, Decision Room review routing without inbox leakage, Army HQ commander/OOB data, native-hidden inactive flip-card backs with zero visible inactive Back buttons, and no sampled `ENOENT`, `Unknown commander`, `Command Authority`, `TRANSFUSING`, `Obj 0/0`, or `front sitrep` leak. `gh run list --branch main --limit 10` showed `main` green before this branch push.
+
+**Scope/determinism:** UI/read-model/accessibility/test/docs polish only; no simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] docs: close P4 player-polish merge
 
 **Type:** Docs/process closeout.

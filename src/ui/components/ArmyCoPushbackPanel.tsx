@@ -111,6 +111,16 @@ const OVERRIDE_RELIEF_THRESHOLD = 3;
 /** Override-history rolling window (turns). */
 const OVERRIDE_HISTORY_WINDOW = 12;
 
+const COMMANDER_RECORD_UNREPORTED = 'Commander record unreported';
+
+function displayOfficerName(...candidates: Array<string | null | undefined>): string {
+    for (const candidate of candidates) {
+        const trimmed = candidate?.trim();
+        if (trimmed) return trimmed;
+    }
+    return COMMANDER_RECORD_UNREPORTED;
+}
+
 function isObjectionRationale(rationale: string | undefined): boolean {
     if (!rationale) return false;
     const r = rationale.toLowerCase();
@@ -158,7 +168,7 @@ function selectMladicWarnings(props: ArmyCoPushbackPanelProps): MladicWarning[] 
         if (stubbornness < STUBBORNNESS_AUTONOMOUS_THRESHOLD) continue;
         warnings.push({
             officerId: ev.officer_id,
-            officerName: officer?.name ?? ev.officer_name ?? 'Unknown commander',
+            officerName: displayOfficerName(officer?.name, ev.officer_name),
             faction: officer?.faction ?? ev.faction,
             stubbornness,
             source: 'pending_event',
@@ -228,7 +238,7 @@ function selectArmyObjections(props: ArmyCoPushbackPanelProps): ArmyObjection[] 
         );
         objections.push({
             faction,
-            officerName: armyCO?.name ?? 'Army staff',
+            officerName: displayOfficerName(armyCO?.name, 'Army staff'),
             campaignRole: last.campaign_role,
             rationale: last.rationale,
             turn: last.turn,
@@ -251,7 +261,7 @@ function selectArmyObjections(props: ArmyCoPushbackPanelProps): ArmyObjection[] 
         const officer = props.officers.find((o) => o.id === ev.officer_id);
         objections.push({
             faction: ev.faction,
-            officerName: officer?.name ?? ev.officer_name ?? 'Army staff',
+            officerName: displayOfficerName(officer?.name, ev.officer_name, 'Army staff'),
             campaignRole: '(directive)',
             rationale: ev.reason ?? 'Army CO objected to political directive.',
             turn: ev.turn,

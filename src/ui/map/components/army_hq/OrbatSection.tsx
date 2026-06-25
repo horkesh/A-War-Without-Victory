@@ -49,6 +49,12 @@ function engagementOutcomeLabel(outcome: string): string {
 }
 
 /** Inline bar — fraction 0..1, fixed width. */
+function engagementTurnLabel(turn: number): string {
+    if (!Number.isFinite(turn)) return t('formationDetail.undated');
+    if (turn <= 0) return t('formationDetail.setupRecord');
+    return turnToDateString(turn);
+}
+
 function MiniBar({ value, max, color, width = 60 }: { value: number | null; max: number; color: string; width?: number }) {
     const pct = value != null && max > 0 ? Math.min(1, Math.max(0, value / max)) : 0;
     return (
@@ -256,7 +262,7 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                     <div className="space-y-1">
                         {engagements.slice(0, 5).map((e, i) => (
                             <div key={i} className="flex items-center gap-2 text-[10px]">
-                                <span className="text-text-secondary/50 w-16 shrink-0">{turnToDateString(e.turn)}</span>
+                                <span className="text-text-secondary/50 w-16 shrink-0">{engagementTurnLabel(e.turn)}</span>
                                 <span
                                     className="text-text-secondary/40 truncate w-20 shrink-0"
                                     title={getOsidDisplayName(e.osid, osidDisplayNames)}

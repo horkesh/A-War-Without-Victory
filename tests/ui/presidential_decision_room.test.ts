@@ -1660,6 +1660,43 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
+  it('routes command-only review aggregates to the Decision Room command card instead of the Desk', () => {
+    const state = makeState({
+      presidentialReviewQueue: {
+        pendingCount: 1,
+        criticalCount: 0,
+        eventDecisionCount: 0,
+        commandInterpretationCount: 1,
+        personnelDirectiveCount: 0,
+        operationOpportunityCount: 0,
+      },
+      pendingOfficerEvents: [
+        {
+          event_id: 'pushback_1',
+          type: 'order_pushback',
+          faction: 'RBiH',
+          turn: 24,
+          officer_id: 'arbih_co',
+          officer_name: 'Serving CO',
+          acknowledged: false,
+          reason: 'Pushes back on the directive.',
+        },
+      ] as LoadedGameState['pendingOfficerEvents'],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const review = view.cards.find((c) => c.id === 'review:pending');
+
+    expect(review?.navigationTarget).toEqual({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'pushback:player-army-co',
+    });
+    expect(review?.sourceHandoffTarget).toEqual({ kind: 'army-hq-tab', tab: 'briefing' });
+    expect(review?.actionLabel).toBe('Review Pushback');
+    expect(review?.navigationTarget).not.toEqual({ kind: 'inbox' });
+  });
+
   it('omits a replace-co card when the corps CO is only an acting commander', () => {
     const state = makeState({
       formations: [
