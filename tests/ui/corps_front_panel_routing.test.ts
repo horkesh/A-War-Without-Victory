@@ -1033,6 +1033,32 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.focusedOperationHistoryId).toBeNull();
   });
 
+  it('does not expose or route current operation objective when sector intel is low confidence', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      intel_confidence: 0.2,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+      selectedOsid: null,
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+
+    expect(screen.queryByRole('button', { name: /dobrinja/i })).toBeNull();
+    const redactedObjective = screen.getByRole('button', { name: /Objective location redacted/i });
+    expect(redactedObjective).toHaveProperty('disabled', true);
+
+    fireEvent.click(redactedObjective);
+
+    expect(useGameStore.getState().selectedOsid).toBeNull();
+  });
+
   it('does not focus the first operation objective when current objective is unreported', () => {
     const state = makeState();
     state.operations = ([{

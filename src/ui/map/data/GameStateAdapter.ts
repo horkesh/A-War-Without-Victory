@@ -705,10 +705,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         Record<string, { per_formation?: Record<string, { killed?: number; wounded?: number; missing_captured?: number }> }> | undefined;
     const perFormationCasualties: Record<string, { kia: number; wia: number; mia: number }> = {};
     if (rawLedgerForPerFm && typeof rawLedgerForPerFm === 'object') {
-        for (const factionData of Object.values(rawLedgerForPerFm)) {
+        for (const factionId of Object.keys(rawLedgerForPerFm).sort(strictCompare)) {
+            const factionData = rawLedgerForPerFm[factionId];
             const pf = factionData?.per_formation;
             if (pf && typeof pf === 'object') {
-                for (const [bid, bd] of Object.entries(pf)) {
+                for (const bid of Object.keys(pf).sort(strictCompare)) {
+                    const bd = pf[bid];
                     const b = bd as { killed?: number; wounded?: number; missing_captured?: number };
                     perFormationCasualties[bid] = {
                         kia: typeof b?.killed === 'number' ? b.killed : 0,
@@ -951,11 +953,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             // Campaign casualty ledger (actual KIA/WIA/MIA from casualty_ledger.per_formation).
             if (f.kind === 'brigade' || f.kind === 'operational_group') {
+                fv.campaignCasualtySplitProvenance = 'unreported';
                 const cfCas = perFormationCasualties[id];
                 if (cfCas) {
                     fv.campaignKia = cfCas.kia;
                     fv.campaignWia = cfCas.wia;
                     fv.campaignMia = cfCas.mia;
+                    fv.campaignCasualtySplitProvenance = 'exact_ledger';
                 }
             }
 
@@ -1077,6 +1081,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     fv.campaignKia = split.killed;
                     fv.campaignWia = split.wounded;
                     fv.campaignMia = split.missing_captured;
+                    fv.campaignCasualtySplitProvenance = 'derived_from_total';
                 }
             }
 

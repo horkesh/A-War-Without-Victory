@@ -957,6 +957,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     const objective = currentObjectiveIndex != null && currentObjectiveIndex >= 0
                       ? op.objectives?.[currentObjectiveIndex]
                       : undefined;
+                    const canRevealObjective = objective != null && intelConfidence != null && intelConfidence >= 0.3;
                     const forceBalance = op.force_ratio_estimate != null
                       ? getPlayerSafeOperationBalancePresentation(op.force_ratio_estimate)
                       : null;
@@ -1020,14 +1021,21 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                           <div className="mt-3 pt-2 border-t border-neutral-300 border-dashed">
                             <button
                               type="button"
-                              aria-label={t('corpsFront.focusObjectiveAria', { objective: getOsidDisplayName(objective, osidDisplayNames) })}
+                              disabled={!canRevealObjective}
+                              aria-label={canRevealObjective
+                                ? t('corpsFront.focusObjectiveAria', { objective: getOsidDisplayName(objective, osidDisplayNames) })
+                                : t('corpsFront.focusObjectiveRedactedAria')}
                               onClick={() => {
+                                if (!canRevealObjective) return;
                                 panToOsid?.(objective);
                                 inspectOnField(useGameStore.getState(), { kind: 'field-settlement', osid: objective });
                               }}
-                              className="kbd-focus text-[9px] uppercase font-bold text-blue-700 hover:text-blue-900 flex items-center gap-1"
+                              className={`kbd-focus text-[9px] uppercase font-bold flex items-center gap-1 ${canRevealObjective
+                                ? 'text-blue-700 hover:text-blue-900'
+                                : 'text-neutral-500 cursor-not-allowed'
+                                }`}
                             >
-                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {intelConfidence == null || intelConfidence < 0.3 ? <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span> : getOsidDisplayName(objective, osidDisplayNames)}
+                              <span className="text-[11px]">⌖</span> {t('corpsFront.focusObj')}: {canRevealObjective ? getOsidDisplayName(objective, osidDisplayNames) : <span className="bg-black text-black select-none">{t('corpsFront.redact')}</span>}
                             </button>
                           </div>
                         )}

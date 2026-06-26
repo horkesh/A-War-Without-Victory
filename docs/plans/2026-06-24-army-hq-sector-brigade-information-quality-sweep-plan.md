@@ -171,6 +171,18 @@ Follow-up verification passed: route/accessibility proof 5 files / 45 tests; com
 
 Twelfth-slice closeout completed: PR #451 merged to `main` at `ed8a04e8a` after green GitHub checks across Event System validation, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. Local and remote `codex/p8-player-polish-batch` refs were deleted/pruned; the worktree audit shows one clean `main` worktree; only `.tmp_dev_server` remains for the active local browser/dev session. James, Newton, and Einstein were closed after P9 scout absorption. P9 implementation should start with settlement timeline municipality-substring false-history matching, Corps Front low-intel objective leakage, stale operation-key routing, and derived casualty-split provenance, then fold in settlement estimate labeling, OOB enemy-anchor fallback, sparse supply precision, and legacy `autonomy_panel` retirement if the batch remains cohesive.
 
+Thirteenth P9 player-polish batch implemented locally so far on `codex/p9-player-polish-batch`:
+
+- Settlement timelines no longer attach historical events by municipality-substring matching; explicit settlement or municipality scope metadata is required before a historical event appears on a settlement timeline.
+- Corps Front low-intel objective controls no longer resolve real objective names for accessible labels and cannot route/click to the hidden settlement while intelligence is below the reveal threshold.
+- Operations Panel no longer turns a stale non-null operation key into the first live operation on open.
+- OOB sector drilldown no longer falls back to enemy OSIDs as field-inspection anchors when a sector has no friendly segment anchor.
+- Formation casualty split provenance now distinguishes ledger-exact, derived-from-total, and unreported splits; derived fallback KIA/WIA/MIA values render as estimated in Formation Detail and Army HQ ORBAT.
+- Settlement population/displacement panels label municipality-ratio fallback flows as estimates when no settlement-level displacement receipt exists.
+- Averroes and Kierkegaard implementation reports were absorbed and both agents were closed.
+
+P9 local verification passed: focused settlement/Corps Front proof passed 2 files / 49 tests; focused OOB/Operations/settlement-estimate proof passed 3 files / 58 tests; focused casualty provenance proof passed 3 files / 117 tests; combined focused proof passed 8 files / 224 tests; `npm.cmd run typecheck` passed; `npm.cmd run qa:player-journeys` passed 43 files / 651 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed; `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk warnings; `git diff --check` passed. Manual live-page sanity against `http://127.0.0.1:3003/` reached `AWWV Map`, showed the faction picker, had no visible error banners, and recorded only one benign missing-resource 404 console error. Generated browser evidence folders were removed after verification; only `.tmp_dev_server` remains for the active local browser/dev session. Remaining before closeout: GitHub comments/checks, merge, branch prune, and clean-worktree proof. Deferred P9 queue: sparse Supply Intelligence forecast precision and legacy `autonomy_panel` retirement.
+
 ## Pyrrhic Roles
 
 - **Orchestrator:** keep the lane scoped, update board/roadmap/ledger, merge and clean branch/worktree after verification.

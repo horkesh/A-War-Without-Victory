@@ -688,6 +688,30 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toMatch(/Battles\s*0|Win Rate\s*0\.0%|Men Lost\s*0/i);
   });
 
+  it('labels derived campaign loss splits as estimates instead of exact records', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        campaignKia: 22,
+        campaignWia: 74,
+        campaignMia: 4,
+        campaignCasualtySplitProvenance: 'derived_from_total',
+      } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Estimated split from total casualties');
+    expect(copy).toContain('Killedest. 22');
+    expect(copy).toContain('Woundedest. 74');
+    expect(copy).toContain('Missing or capturedest. 4');
+    expect(copy).not.toContain('Exact ledger split');
+  });
+
   it('setup-labels turn-zero captured territory history instead of narrating it as campaign history', () => {
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'

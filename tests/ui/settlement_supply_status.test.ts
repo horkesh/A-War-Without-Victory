@@ -246,6 +246,33 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(document.body.textContent).not.toMatch(/Croats\s*15|Others\s*5/);
   });
 
+  it('labels settlement population flows as estimated when only municipality displacement is available', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 100,
+        },
+      },
+      displacementByMun: {
+        testmun: {
+          originalPopulation: 200,
+          currentPopulation: 160,
+          displacedOut: 40,
+          displacedIn: 0,
+          lostPopulation: 10,
+          arrivedByFaction: {},
+        },
+      },
+      displacementByOsid: {},
+    }));
+
+    expect(screen.getByTestId('settlement-displacement-estimate-note').textContent)
+      .toContain('Estimated from municipality records');
+  });
+
   it('renders stationed-unit drilldowns as native buttons when they are clickable', () => {
     const onFormationClick = vi.fn();
     render(createElement(SettlementDetailContent, {

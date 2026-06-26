@@ -53,7 +53,7 @@ function formatReportedPercent(value: number | null | undefined): string {
 
 function pickOobSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | undefined {
   for (const segment of sector.sub_segments ?? []) {
-    const osid = segment.friendly_osids?.[0] ?? segment.enemy_osids?.[0];
+    const osid = segment.friendly_osids?.[0];
     if (osid) return osid;
   }
   return undefined;

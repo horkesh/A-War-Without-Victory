@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): implement P9 player-polish batch
+
+**Type:** UI/read-model/routing/provenance/test/docs polish.
+
+**Fix:** Started the next owner-playthrough P9 batch on `codex/p9-player-polish-batch`. Settlement timelines now require explicit settlement/municipality scope metadata for historical events instead of matching municipality names inside event ids. Corps Front low-intel objectives no longer expose real objective names through accessible labels or click routing. Operations Panel stale operation keys no longer auto-select the first live operation. OOB sector drilldown no longer falls back to enemy OSIDs as field-inspection anchors. Formation casualty splits now carry exact/derived/unreported provenance and derived fallback splits render as estimated in Formation Detail and Army HQ ORBAT. Settlement population/displacement fallback flows now label municipality-ratio values as estimates when settlement-level receipts are absent.
+
+**Verification:** Focused settlement/Corps Front proof passed 2 files / 49 tests. Focused OOB/Operations/settlement-estimate proof passed 3 files / 58 tests. Focused casualty provenance proof passed 3 files / 117 tests. Combined focused proof passed 8 files / 224 tests with `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts tests/ui/corps_front_panel_routing.test.ts tests/ui/settlement_supply_status.test.ts tests/ui/oob_operations_panel.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui_map_game_state_adapter.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 651 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk warnings. `git diff --check` passed. Manual live-page sanity against `http://127.0.0.1:3003/` reached `AWWV Map`, showed the faction picker, had no visible error banners, and recorded only one benign missing-resource 404 console error. Generated browser evidence folders were removed after verification; only `.tmp_dev_server` remains for the active local browser/dev session. Averroes and Kierkegaard were closed after their implementation reports were absorbed. GitHub checks/comments, merge, branch prune, and clean-worktree proof remain before final closeout.
+
+**Scope/determinism:** UI/read-model/routing/provenance/test/docs polish only. No simulation logic, event evaluator mechanics, scenario data, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] docs: close P8 player-polish merge
 
 **Type:** Docs/process closeout.

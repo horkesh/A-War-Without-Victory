@@ -9,6 +9,7 @@ import {
   formatSettlementTimelineTurnDate,
   SettlementTimeline,
 } from '../../src/ui/map/components/SettlementTimeline.js';
+import { filterHistoricalEventsForSettlement } from '../../src/ui/map/components/SettlementDetailContent.js';
 import { buildSettlementTimeline } from '../../src/ui/map/utils/buildSettlementTimeline.js';
 
 describe('SettlementTimeline localization', () => {
@@ -96,6 +97,40 @@ describe('SettlementTimeline localization', () => {
     expect(parsed.historicalEventsByTurn[0]?.text).toBe('Historijski događaj zabilježen');
     expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('srebrenica');
     expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('_');
+  });
+
+  it('requires explicit settlement or municipality scope before attaching historical events to a settlement timeline', () => {
+    const events = [
+      {
+        turn: 170,
+        id: 'srebrenica_column_breakout_1995',
+        text: 'Column breakout recorded',
+      },
+      {
+        turn: 171,
+        id: 'srebrenica_falls_1995',
+        text: 'Settlement-scoped fall receipt',
+        osids: ['op:srebrenica:srebrenica_2'],
+      },
+      {
+        turn: 172,
+        id: 'srebrenica_municipality_signal',
+        text: 'Municipality-scoped signal',
+        municipalityIds: ['srebrenica'],
+      },
+    ];
+
+    expect(filterHistoricalEventsForSettlement(
+      events,
+      'op:srebrenica:remote_village_9',
+      'srebrenica',
+    ).map((event) => event.id)).toEqual(['srebrenica_municipality_signal']);
+
+    expect(filterHistoricalEventsForSettlement(
+      events,
+      'op:srebrenica:srebrenica_2',
+      'srebrenica',
+    ).map((event) => event.id)).toEqual(['srebrenica_falls_1995', 'srebrenica_municipality_signal']);
   });
 
   it('localizes control battle and movement rows in BCS mode without English timeline fragments', () => {
