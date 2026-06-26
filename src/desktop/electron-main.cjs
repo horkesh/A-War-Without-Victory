@@ -10,7 +10,7 @@ if (typeof _electronModule === 'string') {
   );
   process.exit(1);
 }
-const { app, BrowserWindow, protocol, ipcMain, dialog, Menu } = _electronModule;
+const { app, BrowserWindow, protocol, ipcMain, dialog, Menu, session } = _electronModule;
 const path = require('path');
 const fs = require('fs');
 const http = require('http');
@@ -297,6 +297,10 @@ function getDataSourceDir() {
   return resourcePath('data', 'source');
 }
 
+function getDataUiDir() {
+  return resourcePath('data', 'ui');
+}
+
 function getDataScenariosDir() {
   return resourcePath('data', 'scenarios');
 }
@@ -323,9 +327,9 @@ function assertReadableFile(filePath, label) {
   return stat.size;
 }
 
-function fetchLocalText(url) {
+function fetchLocalText(url, options = {}) {
   return new Promise((resolve, reject) => {
-    const req = http.get(url, (res) => {
+    const req = http.get(url, { headers: options.headers || {} }, (res) => {
       let body = '';
       res.setEncoding('utf8');
       res.on('data', (chunk) => {
@@ -342,6 +346,96 @@ function fetchLocalText(url) {
     req.setTimeout(5000, () => {
       req.destroy(new Error(`timeout fetching ${url}`));
     });
+  });
+}
+
+function isIgnorableRuntimeProbeFailure(entry) {
+  const url = String(entry?.url || entry?.source_id || '');
+  const message = String(entry?.message || entry?.error || '');
+  if (url.includes('/favicon.ico') || url.endsWith('favicon.ico')) return true;
+  if (url.startsWith('data:')) return true;
+  if (url.startsWith('blob:')) return true;
+  if (message.includes('data:') || message.includes('blob:')) return true;
+  if (message.includes('favicon.ico')) return true;
+  if (
+    message.includes('ERR_ABORTED') &&
+    entry?.type === 'did-fail-load' &&
+    entry?.is_main_frame === false &&
+    entry?.intentional_abort === true
+  ) return true;
+  return false;
+}
+
+function attachRuntimeProbeFailureCapture(win, label, runtimeFailureChecks) {
+  if (!runtimeFailureChecks) return;
+
+  win.webContents.on('console-message', (_event, levelOrDetails, message, line, sourceId) => {
+    const details = typeof levelOrDetails === 'object' && levelOrDetails !== null
+      ? levelOrDetails
+      : { level: levelOrDetails, message, lineNumber: line, sourceId };
+    const level = Number(details.level ?? 0);
+    if (level < 3) return;
+    const entry = {
+      type: 'console-message',
+      label,
+      level,
+      message: String(details.message ?? ''),
+      line: details.lineNumber ?? null,
+      source_id: details.sourceId ?? null,
+    };
+    if (!isIgnorableRuntimeProbeFailure(entry)) runtimeFailureChecks.push(entry);
+  });
+
+  win.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+    const entry = {
+      type: 'did-fail-load',
+      label,
+      error_code: errorCode,
+      error: errorDescription,
+      url: validatedURL || null,
+      is_main_frame: Boolean(isMainFrame),
+      intentional_abort: errorDescription === 'ERR_ABORTED' && isMainFrame === false,
+    };
+    if (!isIgnorableRuntimeProbeFailure(entry)) runtimeFailureChecks.push(entry);
+  });
+
+  win.webContents.on('render-process-gone', (_event, details) => {
+    const entry = {
+      type: 'render-process-gone',
+      label,
+      reason: details?.reason ?? null,
+      exit_code: details?.exitCode ?? null,
+    };
+    if (!isIgnorableRuntimeProbeFailure(entry)) runtimeFailureChecks.push(entry);
+  });
+}
+
+function installRuntimeProbeNetworkFailureCapture(runtimeFailureChecks) {
+  if (!session?.defaultSession?.webRequest || !runtimeFailureChecks) return;
+  const webRequest = session.defaultSession.webRequest;
+  webRequest.onErrorOccurred((details) => {
+    const entry = {
+      type: 'request-failed',
+      label: `webContents:${details.webContentsId ?? 'unknown'}`,
+      error: details.error,
+      method: details.method,
+      resource_type: details.resourceType,
+      url: details.url,
+      intentional_abort: false,
+    };
+    if (!isIgnorableRuntimeProbeFailure(entry)) runtimeFailureChecks.push(entry);
+  });
+  webRequest.onCompleted((details) => {
+    if ((details.statusCode ?? 0) < 400) return;
+    const entry = {
+      type: 'http-status-failure',
+      label: `webContents:${details.webContentsId ?? 'unknown'}`,
+      method: details.method,
+      resource_type: details.resourceType,
+      status: details.statusCode,
+      url: details.url,
+    };
+    if (!isIgnorableRuntimeProbeFailure(entry)) runtimeFailureChecks.push(entry);
   });
 }
 
@@ -738,7 +832,7 @@ function getTacticalMapWindowUrl(mode = 'operational') {
 }
 
 function createMainWindow(options = {}) {
-  const { show = true, openDevTools = true } = options;
+  const { show = true, openDevTools = true, runtimeFailureChecks = null, runtimeProbeLabel = 'main window' } = options;
   const warroomUrl = 'awwv://warroom/index.html';
 
   const win = new BrowserWindow({
@@ -753,6 +847,7 @@ function createMainWindow(options = {}) {
     },
   });
 
+  attachRuntimeProbeFailureCapture(win, runtimeProbeLabel, runtimeFailureChecks);
   win.loadURL(warroomUrl);
 
   // Clear HTTP cache so the tactical map iframe always loads the latest bundle from the map server.
@@ -819,7 +914,12 @@ function createMainWindow(options = {}) {
 }
 
 function createTacticalMapWindow(options = {}) {
-  const { mode = 'operational', show = true } = options;
+  const {
+    mode = 'operational',
+    show = true,
+    runtimeFailureChecks = null,
+    runtimeProbeLabel = 'tactical map window',
+  } = options;
   const targetUrl = getTacticalMapWindowUrl(mode);
 
   const win = new BrowserWindow({
@@ -833,6 +933,7 @@ function createTacticalMapWindow(options = {}) {
       nodeIntegration: false,
     },
   });
+  attachRuntimeProbeFailureCapture(win, runtimeProbeLabel, runtimeFailureChecks);
   win.loadURL(targetUrl);
   win.on('closed', () => {
     if (tacticalMapWindow === win) tacticalMapWindow = null;
@@ -850,6 +951,8 @@ async function runPackagedRuntimeProbe() {
   if (!app.isPackaged) {
     throw new Error('runtime probe must run against the packaged desktop artifact');
   }
+  const runtimeFailureChecks = [];
+  installRuntimeProbeNetworkFailureCapture(runtimeFailureChecks);
 
   const requiredFiles = [
     ['desktopSimBundle', path.join(getBaseDir(), 'dist', 'desktop', 'desktop_sim.cjs')],
@@ -884,14 +987,36 @@ async function runPackagedRuntimeProbe() {
     '/data/scenarios/events/war_1995.json',
     '/data/scenarios/events/consequences.json',
   ];
-  const [mapIndexResponse, snapshotResponse, ...rawEventCatalogResponses] = await Promise.all([
+  const packagedRouteInventory = [
+    { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
+    { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
+    { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
+    { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200 },
+    { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200 },
+    { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200 },
+    { route: '/data/source/settlements_initial_master.json', expected_status: 200 },
+    { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200 },
+  ];
+  const [mapIndexResponse, snapshotResponse, ...rawRouteResponses] = await Promise.all([
     fetchLocalText(getMapServerUrl('/')),
     fetchLocalText(getMapServerUrl('/data/derived/startup/apr_1992_initial_save.json')),
     ...eventCatalogRoutes.map((route) => fetchLocalText(getMapServerUrl(route))),
+    ...packagedRouteInventory.map((entry) => fetchLocalText(
+      getMapServerUrl(entry.route),
+      entry.range ? { headers: { Range: entry.range } } : {},
+    )),
   ]);
+  const rawEventCatalogResponses = rawRouteResponses.slice(0, eventCatalogRoutes.length);
+  const rawPackagedRouteResponses = rawRouteResponses.slice(eventCatalogRoutes.length);
   const eventCatalogResponses = rawEventCatalogResponses.map((response, index) => ({
     ...response,
     route: eventCatalogRoutes[index],
+  }));
+  const routeInventoryResponses = rawPackagedRouteResponses.map((response, index) => ({
+    ...response,
+    expected_status: packagedRouteInventory[index].expected_status,
+    range: packagedRouteInventory[index].range ?? null,
+    route: packagedRouteInventory[index].route,
   }));
 
   if (mapIndexResponse.statusCode !== 200) {
@@ -904,13 +1029,26 @@ async function runPackagedRuntimeProbe() {
   if (failedEventCatalogResponse) {
     throw new Error(`packaged tactical map server returned ${failedEventCatalogResponse.statusCode} for event catalog ${failedEventCatalogResponse.route}`);
   }
+  const failedRouteInventoryResponse = routeInventoryResponses.find((response) => response.statusCode !== response.expected_status);
+  if (failedRouteInventoryResponse) {
+    throw new Error(
+      `packaged tactical map server returned ${failedRouteInventoryResponse.statusCode} for route inventory ${failedRouteInventoryResponse.route}; expected ${failedRouteInventoryResponse.expected_status}`,
+    );
+  }
 
-  const probeWindow = createMainWindow({ show: false, openDevTools: false });
+  const probeWindow = createMainWindow({
+    show: false,
+    openDevTools: false,
+    runtimeFailureChecks,
+    runtimeProbeLabel: 'packaged main window',
+  });
   const windowLoad = await waitForWindowLoad(probeWindow, warroomUrl, 'packaged main window');
 
   const { win: mapProbeWindow, targetUrl: tacticalMapUrl } = createTacticalMapWindow({
     mode: 'operational',
     show: false,
+    runtimeFailureChecks,
+    runtimeProbeLabel: 'packaged tactical map window',
   });
   const tacticalWindowLoad = await waitForWindowLoad(
     mapProbeWindow,
@@ -928,6 +1066,8 @@ async function runPackagedRuntimeProbe() {
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
     mode: 'sandbox',
     show: false,
+    runtimeFailureChecks,
+    runtimeProbeLabel: 'packaged tactical sandbox window',
   });
   const tacticalSandboxWindowLoad = await waitForWindowLoad(
     sandboxProbeWindow,
@@ -994,6 +1134,8 @@ async function runPackagedRuntimeProbe() {
   const { win: endgameProbeWindow, targetUrl: endgameMapUrl } = createTacticalMapWindow({
     mode: 'operational',
     show: false,
+    runtimeFailureChecks,
+    runtimeProbeLabel: 'packaged endgame tactical map window',
   });
   await waitForWindowLoad(
     endgameProbeWindow,
@@ -1077,6 +1219,13 @@ async function runPackagedRuntimeProbe() {
       { route: '/data/derived/startup/apr_1992_initial_save.json', status: snapshotResponse.statusCode },
       ...eventCatalogResponses.map((response) => ({ route: response.route, status: response.statusCode })),
     ],
+    route_inventory_checks: routeInventoryResponses.map((response) => ({
+      expected_status: response.expected_status,
+      range: response.range,
+      route: response.route,
+      status: response.statusCode,
+    })),
+    runtime_failure_checks: runtimeFailureChecks,
     startup: {
       phase: state?.meta?.phase ?? null,
       player_faction: state?.meta?.player_faction ?? null,
@@ -1165,6 +1314,10 @@ async function runPackagedRuntimeProbe() {
   };
 
   fs.writeFileSync(getRuntimeProbeManifestPath(), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  const disallowedRuntimeFailures = runtimeFailureChecks.filter((entry) => !isIgnorableRuntimeProbeFailure(entry));
+  if (disallowedRuntimeFailures.length > 0) {
+    throw new Error(`packaged runtime probe captured renderer/network failures: ${JSON.stringify(disallowedRuntimeFailures, null, 2)}`);
+  }
   console.log(`AWWV_DESKTOP_RUNTIME_PROBE_OK ${JSON.stringify(manifest)}`);
   mapProbeWindow.destroy();
   probeWindow.destroy();
@@ -1183,6 +1336,7 @@ async function runPackagedRuntimeProbe() {
  *   /assets/*              → dist/tactical-map/assets/*
  *   /data/derived/*        → data/derived/*  (with Range support for PMTiles)
  *   /data/source/*         → data/source/*
+ *   /data/ui/*             → data/ui/*
  *   /data/scenarios/*      → data/scenarios/*
  *   /data/runs/*           → runs/*  (e.g. final_save.json for "Load run")
  */
@@ -1192,8 +1346,10 @@ function startMapServer() {
   const mapDir = getMapAppDir();
   const derivedDir = getDataDerivedDir();
   const sourceDir = getDataSourceDir();
+  const uiDir = getDataUiDir();
   const scenariosDir = getDataScenariosDir();
   const runsDir = getRunsDir();
+  const assetsDir = resourcePath('assets');
 
   const MIME = {
     '.html': 'text/html', '.js': 'application/javascript', '.css': 'text/css',
@@ -1216,6 +1372,9 @@ function startMapServer() {
     } else if (segments[0] === 'data' && segments[1] === 'source') {
       filePath = path.join(sourceDir, ...segments.slice(2));
       if (!path.resolve(filePath).startsWith(path.resolve(sourceDir))) { res.writeHead(403); res.end(); return; }
+    } else if (segments[0] === 'data' && segments[1] === 'ui') {
+      filePath = path.join(uiDir, ...segments.slice(2));
+      if (!path.resolve(filePath).startsWith(path.resolve(uiDir))) { res.writeHead(403); res.end(); return; }
     } else if (segments[0] === 'data' && segments[1] === 'scenarios') {
       filePath = path.join(scenariosDir, ...segments.slice(2));
       if (!path.resolve(filePath).startsWith(path.resolve(scenariosDir))) { res.writeHead(403); res.end(); return; }
@@ -1228,6 +1387,11 @@ function startMapServer() {
       const rel = segments.join(path.sep) || 'index.html';
       filePath = path.join(mapDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(mapDir))) { res.writeHead(403); res.end(); return; }
+      if (!fs.existsSync(filePath) && segments[0] === 'assets') {
+        const assetRel = segments.slice(1).join(path.sep);
+        filePath = path.join(assetsDir, assetRel);
+        if (!path.resolve(filePath).startsWith(path.resolve(assetsDir))) { res.writeHead(403); res.end(); return; }
+      }
     }
 
     let stat;

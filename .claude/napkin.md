@@ -1,6 +1,10 @@
 # Napkin Runbook
 
+**MISSING CORPS COMMAND ROWS ARE UNREPORTED (2026-06-26).** A corps without `state.military.corps_command[corpsId]` has no reported command-strain/exhaustion/assessment source; it is not healthy zero. Do instead: preserve explicit reported zeroes, but render missing command strain, corps exhaustion, and Corps Situation assessment as `Unreported`.
+
 **RELEASE GATES MUST WATCH PACKAGED RUNTIME RESOURCES (2026-06-26).** Desktop/package regressions can come from data and asset changes, not just Electron source. Do instead: keep desktop/full-suite path filters covering `data/derived/`, `data/ui/`, event scenario data, `assets/`, `build/icon.png`, `package-lock.json`, and release workflow edits; run the packaged runtime probe before publishing Windows artifacts.
+
+**PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows; keep request-failed and HTTP >=400 rows reportable.
 
 **TRUSTED CI DETECTORS MUST RESTORE HEAD BEFORE TESTS (2026-06-26).** Base-branch detector checkouts protect required checks from PR bypass, but leaving the trusted copy in the worktree makes tests/builds inspect stale scripts. Do instead: run the trusted detector, then `git restore --source=HEAD -- .github/scripts/detect-*.sh` before setup/build/test steps.
 

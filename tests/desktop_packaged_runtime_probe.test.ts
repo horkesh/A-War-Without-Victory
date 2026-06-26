@@ -265,6 +265,51 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /runtime_failure_checks:/,
+        'packaged runtime probe manifest should capture renderer and network failure observations',
+    );
+    assert.match(
+        source,
+        /intentional_abort:\s*false/,
+        'packaged runtime probe should not mark generic failed network requests as intentional aborts',
+    );
+    assert.match(
+        source,
+        /console-message/,
+        'packaged runtime probe should capture renderer console messages in the manifest',
+    );
+    assert.match(
+        source,
+        /did-fail-load/,
+        'packaged runtime probe should capture window did-fail-load events in the manifest',
+    );
+    assert.match(
+        source,
+        /render-process-gone/,
+        'packaged runtime probe should capture renderer process exits in the manifest',
+    );
+    assert.match(
+        source,
+        /request-failed/,
+        'packaged runtime probe should capture failed network requests in the manifest',
+    );
+    assert.match(
+        source,
+        /http-status-failure/,
+        'packaged runtime probe should capture HTTP status failures in the manifest',
+    );
+    assert.match(
+        source,
+        /isIgnorableRuntimeProbeFailure\(/,
+        'packaged runtime probe should filter deterministic runtime probe noise through a narrow helper',
+    );
+    assert.match(
+        source,
+        /favicon[\s\S]*data:[\s\S]*blob:[\s\S]*entry\?\.type === 'did-fail-load'[\s\S]*entry\?\.is_main_frame === false[\s\S]*entry\?\.intentional_abort === true/s,
+        'runtime failure filtering should be limited to favicon/data/blob and deliberate subframe did-fail-load abort noise',
+    );
+    assert.match(
+        source,
         /surface_type:[\s\S]*outcome_label:[\s\S]*has_pyrrhic_score:[\s\S]*has_war_cost:[\s\S]*has_faction_tabs:[\s\S]*has_awwv_title:/s,
         'packaged runtime probe endgame checks should record verdict surface DOM observations',
     );
@@ -277,6 +322,56 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         source,
         /endgamePush\.player_faction/,
         'packaged runtime probe endgame should record player faction from the state push proof',
+    );
+    assert.match(
+        source,
+        /packagedRouteInventory/,
+        'packaged runtime probe should maintain a named deterministic packaged route inventory',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/operational\/operational_settlements\.geojson/,
+        'packaged runtime probe should verify operational GeoJSON is served',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/terrain\/settlements_terrain_scalars\.json/,
+        'packaged runtime probe should verify terrain scalar JSON is served',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/tiles\/osm\.pmtiles[\s\S]*range:\s*'bytes=0-15'/,
+        'packaged runtime probe should verify the exact PMTiles byte-range route coverage',
+    );
+    assert.match(
+        source,
+        /expected_status:\s*206/,
+        'packaged runtime probe should require PMTiles inventory checks to return HTTP 206',
+    );
+    assert.match(
+        source,
+        /\/data\/ui\/hq_rbih_clickable_regions\.json[\s\S]*\/data\/ui\/hq_rs_clickable_regions\.json[\s\S]*\/data\/ui\/hq_hrhb_clickable_regions\.json/s,
+        'packaged runtime probe should verify all HQ clickable region JSON resources are served',
+    );
+    assert.match(
+        source,
+        /\/data\/source\/settlements_initial_master\.json/,
+        'packaged runtime probe should verify source settlement master data is served',
+    );
+    assert.match(
+        source,
+        /\/assets\/ui\/icons\/icon_warning\.svg/,
+        'packaged runtime probe should verify a root runtime asset is served',
+    );
+    assert.match(
+        source,
+        /route_inventory_checks:/,
+        'packaged runtime probe manifest should record packaged route inventory checks',
+    );
+    assert.match(
+        source,
+        /failedRouteInventoryResponse/,
+        'packaged runtime probe should fail loudly when a packaged route inventory item is not served',
     );
 });
 
@@ -382,6 +477,66 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /endgame_checks/,
         'probe tool should fail if the packaged manifest omits the endgame reachability proof',
+    );
+    assert.match(
+        source,
+        /expectedPackagedRouteInventory/,
+        'probe tool should maintain the packaged route inventory it expects from the packaged manifest',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/operational\/operational_settlements\.geojson/,
+        'probe tool should require operational GeoJSON route proof',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/terrain\/settlements_terrain_scalars\.json/,
+        'probe tool should require terrain scalar route proof',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/tiles\/osm\.pmtiles[\s\S]*expected_status:\s*206[\s\S]*range:\s*'bytes=0-15'/s,
+        'probe tool should require exact PMTiles Range 206 route proof',
+    );
+    assert.match(
+        source,
+        /entry\?\.range === expected\.range/,
+        'probe tool should match inventory entries on required byte range when the route expects one',
+    );
+    assert.match(
+        source,
+        /\/data\/ui\/hq_rbih_clickable_regions\.json[\s\S]*\/data\/ui\/hq_rs_clickable_regions\.json[\s\S]*\/data\/ui\/hq_hrhb_clickable_regions\.json/s,
+        'probe tool should require all HQ clickable region route proofs',
+    );
+    assert.match(
+        source,
+        /\/data\/source\/settlements_initial_master\.json/,
+        'probe tool should require source settlement master route proof',
+    );
+    assert.match(
+        source,
+        /\/assets\/ui\/icons\/icon_warning\.svg/,
+        'probe tool should require root runtime asset route proof',
+    );
+    assert.match(
+        source,
+        /route_inventory_checks/,
+        'probe tool should fail if the packaged manifest omits route inventory checks',
+    );
+    assert.match(
+        source,
+        /runtime_failure_checks/,
+        'probe tool should fail if the packaged manifest omits runtime failure checks',
+    );
+    assert.match(
+        source,
+        /disallowedRuntimeFailures/,
+        'probe tool should fail if the packaged manifest contains non-ignorable runtime failures',
+    );
+    assert.match(
+        source,
+        /entry\?\.type === 'did-fail-load'[\s\S]*entry\?\.is_main_frame === false[\s\S]*entry\?\.intentional_abort === true/s,
+        'probe tool should ignore ERR_ABORTED only for deliberate subframe did-fail-load aborts',
     );
     assert.match(
         source,

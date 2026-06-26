@@ -456,6 +456,11 @@ function safeSectorLabel(sectorId: string, sectors: CorpsFrontSectorView[]): str
     return isUnsafeRawLabel(label) ? t('sectorsSection.assignedSector') : label;
 }
 
+function sanitizeDomIdPart(value: string): string {
+    const sanitized = value.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    return sanitized.length > 0 ? sanitized : 'sector';
+}
+
 function pickSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | null {
     const seen = new Set<string>();
     for (const segment of sector.sub_segments ?? []) {
@@ -543,7 +548,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                             sector,
                             sectorAssignment.lineHoldingIds.length,
                         );
-                        const detailId = `army-hq-sector-detail-${sector.sector_id}`;
+                        const detailId = `army-hq-sector-detail-${sanitizeDomIdPart(sector.sector_id)}`;
                         const toggleLabel = isExpanded
                             ? t('sectorsSection.collapseSectorAria', { sector: sectorLabel })
                             : t('sectorsSection.expandSectorAria', { sector: sectorLabel });

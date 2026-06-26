@@ -67,9 +67,13 @@ case "${PATH_SET}" in
       "src/ui/"
       "tools/"
       "data/derived/"
+      "data/source/"
+      "data/reference/"
       "data/ui/"
       "data/scenarios/events/"
       "assets/"
+      "src/shared/"
+      "src/runtime/"
     )
     EXACT_FILES=(
       "package.json"

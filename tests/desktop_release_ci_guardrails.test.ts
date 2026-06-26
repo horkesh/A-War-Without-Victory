@@ -84,9 +84,13 @@ test('desktop path filter watches packaged dependencies and runtime resources', 
     assert.match(desktopCase, /"package-lock\.json"/, 'lockfile-only desktop dependency changes should run desktop package/probe gates');
     assert.match(desktopCase, /"\.github\/workflows\/release\.yml"/, 'release workflow edits should run desktop package/probe gates');
     assert.match(desktopCase, /"data\/derived\/"/, 'packaged derived-data changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"data\/source\/"/, 'packaged source-data changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"data\/reference\/"/, 'packaged reference-data changes should run desktop package/probe gates');
     assert.match(desktopCase, /"data\/ui\/"/, 'packaged UI-data changes should run desktop package/probe gates');
     assert.match(desktopCase, /"data\/scenarios\/events\/"/, 'packaged event catalog changes should run desktop package/probe gates');
     assert.match(desktopCase, /"assets\/"/, 'packaged root asset changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"src\/shared\/"/, 'shared runtime module changes used by packaged bundles should run desktop package/probe gates');
+    assert.match(desktopCase, /"src\/runtime\/"/, 'runtime module changes used by packaged bundles should run desktop package/probe gates');
     assert.match(desktopCase, /"build\/icon\.png"/, 'packaged icon changes should run desktop package/probe gates');
 });
 

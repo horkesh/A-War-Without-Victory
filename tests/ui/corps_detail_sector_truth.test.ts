@@ -237,4 +237,17 @@ describe('CorpsDetail sector truth', () => {
     expect(container.textContent).toContain('UNREPORTED');
     expect(container.textContent).not.toMatch(/Probe Then Pause|probe_then_pause/i);
   });
+
+  it('renders missing corps exhaustion as unreported instead of healthy silence', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => formation.id === 'arbih_1st_corps'
+      ? { ...formation, corpsStance: 'defensive', corpsExhaustion: undefined }
+      : formation);
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    expect(container.textContent).toMatch(/Exhaustion:\s*Unreported/);
+    expect(container.textContent).not.toContain('Exhaustion: 0');
+  });
 });
