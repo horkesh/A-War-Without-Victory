@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ChronicleOverlay } from '../../src/ui/map/components/chronicle/ChronicleOverlay.js';
@@ -99,5 +99,25 @@ describe('Chronicle focused decision routing', () => {
     expect(focused?.textContent).not.toContain('Aid corridor response');
     expect(focused?.textContent).not.toContain('Later decision');
     expect(document.activeElement).toBe(focused);
+  });
+
+  it('keeps Chronicle-filed decision record actions inside Chronicle', async () => {
+    render(React.createElement(ChronicleOverlay));
+
+    await waitFor(() => {
+      expect(screen.getAllByText(turnToDateString(8)).length).toBeGreaterThan(0);
+    });
+
+    const focused = document.querySelector('[data-focused-chronicle-decision-record-id="event:cabinet-crisis"]');
+    const openButton = focused?.querySelector<HTMLElement>('[data-testid="chronicle-open-record"]');
+    expect(openButton).toBeTruthy();
+
+    fireEvent.click(openButton!);
+
+    expect(useGameStore.getState()).toMatchObject({
+      armyHQOpen: false,
+      chronicleOpen: true,
+      focusedChronicleDecisionRecordId: 'event:cabinet-crisis',
+    });
   });
 });

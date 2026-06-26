@@ -6,6 +6,8 @@ import {
   filterPlayerFacingMovementsByOsid,
   filterPlayerFacingOperations,
   filterPlayerFacingOperationHistory,
+  filterPlayerFacingBattlesByOsid,
+  filterPlayerVisibleBattles,
   filterPlayerFacingSectors,
   findPlayerFacingOperationByKey,
   getPlayerFacingFaction,
@@ -172,6 +174,46 @@ describe('player visibility helpers', () => {
         { turn: 2, formation_id: 'arbih_b1', formation_name: '1st Brigade', type: 'arrived' },
       ],
     });
+  });
+
+  it('filters battle rows to player-involved or fog-visible contacts only', () => {
+    const state = {
+      player_faction: 'RBiH',
+      fogOfWar: {
+        visibleEnemyOsids: ['op:visible_enemy_contact'],
+        visibleEnemySectorIds: [],
+      },
+    } as unknown as LoadedGameState;
+    const battles = [
+      { osid: 'op:own_defense', attacker_faction: 'RS', defender_faction: 'RBiH' },
+      { osid: 'op:visible_enemy_contact', attacker_faction: 'RS', defender_faction: 'HRHB' },
+      { osid: 'op:hidden_enemy_rear', attacker_faction: 'RS', defender_faction: 'HRHB' },
+    ];
+
+    expect(filterPlayerVisibleBattles(battles, state).map((battle) => battle.osid)).toEqual([
+      'op:own_defense',
+      'op:visible_enemy_contact',
+    ]);
+  });
+
+  it('filters settlement battle history by player visibility', () => {
+    const state = {
+      player_faction: 'RBiH',
+      fogOfWar: {
+        visibleEnemyOsids: ['op:visible_enemy_contact'],
+        visibleEnemySectorIds: [],
+      },
+      battlesByOsid: {
+        'op:own_defense': [{ turn: 5, osid: 'op:own_defense', attacker_faction: 'RS', defender_faction: 'RBiH' }],
+        'op:visible_enemy_contact': [{ turn: 5, osid: 'op:visible_enemy_contact', attacker_faction: 'RS', defender_faction: 'HRHB' }],
+        'op:hidden_enemy_rear': [{ turn: 5, osid: 'op:hidden_enemy_rear', attacker_faction: 'RS', defender_faction: 'HRHB' }],
+      },
+    } as unknown as LoadedGameState;
+
+    expect(Object.keys(filterPlayerFacingBattlesByOsid(state)).sort()).toEqual([
+      'op:own_defense',
+      'op:visible_enemy_contact',
+    ]);
   });
 
   it('operation arrows are built only for player-facing operations', () => {

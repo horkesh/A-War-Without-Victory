@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { DecisionConsequenceRecordsPanel } from '../../src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.js';
@@ -40,7 +40,7 @@ afterEach(() => {
 });
 
 describe('DecisionConsequenceRecordsPanel', () => {
-  it('renders filed presidential choices in Army HQ Records', () => {
+  it('keeps Chronicle-filed presidential choices out of Army HQ Records rows', () => {
     useGameStore.setState({
       loadedGameState: makeState({
         firedEvents: [
@@ -60,18 +60,14 @@ describe('DecisionConsequenceRecordsPanel', () => {
     render(React.createElement(DecisionConsequenceRecordsPanel));
 
     expect(screen.getByRole('region', { name: 'Decision consequence records' })).toBeTruthy();
-    expect(screen.getByText('Cabinet crisis response')).toBeTruthy();
-    expect(screen.getByText('Decision recorded')).toBeTruthy();
-    expect(screen.getByText(`Event decision / ${turnToDateString(8)}`)).toBeTruthy();
-    const latestFilingMetric = screen.getByText('Latest Filing').closest('div')?.parentElement;
-    expect(latestFilingMetric?.textContent).toContain(turnToDateString(8));
-    expect(screen.queryByText('Latest Turn')).toBeNull();
-    expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();
-    expect(screen.getByText('Chronicle Route')).toBeTruthy();
-    expect(screen.getByText('Filed to Chronicle')).toBeTruthy();
+    expect(screen.getByText('No presidential decision consequences have been filed yet.')).toBeTruthy();
+    expect(screen.queryByText('Cabinet crisis response')).toBeNull();
+    expect(screen.queryByText('Decision recorded')).toBeNull();
+    expect(screen.queryByText(`Event decision / ${turnToDateString(8)}`)).toBeNull();
+    expect(screen.queryByText('Filed to Chronicle')).toBeNull();
   });
 
-  it('opens Chronicle focused to the exact Chronicle-filed decision record', () => {
+  it('does not expose an Army HQ action for Chronicle-filed decision records', () => {
     useGameStore.setState({
       loadedGameState: makeState({
         firedEvents: [
@@ -91,12 +87,7 @@ describe('DecisionConsequenceRecordsPanel', () => {
     render(React.createElement(DecisionConsequenceRecordsPanel));
 
     expect(useGameStore.getState().chronicleOpen).toBe(false);
-    fireEvent.click(screen.getByRole('button', { name: 'Open Chronicle' }));
-    expect(useGameStore.getState()).toMatchObject({
-      armyHQOpen: false,
-      chronicleOpen: true,
-      focusedChronicleDecisionRecordId: 'event:cabinet-crisis',
-    });
+    expect(screen.queryByRole('button', { name: 'Open Chronicle' })).toBeNull();
   });
 
   it('renders patron defiance material receipts as Records-filed consequences', () => {
@@ -122,6 +113,37 @@ describe('DecisionConsequenceRecordsPanel', () => {
     expect(screen.queryByText(/Patron relations \/ Turn 44/)).toBeNull();
     expect(screen.getByText('Filed to Records')).toBeTruthy();
     expect(screen.getByText('Review in Records')).toBeTruthy();
+  });
+
+  it('applies the row cap after filtering out Chronicle-filed decisions', () => {
+    const firedEvents = Array.from({ length: 60 }, (_, index) => ({
+      id: `chronicle-decision-${index}`,
+      turn: 100 + index,
+      title: `Chronicle decision ${index}`,
+      narrative: 'A Chronicle-targeted decision was recorded.',
+      category: 'political',
+      effects: [{ kind: 'authority', description: 'Authority held.' }],
+      isDecision: true,
+    }));
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        firedEvents,
+        rawGameState: {
+          military: {
+            patron_defiance_supply_cuts: [
+              { faction: 'RS', turn: 12, cut_fraction: 0.2, support_after: 0.6 },
+            ],
+          },
+        } as any,
+      } as Partial<LoadedGameState>),
+    });
+
+    render(React.createElement(DecisionConsequenceRecordsPanel));
+
+    expect(screen.getByText('Patron defiance supply cut')).toBeTruthy();
+    expect(screen.getByText('Filed to Records')).toBeTruthy();
+    expect(screen.queryByText('Chronicle decision 59')).toBeNull();
   });
 
   it('focuses an older decision consequence when routed from the desk', () => {
@@ -198,14 +220,13 @@ describe('DecisionConsequenceRecordsPanel', () => {
     try {
       render(React.createElement(DecisionConsequenceRecordsPanel));
 
-      expect(screen.getByText('Odluka zabilježena')).toBeTruthy();
       expect(screen.getByRole('region', { name: 'Zapisi posljedica odluka' })).toBeTruthy();
       expect(screen.getByText('Posljedice odluka')).toBeTruthy();
-      expect(screen.getByText('Put Hronike')).toBeTruthy();
-      expect(screen.getAllByText(`Odluka događaja / ${turnToDateString(8)}`).length).toBeGreaterThan(0);
-      expect(screen.queryByText(/Odluka događaja \/ Potez 8/)).toBeNull();
-      expect(screen.getByText('Arhivirano u: Hronika')).toBeTruthy();
-      expect(screen.getByRole('button', { name: 'Otvori Hroniku' })).toBeTruthy();
+      expect(screen.getByText('Jos nema arhiviranih posljedica predsjedničkih odluka.')).toBeTruthy();
+      expect(screen.queryByText('Odluka zabilježena')).toBeNull();
+      expect(screen.queryByText(`Odluka događaja / ${turnToDateString(8)}`)).toBeNull();
+      expect(screen.queryByText('Arhivirano u: Hronika')).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Otvori Hroniku' })).toBeNull();
       expect(screen.queryByText('Decision recorded')).toBeNull();
       expect(screen.queryByText(/Event decision \/ Turn 8/)).toBeNull();
     } finally {

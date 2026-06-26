@@ -626,27 +626,38 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await waitForVisibleText(page, 'Archive Routes');
   await assertTurnZeroRecordsProvenanceCounts(page, summary, flow);
   await captureEvidence(page, summary, 'army_hq_records');
-  await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
-  await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
-  await waitForVisibleText(page, 'Decision Consequences');
+  await waitForVisibleText(page, 'Latest Decision');
   await waitForVisibleText(page, flow.decisionTitle);
-  await waitForVisibleText(page, 'Decision recorded');
-  await waitForVisibleText(page, 'Filed to Chronicle');
+  await waitForVisibleText(page, 'Chronicle Filed');
+  await waitForVisibleText(page, '1');
+  const recordsSummaryText = await visibleSurfaceText(page, [
+    'Archive Routes',
+    'Chronicle Filed',
+    flow.decisionTitle,
+  ]);
+  assertRawLabelsAbsent('Army HQ Records summary', recordsSummaryText);
   summary.evidence.receiptChecksByFaction ??= {};
   summary.evidence.receiptChecksByFaction[flow.faction] = {
     eventId: flow.eventId,
     decisionTitle: flow.decisionTitle,
     responseLabel: flow.responseLabel,
-    records: true,
+    records: false,
     chronicle: false,
   };
-  summary.evidence.recordsReceiptAppears = true;
+  summary.evidence.recordsSummaryShowsChronicleFiledDecision = true;
+  await clickFirstMatchingText(page, ['DECISION LOG', 'Decision Log', 'Decisions', 'DECISIONS']);
+  await page.waitForSelector('[aria-label="Decision consequence records"]', { timeout: 30000 });
+  await waitForVisibleText(page, 'Decision Consequences');
+  await waitForVisibleText(page, 'No presidential decision consequences have been filed yet.');
+  summary.evidence.recordsReceiptAppears = false;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_records_decision_receipt`);
   const recordsText = await visibleSurfaceText(page, [
     'Decision Consequences',
-    flow.decisionTitle,
-    flow.responseLabel,
+    'No presidential decision consequences have been filed yet.',
   ]);
+  if (recordsText.includes(flow.responseLabel)) {
+    throw new Error(`${flow.faction} Chronicle-filed response appeared inside Army HQ Records decision log`);
+  }
   assertRawLabelsAbsent('Army HQ Records', recordsText);
   summary.evidence.rawFirstHourLabelsAbsentByFaction ??= {};
   summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction] ??= {};

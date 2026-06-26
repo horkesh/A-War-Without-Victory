@@ -286,6 +286,70 @@ describe('AAR and tooltip friction labels', () => {
     expect(document.body.textContent).not.toMatch(/Battle at|this position/);
   });
 
+  it('does not expose hidden enemy-only battle details in battle tooltips', () => {
+    vi.useFakeTimers();
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: {
+          ...makeSummary(),
+          battles: [{
+            ...makeSummary().battles[0],
+            osid: 'op:hidden:rear',
+            attacker_faction: 'RS',
+            defender_faction: 'HRHB',
+            attacker_casualties: 90,
+            defender_casualties: 140,
+          }],
+        },
+        turnSummaries: [],
+      },
+      osidDisplayNames: { 'op:hidden:rear': 'Hidden Rear' },
+      tooltipTarget: { type: 'battle', id: 'op:hidden:rear' },
+      tooltipPosition: { x: 1, y: 1 },
+    });
+
+    render(createElement(Tooltip));
+
+    act(() => {
+      vi.advanceTimersByTime(301);
+    });
+
+    expect(document.body.textContent).toContain('Battle at Hidden Rear');
+    expect(document.body.textContent).not.toMatch(/VRS.*HVO|HVO.*VRS|Attacker losses|Defender losses|90|140/);
+  });
+
+  it('renders missing battle tooltip casualties as unreported instead of zero', () => {
+    vi.useFakeTimers();
+    useGameStore.setState({
+      loadedGameState: {
+        ...makeState(),
+        latestTurnSummary: {
+          ...makeSummary(),
+          battles: [{
+            ...makeSummary().battles[0],
+            attacker_casualties: undefined,
+            defender_casualties: undefined,
+          } as unknown as TurnSummary['battles'][number]],
+        },
+        turnSummaries: [],
+      },
+      osidDisplayNames: { 'op:tuzla:center': 'Tuzla' },
+      tooltipTarget: { type: 'battle', id: 'op:tuzla:center' },
+      tooltipPosition: { x: 1, y: 1 },
+    });
+
+    render(createElement(Tooltip));
+
+    act(() => {
+      vi.advanceTimersByTime(301);
+    });
+
+    expect(document.body.textContent).toMatch(/Attacker losses\s*Unreported/);
+    expect(document.body.textContent).toMatch(/Defender losses\s*Unreported/);
+    expect(document.body.textContent).not.toMatch(/Attacker losses\s*[-−]0|Defender losses\s*[-−]0/);
+  });
+
   it('renders missing formation cohesion as unreported instead of zero', () => {
     vi.useFakeTimers();
     useGameStore.setState({

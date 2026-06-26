@@ -165,4 +165,34 @@ describe('PresidentialToolbar RECORDS button', () => {
             chronicleOpen: false,
         });
     });
+
+    it('keeps Chronicle-targeted decision records in Chronicle when routed by id', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                firedEvents: [
+                    {
+                        id: 'cabinet-crisis',
+                        turn: 8,
+                        title: 'Cabinet crisis response',
+                        narrative: 'The cabinet accepted the policy line.',
+                        category: 'political',
+                        effects: [{ kind: 'authority', description: 'Authority held.' }],
+                        isDecision: true,
+                    },
+                ],
+            },
+        });
+
+        const opened = openArmyHQDecisionConsequenceRecord(useGameStore.getState(), 'event:cabinet-crisis');
+
+        expect(opened).toBe(true);
+        expect(useGameStore.getState()).toMatchObject({
+            armyHQOpen: false,
+            armyHQRecordsSubTab: 'aftermath',
+            focusedDecisionConsequenceId: null,
+            chronicleOpen: true,
+            focusedChronicleDecisionRecordId: 'event:cabinet-crisis',
+        });
+    });
 });

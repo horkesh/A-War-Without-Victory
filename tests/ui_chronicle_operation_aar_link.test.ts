@@ -194,7 +194,7 @@ describe('Chronicle completed-operation AAR visibility', () => {
     });
   });
 
-  it('routes Chronicle presidential decision entries to the exact Records decision receipt', async () => {
+  it('keeps Chronicle presidential decision entries focused in Chronicle', async () => {
     useGameStore.setState({
       ...useGameStore.getInitialState(),
       chronicleOpen: true,
@@ -226,10 +226,10 @@ describe('Chronicle completed-operation AAR visibility', () => {
 
     await waitFor(() => {
       const state = useGameStore.getState();
-      expect(state.chronicleOpen).toBe(false);
-      expect(state.armyHQOpen).toBe(true);
-      expect(state.armyHQRecordsSubTab).toBe('decisions');
-      expect(state.focusedDecisionConsequenceId).toBe('event:rbih_state_identity');
+      expect(state.chronicleOpen).toBe(true);
+      expect(state.armyHQOpen).toBe(false);
+      expect(state.focusedDecisionConsequenceId).toBeNull();
+      expect(state.focusedChronicleDecisionRecordId).toBe('event:rbih_state_identity');
     });
   });
 });

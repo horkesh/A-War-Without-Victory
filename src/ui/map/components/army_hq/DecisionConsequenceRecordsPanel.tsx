@@ -36,12 +36,18 @@ function familyLabel(record: DecisionConsequenceRecord): string {
 export function DecisionConsequenceRecordsPanel() {
   const state = useGameStore((s) => s.loadedGameState);
   const focusedDecisionConsequenceId = useGameStore((s) => s.focusedDecisionConsequenceId);
-  const records = useMemo(() => buildDecisionConsequenceLedger(state, 50), [state]);
+  const records = useMemo(
+    () => buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+      .filter((record) => record.recordTarget === 'records')
+      .slice(0, 50),
+    [state],
+  );
   const visibleRecords = useMemo(() => {
     if (!focusedDecisionConsequenceId || records.some((record) => record.id === focusedDecisionConsequenceId)) {
       return records;
     }
-    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER);
+    return buildDecisionConsequenceLedger(state, Number.MAX_SAFE_INTEGER)
+      .filter((record) => record.recordTarget === 'records');
   }, [focusedDecisionConsequenceId, records, state]);
   const summary = buildDecisionConsequenceLedgerSummary(visibleRecords);
 

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): implement P6 player-polish scout queue
+
+**Type:** UI/read-model/map-rendering/navigation/test/docs polish.
+
+**Fix:** Closed the next P2 scout queue from the Army HQ / sector / brigade information-quality sweep on `codex/p6-player-polish-batch`. Battle marker generation, battle hover tooltips, and settlement battle timelines now share player-facing battle visibility: player-involved battles remain visible, fog-visible enemy contacts remain visible, and hidden enemy-only battles do not leak marker or timeline truth. Sparse battle casualty fields remain `null` with `casualties_reported: false` and render as `Unreported`, not invented zeroes. Army HQ decision consequence records now show only Records-filed receipts; Chronicle-filed presidential decisions stay in Chronicle and route/focus there by record id. Sector staged-order arrows now use only line-holding formations for sector-front origin snapping, so reserve/member-only brigades keep physical `location_osid` origins.
+
+**Verification:** Focused P6 proof passed 11 files / 124 tests with `npm.cmd exec -- vitest run tests/ui_map_battle_casualty_truth.test.ts tests/ui_map_game_state_adapter.test.ts tests/ui_player_visibility.test.ts tests/ui/aar_tooltip_friction_labels.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/records_button_behavior.test.ts tests/ui_chronicle_operation_aar_link.test.ts tests/ui/chronicle_focus_routing.test.ts tests/ui/sector_staged_order_map_feedback.test.ts tests/ui_map_sector_lookup.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck` passed after integration typing fixes. `npm.cmd run qa:player-journeys` passed 43 files / 631 tests. `npm.cmd run qa:first-hour:browser` passed after updating the gate for Chronicle-owned decision receipts and deterministic tileless browser proof. `npm.cmd run qa:live-surface:browser` passed after updating the live drilldown for the same ownership rule. Final focused proof passed 12 files / 130 tests including `tests/ui/first_hour_browser_gate_contract.test.ts`, and `git diff --check` passed. GitHub PR checks, merge, and branch cleanup remain pending at this ledger stage.
+
+**Scope/determinism:** UI/read-model/map rendering/navigation/test/docs polish only. No simulation logic, event evaluator mechanics, scenario data, startup artifact, save schema, baseline/golden manifest, structural fingerprint artifact, calibration, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale persistence, or persisted simulation output changed.
+
+---
+
 ## [2026-06-26] docs: close P5 player-polish merge
 
 **Type:** Docs/process closeout.

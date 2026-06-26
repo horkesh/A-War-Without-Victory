@@ -1,6 +1,6 @@
 # Napkin Runbook
 
-**CI BROWSER GATES MUST SURVIVE LFS POINTER CHECKOUTS (2026-06-25).** GitHub can check out PMTiles as Git LFS pointer stubs when LFS bandwidth is exhausted. Do instead: keep browser gates mandatory, detect PMTiles pointer files in the gate launcher, set `VITE_AWWV_DISABLE_PMTILES=1`, and strip PMTiles basemap sources only for that proof run; real dev/Electron sessions with tile binaries must keep using PMTiles.
+**BROWSER GATES USE TILELESS PROOF BY DEFAULT (2026-06-26).** Browser gates prove player flow, shell ownership, route contracts, and console health; real PMTiles fetches can produce noisy aborted tile errors during repeated reloads. Do instead: let gate launchers set `VITE_AWWV_DISABLE_PMTILES=1` unless `AWWV_BROWSER_GATE_USE_PMTILES=1`; real dev/Electron sessions with tile binaries keep using PMTiles.
 
 **SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
 

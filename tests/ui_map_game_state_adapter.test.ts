@@ -128,6 +128,40 @@ test('parseGameState keeps sparse brigade history combat fields unreported', () 
     assert.strictEqual(brigade?.combatSummary?.win_rate, 0);
 });
 
+test('parseGameState preserves missing battle casualties as unreported in settlement history', () => {
+    const parsed = parseGameState({
+        meta: { turn: 5, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+        },
+        political: {
+            political_controllers: {},
+        },
+        turn_summaries: [{
+            turn: 5,
+            battles: [{
+                osid: 'op:test:a',
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                outcome: 'stalemate',
+                territory_flipped: false,
+            }],
+        }],
+    } as any);
+
+    assert.deepStrictEqual(parsed.battlesByOsid['op:test:a']?.[0], {
+        turn: 5,
+        osid: 'op:test:a',
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        outcome: 'stalemate',
+        attacker_casualties: null,
+        defender_casualties: null,
+        casualties_reported: false,
+        territory_flipped: false,
+    });
+});
+
 test('parseGameState does not synthesize zero condition metrics for compatibility Army HQ rows', () => {
     const parsed = parseGameState({
         meta: { turn: 4, phase: 'war', player_faction: 'RBiH' },

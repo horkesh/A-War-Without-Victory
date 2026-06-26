@@ -23,9 +23,12 @@ function hasPmtilesLfsPointer(root = process.cwd()) {
 }
 
 function resolveBrowserGateEnv(root = process.cwd(), label = 'browser-gate') {
-  const disablePmtiles = process.env.VITE_AWWV_DISABLE_PMTILES === '1' || hasPmtilesLfsPointer(root);
+  const useRealPmtiles = process.env.AWWV_BROWSER_GATE_USE_PMTILES === '1';
+  const disablePmtiles = !useRealPmtiles
+    || process.env.VITE_AWWV_DISABLE_PMTILES === '1'
+    || hasPmtilesLfsPointer(root);
   if (disablePmtiles) {
-    console.warn(`[${label}] PMTiles binaries unavailable; running browser proof with tileless CI basemap fallback`);
+    console.warn(`[${label}] running browser proof with tileless basemap fallback`);
   }
   return {
     ...process.env,

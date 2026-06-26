@@ -1690,22 +1690,45 @@ async function runArchiveInboxDrilldown(page, summary) {
     'data-record-target',
     'Chronicle record route',
   );
+  const chronicleDecisionRecordId = chronicleRecordTarget === 'decision'
+    ? await getVisibleSelectorAttribute(
+      page,
+      chronicleRecordSelector,
+      'data-decision-record-id',
+      'Chronicle decision record id',
+    )
+    : null;
   await activateVisibleControl(page, chronicleRecordSelector);
-  await waitForVisibleSelector(page, '[data-testid="records-content"]');
-  await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
-  if (chronicleRecordTarget === 'operation') {
-    await waitForVisibleSelector(page, '[data-testid="records-subtab-ops"][data-selected="true"]');
-  } else if (chronicleRecordTarget === 'decision') {
-    await waitForVisibleSelector(page, '[data-testid="records-subtab-decisions"][data-selected="true"]');
-    await waitForVisibleSelector(page, '[data-testid="decision-consequence-records-panel"]');
+  if (chronicleRecordTarget === 'decision') {
+    await waitForVisibleSelector(page, '[data-testid="chronicle-overlay"]');
+    if (chronicleDecisionRecordId) {
+      await waitForVisibleSelector(
+        page,
+        `[data-focused-chronicle-decision-record-id="${quoteCssAttributeValue(chronicleDecisionRecordId)}"]`,
+      );
+    }
+    await assertSingleShellSurface(page, 'Chronicle');
+    await captureEvidence(page, summary, 'archive_chronicle_decision_stays_chronicle');
+    summary.evidence.archiveChronicleToRecordsDrilldown = false;
+    summary.evidence.archiveChronicleDecisionStaysChronicle = true;
+    summary.evidence.archiveChronicleDecisionRecordId = chronicleDecisionRecordId;
   } else {
-    await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
+    await waitForVisibleSelector(page, '[data-testid="records-content"]');
+    await waitForVisibleSelector(page, '#army-hq-tab-records[aria-selected="true"]');
+    if (chronicleRecordTarget === 'operation') {
+      await waitForVisibleSelector(page, '[data-testid="records-subtab-ops"][data-selected="true"]');
+    } else {
+      await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
+    }
+    await assertSingleShellSurface(page, 'Records');
+    await captureEvidence(page, summary, 'archive_chronicle_to_records');
+    summary.evidence.archiveChronicleToRecordsDrilldown = true;
+    summary.evidence.archiveChronicleDecisionStaysChronicle = false;
   }
-  await assertSingleShellSurface(page, 'Records');
-  await captureEvidence(page, summary, 'archive_chronicle_to_records');
-  summary.evidence.archiveChronicleToRecordsDrilldown = true;
   summary.evidence.archiveChronicleToRecordsTarget = chronicleRecordTarget;
 
+  await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
+  await waitForVisibleSelector(page, '[data-testid="records-content"]');
   await activateVisibleControl(page, '[data-testid="records-subtab-decisions"]');
   await waitForVisibleSelector(page, '[data-testid="decision-consequence-records-panel"]');
   if (await visibleSelectorCount(page, '[data-testid="decision-consequence-record"][data-record-target="chronicle"]') > 0) {
@@ -1731,8 +1754,9 @@ async function runArchiveInboxDrilldown(page, summary) {
     summary.evidence.archiveRecordsDecisionToChronicleDrilldown = true;
     summary.evidence.archiveRecordsDecisionToChronicleRecordId = chronicleDecisionRecordId;
   } else {
-    await captureEvidence(page, summary, 'archive_records_decision_missing_chronicle_target');
-    throw new Error('Records decision archive did not expose a Chronicle route target');
+    await captureEvidence(page, summary, 'archive_records_no_chronicle_target');
+    summary.evidence.archiveRecordsDecisionToChronicleDrilldown = false;
+    summary.evidence.archiveRecordsExcludeChronicleTargets = true;
   }
 
   await resetToWarMap(page);
