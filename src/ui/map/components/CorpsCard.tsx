@@ -165,6 +165,12 @@ export function CorpsCard({
   const equip = getEquipmentSummary(brigades);
   const stanceKey = stance ?? 'unreported';
   const stanceBorder = STANCE_COLOR[stanceKey] ?? STANCE_COLOR.unreported;
+  const brigadeCountLabel = t(
+    brigades.length === 1 ? 'corpsCard.fieldedBrigades.one' : 'corpsCard.fieldedBrigades.many',
+    { count: brigades.length }
+  );
+  const flipToDetailsLabel = t('corpsCard.showDetails', { corps: displayName });
+  const flipToSummaryLabel = t('corpsCard.showSummary', { corps: displayName });
   const corpsOsids = Array.from(
     new Set(
       brigades
@@ -181,33 +187,45 @@ export function CorpsCard({
   // R5: Stance change confirmation — flash + toast
   const stanceLabel = STANCE_LABEL_KEY[stanceKey] ? t(STANCE_LABEL_KEY[stanceKey]) : t('corpsCard.stance.unreported');
 
+  const headerContent = (
+    <>
+      <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
+      <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
+        <span className="flex items-center gap-0.5">
+          <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
+            <Icon name="personnel" size={11} color={personnelTone.iconColor} />
+          </span>
+          <span
+            data-testid="corps-card-personnel"
+            data-report-state={personnelTone.state}
+            className={personnelTone.textClass}
+          >
+            {totalPersonnelLabel}
+          </span>
+        </span>
+        <span className="text-text-secondary">{brigadeCountLabel}</span>
+      </span>
+    </>
+  );
+
   const cardFront = (
     <div
       className={`rounded-lg border border-panel-border bg-panel-card/90 overflow-visible border-l-3 ${stanceBorder}`}
       style={{ position: 'relative', zIndex: Z.CORPS_CARD_LABEL }}
     >
-      <button
-        type="button"
-        onClick={(e) => { e.stopPropagation(); onHeaderClick?.(); }}
-        className={`w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 ${onHeaderClick ? 'hover:bg-panel-hover transition-colors cursor-pointer' : 'cursor-default'}`}
-      >
-        <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
-        <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
-          <span className="flex items-center gap-0.5">
-            <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
-              <Icon name="personnel" size={11} color={personnelTone.iconColor} />
-            </span>
-            <span
-              data-testid="corps-card-personnel"
-              data-report-state={personnelTone.state}
-              className={personnelTone.textClass}
-            >
-              {totalPersonnelLabel}
-            </span>
-          </span>
-          <span className="text-text-secondary">{brigades.length} brigades</span>
-        </span>
-      </button>
+      {onHeaderClick ? (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onHeaderClick(); }}
+          className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 hover:bg-panel-hover transition-colors cursor-pointer"
+        >
+          {headerContent}
+        </button>
+      ) : (
+        <div className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 cursor-default">
+          {headerContent}
+        </div>
+      )}
 
       {/* Corps health bar — average cohesion */}
       <div className="h-[2px] bg-panel-border/50">
@@ -218,6 +236,8 @@ export function CorpsCard({
       <div
         role="button"
         tabIndex={0}
+        aria-label={flipToDetailsLabel}
+        title={flipToDetailsLabel}
         onClick={handleBodyClick}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -312,6 +332,8 @@ export function CorpsCard({
         <button
           type="button"
           onClick={() => setIsFlipped(false)}
+          aria-label={flipToSummaryLabel}
+          title={flipToSummaryLabel}
           className="text-[10px] text-text-secondary hover:text-text-primary transition-colors font-mono"
         >
           {t('corpsCard.back')}
@@ -372,7 +394,7 @@ export function CorpsCard({
           <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
             <span className="text-text-secondary">{t('corpsCard.personnel')}</span>
             <span className="text-text-primary tabular-nums font-semibold">{totalPersonnelLabel}</span>
-            <span className="text-text-secondary">{t('corpsCard.brigades')}</span>
+            <span className="text-text-secondary">{t('corpsCard.fieldedBrigadesLabel')}</span>
             <span className="text-text-primary tabular-nums font-semibold">{brigades.length}</span>
             <span className="text-text-secondary">{t('corpsCard.avgCohesion')}</span>
             <span className={`tabular-nums font-semibold ${avgCohesion == null ? 'text-text-secondary' : avgCohesion >= 70 ? 'text-emerald-400' : avgCohesion >= 40 ? 'text-amber-400' : 'text-red-400'}`}>

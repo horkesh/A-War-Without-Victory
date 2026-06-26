@@ -121,6 +121,15 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function cleanBrowserGateOutputDir() {
+  ensureDir(OUT_DIR);
+  for (const fileName of ['live_surface_browser_sweep.json', 'live_surface_browser_sweep_failed.json']) {
+    fs.rmSync(path.join(OUT_DIR, fileName), { force: true });
+  }
+  fs.rmSync(SCREENSHOT_DIR, { recursive: true, force: true });
+  ensureDir(SCREENSHOT_DIR);
+}
+
 function buildRecordsAarLiveProofFixtureState() {
   const state = readJson(STARTUP_SAVE_PATH);
   const fixtureState = typeof structuredClone === 'function'
@@ -1088,6 +1097,24 @@ function assertNoConsoleErrors(consoleMessages) {
   }
 }
 
+function isIgnoredNetworkFailure(entry) {
+  const url = String(entry.url ?? '');
+  if (/^(?:data|blob):/i.test(url)) return true;
+  if (/\/favicon\.ico(?:\?|$)/i.test(url)) return true;
+  return entry.failureText === 'net::ERR_ABORTED';
+}
+
+function assertNoNetworkFailures(requestFailures, httpFailures) {
+  const failedRequests = requestFailures.filter((entry) => !isIgnoredNetworkFailure(entry));
+  const failedResponses = httpFailures.filter((entry) => !isIgnoredNetworkFailure(entry));
+  if (failedRequests.length > 0 || failedResponses.length > 0) {
+    throw new Error(`Browser network failures detected: ${JSON.stringify({
+      requestFailures: failedRequests.slice(0, 10),
+      httpFailures: failedResponses.slice(0, 10),
+    }, null, 2)}`);
+  }
+}
+
 function assertNoRawTechnicalTokens(surfaceName, text) {
   const found = [];
   for (const { label, pattern } of RAW_TECHNICAL_TOKENS) {
@@ -1862,8 +1889,7 @@ async function runCodexInternalDrilldown(page, summary) {
 }
 
 async function run() {
-  ensureDir(OUT_DIR);
-  ensureDir(SCREENSHOT_DIR);
+  cleanBrowserGateOutputDir();
   const summary = {
     ok: false,
     url: URL,
@@ -1900,6 +1926,8 @@ async function run() {
       serverPortCleanupVerified: false,
     },
     consoleMessages: [],
+    requestFailures: [],
+    httpFailures: [],
   };
   const server = process.env.AWWV_LIVE_SURFACE_BROWSER_URL ? null : startDevServer();
   let caughtError = null;
@@ -1933,6 +1961,25 @@ async function run() {
         kind: 'pageerror',
         text: error.message,
       }));
+      page.on('requestfailed', (request) => summary.requestFailures.push({
+        url: request.url(),
+        method: request.method(),
+        resourceType: request.resourceType(),
+        failureText: request.failure()?.errorText ?? 'unknown',
+      }));
+      page.on('response', (response) => {
+        const status = response.status();
+        if (status >= 400) {
+          const request = response.request();
+          summary.httpFailures.push({
+            url: response.url(),
+            status,
+            statusText: response.statusText(),
+            method: request.method(),
+            resourceType: request.resourceType(),
+          });
+        }
+      });
 
     await runFoundationalFlow(page, summary);
     await runSurfaceSweep(page, summary);
@@ -1953,6 +2000,7 @@ async function run() {
     await runBattleMarkerLiveProof(page, summary);
     await runRecordsAarFormationLinkLiveProof(page, summary);
       assertNoConsoleErrors(summary.consoleMessages);
+      assertNoNetworkFailures(summary.requestFailures, summary.httpFailures);
       summary.ok = true;
     } finally {
       await browser.close();

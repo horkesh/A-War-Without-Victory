@@ -1103,6 +1103,18 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     const frontlineBrigadeCount = sectorAssignment?.frontlineIds.length ?? 0;
                     const rearBrigadeCount = sectorAssignment?.rearIds.length ?? 0;
                     const sectorLabel = safeSectorLabel(sector.sector_id, sameSectorList);
+                    const sectorOptionReason = !ipc.isAvailable
+                      ? t('formationDetail.sectorOptionReason.bridgeUnavailable')
+                      : isCurrentOverride
+                        ? t('formationDetail.sectorOptionReason.currentOverride')
+                        : isCurrentAutomatic
+                          ? t('formationDetail.sectorOptionReason.currentAutomatic')
+                          : t('formationDetail.sectorOptionReason.select');
+                    const sectorOptionAria = t(currentBrigadeCount === 1 ? 'formationDetail.sectorOptionAria.one' : 'formationDetail.sectorOptionAria.many', {
+                      sector: sectorLabel,
+                      count: currentBrigadeCount,
+                      reason: sectorOptionReason,
+                    });
                     return (
                       <button
                         key={sector.sector_id}
@@ -1113,10 +1125,8 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         data-current-brigade-count={currentBrigadeCount}
                         data-frontline-brigade-count={frontlineBrigadeCount}
                         data-rear-brigade-count={rearBrigadeCount}
-                        aria-label={t(currentBrigadeCount === 1 ? 'formationDetail.sectorOptionAria.one' : 'formationDetail.sectorOptionAria.many', {
-                          sector: sectorLabel,
-                          count: currentBrigadeCount,
-                        })}
+                        aria-label={sectorOptionAria}
+                        title={sectorOptionAria}
                         onClick={() => {
                           if (!ipc.isAvailable || isCurrentAutomatic) return;
                           void assignBrigadeToSectorOverrideAction(

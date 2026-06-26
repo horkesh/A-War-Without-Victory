@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**BROWSER GATES FAIL ON REAL NETWORK/HTTP FAILURES (2026-06-26).** Console-only browser proof misses missing chunks/data and HTTP 4xx/5xx. Do instead: collect `requestfailed` and `response >= 400`, ignore only deterministic noise such as favicon/data/blob and deliberate `net::ERR_ABORTED` cancellations, and clean stale gate artifacts at startup while preserving current-run evidence.
+
 **DISPLACEMENT ATTRIBUTION IS NOT CONTROL TRUTH (2026-06-26).** A displacement row can explain movement pressure without proving who controlled a settlement. Do instead: require explicit control receipts/history for timeline control flips; render displacement as displacement evidence only.
 
 **DECISION ROOM FOCUS MUST RECONCILE TO LIVE CARDS (2026-06-26).** Stored card ids and command-category filters can outlive the current card list after turn/state changes. Do instead: clear missing active cards and stale category filters before rendering an empty or unrelated dossier.

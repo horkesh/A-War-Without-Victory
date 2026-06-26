@@ -162,11 +162,17 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     { id: 'ops'      as const, label: t('corpsDetail.opsSnapshot'), count: corpsOps.length },
     { id: 'orders'   as const, label: t('corpsDetail.orders') },
   ];
+  const primaryOpsPlanningSector = chooseOpsPlanningSector(corpsSectors);
+  const primaryOpsPlanningSectorLabel = primaryOpsPlanningSector
+    ? getPlayerFacingSectorName(primaryOpsPlanningSector.sector_id, corpsSectors)
+    : null;
+  const opsPlanningLabel = primaryOpsPlanningSectorLabel
+    ? t('corpsDetail.prepareOperationInHqForSector', { sector: primaryOpsPlanningSectorLabel })
+    : t('corpsDetail.prepareOperationInHq');
 
   const handleOpenOpsPlanning = () => {
-    const primarySector = chooseOpsPlanningSector(corpsSectors);
-    if (primarySector) {
-      setOpsPlanningContext(selectedCorpsId, primarySector.sector_id);
+    if (primaryOpsPlanningSector) {
+      setOpsPlanningContext(selectedCorpsId, primaryOpsPlanningSector.sector_id);
     } else {
       setLoadError(t('corpsDetail.opsPlanningRequiresSector'));
     }
@@ -293,7 +299,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 );
               })()}
               <div className="flex justify-between">
-                <span className="text-text-secondary">{t('corpsCard.brigades')}</span>
+                <span className="text-text-secondary">{t('corpsCard.fieldedBrigadesLabel')}</span>
                 <span className="text-text-primary tabular-nums">{subordinates.length}</span>
               </div>
               <div className="flex justify-between">
@@ -556,6 +562,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               <button
                 type="button"
                 onClick={handleOpenOpsPlanning}
+                aria-label={opsPlanningLabel}
+                title={opsPlanningLabel}
                 className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
                 {t('corpsDetail.prepareOperationInHq')}
@@ -574,6 +582,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               <button
                 type="button"
                 onClick={handleOpenOpsPlanning}
+                aria-label={opsPlanningLabel}
+                title={opsPlanningLabel}
                 className="w-full text-xs font-sans px-2 py-2.5 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
               >
                 {t('corpsDetail.prepareOperationInHq')}

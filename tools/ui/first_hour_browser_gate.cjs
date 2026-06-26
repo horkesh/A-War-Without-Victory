@@ -65,6 +65,15 @@ function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
+function cleanBrowserGateOutputDir() {
+  ensureDir(OUT_DIR);
+  for (const fileName of ['first_hour_browser_gate.json', 'first_hour_browser_gate_failed.json']) {
+    fs.rmSync(path.join(OUT_DIR, fileName), { force: true });
+  }
+  fs.rmSync(SCREENSHOT_DIR, { recursive: true, force: true });
+  ensureDir(SCREENSHOT_DIR);
+}
+
 async function waitForServer(url, timeoutMs = 45000) {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
@@ -465,6 +474,24 @@ function assertNoConsoleErrors(consoleMessages) {
   }
 }
 
+function isIgnoredNetworkFailure(entry) {
+  const url = String(entry.url ?? '');
+  if (/^(?:data|blob):/i.test(url)) return true;
+  if (/\/favicon\.ico(?:\?|$)/i.test(url)) return true;
+  return entry.failureText === 'net::ERR_ABORTED';
+}
+
+function assertNoNetworkFailures(requestFailures, httpFailures) {
+  const failedRequests = requestFailures.filter((entry) => !isIgnoredNetworkFailure(entry));
+  const failedResponses = httpFailures.filter((entry) => !isIgnoredNetworkFailure(entry));
+  if (failedRequests.length > 0 || failedResponses.length > 0) {
+    throw new Error(`Browser network failures detected: ${JSON.stringify({
+      requestFailures: failedRequests.slice(0, 10),
+      httpFailures: failedResponses.slice(0, 10),
+    }, null, 2)}`);
+  }
+}
+
 function assertRawLabelsAbsent(surfaceName, text) {
   const lower = text.toLowerCase();
   const found = RAW_FIRST_HOUR_LABELS
@@ -703,8 +730,7 @@ async function assertTurnZeroRecordsProvenanceCounts(page, summary, flow) {
 }
 
 async function run() {
-  ensureDir(OUT_DIR);
-  ensureDir(SCREENSHOT_DIR);
+  cleanBrowserGateOutputDir();
   const summary = {
     ok: false,
     url: URL,
@@ -714,6 +740,8 @@ async function run() {
       serverPortCleanupVerified: false,
     },
     consoleMessages: [],
+    requestFailures: [],
+    httpFailures: [],
   };
   const server = process.env.AWWV_FIRST_HOUR_BROWSER_URL ? null : startDevServer();
   let caughtError = null;
@@ -747,6 +775,25 @@ async function run() {
         kind: 'pageerror',
         text: error.message,
       }));
+      page.on('requestfailed', (request) => summary.requestFailures.push({
+        url: request.url(),
+        method: request.method(),
+        resourceType: request.resourceType(),
+        failureText: request.failure()?.errorText ?? 'unknown',
+      }));
+      page.on('response', (response) => {
+        const status = response.status();
+        if (status >= 400) {
+          const request = response.request();
+          summary.httpFailures.push({
+            url: response.url(),
+            status,
+            statusText: response.statusText(),
+            method: request.method(),
+            resourceType: request.resourceType(),
+          });
+        }
+      });
 
       for (const flow of FACTION_OPENING_FLOWS) {
         await runFoundationalFlow(page, summary, flow);
@@ -756,6 +803,7 @@ async function run() {
       }
 
       assertNoConsoleErrors(summary.consoleMessages);
+      assertNoNetworkFailures(summary.requestFailures, summary.httpFailures);
       summary.ok = true;
     } finally {
       await browser.close();

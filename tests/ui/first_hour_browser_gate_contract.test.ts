@@ -17,7 +17,15 @@ describe('first-hour browser QA gate contract', () => {
 
     expect(tool).toContain('.tmp_first_hour_browser_gate');
     expect(tool).toContain('consoleMessages');
+    expect(tool).toContain('requestFailures');
+    expect(tool).toContain('httpFailures');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('assertNoNetworkFailures');
+    expect(tool).toContain("page.on('requestfailed'");
+    expect(tool).toContain("page.on('response'");
+    expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('cleanBrowserGateOutputDir');
+    expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
@@ -71,7 +79,15 @@ describe('live surface browser sweep contract', () => {
 
     expect(tool).toContain('.tmp_live_surface_browser_sweep');
     expect(tool).toContain('consoleMessages');
+    expect(tool).toContain('requestFailures');
+    expect(tool).toContain('httpFailures');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('assertNoNetworkFailures');
+    expect(tool).toContain("page.on('requestfailed'");
+    expect(tool).toContain("page.on('response'");
+    expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('cleanBrowserGateOutputDir');
+    expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
