@@ -6,7 +6,7 @@
 
 ## Scope
 
-P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-model/test/docs packet. It does not reopen packaging, calibration, startup construction, scenario data, save schema, baseline manifests, structural fingerprint artifacts, or Srebrenica/Zepa fall delivery. Srebrenica/Zepa fall receipts remain event-owned.
+P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-model/test/docs packet. It does not reopen packaging, calibration, startup construction, scenario data, save schema, structural fingerprint artifacts, or Srebrenica/Zepa fall delivery. It does update the scenario baseline manifest narrowly for `apr1992_52w` `final_save.json` and the dependent `run_summary.json` hash because saved `turn_summaries[*].battles[*]` now preserve casualty provenance. Srebrenica/Zepa fall receipts remain event-owned.
 
 ## Implemented
 
@@ -27,11 +27,14 @@ P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 - `npm.cmd run qa:live-surface:browser` passed; generated `.tmp_live_surface_browser_sweep` evidence was removed after inspection.
 - `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk-size warnings.
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified title screen, RBiH war-start splash, Army HQ, and 1st Corps Order of Battle drilldown with no visible error banners, no console errors, no raw Windows paths, and no visible `NaN` / `Infinity`.
+- GitHub Event System CI baseline failure was reproduced locally. Parent/current artifact comparison showed only `apr1992_52w/final_save.json` and dependent `run_summary.json` changed; `activity_summary.json`, `control_delta.json`, `end_report.md`, `formation_delta.json`, `watched_operations.json`, and `weekly_report.jsonl` stayed byte-identical. The final-save structural diff is limited to `turn_summaries[*].battles[*]` casualty provenance (`casualties_reported` plus sourced raw defender casualties replacing prior zero fallbacks).
+- `UPDATE_BASELINES=1 node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts` refreshed only those two `apr1992_52w` manifest hashes.
+- `node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts` passed after the narrow manifest refresh.
 - `git diff --check` passed with the existing CRLF normalization warning on `src/ui/map/utils/operations.ts`.
 
 ## Remaining Gates
 
-- PR #455 is open with no initial comments, reviews, or review threads. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
+- PR #455 is open with no initial comments or review threads; Codex posted an automated review shell but no actionable thread. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
 
 ## Pyrrhic Roles
 
