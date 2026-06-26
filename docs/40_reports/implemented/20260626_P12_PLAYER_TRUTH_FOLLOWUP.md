@@ -11,7 +11,7 @@ P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 ## Implemented
 
 - App-local stale selection ids now fail closed: Officer Matter modals no longer fall back to the first pending officer event, and Decision Room selected-card misses no longer open the first unrelated dossier.
-- OOB ungrouped command rows are no longer executable corps headers: ungrouped headers do not select the first sorted brigade, and ungrouped rows do not expose an Order of Battle route.
+- OOB ungrouped command rows are no longer executable corps headers: ungrouped headers do not select the first sorted brigade, and ungrouped rows do not expose an Order of Battle route. No-corps independent brigades remain inspectable through explicit individual field-inspection rows under that aggregate.
 - Operation read models preserve sparse assessment truth: non-finite preparation, assessment, force-ratio, postponement, participant cohesion/personnel, and sector-intel confidence values remain unreported instead of becoming zero readiness.
 - Operation phase labels now respect `phase_unreported` across OOB, Corps Detail, and Corps Front; sparse active operations render `Status pending` instead of false planning/execution truth.
 - Turn summary compilation now carries battle casualty provenance. Raw attack-resolution casualties are used when present; otherwise brigade-history casualties are used; otherwise attacker/defender casualties remain `null` with `casualties_reported: false`.
@@ -30,11 +30,12 @@ P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 - GitHub Event System CI baseline failure was reproduced locally. Parent/current artifact comparison showed only `apr1992_52w/final_save.json` and dependent `run_summary.json` changed; `activity_summary.json`, `control_delta.json`, `end_report.md`, `formation_delta.json`, `watched_operations.json`, and `weekly_report.jsonl` stayed byte-identical. The final-save structural diff is limited to `turn_summaries[*].battles[*]` casualty provenance (`casualties_reported` plus sourced raw defender casualties replacing prior zero fallbacks).
 - `UPDATE_BASELINES=1 node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts` refreshed only those two `apr1992_52w` manifest hashes.
 - `node node_modules/tsx/dist/cli.mjs tools/scenario_runner/run_baseline_regression.ts` passed after the narrow manifest refresh.
+- Codex review follow-up for ungrouped OOB drilldown passed `npm.cmd exec -- vitest run tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (12 tests) and `npm.cmd run typecheck -- --pretty false`.
 - `git diff --check` passed with the existing CRLF normalization warning on `src/ui/map/utils/operations.ts`.
 
 ## Remaining Gates
 
-- PR #455 is open with no initial comments or review threads; Codex posted an automated review shell but no actionable thread. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
+- PR #455 is open. The actionable Codex thread on ungrouped OOB drilldown is addressed locally and still needs push/recheck/resolution. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
 
 ## Pyrrhic Roles
 

@@ -354,6 +354,10 @@ export function OOBSidebar() {
                   );
                   const hqEntries = Array.from(reserveByCorps.entries()).filter(([id]) => armyHqIds.has(id));
                   const corpsEntriesById = new Map(Array.from(byCorps.entries()).filter(([id]) => !armyHqIds.has(id)));
+                  const ungroupedReserveBrigades = reserveByCorps.get('_ungrouped') ?? [];
+                  if (ungroupedReserveBrigades.length > 0) {
+                    corpsEntriesById.set('_ungrouped', ungroupedReserveBrigades);
+                  }
                   for (const command of phantomCommandFormations) {
                     if (corpsEntriesById.has(command.id)) continue;
                     corpsEntriesById.set(command.id, []);
@@ -499,35 +503,62 @@ export function OOBSidebar() {
                               ? getSyntheticJnaCommandPresentation(corpsFormation, corpsOps, loadedGameState)
                               : null;
                             return (
-                              <CorpsCard
-                                key={corpsId}
-                                corpsId={corpsId}
-                                corpsName={corpsId === '_ungrouped'
-                                  ? 'Ungrouped'
-                                  : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
-                                brigades={brigades}
-                                faction={faction}
-                                stance={getCorpsStance(corpsId, faction)}
-                                onHeaderClick={corpsId !== '_ungrouped'
-                                  ? () => setSelectedCorpsId(corpsId)
-                                  : undefined}
-                                onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                                onMouseEnter={() => setHoveredCorpsId(corpsId)}
-                                onMouseLeave={() => setHoveredCorpsId(null)}
-                                onOrbatClick={corpsId !== '_ungrouped'
-                                  ? () => setSelectedOrbatCorpsId(corpsId)
-                                  : undefined}
-                                sectorCount={corpsSectors.length}
-                                activeOperationName={displayedOp?.display_name}
-                                activeOperationPhase={displayedOp?.phase}
-                                activeOperationPhaseUnreported={displayedOp?.phase_unreported}
-                                commanderName={syntheticCommand?.commanderName ?? commander?.name}
-                                commanderActing={syntheticCommand ? false : commander?.acting}
-                                commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
-                                commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {
-                                  operation: syntheticCommand.operationName ?? t('corpsCard.syntheticJnaOperationFallback'),
-                                }) : undefined}
-                              />
+                              <div key={corpsId} className="space-y-1">
+                                <CorpsCard
+                                  corpsId={corpsId}
+                                  corpsName={corpsId === '_ungrouped'
+                                    ? 'Ungrouped'
+                                    : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
+                                  brigades={brigades}
+                                  faction={faction}
+                                  stance={getCorpsStance(corpsId, faction)}
+                                  onHeaderClick={corpsId !== '_ungrouped'
+                                    ? () => setSelectedCorpsId(corpsId)
+                                    : undefined}
+                                  onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
+                                  onMouseEnter={() => setHoveredCorpsId(corpsId)}
+                                  onMouseLeave={() => setHoveredCorpsId(null)}
+                                  onOrbatClick={corpsId !== '_ungrouped'
+                                    ? () => setSelectedOrbatCorpsId(corpsId)
+                                    : undefined}
+                                  sectorCount={corpsSectors.length}
+                                  activeOperationName={displayedOp?.display_name}
+                                  activeOperationPhase={displayedOp?.phase}
+                                  activeOperationPhaseUnreported={displayedOp?.phase_unreported}
+                                  commanderName={syntheticCommand?.commanderName ?? commander?.name}
+                                  commanderActing={syntheticCommand ? false : commander?.acting}
+                                  commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
+                                  commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {
+                                    operation: syntheticCommand.operationName ?? t('corpsCard.syntheticJnaOperationFallback'),
+                                  }) : undefined}
+                                />
+                                {corpsId === '_ungrouped' && brigades.length > 0 && (
+                                  <div className="ml-2 border-l border-panel-border/60 pl-2 space-y-0.5">
+                                    {brigades.map((brigade) => {
+                                      const brigadeName = getLocalizedFormationName(brigade, locale);
+                                      const inspectLabel = t('orbat.inspectOnField', { formation: brigadeName });
+                                      return (
+                                        <button
+                                          key={brigade.id}
+                                          type="button"
+                                          data-testid="oob-ungrouped-brigade"
+                                          data-formation-id={brigade.id}
+                                          aria-label={inspectLabel}
+                                          title={inspectLabel}
+                                          className="block w-full truncate rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1 text-left text-[10px] text-accent-gold/80 hover:border-accent-gold/50 hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
+                                          onMouseEnter={() => setHoveredOsids(brigade.location_osid ? [brigade.location_osid] : [])}
+                                          onMouseLeave={() => setHoveredOsids([])}
+                                          onClick={() => inspectOnField(useGameStore.getState(), brigade.location_osid
+                                            ? { kind: 'field-formation-at-settlement', formationId: brigade.id, osid: brigade.location_osid }
+                                            : { kind: 'field-formation', formationId: brigade.id })}
+                                        >
+                                          {brigadeName}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
                         </>

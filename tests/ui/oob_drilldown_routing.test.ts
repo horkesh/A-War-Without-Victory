@@ -339,7 +339,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).not.toMatch(/\badequate\b/);
   });
 
-  it('does not select the first ungrouped brigade when the ungrouped header is clicked', () => {
+  it('exposes no-corps brigades as individual drilldowns without fake ungrouped ORBAT routing', () => {
     const state = makeState();
     state.formations = [
       ...(state.formations ?? []),
@@ -395,6 +395,18 @@ describe('OOBSidebar drilldown routing', () => {
     expect(useGameStore.getState().selectedFormationId).toBeNull();
     expect(useGameStore.getState().selectedOrbatCorpsId).toBe('vrs_field_corps');
     expect(useGameStore.getState().selectedOrbatCorpsId).not.toBe('_ungrouped');
+
+    const independentButton = screen.getByTestId('oob-ungrouped-brigade');
+    expect(independentButton.getAttribute('data-formation-id')).toBe('independent_bde');
+    expect(independentButton.getAttribute('aria-label')).toBe('Inspect Independent Brigade on field');
+    expect(independentButton.getAttribute('title')).toBe('Inspect Independent Brigade on field');
+    fireEvent.click(independentButton);
+
+    const store = useGameStore.getState();
+    expect(store.selectedFormationId).toBe('independent_bde');
+    expect(store.selectedOrbatCorpsId).toBeNull();
+    expect(store.selectedCorpsId).toBeNull();
+    expect(derivePanelRailState(store)).toEqual({ primary: 'formation', secondary: null });
   });
 
   it('renders sparse mobilization reports as unreported without hiding explicit zeroes', () => {
