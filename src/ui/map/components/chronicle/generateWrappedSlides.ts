@@ -254,7 +254,7 @@ export function generateWrappedSlides(
         }
         totalDisplaced += s?.displacement_total ?? 0;
     }
-    if (totalCasualties === 0 && sawUnreportedCostCasualties) totalCasualties = null;
+    if (sawUnreportedCostCasualties) totalCasualties = null;
     slides.push({
         id: 'what_it_cost',
         title: t('wrapped.slide.cost.title'),

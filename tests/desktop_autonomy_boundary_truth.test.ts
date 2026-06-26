@@ -175,4 +175,17 @@ describe('op-proposal decision card builder (desktop boundary)', () => {
     expect(buildOpProposalCardData(null, [proposal])).toHaveLength(1);
     expect(buildOpProposalCardData({}, [])).toEqual([]);
   });
+
+  it('does not attach stale proposal plan ids to the first active desktop operation', () => {
+    const staleProposal = { ...proposal, proposed_action: 'APPROVE_OP:1st_corps:stale_plan' };
+    const cards = buildOpProposalCardData(state({ force_ratio_estimate: 0.7, commander_assessment: 'abort' }), [staleProposal]);
+
+    expect(cards).toHaveLength(1);
+    expect(cards[0].op_id).toBeNull();
+    expect(cards[0].op_name).toBeNull();
+    expect(cards[0].commander).toBeNull();
+    expect(cards[0].force_ratio_estimate).toBeNull();
+    expect(cards[0].commander_assessment).toBeNull();
+    expect(cards[0].override_available).toBe(false);
+  });
 });

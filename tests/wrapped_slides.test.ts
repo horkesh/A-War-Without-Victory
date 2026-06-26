@@ -227,6 +227,25 @@ describe('generateWrappedSlides', () => {
             expect(slide.data?.totalCasualties).toBeNull();
             expect(slide.data?.totalDisplaced).toBe(500);
         });
+
+        it('does not publish partial campaign casualty totals when any battle casualty source is unreported', () => {
+            const state = makeMinimalState({
+                turnSummaries: [
+                    makeTurnSummary(1, {
+                        battles: [{ attacker_casualties: 120, defender_casualties: 80 }],
+                        displacement_total: 500,
+                    }),
+                    makeTurnSummary(2, {
+                        battles: [{ attacker_faction: 'RBiH', defender_faction: 'RS', casualties_reported: false }],
+                        displacement_total: 1000,
+                    }),
+                ],
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'what_it_cost')!;
+            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.data?.totalCasualties).toBeNull();
+            expect(slide.data?.totalDisplaced).toBe(1500);
+        });
     });
 
     describe('world_watching slide', () => {

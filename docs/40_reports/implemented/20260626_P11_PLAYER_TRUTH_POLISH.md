@@ -15,8 +15,9 @@ P11 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 - Formation Detail and OOB sector controls sanitize raw sector/command identifiers in title and accessible copy.
 - Operation lifecycle read models require finite objective, momentum, and supply-readiness values.
 - Back-the-Officer stale proposal plan ids no longer bind to the first operation as a fallback.
+- The desktop autonomy IPC mirror now follows the same stale proposal behavior, so live Electron proposal cards do not bind a stale plan id to the first active operation or publish the stale plan id as an operation name.
 - G-2 prediction normalization keeps missing prediction dimensions nullable instead of defaulting to zero or `stalemate`, while preserving explicit reported zeroes.
-- War Summary, Chronicle, and Wrapped campaign-cost surfaces distinguish absent casualty/displacement sources from explicit reported zeroes.
+- War Summary, Chronicle, and Wrapped campaign-cost surfaces distinguish absent or partial casualty/displacement sources from explicit reported zeroes.
 
 ## Verification
 
@@ -29,6 +30,7 @@ P11 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 - `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk warnings.
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, war-start splash, identity brief, foundational `What Is Bosnia?` blocker, named opening corps commanders, 1st Corps detail, and sector rows without sampled raw-label/title/aria leaks.
 - Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains for the active browser/dev session.
+- GitHub Codex review follow-up proof passed `npm.cmd exec -- vitest run tests/desktop_autonomy_boundary_truth.test.ts tests/wrapped_slides.test.ts --pool=forks --reporter=dot`: 2 files / 36 tests.
 
 ## Remaining Gates
 
