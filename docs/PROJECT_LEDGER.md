@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] docs: close P16 provenance runtime hardening merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the P16 implementation report, command board, master roadmap, project ledger, and workflow notes with the verified PR #458 closeout: merge to `main` at `9adce5a4866907f97d5a01071c91728ba8f46ded`, green GitHub checks, no comments/reviews/review threads, local exact package-probe proof, and branch/worktree cleanup in progress.
+
+**Verification:** `gh pr checks 458 --watch=false` showed Event System validation x2, Desktop Release Guard (`desktop-release-check` and `desktop-packaged-runtime-probe`), Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. `gh pr view 458` showed merge state `CLEAN`, no comments/reviews, no review threads, and merge commit `9adce5a4866907f97d5a01071c91728ba8f46ded`. Direct GraphQL review-thread inspection returned no review threads. Local P16 proof included `npm.cmd run desktop:package:probe` with glyph routes 200, PMTiles range 206, tactical windows using `disable_pmtiles=1`, and `runtime_failure_checks: []`.
+
+**Scope/determinism:** Documentation/process closeout only. No code, simulation logic, scenario source data, event evaluator mechanics, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] fix(desktop): repair P16 packaged runtime glyph/resource proof
 
 **Type:** Desktop packaging/runtime-probe/build guardrail repair.

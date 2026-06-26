@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-26
 **Branch:** `codex/p16-provenance-runtime-hardening`
-**Result:** Local candidate implemented and verified with full local player/browser/release gates; PR/merge closeout still pending.
+**Result:** Merged to `main` through PR #458 at `9adce5a4866907f97d5a01071c91728ba8f46ded` after local proof and all required GitHub checks passed.
 
 ## Summary
 - Preserved missing corps-command telemetry as unreported instead of coercing missing source rows into healthy zero strain.
@@ -55,6 +55,8 @@
 - Packaged-probe CI repair proof passed: `node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (2 files / 13 tests).
 - `npm.cmd run desktop:map:build` passed and produced all eight glyph PBF ranges under `dist\tactical-map\font`.
 - `npm.cmd run desktop:package:probe` passed; the manifest recorded glyph routes at HTTP 200, PMTiles Range `bytes=0-15` at HTTP 206, tactical operational/sandbox windows with `disable_pmtiles=1`, and `runtime_failure_checks: []`.
+- GitHub PR #458 passed Event System validation x2, Desktop Release Guard (`desktop-release-check` and `desktop-packaged-runtime-probe`), Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite before merge.
+- `gh pr view 458` and direct API/GraphQL sweeps showed no comments, no reviews, and no review threads before merge.
 - A broad `npm.cmd run test:ui` attempt exceeded the local 4-minute timeout and is not used as completion proof.
 
 ## Files Changed
@@ -74,6 +76,7 @@
 | `.github/workflows/README.md` | Document desktop path-set expansion |
 | `tests/*` | Focused regression coverage for UI provenance and packaged runtime guardrails |
 
-## Next Steps
-- Push the branch, open PR, inspect GitHub checks and Codex comments, then merge and prune only after green.
-- Continue the next non-BCS owner-playthrough polish packet after P16 is integrated.
+## Closeout
+- PR #458 merged to `main` at `9adce5a4866907f97d5a01071c91728ba8f46ded`.
+- Remote/local branch and worktree cleanup performed after merge.
+- Continue the next non-BCS owner-playthrough polish packet from the active D2 information-quality plan.
