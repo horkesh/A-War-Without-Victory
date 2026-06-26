@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P11 player-truth polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P11 implementation report, and ledger with the verified PR #454 closeout: merge to `main` at `12cef62f3`, green GitHub checks, resolved Codex review threads, generated browser evidence cleanup, closed Faraday/Leibniz/Ramanujan scouts, and recorded the P12 queue from their reports.
+
+**Verification:** `gh pr checks 454 --watch=false` showed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. Direct GraphQL review-thread inspection showed both Codex review threads resolved. `gh pr view 454` showed merged state and merge commit `12cef62f3`.
+
+**Scope/determinism:** Documentation/process closeout only. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] fix(ui): implement P11 player-truth polish
 
 **Type:** UI/read-model/routing/provenance/test/docs polish.

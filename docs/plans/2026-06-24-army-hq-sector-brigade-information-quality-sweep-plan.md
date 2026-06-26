@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P10 at `b3d4ea76e`; active local packet is P11 on `codex/p11-player-truth-polish`.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P11 at `12cef62f3`.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -8,7 +8,7 @@
 
 ## Current Queue 2026-06-26
 
-P10 is merged and green. P11 is implemented locally from the next closed scout reports without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
+P11 is merged and green. It was implemented from the next closed scout reports without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
 
 - Corps Detail sector drilldown now preserves authored friendly OSID anchors instead of dropping the battlefield context.
 - Sector entrenchment/dig-in aggregates carry reported-field counts; Corps Front renders exact, partial, or unreported values instead of inventing zeros from missing line-holder data.
@@ -18,7 +18,16 @@ P10 is merged and green. P11 is implemented locally from the next closed scout r
 - G-2 prediction normalization preserves sparse payload truth with nullable force ratio, intel confidence, casualties, predicted outcome, axis readiness, and defense strength; explicit reported zeroes still remain exact.
 - War Summary, Chronicle, and Wrapped campaign-cost surfaces distinguish missing casualty/displacement sources from explicit reported zeroes.
 
-P11 local verification passed: focused player-truth proof 10 files / 229 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 659 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `npm.cmd run desktop:map:build` with existing non-fatal Vite warnings; `git diff --check` with the existing CRLF normalization warning; and manual in-app browser proof on `http://127.0.0.1:3003/` covering RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational blocker routing, opening corps commander names, 1st Corps detail, and sector rows with no sampled raw-label leaks. Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains only for the active browser/dev session. Remaining before closeout: GitHub PR checks/comments, merge, branch prune, and clean-worktree proof. Fall receipts remain event-owned.
+P11 verification passed: focused player-truth proof 10 files / 229 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 659 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `npm.cmd run desktop:map:build` with existing non-fatal Vite warnings; `git diff --check`; manual in-app browser proof on `http://127.0.0.1:3003/`; review-fix proof 2 files / 36 tests; and GitHub PR #454 checks green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression, structural fingerprint, Typecheck, and Full Suite. Codex review threads were resolved before merge. Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains only for the active browser/dev session. Fall receipts remain event-owned.
+
+Next P12 queue from closed Faraday/Leibniz/Ramanujan scouts:
+
+- App-local modal ids and officer-matter fallback-to-first behavior after load/turn changes.
+- Operation assessment finite guards for preparation, assessment, force-ratio, and postponement fields.
+- Decision Room selected-card miss behavior; stale card ids must not open the first unrelated dossier.
+- OOB ungrouped command rows must not select the first brigade by sorted id.
+- Turn Aftermath/Chronicle remaining sparse-cost provenance, including absent battle/displacement data.
+- Army HQ/Corps Detail sparse command-equipment and operation-slot truth.
 
 ## Progress 2026-06-24
 

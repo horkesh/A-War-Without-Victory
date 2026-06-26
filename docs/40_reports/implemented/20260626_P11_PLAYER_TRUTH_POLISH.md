@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-26  
 **Branch:** `codex/p11-player-truth-polish`  
-**Status:** Local implementation and broad proof complete; GitHub verification, merge, branch cleanup, and final clean-worktree proof still pending.
+**Status:** Merged through PR #454 at `12cef62f3`; branch/worktree cleanup tracked in the command board closeout.
 
 ## Scope
 
@@ -31,10 +31,12 @@ P11 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, war-start splash, identity brief, foundational `What Is Bosnia?` blocker, named opening corps commanders, 1st Corps detail, and sector rows without sampled raw-label/title/aria leaks.
 - Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains for the active browser/dev session.
 - GitHub Codex review follow-up proof passed `npm.cmd exec -- vitest run tests/desktop_autonomy_boundary_truth.test.ts tests/wrapped_slides.test.ts --pool=forks --reporter=dot`: 2 files / 36 tests.
+- GitHub PR #454 checks passed: Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite.
+- The two Codex review threads were resolved before merge.
 
 ## Remaining Gates
 
-Before closeout: GitHub PR checks/comments, merge, branch prune, and clean-worktree proof.
+Before next implementation batch: final branch prune and clean-worktree proof after this docs closeout.
 
 ## Pyrrhic Roles
 
