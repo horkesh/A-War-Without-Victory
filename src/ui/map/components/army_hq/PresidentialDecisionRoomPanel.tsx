@@ -499,6 +499,20 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
     () => new Map(view.cards.map((card) => [card.id, card])),
     [view.cards],
   );
+  useEffect(() => {
+    if (activeCardId && !cardsById.has(activeCardId)) {
+      setActiveCardId(null);
+    }
+  }, [activeCardId, cardsById]);
+  useEffect(() => {
+    if (
+      activeCommandCategoryId
+      && view.cards.length > 0
+      && !view.cards.some((card) => cardBelongsToPresidentialCommandCategory(card, activeCommandCategoryId))
+    ) {
+      setActiveCommandCategoryId(null);
+    }
+  }, [activeCommandCategoryId, view.cards]);
 
   if (!view.hasPlayerFaction) {
     return (

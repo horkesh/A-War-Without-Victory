@@ -588,7 +588,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       'chronicle',
     ]);
     expect(byId['presidential-inbox']).toMatchObject({
-      label: 'Presidential Inbox',
+      label: "President's Desk",
       count: 1,
       urgentCount: 1,
       cardIds: ['review:pending'],
@@ -889,7 +889,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(loopsById.cost.summary).toContain('stavke cijene');
     expect(loopsById.report.summary).toContain('zapisana poteza');
     expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Štaba armije');
-    expect(handoffsById['presidential-inbox'].label).toBe('Predsjednički inbox');
+    expect(handoffsById['presidential-inbox'].label).toBe('Predsjednički sto');
     expect(handoffsById['presidential-inbox'].label).not.toBe('Presidential Inbox');
     expect(handoffsById['turn-aftermath-records'].label).toBe('Zapisi posljedica poteza');
     expect(handoffsById.chronicle.actionLabel).toBe('Otvori Hroniku');
@@ -937,12 +937,12 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
 
-    expect(cardsById['review:pending'].sourceLabel).toBe('Predsjednički inbox');
+    expect(cardsById['review:pending'].sourceLabel).toBe('Predsjednički sto');
     expect(cardsById['paramilitary:pending'].actionLabel).toBe('Pregledaj raspoređivanje');
     expect(cardsById['manifest:peace_plan'].sourceLabel).toBe('Mirovni prijedlog');
-    expect(cardsById['manifest:peace_plan'].actionLabel).toBe('Otvori inbox');
+    expect(cardsById['manifest:peace_plan'].actionLabel).toBe('Otvori sto');
     expect(cardsById['manifest:convoy_decision'].sourceLabel).toBe('Pregled konvoja');
-    expect(cardsById['manifest:convoy_decision'].actionLabel).toBe('Otvori inbox');
+    expect(cardsById['manifest:convoy_decision'].actionLabel).toBe('Otvori sto');
     expect(Object.values(cardsById).map((card) => `${card.sourceLabel} ${card.actionLabel}`).join('\n'))
       .not.toMatch(/Presidential Inbox|Diplomatic channel|Humanitarian channel|Review deployment|Review proposal|Review convoy/);
 

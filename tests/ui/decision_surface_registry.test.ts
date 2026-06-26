@@ -209,11 +209,11 @@ describe('decision surface registry', () => {
     });
 
     expect(view.items.find((item) => item.id === 'manifest:peace_plan')).toMatchObject({
-      actionLabel: 'Open Inbox',
+      actionLabel: "Open President's Desk",
       sourceLabel: 'Peace proposal',
     });
     expect(view.items.find((item) => item.id === 'manifest:convoy_decision')).toMatchObject({
-      actionLabel: 'Open Inbox',
+      actionLabel: "Open President's Desk",
       sourceLabel: 'Convoy review',
     });
     expect(getDecisionSurface('peace_plan')).toMatchObject({

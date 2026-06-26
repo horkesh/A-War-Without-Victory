@@ -125,7 +125,7 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(displacements.length).toBeGreaterThan(0);
     });
 
-    it('preserves displacement inference when startController is null (backward compat)', () => {
+    it('does not infer control from displacement when startController is null', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {
             startController: null,
@@ -133,14 +133,11 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         });
 
         const controlFlips = events.filter(e => e.type === 'control_flip');
-        expect(controlFlips).toHaveLength(1);
-        expect(controlFlips[0].faction).toBe('RS');
-        expect(controlFlips[0].title).toContain('VRS');
-        expect(controlFlips[0].title).toContain('took control');
-        expect(controlFlips[0].detail).toBe('inferred from displacement');
+        expect(controlFlips).toHaveLength(0);
+        expect(events.filter(e => e.type === 'displacement')).toHaveLength(1);
     });
 
-    it('preserves displacement inference when caused_by differs from startController', () => {
+    it('does not infer control when caused_by differs from startController', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {
             startController: 'RBiH',
@@ -148,23 +145,17 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         });
 
         const controlFlips = events.filter(e => e.type === 'control_flip');
-        // Turn-0 for RBiH + inferred RS takeover at turn 5
-        expect(controlFlips).toHaveLength(2);
+        expect(controlFlips).toHaveLength(1);
 
         const turn0 = controlFlips.find(e => e.turn === 0);
         expect(turn0).toBeDefined();
         expect(turn0!.faction).toBe('RBiH');
         expect(turn0!.detail).toBe('initial control');
-
-        const inferred = controlFlips.find(e => e.turn === 5);
-        expect(inferred).toBeDefined();
-        expect(inferred!.faction).toBe('RS');
-        expect(inferred!.title).toContain('VRS');
-        expect(inferred!.title).toContain('took control');
-        expect(inferred!.detail).toBe('inferred from displacement');
+        expect(controlFlips.find(e => e.turn === 5)).toBeUndefined();
+        expect(events.filter(e => e.type === 'displacement')).toHaveLength(1);
     });
 
-    it('preserves displacement inference when persisted control_events exist', () => {
+    it('keeps persisted control_events as the only control source when displacement also exists', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {
             startController: 'RS',
@@ -175,13 +166,11 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         });
 
         const controlFlips = events.filter(e => e.type === 'control_flip');
-        // turn-0 initial + turn 10 persisted + turn 15 inferred (persistedFlipCount > 0, not suppressed)
-        expect(controlFlips).toHaveLength(3);
+        expect(controlFlips).toHaveLength(2);
 
         const turn15 = controlFlips.find(e => e.turn === 15);
-        expect(turn15).toBeDefined();
-        expect(turn15!.faction).toBe('RS');
-        expect(turn15!.detail).toBe('inferred from displacement');
+        expect(turn15).toBeUndefined();
+        expect(events.filter(e => e.type === 'displacement')).toHaveLength(1);
     });
 
     it('RS-held OSID: suppresses false VRS takeover from displacement', () => {
@@ -206,6 +195,25 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         // Displacement still recorded
         const disp = events.filter(e => e.type === 'displacement');
         expect(disp.length).toBeGreaterThan(0);
+    });
+
+    it('does not infer control flips from displacement attribution alone', () => {
+        const osid = 'op:test:test_1';
+        const events = callTimeline(osid, {
+            startController: 'RBiH',
+            displacementEvents: [
+                makeDispEvent(3, osid, 'RS'),
+            ],
+        });
+
+        const controlFlips = events.filter(e => e.type === 'control_flip');
+        expect(controlFlips).toHaveLength(1);
+        expect(controlFlips[0].turn).toBe(0);
+        expect(controlFlips[0].faction).toBe('RBiH');
+        expect(controlFlips.map(e => e.detail).join(' ')).not.toContain('inferred from displacement');
+
+        const displacementRows = events.filter(e => e.type === 'displacement');
+        expect(displacementRows).toHaveLength(1);
     });
 
     it('uses operation display names instead of raw identifiers in operation timeline entries', () => {

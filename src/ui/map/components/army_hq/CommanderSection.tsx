@@ -70,6 +70,13 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                     </div>
                 </div>
             ) : commanderDisplay ? (
+                commanderDisplay.source === 'unreported' ? (
+                <div className="space-y-4">
+                    <div className="text-[12px] text-text-secondary font-mono italic p-3 bg-panel-bg border border-panel-border">
+                        {t('commanderSection.sourceUnreported')}
+                    </div>
+                </div>
+                ) : (
                 <div className="space-y-4">
                     {commanderDisplay.acting && (
                         <div className="text-[10px] font-bold uppercase tracking-widest text-amber-500 bg-amber-500/5 px-3 py-1.5 border border-amber-500/20">
@@ -78,6 +85,7 @@ export function CommanderSection({ corps, gameState, operations }: CommanderSect
                     )}
                     <CommanderDisplayPanel display={commanderDisplay} label={t('corpsDetail.corpsCommander')} />
                 </div>
+                )
             ) : (
                 <div className="space-y-4">
                     <div className="text-[12px] text-red-500/80 font-mono italic p-3 bg-red-500/5 border border-red-500/20">

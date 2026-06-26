@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P12 at `d47736be6`; GitHub PR #455 is green and merged, local/remote branch refs are pruned, and one clean `main` worktree remains.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P12 at `d47736be6`; current P13/P14 packet is implemented and locally verified on `codex/p13-player-truth-batch`, with GitHub closeout pending. Packaging remains paused, local/remote P12 refs are pruned, and one clean `main` worktree remains behind the active branch.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -39,6 +39,30 @@ P12 local implementation on `codex/p12-player-truth-followup` now covers that qu
 - Compact command-equipment summaries render fully absent equipment-condition reports as `Unreported` and avoid exact-looking `0/N operational` tooltips.
 
 P12 closeout completed through PR #455 at `d47736be6`: `npm.cmd run typecheck -- --pretty false` passed; focused P12 pack passed 14 files / 340 tests after the persisted turn-summary/schema/baseline experiment was removed from this PR; CI strict-null repair proof passed 91 tests plus related AAR/Army HQ focused proof 3 files / 102 tests; Codex review follow-up passed focused OOB routing 12 tests plus typecheck; `npm.cmd run qa:player-journeys` passed 43 files / 667 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed; `npm.cmd run desktop:map:build` passed with existing non-fatal Vite warnings; `git diff --check` passed; manual in-app browser proof on `http://127.0.0.1:3003/` verified title screen, RBiH war-start splash, Army HQ, and 1st Corps Order of Battle drilldown with no visible error banners, console errors, raw paths, or malformed numeric values. GitHub PR checks were green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. The earlier persisted casualty-provenance baseline rebless was reverted to keep P12 UI/read-model scoped; no scenario baseline/sim/state diff remains in the merged PR. The Codex review thread on ungrouped OOB drilldown was addressed and resolved before merge. Generated browser evidence folders and local `runs/eh_local_*` evidence were removed; `.tmp_dev_server` remains for the active local browser/dev session. Local/remote `codex/p12-player-truth-followup` refs are pruned and one clean `main` worktree remains. Report: `docs/40_reports/implemented/20260626_P12_PLAYER_TRUTH_FOLLOWUP.md`.
+
+P13/P14 local implementation on `codex/p13-player-truth-batch` now covers the next player-truth queue:
+
+- President's Desk handoffs open the Desk home surface and use Desk copy instead of generic inbox labels.
+- Pre-advance blockers derive from live required decision rows rather than stale aggregate metadata.
+- Settlement timelines no longer infer control changes from displacement attribution alone.
+- Combat records, brigade engagements, casualty splits, and turn-zero setup battle summaries preserve sparse source truth instead of inventing confirmed zeroes or campaign gains.
+- Enemy-contact map markers no longer leak hostile faction identity through marker faction/icon ids.
+- Army HQ sector expansion exposes rear/support elements with inspect affordances.
+- The dead operational heatmap mode-7 builder and layer wiring are removed.
+- Decision Room active-card/category state reconciles after live card changes.
+- Chronicle consequence receipts carry their owning surface, keeping Chronicle-filed actions in Chronicle focus.
+- Missing officer roster source renders as commander record unreported; explicit empty rosters remain true vacancies.
+- Codex review follow-up: grouped combat record metrics require complete grouped fields before rendering; OOB pseudo-groups do not receive commander-source fallback copy.
+
+P13/P14 local verification passed: focused P13/P14 pack 16 files / 260 tests; Codex review-fix proof 2 files / 48 tests; adjacent command-surface proof 6 files / 56 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 671 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `npm.cmd run desktop:map:build` with existing non-fatal Vite chunk-size warning; live Edge fresh-start sweep on `http://127.0.0.1:3003/`; and `git diff --check`. Report: `docs/40_reports/implemented/20260626_P13_P14_PLAYER_TRUTH_BATCH.md`.
+
+Next P15 queue from closed Peirce/Kant/Heisenberg scouts:
+
+- Browser-gate hardening: add BCS/narrow-viewport coverage, request-failure detection, stronger stable-selector assertions, optional modal/receipt smokes, and deterministic temp-evidence cleanup.
+- OOB/CorpsCard affordance cleanup: no-op command headers should not be focusable buttons, flip targets need action-specific accessible names, and command count copy should distinguish fielded/reported truth.
+- Corps Detail operation planning should reveal which sector will seed `Prepare Operation in HQ`.
+- Formation Detail sector options need disabled-reason accessible copy for current assignment, override, and bridge-unavailable cases.
+- Doc staleness pass after PR #456: refresh the MASTER_ROADMAP top paragraph, closeout docs with PR/check/branch-cleanup proof, fix stale DoD version text, and resolve mandatory-canon references to missing engine-freeze/v0.2.7 files.
 
 ## Progress 2026-06-24
 

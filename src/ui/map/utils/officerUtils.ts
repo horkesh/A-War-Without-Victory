@@ -5,7 +5,7 @@ import { strictCompare } from '../../../state/validateGameState';
 export interface CommanderDisplay {
     name: string;
     acting: boolean;
-    source: 'active' | 'opening_read_model' | 'synthetic';
+    source: 'active' | 'opening_read_model' | 'synthetic' | 'unreported';
 }
 
 const SYNTHETIC_COMMAND_LABELS: Record<string, string> = {
@@ -89,16 +89,22 @@ export function resolveCorpsCommanderDisplay(
     faction: string,
     loadedGameState: LoadedGameState,
 ): CommanderDisplay | null {
-    const officers = loadedGameState.namedOfficerData ?? [];
+    const officers = Array.isArray(loadedGameState.namedOfficerData) ? loadedGameState.namedOfficerData : null;
+    if (officers) {
     for (const officer of officers) {
         if (officerStatusFor(loadedGameState, officer) === 'active' && assignedCorpsFor(loadedGameState, officer) === corpsId) {
             const st = loadedGameState.namedOfficerStateById?.[officer.id];
             return { name: officer.name, acting: Boolean(st?.acting_commander ?? officer.acting_commander), source: 'active' };
         }
     }
+    }
 
     if (SYNTHETIC_COMMAND_LABELS[corpsId]) {
         return { name: SYNTHETIC_COMMAND_LABELS[corpsId], acting: false, source: 'synthetic' };
+    }
+
+    if (!officers) {
+        return { name: '', acting: false, source: 'unreported' };
     }
 
     const openingCandidate = resolveOpeningCorpsCommanderOfficer(corpsId, faction, loadedGameState);

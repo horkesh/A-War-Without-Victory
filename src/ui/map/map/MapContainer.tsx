@@ -353,7 +353,6 @@ const FORMATION_LABELS_LAYER_ID = 'formation-labels';
 const FORMATION_LABELS_MIN_ZOOM = 9;
 /** Layer ID for home-defense badge on formations at their home municipality. */
 const FORMATION_HOME_BADGE_LAYER_ID = 'formation-home-badge';
-import { buildOperationalHeatmapGeoJSON } from './builders/buildOperationalHeatmapGeoJSON';
 // Brigade AoR highlight: dedicated layers that never interfere with sector/corps highlight
 const BRIGADE_AOR_POS_LAYER_ID = 'brigade-aor-pos';
 const BRIGADE_AOR_NEG_LAYER_ID = 'brigade-aor-neg';
@@ -1393,12 +1392,6 @@ export function MapContainer() {
               const stableFrontLinesGeoJson = buildFrontStabilityGeoJSON(frontLinesGeoJson);
               (m2.getSource('front-lines') as GeoJSONSource)?.setData(stableFrontLinesGeoJson);
 
-              // Operational Heatmap (Mode 7) update
-              if (Number(mapMode) === 7 && osidCentroidsRef.current.size > 0) {
-                const heatmapData = buildOperationalHeatmapGeoJSON(state, osidCentroidsRef.current);
-                (m2.getSource('operational-heatmap') as GeoJSONSource)?.setData(heatmapData);
-              }
-
               const frontEdgesOsid = state.frontEdgesOsid;
               if (frontEdgesOsid && frontEdgesOsid.length > 0) {
               const centroidsForHover = osidCentroidsRef.current.size > 0 ? osidCentroidsRef.current : undefined;
@@ -1615,30 +1608,6 @@ export function MapContainer() {
                     // Keep empty source for sector highlight rings if needed, but disable MapLibre native formation symbols
                     if (m.getSource('formations')) (m.getSource('formations') as GeoJSONSource).setData(formationsGeoJson);
                     // order-arrows source stays empty (arrows removed)
-
-                    // Heatmap: Supply and Combat intensity
-                    safeEnsureSource(m, 'operational-heatmap', { type: 'geojson', data: EMPTY_GEOJSON });
-                    safeEnsureLayer(m, {
-                      id: 'heatmap-layer',
-                      type: 'heatmap',
-                      source: 'operational-heatmap',
-                      maxzoom: 14,
-                      paint: {
-                        'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 1, 1],
-                        'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 6, 1, 14, 3],
-                        'heatmap-color': [
-                          'interpolate', ['linear'], ['heatmap-density'],
-                          0, 'rgba(0, 0, 0, 0)',
-                          0.2, 'rgba(0, 255, 255, 0.1)',
-                          0.4, 'rgba(0, 255, 0, 0.3)',
-                          0.6, 'rgba(255, 255, 0, 0.5)',
-                          0.8, 'rgba(255, 0, 0, 0.7)',
-                          1, 'rgba(255, 255, 255, 0.9)'
-                        ],
-                        'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 6, 10, 14, 40],
-                        'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 13, 0.8, 14, 0],
-                      }
-                    }, 'formation-markers');
 
                     // Operation arrows: sweeping military-style arrows for active operations
                     const opArrowsGeoJson = buildOperationArrowsGeoJSON(state, osidCentroidsRef.current);
@@ -1864,7 +1833,7 @@ export function MapContainer() {
                       safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, false);
                     }
                     // Force render frame to process newly-added GeoJSON sources
-                    // Without this, sources like operational-heatmap/enclave-* may never tile,
+                    // Without this, optional overlay sources like enclave-* may never tile,
                     // blocking isStyleLoaded() and leaving the map blank.
                     m.triggerRepaint();
                   } catch (deferredErr) {

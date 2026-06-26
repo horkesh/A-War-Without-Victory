@@ -129,6 +129,7 @@ function SectorExpandedDetail({
     const sectorAssignment = buildSectorFormationAssignment(sector, [...formationMap.values()], sectors);
     const frontIds = sectorAssignment.frontlineIds;
     const reserveIds = sectorAssignment.reserveIds;
+    const rearIds = sectorAssignment.rearIds;
     const overrideIds = sectorAssignment.overrideIds;
     const unresolvedRosterIds = sectorAssignment.unresolvedRosterIds;
     const frontFormations = frontIds
@@ -252,6 +253,48 @@ function SectorExpandedDetail({
                     <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.sectorReserves', { count: reserveIds.length })}</div>
                     <div className="space-y-1.5">
                         {reserveIds.map((id) => {
+                            const b = formationMap.get(id);
+                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            return (
+                                <div key={id} className="flex items-center gap-3 text-text-secondary">
+                                    <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
+                                    <span className="tabular-nums w-12 text-right shrink-0">
+                                        {reportedPersonnelLabel(b.personnel)}
+                                    </span>
+                                    {b.location_osid && (
+                                        <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
+                                            @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
+                                        </span>
+                                    )}
+                                    <button
+                                        type="button"
+                                        data-testid="army-hq-sector-brigade-inspect"
+                                        data-formation-id={b.id}
+                                        data-sector-id={sector.sector_id}
+                                        aria-label={t('sectorsSection.inspectFormationOnField', { formation: getLocalizedFormationName(b, locale) })}
+                                        onClick={() => inspectOnField(useGameStore.getState(), {
+                                            kind: 'field-formation-in-sector',
+                                            formationId: b.id,
+                                            sectorId: sector.sector_id,
+                                            corpsId: sector.corps_id,
+                                            osid: b.location_osid ?? null,
+                                        })}
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                    >
+                                        {t('sectorsSection.inspect')}
+                                    </button>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {rearIds.length > 0 && (
+                <div>
+                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('corpsFront.rearSupportElements', { count: rearIds.length })}</div>
+                    <div className="space-y-1.5">
+                        {rearIds.map((id) => {
                             const b = formationMap.get(id);
                             if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
                             return (

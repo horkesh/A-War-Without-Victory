@@ -7,7 +7,7 @@ import { ChronicleCard } from './ChronicleCard.js';
 import { ChronicleRibbon, ChronicleRibbonScrubber } from './ChronicleSpine.js';
 import { CHRONICLE_FILTERS, chronicleFilterLabel, countChronicleEntriesByFilter, filterChronicleEntries } from './ChronicleReviewFilters.js';
 import { turnToDateString } from '../../utils/formatters.js';
-import { openArmyHQAftermathRecord, openArmyHQDecisionConsequenceRecord, openArmyHQOperationHistory } from '../../utils/shellNavigation.js';
+import { openArmyHQAftermathRecord, openArmyHQDecisionConsequenceRecord, openArmyHQOperationHistory, openChronicleDecisionRecord } from '../../utils/shellNavigation.js';
 import {
     buildChronicleCampaignRecap,
     buildChronicleChapters,
@@ -489,6 +489,10 @@ export function ChronicleOverlay() {
             return;
         }
         if (entry.metadata?.decisionRecordId) {
+            if (entry.metadata.decisionRecordSurface === 'chronicle') {
+                openChronicleDecisionRecord(useGameStore.getState(), entry.metadata.decisionRecordId);
+                return;
+            }
             openArmyHQDecisionConsequenceRecord(useGameStore.getState(), entry.metadata.decisionRecordId);
             return;
         }

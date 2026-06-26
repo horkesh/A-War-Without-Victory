@@ -73,6 +73,32 @@ test('parseGameState preserves absent formation condition fields as unreported',
     assert.strictEqual(sparse?.fatigue, undefined);
 });
 
+test('parseGameState preserves explicit empty officer roster source', () => {
+    const parsedEmpty = parseGameState({
+        meta: { turn: 1, phase: 'war' },
+        military: {
+            formations: {},
+            named_officer_data: [],
+            named_officers: {},
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+    const parsedMissing = parseGameState({
+        meta: { turn: 1, phase: 'war' },
+        military: {
+            formations: {},
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    assert.deepStrictEqual(parsedEmpty.namedOfficerData, []);
+    assert.strictEqual(parsedMissing.namedOfficerData, undefined);
+});
+
 test('parseGameState records which combat summary fields were source-reported', () => {
     const parsed = parseGameState({
         meta: { turn: 4, phase: 'war' },
@@ -187,6 +213,39 @@ test('parseGameState marks formation casualty split provenance', () => {
     assert.deepStrictEqual([unreported?.campaignKia, unreported?.campaignWia, unreported?.campaignMia], [undefined, undefined, undefined]);
 });
 
+test('parseGameState preserves partial formation casualty ledger fields as unreported', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war' },
+        military: {
+            casualty_ledger: {
+                RBiH: {
+                    per_formation: {
+                        partial_ledger_brigade: { killed: 7 },
+                    },
+                },
+            },
+            formations: {
+                partial_ledger_brigade: {
+                    faction: 'RBiH',
+                    name: 'Partial Ledger Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const brigade = parsed.formations.find((formation) => formation.id === 'partial_ledger_brigade');
+    assert.strictEqual(brigade?.campaignCasualtySplitProvenance, 'exact_ledger');
+    assert.deepStrictEqual([brigade?.campaignKia, brigade?.campaignWia, brigade?.campaignMia], [7, undefined, undefined]);
+});
+
 test('parseGameState preserves missing battle casualties as unreported in settlement history', () => {
     const parsed = parseGameState({
         meta: { turn: 5, phase: 'war', player_faction: 'RBiH' },
@@ -219,6 +278,101 @@ test('parseGameState preserves missing battle casualties as unreported in settle
         casualties_reported: false,
         territory_flipped: false,
     });
+});
+
+test('parseGameState suppresses setup-control battle rows from settlement battle history', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+        },
+        political: {
+            political_controllers: {},
+        },
+        turn_summaries: [{
+            turn: 0,
+            mechanism: 'setup_control',
+            battles: [{
+                osid: 'op:test:setup',
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                outcome: 'victory',
+                territory_flipped: true,
+                attacker_casualties: 0,
+                defender_casualties: 0,
+            }],
+        }, {
+            turn: 1,
+            battles: [{
+                osid: 'op:test:combat',
+                attacker_faction: 'RS',
+                defender_faction: 'RBiH',
+                outcome: 'victory',
+                territory_flipped: true,
+                attacker_casualties: 4,
+                defender_casualties: 2,
+            }],
+        }],
+    } as any);
+
+    assert.strictEqual(parsed.battlesByOsid['op:test:setup'], undefined);
+    assert.strictEqual(parsed.battlesByOsid['op:test:combat']?.[0]?.turn, 1);
+});
+
+test('parseGameState does not promote sparse brigade engagements to displayed battle history', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war' },
+        military: {
+            formations: {
+                sparse_engagement_brigade: {
+                    faction: 'RBiH',
+                    name: 'Sparse Engagement Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                    brigade_history: {
+                        engagements: [{ osid: 'op:test:sparse' }],
+                    },
+                },
+                complete_engagement_brigade: {
+                    faction: 'RBiH',
+                    name: 'Complete Engagement Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                    brigade_history: {
+                        engagements: [{
+                            turn: 3,
+                            osid: 'op:test:complete',
+                            role: 'attacker',
+                            outcome: 'victory',
+                            casualties_taken: 5,
+                            territory_flipped: true,
+                        }],
+                    },
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const sparse = parsed.formations.find((formation) => formation.id === 'sparse_engagement_brigade');
+    const complete = parsed.formations.find((formation) => formation.id === 'complete_engagement_brigade');
+    assert.strictEqual(sparse?.recent_engagements, undefined);
+    assert.deepStrictEqual(complete?.recent_engagements, [{
+        turn: 3,
+        osid: 'op:test:complete',
+        role: 'attacker',
+        outcome: 'victory',
+        casualties_taken: 5,
+        territory_flipped: true,
+    }]);
 });
 
 test('parseGameState does not synthesize zero condition metrics for compatibility Army HQ rows', () => {

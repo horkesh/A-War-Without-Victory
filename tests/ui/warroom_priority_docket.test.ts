@@ -170,7 +170,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(first.items[0]).toMatchObject({
       category: 'decision',
       severity: 'blocking',
-      actionLabel: 'Open Inbox',
+      actionLabel: "Open President's Desk",
       navigationTarget: { kind: 'inbox' },
     });
     expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([

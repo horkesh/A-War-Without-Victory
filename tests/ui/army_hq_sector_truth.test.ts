@@ -264,6 +264,9 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('No friendly line');
     expect(container.textContent).not.toContain('0 on line');
     expect(container.textContent).toContain('1 rear/support');
+    expect(container.textContent).toMatch(/Rear\/Support Elements \(1\)/i);
+    expect(container.textContent).toContain('Rear Brigade');
+    expect(screen.getByRole('button', { name: 'Inspect Rear Brigade on field' })).toBeTruthy();
     expect(container.textContent).not.toContain('density 0.00');
     expect(container.textContent).not.toContain('density 0.42');
     expect(container.textContent).not.toMatch(/Held coverage|Dense coverage/i);

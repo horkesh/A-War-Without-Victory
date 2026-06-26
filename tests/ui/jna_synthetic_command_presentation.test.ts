@@ -140,6 +140,29 @@ afterEach(() => {
 });
 
 describe('synthetic JNA command presentation', () => {
+    it('shows unreported Army HQ command source instead of vacancy copy when officer roster is missing', () => {
+        const state = loadedState();
+        delete (state as Partial<LoadedGameState>).namedOfficerData;
+        delete (state as Partial<LoadedGameState>).namedOfficerStateById;
+        useGameStore.setState({ loadedGameState: state });
+
+        const { container } = render(createElement(ArmyHQCorpsCard, {
+            corps: state.formations[0],
+            brigades: [state.formations[1]],
+            sectors: [],
+            operations: state.operations ?? [],
+            factionBattles: [],
+            gameState: state,
+            isExpanded: true,
+            isCompressed: false,
+            onToggleExpand: vi.fn(),
+        }));
+
+        expect(container.textContent).toContain('Commander record unreported');
+        expect(container.textContent).not.toContain('[!] UNASSIGNED');
+        expect(container.textContent).not.toContain('[!] VACANCY DETECTED');
+    });
+
     it('shows Operation Herzegovina command context in Army HQ instead of vacancy copy', () => {
         const state = loadedState();
         useGameStore.setState({ loadedGameState: state });

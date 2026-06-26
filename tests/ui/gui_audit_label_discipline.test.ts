@@ -87,6 +87,12 @@ describe('GUI audit label discipline', () => {
     useGameStore.setState(useGameStore.getInitialState());
   });
 
+  it('does not keep numeric legacy map-mode branches in the tactical map container', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    expect(source).not.toMatch(/Number\s*\(\s*mapMode\s*\)/);
+    expect(source).not.toContain('Operational Heatmap (Mode 7)');
+  });
+
   it('renders SITREP priority fronts with player-facing display names instead of raw slugs', () => {
     useGameStore.setState({
       osidDisplayNames: {
@@ -409,6 +415,43 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).toContain('Ground Won/LostUnreported');
     expect(container.textContent).toContain('BrigadesUnreported');
     expect(container.textContent).not.toMatch(/0\.0%|0\.00:1|0 won \/ 0 lost|0 active brigades \/ 0 total/i);
+
+    cleanup();
+
+    useGameStore.setState({ armyHQExpandedSections: { 'combat-arbih_1st_corps': true } });
+
+    const { container: corpsContainer } = render(createElement(CombatRecordSection, {
+      corpsId: 'arbih_1st_corps',
+      corps: { combatSummary } as unknown as FormationView,
+    }));
+
+    expect(corpsContainer.textContent).toContain('Battles2');
+    expect(corpsContainer.textContent).toContain('RecordUnreported');
+    expect(corpsContainer.textContent).toContain('Win RateUnreported');
+    expect(corpsContainer.textContent).toContain('Casualties TakenUnreported');
+    expect(corpsContainer.textContent).toContain('Casualties InflictedUnreported');
+    expect(corpsContainer.textContent).toContain('Exchange RatioUnreported');
+    expect(corpsContainer.textContent).toContain('Ground Won/LostUnreported');
+    expect(corpsContainer.textContent).not.toMatch(/Wins: 0|Losses: 0|Stalemates: 0|0%|0\.00:1|0 won \/ 0 lost/i);
+
+    cleanup();
+
+    useGameStore.setState({ armyHQExpandedSections: { 'combat-arbih_1st_corps': true } });
+    const partialGroupedSummary = {
+      ...combatSummary,
+      victories: 1,
+      total_osids_captured: 2,
+      reportedFields: ['battles_fought', 'victories', 'total_osids_captured'],
+    };
+
+    const { container: partialCorpsContainer } = render(createElement(CombatRecordSection, {
+      corpsId: 'arbih_1st_corps',
+      corps: { combatSummary: partialGroupedSummary } as unknown as FormationView,
+    }));
+
+    expect(partialCorpsContainer.textContent).toContain('RecordUnreported');
+    expect(partialCorpsContainer.textContent).toContain('Ground Won/LostUnreported');
+    expect(partialCorpsContainer.textContent).not.toMatch(/Wins: 1 \/ Losses: 0 \/ Stalemates: 0|2 won \/ 0 lost/i);
   });
 
   it('renders brigade effectiveness unreported when grade-critical inputs are incomplete', () => {

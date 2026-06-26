@@ -211,6 +211,15 @@ describe('opening corps commander display', () => {
         });
     });
 
+    it('distinguishes a missing officer source from a reported empty roster', () => {
+        expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', state())).toEqual({
+            name: '',
+            acting: false,
+            source: 'unreported',
+        });
+        expect(resolveCorpsCommanderDisplay('vrs_drina', 'RS', state({ namedOfficerData: [] }))).toBeNull();
+    });
+
     it('shows opening ARBiH corps command without assigning the officers', () => {
         const gameState = state({
             namedOfficerData: [
