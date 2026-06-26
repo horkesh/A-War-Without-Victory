@@ -3,7 +3,7 @@
 **Date:** 2026-06-26  
 **Branch:** `codex/p5-player-polish-batch`  
 **Type:** UI/read-model/accessibility/test/docs polish  
-**Status:** Locally verified; awaiting PR/GitHub/merge closeout.
+**Status:** Merged to `main` through PR #448 at `3182bddb8`; post-merge GitHub green and branch refs pruned.
 
 ## Summary
 
@@ -30,10 +30,13 @@ Packaging remains paused. This packet does not change simulation logic, event ev
 - `npm.cmd run qa:first-hour:browser` passed, with dev-server cleanup verified.
 - `npm.cmd run qa:live-surface:browser` passed after rerun with a longer local timeout, with dev-server cleanup verified.
 - Manual in-app browser proof on `http://127.0.0.1:3003/` verified fresh RBiH start, `WAR HAS STARTED`, identity brief, `Begin`, foundational Desk decision, Decision Room review route without inbox leakage, Army HQ commander/OOB data, native-hidden inactive flip-card backs with zero visible inactive Back buttons, and no sampled `ENOENT`, `Unknown commander`, `Command Authority`, `TRANSFUSING`, `Obj 0/0`, or `front sitrep` leak.
-- GitHub `main` was checked green before this branch push.
+- GitHub `main` was checked green before branch push.
+- PR #448 merged to `main` at `3182bddb8`.
+- Post-merge `main` checks passed across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint.
+- Local/remote `codex/p5-player-polish-batch` refs were deleted/pruned, the repo returned to one clean `main` worktree, all P5 scout agents were closed after report absorption, and temporary browser-gate evidence folders were cleaned.
 
-## Remaining Closeout
+## Next Queue
 
-- Push branch and open PR.
-- Inspect GitHub checks/comments until green.
-- Merge to `main`, delete/prune local and remote branch refs, and verify a clean worktree audit.
+- Battle marker/timeline fog filtering and missing-casualty unreported handling.
+- Chronicle-vs-Records decision filing ownership.
+- Reserve-origin order-arrow snapping.

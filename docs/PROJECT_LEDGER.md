@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P5 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P5 implementation report, and ledger with the verified PR #448 closeout: merge to `main` at `3182bddb8`, green post-merge GitHub runs, deleted/pruned branch refs, one clean `main` worktree, absorbed and closed P5 scout agents, and cleaned temporary browser evidence. The next P2 queue from closed scouts is battle marker/timeline fog filtering, Chronicle-vs-Records decision filing ownership, and reserve-origin order-arrow snapping.
+
+**Verification:** `gh run list --branch main --limit 8` showed PR #448 post-merge `main` checks green across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint. `gh pr list --state open --limit 20` returned no open PRs. `git status --short --branch` showed only docs closeout edits on `main`, `git worktree list` showed a single `main` worktree, and `git diff --check` passed for the closeout docs.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. `FORAWWV.md` was not edited.
+
+---
+
 ## [2026-06-26] fix(ui): continue P5 player-polish batch
 
 **Type:** UI/read-model/accessibility/test/docs polish.
