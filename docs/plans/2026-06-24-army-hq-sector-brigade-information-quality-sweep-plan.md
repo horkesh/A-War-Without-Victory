@@ -1,10 +1,17 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest player-surface truth packet closed 2026-06-25.
+**Status:** ACTIVE rolling D2 polish plan; latest P9 player-polish packet merged 2026-06-26 at `ba95ce8e8`.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
 **Why now:** `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` make D2 owner playthrough the remaining 1.0 gate. The closed June 22 sector-truth plan established the rules; this sweep verifies the current live surfaces again and closes the next coherent set before another long CI wait.
+
+## Current Queue 2026-06-26
+
+P9 is merged and green. The next P10 packet should start from closed scout reports rather than reopening packaging, BCS-only cleanup, or Srebrenica/Zepa scripted-operation calibration:
+
+- Sparse Supply Intelligence / Economy forecast precision: preserve unreported reserve/current-supply source data through `GameStateAdapter`, `EconomyPanel`, `playerSupplyVisibility`, and `SupplyIntelligence`; do not render missing reserves or composition as exact zero/depleted truth.
+- Legacy `autonomy_panel` route retirement: generated proposal reviews now route through Decision Room command cards, so remove the stale App/registry/inbox action branch after preserving any pure helper still used by tests.
 
 ## Progress 2026-06-24
 

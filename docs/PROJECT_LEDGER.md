@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P9 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P9 implementation report, and ledger with the verified PR #452 closeout: merge to `main` at `ba95ce8e8`, resolved Codex inline review thread, green GitHub PR checks, deleted/pruned branch refs, one clean `main` worktree, absorbed and closed Averroes, Kierkegaard, Volta/Hilbert, and Laplace/Kant, and recorded the P10 queue for sparse Supply Intelligence / Economy forecast precision followed by legacy `autonomy_panel` route retirement.
+
+**Verification:** `gh pr checks 452` showed Event system validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. Direct GraphQL review-thread inspection showed the Codex thread resolved. `gh pr view 452` showed merge commit `ba95ce8e8` and merged state. `git status --short --branch` showed clean `main...origin/main`, `git worktree list` showed a single `main` worktree, and `git fetch --prune` removed the remote P9 ref.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] fix(ui): implement P9 player-polish batch
 
 **Type:** UI/read-model/routing/provenance/test/docs polish.

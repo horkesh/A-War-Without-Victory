@@ -2,6 +2,8 @@
 
 **Date:** 2026-06-26  
 **Branch:** `codex/p9-player-polish-batch`  
+**PR:** #452
+**Merge:** `ba95ce8e8`
 **Plan:** `docs/plans/2026-06-24-army-hq-sector-brigade-information-quality-sweep-plan.md`
 
 ## Summary
@@ -37,8 +39,9 @@ This packet is UI/read-model/test/docs polish. It does not change simulation log
 - Codex review follow-up proof passed: `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts --pool=forks --reporter=dot` failed before the adapter fix because `osids` was undefined, then passed 11 tests after the fix.
 - Focused review-fix regression passed: `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts tests/ui/settlement_supply_status.test.ts tests/ui_map_game_state_adapter.test.ts --pool=forks --reporter=dot` (3 files / 82 tests).
 - Review-fix TypeScript passed: `npm.cmd run typecheck`.
-
-Remaining before closeout: GitHub checks/comments, merge, branch prune, and clean-worktree proof.
+- GitHub PR #452 checks passed before merge: Event system validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite.
+- Codex inline review thread `PRRT_kwDORNoPiM6Mcbzr` was resolved after the adapter-scope fix.
+- PR #452 merged to `main` at `ba95ce8e8`; local/remote `codex/p9-player-polish-batch` refs were deleted/pruned, and `git worktree list` showed one `main` worktree.
 
 ## Pyrrhic Reports Absorbed
 
@@ -46,8 +49,8 @@ Remaining before closeout: GitHub checks/comments, merge, branch prune, and clea
 - Einstein: Corps Front low-intel objective accessible/routing leak and OOB enemy-anchor fallback.
 - James: stale operation-key routing and derived casualty split provenance.
 - Averroes and Kierkegaard implementation reports were integrated and the agents were closed after review.
-- Volta read-only scout: legacy `autonomy_panel` registry/App branch is still present but currently unreachable from generated proposal review cards; queue as a P10 route-cleanup test/docs slice.
-- Laplace read-only scout: Supply Intelligence/Economy forecast surfaces can still imply exact zero reserves or forecast components when current supply/reserve source data is unreported; queue as a P10 sparse-truth UI/read-model slice.
+- Volta/Hilbert read-only scout: legacy `autonomy_panel` registry/App branch is still present but currently unreachable from generated proposal review cards; queue as a P10 route-cleanup test/docs slice.
+- Laplace/Kant read-only scout: Supply Intelligence/Economy forecast surfaces can still imply exact zero reserves or forecast components when current supply/reserve source data is unreported; queue as a P10 sparse-truth UI/read-model slice.
 
 ## Deferred Queue
 
