@@ -372,6 +372,8 @@ export interface SectorEntrenchmentSummaryView {
     avgDigIn: number;
     digInCount: number;
     totalCount: number;
+    entrenchmentReportCount?: number;
+    digInReportCount?: number;
 }
 
 export interface MobilizationSummaryView {

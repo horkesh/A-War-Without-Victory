@@ -188,6 +188,25 @@ describe('OOBSidebar drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
 
+  it('sanitizes raw command ids in OOB sector owner copy', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => (
+      formation.id === 'vrs_main_staff'
+        ? { ...formation, name: 'vrs_main_staff' }
+        : formation
+    )) as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    const sectorRow = screen.getByTestId('oob-sector-row');
+    const labelText = `${sectorRow.getAttribute('aria-label')} ${sectorRow.getAttribute('title')} ${sectorRow.textContent}`;
+
+    expect(labelText).not.toContain('vrs_main_staff');
+    expect(labelText).toContain('Main Staff');
+  });
+
   it('does not route enemy-only sector segments as field settlement anchors', () => {
     const state = makeState();
     state.corpsFrontSectors = [{

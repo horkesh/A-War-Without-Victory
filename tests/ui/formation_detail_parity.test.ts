@@ -241,6 +241,26 @@ describe('Formation Detail parity display', () => {
     useGameStore.setState(useGameStore.getInitialState());
   });
 
+  it('keeps raw sector labels out of Formation Detail sector button title and aria copy', () => {
+    const state = makeFormationDetailState();
+    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => (
+      sector.sector_id === 'sector_north'
+        ? { ...sector, display_name: 'sector_rbih_1st_corps_north' }
+        : sector
+    ));
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedFormationId: 'rbih_heroic_brigade',
+    });
+
+    render(React.createElement(FormationDetail, { railSlot: 'secondary' }));
+
+    const sectorButton = screen.getByRole('button', { name: 'Inspect sector Assigned sector' });
+    expect(sectorButton.getAttribute('title')).toBe('Assigned sector');
+    expect(sectorButton.getAttribute('aria-label')).toBe('Inspect sector Assigned sector');
+    expect(`${sectorButton.getAttribute('title')} ${sectorButton.getAttribute('aria-label')} ${sectorButton.textContent}`).not.toMatch(/sector_rbih|sector:rbih/i);
+  });
+
   it('uses player-safe narrative arc labels in formation history copy', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 

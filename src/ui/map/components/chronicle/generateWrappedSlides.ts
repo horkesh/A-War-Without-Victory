@@ -133,28 +133,46 @@ export function generateWrappedSlides(
         data: { earlyGains, earlyLosses, earlyBattles },
     });
 
+    const battleCasualties = (battle: any): number | null => {
+        if (battle?.casualties_reported === false) return null;
+        const attackerReported = typeof battle?.attacker_casualties === 'number' && Number.isFinite(battle.attacker_casualties);
+        const defenderReported = typeof battle?.defender_casualties === 'number' && Number.isFinite(battle.defender_casualties);
+        if (!attackerReported && !defenderReported) return null;
+        return (attackerReported ? battle.attacker_casualties : 0)
+            + (defenderReported ? battle.defender_casualties : 0);
+    };
+
     // --- Slide 3: bloodiest_week ---
     let bloodiestTurn = 0;
-    let bloodiestCasualties = 0;
+    let bloodiestCasualties: number | null = 0;
+    let sawUnreportedBattleCasualties = false;
     for (const s of narratedTurnSummaries) {
         let turnCasualties = 0;
+        let turnCasualtiesReported = false;
         if (Array.isArray(s?.battles)) {
             for (const b of s.battles) {
-                turnCasualties += (b?.attacker_casualties ?? 0) + (b?.defender_casualties ?? 0);
+                const casualties = battleCasualties(b);
+                if (casualties == null) {
+                    sawUnreportedBattleCasualties = true;
+                    continue;
+                }
+                turnCasualtiesReported = true;
+                turnCasualties += casualties;
             }
         }
-        if (turnCasualties > bloodiestCasualties) {
+        if (turnCasualtiesReported && (bloodiestCasualties == null || turnCasualties > bloodiestCasualties)) {
             bloodiestCasualties = turnCasualties;
             bloodiestTurn = s?.turn ?? 0;
         }
     }
+    if (bloodiestCasualties === 0 && sawUnreportedBattleCasualties) bloodiestCasualties = null;
     slides.push({
         id: 'bloodiest_week',
         title: t('wrapped.slide.bloodiest.title'),
-        subtitle: bloodiestCasualties > 0
+        subtitle: bloodiestCasualties != null && bloodiestCasualties > 0
             ? t('wrapped.slide.bloodiest.subtitle', { date: turnToDateString(bloodiestTurn) })
             : t('wrapped.slide.bloodiest.subtitle.none'),
-        heroValue: bloodiestCasualties > 0 ? String(bloodiestCasualties) : '0',
+        heroValue: bloodiestCasualties == null ? t('corpsFront.unreported') : bloodiestCasualties > 0 ? String(bloodiestCasualties) : '0',
         heroLabel: t('wrapped.slide.bloodiest.heroLabel'),
         detail: bloodiestTurn > 0 ? t('wrapped.slide.bloodiest.detail', { date: turnToDateString(bloodiestTurn) }) : undefined,
         data: { bloodiestTurn, bloodiestCasualties },
@@ -220,21 +238,28 @@ export function generateWrappedSlides(
     });
 
     // --- Slide 6: what_it_cost ---
-    let totalCasualties = 0;
+    let totalCasualties: number | null = 0;
     let totalDisplaced = 0;
+    let sawUnreportedCostCasualties = false;
     for (const s of narratedTurnSummaries) {
         if (Array.isArray(s?.battles)) {
             for (const b of s.battles) {
-                totalCasualties += (b?.attacker_casualties ?? 0) + (b?.defender_casualties ?? 0);
+                const casualties = battleCasualties(b);
+                if (casualties == null) {
+                    sawUnreportedCostCasualties = true;
+                    continue;
+                }
+                totalCasualties += casualties;
             }
         }
         totalDisplaced += s?.displacement_total ?? 0;
     }
+    if (sawUnreportedCostCasualties) totalCasualties = null;
     slides.push({
         id: 'what_it_cost',
         title: t('wrapped.slide.cost.title'),
         subtitle: t('wrapped.slide.cost.subtitle'),
-        heroValue: String(totalCasualties),
+        heroValue: totalCasualties == null ? t('corpsFront.unreported') : String(totalCasualties),
         heroLabel: t('wrapped.slide.cost.heroLabel'),
         detail: t('wrapped.slide.cost.detail', { displaced: totalDisplaced }),
         data: { totalCasualties, totalDisplaced },

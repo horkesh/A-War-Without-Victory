@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**MISSING PREDICTION/COST SOURCES ARE UNREPORTED, NOT ZERO (2026-06-26).** Sparse G-2 predictions, casualty ledgers, displacement sources, and battle-cost rows do not prove `0` or `stalemate`. Do instead: preserve nullable fields/reported flags through normalization and render `Unreported`; preserve explicit reported zeroes as exact zero.
+
 **FOG-VISIBLE ENEMY CONTACTS ARE CONTACTS, NOT FORMATIONS (2026-06-26).** A player-observed hostile presence should not leak hostile OOB identity or open full Formation Detail. Do instead: project generic `enemy_contact:*` ids/names, redact stats/anchors/operation fields, and route clicks through settlement/contact context unless a canon-reviewed intel surface explicitly grants detail.
 
 **SETTLEMENT TIMELINES NEED EXPLICIT EVENT SCOPE (2026-06-26).** Event ids containing a municipality name are not proof that every settlement in that municipality was directly touched. Do instead: include settlement timeline events only from explicit OSID/municipality scope metadata or other direct receipts; never attach historical rows by substring matching.

@@ -1935,6 +1935,7 @@ export const bcsMessages: Partial<Record<MessageKey, string>> = {
     'formationDetail.assignedCommand': 'Dodijeljena komanda',
     'formationDetail.assignedCommandUnreported': 'Dodijeljena komanda nije prijavljena',
     'formationDetail.assignedSector': 'Dodijeljeni sektor',
+    'formationDetail.inspectSector': 'Pregledaj sektor {sector}',
     'formationDetail.recallFailed': 'Opoziv nije uspio',
     'formationDetail.recallToReserve': 'OPOZOVI U REZERVU',
     'formationDetail.commandBridgeUnavailable': 'Desktop komandni most nije dostupan. Otvorite zapakovanu desktop ljusku za pripremu formacijskih komandi.',

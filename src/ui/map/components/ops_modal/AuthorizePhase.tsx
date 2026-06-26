@@ -108,7 +108,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
     const eligibilityErrors = eligibility?.warnings.filter((w) => w.severity === 'error') ?? [];
     const eligibilityWarnings = eligibility?.warnings.filter((w) => w.severity === 'warning') ?? [];
 
-    const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
+    const isLowIntel = prediction?.overall.intelConfidence != null && prediction.overall.intelConfidence < 0.4;
 
     // Free War Phase 4, #67 (Slice 2): gate the Authorize button on the canonical
     // eligibility read-model. Disabled unless the op is valid (no blocking errors),

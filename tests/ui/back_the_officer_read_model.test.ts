@@ -286,6 +286,28 @@ describe('op-proposal decision cards (Phase 2 slice 1)', () => {
     expect(cards[0].op_name).not.toContain('ghost');
   });
 
+  it('does not attach stale proposal plan ids to the first live operation on the same corps', () => {
+    const staleProposal: OpProposalReviewRow = {
+      ...OP_PROPOSAL,
+      id: 'PROP_30_ops_stale',
+      proposed_action: 'APPROVE_OP:1st_corps:missing_plan',
+    };
+    const cards = buildOpProposalCards(
+      proposalState({ force_ratio_estimate: 2.4, commander_assessment: 'abort' }),
+      ROSTER,
+      [staleProposal],
+    );
+
+    expect(cards).toHaveLength(1);
+    expect(cards[0].op_id).toBeNull();
+    expect(cards[0].commander).toBeNull();
+    expect(cards[0].force_ratio_estimate).toBeNull();
+    expect(cards[0].donors).toEqual([]);
+    expect(cards[0].total_personnel_lent).toBe(0);
+    expect(cards[0].override_available).toBe(false);
+    expect(cards[0].op_name).toBe('Unspecified operation');
+  });
+
   it('ignores non-ops proposals and malformed actions; sorts by proposal id', () => {
     const stance: OpProposalReviewRow = { id: 'PROP_30_military_0', faction: 'RBiH', domain: 'military', proposed_action: 'SET_STANCE:1st_corps:offensive' };
     const malformed: OpProposalReviewRow = { id: 'PROP_30_ops_9', faction: 'RBiH', domain: 'ops', proposed_action: 'APPROVE_OP:' };

@@ -36,6 +36,10 @@ function campaignCostSeverityLabel(severity: TurnAftermathCostSeverity): string 
     return t(CAMPAIGN_COST_SEVERITY_LABEL_KEYS[severity]);
 }
 
+function reportedK(value: number | undefined, reported: boolean): string {
+    return reported ? fmtK(value ?? 0) : t('corpsFront.unreported');
+}
+
 interface WarSummaryContentProps {
     focusSection?: SummaryFocusSection;
 }
@@ -64,8 +68,11 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
         mobilizedTotalByFaction,
         totalDisplaced,
         displacedByFaction,
+        totalDisplacedReported,
+        displacedByFactionReported,
         warExhaustionByFaction,
     } = data;
+    const casualtyLedgerReported = casualtyLedger != null;
 
     // Cluster C — campaign drag handoff. WarSummary summarises + routes;
     // canonical per-corps explanation lives in Army HQ → Command Relationship.
@@ -140,11 +147,11 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                     )}
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.kia')}</span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(casualtyLedger?.[playerFaction]?.killed ?? 0)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(casualtyLedger?.[playerFaction]?.killed, casualtyLedgerReported)}</span>
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.wia')}</span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(casualtyLedger?.[playerFaction]?.wounded ?? 0)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(casualtyLedger?.[playerFaction]?.wounded, casualtyLedgerReported)}</span>
                                     </div>
                                 </div>
                             </SummarySection>
@@ -153,11 +160,11 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 <div className="space-y-1 text-[12px]">
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.theaterDisplaced')}</span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
                                     </div>
                                     <div className="flex items-center justify-between gap-3">
                                         <span className="text-text-secondary">{t('warSummary.label.ownDisplaced')}</span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(displacedByFaction[playerFaction] ?? 0)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(displacedByFaction[playerFaction], displacedByFactionReported)}</span>
                                     </div>
                                     <div className="text-[10px] text-text-secondary leading-snug">
                                         {t('warSummary.note.enemyDisplacement')}
@@ -293,13 +300,13 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                         <tr>
                                             <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.label.kia')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.killed ?? 0)}</td>
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.killed, casualtyLedgerReported)}</td>
                                             ))}
                                         </tr>
                                         <tr>
                                             <td className="text-[11px] text-text-secondary py-0.5">{t('warSummary.label.wia')}</td>
                                             {WAR_SUMMARY_FACTIONS.map((f) => (
-                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{fmtK(casualtyLedger?.[f]?.wounded ?? 0)}</td>
+                                                <td key={f} className="text-[12px] text-text-primary text-right px-2 py-0.5 tabular-nums">{reportedK(casualtyLedger?.[f]?.wounded, casualtyLedgerReported)}</td>
                                             ))}
                                         </tr>
                                     </tbody>
@@ -310,10 +317,11 @@ export function WarSummaryContent({ focusSection = 'overview' }: WarSummaryConte
                                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-[12px]">
                                     <div>
                                         <span className="text-text-secondary">{t('warSummary.label.totalDisplaced')} </span>
-                                        <span className="text-text-primary tabular-nums">{fmtK(totalDisplaced)}</span>
+                                        <span className="text-text-primary tabular-nums">{reportedK(totalDisplaced, totalDisplacedReported)}</span>
                                     </div>
                                     {WAR_SUMMARY_FACTIONS.map((f) => {
                                         const n = displacedByFaction[f] ?? 0;
+                                        if (!displacedByFactionReported) return null;
                                         if (n === 0) return null;
                                         return (
                                             <div key={f} className="flex items-center gap-1">

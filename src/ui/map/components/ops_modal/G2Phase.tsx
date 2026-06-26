@@ -45,7 +45,7 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
     }, [loadedGameState, corpsId]);
 
     const hasObjectives = plan.axes.some((a) => a.objectives.length > 0);
-    const isLowIntel = prediction && prediction.overall.intelConfidence < 0.4;
+    const isLowIntel = prediction?.overall.intelConfidence != null && prediction.overall.intelConfidence < 0.4;
     const totalObjectives = plan.axes.reduce((sum, axis) => sum + axis.objectives.length, 0);
     const totalAssignedBrigades = plan.axes.reduce((sum, axis) => sum + axis.brigadeIds.length, 0);
     const canProceed = !loading && (prediction != null || error != null);
@@ -96,7 +96,11 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                 {prediction && (
                     <div className="mt-2 rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
                         <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.predictedOutcome')}</div>
-                        <div className="text-[10px] font-bold text-white">{formatPlanningPredictedOutcome(prediction.overall.predictedOutcome)}</div>
+                        <div className="text-[10px] font-bold text-white">
+                            {prediction.overall.predictedOutcome == null
+                                ? t('corpsFront.unreported')
+                                : formatPlanningPredictedOutcome(prediction.overall.predictedOutcome)}
+                        </div>
                     </div>
                 )}
             </div>

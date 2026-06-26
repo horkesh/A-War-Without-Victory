@@ -625,7 +625,7 @@ function parseApproveOpAction(action: string | undefined): { corpsId: string; pl
   return { corpsId: parts[1], planId: parts.slice(2).join(':') };
 }
 
-/** Find an active operation on a corps by plan id (best-effort), else first active op. */
+/** Find an active operation on a corps by plan id. Stale proposal ids stay unresolved. */
 function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
   if (!cc) return null;
   const activeOps: unknown[] = Array.isArray(cc.active_operations)
@@ -636,7 +636,7 @@ function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
   const ops = activeOps.map(asRecord).filter((o): o is RawRecord => o != null);
   if (ops.length === 0) return null;
   const byPlan = ops.find((o) => str(o.plan_id) === planId || str(o.id) === planId);
-  return byPlan ?? ops[0];
+  return byPlan ?? null;
 }
 
 function assessmentOrNull(value: unknown): 'launch' | 'postpone' | 'abort' | null {

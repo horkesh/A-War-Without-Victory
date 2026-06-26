@@ -177,7 +177,7 @@ function findActiveOpForPlan(cc, planId) {
     : (cc.active_operation && typeof cc.active_operation === 'object' ? [cc.active_operation] : []);
   if (ops.length === 0) return null;
   const byPlan = ops.find((o) => o && (o.plan_id === planId || o.id === planId));
-  return byPlan || ops[0] || null;
+  return byPlan || null;
 }
 
 function safeStr(v) {
@@ -252,7 +252,7 @@ function buildOpProposalCardData(state, proposals) {
     const corpsName = (formations[corpsId] && typeof formations[corpsId].name === 'string')
       ? formations[corpsId].name
       : corpsId;
-    const opName = (op && (safeStr(op.name) || safeStr(op.objective_description))) || planId;
+    const opName = op ? (safeStr(op.name) || safeStr(op.objective_description) || null) : null;
 
     cards.push({
       proposal_id: proposal.id,

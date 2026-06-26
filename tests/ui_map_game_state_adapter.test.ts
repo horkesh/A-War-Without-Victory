@@ -555,6 +555,64 @@ test('parseGameState derives enclave, mobilization, and sector entrenchment summ
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.4);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInCount, 1);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 2);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.entrenchmentReportCount, 2);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInReportCount, 2);
+});
+
+test('parseGameState preserves partial sector entrenchment reporting provenance', () => {
+    const parsed = parseGameState({
+        meta: { turn: 0, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                reported: {
+                    id: 'reported',
+                    faction: 'RBiH',
+                    corps_id: 'rbih_corps',
+                    name: 'Reported Brigade',
+                    kind: 'brigade',
+                    readiness: 'ready',
+                    status: 'active',
+                    created_turn: 0,
+                    entrenchment_turns: 6,
+                    dig_in_progress: 0.5,
+                    posture: 'dig_in',
+                    tags: [],
+                },
+                sparse: {
+                    id: 'sparse',
+                    faction: 'RBiH',
+                    corps_id: 'rbih_corps',
+                    name: 'Sparse Brigade',
+                    kind: 'brigade',
+                    readiness: 'ready',
+                    status: 'active',
+                    created_turn: 0,
+                    posture: 'hold',
+                    tags: [],
+                },
+            },
+            corps_front_sectors: {
+                rbih_sector_1: {
+                    sector_id: 'rbih_sector_1',
+                    corps_id: 'rbih_corps',
+                    faction: 'RBiH',
+                    edge_ids: [],
+                    assigned_brigade_ids: ['reported', 'sparse'],
+                    reserve_brigade_ids: [],
+                    density: 0,
+                    threat_ratio: 0,
+                    defensive_power: 0,
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgEntrenchment, 6);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.5);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.entrenchmentReportCount, 1);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInReportCount, 1);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 2);
 });
 
 test('parseGameState keeps missing sector stance unreported', () => {
@@ -779,6 +837,8 @@ test('parseGameState derives sector entrenchment from current fielded assignment
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.avgDigIn, 0.5);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInCount, 1);
     assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.totalCount, 1);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.entrenchmentReportCount, 1);
+    assert.equal(parsed.sectorEntrenchmentSummary?.rbih_sector_1?.digInReportCount, 1);
 });
 
 test('parseGameState hides non-player enclave resilience when no player-owned enclave exists', () => {
@@ -973,11 +1033,16 @@ test('parseGameState flags sparse operation lifecycle fields instead of inventin
                         type: 'sector_attack',
                         participating_brigades: ['b1'],
                         objectives: ['op:one', 'op:two'],
+                        current_objective_index: Number.POSITIVE_INFINITY,
+                        momentum: Number.NaN,
+                        supply_readiness: Number.NEGATIVE_INFINITY,
                         axes: [{
                             axis_id: 'axis_sparse',
                             name: 'Axis Sparse',
                             assigned_brigades: ['b1'],
                             objectives: ['op:one', 'op:two'],
+                            current_objective_index: Number.POSITIVE_INFINITY,
+                            momentum: Number.NaN,
                         }],
                         started_turn: 14,
                     }],
@@ -995,6 +1060,8 @@ test('parseGameState flags sparse operation lifecycle fields instead of inventin
     assert.equal(operation?.phase, 'planning');
     assert.equal(operation?.current_objective_index, undefined);
     assert.equal(operation?.momentum, undefined);
+    assert.equal(operation?.supply_readiness, undefined);
+    assert.equal(operation?.readiness?.supply, undefined);
     assert.deepEqual(operation?.axes?.[0], {
         axis_id: 'axis_sparse',
         name: 'Axis Sparse',

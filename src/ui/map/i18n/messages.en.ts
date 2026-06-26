@@ -1976,6 +1976,7 @@ export const enMessages = {
     'formationDetail.assignedCommand': 'Assigned command',
     'formationDetail.assignedCommandUnreported': 'Assigned command unreported',
     'formationDetail.assignedSector': 'Assigned sector',
+    'formationDetail.inspectSector': 'Inspect sector {sector}',
     'formationDetail.recallFailed': 'Recall failed',
     'formationDetail.recallToReserve': 'RECALL TO RESERVE',
     'formationDetail.commandBridgeUnavailable': 'Desktop command bridge unavailable. Open the packaged desktop shell to stage formation commands.',

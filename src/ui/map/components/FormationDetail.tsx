@@ -404,6 +404,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             {/* Sector assignment (brigades) */}
             {(() => {
               if (isBrigade && formation.corps_id && currentSector) {
+                const sectorLabel = safeSectorLabel(currentSector.sector_id, sectors);
                 return (
                   <button
                     type="button"
@@ -415,12 +416,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       osid: formation.location_osid,
                     })}
                     className="w-full text-left px-2 py-1.5 bg-accent-gold/5 border border-accent-gold/20 rounded-md flex items-center justify-between text-[11px] hover:bg-accent-gold/10 transition-colors group"
-                    title={getPlayerFacingSectorName(currentSector.sector_id, sectors)}
+                    title={sectorLabel}
+                    aria-label={t('formationDetail.inspectSector', { sector: sectorLabel })}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-accent-gold/60 uppercase font-bold tracking-tighter">{t('formationDetail.sector')}</span>
                       <span className="text-accent-gold font-bold uppercase group-hover:underline">
-                        {safeSectorLabel(currentSector.sector_id, sectors)}
+                        {sectorLabel}
                       </span>
                       {currentSectorIsOverride && (
                         <span className="px-1 py-0 bg-accent-gold/20 text-accent-gold text-[9px] uppercase rounded border border-accent-gold/30 font-bold">

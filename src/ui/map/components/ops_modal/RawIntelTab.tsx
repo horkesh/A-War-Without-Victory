@@ -31,18 +31,21 @@ function getRecommendationReasoning(prediction: PredictionResult): string {
     const parts: string[] = [];
 
     // Force ratio assessment
-    if (overall.forceRatio >= 2.0) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 favorable`);
+    if (overall.forceRatio == null) parts.push('force ratio unreported');
+    else if (overall.forceRatio >= 2.0) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 favorable`);
     else if (overall.forceRatio >= 1.2) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 adequate`);
     else if (overall.forceRatio >= 0.8) parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 contested`);
     else parts.push(`Force ratio ${overall.forceRatio.toFixed(1)}:1 unfavorable`);
 
     // Intel confidence
-    if (overall.intelConfidence >= 0.7) parts.push('intel high');
+    if (overall.intelConfidence == null) parts.push('intel unreported');
+    else if (overall.intelConfidence >= 0.7) parts.push('intel high');
     else if (overall.intelConfidence >= 0.4) parts.push('intel moderate');
     else parts.push('intel insufficient');
 
     // Casualty estimate
-    if (overall.estimatedCasualties > 500) parts.push('heavy casualties expected');
+    if (overall.estimatedCasualties == null) parts.push('casualties unreported');
+    else if (overall.estimatedCasualties > 500) parts.push('heavy casualties expected');
     else if (overall.estimatedCasualties > 200) parts.push('moderate casualties expected');
     else parts.push('light casualties expected');
 
@@ -51,8 +54,9 @@ function getRecommendationReasoning(prediction: PredictionResult): string {
 
 export function RawIntelTab({ prediction }: RawIntelTabProps) {
     const { overall, perAxis } = prediction;
-    const outcomeStyle = OUTCOME_STYLES[overall.predictedOutcome] ?? {
-        bg: 'bg-[rgba(180,160,130,0.1)]', text: 'text-text-secondary', label: overall.predictedOutcome,
+    const outcomeStyle = overall.predictedOutcome ? OUTCOME_STYLES[overall.predictedOutcome] : undefined;
+    const resolvedOutcomeStyle = outcomeStyle ?? {
+        bg: 'bg-[rgba(180,160,130,0.1)]', text: 'text-text-secondary', label: overall.predictedOutcome ?? t('corpsFront.unreported'),
     };
 
     return (
@@ -61,23 +65,23 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
             <div className="space-y-2">
                 <ReadinessBar
                     label="Intel Confidence"
-                    value={overall.intelConfidence}
-                    qualitativeLabel={labelFromThresholds(overall.intelConfidence, INTEL_LABELS)}
+                    value={overall.intelConfidence ?? 0}
+                    qualitativeLabel={overall.intelConfidence == null ? t('corpsFront.unreported') : labelFromThresholds(overall.intelConfidence, INTEL_LABELS)}
                 />
                 <ReadinessBar
                     label="Force Ratio"
-                    value={Math.min(1, overall.forceRatio / 2)}
-                    qualitativeLabel={`${overall.forceRatio.toFixed(2)}:1 \u2014 ${labelFromThresholds(overall.forceRatio, FORCE_RATIO_LABELS)}`}
+                    value={overall.forceRatio == null ? 0 : Math.min(1, overall.forceRatio / 2)}
+                    qualitativeLabel={overall.forceRatio == null ? t('corpsFront.unreported') : `${overall.forceRatio.toFixed(2)}:1 - ${labelFromThresholds(overall.forceRatio, FORCE_RATIO_LABELS)}`}
                 />
             </div>
 
             {/* Predicted outcome */}
-            <div className={`${outcomeStyle.bg} rounded-lg p-3 border border-[rgba(180,160,130,0.08)]`}>
+            <div className={`${resolvedOutcomeStyle.bg} rounded-lg p-3 border border-[rgba(180,160,130,0.08)]`}>
                 <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary mb-1">
                     Predicted Outcome
                 </div>
-                <div className={`text-sm font-bold uppercase tracking-wider ${outcomeStyle.text}`}>
-                    {outcomeStyle.label}
+                <div className={`text-sm font-bold uppercase tracking-wider ${resolvedOutcomeStyle.text}`}>
+                    {resolvedOutcomeStyle.label}
                 </div>
             </div>
 
@@ -86,8 +90,8 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                 <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary mb-1">
                     Estimated Casualties
                 </div>
-                <div className="text-lg font-bold" style={{ color: getCasualtySeverityColor(overall.estimatedCasualties) }}>
-                    {overall.estimatedCasualties.toLocaleString()}
+                <div className="text-lg font-bold" style={{ color: overall.estimatedCasualties == null ? undefined : getCasualtySeverityColor(overall.estimatedCasualties) }}>
+                    {overall.estimatedCasualties == null ? t('corpsFront.unreported') : overall.estimatedCasualties.toLocaleString()}
                 </div>
             </div>
 
@@ -120,19 +124,19 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
                         {t('opsModal.perAxisBreakdown')}
                     </div>
                     {perAxis.map((axis) => {
-                        const axisOutcome = OUTCOME_STYLES[axis.predictedOutcome];
+                        const axisOutcome = axis.predictedOutcome ? OUTCOME_STYLES[axis.predictedOutcome] : undefined;
                         return (
                             <div key={axis.axisId}
                                  className="bg-[rgba(20,18,15,0.3)] rounded p-2 border border-[rgba(180,160,130,0.05)]">
                                 <div className="flex justify-between items-center">
                                     <span className="text-[9px] font-bold text-white">{axis.axisId}</span>
                                     <span className={`text-[8px] font-bold uppercase ${axisOutcome?.text ?? 'text-text-secondary'}`}>
-                                        {axisOutcome?.label ?? axis.predictedOutcome}
+                                        {axisOutcome?.label ?? axis.predictedOutcome ?? t('corpsFront.unreported')}
                                     </span>
                                 </div>
                                 <div className="flex gap-3 mt-1 text-[9px] text-text-secondary">
-                                    <span>{t('opsModal.forceRatioShort')} <span className="text-white font-bold">{axis.forceRatio.toFixed(2)}</span></span>
-                                    <span>{t('opsModal.defenseShort')} <span className="text-white font-bold">{axis.defenseStrength.toLocaleString()}</span></span>
+                                    <span>{t('opsModal.forceRatioShort')} <span className="text-white font-bold">{axis.forceRatio == null ? t('corpsFront.unreported') : axis.forceRatio.toFixed(2)}</span></span>
+                                    <span>{t('opsModal.defenseShort')} <span className="text-white font-bold">{axis.defenseStrength == null ? t('corpsFront.unreported') : axis.defenseStrength.toLocaleString()}</span></span>
                                 </div>
                             </div>
                         );
@@ -141,7 +145,7 @@ export function RawIntelTab({ prediction }: RawIntelTabProps) {
             )}
 
             {/* Intelligence warning */}
-            {overall.intelConfidence < 0.4 && (
+            {overall.intelConfidence != null && overall.intelConfidence < 0.4 && (
                 <div className="bg-red-900/20 border border-red-400/20 rounded-lg p-3">
                     <div className="text-[10px] font-bold text-red-400 uppercase tracking-wider">
                         \u26A0 INTELLIGENCE INSUFFICIENT
