@@ -381,6 +381,20 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('1250%');
   });
 
+  it('renders missing corps command metrics as unreported instead of healthy silence', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_1st_corps'
+      ? { ...formation, corpsStance: undefined, corpsExhaustion: undefined, corpsCommandSpan: undefined }
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_1st_corps' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('ExhaustionUnreported');
+    expect(copy).toContain('Command SpanUnreported');
+  });
+
   it('does not invent a field posture for army headquarters', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_general_staff' });
 
@@ -742,6 +756,56 @@ describe('Formation Detail parity display', () => {
 
     expect(copy).toContain('Distance from home 70%');
     expect(copy).not.toContain('homeDistance');
+  });
+
+  it('renders home-distance power values as unreported when personnel is absent', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_hq_guard_brigade'
+      ? {
+          ...formation,
+          personnel: undefined,
+          homeHops: 6,
+          homeDistanceMult: 0.7,
+        } as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_hq_guard_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Power at home (100%)Unreported');
+    expect(copy).toContain('Power here (70%)Unreported');
+    expect(copy).not.toContain('Power at home (100%)—');
+    expect(copy).not.toContain('Power here (70%)—');
+  });
+
+  it('renders missing elite loan target as unreported command destination', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => {
+      if (formation.id !== 'rbih_hq_guard_brigade') return formation;
+      return {
+        ...formation,
+        eliteLoanState: {
+          on_loan: true,
+          loaned_to_corps: null,
+          loan_start_turn: 1,
+          turns_deployed: 3,
+          in_cooldown: false,
+          permanently_degraded: false,
+          current_episode_id: 1,
+          base_osid: 'op:test:hq',
+        },
+      } as LoadedGameState['formations'][number];
+    });
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_hq_guard_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Assigned command unreported');
+    expect(copy).not.toMatch(/-> Assigned command(?:RECALL TO RESERVE|$)/);
   });
 
   it.each([

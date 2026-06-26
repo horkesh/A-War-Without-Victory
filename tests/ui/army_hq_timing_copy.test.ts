@@ -640,6 +640,47 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('Staff advisory');
   });
 
+  it('does not surface stale presidential queue counts when live decision rows are absent', () => {
+    render(React.createElement(PresidentialAttentionPanel, {
+      gameState: makeGameState({
+        presidentialReviewQueue: {
+          pendingCount: 2,
+          criticalCount: 2,
+          eventDecisionCount: 2,
+          commandInterpretationCount: 0,
+          personnelDirectiveCount: 0,
+          operationOpportunityCount: 0,
+        },
+        pendingEventDecisions: [
+          {
+            event_id: 'evt_foreign_advisory',
+            event_title: 'Foreign advisory',
+            faction: 'RS',
+            turn_fired: 14,
+            requires_player_response: true,
+            response_options: [{ id: 'ack', label: 'Acknowledge', effects: [] }],
+          },
+          {
+            event_id: 'evt_staff_advisory',
+            event_title: 'Staff advisory',
+            faction: 'RBiH',
+            turn_fired: 14,
+            requires_player_response: false,
+            response_options: [],
+          },
+        ],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('No presidential military reviews pending');
+    expect(copy).not.toContain('2 presidential or command reviews pending');
+    expect(copy).not.toContain('Foreign advisory');
+    expect(copy).not.toContain('Staff advisory');
+    expect(copy).not.toContain('Decision Required');
+  });
+
   it('renders presidential attention counts through BCS one/many keys', () => {
     setLocale('bcs', undefined);
     render(React.createElement(PresidentialAttentionPanel, {
@@ -648,7 +689,7 @@ describe('Army HQ timing copy', () => {
           pendingCount: 2,
           criticalCount: 1,
           eventDecisionCount: 1,
-          commandInterpretationCount: 0,
+          commandInterpretationCount: 1,
           personnelDirectiveCount: 0,
           operationOpportunityCount: 0,
         },

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): implement P7 sparse-truth player polish
+
+**Type:** UI/read-model/map projection/rendering/test/docs polish.
+
+**Fix:** Continued the D2 owner-playthrough information-quality sweep on `codex/p7-player-polish-batch`. Supply Panel, Tactical Card, OOB, and Formation Detail now preserve missing reserves, personnel, cohesion, fatigue, command span, exhaustion, home-distance personnel, operation supply readiness, and elite-loan destination fields as `Unreported` instead of invented zeroes or favorable health. Formation counters omit health bars when no authorized-strength denominator exists. Ghost-map ethnicity paint requires complete census ethnicity rows. Presidential Attention and Decision Room counts now derive from live required decision/review rows instead of stale aggregate metadata. Personnel distinguishes an absent officer-roster source from an explicitly empty roster. Operations-mode effort paint now uses live fielded line holders from `buildSectorFormationAssignment(...)` and skips stale, forming, destroyed, and reserve-only roster ids.
+
+**Verification:** Focused sparse-truth proof passed 14 files / 211 tests with `npm.cmd exec -- vitest run tests/ui/oob_operations_panel.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/supply_fallbacks.test.ts tests/ui/tactical_card_sparse_truth.test.ts tests/ui_map_render_smoke.test.ts tests/ui/army_hq_timing_copy.test.ts tests/ui/presidential_decision_room.test.ts tests/ui_map_ethnic_truth.test.ts tests/ui/personnel_player_safe_display.test.ts tests/ui_map_operations_mode.test.ts tests/ui/decision_consequence_records_panel.test.ts tests/ui/records_button_behavior.test.ts tests/ui/chronicle_focus_routing.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot`. The existing `npm.cmd run qa:player-journeys` gate passed 43 files / 639 tests. `npm.cmd run typecheck -- --pretty false` passed. The post-fix Personnel focused suite passed 16 tests. The CI-repair registry/Decision Room/pre-advance focused pack passed 3 files / 75 tests. `npm.cmd run qa:first-hour:browser` and `npm.cmd run qa:live-surface:browser` passed with tileless browser proof and dev-server cleanup. `npm.cmd run desktop:map:build` passed with existing non-fatal Vite warnings. `git diff --check` passed with expected CRLF normalization warnings only. Generated browser/vitest evidence folders were removed after verification; `.tmp_dev_server` remains only for the active local browser session.
+
+**Scope/determinism:** UI/read-model/map projection/rendering/test/docs polish only. No simulation logic, event evaluator mechanics, scenario data, startup artifact, save schema, baseline/golden manifest, structural fingerprint artifact, calibration, Srebrenica/Zepa event ownership, packaged installer artifact, randomness, timestamps, locale persistence, or persisted simulation output changed.
+
+---
+
 ## [2026-06-26] docs: close P6 player-polish merge
 
 **Type:** Docs/process closeout.

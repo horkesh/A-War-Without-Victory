@@ -601,6 +601,12 @@ function addManifestDecisionCards(
   cards: CandidateCard[],
 ): void {
   const summary = state.playerDecisionSummary;
+  const liveCounts = new Map<ManifestModalFamilyId, number>();
+  for (const item of deriveInboxItems(state, osidNameMap)) {
+    if (isManifestModalFamilyId(item.type)) {
+      liveCounts.set(item.type, (liveCounts.get(item.type) ?? 0) + 1);
+    }
+  }
 
   const existingIds = new Set(cards.map((card) => card.id));
   const cardSpecs: Record<string, {
@@ -653,13 +659,7 @@ function addManifestDecisionCards(
   };
 
   if (!summary) {
-    const counts = new Map<ManifestModalFamilyId, number>();
-    for (const item of deriveInboxItems(state, osidNameMap)) {
-      if (isManifestModalFamilyId(item.type)) {
-        counts.set(item.type, (counts.get(item.type) ?? 0) + 1);
-      }
-    }
-    for (const [familyId, count] of counts) pushManifestCard(familyId, count);
+    for (const [familyId, count] of liveCounts) pushManifestCard(familyId, count);
     return;
   }
 
@@ -670,7 +670,7 @@ function addManifestDecisionCards(
     if (blockingCount <= 0) continue;
     if (family.id === 'event_decision' || family.id === 'paramilitary_request') continue;
     if (!isManifestModalFamilyId(family.id)) continue;
-    pushManifestCard(family.id, blockingCount);
+    pushManifestCard(family.id, Math.min(blockingCount, liveCounts.get(family.id) ?? 0));
   }
 }
 
@@ -1597,9 +1597,7 @@ function buildAdvanceReadiness(
   }
 
   const hasBlockingReadinessItem = eligible.some((card) => card.severity === 'blocking');
-  const blockedByExistingSystems = state.playerDecisionSummary
-    ? state.playerDecisionSummary.blockingCount > 0 || hasBlockingReadinessItem
-    : hasBlockingReadinessItem;
+  const blockedByExistingSystems = hasBlockingReadinessItem;
 
   return {
     headline: t(

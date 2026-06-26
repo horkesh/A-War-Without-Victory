@@ -400,6 +400,34 @@ describe('PersonnelContent player-facing display', () => {
     expect(copy).not.toContain('undefined');
   });
 
+  it('renders missing officer roster source as unreported instead of a clean empty roster', () => {
+    const state = makeState();
+    delete (state as Partial<LoadedGameState>).namedOfficerData;
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('OFFICER ROSTER (Unreported)');
+    expect(copy).toContain('Officer roster source is unreported.');
+    expect(copy).not.toContain('OFFICER ROSTER (0 active, 0 reserve)');
+    expect(copy).not.toContain('No reserve officers available.');
+    expect(copy).not.toContain('No serving commander is flagged as low loyalty.');
+  });
+
+  it('preserves explicitly reported empty officer rosters as empty, not unreported', () => {
+    const state = makeState();
+    state.namedOfficerData = [];
+    useGameStore.setState({ loadedGameState: state, selectedArmyId: 'RS' });
+
+    const { container } = render(React.createElement(PersonnelContent));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('OFFICER ROSTER (0 active, 0 reserve)');
+    expect(copy).toContain('No reserve officers available.');
+    expect(copy).not.toContain('OFFICER ROSTER (Unreported)');
+  });
+
   it('keeps explicit zero supply and mobilization values as reported zeroes', () => {
     const state = makeState();
     state.factionReserves = {

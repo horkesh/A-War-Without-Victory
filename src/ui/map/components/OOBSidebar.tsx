@@ -654,7 +654,7 @@ export function OOBSidebar() {
                                   {(op.supply_readiness * 100).toFixed(0)}%
                                 </span>
                               ) : (
-                                <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('operationsPanel.na')}</span>
+                                <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('corpsFront.unreported')}</span>
                               )}
                               <span className="text-text-secondary"> - {t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                             </div>

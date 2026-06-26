@@ -220,6 +220,25 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(first.cards.map((card) => card.id)).toContain('briefing:briefing:zeta');
   });
 
+  it('ignores stale manifest blocking summaries when no live inbox items remain', () => {
+    const state = makeState({
+      playerDecisionSummary: makePlayerDecisionSummary({
+        totalCount: 1,
+        blockingCount: 1,
+        families: [
+          { id: 'peace_plan', count: 1, blockingCount: 1, gatePolicy: 'modal_required' },
+        ],
+      }),
+      pendingEventDecisions: [],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.map((card) => card.id)).not.toContain('manifest:peace_plan');
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
+    expect(view.advanceReadiness.headline).toBe('Clear to advance');
+  });
+
   it('routes briefing operation, sector, and settlement cards to tactical field inspection targets', () => {
     const state = makeState({
       commandBriefing: {
@@ -890,6 +909,18 @@ describe('buildPresidentialDecisionRoomView', () => {
           operationOpportunityCount: 1,
         },
         playerDecisionSummary: makePlayerDecisionSummary(),
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 24,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
+        pendingConvoyDecisions: [
+          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RBiH', supply_amount: 20 },
+        ],
         pendingParamilitaryRequests: [
           { faction: 'RBiH', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
         ],
@@ -1151,7 +1182,7 @@ describe('buildPresidentialDecisionRoomView', () => {
       state: makeState({
         playerDecisionSummary: makePlayerDecisionSummary(),
         pendingConvoyDecisions: [
-          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RS', supply_amount: 20 },
+          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RBiH', supply_amount: 20 },
         ],
         pendingDayton: {
           territorialPackages: [],

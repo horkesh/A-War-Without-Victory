@@ -127,14 +127,14 @@ export function buildFormationsGeoJSON(
     const displayName = getLocalizedFormationName(formation, locale);
     const postureSuffix = formation.posture ? `__${formation.posture}` : '';
 
-    // Status Banners: quantize Health and Morale to 10% steps when reported.
-    const hQuant = 100; // Personnel pct not easily available per-unit yet
+    // Status Banners: quantize reported morale to 10% steps. Counter health remains
+    // unreported because the read model has raw personnel, not authorized strength.
     const rawMorale = typeof formation.morale === 'number' && Number.isFinite(formation.morale)
       ? formation.morale
       : null;
     const statusSuffix = rawMorale == null
-      ? `__h${hQuant}__munreported`
-      : `__h${hQuant}__m${Math.round(rawMorale / 10) * 10}`;
+      ? '__hunreported__munreported'
+      : `__hunreported__m${Math.round(rawMorale / 10) * 10}`;
 
     const icon_id = `${type}__${formation.faction}${postureSuffix}${statusSuffix}`;
 

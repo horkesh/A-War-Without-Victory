@@ -83,10 +83,18 @@ export const POSTURE_STRIPE: Record<string, string> = {
   assault: 'rgba(130, 0, 0, 0.95)',
 };
 
+function parseReportedBar(token: string | undefined, prefix: 'h' | 'm'): number | undefined {
+  if (!token || !new RegExp(`^${prefix}(?:\\d+|unreported)`).test(token)) return undefined;
+  const value = parseInt(token.slice(1), 10);
+  return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : undefined;
+}
+
 function parseIconId(iconId: string): { kind: string; faction: string; posture?: string; health?: number; morale?: number } {
-  const [kind = 'unit', faction = 'UNKNOWN', posture, hStr, mStr] = iconId.split('__');
-  const health = hStr ? parseInt(hStr.slice(1)) : undefined;
-  const morale = mStr ? parseInt(mStr.slice(1)) : undefined;
+  const [kind = 'unit', faction = 'UNKNOWN', ...rest] = iconId.split('__');
+  const isStatusToken = (token: string) => /^(?:h|m)(?:\d+|unreported)/.test(token);
+  const posture = rest.find((token) => !isStatusToken(token));
+  const health = parseReportedBar(rest.find((token) => /^h(?:\d+|unreported)/.test(token)), 'h');
+  const morale = parseReportedBar(rest.find((token) => /^m(?:\d+|unreported)/.test(token)), 'm');
   return { kind, faction, posture, health, morale };
 }
 

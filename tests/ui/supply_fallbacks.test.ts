@@ -107,6 +107,21 @@ describe('supply UI fallbacks', () => {
     expect(screen.queryByText('99 cut')).toBeNull();
   });
 
+  it('SupplyPanel keeps missing player reserve rows unreported instead of depleted zero bars', () => {
+    render(createElement(SupplyPanel, {
+      state: {
+        player_faction: 'RBiH',
+        factionReserves: {
+          RS: { generalSupply: 80, heavyMunitions: 70 },
+        },
+      } as unknown as LoadedGameState,
+    }));
+
+    expect(screen.getByText('ARBiH')).toBeTruthy();
+    expect(screen.getAllByText('Unreported')).toHaveLength(2);
+    expect(screen.queryByText('0')).toBeNull();
+  });
+
   it('buildSupplyGeoJSON treats high legacy pressure as critical, not adequate', () => {
     const geo = buildSupplyGeoJSON(
       controlGeoJson,

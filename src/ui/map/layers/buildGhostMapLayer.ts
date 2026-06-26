@@ -50,6 +50,27 @@ function computeCentroid(geometry: Polygon | MultiPolygon): [number, number] | n
   return [sumLng / count, sumLat / count];
 }
 
+function readCompleteEthnicityCounts(props: NonNullable<FeatureCollection['features'][number]['properties']>): {
+  bosniaks: number;
+  croats: number;
+  serbs: number;
+  others: number;
+} | null {
+  const bosniaks = props.population_bosniaks;
+  const croats = props.population_croats;
+  const serbs = props.population_serbs;
+  const others = props.population_others;
+  if (
+    typeof bosniaks !== 'number' || !Number.isFinite(bosniaks)
+    || typeof croats !== 'number' || !Number.isFinite(croats)
+    || typeof serbs !== 'number' || !Number.isFinite(serbs)
+    || typeof others !== 'number' || !Number.isFinite(others)
+  ) {
+    return null;
+  }
+  return { bosniaks, croats, serbs, others };
+}
+
 /** Transform census GeoJSON features into flat Deck.gl data array. */
 export function buildGhostMapData(geojson: FeatureCollection): GhostMapDatum[] {
   const result: GhostMapDatum[] = [];
@@ -67,10 +88,9 @@ export function buildGhostMapData(geojson: FeatureCollection): GhostMapDatum[] {
     const centroid = computeCentroid(geom as Polygon | MultiPolygon);
     if (!centroid) continue;
 
-    const bosniaks = typeof props.population_bosniaks === 'number' ? props.population_bosniaks : 0;
-    const croats = typeof props.population_croats === 'number' ? props.population_croats : 0;
-    const serbs = typeof props.population_serbs === 'number' ? props.population_serbs : 0;
-    const others = typeof props.population_others === 'number' ? props.population_others : 0;
+    const ethnicity = readCompleteEthnicityCounts(props);
+    if (!ethnicity) continue;
+    const { bosniaks, croats, serbs, others } = ethnicity;
 
     // Determine majority: highest of the three main groups
     let majority: GhostMapDatum['majority'];

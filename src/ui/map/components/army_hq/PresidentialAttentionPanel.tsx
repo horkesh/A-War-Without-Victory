@@ -38,7 +38,6 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     const reviewQueue = gameState.presidentialReviewQueue;
     const armyReserveQueue = gameState.armyReserveQueue;
     const reserveSummary = armyReserveQueue ? getArmyReserveAttentionSummary(armyReserveQueue) : null;
-    const liveReviewCount = reviewQueue?.pendingCount ?? 0;
 
     const pendingDecisions = useMemo(
         () =>
@@ -62,6 +61,21 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                 .sort((a, b) => a.turn - b.turn || a.event_id.localeCompare(b.event_id)),
         [gameState.pendingOfficerEvents, playerFaction],
     );
+
+    const operationDossierCount = useMemo(
+        () =>
+            [...(gameState.operationOpportunityProposals ?? [])]
+                .filter((proposal) => !proposal.faction || proposal.faction === playerFaction)
+                .length,
+        [gameState.operationOpportunityProposals, playerFaction],
+    );
+
+    const commandReactionCount = reviewQueue?.commandInterpretationCount ?? 0;
+    const liveReviewCount = pendingDecisions.length
+        + commandReactionCount
+        + personnelDirectives.length
+        + operationDossierCount;
+    const liveCriticalCount = Math.min(reviewQueue?.criticalCount ?? pendingDecisions.length, liveReviewCount);
 
     const handleAcknowledgeOfficerEvent = async (eventId: string) => {
         if (!ipc.isAvailable) {
@@ -89,7 +103,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
         }
     };
 
-    if ((!reviewQueue || reviewQueue.pendingCount === 0) && !armyReserveQueue && pendingDecisions.length === 0 && personnelDirectives.length === 0) {
+    if (liveReviewCount === 0 && !armyReserveQueue) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
                 <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
@@ -121,11 +135,11 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     </div>
                     {liveReviewCount > 0 && (
                         <div className="grid grid-cols-2 gap-2 min-w-[15rem]">
-                            <CountCard label={t('attention.critical')} value={reviewQueue?.criticalCount ?? 0} tone="critical" />
-                            <CountCard label={t('attention.eventDecisions')} value={reviewQueue?.eventDecisionCount ?? 0} tone={(reviewQueue?.eventDecisionCount ?? 0) > 0 ? 'critical' : 'neutral'} />
-                            <CountCard label={t('attention.commandReactions')} value={reviewQueue?.commandInterpretationCount ?? 0} tone={(reviewQueue?.commandInterpretationCount ?? 0) > 0 ? 'warning' : 'neutral'} />
-                            <CountCard label={t('attention.personnelDirectives')} value={reviewQueue?.personnelDirectiveCount ?? 0} tone={(reviewQueue?.personnelDirectiveCount ?? 0) > 0 ? 'warning' : 'neutral'} />
-                            <CountCard label={t('attention.opDossiers')} value={reviewQueue?.operationOpportunityCount ?? 0} tone={(reviewQueue?.operationOpportunityCount ?? 0) > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label={t('attention.critical')} value={liveCriticalCount} tone="critical" />
+                            <CountCard label={t('attention.eventDecisions')} value={pendingDecisions.length} tone={pendingDecisions.length > 0 ? 'critical' : 'neutral'} />
+                            <CountCard label={t('attention.commandReactions')} value={commandReactionCount} tone={commandReactionCount > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label={t('attention.personnelDirectives')} value={personnelDirectives.length} tone={personnelDirectives.length > 0 ? 'warning' : 'neutral'} />
+                            <CountCard label={t('attention.opDossiers')} value={operationDossierCount} tone={operationDossierCount > 0 ? 'warning' : 'neutral'} />
                         </div>
                     )}
                 </div>

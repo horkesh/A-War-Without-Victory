@@ -180,6 +180,23 @@ describe('decision surface registry', () => {
         latestTurnSummary: null,
         turnSummaries: [],
         player_faction: 'RBiH',
+        pendingPeacePlan: {
+          planId: 'vance_owen',
+          planName: 'Vance-Owen Peace Plan',
+          narrative: 'International mediators have presented a proposal.',
+          turnOffered: 1,
+          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+          institutionalModel: 'cantons',
+          botResponses: {},
+        },
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_srebrenica',
+            target_enclave: 'srebrenica',
+            route_faction: 'RBiH',
+            supply_amount: 20,
+          },
+        ],
         playerDecisionSummary: {
           totalCount: 2,
           blockingCount: 2,
