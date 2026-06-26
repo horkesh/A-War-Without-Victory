@@ -50,6 +50,17 @@ describe('player-knowledge integrity — adapter-level filtering', () => {
         expect(parsed.factionReserves!['RS']).toBeUndefined();
     });
 
+    it('preserves missing heavy-munitions reserve as unreported instead of zero', () => {
+        const state = buildMinimalState('RBiH');
+        delete state.military.heavy_munitions_reserve;
+
+        const parsed = parseGameState(state);
+
+        expect(parsed.factionReserves).toBeDefined();
+        expect(parsed.factionReserves!['RBiH'].generalSupply).toBe(500);
+        expect(parsed.factionReserves!['RBiH'].heavyMunitions).toBeUndefined();
+    });
+
     it('scopes warPhaseSupplyPressure to player faction only', () => {
         const parsed = parseGameState(buildMinimalState('RBiH'));
         expect(parsed.warPhaseSupplyPressure).toBeDefined();

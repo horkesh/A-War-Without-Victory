@@ -55,7 +55,7 @@ function localStateToPressure(supplyClass: ExplicitOsidSupplyClass): number {
 export function buildSupplyGeoJSON(
   controlGeoJson: FeatureCollection,
   controlBySettlement: Record<string, string | null>,
-  factionReserves: Record<string, { generalSupply: number; heavyMunitions: number }> | undefined,
+  factionReserves: Record<string, { generalSupply?: number; heavyMunitions?: number }> | undefined,
   warPhaseSupplyPressure?: Record<string, number>,
   warPhaseSupplyCondition?: Record<string, number>,
   supplyStateByOsid?: Partial<Record<string, ExplicitOsidSupplyClass>>
@@ -76,7 +76,7 @@ export function buildSupplyGeoJSON(
       supply_pressure = localStateToPressure(localSupply);
     } else if (controller) {
       const res = factionReserves?.[controller];
-      if (res != null && isFinite(res.generalSupply)) {
+      if (res != null && typeof res.generalSupply === 'number' && isFinite(res.generalSupply)) {
         supply_pressure = res.generalSupply;
         supply_class = reserveToClass(res.generalSupply);
       } else if (warPhaseSupplyCondition) {

@@ -30,7 +30,6 @@ import { EnclaveDashboard } from './components/EnclaveDashboard';
 import { EventModal } from './components/EventModal';
 import { AiAdvisorPanel } from './components/AiAdvisorPanel';
 import { AiSettingsPanel } from './components/AiSettingsPanel';
-import { AutonomyPanel } from './components/AutonomyPanel';
 import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
@@ -569,7 +568,6 @@ function App() {
   // Item 2: National Humanitarian Ledger surface (read-model; 'U' hotkey toggle).
   const [humanitarianLedgerOpen, setHumanitarianLedgerOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
-  const [autonomyPanelOpen, setAutonomyPanelOpen] = useState(false);
   const [diplomacyOpen, setDiplomacyOpen] = useState(false);
   const [aiAdvisorOpen, setAiAdvisorOpen] = useState(false);
   const [aiAdvisorResponse, setAiAdvisorResponse] = useState<any>(null);
@@ -863,7 +861,6 @@ function App() {
     economyOpen ||
     humanitarianLedgerOpen ||
     aiSettingsOpen ||
-    autonomyPanelOpen ||
     diplomacyOpen ||
     aiAdvisorOpen ||
     recruitmentOpen ||
@@ -1508,10 +1505,6 @@ function App() {
     if (action === 'convoy_decision_modal') {
       setSelectedConvoyDecisionId(itemId.startsWith('convoy:') ? itemId.slice('convoy:'.length) : itemId);
     }
-    if (action === 'autonomy_panel') {
-      setAutonomyPanelOpen(true);
-      leaveWarroomForGame();
-    }
     if (action === 'dismiss_intelligence_notification') {
       setSelectedIntelligenceBriefId(itemId);
     }
@@ -1813,14 +1806,6 @@ function App() {
       )}
       {aiSettingsOpen && (
         <AiSettingsPanel onClose={() => setAiSettingsOpen(false)} />
-      )}
-      {/* v0.8.4 Phase C: Command Autonomy panel */}
-      {autonomyPanelOpen && (
-        <AutonomyPanel
-          onClose={() => setAutonomyPanelOpen(false)}
-          playerFaction={playerFaction}
-          namedOfficerData={loadedGameState?.namedOfficerData}
-        />
       )}
       {diplomacyOpen && loadedGameState?.diplomacyView && (
         <DiplomacyPanel

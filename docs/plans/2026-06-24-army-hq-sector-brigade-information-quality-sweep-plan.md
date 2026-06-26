@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest P9 player-polish packet merged 2026-06-26 at `ba95ce8e8`.
+**Status:** ACTIVE rolling D2 polish plan; latest P10 player-polish packet implemented locally 2026-06-26 on `codex/p10-supply-autonomy-polish`; PR/merge closeout pending.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -8,10 +8,16 @@
 
 ## Current Queue 2026-06-26
 
-P9 is merged and green. The next P10 packet should start from closed scout reports rather than reopening packaging, BCS-only cleanup, or Srebrenica/Zepa scripted-operation calibration:
+P9 is merged and green. P10 has been implemented locally from closed scout reports without reopening packaging, BCS-only cleanup, or Srebrenica/Zepa scripted-operation calibration:
 
-- Sparse Supply Intelligence / Economy forecast precision: preserve unreported reserve/current-supply source data through `GameStateAdapter`, `EconomyPanel`, `playerSupplyVisibility`, and `SupplyIntelligence`; do not render missing reserves or composition as exact zero/depleted truth.
-- Legacy `autonomy_panel` route retirement: generated proposal reviews now route through Decision Room command cards, so remove the stale App/registry/inbox action branch after preserving any pure helper still used by tests.
+- `GameStateAdapter` preserves partial faction reserve records instead of filling missing general/heavy reserves as zero.
+- `EconomyPanel` renders missing reserve fields as `Unreported` and does not count absent reserve data as strained.
+- `playerSupplyVisibility` preserves partial supply-summary warnings while marking missing fields as `Unreported`; no exact zero supply mix is invented from sparse rows.
+- `SupplyIntelligence` marks heavy-equipment drain unreported when fielded formation composition is missing, while preserving explicit reported zeroes and rendering zero heavy drain as `0`.
+- `buildSupplyGeoJSON` uses faction reserve fallback only when general supply is reported.
+- The stale `autonomy_panel` App state, action branch, registry surface, and inbox action type are retired; generated proposal reviews remain Decision Room-owned.
+
+P10 verification passed: review-fix red/green proof; focused P10 proof 10 files / 113 tests; `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` 43 files / 654 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; and manual in-app browser reload at `http://127.0.0.1:3003/` with no alerts, no console errors, and no retired autonomy-panel text. Final `git diff --check`, GitHub PR proof, merge, branch deletion, and main-closeout docs remain. No installer/package work, no calibration, no save schema change, and no Srebrenica/Zepa operation-delivery tuning; fall receipts remain event-owned.
 
 ## Progress 2026-06-24
 

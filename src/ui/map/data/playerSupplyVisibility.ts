@@ -27,11 +27,17 @@ export interface PlayerSupplyVisibilityView {
     playerFaction: string;
     hasSupplyData: boolean;
     adequateCount: number;
+    adequateReported: boolean;
     strainedCount: number;
+    strainedReported: boolean;
     criticalCount: number;
+    criticalReported: boolean;
     corridorOpenCount: number;
+    corridorOpenReported: boolean;
     corridorBrittleCount: number;
+    corridorBrittleReported: boolean;
     corridorCutCount: number;
+    corridorCutReported: boolean;
     corridorAtRisk: boolean;
     isolatedFormationCount: number;
     severity: PlayerSupplySeverity;
@@ -108,19 +114,20 @@ function buildEvidence(view: Omit<PlayerSupplyVisibilityView, 'headline' | 'evid
         return [t('decisionRoom.card.supply.evidence.noData')];
     }
     const evidence: string[] = [];
+    const unreported = t('corpsFront.unreported');
     evidence.push(
         t('decisionRoom.card.supply.evidence.stateMix', {
-            adequate: t('supply.stateAdequateCount', { count: view.adequateCount }),
-            strained: t('supply.stateStrainedCount', { count: view.strainedCount }),
-            critical: t('supply.stateCriticalCount', { count: view.criticalCount }),
+            adequate: view.adequateReported ? t('supply.stateAdequateCount', { count: view.adequateCount }) : unreported,
+            strained: view.strainedReported ? t('supply.stateStrainedCount', { count: view.strainedCount }) : unreported,
+            critical: view.criticalReported ? t('supply.stateCriticalCount', { count: view.criticalCount }) : unreported,
         }),
     );
     const corridorTotal = view.corridorOpenCount + view.corridorBrittleCount + view.corridorCutCount;
     evidence.push(
         t('decisionRoom.card.supply.evidence.corridorMix', {
-            open: t('supply.corridorOpenCount', { count: view.corridorOpenCount }),
-            brittle: t('supply.corridorStrainedCount', { count: view.corridorBrittleCount }),
-            cut: t('supply.corridorCutCount', { count: view.corridorCutCount }),
+            open: view.corridorOpenReported ? t('supply.corridorOpenCount', { count: view.corridorOpenCount }) : unreported,
+            brittle: view.corridorBrittleReported ? t('supply.corridorStrainedCount', { count: view.corridorBrittleCount }) : unreported,
+            cut: view.corridorCutReported ? t('supply.corridorCutCount', { count: view.corridorCutCount }) : unreported,
             corridorLabel: t(corridorTotal === 1
                 ? 'decisionRoom.card.supply.unit.corridorSingular'
                 : 'decisionRoom.card.supply.unit.corridorPlural'),
@@ -137,6 +144,27 @@ function buildEvidence(view: Omit<PlayerSupplyVisibilityView, 'headline' | 'evid
     return evidence;
 }
 
+const SUPPLY_SUMMARY_COUNT_KEYS = [
+    'adequate_count',
+    'strained_count',
+    'critical_count',
+    'corridor_open_count',
+    'corridor_brittle_count',
+    'corridor_cut_count',
+] as const;
+
+type SupplySummaryCountKey = typeof SUPPLY_SUMMARY_COUNT_KEYS[number];
+
+function asSupplySummaryRow(summary: unknown): Record<SupplySummaryCountKey, unknown> | null {
+    if (!summary || typeof summary !== 'object' || Array.isArray(summary)) return null;
+    return summary as Record<SupplySummaryCountKey, unknown>;
+}
+
+function readFiniteCount(row: Record<SupplySummaryCountKey, unknown> | null, key: SupplySummaryCountKey): number | null {
+    const value = row?.[key];
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 export function buildPlayerSupplyVisibility(
     state: LoadedGameState,
 ): PlayerSupplyVisibilityView | null {
@@ -145,18 +173,25 @@ export function buildPlayerSupplyVisibility(
         return null;
     }
 
-    const summary = state.supplySummaryByFaction?.[playerFaction];
+    const summary = asSupplySummaryRow(state.supplySummaryByFaction?.[playerFaction]);
+    const adequate = readFiniteCount(summary, 'adequate_count');
+    const strained = readFiniteCount(summary, 'strained_count');
+    const critical = readFiniteCount(summary, 'critical_count');
+    const corridorOpen = readFiniteCount(summary, 'corridor_open_count');
+    const corridorBrittle = readFiniteCount(summary, 'corridor_brittle_count');
+    const corridorCut = readFiniteCount(summary, 'corridor_cut_count');
     const supplyByOsid = state.supplyStateByOsid;
-    const hasSummary = !!summary;
+    const hasSummary = [adequate, strained, critical, corridorOpen, corridorBrittle, corridorCut]
+        .some((value) => value != null);
     const hasOsidData = !!supplyByOsid && Object.keys(supplyByOsid).length > 0;
     const hasSupplyData = hasSummary || hasOsidData;
 
-    const adequateCount = summary?.adequate_count ?? 0;
-    const strainedCount = summary?.strained_count ?? 0;
-    const criticalCount = summary?.critical_count ?? 0;
-    const corridorOpenCount = summary?.corridor_open_count ?? 0;
-    const corridorBrittleCount = summary?.corridor_brittle_count ?? 0;
-    const corridorCutCount = summary?.corridor_cut_count ?? 0;
+    const adequateCount = adequate ?? 0;
+    const strainedCount = strained ?? 0;
+    const criticalCount = critical ?? 0;
+    const corridorOpenCount = corridorOpen ?? 0;
+    const corridorBrittleCount = corridorBrittle ?? 0;
+    const corridorCutCount = corridorCut ?? 0;
     const corridorAtRisk = corridorBrittleCount > 0 || corridorCutCount > 0;
 
     const isolatedFormationCount = hasOsidData
@@ -171,11 +206,17 @@ export function buildPlayerSupplyVisibility(
         playerFaction,
         hasSupplyData,
         adequateCount,
+        adequateReported: adequate != null,
         strainedCount,
+        strainedReported: strained != null,
         criticalCount,
+        criticalReported: critical != null,
         corridorOpenCount,
+        corridorOpenReported: corridorOpen != null,
         corridorBrittleCount,
+        corridorBrittleReported: corridorBrittle != null,
         corridorCutCount,
+        corridorCutReported: corridorCut != null,
         corridorAtRisk,
         isolatedFormationCount,
         severity,
