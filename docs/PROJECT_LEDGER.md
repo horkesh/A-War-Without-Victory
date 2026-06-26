@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] docs: sync active information-quality plan after P16 merge
+
+**Type:** Docs/process hygiene.
+
+**Fix:** Updated the active Army HQ / sector / brigade information-quality sweep plan so it no longer describes P15 as the current candidate. The plan now records P16 as merged/green, names the P16 local and GitHub proof, confirms branch/worktree cleanup, and points the next queue back to non-BCS owner-playthrough surfaces with substantial batching.
+
+**Verification:** Docs-only edit. `git diff --check` passed before commit.
+
+**Scope/determinism:** Documentation/process sync only. No code, simulation logic, scenario source data, event evaluator mechanics, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] docs: close P16 provenance runtime hardening merge
 
 **Type:** Docs/process closeout.

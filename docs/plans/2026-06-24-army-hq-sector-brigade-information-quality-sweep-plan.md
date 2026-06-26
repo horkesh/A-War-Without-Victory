@@ -1,12 +1,30 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P13/P14 at `c12659a29` through PR #456. Current P15 candidate is PR #457 on `codex/p15-browser-affordance-hardening`; local focused/browser proof is green and GitHub closeout is pending. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P16 at `9adce5a48` through PR #458, followed by docs closeout `790f76cd5` on `main`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
 **Why now:** `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` make D2 owner playthrough the remaining 1.0 gate. The closed June 22 sector-truth plan established the rules; this sweep verifies the current live surfaces again and closes the next coherent set before another long CI wait.
 
 ## Current Queue 2026-06-26
+
+P16 is merged and green. It closed the post-P15 queue without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
+
+- Missing corps-command rows stay unreported instead of being coerced into healthy zero command strain/exhaustion.
+- Explicit reported zeroes remain exact zeroes.
+- Corps Detail and Corps Situation render missing command-source truth honestly.
+- Army HQ sector DOM/ARIA ids are sanitized while raw `data-sector-id` routing/provenance is preserved.
+- Packaged runtime probes now capture renderer/network failures and verify data/UI/source/assets/PMTiles/glyph route inventory.
+- The tactical-map build copies bundled MapLibre glyph PBFs into the packaged map output.
+- Packaged tactical probe windows use `disable_pmtiles=1` while the PMTiles byte-range route remains explicitly checked.
+
+P16 closeout proof: local expanded focused proof 7 files / 122 tests, `npm.cmd run typecheck`, `git diff --check`, `npm.cmd run qa:player-journeys` 43 files / 677 tests, `npm.cmd run desktop:release:check`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, live in-app browser proof, and exact `npm.cmd run desktop:package:probe` with glyph routes 200, PMTiles range 206, tactical windows using `disable_pmtiles=1`, and `runtime_failure_checks: []`. GitHub PR #458 checks were green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite; comments/reviews/review threads were empty; local/remote P16 branch refs and the P16 worktree were removed. The docs closeout commit `790f76cd5` is also green on `main` across Event System CI, Desktop Release Guard, Baseline Regression, and Full Suite + Structural Fingerprint.
+
+Next queue after P16:
+
+- Return to non-BCS owner-playthrough surfaces under this plan.
+- Prioritize fresh live-browser inspection of Army HQ, OOB, Corps Front, sector, brigade/Formation Detail, settlement, Records, and Decision Room disabled-action copy.
+- Keep batching substantial coherent fixes before CI, rather than small one-off PRs.
 
 P11 is merged and green. It was implemented from the next closed scout reports without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
 
