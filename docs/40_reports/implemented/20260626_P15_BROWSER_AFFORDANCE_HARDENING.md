@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-26
 **Branch:** `codex/p15-browser-affordance-hardening`
-**Result:** PR #457 candidate implemented and locally verified through the focused follow-up pack; GitHub merge closeout pending after required 188w gate re-floor repair.
+**Result:** PR #457 merged to `main` at `315ca38718b3d91e994f3338439290ec2518112b`; GitHub checks green and branch refs pruned.
 
 ## Summary
 - Hardened OOB/CorpsCard, Corps Detail, and Formation Detail affordances found during the owner-playthrough scout wave.
@@ -52,7 +52,7 @@
 - CI repair focused proof passed `node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/command_surface_repurpose_panels.test.ts tests/ui_presidential_decision_room_wiring.test.ts --pool=forks --reporter=dot` (4 files / 35 tests), after the first PR run exposed that Baseline Regression left the base-branch detector file in the test worktree.
 - Sim-detector repair proof passed `node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (2 files / 14 tests), after the repaired PR run proved workflow/detector-only changes were still forcing the known-stale 188w engine-health floor.
 - GitHub PR run `28258283034` confirmed the false heavy-gate trigger and measured the current CI 188w floor as `matched_osids=609`, `consistency_failures=36`, `zero_eligible_ops=1`, `dead_ops=21`, `ghost_destroyed=1`, `stranded_brigades=0`, and `K:W=3.903`; `data/calibration/engine_health_thresholds.json`, `data/calibration/c3_freeze_manifest.json`, and `docs/40_reports/CALIBRATION_MASTER.md` now record that required-gate re-floor.
-- PR #457 is open for GitHub checks/comments and merge closeout.
+- GitHub PR #457 passed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and re-floored `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. PR comments, reviews, and review threads were empty before merge.
 
 ## Files Changed
 | File | Change |
@@ -78,7 +78,9 @@
 | `src/ui/map/App.tsx` | Enclave Dashboard handoff closes Army HQ shell |
 | `src/ui/map/components/EnclaveDashboard.tsx` | Airdrop budget guard, player-facing labels, accessible close affordance |
 
-## Remaining Closeout
-- Remove generated `.tmp_first_hour_browser_gate` and `.tmp_live_surface_browser_sweep` evidence folders after recording verification; preserve `.tmp_dev_server` only if it backs the active local browser session.
-- Push the follow-up commit to PR #457, inspect GitHub checks/comments, merge only after green, then prune local/remote branch refs.
-- Deferred scout queue: packaged-probe network/status capture, an opt-in real-PMTiles browser smoke, Army HQ raw sector-detail id fallback, and Corps Situation "healthy silence" copy.
+## Closeout
+- PR #457 merged to `main` at `315ca38718b3d91e994f3338439290ec2518112b`.
+- Local and remote `codex/p15-browser-affordance-hardening` refs are pruned; one clean `main` worktree remains.
+- `.tmp_first_hour_browser_gate` was removed after verification; `.tmp_dev_server` remains for the active local browser/dev session.
+- Preserved WIP stashes remain for the separate fresh-campaign/event-decision draft and must be reapplied only on the next appropriate branch.
+- Deferred scout queue: packaged-probe network/status capture, an opt-in real-PMTiles browser smoke, Army HQ raw sector-detail id fallback, Corps Situation "healthy silence" copy, command-strain provenance, and Decision Room disabled-action reasons.

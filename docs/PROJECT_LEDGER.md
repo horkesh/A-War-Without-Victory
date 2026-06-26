@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P15 browser-affordance hardening merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the P15 implementation report, command board, active Army HQ/sector/brigade information-quality plan, and ledger with the verified PR #457 closeout: merge to `main` at `315ca38718b3d91e994f3338439290ec2518112b`, green GitHub checks, no comments/reviews/review threads, remote branch deletion/prune, one clean `main` worktree, and stale browser-gate evidence cleanup.
+
+**Verification:** `gh pr checks 457` showed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and re-floored `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. `gh pr view 457` showed merge state `CLEAN`, no comments/reviews, and merge commit `315ca38718b3d91e994f3338439290ec2518112b`; direct GraphQL review-thread inspection returned no review threads. `git status --short --branch` showed clean `main...origin/main`; `git worktree list` showed one `main` worktree; `git branch --list 'codex/*'` returned no local codex branches; `git fetch --prune origin` removed `origin/codex/p15-browser-affordance-hardening`; `.tmp_first_hour_browser_gate` was removed and `.tmp_dev_server` preserved for the active browser/dev session.
+
+**Scope/determinism:** Documentation/process closeout only. No code, simulation logic, scenario source data, event evaluator mechanics, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, packaged installer artifact, or persisted output ordering changed. The preserved fresh-campaign/event-decision WIP remains stashed and outside the merged PR.
+
+---
+
 ## [2026-06-26] fix(ci): re-floor required 188w engine-health gate after false trigger
 
 **Type:** CI/calibration-gate threshold and documentation repair.
