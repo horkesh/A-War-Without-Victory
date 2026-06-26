@@ -1254,6 +1254,11 @@ function App() {
       setSummaryOpen(false);
       return true;
     }
+    if (target.kind === 'inbox') {
+      openInboxHome();
+      setSummaryOpen(false);
+      return true;
+    }
     return openPresidentialDecisionRoomNavigationTarget(target, useGameStore.getState());
   };
 

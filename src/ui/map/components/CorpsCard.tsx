@@ -48,6 +48,7 @@ export interface CorpsCardProps {
   onMouseEnter?: () => void;
   onMouseLeave?: () => void;
   commanderName?: string;
+  commanderSourceUnreported?: boolean;
   commanderActing?: boolean;
   commanderLabel?: string;
   commanderDetail?: string;
@@ -142,6 +143,7 @@ export function CorpsCard({
   onMouseEnter,
   onMouseLeave,
   commanderName,
+  commanderSourceUnreported,
   commanderActing,
   commanderLabel,
   commanderDetail,
@@ -225,10 +227,12 @@ export function CorpsCard({
         }}
         className="cursor-pointer hover:bg-panel-hover/40 transition-colors"
       >
-        {commanderName && (
+        {(commanderName || commanderSourceUnreported) && (
           <div className="px-3 py-1 text-[10px] bg-panel-bg border-b border-panel-border/50 text-text-secondary">
             <div>{commanderLabel ? `${commanderLabel}:` : t('corpsCard.commanderColon')}</div>
-            <div className="text-text-primary font-semibold">{commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}</div>
+            <div className={`${commanderSourceUnreported ? 'text-text-secondary italic' : 'text-text-primary font-semibold'}`}>
+              {commanderSourceUnreported ? t('corpsCard.commanderUnreported') : <>{commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}</>}
+            </div>
             {commanderDetail && (
               <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-amber-400/80">{commanderDetail}</div>
             )}
@@ -327,6 +331,8 @@ export function CorpsCard({
                 <div className="mt-0.5 text-[10px] text-amber-400/80">{commanderDetail}</div>
               )}
             </>
+          ) : commanderSourceUnreported ? (
+            <div className="text-[11px] text-text-secondary italic">{t('corpsCard.commanderUnreported')}</div>
           ) : (
             <div className="text-[11px] text-amber-500/60 italic">{t('corpsCard.unassigned')}</div>
           )}

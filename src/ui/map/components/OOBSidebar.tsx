@@ -495,10 +495,10 @@ export function OOBSidebar() {
                             const corpsOps = filterPlayerFacingOperations(loadedGameState).filter((op) => op.corps_id === corpsId);
                             const activeOp = corpsOps.find((op) => op.phase === 'execution');
                             const displayedOp = activeOp ?? corpsOps.find((op) => op.phase === 'planning');
-                            const commander = loadedGameState
+                            const corpsFormation = corpsFormationById.get(corpsId);
+                            const commander = loadedGameState && corpsFormation
                               ? resolveCorpsCommanderDisplay(corpsId, faction, loadedGameState)
                               : null;
-                            const corpsFormation = corpsFormationById.get(corpsId);
                             const syntheticCommand = commander?.source === 'synthetic' && corpsFormation && loadedGameState
                               ? getSyntheticJnaCommandPresentation(corpsFormation, corpsOps, loadedGameState)
                               : null;
@@ -526,6 +526,7 @@ export function OOBSidebar() {
                                   activeOperationPhase={displayedOp?.phase}
                                   activeOperationPhaseUnreported={displayedOp?.phase_unreported}
                                   commanderName={syntheticCommand?.commanderName ?? commander?.name}
+                                  commanderSourceUnreported={commander?.source === 'unreported'}
                                   commanderActing={syntheticCommand ? false : commander?.acting}
                                   commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
                                   commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {

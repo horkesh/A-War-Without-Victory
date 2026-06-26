@@ -144,7 +144,9 @@ export function buildFormationsGeoJSON(
       ? '__hunreported__munreported'
       : `__hunreported__m${Math.round(reportedMorale / 10) * 10}`;
 
-    const icon_id = `${type}__${formation.faction}${postureSuffix}${statusSuffix}`;
+    const markerFaction = isEnemyContact ? 'enemy_contact' : formation.faction;
+    const markerType = isEnemyContact ? 'enemy_contact' : type;
+    const icon_id = `${markerType}__${markerFaction}${postureSuffix}${statusSuffix}`;
 
     features.push({
       type: 'Feature',
@@ -153,7 +155,7 @@ export function buildFormationsGeoJSON(
         id: isEnemyContact ? contactId : formation.id,
         name: displayName,
         kind: isEnemyContact ? 'enemy_contact' : formation.kind,
-        faction: formation.faction,
+        faction: markerFaction,
         corps_id: isEnemyContact ? null : formation.corps_id ?? null,
         icon_id: icon_id,
         white_icon_id: `white__${icon_id}`,

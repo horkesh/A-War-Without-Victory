@@ -324,7 +324,7 @@ describe('player visibility helpers', () => {
     expect(contact).toMatchObject({
       name: 'Enemy contact',
       kind: 'enemy_contact',
-      faction: 'RS',
+      faction: 'enemy_contact',
       location_osid: 'op:enemy_seen',
       is_enemy_contact: true,
       corps_id: null,
@@ -343,6 +343,8 @@ describe('player visibility helpers', () => {
     expect(contact?.readiness).toBe('contact');
     expect(contact?.status).toBe('contact');
     expect(contact?.icon_id).toContain('__hunreported__munreported');
+    expect(contact?.icon_id).toContain('enemy_contact');
+    expect(contact?.icon_id).not.toContain('RS');
     expect(contact?.icon_id).not.toContain('__m80');
     expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_seen'))).toBe(true);
     expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'own_1'))).toBe(false);

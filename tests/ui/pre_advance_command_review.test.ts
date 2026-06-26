@@ -184,7 +184,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.items[0]).toMatchObject({
       severity: 'blocking',
       category: 'decision',
-      actionLabel: 'Open Inbox',
+      actionLabel: "Open President's Desk",
       sourceOwner: 'Presidential review queue',
       navigationTarget: { kind: 'inbox' },
     });
@@ -200,7 +200,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
       'turn-aftermath-records',
     ]);
     expect(view.sourceHandoffs[0]).toMatchObject({
-      label: 'Presidential Inbox',
+      label: "President's Desk",
       count: 1,
       cardIds: ['review:pending'],
     });
@@ -370,64 +370,31 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.status).toBe('clear');
   });
 
-  it('uses the manifest summary for blocking counts across modal and advisory decision families', () => {
+  it('does not let stale manifest summary counts block advance without live blockers', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
-        playerDecisionSummary: makePlayerDecisionSummary(),
-        pendingParamilitaryRequests: [
-          { faction: 'RBiH', strength: 300, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 21, mode: 'offensive' },
-        ],
+        playerDecisionSummary: makePlayerDecisionSummary({ blockingCount: 4 }),
+        presidentialReviewQueue: undefined,
+        pendingParamilitaryRequests: [],
         pendingConvoyDecisions: [
-          { id: 'convoy_srebrenica', target_enclave: 'srebrenica', route_faction: 'RS', supply_amount: 20 },
-        ],
-        pendingDayton: {
-          territorialPackages: [],
-          institutionalPackages: [],
-          factionCapital: {},
-          patronOverride: {},
-        },
-        pendingPeacePlan: {
-          planId: 'vance_owen',
-          planName: 'Vance-Owen Peace Plan',
-          narrative: 'International mediators have presented a proposal.',
-          turnOffered: 24,
-          proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
-          institutionalModel: 'cantons',
-          botResponses: {},
-        },
-        pendingReserveRequests: [
           {
-            request_id: 'reserve_1',
-            corps_id: 'arbih_3rd_corps',
-            faction: 'RBiH',
-            reason: 'defensive_gap',
-            priority: 40,
-            severityBand: 'routine',
-            travel_hops: 2,
-            description: 'Routine reserve request.',
-            suggested_brigade_id: null,
-            turn_requested: 24,
+            id: 'convoy_answered',
+            target_enclave: 'srebrenica',
+            route_faction: 'RBiH',
+            supply_amount: 20,
+            decision: 'allow',
           },
         ],
-        pendingOfficerEvents: [
-          {
-            event_id: 'officer_1',
-            type: 'officer_available',
-            faction: 'RBiH',
-            turn: 24,
-            officer_id: 'officer_new',
-            officer_name: 'Staff Officer',
-            officer_competence: 0.5,
-            officer_aggressiveness: 0.4,
-            officer_defensive_skill: 0.6,
-            acknowledged: false,
-          },
-        ],
+        pendingDayton: undefined,
+        pendingPeacePlan: undefined,
+        pendingReserveRequests: [],
+        pendingOfficerEvents: [],
+        pendingEventDecisions: [],
       } as Partial<LoadedGameState>),
     });
 
-    expect(view.status).toBe('blocked');
-    expect(view.blockingDecisionCount).toBe(4);
+    expect(view.status).toBe('clear');
+    expect(view.blockingDecisionCount).toBe(0);
   });
 
   it('does not count counter-offers addressed to another faction as pre-advance blockers', () => {

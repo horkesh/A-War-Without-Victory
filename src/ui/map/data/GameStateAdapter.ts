@@ -74,6 +74,7 @@ import { buildDiplomacyView } from './diplomacyView.js';
 import { playerFactionMatch } from './playerFactionMatch.js';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting.js';
 import { getEliteCommanderForFormationId } from './eliteCommanderSidecar.js';
+import { shouldNarrateTerritorySummary } from './territorySummaryGuard.js';
 import {
     deriveFactionSupplyConditionFromFlatOsidState,
     deriveFactionSupplyConditionFromOsidReport,
@@ -707,7 +708,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     // Per-formation campaign casualty totals from casualty_ledger.per_formation.
     const rawLedgerForPerFm = state.military.casualty_ledger as
         Record<string, { per_formation?: Record<string, { killed?: number; wounded?: number; missing_captured?: number }> }> | undefined;
-    const perFormationCasualties: Record<string, { kia: number; wia: number; mia: number }> = {};
+    const perFormationCasualties: Record<string, { kia?: number; wia?: number; mia?: number }> = {};
     if (rawLedgerForPerFm && typeof rawLedgerForPerFm === 'object') {
         for (const factionId of Object.keys(rawLedgerForPerFm).sort(strictCompare)) {
             const factionData = rawLedgerForPerFm[factionId];
@@ -716,11 +717,10 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 for (const bid of Object.keys(pf).sort(strictCompare)) {
                     const bd = pf[bid];
                     const b = bd as { killed?: number; wounded?: number; missing_captured?: number };
-                    perFormationCasualties[bid] = {
-                        kia: typeof b?.killed === 'number' ? b.killed : 0,
-                        wia: typeof b?.wounded === 'number' ? b.wounded : 0,
-                        mia: typeof b?.missing_captured === 'number' ? b.missing_captured : 0,
-                    };
+                    perFormationCasualties[bid] = {};
+                    if (typeof b?.killed === 'number' && Number.isFinite(b.killed)) perFormationCasualties[bid].kia = b.killed;
+                    if (typeof b?.wounded === 'number' && Number.isFinite(b.wounded)) perFormationCasualties[bid].wia = b.wounded;
+                    if (typeof b?.missing_captured === 'number' && Number.isFinite(b.missing_captured)) perFormationCasualties[bid].mia = b.missing_captured;
                 }
             }
         }
@@ -920,16 +920,24 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 const bh = asLooseRecord(f.brigade_history) ?? brigadeHistoryRecord?.[id];
                 if (bh && typeof bh === 'object') {
                     const engs = Array.isArray(bh.engagements) ? (bh.engagements as Array<Record<string, unknown>>) : [];
-                    const normalizedEngagements = engs.map((e) => ({
-                        turn: typeof e.turn === 'number' ? e.turn : 0,
-                        osid: typeof e.osid === 'string' ? e.osid : '',
-                        role: (e.role === 'attacker' || e.role === 'defender')
-                            ? e.role as 'attacker' | 'defender'
-                            : 'defender' as 'attacker' | 'defender',
-                        outcome: typeof e.outcome === 'string' ? e.outcome : '',
-                        casualties_taken: typeof e.casualties_taken === 'number' ? e.casualties_taken : 0,
-                        territory_flipped: e.territory_flipped === true,
-                    })).sort((a, b) => a.turn - b.turn);
+                    const normalizedEngagements = engs.flatMap((e) => {
+                        const turn = typeof e.turn === 'number' && Number.isFinite(e.turn) ? e.turn : null;
+                        const osid = typeof e.osid === 'string' && e.osid ? e.osid : null;
+                        const role = e.role === 'attacker' || e.role === 'defender' ? e.role : null;
+                        const outcome = typeof e.outcome === 'string' && e.outcome ? e.outcome : null;
+                        const casualtiesTaken = typeof e.casualties_taken === 'number' && Number.isFinite(e.casualties_taken)
+                            ? e.casualties_taken
+                            : null;
+                        if (turn == null || osid == null || role == null || outcome == null || casualtiesTaken == null) return [];
+                        return [{
+                            turn,
+                            osid,
+                            role: role as 'attacker' | 'defender',
+                            outcome,
+                            casualties_taken: casualtiesTaken,
+                            territory_flipped: e.territory_flipped === true,
+                        }];
+                    }).sort((a, b) => a.turn - b.turn);
                     if (normalizedEngagements.length > 0) {
                         fv.firstBattleTurn = normalizedEngagements[0].turn;
                         fv.firstBattleOsid = normalizedEngagements[0].osid || null;
@@ -1854,7 +1862,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 combat_record: combatRecordsByOfficer.get(id),
             });
         }
-        if (officerList.length > 0) namedOfficerData = officerList;
+        namedOfficerData = officerList;
 
         const stateById: Record<string, NamedOfficerStateView> = {};
         for (const officerId of Object.keys(rawOfficers).sort(strictCompare)) {
@@ -2624,10 +2632,11 @@ function deriveEliteBrigadeTracker(state: any): LoadedGameState['eliteBrigadeTra
 
 function deriveBattlesByOsid(state: any): LoadedGameState['battlesByOsid'] {
     const result: LoadedGameState['battlesByOsid'] = {};
-    const summaries = state.turn_summaries as Array<{ turn?: number; battles?: Array<Record<string, unknown>> }> | undefined;
+    const summaries = state.turn_summaries as Array<{ turn?: number; battles?: Array<Record<string, unknown>>; mechanism?: unknown; provenance?: unknown; source?: unknown; summary_kind?: unknown; kind?: unknown; is_setup?: unknown }> | undefined;
     if (!Array.isArray(summaries)) return result;
     for (const summary of summaries) {
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!shouldNarrateTerritorySummary(summary)) continue;
         if (!Array.isArray(summary.battles)) continue;
         for (const b of summary.battles) {
             const osid = typeof b.osid === 'string' ? b.osid : '';

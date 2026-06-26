@@ -82,7 +82,6 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
   const counterOfferCount = (state.pendingCounterOffers ?? [])
     .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
     .length;
-  if (state.playerDecisionSummary) return Math.max(state.playerDecisionSummary.blockingCount, presidentialBlockerCount) + counterOfferCount;
   const liveRequiredEventDecisionCount = (state.pendingEventDecisions ?? []).filter((decision) =>
       playerFactionMatch(decision.faction, state.player_faction ?? null)
       && isRequiredPendingEventDecision(decision)

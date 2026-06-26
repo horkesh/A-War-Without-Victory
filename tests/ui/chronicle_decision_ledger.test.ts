@@ -210,5 +210,9 @@ describe('Chronicle decision ledger integration', () => {
     const receipt = entries.find((entry) => entry.id === 'consequence-receipt-cabinet_crisis::hold_line::cabinet_aftershock');
     expect(receipt?.detail).toContain(`on ${turnToDateString(decisionTurn)}`);
     expect(receipt?.detail).not.toContain(`at week ${decisionTurn}`);
+    expect(receipt?.metadata).toMatchObject({
+      decisionRecordId: 'event:cabinet_crisis',
+      decisionRecordSurface: 'chronicle',
+    });
   });
 });

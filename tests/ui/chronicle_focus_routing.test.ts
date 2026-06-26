@@ -120,4 +120,5 @@ describe('Chronicle focused decision routing', () => {
       focusedChronicleDecisionRecordId: 'event:cabinet-crisis',
     });
   });
+
 });

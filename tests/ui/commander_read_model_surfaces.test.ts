@@ -159,4 +159,28 @@ describe('commander read-model surfaces', () => {
         expect(container.textContent).not.toContain('[!] UNASSIGNED');
         expect(gameState.namedOfficerStateById?.arbih_cikotic?.assigned_corps_id).toBeNull();
     });
+
+    it('labels a non-synthetic corps commander source as unreported when officer data is absent', () => {
+        const gameState = makeOpeningCommandState();
+        delete (gameState as Partial<LoadedGameState>).namedOfficerData;
+        delete (gameState as Partial<LoadedGameState>).namedOfficerStateById;
+        const corps = gameState.formations.find((formation) => formation.id === 'arbih_3rd_corps')!;
+        const brigades = gameState.formations.filter((formation) => formation.corps_id === 'arbih_3rd_corps');
+
+        const { container } = render(React.createElement(ArmyHQCorpsCard, {
+            corps,
+            brigades,
+            sectors: [],
+            operations: [],
+            factionBattles: [],
+            gameState,
+            isExpanded: false,
+            isCompressed: false,
+            onToggleExpand: () => undefined,
+        }));
+
+        expect(container.textContent).toContain('Commander record unreported');
+        expect(container.textContent).not.toContain('[!] UNASSIGNED');
+        expect(container.textContent).not.toContain('VACANCY DETECTED');
+    });
 });

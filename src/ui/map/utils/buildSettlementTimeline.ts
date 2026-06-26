@@ -219,40 +219,7 @@ export function buildSettlementTimeline(
             detail: initialControl ? t('settlementTimeline.control.mechanism.initial') : controlMechanismLabel(ce.mechanism),
         });
     }
-    // 2. Infer control flips from displacement events — when `caused_by` faction
-    //    first appears or changes at this OSID, it means that faction took control.
-    //    This covers cases where control_events is empty (not persisted in save).
-    {
-        const controlFlipTurns = new Set(events.filter(e => e.type === 'control_flip').map(e => e.turn));
-        let lastCausedBy: string | null = null;
-        const dispEventsForOsid = displacementEvents
-            .filter(de => de.origin_osid === osid && de.caused_by)
-            .sort((a, b) => a.turn - b.turn);
-        // Count persisted (non-inferred) control events for this OSID to gate displacement inference
-        const persistedFlipCount = controlEvents.filter(ce => ce.settlementId === osid).length;
-        for (const de of dispEventsForOsid) {
-            if (de.caused_by && de.caused_by !== lastCausedBy) {
-                // Don't infer "took control" from displacement when the faction already held
-                // this OSID at scenario start and no real control flip events exist
-                if (startController && de.caused_by === startController && persistedFlipCount === 0) {
-                    lastCausedBy = de.caused_by;
-                    continue;
-                }
-                // Don't duplicate if we already have a control_flip event at this turn
-                if (!controlFlipTurns.has(de.turn)) {
-                    events.push({
-                        turn: de.turn,
-                        type: 'control_flip',
-                        faction: de.caused_by,
-                        title: t('settlementTimeline.control.changed', { faction: factionName(de.caused_by) }),
-                        detail: t('settlementTimeline.control.mechanism.displacementInferred'),
-                    });
-                    controlFlipTurns.add(de.turn);
-                }
-                lastCausedBy = de.caused_by;
-            }
-        }
-    }
+    // Displacement rows are rendered below as displacement evidence only.
 
     // --- Battles ---
     for (const b of battles) {

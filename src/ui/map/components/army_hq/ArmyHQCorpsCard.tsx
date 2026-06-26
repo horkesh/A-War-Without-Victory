@@ -183,7 +183,8 @@ export function ArmyHQCorpsCard({
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
     const isCritical = data.avgCohesion != null && data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commanderDisplay;
-    const displayCommanderName = data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
+    const commanderSourceUnreported = data.commanderDisplay?.source === 'unreported';
+    const displayCommanderName = commanderSourceUnreported ? undefined : data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.unreported;
     const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.unreported');
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
@@ -260,7 +261,9 @@ export function ArmyHQCorpsCard({
                             )}
                         </span>
                     ) : (
-                        <span className="italic text-red-500/60">{t('armyHqCorps.unassigned')}</span>
+                        <span className={`italic ${commanderSourceUnreported ? 'text-text-secondary' : 'text-red-500/60'}`}>
+                            {commanderSourceUnreported ? t('armyHqCorps.commanderUnreported') : t('armyHqCorps.unassigned')}
+                        </span>
                     )}
                     <div className="w-1 h-3 border-l border-panel-border" />
                     <span className={`font-bold ${gradeColor}`}>{t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}</span>

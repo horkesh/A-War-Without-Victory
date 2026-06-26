@@ -25,6 +25,7 @@ export interface ChronicleEntry {
         officerRank?: string;
         costLedgerRef?: string;
         decisionRecordId?: string;
+        decisionRecordSurface?: 'chronicle' | 'records';
         codexRef?: string;
         sensitiveSignals?: Array<'atrocity' | 'rupture'>;
         imageUrl?: string;
@@ -421,6 +422,7 @@ function buildDecisionLedgerEntries(state: any): ChronicleEntry[] {
             detail: resolveDecisionConsequenceCopy(record, 'detail'),
             metadata: {
                 decisionRecordId: record.id,
+                decisionRecordSurface: record.recordTarget,
                 imageUrl: getConsequenceStillForRecord(record),
             },
         }));
@@ -460,6 +462,7 @@ function buildConsequenceReceiptEntries(
             }),
             metadata: {
                 decisionRecordId: `event:${receipt.decisionEventId}`,
+                decisionRecordSurface: 'chronicle',
             },
         });
     }

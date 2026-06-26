@@ -518,7 +518,7 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
 
   const route = eventDecisionCount > 0
     ? {
-      sourceLabel: t('inbox.title'),
+      sourceLabel: t('inbox.decisionRoom'),
       actionLabel: t('decisionRoom.action.openInbox'),
       navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
       sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
@@ -538,7 +538,7 @@ function addReviewCard(state: LoadedGameState, cards: CandidateCard[]): void {
           sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
         }
         : {
-          sourceLabel: t('inbox.title'),
+          sourceLabel: t('inbox.decisionRoom'),
           actionLabel: t('decisionRoom.action.openInbox'),
           navigationTarget: { kind: 'inbox' } as PresidentialDecisionRoomNavigationTarget,
           sourceHandoffTarget: undefined as PresidentialDecisionRoomNavigationTarget | undefined,
@@ -1696,7 +1696,7 @@ function describeSourceHandoffTarget(
   if (target.kind === 'inbox') {
     return {
       id: 'presidential-inbox',
-      label: t('inbox.title'),
+      label: t('inbox.decisionRoom'),
       actionLabel: t('decisionRoom.action.openInbox'),
     };
   }

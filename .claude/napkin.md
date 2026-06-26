@@ -1,5 +1,11 @@
 # Napkin Runbook
 
+**DISPLACEMENT ATTRIBUTION IS NOT CONTROL TRUTH (2026-06-26).** A displacement row can explain movement pressure without proving who controlled a settlement. Do instead: require explicit control receipts/history for timeline control flips; render displacement as displacement evidence only.
+
+**DECISION ROOM FOCUS MUST RECONCILE TO LIVE CARDS (2026-06-26).** Stored card ids and command-category filters can outlive the current card list after turn/state changes. Do instead: clear missing active cards and stale category filters before rendering an empty or unrelated dossier.
+
+**CHRONICLE RECEIPT ACTIONS NEED OWNING SURFACE METADATA (2026-06-26).** A consequence receipt filed to Chronicle should not route through Army HQ Records just because it is a decision ledger row. Do instead: carry `decisionRecordSurface` and open Chronicle-filed receipt actions inside Chronicle focus.
+
 **MISSING PREDICTION/COST SOURCES ARE UNREPORTED, NOT ZERO (2026-06-26).** Sparse G-2 predictions, casualty ledgers, displacement sources, and battle-cost rows do not prove `0` or `stalemate`. Do instead: preserve nullable fields/reported flags through normalization and render `Unreported`; preserve explicit reported zeroes as exact zero.
 
 **FOG-VISIBLE ENEMY CONTACTS ARE CONTACTS, NOT FORMATIONS (2026-06-26).** A player-observed hostile presence should not leak hostile OOB identity or open full Formation Detail. Do instead: project generic `enemy_contact:*` ids/names, redact stats/anchors/operation fields, and route clicks through settlement/contact context unless a canon-reviewed intel surface explicitly grants detail.

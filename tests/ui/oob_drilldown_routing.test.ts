@@ -384,12 +384,18 @@ describe('OOBSidebar drilldown routing', () => {
         personnel: 450,
       },
     ] as LoadedGameState['formations'];
+    delete (state as Partial<LoadedGameState>).namedOfficerData;
+    delete (state as Partial<LoadedGameState>).namedOfficerStateById;
     useGameStore.setState({ loadedGameState: state });
 
-    render(React.createElement(OOBSidebar));
+    const { container } = render(React.createElement(OOBSidebar));
 
     const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
     expect(orbatButtons).toHaveLength(1);
+    const ungroupedHeader = screen.getByRole('button', { name: /Ungrouped/i });
+    const ungroupedCard = ungroupedHeader.closest('.rounded-lg');
+    expect(ungroupedCard?.textContent).toContain('Ungrouped');
+    expect(ungroupedCard?.textContent).not.toContain('Commander record unreported');
     fireEvent.click(orbatButtons[0]);
 
     expect(useGameStore.getState().selectedFormationId).toBeNull();
