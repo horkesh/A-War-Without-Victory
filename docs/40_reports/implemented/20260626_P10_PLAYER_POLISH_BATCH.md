@@ -2,7 +2,9 @@
 
 **Date:** 2026-06-26  
 **Branch:** `codex/p10-supply-autonomy-polish`  
-**Status:** implemented locally; PR/merge closeout pending
+**PR:** #453
+**Merge:** `b3d4ea76e`
+**Status:** merged to `main`
 
 ## Summary
 
@@ -35,6 +37,10 @@ Epicurus caught a real P1 issue in the initial P10 patch: incomplete supply-summ
 - Manual in-app browser reload at `http://127.0.0.1:3003/` rendered the side picker with no alert banners, no console errors, and no `autonomy_panel` / `Autonomy Panel` text.
 - `git diff --check` passed.
 - Generated browser evidence folders were removed after recording proof; only `.tmp_dev_server` remains for the active local dev-server session.
+- GitHub PR #453 checks passed: Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite.
+- `gh pr view 453` showed no comments, no reviews, no review threads, `mergeStateStatus: CLEAN`, and merge commit `b3d4ea76e`.
+- Recent GitHub review-thread sweep found previously addressed Codex threads on PRs #451, #449, #444, and #442; each was verified against current code/docs and marked resolved.
+- Local/remote `codex/p10-supply-autonomy-polish` refs were deleted/pruned and `git status --short --branch` showed clean `main...origin/main`.
 
 ## Scope And Determinism
 

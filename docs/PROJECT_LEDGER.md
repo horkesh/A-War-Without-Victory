@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P10 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P10 implementation report, and ledger with the verified PR #453 closeout: merge to `main` at `b3d4ea76e`, green GitHub PR checks, no PR comments/reviews/review threads, deleted/pruned branch refs, one clean `main` worktree, and stale resolved-in-code Codex review threads from PRs #451, #449, #444, and #442 marked resolved after local verification.
+
+**Verification:** `gh pr checks 453` showed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. `gh pr view 453` showed no comments, no reviews, no review threads, `mergeStateStatus: CLEAN`, merged state, and merge commit `b3d4ea76e`. Direct GraphQL review-thread sweep showed #453 had no review threads and the recent stale threads are now resolved. `git fetch --prune` removed the remote P10 ref, generated browser evidence folders were already cleaned, and only `.tmp_dev_server` remains for the active local dev-server session.
+
+**Scope/determinism:** Documentation/process closeout plus GitHub review-thread hygiene. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] fix(ui): implement P10 supply/autonomy polish
 
 **Type:** UI/read-model/routing/test/docs polish.

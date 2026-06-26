@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest P10 player-polish packet implemented locally 2026-06-26 on `codex/p10-supply-autonomy-polish`; PR/merge closeout pending.
+**Status:** ACTIVE rolling D2 polish plan; latest P10 player-polish packet merged 2026-06-26 at `b3d4ea76e`.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -17,7 +17,7 @@ P9 is merged and green. P10 has been implemented locally from closed scout repor
 - `buildSupplyGeoJSON` uses faction reserve fallback only when general supply is reported.
 - The stale `autonomy_panel` App state, action branch, registry surface, and inbox action type are retired; generated proposal reviews remain Decision Room-owned.
 
-P10 verification passed: review-fix red/green proof; focused P10 proof 10 files / 113 tests; `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` 43 files / 654 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; and manual in-app browser reload at `http://127.0.0.1:3003/` with no alerts, no console errors, and no retired autonomy-panel text. Final `git diff --check`, GitHub PR proof, merge, branch deletion, and main-closeout docs remain. No installer/package work, no calibration, no save schema change, and no Srebrenica/Zepa operation-delivery tuning; fall receipts remain event-owned.
+P10 verification passed: review-fix red/green proof; focused P10 proof 10 files / 113 tests; `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` 43 files / 654 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `git diff --check`; GitHub PR #453 checks green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression, structural fingerprint, Typecheck, and Full Suite; and manual in-app browser reload at `http://127.0.0.1:3003/` with no alerts, no console errors, and no retired autonomy-panel text. Branch refs were deleted/pruned, one clean `main` worktree remains, and stale resolved-in-code Codex review threads from PRs #451, #449, #444, and #442 were marked resolved. No installer/package work, no calibration, no save schema change, and no Srebrenica/Zepa operation-delivery tuning; fall receipts remain event-owned.
 
 ## Progress 2026-06-24
 
