@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P8 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P8 implementation report, and ledger with the verified PR #451 closeout: merge to `main` at `ed8a04e8a`, green GitHub PR checks, deleted/pruned branch refs, one clean `main` worktree, absorbed and closed James, Newton, and Einstein, and recorded the ordered P9 queue from their scout reports.
+
+**Verification:** `gh pr checks 451` showed Event System validation, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. `gh pr view 451` showed merge commit `ed8a04e8a` and merged state. `git status --short --branch` showed clean `main...origin/main` before the docs-only closeout edits, `git worktree list` showed a single `main` worktree, and temp cleanup left only `.tmp_dev_server` for the active local browser/dev session.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. `FORAWWV.md` was not edited.
+
+---
+
 ## [2026-06-26] fix(ui): implement P8 player-polish batch
 
 **Type:** UI/read-model/map projection/accessibility/test/docs polish.

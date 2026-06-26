@@ -2,6 +2,8 @@
 
 **FOG-VISIBLE ENEMY CONTACTS ARE CONTACTS, NOT FORMATIONS (2026-06-26).** A player-observed hostile presence should not leak hostile OOB identity or open full Formation Detail. Do instead: project generic `enemy_contact:*` ids/names, redact stats/anchors/operation fields, and route clicks through settlement/contact context unless a canon-reviewed intel surface explicitly grants detail.
 
+**SETTLEMENT TIMELINES NEED EXPLICIT EVENT SCOPE (2026-06-26).** Event ids containing a municipality name are not proof that every settlement in that municipality was directly touched. Do instead: include settlement timeline events only from explicit OSID/municipality scope metadata or other direct receipts; never attach historical rows by substring matching.
+
 **DECISION ROOM COUNTS USE LIVE WEIGHTED CARDS (2026-06-26).** Stale manifest summary metadata can invent pending reviews or undercount grouped blockers. Do instead: count live cards after ownership/filtering and sum `countWeight` through lenses, handoffs, command questions, loop steps, pending totals, and urgent totals.
 
 **GLOBAL SHORTCUTS MUST RESPECT FOCUSED CONTROLS (2026-06-26).** Plain Tab, Space, and Enter belong to focused inputs/buttons/tabs/menuitems. Do instead: guard global handlers with interactive-focus checks and bind app-level cycling to modified shortcuts such as `Ctrl+Tab`.

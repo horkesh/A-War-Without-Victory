@@ -69,3 +69,7 @@ The follow-up P9 scout wave found additional non-packaging polish candidates not
 ## Scope And Determinism
 
 This is player-surface polish only. It is deterministic by construction because it only changes UI projections, read-model counting, focus/ARIA contracts, i18n keys, and tests. No persisted simulation output, scenario artifact, event catalog behavior, random ordering, timestamp generation, or locale-sensitive simulation ordering is changed.
+
+## Closeout
+
+PR #451 merged to `main` at `ed8a04e8a` on 2026-06-26. GitHub PR checks were green across Event System validation, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite before merge. Local and remote `codex/p8-player-polish-batch` refs were deleted/pruned, the worktree audit showed one clean `main` worktree, and `.tmp_dev_server` was the only remaining `.tmp_*` directory for the active local browser/dev session.
