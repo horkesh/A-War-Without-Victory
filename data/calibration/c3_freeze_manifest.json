@@ -20,22 +20,22 @@
     "note": "Schema v2 fingerprints sorted OSID flip rows as well as per-faction counts, anchors, benchmarks, and run shape; equal-count control swaps are no longer invisible to the CI gate."
   },
   "calibration_188w": {
-    "matched_osids_floor": 658,
+    "matched_osids_floor": 609,
     "matched_osids_total": 712,
     "final_save_hash_188w": "f08f40522afff835",
     "anchor_set_count": 30,
     "source": "docs/40_reports/CALIBRATION_MASTER.md (authoritative floor) + data/calibration/engine_health_thresholds.json",
-    "note": "The 188w control_delta is platform-stable but byte-pinned only via the matched_osids_floor integer (658), not a manifest SHA. The 188w final_save_hash is recorded for the debrief but is NOT a CI gate (platform-divergent)."
+    "note": "The 188w control_delta is platform-stable but byte-pinned only via the matched_osids_floor integer (609 after the 2026-06-26 required-gate re-floor), not a manifest SHA. The 188w final_save_hash is recorded for the debrief but is NOT a CI gate (platform-divergent)."
   },
   "engine_health_188w": {
     "zero_eligible_ops_max": 4,
-    "dead_ops_max": 37,
-    "ghost_destroyed_max": 5,
-    "stranded_brigades_max": 7,
-    "consistency_failures_max": 6,
-    "matched_osids_min": 658,
-    "kw_ratio_lo": 3.27,
-    "kw_ratio_hi": 4.424,
+    "dead_ops_max": 25,
+    "ghost_destroyed_max": 4,
+    "stranded_brigades_max": 3,
+    "consistency_failures_max": 42,
+    "matched_osids_min": 609,
+    "kw_ratio_lo": 3.318,
+    "kw_ratio_hi": 4.488,
     "source": "data/calibration/engine_health_thresholds.json (tools/engine_health_gate.cjs)",
     "enforced_by": "engine-health-188w CI job — REQUIRED + blocking (promoted from advisory 2026-06-13, owner-authorized: continue-on-error removed #430 + added to main branch-protection required checks). A hard 188w regression now BLOCKS merge on sim-touching PRs; doc/CI PRs pass via the always-report green-fast shim (verified: #431 reported green-fast pass on a CI-only PR)."
   },

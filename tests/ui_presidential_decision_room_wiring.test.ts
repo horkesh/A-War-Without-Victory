@@ -185,6 +185,11 @@ describe('Presidential Decision Room wiring', () => {
     expect(app).toContain('setSelectedCounterOfferId(target.counterOfferId)');
     expect(app).toContain("if (target.kind === 'enclave-dashboard')");
     expect(app).toContain('setEnclaveDashboardOpen(true)');
+    const decisionRoomTargetStart = app.indexOf('const openDecisionRoomTarget =');
+    const enclaveBranchStart = app.indexOf("if (target.kind === 'enclave-dashboard')", decisionRoomTargetStart);
+    const inboxBranchStart = app.indexOf("if (target.kind === 'inbox')", enclaveBranchStart);
+    const enclaveBranch = app.slice(enclaveBranchStart, inboxBranchStart);
+    expect(enclaveBranch).toContain('gs.setArmyHQOpen(false)');
     expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
     expect(app).toContain('<ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} />');
     expect(app).toContain("openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null)");

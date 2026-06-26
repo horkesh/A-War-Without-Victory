@@ -66,6 +66,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
           fi
           bash .github/scripts/detect-changed-paths.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-changed-paths.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -119,6 +122,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
           fi
           bash .github/scripts/detect-changed-paths.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-changed-paths.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -170,6 +176,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
           fi
           bash .github/scripts/detect-changed-paths.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-changed-paths.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -210,7 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # REQUIRED (promoted from advisory 2026-06-13, owner-authorized): a hard
-    # engine-health regression at 188w (matched_osids < 658, stranded/dead-op/ghost
+    # engine-health regression at 188w (matched_osids < 609, stranded/dead-op/ghost
     # ceilings, K:W band) fails this job RED and blocks merge. The 3-5-clean-cycle
     # criterion was met (#424/#426/#427/#428/#429 all green). Path-gated: non-sim PRs
     # report success via the always-report shim, so only sim-touching PRs pay the run.
@@ -242,6 +251,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-changed-paths.sh
           fi
           bash .github/scripts/detect-changed-paths.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-changed-paths.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'

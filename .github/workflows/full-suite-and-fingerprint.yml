@@ -68,6 +68,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
           fi
           bash .github/scripts/detect-full-suite-changes.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-full-suite-changes.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'
@@ -145,6 +148,9 @@ jobs:
             git checkout "origin/${base_ref}" -- .github/scripts/detect-full-suite-changes.sh
           fi
           bash .github/scripts/detect-full-suite-changes.sh
+          if [[ "${GITHUB_EVENT_NAME:-}" == "pull_request" ]]; then
+            git restore --source=HEAD -- .github/scripts/detect-full-suite-changes.sh
+          fi
 
       - uses: actions/setup-node@v5
         if: steps.changes.outputs.relevant == 'true'

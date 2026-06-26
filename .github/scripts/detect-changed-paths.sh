@@ -33,8 +33,9 @@
 #
 #   sim      Simulation / scenario / calibration surfaces that can move a scenario
 #            anchor: src/sim, src/state, src/scenario, data/scenarios, data/calibration,
-#            plus package.json / vitest.config.ts / tsconfig.json and the Baseline
-#            Regression workflow + this script (so anchor tooling edits still run).
+#            plus package.json / vitest.config.ts / tsconfig.json. Trusted detector
+#            checkout means workflow/detector edits cannot bypass the gate, so CI-only
+#            detector/workflow edits do not force the 188w engine-health run.
 #
 # The diff-resolution logic below is identical to detect-full-suite-changes.sh.
 set -euo pipefail
@@ -65,11 +66,18 @@ case "${PATH_SET}" in
       "src/desktop/"
       "src/ui/"
       "tools/"
+      "data/derived/"
+      "data/ui/"
+      "data/scenarios/events/"
+      "assets/"
     )
     EXACT_FILES=(
       "package.json"
+      "package-lock.json"
       ".github/workflows/desktop-release-guard.yml"
+      ".github/workflows/release.yml"
       ".github/scripts/detect-changed-paths.sh"
+      "build/icon.png"
     )
     ;;
   sim)
@@ -85,8 +93,6 @@ case "${PATH_SET}" in
       "package-lock.json"
       "vitest.config.ts"
       "tsconfig.json"
-      ".github/workflows/baseline-regression.yml"
-      ".github/scripts/detect-changed-paths.sh"
       # Scenario TEST files the `scenario-anchors` gate actually executes
       # (npm run test:vitest:scenario:anchors). Without these, a PR that edits ONLY
       # an anchor test would match no `sim` prefix and skip the anchor gate.

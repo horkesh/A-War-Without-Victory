@@ -165,10 +165,10 @@ describe('OOBSidebar drilldown routing', () => {
     const { container } = render(React.createElement(OOBSidebar));
 
     expect(container.textContent).toContain('JNA Herzegovina Command');
-    expect(container.textContent).toContain('0 brigades');
+    expect(container.textContent).toContain('0 fielded brigades');
     expect(container.textContent).not.toContain('JNA phantom battalion');
     expect(container.textContent).not.toContain('No formations.');
-    expect(screen.getByRole('button', { name: /JNA Herzegovina Command/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /^JNA Herzegovina Command\s+0\s+0 fielded brigades$/i })).toBeTruthy();
   });
 
   it('routes sector rows with their corps context preserved', () => {
@@ -392,8 +392,9 @@ describe('OOBSidebar drilldown routing', () => {
 
     const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
     expect(orbatButtons).toHaveLength(1);
-    const ungroupedHeader = screen.getByRole('button', { name: /Ungrouped/i });
-    const ungroupedCard = ungroupedHeader.closest('.rounded-lg');
+    expect(screen.queryByRole('button', { name: /^Ungrouped/i })).toBeNull();
+    const ungroupedCard = Array.from(container.querySelectorAll('.rounded-lg'))
+      .find((card) => (card.textContent ?? '').includes('Ungrouped'));
     expect(ungroupedCard?.textContent).toContain('Ungrouped');
     expect(ungroupedCard?.textContent).not.toContain('Commander record unreported');
     fireEvent.click(orbatButtons[0]);
@@ -413,6 +414,49 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedOrbatCorpsId).toBeNull();
     expect(store.selectedCorpsId).toBeNull();
     expect(derivePanelRailState(store)).toEqual({ primary: 'formation', secondary: null });
+  });
+
+  it('names corps card flip actions as details and summary affordances', () => {
+    const state = makeState();
+    state.formations = [
+      ...(state.formations ?? []),
+      {
+        id: 'vrs_field_corps',
+        faction: 'RS',
+        name: 'Field Corps',
+        kind: 'corps',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 1200,
+      },
+      {
+        id: 'field_corps_bde',
+        faction: 'RS',
+        name: 'Field Corps Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 500,
+        corps_id: 'vrs_field_corps',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    const detailsButton = screen.getByRole('button', { name: 'Show Field Corps details' });
+    fireEvent.click(detailsButton);
+
+    expect(screen.getByRole('button', { name: 'Show Field Corps summary' })).toBeTruthy();
+    expect(document.body.textContent ?? '').toContain('Fielded brigades');
   });
 
   it('renders sparse mobilization reports as unreported without hiding explicit zeroes', () => {

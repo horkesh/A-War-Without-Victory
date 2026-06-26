@@ -17,7 +17,15 @@ describe('first-hour browser QA gate contract', () => {
 
     expect(tool).toContain('.tmp_first_hour_browser_gate');
     expect(tool).toContain('consoleMessages');
+    expect(tool).toContain('requestFailures');
+    expect(tool).toContain('httpFailures');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('assertNoNetworkFailures');
+    expect(tool).toContain("page.on('requestfailed'");
+    expect(tool).toContain("page.on('response'");
+    expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('cleanBrowserGateOutputDir');
+    expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
@@ -71,7 +79,15 @@ describe('live surface browser sweep contract', () => {
 
     expect(tool).toContain('.tmp_live_surface_browser_sweep');
     expect(tool).toContain('consoleMessages');
+    expect(tool).toContain('requestFailures');
+    expect(tool).toContain('httpFailures');
     expect(tool).toContain('assertNoConsoleErrors');
+    expect(tool).toContain('assertNoNetworkFailures');
+    expect(tool).toContain("page.on('requestfailed'");
+    expect(tool).toContain("page.on('response'");
+    expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('cleanBrowserGateOutputDir');
+    expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
     expect(tool).toContain('WAR HAS STARTED');
     expect(tool).toContain('WAR BEGINS');
@@ -338,6 +354,16 @@ describe('live surface browser sweep contract', () => {
 });
 
 describe('browser QA CI wiring contract', () => {
+  it('runs browser gates for packaged runtime data and asset path changes', () => {
+    const detector = read('.github/scripts/detect-full-suite-changes.sh');
+
+    expect(detector).toContain('"data/derived/"');
+    expect(detector).toContain('"data/ui/"');
+    expect(detector).toContain('"data/scenarios/"');
+    expect(detector).toContain('"assets/"');
+    expect(detector).toContain('"build/icon.png"');
+  });
+
   it('runs first-hour and live-surface browser gates in the required full-suite job', () => {
     const workflow = read('.github/workflows/full-suite-and-fingerprint.yml');
 

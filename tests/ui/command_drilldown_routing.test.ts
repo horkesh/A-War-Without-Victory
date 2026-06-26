@@ -140,6 +140,7 @@ describe('command drilldown routing', () => {
 
     expect(container.textContent).toMatch(/1[,.]200/);
     expect(container.textContent).not.toMatch(/2[,.]100/);
+    expect(container.textContent).toContain('Fielded brigades');
 
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
 
@@ -325,5 +326,52 @@ describe('command drilldown routing', () => {
     fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
 
     expect(container.textContent).not.toContain('Obj 0/0');
+  });
+
+  it('names the sector used when opening CorpsDetail operation planning', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [
+      {
+        ...state.corpsFrontSectors![0],
+        sector_id: 'sector:rbih_1_corps:quiet',
+        display_name: 'Quiet line',
+        sub_segments: [{
+          sub_segment_id: 'quiet-1',
+          edge_ids: [],
+          friendly_osids: ['op:quiet:friendly'],
+          enemy_osids: [],
+          length_edges: 1,
+          primary_brigade_ids: ['rbih_1_brigade'],
+        }],
+      },
+      {
+        ...state.corpsFrontSectors![0],
+        sector_id: 'sector:rbih_1_corps:contact',
+        display_name: 'Contact line',
+        sub_segments: [{
+          sub_segment_id: 'contact-1',
+          edge_ids: [],
+          friendly_osids: ['op:contact:friendly'],
+          enemy_osids: ['op:contact:enemy'],
+          length_edges: 1,
+          primary_brigade_ids: ['rbih_1_brigade'],
+        }],
+      },
+    ] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Orders/i }));
+    const planButton = screen.getByRole('button', { name: /Prepare Operation in HQ for Contact line/i });
+    expect(planButton.getAttribute('title')).toBe('Prepare Operation in HQ for Contact line');
+    fireEvent.click(planButton);
+
+    expect(useGameStore.getState().opsPlanningCorpsId).toBe('rbih_1_corps');
+    expect(useGameStore.getState().opsPlanningOriginSectorId).toBe('sector:rbih_1_corps:contact');
   });
 });

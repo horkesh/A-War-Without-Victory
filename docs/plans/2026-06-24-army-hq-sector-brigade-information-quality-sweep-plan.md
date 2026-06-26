@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P13/P14 at `c12659a29` through PR #456. GitHub is green, Codex review threads are resolved, local/remote branch refs are pruned, one clean `main` worktree remains, and packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P13/P14 at `c12659a29` through PR #456. Current P15 candidate is PR #457 on `codex/p15-browser-affordance-hardening`; local focused/browser proof is green and GitHub closeout is pending. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -56,13 +56,30 @@ P13/P14 implementation, merged through PR #456 at `c12659a29`, covers the next p
 
 P13/P14 verification passed: focused P13/P14 pack 16 files / 260 tests; Codex review-fix proof 2 files / 48 tests; adjacent command-surface proof 6 files / 56 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 671 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `npm.cmd run desktop:map:build` with existing non-fatal Vite chunk-size warning; live Edge fresh-start sweep on `http://127.0.0.1:3003/`; `git diff --check`; and GitHub PR #456 green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. Codex review threads were resolved before merge; local/remote `codex/p13-player-truth-batch` refs are pruned. Report: `docs/40_reports/implemented/20260626_P13_P14_PLAYER_TRUTH_BATCH.md`.
 
-Next P15 queue from closed Peirce/Kant/Heisenberg scouts:
+P15 local candidate from closed Peirce/Kant/Heisenberg scouts:
 
-- Browser-gate hardening: add BCS/narrow-viewport coverage, request-failure detection, stronger stable-selector assertions, optional modal/receipt smokes, and deterministic temp-evidence cleanup.
-- OOB/CorpsCard affordance cleanup: no-op command headers should not be focusable buttons, flip targets need action-specific accessible names, and command count copy should distinguish fielded/reported truth.
-- Corps Detail operation planning should reveal which sector will seed `Prepare Operation in HQ`.
-- Formation Detail sector options need disabled-reason accessible copy for current assignment, override, and bridge-unavailable cases.
-- Doc staleness pass after PR #456: refresh the MASTER_ROADMAP top paragraph, closeout docs with PR/check/branch-cleanup proof, fix stale DoD version text, and resolve mandatory-canon references to missing engine-freeze/v0.2.7 files.
+- Browser-gate hardening implemented locally for request-failure/status detection and deterministic startup cleanup. Current-run evidence is still preserved on pass/fail; stale screenshots and stale pass/fail JSON are removed before each run. BCS/narrow-viewport expansion remains deferred because the owner redirected attention away from BCS-only work.
+- OOB/CorpsCard affordance cleanup implemented locally: no-op command headers render as non-focusable static headers, flip targets have action-specific accessible names, and command count copy distinguishes fielded brigade truth.
+- Corps Detail operation planning implemented locally: the `Prepare Operation in HQ` button exposes which sector seeds the planning context.
+- Formation Detail sector options implemented locally: disabled options explain current automatic assignment, current override, and desktop command bridge unavailability.
+- Follow-up scout absorption implemented locally: packaged runtime resources now trigger desktop/full-suite gates, Windows release runs the packaged runtime probe before packaging, Enclave Dashboard closes Army HQ on handoff, over-budget airdrop staging is blocked/clamped, and enclave faction/supply/close affordances use player-facing copy.
+- Doc staleness pass is synchronized across COMMAND_BOARD, MASTER_ROADMAP, this plan, PROJECT_LEDGER, and the P15 implementation report. Final closeout still needs PR #457 check/branch-cleanup proof after merge.
+
+P15 local verification:
+
+- Focused UI/browser-contract pack passed 4 files / 70 tests: `tests/ui/oob_drilldown_routing.test.ts`, `tests/ui/command_drilldown_routing.test.ts`, `tests/ui/formation_detail_parity.test.ts`, and `tests/ui/first_hour_browser_gate_contract.test.ts`.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run qa:first-hour:browser` passed after allowing deliberate `net::ERR_ABORTED` request cancellations while keeping HTTP 4xx/5xx and real request failures fatal.
+- `npm.cmd run qa:live-surface:browser` passed.
+- `npm.cmd run qa:player-journeys` passed 43 files / 675 tests.
+- `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk-size warnings.
+- `git diff --check` passed.
+- Live in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, OOB CorpsCard fielded-brigade copy and detail/summary flip labels, Corps Detail `Prepare Operation in HQ for 2nd Corps - Gracanica, Lukavac` accessible/title copy, Formation Detail disabled sector options carrying desktop-bridge-unavailable reasons, and console health with only the expected dev-map desktop-bridge fallback warning.
+- Follow-up focused proof passed 4 files / 34 tests: `tests/ui/command_surface_repurpose_panels.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, and `tests/ui/first_hour_browser_gate_contract.test.ts`.
+- CI repair focused proof passed 4 files / 35 tests after restoring head detector files following trusted base-branch detection in Baseline Regression, Desktop Release Guard, and Full Suite workflows.
+- Sim-detector repair proof passed 2 files / 14 tests after the repaired PR run exposed a false 188w trigger on CI-only detector/workflow edits. Real sim/scenario/source/test inputs still gate the heavy scenario path; trusted detector integrity prevents detector edits from bypassing it.
+- PR #457 is open; remaining closeout is GitHub checks/comments, merge, branch pruning, and temp evidence cleanup.
+- Deferred scout queue after P15: command-strain provenance, Corps Detail exhaustion unreported truth, Corps Situation unreported-vs-healthy-silence copy, Army HQ sector DOM-id hygiene, Enclave missing-supply risk copy, Decision Room disabled-action reasons, packaged-probe network/status capture, opt-in real-PMTiles browser smoke, and desktop path coverage for `data/source`, `data/reference`, and shared imported source modules.
 
 ## Progress 2026-06-24
 

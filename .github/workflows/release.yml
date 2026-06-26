@@ -138,6 +138,9 @@ jobs:
       - name: Verify baked startup snapshot and desktop build artifacts
         run: npm run desktop:release:check
 
+      - name: Probe packaged desktop runtime contract
+        run: npm run desktop:package:probe
+
       - name: Package Windows NSIS installer
         run: npm run desktop:package:win:nsis
 

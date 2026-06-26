@@ -68,6 +68,34 @@ describe('presidential command surface repurpose panels', () => {
     expect(html.indexOf('Alpha Enclave')).toBeLessThan(html.indexOf('Zulu Enclave'));
   });
 
+  it('renders enclave faction and supply state as player-facing labels', () => {
+    setLocale('en');
+
+    const html = renderToStaticMarkup(
+      React.createElement(EnclaveDashboard, {
+        open: true,
+        onClose: () => {},
+        state: baseState({
+          enclaveResilience: {
+            gorazde: {
+              display_name: 'Gorazde',
+              resilience: 6,
+              isolation_turns: 5,
+              hardening_active: true,
+              supply_state: 'critical',
+              faction: 'RBiH',
+            },
+          },
+        }),
+      }),
+    );
+
+    expect(html).toContain('Republic of Bosnia and Herzegovina');
+    expect(html).toContain('Critical supply');
+    expect(html).not.toContain('>RBiH<');
+    expect(html).not.toContain('>critical<');
+  });
+
   it('keeps enclave airdrop controls read-only without the desktop command bridge', () => {
     setLocale('en');
 
@@ -93,6 +121,17 @@ describe('presidential command surface repurpose panels', () => {
     expect(html).toContain('Unreported');
     expect(html).toContain('disabled');
     expect(html).toContain('Desktop command bridge unavailable');
+  });
+
+  it('keeps enclave airdrop allocations inside the turn budget', () => {
+    const source = readFileSync(join(process.cwd(), 'src/ui/map/components/EnclaveDashboard.tsx'), 'utf8');
+
+    expect(source).toContain('const overAllocated = allocated > airdropBudget');
+    expect(source).toContain('const canStageAirdrop = ipc.isAvailable && !overAllocated');
+    expect(source).toContain('disabled={!canStageAirdrop}');
+    expect(source).toContain('remaining + currentAllocation');
+    expect(source).toContain('Math.min(Math.max(value, 0), maxAllocation)');
+    expect(source).toContain("t('enclave.airdropOverBudget'");
   });
 
   it('frames economy as War Footing and renders player-faction summary only', () => {

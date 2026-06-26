@@ -521,12 +521,41 @@ describe('Formation Detail parity display', () => {
     const northButton = screen.getByRole('button', { name: /Northern line/i });
     expect(southButton.textContent ?? '').toContain('1 current brigade');
     expect(southButton.textContent ?? '').not.toContain('1 current brigades');
-    expect(southButton.getAttribute('aria-label')).toBe('Southern line, 1 current brigade');
+    expect(southButton.getAttribute('aria-label')).toBe('Southern line, 1 current brigade. Select this sector for command responsibility.');
     expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
     expect(northButton.textContent ?? '').toContain('1 current brigade');
     expect(northButton.textContent ?? '').not.toContain('1 current brigades');
-    expect(northButton.getAttribute('aria-label')).toBe('Northern line, 1 current brigade');
+    expect(northButton.getAttribute('aria-label')).toBe('Northern line, 1 current brigade. Already the automatic sector assignment.');
     expect(northButton.textContent ?? '').not.toContain('2 current brigades');
+  });
+
+  it('explains why sector assignment options are disabled', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => (
+      formation.id === 'rbih_heroic_brigade'
+        ? { ...formation, sectorOverrideId: 'sector_south' }
+        : formation
+    ));
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const southButton = screen.getByRole('button', { name: /Southern line/i });
+    expect((southButton as HTMLButtonElement).disabled).toBe(true);
+    expect(southButton.getAttribute('aria-label')).toContain('Already the active override sector.');
+    expect(southButton.getAttribute('title')).toContain('Already the active override sector.');
+
+    delete (window as unknown as { awwv?: unknown }).awwv;
+    cleanup();
+    useGameStore.setState({ loadedGameState: state });
+    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
+
+    const northButton = screen.getByRole('button', { name: /Northern line/i });
+    expect((northButton as HTMLButtonElement).disabled).toBe(true);
+    expect(northButton.getAttribute('aria-label')).toContain('Desktop command bridge unavailable.');
+    expect(northButton.getAttribute('title')).toContain('Desktop command bridge unavailable.');
   });
 
   it('describes sector overrides as command responsibility rather than physical movement orders', () => {
