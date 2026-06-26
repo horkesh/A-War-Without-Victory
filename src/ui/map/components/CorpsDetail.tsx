@@ -250,6 +250,13 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               </span>
               {' · '}
               <span>{formatCorpsDetailStance(corpsFormation.corpsStance)}</span>
+              {corpsFormation.corpsExhaustion == null && (
+                <span>
+                  {' - '}
+                  {t('corpsDetail.exhaustion')} {' '}
+                  <span className="italic text-text-secondary/80">{t('corpsFront.unreported')}</span>
+                </span>
+              )}
               {corpsFormation.corpsExhaustion != null && (
                 <span>
                   {' · Exhaustion: '}

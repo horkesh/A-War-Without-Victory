@@ -47,7 +47,15 @@ const CONSTRAINT_BADGE: Record<PrimaryConstraint, { labelKey: MessageKey; color:
 };
 
 export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps) {
-    if (!assessment) return null;
+    if (!assessment) {
+        return (
+            <CollapsibleSection sectionKey="situation-assessment" title={t('corpsSituation.title')} defaultOpen>
+                <div className="px-3 py-2 text-xs italic text-text-secondary/80">
+                    {t('corpsFront.unreported')}
+                </div>
+            </CollapsibleSection>
+        );
+    }
 
     const {
         dominantReason,

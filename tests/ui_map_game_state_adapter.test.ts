@@ -402,6 +402,53 @@ test('parseGameState does not synthesize zero condition metrics for compatibilit
     assert.strictEqual(hq?.fatigue, undefined);
 });
 
+test('parseGameState keeps missing corps_command rows unreported while preserving reported zero strain', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                reported_corps: {
+                    faction: 'RBiH',
+                    name: 'Reported Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+                missing_corps: {
+                    faction: 'RBiH',
+                    name: 'Missing Corps',
+                    kind: 'corps',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+            },
+            corps_command: {
+                reported_corps: {
+                    stance: 'balanced',
+                    corps_exhaustion: 0,
+                },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const reported = parsed.formations.find((formation) => formation.id === 'reported_corps');
+    const missing = parsed.formations.find((formation) => formation.id === 'missing_corps');
+
+    assert.strictEqual(reported?.commandStrain, 0);
+    assert.strictEqual(reported?.commandStrainLabel, 'healthy');
+    assert.strictEqual(reported?.corpsExhaustion, 0);
+    assert.strictEqual(missing?.commandStrain, undefined);
+    assert.strictEqual(missing?.commandStrainLabel, undefined);
+    assert.strictEqual(missing?.corpsExhaustion, undefined);
+});
+
 test('parseGameState keeps absent officer ratings unreported instead of inventing poor traits', () => {
     const parsed = parseGameState({
         meta: { turn: 1, phase: 'war', player_faction: 'RS' },

@@ -322,7 +322,9 @@ function stripPmtilesSourcesForCiFallback(
 }
 
 function shouldUseTilelessCiFallback(): boolean {
-  return import.meta.env.VITE_AWWV_DISABLE_PMTILES === '1';
+  if (import.meta.env.VITE_AWWV_DISABLE_PMTILES === '1') return true;
+  if (typeof window === 'undefined') return false;
+  return new URLSearchParams(window.location.search).get('disable_pmtiles') === '1';
 }
 const OSID_ETHNIC_SOURCE_ID = 'osid-ethnic';
 const OSID_MORALE_FILL_LAYER_ID = 'osid-morale-fill';

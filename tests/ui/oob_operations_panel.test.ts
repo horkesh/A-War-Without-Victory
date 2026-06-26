@@ -190,6 +190,14 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('Corps Commander');
   });
 
+  it('does not coerce missing briefing corps strain into zero-strain command advice', () => {
+    const source = readFileSync('src/ui/map/components/OperationBriefingModal.tsx', 'utf8');
+
+    expect(source).toContain('if (operation.phase !== \'planning\' || !assessment || corpsStrain == null) return undefined;');
+    expect(source).toContain("operation.phase === 'planning' && corpsStrain != null");
+    expect(source).not.toContain('corpsStrain ?? 0');
+  });
+
   it('renders absent operation commanders as explicitly unassigned', () => {
     setOperationPatch({ commander_officer_id: undefined });
 

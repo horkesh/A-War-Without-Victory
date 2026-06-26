@@ -87,10 +87,12 @@ describe('Army HQ sector truth', () => {
 
     expect(row.getAttribute('data-coverage-tier')).toBe('uncovered');
     expect(toggle.getAttribute('aria-expanded')).toBe('true');
-    expect(toggle.getAttribute('aria-controls')).toBe('army-hq-sector-detail-sector:arbih_1st_corps:uncovered');
+    expect(row.getAttribute('data-sector-id')).toBe('sector:arbih_1st_corps:uncovered');
+    expect(toggle.getAttribute('aria-controls')).toBe('army-hq-sector-detail-sector-arbih-1st-corps-uncovered');
     expect(toggle.getAttribute('aria-label')).toMatch(/Collapse sector details for Remote front/i);
     expect(`${toggle.getAttribute('aria-label')} ${toggle.getAttribute('title')}`).not.toMatch(/sector:|arbih_1st_corps/i);
-    expect(screen.getByTestId('army-hq-sector-detail').getAttribute('id')).toBe('army-hq-sector-detail-sector:arbih_1st_corps:uncovered');
+    expect(screen.getByTestId('army-hq-sector-detail').getAttribute('id')).toBe('army-hq-sector-detail-sector-arbih-1st-corps-uncovered');
+    expect(document.getElementById(toggle.getAttribute('aria-controls') ?? '')).toBe(screen.getByTestId('army-hq-sector-detail'));
     expect(container.querySelector('button button')).toBeNull();
     expect(row.getAttribute('data-current-brigade-count')).toBe('0');
     expect(row.getAttribute('data-frontline-brigade-count')).toBe('0');

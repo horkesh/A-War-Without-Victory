@@ -709,8 +709,11 @@ function OperationExpandedDetail({ op, gameState }: { op: OperationView; gameSta
     );
 }
 
-export function OperationsSection({ corpsId, operations, gameState, commandStrain = 0, commandStrainLabel, defaultOpen = false }: OperationsSectionProps) {
-    const normalizedCommandStrainLabel = normalizeCommandStrainLabel(commandStrain, commandStrainLabel);
+export function OperationsSection({ corpsId, operations, gameState, commandStrain, commandStrainLabel, defaultOpen = false }: OperationsSectionProps) {
+    const hasReportedCommandStrain = isReportedNumber(commandStrain);
+    const normalizedCommandStrainLabel = hasReportedCommandStrain
+        ? normalizeCommandStrainLabel(commandStrain, commandStrainLabel)
+        : 'healthy';
     const [expandedOp, setExpandedOp] = useState<string | null>(null);
     const setOperationBriefingContext = useGameStore((s) => s.setOperationBriefingContext);
 
@@ -732,7 +735,7 @@ export function OperationsSection({ corpsId, operations, gameState, commandStrai
                 <div className="space-y-3">
                     {/* Command-risk inline reminder — demoted in Wave 10 (Standing section owns detail).
                         Silence = healthy: no notice at strain 0. */}
-                    {commandStrain > 0 && (
+                    {hasReportedCommandStrain && commandStrain > 0 && (
                         <p className={`text-[9px] font-mono italic ${
                             normalizedCommandStrainLabel === 'compromised' ? 'text-red-400/70' : 'text-amber-400/70'
                         }`}>

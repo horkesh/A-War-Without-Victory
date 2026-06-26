@@ -58,10 +58,16 @@ const windowCheck = manifest?.window_checks?.find?.(
   (entry) => entry?.route === 'awwv://warroom/index.html' && entry?.status === 'did-finish-load',
 );
 const tacticalMapWindowCheck = manifest?.window_checks?.find?.(
-  (entry) => entry?.route?.endsWith?.('/?desktop_window=operational') && entry?.status === 'did-finish-load',
+  (entry) => {
+    const route = String(entry?.route || '');
+    return route.includes('/?') && route.includes('desktop_window=operational') && entry?.status === 'did-finish-load';
+  },
 );
 const tacticalSandboxWindowCheck = manifest?.window_checks?.find?.(
-  (entry) => entry?.route?.endsWith?.('/tactical_sandbox.html?desktop_window=sandbox') && entry?.status === 'did-finish-load',
+  (entry) => {
+    const route = String(entry?.route || '');
+    return route.includes('/tactical_sandbox.html?') && route.includes('desktop_window=sandbox') && entry?.status === 'did-finish-load';
+  },
 );
 const expectedEventCatalogRoutes = [
   '/data/scenarios/events/war_1992.json',
@@ -74,6 +80,61 @@ const expectedEventCatalogRoutes = [
 const missingEventCatalogRoutes = expectedEventCatalogRoutes.filter((route) => !manifest?.map_server_checks?.some?.(
   (entry) => entry?.route === route && entry?.status === 200,
 ));
+const expectedPackagedRouteInventory = [
+  { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
+  { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
+  { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
+  { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200 },
+  { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200 },
+  { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200 },
+  { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200 },
+  { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200 },
+  { route: '/data/source/settlements_initial_master.json', expected_status: 200 },
+  { route: '/assets/ui/icons/icon_warning.svg', expected_status: 200 },
+];
+const missingPackagedRouteInventory = expectedPackagedRouteInventory.filter((expected) => !manifest?.route_inventory_checks?.some?.(
+  (entry) =>
+    entry?.route === expected.route &&
+    entry?.status === expected.expected_status &&
+    (expected.range == null || entry?.range === expected.range),
+));
+const runtimeProbeTeardownSafeRoutes = new Set([
+  '/data/derived/operational/operational_settlements.geojson',
+]);
+function isIgnorablePackagedRouteTeardownFailure(entry, url) {
+  if (entry?.type !== 'request-failed') return false;
+  if (entry?.error !== 'net::ERR_FAILED') return false;
+  if (entry?.label !== 'webContents:unknown') return false;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return false;
+    return runtimeProbeTeardownSafeRoutes.has(decodeURIComponent(parsed.pathname));
+  } catch (_error) {
+    return false;
+  }
+}
+function isIgnorableRuntimeProbeFailure(entry) {
+  const url = String(entry?.url || entry?.source_id || '');
+  const message = String(entry?.message || entry?.error || '');
+  if (url.includes('/favicon.ico') || url.endsWith('favicon.ico')) return true;
+  if (url.startsWith('data:')) return true;
+  if (url.startsWith('blob:')) return true;
+  if (entry?.resource_type === 'font' && /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\//.test(url)) return true;
+  if (isIgnorablePackagedRouteTeardownFailure(entry, url)) return true;
+  if (message.includes('data:') || message.includes('blob:')) return true;
+  if (message.includes('favicon.ico')) return true;
+  if (
+    message.includes('ERR_ABORTED') &&
+    entry?.type === 'did-fail-load' &&
+    entry?.is_main_frame === false &&
+    entry?.intentional_abort === true
+  ) return true;
+  return false;
+}
+const runtimeFailureChecks = Array.isArray(manifest?.runtime_failure_checks)
+  ? manifest.runtime_failure_checks
+  : null;
+const disallowedRuntimeFailures = (runtimeFailureChecks ?? []).filter((entry) => !isIgnorableRuntimeProbeFailure(entry));
 const operationalInteractionCheck = manifest?.tactical_interactions?.find?.(
   (entry) =>
     entry?.route_mode === 'operational' &&
@@ -153,6 +214,24 @@ if (!tacticalSandboxWindowCheck || tacticalSandboxWindowCheck.status !== 'did-fi
 if (missingEventCatalogRoutes.length > 0) {
   throw new Error(
     `Packaged desktop runtime probe manifest is missing DataLoader event catalog HTTP proof for: ${missingEventCatalogRoutes.join(', ')}.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (missingPackagedRouteInventory.length > 0) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing route inventory proof for: ${missingPackagedRouteInventory.map((entry) => `${entry.route}=${entry.expected_status}`).join(', ')}.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (!runtimeFailureChecks) {
+  throw new Error(
+    `Packaged desktop runtime probe manifest is missing runtime failure checks.\n${JSON.stringify(manifest, null, 2)}`,
+  );
+}
+
+if (disallowedRuntimeFailures.length > 0) {
+  throw new Error(
+    `Packaged desktop runtime probe captured renderer/network failures.\n${JSON.stringify(disallowedRuntimeFailures, null, 2)}`,
   );
 }
 

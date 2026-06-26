@@ -1137,6 +1137,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     .filter((sub) => sub.corps_id === fv.id && sub.id !== fv.id)
                     .map((sub) => sub.id)
                     .sort();
+                if (!cc) continue;
 
                 // ── Command Strain (derived on-read, not stored on GameState) ──────
                 const strain = computeCorpsCommandStrain(fv.id, state as GameState);

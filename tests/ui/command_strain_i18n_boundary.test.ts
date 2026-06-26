@@ -152,4 +152,12 @@ describe('command strain i18n boundary', () => {
         expectBcsCopy(armyCopy);
         expectBcsCopy(briefingCopy);
     });
+
+    it('renders a compact unreported situation assessment when the source is missing', () => {
+        const view = render(React.createElement(CorpsSituationSection, { assessment: undefined }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('Situation Assessment');
+        expect(copy).toContain('Unreported');
+    });
 });

@@ -102,7 +102,7 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     assessmentAtLaunch: 'launch' | 'postpone' | 'abort';
     wasForce: boolean;
     caCost: number;
-    corpsStrain: number;
+    corpsStrain: number | undefined;
     corpsStrainLabel: 'healthy' | 'strained' | 'compromised';
 }) {
     const outcomeCategory = deriveOperationOutcomeCategory(assessmentAtLaunch, wasForce);
@@ -150,7 +150,7 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                     </div>
                 )}
                 {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
-                {wasForce && corpsStrain > 0 && (
+                {wasForce && typeof corpsStrain === 'number' && corpsStrain > 0 && (
                     <div className="flex items-center gap-2 pt-1 border-t border-panel-border mt-1">
                         <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandStrain')}</span>
                         <span className={`text-[10px] font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
@@ -361,7 +361,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
     const context = useGameStore((s) => s.operationBriefingContext);
 
     const { operation, commanderDisplay, corpsStrain, corpsStrainLabel, situationAssessment } = useMemo(() => {
-        if (!loadedGameState || !context) return { operation: null, commanderDisplay: null, corpsStrain: 0, corpsStrainLabel: 'healthy' as const, situationAssessment: undefined };
+        if (!loadedGameState || !context) return { operation: null, commanderDisplay: null, corpsStrain: undefined, corpsStrainLabel: 'healthy' as const, situationAssessment: undefined };
         const op = findPlayerFacingOperationByKey(
             loadedGameState,
             `${context.corpsId}|${context.operationName}`,
@@ -369,8 +369,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
         const cdr = op ? resolveBriefingCommander(op.commander_officer_id, loadedGameState.namedOfficerData) : null;
         // Look up command strain + situation assessment from the corps formation (derived on-read by adapter)
         const corpsFormation = loadedGameState.formations?.find(f => f.id === context.corpsId);
-        const strain = corpsFormation?.commandStrain ?? 0;
-        const strainLabel = normalizeCommandStrainLabel(strain, corpsFormation?.commandStrainLabel);
+        const strain = typeof corpsFormation?.commandStrain === 'number' && Number.isFinite(corpsFormation.commandStrain)
+            ? corpsFormation.commandStrain
+            : undefined;
+        const strainLabel = strain == null ? 'healthy' : normalizeCommandStrainLabel(strain, corpsFormation?.commandStrainLabel);
         const sitAssessment = corpsFormation?.situationAssessment;
         return { operation: op, commanderDisplay: cdr, corpsStrain: strain, corpsStrainLabel: strainLabel, situationAssessment: sitAssessment };
     }, [loadedGameState, context]);
@@ -392,7 +394,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
     // Delegation Visibility Wave 1: Derive pre-decision delegation context (planning phase only)
     const delegationContext = useMemo(() => {
-        if (operation.phase !== 'planning' || !assessment) return undefined;
+        if (operation.phase !== 'planning' || !assessment || corpsStrain == null) return undefined;
         return deriveDelegationContext(
             assessment as 'launch' | 'postpone' | 'abort',
             corpsStrain,
@@ -521,7 +523,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 {/* Order Interpretation Preview — fires even on clean approvals when strain > 0.
                     Only in planning phase (decision-ready). DirectInterventionSection owns
                     the override-cost display; this section owns pre-decision institutional context. */}
-                {operation.phase === 'planning' && (
+                {operation.phase === 'planning' && corpsStrain != null && (
                     <OrderInterpretationSection
                         strain={corpsStrain}
                         commanderAssessment={assessment as 'launch' | 'postpone' | 'abort' | null | undefined}

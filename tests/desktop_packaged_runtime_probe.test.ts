@@ -70,8 +70,13 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /desktop_window=operational/,
+        /new URLSearchParams[\s\S]*desktop_window:[\s\S]*operational/,
         'secondary tactical-map probe should use a deterministic operational route marker',
+    );
+    assert.match(
+        source,
+        /disable_pmtiles/,
+        'packaged runtime probe should disable PMTiles rendering while still checking PMTiles HTTP range routes',
     );
     assert.match(
         source,
@@ -80,7 +85,7 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /desktop_window=sandbox/,
+        /new URLSearchParams[\s\S]*desktop_window:[\s\S]*sandbox/,
         'tactical sandbox probe should use a deterministic sandbox route marker',
     );
     assert.match(
@@ -265,6 +270,61 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /runtime_failure_checks:/,
+        'packaged runtime probe manifest should capture renderer and network failure observations',
+    );
+    assert.match(
+        source,
+        /intentional_abort:\s*false/,
+        'packaged runtime probe should not mark generic failed network requests as intentional aborts',
+    );
+    assert.match(
+        source,
+        /console-message/,
+        'packaged runtime probe should capture renderer console messages in the manifest',
+    );
+    assert.match(
+        source,
+        /did-fail-load/,
+        'packaged runtime probe should capture window did-fail-load events in the manifest',
+    );
+    assert.match(
+        source,
+        /render-process-gone/,
+        'packaged runtime probe should capture renderer process exits in the manifest',
+    );
+    assert.match(
+        source,
+        /request-failed/,
+        'packaged runtime probe should capture failed network requests in the manifest',
+    );
+    assert.match(
+        source,
+        /http-status-failure/,
+        'packaged runtime probe should capture HTTP status failures in the manifest',
+    );
+    assert.match(
+        source,
+        /isIgnorableRuntimeProbeFailure\(/,
+        'packaged runtime probe should filter deterministic runtime probe noise through a narrow helper',
+    );
+    assert.match(
+        source,
+        /favicon[\s\S]*data:[\s\S]*blob:[\s\S]*entry\?\.type === 'did-fail-load'[\s\S]*entry\?\.is_main_frame === false[\s\S]*entry\?\.intentional_abort === true/s,
+        'runtime failure filtering should be limited to favicon/data/blob and deliberate subframe did-fail-load abort noise',
+    );
+    assert.match(
+        source,
+        /resource_type === 'font'[\s\S]*fonts/,
+        'runtime failure filtering should ignore deterministic external webfont cache misses in packaged CI',
+    );
+    assert.match(
+        source,
+        /RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'runtime failure filtering should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+    );
+    assert.match(
+        source,
         /surface_type:[\s\S]*outcome_label:[\s\S]*has_pyrrhic_score:[\s\S]*has_war_cost:[\s\S]*has_faction_tabs:[\s\S]*has_awwv_title:/s,
         'packaged runtime probe endgame checks should record verdict surface DOM observations',
     );
@@ -277,6 +337,61 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         source,
         /endgamePush\.player_faction/,
         'packaged runtime probe endgame should record player faction from the state push proof',
+    );
+    assert.match(
+        source,
+        /packagedRouteInventory/,
+        'packaged runtime probe should maintain a named deterministic packaged route inventory',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/operational\/operational_settlements\.geojson/,
+        'packaged runtime probe should verify operational GeoJSON is served',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/terrain\/settlements_terrain_scalars\.json/,
+        'packaged runtime probe should verify terrain scalar JSON is served',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/tiles\/osm\.pmtiles[\s\S]*range:\s*'bytes=0-15'/,
+        'packaged runtime probe should verify the exact PMTiles byte-range route coverage',
+    );
+    assert.match(
+        source,
+        /\/font\/Open%20Sans%20Bold\/0-255\.pbf[\s\S]*\/font\/Open%20Sans%20Bold\/256-511\.pbf/s,
+        'packaged runtime probe should verify packaged MapLibre glyph routes are served',
+    );
+    assert.match(
+        source,
+        /expected_status:\s*206/,
+        'packaged runtime probe should require PMTiles inventory checks to return HTTP 206',
+    );
+    assert.match(
+        source,
+        /\/data\/ui\/hq_rbih_clickable_regions\.json[\s\S]*\/data\/ui\/hq_rs_clickable_regions\.json[\s\S]*\/data\/ui\/hq_hrhb_clickable_regions\.json/s,
+        'packaged runtime probe should verify all HQ clickable region JSON resources are served',
+    );
+    assert.match(
+        source,
+        /\/data\/source\/settlements_initial_master\.json/,
+        'packaged runtime probe should verify source settlement master data is served',
+    );
+    assert.match(
+        source,
+        /\/assets\/ui\/icons\/icon_warning\.svg/,
+        'packaged runtime probe should verify a root runtime asset is served',
+    );
+    assert.match(
+        source,
+        /route_inventory_checks:/,
+        'packaged runtime probe manifest should record packaged route inventory checks',
+    );
+    assert.match(
+        source,
+        /failedRouteInventoryResponse/,
+        'packaged runtime probe should fail loudly when a packaged route inventory item is not served',
     );
 });
 
@@ -330,7 +445,7 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
-        /window_checks[\s\S]*tactical_sandbox\.html\?desktop_window=sandbox[\s\S]*did-finish-load/s,
+        /window_checks[\s\S]*tactical_sandbox\.html\?[\s\S]*desktop_window=sandbox[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox route proof',
     );
     assert.match(
@@ -385,6 +500,76 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
+        /expectedPackagedRouteInventory/,
+        'probe tool should maintain the packaged route inventory it expects from the packaged manifest',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/operational\/operational_settlements\.geojson/,
+        'probe tool should require operational GeoJSON route proof',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/terrain\/settlements_terrain_scalars\.json/,
+        'probe tool should require terrain scalar route proof',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/tiles\/osm\.pmtiles[\s\S]*expected_status:\s*206[\s\S]*range:\s*'bytes=0-15'/s,
+        'probe tool should require exact PMTiles Range 206 route proof',
+    );
+    assert.match(
+        source,
+        /\/font\/Open%20Sans%20Bold\/0-255\.pbf[\s\S]*\/font\/Open%20Sans%20Bold\/256-511\.pbf/s,
+        'probe tool should require packaged MapLibre glyph route proof',
+    );
+    assert.match(
+        source,
+        /entry\?\.range === expected\.range/,
+        'probe tool should match inventory entries on required byte range when the route expects one',
+    );
+    assert.match(
+        source,
+        /\/data\/ui\/hq_rbih_clickable_regions\.json[\s\S]*\/data\/ui\/hq_rs_clickable_regions\.json[\s\S]*\/data\/ui\/hq_hrhb_clickable_regions\.json/s,
+        'probe tool should require all HQ clickable region route proofs',
+    );
+    assert.match(
+        source,
+        /\/data\/source\/settlements_initial_master\.json/,
+        'probe tool should require source settlement master route proof',
+    );
+    assert.match(
+        source,
+        /\/assets\/ui\/icons\/icon_warning\.svg/,
+        'probe tool should require root runtime asset route proof',
+    );
+    assert.match(
+        source,
+        /route_inventory_checks/,
+        'probe tool should fail if the packaged manifest omits route inventory checks',
+    );
+    assert.match(
+        source,
+        /runtime_failure_checks/,
+        'probe tool should fail if the packaged manifest omits runtime failure checks',
+    );
+    assert.match(
+        source,
+        /disallowedRuntimeFailures/,
+        'probe tool should fail if the packaged manifest contains non-ignorable runtime failures',
+    );
+    assert.match(
+        source,
+        /entry\?\.type === 'did-fail-load'[\s\S]*entry\?\.is_main_frame === false[\s\S]*entry\?\.intentional_abort === true/s,
+        'probe tool should ignore ERR_ABORTED only for deliberate subframe did-fail-load aborts',
+    );
+    assert.match(
+        source,
+        /runtimeProbeTeardownSafeRoutes[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'probe tool should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+    );
+    assert.match(
+        source,
         /surface_type !== 'verdict' && endgameCheck\.surface_type !== 'fallback'/,
         'probe tool should validate that the endgame surface type is either verdict or fallback',
     );
@@ -407,6 +592,26 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /route_mode !== 'operational'/,
         'probe tool should assert endgame state push used the operational route mode',
+    );
+});
+
+test('tactical map build copies packaged MapLibre glyph fonts', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'vite.config.ts'), 'utf8');
+
+    assert.match(
+        source,
+        /copy-map-public-fonts/,
+        'tactical map build should have an explicit packaged font-copy plugin',
+    );
+    assert.match(
+        source,
+        /public', 'font'[\s\S]*dist\/tactical-map\/font/s,
+        'tactical map build should copy source glyphs into the packaged tactical-map font route',
+    );
+    assert.match(
+        source,
+        /fs\.cpSync\(mapPublicFontDir, mapBuildFontDir, \{ recursive: true \}\)/,
+        'tactical map build should recursively copy all bundled glyph ranges',
     );
 });
 
