@@ -23,6 +23,12 @@ import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import { inspectOnField } from '../utils/shellNavigation';
 import { resolveMapFormationInspectionTarget } from '../map/mapSelectionRouting';
 
+type BattleCasualtyPayload = TurnBattle & {
+    attacker_casualties?: number | null;
+    defender_casualties?: number | null;
+    casualties_reported?: boolean;
+};
+
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
     RS: '#c04040',
@@ -217,11 +223,7 @@ function BattleRow({
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
         : null;
-    const casualtyPayload = battle as unknown as {
-        attacker_casualties?: number | null;
-        defender_casualties?: number | null;
-        casualties_reported?: boolean;
-    };
+    const casualtyPayload: BattleCasualtyPayload = battle;
     const attackerCasualties = reportedNumber(casualtyPayload.attacker_casualties);
     const defenderCasualties = reportedNumber(casualtyPayload.defender_casualties);
     const casualtiesReported = casualtyPayload.casualties_reported !== false
