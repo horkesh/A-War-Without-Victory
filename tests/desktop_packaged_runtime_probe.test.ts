@@ -70,8 +70,13 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /desktop_window=operational/,
+        /new URLSearchParams[\s\S]*desktop_window:[\s\S]*operational/,
         'secondary tactical-map probe should use a deterministic operational route marker',
+    );
+    assert.match(
+        source,
+        /disable_pmtiles/,
+        'packaged runtime probe should disable PMTiles rendering while still checking PMTiles HTTP range routes',
     );
     assert.match(
         source,
@@ -80,7 +85,7 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /desktop_window=sandbox/,
+        /new URLSearchParams[\s\S]*desktop_window:[\s\S]*sandbox/,
         'tactical sandbox probe should use a deterministic sandbox route marker',
     );
     assert.match(
@@ -310,6 +315,16 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /resource_type === 'font'[\s\S]*fonts/,
+        'runtime failure filtering should ignore deterministic external webfont cache misses in packaged CI',
+    );
+    assert.match(
+        source,
+        /RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'runtime failure filtering should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+    );
+    assert.match(
+        source,
         /surface_type:[\s\S]*outcome_label:[\s\S]*has_pyrrhic_score:[\s\S]*has_war_cost:[\s\S]*has_faction_tabs:[\s\S]*has_awwv_title:/s,
         'packaged runtime probe endgame checks should record verdict surface DOM observations',
     );
@@ -342,6 +357,11 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
         source,
         /\/data\/derived\/tiles\/osm\.pmtiles[\s\S]*range:\s*'bytes=0-15'/,
         'packaged runtime probe should verify the exact PMTiles byte-range route coverage',
+    );
+    assert.match(
+        source,
+        /\/font\/Open%20Sans%20Bold\/0-255\.pbf[\s\S]*\/font\/Open%20Sans%20Bold\/256-511\.pbf/s,
+        'packaged runtime probe should verify packaged MapLibre glyph routes are served',
     );
     assert.match(
         source,
@@ -425,7 +445,7 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
-        /window_checks[\s\S]*tactical_sandbox\.html\?desktop_window=sandbox[\s\S]*did-finish-load/s,
+        /window_checks[\s\S]*tactical_sandbox\.html\?[\s\S]*desktop_window=sandbox[\s\S]*did-finish-load/s,
         'probe tool should fail if the packaged manifest omits the tactical sandbox route proof',
     );
     assert.match(
@@ -500,6 +520,11 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
+        /\/font\/Open%20Sans%20Bold\/0-255\.pbf[\s\S]*\/font\/Open%20Sans%20Bold\/256-511\.pbf/s,
+        'probe tool should require packaged MapLibre glyph route proof',
+    );
+    assert.match(
+        source,
         /entry\?\.range === expected\.range/,
         'probe tool should match inventory entries on required byte range when the route expects one',
     );
@@ -540,6 +565,11 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
+        /runtimeProbeTeardownSafeRoutes[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'probe tool should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+    );
+    assert.match(
+        source,
         /surface_type !== 'verdict' && endgameCheck\.surface_type !== 'fallback'/,
         'probe tool should validate that the endgame surface type is either verdict or fallback',
     );
@@ -562,6 +592,26 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /route_mode !== 'operational'/,
         'probe tool should assert endgame state push used the operational route mode',
+    );
+});
+
+test('tactical map build copies packaged MapLibre glyph fonts', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'ui', 'map', 'vite.config.ts'), 'utf8');
+
+    assert.match(
+        source,
+        /copy-map-public-fonts/,
+        'tactical map build should have an explicit packaged font-copy plugin',
+    );
+    assert.match(
+        source,
+        /public', 'font'[\s\S]*dist\/tactical-map\/font/s,
+        'tactical map build should copy source glyphs into the packaged tactical-map font route',
+    );
+    assert.match(
+        source,
+        /fs\.cpSync\(mapPublicFontDir, mapBuildFontDir, \{ recursive: true \}\)/,
+        'tactical map build should recursively copy all bundled glyph ranges',
     );
 });
 

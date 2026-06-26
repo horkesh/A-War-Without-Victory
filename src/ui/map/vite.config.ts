@@ -6,6 +6,8 @@ import fs from 'fs';
 const dataDir = path.resolve(__dirname, '../../../data');
 const runsDir = path.resolve(__dirname, '../../../runs');
 const mapRoot = path.resolve(__dirname, '.');
+const mapPublicFontDir = path.resolve(mapRoot, 'public', 'font');
+const mapBuildFontDir = path.resolve(__dirname, '../../../dist/tactical-map/font');
 
 export default defineConfig({
   plugins: [
@@ -106,6 +108,14 @@ export default defineConfig({
             }
           });
         });
+      },
+    },
+    {
+      name: 'copy-map-public-fonts',
+      closeBundle() {
+        fs.rmSync(mapBuildFontDir, { recursive: true, force: true });
+        fs.mkdirSync(path.dirname(mapBuildFontDir), { recursive: true });
+        fs.cpSync(mapPublicFontDir, mapBuildFontDir, { recursive: true });
       },
     },
   ],

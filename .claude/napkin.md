@@ -6,6 +6,8 @@
 
 **PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows; keep request-failed and HTTP >=400 rows reportable.
 
+**PACKAGED MAP GLYPHS ARE BUILD ASSETS (2026-06-26).** MapLibre glyph PBFs live under `src/ui/map/public/font`, but the tactical map build disables Vite public-dir copying. Do instead: keep the explicit `copy-map-public-fonts` build plugin and package-probe glyph route inventory before trusting packaged map text rendering.
+
 **TRUSTED CI DETECTORS MUST RESTORE HEAD BEFORE TESTS (2026-06-26).** Base-branch detector checkouts protect required checks from PR bypass, but leaving the trusted copy in the worktree makes tests/builds inspect stale scripts. Do instead: run the trusted detector, then `git restore --source=HEAD -- .github/scripts/detect-*.sh` before setup/build/test steps.
 
 **CI DETECTOR EDITS ARE NOT SIM CHANGES (2026-06-26).** Trusted base-branch detector execution already prevents a PR from editing path filters to skip required gates. Do instead: keep `.github/workflows/baseline-regression.yml` and `.github/scripts/detect-changed-paths.sh` out of the `sim` path set unless real sim/scenario/source/test files change, or workflow-only PRs can force the known-stale 188w floor.

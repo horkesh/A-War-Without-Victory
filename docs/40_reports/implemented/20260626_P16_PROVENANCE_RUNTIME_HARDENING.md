@@ -8,6 +8,7 @@
 - Preserved missing corps-command telemetry as unreported instead of coercing missing source rows into healthy zero strain.
 - Hardened Army HQ sector DOM/ARIA ids, Corps Detail exhaustion copy, and Corps Situation missing-source presentation.
 - Extended the packaged desktop runtime probe to fail on renderer/network failures and to verify packaged route inventory for data, UI, PMTiles, source, and root asset resources.
+- Repaired the packaged-probe CI path after broad runtime capture exposed missing bundled MapLibre glyph PBFs; the tactical-map build now copies local glyphs into the packaged map route and the probe verifies them.
 - Kept scope UI/read-model/platform-guardrail only. No simulation control logic, scenario data, startup artifacts, save schema, calibration floors, structural fingerprint, packaging artifacts, or Srebrenica/Zepa event-owned fall receipt behavior changed.
 
 ## Changes Made
@@ -28,6 +29,9 @@
 - `electron-main.cjs` captures packaged-runtime `console-message`, `did-fail-load`, `render-process-gone`, request failures, and HTTP status failures.
 - The probe filters only deterministic favicon, `data:`, `blob:`, and deliberate subframe `did-fail-load` abort noise; generic failed network requests remain reportable.
 - The packaged route inventory now checks operational GeoJSON, terrain scalars, exact PMTiles Range `bytes=0-15` / `206`, HQ clickable region JSON, `data/source/settlements_initial_master.json`, and a root runtime asset.
+- Packaged probe windows append `disable_pmtiles=1` so CI can prove player/window/bridge behavior without trying to render LFS-backed PMTiles, while the route inventory still proves the real PMTiles byte-range endpoint.
+- `src/ui/map/vite.config.ts` copies `src/ui/map/public/font` into `dist/tactical-map/font`, and the route inventory verifies the Open Sans Bold glyph PBFs that MapLibre requests on startup.
+- External Google webfont cache misses are treated as deterministic CI noise; teardown-time `net::ERR_FAILED` rows are ignored only for inventory-proven local packaged routes with unknown webContents.
 - `tools/desktop_packaged_runtime_probe.mjs` now requires route inventory and runtime failure-check proof in the emitted manifest.
 - Desktop release path filtering now includes `data/source/`, `data/reference/`, `src/shared/`, and `src/runtime/`.
 
@@ -48,6 +52,9 @@
 - `npm.cmd run qa:first-hour:browser` passed with dev-server cleanup verified.
 - `npm.cmd run qa:live-surface:browser` passed with dev-server cleanup verified.
 - Live in-app browser proof on `http://127.0.0.1:3004/` verified fresh RBiH start, war-start briefing, Army HQ, 1st Corps sector expansion, sanitized sector ARIA ids with raw sector data ids preserved, visible `Unreported` sector truth, no alert banners, no visible `NaN` / `Infinity` / `undefined` / `null`, and console health with only the expected dev-map desktop-bridge fallback warning.
+- Packaged-probe CI repair proof passed: `node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (2 files / 13 tests).
+- `npm.cmd run desktop:map:build` passed and produced all eight glyph PBF ranges under `dist\tactical-map\font`.
+- `npm.cmd run desktop:package:probe` passed; the manifest recorded glyph routes at HTTP 200, PMTiles Range `bytes=0-15` at HTTP 206, tactical operational/sandbox windows with `disable_pmtiles=1`, and `runtime_failure_checks: []`.
 - A broad `npm.cmd run test:ui` attempt exceeded the local 4-minute timeout and is not used as completion proof.
 
 ## Files Changed
@@ -61,6 +68,7 @@
 | `src/ui/map/components/army_hq/CorpsSituationSection.tsx` | Render compact unreported state for missing assessment source |
 | `src/ui/map/components/army_hq/SectorsSection.tsx` | Sanitize DOM/ARIA ids while preserving raw sector ids |
 | `src/desktop/electron-main.cjs` | Capture packaged runtime renderer/network failures and route inventory |
+| `src/ui/map/vite.config.ts` | Copy bundled MapLibre glyph PBFs into packaged tactical-map output |
 | `tools/desktop_packaged_runtime_probe.mjs` | Require route inventory and runtime failure-check manifest proof |
 | `.github/scripts/detect-changed-paths.sh` | Watch additional packaged source/reference/runtime paths |
 | `.github/workflows/README.md` | Document desktop path-set expansion |

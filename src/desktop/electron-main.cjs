@@ -349,12 +349,31 @@ function fetchLocalText(url, options = {}) {
   });
 }
 
+const RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES = new Set([
+  '/data/derived/operational/operational_settlements.geojson',
+]);
+
+function isIgnorablePackagedRouteTeardownFailure(entry, url) {
+  if (entry?.type !== 'request-failed') return false;
+  if (entry?.error !== 'net::ERR_FAILED') return false;
+  if (entry?.label !== 'webContents:unknown') return false;
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return false;
+    return RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES.has(decodeURIComponent(parsed.pathname));
+  } catch (_error) {
+    return false;
+  }
+}
+
 function isIgnorableRuntimeProbeFailure(entry) {
   const url = String(entry?.url || entry?.source_id || '');
   const message = String(entry?.message || entry?.error || '');
   if (url.includes('/favicon.ico') || url.endsWith('favicon.ico')) return true;
   if (url.startsWith('data:')) return true;
   if (url.startsWith('blob:')) return true;
+  if (entry?.resource_type === 'font' && /^https:\/\/fonts\.(?:gstatic|googleapis)\.com\//.test(url)) return true;
+  if (isIgnorablePackagedRouteTeardownFailure(entry, url)) return true;
   if (message.includes('data:') || message.includes('blob:')) return true;
   if (message.includes('favicon.ico')) return true;
   if (
@@ -825,10 +844,14 @@ function collectRendererReactionProbe(win, expectedMode, label) {
   });
 }
 
-function getTacticalMapWindowUrl(mode = 'operational') {
+function getTacticalMapWindowUrl(mode = 'operational', options = {}) {
+  const { disablePmtiles = false } = options;
   const targetPath = mode === 'sandbox' ? '/tactical_sandbox.html' : '/';
-  const query = mode === 'sandbox' ? '?desktop_window=sandbox' : '?desktop_window=operational';
-  return `${getMapServerUrl(targetPath)}${query}`;
+  const query = new URLSearchParams({
+    desktop_window: mode === 'sandbox' ? 'sandbox' : 'operational',
+  });
+  if (disablePmtiles) query.set('disable_pmtiles', '1');
+  return `${getMapServerUrl(targetPath)}?${query.toString()}`;
 }
 
 function createMainWindow(options = {}) {
@@ -917,10 +940,11 @@ function createTacticalMapWindow(options = {}) {
   const {
     mode = 'operational',
     show = true,
+    disablePmtiles = false,
     runtimeFailureChecks = null,
     runtimeProbeLabel = 'tactical map window',
   } = options;
-  const targetUrl = getTacticalMapWindowUrl(mode);
+  const targetUrl = getTacticalMapWindowUrl(mode, { disablePmtiles });
 
   const win = new BrowserWindow({
     width: 1400,
@@ -991,6 +1015,8 @@ async function runPackagedRuntimeProbe() {
     { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
     { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
     { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
+    { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200 },
+    { route: '/font/Open%20Sans%20Bold/256-511.pbf', expected_status: 200 },
     { route: '/data/ui/hq_rbih_clickable_regions.json', expected_status: 200 },
     { route: '/data/ui/hq_rs_clickable_regions.json', expected_status: 200 },
     { route: '/data/ui/hq_hrhb_clickable_regions.json', expected_status: 200 },
@@ -1047,6 +1073,7 @@ async function runPackagedRuntimeProbe() {
   const { win: mapProbeWindow, targetUrl: tacticalMapUrl } = createTacticalMapWindow({
     mode: 'operational',
     show: false,
+    disablePmtiles: true,
     runtimeFailureChecks,
     runtimeProbeLabel: 'packaged tactical map window',
   });
@@ -1066,6 +1093,7 @@ async function runPackagedRuntimeProbe() {
   const { win: sandboxProbeWindow, targetUrl: tacticalSandboxUrl } = createTacticalMapWindow({
     mode: 'sandbox',
     show: false,
+    disablePmtiles: true,
     runtimeFailureChecks,
     runtimeProbeLabel: 'packaged tactical sandbox window',
   });
@@ -1134,6 +1162,7 @@ async function runPackagedRuntimeProbe() {
   const { win: endgameProbeWindow, targetUrl: endgameMapUrl } = createTacticalMapWindow({
     mode: 'operational',
     show: false,
+    disablePmtiles: true,
     runtimeFailureChecks,
     runtimeProbeLabel: 'packaged endgame tactical map window',
   });
@@ -1387,6 +1416,9 @@ function startMapServer() {
       const rel = segments.join(path.sep) || 'index.html';
       filePath = path.join(mapDir, rel);
       if (!path.resolve(filePath).startsWith(path.resolve(mapDir))) { res.writeHead(403); res.end(); return; }
+      if (!fs.existsSync(filePath) && segments[0] === 'tactical_sandbox.html') {
+        filePath = path.join(mapDir, 'index.html');
+      }
       if (!fs.existsSync(filePath) && segments[0] === 'assets') {
         const assetRel = segments.slice(1).join(path.sep);
         filePath = path.join(assetsDir, assetRel);

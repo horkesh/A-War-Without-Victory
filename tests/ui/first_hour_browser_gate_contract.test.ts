@@ -275,6 +275,7 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/PresidentialToolbar.tsx')).toContain('data-testid="toolbar-route-records"');
     expect(read('src/ui/map/map/MapContainer.tsx')).toContain('data-testid="tactical-map"');
     expect(read('src/ui/map/map/MapContainer.tsx')).toContain('VITE_AWWV_DISABLE_PMTILES');
+    expect(read('src/ui/map/map/MapContainer.tsx')).toContain("disable_pmtiles') === '1'");
     expect(read('src/ui/map/map/MapContainer.tsx')).toContain('stripPmtilesSourcesForCiFallback');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-close"');
     expect(read('src/ui/map/components/CodexPanel.tsx')).toContain('data-testid="codex-essay-row"');

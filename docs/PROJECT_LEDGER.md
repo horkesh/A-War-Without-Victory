@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(desktop): repair P16 packaged runtime glyph/resource proof
+
+**Type:** Desktop packaging/runtime-probe/build guardrail repair.
+
+**Fix:** Follow-up on `codex/p16-provenance-runtime-hardening` after GitHub Desktop Release Guard exposed the packaged probe's broadened runtime-failure capture. The tactical-map build now copies bundled MapLibre glyph PBFs from `src/ui/map/public/font` into `dist/tactical-map/font`, packaged runtime windows launch with `disable_pmtiles=1` while the route inventory still checks the real PMTiles byte-range endpoint, the route inventory now proves the two Open Sans Bold glyph ranges requested during startup, and the runtime-failure filter remains narrow while tolerating only teardown-time `net::ERR_FAILED` rows for inventory-proven local packaged routes.
+
+**Verification:** `node node_modules/vitest/vitest.mjs run tests/desktop_packaged_runtime_probe.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` passed (2 files / 13 tests). `node --check src\desktop\electron-main.cjs` and `node --check tools\desktop_packaged_runtime_probe.mjs` passed. `git diff --check` passed. `npm.cmd run desktop:map:build` passed and produced all eight glyph PBF ranges under `dist\tactical-map\font`. `npm.cmd run typecheck` passed. `npm.cmd run desktop:package:probe` passed; the emitted packaged manifest showed glyph routes 200, PMTiles range 206, tactical operational/sandbox windows loaded with `disable_pmtiles=1`, and `runtime_failure_checks: []`.
+
+**Scope/determinism:** Build/probe/resource packaging guardrail only. No simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, calibration floor, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event-owned fall receipt behavior, randomness, timestamps in persisted state, locale sorting, installer publishing, or gameplay output ordering changed.
+
+---
+
 ## [2026-06-26] docs: close P15 browser-affordance hardening merge
 
 **Type:** Docs/process closeout.
