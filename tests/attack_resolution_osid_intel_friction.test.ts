@@ -390,47 +390,6 @@ describe('attack resolution intel execution friction', () => {
         });
     });
 
-    it('compiles battle casualties from raw attack-resolution rows when brigade history is absent', () => {
-        const scenario = makeScenario();
-        const report = resolveAttackOrdersOsid(scenario.state, scenario.edges, new Map<string, string[]>());
-        for (const formation of Object.values(scenario.state.military.formations)) {
-            if (formation?.brigade_history) formation.brigade_history.engagements = [];
-        }
-
-        const summary = compileTurnSummary(
-            scenario.state,
-            makeSnapshot(5),
-            { attack_resolution_osid: report } as TurnReport,
-        );
-
-        expect(summary.battles[0]!.attacker_casualties).toBe(report.battles[0]!.attacker_casualties);
-        expect(summary.battles[0]!.defender_casualties).toBe(report.battles[0]!.defender_casualties);
-        expect(summary.battles[0]!.casualties_reported).toBe(true);
-    });
-
-    it('marks compiled battle casualties unreported when no finite casualty source exists', () => {
-        const scenario = makeScenario();
-        const report = resolveAttackOrdersOsid(scenario.state, scenario.edges, new Map<string, string[]>());
-        for (const formation of Object.values(scenario.state.military.formations)) {
-            if (formation?.brigade_history) formation.brigade_history.engagements = [];
-        }
-        report.battles[0] = {
-            ...report.battles[0]!,
-            attacker_casualties: undefined as never,
-            defender_casualties: undefined as never,
-        };
-
-        const summary = compileTurnSummary(
-            scenario.state,
-            makeSnapshot(5),
-            { attack_resolution_osid: report } as TurnReport,
-        );
-
-        expect(summary.battles[0]!.attacker_casualties).toBeNull();
-        expect(summary.battles[0]!.defender_casualties).toBeNull();
-        expect(summary.battles[0]!.casualties_reported).toBe(false);
-    });
-
     it('applies low-confidence OPSEC ambush friction as extra attacker losses', () => {
         const staleOnly = makeScenario();
         seedIntel(staleOnly.state, 0);

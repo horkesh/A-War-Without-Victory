@@ -217,9 +217,14 @@ function BattleRow({
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
         : null;
-    const attackerCasualties = reportedNumber(battle.attacker_casualties);
-    const defenderCasualties = reportedNumber(battle.defender_casualties);
-    const casualtiesReported = battle.casualties_reported !== false
+    const casualtyPayload = battle as unknown as {
+        attacker_casualties?: number | null;
+        defender_casualties?: number | null;
+        casualties_reported?: boolean;
+    };
+    const attackerCasualties = reportedNumber(casualtyPayload.attacker_casualties);
+    const defenderCasualties = reportedNumber(casualtyPayload.defender_casualties);
+    const casualtiesReported = casualtyPayload.casualties_reported !== false
         && attackerCasualties !== null
         && defenderCasualties !== null;
     const hasReportedLosses = casualtiesReported && (attackerCasualties > 0 || defenderCasualties > 0);

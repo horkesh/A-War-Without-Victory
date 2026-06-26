@@ -118,7 +118,7 @@ describe('AARPanel drilldown routing', () => {
       attacker_casualties: null,
       defender_casualties: null,
       casualties_reported: false,
-    };
+    } as any;
     useGameStore.setState({
       ...useGameStore.getInitialState(),
       loadedGameState: state,

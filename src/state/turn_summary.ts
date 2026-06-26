@@ -25,9 +25,8 @@ export interface TurnBattle {
     all_attacker_ids: FormationId[];
     /** Outcome from attacker's perspective. */
     outcome: CombatOutcome;
-    attacker_casualties: number | null;
-    defender_casualties: number | null;
-    casualties_reported?: boolean;
+    attacker_casualties: number;
+    defender_casualties: number;
     territory_flipped: boolean;
     was_concentrated: boolean;
     /** Public-safe execution-friction annotation; no hidden enemy truth. */

@@ -129,19 +129,6 @@ function compileBattles(
         }
     }
 
-    const readRawCasualties = (group: typeof rawBattles): { att: number; def: number } | null => {
-        let att = 0;
-        let def = 0;
-        for (const battle of group) {
-            if (!Number.isFinite(battle.attacker_casualties) || !Number.isFinite(battle.defender_casualties)) {
-                return null;
-            }
-            att += battle.attacker_casualties;
-            def += battle.defender_casualties;
-        }
-        return { att, def };
-    };
-
     // Build flipped OSID set and mun_id lookup from pre-filtered control_events
     const flippedOsids = new Set<string>();
     const osidToMunId = new Map<string, string>();
@@ -154,9 +141,7 @@ function compileBattles(
     for (const [osid, group] of Array.from(byOsid.entries()).sort(([a], [b]) => strictCompare(a, b))) {
         const first = group[0];
         const allAttackerIds = [...new Set(group.map((b) => b.attacker_brigade))];
-        const historyCasualties = casualtiesByOsid.get(osid) ?? null;
-        const rawCasualties = readRawCasualties(group);
-        const cas = rawCasualties ?? historyCasualties;
+        const cas = casualtiesByOsid.get(osid) ?? { att: 0, def: 0 };
 
         result.push({
             osid,
@@ -167,9 +152,8 @@ function compileBattles(
             primary_defender_id: first.defender_brigade,
             all_attacker_ids: allAttackerIds,
             outcome: first.outcome,
-            attacker_casualties: cas?.att ?? null,
-            defender_casualties: cas?.def ?? null,
-            casualties_reported: cas != null,
+            attacker_casualties: cas.att,
+            defender_casualties: cas.def,
             territory_flipped: flippedOsids.has(osid),
             was_concentrated: group.length > 1,
             ...(first.execution_friction ? { execution_friction: first.execution_friction } : {}),

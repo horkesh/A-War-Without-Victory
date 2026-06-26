@@ -66,9 +66,14 @@ function reportedPersonnelLabel(value: number | undefined | null): string {
 }
 
 function reportedBattleLossLabel(battle: TurnBattle): string {
-    const attackerCasualties = isReportedNumber(battle.attacker_casualties) ? battle.attacker_casualties : null;
-    const defenderCasualties = isReportedNumber(battle.defender_casualties) ? battle.defender_casualties : null;
-    if (battle.casualties_reported === false || attackerCasualties === null || defenderCasualties === null) {
+    const casualtyPayload = battle as unknown as {
+        attacker_casualties?: number | null;
+        defender_casualties?: number | null;
+        casualties_reported?: boolean;
+    };
+    const attackerCasualties = isReportedNumber(casualtyPayload.attacker_casualties) ? casualtyPayload.attacker_casualties : null;
+    const defenderCasualties = isReportedNumber(casualtyPayload.defender_casualties) ? casualtyPayload.defender_casualties : null;
+    if (casualtyPayload.casualties_reported === false || attackerCasualties === null || defenderCasualties === null) {
         return t('aar.casualtiesUnreported');
     }
     return t('sectorsSection.personnelLosses', { count: attackerCasualties + defenderCasualties });
