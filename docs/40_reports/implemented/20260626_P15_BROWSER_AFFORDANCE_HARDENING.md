@@ -2,13 +2,13 @@
 
 **Date:** 2026-06-26
 **Branch:** `codex/p15-browser-affordance-hardening`
-**Result:** PR #457 candidate implemented and locally verified through the focused follow-up pack; GitHub merge closeout pending.
+**Result:** PR #457 candidate implemented and locally verified through the focused follow-up pack; GitHub merge closeout pending after required 188w gate re-floor repair.
 
 ## Summary
 - Hardened OOB/CorpsCard, Corps Detail, and Formation Detail affordances found during the owner-playthrough scout wave.
 - Added real browser-gate network/status failure detection and deterministic startup cleanup for browser evidence folders.
 - Absorbed the Einstein/Kepler follow-up scout findings: desktop/full-suite path filters now cover packaged runtime resources, the Windows release job runs the packaged runtime probe before publishing artifacts, and Enclave Dashboard routing/budget/label affordances are hardened.
-- Kept the packet UI/read-model/browser-QA scoped; no simulation, scenario, calibration, save-schema, packaging, or Srebrenica/Zepa event-owned fall behavior changed.
+- Kept the gameplay packet UI/read-model/browser-QA scoped; no simulation logic, scenario source, save-schema, packaging behavior, or Srebrenica/Zepa event-owned fall behavior changed. A required-gate follow-up re-floored `engine-health-188w` thresholds to the current CI-observed 188w floor after `main`'s trusted detector forced a known-stale heavy gate on CI-only detector/workflow edits.
 
 ## Changes Made
 
@@ -51,6 +51,7 @@
 - Follow-up focused proof passed `node node_modules/vitest/vitest.mjs run tests/ui/command_surface_repurpose_panels.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (4 files / 34 tests).
 - CI repair focused proof passed `node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/command_surface_repurpose_panels.test.ts tests/ui_presidential_decision_room_wiring.test.ts --pool=forks --reporter=dot` (4 files / 35 tests), after the first PR run exposed that Baseline Regression left the base-branch detector file in the test worktree.
 - Sim-detector repair proof passed `node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (2 files / 14 tests), after the repaired PR run proved workflow/detector-only changes were still forcing the known-stale 188w engine-health floor.
+- GitHub PR run `28258283034` confirmed the false heavy-gate trigger and measured the current CI 188w floor as `matched_osids=609`, `consistency_failures=36`, `zero_eligible_ops=1`, `dead_ops=21`, `ghost_destroyed=1`, `stranded_brigades=0`, and `K:W=3.903`; `data/calibration/engine_health_thresholds.json`, `data/calibration/c3_freeze_manifest.json`, and `docs/40_reports/CALIBRATION_MASTER.md` now record that required-gate re-floor.
 - PR #457 is open for GitHub checks/comments and merge closeout.
 
 ## Files Changed
@@ -71,6 +72,9 @@
 | `.github/workflows/desktop-release-guard.yml` | Restore head detector after trusted relevance detection |
 | `.github/workflows/full-suite-and-fingerprint.yml` | Restore head detector after trusted relevance detection |
 | `.github/scripts/detect-changed-paths.sh` | Avoid false 188w engine-health runs for CI-only detector/workflow edits |
+| `data/calibration/engine_health_thresholds.json` | Re-floor required 188w gate to current CI-observed floor after false trigger |
+| `data/calibration/c3_freeze_manifest.json` | Sync frozen C3 engine-health values with required gate |
+| `docs/40_reports/CALIBRATION_MASTER.md` | Record 2026-06-26 required-gate re-floor and event-owned Srebrenica/Zepa boundary |
 | `src/ui/map/App.tsx` | Enclave Dashboard handoff closes Army HQ shell |
 | `src/ui/map/components/EnclaveDashboard.tsx` | Airdrop budget guard, player-facing labels, accessible close affordance |
 
