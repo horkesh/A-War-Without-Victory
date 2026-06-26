@@ -4,6 +4,8 @@
 
 **TRUSTED CI DETECTORS MUST RESTORE HEAD BEFORE TESTS (2026-06-26).** Base-branch detector checkouts protect required checks from PR bypass, but leaving the trusted copy in the worktree makes tests/builds inspect stale scripts. Do instead: run the trusted detector, then `git restore --source=HEAD -- .github/scripts/detect-*.sh` before setup/build/test steps.
 
+**CI DETECTOR EDITS ARE NOT SIM CHANGES (2026-06-26).** Trusted base-branch detector execution already prevents a PR from editing path filters to skip required gates. Do instead: keep `.github/workflows/baseline-regression.yml` and `.github/scripts/detect-changed-paths.sh` out of the `sim` path set unless real sim/scenario/source/test files change, or workflow-only PRs can force the known-stale 188w floor.
+
 **ENCLAVE AIRDROP UI MUST BE BUDGET-BOUNDED (2026-06-26).** Row-level allocation controls can overcommit if each row independently exposes the full budget. Do instead: cap each row at remaining budget plus its current allocation, block over-budget staging before IPC, and close competing command shells before opening the Enclave Dashboard.
 
 **BROWSER GATES FAIL ON REAL NETWORK/HTTP FAILURES (2026-06-26).** Console-only browser proof misses missing chunks/data and HTTP 4xx/5xx. Do instead: collect `requestfailed` and `response >= 400`, ignore only deterministic noise such as favicon/data/blob and deliberate `net::ERR_ABORTED` cancellations, and clean stale gate artifacts at startup while preserving current-run evidence.

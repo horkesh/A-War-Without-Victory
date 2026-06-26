@@ -109,6 +109,28 @@ test('trusted detector checkout is restored before tests and builds run', async 
     }
 });
 
+test('sim path filter does not force engine-health for CI-only detector workflow edits', async () => {
+    const detector = await readFile(
+        join(process.cwd(), '.github', 'scripts', 'detect-changed-paths.sh'),
+        'utf8',
+    );
+
+    const simCaseStart = detector.indexOf('  sim)');
+    const defaultCaseStart = detector.indexOf('  *)');
+    const simCase = detector.slice(simCaseStart, defaultCaseStart);
+
+    assert.doesNotMatch(
+        simCase,
+        /"\.github\/workflows\/baseline-regression\.yml"/,
+        'baseline workflow edits should not force the 188w engine-health gate without sim/scenario changes',
+    );
+    assert.doesNotMatch(
+        simCase,
+        /"\.github\/scripts\/detect-changed-paths\.sh"/,
+        'trusted detector edits should not force the 188w engine-health gate; base-branch detector integrity already prevents bypass',
+    );
+});
+
 test('release workflow runs packaged runtime probe before publishing windows artifacts', async () => {
     const workflow = await readFile(
         join(process.cwd(), '.github', 'workflows', 'release.yml'),
