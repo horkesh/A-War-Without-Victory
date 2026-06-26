@@ -86,7 +86,8 @@ describe('RootErrorBoundary panel isolation', () => {
 
     expect(appSource).toMatch(/<RootErrorBoundary zone="army hq">[\s\S]*<ArmyHQModal onDecisionRoomNavigateTarget=\{openDecisionRoomTarget\} \/>[\s\S]*<\/RootErrorBoundary>/);
     expect(appSource).toMatch(/<RootErrorBoundary zone="ops planning">[\s\S]*<OpsPlanningModal \/>[\s\S]*<\/RootErrorBoundary>/);
-    expect(armyHqSource).toMatch(/<RootErrorBoundary zone="decision room">[\s\S]*<PresidentialDecisionRoomPanel onNavigateTarget=\{onDecisionRoomNavigateTarget\} \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(armyHqSource).not.toContain('PresidentialDecisionRoomPanel');
+    expect(armyHqSource).toContain('data-testid="army-hq-decision-room-handoff"');
     expect(armyHqSource).toMatch(/<RootErrorBoundary zone="presidential decisions">[\s\S]*<PresidentialAttentionPanel[\s\S]*<\/RootErrorBoundary>/);
   });
 });

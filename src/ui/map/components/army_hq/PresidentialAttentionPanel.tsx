@@ -7,7 +7,6 @@ import { turnToDateString } from '../../utils/formatters';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
 import { isRequiredPendingEventDecision } from '../../data/eventDecisionRouting';
-import { OperationOpportunityDossierPanel } from './OperationOpportunityDossierPanel';
 import { OrderInterpretationPanel } from './OrderInterpretationPanel';
 
 interface PresidentialAttentionPanelProps {
@@ -185,8 +184,6 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     </section>
                 )}
             </div>
-
-            <OperationOpportunityDossierPanel gameState={gameState} playerFaction={playerFaction} />
 
             {pendingDecisions.length > 0 && (
                 <section className="space-y-2">

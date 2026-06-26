@@ -153,7 +153,9 @@ function FormationTooltipContent({
     playerFaction,
     locale,
   });
-  if (!formation) return <div className="text-[11px] text-text-secondary">{t('tooltip.unknownFormation')}</div>;
+  if (!formation && !formationId.startsWith('enemy_contact:')) {
+    return <div className="text-[11px] text-text-secondary">{t('tooltip.unknownFormation')}</div>;
+  }
 
   if (model.classification === 'enemy_contact') {
     return (

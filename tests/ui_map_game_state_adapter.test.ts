@@ -1615,6 +1615,58 @@ test('parseGameState derives player-scoped operation opportunity records with AA
     });
 });
 
+test('parseGameState does not count stale operation opportunity AAR ids as completed', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 176,
+            phase: 'war',
+            player_faction: 'RBiH',
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [
+                {
+                    opportunity_id: 'sana_95',
+                    proposal_id: 'OPP_175_sana_95',
+                    eligibility_turn: 175,
+                    expires_turn: 199,
+                    status: 'approved',
+                    approver_faction: 'RBiH',
+                    last_axis_evaluation: [
+                        { axis: 'date_window', mode: 'required', green: true, reason: 'window open' },
+                    ],
+                },
+            ],
+            operation_opportunity_resolutions: [
+                {
+                    proposal_id: 'OPP_175_sana_95',
+                    opportunity_id: 'sana_95',
+                    response: 'approve',
+                    response_turn: 175,
+                    executed_op_name: 'Operation Sana',
+                    executed_op_aar_id: 'missing_aar_id',
+                    exit_class: 'partial_success',
+                },
+            ],
+        } as any,
+        operation_history: [],
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.operationOpportunityRecords?.length, 1);
+    const record = parsed.operationOpportunityRecords![0];
+    assert.equal(record.executed_op_aar_id, undefined);
+    assert.equal(record.total_attacks, undefined);
+    assert.deepEqual(parsed.operationOpportunitySummary, {
+        pendingCount: 0,
+        resolvedCount: 1,
+        completedCount: 0,
+        successCount: 1,
+        failedCount: 0,
+        didNotLaunchCount: 0,
+    });
+});
+
 test('parseGameState derives player-scoped pending operation opportunity proposal dossiers', () => {
     const parsed = parseGameState({
         meta: {

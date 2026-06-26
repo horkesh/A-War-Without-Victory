@@ -54,10 +54,14 @@ function RecordBadge({ record }: { record: OperationOpportunityRecordView }) {
 
 function AxisLine({ record }: { record: OperationOpportunityRecordView }) {
     const required = record.required_axes_total != null
-        ? t('opportunityLedger.requiredAxes', { green: record.required_axes_green ?? 0, total: record.required_axes_total })
+        ? record.required_axes_green == null
+            ? t('opportunityLedger.requiredAxesUnreported', { total: record.required_axes_total })
+            : t('opportunityLedger.requiredAxes', { green: record.required_axes_green, total: record.required_axes_total })
         : null;
     const optional = record.optional_axes_total != null
-        ? t('opportunityLedger.optionalAxes', { green: record.optional_axes_green ?? 0, total: record.optional_axes_total })
+        ? record.optional_axes_green == null
+            ? t('opportunityLedger.optionalAxesUnreported', { total: record.optional_axes_total })
+            : t('opportunityLedger.optionalAxes', { green: record.optional_axes_green, total: record.optional_axes_total })
         : null;
     if (!required && !optional) return null;
     return (

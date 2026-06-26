@@ -10,13 +10,9 @@ import { useIPC } from '../desktop/useIPC';
 import { getPlayerFacingFaction } from '../../shared/playerFacingLabels';
 import { useGameStore } from '../store/gameStore';
 import { MAP_MODES } from '../utils/mapModes';
+import { isFocusInInteractiveControl } from '../utils/interactiveFocus';
 
 const MAP_MODES_BY_KEY = MAP_MODES.map((mode) => mode.id);
-
-function isFocusInInput(): boolean {
-  const tag = document.activeElement?.tagName?.toUpperCase();
-  return tag === 'INPUT' || tag === 'TEXTAREA';
-}
 
 export function useKeyboardShortcuts(): void {
   const ipc = useIPC();
@@ -27,7 +23,7 @@ export function useKeyboardShortcuts(): void {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (isFocusInInput()) return;
+      if (isFocusInInteractiveControl()) return;
 
       // Ctrl+S → quick-save
       if ((event.ctrlKey || event.metaKey) && event.key === 's') {
@@ -92,7 +88,7 @@ export function useKeyboardShortcuts(): void {
       }
 
       // Tab → cycle through corps (within HQ or sidebar)
-      if (event.key === 'Tab') {
+      if (event.key === 'Tab' && event.ctrlKey && !event.altKey && !event.metaKey) {
         event.preventDefault();
         const store = useGameStore.getState();
         const state = store.loadedGameState;

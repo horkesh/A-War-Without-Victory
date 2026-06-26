@@ -12,6 +12,7 @@ interface StackExpansionOverlayProps {
     anchorX: number;
     anchorY: number;
     formations: FormationView[];
+    playerFaction?: string | null;
     onClose: () => void;
     onSelect: (id: string) => void;
 }
@@ -61,9 +62,11 @@ const FormationIconCanvas: React.FC<{ formation: FormationView; className?: stri
  * Features backdrop-blur, radial fan-out animation, and high-quality selection.
  */
 export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
+    osid,
     anchorX,
     anchorY,
     formations,
+    playerFaction,
     onClose,
     onSelect,
 }) => {
@@ -181,14 +184,16 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                     const radius = Math.min(300, baseRadius + total * 12);
                     const tx = Math.cos(angle) * radius;
                     const ty = Math.sin(angle) * radius;
-                    const name = getLocalizedFormationName(f, locale);
+                    const isEnemyContact = Boolean(playerFaction && f.faction !== playerFaction);
+                    const name = isEnemyContact ? t('tooltip.enemyContactTitle') : getLocalizedFormationName(f, locale);
+                    const selectionId = isEnemyContact ? `enemy_contact:${f.location_osid ?? osid}:${i}` : f.id;
 
                     // Staggered delay for each unit
                     const delay = i * 60;
 
                     return (
                         <div
-                            key={f.id}
+                            key={selectionId}
                             className="absolute pointer-events-auto transition-all duration-500"
                             style={{
                                 transform: `translate(calc(${tx}px - 50%), calc(${ty}px - 50%)) scale(${isMounted ? 1 : 0.2})`,
@@ -202,9 +207,11 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 className="group relative flex flex-col items-center gap-2 cursor-pointer border-0 bg-transparent p-0"
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    onSelect(f.id);
+                                    onSelect(selectionId);
                                 }}
-                                aria-label={t('stackExpansion.selectAria', { name })}
+                                aria-label={isEnemyContact
+                                    ? t('stackExpansion.inspectEnemyContactAria')
+                                    : t('stackExpansion.selectAria', { name })}
                                 data-stack-focusable="true"
                             >
                                 {/* Shield Glow */}

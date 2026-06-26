@@ -134,6 +134,8 @@ export interface SettlementDetailContentProps {
     /** Cohesion 0–100. Panel only. */
     cohesion?: number;
   }[];
+  /** Reduced fog-of-war enemy observations at this OSID; identities are intentionally hidden. */
+  enemyContactCount?: number;
   /** When provided (e.g. in SelectionPanel), show current population and change. */
   displacementByMun?: Record<string, DisplacementByMunEntry> | null;
   /** When provided, use exact per-OSID out/lost/in from event log (numbers add up). */
@@ -204,6 +206,7 @@ export function SettlementDetailContent({
   osidPropertiesMap,
   controlBySettlement,
   formationsAtOsid,
+  enemyContactCount = 0,
   displacementByMun,
   displacementByOsid,
   variant = 'tooltip',
@@ -475,6 +478,9 @@ export function SettlementDetailContent({
       <div
         className={isPanel ? 'space-y-2.5 p-4' : 'space-y-2.5'}
         data-testid={isPanel ? `settlement-panel-${activeTab}` : undefined}
+        id={isPanel ? `settlement-panel-${activeTab}` : undefined}
+        role={isPanel ? 'tabpanel' : undefined}
+        aria-labelledby={isPanel ? `settlement-tab-${activeTab}` : undefined}
       >
         {(!isPanel || activeTab === 'overview') && municipality && (
           <div className="flex justify-between items-center text-[11px]">
@@ -871,13 +877,24 @@ export function SettlementDetailContent({
           </div>
         )}
 
+        {isPanel && activeTab === 'overview' && enemyContactCount > 0 && (
+          <div data-testid="settlement-enemy-contact-summary" className="pt-2 border-t border-panel-border/50">
+            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">
+              {t('tooltip.enemyContactTitle')}
+            </div>
+            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-[11px] text-amber-300/90">
+              {t(enemyContactCount === 1 ? 'settlement.enemyContactObserved' : 'settlement.enemyContactsObserved', { count: enemyContactCount })}
+            </div>
+          </div>
+        )}
+
         {isPanel && activeTab === 'overview' && formationsAtOsid.length === 0 && (
           <div data-testid="settlement-stationed-units-empty" className="pt-2 border-t border-panel-border/50">
             <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">
               {t('settlement.stationedUnits')}
             </div>
             <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-[11px] text-text-secondary italic">
-              {t('settlement.noStationedUnits')}
+              {t(enemyContactCount > 0 ? 'settlement.noFriendlyStationedUnits' : 'settlement.noStationedUnits')}
             </div>
           </div>
         )}

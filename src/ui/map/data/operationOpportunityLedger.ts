@@ -131,8 +131,9 @@ export function deriveOperationOpportunityRecords(
         const proposal = proposalById.get(proposalId);
         const resolution = resolutionByProposalId.get(proposalId);
         const review = reviewByProposalId.get(proposalId);
-        const aarId = typeof resolution?.executed_op_aar_id === 'string' ? resolution.executed_op_aar_id : undefined;
-        const aar = aarId ? aarById.get(aarId) : undefined;
+        const rawAarId = typeof resolution?.executed_op_aar_id === 'string' ? resolution.executed_op_aar_id : undefined;
+        const aar = rawAarId ? aarById.get(rawAarId) : undefined;
+        const aarId = aar ? rawAarId : undefined;
         const response = resolution?.response as OperationOpportunityRecordView['response'] | undefined;
         const status = resolution
             ? statusFromResolution(response)

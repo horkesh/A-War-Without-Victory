@@ -107,16 +107,20 @@ function createNavigationState(): ShellNavigationState & { calls: Array<[string,
 }
 
 describe('Presidential Decision Room wiring', () => {
-  it('keeps the Chief of Staff report before the decision-room synthesis in Army HQ briefing', () => {
+  it('keeps Army HQ as a source handoff, not an executable Decision Room host', () => {
     const armyHq = read('../src/ui/map/components/army_hq/ArmyHQModal.tsx');
 
-    expect(armyHq).toContain('PresidentialDecisionRoomPanel');
     expect(armyHq.indexOf('<ChiefOfStaffBriefing')).toBeLessThan(
-      armyHq.indexOf('<PresidentialDecisionRoomPanel'),
+      armyHq.indexOf('<DecisionRoomHandoff'),
     );
-    expect(armyHq.indexOf('<PresidentialDecisionRoomPanel')).toBeLessThan(
+    expect(armyHq.indexOf('<DecisionRoomHandoff')).toBeLessThan(
       armyHq.indexOf('<PresidentialAttentionPanel'),
     );
+    expect(armyHq).not.toContain('PresidentialDecisionRoomPanel');
+    expect(armyHq).toContain('data-testid="army-hq-decision-room-handoff"');
+    expect(armyHq).toContain("kind: 'decision-room'");
+    expect(armyHq).toContain("lens: 'all'");
+    expect(armyHq).toContain("t('armyHq.openDecisionRoom')");
   });
 
   it('keeps decision-room synthesis in a pure UI read-model module', () => {
@@ -183,6 +187,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(app).toContain('setEnclaveDashboardOpen(true)');
     expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
     expect(app).toContain('<ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} />');
+    expect(app).toContain("openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null)");
   });
 
   it('does not let the generic Decision Room helper claim App-owned counter-offer targets', () => {

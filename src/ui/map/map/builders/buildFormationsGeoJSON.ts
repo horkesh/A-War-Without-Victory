@@ -4,8 +4,9 @@ import { buildOsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
-import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../../shared/playerVisibility';
+import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation, isPlayerEnemyContactFormation } from '../../../shared/playerVisibility';
 import type { Locale } from '../../i18n';
+import { t } from '../../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
 export { formationIconId };
@@ -42,6 +43,8 @@ export interface FormationMarkerProperties {
   is_stack_top: boolean;
   /** Number of units at same OSID. */
   stack_count: number;
+  /** Enemy contact is visible only as a reduced observation, not a formation dossier. */
+  is_enemy_contact: boolean;
 }
 
 export const getBrigadeType = (name: string): string => {
@@ -124,17 +127,22 @@ export function buildFormationsGeoJSON(
     }
 
     const type = getFormationMarkerType(formation);
-    const displayName = getLocalizedFormationName(formation, locale);
-    const postureSuffix = formation.posture ? `__${formation.posture}` : '';
+    const isEnemyContact = isPlayerEnemyContactFormation(state, formation);
+    const displayName = isEnemyContact
+      ? t('tooltip.enemyContactTitle', undefined, locale)
+      : getLocalizedFormationName(formation, locale);
+    const contactId = `enemy_contact:${osid}:${stackIndex}`;
+    const postureSuffix = !isEnemyContact && formation.posture ? `__${formation.posture}` : '';
 
     // Status Banners: quantize reported morale to 10% steps. Counter health remains
     // unreported because the read model has raw personnel, not authorized strength.
     const rawMorale = typeof formation.morale === 'number' && Number.isFinite(formation.morale)
       ? formation.morale
       : null;
-    const statusSuffix = rawMorale == null
+    const reportedMorale = isEnemyContact ? null : rawMorale;
+    const statusSuffix = reportedMorale == null
       ? '__hunreported__munreported'
-      : `__hunreported__m${Math.round(rawMorale / 10) * 10}`;
+      : `__hunreported__m${Math.round(reportedMorale / 10) * 10}`;
 
     const icon_id = `${type}__${formation.faction}${postureSuffix}${statusSuffix}`;
 
@@ -142,30 +150,31 @@ export function buildFormationsGeoJSON(
       type: 'Feature',
       geometry: { type: 'Point', coordinates: point },
       properties: {
-        id: formation.id,
+        id: isEnemyContact ? contactId : formation.id,
         name: displayName,
-        kind: formation.kind,
+        kind: isEnemyContact ? 'enemy_contact' : formation.kind,
         faction: formation.faction,
-        corps_id: formation.corps_id ?? null,
+        corps_id: isEnemyContact ? null : formation.corps_id ?? null,
         icon_id: icon_id,
         white_icon_id: `white__${icon_id}`,
-        status: formation.status,
-        readiness: formation.readiness,
-        cohesion: typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion) ? formation.cohesion : null,
-        morale: rawMorale,
-        fatigue: typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) ? formation.fatigue : null,
-        personnel: typeof formation.personnel === 'number' ? formation.personnel : null,
+        status: isEnemyContact ? 'contact' : formation.status,
+        readiness: isEnemyContact ? 'contact' : formation.readiness,
+        cohesion: isEnemyContact ? null : typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion) ? formation.cohesion : null,
+        morale: reportedMorale,
+        fatigue: isEnemyContact ? null : typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) ? formation.fatigue : null,
+        personnel: isEnemyContact ? null : typeof formation.personnel === 'number' ? formation.personnel : null,
         location_osid: osid,
-        posture: formation.posture ?? null,
-        sector_id: resolveCurrentSectorForFormation(formation, state.corpsFrontSectors)?.sector_id ?? null,
-        assigned_sub_segment_id: formation.assigned_sub_segment_id ?? null,
-        is_home: !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
-        home_distance_mult: typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
-        is_in_operation: activeOperationFormationIds.has(formation.id),
-        is_disrupted: (formation.disrupted_turns ?? 0) > 0,
-        movement_stance: formation.movementStance ?? null,
+        posture: isEnemyContact ? null : formation.posture ?? null,
+        sector_id: isEnemyContact ? null : resolveCurrentSectorForFormation(formation, state.corpsFrontSectors)?.sector_id ?? null,
+        assigned_sub_segment_id: isEnemyContact ? null : formation.assigned_sub_segment_id ?? null,
+        is_home: isEnemyContact ? false : !!(munFromOsid(formation.home_osid) && munFromOsid(formation.home_osid) === munFromOsid(osid)),
+        home_distance_mult: isEnemyContact ? 1.0 : typeof formation.homeDistanceMult === 'number' ? formation.homeDistanceMult : 1.0,
+        is_in_operation: isEnemyContact ? false : activeOperationFormationIds.has(formation.id),
+        is_disrupted: isEnemyContact ? false : (formation.disrupted_turns ?? 0) > 0,
+        movement_stance: isEnemyContact ? null : formation.movementStance ?? null,
         is_stack_top: stackIndex === 0,
         stack_count: totalInStack,
+        is_enemy_contact: isEnemyContact,
       },
     });
   }

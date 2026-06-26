@@ -13,6 +13,7 @@ import {
   getPlayerFacingFaction,
   filterPlayerVisibleMapFormations,
   isFieldedTacticalFormation,
+  isPlayerEnemyContactFormation,
 } from '../src/ui/shared/playerVisibility.js';
 import {
   getPlayerSafeBrigadeName,
@@ -289,7 +290,7 @@ describe('player visibility helpers', () => {
     expect(isFieldedTacticalFormation(parsed.formations[0])).toBe(false);
   });
 
-  it('formation geojson excludes enemy formations outside fog visibility', () => {
+  it('formation geojson redacts fog-visible enemy contacts and excludes hidden enemies', () => {
     const state = {
       player_faction: 'RBiH',
       fogOfWar: {
@@ -318,7 +319,33 @@ describe('player visibility helpers', () => {
     } as const;
 
     const geo = buildFormationsGeoJSON(state, baseGeo as any);
-    expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_seen', 'own_1']);
+    expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_contact:op:enemy_seen:0', 'own_1']);
+    const contact = geo.features.find((feature) => feature.properties.id === 'enemy_contact:op:enemy_seen:0')?.properties;
+    expect(contact).toMatchObject({
+      name: 'Enemy contact',
+      kind: 'enemy_contact',
+      faction: 'RS',
+      location_osid: 'op:enemy_seen',
+      is_enemy_contact: true,
+      corps_id: null,
+      sector_id: null,
+      assigned_sub_segment_id: null,
+      cohesion: null,
+      morale: null,
+      fatigue: null,
+      personnel: null,
+      posture: null,
+      is_in_operation: false,
+      is_disrupted: false,
+      movement_stance: null,
+    });
+    expect(contact?.id).not.toBe('enemy_seen');
+    expect(contact?.readiness).toBe('contact');
+    expect(contact?.status).toBe('contact');
+    expect(contact?.icon_id).toContain('__hunreported__munreported');
+    expect(contact?.icon_id).not.toContain('__m80');
+    expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_seen'))).toBe(true);
+    expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'own_1'))).toBe(false);
   });
 
   it('formation stack expansion only includes player-visible fielded units', () => {

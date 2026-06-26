@@ -71,6 +71,22 @@ describe('player-safe tooltip models', () => {
     expect(enemy.title).not.toContain('1st Krajina');
   });
 
+  it('renders synthetic enemy-contact marker ids as redacted contacts, not unknown formations', () => {
+    const contact = buildPlayerSafeFormationTooltipModel({
+      formationId: 'enemy_contact:op:doboj:0',
+      formations: [],
+      attackOrders: [],
+      osidDisplayNames: { 'op:doboj': 'Doboj' },
+      playerFaction: 'RBiH',
+    });
+
+    expect(contact.classification).toBe('enemy_contact');
+    expect(contact.title).toBe('Enemy contact');
+    expect(contact.statusLine).toBe('Observed unit');
+    expect(contact.personnel).toBeNull();
+    expect(contact.orderLine).toBeNull();
+  });
+
   it('keeps settlement tooltip unit lists to own formations only', () => {
     const state = {
       player_faction: 'RBiH',

@@ -237,6 +237,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.map((card) => card.id)).not.toContain('manifest:peace_plan');
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
     expect(view.advanceReadiness.headline).toBe('Clear to advance');
+    expect(view.metrics.pendingReviews).toBe(0);
   });
 
   it('routes briefing operation, sector, and settlement cards to tactical field inspection targets', () => {
@@ -1233,7 +1234,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
     expect(view.advanceReadiness.headline).toBe('Review before advance');
     expect(view.cards.find((card) => card.id === 'review:pending')).toBeUndefined();
-    expect(view.metrics.pendingReviews).toBe(5);
+    expect(view.metrics.pendingReviews).toBe(3);
     expect(view.cards.map((card) => card.id)).toContain('manifest:peace_plan');
     expect(view.cards.map((card) => card.id)).toContain('manifest:dayton_negotiation');
     expect(view.cards.map((card) => card.id)).toContain('manifest:convoy_decision');
@@ -1261,6 +1262,27 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(view.cards.map((card) => card.id)).not.toContain('manifest:convoy_decision');
     expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('manifest:convoy_decision');
+  });
+
+  it('weights grouped modal cards across metrics, lenses, handoffs, questions, and loop steps', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        playerDecisionSummary: undefined,
+        pendingConvoyDecisions: [
+          { id: 'convoy_gorazde', target_enclave: 'Gorazde', route_faction: 'RBiH', supply_amount: 20 },
+          { id: 'convoy_srebrenica', target_enclave: 'Srebrenica', route_faction: 'RBiH', supply_amount: 25 },
+        ],
+      } as Partial<LoadedGameState>),
+    });
+
+    const convoyCard = view.cards.find((card) => card.id === 'manifest:convoy_decision');
+    expect(convoyCard?.countWeight).toBe(2);
+    expect(view.metrics.pendingReviews).toBe(2);
+    expect(view.lenses.find((lens) => lens.id === 'decision')?.count).toBe(2);
+    expect(view.sourceHandoffs.find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
+    expect(view.commandQuestions.find((question) => question.id === 'pending')?.count).toBe(2);
+    expect(view.loopSteps.find((step) => step.id === 'decide')?.count).toBe(2);
   });
 
   it('falls back to pending modal blockers when player decision summary is absent', () => {

@@ -98,6 +98,20 @@ export function buildPlayerSafeFormationTooltipModel(args: {
 }): PlayerSafeFormationTooltipModel {
   const formation = args.formations?.find((entry) => entry.id === args.formationId);
   const locale = args.locale ?? 'en';
+  if (args.formationId.startsWith('enemy_contact:')) {
+    return {
+      classification: 'enemy_contact',
+      title: t('tooltip.enemyContactTitle', undefined, locale),
+      subtitle: null,
+      personnel: null,
+      cohesion: null,
+      posture: null,
+      aorSummary: null,
+      orderLine: null,
+      statusLine: t('tooltip.status.observedUnit', undefined, locale),
+      showHomeMunicipality: false,
+    };
+  }
   if (!formation) {
     return {
       classification: 'enemy_contact',
