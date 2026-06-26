@@ -99,6 +99,32 @@ describe('SettlementTimeline localization', () => {
     expect(parsed.historicalEventsByTurn[0]?.text).not.toContain('_');
   });
 
+  it('preserves static control-change scope on adapter historical events before timeline filtering', () => {
+    const parsed = parseGameState({
+      meta: { turn: 170, phase: 'war' },
+      military: { formations: {} },
+      political: { political_controllers: {} },
+      turn_summaries: [{
+        turn: 170,
+        events_fired: [{ id: 'srebrenica_falls_1995' }],
+      }],
+    } as any);
+
+    expect(parsed.historicalEventsByTurn[0]?.osids).toContain('op:srebrenica:srebrenica_2');
+
+    expect(filterHistoricalEventsForSettlement(
+      parsed.historicalEventsByTurn,
+      'op:srebrenica:srebrenica_2',
+      'srebrenica',
+    ).map((event) => event.id)).toEqual(['srebrenica_falls_1995']);
+
+    expect(filterHistoricalEventsForSettlement(
+      parsed.historicalEventsByTurn,
+      'op:srebrenica:remote_village_9',
+      'srebrenica',
+    ).map((event) => event.id)).toEqual([]);
+  });
+
   it('requires explicit settlement or municipality scope before attaching historical events to a settlement timeline', () => {
     const events = [
       {

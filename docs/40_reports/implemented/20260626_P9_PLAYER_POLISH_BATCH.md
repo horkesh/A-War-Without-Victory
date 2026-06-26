@@ -18,6 +18,7 @@ This packet is UI/read-model/test/docs polish. It does not change simulation log
 - OOB sector drilldown no longer falls back to enemy OSIDs as field-inspection anchors. Enemy-only sub-segments keep corps/sector context without setting `selectedOsid`.
 - Formation casualty split provenance is preserved as `exact_ledger`, `derived_from_total`, or `unreported`. Derived fallback splits render as estimated in Formation Detail and Army HQ ORBAT instead of exact KIA/WIA/MIA records.
 - Settlement population/displacement panels label municipality-ratio fallback flows as estimates when no settlement-level displacement receipt exists.
+- Codex review follow-up: adapter-derived historical event rows now preserve explicit saved-event scope and recover static `control_change` OSID scope from the loaded event catalog, so event-owned Srebrenica/Zepa fall receipts remain visible on the directly affected settlements without restoring municipality-substring matching.
 
 ## Verification
 
@@ -33,6 +34,9 @@ This packet is UI/read-model/test/docs polish. It does not change simulation log
 - Diff hygiene passed: `git diff --check`.
 - Manual live-page sanity against `http://127.0.0.1:3003/` reached `AWWV Map`, showed the faction picker, had no visible error banners, and recorded only one benign missing-resource 404 console error.
 - Generated `.tmp_first_hour_browser_gate` and `.tmp_live_surface_browser_sweep` evidence folders were removed after verification; `.tmp_dev_server` remains only for the active local browser/dev session.
+- Codex review follow-up proof passed: `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts --pool=forks --reporter=dot` failed before the adapter fix because `osids` was undefined, then passed 11 tests after the fix.
+- Focused review-fix regression passed: `npm.cmd exec -- vitest run tests/ui/settlement_timeline_i18n.test.ts tests/ui/settlement_supply_status.test.ts tests/ui_map_game_state_adapter.test.ts --pool=forks --reporter=dot` (3 files / 82 tests).
+- Review-fix TypeScript passed: `npm.cmd run typecheck`.
 
 Remaining before closeout: GitHub checks/comments, merge, branch prune, and clean-worktree proof.
 
@@ -42,10 +46,12 @@ Remaining before closeout: GitHub checks/comments, merge, branch prune, and clea
 - Einstein: Corps Front low-intel objective accessible/routing leak and OOB enemy-anchor fallback.
 - James: stale operation-key routing and derived casualty split provenance.
 - Averroes and Kierkegaard implementation reports were integrated and the agents were closed after review.
+- Volta read-only scout: legacy `autonomy_panel` registry/App branch is still present but currently unreachable from generated proposal review cards; queue as a P10 route-cleanup test/docs slice.
+- Laplace read-only scout: Supply Intelligence/Economy forecast surfaces can still imply exact zero reserves or forecast components when current supply/reserve source data is unreported; queue as a P10 sparse-truth UI/read-model slice.
 
 ## Deferred Queue
 
-- Sparse Supply Intelligence forecast precision where current reserves are unreported.
+- Sparse Supply Intelligence / Economy forecast precision where current reserves or supply source data are unreported.
 - Legacy `autonomy_panel` branch retirement after another targeted routing sweep.
 
 ## Scope And Determinism
