@@ -1,5 +1,13 @@
 # Napkin Runbook
 
+**FOG-VISIBLE ENEMY CONTACTS ARE CONTACTS, NOT FORMATIONS (2026-06-26).** A player-observed hostile presence should not leak hostile OOB identity or open full Formation Detail. Do instead: project generic `enemy_contact:*` ids/names, redact stats/anchors/operation fields, and route clicks through settlement/contact context unless a canon-reviewed intel surface explicitly grants detail.
+
+**DECISION ROOM COUNTS USE LIVE WEIGHTED CARDS (2026-06-26).** Stale manifest summary metadata can invent pending reviews or undercount grouped blockers. Do instead: count live cards after ownership/filtering and sum `countWeight` through lenses, handoffs, command questions, loop steps, pending totals, and urgent totals.
+
+**GLOBAL SHORTCUTS MUST RESPECT FOCUSED CONTROLS (2026-06-26).** Plain Tab, Space, and Enter belong to focused inputs/buttons/tabs/menuitems. Do instead: guard global handlers with interactive-focus checks and bind app-level cycling to modified shortcuts such as `Ctrl+Tab`.
+
+**ARMY HQ IS EVIDENCE, DECISION ROOM EXECUTES PRESIDENTIAL CHOICES (2026-06-26).** Embedding executable presidential cards in Army HQ reintroduces owner-shell drift. Do instead: show Army HQ briefing/evidence and hand off to the Warroom-native Decision Room for presidential directives, convoy/counteroffer/opportunity choices, and grouped modal blockers.
+
 **BROWSER GATES USE TILELESS PROOF BY DEFAULT (2026-06-26).** Browser gates prove player flow, shell ownership, route contracts, and console health; real PMTiles fetches can produce noisy aborted tile errors during repeated reloads. Do instead: let gate launchers set `VITE_AWWV_DISABLE_PMTILES=1` unless `AWWV_BROWSER_GATE_USE_PMTILES=1`; real dev/Electron sessions with tile binaries keep using PMTiles.
 
 **OPERATIONS-MODE EFFORT PAINT USES LIVE LINE HOLDERS (2026-06-26).** Saved sector rosters can include stale, forming, destroyed, or reserve-only ids. Do instead: build operations-mode effort from `buildSectorFormationAssignment(...)` line holders, and skip sectors with no live line-holding formations.

@@ -15,7 +15,7 @@ import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { EliteCommanderSummary } from './EliteCommanderSummary';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
-import { TabBar } from './TabBar';
+import { TabBar, tabId, tabPanelId } from './TabBar';
 import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
@@ -331,7 +331,12 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
       <TabBar tabs={tabs} activeTab={activeTab} onTabChange={setActiveTab} idPrefix="formation-detail" />
 
-      <div className="p-3 flex-1 space-y-2.5 overflow-auto min-h-0 min-w-0 relative">
+      <div
+        id={tabPanelId('formation-detail', activeTab)}
+        role="tabpanel"
+        aria-labelledby={tabId('formation-detail', activeTab)}
+        className="p-3 flex-1 space-y-2.5 overflow-auto min-h-0 min-w-0 relative"
+      >
         {/* Faction crest watermark */}
         {getArmyCrest(formation.faction) && (
           <div

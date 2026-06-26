@@ -51,6 +51,60 @@ describe('map mode shortcut contract', () => {
         expect(useGameStore.getState().mapMode).toBe('legitimacy');
     });
 
+    it('does not hijack native Tab traversal or focused button Space activation', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            selectedCorpsId: 'corps_a',
+            loadedGameState: {
+                label: 'test',
+                turn: 1,
+                phase: 'war',
+                player_faction: 'RBiH',
+                formations: [
+                    { id: 'corps_a', faction: 'RBiH', name: 'A Corps', kind: 'corps', status: 'active', readiness: 'active', createdTurn: 0, tags: [] },
+                    { id: 'corps_b', faction: 'RBiH', name: 'B Corps', kind: 'corps', status: 'active', readiness: 'active', createdTurn: 0, tags: [] },
+                ],
+            } as never,
+        });
+        render(createElement(KeyboardShortcutProbe));
+        const plainTab = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+        window.dispatchEvent(plainTab);
+        expect(plainTab.defaultPrevented).toBe(false);
+        expect(useGameStore.getState().selectedCorpsId).toBe('corps_a');
+
+        const button = document.createElement('button');
+        document.body.appendChild(button);
+        button.focus();
+        const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+        window.dispatchEvent(space);
+        expect(space.defaultPrevented).toBe(false);
+        button.remove();
+    });
+
+    it('uses Ctrl+Tab as the explicit corps-cycle shortcut', () => {
+        useGameStore.setState({
+            ...useGameStore.getInitialState(),
+            selectedCorpsId: 'corps_a',
+            loadedGameState: {
+                label: 'test',
+                turn: 1,
+                phase: 'war',
+                player_faction: 'RBiH',
+                formations: [
+                    { id: 'corps_a', faction: 'RBiH', name: 'A Corps', kind: 'corps', status: 'active', readiness: 'active', createdTurn: 0, tags: [] },
+                    { id: 'corps_b', faction: 'RBiH', name: 'B Corps', kind: 'corps_asset', status: 'active', readiness: 'active', createdTurn: 0, tags: [] },
+                ],
+            } as never,
+        });
+        render(createElement(KeyboardShortcutProbe));
+
+        const modifiedTab = new KeyboardEvent('keydown', { key: 'Tab', ctrlKey: true, bubbles: true, cancelable: true });
+        window.dispatchEvent(modifiedTab);
+
+        expect(modifiedTab.defaultPrevented).toBe(true);
+        expect(useGameStore.getState().selectedCorpsId).toBe('corps_b');
+    });
+
     it('keeps player and engineering docs current with all nine modes', () => {
         const mapUiMaster = readFileSync('docs/20_engineering/MAP_UI_MASTER.md', 'utf8');
         const guiArchitecture = readFileSync('docs/20_engineering/AWWV_GUI_ARCHITECTURE_REWORK_v2.md', 'utf8');

@@ -327,6 +327,12 @@ body {
   animation: powerOn 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
+.kbd-focus:focus-visible {
+  outline: 2px solid var(--color-accent-gold, #d4af37);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.18);
+}
+
 /* Stance confirmation flash — gold border pulse */
 @keyframes stanceFlash {
   0% {

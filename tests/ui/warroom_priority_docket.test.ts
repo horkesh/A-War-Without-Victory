@@ -124,6 +124,15 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   } as LoadedGameState;
 }
 
+function makeConvoyDecision(id: string) {
+  return {
+    id,
+    target_enclave: id === 'convoy_a' ? 'Gorazde' : 'Srebrenica',
+    route_faction: 'RBiH' as const,
+    supply_amount: 20,
+  };
+}
+
 describe('buildWarroomPriorityDocketView', () => {
   it('projects the top pre-advance priorities into a deterministic Warroom docket', () => {
     const state = makeState({
@@ -192,6 +201,24 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.sourceHandoffs).toEqual([]);
     expect(view.sourceHandoffSummary).toBe('0 source handoffs / 0 urgent');
     expect(view.canOpenBoard).toBe(true);
+  });
+
+  it('uses weighted grouped-decision counts in the docket summary', () => {
+    const view = buildWarroomPriorityDocketView({
+      state: makeState({
+        latestTurnSummary: null,
+        turnSummaries: [],
+        pendingConvoyDecisions: [
+          makeConvoyDecision('convoy_a'),
+          makeConvoyDecision('convoy_b'),
+        ],
+      }),
+    });
+
+    expect(view.metrics.pendingReviews).toBe(2);
+    expect(view.metrics.urgentCount).toBe(2);
+    expect(view.metrics.advanceReviewCount).toBe(2);
+    expect(view.summary).toBe('2 advance items / 2 urgent / 2 pending');
   });
 
   it('returns a safe unavailable state when no campaign is loaded', () => {

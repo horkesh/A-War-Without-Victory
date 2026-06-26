@@ -16,6 +16,7 @@ interface CollapsibleSectionProps {
 export function CollapsibleSection({ sectionKey, title, count, children, defaultOpen = false }: CollapsibleSectionProps) {
     const expanded = useGameStore((s) => s.armyHQExpandedSections[sectionKey] ?? defaultOpen);
     const toggle = useGameStore((s) => s.toggleArmyHQSection);
+    const contentId = `army-hq-collapsible-section-${sectionKey.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
     const ariaLabel = expanded
         ? t('armyHqCorps.collapseSectionAria', { title })
         : t('armyHqCorps.expandSectionAria', { title });
@@ -27,6 +28,7 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
                 onClick={() => toggle(sectionKey)}
                 aria-label={ariaLabel}
                 aria-expanded={expanded}
+                aria-controls={contentId}
                 className="w-full flex items-center justify-between px-4 py-2 hover:bg-panel-bg transition-colors group"
             >
                 <div className="flex items-center gap-2.5">
@@ -45,7 +47,7 @@ export function CollapsibleSection({ sectionKey, title, count, children, default
                 </span>
             </button>
             {expanded && (
-                <div className="px-4 pb-3 pt-1.5 border-t border-panel-border/50">
+                <div id={contentId} className="px-4 pb-3 pt-1.5 border-t border-panel-border/50">
                     {children}
                 </div>
             )}

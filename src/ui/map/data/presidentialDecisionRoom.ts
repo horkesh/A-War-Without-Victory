@@ -1717,6 +1717,20 @@ function sourceHandoffSummary(count: number, urgentCount: number): string {
     : t('decisionRoom.summary.countOnly', { count, noun: itemLabel });
 }
 
+function cardWeight(card: Pick<PresidentialDecisionRoomCard, 'countWeight'>): number {
+  return typeof card.countWeight === 'number' && Number.isFinite(card.countWeight) && card.countWeight > 0
+    ? card.countWeight
+    : 1;
+}
+
+function weightedCardCount(cards: readonly PresidentialDecisionRoomCard[]): number {
+  return cards.reduce((sum, card) => sum + cardWeight(card), 0);
+}
+
+function weightedUrgentCount(cards: readonly PresidentialDecisionRoomCard[]): number {
+  return cards.reduce((sum, card) => sum + (isUrgentCard(card) ? cardWeight(card) : 0), 0);
+}
+
 export function buildPresidentialDecisionRoomSourceHandoffs(
   cards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomSourceHandoff[] {
@@ -1747,12 +1761,13 @@ export function buildPresidentialDecisionRoomSourceHandoffs(
       return strictCompare(a.id, b.id);
     })
     .map((group) => {
-      const urgentCount = group.cards.filter(isUrgentCard).length;
+      const count = weightedCardCount(group.cards);
+      const urgentCount = weightedUrgentCount(group.cards);
       return {
         id: group.id,
         label: group.label,
-        summary: sourceHandoffSummary(group.cards.length, urgentCount),
-        count: group.cards.length,
+        summary: sourceHandoffSummary(count, urgentCount),
+        count,
         urgentCount,
         cardIds: group.cards.map((card) => card.id),
         actionLabel: group.actionLabel,
@@ -1767,11 +1782,12 @@ function buildLens(
   cards: PresidentialDecisionRoomCard[],
 ): PresidentialDecisionRoomLens {
   const topCard = cards[0] ?? null;
+  const count = weightedCardCount(cards);
   return {
     id,
     label,
-    count: cards.length,
-    urgentCount: cards.filter(isUrgentCard).length,
+    count,
+    urgentCount: weightedUrgentCount(cards),
     topCardId: topCard?.id ?? null,
     actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.review'),
     navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
@@ -1816,15 +1832,16 @@ function buildCommandQuestion(
 ): PresidentialDecisionRoomCommandQuestion {
   const visibleCards = cards.slice(0, options.limit ?? 3);
   const topCard = visibleCards[0] ?? null;
-  const urgentCount = cards.filter(isUrgentCard).length;
+  const count = weightedCardCount(cards);
+  const urgentCount = weightedUrgentCount(cards);
   return {
     id,
     label,
     headline: options.headlineOverride ?? topCard?.title ?? options.fallbackHeadline,
     summary: cards.length > 0
-      ? summaryCount(cards.length, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
+      ? summaryCount(count, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
       : options.fallbackSummary,
-    count: cards.length,
+    count,
     urgentCount,
     cardIds: visibleCards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel ?? t('decisionRoom.action.review'),
@@ -1988,15 +2005,16 @@ function buildCardLoopStep(
   },
 ): PresidentialDecisionRoomLoopStep {
   const topCard = cards[0] ?? null;
-  const urgentCount = cards.filter(isUrgentCard).length;
+  const count = weightedCardCount(cards);
+  const urgentCount = weightedUrgentCount(cards);
   return {
     id,
     label,
     headline: topCard?.title ?? options.fallbackHeadline,
     summary: cards.length > 0
-      ? loopStepSummary(cards.length, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
+      ? loopStepSummary(count, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
       : options.fallbackSummary,
-    count: cards.length,
+    count,
     urgentCount,
     cardIds: cards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel,
@@ -2259,6 +2277,9 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
   const loopSteps = buildLoopSteps(state, cards, inspectNext, advanceReadiness);
   const activeDossier = buildActiveDossier(cards, sourceHandoffs, advanceReadiness, input.selectedCardId);
+  const livePendingReviewCards = cards.filter((card) => (
+    card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity'
+  ));
 
   return {
     hasPlayerFaction: true,
@@ -2273,11 +2294,11 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     inspectNext,
     advanceReadiness,
     metrics: {
-      urgentCount: cards.filter((card) => card.severity === 'blocking' || card.severity === 'critical').length,
-      pendingReviews: state.playerDecisionSummary?.totalCount ?? state.presidentialReviewQueue?.pendingCount ?? 0,
+      urgentCount: weightedUrgentCount(cards),
+      pendingReviews: weightedCardCount(livePendingReviewCards),
       opportunities: state.operationOpportunityProposals?.length ?? 0,
       hardTurns: cards.filter((card) => card.category === 'turn').length,
-      advanceReviewCount: advanceReadiness.items.length,
+      advanceReviewCount: weightedCardCount(advanceReadiness.items),
     },
   };
 }

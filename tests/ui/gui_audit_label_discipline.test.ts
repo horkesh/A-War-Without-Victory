@@ -266,6 +266,32 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/\bT3\b/);
   });
 
+  it('renders sparse opportunity axis readiness as unreported instead of zero-ready axes', () => {
+    useGameStore.setState({
+      loadedGameState: makeState({
+        operationOpportunityRecords: [
+          {
+            proposal_id: 'p_sparse',
+            opportunity_id: 'o_sparse',
+            display_name: 'Sparse axis window',
+            faction: 'RBiH',
+            status: 'approved',
+            response: 'approve',
+            required_axes_total: 2,
+            optional_axes_total: 1,
+          },
+        ],
+      }),
+    });
+
+    const { container } = render(createElement(OpportunityLedgerPanel));
+
+    expect(container.textContent).toContain('Required axes unreported (2)');
+    expect(container.textContent).toContain('Optional axes unreported (1)');
+    expect(container.textContent).not.toContain('0/2 required');
+    expect(container.textContent).not.toContain('0/1 optional');
+  });
+
   it('labels opportunity AAR objectives as held at close, not taken', () => {
     useGameStore.setState({
       loadedGameState: makeState({
@@ -408,6 +434,9 @@ describe('GUI audit label discipline', () => {
 
     expect(container.textContent).toContain('EffectivenessUnreported');
     expect(container.textContent).not.toMatch(/Effectiveness\d/);
+    const panel = container.querySelector('[role="tabpanel"]');
+    expect(panel?.getAttribute('id')).toBe('formation-detail-tabpanel-overview');
+    expect(panel?.getAttribute('aria-labelledby')).toBe('formation-detail-tab-overview');
   });
 
   it('keeps Army HQ corps cards free of stance and count shorthand', () => {
@@ -853,10 +882,12 @@ describe('GUI audit label discipline', () => {
 
     const sectionToggle = screen.getByRole('button', { name: 'Expand Combat record section' });
     expect(sectionToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(sectionToggle.getAttribute('aria-controls')).toBe('army-hq-collapsible-section-combat-arbih_1st_corps');
     expect(sectionToggle.textContent).toContain('>');
     fireEvent.click(sectionToggle);
     const collapseToggle = screen.getByRole('button', { name: 'Collapse Combat record section' });
     expect(collapseToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(document.getElementById(collapseToggle.getAttribute('aria-controls') ?? '')?.textContent).toContain('Combat body');
     expect(collapseToggle.textContent).toContain('v');
   });
 

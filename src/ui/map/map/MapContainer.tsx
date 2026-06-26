@@ -180,7 +180,7 @@ const REFUGEE_COLUMN_FEATURE_FLAG = true;
  * noise and was too easy to mistake for player-issued orders.
  */
 const CORRIDOR_HEARTBEAT_FEATURE_FLAG = false;
-import { findPlayerFacingSectorById, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
+import { findPlayerFacingSectorById, isPlayerEnemyContactFormation, resolvePlayerFacingFaction } from '../../shared/playerVisibility';
 import {
   FRONT_SURFACE_HITBOX_WIDTHS,
   INTERACTION_HITBOX_OPACITY,
@@ -231,6 +231,19 @@ function inspectSectorFromMap(sectorId: string, properties?: Record<string, unkn
 function inspectSettlementFromMap(osid: string, sectorId?: string | null) {
   const store = useGameStore.getState();
   inspectOnField(store, resolveMapSettlementInspectionTarget(osid, store.loadedGameState, sectorId));
+}
+
+function isEnemyContactMarker(properties?: Record<string, unknown> | null): boolean {
+  return properties?.is_enemy_contact === true;
+}
+
+function inspectMarkerContactOrFormation(formationId: string, properties?: Record<string, unknown> | null) {
+  const osid = typeof properties?.location_osid === 'string' ? properties.location_osid : null;
+  if (isEnemyContactMarker(properties) && osid) {
+    inspectSettlementFromMap(osid);
+    return;
+  }
+  inspectFormationFromMap(formationId, properties);
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
@@ -695,10 +708,16 @@ export function MapContainer() {
     const { type, properties } = contextMenu;
     switch (type) {
       case 'formation': return [
+        ...(isEnemyContactMarker(properties) ? [{
+          id: 'contact', label: t('map.context.settlement'), icon: '\u{1F441}', action: () => {
+            const osid = properties?.location_osid as string | undefined;
+            if (osid) inspectSettlementFromMap(osid, osidToSector.get(osid));
+          }
+        }] : [
         {
           id: 'view', label: t('map.context.viewUnit'), icon: '\u{1F441}', action: () => {
             const id = properties?.id as string;
-            if (id) inspectFormationFromMap(id, properties);
+            if (id) inspectMarkerContactOrFormation(id, properties);
           }
         },
         {
@@ -716,6 +735,7 @@ export function MapContainer() {
             }
           }
         },
+        ]),
       ];
       case 'osid': return [
         {
@@ -936,6 +956,9 @@ export function MapContainer() {
           if (osid && stackCount > 1) {
             store.setExpandedStackOsid(osid);
             // overlayAnchor is derived by useEffect from expandedStackOsid
+          } else if (isEnemyContactMarker(props) && osid) {
+            inspectSettlementFromMap(osid);
+            store.setExpandedStackOsid(null);
           } else {
             inspectFormationFromMap(clickTarget.formationId, props);
             store.setExpandedStackOsid(null);
@@ -1091,6 +1114,10 @@ export function MapContainer() {
             if (stackSize > 1) {
               setExpandedStackOsid(osid);
               setOverlayAnchor(point);
+            } else if (isEnemyContactMarker(props)) {
+              inspectSettlementFromMap(osid);
+              setExpandedStackOsid(null);
+              setOverlayAnchor(null);
             } else {
               inspectFormationFromMap(id, props);
               setExpandedStackOsid(null);
@@ -3538,12 +3565,25 @@ export function MapContainer() {
           anchorX={overlayAnchor.x}
           anchorY={overlayAnchor.y}
           formations={getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)}
+          playerFaction={loadedGameState.player_faction}
           onClose={() => {
             setExpandedStackOsid(null);
             setOverlayAnchor(null);
           }}
           onSelect={(id) => {
-            inspectFormationFromMap(id);
+            if (id.startsWith('enemy_contact:')) {
+              inspectSettlementFromMap(expandedStackOsid);
+              setExpandedStackOsid(null);
+              setOverlayAnchor(null);
+              return;
+            }
+            const formation = getPlayerVisibleFormationStack(loadedGameState, expandedStackOsid, osidCentroidsRef.current)
+              .find((candidate) => candidate.id === id);
+            if (isPlayerEnemyContactFormation(loadedGameState, formation)) {
+              inspectSettlementFromMap(expandedStackOsid);
+            } else {
+              inspectFormationFromMap(id);
+            }
             setExpandedStackOsid(null);
             setOverlayAnchor(null);
           }}

@@ -20,6 +20,8 @@ import {
   filterPlayerFacingMovementsByOsid,
   filterPlayerFacingOperationHistory,
   filterPlayerFacingSectors,
+  filterPlayerVisibleMapFormations,
+  isFieldedTacticalFormation,
   resolvePlayerFacingFaction,
 } from '../../shared/playerVisibility';
 import { getPlayerFacingSectorName, getPlayerVisibleOperations } from '../../shared/playerFacingLabels';
@@ -91,6 +93,11 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
   const playerFacingFormations = filterPlayerFacingFormations(loadedGameState);
   const formations = getFormationsAtOsid(playerFacingFormations, selectedOsid);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
+  const enemyContactCount = playerFaction
+    ? getFormationsAtOsid(filterPlayerVisibleMapFormations(loadedGameState), selectedOsid)
+      .filter((formation) => formation.faction !== playerFaction && isFieldedTacticalFormation(formation))
+      .length
+    : 0;
   const selectedMunId = resolveSelectionPanelMunicipalityId(selectedOsid, osidPropertiesMap);
   const rawActiveSupport = playerFaction ? loadedGameState?.municipalitySupportOrders?.[playerFaction] : undefined;
   const activeSupport = rawActiveSupport?.staged_turn === loadedGameState?.turn ? rawActiveSupport : undefined;
@@ -312,6 +319,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           osidPropertiesMap={osidPropertiesMap}
           controlBySettlement={loadedGameState?.controlBySettlement}
           formationsAtOsid={formationsForDetail}
+          enemyContactCount={enemyContactCount}
           displacementByMun={loadedGameState?.displacementByMun ?? undefined}
           displacementByOsid={loadedGameState?.displacementByOsid ?? undefined}
           variant="panel"

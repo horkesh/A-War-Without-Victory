@@ -97,6 +97,7 @@ import { shouldShowPeaceWarTransition } from './data/peaceWarTransitionGate';
 import { applyShellHandoffCommand, openArmyHQDecisionConsequenceRecord, openArmyHQRecordsSubTab, openArmyHQTab, openChronicle, openChronicleDecisionRecord, openCodex, warroomCommandStaysInRoom } from './utils/shellNavigation';
 import { openPresidentialDecisionRoomNavigationTarget } from './utils/presidentialDecisionRoomNavigation';
 import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
+import { isKeyboardEventFromInteractiveControl } from './utils/interactiveFocus';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
 import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
@@ -1093,9 +1094,7 @@ function App() {
   // Keyboard shortcuts for Army HQ tabs + orphaned modals
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Don't trigger in input/select/textarea
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (isKeyboardEventFromInteractiveControl(e)) return;
       if (activeEventDecisionIdRef.current !== null) return;
 
       if (e.key === 'h' || e.key === 'H') {
@@ -1245,8 +1244,7 @@ function App() {
 
   const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'decision-room') {
-      requestDecisionRoomLens(target.lens, null, target.cardId ?? null);
-      setSummaryOpen(false);
+      openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
       return true;
     }
     if (target.kind === 'counter-offer') {

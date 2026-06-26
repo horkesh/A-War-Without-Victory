@@ -116,6 +116,20 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(screen.getByTestId('settlement-stationed-units-empty').textContent).toContain('No fielded units physically reported here.');
   });
 
+  it('shows redacted enemy contact copy instead of implying a contact settlement is empty', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      formationsAtOsid: [],
+      enemyContactCount: 2,
+    }));
+
+    expect(screen.getByTestId('settlement-enemy-contact-summary').textContent)
+      .toContain('2 enemy contacts observed here; formation identities remain unconfirmed.');
+    expect(screen.getByTestId('settlement-stationed-units-empty').textContent)
+      .toContain('No friendly fielded units physically reported here.');
+    expect(screen.queryByText('No fielded units physically reported here.')).toBeNull();
+  });
+
   it('refreshes timeline rows when per-settlement movement data changes', () => {
     const { rerender } = render(createElement(SettlementDetailContent, { ...BASE_PROPS }));
     fireEvent.click(screen.getByRole('tab', { name: /Timeline/i }));
@@ -129,6 +143,20 @@ describe('SettlementDetailContent supply status surface', () => {
     }));
 
     expect(screen.getByText(/101st Brigade stationed at settlement/i)).toBeTruthy();
+  });
+
+  it('links every settlement tab to the active tabpanel it controls', () => {
+    render(createElement(SettlementDetailContent, { ...BASE_PROPS }));
+
+    for (const tab of screen.getAllByRole('tab')) {
+      fireEvent.click(tab);
+      const controls = tab.getAttribute('aria-controls');
+      expect(controls).toBeTruthy();
+      const panel = document.getElementById(controls ?? '');
+      expect(panel).toBeTruthy();
+      expect(panel?.getAttribute('role')).toBe('tabpanel');
+      expect(panel?.getAttribute('aria-labelledby')).toBe(tab.id);
+    }
   });
 
   it('uses recent control events when full control history is absent', () => {
@@ -279,6 +307,7 @@ describe('SettlementDetailContent supply status surface', () => {
         latestTurnSummary: null,
         turnSummaries: [],
         player_faction: 'RBiH',
+        fogOfWar: { visibleEnemyOsids: ['op:test:a'], visibleEnemySectorIds: [] },
         corpsFrontSectors: [
           {
             sector_id: 'sector_alpha',
@@ -303,6 +332,52 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(store.selectedCorpsId).toBe('corps_alpha');
     expect(store.selectedOsid).toBe('op:test:a');
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+  });
+
+  it('SelectionPanel counts fog-visible enemy formations as redacted contacts, not stationed units', () => {
+    useGameStore.setState({
+      selectedOsid: 'op:test:a',
+      osidDisplayNames: { 'op:test:a': 'Testograd' },
+      osidPropertiesMap: { 'op:test:a': { mun1990_id: 'testmun', mun1990_name: 'Testmun' } },
+      loadedGameState: {
+        label: 'test',
+        turn: 1,
+        phase: 'war',
+        player_faction: 'RBiH',
+        fogOfWar: { visibleEnemyOsids: ['op:test:a'], visibleEnemySectorIds: [] },
+        formations: [{
+          id: 'vrs_secret_brigade',
+          name: 'Secret Enemy Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          status: 'active',
+          readiness: 'ready',
+          location_osid: 'op:test:a',
+          cohesion: 80,
+        }],
+        militiaPools: [],
+        controlBySettlement: { 'op:test:a': 'RS' },
+        statusBySettlement: {},
+        brigadeAorByFormationId: {},
+        attackOrders: [],
+        aorOrders: [],
+        recentControlEvents: [],
+        allControlEvents: [],
+        displacementEventLog: [],
+        battlesByOsid: {},
+        movementsByOsid: {},
+        supplyTransitionsByOsid: {},
+        historicalEventsByTurn: [],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as never,
+    });
+
+    render(createElement(SelectionPanel));
+
+    expect(screen.getByTestId('settlement-enemy-contact-summary').textContent)
+      .toContain('1 enemy contact observed here; formation identity remains unconfirmed.');
+    expect(document.body.textContent).not.toContain('Secret Enemy Brigade');
   });
 
   it('does not synthesize current ethnic structure without departure evidence', () => {

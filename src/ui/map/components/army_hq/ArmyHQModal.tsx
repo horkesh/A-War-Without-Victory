@@ -18,7 +18,6 @@ import { ArmyHQCorpsCard } from './ArmyHQCorpsCard';
 import { generateForceReadiness, readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
 import { generateThreatAssessment } from './generateThreatAssessment';
 import { SituationBriefing, type BriefingTarget } from './SituationBriefing';
-import { PresidentialDecisionRoomPanel } from './PresidentialDecisionRoomPanel';
 import { PresidentialAttentionPanel } from './PresidentialAttentionPanel';
 import { StrategicPosition } from './StrategicPosition';
 import { ChiefOfStaffBriefing } from './ChiefOfStaffBriefing';
@@ -56,6 +55,35 @@ const FACTION_DISPLAY: Record<string, string> = {
     RBiH: 'Armija Republike Bosne i Hercegovine',
     HRHB: 'Hrvatsko Vijeće Obrane',
 };
+
+function DecisionRoomHandoff({
+    onNavigateTarget,
+}: {
+    onNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
+}) {
+    const disabled = !onNavigateTarget;
+    return (
+        <section
+            data-testid="army-hq-decision-room-handoff"
+            className="rounded-lg border border-amber-400/25 bg-amber-400/[0.05] p-3"
+        >
+            <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-amber-300/80">
+                {t('armyHq.decisionRoomHandoff.title')}
+            </div>
+            <div className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+                {t('armyHq.decisionRoomHandoff.detail')}
+            </div>
+            <button
+                type="button"
+                disabled={disabled}
+                onClick={() => onNavigateTarget?.({ kind: 'decision-room', lens: 'all' })}
+                className="mt-2 h-8 rounded border border-amber-400/35 bg-amber-400/12 px-3 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+            >
+                {t('armyHq.openDecisionRoom')}
+            </button>
+        </section>
+    );
+}
 
 function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     return (
@@ -542,9 +570,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                                             onCorpsClick={navigateToCorps}
                                         />
 
-                                        <RootErrorBoundary zone="decision room">
-                                            <PresidentialDecisionRoomPanel onNavigateTarget={onDecisionRoomNavigateTarget} />
-                                        </RootErrorBoundary>
+                                        <DecisionRoomHandoff onNavigateTarget={onDecisionRoomNavigateTarget} />
 
                                         <RootErrorBoundary zone="presidential decisions">
                                             <PresidentialAttentionPanel

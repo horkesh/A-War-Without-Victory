@@ -125,4 +125,40 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(document.activeElement).toBe(returnFocus);
     returnFocus.remove();
   });
+
+  it('redacts enemy contact labels in the stack chooser', () => {
+    vi.useFakeTimers();
+    const onSelect = vi.fn();
+
+    render(createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 300,
+      anchorY: 300,
+      formations: [
+        formations()[0]!,
+        {
+          ...formations()[1]!,
+          id: 'vrs_secret_brigade',
+          name: 'Secret Enemy Brigade',
+          faction: 'RS',
+        },
+      ],
+      playerFaction: 'RBiH',
+      onClose: vi.fn(),
+      onSelect,
+    }));
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    expect(screen.getByRole('button', { name: /Select A Brigade/i })).toBeTruthy();
+    const contact = screen.getByRole('button', { name: /Inspect enemy contact at settlement/i });
+    expect(contact.textContent).toContain('Enemy contact');
+    expect(document.body.textContent).not.toContain('Secret Enemy Brigade');
+
+    fireEvent.click(contact);
+    expect(onSelect).toHaveBeenCalledWith('enemy_contact:op:stacked:1');
+    expect(onSelect).not.toHaveBeenCalledWith('vrs_secret_brigade');
+  });
 });

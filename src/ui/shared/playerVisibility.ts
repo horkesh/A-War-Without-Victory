@@ -144,3 +144,13 @@ export function filterPlayerVisibleMapFormations(state: LoadedGameState | null |
     || (typeof formation.location_osid === 'string' && visibleEnemyOsids.has(formation.location_osid))
   ));
 }
+
+export function isPlayerEnemyContactFormation(
+  state: LoadedGameState | null | undefined,
+  formation: { faction?: unknown; location_osid?: unknown } | null | undefined,
+): boolean {
+  const playerFaction = resolvePlayerFacingFaction(state);
+  if (!playerFaction || !formation || formation.faction === playerFaction) return false;
+  return typeof formation.location_osid === 'string'
+    && (state?.fogOfWar?.visibleEnemyOsids ?? []).includes(formation.location_osid);
+}
