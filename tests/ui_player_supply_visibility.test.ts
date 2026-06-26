@@ -119,6 +119,29 @@ describe('buildPlayerSupplyVisibility', () => {
     expect(view!.headline).toMatch(/unavailable|unknown/i);
   });
 
+  it('preserves reported partial summary warnings without inventing missing zeroes', () => {
+    const state = emptyState({
+      player_faction: 'RBiH',
+      supplySummaryByFaction: {
+        RBiH: {
+          corridor_brittle_count: 1,
+        } as any,
+      },
+    });
+
+    const view = buildPlayerSupplyVisibility(state);
+
+    expect(view).not.toBeNull();
+    expect(view!.hasSupplyData).toBe(true);
+    expect(view!.severity).toBe('warning');
+    expect(view!.corridorAtRisk).toBe(true);
+    expect(view!.corridorBrittleCount).toBe(1);
+    expect(view!.evidence.join(' ')).toContain('Unreported');
+    expect(view!.evidence.join(' ')).toContain('1 strained');
+    expect(view!.evidence.join(' ')).not.toContain('0 adequate');
+    expect(view!.evidence.join(' ')).not.toContain('0 cut');
+  });
+
   it('flags corridor at risk when player faction has brittle or cut corridors', () => {
     const state = emptyState({
       player_faction: 'RBiH',

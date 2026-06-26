@@ -1590,14 +1590,28 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
     let factionReserves: LoadedGameState['factionReserves'] | undefined;
     const rawGeneral = state.military.general_supply_reserve;
-    if (rawGeneral && typeof rawGeneral === 'object' && !Array.isArray(rawGeneral)) {
+    const rawHeavy = state.military.heavy_munitions_reserve;
+    const generalReserves = rawGeneral && typeof rawGeneral === 'object' && !Array.isArray(rawGeneral)
+        ? rawGeneral as Record<string, unknown>
+        : undefined;
+    const heavyReserves = rawHeavy && typeof rawHeavy === 'object' && !Array.isArray(rawHeavy)
+        ? rawHeavy as Record<string, unknown>
+        : undefined;
+    if (generalReserves || heavyReserves) {
         const out: NonNullable<LoadedGameState['factionReserves']> = {};
-        const rawHeavy = state.military.heavy_munitions_reserve;
-        for (const faction of Object.keys(rawGeneral).sort((a, b) => a.localeCompare(b))) {
-            out[faction] = {
-                generalSupply: finiteNumber(rawGeneral[faction], 0),
-                heavyMunitions: finiteNumber(rawHeavy?.[faction] ?? 0, 0),
-            };
+        const factions = Array.from(new Set([
+            ...Object.keys(generalReserves ?? {}),
+            ...Object.keys(heavyReserves ?? {}),
+        ])).sort(strictCompare);
+        for (const faction of factions) {
+            const row: NonNullable<LoadedGameState['factionReserves']>[string] = {};
+            if (generalReserves && hasFiniteNumber(generalReserves, faction)) {
+                row.generalSupply = finiteNumber(generalReserves[faction]);
+            }
+            if (heavyReserves && hasFiniteNumber(heavyReserves, faction)) {
+                row.heavyMunitions = finiteNumber(heavyReserves[faction]);
+            }
+            if (Object.keys(row).length > 0) out[faction] = row;
         }
         if (Object.keys(out).length > 0) factionReserves = out;
     }

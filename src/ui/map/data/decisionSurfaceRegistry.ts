@@ -27,7 +27,6 @@ export type DecisionResolverSurface =
   | 'officer_matter_modal'
   | 'operation_opportunity_dossier'
   | 'proposal_review_dossier'
-  | 'autonomy_panel'
   | 'counter_offer_modal'
   | 'intelligence_brief_modal'
   | 'situation_brief'

@@ -105,6 +105,38 @@ describe('SupplyIntelligence mobilization info', () => {
         expect(container.textContent).not.toContain('GENERAL SUPPLY: 0');
     });
 
+    it('marks heavy-equipment drain unreported when fielded formation composition is missing', () => {
+        const state = {
+            factionReserves: {
+                RBiH: { generalSupply: 50, heavyMunitions: 20 },
+            },
+            formations: [
+                {
+                    id: 'fielded_without_composition',
+                    faction: 'RBiH',
+                    kind: 'brigade',
+                    status: 'active',
+                    readiness: 'ready',
+                },
+            ],
+        } as unknown as LoadedGameState;
+
+        const breakdown = computeSupplyBreakdown(state, 'RBiH');
+
+        expect(breakdown.estimatedHeavyDrainReported).toBe(false);
+        expect(breakdown.estimatedHeavyDrain).toBeNull();
+
+        const { container } = render(React.createElement(SupplyIntelligence, {
+            breakdown,
+            enclaves: [],
+            mobilization: null,
+            currentTurn: 0,
+        }));
+
+        expect(container.textContent).toContain('heavy equip Unreported');
+        expect(container.textContent).not.toContain('heavy equip −0');
+    });
+
     it('keeps explicit zero faction reserves as reported zero supply', () => {
         const state = {
             factionReserves: {
@@ -119,6 +151,28 @@ describe('SupplyIntelligence mobilization info', () => {
         expect(breakdown.currentHeavyReported).toBe(true);
         expect(breakdown.currentGeneral).toBe(0);
         expect(breakdown.currentHeavy).toBe(0);
+    });
+
+    it('renders reported zero heavy-equipment drain as zero rather than negative zero', () => {
+        const breakdown = computeSupplyBreakdown({
+            factionReserves: {
+                RBiH: { generalSupply: 50, heavyMunitions: 20 },
+            },
+            formations: [],
+        } as unknown as LoadedGameState, 'RBiH');
+
+        expect(breakdown.estimatedHeavyDrainReported).toBe(true);
+        expect(breakdown.estimatedHeavyDrain).toBe(0);
+
+        const { container } = render(React.createElement(SupplyIntelligence, {
+            breakdown,
+            enclaves: [],
+            mobilization: null,
+            currentTurn: 0,
+        }));
+
+        expect(container.textContent).toContain('heavy equip 0');
+        expect(container.textContent).not.toContain('heavy equip -0');
     });
 
     it('keeps missing enclave supply unreported instead of inventing adequate supply', () => {

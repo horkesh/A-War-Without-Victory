@@ -52,8 +52,9 @@ function ConditionBar({ value, max = 1 }: { value: number; max?: number }) {
     );
 }
 
-function ReserveGauge({ label, value, color }: { label: string; value: number; color: string }) {
-    const pct = Math.max(0, Math.min(100, value));
+function ReserveGauge({ label, value, color }: { label: string; value: number | null | undefined; color: string }) {
+    const reported = typeof value === 'number' && Number.isFinite(value);
+    const pct = reported ? Math.max(0, Math.min(100, value)) : 0;
     const barColor =
         pct >= 50 ? 'bg-green-500' :
         pct >= 20 ? 'bg-yellow-400' :
@@ -64,12 +65,18 @@ function ReserveGauge({ label, value, color }: { label: string; value: number; c
             <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
                 <div
                     className={`absolute left-0 top-0 h-full rounded-full transition-all ${barColor}`}
-                    style={{ width: `${pct}%` }}
+                    style={{ width: reported ? `${pct}%` : '0%' }}
                 />
             </div>
-            <span className="w-6 shrink-0 text-right text-[10px] tabular-nums text-text-secondary">{Math.round(pct)}</span>
+            <span className={`shrink-0 text-right text-[10px] tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
+                {reported ? Math.round(pct) : t('corpsFront.unreported')}
+            </span>
         </div>
     );
+}
+
+function reserveValueIsStrained(value: unknown): boolean {
+    return typeof value === 'number' && Number.isFinite(value) && value < 20;
 }
 
 export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
@@ -89,7 +96,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     const strainedReserveCount = reserves
         ? reserveFactions.filter((faction) => {
             const reserve = reserves[faction];
-            return (reserve?.generalSupply ?? 0) < 20 || (reserve?.heavyMunitions ?? 0) < 20;
+            return reserveValueIsStrained(reserve?.generalSupply) || reserveValueIsStrained(reserve?.heavyMunitions);
         }).length
         : 0;
     const disruptedRouteCount = routes.filter((route) => route.disrupted).length;
@@ -128,8 +135,8 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             return (
                                 <div key={faction} className="space-y-0.5">
                                     <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
-                                    <ReserveGauge label={t('economy.supply')} value={r?.generalSupply ?? 0} color="text-text-secondary" />
-                                    <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions ?? 0} color="text-text-secondary" />
+                                    <ReserveGauge label={t('economy.supply')} value={r?.generalSupply} color="text-text-secondary" />
+                                    <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions} color="text-text-secondary" />
                                 </div>
                             );
                         })}

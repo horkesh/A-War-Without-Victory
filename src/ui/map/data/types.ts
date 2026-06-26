@@ -1187,7 +1187,7 @@ export interface LoadedGameState {
     /** Officer mutable state by id (sorted keys when iterating). */
     namedOfficerStateById?: Record<string, NamedOfficerStateView>;
     /** Per-faction supply reserve levels (general supply + heavy munitions, 0–100 each). Only present when supply_reserves_enabled. */
-    factionReserves?: Record<string, { generalSupply: number; heavyMunitions: number }>;
+    factionReserves?: Record<string, { generalSupply?: number; heavyMunitions?: number }>;
     /** Production facility views for EconomyPanel. */
     productionFacilities?: Array<{ id: string; name: string; type: string; municipality: string; condition: number; controller: string | null }>;
     /** Smuggling route views for EconomyPanel. */

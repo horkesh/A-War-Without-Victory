@@ -32,7 +32,8 @@ export interface SupplyBreakdown {
     currentGeneralReported: boolean;
     currentHeavyReported: boolean;
     estimatedMaintenanceDrain: number;
-    estimatedHeavyDrain: number;
+    estimatedHeavyDrain: number | null;
+    estimatedHeavyDrainReported: boolean;
     estimatedPatronAid: number;
     estimatedNetPerTurn: number;
     estimatedRunwayTurns: number | null;  // null = sustainable
@@ -71,6 +72,7 @@ export function computeSupplyBreakdown(
     ) ?? [];
 
     const formationCount = formations.length;
+    const heavyCompositionReported = formations.every((f) => f.composition != null);
     const totalHeavyWeapons = formations.reduce((sum, f) => {
         const c = f.composition;
         if (!c) return sum;
@@ -78,7 +80,9 @@ export function computeSupplyBreakdown(
     }, 0);
 
     const estimatedMaintenanceDrain = formationCount * MAINTENANCE_DRAIN_PER_FORMATION;
-    const estimatedHeavyDrain = totalHeavyWeapons * HEAVY_MAINTENANCE_PER_WEAPON;
+    const estimatedHeavyDrain = heavyCompositionReported
+        ? totalHeavyWeapons * HEAVY_MAINTENANCE_PER_WEAPON
+        : null;
     const estimatedPatronAid = (PATRON_COMMITMENT[faction] ?? 0.1) * PATRON_AID_SCALE * 0.01;
     const estimatedNetPerTurn = estimatedPatronAid - estimatedMaintenanceDrain;
     const estimatedRunwayTurns = currentGeneral != null && estimatedNetPerTurn < 0
@@ -91,7 +95,8 @@ export function computeSupplyBreakdown(
         currentGeneralReported,
         currentHeavyReported,
         estimatedMaintenanceDrain: Math.round(estimatedMaintenanceDrain * 100) / 100,
-        estimatedHeavyDrain: Math.round(estimatedHeavyDrain * 100) / 100,
+        estimatedHeavyDrain: estimatedHeavyDrain == null ? null : Math.round(estimatedHeavyDrain * 100) / 100,
+        estimatedHeavyDrainReported: heavyCompositionReported,
         estimatedPatronAid: Math.round(estimatedPatronAid * 100) / 100,
         estimatedNetPerTurn: Math.round(estimatedNetPerTurn * 100) / 100,
         estimatedRunwayTurns,
@@ -164,6 +169,9 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
     const currentGeneralLabel = breakdown.currentGeneralReported && breakdown.currentGeneral != null
         ? String(breakdown.currentGeneral)
         : 'Unreported';
+    const heavyDrainLabel = breakdown.estimatedHeavyDrainReported && breakdown.estimatedHeavyDrain != null
+        ? (breakdown.estimatedHeavyDrain === 0 ? '0' : `-${breakdown.estimatedHeavyDrain}`)
+        : 'Unreported';
 
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
@@ -189,7 +197,7 @@ export function SupplyIntelligence({ breakdown, enclaves, mobilization, currentT
                 <div className="text-[10px] text-text-secondary/70 flex flex-wrap gap-x-3 ml-1">
                     <span>maint −{breakdown.estimatedMaintenanceDrain}</span>
                     <span>patron +{breakdown.estimatedPatronAid}</span>
-                    <span>heavy equip −{breakdown.estimatedHeavyDrain}</span>
+                    <span>heavy equip {heavyDrainLabel}</span>
                 </div>
             </div>
 

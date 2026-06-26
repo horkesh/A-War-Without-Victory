@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): implement P10 supply/autonomy polish
+
+**Type:** UI/read-model/routing/test/docs polish.
+
+**Fix:** Closed the deferred P10 queue on `codex/p10-supply-autonomy-polish`. Sparse Supply Intelligence / Economy forecast precision now preserves missing faction reserve fields, partial supply summaries, and missing fielded-formation composition as unreported instead of exact zero/depleted truth. Partial supply-summary warning fields remain visible while missing sibling fields render as `Unreported`. The legacy `autonomy_panel` App/registry/inbox route is retired now that generated proposal reviews route through Decision Room command cards.
+
+**Verification:** Review-fix red proof failed 3 expected tests before the production correction, then passed 3 files / 24 tests after the fix. Combined focused P10 proof passed 10 files / 113 tests. `npm.cmd run typecheck` passed. `npm.cmd run qa:player-journeys` passed 43 files / 654 tests. `npm.cmd run qa:first-hour:browser` passed. `npm.cmd run qa:live-surface:browser` passed. Manual in-app browser reload at `http://127.0.0.1:3003/` rendered the side picker with no alert banners, no console errors, and no retired autonomy-panel text. `git diff --check` passed.
+
+**Scope/determinism:** UI/read-model/routing/test/docs polish only. No packaging, no calibration, no simulation logic, no event evaluator mechanics, no scenario data, no startup snapshot construction, no save schema, no baseline/golden manifest, no structural fingerprint artifact, no Srebrenica/Zepa event ownership change, no randomness, timestamps, locale sorting, or persisted output ordering changed. Srebrenica/Zepa fall receipts remain event-owned.
+
+---
+
 ## [2026-06-26] docs: close P9 player-polish merge
 
 **Type:** Docs/process closeout.

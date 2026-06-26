@@ -5,6 +5,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { FeatureCollection, Polygon } from 'geojson';
 
+import { EconomyPanel } from '../../src/ui/map/components/EconomyPanel.js';
 import { SupplyPanel } from '../../src/ui/map/components/SupplyPanel.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { buildSupplyGeoJSON } from '../../src/ui/map/map/builders/buildSupplyGeoJSON.js';
@@ -120,6 +121,24 @@ describe('supply UI fallbacks', () => {
     expect(screen.getByText('ARBiH')).toBeTruthy();
     expect(screen.getAllByText('Unreported')).toHaveLength(2);
     expect(screen.queryByText('0')).toBeNull();
+  });
+
+  it('EconomyPanel keeps partial reserve rows unreported instead of counting missing fields as strained', () => {
+    render(createElement(EconomyPanel, {
+      state: {
+        player_faction: 'RBiH',
+        factionReserves: {
+          RBiH: { generalSupply: 80 },
+        },
+        productionFacilities: [],
+        smugglingRoutes: [],
+      } as unknown as LoadedGameState,
+      onClose: () => {},
+    }));
+
+    expect(screen.getByText('Strained').parentElement?.textContent).toContain('0');
+    expect(screen.getByText('Supply').parentElement?.textContent).toContain('80');
+    expect(screen.getByText('Ammo').parentElement?.textContent).toContain('Unreported');
   });
 
   it('buildSupplyGeoJSON treats high legacy pressure as critical, not adequate', () => {

@@ -63,6 +63,24 @@ describe('PresidentialDecisionRoom supply visibility card', () => {
     expect(view.cards.find((card) => card.id === 'supply:player-visibility')).toBeUndefined();
   });
 
+  it('emits a warning supply card when a partial player summary reports brittle corridors', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        supplySummaryByFaction: {
+          RBiH: {
+            corridor_brittle_count: 1,
+          } as any,
+        },
+      }),
+    });
+
+    const card = view.cards.find((card) => card.id === 'supply:player-visibility');
+    expect(card).toBeDefined();
+    expect(card!.severity).toBe('warning');
+    expect(card!.evidence.join(' ')).toContain('Unreported');
+    expect(card!.evidence.join(' ')).toContain('1 strained');
+  });
+
   it('emits a warning supply card when player corridors are brittle/cut', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
