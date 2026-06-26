@@ -4,6 +4,8 @@
 
 **Branch:** `codex/p6-player-polish-batch`
 
+**Merge:** PR #449 to `main` at `3314a4247`
+
 ## Summary
 
 Closed the next P2 owner-playthrough scout queue from the Army HQ / sector / brigade information-quality sweep without reopening packaging, calibration, or BCS-only cleanup.
@@ -24,8 +26,10 @@ Focused/local proof completed before broad browser gates:
 - `npm.cmd run qa:live-surface:browser` passed after the live-surface drilldown was updated to prove the same Chronicle/Records route ownership.
 - Final focused proof passed 12 files / 130 tests, including `tests/ui/first_hour_browser_gate_contract.test.ts`.
 - `git diff --check` passed.
+- Codex review feedback on the Records panel cap/filter order was addressed with a regression covering 60 newer Chronicle decisions plus an older Records receipt.
+- GitHub PR checks passed across Event System validation, Desktop Release Guard, desktop packaged runtime probe, engine-health-188w, scenario anchors, scenarios, structural fingerprint, test, typecheck, and Full Suite.
 
-GitHub PR checks, merge, and branch cleanup remain pending at this report stage.
+The local/remote feature refs were deleted/pruned after merge, generated browser evidence folders were removed, and the repo returned to one clean `main` worktree.
 
 ## Scope
 

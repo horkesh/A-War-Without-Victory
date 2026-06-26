@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P6 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P6 implementation report, and ledger with the verified PR #449 closeout: merge to `main` at `3314a4247`, green GitHub PR checks, deleted/pruned branch refs, one clean `main` worktree, absorbed and closed Carson, Darwin, and Huygens, addressed the Codex Records cap/filter review comment, and cleaned temporary browser evidence.
+
+**Verification:** `gh pr checks 449` showed Event System validation, Desktop Release Guard, desktop packaged runtime probe, engine-health-188w, scenario anchors, scenarios, structural fingerprint, test, typecheck, and Full Suite all passing before merge. `gh pr view 449` and direct review-comment inspection found one actionable Codex inline comment, which was fixed before merge. `git status --short --branch` showed clean `main...origin/main`, `git worktree list` showed a single `main` worktree, and generated `.tmp_first_hour_browser_gate` / `.tmp_live_surface_browser_sweep` evidence folders were removed after captured proof.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. `FORAWWV.md` was not edited.
+
+---
+
 ## [2026-06-26] fix(ui): implement P6 player-polish scout queue
 
 **Type:** UI/read-model/map-rendering/navigation/test/docs polish.
