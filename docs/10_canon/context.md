@@ -506,7 +506,7 @@ cat docs/specs/sim/phase3a_pressure_eligibility.md
 - `docs/PROJECT_LEDGER.md` - Current project state
 - `.claude/napkin.md` - Corrections, preferences, patterns (read at session start)
 - `docs/10_canon/FORAWWV.md` - Validated design insights
-- `docs/ENGINE_FREEZE_v0_2_6.md` - Engine freeze contract
+- `docs/10_canon/Engine_Invariants_v0_9_0.md` - Current engine invariants / freeze contract
 
 ### Must Update After Work
 - `docs/PROJECT_LEDGER.md` - Always
@@ -639,7 +639,9 @@ console.log('Convene the appropriate Pyrrhic panel (unanimous GO = signature; im
 - Update ledger
 - Flag FORAWWV if design insight discovered
 
-## Document Reconciliation Status (2026-01-29)
+## Document Reconciliation Status (2026-01-29; superseded by 2026-06-26 docs-staleness note)
+
+> Historical snapshot only. Current mandatory canon/process entrypoints are tracked in `docs/00_start_here/docs_index.md`, `docs/10_canon/Engine_Invariants_v0_9_0.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/plans/COMMAND_BOARD.md`; do not treat the v0.2.7 reconciliation checklist below as active work.
 
 **Current Task:** Reconciling all documentation to v0.2.7
 

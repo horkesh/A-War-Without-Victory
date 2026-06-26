@@ -2,7 +2,7 @@
 
 Date: 2026-06-26
 Branch: `codex/p13-player-truth-batch`
-Status: implemented and locally verified; GitHub closeout pending
+Status: merged via PR #456 at `c12659a29`; GitHub green; branch pruned
 
 ## Summary
 
@@ -34,6 +34,7 @@ Closed the next owner-playthrough truth packet without reopening packaging, cali
 - `npm.cmd run qa:live-surface:browser` passed.
 - `npm.cmd run desktop:map:build` passed with the existing non-fatal Vite chunk-size warning.
 - `git diff --check` passed.
+- GitHub PR #456 passed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. Codex review threads were resolved before merge.
 
 ## Scope
 
