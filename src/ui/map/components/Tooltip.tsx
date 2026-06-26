@@ -16,7 +16,7 @@ import {
   buildPlayerSafeFrontTooltipModel,
   getPlayerSafeSettlementTooltipFormations,
 } from './tooltipPlayerSafe';
-import { filterPlayerFacingSectors, getPlayerFacingFaction, isFieldedTacticalFormation } from '../../shared/playerVisibility';
+import { filterPlayerFacingSectors, filterPlayerVisibleBattles, getPlayerFacingFaction, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSettlementName,
@@ -58,21 +58,33 @@ const CONFIDENCE_BAND_LABEL_KEY: Record<string, MessageKey> = {
   medium: 'aar.confidence.medium',
   high: 'aar.confidence.high',
 };
+
+function formatReportedLoss(value: unknown): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `−${value.toLocaleString()}`
+    : t('corpsFront.unreported');
+}
+
 function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   osid: string;
-  battles?: TurnBattle[];
+  battles?: ReadonlyArray<Partial<TurnBattle> & { osid?: string }>;
   osidDisplayNames: Record<string, string> | null;
 }) {
   const battle = battles?.find((b) => b.osid === osid);
   if (!battle) {
+    const location = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, t('tooltip.thisPosition'));
     return (
       <div className="text-[11px] text-text-secondary">
-        {t('tooltip.battleAtPosition', { location: getPlayerSafeSettlementName(osid, t('tooltip.thisPosition')) })}
+        {t('tooltip.battleAtPosition', { location })}
       </div>
     );
   }
-  const outcomeLabel = OUTCOME_LABEL_KEY[battle.outcome] ? t(OUTCOME_LABEL_KEY[battle.outcome]) : t('aar.outcome.recorded');
-  const outcomeColor = OUTCOME_COLOR[battle.outcome] ?? '#aaa';
+  const outcome = typeof battle.outcome === 'string' ? battle.outcome : '';
+  const attackerFaction = typeof battle.attacker_faction === 'string' ? battle.attacker_faction : null;
+  const defenderFaction = typeof battle.defender_faction === 'string' ? battle.defender_faction : null;
+  const outcomeLabelKey = OUTCOME_LABEL_KEY[outcome];
+  const outcomeLabel = outcomeLabelKey ? t(outcomeLabelKey) : t('aar.outcome.recorded');
+  const outcomeColor = OUTCOME_COLOR[outcome] ?? '#aaa';
   const locationName = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, 'this position');
   return (
     <div className="min-w-[200px] max-w-[280px]">
@@ -81,24 +93,24 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       </div>
       <div className="text-[11px] text-text-primary mb-1">{locationName}</div>
       <div className="text-[10px] text-text-secondary mb-1.5">
-        <span style={{ color: FACTION_COLORS[battle.attacker_faction] ?? '#aaa' }}>
-          {getPlayerSafeMilitaryFactionName(battle.attacker_faction)}
+        <span style={{ color: FACTION_COLORS[attackerFaction ?? ''] ?? '#aaa' }}>
+          {getPlayerSafeMilitaryFactionName(attackerFaction)}
         </span>
         <span className="mx-1">→</span>
-        <span style={{ color: FACTION_COLORS[battle.defender_faction] ?? '#aaa' }}>
-          {getPlayerSafeMilitaryFactionName(battle.defender_faction)}
+        <span style={{ color: FACTION_COLORS[defenderFaction ?? ''] ?? '#aaa' }}>
+          {getPlayerSafeMilitaryFactionName(defenderFaction)}
         </span>
         {battle.was_concentrated && (
           <span className="ml-1 text-text-muted">
-            ({t('tooltip.concentratedAttack', { count: battle.all_attacker_ids.length })})
+            ({t('tooltip.concentratedAttack', { count: battle.all_attacker_ids?.length ?? 0 })})
           </span>
         )}
       </div>
       <div className="grid grid-cols-2 gap-x-3 text-[10px] tabular-nums">
         <div className="text-text-secondary">{t('tooltip.attackerLosses')}</div>
-        <div className="text-text-primary">−{battle.attacker_casualties.toLocaleString()}</div>
+        <div className="text-text-primary">{formatReportedLoss(battle.attacker_casualties)}</div>
         <div className="text-text-secondary">{t('tooltip.defenderLosses')}</div>
-        <div className="text-text-primary">−{battle.defender_casualties.toLocaleString()}</div>
+        <div className="text-text-primary">{formatReportedLoss(battle.defender_casualties)}</div>
       </div>
       {battle.territory_flipped && (
         <div className="mt-1 text-[9px] text-amber-400">{t('tooltip.territoryCaptured')}</div>
@@ -499,7 +511,7 @@ export const Tooltip = React.memo(function Tooltip() {
       {delayedTarget.type === 'battle' && (
         <BattleTooltipContent
           osid={delayedTarget.id}
-          battles={loadedGameState?.latestTurnSummary?.battles}
+          battles={filterPlayerVisibleBattles(loadedGameState?.latestTurnSummary?.battles, loadedGameState)}
           osidDisplayNames={osidDisplayNames}
         />
       )}

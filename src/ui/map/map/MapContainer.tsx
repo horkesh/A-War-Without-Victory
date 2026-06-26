@@ -1737,6 +1737,10 @@ export function MapContainer() {
                       state.turn ?? 0,
                       state.latestTurnSummary?.battles,
                       state.latestTurnSummary?.turn ?? null,
+                      {
+                        playerFaction: state.player_faction ?? null,
+                        fogOfWar: state.fogOfWar ?? null,
+                      },
                     );
                     const nextBattleMarkerProbe = {
                       count: battleMarkersGeoJson.features.length,

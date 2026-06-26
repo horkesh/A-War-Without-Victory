@@ -36,7 +36,7 @@ export interface SettlementTimelineEvent {
     faction?: string;
     title: string;
     detail?: string;
-    casualties?: { attacker: number; defender: number };
+    casualties?: { attacker: number | null; defender: number | null };
     population?: number;
     ethnicity?: string;
     brigadeName?: string;
@@ -96,11 +96,13 @@ function factionName(f: string | null | undefined): string {
 
 interface BattleRecord {
     turn: number;
+    osid?: string;
     attacker_faction: string;
     defender_faction: string;
     outcome: string;
-    attacker_casualties: number;
-    defender_casualties: number;
+    attacker_casualties: number | null;
+    defender_casualties: number | null;
+    casualties_reported?: boolean;
     territory_flipped: boolean;
 }
 

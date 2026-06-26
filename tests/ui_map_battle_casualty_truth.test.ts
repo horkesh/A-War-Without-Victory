@@ -95,6 +95,36 @@ describe('map battle and casualty truth gates', () => {
     expect(markers.features[0].properties?.attacker_count).toBeNull();
   });
 
+  it('does not render battle markers for hidden enemy-only battles or combat flips', () => {
+    const markers = buildBattleMarkersGeoJSON([
+      { settlementId: 'op:test:a', from: 'RS', to: 'HRHB', turn: 5, mechanism: 'combat', municipalityId: 'test' },
+    ], baseGeoJson(), 5, [
+      { ...battle('op:test:a'), attacker_faction: 'RS', defender_faction: 'HRHB' },
+      { ...battle('op:test:b'), attacker_faction: 'RS', defender_faction: 'RBiH' },
+    ], 5, {
+      playerFaction: 'RBiH',
+      fogOfWar: { visibleEnemyOsids: [] },
+    });
+
+    expect(markers.features.map((feature) => feature.properties?.osid)).toEqual(['op:test:b']);
+  });
+
+  it('keeps missing current-turn battle casualty fields unreported on markers', () => {
+    const markers = buildBattleMarkersGeoJSON([], baseGeoJson(), 5, [
+      {
+        ...battle('op:test:a'),
+        attacker_casualties: undefined,
+        defender_casualties: undefined,
+      } as unknown as TurnBattle,
+    ], 5);
+
+    expect(markers.features).toHaveLength(1);
+    expect(markers.features[0].properties?.casualties_reported).toBe(false);
+    expect(markers.features[0].properties?.attacker_casualties).toBeNull();
+    expect(markers.features[0].properties?.defender_casualties).toBeNull();
+    expect(markers.features[0].properties?.total_casualties).toBeNull();
+  });
+
   it('does not render turn-zero or future casualty overlays', () => {
     const formations: FormationView[] = [
       {

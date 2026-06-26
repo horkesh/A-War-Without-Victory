@@ -8,8 +8,9 @@
  * Deterministic: input events are pre-sorted; output features sorted by OSID.
  */
 import type { Feature, FeatureCollection, Point, Polygon, MultiPolygon } from 'geojson';
-import type { RecentControlEventView } from '../../data/types.js';
+import type { LoadedGameState, RecentControlEventView } from '../../data/types.js';
 import type { TurnBattle } from '../../../../state/turn_summary.js';
+import { isPlayerVisibleBattle } from '../../../shared/playerVisibility.js';
 
 function polygonCentroid(coordinates: number[][][]): [number, number] {
   let sumX = 0;
@@ -38,6 +39,10 @@ export function buildBattleMarkersGeoJSON(
   currentTurn: number,
   battles?: TurnBattle[],
   battleSummaryTurn: number | null = currentTurn,
+  visibility?: {
+    playerFaction?: string | null;
+    fogOfWar?: { visibleEnemyOsids?: readonly string[]; visibleEnemySectorIds?: readonly string[] } | null;
+  },
 ): FeatureCollection<Point> {
   const centroidByOsid = new Map<string, [number, number]>();
   for (const feature of baseGeoJson.features) {
@@ -52,8 +57,17 @@ export function buildBattleMarkersGeoJSON(
   // Index battles by OSID for enrichment
   const battleByOsid = new Map<string, TurnBattle>();
   const battlesAreCurrentTurn = currentTurn > 0 && (battleSummaryTurn ?? currentTurn) === currentTurn;
+  const visibilityState: Pick<LoadedGameState, 'player_faction' | 'fogOfWar'> = {
+    player_faction: visibility?.playerFaction ?? null,
+    fogOfWar: {
+      visibleEnemyOsids: [...(visibility?.fogOfWar?.visibleEnemyOsids ?? [])],
+      visibleEnemySectorIds: [],
+    },
+  };
   if (battles && battlesAreCurrentTurn) {
-    for (const b of battles) battleByOsid.set(b.osid, b);
+    for (const b of battles) {
+      if (isPlayerVisibleBattle(b, visibilityState)) battleByOsid.set(b.osid, b);
+    }
   }
 
   // Filter to combat flips in the last 3 turns
@@ -61,7 +75,12 @@ export function buildBattleMarkersGeoJSON(
     (e) => e.mechanism === 'combat'
       && e.turn > 0
       && e.turn <= currentTurn
-      && e.turn >= currentTurn - 2,
+      && e.turn >= currentTurn - 2
+      && isPlayerVisibleBattle({
+        osid: e.settlementId,
+        attacker_faction: e.from,
+        defender_faction: e.to,
+      }, visibilityState),
   );
 
   const latestByOsid = new Map<string, RecentControlEventView>();
@@ -75,6 +94,7 @@ export function buildBattleMarkersGeoJSON(
   // Also include battles from this turn that didn't flip territory
   if (battles && battlesAreCurrentTurn) {
     for (const b of battles) {
+      if (!isPlayerVisibleBattle(b, visibilityState)) continue;
       if (!latestByOsid.has(b.osid) && centroidByOsid.has(b.osid)) {
         latestByOsid.set(b.osid, {
           settlementId: b.osid,
@@ -94,7 +114,14 @@ export function buildBattleMarkersGeoJSON(
     if (!centroid) continue;
 
     const battle = battleByOsid.get(osid);
-    const totalCasualties = battle ? battle.attacker_casualties + battle.defender_casualties : null;
+    const attackerCasualties = typeof battle?.attacker_casualties === 'number' && Number.isFinite(battle.attacker_casualties)
+      ? battle.attacker_casualties
+      : null;
+    const defenderCasualties = typeof battle?.defender_casualties === 'number' && Number.isFinite(battle.defender_casualties)
+      ? battle.defender_casualties
+      : null;
+    const casualtiesReported = attackerCasualties != null && defenderCasualties != null;
+    const totalCasualties = casualtiesReported ? attackerCasualties + defenderCasualties : null;
     const battleReported = battle != null;
 
     features.push({
@@ -111,9 +138,9 @@ export function buildBattleMarkersGeoJSON(
         attacker_faction: battle?.attacker_faction ?? null,
         defender_faction: battle?.defender_faction ?? null,
         outcome: battle?.outcome ?? null,
-        casualties_reported: battleReported,
-        attacker_casualties: battle?.attacker_casualties ?? null,
-        defender_casualties: battle?.defender_casualties ?? null,
+        casualties_reported: casualtiesReported,
+        attacker_casualties: attackerCasualties,
+        defender_casualties: defenderCasualties,
         total_casualties: totalCasualties,
         territory_flipped: battle?.territory_flipped ?? false,
         was_concentrated: battle?.was_concentrated ?? false,

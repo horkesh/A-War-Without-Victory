@@ -96,6 +96,43 @@ export function filterPlayerFacingMovementsByOsid(
   return Object.fromEntries(filteredEntries);
 }
 
+type BattleVisibilityRecord = {
+  osid?: unknown;
+  attacker_faction?: unknown;
+  defender_faction?: unknown;
+};
+
+export function isPlayerVisibleBattle(
+  battle: BattleVisibilityRecord | null | undefined,
+  state: Pick<LoadedGameState, 'player_faction' | 'fogOfWar'> | null | undefined,
+): boolean {
+  const playerFaction = resolvePlayerFacingFaction(state as LoadedGameState | null | undefined);
+  if (!playerFaction) return true;
+  if (battle?.attacker_faction === playerFaction || battle?.defender_faction === playerFaction) return true;
+  const osid = typeof battle?.osid === 'string' ? battle.osid : null;
+  return Boolean(osid && state?.fogOfWar?.visibleEnemyOsids?.includes(osid));
+}
+
+export function filterPlayerVisibleBattles<T extends BattleVisibilityRecord>(
+  battles: readonly T[] | null | undefined,
+  state: Pick<LoadedGameState, 'player_faction' | 'fogOfWar'> | null | undefined,
+): T[] {
+  if (!battles) return [];
+  return battles.filter((battle) => isPlayerVisibleBattle(battle, state));
+}
+
+export function filterPlayerFacingBattlesByOsid(
+  state: LoadedGameState | null | undefined,
+): LoadedGameState['battlesByOsid'] {
+  if (!state?.battlesByOsid) return {};
+  const out: LoadedGameState['battlesByOsid'] = {};
+  for (const [osid, battles] of Object.entries(state.battlesByOsid).sort(([a], [b]) => a.localeCompare(b))) {
+    const visible = battles.filter((battle) => isPlayerVisibleBattle({ ...battle, osid: battle.osid ?? osid }, state));
+    if (visible.length > 0) out[osid] = visible;
+  }
+  return out;
+}
+
 export function filterPlayerVisibleMapFormations(state: LoadedGameState | null | undefined): FormationView[] {
   if (!state?.formations) return [];
   const playerFaction = resolvePlayerFacingFaction(state);

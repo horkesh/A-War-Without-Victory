@@ -16,6 +16,7 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { inspectOnField } from '../utils/shellNavigation';
 import {
   filterPlayerFacingFormations,
+  filterPlayerFacingBattlesByOsid,
   filterPlayerFacingMovementsByOsid,
   filterPlayerFacingOperationHistory,
   filterPlayerFacingSectors,
@@ -200,6 +201,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
     brigadeCountByFaction[f.faction] = (brigadeCountByFaction[f.faction] ?? 0) + 1;
   }
   const playerFormationIds = new Set(playerFacingFormations.map((formation) => formation.id));
+  const playerFacingBattlesByOsid = filterPlayerFacingBattlesByOsid(loadedGameState);
   const playerFacingOperationHistory = filterPlayerFacingOperationHistory(loadedGameState);
   const playerFacingMovementsByOsid = filterPlayerFacingMovementsByOsid(loadedGameState);
 
@@ -336,7 +338,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           displacementEventLog={loadedGameState?.displacementEventLog}
           allControlEvents={loadedGameState?.allControlEvents}
           operationHistory={playerFacingOperationHistory}
-          battlesByOsid={loadedGameState?.battlesByOsid}
+          battlesByOsid={playerFacingBattlesByOsid}
           movementsByOsid={playerFacingMovementsByOsid}
           supplyTransitionsByOsid={loadedGameState?.supplyTransitionsByOsid}
           historicalEventsByTurn={loadedGameState?.historicalEventsByTurn}

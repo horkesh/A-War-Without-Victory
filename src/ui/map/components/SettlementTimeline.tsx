@@ -25,6 +25,12 @@ export function formatSettlementTimelineTurnDate(turn: number): string {
     return turnToDateString(turn);
 }
 
+function formatCasualtyCount(value: number | null): string {
+    return typeof value === 'number' && Number.isFinite(value)
+        ? value.toLocaleString()
+        : t('corpsFront.unreported');
+}
+
 interface Props {
     events: SettlementTimelineEvent[];
 }
@@ -89,8 +95,8 @@ export function SettlementTimeline({ events }: Props) {
                                             {event.casualties && (
                                                 <div className="text-[9px] text-text-secondary font-mono">
                                                     {t('settlementTimeline.casualties', {
-                                                        attacker: event.casualties.attacker,
-                                                        defender: event.casualties.defender,
+                                                        attacker: formatCasualtyCount(event.casualties.attacker),
+                                                        defender: formatCasualtyCount(event.casualties.defender),
                                                     })}
                                                 </div>
                                             )}

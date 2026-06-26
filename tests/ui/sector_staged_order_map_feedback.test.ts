@@ -31,6 +31,8 @@ function makeControlledGeoJson(): FeatureCollection {
       square('op:aor:coverage', 2, 0),
       square('op:sector:far', 10, 0),
       square('op:sector:near', 3, 0),
+      square('op:sector:front', 8, 0),
+      square('op:enemy:target', 9, 0),
     ],
   };
 }
@@ -202,5 +204,33 @@ describe('sector staged order map feedback', () => {
 
     expect(arrows.features.some((feature) => feature.properties?.type === 'movement-staged')).toBe(false);
     expect(ghostPaths.features).toHaveLength(0);
+  });
+
+  it('keeps reserve-only order arrows anchored to physical brigade location', () => {
+    const state = makeState();
+    state.corpsFrontSectors = (state.corpsFrontSectors ?? []).map((sector) => ({
+      ...sector,
+      edge_ids: ['edge:front-target'],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: ['rbih_test_brigade'],
+    }));
+    state.frontEdgesOsid = [{
+      edge_id: 'edge:front-target',
+      a: 'op:sector:front',
+      b: 'op:enemy:target',
+      side_a: 'RBiH',
+      side_b: 'RS',
+    }];
+    state.attackOrders = [{
+      brigadeId: 'rbih_test_brigade',
+      targetSettlementId: 'op:enemy:target',
+    }];
+
+    const arrows = buildOrderArrowsGeoJSON(state, [], makeControlledGeoJson());
+    const originDot = arrows.features.find((feature) => feature.properties?.type === 'origin-dot');
+
+    expect(originDot?.geometry.type).toBe('Point');
+    if (originDot?.geometry.type !== 'Point') throw new Error('Expected reserve order origin dot');
+    expect(originDot.geometry.coordinates).toEqual([0.5, 0.5]);
   });
 });

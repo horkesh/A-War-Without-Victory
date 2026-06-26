@@ -6,6 +6,7 @@ import type { OsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { hashString, buildBezierCurve, buildArrowheadTriangle, getClosestPointOnSectorEdge } from './arrowGeometry';
 import { resolveSectorOrderTargetOsid } from './resolveSectorOrderTarget';
+import { buildSectorFormationAssignment } from '../../utils/sectorUtils';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -150,8 +151,9 @@ export function buildOrderArrowsGeoJSON(
     }
 
     for (const sector of state.corpsFrontSectors) {
-      for (const bid of sector.assigned_brigade_ids) sectorByBrigade.set(bid, sector);
-      for (const bid of sector.reserve_brigade_ids) sectorByBrigade.set(bid, sector);
+      for (const bid of buildSectorFormationAssignment(sector, state.formations, state.corpsFrontSectors).lineHoldingIds) {
+        sectorByBrigade.set(bid, sector);
+      }
 
       // Extract coordinates for the sector's edge list
       const points: [number, number][] = [];

@@ -2583,13 +2583,21 @@ function deriveBattlesByOsid(state: any): LoadedGameState['battlesByOsid'] {
             const osid = typeof b.osid === 'string' ? b.osid : '';
             if (!osid) continue;
             if (!result[osid]) result[osid] = [];
+            const attackerCasualties = typeof b.attacker_casualties === 'number' && Number.isFinite(b.attacker_casualties)
+                ? b.attacker_casualties
+                : null;
+            const defenderCasualties = typeof b.defender_casualties === 'number' && Number.isFinite(b.defender_casualties)
+                ? b.defender_casualties
+                : null;
             result[osid].push({
                 turn,
+                osid,
                 attacker_faction: String(b.attacker_faction ?? ''),
                 defender_faction: String(b.defender_faction ?? ''),
                 outcome: String(b.outcome ?? ''),
-                attacker_casualties: typeof b.attacker_casualties === 'number' ? b.attacker_casualties : 0,
-                defender_casualties: typeof b.defender_casualties === 'number' ? b.defender_casualties : 0,
+                attacker_casualties: attackerCasualties,
+                defender_casualties: defenderCasualties,
+                casualties_reported: attackerCasualties != null && defenderCasualties != null,
                 territory_flipped: Boolean(b.territory_flipped),
             });
         }

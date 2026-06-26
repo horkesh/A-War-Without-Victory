@@ -9,6 +9,8 @@
  * These helpers handle handoffs from Tactical Map into Army HQ tabs.
  */
 import type { ArmyHQRecordsSubTab, ArmyHQTab, ShellHandoffCommand } from '../../shared/shellHandoff';
+import { buildDecisionConsequenceLedger } from '../data/decisionConsequenceLedger';
+import type { LoadedGameState } from '../data/types';
 import type { FieldInspectionTarget } from './fieldInspectionTarget';
 
 export interface ShellNavigationState {
@@ -114,6 +116,16 @@ export function openArmyHQOperationHistory(state: ShellNavigationState, operatio
 export function openArmyHQDecisionConsequenceRecord(state: ShellNavigationState, recordId?: string | null): boolean {
   const faction = getPlayerFaction(state);
   if (!faction) return false;
+  if (recordId) {
+    const record = buildDecisionConsequenceLedger(
+      state.loadedGameState as LoadedGameState | null | undefined,
+      Number.MAX_SAFE_INTEGER,
+    )
+      .find((candidate) => candidate.id === recordId);
+    if (record?.recordTarget === 'chronicle') {
+      return openChronicleDecisionRecord(state, recordId);
+    }
+  }
   closeReferenceOverlays(state);
   state.setSelectedArmyId(faction);
   state.setArmyHQOpen(true);

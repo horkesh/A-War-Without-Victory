@@ -1064,7 +1064,7 @@ export interface LoadedGameState {
     /** Raw displacement event log for settlement timeline. */
     displacementEventLog: Array<{ turn: number; origin_osid?: string; dest_osid?: string; origin_mun?: string; ethnicity?: string; displaced: number; killed: number; fled_abroad: number; settled: number; caused_by?: string }>;
     /** Per-OSID battle records from all turn summaries, for settlement timeline. */
-    battlesByOsid: Record<string, Array<{ turn: number; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number; defender_casualties: number; territory_flipped: boolean }>>;
+    battlesByOsid: Record<string, Array<{ turn: number; osid: string; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number | null; defender_casualties: number | null; casualties_reported: boolean; territory_flipped: boolean }>>;
     /** Per-OSID brigade movement events (arrived/departed) from all turn summaries. */
     movementsByOsid: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
     /** Per-OSID supply state transitions from all turn summaries. */

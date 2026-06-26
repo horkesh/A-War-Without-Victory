@@ -181,7 +181,7 @@ export interface SettlementDetailContentProps {
   /** Completed operation history for timeline. */
   operationHistory?: Array<{ operation_name: string; corps_id: string; faction: string; started_turn: number; ended_turn: number; outcome: string; objectives_targeted: string[]; objectives_captured: string[] }>;
   /** Per-OSID battle records for timeline. */
-  battlesByOsid?: Record<string, Array<{ turn: number; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number; defender_casualties: number; territory_flipped: boolean }>>;
+  battlesByOsid?: Record<string, Array<{ turn: number; osid: string; attacker_faction: string; defender_faction: string; outcome: string; attacker_casualties: number | null; defender_casualties: number | null; casualties_reported: boolean; territory_flipped: boolean }>>;
   /** Per-OSID brigade movements for timeline. */
   movementsByOsid?: Record<string, Array<{ turn: number; formation_id: string; formation_name: string; type: 'arrived' | 'departed' }>>;
   /** Per-OSID supply transitions for timeline. */
