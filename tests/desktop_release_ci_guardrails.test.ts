@@ -70,3 +70,40 @@ test('desktop release workflow enforces packaged runtime probe on windows', asyn
         'desktop release guard should invoke the canonical packaged runtime probe command',
     );
 });
+
+test('desktop path filter watches packaged dependencies and runtime resources', async () => {
+    const detector = await readFile(
+        join(process.cwd(), '.github', 'scripts', 'detect-changed-paths.sh'),
+        'utf8',
+    );
+
+    const desktopCaseStart = detector.indexOf('  desktop)');
+    const simCaseStart = detector.indexOf('  sim)');
+    const desktopCase = detector.slice(desktopCaseStart, simCaseStart);
+
+    assert.match(desktopCase, /"package-lock\.json"/, 'lockfile-only desktop dependency changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"\.github\/workflows\/release\.yml"/, 'release workflow edits should run desktop package/probe gates');
+    assert.match(desktopCase, /"data\/derived\/"/, 'packaged derived-data changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"data\/ui\/"/, 'packaged UI-data changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"data\/scenarios\/events\/"/, 'packaged event catalog changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"assets\/"/, 'packaged root asset changes should run desktop package/probe gates');
+    assert.match(desktopCase, /"build\/icon\.png"/, 'packaged icon changes should run desktop package/probe gates');
+});
+
+test('release workflow runs packaged runtime probe before publishing windows artifacts', async () => {
+    const workflow = await readFile(
+        join(process.cwd(), '.github', 'workflows', 'release.yml'),
+        'utf8',
+    );
+
+    const windowsJobStart = workflow.indexOf('  build-windows:');
+    const releaseJobStart = workflow.indexOf('  release:');
+    const windowsJob = workflow.slice(windowsJobStart, releaseJobStart);
+    const probeStart = windowsJob.indexOf('npm run desktop:package:probe');
+    const packageStart = windowsJob.indexOf('npm run desktop:package:win:nsis');
+    const uploadStart = windowsJob.indexOf('name: Upload Windows NSIS workflow artifact');
+
+    assert.notStrictEqual(probeStart, -1, 'release Windows job should run the packaged runtime probe');
+    assert.ok(packageStart > probeStart, 'release Windows runtime probe should run before installer packaging');
+    assert.ok(uploadStart > packageStart, 'release Windows upload should remain after installer packaging');
+});

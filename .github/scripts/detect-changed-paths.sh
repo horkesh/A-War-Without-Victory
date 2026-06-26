@@ -65,11 +65,18 @@ case "${PATH_SET}" in
       "src/desktop/"
       "src/ui/"
       "tools/"
+      "data/derived/"
+      "data/ui/"
+      "data/scenarios/events/"
+      "assets/"
     )
     EXACT_FILES=(
       "package.json"
+      "package-lock.json"
       ".github/workflows/desktop-release-guard.yml"
+      ".github/workflows/release.yml"
       ".github/scripts/detect-changed-paths.sh"
+      "build/icon.png"
     )
     ;;
   sim)

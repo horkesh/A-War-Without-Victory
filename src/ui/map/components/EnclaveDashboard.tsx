@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import type { EnclaveResilienceView, LoadedGameState } from '../data/types';
 import { AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN } from '../../../state/supply_reserve_constants';
 import { useIPC } from '../desktop/useIPC';
-import { getPlayerSafeEnclaveName } from '../utils/playerSafeText';
+import { getPlayerSafeEnclaveName, getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { t, type MessageKey } from '../i18n';
 import { strictCompare } from '../../../state/validateGameState';
 
@@ -19,6 +19,12 @@ const SUPPLY_CLASSES: Record<'adequate' | 'strained' | 'critical', string> = {
 };
 
 const SUPPLY_UNREPORTED_CLASS = 'text-text-secondary';
+
+const SUPPLY_LABEL_KEYS: Record<'adequate' | 'strained' | 'critical', MessageKey> = {
+  adequate: 'enclave.supplyState.adequate',
+  strained: 'enclave.supplyState.strained',
+  critical: 'enclave.supplyState.critical',
+};
 
 const AIRDROP_LABEL_KEYS: Record<'receiving' | 'not_eligible' | 'not_isolated_long_enough', MessageKey> = {
   receiving: 'enclave.airdrop.receiving',
@@ -70,8 +76,15 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
   const eligibleEnclaveIdSet = useMemo(() => new Set(eligibleEnclaveIds), [eligibleEnclaveIds]);
   const airdropBudget = Math.min(eligibleEnclaveIds.length * AIRDROP_GENERAL_SUPPLY_PER_ENCLAVE, AIRDROP_MAX_SUPPLY_PER_TURN);
   const allocated = Object.values(allocations).reduce((sum, value) => sum + value, 0);
+  const overAllocated = allocated > airdropBudget;
   const remaining = Math.max(0, airdropBudget - allocated);
   const allocatedPct = airdropBudget > 0 ? Math.min(100, (allocated / airdropBudget) * 100) : 0;
+  const canStageAirdrop = ipc.isAvailable && !overAllocated;
+  const airdropStageDisabledReason = !ipc.isAvailable
+    ? t('formationDetail.commandBridgeUnavailable')
+    : overAllocated
+      ? t('enclave.airdropOverBudget', { budget: airdropBudget.toFixed(1) })
+      : undefined;
   const criticalCount = enclaves.filter(([, enclave]) => enclave.supply_state === 'critical' || enclave.resilience <= 8).length;
   const heightenedCount = enclaves.filter(([, enclave]) => (
     !(enclave.supply_state === 'critical' || enclave.resilience <= 8)
@@ -92,6 +105,10 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
       setActionMessage(t('formationDetail.commandBridgeUnavailable'));
       return;
     }
+    if (overAllocated) {
+      setActionMessage(t('enclave.airdropOverBudget', { budget: airdropBudget.toFixed(1) }));
+      return;
+    }
     const result = await ipc.stageAirdropAllocation(allocations);
     setActionMessage(result.ok ? t('enclave.airdropStaged') : (result.error ?? t('enclave.airdropFailed')));
   };
@@ -110,6 +127,8 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
         <button
           type="button"
           onClick={onClose}
+          aria-label={t('enclave.close')}
+          title={t('enclave.close')}
           className="text-text-secondary hover:text-interactive text-sm leading-none"
         >
           x
@@ -148,8 +167,8 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
             <button
               type="button"
               onClick={() => void stageAllocations()}
-              disabled={!ipc.isAvailable}
-              title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+              disabled={!canStageAirdrop}
+              title={airdropStageDisabledReason}
               className="w-full rounded border border-panel-border px-2 py-1 text-[11px] text-text-primary hover:bg-panel-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('enclave.stageAirdropAllocation')}
@@ -166,6 +185,8 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
             const supplyState = enclave.supply_state;
             const airdropStatus = enclave.airdrop_status ?? 'not_eligible';
             const risk = getEnclaveRisk(enclave);
+            const currentAllocation = allocations[enclaveId] ?? 0;
+            const maxAllocation = remaining + currentAllocation;
             return (
               <div key={enclaveId} className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -174,7 +195,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                       {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
                     </div>
                     <div className="text-[10px] uppercase tracking-wide text-text-secondary">
-                      {enclave.faction ?? t('common.unknown')}
+                      {getPlayerSafePoliticalFactionName(enclave.faction, t('common.unknown'))}
                     </div>
                   </div>
                   <div className={`text-[11px] font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
@@ -208,7 +229,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   <div>
                     <div className="text-text-secondary">{t('enclave.supplyState')}</div>
                     <div className={`font-mono uppercase ${supplyState ? SUPPLY_CLASSES[supplyState] : SUPPLY_UNREPORTED_CLASS}`}>
-                      {supplyState ?? t('corpsFront.unreported')}
+                      {supplyState ? t(SUPPLY_LABEL_KEYS[supplyState]) : t('corpsFront.unreported')}
                     </div>
                   </div>
                   <div className="col-span-2">
@@ -227,15 +248,18 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                         id={`enclave-allocation-${enclaveId}`}
                         type="number"
                         min={0}
-                        max={airdropBudget}
+                        max={maxAllocation}
                         step={0.1}
-                        value={(allocations[enclaveId] ?? 0).toFixed(1)}
+                        value={currentAllocation.toFixed(1)}
                         disabled={!ipc.isAvailable}
                         onChange={(event) => {
                           const value = Number(event.target.value);
+                          const clampedValue = Number.isFinite(value)
+                            ? Math.min(Math.max(value, 0), maxAllocation)
+                            : 0;
                           setAllocations((prev) => ({
                             ...prev,
-                            [enclaveId]: Number.isFinite(value) && value > 0 ? value : 0,
+                            [enclaveId]: clampedValue,
                           }));
                         }}
                         className="w-full rounded border border-panel-border bg-panel-bg px-2 py-1 text-text-primary disabled:opacity-50 disabled:cursor-not-allowed"

@@ -23,6 +23,9 @@ PREFIXES=(
   "tests/"
   "data/scenarios/"
   "data/calibration/"
+  "data/derived/"
+  "data/ui/"
+  "assets/"
   "scripts/"
 )
 EXACT_FILES=(
@@ -32,6 +35,7 @@ EXACT_FILES=(
   "tsconfig.json"
   ".github/workflows/full-suite-and-fingerprint.yml"
   ".github/scripts/detect-full-suite-changes.sh"
+  "build/icon.png"
 )
 
 # Resolve the changed-files set for the current event.

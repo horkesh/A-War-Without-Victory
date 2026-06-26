@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P13/P14 at `c12659a29` through PR #456. Current local P15 candidate on `codex/p15-browser-affordance-hardening` is locally verified and awaiting PR/GitHub closeout; packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P13/P14 at `c12659a29` through PR #456. Current P15 candidate is PR #457 on `codex/p15-browser-affordance-hardening`; local focused/browser proof is green and GitHub closeout is pending. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -62,7 +62,8 @@ P15 local candidate from closed Peirce/Kant/Heisenberg scouts:
 - OOB/CorpsCard affordance cleanup implemented locally: no-op command headers render as non-focusable static headers, flip targets have action-specific accessible names, and command count copy distinguishes fielded brigade truth.
 - Corps Detail operation planning implemented locally: the `Prepare Operation in HQ` button exposes which sector seeds the planning context.
 - Formation Detail sector options implemented locally: disabled options explain current automatic assignment, current override, and desktop command bridge unavailability.
-- Doc staleness pass is synchronized across COMMAND_BOARD, MASTER_ROADMAP, this plan, PROJECT_LEDGER, and the P15 implementation report. Final closeout still needs PR/check/branch-cleanup proof after merge.
+- Follow-up scout absorption implemented locally: packaged runtime resources now trigger desktop/full-suite gates, Windows release runs the packaged runtime probe before packaging, Enclave Dashboard closes Army HQ on handoff, over-budget airdrop staging is blocked/clamped, and enclave faction/supply/close affordances use player-facing copy.
+- Doc staleness pass is synchronized across COMMAND_BOARD, MASTER_ROADMAP, this plan, PROJECT_LEDGER, and the P15 implementation report. Final closeout still needs PR #457 check/branch-cleanup proof after merge.
 
 P15 local verification:
 
@@ -74,7 +75,9 @@ P15 local verification:
 - `npm.cmd run desktop:map:build` passed with existing non-fatal Vite externalization/chunk-size warnings.
 - `git diff --check` passed.
 - Live in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, OOB CorpsCard fielded-brigade copy and detail/summary flip labels, Corps Detail `Prepare Operation in HQ for 2nd Corps - Gracanica, Lukavac` accessible/title copy, Formation Detail disabled sector options carrying desktop-bridge-unavailable reasons, and console health with only the expected dev-map desktop-bridge fallback warning.
-- GitHub inspection found no open PRs and latest `main` runs green; obsolete cancelled runs are the intentionally cancelled PR #456 merge-SHA runs.
+- Follow-up focused proof passed 4 files / 34 tests: `tests/ui/command_surface_repurpose_panels.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, and `tests/ui/first_hour_browser_gate_contract.test.ts`.
+- PR #457 is open; remaining closeout is GitHub checks/comments, merge, branch pruning, and temp evidence cleanup.
+- Deferred scout queue after P15: packaged-probe network/status capture, opt-in real-PMTiles browser smoke, Army HQ raw sector-detail id fallback, and Corps Situation unreported-vs-healthy-silence copy.
 
 ## Progress 2026-06-24
 

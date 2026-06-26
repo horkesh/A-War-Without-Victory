@@ -1250,6 +1250,8 @@ function App() {
       return true;
     }
     if (target.kind === 'enclave-dashboard') {
+      const gs = useGameStore.getState();
+      gs.setArmyHQOpen(false);
       setEnclaveDashboardOpen(true);
       setSummaryOpen(false);
       return true;
