@@ -189,7 +189,7 @@ export interface SettlementDetailContentProps {
   /** Per-OSID supply transitions for timeline. */
   supplyTransitionsByOsid?: Record<string, Array<{ turn: number; from: string; to: string }>>;
   /** Historical events fired, for timeline. */
-  historicalEventsByTurn?: Array<{ turn: number; id: string; text: string }>;
+  historicalEventsByTurn?: SettlementScopedHistoricalEvent[];
   /** Initial political controllers at scenario start (for timeline provenance). */
   initialControlBySettlement?: Record<string, string | null> | null;
   /**
@@ -198,6 +198,66 @@ export interface SettlementDetailContentProps {
    * Surfaced as a player-legible status line in the overview tab.
    */
   supplyStateByOsid?: Record<string, 'adequate' | 'strained' | 'critical'>;
+}
+
+export interface SettlementScopedHistoricalEvent {
+  turn: number;
+  id: string;
+  text: string;
+  osids?: string[];
+  affected_osids?: string[];
+  settlementIds?: string[];
+  settlement_ids?: string[];
+  municipalityIds?: string[];
+  municipality_ids?: string[];
+  munIds?: string[];
+  mun_ids?: string[];
+}
+
+function normalizeScopeId(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  return trimmed ? trimmed.toLowerCase() : null;
+}
+
+function normalizedScopeList(values: unknown): Set<string> {
+  if (!Array.isArray(values)) return new Set();
+  const normalized = values
+    .map(normalizeScopeId)
+    .filter((value): value is string => value != null);
+  return new Set(normalized);
+}
+
+export function historicalEventAppliesToSettlement(
+  event: SettlementScopedHistoricalEvent,
+  osid: string,
+  munId: string | null,
+): boolean {
+  const scopedOsids = new Set([
+    ...normalizedScopeList(event.osids),
+    ...normalizedScopeList(event.affected_osids),
+    ...normalizedScopeList(event.settlementIds),
+    ...normalizedScopeList(event.settlement_ids),
+  ]);
+  if (scopedOsids.has(osid.toLowerCase())) return true;
+
+  const normalizedMunId = normalizeScopeId(munId);
+  if (!normalizedMunId) return false;
+  const scopedMunicipalities = new Set([
+    ...normalizedScopeList(event.municipalityIds),
+    ...normalizedScopeList(event.municipality_ids),
+    ...normalizedScopeList(event.munIds),
+    ...normalizedScopeList(event.mun_ids),
+  ]);
+  return scopedMunicipalities.has(normalizedMunId);
+}
+
+export function filterHistoricalEventsForSettlement(
+  events: SettlementScopedHistoricalEvent[] | undefined,
+  osid: string,
+  munId: string | null,
+): SettlementScopedHistoricalEvent[] {
+  return (events ?? []).filter((event) => historicalEventAppliesToSettlement(event, osid, munId));
 }
 
 export function SettlementDetailContent({
@@ -280,6 +340,9 @@ export function SettlementDetailContent({
   const munId = getMunIdForDisplacement(props);
   const disp = munId && displacementByMun?.[munId];
   const osidDisp = displacementByOsid?.[osid];
+  const settlementShare =
+    disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
+  const settlementDisplacementEstimated = osidDisp == null && !!disp && settlementShare > 0;
 
   // Municipality-level ethnic aggregation from all OSIDs in the same mun
   const munEthnicData = (() => {
@@ -366,12 +429,7 @@ export function SettlementDetailContent({
       settlementBattles ?? [],
       settlementMovements ?? [],
       settlementSupplyTransitions ?? [],
-      (historicalEventsByTurn ?? []).filter(e => {
-        // Match events to this OSID's municipality (event IDs often contain mun name)
-        if (!munId) return false;
-        const munSlug = munId.replace(/_/g, '');
-        return e.id.replace(/_/g, '').includes(munSlug);
-      }),
+      filterHistoricalEventsForSettlement(historicalEventsByTurn, osid, munId),
       popOriginal > 0 ? {
         bosniaks: num(props.population_bosniaks),
         serbs: num(props.population_serbs),
@@ -382,8 +440,6 @@ export function SettlementDetailContent({
     );
   }, [osid, munId, displacementEventLog, allControlEvents, recentControlEvents, operationHistory, settlementBattles, settlementMovements, settlementSupplyTransitions, historicalEventsByTurn, variant, popOriginal, props.population_bosniaks, props.population_serbs, props.population_croats, props.population_others, initialControlBySettlement]);
   /** Settlement-level flows: exact per-OSID when available, else municipality share. */
-  const settlementShare =
-    disp && disp.originalPopulation > 0 && popOriginal > 0 ? popOriginal / disp.originalPopulation : 0;
   // outSettlement = displaced alive (moved to another OSID)
   // lostSettlement = killed + fled abroad (subset of total displaced)
   // osidDisp.out = total displaced (includes killed + fled as subsets)
@@ -629,9 +685,19 @@ export function SettlementDetailContent({
                     {t('settlement.noDisplacementYet')}
                   </div>
                 ) : (
-                  <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
-                    {t('settlement.populationFormula')}
-                  </div>
+                  <>
+                    <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
+                      {t('settlement.populationFormula')}
+                    </div>
+                    {settlementDisplacementEstimated && (
+                      <div
+                        className="text-[10px] text-amber-300/90 italic mb-1.5"
+                        data-testid="settlement-displacement-estimate-note"
+                      >
+                        {t('settlement.estimatedFromMunicipality')}
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="grid grid-cols-3 gap-2 text-[10px] mb-1.5">
                   {outSettlement > 0 && (

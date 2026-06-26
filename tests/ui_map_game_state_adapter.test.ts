@@ -128,6 +128,65 @@ test('parseGameState keeps sparse brigade history combat fields unreported', () 
     assert.strictEqual(brigade?.combatSummary?.win_rate, 0);
 });
 
+test('parseGameState marks formation casualty split provenance', () => {
+    const parsed = parseGameState({
+        meta: { turn: 4, phase: 'war' },
+        military: {
+            casualty_ledger: {
+                RBiH: {
+                    per_formation: {
+                        ledger_brigade: { killed: 3, wounded: 8, missing_captured: 1 },
+                    },
+                },
+            },
+            formations: {
+                ledger_brigade: {
+                    faction: 'RBiH',
+                    name: 'Ledger Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+                derived_brigade: {
+                    faction: 'RBiH',
+                    name: 'Derived Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                    brigade_history: { battles_fought: 1, total_casualties_taken: 100 },
+                },
+                unreported_brigade: {
+                    faction: 'RBiH',
+                    name: 'Unreported Brigade',
+                    kind: 'brigade',
+                    readiness: 'active',
+                    status: 'active',
+                    created_turn: 1,
+                    tags: [],
+                },
+            },
+        },
+        political: {
+            political_controllers: {},
+        },
+    });
+
+    const ledger = parsed.formations.find((formation) => formation.id === 'ledger_brigade');
+    const derived = parsed.formations.find((formation) => formation.id === 'derived_brigade');
+    const unreported = parsed.formations.find((formation) => formation.id === 'unreported_brigade');
+
+    assert.strictEqual(ledger?.campaignCasualtySplitProvenance, 'exact_ledger');
+    assert.deepStrictEqual([ledger?.campaignKia, ledger?.campaignWia, ledger?.campaignMia], [3, 8, 1]);
+    assert.strictEqual(derived?.campaignCasualtySplitProvenance, 'derived_from_total');
+    assert.deepStrictEqual([derived?.campaignKia, derived?.campaignWia, derived?.campaignMia], [22, 76, 2]);
+    assert.strictEqual(unreported?.campaignCasualtySplitProvenance, 'unreported');
+    assert.deepStrictEqual([unreported?.campaignKia, unreported?.campaignWia, unreported?.campaignMia], [undefined, undefined, undefined]);
+});
+
 test('parseGameState preserves missing battle casualties as unreported in settlement history', () => {
     const parsed = parseGameState({
         meta: { turn: 5, phase: 'war', player_faction: 'RBiH' },

@@ -4,6 +4,8 @@
 
 **SETTLEMENT TIMELINES NEED EXPLICIT EVENT SCOPE (2026-06-26).** Event ids containing a municipality name are not proof that every settlement in that municipality was directly touched. Do instead: include settlement timeline events only from explicit OSID/municipality scope metadata or other direct receipts; never attach historical rows by substring matching.
 
+**ADAPTER-DERIVED EVENT ROWS MUST CARRY SCOPE (2026-06-26).** `turn_summaries.events_fired` often stores only event id/text, while event definitions hold `control_change.osids`. Do instead: propagate saved-event scope first, then recover static control-change scope from the event catalog before settlement timeline filtering.
+
 **DECISION ROOM COUNTS USE LIVE WEIGHTED CARDS (2026-06-26).** Stale manifest summary metadata can invent pending reviews or undercount grouped blockers. Do instead: count live cards after ownership/filtering and sum `countWeight` through lenses, handoffs, command questions, loop steps, pending totals, and urgent totals.
 
 **GLOBAL SHORTCUTS MUST RESPECT FOCUSED CONTROLS (2026-06-26).** Plain Tab, Space, and Enter belong to focused inputs/buttons/tabs/menuitems. Do instead: guard global handlers with interactive-focus checks and bind app-level cycling to modified shortcuts such as `Ctrl+Tab`.

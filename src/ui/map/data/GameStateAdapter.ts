@@ -705,10 +705,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         Record<string, { per_formation?: Record<string, { killed?: number; wounded?: number; missing_captured?: number }> }> | undefined;
     const perFormationCasualties: Record<string, { kia: number; wia: number; mia: number }> = {};
     if (rawLedgerForPerFm && typeof rawLedgerForPerFm === 'object') {
-        for (const factionData of Object.values(rawLedgerForPerFm)) {
+        for (const factionId of Object.keys(rawLedgerForPerFm).sort(strictCompare)) {
+            const factionData = rawLedgerForPerFm[factionId];
             const pf = factionData?.per_formation;
             if (pf && typeof pf === 'object') {
-                for (const [bid, bd] of Object.entries(pf)) {
+                for (const bid of Object.keys(pf).sort(strictCompare)) {
+                    const bd = pf[bid];
                     const b = bd as { killed?: number; wounded?: number; missing_captured?: number };
                     perFormationCasualties[bid] = {
                         kia: typeof b?.killed === 'number' ? b.killed : 0,
@@ -951,11 +953,13 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
 
             // Campaign casualty ledger (actual KIA/WIA/MIA from casualty_ledger.per_formation).
             if (f.kind === 'brigade' || f.kind === 'operational_group') {
+                fv.campaignCasualtySplitProvenance = 'unreported';
                 const cfCas = perFormationCasualties[id];
                 if (cfCas) {
                     fv.campaignKia = cfCas.kia;
                     fv.campaignWia = cfCas.wia;
                     fv.campaignMia = cfCas.mia;
+                    fv.campaignCasualtySplitProvenance = 'exact_ledger';
                 }
             }
 
@@ -1077,6 +1081,7 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     fv.campaignKia = split.killed;
                     fv.campaignWia = split.wounded;
                     fv.campaignMia = split.missing_captured;
+                    fv.campaignCasualtySplitProvenance = 'derived_from_total';
                 }
             }
 
@@ -2633,9 +2638,77 @@ function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
     return result;
 }
 
+const HISTORICAL_EVENT_SCOPE_FIELDS = [
+    'osids',
+    'affected_osids',
+    'settlementIds',
+    'settlement_ids',
+    'municipalityIds',
+    'municipality_ids',
+    'munIds',
+    'mun_ids',
+] as const;
+
+type HistoricalEventScopeField = typeof HISTORICAL_EVENT_SCOPE_FIELDS[number];
+type HistoricalEventScope = Partial<Record<HistoricalEventScopeField, string[]>>;
+
+function appendUniqueStrings(target: string[], values: unknown): void {
+    if (!Array.isArray(values)) return;
+    for (const value of values) {
+        if (typeof value !== 'string') continue;
+        const trimmed = value.trim();
+        if (trimmed && !target.includes(trimmed)) target.push(trimmed);
+    }
+}
+
+function mergeHistoricalEventScopes(...sources: Array<HistoricalEventScope | null | undefined>): HistoricalEventScope {
+    const merged: HistoricalEventScope = {};
+    for (const source of sources) {
+        if (!source) continue;
+        for (const field of HISTORICAL_EVENT_SCOPE_FIELDS) {
+            const next = source[field];
+            if (!next || next.length === 0) continue;
+            const target = merged[field] ?? [];
+            appendUniqueStrings(target, next);
+            if (target.length > 0) merged[field] = target;
+        }
+    }
+    return merged;
+}
+
+function collectHistoricalEventScope(source: Record<string, unknown> | null | undefined): HistoricalEventScope {
+    if (!source) return {};
+    const scope: HistoricalEventScope = {};
+    for (const field of HISTORICAL_EVENT_SCOPE_FIELDS) {
+        const values: string[] = [];
+        appendUniqueStrings(values, source[field]);
+        if (values.length > 0) scope[field] = values;
+    }
+    const effectRows: Record<string, unknown>[] = [];
+    if (source.effect && typeof source.effect === 'object' && !Array.isArray(source.effect)) {
+        effectRows.push(source.effect as Record<string, unknown>);
+    }
+    if (Array.isArray(source.effects)) {
+        for (const effect of source.effects) {
+            if (effect && typeof effect === 'object' && !Array.isArray(effect)) {
+                effectRows.push(effect as Record<string, unknown>);
+            }
+        }
+    }
+    for (const effect of effectRows) {
+        if (effect.kind !== 'control_change') continue;
+        for (const field of HISTORICAL_EVENT_SCOPE_FIELDS) {
+            const values = scope[field] ?? [];
+            appendUniqueStrings(values, effect[field]);
+            if (values.length > 0) scope[field] = values;
+        }
+    }
+    return scope;
+}
+
 function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsByTurn'] {
     const result: LoadedGameState['historicalEventsByTurn'] = [];
-    const summaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<{ id: string; text: string }> }> | undefined;
+    const summaries = state.turn_summaries as Array<{ turn?: number; events_fired?: Array<Record<string, unknown>> }> | undefined;
     if (!Array.isArray(summaries)) return result;
     for (const summary of summaries) {
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
@@ -2643,6 +2716,8 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
         for (const e of summary.events_fired) {
             const rawId = String(e.id ?? '');
             const rawText = typeof e.text === 'string' ? e.text.trim() : '';
+            const staticScope = getStaticEventDisplayInfo(rawId)?.scope ?? null;
+            const scope = mergeHistoricalEventScopes(collectHistoricalEventScope(e), staticScope);
             const fallback = t('settlementTimeline.historicalEvent.fallback');
             const text = rawText && rawText !== rawId && !looksLikeRawPlayerFacingToken(rawText)
                 ? getPlayerSafeDisplayLabel(rawText, fallback)
@@ -2651,6 +2726,7 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
                 turn,
                 id: rawId,
                 text,
+                ...scope,
             });
         }
     }
@@ -3006,11 +3082,22 @@ interface StaticEventDisplayDefinition {
     id?: unknown;
     title?: unknown;
     response_options?: ReadonlyArray<{ id?: unknown; label?: unknown }>;
+    effect?: Record<string, unknown>;
+    effects?: ReadonlyArray<Record<string, unknown>>;
+    osids?: unknown;
+    affected_osids?: unknown;
+    settlementIds?: unknown;
+    settlement_ids?: unknown;
+    municipalityIds?: unknown;
+    municipality_ids?: unknown;
+    munIds?: unknown;
+    mun_ids?: unknown;
 }
 
 interface StaticEventDisplayInfo {
     title: string | null;
     responseLabels: ReadonlyMap<string, string>;
+    scope: HistoricalEventScope;
 }
 
 const STATIC_EVENT_DISPLAY_CATALOG = buildStaticEventDisplayCatalog([
@@ -3037,6 +3124,7 @@ function buildStaticEventDisplayCatalog(catalogs: ReadonlyArray<unknown>): Reado
             out.set(id, {
                 title: typeof row?.title === 'string' && row.title.trim() ? row.title.trim() : null,
                 responseLabels,
+                scope: collectHistoricalEventScope(row as Record<string, unknown>),
             });
         }
     }

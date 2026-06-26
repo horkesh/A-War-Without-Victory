@@ -81,10 +81,22 @@ function reportedNonNegative(value: number | undefined): number | null {
         : null;
 }
 
-function formatCampaignLossValue(value: number | undefined): string {
-    return typeof value === 'number' && Number.isFinite(value)
+function formatCampaignLossValue(value: number | undefined, derived = false): string {
+    const formatted = typeof value === 'number' && Number.isFinite(value)
         ? Math.max(0, Math.round(value)).toLocaleString()
         : t('orbat.metricUnreported');
+    if (derived && typeof value === 'number' && Number.isFinite(value)) {
+        return t('orbat.estimatedValue', { value: formatted });
+    }
+    return formatted;
+}
+
+function getCampaignLossesLabel(derived: boolean): string {
+    return derived ? t('orbat.campaignLossesEstimated') : t('orbat.campaignLosses');
+}
+
+function getCampaignLossesHelp(derived: boolean): string | null {
+    return derived ? t('orbat.campaignLossesEstimatedHelp') : null;
 }
 
 function formatOperationalEquipment(total: number | undefined, operational: number | undefined): { label: string; reported: boolean } | null {
@@ -137,6 +149,11 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
     const reportedCampaignCasualties = [b.campaignKia, b.campaignWia, b.campaignMia]
         .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
     const totalCampaignCasualties = reportedCampaignCasualties.reduce((sum, value) => sum + Math.max(0, value), 0);
+    const campaignLossesEstimated = b.campaignCasualtySplitProvenance === 'derived_from_total';
+    const campaignLossValue = (value: number | undefined): string => {
+        return formatCampaignLossValue(value, campaignLossesEstimated);
+    };
+    const campaignLossesHelp = getCampaignLossesHelp(campaignLossesEstimated);
 
     return (
         <div className="px-4 py-3 space-y-3 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -192,14 +209,19 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                 )}
                 {reportedCampaignCasualties.length > 0 && (
                     <div className="flex flex-col gap-0.5">
-                        <span className="text-[9px] text-text-secondary/50">{t('orbat.campaignLosses')}</span>
-                        <span className="text-red-500 font-bold">
+                        <span className="text-[9px] text-text-secondary/50">
+                            {getCampaignLossesLabel(campaignLossesEstimated)}
+                        </span>
+                        <span className={`${campaignLossesEstimated ? 'text-amber-300' : 'text-red-500'} font-bold`}>
                             {t('orbat.campaignLossBreakdown', {
-                                killed: formatCampaignLossValue(b.campaignKia),
-                                wounded: formatCampaignLossValue(b.campaignWia),
-                                missing: formatCampaignLossValue(b.campaignMia),
+                                killed: campaignLossValue(b.campaignKia),
+                                wounded: campaignLossValue(b.campaignWia),
+                                missing: campaignLossValue(b.campaignMia),
                             })}
                         </span>
+                        {campaignLossesHelp && (
+                            <span className="text-[9px] text-text-secondary/60 normal-case">{campaignLossesHelp}</span>
+                        )}
                     </div>
                 )}
             </div>

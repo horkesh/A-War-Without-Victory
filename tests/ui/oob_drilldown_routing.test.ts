@@ -188,6 +188,33 @@ describe('OOBSidebar drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
   });
 
+  it('does not route enemy-only sector segments as field settlement anchors', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      sub_segments: [{
+        sub_segment_id: 'north-1',
+        edge_ids: [],
+        friendly_osids: [],
+        enemy_osids: ['op:sarajevo:enemy_only_1'],
+        length_edges: 1,
+        primary_brigade_ids: [],
+      }],
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    fireEvent.click(screen.getByTestId('oob-sector-row'));
+
+    const store = useGameStore.getState();
+    expect(store.selectedCorpsId).toBe('vrs_main_staff');
+    expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
+    expect(store.selectedOsid).toBeNull();
+    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
+  });
+
   it('does not label zero-formation sectors as held coverage in OOB', () => {
     const state = makeState();
     state.corpsFrontSectors = [{

@@ -148,7 +148,7 @@ export function OperationsPanel() {
     const justOpened = isOpen && !prevIsOpenRef.current;
     prevIsOpenRef.current = isOpen;
     if (!justOpened || operations.length === 0) return;
-    if (selectedOperationKey != null && operations.some((op) => getOperationId(op) === selectedOperationKey)) return;
+    if (selectedOperationKey != null) return;
     const first = operations[0];
     if (first) setSelectedOperationKey(getOperationId(first));
   }, [isOpen, operations, selectedOperationKey, setSelectedOperationKey]);

@@ -137,6 +137,8 @@ export interface EliteCommanderView {
     defensive_skill?: number;
 }
 
+export type CampaignCasualtySplitProvenance = 'exact_ledger' | 'derived_from_total' | 'unreported';
+
 export interface FormationView {
     id: string;
     faction: string;
@@ -187,10 +189,11 @@ export interface FormationView {
     supply_state?: 'adequate' | 'strained' | 'critical';
     /** Sub-segment this brigade is assigned to (from corps_front_sectors). */
     assigned_sub_segment_id?: string;
-    /** Actual campaign casualties from casualty_ledger.per_formation (brigades only). */
+    /** Campaign casualty split values (brigades only); provenance distinguishes exact ledger rows from estimated splits. */
     campaignKia?: number;
     campaignWia?: number;
     campaignMia?: number;
+    campaignCasualtySplitProvenance?: CampaignCasualtySplitProvenance;
     /** Elite loan state (elite brigades only). */
     eliteLoanState?: {
         on_loan: boolean;
@@ -1083,7 +1086,19 @@ export interface LoadedGameState {
     /** Current per-OSID political authority/legitimacy metrics, normalized to 0-100. */
     politicalMetricsByOsid?: Record<string, PoliticalMetricView>;
     /** Historical events fired per turn (from scenario event definitions). */
-    historicalEventsByTurn: Array<{ turn: number; id: string; text: string }>;
+    historicalEventsByTurn: Array<{
+      turn: number;
+      id: string;
+      text: string;
+      osids?: string[];
+      affected_osids?: string[];
+      settlementIds?: string[];
+      settlement_ids?: string[];
+      municipalityIds?: string[];
+      municipality_ids?: string[];
+      munIds?: string[];
+      mun_ids?: string[];
+    }>;
     recruitment?: RecruitmentView;
     armyStance?: Record<string, string>;
     casualtyLedger?: Record<string, CasualtyLedgerEntryView>;

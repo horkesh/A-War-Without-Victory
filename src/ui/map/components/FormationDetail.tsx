@@ -123,6 +123,13 @@ function formatOptionalInteger(value: number | null | undefined): string {
   return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
 }
 
+function formatCampaignLossInteger(value: number | null | undefined, derived: boolean): string {
+  const formatted = formatOptionalInteger(value);
+  return derived && Number.isFinite(value)
+    ? t('formationDetail.estimatedValue', { value: formatted })
+    : formatted;
+}
+
 function isCommandFormation(formation: FormationView): boolean {
   return formation.kind === 'corps' || formation.kind === 'corps_asset';
 }
@@ -243,6 +250,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     ? getPlayerSafeFormationReadinessLabel(formation.readiness)
     : t('corpsFront.unreported');
   const formationName = getLocalizedFormationName(formation, locale);
+  const casualtySplitIsDerived = formation.campaignCasualtySplitProvenance === 'derived_from_total';
+  const casualtySplitIsExact = formation.campaignCasualtySplitProvenance === 'exact_ledger';
+  const casualtySplitProvenanceLabel = casualtySplitIsDerived
+    ? t('formationDetail.campaignLossesDerived')
+    : casualtySplitIsExact
+      ? t('formationDetail.campaignLossesExact')
+      : null;
 
   // Home-distance helpers
   const hops = formation.homeHops;
@@ -794,24 +808,34 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                 component never runtime-imports from src/sim/combat/ (#73). */}
             {isBrigade && (
               <div className="p-2 bg-black/20 rounded border border-panel-border/40 space-y-1.5">
-                <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="text-[10px] text-text-secondary uppercase font-bold tracking-widest">{t('formationDetail.campaignLosses')}</div>
+                  {casualtySplitIsDerived && (
+                    <div className="text-[9px] text-amber-300 uppercase font-bold tracking-widest">{t('formationDetail.estimatedSplit')}</div>
+                  )}
+                </div>
+                {casualtySplitProvenanceLabel && (
+                  <div className={`text-[10px] leading-snug ${casualtySplitIsDerived ? 'text-amber-300/90 italic' : 'text-text-secondary'}`}>
+                    {casualtySplitProvenanceLabel}
+                  </div>
+                )}
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.kia')}</div>
-                    <div className="text-sm font-mono font-bold" style={{ color: '#d45555' }}>
-                      {formatOptionalInteger(formation.campaignKia)}
+                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d45555' }}>
+                      {formatCampaignLossInteger(formation.campaignKia, casualtySplitIsDerived)}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.wia')}</div>
-                    <div className="text-sm font-mono font-bold" style={{ color: '#d4d455' }}>
-                      {formatOptionalInteger(formation.campaignWia)}
+                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : ''}`} style={casualtySplitIsDerived ? undefined : { color: '#d4d455' }}>
+                      {formatCampaignLossInteger(formation.campaignWia, casualtySplitIsDerived)}
                     </div>
                   </div>
                   <div>
                     <div className="text-[10px] text-text-secondary uppercase">{t('formationDetail.miaPow')}</div>
-                    <div className="text-sm font-mono font-bold text-text-secondary">
-                      {formatOptionalInteger(formation.campaignMia)}
+                    <div className={`text-sm font-mono font-bold ${casualtySplitIsDerived ? 'text-amber-300' : 'text-text-secondary'}`}>
+                      {formatCampaignLossInteger(formation.campaignMia, casualtySplitIsDerived)}
                     </div>
                   </div>
                 </div>

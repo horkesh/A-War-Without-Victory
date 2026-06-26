@@ -224,6 +224,21 @@ describe('OOB and operations panel operation labels', () => {
     })).toBeNull();
   });
 
+  it('does not auto-select the first operation when an existing operation key is stale', () => {
+    useGameStore.setState({
+      selectedOperationKey: `${CORPS_ID}|old_review_state`,
+    });
+
+    const { container } = render(createElement(OperationsPanel));
+
+    expect(container.textContent).toContain('Select an operation.');
+    expect(screen.getByRole('option', {
+      name: 'Operation Breakthrough, In execution, 1 brigades',
+    }).getAttribute('aria-selected')).toBe('false');
+    expect(useGameStore.getState().selectedOperationKey).toBe(`${CORPS_ID}|old_review_state`);
+    expect(useGameStore.getState().operationTargetOsids).toEqual([]);
+  });
+
   it('renders sparse operation lifecycle as status pending without fake objective or momentum progress', () => {
     setOperationPatch({
       phase: 'planning',
