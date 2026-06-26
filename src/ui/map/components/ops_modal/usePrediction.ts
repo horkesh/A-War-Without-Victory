@@ -12,17 +12,17 @@ import type { OpsPlanState } from './types';
 
 export interface PredictionResult {
     overall: {
-        intelConfidence: number;
-        forceRatio: number;
-        estimatedCasualties: number;
-        predictedOutcome: string;
+        intelConfidence: number | null;
+        forceRatio: number | null;
+        estimatedCasualties: number | null;
+        predictedOutcome: string | null;
         recommendedAction: string;
     };
     perAxis: Array<{
         axisId: string;
-        forceRatio: number;
-        predictedOutcome: string;
-        defenseStrength: number;
+        forceRatio: number | null;
+        predictedOutcome: string | null;
+        defenseStrength: number | null;
     }>;
     commanderAssessment?: {
         sections: Array<{
@@ -40,13 +40,18 @@ export function normalizeOperationPredictionResponse(raw: unknown): PredictionRe
     if (!overallIn || typeof overallIn !== 'object') return null;
     const o = overallIn as Record<string, unknown>;
 
-    const totalCas = Number(o.totalEstimatedCasualties ?? o.estimatedCasualties ?? 0) || 0;
-    const forceRatio = Number(o.forceRatio ?? 0) || 0;
-    const intelConfidence = Number(o.intelConfidence ?? 0) || 0;
+    const finiteOrNull = (value: unknown): number | null => {
+        const numeric = typeof value === 'number' ? value : Number(value);
+        return Number.isFinite(numeric) ? numeric : null;
+    };
+
+    const totalCas = finiteOrNull(o.totalEstimatedCasualties ?? o.estimatedCasualties);
+    const forceRatio = finiteOrNull(o.forceRatio);
+    const intelConfidence = finiteOrNull(o.intelConfidence);
 
     const axesIn = Array.isArray(r.axes) ? r.axes : [];
     const primary = axesIn[0];
-    let predictedOutcome = 'stalemate';
+    let predictedOutcome: string | null = null;
     if (primary && typeof primary === 'object') {
         const p = primary as Record<string, unknown>;
         if (typeof p.predictedOutcome === 'string') predictedOutcome = p.predictedOutcome;
@@ -85,10 +90,10 @@ export function normalizeOperationPredictionResponse(raw: unknown): PredictionRe
         const axisId = typeof ax.axisId === 'string' ? ax.axisId : '';
         return {
             axisId,
-            forceRatio: Number(ax.forceRatio ?? 0),
+            forceRatio: finiteOrNull(ax.forceRatio),
             predictedOutcome:
-                typeof ax.predictedOutcome === 'string' ? ax.predictedOutcome : 'stalemate',
-            defenseStrength: Number(ax.defenderPower ?? ax.defenseStrength ?? 0),
+                typeof ax.predictedOutcome === 'string' ? ax.predictedOutcome : null,
+            defenseStrength: finiteOrNull(ax.defenderPower ?? ax.defenseStrength),
         };
     });
 

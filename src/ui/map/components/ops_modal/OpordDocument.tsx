@@ -52,7 +52,7 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
     const allBrigades = plan.axes.flatMap((a) => a.brigadeIds);
     const display = buildOpordDisplayModel(plan, osidDisplayNames);
     const allObjectives = display.objectiveLabels;
-    const forceBalance = prediction ? getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio) : null;
+    const forceBalance = prediction?.overall.forceRatio == null ? null : getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio);
 
     return (
         <div className="relative bg-[#f0e8d8] rounded-lg border border-[#c0b090] p-8 max-w-[600px] mx-auto shadow-2xl"
@@ -176,7 +176,7 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
                         {t('opsPlanning.opord.section.logistics')}
                     </div>
                     <div className="text-[10px] text-[#4a4238] leading-relaxed">
-                        {prediction
+                        {prediction && prediction.overall.estimatedCasualties != null
                             ? t('opsPlanning.opord.casualties', { count: prediction.overall.estimatedCasualties.toLocaleString() })
                             : t('opsPlanning.opord.casualtiesPending')
                         }

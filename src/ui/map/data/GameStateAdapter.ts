@@ -1265,7 +1265,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         return confidence > best ? confidence : best;
                     }, 0)
                     : undefined;
-                const supplyReadiness = typeof op.supply_readiness === 'number' ? op.supply_readiness : undefined;
+                const supplyReadiness = typeof op.supply_readiness === 'number' && Number.isFinite(op.supply_readiness) ? op.supply_readiness : undefined;
+                const currentObjectiveIndex = typeof op.current_objective_index === 'number' && Number.isFinite(op.current_objective_index) ? op.current_objective_index : undefined;
+                const momentum = typeof op.momentum === 'number' && Number.isFinite(op.momentum) ? op.momentum : undefined;
                 const operationPhase = readOperationPhase(op.phase);
                 operations.push({
                     corps_id: fv.id,
@@ -1286,8 +1288,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     sector_id: typeof op.sector_id === 'string' ? op.sector_id : undefined,
                     staging_osid: typeof op.staging_osid === 'string' ? op.staging_osid : undefined,
                     objectives: Array.isArray(op.objectives) ? (op.objectives as string[]).filter(o => typeof o === 'string') : undefined,
-                    current_objective_index: typeof op.current_objective_index === 'number' ? op.current_objective_index : undefined,
-                    momentum: typeof op.momentum === 'number' ? op.momentum : undefined,
+                    current_objective_index: currentObjectiveIndex,
+                    momentum,
                     failure_count: typeof op.failure_count === 'number' ? op.failure_count : undefined,
                     consecutive_failures_on_current: typeof op.consecutive_failures_on_current === 'number' ? op.consecutive_failures_on_current : undefined,
                     phase_started_turn: typeof op.phase_started_turn === 'number' ? op.phase_started_turn : undefined,
@@ -1318,9 +1320,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                         name: String(a.name ?? ''),
                         assigned_brigades: Array.isArray(a.assigned_brigades) ? (a.assigned_brigades as string[]).filter(s => typeof s === 'string') : [],
                         objectives: Array.isArray(a.objectives) ? (a.objectives as string[]).filter(s => typeof s === 'string') : [],
-                        ...(typeof a.current_objective_index === 'number' ? { current_objective_index: a.current_objective_index } : {}),
+                        ...(typeof a.current_objective_index === 'number' && Number.isFinite(a.current_objective_index) ? { current_objective_index: a.current_objective_index } : {}),
                         ...(readAxisStatus(a.status) ? { status: readAxisStatus(a.status) } : {}),
-                        ...(typeof a.momentum === 'number' ? { momentum: a.momentum } : {}),
+                        ...(typeof a.momentum === 'number' && Number.isFinite(a.momentum) ? { momentum: a.momentum } : {}),
                         ...(typeof a.staging_osid === 'string' ? { staging_osid: a.staging_osid } : {}),
                     })) : undefined,
                     commander_officer_id: typeof op.commander_officer_id === 'string' ? op.commander_officer_id : undefined,
@@ -2259,11 +2261,23 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 .map((formationId) => formationsById.get(formationId))
                 .filter((formation): formation is FormationView => Boolean(formation));
             if (assigned.length === 0) continue;
+            const reportedEntrenchment = assigned
+                .map((formation) => formation.entrenchment_turns)
+                .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+            const reportedDigIn = assigned
+                .map((formation) => formation.dig_in_progress)
+                .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
             out[sector.sector_id] = {
-                avgEntrenchment: assigned.reduce((sum, formation) => sum + finiteNumber(formation.entrenchment_turns), 0) / assigned.length,
-                avgDigIn: assigned.reduce((sum, formation) => sum + finiteNumber(formation.dig_in_progress), 0) / assigned.length,
+                avgEntrenchment: reportedEntrenchment.length > 0
+                    ? reportedEntrenchment.reduce((sum, value) => sum + value, 0) / reportedEntrenchment.length
+                    : 0,
+                avgDigIn: reportedDigIn.length > 0
+                    ? reportedDigIn.reduce((sum, value) => sum + value, 0) / reportedDigIn.length
+                    : 0,
                 digInCount: assigned.filter((formation) => formation.posture === 'dig_in').length,
                 totalCount: assigned.length,
+                entrenchmentReportCount: reportedEntrenchment.length,
+                digInReportCount: reportedDigIn.length,
             };
         }
         if (Object.keys(out).length > 0) sectorEntrenchmentSummary = out;

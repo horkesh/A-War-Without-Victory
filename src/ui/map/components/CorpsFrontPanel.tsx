@@ -361,6 +361,17 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
       : 0;
   const avgOperationSupply = averageComplete(relatedOperations.map((op) => op.supply_readiness)) ?? null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
+  const formatEntrenchmentMetric = (
+    value: number,
+    reportedCount: number | undefined,
+    formatter: (reportedValue: number) => string,
+  ): string => {
+    const total = entrenchmentSummary?.totalCount ?? 0;
+    const reported = reportedCount ?? total;
+    if (reported <= 0) return t('corpsFront.unreported');
+    const formatted = formatter(value);
+    return reported < total ? t('corpsFront.partialEquipment', { value: formatted }) : formatted;
+  };
   const currentSectorStance = sector.sector_stance ?? null;
   const currentStanceSource = sector.stance_source ?? 'bot';
   const sectorStanceLabel = stanceLabel(currentSectorStance);
@@ -922,11 +933,23 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                       <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.avgEntrenchment')}</span>
-                      <span className="font-medium">{t('corpsFront.turnsValue', { count: entrenchmentSummary.avgEntrenchment.toFixed(1) })}</span>
+                      <span className="font-medium">
+                        {formatEntrenchmentMetric(
+                          entrenchmentSummary.avgEntrenchment,
+                          entrenchmentSummary.entrenchmentReportCount,
+                          (value) => t('corpsFront.turnsValue', { count: value.toFixed(1) }),
+                        )}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                       <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.avgDigIn')}</span>
-                      <span className="font-medium">{Math.round(entrenchmentSummary.avgDigIn * 100)}%</span>
+                      <span className="font-medium">
+                        {formatEntrenchmentMetric(
+                          entrenchmentSummary.avgDigIn,
+                          entrenchmentSummary.digInReportCount,
+                          (value) => `${Math.round(value * 100)}%`,
+                        )}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                       <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.digInPosture')}</span>

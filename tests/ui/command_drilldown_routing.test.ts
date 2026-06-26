@@ -175,8 +175,20 @@ describe('command drilldown routing', () => {
   });
 
   it('routes CorpsDetail sector rows through field inspection and clears stale shell context', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      sub_segments: [{
+        sub_segment_id: 'front-1',
+        edge_ids: [],
+        friendly_osids: ['op:friendly:anchor_1'],
+        enemy_osids: ['op:enemy:hidden_1'],
+        length_edges: 1,
+        primary_brigade_ids: ['rbih_1_brigade'],
+      }],
+    }] as LoadedGameState['corpsFrontSectors'];
     useGameStore.setState({
-      loadedGameState: makeState(),
+      loadedGameState: state,
       selectedArmyId: 'RBiH',
       selectedCorpsId: 'rbih_1_corps',
       codexOpen: true,
@@ -193,6 +205,7 @@ describe('command drilldown routing', () => {
     const store = useGameStore.getState();
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
     expect(store.selectedCorpsFrontSectorId).toBe('sector:rbih_1_corps:0');
+    expect(store.selectedOsid).toBe('op:friendly:anchor_1');
     expect(store.codexOpen).toBe(false);
     expect(store.chronicleOpen).toBe(false);
     expect(store.focusedAftermathTurn).toBeNull();
@@ -251,6 +264,27 @@ describe('command drilldown routing', () => {
 
     expect(container.textContent).toContain('Unreported');
     expect(container.textContent).not.toContain('0.0');
+  });
+
+  it('renders non-finite CorpsDetail operation momentum as unreported', () => {
+    const state = makeState();
+    state.operations = [{
+      ...state.operations![0],
+      phase: 'execution',
+      momentum: Number.POSITIVE_INFINITY,
+    }] as LoadedGameState['operations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
+
+    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).not.toContain('Infinity');
   });
 
   it('does not render fake 0/0 objective progress for empty CorpsDetail operation chains', () => {

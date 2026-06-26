@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest P10 player-polish packet merged 2026-06-26 at `b3d4ea76e`.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P10 at `b3d4ea76e`; active local packet is P11 on `codex/p11-player-truth-polish`.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -8,16 +8,17 @@
 
 ## Current Queue 2026-06-26
 
-P9 is merged and green. P10 has been implemented locally from closed scout reports without reopening packaging, BCS-only cleanup, or Srebrenica/Zepa scripted-operation calibration:
+P10 is merged and green. P11 is implemented locally from the next closed scout reports without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
 
-- `GameStateAdapter` preserves partial faction reserve records instead of filling missing general/heavy reserves as zero.
-- `EconomyPanel` renders missing reserve fields as `Unreported` and does not count absent reserve data as strained.
-- `playerSupplyVisibility` preserves partial supply-summary warnings while marking missing fields as `Unreported`; no exact zero supply mix is invented from sparse rows.
-- `SupplyIntelligence` marks heavy-equipment drain unreported when fielded formation composition is missing, while preserving explicit reported zeroes and rendering zero heavy drain as `0`.
-- `buildSupplyGeoJSON` uses faction reserve fallback only when general supply is reported.
-- The stale `autonomy_panel` App state, action branch, registry surface, and inbox action type are retired; generated proposal reviews remain Decision Room-owned.
+- Corps Detail sector drilldown now preserves authored friendly OSID anchors instead of dropping the battlefield context.
+- Sector entrenchment/dig-in aggregates carry reported-field counts; Corps Front renders exact, partial, or unreported values instead of inventing zeros from missing line-holder data.
+- Formation Detail and OOB sector affordances use player-safe labels in visible, title, and accessible copy instead of raw sector or command ids.
+- Operation lifecycle fields reject non-finite objective/momentum/supply-readiness values before they reach command panels.
+- Back-the-Officer stale proposal plan ids no longer fall through to the first live operation.
+- G-2 prediction normalization preserves sparse payload truth with nullable force ratio, intel confidence, casualties, predicted outcome, axis readiness, and defense strength; explicit reported zeroes still remain exact.
+- War Summary, Chronicle, and Wrapped campaign-cost surfaces distinguish missing casualty/displacement sources from explicit reported zeroes.
 
-P10 verification passed: review-fix red/green proof; focused P10 proof 10 files / 113 tests; `npm.cmd run typecheck`; `npm.cmd run qa:player-journeys` 43 files / 654 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `git diff --check`; GitHub PR #453 checks green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression, structural fingerprint, Typecheck, and Full Suite; and manual in-app browser reload at `http://127.0.0.1:3003/` with no alerts, no console errors, and no retired autonomy-panel text. Branch refs were deleted/pruned, one clean `main` worktree remains, and stale resolved-in-code Codex review threads from PRs #451, #449, #444, and #442 were marked resolved. No installer/package work, no calibration, no save schema change, and no Srebrenica/Zepa operation-delivery tuning; fall receipts remain event-owned.
+P11 local verification passed: focused player-truth proof 10 files / 229 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 659 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; `npm.cmd run desktop:map:build` with existing non-fatal Vite warnings; `git diff --check` with the existing CRLF normalization warning; and manual in-app browser proof on `http://127.0.0.1:3003/` covering RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, foundational blocker routing, opening corps commander names, 1st Corps detail, and sector rows with no sampled raw-label leaks. Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains only for the active browser/dev session. Remaining before closeout: GitHub PR checks/comments, merge, branch prune, and clean-worktree proof. Fall receipts remain event-owned.
 
 ## Progress 2026-06-24
 

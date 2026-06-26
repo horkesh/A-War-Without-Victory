@@ -140,4 +140,41 @@ describe('War Summary campaign cost localization', () => {
         expect(text).not.toContain('Faction is collapse-eligible.');
         expect(text).not.toContain('collapse-eligible');
     });
+
+    it('renders missing casualty and displacement sources as unreported in the overview', () => {
+        storeState.loadedGameState = {
+            ...makeMockLoadedGameState(),
+            player_faction: 'RBiH',
+            casualtyLedger: undefined,
+            departedByOsid: undefined,
+            displacementByMun: undefined,
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const copy = document.body.textContent ?? '';
+        expect(copy).toMatch(/Killed\s*Unreported/i);
+        expect(copy).toMatch(/Wounded\s*Unreported/i);
+        expect(copy).toMatch(/Theater-wide displaced\s*Unreported/i);
+        expect(copy).toMatch(/Own-side displaced\s*Unreported/i);
+    });
+
+    it('preserves explicit zero casualty and displacement records in the overview', () => {
+        storeState.loadedGameState = {
+            ...makeMockLoadedGameState(),
+            player_faction: 'RBiH',
+            casualtyLedger: { RBiH: { killed: 0, wounded: 0, missing_captured: 0 } },
+            departedByOsid: { 'op:test:zero': { RBiH: 0 } },
+            displacementByMun: undefined,
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const copy = document.body.textContent ?? '';
+        expect(copy).toMatch(/Killed\s*0/i);
+        expect(copy).toMatch(/Wounded\s*0/i);
+        expect(copy).toMatch(/Theater-wide displaced\s*0/i);
+        expect(copy).toMatch(/Own-side displaced\s*0/i);
+        expect(copy).not.toMatch(/Killed\s*Unreported/i);
+    });
 });

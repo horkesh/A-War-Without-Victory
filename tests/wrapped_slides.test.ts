@@ -156,6 +156,22 @@ describe('generateWrappedSlides', () => {
             expect(slide.heroValue).toBe('0');
             expect(slide.data?.bloodiestCasualties).toBe(0);
         });
+
+        it('does not publish zero as the bloodiest week when battle casualty fields are unreported', () => {
+            const state = makeMinimalState({
+                turnSummaries: [
+                    makeTurnSummary(5, {
+                        battles: [
+                            { attacker_faction: 'RBiH', defender_faction: 'RS', casualties_reported: false },
+                            { attacker_faction: 'RBiH', defender_faction: 'RS' },
+                        ],
+                    }),
+                ],
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'bloodiest_week')!;
+            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.data?.bloodiestCasualties).toBeNull();
+        });
     });
 
     describe('best_brigade slide', () => {
@@ -195,6 +211,21 @@ describe('generateWrappedSlides', () => {
             const slide = generateWrappedSlides(state).find(s => s.id === 'what_it_cost')!;
             expect(slide.data?.totalCasualties).toBe(530);
             expect(slide.data?.totalDisplaced).toBe(1500);
+        });
+
+        it('renders campaign casualty cost as unreported when battle casualty fields are absent', () => {
+            const state = makeMinimalState({
+                turnSummaries: [
+                    makeTurnSummary(1, {
+                        battles: [{ attacker_faction: 'RBiH', defender_faction: 'RS', casualties_reported: false }],
+                        displacement_total: 500,
+                    }),
+                ],
+            });
+            const slide = generateWrappedSlides(state).find(s => s.id === 'what_it_cost')!;
+            expect(slide.heroValue).toBe('Unreported');
+            expect(slide.data?.totalCasualties).toBeNull();
+            expect(slide.data?.totalDisplaced).toBe(500);
         });
     });
 

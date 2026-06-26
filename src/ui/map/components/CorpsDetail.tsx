@@ -183,10 +183,15 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   };
 
   const inspectSectorInCorps = (sectorId: string) => {
+    const sector = corpsSectors.find((item) => item.sector_id === sectorId);
+    const anchorOsid = sector?.sub_segments
+      ?.flatMap((segment) => segment.friendly_osids ?? [])
+      .find((osid): osid is string => typeof osid === 'string' && osid.length > 0) ?? null;
     inspectOnField(useGameStore.getState(), {
       kind: 'field-sector-in-corps',
       sectorId,
       corpsId: selectedCorpsId,
+      osid: anchorOsid,
     });
   };
 
@@ -482,7 +487,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   : 'bg-neutral-600/60 text-white';
                 const opKey = getOperationId(op);
                 const isSelected = selectedOperationKey === opKey;
-                const momentum = typeof op.momentum === 'number' ? op.momentum : null;
+                const momentum = typeof op.momentum === 'number' && Number.isFinite(op.momentum) ? op.momentum : null;
 
                 return (
                   <button

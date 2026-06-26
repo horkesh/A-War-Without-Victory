@@ -109,14 +109,22 @@ function summarizeBattleCost(summary: any, playerFaction: string | null): {
     friendlyCasualties: number;
     opposingCasualties: number;
     theaterCasualties: number;
+    casualtiesReported: boolean;
 } {
     let friendlyCasualties = 0;
     let opposingCasualties = 0;
     let theaterCasualties = 0;
 
+    let casualtiesReported = false;
+
     for (const battle of Array.isArray(summary?.battles) ? summary.battles : []) {
-        const attackerCasualties = Number(battle?.attacker_casualties ?? 0);
-        const defenderCasualties = Number(battle?.defender_casualties ?? 0);
+        if (battle?.casualties_reported === false) continue;
+        const attackerReported = typeof battle?.attacker_casualties === 'number' && Number.isFinite(battle.attacker_casualties);
+        const defenderReported = typeof battle?.defender_casualties === 'number' && Number.isFinite(battle.defender_casualties);
+        if (!attackerReported && !defenderReported) continue;
+        casualtiesReported = true;
+        const attackerCasualties = attackerReported ? battle.attacker_casualties : 0;
+        const defenderCasualties = defenderReported ? battle.defender_casualties : 0;
         theaterCasualties += attackerCasualties + defenderCasualties;
         if (!playerFaction) continue;
         if (battle?.attacker_faction === playerFaction) {
@@ -128,12 +136,12 @@ function summarizeBattleCost(summary: any, playerFaction: string | null): {
         }
     }
 
-    return { friendlyCasualties, opposingCasualties, theaterCasualties };
+    return { friendlyCasualties, opposingCasualties, theaterCasualties, casualtiesReported };
 }
 
 function buildTurnCostEntry(summary: any, playerFaction: string | null): ChronicleEntry | null {
     const turn = Number(summary?.turn ?? 0);
-    const { friendlyCasualties, opposingCasualties, theaterCasualties } = summarizeBattleCost(summary, playerFaction);
+    const { friendlyCasualties, opposingCasualties, theaterCasualties, casualtiesReported } = summarizeBattleCost(summary, playerFaction);
     const displaced = Number(summary?.displacement_total ?? 0);
     const ownFormationsDestroyed = Array.isArray(summary?.formation_destructions)
         ? summary.formation_destructions.filter((formation: any) => formation?.faction === playerFaction).length
@@ -144,15 +152,15 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
     const narrateTerritory = shouldNarrateTerritorySummary(summary);
 
     const playerScopedCost = playerFaction
-        ? friendlyCasualties >= COST_FRIENDLY_CASUALTY_THRESHOLD
+        ? (casualtiesReported && friendlyCasualties >= COST_FRIENDLY_CASUALTY_THRESHOLD)
             || ownFormationsDestroyed > 0
             || displaced >= COST_DISPLACEMENT_THRESHOLD
-        : theaterCasualties >= COST_THEATER_CASUALTY_THRESHOLD
+        : (casualtiesReported && theaterCasualties >= COST_THEATER_CASUALTY_THRESHOLD)
             || displaced >= COST_DISPLACEMENT_THRESHOLD;
     if (!playerScopedCost) return null;
 
     const severity: 'severe' | 'critical' = ownFormationsDestroyed > 0
-        || friendlyCasualties >= CASUALTY_THRESHOLD
+        || (casualtiesReported && friendlyCasualties >= CASUALTY_THRESHOLD)
         || displaced >= COST_DISPLACEMENT_THRESHOLD
         ? 'critical'
         : 'severe';
@@ -192,7 +200,7 @@ function buildTurnCostEntry(summary: any, playerFaction: string | null): Chronic
             : t('chronicle.generated.cost.title.severe'),
         detail: reasons.join(' | '),
         metadata: {
-            casualties: playerFaction ? friendlyCasualties : theaterCasualties,
+            casualties: casualtiesReported ? (playerFaction ? friendlyCasualties : theaterCasualties) : undefined,
             displaced,
             costSeverity: severity,
             netFriendlyTerritory: playerFaction && narrateTerritory ? netFriendlyTerritory : undefined,

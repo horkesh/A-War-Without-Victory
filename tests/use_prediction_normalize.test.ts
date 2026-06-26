@@ -52,4 +52,39 @@ describe('normalizeOperationPredictionResponse', () => {
         expect(normalizeOperationPredictionResponse(null)).toBeNull();
         expect(normalizeOperationPredictionResponse({})).toBeNull();
     });
+
+    it('preserves sparse and non-finite prediction fields as unreported', () => {
+        const out = normalizeOperationPredictionResponse({
+            overall: {
+                forceRatio: Number.NaN,
+                intelConfidence: undefined,
+                totalEstimatedCasualties: Number.POSITIVE_INFINITY,
+            },
+            axes: [
+                { axisId: 'axis-sparse', forceRatio: Number.NaN, defenderPower: undefined },
+            ],
+        });
+
+        expect(out).not.toBeNull();
+        expect(out!.overall.forceRatio).toBeNull();
+        expect(out!.overall.intelConfidence).toBeNull();
+        expect(out!.overall.estimatedCasualties).toBeNull();
+        expect(out!.overall.predictedOutcome).toBeNull();
+        expect(out!.perAxis[0].forceRatio).toBeNull();
+        expect(out!.perAxis[0].defenseStrength).toBeNull();
+        expect(out!.perAxis[0].predictedOutcome).toBeNull();
+    });
+
+    it('preserves explicit zero prediction values', () => {
+        const out = normalizeOperationPredictionResponse({
+            overall: { forceRatio: 0, intelConfidence: 0, totalEstimatedCasualties: 0 },
+            axes: [{ axisId: 'axis-zero', forceRatio: 0, defenderPower: 0, predictedOutcome: 'stalemate' }],
+        });
+
+        expect(out?.overall.forceRatio).toBe(0);
+        expect(out?.overall.intelConfidence).toBe(0);
+        expect(out?.overall.estimatedCasualties).toBe(0);
+        expect(out?.perAxis[0].forceRatio).toBe(0);
+        expect(out?.perAxis[0].defenseStrength).toBe(0);
+    });
 });

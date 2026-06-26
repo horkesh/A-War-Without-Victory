@@ -1000,6 +1000,33 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Personnel\s*500\s*Offensive Power/i);
   });
 
+  it('renders partial and unreported sector entrenchment provenance', () => {
+    const state = makeState();
+    state.sectorEntrenchmentSummary = {
+      'sector:arbih_1st_corps:0': {
+        avgEntrenchment: 3,
+        avgDigIn: 0,
+        digInCount: 1,
+        totalCount: 2,
+        entrenchmentReportCount: 1,
+        digInReportCount: 0,
+      },
+    };
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+
+    expect(container.textContent).toContain('Partial 3.0 turns');
+    expect(container.textContent).toMatch(/Avg Dig-in\s*Unreported/i);
+    expect(container.textContent).not.toContain('Average dig-in0%');
+  });
+
   it('labels Corps Front metadata with a true turn number instead of a second date', () => {
     const state = makeState();
     state.turn = 8;

@@ -492,6 +492,34 @@ describe('generateChronicleEntries', () => {
         expect(generateChronicleEntries(state as any).some(e => e.type === 'cost')).toBe(false);
     });
 
+    it('does not convert unreported battle casualties into zero-cost Chronicle metadata', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turnSummaries: [{
+                turn: 9,
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'RS',
+                    outcome: 'stalemate',
+                    casualties_reported: false,
+                    territory_flipped: false,
+                }],
+                notable_flips: [], notable_events: [], events_fired: [],
+                decoration_awards: [], arc_transitions: [], formation_spawns: [], formation_destructions: [],
+                displacement_total: 2600, displacement_by_ethnicity: {},
+                territory_net: { RBiH: 0 }, supply_deltas: {}, heavy_munitions_deltas: {},
+                movements: [], supply_transitions: [],
+            }],
+        };
+
+        const cost = generateChronicleEntries(state as any).find(e => e.type === 'cost');
+        expect(cost).toBeTruthy();
+        expect(cost?.metadata?.casualties).toBeUndefined();
+        expect(cost?.detail).toContain('2600');
+        expect(cost?.detail).not.toMatch(/casualt/i);
+    });
+
     it('creates military card for formation spawn', () => {
         const state = {
             turn: 6,

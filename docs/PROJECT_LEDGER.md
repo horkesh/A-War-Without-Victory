@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] fix(ui): implement P11 player-truth polish
+
+**Type:** UI/read-model/routing/provenance/test/docs polish.
+
+**Fix:** Started the P11 owner-playthrough truth packet on `codex/p11-player-truth-polish`. Corps Detail sector drilldowns preserve authored friendly OSID anchors; sector entrenchment/dig-in summaries carry partial/unreported provenance; Formation Detail and OOB sector copy avoid raw sector/command labels; operation lifecycle numerics reject non-finite values; stale Back-the-Officer proposal plan ids no longer bind to the first live operation; sparse G-2 prediction payloads remain nullable instead of becoming zero or `stalemate`; and War Summary, Chronicle, and Wrapped cost surfaces no longer convert missing casualty/displacement sources into reported zeroes.
+
+**Verification:** Focused player-truth proof passed 10 files / 229 tests with `npm.cmd exec -- vitest run tests/ui_map_game_state_adapter.test.ts tests/ui/back_the_officer_read_model.test.ts tests/use_prediction_normalize.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/corps_front_panel_routing.test.ts tests/ui/war_summary_campaign_cost_i18n.test.ts tests/wrapped_slides.test.ts tests/chronicle_entries.test.ts --pool=forks --reporter=dot`. `npm.cmd run typecheck -- --pretty false` passed. `git diff --check` passed with the existing CRLF normalization warning. `npm.cmd run qa:player-journeys` passed 43 files / 659 tests. `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, and `npm.cmd run desktop:map:build` passed; the build carried existing non-fatal Vite externalization/chunk warnings. Manual in-app browser proof covered RBiH start, war-start splash, identity brief, foundational blocker, named opening corps commanders, 1st Corps detail, and sector rows with no sampled raw-label leaks. Generated browser evidence folders were removed after verification; `.tmp_dev_server` remains for the active browser/dev session. Remaining before closeout: GitHub checks/comments, merge, branch prune, and clean-worktree proof.
+
+**Scope/determinism:** UI/read-model/routing/provenance/test/docs polish only. No packaging, calibration, simulation logic, event evaluator mechanics, scenario data, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, persisted simulation output, randomness, timestamps, or locale sorting changed. Srebrenica/Zepa fall receipts remain event-owned.
+
+---
+
 ## [2026-06-26] docs: close P10 player-polish merge
 
 **Type:** Docs/process closeout.

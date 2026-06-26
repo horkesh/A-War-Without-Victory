@@ -697,9 +697,7 @@ export function OOBSidebar() {
                         );
                         const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
                         const owner = loadedGameState.formations.find((f) => f.id === sector.corps_id);
-                        const ownerName = owner
-                          ? getLocalizedFormationName(owner, locale)
-                          : getPlayerSafeDisplayLabel(sector.corps_id, t('formationDetail.corps'));
+                        const ownerName = getPlayerSafeCorpsName(owner?.name, sector.corps_id);
                         const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);
                         const inspectSectorLabel = t('oob.inspectSectorOnField', {
                           sector: sectorLabel,

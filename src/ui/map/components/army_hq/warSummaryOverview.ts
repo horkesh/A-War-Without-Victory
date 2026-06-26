@@ -17,6 +17,8 @@ export interface WarSummaryOverviewModel {
     personnelByFaction: Record<string, number>;
     totalDisplaced: number;
     displacedByFaction: Record<string, number>;
+    totalDisplacedReported: boolean;
+    displacedByFactionReported: boolean;
     /**
      * Cluster C — faction-level war exhaustion passthrough.
      * Sourced from state.warPhaseExhaustion (which is
@@ -77,7 +79,11 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
 
     let totalDisplaced = 0;
     const displacedByFaction: Record<string, number> = {};
+    let totalDisplacedReported = false;
+    let displacedByFactionReported = false;
     if (state.departedByOsid) {
+        totalDisplacedReported = true;
+        displacedByFactionReported = true;
         for (const factionCounts of Object.values(state.departedByOsid)) {
             for (const [faction, count] of Object.entries(factionCounts)) {
                 if (typeof count !== 'number') continue;
@@ -86,6 +92,7 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
             }
         }
     } else if (state.displacementByMun) {
+        totalDisplacedReported = true;
         for (const mun of Object.values(state.displacementByMun)) {
             totalDisplaced += mun.displacedOut ?? 0;
         }
@@ -120,6 +127,8 @@ export function buildWarSummaryOverviewModel(state: LoadedGameState): WarSummary
         personnelByFaction: atArmsByFaction,
         totalDisplaced,
         displacedByFaction,
+        totalDisplacedReported,
+        displacedByFactionReported,
         warExhaustionByFaction,
         warWearinessByFaction,
     };

@@ -40,8 +40,12 @@ function translateTitle(title: string): string {
 export function NarrativeTab({ prediction, commanderName, corpsName, faction, date }: NarrativeTabProps) {
     const headers = FACTION_ARMY_HEADERS[faction] ?? FACTION_ARMY_HEADERS.RBiH;
     const sections = prediction.commanderAssessment?.sections ?? [];
-    const forceBalance = getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio);
-    const predictedOutcomeLabel = formatPlanningPredictedOutcome(prediction.overall.predictedOutcome);
+    const forceBalance = prediction.overall.forceRatio == null
+        ? null
+        : getPlayerSafeOperationBalancePresentation(prediction.overall.forceRatio);
+    const predictedOutcomeLabel = prediction.overall.predictedOutcome == null
+        ? t('corpsFront.unreported')
+        : formatPlanningPredictedOutcome(prediction.overall.predictedOutcome);
     const recommendedActionLabel = formatPlanningRecommendation(prediction.overall.recommendedAction);
 
     return (
@@ -69,9 +73,9 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                 <div className="text-[9px] font-bold uppercase tracking-wider text-[#1a1610] mb-2">{t('opsPlanning.narrative.quickAssessment')}</div>
                 <div className="grid grid-cols-2 gap-1 text-[9px]">
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.forceBalance')}</span>
-                    <span className={`font-bold uppercase ${forceBalance.toneClass}`}>{forceBalance.label}</span>
+                    <span className={`font-bold uppercase ${forceBalance?.toneClass ?? 'text-[#1a1610]'}`}>{forceBalance?.label ?? t('corpsFront.unreported')}</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.intelConfidence')}</span>
-                    <span className="font-bold text-[#1a1610]">{Math.round(prediction.overall.intelConfidence * 100)}%</span>
+                    <span className="font-bold text-[#1a1610]">{prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : `${Math.round(prediction.overall.intelConfidence * 100)}%`}</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.predicted')}</span>
                     <span className="font-bold text-[#1a1610]">{predictedOutcomeLabel}</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.recommendation')}</span>
@@ -100,8 +104,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.enemyLine', {
-                                summary: forceBalance.summary,
-                                confidence: (prediction.overall.intelConfidence * 100).toFixed(0),
+                                summary: forceBalance?.summary ?? t('corpsFront.unreported'),
+                                confidence: prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : (prediction.overall.intelConfidence * 100).toFixed(0),
                             })}
                         </div>
                     </div>
@@ -111,7 +115,7 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                         </div>
                         <div className="text-[10px] text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.ownLine', {
-                                casualties: prediction.overall.estimatedCasualties.toLocaleString(),
+                                casualties: prediction.overall.estimatedCasualties == null ? t('corpsFront.unreported') : prediction.overall.estimatedCasualties.toLocaleString(),
                                 outcome: predictedOutcomeLabel,
                             })}
                         </div>
