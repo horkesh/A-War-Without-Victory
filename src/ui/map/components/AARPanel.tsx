@@ -23,6 +23,12 @@ import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import { inspectOnField } from '../utils/shellNavigation';
 import { resolveMapFormationInspectionTarget } from '../map/mapSelectionRouting';
 
+type BattleCasualtyPayload = TurnBattle & {
+    attacker_casualties?: number | null;
+    defender_casualties?: number | null;
+    casualties_reported?: boolean;
+};
+
 // --- Faction colors ---
 const FACTION_COLOR: Record<string, string> = {
     RS: '#c04040',
@@ -67,6 +73,10 @@ const CONFIDENCE_BAND_LABEL_KEY: Record<string, MessageKey> = {
     medium: 'aar.confidence.medium',
     high: 'aar.confidence.high',
 };
+
+function reportedNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
 
 // --- Notable event labels ---
 const NOTABLE_LABEL_KEY: Record<TurnNotableEvent['kind'], MessageKey> = {
@@ -213,6 +223,13 @@ function BattleRow({
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
         : null;
+    const casualtyPayload: BattleCasualtyPayload = battle;
+    const attackerCasualties = reportedNumber(casualtyPayload.attacker_casualties);
+    const defenderCasualties = reportedNumber(casualtyPayload.defender_casualties);
+    const casualtiesReported = casualtyPayload.casualties_reported !== false
+        && attackerCasualties !== null
+        && defenderCasualties !== null;
+    const hasReportedLosses = casualtiesReported && (attackerCasualties > 0 || defenderCasualties > 0);
 
     return (
         <div
@@ -231,9 +248,14 @@ function BattleRow({
                 </div>
                 <span className={`${outcomeColor} font-mono text-[10px] shrink-0 ml-2`}>{outcomeLabel}</span>
             </div>
-            {(battle.attacker_casualties > 0 || battle.defender_casualties > 0) && (
+            {hasReportedLosses && (
                 <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
-                    {t('aar.attackerShort')} −{battle.attacker_casualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{battle.defender_casualties.toLocaleString()}
+                    {t('aar.attackerShort')} −{attackerCasualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{defenderCasualties.toLocaleString()}
+                </div>
+            )}
+            {!casualtiesReported && (
+                <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
+                    {t('aar.casualtiesUnreported')}
                 </div>
             )}
             {battle.execution_friction && (

@@ -57,6 +57,8 @@ export interface CorpsCardProps {
   activeOperationName?: string;
   /** Active operation phase (if any). */
   activeOperationPhase?: string;
+  /** True when the phase fallback is a placeholder rather than reported lifecycle truth. */
+  activeOperationPhaseUnreported?: boolean;
 }
 
 function getAvgCohesion(brigades: FormationView[]): number | null {
@@ -75,8 +77,28 @@ function getCohesionBarColor(cohesion: number | null): string {
 }
 
 function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+  if (summary.unreportedCount > 0 && summary.reportedCount === 0) return t('corpsFront.unreported');
   const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
   return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
+}
+
+function formatEquipmentTitle(
+  kind: 'tanks' | 'artillery',
+  summary: EquipmentConditionSummary,
+): string {
+  if (summary.unreportedCount > 0) {
+    return t(kind === 'tanks' ? 'corpsCard.tanksTitleSparse' : 'corpsCard.artilleryTitleSparse', {
+      value: formatEquipmentSummary(summary),
+    });
+  }
+  return t(kind === 'tanks' ? 'corpsCard.tanksTitle' : 'corpsCard.artilleryTitle', {
+    operational: Math.round(summary.operational),
+    total: Math.round(summary.total),
+  });
+}
+
+function activeOperationPhaseLabel(phase: string, unreported?: boolean): string {
+  return unreported ? getPlayerSafeOperationPhaseLabel(null) : getPlayerSafeOperationPhaseLabel(phase);
 }
 
 function getEquipmentSummary(brigades: FormationView[]): { tanks: EquipmentConditionSummary; arty: EquipmentConditionSummary } {
@@ -126,6 +148,7 @@ export function CorpsCard({
   sectorCount,
   activeOperationName,
   activeOperationPhase,
+  activeOperationPhaseUnreported,
 }: CorpsCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const displayName = getPlayerSafeCorpsName(corpsName, corpsId);
@@ -216,14 +239,14 @@ export function CorpsCard({
         {(equip.tanks.total > 0 || equip.arty.total > 0) && (
           <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
             {equip.tanks.total > 0 && (
-              <span className="flex items-center gap-1" title={t('corpsCard.tanksTitle', { operational: Math.round(equip.tanks.operational), total: Math.round(equip.tanks.total) })}>
+              <span className="flex items-center gap-1" title={formatEquipmentTitle('tanks', equip.tanks)}>
                 <Icon name="tanks" size={13} />
                 <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.tanks')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.tanks)}</span>
               </span>
             )}
             {equip.arty.total > 0 && (
-              <span className="flex items-center gap-1" title={t('corpsCard.artilleryTitle', { operational: Math.round(equip.arty.operational), total: Math.round(equip.arty.total) })}>
+              <span className="flex items-center gap-1" title={formatEquipmentTitle('artillery', equip.arty)}>
                 <Icon name="artillery" size={13} />
                 <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.arty')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.arty)}</span>
@@ -262,13 +285,15 @@ export function CorpsCard({
           )}
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onOrbatClick?.(); }}
-          className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
-        >
-          {t('corpsCard.orbat')}
-        </button>
+        {onOrbatClick && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onOrbatClick(); }}
+            className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
+          >
+            {t('corpsCard.orbat')}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -327,7 +352,7 @@ export function CorpsCard({
               <div className="text-[11px]">
                 <span className="text-red-400 font-bold uppercase">{activeOperationName}</span>
                 {activeOperationPhase && (
-                  <span className="text-text-secondary ml-1.5">({getPlayerSafeOperationPhaseLabel(activeOperationPhase)})</span>
+                  <span className="text-text-secondary ml-1.5">({activeOperationPhaseLabel(activeOperationPhase, activeOperationPhaseUnreported)})</span>
                 )}
               </div>
             </div>

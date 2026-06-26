@@ -11,10 +11,10 @@ import {
   getPlayerSafeCorpsName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
-  getPlayerSafeOperationPhaseLabel,
   getPlayerSafeDisplayLabel,
   getPlayerSafeSectorStrengthLabel,
 } from '../utils/playerSafeText';
+import { getOperationPhaseLabel } from '../utils/operations';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
@@ -354,6 +354,10 @@ export function OOBSidebar() {
                   );
                   const hqEntries = Array.from(reserveByCorps.entries()).filter(([id]) => armyHqIds.has(id));
                   const corpsEntriesById = new Map(Array.from(byCorps.entries()).filter(([id]) => !armyHqIds.has(id)));
+                  const ungroupedReserveBrigades = reserveByCorps.get('_ungrouped') ?? [];
+                  if (ungroupedReserveBrigades.length > 0) {
+                    corpsEntriesById.set('_ungrouped', ungroupedReserveBrigades);
+                  }
                   for (const command of phantomCommandFormations) {
                     if (corpsEntriesById.has(command.id)) continue;
                     corpsEntriesById.set(command.id, []);
@@ -499,37 +503,62 @@ export function OOBSidebar() {
                               ? getSyntheticJnaCommandPresentation(corpsFormation, corpsOps, loadedGameState)
                               : null;
                             return (
-                              <CorpsCard
-                                key={corpsId}
-                                corpsId={corpsId}
-                                corpsName={corpsId === '_ungrouped'
-                                  ? 'Ungrouped'
-                                  : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
-                                brigades={brigades}
-                                faction={faction}
-                                stance={getCorpsStance(corpsId, faction)}
-                                onHeaderClick={() => {
-                                  if (corpsId !== '_ungrouped') {
-                                    setSelectedCorpsId(corpsId);
-                                  } else {
-                                    const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
-                                    if (first) setSelectedFormationId(first.id);
-                                  }
-                                }}
-                                onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
-                                onMouseEnter={() => setHoveredCorpsId(corpsId)}
-                                onMouseLeave={() => setHoveredCorpsId(null)}
-                                onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
-                                sectorCount={corpsSectors.length}
-                                activeOperationName={displayedOp?.display_name}
-                                activeOperationPhase={displayedOp?.phase}
-                                commanderName={syntheticCommand?.commanderName ?? commander?.name}
-                                commanderActing={syntheticCommand ? false : commander?.acting}
-                                commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
-                                commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {
-                                  operation: syntheticCommand.operationName ?? t('corpsCard.syntheticJnaOperationFallback'),
-                                }) : undefined}
-                              />
+                              <div key={corpsId} className="space-y-1">
+                                <CorpsCard
+                                  corpsId={corpsId}
+                                  corpsName={corpsId === '_ungrouped'
+                                    ? 'Ungrouped'
+                                    : getPlayerSafeCorpsName(corpsFormationById.get(corpsId)?.name, corpsId)}
+                                  brigades={brigades}
+                                  faction={faction}
+                                  stance={getCorpsStance(corpsId, faction)}
+                                  onHeaderClick={corpsId !== '_ungrouped'
+                                    ? () => setSelectedCorpsId(corpsId)
+                                    : undefined}
+                                  onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
+                                  onMouseEnter={() => setHoveredCorpsId(corpsId)}
+                                  onMouseLeave={() => setHoveredCorpsId(null)}
+                                  onOrbatClick={corpsId !== '_ungrouped'
+                                    ? () => setSelectedOrbatCorpsId(corpsId)
+                                    : undefined}
+                                  sectorCount={corpsSectors.length}
+                                  activeOperationName={displayedOp?.display_name}
+                                  activeOperationPhase={displayedOp?.phase}
+                                  activeOperationPhaseUnreported={displayedOp?.phase_unreported}
+                                  commanderName={syntheticCommand?.commanderName ?? commander?.name}
+                                  commanderActing={syntheticCommand ? false : commander?.acting}
+                                  commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
+                                  commanderDetail={syntheticCommand ? t('corpsCard.syntheticJnaStaff', {
+                                    operation: syntheticCommand.operationName ?? t('corpsCard.syntheticJnaOperationFallback'),
+                                  }) : undefined}
+                                />
+                                {corpsId === '_ungrouped' && brigades.length > 0 && (
+                                  <div className="ml-2 border-l border-panel-border/60 pl-2 space-y-0.5">
+                                    {brigades.map((brigade) => {
+                                      const brigadeName = getLocalizedFormationName(brigade, locale);
+                                      const inspectLabel = t('orbat.inspectOnField', { formation: brigadeName });
+                                      return (
+                                        <button
+                                          key={brigade.id}
+                                          type="button"
+                                          data-testid="oob-ungrouped-brigade"
+                                          data-formation-id={brigade.id}
+                                          aria-label={inspectLabel}
+                                          title={inspectLabel}
+                                          className="block w-full truncate rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1 text-left text-[10px] text-accent-gold/80 hover:border-accent-gold/50 hover:text-accent-gold focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-accent-gold/70"
+                                          onMouseEnter={() => setHoveredOsids(brigade.location_osid ? [brigade.location_osid] : [])}
+                                          onMouseLeave={() => setHoveredOsids([])}
+                                          onClick={() => inspectOnField(useGameStore.getState(), brigade.location_osid
+                                            ? { kind: 'field-formation-at-settlement', formationId: brigade.id, osid: brigade.location_osid }
+                                            : { kind: 'field-formation', formationId: brigade.id })}
+                                        >
+                                          {brigadeName}
+                                        </button>
+                                      );
+                                    })}
+                                  </div>
+                                )}
+                              </div>
                             );
                           })}
                         </>
@@ -612,7 +641,8 @@ export function OOBSidebar() {
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {ops.map((op) => {
-                        const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
+                        const phaseBg = op.phase_unreported ? 'bg-neutral-600/60' : op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
+                        const phaseLabel = getOperationPhaseLabel(op);
                         const objTotal = op.objectives?.length ?? 0;
                         const objDisplayCurrent = objTotal > 0 && typeof op.current_objective_index === 'number'
                           ? Math.min(objTotal, Math.max(1, op.current_objective_index + 1))
@@ -634,7 +664,7 @@ export function OOBSidebar() {
                             </div>
                             <div className="flex items-center gap-2 text-[10px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
-                                {getPlayerSafeOperationPhaseLabel(op.phase)}
+                                {phaseLabel}
                               </span>
                               {op.momentum != null && (
                                 <span className="text-text-secondary">{t('operationsSection.momShort')} {op.momentum}</span>

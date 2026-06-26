@@ -503,4 +503,47 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('Enemy picture unconfirmed');
     expect(container.textContent).not.toMatch(/OFFENSIVE SIGNS|Recommend|overmatch/i);
   });
+
+  it('marks recent engagement losses unreported when battle casualty sources are missing', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:cost_gap',
+      display_name: 'Cost gap front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 1,
+      density: 0,
+      sub_segments: [{ friendly_osids: ['op:test:cost-gap'], hostile_osids: ['op:test:hostile'] }],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    useGameStore.setState({ loadedGameState: makeState(sector) });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [{
+        turn: 3,
+        osid: 'op:test:cost-gap',
+        attacker_faction: 'RBiH',
+        defender_faction: 'RS',
+        outcome: 'stalemate',
+        attacker_casualties: null,
+        defender_casualties: null,
+        casualties_reported: false,
+        territory_flipped: false,
+        primary_attacker_id: 'arbih_1st_corps',
+        all_attacker_ids: ['arbih_1st_corps'],
+        was_concentrated: false,
+      } as any],
+      defaultOpen: true,
+    }));
+
+    expect(container.textContent).toMatch(/recent engagements/i);
+    expect(container.textContent).toContain('Casualties unreported');
+    expect(container.textContent).not.toContain('0 personnel lost');
+  });
 });

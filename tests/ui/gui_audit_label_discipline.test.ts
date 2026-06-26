@@ -1035,6 +1035,20 @@ describe('GUI audit label discipline', () => {
     expect(partialContainer.textContent).not.toContain('18/20');
     cleanup();
 
+    const { container: corpsCardSparseEquipment } = render(createElement(CorpsCard, {
+      corpsId: 'arbih_1st_corps',
+      corpsName: '1st Corps',
+      brigades: [partiallyReported],
+      faction: 'RBiH',
+    } as Parameters<typeof CorpsCard>[0]));
+    expect(corpsCardSparseEquipment.textContent).toContain('Unreported');
+    expect(corpsCardSparseEquipment.textContent).not.toContain('0/10');
+    expect(corpsCardSparseEquipment.textContent).not.toContain('0/5');
+    expect(corpsCardSparseEquipment.querySelector('[title="Tanks: Unreported"]')).toBeTruthy();
+    expect(corpsCardSparseEquipment.querySelector('[title="Artillery: Unreported"]')).toBeTruthy();
+    expect(corpsCardSparseEquipment.querySelector('[title="Tanks: 0 operational / 10 total"]')).toBeNull();
+    cleanup();
+
     useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
     const { container: orbatContainer } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [first] }));
 
@@ -1526,7 +1540,7 @@ describe('GUI audit label discipline', () => {
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);
     expect(corpsFrontSource).not.toMatch(/`~\$\{sector\.length_edges\} km`/);
-    expect(corpsCardSource).toContain('getPlayerSafeOperationPhaseLabel(activeOperationPhase)');
+    expect(corpsCardSource).toContain('activeOperationPhaseLabel(activeOperationPhase');
   });
 
   it('uses a contextual accessible close name for the Army Reserve panel', () => {

@@ -106,6 +106,7 @@ function roundConditionLabel(value: number | null): string {
 }
 
 function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+    if (summary.unreportedCount > 0 && summary.reportedCount === 0) return t('corpsFront.unreported');
     const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
     return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
 }

@@ -1443,7 +1443,8 @@ describe('buildPresidentialDecisionRoomView', () => {
       advanceSensitive: true,
       navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
     });
-    expect(fallbackView.activeDossier?.cardId).toBe(defaultView.cards[0]?.id);
+    expect(fallbackView.cards.map((card) => card.id)).toEqual(defaultView.cards.map((card) => card.id));
+    expect(fallbackView.activeDossier).toBeNull();
   });
 
   it('populates an authorize-op directive (cost 0) on an opportunity card with an enabled approve action', () => {

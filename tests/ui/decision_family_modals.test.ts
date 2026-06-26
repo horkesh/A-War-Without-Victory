@@ -241,6 +241,35 @@ describe('decision family modals', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
+  it('does not substitute the first officer matter when the requested id is stale', () => {
+    const { container } = render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:replacement_suggested:stale_officer',
+      state: makeState({
+        pendingOfficerEvents: [
+          {
+            event_id: 'evt-first',
+            type: 'replacement_suggested',
+            faction: 'RS',
+            turn: 1,
+            officer_id: 'first-officer',
+            officer_name: 'First Officer',
+            officer_competence: 4,
+            officer_aggressiveness: 3,
+            officer_defensive_skill: 4,
+            acknowledged: false,
+            reason: 'First matter.',
+          },
+        ],
+      }),
+      onClose: vi.fn(),
+      onOpenPersonnel: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('The personnel matter is no longer pending.');
+    expect(container.textContent).not.toContain('First Officer');
+    expect(screen.getByRole('button', { name: 'Acknowledge' }).getAttribute('disabled')).not.toBeNull();
+  });
+
   it('requires intelligence briefs to be opened and acknowledged as a readable brief', () => {
     render(React.createElement(IntelligenceBriefModal, {
       notificationId: 'intel:intel-1',

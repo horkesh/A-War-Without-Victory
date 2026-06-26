@@ -260,6 +260,43 @@ describe('buildTurnAftermathView', () => {
     ]);
   });
 
+  it('keeps sparse battle casualties and absent displacement from becoming exact cost drivers', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 13,
+          territory_net: { RBiH: 1 },
+          battles: [{
+            osid: 'op:test:sparse',
+            attacker_faction: 'RBiH',
+            defender_faction: 'RS',
+            primary_attacker_id: 'arbih_1',
+            primary_defender_id: 'rs_1',
+            all_attacker_ids: ['arbih_1'],
+            outcome: 'stalemate' as never,
+            attacker_casualties: undefined as never,
+            defender_casualties: 60,
+            territory_flipped: false,
+            was_concentrated: false,
+          }],
+          displacement_total: undefined as never,
+        }),
+      }),
+    })!;
+
+    expect(view.combat).toMatchObject({
+      friendlyBattleCount: 1,
+      friendlyCasualties: 0,
+      opposingCasualties: 60,
+    });
+    expect(view.humanitarian.displacedThisTurn).toBe(0);
+    expect(view.cost.friendlyMilitaryCasualties).toBe(0);
+    expect(view.cost.theaterMilitaryCasualties).toBe(60);
+    expect(view.cost.displacedThisTurn).toBe(0);
+    expect(view.cost.severity).toBe('moderate');
+    expect(view.cost.reasons).toEqual(['No major costs recorded']);
+  });
+
   it('derives loss and quiet tones from the player faction net change', () => {
     const loss = buildTurnAftermathView({
       nextState: makeState({ latestTurnSummary: makeSummary({ territory_net: { RBiH: -3, RS: 3 } }) }),

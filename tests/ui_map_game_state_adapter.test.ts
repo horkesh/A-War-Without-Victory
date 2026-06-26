@@ -1018,6 +1018,48 @@ test('parseGameState derives operation readiness and offensive metadata', () => 
     assert.equal(operation?.avg_personnel_pct, 0.7);
 });
 
+test('parseGameState leaves operation readiness unreported when participant or intel inputs are sparse', () => {
+    const parsed = parseGameState({
+        meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                rbih_corps: { id: 'rbih_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps', tags: [] },
+                reported_bde: { id: 'reported_bde', faction: 'RBiH', corps_id: 'rbih_corps', name: 'Reported Brigade', kind: 'brigade', cohesion: 80, personnel: 2000, tags: [] },
+                sparse_bde: { id: 'sparse_bde', faction: 'RBiH', corps_id: 'rbih_corps', name: 'Sparse Brigade', kind: 'brigade', tags: [] },
+            },
+            sector_intel: {
+                rbih_sector_1: [
+                    { enemy_sector_id: 'rs_sector_1', confidence: 0.65 },
+                    { enemy_sector_id: 'rs_sector_2' },
+                ],
+            },
+            corps_command: {
+                rbih_corps: {
+                    active_operations: [{
+                        name: 'Sparse Readiness',
+                        type: 'sector_attack',
+                        phase: 'planning',
+                        sector_id: 'rbih_sector_1',
+                        participating_brigades: ['reported_bde', 'sparse_bde'],
+                        objectives: ['op:drina:1'],
+                        started_turn: 14,
+                    }],
+                },
+            },
+        } as any,
+        political: {
+            political_controllers: {},
+        } as any,
+    });
+
+    const operation = parsed.operations?.[0];
+    assert.ok(operation);
+    assert.equal(operation?.avg_cohesion, undefined);
+    assert.equal(operation?.avg_personnel_pct, undefined);
+    assert.equal(operation?.readiness?.cohesion, undefined);
+    assert.equal(operation?.readiness?.intel, undefined);
+});
+
 test('parseGameState flags sparse operation lifecycle fields instead of inventing execution progress', () => {
     const parsed = parseGameState({
         meta: { turn: 16, phase: 'war', player_faction: 'RBiH' },
@@ -1036,6 +1078,12 @@ test('parseGameState flags sparse operation lifecycle fields instead of inventin
                         current_objective_index: Number.POSITIVE_INFINITY,
                         momentum: Number.NaN,
                         supply_readiness: Number.NEGATIVE_INFINITY,
+                        preparation_turns_elapsed: Number.NaN,
+                        preparation_max_turns: Number.POSITIVE_INFINITY,
+                        intel_confidence_at_assessment: Number.NEGATIVE_INFINITY,
+                        supply_readiness_at_assessment: Number.NaN,
+                        force_ratio_estimate: Number.POSITIVE_INFINITY,
+                        postponement_count: Number.NaN,
                         axes: [{
                             axis_id: 'axis_sparse',
                             name: 'Axis Sparse',
@@ -1062,6 +1110,12 @@ test('parseGameState flags sparse operation lifecycle fields instead of inventin
     assert.equal(operation?.momentum, undefined);
     assert.equal(operation?.supply_readiness, undefined);
     assert.equal(operation?.readiness?.supply, undefined);
+    assert.equal(operation?.preparation_turns_elapsed, undefined);
+    assert.equal(operation?.preparation_max_turns, undefined);
+    assert.equal(operation?.intel_confidence_at_assessment, undefined);
+    assert.equal(operation?.supply_readiness_at_assessment, undefined);
+    assert.equal(operation?.force_ratio_estimate, undefined);
+    assert.equal(operation?.postponement_count, undefined);
     assert.deepEqual(operation?.axes?.[0], {
         axis_id: 'axis_sparse',
         name: 'Axis Sparse',

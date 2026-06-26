@@ -1,4 +1,5 @@
 import type { OperationView } from '../data/types';
+import { getPlayerSafeOperationPhaseLabel } from './playerSafeText';
 
 /** Stable unique key for an operation (matches store selectedOperationKey format). */
 export function getOperationId(op: OperationView): string {
@@ -13,6 +14,16 @@ export function getOperationPhaseBadgeClass(phase: string): string {
     case 'recovery':  return 'bg-neutral-600/80';
     default:          return 'bg-neutral-600/80';
   }
+}
+
+export function getOperationPhaseBadgeClassForOperation(op: OperationView): string {
+  return op.phase_unreported ? 'bg-neutral-600/80' : getOperationPhaseBadgeClass(op.phase);
+}
+
+export function getOperationPhaseLabel(op: OperationView): string {
+  return op.phase_unreported
+    ? getPlayerSafeOperationPhaseLabel(null)
+    : getPlayerSafeOperationPhaseLabel(op.phase);
 }
 
 /** Tailwind classes (bg + border + text) for the phase timeline indicator. */

@@ -339,6 +339,76 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).not.toMatch(/\badequate\b/);
   });
 
+  it('exposes no-corps brigades as individual drilldowns without fake ungrouped ORBAT routing', () => {
+    const state = makeState();
+    state.formations = [
+      ...(state.formations ?? []),
+      {
+        id: 'vrs_field_corps',
+        faction: 'RS',
+        name: 'Field Corps',
+        kind: 'corps',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 1200,
+      },
+      {
+        id: 'field_corps_bde',
+        faction: 'RS',
+        name: 'Field Corps Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 500,
+        corps_id: 'vrs_field_corps',
+      },
+      {
+        id: 'independent_bde',
+        faction: 'RS',
+        name: 'Independent Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 65,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 450,
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
+    expect(orbatButtons).toHaveLength(1);
+    fireEvent.click(orbatButtons[0]);
+
+    expect(useGameStore.getState().selectedFormationId).toBeNull();
+    expect(useGameStore.getState().selectedOrbatCorpsId).toBe('vrs_field_corps');
+    expect(useGameStore.getState().selectedOrbatCorpsId).not.toBe('_ungrouped');
+
+    const independentButton = screen.getByTestId('oob-ungrouped-brigade');
+    expect(independentButton.getAttribute('data-formation-id')).toBe('independent_bde');
+    expect(independentButton.getAttribute('aria-label')).toBe('Inspect Independent Brigade on field');
+    expect(independentButton.getAttribute('title')).toBe('Inspect Independent Brigade on field');
+    fireEvent.click(independentButton);
+
+    const store = useGameStore.getState();
+    expect(store.selectedFormationId).toBe('independent_bde');
+    expect(store.selectedOrbatCorpsId).toBeNull();
+    expect(store.selectedCorpsId).toBeNull();
+    expect(derivePanelRailState(store)).toEqual({ primary: 'formation', secondary: null });
+  });
+
   it('renders sparse mobilization reports as unreported without hiding explicit zeroes', () => {
     const state = makeState();
     state.mobilizationSummary = {

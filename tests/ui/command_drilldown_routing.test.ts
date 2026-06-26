@@ -245,6 +245,27 @@ describe('command drilldown routing', () => {
     expect(store.focusedOperationHistoryId).toBeNull();
   });
 
+  it('renders unreported CorpsDetail operation phase as status pending instead of planning', () => {
+    const state = makeState();
+    state.operations = state.operations?.map((operation) => ({
+      ...operation,
+      phase: 'planning',
+      phase_unreported: true,
+    })) as LoadedGameState['operations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
+
+    expect(container.textContent).toContain('Status pending');
+    expect(container.textContent).not.toContain('Planning');
+  });
+
   it('renders missing CorpsDetail operation momentum as unreported instead of green zero', () => {
     const state = makeState();
     state.operations = [{

@@ -280,6 +280,10 @@ function buildNarrativeLine(tone: TurnAftermathTone): string {
   return t('turnAftermath.narrative.quiet');
 }
 
+function reportedNumber(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | null): {
   involved: boolean;
   friendlyCasualties: number;
@@ -291,15 +295,15 @@ function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | n
   if (battle.attacker_faction === playerFaction) {
     return {
       involved: true,
-      friendlyCasualties: battle.attacker_casualties,
-      opposingCasualties: battle.defender_casualties,
+      friendlyCasualties: reportedNumber(battle.attacker_casualties) ?? 0,
+      opposingCasualties: reportedNumber(battle.defender_casualties) ?? 0,
     };
   }
   if (battle.defender_faction === playerFaction) {
     return {
       involved: true,
-      friendlyCasualties: battle.defender_casualties,
-      opposingCasualties: battle.attacker_casualties,
+      friendlyCasualties: reportedNumber(battle.defender_casualties) ?? 0,
+      opposingCasualties: reportedNumber(battle.attacker_casualties) ?? 0,
     };
   }
   return { involved: false, friendlyCasualties: 0, opposingCasualties: 0 };
@@ -337,7 +341,9 @@ function buildTurnCost(input: {
   ownFormationsDestroyed: number;
 }): TurnAftermathCostView {
   const theaterMilitaryCasualties = (input.summary?.battles ?? []).reduce(
-    (total, battle) => total + battle.attacker_casualties + battle.defender_casualties,
+    (total, battle) => total
+      + (reportedNumber(battle.attacker_casualties) ?? 0)
+      + (reportedNumber(battle.defender_casualties) ?? 0),
     0,
   );
   const ownSupplyDelta = input.playerFaction
@@ -348,7 +354,7 @@ function buildTurnCost(input: {
     : 0;
   const ownSupplySpent = Math.max(0, -ownSupplyDelta);
   const ownHeavyMunitionsSpent = Math.max(0, -ownHeavyMunitionsDelta);
-  const displacedThisTurn = input.summary?.displacement_total ?? 0;
+  const displacedThisTurn = reportedNumber(input.summary?.displacement_total) ?? 0;
 
   let severity: TurnAftermathCostSeverity = 'low';
   if (

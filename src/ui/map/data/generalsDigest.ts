@@ -81,6 +81,8 @@ export interface GeneralsDigestTurn {
     netTerritory: number;
     /** Friendly casualties suffered by the player this turn (across all battles). */
     friendlyCasualties: number;
+    /** True only when every player-involved battle reported the player-side casualty figure. */
+    friendlyCasualtiesReported: boolean;
     /** Own formations lost this turn. */
     ownFormationsDestroyed: number;
     /** How many battles the player was a party to this turn. */
@@ -192,17 +194,21 @@ export function deriveActiveOps(
 }
 
 /** Sum a battle's casualties from the player's perspective (attacker or defender). */
-function friendlyCasualtiesFromBattle(battle: unknown, playerFaction: DigestFaction): number {
+function reportedNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function friendlyCasualtiesFromBattle(battle: unknown, playerFaction: DigestFaction): number | null {
     const b = battle as {
         attacker_faction?: unknown;
         defender_faction?: unknown;
         attacker_casualties?: unknown;
         defender_casualties?: unknown;
     } | null;
-    if (!b) return 0;
-    if (b.attacker_faction === playerFaction) return Number(b.attacker_casualties ?? 0) || 0;
-    if (b.defender_faction === playerFaction) return Number(b.defender_casualties ?? 0) || 0;
-    return 0;
+    if (!b) return null;
+    if (b.attacker_faction === playerFaction) return reportedNumber(b.attacker_casualties);
+    if (b.defender_faction === playerFaction) return reportedNumber(b.defender_casualties);
+    return null;
 }
 
 /** True if the player was a party (attacker or defender) to this battle. */
@@ -231,11 +237,17 @@ export function deriveDigestTurn(
         ? ((s as { battles: unknown[] }).battles)
         : [];
     let friendlyCasualties = 0;
+    let friendlyCasualtiesReported = true;
     let battleCount = 0;
     for (const battle of battles) {
         if (!playerInBattle(battle, playerFaction)) continue;
         battleCount += 1;
-        friendlyCasualties += friendlyCasualtiesFromBattle(battle, playerFaction);
+        const reported = friendlyCasualtiesFromBattle(battle, playerFaction);
+        if (reported === null) {
+            friendlyCasualtiesReported = false;
+        } else {
+            friendlyCasualties += reported;
+        }
     }
 
     const narrateTerritory = shouldNarrateTerritorySummary(s);
@@ -268,6 +280,7 @@ export function deriveDigestTurn(
         activeOps: deriveActiveOps(corpsCommand, playerFaction),
         netTerritory,
         friendlyCasualties,
+        friendlyCasualtiesReported,
         ownFormationsDestroyed,
         battleCount,
         notableGains,
@@ -351,7 +364,7 @@ export function generalsDigestGloss(digest: GeneralsDigestTurn): string {
         clauses.push(t('chronicle.generated.generals.clause.formationsLost', {
             count: digest.ownFormationsDestroyed,
         }));
-    } else if (digest.friendlyCasualties > 0) {
+    } else if (digest.friendlyCasualtiesReported && digest.friendlyCasualties > 0) {
         clauses.push(t('chronicle.generated.generals.clause.casualtiesBorne', {
             count: digest.friendlyCasualties,
         }));

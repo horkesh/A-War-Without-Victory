@@ -633,6 +633,22 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('No active operations');
   });
 
+  it('renders unreported OOB operation phase as status pending instead of planning', () => {
+    const sparse = { ...operation(), phase: 'planning' as const, phase_unreported: true };
+    useGameStore.setState({
+      loadedGameState: {
+        ...loadedState(),
+        operations: [sparse],
+      } as LoadedGameState,
+    });
+
+    const { container } = render(createElement(OOBSidebar));
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+
+    expect(container.textContent).toContain('Status pending');
+    expect(container.textContent).not.toContain('Planning');
+  });
+
   it('labels OOB sector frontage as front segments instead of kilometers', () => {
     useGameStore.setState({
       loadedGameState: {

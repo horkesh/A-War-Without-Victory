@@ -4,9 +4,9 @@ import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { buildSectorFormationAssignment, collectSectorFriendlyOsids } from '../utils/sectorUtils';
-import { getOperationId, getOperationPhaseBadgeClass } from '../utils/operations';
+import { getOperationId, getOperationPhaseBadgeClassForOperation, getOperationPhaseLabel } from '../utils/operations';
 import { getPanelRailStyle } from './panelRail';
-import { getPlayerSafeMilitaryFactionName, getPlayerSafeOperationPhaseLabel } from '../utils/playerSafeText';
+import { getPlayerSafeMilitaryFactionName } from '../utils/playerSafeText';
 import { getPlayerSafeOperationBalancePresentation } from '../../../shared/playerSafeOperationBalance';
 import { getPlayerSafeThreatPresentation } from '../utils/playerSafeThreat';
 import { useIPC } from '../desktop/useIPC';
@@ -972,7 +972,8 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                   <div className="text-[10px] text-neutral-500 italic uppercase">{t('corpsFront.noActiveDirectives')}</div>
                 ) : (
                   relatedOperations.map((op) => {
-                    const phaseBg = getOperationPhaseBadgeClass(op.phase);
+                    const phaseBg = getOperationPhaseBadgeClassForOperation(op);
+                    const phaseLabel = getOperationPhaseLabel(op);
                     const operationId = getOperationId(op);
                     const currentObjectiveIndex = typeof op.current_objective_index === 'number'
                       ? op.current_objective_index
@@ -987,13 +988,13 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     return (
                       <div key={operationId} className="bg-neutral-100 border-2 border-neutral-300 p-2 relative shadow-sm">
                         {/* Stamp effect */}
-                        <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' ? 'text-red-600' : 'text-amber-600'}`}>
-                          {getPlayerSafeOperationPhaseLabel(op.phase)}
+                        <div className={`absolute top-1 right-2 opacity-20 font-black text-xl -rotate-12 select-none uppercase ${op.phase === 'execution' && !op.phase_unreported ? 'text-red-600' : op.phase_unreported ? 'text-neutral-600' : 'text-amber-600'}`}>
+                          {phaseLabel}
                         </div>
 
                         <div className="font-bold text-[12px] uppercase tracking-wide mb-1 flex items-center gap-2">
                           <span>{op.display_name}</span>
-                          <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{getPlayerSafeOperationPhaseLabel(op.phase)}</span>
+                          <span className={`px-1 rounded text-[8px] text-white ${phaseBg}`}>{phaseLabel}</span>
                         </div>
 
                         <div className="text-[9px] uppercase font-bold text-neutral-500 mb-0.5 mt-2">{t('corpsFront.forcesCommitted')}</div>

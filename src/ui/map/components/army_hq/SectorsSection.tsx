@@ -29,6 +29,12 @@ interface SectorsSectionProps {
     defaultOpen?: boolean;
 }
 
+type BattleCasualtyPayload = TurnBattle & {
+    attacker_casualties?: number | null;
+    defender_casualties?: number | null;
+    casualties_reported?: boolean;
+};
+
 const SECTOR_BATTLE_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
     decisive_victory: 'aar.outcome.decisive',
     victory: 'aar.outcome.victory',
@@ -63,6 +69,16 @@ function isReportedNumber(value: number | undefined | null): value is number {
 
 function reportedPersonnelLabel(value: number | undefined | null): string {
     return isReportedNumber(value) ? formatPersonnel(value) : t('corpsFront.unreported');
+}
+
+function reportedBattleLossLabel(battle: TurnBattle): string {
+    const casualtyPayload: BattleCasualtyPayload = battle;
+    const attackerCasualties = isReportedNumber(casualtyPayload.attacker_casualties) ? casualtyPayload.attacker_casualties : null;
+    const defenderCasualties = isReportedNumber(casualtyPayload.defender_casualties) ? casualtyPayload.defender_casualties : null;
+    if (casualtyPayload.casualties_reported === false || attackerCasualties === null || defenderCasualties === null) {
+        return t('aar.casualtiesUnreported');
+    }
+    return t('sectorsSection.personnelLosses', { count: attackerCasualties + defenderCasualties });
 }
 
 function reportedCohesionLabel(value: number | undefined | null): { label: string; className: string } {
@@ -339,7 +355,7 @@ function SectorExpandedDetail({
                                 <span className="text-text-secondary truncate flex-1">
                                     {getOsidDisplayName(battle.osid, osidDisplayNames)}
                                 </span>
-                                <span className="text-red-500 font-bold shrink-0">{t('sectorsSection.personnelLosses', { count: battle.attacker_casualties + battle.defender_casualties })}</span>
+                                <span className="text-red-500 font-bold shrink-0">{reportedBattleLossLabel(battle)}</span>
                             </div>
                         ))}
                     </div>

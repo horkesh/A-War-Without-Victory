@@ -61,7 +61,7 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const rawId = itemId ? stripOfficerPrefix(itemId) : null;
-  const event = state?.pendingOfficerEvents?.find((entry) => matchesOfficerMatterId(entry, rawId)) ?? state?.pendingOfficerEvents?.[0] ?? null;
+  const event = state?.pendingOfficerEvents?.find((entry) => matchesOfficerMatterId(entry, rawId)) ?? null;
   const headerImage = getDecisionHeaderForFamily('officer_event');
 
   const acknowledge = async () => {
