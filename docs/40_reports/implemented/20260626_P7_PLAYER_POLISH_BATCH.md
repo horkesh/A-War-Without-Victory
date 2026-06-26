@@ -4,7 +4,7 @@
 
 **Branch:** `codex/p7-player-polish-batch`
 
-**Merge:** Pending GitHub verification and integration.
+**Merge:** PR #450 to `main` at `7204cffca`.
 
 ## Summary
 
@@ -30,8 +30,11 @@ Focused/local proof completed before documentation closeout:
 - `npm.cmd run qa:live-surface:browser` passed with tileless browser proof and dev-server cleanup.
 - `npm.cmd run desktop:map:build` passed; existing Vite browser-externalization and chunk-size warnings remain non-fatal.
 - `git diff --check` passed with only expected CRLF normalization warnings for existing Windows-touched files.
+- GitHub PR checks passed across Event System validation, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, `engine-health-188w` green-fast), structural fingerprint, and Full Suite.
 
 Generated browser/vitest evidence folders were removed after verification; `.tmp_dev_server` remains only for the active local browser session.
+
+The local/remote feature refs were deleted/pruned after merge, all scout agents were closed after report absorption, and the repo returned to one clean `main` worktree.
 
 ## Scope
 

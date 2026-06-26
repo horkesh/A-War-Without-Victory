@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P7 player-polish merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P7 implementation report, and ledger with the verified PR #450 closeout: merge to `main` at `7204cffca`, green GitHub PR checks, deleted/pruned branch refs, one clean `main` worktree, absorbed and closed Bacon, Ohm, Banach, Erdos, and Parfit, and recorded the next P8 queue from those scout reports.
+
+**Verification:** `gh pr checks 450` showed Event System validation, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and green-fast `engine-health-188w`), structural fingerprint, and Full Suite all passing before merge. `gh pr view 450` showed no comments or reviews. `git status --short --branch` showed clean `main...origin/main` before the docs-only closeout edits, `git worktree list` showed a single `main` worktree, and `git fetch --prune` removed the remote P7 ref.
+
+**Scope/determinism:** Documentation-only closeout. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed. `FORAWWV.md` was not edited.
+
+---
+
 ## [2026-06-26] fix(ui): implement P7 sparse-truth player polish
 
 **Type:** UI/read-model/map projection/rendering/test/docs polish.
