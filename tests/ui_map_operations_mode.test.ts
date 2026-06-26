@@ -1,8 +1,22 @@
-import { expect, it } from 'vitest';
-
+import { describe, expect, it } from 'vitest';
+import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import { buildOperationalWeightGeoJSON } from '../src/ui/map/map/builders/buildOperationalWeightGeoJSON.js';
 
-it('buildOperationalWeightGeoJSON classifies frontline effort from sector assignment and tempo', () => {
+function makeFieldedFormation(id: string, overrides: Record<string, unknown> = {}): LoadedGameState['formations'][number] {
+    return {
+        id,
+        name: id,
+        faction: 'RBiH',
+        kind: 'brigade',
+        status: 'active',
+        readiness: 'ready',
+        location_osid: 'op:gorazde:1',
+        ...overrides,
+    } as LoadedGameState['formations'][number];
+}
+
+describe('buildOperationalWeightGeoJSON', () => {
+it('classifies frontline effort from live fielded sector assignment and tempo', () => {
     const geojson = {
         type: 'FeatureCollection',
         features: [
@@ -57,8 +71,86 @@ it('buildOperationalWeightGeoJSON classifies frontline effort from sector assign
         },
     ] as any;
 
-    const result = buildOperationalWeightGeoJSON(geojson, sectors as any, frontEdges as any, operations);
+    const formations = ['b1', 'b2', 'b3', 'b4'].map((id) => makeFieldedFormation(id));
+    const result = buildOperationalWeightGeoJSON(geojson, sectors as any, frontEdges as any, operations, formations);
     expect(result.features.length).toBe(1);
     expect(result.features[0]?.properties.effort_class).toBe('main');
     expect(result.features[0]?.properties.has_active_operation).toBe(true);
+});
+
+it('does not paint effort from stale assigned roster ids', () => {
+    const geojson = {
+        type: 'FeatureCollection',
+        features: [{
+            type: 'Feature',
+            properties: { osid: 'op:gorazde:1' },
+            geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]] },
+        }],
+    } as any;
+    const sectors = [{
+        sector_id: 'rbih_sector',
+        corps_id: 'rbih_corps',
+        faction: 'RBiH',
+        edge_ids: ['op:foe:1__op:gorazde:1'],
+        assigned_brigade_ids: ['missing_brigade'],
+        reserve_brigade_ids: [],
+    }] as any;
+    const frontEdges = [{ edge_id: 'op:foe:1__op:gorazde:1', a: 'op:gorazde:1', b: 'op:foe:1', side_a: 'RBiH', side_b: 'RS' }] as any;
+
+    const result = buildOperationalWeightGeoJSON(geojson, sectors, frontEdges, undefined, []);
+
+    expect(result.features).toHaveLength(0);
+});
+
+it('does not paint effort from forming or destroyed assigned formations', () => {
+    const geojson = {
+        type: 'FeatureCollection',
+        features: [{
+            type: 'Feature',
+            properties: { osid: 'op:gorazde:1' },
+            geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]] },
+        }],
+    } as any;
+    const sectors = [{
+        sector_id: 'rbih_sector',
+        corps_id: 'rbih_corps',
+        faction: 'RBiH',
+        edge_ids: ['op:foe:1__op:gorazde:1'],
+        assigned_brigade_ids: ['forming_bde', 'destroyed_bde'],
+        reserve_brigade_ids: [],
+    }] as any;
+    const frontEdges = [{ edge_id: 'op:foe:1__op:gorazde:1', a: 'op:gorazde:1', b: 'op:foe:1', side_a: 'RBiH', side_b: 'RS' }] as any;
+    const formations = [
+        makeFieldedFormation('forming_bde', { readiness: 'forming' }),
+        makeFieldedFormation('destroyed_bde', { status: 'destroyed', readiness: 'destroyed' }),
+    ];
+
+    const result = buildOperationalWeightGeoJSON(geojson, sectors, frontEdges, undefined, formations);
+
+    expect(result.features).toHaveLength(0);
+});
+
+it('does not paint reserve-only sectors as operational effort', () => {
+    const geojson = {
+        type: 'FeatureCollection',
+        features: [{
+            type: 'Feature',
+            properties: { osid: 'op:gorazde:1' },
+            geometry: { type: 'Polygon', coordinates: [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]] },
+        }],
+    } as any;
+    const sectors = [{
+        sector_id: 'rbih_sector',
+        corps_id: 'rbih_corps',
+        faction: 'RBiH',
+        edge_ids: ['op:foe:1__op:gorazde:1'],
+        assigned_brigade_ids: [],
+        reserve_brigade_ids: ['reserve_bde'],
+    }] as any;
+    const frontEdges = [{ edge_id: 'op:foe:1__op:gorazde:1', a: 'op:gorazde:1', b: 'op:foe:1', side_a: 'RBiH', side_b: 'RS' }] as any;
+
+    const result = buildOperationalWeightGeoJSON(geojson, sectors, frontEdges, undefined, [makeFieldedFormation('reserve_bde')]);
+
+    expect(result.features).toHaveLength(0);
+});
 });

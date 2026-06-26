@@ -1,6 +1,6 @@
 import type { Feature, FeatureCollection, MultiPolygon, Polygon } from 'geojson';
-import type { CorpsFrontSectorView, FrontEdgeView, OperationView } from '../../data/types';
-import { collectSectorFriendlyOsids } from '../../utils/sectorUtils';
+import type { CorpsFrontSectorView, FormationView, FrontEdgeView, OperationView } from '../../data/types';
+import { buildSectorFormationAssignment, collectSectorFriendlyOsids } from '../../utils/sectorUtils';
 
 type EffortClass = 'holding' | 'supporting' | 'main';
 
@@ -25,6 +25,7 @@ export function buildOperationalWeightGeoJSON(
   sectors: CorpsFrontSectorView[],
   frontEdgesOsid: FrontEdgeView[],
   operations: OperationView[] | undefined,
+  formations: FormationView[] | undefined = undefined,
 ): FeatureCollection<Polygon | MultiPolygon, OperationalWeightProperties> {
   const operationsBySector = new Map<string, OperationView[]>();
   for (const operation of operations ?? []) {
@@ -39,7 +40,9 @@ export function buildOperationalWeightGeoJSON(
     const activeOperations = operationsBySector.get(sector.sector_id) ?? [];
     const activeOperation = activeOperations.find((operation) => operation.phase !== 'recovery');
     const aggressionModifier = activeOperation?.tempo === 'all_out' ? 0.1 : activeOperation?.tempo === 'methodical' ? -0.05 : 0;
-    const sectorBrigadeShare = Math.max(0, sector.assigned_brigade_ids.length / Math.max(1, sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length));
+    const assignment = buildSectorFormationAssignment(sector, formations, sectors);
+    if (assignment.lineHoldingIds.length === 0) continue;
+    const sectorBrigadeShare = Math.max(0, assignment.lineHoldingIds.length / Math.max(1, assignment.lineHoldingIds.length + assignment.reserveIds.length));
     const effort = Math.max(0, Math.min(1, sectorBrigadeShare * (1 + aggressionModifier)));
     const properties: OperationalWeightProperties = {
       osid: '',

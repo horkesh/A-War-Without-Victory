@@ -123,6 +123,28 @@ function formatOptionalInteger(value: number | null | undefined): string {
   return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
 }
 
+function isCommandFormation(formation: FormationView): boolean {
+  return formation.kind === 'corps' || formation.kind === 'corps_asset';
+}
+
+function formatReportedPercentValue(value: number | null | undefined): string {
+  return Number.isFinite(value) ? `${Math.round(value as number)}%` : t('corpsFront.unreported');
+}
+
+function formatReportedCommandSpan(value: number | null | undefined): string {
+  return Number.isFinite(value) ? `${(value as number).toFixed(1)}x` : t('corpsFront.unreported');
+}
+
+function formatHomePower(value: number | null | undefined): string {
+  return Number.isFinite(value) ? Math.round(value as number).toLocaleString() : t('corpsFront.unreported');
+}
+
+function formatLoanCommandDestination(corpsId: string | null | undefined, formations: FormationView[]): string {
+  return corpsId
+    ? getPlayerFacingCorpsName(corpsId, formations, t('formationDetail.assignedCommand'))
+    : t('formationDetail.assignedCommandUnreported');
+}
+
 type EquipmentConditionReport = {
   operational?: number | null;
   degraded?: number | null;
@@ -681,16 +703,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
-              {formation.kind === 'corps' && formation.corpsExhaustion != null && (
+              {isCommandFormation(formation) && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.exhaustion')}</span>
-                  <span className="text-text-primary tabular-nums">{Math.round(formation.corpsExhaustion)}%</span>
+                  <span className="text-text-primary tabular-nums">{formatReportedPercentValue(formation.corpsExhaustion)}</span>
                 </>
               )}
-              {formation.kind === 'corps' && formation.corpsCommandSpan != null && (
+              {isCommandFormation(formation) && (
                 <>
                   <span className="text-text-secondary">{t('formationDetail.commandSpan')}</span>
-                  <span className="text-text-primary tabular-nums">{formation.corpsCommandSpan.toFixed(1)}x</span>
+                  <span className="text-text-primary tabular-nums">{formatReportedCommandSpan(formation.corpsCommandSpan)}</span>
                 </>
               )}
             </div>
@@ -948,10 +970,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         </span>
                       </div>
                       <div className="text-text-secondary">
-                        → {getPlayerFacingCorpsName(
+                        {'->'} {formatLoanCommandDestination(
                           formation.eliteLoanState.loaned_to_corps,
                           loadedGameState.formations,
-                          t('formationDetail.assignedCommand'),
                         )}
                       </div>
                     </div>
@@ -1005,13 +1026,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary">{t('formationDetail.powerAtHome')}</span>
                       <span className="text-[#55d48a] font-mono font-semibold">
-                        {formation.personnel != null ? Math.round(formation.personnel).toLocaleString() : '—'}
+                        {formatHomePower(formation.personnel)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-text-secondary">{t('formationDetail.powerHere', { percent: effPct.toString() })}</span>
                       <span className={`font-mono font-semibold ${effPct >= 90 ? 'text-[#d4d455]' : 'text-[#d45555]'}`}>
-                        {formation.personnel != null ? Math.round(formation.personnel * (effPct / 100)).toLocaleString() : '—'}
+                        {formatHomePower(Number.isFinite(formation.personnel) ? (formation.personnel as number) * (effPct / 100) : null)}
                       </span>
                     </div>
                     <div className="text-[10px] text-text-secondary pt-0.5">

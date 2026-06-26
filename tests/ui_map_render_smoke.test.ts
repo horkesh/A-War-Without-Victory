@@ -299,6 +299,52 @@ describe('Tactical map render smoke', () => {
     expect(feature?.properties?.fatigue).toBeNull();
   });
 
+  it('buildFormationsGeoJSON keeps counter health unreported instead of drawing full strength', () => {
+    const state: LoadedGameState = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: { 'op:sarajevo': 'RBiH' },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'personnel_sparse_brigade',
+          faction: 'RBiH',
+          name: 'Personnel Sparse Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          morale: 74,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+        },
+      ],
+    } as LoadedGameState;
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const feature = buildFormationsGeoJSON(state, controlledGeo).features[0];
+
+    expect(feature?.properties?.icon_id).toContain('__hunreported');
+    expect(feature?.properties?.icon_id).toContain('__m70');
+    expect(feature?.properties?.icon_id).not.toContain('__h100');
+    expect(feature?.properties?.personnel).toBeNull();
+  });
+
   it('buildFormationsGeoJSON does not substitute cohesion for missing morale', () => {
     const state: LoadedGameState = {
       label: 'Turn 1',

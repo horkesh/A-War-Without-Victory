@@ -2804,7 +2804,8 @@ export function MapContainer() {
         controlGeoJson,
         loadedGameState.corpsFrontSectors ?? [],
         loadedGameState.frontEdgesOsid ?? [],
-        loadedGameState.operations
+        loadedGameState.operations,
+        loadedGameState.formations ?? [],
       );
       if (cancelled || !mapRef.current) return;
       const m = mapRef.current;

@@ -562,6 +562,25 @@ describe('OOB and operations panel operation labels', () => {
     expect(container.textContent).not.toContain('1/2');
   });
 
+  it('renders missing OOB operation supply readiness as unreported instead of N/A', () => {
+    useGameStore.setState({
+      loadedGameState: {
+        ...loadedState(),
+        operations: [{
+          ...operation(),
+          supply_readiness: undefined,
+        }],
+      } as LoadedGameState,
+    });
+
+    const { container } = render(createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
+
+    expect(container.textContent).toContain('Supply: Unreported');
+    expect(container.textContent).not.toContain('Supply N/A');
+  });
+
   it('opens the operation drilldown when an OOB operation row is clicked', () => {
     useGameStore.setState({
       isOperationsPanelOpen: false,

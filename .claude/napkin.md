@@ -2,6 +2,10 @@
 
 **BROWSER GATES USE TILELESS PROOF BY DEFAULT (2026-06-26).** Browser gates prove player flow, shell ownership, route contracts, and console health; real PMTiles fetches can produce noisy aborted tile errors during repeated reloads. Do instead: let gate launchers set `VITE_AWWV_DISABLE_PMTILES=1` unless `AWWV_BROWSER_GATE_USE_PMTILES=1`; real dev/Electron sessions with tile binaries keep using PMTiles.
 
+**OPERATIONS-MODE EFFORT PAINT USES LIVE LINE HOLDERS (2026-06-26).** Saved sector rosters can include stale, forming, destroyed, or reserve-only ids. Do instead: build operations-mode effort from `buildSectorFormationAssignment(...)` line holders, and skip sectors with no live line-holding formations.
+
+**ABSENT SOURCE ARRAYS ARE UNREPORTED, NOT EMPTY (2026-06-26).** A missing source such as `namedOfficerData` is not proof of an empty roster. Do instead: render the source as unreported; preserve explicit `[]` as a reported empty roster.
+
 **SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
 
 **OPENING COMMANDER PROJECTION IS NOT RESERVE AVAILABILITY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state. Do instead: exclude projected opening commanders from Personnel reserve pools and skip operation-assigned officers when resolving opening command display.

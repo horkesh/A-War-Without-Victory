@@ -3,10 +3,24 @@ import { getLocalizedFormationName } from '../data/formationNameLocalizations';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { t, useLocale } from '../i18n';
 
-function getFitnessColor(personnel: number, cohesion: number, fatigue: number): string {
+function getReportedNumber(value: number | null | undefined): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+function getFitnessColor(personnel: number | null, cohesion: number | null, fatigue: number | null): string {
+    if (personnel == null || cohesion == null || fatigue == null) return '#6b7280';
     if (personnel < 400 || cohesion < 20 || fatigue > 70) return '#c24040';
     if (cohesion < 40 || fatigue > 50) return '#c4a35a';
     return '#4a9a55';
+}
+
+function metricTitle(labelKey: 'tacticalCard.cohesionTitle' | 'tacticalCard.fatigueTitle', value: number | null): string {
+    if (value == null) {
+        return t(labelKey === 'tacticalCard.cohesionTitle'
+            ? 'tacticalCard.cohesionUnreportedTitle'
+            : 'tacticalCard.fatigueUnreportedTitle');
+    }
+    return t(labelKey, { value: Math.round(value) });
 }
 
 interface TacticalCardProps {
@@ -20,9 +34,9 @@ interface TacticalCardProps {
 export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLabelColor }: TacticalCardProps) {
     const [locale] = useLocale();
     const name = getPlayerSafeBrigadeName(getLocalizedFormationName(formation, locale));
-    const pers = formation.personnel ?? 0;
-    const fat = formation.fatigue ?? 0;
-    const coh = formation.cohesion ?? 0;
+    const pers = getReportedNumber(formation.personnel);
+    const fat = getReportedNumber(formation.fatigue);
+    const coh = getReportedNumber(formation.cohesion);
     const tanks = formation.composition?.tanks ?? 0;
     const arty = formation.composition?.artillery ?? 0;
 
@@ -59,7 +73,7 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
                     {/* Stats */}
                     <div className="flex gap-2 text-[10px] text-text-secondary font-mono">
                         <span title={t('formationDetail.personnel')} className="flex items-center gap-0.5">
-                            <span className="opacity-50">#</span>{pers.toLocaleString()}
+                            <span className="opacity-50">#</span>{pers == null ? t('corpsFront.unreported') : pers.toLocaleString()}
                         </span>
                         {(tanks > 0 || arty > 0) && (
                             <span title={t('corpsDetail.equipment')} className="flex items-center gap-0.5 text-interactive/80">
@@ -72,16 +86,16 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
 
                     {/* Bars */}
                     <div className="flex flex-col gap-1 w-12 shrink-0">
-                        <div className="flex items-center gap-1 group/bar" title={t('tacticalCard.cohesionTitle', { value: Math.round(coh) })}>
+                        <div className="flex items-center gap-1 group/bar" title={metricTitle('tacticalCard.cohesionTitle', coh)}>
                             <span className="text-[7px] text-text-secondary uppercase w-4 leading-none text-right">{t('tacticalCard.cohShort')}</span>
                             <div className="h-1 flex-1 bg-black/50 rounded-full overflow-hidden">
-                                <div className={`h-full ${coh > 60 ? 'bg-green-500' : coh > 30 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: `${Math.min(100, Math.max(0, coh))}%` }} />
+                                <div className={`h-full ${coh == null ? 'bg-text-secondary/40' : coh > 60 ? 'bg-green-500' : coh > 30 ? 'bg-yellow-500' : 'bg-red-500'}`} style={{ width: coh == null ? '0%' : `${Math.min(100, Math.max(0, coh))}%` }} />
                             </div>
                         </div>
-                        <div className="flex items-center gap-1 group/bar" title={t('tacticalCard.fatigueTitle', { value: Math.round(fat) })}>
+                        <div className="flex items-center gap-1 group/bar" title={metricTitle('tacticalCard.fatigueTitle', fat)}>
                             <span className="text-[7px] text-text-secondary w-4 leading-none text-right uppercase">{t('tacticalCard.fatShort')}</span>
                             <div className="h-1 flex-1 bg-black/50 rounded-full overflow-hidden">
-                                <div className={`h-full ${fat > 70 ? 'bg-red-500' : fat > 40 ? 'bg-yellow-500' : 'bg-orange-500'}`} style={{ width: `${Math.min(100, Math.max(0, fat))}%` }} />
+                                <div className={`h-full ${fat == null ? 'bg-text-secondary/40' : fat > 70 ? 'bg-red-500' : fat > 40 ? 'bg-yellow-500' : 'bg-orange-500'}`} style={{ width: fat == null ? '0%' : `${Math.min(100, Math.max(0, fat))}%` }} />
                             </div>
                         </div>
                     </div>

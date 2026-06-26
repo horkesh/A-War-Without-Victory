@@ -61,7 +61,9 @@ export function PersonnelContent() {
             partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
             unreported: t('corpsFront.unreported'),
         });
-        const officers = (state.namedOfficerData ?? []).filter(o => o.faction === faction);
+        const officerRosterReported = Array.isArray(state.namedOfficerData);
+        const officerRows = officerRosterReported ? state.namedOfficerData ?? [] : [];
+        const officers = officerRows.filter(o => o.faction === faction);
         const activeOfficers = officers.filter(o => o.status === 'active');
         const openingCommanderOfficerIds = new Set(
             corpsFormations
@@ -71,9 +73,9 @@ export function PersonnelContent() {
         const reserveOfficers = officers.filter(o => o.status === 'reserve' && !openingCommanderOfficerIds.has(o.id));
         const reserves = state.factionReserves?.[faction];
         const mobilization = state.mobilizationSummary?.[faction];
-        const commanderVacancies = corpsFormations
+        const commanderVacancies = officerRosterReported ? corpsFormations
             .filter((corps) => !resolveCorpsCommanderDisplay(corps.id, corps.faction, state))
-            .sort((a, b) => strictCompare(a.id, b.id));
+            .sort((a, b) => strictCompare(a.id, b.id)) : [];
         const lowReliabilityCommanders = activeOfficers
             .filter((officer) => officer.assigned_corps_id && typeof officer.political_reliability === 'number' && officer.political_reliability <= 2)
             .sort((a, b) => strictCompare(a.assigned_corps_id ?? '', b.assigned_corps_id ?? '') || strictCompare(a.id, b.id));
@@ -94,6 +96,7 @@ export function PersonnelContent() {
             totalPersonnelLabel,
             activeOfficers,
             reserveOfficers,
+            officerRosterReported,
             reserves,
             mobilization,
             commanderVacancies,
@@ -117,24 +120,30 @@ export function PersonnelContent() {
                 <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
                     <DossierCard
                         label={t('personnel.dossier.vacancies')}
-                        value={String(data.commanderVacancies.length)}
-                        detail={data.commanderVacancies.length > 0
+                        value={data.officerRosterReported ? String(data.commanderVacancies.length) : t('corpsFront.unreported')}
+                        detail={!data.officerRosterReported
+                            ? t('personnel.officerRosterSourceUnreported')
+                            : data.commanderVacancies.length > 0
                             ? t('personnel.dossier.vacanciesDetail', { commands: data.commanderVacancies.map((corps) => getLocalizedFormationName(corps, locale)).join(', ') })
                             : t('personnel.dossier.vacanciesClear')}
-                        tone={data.commanderVacancies.length > 0 ? 'warning' : 'steady'}
+                        tone={data.officerRosterReported && data.commanderVacancies.length > 0 ? 'warning' : data.officerRosterReported ? 'steady' : 'neutral'}
                     />
                     <DossierCard
                         label={t('personnel.dossier.lowLoyalty')}
-                        value={String(data.lowReliabilityCommanders.length)}
-                        detail={data.lowReliabilityCommanders.length > 0
+                        value={data.officerRosterReported ? String(data.lowReliabilityCommanders.length) : t('corpsFront.unreported')}
+                        detail={!data.officerRosterReported
+                            ? t('personnel.officerRosterSourceUnreported')
+                            : data.lowReliabilityCommanders.length > 0
                             ? t('personnel.dossier.lowLoyaltyDetail', { officers: data.lowReliabilityCommanders.map((officer) => officer.name).join(', ') })
                             : t('personnel.dossier.lowLoyaltyClear')}
-                        tone={data.lowReliabilityCommanders.length > 0 ? 'warning' : 'steady'}
+                        tone={data.officerRosterReported && data.lowReliabilityCommanders.length > 0 ? 'warning' : data.officerRosterReported ? 'steady' : 'neutral'}
                     />
                     <DossierCard
                         label={t('personnel.dossier.reserveOfficers')}
-                        value={String(data.reserveOfficers.length)}
-                        detail={data.reserveOfficers.length > 0
+                        value={data.officerRosterReported ? String(data.reserveOfficers.length) : t('corpsFront.unreported')}
+                        detail={!data.officerRosterReported
+                            ? t('personnel.officerRosterSourceUnreported')
+                            : data.reserveOfficers.length > 0
                             ? t('personnel.dossier.reserveOfficersDetail', { officers: data.reserveOfficers.map((officer) => officer.name).join(', ') })
                             : t('personnel.dossier.reserveOfficersEmpty')}
                     />
@@ -250,8 +259,15 @@ export function PersonnelContent() {
 
             <div className="bg-panel-card border border-panel-border rounded-lg p-3">
                 <div className="text-[9px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
-                    {t('personnel.officerRoster', { active: data.activeOfficers.length, reserve: data.reserveOfficers.length })}
+                    {data.officerRosterReported
+                        ? t('personnel.officerRoster', { active: data.activeOfficers.length, reserve: data.reserveOfficers.length })
+                        : t('personnel.officerRosterUnreported')}
                 </div>
+                {!data.officerRosterReported && (
+                    <div className="mb-2 rounded border border-panel-border/50 bg-panel-bg/70 px-2 py-1.5 text-[10px] italic text-text-secondary">
+                        {t('personnel.officerRosterSourceUnreported')}
+                    </div>
+                )}
                 <div className="grid grid-cols-1 gap-2 xl:grid-cols-3">
                     {data.activeOfficers.map(o => (
                         <div key={o.id} className="border border-panel-border/50 rounded-md bg-panel-bg px-2.5 py-2 text-[10px]">
