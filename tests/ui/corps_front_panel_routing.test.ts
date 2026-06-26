@@ -1160,6 +1160,31 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Waiting For Bridge Report|waiting_for_bridge_report/i);
   });
 
+  it('renders unreported operation phase as status pending instead of planning', () => {
+    const state = makeState();
+    state.operations = ([{
+      ...state.operations![0],
+      phase: 'planning',
+      phase_unreported: true,
+    }] as unknown) as LoadedGameState['operations'];
+    state.activeOperations = ([{
+      ...state.activeOperations![0],
+      phase: 'planning',
+      phase_unreported: true,
+    }] as unknown) as LoadedGameState['activeOperations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
+    expect(container.textContent).toContain('Status pending');
+    expect(container.textContent).not.toContain('Planning');
+  });
+
   it('does not invent an 0 of 8 preparation cycle when operation timing is unreported', () => {
     const state = makeState();
     state.operations = ([{

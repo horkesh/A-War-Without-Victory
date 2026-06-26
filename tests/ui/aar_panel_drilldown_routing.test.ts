@@ -110,4 +110,24 @@ describe('AARPanel drilldown routing', () => {
     expect(store.armyHQOpen).toBe(false);
     expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
   });
+
+  it('marks AAR battle casualties unreported when the turn summary lacks casualty sources', () => {
+    const state = makeAarState();
+    state.latestTurnSummary!.battles[0] = {
+      ...state.latestTurnSummary!.battles[0],
+      attacker_casualties: null,
+      defender_casualties: null,
+      casualties_reported: false,
+    };
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      loadedGameState: state,
+    });
+
+    const { container } = render(React.createElement(AARPanel, { isOpen: true, onClose: () => {}, embedded: true }));
+
+    expect(container.textContent).toContain('Casualties unreported');
+    expect(container.textContent).not.toContain('Attacker −0');
+    expect(container.textContent).not.toContain('Defender −0');
+  });
 });

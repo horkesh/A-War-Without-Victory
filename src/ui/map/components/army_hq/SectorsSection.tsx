@@ -65,6 +65,15 @@ function reportedPersonnelLabel(value: number | undefined | null): string {
     return isReportedNumber(value) ? formatPersonnel(value) : t('corpsFront.unreported');
 }
 
+function reportedBattleLossLabel(battle: TurnBattle): string {
+    const attackerCasualties = isReportedNumber(battle.attacker_casualties) ? battle.attacker_casualties : null;
+    const defenderCasualties = isReportedNumber(battle.defender_casualties) ? battle.defender_casualties : null;
+    if (battle.casualties_reported === false || attackerCasualties === null || defenderCasualties === null) {
+        return t('aar.casualtiesUnreported');
+    }
+    return t('sectorsSection.personnelLosses', { count: attackerCasualties + defenderCasualties });
+}
+
 function reportedCohesionLabel(value: number | undefined | null): { label: string; className: string } {
     if (!isReportedNumber(value)) {
         return { label: t('corpsFront.unreported'), className: 'text-text-secondary/60 italic' };
@@ -339,7 +348,7 @@ function SectorExpandedDetail({
                                 <span className="text-text-secondary truncate flex-1">
                                     {getOsidDisplayName(battle.osid, osidDisplayNames)}
                                 </span>
-                                <span className="text-red-500 font-bold shrink-0">{t('sectorsSection.personnelLosses', { count: battle.attacker_casualties + battle.defender_casualties })}</span>
+                                <span className="text-red-500 font-bold shrink-0">{reportedBattleLossLabel(battle)}</span>
                             </div>
                         ))}
                     </div>

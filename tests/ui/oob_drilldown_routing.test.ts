@@ -339,6 +339,64 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).not.toMatch(/\badequate\b/);
   });
 
+  it('does not select the first ungrouped brigade when the ungrouped header is clicked', () => {
+    const state = makeState();
+    state.formations = [
+      ...(state.formations ?? []),
+      {
+        id: 'vrs_field_corps',
+        faction: 'RS',
+        name: 'Field Corps',
+        kind: 'corps',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 1200,
+      },
+      {
+        id: 'field_corps_bde',
+        faction: 'RS',
+        name: 'Field Corps Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 500,
+        corps_id: 'vrs_field_corps',
+      },
+      {
+        id: 'independent_bde',
+        faction: 'RS',
+        name: 'Independent Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 65,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        personnel: 450,
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
+    expect(orbatButtons).toHaveLength(1);
+    fireEvent.click(orbatButtons[0]);
+
+    expect(useGameStore.getState().selectedFormationId).toBeNull();
+    expect(useGameStore.getState().selectedOrbatCorpsId).toBe('vrs_field_corps');
+    expect(useGameStore.getState().selectedOrbatCorpsId).not.toBe('_ungrouped');
+  });
+
   it('renders sparse mobilization reports as unreported without hiding explicit zeroes', () => {
     const state = makeState();
     state.mobilizationSummary = {

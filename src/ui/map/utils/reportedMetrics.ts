@@ -8,6 +8,7 @@ export interface ReportedMetricSummary {
 export interface EquipmentConditionSummary {
     operational: number;
     total: number;
+    reportedCount: number;
     unreportedCount: number;
 }
 
@@ -57,11 +58,12 @@ export function addEquipmentCondition(
         summary.unreportedCount += 1;
         return summary;
     }
+    summary.reportedCount += 1;
     const operationalCount = operational <= 1 ? count * operational : operational;
     summary.operational += Math.min(count, Math.max(0, Math.round(operationalCount)));
     return summary;
 }
 
 export function emptyEquipmentConditionSummary(): EquipmentConditionSummary {
-    return { operational: 0, total: 0, unreportedCount: 0 };
+    return { operational: 0, total: 0, reportedCount: 0, unreportedCount: 0 };
 }

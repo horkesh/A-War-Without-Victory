@@ -7,6 +7,7 @@ import {
     deriveDigestTurn,
     factionFromCorpsId,
     formatDigestCorpsName,
+    generalsDigestGloss,
     isQuietWeek,
     DIGEST_FORBIDDEN_VOCAB,
 } from '../src/ui/map/data/generalsDigest.js';
@@ -113,6 +114,20 @@ describe('generals-digest helpers', () => {
         expect(d.ownFormationsDestroyed).toBe(1);
         expect(d.notableGains).toBe(1);
         expect(d.notableLosses).toBe(1);
+    });
+
+    it('counts player battles but does not publish exact attrition when player casualties are unreported', () => {
+        const d = deriveDigestTurn(summary(40, {
+            battles: [
+                { attacker_faction: 'RBiH', defender_faction: 'RS', attacker_casualties: undefined, defender_casualties: 50 },
+            ],
+        }), 'RBiH', undefined);
+
+        expect(d.battleCount).toBe(1);
+        expect(d.friendlyCasualties).toBe(0);
+        expect(d.friendlyCasualtiesReported).toBe(false);
+        expect(generalsDigestGloss(d)).toContain('The line held, no ground changed hands.');
+        expect(generalsDigestGloss(d)).not.toContain('casualties borne');
     });
 
     it('treats turn-0 territory_net as scenario-start provenance, not ground taken', () => {

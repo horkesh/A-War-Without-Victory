@@ -169,7 +169,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     for (const battle of factionBattles) {
         const isAttacker = battle.attacker_faction === faction;
         const casualties = isAttacker ? battle.attacker_casualties : battle.defender_casualties;
-        if (casualties <= 0) continue;
+        if (typeof casualties !== 'number' || !Number.isFinite(casualties) || casualties <= 0) continue;
 
         // KIA/WIA/MIA split mirrors the canonical ledger fractions the battle
         // engine books (attack_casualty_distribution.ts: KIA 0.22 / WIA 0.74 /

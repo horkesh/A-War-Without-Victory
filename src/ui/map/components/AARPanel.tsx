@@ -68,6 +68,10 @@ const CONFIDENCE_BAND_LABEL_KEY: Record<string, MessageKey> = {
     high: 'aar.confidence.high',
 };
 
+function reportedNumber(value: unknown): number | null {
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 // --- Notable event labels ---
 const NOTABLE_LABEL_KEY: Record<TurnNotableEvent['kind'], MessageKey> = {
     graz_accords_activated: 'aar.notable.graz',
@@ -213,6 +217,12 @@ function BattleRow({
     const primaryDefenderLabel = battle.primary_defender_id
         ? getPlayerSafeBrigadeName(formationNameById.get(battle.primary_defender_id))
         : null;
+    const attackerCasualties = reportedNumber(battle.attacker_casualties);
+    const defenderCasualties = reportedNumber(battle.defender_casualties);
+    const casualtiesReported = battle.casualties_reported !== false
+        && attackerCasualties !== null
+        && defenderCasualties !== null;
+    const hasReportedLosses = casualtiesReported && (attackerCasualties > 0 || defenderCasualties > 0);
 
     return (
         <div
@@ -231,9 +241,14 @@ function BattleRow({
                 </div>
                 <span className={`${outcomeColor} font-mono text-[10px] shrink-0 ml-2`}>{outcomeLabel}</span>
             </div>
-            {(battle.attacker_casualties > 0 || battle.defender_casualties > 0) && (
+            {hasReportedLosses && (
                 <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
-                    {t('aar.attackerShort')} −{battle.attacker_casualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{battle.defender_casualties.toLocaleString()}
+                    {t('aar.attackerShort')} −{attackerCasualties.toLocaleString()}  ·  {t('aar.defenderShort')} −{defenderCasualties.toLocaleString()}
+                </div>
+            )}
+            {!casualtiesReported && (
+                <div className="text-[9px] text-text-muted tabular-nums mt-0.5 ml-6">
+                    {t('aar.casualtiesUnreported')}
                 </div>
             )}
             {battle.execution_friction && (

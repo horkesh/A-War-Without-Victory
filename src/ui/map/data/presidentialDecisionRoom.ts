@@ -2158,6 +2158,7 @@ function buildActiveDossier(
   const selectedCard = selectedCardId
     ? cards.find((card) => card.id === selectedCardId) ?? null
     : null;
+  if (selectedCardId && !selectedCard) return null;
   const card = selectedCard ?? cards[0] ?? null;
   if (!card) return null;
 

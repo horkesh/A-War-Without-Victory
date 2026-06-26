@@ -134,6 +134,10 @@ function finiteNumber(value: unknown, fallback = 0): number {
     return typeof value === 'number' && Number.isFinite(value) ? value : fallback;
 }
 
+function optionalFiniteNumber(value: unknown): number | undefined {
+    return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
 function hasFiniteNumber(record: Record<string, unknown>, key: string): boolean {
     return typeof record[key] === 'number' && Number.isFinite(record[key]);
 }
@@ -1246,12 +1250,16 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 const participatingFormations = rawParticipatingFormations
                     .slice()
                     .sort((a, b) => strictCompare(a.id, b.id));
-                const avgCohesion = participatingFormations.length > 0
-                    ? participatingFormations.reduce((sum, formation) => sum + finiteNumber(formation.cohesion, 0), 0) / participatingFormations.length
+                const allParticipantsReportCohesion = participatingFormations.length > 0
+                    && participatingFormations.every((formation) => typeof formation.cohesion === 'number' && Number.isFinite(formation.cohesion));
+                const avgCohesion = allParticipantsReportCohesion
+                    ? participatingFormations.reduce((sum, formation) => sum + formation.cohesion!, 0) / participatingFormations.length
                     : undefined;
-                const avgPersonnelPct = participatingFormations.length > 0
+                const allParticipantsReportPersonnel = participatingFormations.length > 0
+                    && participatingFormations.every((formation) => typeof formation.personnel === 'number' && Number.isFinite(formation.personnel));
+                const avgPersonnelPct = allParticipantsReportPersonnel
                     ? participatingFormations.reduce((sum, formation) => {
-                        const personnel = finiteNumber(formation.personnel, 0);
+                        const personnel = formation.personnel!;
                         const baseline = personnel > 0 ? Math.min(1, personnel / 2500) : 0;
                         return sum + baseline;
                     }, 0) / participatingFormations.length
@@ -1259,15 +1267,24 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                 const sectorIntelRecords = typeof op.sector_id === 'string'
                     ? (state.military.sector_intel as Record<string, Array<Record<string, unknown>>> | undefined)?.[op.sector_id]
                     : undefined;
-                const intelReadiness = Array.isArray(sectorIntelRecords) && sectorIntelRecords.length > 0
+                const allSectorIntelReportsConfidence = Array.isArray(sectorIntelRecords)
+                    && sectorIntelRecords.length > 0
+                    && sectorIntelRecords.every((record) => typeof record.confidence === 'number' && Number.isFinite(record.confidence));
+                const intelReadiness = allSectorIntelReportsConfidence
                     ? sectorIntelRecords.reduce((best, record) => {
-                        const confidence = finiteNumber(record.confidence, 0);
+                        const confidence = record.confidence as number;
                         return confidence > best ? confidence : best;
                     }, 0)
                     : undefined;
                 const supplyReadiness = typeof op.supply_readiness === 'number' && Number.isFinite(op.supply_readiness) ? op.supply_readiness : undefined;
                 const currentObjectiveIndex = typeof op.current_objective_index === 'number' && Number.isFinite(op.current_objective_index) ? op.current_objective_index : undefined;
                 const momentum = typeof op.momentum === 'number' && Number.isFinite(op.momentum) ? op.momentum : undefined;
+                const preparationTurnsElapsed = optionalFiniteNumber(op.preparation_turns_elapsed);
+                const preparationMaxTurns = optionalFiniteNumber(op.preparation_max_turns);
+                const intelConfidenceAtAssessment = optionalFiniteNumber(op.intel_confidence_at_assessment);
+                const supplyReadinessAtAssessment = optionalFiniteNumber(op.supply_readiness_at_assessment);
+                const forceRatioEstimate = optionalFiniteNumber(op.force_ratio_estimate);
+                const postponementCount = optionalFiniteNumber(op.postponement_count);
                 const operationPhase = readOperationPhase(op.phase);
                 operations.push({
                     corps_id: fv.id,
@@ -1327,20 +1344,20 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
                     })) : undefined,
                     commander_officer_id: typeof op.commander_officer_id === 'string' ? op.commander_officer_id : undefined,
                     preparation_sub_phase: typeof op.preparation_sub_phase === 'string' ? op.preparation_sub_phase as OperationView['preparation_sub_phase'] : undefined,
-                    preparation_turns_elapsed: typeof op.preparation_turns_elapsed === 'number' ? op.preparation_turns_elapsed : undefined,
-                    preparation_max_turns: typeof op.preparation_max_turns === 'number' ? op.preparation_max_turns : undefined,
+                    preparation_turns_elapsed: preparationTurnsElapsed,
+                    preparation_max_turns: preparationMaxTurns,
                     commander_assessment: typeof op.commander_assessment === 'string' ? op.commander_assessment as OperationView['commander_assessment'] : undefined,
                     commander_assessment_at_launch: typeof op.commander_assessment_at_launch === 'string' ? op.commander_assessment_at_launch as OperationView['commander_assessment_at_launch'] : undefined,
-                    intel_confidence_at_assessment: typeof op.intel_confidence_at_assessment === 'number' ? op.intel_confidence_at_assessment : undefined,
-                    supply_readiness_at_assessment: typeof op.supply_readiness_at_assessment === 'number' ? op.supply_readiness_at_assessment : undefined,
-                    force_ratio_estimate: typeof op.force_ratio_estimate === 'number' ? op.force_ratio_estimate : undefined,
-                    postponement_count: typeof op.postponement_count === 'number' ? op.postponement_count : undefined,
+                    intel_confidence_at_assessment: intelConfidenceAtAssessment,
+                    supply_readiness_at_assessment: supplyReadinessAtAssessment,
+                    force_ratio_estimate: forceRatioEstimate,
+                    postponement_count: postponementCount,
                     // Wave 6: Readiness trend — derived on-read from existing persisted fields
                     readinessTrend: op.phase === 'planning' ? deriveReadinessTrend(
                         typeof op.commander_assessment === 'string' ? op.commander_assessment as 'launch' | 'postpone' | 'abort' : undefined,
-                        typeof op.postponement_count === 'number' ? op.postponement_count : 0,
-                        typeof op.preparation_turns_elapsed === 'number' ? op.preparation_turns_elapsed : undefined,
-                        typeof op.preparation_max_turns === 'number' ? op.preparation_max_turns : undefined,
+                        postponementCount ?? 0,
+                        preparationTurnsElapsed,
+                        preparationMaxTurns,
                     ) : undefined,
                     has_active_probe: op.active_probe != null && typeof op.active_probe === 'object' ? true : undefined,
                     supporting_sector_ids: Array.isArray(op.supporting_sector_ids) ? (op.supporting_sector_ids as string[]).filter(id => typeof id === 'string').sort(strictCompare) : undefined,

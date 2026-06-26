@@ -11,10 +11,10 @@ import {
   getPlayerSafeCorpsName,
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeMunicipalityName,
-  getPlayerSafeOperationPhaseLabel,
   getPlayerSafeDisplayLabel,
   getPlayerSafeSectorStrengthLabel,
 } from '../utils/playerSafeText';
+import { getOperationPhaseLabel } from '../utils/operations';
 import { getArmyCrest, getArmyName } from '../utils/factionAssets';
 import { getFactionArmyCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../utils/officerUtils';
 import { formatRank } from '../utils/officerCharacter';
@@ -508,21 +508,19 @@ export function OOBSidebar() {
                                 brigades={brigades}
                                 faction={faction}
                                 stance={getCorpsStance(corpsId, faction)}
-                                onHeaderClick={() => {
-                                  if (corpsId !== '_ungrouped') {
-                                    setSelectedCorpsId(corpsId);
-                                  } else {
-                                    const first = [...brigades].sort((a, b) => a.id.localeCompare(b.id))[0];
-                                    if (first) setSelectedFormationId(first.id);
-                                  }
-                                }}
+                                onHeaderClick={corpsId !== '_ungrouped'
+                                  ? () => setSelectedCorpsId(corpsId)
+                                  : undefined}
                                 onHoverOsidsChange={(osids) => setHoveredOsids(osids)}
                                 onMouseEnter={() => setHoveredCorpsId(corpsId)}
                                 onMouseLeave={() => setHoveredCorpsId(null)}
-                                onOrbatClick={() => setSelectedOrbatCorpsId(corpsId)}
+                                onOrbatClick={corpsId !== '_ungrouped'
+                                  ? () => setSelectedOrbatCorpsId(corpsId)
+                                  : undefined}
                                 sectorCount={corpsSectors.length}
                                 activeOperationName={displayedOp?.display_name}
                                 activeOperationPhase={displayedOp?.phase}
+                                activeOperationPhaseUnreported={displayedOp?.phase_unreported}
                                 commanderName={syntheticCommand?.commanderName ?? commander?.name}
                                 commanderActing={syntheticCommand ? false : commander?.acting}
                                 commanderLabel={syntheticCommand ? t('corpsCard.operationCommander') : undefined}
@@ -612,7 +610,8 @@ export function OOBSidebar() {
                         {getPlayerSafeMilitaryFactionName(faction)}
                       </div>
                       {ops.map((op) => {
-                        const phaseBg = op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
+                        const phaseBg = op.phase_unreported ? 'bg-neutral-600/60' : op.phase === 'execution' ? 'bg-red-800/60' : op.phase === 'planning' ? 'bg-yellow-700/60' : 'bg-neutral-600/60';
+                        const phaseLabel = getOperationPhaseLabel(op);
                         const objTotal = op.objectives?.length ?? 0;
                         const objDisplayCurrent = objTotal > 0 && typeof op.current_objective_index === 'number'
                           ? Math.min(objTotal, Math.max(1, op.current_objective_index + 1))
@@ -634,7 +633,7 @@ export function OOBSidebar() {
                             </div>
                             <div className="flex items-center gap-2 text-[10px]">
                               <span className={`px-1.5 py-0.5 rounded text-white uppercase font-semibold ${phaseBg}`}>
-                                {getPlayerSafeOperationPhaseLabel(op.phase)}
+                                {phaseLabel}
                               </span>
                               {op.momentum != null && (
                                 <span className="text-text-secondary">{t('operationsSection.momShort')} {op.momentum}</span>

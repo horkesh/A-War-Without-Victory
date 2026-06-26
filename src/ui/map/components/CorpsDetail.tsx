@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
-import { getOperationId } from '../utils/operations';
+import { getOperationId, getOperationPhaseLabel } from '../utils/operations';
 import { buildCorpsColorMap } from '../map/builders/buildCorpsFrontLinesGeoJSON';
 import { getPanelRailStyle } from './panelRail';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
@@ -17,7 +17,6 @@ import { TabBar } from './TabBar';
 import {
   getPlayerSafeCorpsName,
   getPlayerSafeMilitaryFactionName,
-  getPlayerSafeOperationPhaseLabel,
   getPlayerSafeSectorStanceLabel,
 } from '../utils/playerSafeText';
 import { aggregateEffectiveness } from '../utils/combatEffectiveness';
@@ -47,6 +46,7 @@ const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> 
 };
 
 function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
+  if (summary.unreportedCount > 0 && summary.reportedCount === 0) return t('corpsFront.unreported');
   const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
   return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
 }
@@ -480,11 +480,14 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               <div className="text-text-secondary italic text-xs">{t('corpsDetail.noPlayerFacingOps')}</div>
             ) : (
               corpsOps.map((op) => {
-                const phaseBg = op.phase === 'execution'
+                const phaseBg = op.phase_unreported
+                  ? 'bg-neutral-600/60 text-white'
+                  : op.phase === 'execution'
                   ? 'bg-[#d45555]/60 text-white'
                   : op.phase === 'planning'
                   ? 'bg-[#d4a055]/60 text-white'
                   : 'bg-neutral-600/60 text-white';
+                const phaseLabel = getOperationPhaseLabel(op);
                 const opKey = getOperationId(op);
                 const isSelected = selectedOperationKey === opKey;
                 const momentum = typeof op.momentum === 'number' && Number.isFinite(op.momentum) ? op.momentum : null;
@@ -505,7 +508,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.display_name}</div>
                       <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${phaseBg}`}>
-                        {getPlayerSafeOperationPhaseLabel(op.phase)}
+                        {phaseLabel}
                       </span>
                     </div>
 

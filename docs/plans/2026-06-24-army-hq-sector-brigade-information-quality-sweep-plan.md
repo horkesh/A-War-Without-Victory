@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P11 at `12cef62f3`.
+**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P11 at `12cef62f3`; P12 is implemented locally on `codex/p12-player-truth-followup` with broad local proof complete and GitHub/merge closeout pending.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -28,6 +28,17 @@ Next P12 queue from closed Faraday/Leibniz/Ramanujan scouts:
 - OOB ungrouped command rows must not select the first brigade by sorted id.
 - Turn Aftermath/Chronicle remaining sparse-cost provenance, including absent battle/displacement data.
 - Army HQ/Corps Detail sparse command-equipment and operation-slot truth.
+
+P12 local implementation on `codex/p12-player-truth-followup` now covers that queue:
+
+- Officer Matter and Decision Room stale selections fail closed instead of falling through to the first pending event/card.
+- OOB ungrouped rows are non-command groupings: no first-brigade header selection and no `_ungrouped` Order of Battle route.
+- Operation assessment/readiness fields preserve non-finite and missing values as unreported, including participant cohesion/personnel and sector-intel confidence.
+- OOB, Corps Detail, and Corps Front render `phase_unreported` operations as `Status pending`.
+- Turn summary battle casualties now carry `casualties_reported`; AAR, Army HQ sector engagements, Turn Aftermath, Chronicle, and Generals' Digest no longer treat missing casualty/displacement sources as zero cost.
+- Compact command-equipment summaries render fully absent equipment-condition reports as `Unreported` and avoid exact-looking `0/N operational` tooltips.
+
+P12 local proof so far: `npm.cmd run typecheck -- --pretty false` passed; focused P12 pack passed 14 files / 342 tests; `npm.cmd run qa:player-journeys` passed 43 files / 667 tests; `npm.cmd run qa:first-hour:browser` passed; `npm.cmd run qa:live-surface:browser` passed; `npm.cmd run desktop:map:build` passed with existing non-fatal Vite warnings; `git diff --check` passed with the existing CRLF normalization warning on `src/ui/map/utils/operations.ts`; manual in-app browser proof on `http://127.0.0.1:3003/` verified title screen, RBiH war-start splash, Army HQ, and 1st Corps Order of Battle drilldown with no visible error banners, console errors, raw paths, or malformed numeric values. Generated browser evidence folders were removed; `.tmp_dev_server` remains for the active local browser/dev session. Remaining before closeout: push, GitHub comments/checks, merge, branch prune, and clean-worktree proof. Report: `docs/40_reports/implemented/20260626_P12_PLAYER_TRUTH_FOLLOWUP.md`.
 
 ## Progress 2026-06-24
 

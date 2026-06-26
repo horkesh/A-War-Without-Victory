@@ -84,6 +84,30 @@ describe('generateChronicleEntries', () => {
         expect(combat[0].metadata?.casualties).toBe(250);
     });
 
+    it('renders flipped battles with sparse casualty reports without exact casualty metadata', () => {
+        const state = {
+            turn: 10,
+            turnSummaries: [makeTurnSummary(10, {
+                battles: [{
+                    osid: 'op:brcko:brcko_2',
+                    attacker_faction: 'RS',
+                    defender_faction: 'RBiH',
+                    outcome: 'decisive_victory',
+                    attacker_casualties: 50,
+                    territory_flipped: true,
+                }],
+                territory_net: { RS: 1, RBiH: -1 },
+            })],
+            firedEvents: [],
+        };
+
+        const combat = generateChronicleEntries(state as any).filter(e => e.type === 'combat');
+
+        expect(combat).toHaveLength(1);
+        expect(combat[0].detail).toContain('Unreported casualties');
+        expect(combat[0].metadata?.casualties).toBeUndefined();
+    });
+
     it('creates political card for fired event', () => {
         const state = {
             turn: 5,
@@ -518,6 +542,32 @@ describe('generateChronicleEntries', () => {
         expect(cost?.metadata?.casualties).toBeUndefined();
         expect(cost?.detail).toContain('2600');
         expect(cost?.detail).not.toMatch(/casualt/i);
+    });
+
+    it('does not emit displacement metadata when displacement is absent and another driver creates the cost card', () => {
+        const state = {
+            player_faction: 'RBiH',
+            turnSummaries: [makeTurnSummary(9, {
+                battles: [{
+                    osid: 'op:test:test_1',
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'RS',
+                    outcome: 'stalemate',
+                    attacker_casualties: 75,
+                    defender_casualties: 60,
+                    territory_flipped: false,
+                }],
+                displacement_total: undefined,
+                territory_net: { RBiH: 0 },
+            })],
+        };
+
+        const cost = generateChronicleEntries(state as any).find(e => e.type === 'cost');
+
+        expect(cost).toBeTruthy();
+        expect(cost?.metadata?.casualties).toBe(75);
+        expect(cost?.metadata?.displaced).toBeUndefined();
+        expect(cost?.detail).not.toContain('0 displaced');
     });
 
     it('creates military card for formation spawn', () => {
