@@ -90,6 +90,25 @@ test('desktop path filter watches packaged dependencies and runtime resources', 
     assert.match(desktopCase, /"build\/icon\.png"/, 'packaged icon changes should run desktop package/probe gates');
 });
 
+test('trusted detector checkout is restored before tests and builds run', async () => {
+    const workflowPaths = [
+        join(process.cwd(), '.github', 'workflows', 'baseline-regression.yml'),
+        join(process.cwd(), '.github', 'workflows', 'desktop-release-guard.yml'),
+        join(process.cwd(), '.github', 'workflows', 'full-suite-and-fingerprint.yml'),
+    ];
+
+    for (const workflowPath of workflowPaths) {
+        const workflow = await readFile(workflowPath, 'utf8');
+        const trustedCheckoutCount = (workflow.match(/git checkout "origin\/\$\{base_ref\}" -- \.github\/scripts\/detect-[^\s]+\.sh/g) ?? []).length;
+        const restoreCount = (workflow.match(/git restore --source=HEAD -- \.github\/scripts\/detect-[^\s]+\.sh/g) ?? []).length;
+        assert.strictEqual(
+            restoreCount,
+            trustedCheckoutCount,
+            `${workflowPath} should restore trusted detector checkouts so later tests/builds see the PR version`,
+        );
+    }
+});
+
 test('release workflow runs packaged runtime probe before publishing windows artifacts', async () => {
     const workflow = await readFile(
         join(process.cwd(), '.github', 'workflows', 'release.yml'),

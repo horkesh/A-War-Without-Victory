@@ -30,6 +30,7 @@
 - Desktop path detection now treats `package-lock.json`, `.github/workflows/release.yml`, `build/icon.png`, `assets/`, `data/derived/`, `data/ui/`, and `data/scenarios/events/` as desktop release-relevant.
 - Full-suite path detection now treats packaged runtime data and assets as browser/full-suite relevant.
 - The Windows release workflow runs `npm run desktop:package:probe` before NSIS packaging/publishing.
+- CI trusted-detector steps now restore the checked-out head detector script after base-branch relevance detection, so later tests/builds do not see a stale base copy.
 
 ### Enclave Dashboard
 - Army HQ handoff to the Enclave Dashboard closes Army HQ first, preventing overlapping command shells.
@@ -47,6 +48,7 @@
 - `git diff --check` passed.
 - Live in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, war-start splash, opening brief, OOB CorpsCard flip affordances, Corps Detail seed-sector operation CTA, Formation Detail bridge-disabled sector reasons, and console health with only the expected dev-map desktop-bridge fallback warning.
 - Follow-up focused proof passed `node node_modules/vitest/vitest.mjs run tests/ui/command_surface_repurpose_panels.test.ts tests/ui_presidential_decision_room_wiring.test.ts tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (4 files / 34 tests).
+- CI repair focused proof passed `node node_modules/vitest/vitest.mjs run tests/desktop_release_ci_guardrails.test.ts tests/ui/first_hour_browser_gate_contract.test.ts tests/ui/command_surface_repurpose_panels.test.ts tests/ui_presidential_decision_room_wiring.test.ts --pool=forks --reporter=dot` (4 files / 35 tests), after the first PR run exposed that Baseline Regression left the base-branch detector file in the test worktree.
 - PR #457 is open for GitHub checks/comments and merge closeout.
 
 ## Files Changed
@@ -63,6 +65,9 @@
 | `.github/scripts/detect-changed-paths.sh` | Desktop release-relevant packaged runtime/resource detection |
 | `.github/scripts/detect-full-suite-changes.sh` | Browser/full-suite packaged runtime/resource detection |
 | `.github/workflows/release.yml` | Packaged runtime probe before Windows artifact publishing |
+| `.github/workflows/baseline-regression.yml` | Restore head detector after trusted relevance detection |
+| `.github/workflows/desktop-release-guard.yml` | Restore head detector after trusted relevance detection |
+| `.github/workflows/full-suite-and-fingerprint.yml` | Restore head detector after trusted relevance detection |
 | `src/ui/map/App.tsx` | Enclave Dashboard handoff closes Army HQ shell |
 | `src/ui/map/components/EnclaveDashboard.tsx` | Airdrop budget guard, player-facing labels, accessible close affordance |
 

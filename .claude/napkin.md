@@ -2,6 +2,8 @@
 
 **RELEASE GATES MUST WATCH PACKAGED RUNTIME RESOURCES (2026-06-26).** Desktop/package regressions can come from data and asset changes, not just Electron source. Do instead: keep desktop/full-suite path filters covering `data/derived/`, `data/ui/`, event scenario data, `assets/`, `build/icon.png`, `package-lock.json`, and release workflow edits; run the packaged runtime probe before publishing Windows artifacts.
 
+**TRUSTED CI DETECTORS MUST RESTORE HEAD BEFORE TESTS (2026-06-26).** Base-branch detector checkouts protect required checks from PR bypass, but leaving the trusted copy in the worktree makes tests/builds inspect stale scripts. Do instead: run the trusted detector, then `git restore --source=HEAD -- .github/scripts/detect-*.sh` before setup/build/test steps.
+
 **ENCLAVE AIRDROP UI MUST BE BUDGET-BOUNDED (2026-06-26).** Row-level allocation controls can overcommit if each row independently exposes the full budget. Do instead: cap each row at remaining budget plus its current allocation, block over-budget staging before IPC, and close competing command shells before opening the Enclave Dashboard.
 
 **BROWSER GATES FAIL ON REAL NETWORK/HTTP FAILURES (2026-06-26).** Console-only browser proof misses missing chunks/data and HTTP 4xx/5xx. Do instead: collect `requestfailed` and `response >= 400`, ignore only deterministic noise such as favicon/data/blob and deliberate `net::ERR_ABORTED` cancellations, and clean stale gate artifacts at startup while preserving current-run evidence.

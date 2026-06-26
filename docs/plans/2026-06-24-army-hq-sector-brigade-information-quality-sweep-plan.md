@@ -76,8 +76,9 @@ P15 local verification:
 - `git diff --check` passed.
 - Live in-app browser proof on `http://127.0.0.1:3003/` verified RBiH start, `WAR HAS STARTED`, `War begins: 6 Apr 1992`, OOB CorpsCard fielded-brigade copy and detail/summary flip labels, Corps Detail `Prepare Operation in HQ for 2nd Corps - Gracanica, Lukavac` accessible/title copy, Formation Detail disabled sector options carrying desktop-bridge-unavailable reasons, and console health with only the expected dev-map desktop-bridge fallback warning.
 - Follow-up focused proof passed 4 files / 34 tests: `tests/ui/command_surface_repurpose_panels.test.ts`, `tests/ui_presidential_decision_room_wiring.test.ts`, `tests/desktop_release_ci_guardrails.test.ts`, and `tests/ui/first_hour_browser_gate_contract.test.ts`.
+- CI repair focused proof passed 4 files / 35 tests after restoring head detector files following trusted base-branch detection in Baseline Regression, Desktop Release Guard, and Full Suite workflows.
 - PR #457 is open; remaining closeout is GitHub checks/comments, merge, branch pruning, and temp evidence cleanup.
-- Deferred scout queue after P15: packaged-probe network/status capture, opt-in real-PMTiles browser smoke, Army HQ raw sector-detail id fallback, and Corps Situation unreported-vs-healthy-silence copy.
+- Deferred scout queue after P15: command-strain provenance, Corps Detail exhaustion unreported truth, Corps Situation unreported-vs-healthy-silence copy, Army HQ sector DOM-id hygiene, Enclave missing-supply risk copy, Decision Room disabled-action reasons, packaged-probe network/status capture, opt-in real-PMTiles browser smoke, and desktop path coverage for `data/source`, `data/reference`, and shared imported source modules.
 
 ## Progress 2026-06-24
 
