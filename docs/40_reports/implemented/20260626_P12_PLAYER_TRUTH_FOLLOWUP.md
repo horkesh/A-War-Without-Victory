@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-26  
 **Branch:** `codex/p12-player-truth-followup`  
-**Status:** Local implementation, broad local proof, manual in-app browser proof, branch push, PR #455 creation, and Codex review-thread fix complete; GitHub recheck/merge closeout pending.
+**Status:** Merged to `main` through PR #455 at `d47736be6`; GitHub checks green; local/remote branch refs pruned; temp evidence cleaned.
 
 ## Scope
 
@@ -34,7 +34,7 @@ P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 
 ## Remaining Gates
 
-- PR #455 is open. The actionable Codex thread on ungrouped OOB drilldown is addressed and resolved; this cleanup still needs push/recheck. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
+- Closed. PR #455 merged after green GitHub checks across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite. The actionable Codex thread on ungrouped OOB drilldown was addressed and resolved before merge. Local cleanup leaves one clean `main` worktree, no local `codex/*` branches, and no local `runs/eh_local_*` evidence folders.
 
 ## Pyrrhic Roles
 

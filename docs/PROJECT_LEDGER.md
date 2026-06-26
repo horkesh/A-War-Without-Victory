@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-26] docs: close P12 player-truth follow-up merge
+
+**Type:** Docs/process closeout.
+
+**Fix:** Synchronized the command board, master roadmap, active Army HQ/sector/brigade information-quality plan, P12 implementation report, and ledger with the verified PR #455 closeout: merge to `main` at `d47736be6`, green GitHub checks, resolved Codex review thread, deleted/pruned `codex/p12-player-truth-followup`, one clean `main` worktree, and local temp evidence cleanup.
+
+**Verification:** `gh pr checks 455 --watch=false` showed Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression (`typecheck`, `test`, `scenario-anchors`, `scenarios`, and `engine-health-188w`), structural fingerprint, Typecheck, and Full Suite all passing before merge. `gh pr view 455` showed merged state and merge commit `d47736be6`. Direct GraphQL review-thread inspection showed the Codex ungrouped-OOB drilldown thread resolved/outdated. `git status --short --branch` showed clean `main...origin/main`; `git worktree list` showed one `main` worktree; `git branch --list 'codex/*'` returned no local codex branches. Local `runs/eh_local_*` evidence folders were removed; `.tmp_dev_server` remains for the active local browser/dev session.
+
+**Scope/determinism:** Documentation/process closeout only. No code, simulation logic, scenario data, event evaluator mechanics, startup snapshot construction, save schema, baseline/golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, calibration, packaged installer artifact, randomness, timestamps, locale sorting, or persisted output ordering changed.
+
+---
+
 ## [2026-06-26] fix(ui): keep P12 player-truth follow-up read-model scoped
 
 **Type:** UI/read-model/routing/provenance/test/docs cleanup.
