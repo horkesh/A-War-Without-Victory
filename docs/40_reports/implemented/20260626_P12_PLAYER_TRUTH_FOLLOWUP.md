@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-26  
 **Branch:** `codex/p12-player-truth-followup`  
-**Status:** Local implementation, broad local proof, and manual in-app browser proof complete; GitHub/merge closeout pending.
+**Status:** Local implementation, broad local proof, manual in-app browser proof, branch push, and PR #455 creation complete; GitHub checks/merge closeout pending.
 
 ## Scope
 
@@ -31,7 +31,7 @@ P12 continues the Army HQ/sector/brigade information-quality sweep as a UI/read-
 
 ## Remaining Gates
 
-- Push the branch, inspect GitHub checks and Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
+- PR #455 is open with no initial comments, reviews, or review threads. Inspect GitHub checks and any new Codex comments, merge only once green, then prune local/remote branch refs and confirm one clean worktree.
 
 ## Pyrrhic Roles
 
