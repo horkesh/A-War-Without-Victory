@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest closed packet is P17 player-start hardening on `main` after P16 at `9adce5a48` through PR #458 and docs closeout `790f76cd5`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; P17 player-start hardening is closed on `main`, and P18 command-surface truth is the active local candidate on `codex/p18-command-surface-truth`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -8,20 +8,23 @@
 
 ## Current Queue 2026-06-27
 
-P17 player-start hardening is verified locally before push:
+P18 command-surface truth is implemented locally before final closeout:
 
-- RBiH, RS, and HRHB foundational decisions remain first-hour required decisions.
-- Pre-choice `EventDecisionModal` no longer renders future-consequence/downstream-impact dossier cards or detail toggles.
-- The all-faction first-hour browser gate fails on future-branch knowledge leaks in foundational decision modals.
-- `qa:player-starts:browser` is an explicit alias for the all-faction first-hour browser gate.
-- Scope is UI/browser-QA/test/docs only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt changes.
+- Decision Room command/loop actions with no route now expose unavailable reasons in visible, title, and accessible copy.
+- Generic Decision Room navigation returns false for Desk inbox targets so App-level Desk handlers retain ownership.
+- Stale `Advanced Desk` / `Product Loop` English copy is replaced with `Advanced Review` / `Decision Loop`.
+- Army HQ, OOB, and Corps Detail sector coverage tiers use live line-holder count over `length_edges` when that denominator exists.
+- Corps Front missing reserve-personnel denominators and sector-security state render as unreported/neutral instead of exact zero or inactive truth.
+- Opening corps commander projections are turn-zero only and still skip operation-assigned officers.
+- Formation Detail war narratives are sanitized through the same player-safe settlement-label pass as notable moments.
+- Scope is UI/read-model/i18n/test/docs only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt changes.
 
-P17 proof so far: focused first-hour/modal proof 3 files / 21 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 677 tests; `npm.cmd run qa:player-starts:browser`.
+P18 local proof is green: focused Decision Room/sector/Corps Front proof 6 files / 127 tests; focused commander/Formation Detail proof 3 files / 57 tests; combined focused pack 9 files / 184 tests; shell-navigation follow-up 2 files / 20 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 681 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; manual in-app browser proof on `http://127.0.0.1:3006/`; and `git diff --check`. Remaining closeout: GitHub proof, merge, and branch/worktree cleanup.
 
-Next queue after P17 remains non-BCS owner-playthrough polish:
+Next queue after P18 remains non-BCS owner-playthrough polish:
 
-- Fresh live-browser inspection of Army HQ, OOB, Corps Front, sector, brigade/Formation Detail, settlement, Records, and Decision Room disabled-action copy.
-- Prioritize Decision Room disabled-action reasons, command-surface information density, and owner-playthrough confusion found in live browser checks.
+- Fresh live-browser inspection of Records, Chronicle, settlement timelines, operation planning, tactical-map selection/stack behavior, and any remaining Army HQ/OOB/Corps Front confusion not covered by P18.
+- Prioritize information-density gaps, sparse-source truth, route ownership, and owner-playthrough confusion found in live browser checks.
 - Keep batching substantial coherent fixes before CI, rather than small one-off PRs.
 
 ## Prior Queue 2026-06-26

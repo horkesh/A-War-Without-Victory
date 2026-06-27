@@ -551,4 +551,49 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('Casualties unreported');
     expect(container.textContent).not.toContain('0 personnel lost');
   });
+
+  it('derives coverage from live line holders instead of stale saved density in Army HQ', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:live-density',
+      display_name: 'Live density front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: ['front_brigade'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 4,
+      density: 0,
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'front_brigade',
+        faction: 'RBiH',
+        name: 'Front Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    expect(screen.getByTestId('army-hq-sector-row').getAttribute('data-coverage-tier')).toBe('held');
+  });
 });

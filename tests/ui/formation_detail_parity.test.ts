@@ -271,6 +271,31 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toMatch(/\bBloodied\b/);
   });
 
+  it('sanitizes raw war-story narrative before rendering Formation Detail history', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+          ...formation,
+          warNarrative: 'rbih_secret_story reports action at op:test_sector:known.',
+        }
+      : formation);
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedFormationId: 'rbih_heroic_brigade',
+      osidDisplayNames: { 'op:test_sector:known': 'Known sector' },
+    });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Record' }));
+
+    const copy = view.container.textContent ?? '';
+    expect(copy).toContain('Known sector');
+    expect(copy).toContain('staff record');
+    expect(copy).not.toContain('rbih_secret_story');
+    expect(copy).not.toContain('op:test_sector:known');
+  });
+
   it('renders known municipality slugs as player-facing names', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';

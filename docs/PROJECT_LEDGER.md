@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] P18 command-surface truth local candidate
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Implemented the next non-packaging owner-playthrough command-surface truth packet on `codex/p18-command-surface-truth`. Decision Room disabled command/loop actions now expose unavailable reasons; generic Decision Room navigation no longer claims Desk inbox targets; stale `Advanced Desk` / `Product Loop` English copy is retired; Army HQ/OOB/Corps Detail sector coverage tiers derive from live line holders over front segments; Corps Front no longer renders fake reserve percentages or inactive sector-security truth from missing source data; opening commander projection is turn-zero only; and Formation Detail war narratives are sanitized through player-safe settlement labels.
+
+**Verification:** Focused local proof passed `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts tests/ui/decision_room_navigation_owner.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/corps_front_panel_routing.test.ts --pool=forks --reporter=dot` (6 files / 127 tests), `npm.cmd exec -- vitest run tests/ui/opening_corps_commander_display.test.ts tests/ui/commander_read_model_surfaces.test.ts tests/ui/formation_detail_parity.test.ts --pool=forks --reporter=dot` (3 files / 57 tests), combined focused proof 9 files / 184 tests, shell-navigation follow-up 2 files / 20 tests, `npm.cmd run typecheck -- --pretty false`, `npm.cmd run qa:player-journeys` (43 files / 681 tests), `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, manual in-app browser proof on `http://127.0.0.1:3006/`, and `git diff --check`. GitHub proof, merge, and branch/worktree cleanup remain pending for branch closeout.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] docs: sync active information-quality plan after P16 merge
 
 **Type:** Docs/process hygiene.

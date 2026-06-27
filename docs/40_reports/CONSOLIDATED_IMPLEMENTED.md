@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest command-surface truth:** [implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md](implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md) - Decision Room disabled actions now explain unavailable routes, generic inbox navigation stays owned by the Desk shell, sector coverage uses live line-holder density, Corps Front missing reserve/security truth stays unreported, opening commander projection is turn-zero only, and Formation Detail war narratives are player-safe.
+
 **Latest player-start hardening:** [implemented/20260627_P17_PLAYER_START_HARDENING.md](implemented/20260627_P17_PLAYER_START_HARDENING.md) - RBiH, RS, and HRHB foundational decisions remain first-hour required decisions, but `EventDecisionModal` no longer renders pre-choice future-consequence/downstream-impact preview cards or detail toggles; the all-faction browser gate now fails on future-branch knowledge leaks before the player chooses.
 
 **Latest command-surface ergonomics / hit-test polish:** [implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md](implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md) - Army HQ sector and ORBAT disclosure controls now expose stable aria/detail contracts, OOB sector drilldowns preserve authored OSID anchors, Corps Front rows expose force-bucket provenance and unreported truth, Formation Detail sector-picker aria grammar is singular/plural safe, and the shared flip-card no longer intercepts clicks in Army HQ.

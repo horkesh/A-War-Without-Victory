@@ -46,22 +46,7 @@ export function openPresidentialDecisionRoomNavigationTarget(
     return inspectOnField(state, target.target);
   }
   if (target.kind === 'inbox') {
-    state.setCodexOpen(false);
-    state.setChronicleOpen(false);
-    state.setArmyHQOpen(false);
-    state.setIsOperationsPanelOpen?.(false);
-    state.setSelectedOsid?.(null);
-    state.setSelectedFormationId?.(null);
-    state.setSelectedCorpsId?.(null);
-    state.setSelectedCorpsFrontSectorId?.(null);
-    state.setSelectedArmyId(null);
-    state.setSelectedArmyHqId?.(null);
-    state.setSelectedOperationKey?.(null);
-    state.setSelectedOrbatCorpsId?.(null);
-    state.setFocusedAftermathTurn?.(null);
-    state.setFocusedOperationHistoryId?.(null);
-    state.setFocusedDecisionConsequenceId?.(null);
-    return true;
+    return false;
   }
   if (target.kind === 'chronicle') {
     return openChronicle(state);

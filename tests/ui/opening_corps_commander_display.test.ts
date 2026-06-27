@@ -287,4 +287,33 @@ describe('opening corps commander display', () => {
         expect(gameState.namedOfficerStateById?.arbih_cikotic?.assigned_corps_id).toBeNull();
         expect(gameState.namedOfficerStateById?.arbih_hujdur?.assigned_corps_id).toBeNull();
     });
+
+    it('does not project opening corps commanders after the campaign start turn', () => {
+        const gameState = state({
+            turn: 8,
+            namedOfficerData: [
+                officer({
+                    id: 'arbih_cikotic',
+                    name: 'Selmo Cikotic',
+                    faction: 'RBiH',
+                    home_corps_id: 'arbih_3rd_corps',
+                    pool_tier: 'tier_b',
+                    competence: 4,
+                }),
+            ],
+            namedOfficerStateById: {
+                arbih_cikotic: {
+                    officer_id: 'arbih_cikotic',
+                    status: 'reserve',
+                    assigned_corps_id: null,
+                    acting_commander: false,
+                    turns_in_command: 0,
+                    battles: 0,
+                    victories: 0,
+                },
+            },
+        });
+
+        expect(resolveCorpsCommanderDisplay('arbih_3rd_corps', 'RBiH', gameState)).toBeNull();
+    });
 });

@@ -430,7 +430,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
                   unreported: t('corpsFront.unreported'),
                 });
-                const coverageTier = getSectorCoverageTier(s.density, sectorAssignment);
+                const coverageTier = getSectorCoverageTier(s.density, sectorAssignment, s.length_edges);
                 const sectorLabel = getPlayerFacingSectorName(s.sector_id, [s]);
                 return (
                 <button

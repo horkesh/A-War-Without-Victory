@@ -75,9 +75,14 @@ export type SectorCoverageTier = 'uncovered' | 'thin' | 'held' | 'dense';
 export function getSectorCoverageTier(
   density: number | undefined | null,
   assignment: Pick<SectorFormationAssignment, 'lineHoldingIds'>,
+  edgeCount?: number | undefined | null,
 ): SectorCoverageTier {
-  if (assignment.lineHoldingIds.length === 0 || !Number.isFinite(density) || (density ?? 0) <= 0) return 'uncovered';
-  const reportedDensity = density ?? 0;
+  if (assignment.lineHoldingIds.length === 0) return 'uncovered';
+  const liveDensity = Number.isFinite(edgeCount) && (edgeCount ?? 0) > 0
+    ? assignment.lineHoldingIds.length / (edgeCount as number)
+    : null;
+  const reportedDensity = liveDensity ?? (Number.isFinite(density) ? density ?? 0 : 0);
+  if (reportedDensity <= 0) return 'uncovered';
   if (reportedDensity < 0.12) return 'thin';
   if (reportedDensity < 0.28) return 'held';
   return 'dense';
