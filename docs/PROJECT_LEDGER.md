@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] fix(ui): preserve P18 command-surface follow-up assertions
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** Preserved the useful dirty-main follow-up work by integrating it into the active P18 branch instead of leaving it stranded in the main workspace. Formation Detail history sanitization now also scrubs raw colon-prefixed internal tokens in war-story prose. Focused assertions now pin disabled opportunity cards as reviewable Decision Room cards without issue directives, pre-advance opportunity/sitrep rows to exact Decision Room/source handoff targets, Corps Detail dense sector coverage copy, and Army HQ held-sector coverage attributes.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 5 files / 129 tests. `git diff --check` passed before commit.
+
+**Scope/determinism:** UI display-edge sanitizer/tests/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] fix(desktop): repair P18 packaged runtime teardown abort filter
 
 **Type:** Desktop packaged-runtime probe guardrail repair.

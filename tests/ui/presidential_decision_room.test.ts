@@ -1491,7 +1491,16 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 0,
       payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
-    // A disabled approve action carries no directive (additive — undefined).
+    expect(noActionCard).toMatchObject({
+      actionLabel: 'Review Dossier',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'opportunity',
+        cardId: 'opportunity:opp_no_action',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    // A disabled approve action keeps the card reviewable but carries no issue directive.
     expect(noActionCard?.directive).toBeUndefined();
   });
 

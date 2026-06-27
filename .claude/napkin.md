@@ -46,7 +46,7 @@
 
 **SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
 
-**OPENING COMMANDER PROJECTION IS NOT RESERVE AVAILABILITY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state. Do instead: limit opening commander fallback display to turn zero, exclude projected opening commanders from Personnel reserve pools, and skip operation-assigned officers when resolving opening command display.
+**OPENING COMMANDER PROJECTION IS TURN-ZERO CONTEXT ONLY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state, but later turns must not present opening candidates as ongoing assignments. Do instead: gate `opening_read_model` commander display to turn 0, exclude projected opening commanders from Personnel reserve pools, and skip operation-assigned officers when resolving opening command display.
 
 **SECTOR INSPECT ANCHORS PRESERVE AUTHORED ORDER (2026-06-25).** Multi-segment sector navigation should not sort OSIDs into an arbitrary lexicographic anchor. Do instead: choose the first authored friendly segment OSID for field inspect; reserve sorting for explicit display lists.
 
@@ -74,7 +74,7 @@
 
 **BRIGADE HISTORY REPORTEDFIELDS ARE SOURCE TRUTH (2026-06-25).** A `brigade_history` row with only `battles_fought` does not prove zero wins, losses, casualties, territory movement, brigade counts, win rate, or exchange ratio. Do instead: synthesize the panel object but include only reported or engagement-derived fields in `reportedFields`.
 
-**TURN-ZERO FORMATION HISTORY IS SETUP PROVENANCE (2026-06-25).** Setup notable moments can otherwise read as impossible campaign captures before play. Do instead: label turn-zero Formation Detail moments as setup records with neutral initial-deployment copy.
+**FORMATION HISTORY NEEDS PLAYER-SAFE SETUP/SANITIZED COPY (2026-06-25).** Setup notable moments can otherwise read as impossible campaign captures before play, and generated war-story prose can carry raw ids. Do instead: label turn-zero Formation Detail moments as setup records with neutral initial-deployment copy and sanitize unit-history narrative/moments before rendering.
 
 **HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
 

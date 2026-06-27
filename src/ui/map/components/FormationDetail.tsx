@@ -88,6 +88,7 @@ function formatEngagementRole(role: string): string {
 function sanitizeHistoryMoment(description: string, osidDisplayNames: Record<string, string> | null): string {
   return description
     .replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))
+    .replace(/\b(?:formation|corps|sector|cmd|csq|event|evt):[a-z0-9_:-]+\b/gi, t('formationDetail.staffRecord'))
     .replace(/\b[a-z]{2,}_[a-z0-9_]*\b/gi, t('formationDetail.staffRecord'));
 }
 

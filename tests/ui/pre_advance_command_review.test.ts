@@ -188,6 +188,24 @@ describe('buildPreAdvanceCommandReviewView', () => {
       sourceOwner: 'Presidential review queue',
       navigationTarget: { kind: 'inbox' },
     });
+    expect(view.items.find((item) => item.id === 'opportunity:opp_pre_advance')).toMatchObject({
+      actionLabel: 'Review Dossier',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'opportunity',
+        cardId: 'opportunity:opp_pre_advance',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    expect(view.items.find((item) => item.id === 'sitrep:front-critical')).toMatchObject({
+      actionLabel: 'Review',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'operational',
+        cardId: 'sitrep:front-critical',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'summary' },
+    });
     expect(view.items.find((item) => item.id === 'turn:31:hard-turn')).toMatchObject({
       actionLabel: 'Review',
       navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:31:hard-turn' },

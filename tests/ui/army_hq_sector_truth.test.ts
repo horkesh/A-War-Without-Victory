@@ -146,6 +146,58 @@ describe('Army HQ sector truth', () => {
     expect(container.textContent).toContain('1 stale roster entry');
   });
 
+  it('marks reported line-held sectors with the held coverage tier', () => {
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:held',
+      display_name: 'Held front',
+      faction: 'RBiH',
+      corps_id: 'arbih_1st_corps',
+      assigned_brigade_ids: ['front_brigade'],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      length_edges: 5,
+      density: 0.2,
+      combat_strength_class: 'adequate',
+      sub_segments: [],
+      threat_ratio: 1,
+      intel_confidence: 0.8,
+      offensive_signs: false,
+    } as unknown as CorpsFrontSectorView;
+    const state = makeState(sector);
+    state.formations = [
+      ...state.formations,
+      {
+        id: 'front_brigade',
+        faction: 'RBiH',
+        name: 'Front Brigade',
+        kind: 'brigade',
+        readiness: 'ready',
+        status: 'active',
+        cohesion: 70,
+        fatigue: 0,
+        personnel: 1000,
+        createdTurn: 0,
+        tags: [],
+        corps_id: 'arbih_1st_corps',
+      },
+    ] as LoadedGameState['formations'];
+    useGameStore.setState({ loadedGameState: state });
+
+    const { container } = render(React.createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+    const row = screen.getByTestId('army-hq-sector-row');
+
+    expect(row.getAttribute('data-coverage-tier')).toBe('held');
+    expect(row.getAttribute('data-current-brigade-count')).toBe('1');
+    expect(row.getAttribute('data-frontline-brigade-count')).toBe('1');
+    expect(container.textContent).toContain('Held front');
+    expect(container.textContent).not.toContain('No friendly line');
+  });
+
   it('marks sector combat aggregates as partial when any line holder lacks reported metrics', () => {
     const sector = {
       sector_id: 'sector:arbih_1st_corps:partial',

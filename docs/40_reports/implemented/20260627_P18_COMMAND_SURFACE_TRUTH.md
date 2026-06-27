@@ -12,7 +12,7 @@ P18 closes the next non-packaging owner-playthrough information-quality packet. 
 - Sector coverage tiers in Army HQ, OOB, and Corps Detail now derive from live line holders over sector front segments when that denominator exists, not from stale roster density alone.
 - Corps Front reserve ratio no longer renders a fake `0%` without a reported sector-personnel denominator, and an unreported sector-security state uses neutral action copy instead of implying security is inactive.
 - Opening corps commander projection is now turn-zero only and still skips operation-assigned officers.
-- Formation Detail war narratives are sanitized through the same player-safe settlement-label replacement used for notable moments.
+- Formation Detail war narratives are sanitized through the same player-safe settlement-label replacement and raw-token scrubbing used for notable moments.
 
 ## Verification
 
@@ -27,6 +27,7 @@ P18 closes the next non-packaging owner-playthrough information-quality packet. 
 - Manual in-app browser proof on `http://127.0.0.1:3006/` from this worktree verified RBiH start, war-start/opening brief, foundational decision response, Desk owner handoff, Decision Room `Advanced Review` / `Decision Loop` labels, disabled `Report` / `Cost` unavailable reasons, turn-zero acting commanders in OOB, and console health with only the expected browser/dev desktop-bridge fallback warning.
 - `git diff --check` passed.
 - CI repair proof for PR #459 packaged-runtime failure passed `npm.cmd exec -- vitest run tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot`, `node --check src/desktop/electron-main.cjs`, `node --check tools/desktop_packaged_runtime_probe.mjs`, and `npm.cmd run desktop:package:probe`. The exact packaged probe emitted `runtime_failure_checks: []` after narrowing teardown-safe local data-route abort filtering to named localhost `GET` / `xhr` routes.
+- Preserved-work follow-up proof passed `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/formation_detail_parity.test.ts --pool=forks --reporter=dot`: 5 files / 129 tests.
 
 ## Scope
 
