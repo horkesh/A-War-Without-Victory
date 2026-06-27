@@ -12,6 +12,7 @@
 
 | Need | Go to |
 |------|--------|
+| **Latest command-surface truth** | [implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md](implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md) - Decision Room unavailable actions, Desk route ownership, live sector coverage density, Corps Front sparse reserve/security truth, turn-zero-only opening commander projection, and Formation Detail narrative safety. |
 | **Latest P12 player-truth follow-up** | [implemented/20260626_P12_PLAYER_TRUTH_FOLLOWUP.md](implemented/20260626_P12_PLAYER_TRUTH_FOLLOWUP.md) - Merged through PR #455 at `d47736be6`: stale App-local selections now fail closed, ungrouped OOB rows cannot route to a first brigade, sparse operation/cost/equipment provenance stays unreported, and the earlier baseline experiment was reverted so the packet remains UI/read-model scoped. |
 | **Latest player-start hardening** | [implemented/20260627_P17_PLAYER_START_HARDENING.md](implemented/20260627_P17_PLAYER_START_HARDENING.md) - Foundational decisions remain first-hour required decisions, but pre-choice future-consequence/downstream-impact previews are retired from `EventDecisionModal` and guarded by all-faction browser proof. |
 | **Latest Command Briefing fallback localization** | [implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md](implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md) - Command briefing compatibility fallback strings no longer drive rendered BCS copy in the tactical banner, Army HQ Situation Briefing, Presidential Decision Room cards, or legacy Warroom modal. |

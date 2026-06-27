@@ -67,6 +67,17 @@ function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: 
 type ActiveDecisionRoomLens = 'all' | PresidentialDecisionRoomCategory;
 type DecisionRoomNavigateTarget = (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
 
+function unavailableButtonReason(
+  target: PresidentialDecisionRoomNavigationTarget,
+  reason: string | undefined,
+): string | undefined {
+  return target.kind === 'none' ? reason ?? t('decisionRoom.actionUnavailable') : undefined;
+}
+
+function unavailableAria(label: string, reason: string | undefined): string | undefined {
+  return reason ? `${label} - ${reason}` : undefined;
+}
+
 function LensButton({
   lens,
   active,
@@ -111,6 +122,7 @@ function CommandQuestionLane({
   navigateTarget: DecisionRoomNavigateTarget;
 }) {
   const disabled = question.navigationTarget.kind === 'none';
+  const disabledReason = unavailableButtonReason(question.navigationTarget, question.unavailableReason);
   return (
     <article className="min-w-0 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2">
       <div className="flex min-w-0 items-start justify-between gap-2">
@@ -135,11 +147,18 @@ function CommandQuestionLane({
       <button
         type="button"
         disabled={disabled}
+        title={disabledReason}
+        aria-label={unavailableAria(question.actionLabel, disabledReason)}
         onClick={() => navigateTarget(question.navigationTarget)}
         className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {question.actionLabel}
       </button>
+      {disabledReason && (
+        <div className="mt-1 text-[8px] uppercase tracking-[0.08em] text-text-muted">
+          {disabledReason}
+        </div>
+      )}
     </article>
   );
 }
@@ -152,6 +171,7 @@ function NextOrderCard({
   navigateTarget: DecisionRoomNavigateTarget;
 }) {
   const disabled = order.navigationTarget.kind === 'none';
+  const disabledReason = unavailableButtonReason(order.navigationTarget, order.unavailableReason);
   return (
     <article className={`min-w-0 rounded border px-3 py-2 ${order.role === 'act'
       ? 'border-amber-400/40 bg-amber-400/10'
@@ -176,11 +196,18 @@ function NextOrderCard({
       <button
         type="button"
         disabled={disabled}
+        title={disabledReason}
+        aria-label={unavailableAria(order.actionLabel, disabledReason)}
         onClick={() => navigateTarget(order.navigationTarget)}
         className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
       >
         {order.actionLabel}
       </button>
+      {disabledReason && (
+        <div className="mt-1 text-[8px] uppercase tracking-[0.08em] text-text-muted">
+          {disabledReason}
+        </div>
+      )}
     </article>
   );
 }
@@ -193,10 +220,13 @@ function ProductLoopStep({
   navigateTarget: DecisionRoomNavigateTarget;
 }) {
   const disabled = step.navigationTarget.kind === 'none';
+  const disabledReason = unavailableButtonReason(step.navigationTarget, step.unavailableReason);
   return (
     <button
       type="button"
       disabled={disabled}
+      title={disabledReason}
+      aria-label={unavailableAria(`${step.label}: ${step.headline}`, disabledReason)}
       onClick={() => navigateTarget(step.navigationTarget)}
       className="flex min-h-[4.75rem] min-w-0 flex-col justify-between rounded border border-panel-border/55 bg-panel-card/50 px-2 py-2 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
     >
@@ -209,7 +239,7 @@ function ProductLoopStep({
         </span>
       </span>
       <span className="mt-1 flex min-w-0 items-center justify-between gap-2">
-        <span className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{step.summary}</span>
+        <span className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{disabledReason ?? step.summary}</span>
         <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${step.urgentCount > 0
           ? 'border-red-400/35 bg-red-500/10 text-red-300'
           : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}

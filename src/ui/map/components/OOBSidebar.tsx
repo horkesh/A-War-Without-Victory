@@ -726,7 +726,7 @@ export function OOBSidebar() {
                           loadedGameState.formations,
                           loadedGameState.corpsFrontSectors ?? [],
                         );
-                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
+                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment, sector.length_edges);
                         const owner = loadedGameState.formations.find((f) => f.id === sector.corps_id);
                         const ownerName = getPlayerSafeCorpsName(owner?.name, sector.corps_id);
                         const sectorLabel = getPlayerFacingSectorName(sector.sector_id, [sector]);

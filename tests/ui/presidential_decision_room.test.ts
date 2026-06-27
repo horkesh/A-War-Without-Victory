@@ -369,16 +369,19 @@ describe('buildPresidentialDecisionRoomView', () => {
       count: 0,
       urgentCount: 0,
       navigationTarget: { kind: 'none' },
+      unavailableReason: 'No current item is available for this action.',
     });
     expect(loopsById.cost).toMatchObject({
       count: 0,
       urgentCount: 0,
       navigationTarget: { kind: 'none' },
+      unavailableReason: 'No current item is available for this action.',
     });
     expect(loopsById.judge).toMatchObject({
       count: 0,
       urgentCount: 0,
       navigationTarget: { kind: 'none' },
+      unavailableReason: 'No current item is available for this action.',
     });
     expect(`${loopsById.report.summary} ${loopsById.cost.summary} ${loopsById.judge.summary}`).not.toContain('recorded turn');
   });
@@ -427,6 +430,20 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(loopsById.brief.navigationTarget).toEqual({ kind: 'decision-room', lens: 'briefing' });
     expect(loopsById.decide.navigationTarget).toEqual({ kind: 'inbox' });
     expect(loopsById.next.navigationTarget.kind).toBe('decision-room');
+    expect(view.loopSteps
+      .filter((step) => step.navigationTarget.kind === 'none')
+      .map((step) => step.unavailableReason))
+      .toEqual([
+        'No current item is available for this action.',
+        'No current item is available for this action.',
+        'No current item is available for this action.',
+        'No current item is available for this action.',
+      ]);
+    expect(view.nextOrders.find((order) => order.navigationTarget.kind === 'none')?.unavailableReason).toBe('No current item is available for this action.');
+    const disabledQuestions = view.commandQuestions.filter((question) => question.navigationTarget.kind === 'none');
+    expect(disabledQuestions.length).toBeGreaterThan(0);
+    expect(disabledQuestions.map((question) => question.unavailableReason))
+      .toEqual(disabledQuestions.map(() => 'No current item is available for this action.'));
     expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-tab');
     expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-records');
   });
@@ -1474,7 +1491,16 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 0,
       payload: { reviewId: 'review_alpha', proposalId: 'opp_authorize' },
     });
-    // A disabled approve action carries no directive (additive — undefined).
+    expect(noActionCard).toMatchObject({
+      actionLabel: 'Review Dossier',
+      navigationTarget: {
+        kind: 'decision-room',
+        lens: 'opportunity',
+        cardId: 'opportunity:opp_no_action',
+      },
+      sourceHandoffTarget: { kind: 'army-hq-tab', tab: 'briefing' },
+    });
+    // A disabled approve action keeps the card reviewable but carries no issue directive.
     expect(noActionCard?.directive).toBeUndefined();
   });
 

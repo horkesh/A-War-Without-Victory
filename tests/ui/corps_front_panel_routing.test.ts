@@ -412,6 +412,17 @@ describe('CorpsFrontPanel field routing', () => {
   });
 
   it('disables Corps Front command controls when the desktop command bridge is unavailable', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      opsec_active: false,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     const bridgeReason = 'Desktop command bridge unavailable. Open the packaged desktop shell to stage sector commands.';
@@ -636,6 +647,48 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).toMatch(/Total manpower\s*Partial 500/i);
     expect(container.textContent).toMatch(/Reserve ratio\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
+  });
+
+  it('does not invent a zero reserve ratio when no fielded manpower denominator is reported', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+      rear_brigade_ids: [],
+      combat_personnel: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
+    expect(container.textContent).toMatch(/Total manpower\s*0/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
+  });
+
+  it('does not label an unreported sector-security state as enabled or disabled', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      opsec_active: undefined,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedCorpsId: 'arbih_1st_corps',
+      selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
+    });
+
+    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+
+    expect(screen.queryByRole('button', { name: /Tighten sector security/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Relax sector security/i })).toBeNull();
+    expect(screen.getByRole('button', { name: /Set sector security active/i })).toBeTruthy();
   });
 
   it('labels missing Forces-tab personnel as unreported in visible rows and accessible names', () => {

@@ -233,6 +233,7 @@ export interface PresidentialDecisionRoomNextOrder {
   urgent: boolean;
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  unavailableReason?: string;
 }
 
 export type PresidentialDecisionRoomCommandQuestionId =
@@ -262,6 +263,7 @@ export interface PresidentialDecisionRoomCommandQuestion {
   cardIds: string[];
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
+  unavailableReason?: string;
 }
 
 export interface PresidentialDecisionRoomLoopStep {
@@ -275,6 +277,7 @@ export interface PresidentialDecisionRoomLoopStep {
   actionLabel: string;
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
   sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
+  unavailableReason?: string;
 }
 
 export interface PresidentialDecisionRoomSourceHandoff {
@@ -1834,6 +1837,7 @@ function buildCommandQuestion(
   const topCard = visibleCards[0] ?? null;
   const count = weightedCardCount(cards);
   const urgentCount = weightedUrgentCount(cards);
+  const navigationTarget = topCard?.navigationTarget ?? { kind: 'none' as const };
   return {
     id,
     label,
@@ -1845,7 +1849,8 @@ function buildCommandQuestion(
     urgentCount,
     cardIds: visibleCards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel ?? t('decisionRoom.action.review'),
-    navigationTarget: topCard?.navigationTarget ?? { kind: 'none' },
+    navigationTarget,
+    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
   };
 }
 
@@ -1983,6 +1988,7 @@ function buildNextOrders(
     urgent: advanceReadiness.blockedByExistingSystems || (monitorCard ? isUrgentCard(monitorCard) : false),
     actionLabel: monitorCard?.actionLabel ?? t('decisionRoom.action.reviewAdvance'),
     navigationTarget: monitorCard?.navigationTarget ?? { kind: 'none' },
+    ...(monitorCard?.navigationTarget ? {} : { unavailableReason: t('decisionRoom.actionUnavailable') }),
   });
 
   return orders;
@@ -2007,6 +2013,7 @@ function buildCardLoopStep(
   const topCard = cards[0] ?? null;
   const count = weightedCardCount(cards);
   const urgentCount = weightedUrgentCount(cards);
+  const navigationTarget = topCard?.navigationTarget ?? options.fallbackNavigationTarget ?? { kind: 'none' as const };
   return {
     id,
     label,
@@ -2018,8 +2025,9 @@ function buildCardLoopStep(
     urgentCount,
     cardIds: cards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel,
-    navigationTarget: topCard?.navigationTarget ?? options.fallbackNavigationTarget ?? { kind: 'none' },
+    navigationTarget,
     ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
+    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
   };
 }
 
@@ -2032,6 +2040,7 @@ function buildReportLoopStep(
   const latestTurn = filedTurns[filedTurns.length - 1] ?? null;
   const topCard = turnCards[0] ?? null;
   const urgentCount = turnCards.filter(isUrgentCard).length;
+  const navigationTarget = topCard?.navigationTarget ?? (recordCount > 0 ? { kind: 'army-hq-records' as const, recordsSubTab: 'aftermath' as const } : { kind: 'none' as const });
   return {
     id: 'report',
     label: t('decisionRoom.loop.report'),
@@ -2043,8 +2052,9 @@ function buildReportLoopStep(
     urgentCount,
     cardIds: turnCards.map((card) => card.id),
     actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.turnRecords'),
-    navigationTarget: topCard?.navigationTarget ?? (recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' }),
+    navigationTarget,
     ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
+    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
   };
 }
 

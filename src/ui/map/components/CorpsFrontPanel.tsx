@@ -354,11 +354,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
         ? sector.defensive_power
         : undefined;
   const displayDefensePerEdge = hasFriendlyLine ? sector.combat_defense_per_edge : undefined;
-  const reserveRatio = missingPersonnelReports > 0
+  const reserveRatio = missingPersonnelReports > 0 || totalSectorPersonnel <= 0
     ? null
-    : totalSectorPersonnel > 0
-      ? reservePersonnel.reportedTotal / totalSectorPersonnel
-      : 0;
+    : reservePersonnel.reportedTotal / totalSectorPersonnel;
   const avgOperationSupply = averageComplete(relatedOperations.map((op) => op.supply_readiness)) ?? null;
   const entrenchmentSummary = loadedGameState.sectorEntrenchmentSummary?.[sector.sector_id];
   const formatEntrenchmentMetric = (
@@ -379,6 +377,9 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, hasReportedLogisticsPriority ? sector.logistics_priority! : 1));
   const hasReportedOpsec = typeof sector.opsec_active === 'boolean';
   const opsecActive = sector.opsec_active === true;
+  const opsecActionLabel = hasReportedOpsec
+    ? (opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec'))
+    : t('corpsFront.setOpsecActive');
   const hasReportedIntelConfidence = typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence);
   const intelConfidence = hasReportedIntelConfidence ? sector.intel_confidence! : null;
   const hasReliableThreatIntel = intelConfidence != null && intelConfidence >= 0.4;
@@ -688,10 +689,10 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     disabled={!ipc.isAvailable}
                     onClick={() => void toggleOpsec()}
                     title={!ipc.isAvailable ? commandBridgeUnavailable : undefined}
-                    aria-label={!ipc.isAvailable ? `${opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')} - ${commandBridgeUnavailable}` : undefined}
+                    aria-label={!ipc.isAvailable ? `${opsecActionLabel} - ${commandBridgeUnavailable}` : undefined}
                     className={`kbd-focus w-full rounded border border-neutral-400 px-2 py-1 text-[10px] font-bold uppercase ${ipc.isAvailable ? 'bg-neutral-200/50 hover:bg-neutral-300/60' : 'bg-neutral-200/30 text-neutral-400 cursor-not-allowed'}`}
                   >
-                    {opsecActive ? t('corpsFront.disableOpsec') : t('corpsFront.enableOpsec')}
+                    {opsecActionLabel}
                   </button>
                   {!ipc.isAvailable && (
                     <div className="text-[10px] text-neutral-600 italic">{t('corpsFront.commandBridgeUnavailable')}</div>

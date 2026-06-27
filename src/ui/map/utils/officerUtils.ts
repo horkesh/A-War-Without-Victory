@@ -72,6 +72,7 @@ export function resolveOpeningCorpsCommanderOfficer(
     faction: string,
     loadedGameState: LoadedGameState,
 ): NamedOfficerView | null {
+    if ((loadedGameState.turn ?? 0) > 0) return null;
     return (loadedGameState.namedOfficerData ?? [])
         .filter((officer) =>
             officer.faction === faction

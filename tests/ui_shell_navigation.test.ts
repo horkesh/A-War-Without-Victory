@@ -330,28 +330,11 @@ describe('shellNavigation', () => {
     ]);
   });
 
-  it('routes Presidential Decision Room inbox returns to a clean desk-owned field', () => {
+  it('leaves Presidential Decision Room inbox targets for the Desk shell owner', () => {
     const state = createState('RBiH');
 
-    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'inbox' }, state)).toBe(true);
-
-    expect(state.calls).toEqual([
-      ['setCodexOpen', false],
-      ['setChronicleOpen', false],
-      ['setArmyHQOpen', false],
-      ['setIsOperationsPanelOpen', false],
-      ['setSelectedOsid', null],
-      ['setSelectedFormationId', null],
-      ['setSelectedCorpsId', null],
-      ['setSelectedCorpsFrontSectorId', null],
-      ['setSelectedArmyId', null],
-      ['setSelectedArmyHqId', null],
-      ['setSelectedOperationKey', null],
-      ['setSelectedOrbatCorpsId', null],
-      ['setFocusedAftermathTurn', null],
-      ['setFocusedOperationHistoryId', null],
-      ['setFocusedDecisionConsequenceId', null],
-    ]);
+    expect(openPresidentialDecisionRoomNavigationTarget({ kind: 'inbox' }, state)).toBe(false);
+    expect(state.calls).toEqual([]);
   });
 
   it('round-trips shared shell handoff commands for cross-shell navigation', () => {

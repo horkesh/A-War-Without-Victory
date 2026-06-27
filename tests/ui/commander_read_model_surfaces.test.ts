@@ -183,4 +183,19 @@ describe('commander read-model surfaces', () => {
         expect(container.textContent).not.toContain('[!] UNASSIGNED');
         expect(container.textContent).not.toContain('VACANCY DETECTED');
     });
+
+    it('does not render opening-command assignment copy on later-turn corps surfaces', () => {
+        const gameState = {
+            ...makeOpeningCommandState(),
+            turn: 8,
+            label: 'Turn 8',
+        } as LoadedGameState;
+        useGameStore.setState({ loadedGameState: gameState, selectedFormationId: 'arbih_3rd_corps' });
+
+        const { container } = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+
+        expect(container.textContent).not.toContain('Selmo Cikotic');
+        expect(container.textContent).not.toContain('Opening command');
+        expect(container.textContent).not.toContain('permanent assignment pending');
+    });
 });

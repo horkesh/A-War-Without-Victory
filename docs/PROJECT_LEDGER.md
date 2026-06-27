@@ -1,4 +1,40 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] fix(ui): preserve P18 command-surface follow-up assertions
+
+**Type:** UI/read-model/test/docs polish.
+
+**Fix:** Preserved the useful dirty-main follow-up work by integrating it into the active P18 branch instead of leaving it stranded in the main workspace. Formation Detail history sanitization now also scrubs raw colon-prefixed internal tokens in war-story prose. Focused assertions now pin disabled opportunity cards as reviewable Decision Room cards without issue directives, pre-advance opportunity/sitrep rows to exact Decision Room/source handoff targets, Corps Detail dense sector coverage copy, and Army HQ held-sector coverage attributes.
+
+**Verification:** `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/formation_detail_parity.test.ts --pool=forks --reporter=dot` passed 5 files / 129 tests. `git diff --check` passed before commit.
+
+**Scope/determinism:** UI display-edge sanitizer/tests/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
+## [2026-06-27] fix(desktop): repair P18 packaged runtime teardown abort filter
+
+**Type:** Desktop packaged-runtime probe guardrail repair.
+
+**Fix:** Follow-up on PR #459 after GitHub Desktop Release Guard failed in `desktop-packaged-runtime-probe`. The packaged runtime probe captured `net::ERR_ABORTED` XHR rows for known local packaged data routes during probe teardown/startup (`operational_settlements.geojson` and `bih_adm3_1990.geojson`). The runtime and wrapper filters now ignore only request-failed `GET`/`xhr` rows for named localhost packaged data routes and only for `net::ERR_FAILED` or `net::ERR_ABORTED`; generic request aborts, HTTP failures, nonlocal URLs, non-XHR resources, and unnamed routes remain reportable.
+
+**Verification:** Red phase: updated `tests/desktop_packaged_runtime_probe.test.ts` failed against the old single-route `ERR_FAILED`-only filter. Green proof passed `npm.cmd exec -- vitest run tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot` (6 tests), `node --check src/desktop/electron-main.cjs`, `node --check tools/desktop_packaged_runtime_probe.mjs`, and exact `npm.cmd run desktop:package:probe`, whose manifest ended with `runtime_failure_checks: []`.
+
+**Scope/determinism:** Desktop probe filtering/tests/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
+## [2026-06-27] P18 command-surface truth local candidate
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Implemented the next non-packaging owner-playthrough command-surface truth packet on `codex/p18-command-surface-truth`. Decision Room disabled command/loop actions now expose unavailable reasons; generic Decision Room navigation no longer claims Desk inbox targets; stale `Advanced Desk` / `Product Loop` English copy is retired; Army HQ/OOB/Corps Detail sector coverage tiers derive from live line holders over front segments; Corps Front no longer renders fake reserve percentages or inactive sector-security truth from missing source data; opening commander projection is turn-zero only; and Formation Detail war narratives are sanitized through player-safe settlement labels.
+
+**Verification:** Focused local proof passed `npm.cmd exec -- vitest run tests/ui/presidential_decision_room.test.ts tests/ui/presidential_decision_room_panel_i18n.test.ts tests/ui/decision_room_navigation_owner.test.ts tests/ui/army_hq_sector_truth.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/corps_front_panel_routing.test.ts --pool=forks --reporter=dot` (6 files / 127 tests), `npm.cmd exec -- vitest run tests/ui/opening_corps_commander_display.test.ts tests/ui/commander_read_model_surfaces.test.ts tests/ui/formation_detail_parity.test.ts --pool=forks --reporter=dot` (3 files / 57 tests), combined focused proof 9 files / 184 tests, shell-navigation follow-up 2 files / 20 tests, `npm.cmd run typecheck -- --pretty false`, `npm.cmd run qa:player-journeys` (43 files / 681 tests), `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, manual in-app browser proof on `http://127.0.0.1:3006/`, and `git diff --check`. GitHub proof, merge, and branch/worktree cleanup remain pending for branch closeout.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] docs: sync active information-quality plan after P16 merge
 
 **Type:** Docs/process hygiene.

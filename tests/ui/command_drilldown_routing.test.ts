@@ -198,10 +198,13 @@ describe('command drilldown routing', () => {
       focusedOperationHistoryId: 'stale-op',
     });
 
-    render(createElement(CorpsDetail, { railSlot: 'primary' }));
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
-    fireEvent.click(screen.getByTestId('corps-detail-sector-row'));
+    const sectorRow = screen.getByTestId('corps-detail-sector-row');
+    expect(sectorRow.getAttribute('data-coverage-tier')).toBe('dense');
+    expect(container.textContent).toContain('Dense coverage');
+    fireEvent.click(sectorRow);
 
     const store = useGameStore.getState();
     expect(store.selectedCorpsId).toBe('rbih_1_corps');

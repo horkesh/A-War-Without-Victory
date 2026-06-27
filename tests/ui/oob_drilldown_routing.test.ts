@@ -330,6 +330,21 @@ describe('OOBSidebar drilldown routing', () => {
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('1');
   });
 
+  it('derives OOB sector coverage from live line holders instead of stale saved density', () => {
+    const state = makeState();
+    state.corpsFrontSectors = [{
+      ...state.corpsFrontSectors![0],
+      length_edges: 4,
+      density: 0,
+    }] as LoadedGameState['corpsFrontSectors'];
+    useGameStore.setState({ loadedGameState: state });
+
+    render(React.createElement(OOBSidebar));
+
+    fireEvent.click(screen.getByTestId('oob-section-sectors-toggle'));
+    expect(screen.getByTestId('oob-sector-row').getAttribute('data-coverage-tier')).toBe('held');
+  });
+
   it('renders player-safe sector strength labels instead of raw enum values', () => {
     const { container } = render(React.createElement(OOBSidebar));
 

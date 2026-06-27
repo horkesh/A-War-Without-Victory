@@ -88,6 +88,7 @@ function formatEngagementRole(role: string): string {
 function sanitizeHistoryMoment(description: string, osidDisplayNames: Record<string, string> | null): string {
   return description
     .replace(/op:[a-z0-9_]+:[a-z0-9_]+/gi, (match) => getOsidDisplayName(match, osidDisplayNames))
+    .replace(/\b(?:formation|corps|sector|cmd|csq|event|evt):[a-z0-9_:-]+\b/gi, t('formationDetail.staffRecord'))
     .replace(/\b[a-z]{2,}_[a-z0-9_]*\b/gi, t('formationDetail.staffRecord'));
 }
 
@@ -950,7 +951,9 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </div>
                 {formation.warNarrative && (
-                  <div className="text-[11px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">{formation.warNarrative}</div>
+                  <div className="text-[11px] text-text-primary leading-4 italic whitespace-pre-wrap break-words">
+                    {sanitizeHistoryMoment(formation.warNarrative, osidDisplayNames)}
+                  </div>
                 )}
                 {formation.notableMoments && formation.notableMoments.length > 0 && (
                   <div className="space-y-0.5 pt-1 min-w-0">

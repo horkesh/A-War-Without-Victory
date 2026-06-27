@@ -543,7 +543,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                         const isExpanded = effectiveExpandedId === sector.sector_id;
                         const sectorLabel = safeSectorLabel(sector.sector_id, sectors);
                         const sectorAssignment = buildSectorFormationAssignment(sector, formations, sectors);
-                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment);
+                        const coverageTier = getSectorCoverageTier(sector.density, sectorAssignment, sector.length_edges);
                         const projectedDensity = computeCurrentFrontDensity(
                             sector,
                             sectorAssignment.lineHoldingIds.length,

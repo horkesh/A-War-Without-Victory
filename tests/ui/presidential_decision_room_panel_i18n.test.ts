@@ -193,6 +193,31 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     });
   });
 
+  it('explains disabled quiet-state actions instead of rendering dead controls', () => {
+    useGameStore.setState({
+      loadedGameState: makeState(),
+      osidDisplayNames: null,
+    });
+
+    const { container } = render(createElement(PresidentialDecisionRoomPanel));
+
+    const disabledButtons = [...container.querySelectorAll('button[disabled]')];
+    expect(disabledButtons.length).toBeGreaterThan(0);
+    for (const button of disabledButtons) {
+      expect(button.getAttribute('title')).toBe('No current item is available for this action.');
+      expect(button.getAttribute('aria-label')).toMatch(/No current item is available for this action\.$/);
+    }
+    expect(container.textContent).toContain('No current item is available for this action.');
+
+    fireEvent.click(screen.getByRole('button', { name: 'View Advanced' }));
+    const advancedDisabledButtons = [...container.querySelectorAll('button[disabled]')];
+    expect(advancedDisabledButtons.length).toBeGreaterThan(disabledButtons.length);
+    for (const button of advancedDisabledButtons) {
+      expect(button.getAttribute('title')).toBe('No current item is available for this action.');
+      expect(button.getAttribute('aria-label')).toMatch(/No current item is available for this action\.$/);
+    }
+  });
+
   it('localizes priority-card severity badges in BCS mode', async () => {
     setLocale('bcs');
     useGameStore.setState({

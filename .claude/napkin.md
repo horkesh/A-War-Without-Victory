@@ -4,7 +4,7 @@
 
 **RELEASE GATES MUST WATCH PACKAGED RUNTIME RESOURCES (2026-06-26).** Desktop/package regressions can come from data and asset changes, not just Electron source. Do instead: keep desktop/full-suite path filters covering `data/derived/`, `data/ui/`, event scenario data, `assets/`, `build/icon.png`, `package-lock.json`, and release workflow edits; run the packaged runtime probe before publishing Windows artifacts.
 
-**PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows; keep request-failed and HTTP >=400 rows reportable.
+**PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows, plus named localhost packaged-probe teardown `GET`/`xhr` data routes; keep request-failed and HTTP >=400 rows reportable otherwise.
 
 **PACKAGED MAP GLYPHS ARE BUILD ASSETS (2026-06-26).** MapLibre glyph PBFs live under `src/ui/map/public/font`, but the tactical map build disables Vite public-dir copying. Do instead: keep the explicit `copy-map-public-fonts` build plugin and package-probe glyph route inventory before trusting packaged map text rendering.
 
@@ -19,6 +19,8 @@
 **DISPLACEMENT ATTRIBUTION IS NOT CONTROL TRUTH (2026-06-26).** A displacement row can explain movement pressure without proving who controlled a settlement. Do instead: require explicit control receipts/history for timeline control flips; render displacement as displacement evidence only.
 
 **DECISION ROOM FOCUS MUST RECONCILE TO LIVE CARDS (2026-06-26).** Stored card ids and command-category filters can outlive the current card list after turn/state changes. Do instead: clear missing active cards and stale category filters before rendering an empty or unrelated dossier.
+
+**DECISION ROOM DISABLED ACTIONS NEED REASONS (2026-06-27).** A disabled command/loop button with no explanation reads as broken UI. Do instead: carry unavailable reasons from the read model to visible helper text, `title`, and accessible names whenever the navigation target is unavailable.
 
 **CHRONICLE RECEIPT ACTIONS NEED OWNING SURFACE METADATA (2026-06-26).** A consequence receipt filed to Chronicle should not route through Army HQ Records just because it is a decision ledger row. Do instead: carry `decisionRecordSurface` and open Chronicle-filed receipt actions inside Chronicle focus.
 
@@ -44,7 +46,7 @@
 
 **SCENARIO_START_DATE MONTH IS 0-INDEXED (2026-06-25).** `{ year: 1992, month: 3, day: 6 }` is April 6, 1992. Do instead: keep baked April startup on month `3`, align browser fallbacks to that anchor, and use date/seasonal tests before treating it as March drift.
 
-**OPENING COMMANDER PROJECTION IS NOT RESERVE AVAILABILITY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state. Do instead: exclude projected opening commanders from Personnel reserve pools and skip operation-assigned officers when resolving opening command display.
+**OPENING COMMANDER PROJECTION IS TURN-ZERO CONTEXT ONLY (2026-06-25).** Turn-zero UI can project opening corps commanders without seating sim command state, but later turns must not present opening candidates as ongoing assignments. Do instead: gate `opening_read_model` commander display to turn 0, exclude projected opening commanders from Personnel reserve pools, and skip operation-assigned officers when resolving opening command display.
 
 **SECTOR INSPECT ANCHORS PRESERVE AUTHORED ORDER (2026-06-25).** Multi-segment sector navigation should not sort OSIDs into an arbitrary lexicographic anchor. Do instead: choose the first authored friendly segment OSID for field inspect; reserve sorting for explicit display lists.
 
@@ -72,7 +74,7 @@
 
 **BRIGADE HISTORY REPORTEDFIELDS ARE SOURCE TRUTH (2026-06-25).** A `brigade_history` row with only `battles_fought` does not prove zero wins, losses, casualties, territory movement, brigade counts, win rate, or exchange ratio. Do instead: synthesize the panel object but include only reported or engagement-derived fields in `reportedFields`.
 
-**TURN-ZERO FORMATION HISTORY IS SETUP PROVENANCE (2026-06-25).** Setup notable moments can otherwise read as impossible campaign captures before play. Do instead: label turn-zero Formation Detail moments as setup records with neutral initial-deployment copy.
+**FORMATION HISTORY NEEDS PLAYER-SAFE SETUP/SANITIZED COPY (2026-06-25).** Setup notable moments can otherwise read as impossible campaign captures before play, and generated war-story prose can carry raw ids. Do instead: label turn-zero Formation Detail moments as setup records with neutral initial-deployment copy and sanitize unit-history narrative/moments before rendering.
 
 **HOVER HIGHLIGHTS NEED PHYSICAL LOCATIONS (2026-06-25).** AoR coverage is command context, not unit presence. Do instead: use `location_osid` for ORBAT, Corps Detail, CorpsCard, and stack hover highlights; keep AoR only for explicitly labeled coverage/navigation surfaces.
 
@@ -122,7 +124,7 @@
 
 **ELECTRON RENDERER FLAGS NEED IPC, NOT `process.env` (2026-06-23).** Packaged renderer windows run with context isolation and no Node integration, so display code can miss runtime flags that the sim process honors. Do instead: expose renderer-visible runtime flags through desktop sim -> Electron main -> preload/bridge -> UI store and pass them explicitly into read-model helpers.
 
-**RESERVE MEMBERSHIP IS NOT FRIENDLY-LINE TRUTH (2026-06-23).** Sector assignments can include reserve/member brigades for navigation and command context. Do instead: use `lineHoldingIds` for Corps Front line presence, displayed combat strength, threat, force balance, defense previews, own-front tooltip truth, and coverage tier; use `allCurrentIds` only when reserve membership is intentionally part of the surface.
+**RESERVE MEMBERSHIP IS NOT FRIENDLY-LINE TRUTH (2026-06-23).** Sector assignments can include reserve/member brigades for navigation and command context. Do instead: use `lineHoldingIds` for Corps Front line presence, displayed combat strength, threat, force balance, defense previews, own-front tooltip truth, and coverage tier; when `length_edges` is reported, derive coverage density from `lineHoldingIds.length / length_edges`; use `allCurrentIds` only when reserve membership is intentionally part of the surface.
 
 **RAW SECTOR IDS MUST FALL BACK, NOT BECOME LABELS (2026-06-23).** Values like `sector:arbih_1st_corps:0` and underscore-heavy generated names are routing/debug truth. Do instead: route sector labels through `getPlayerFacingSectorName(...)`; if a display name still looks internal, render neutral fallback copy rather than humanizing the id.
 
@@ -144,7 +146,7 @@
 
 **DETAIL PANELS MUST RESET ENTITY-LOCAL TABS ON ENTITY CHANGE (2026-06-23).** Formation/settlement detail tabs are local UI state, not global route context. Do instead: reset Formation Detail to Overview when `selectedFormationId` changes and Settlement Detail to Overview when `osid` changes, so a newly selected entity does not inherit stale Orders/Timeline context.
 
-**MISSING LOGISTICS/OPSEC TRUTH IS UNREPORTED (2026-06-23).** Corps Front command controls may stage a new logistics or OPSEC order, but absent read-model fields are not proof of neutral priority or inactive security. Do instead: render absent `logistics_priority` / `opsec_active` as unreported; preserve explicit `1.0` / `false` as neutral/inactive.
+**MISSING LOGISTICS/OPSEC TRUTH IS UNREPORTED (2026-06-23).** Corps Front command controls may stage a new logistics or OPSEC order, but absent read-model fields are not proof of neutral priority or inactive security. Do instead: render absent `logistics_priority` / `opsec_active` as unreported; preserve explicit `1.0` / `false` as neutral/inactive; use neutral action copy such as setting sector security active when the current state is unreported.
 
 **PARTIAL OPERATION READINESS AND PARTICIPANTS MUST STAY HONEST (2026-06-24).** `supply`, `cohesion`, and `intel` readiness dimensions report independently, and raw operation participant ids can go stale. Do instead: preserve missing readiness dimensions as unreported, count/click only resolved formation ids, and display unresolved raw participant ids as stale records.
 
