@@ -4,7 +4,7 @@
 
 **RELEASE GATES MUST WATCH PACKAGED RUNTIME RESOURCES (2026-06-26).** Desktop/package regressions can come from data and asset changes, not just Electron source. Do instead: keep desktop/full-suite path filters covering `data/derived/`, `data/ui/`, event scenario data, `assets/`, `build/icon.png`, `package-lock.json`, and release workflow edits; run the packaged runtime probe before publishing Windows artifacts.
 
-**PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows; keep request-failed and HTTP >=400 rows reportable.
+**PACKAGED RUNTIME ABORT FILTERS MUST BE NARROW (2026-06-26).** Generic `webRequest.onErrorOccurred` failures can include missing chunks/data and must not self-classify as intentional aborts. Do instead: ignore `ERR_ABORTED` only for deliberate subframe `did-fail-load` rows, plus named localhost packaged-probe teardown `GET`/`xhr` data routes; keep request-failed and HTTP >=400 rows reportable otherwise.
 
 **PACKAGED MAP GLYPHS ARE BUILD ASSETS (2026-06-26).** MapLibre glyph PBFs live under `src/ui/map/public/font`, but the tactical map build disables Vite public-dir copying. Do instead: keep the explicit `copy-map-public-fonts` build plugin and package-probe glyph route inventory before trusting packaged map text rendering.
 

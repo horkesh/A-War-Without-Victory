@@ -26,7 +26,8 @@ P18 closes the next non-packaging owner-playthrough information-quality packet. 
 - `npm.cmd run qa:live-surface:browser` passed.
 - Manual in-app browser proof on `http://127.0.0.1:3006/` from this worktree verified RBiH start, war-start/opening brief, foundational decision response, Desk owner handoff, Decision Room `Advanced Review` / `Decision Loop` labels, disabled `Report` / `Cost` unavailable reasons, turn-zero acting commanders in OOB, and console health with only the expected browser/dev desktop-bridge fallback warning.
 - `git diff --check` passed.
+- CI repair proof for PR #459 packaged-runtime failure passed `npm.cmd exec -- vitest run tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot`, `node --check src/desktop/electron-main.cjs`, `node --check tools/desktop_packaged_runtime_probe.mjs`, and `npm.cmd run desktop:package:probe`. The exact packaged probe emitted `runtime_failure_checks: []` after narrowing teardown-safe local data-route abort filtering to named localhost `GET` / `xhr` routes.
 
 ## Scope
 
-UI/read-model/i18n/test/docs polish only. No simulation logic, event evaluator mechanics, scenario data, startup artifact, save schema migration, baseline/golden manifest, structural fingerprint artifact, calibration floor, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or Srebrenica/Zepa event-owned fall receipt behavior changed.
+UI/read-model/i18n/test/docs polish plus packaged-runtime probe filter repair only. No simulation logic, event evaluator mechanics, scenario data, startup artifact, save schema migration, baseline/golden manifest, structural fingerprint artifact, calibration floor, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or Srebrenica/Zepa event-owned fall receipt behavior changed.

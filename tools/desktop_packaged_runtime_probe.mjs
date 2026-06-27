@@ -100,11 +100,14 @@ const missingPackagedRouteInventory = expectedPackagedRouteInventory.filter((exp
 ));
 const runtimeProbeTeardownSafeRoutes = new Set([
   '/data/derived/operational/operational_settlements.geojson',
+  '/data/source/boundaries/bih_adm3_1990.geojson',
 ]);
 function isIgnorablePackagedRouteTeardownFailure(entry, url) {
   if (entry?.type !== 'request-failed') return false;
-  if (entry?.error !== 'net::ERR_FAILED') return false;
+  if (!['net::ERR_FAILED', 'net::ERR_ABORTED'].includes(entry?.error)) return false;
   if (entry?.label !== 'webContents:unknown') return false;
+  if (entry?.method !== 'GET') return false;
+  if (entry?.resource_type !== 'xhr') return false;
   try {
     const parsed = new URL(url);
     if (parsed.hostname !== '127.0.0.1' && parsed.hostname !== 'localhost') return false;

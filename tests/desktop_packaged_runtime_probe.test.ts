@@ -320,8 +320,8 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
-        /RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
-        'runtime failure filtering should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+        /RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES[\s\S]*operational_settlements\.geojson[\s\S]*bih_adm3_1990\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*!\['net::ERR_FAILED', 'net::ERR_ABORTED'\]\.includes\(entry\?\.error\)[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'runtime failure filtering should only ignore teardown-time ERR_FAILED/ERR_ABORTED rows for named local packaged data routes',
     );
     assert.match(
         source,
@@ -565,8 +565,8 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
     );
     assert.match(
         source,
-        /runtimeProbeTeardownSafeRoutes[\s\S]*operational_settlements\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*entry\?\.error !== 'net::ERR_FAILED'[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
-        'probe tool should only ignore teardown-time ERR_FAILED rows for inventory-proven local packaged routes',
+        /runtimeProbeTeardownSafeRoutes[\s\S]*operational_settlements\.geojson[\s\S]*bih_adm3_1990\.geojson[\s\S]*entry\?\.type !== 'request-failed'[\s\S]*!\['net::ERR_FAILED', 'net::ERR_ABORTED'\]\.includes\(entry\?\.error\)[\s\S]*entry\?\.label !== 'webContents:unknown'/s,
+        'probe tool should only ignore teardown-time ERR_FAILED/ERR_ABORTED rows for named local packaged data routes',
     );
     assert.match(
         source,

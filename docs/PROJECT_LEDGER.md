@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-27] fix(desktop): repair P18 packaged runtime teardown abort filter
+
+**Type:** Desktop packaged-runtime probe guardrail repair.
+
+**Fix:** Follow-up on PR #459 after GitHub Desktop Release Guard failed in `desktop-packaged-runtime-probe`. The packaged runtime probe captured `net::ERR_ABORTED` XHR rows for known local packaged data routes during probe teardown/startup (`operational_settlements.geojson` and `bih_adm3_1990.geojson`). The runtime and wrapper filters now ignore only request-failed `GET`/`xhr` rows for named localhost packaged data routes and only for `net::ERR_FAILED` or `net::ERR_ABORTED`; generic request aborts, HTTP failures, nonlocal URLs, non-XHR resources, and unnamed routes remain reportable.
+
+**Verification:** Red phase: updated `tests/desktop_packaged_runtime_probe.test.ts` failed against the old single-route `ERR_FAILED`-only filter. Green proof passed `npm.cmd exec -- vitest run tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot` (6 tests), `node --check src/desktop/electron-main.cjs`, `node --check tools/desktop_packaged_runtime_probe.mjs`, and exact `npm.cmd run desktop:package:probe`, whose manifest ended with `runtime_failure_checks: []`.
+
+**Scope/determinism:** Desktop probe filtering/tests/docs only. No simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] P18 command-surface truth local candidate
 
 **Type:** UI/read-model/i18n/test/docs polish.
