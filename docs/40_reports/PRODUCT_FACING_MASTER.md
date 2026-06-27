@@ -144,7 +144,7 @@ Tactical Groups are engine-meaningful, but not yet product-complete as a player-
 | Missing item | Current evidence | Needed player-facing result | Priority |
 | --- | --- | --- | --- |
 | Full event database | Command Board says 247 rows, 44 choice events, 18 modal-ready rows, future-consequence slices started. | Event rows need authored player-facing modal copy, historical/default labels, branch visibility, and consequence descriptions. | P1 |
-| Branch consequence explanation | Existing future-consequence cards are partial. | Player sees "this opens/closes future paths" without raw event IDs or design diagnostics. | P1 |
+| Branch consequence receipts | Future-consequence metadata exists, but P17 retired pre-choice preview cards. | Player receives post-choice/aftermath receipts for causal branches without raw event IDs, design diagnostics, or future spoilers before choosing. | P1 |
 | Sensitive-history framing | Sensitive-history gate exists; player-facing audit found internal terms leaking before cleanup. | Sensitive content must be framed in-world with source/provenance, not designer labels or gamified reward language. | P0/P1 |
 | Decision history legibility | June 2 cleanup fixed many raw IDs, but broader i18n/hardcoded English remains. | Decision log should read like a government archive, not a debug ledger. | P1 |
 | Event-to-Codex reach | GAME_STATE_RATING_MASTER says many ledger annotations lack Codex consumers. | Major event consequences should link to Codex explanation and Chronicle memory. | P2 |

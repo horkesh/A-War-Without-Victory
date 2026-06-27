@@ -31,7 +31,7 @@ These are hard constraints on every phase below. Violating them breaks either th
 
 ## 2. Phase 1 — Consequence loop (SHIPPED, PR #68)
 
-**Problem.** The decision modal already *promised* future consequences (the `FutureConsequencePreview` surface) but never delivered the **receipt** — the player never learned whether the predicted downstream events actually came to pass. The promise had no payoff.
+**Problem.** The event database already carried future-consequence metadata, but the player never received a post-choice **receipt** showing whether predicted downstream events actually came to pass. P17 (2026-06-27) retired the pre-choice `FutureConsequencePreview` modal surface, so this lane is now receipt/aftermath-owned rather than pre-choice preview-owned.
 
 **What shipped.** `buildConsequenceReceipts(state, catalog)` (`src/ui/map/data/consequenceReceipts.ts:125`) classifies each player decision's predicted `opens_events` as **confirmed / pending / contradicted** (status union at `consequenceReceipts.ts:42`). The realized result is surfaced three ways:
 - a **"Consequences Realized" callback** in `src/ui/map/components/TurnAftermathModal.tsx`;

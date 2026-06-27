@@ -27,6 +27,18 @@ const RAW_FIRST_HOUR_PATTERNS = [
   { label: 'Response recorded: civic.', pattern: /\bResponse recorded:\s+civic\./i },
 ];
 
+const FORBIDDEN_DECISION_LEAK_PATTERNS = [
+  { label: 'Downstream impact preview', pattern: /\bDownstream impact preview\b/i },
+  { label: 'long-term branch copy', pattern: /\blong-term branch\b/i },
+  { label: 'Future consequences heading', pattern: /\bFuture consequences\b/i },
+  { label: 'future details control', pattern: /\bShow details\b/i },
+  { label: 'future_consequences field', pattern: /\bfuture_consequences\b/i },
+  { label: 'opens_events field', pattern: /\bopens_events\b/i },
+  { label: 'closes_events field', pattern: /\bcloses_events\b/i },
+  { label: 'future event id', pattern: /\bcsq_[a-z0-9_]+\b/i },
+  { label: 'speculative later-event copy', pattern: /\blater event may or may not happen\b/i },
+];
+
 const FACTION_OPENING_FLOWS = [
   {
     faction: 'RBiH',
@@ -517,6 +529,22 @@ function assertRawLabelsAbsent(surfaceName, text) {
   }
 }
 
+function assertNoDecisionKnowledgeLeaks(surfaceName, text) {
+  const found = [];
+  for (const { label, pattern } of FORBIDDEN_DECISION_LEAK_PATTERNS) {
+    const match = pattern.exec(text);
+    if (match?.index !== undefined) {
+      found.push({
+        label,
+        context: text.slice(Math.max(0, match.index - 160), Math.min(text.length, match.index + match[0].length + 160)).replace(/\s+/g, ' '),
+      });
+    }
+  }
+  if (found.length > 0) {
+    throw new Error(`${surfaceName} exposed pre-choice decision knowledge: ${JSON.stringify(found, null, 2)}`);
+  }
+}
+
 async function dismissTutorialIfPresent(page) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const before = await visibleText(page);
@@ -624,6 +652,9 @@ async function runFoundationalFlow(page, summary, flow) {
   if (!decisionDialog.includes(flow.decisionTitle) || !decisionDialog.includes(flow.responseLabel)) {
     throw new Error(`${flow.faction} foundational decision modal did not show expected option: ${decisionDialog}`);
   }
+  assertNoDecisionKnowledgeLeaks(`${flow.faction} foundational decision modal`, decisionDialog);
+  summary.evidence.decisionKnowledgeLeaksAbsentByFaction ??= {};
+  summary.evidence.decisionKnowledgeLeaksAbsentByFaction[flow.faction] = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
 
   await clickSelector(

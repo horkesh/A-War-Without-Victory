@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest player-start hardening:** [implemented/20260627_P17_PLAYER_START_HARDENING.md](implemented/20260627_P17_PLAYER_START_HARDENING.md) - RBiH, RS, and HRHB foundational decisions remain first-hour required decisions, but `EventDecisionModal` no longer renders pre-choice future-consequence/downstream-impact preview cards or detail toggles; the all-faction browser gate now fails on future-branch knowledge leaks before the player chooses.
+
 **Latest command-surface ergonomics / hit-test polish:** [implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md](implemented/20260625_COMMAND_SURFACE_ERGONOMICS.md) - Army HQ sector and ORBAT disclosure controls now expose stable aria/detail contracts, OOB sector drilldowns preserve authored OSID anchors, Corps Front rows expose force-bucket provenance and unreported truth, Formation Detail sector-picker aria grammar is singular/plural safe, and the shared flip-card no longer intercepts clicks in Army HQ.
 
 **Latest player-surface edge / field-routing accessibility polish:** [implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md](implemented/20260625_PLAYER_SURFACE_EDGE_POLISH.md) - The June 25 player-surface edge lane now also closes formation routing anchor truth, StackExpansionOverlay modal keyboard semantics, and command-strain label normalization. Physical presence remains `location_osid` only; AoR/HQ anchors are navigation context, not selected-settlement truth.
@@ -250,7 +252,7 @@
 
 **Latest opening command/startup history truth:** [implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md](implemented/20260617_OPENING_COMMAND_AND_STARTUP_HISTORY.md) - Opening corps now show time-safe acting commanders through the Army HQ/OOB read-model, Army HQ route wiring is live-browser verified, later official commanders are not backdated, JNA synthetic command staff is labeled, and JNA setup control no longer appears as false turn-0 combat history.
 
-**Latest UI truth and decision hierarchy hardening:** [implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md](implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md) - Live command surfaces hide future/postwar legal outcomes by default, explicit officer dossiers retain archival access, and decision modals show the full response list before detailed future-consequence previews.
+**Latest UI truth and decision hierarchy hardening:** [implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md](implemented/20260617_UI_TRUTH_AND_DECISION_HIERARCHY.md) - Live command surfaces hide future/postwar legal outcomes by default and explicit officer dossiers retain archival access. Its old future-consequence preview hierarchy is superseded by P17: pre-choice decision modals no longer render future-branch preview/details.
 
 **Latest shell navigation exclusivity:** [implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md](implemented/20260616_SHELL_NAVIGATION_EXCLUSIVITY.md) - Army HQ routes now close Codex/Chronicle centrally, Records routes force the Records tab, Codex/Decision History Escape no longer stack Pause, and App-level Warroom/Inbox/Wrapped handoffs now clear competing shells before opening the next top-level surface.
 
@@ -914,7 +916,7 @@
 # 2026-05-27 - Event future consequence modal slice
 
 - Added behavior-neutral `future_consequences` metadata to `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
-- Rendered future-consequence cards in the existing event decision modal using branch-visibility wording, not runtime open/close claims.
+- Rendered future-consequence cards in the existing event decision modal using branch-visibility wording, not runtime open/close claims. Superseded by P17: this metadata remains, but pre-choice modal cards/details are retired.
 - Preserved evaluator behavior, response effects, bot choices, save schema, scenario setup, generated artifacts, and calibration behavior.
 - Report: `docs/40_reports/implemented/20260527_EVENT_FUTURE_CONSEQUENCE_MODAL_SLICE.md`
 # 2026-06-05 Audio Asset Resolution Path

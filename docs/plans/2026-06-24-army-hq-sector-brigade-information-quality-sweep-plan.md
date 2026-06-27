@@ -1,12 +1,30 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; latest merged packet is P16 at `9adce5a48` through PR #458, followed by docs closeout `790f76cd5` on `main`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; latest closed packet is P17 player-start hardening on `main` after P16 at `9adce5a48` through PR #458 and docs closeout `790f76cd5`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
 **Why now:** `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` make D2 owner playthrough the remaining 1.0 gate. The closed June 22 sector-truth plan established the rules; this sweep verifies the current live surfaces again and closes the next coherent set before another long CI wait.
 
-## Current Queue 2026-06-26
+## Current Queue 2026-06-27
+
+P17 player-start hardening is verified locally before push:
+
+- RBiH, RS, and HRHB foundational decisions remain first-hour required decisions.
+- Pre-choice `EventDecisionModal` no longer renders future-consequence/downstream-impact dossier cards or detail toggles.
+- The all-faction first-hour browser gate fails on future-branch knowledge leaks in foundational decision modals.
+- `qa:player-starts:browser` is an explicit alias for the all-faction first-hour browser gate.
+- Scope is UI/browser-QA/test/docs only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt changes.
+
+P17 proof so far: focused first-hour/modal proof 3 files / 21 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 677 tests; `npm.cmd run qa:player-starts:browser`.
+
+Next queue after P17 remains non-BCS owner-playthrough polish:
+
+- Fresh live-browser inspection of Army HQ, OOB, Corps Front, sector, brigade/Formation Detail, settlement, Records, and Decision Room disabled-action copy.
+- Prioritize Decision Room disabled-action reasons, command-surface information density, and owner-playthrough confusion found in live browser checks.
+- Keep batching substantial coherent fixes before CI, rather than small one-off PRs.
+
+## Prior Queue 2026-06-26
 
 P16 is merged and green. It closed the post-P15 queue without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:
 

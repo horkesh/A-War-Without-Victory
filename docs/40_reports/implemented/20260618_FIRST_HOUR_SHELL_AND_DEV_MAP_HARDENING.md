@@ -3,10 +3,12 @@
 **Date:** 2026-06-18
 **Result:** UI/read-model and repo-command hardening, calibration-inert
 
+**Supersession note (P17, 2026-06-27):** This report's progressive-disclosure future-consequence modal behavior has been retired. Required event decisions no longer render pre-choice future-consequence preview counts or detail toggles; all-faction browser proof now guards against those leaks.
+
 ## Summary
 - `npm run dev:map` and `npm run desktop:map:build` now call the map workspace's Vite entrypoint directly, avoiding the Windows root `.bin` shim failure found during live browser review.
 - Warroom/game shell handoffs now share cleanup paths, Desk-local Command Surface no longer stacks over the Desk, and the Warroom toolbar exposes the route as `Army HQ` instead of the vague `Staff`.
-- Event decision future-consequence previews now use progressive disclosure: response choices and a downstream count are visible first; detailed future branches render only after `Show details`.
+- Historical note: event decision future-consequence previews used progressive disclosure in this packet. P17 supersedes that behavior by removing pre-choice future-branch preview/details entirely.
 
 ## Changes Made
 

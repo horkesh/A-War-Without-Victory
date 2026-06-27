@@ -16,10 +16,8 @@ import type {
     EventResponseOption,
     EventEffect,
     DimensionShift,
-    EventFutureConsequence,
     EventDefinition,
 } from '../../../sim/events/event_types';
-import { useState } from 'react';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../utils/playerSafeText';
@@ -350,59 +348,6 @@ function EffectPreview({ option }: { option: EventResponseOption }) {
     );
 }
 
-function formatFutureReferenceList(label: string, values: string[] | undefined): string | null {
-    if (!values || values.length === 0) return null;
-    return `${label}: ${values.map((value) => humanizeToken(value).toLowerCase()).join(', ')}`;
-}
-
-function buildFutureReferenceRows(consequence: EventFutureConsequence): string[] {
-    return [
-        formatFutureReferenceList('Later eligible events', consequence.opens_events),
-        formatFutureReferenceList('Later suppressed events', consequence.closes_events),
-        formatFutureReferenceList('Recorded flag context', consequence.opens_flags),
-        formatFutureReferenceList('Suppressed flag context', consequence.closes_flags),
-    ].filter((row): row is string => row !== null);
-}
-
-const PLAYER_SAFE_CONSEQUENCE_TERMS: Array<[RegExp, string]> = [
-    [/\brbih_state_identity\b/g, 'state identity posture'],
-    [/\bcsq_bosniak_unity_1993\b/g, 'later Bosniak-national unity consolidation'],
-    [/\bcsq_minority_defections_1992\b/g, 'later minority-officer and recruit defection cascade'],
-    [/\bcsq_pragmatic_coalition_1993\b/g, 'later pragmatic coalition branch'],
-    [/\bbosniak_national\b/g, 'Bosniak national'],
-    [/\brs_strategic_goals\b/g, 'Six Strategic Goals posture'],
-    [/\bcsq_drina_partisan_resistance_1992\b/g, 'restrained Drina resistance branch'],
-    [/\ball_six\b/g, 'all six goals'],
-];
-
-function playerSafeFutureText(text: string, showDiagnostics: boolean): string {
-    if (showDiagnostics) return text;
-    let safe = text.split(/\s*§\d+(?:\.\d+)?\s*/)[0]?.trim() ?? text;
-    safe = safe.split(/\bThese consequence rows\b/i)[0]?.trim() ?? safe;
-    for (const [pattern, replacement] of PLAYER_SAFE_CONSEQUENCE_TERMS) {
-        safe = safe.replace(pattern, replacement);
-    }
-    safe = safe.replace(/\bcsq_[a-z0-9_]+\b/g, 'later consequence branch');
-    safe = safe.replace(/\b[\w./-]+\.json\b/gi, 'event catalog');
-    safe = safe.replace(/\s+(?:recorded\s+)?from\s+(?:the\s+)?event catalog\b/gi, '');
-    safe = safe.replace(/\bRecording\b/gi, 'This choice sets');
-    safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
-    safe = safe.replace(/\bRecording Six Strategic Goals posture as all six goals\b/g, 'Recording the all-six strategic-goals platform');
-    safe = safe.replace(/\bThis choice sets Six Strategic Goals posture as all six goals\b/g, 'This choice sets the all-six strategic-goals platform');
-    safe = safe.replace(/\bThis choice sets the all-six strategic-goals platform forecloses\b/g, 'This choice sets the all-six strategic-goals platform and forecloses');
-    safe = safe.replace(/\bThis choice sets ([^.]+?) as ([^.]+?) (opens|closes|forecloses)\b/g, 'This choice sets $1 to $2 and $3');
-    safe = safe.replace(/\bplatform forecloses\b/g, 'platform and forecloses');
-    safe = safe.replace(/\b(Civic platform) and forecloses\b/g, '$1 forecloses');
-    safe = safe.replace(/\bcounterfactual Six Strategic Goals posture\s*=\s*selective flag\b/g, 'counterfactual restrained strategic-goals branch');
-    safe = safe.replace(/\bThe target is gated on the counterfactual restrained strategic-goals branch, so\b/g, 'The restrained branch is closed here, so');
-    safe = safe.replace(/\s*\((later [^)]+)\)/g, '');
-    return safe.replace(/\s+/g, ' ').trim();
-}
-
-function playerSafeFutureExplanation(text: string, showDiagnostics: boolean): string {
-    return playerSafeFutureText(text, showDiagnostics);
-}
-
 const PLAYER_SAFE_DOSSIER_TERMS: Array<[RegExp, string]> = [
     [/\brbih_state_identity\b/g, 'state identity posture'],
     [/\bretain_minorities\b/g, 'civic minority-protection line'],
@@ -420,142 +365,6 @@ function playerSafeDossierText(text: string, showDiagnostics: boolean): string {
     }
     safe = safe.replace(/\b[a-z][a-z0-9]*(?:_[a-z0-9]+)+\b/g, (token) => humanizeToken(token).toLowerCase());
     return safe.replace(/\s+/g, ' ').trim();
-}
-
-function FutureConsequenceCard({
-    consequence,
-    showDiagnostics,
-}: {
-    consequence: EventFutureConsequence;
-    showDiagnostics: boolean;
-}) {
-    const referenceRows = showDiagnostics ? buildFutureReferenceRows(consequence) : [];
-    const label = playerSafeFutureText(consequence.label, showDiagnostics);
-    const explanation = playerSafeFutureExplanation(consequence.explanation, showDiagnostics);
-    return (
-        <li className="rounded border border-panel-border/70 bg-panel-bg/60 px-3 py-2">
-            <div className="flex flex-wrap items-start justify-between gap-2">
-                <div className="text-[11px] font-semibold text-text-primary">
-                    {label}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                    <span className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary">
-                        {sentenceToken(consequence.timing)}
-                    </span>
-                    <span className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary">
-                        {sentenceToken(consequence.certainty)}
-                    </span>
-                </div>
-            </div>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-text-secondary">
-                {explanation}
-            </p>
-            {referenceRows.length > 0 && (
-                <ul className="mt-2 space-y-1 text-[10px] leading-relaxed text-text-muted">
-                    {referenceRows.map((row) => (
-                        <li key={row}>{row}</li>
-                    ))}
-                </ul>
-            )}
-        </li>
-    );
-}
-
-function FutureConsequencePreview({
-    option,
-    showDiagnostics,
-}: {
-    option: EventResponseOption;
-    showDiagnostics: boolean;
-}) {
-    const consequences = option.future_consequences ?? [];
-    if (consequences.length === 0) return null;
-    return (
-        <div className="mt-2">
-            <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
-                {t('eventDecision.futureConsequences')}
-            </div>
-            <ul className="space-y-1.5">
-                {consequences.map((consequence) => (
-                    <FutureConsequenceCard key={consequence.id} consequence={consequence} showDiagnostics={showDiagnostics} />
-                ))}
-            </ul>
-        </div>
-    );
-}
-
-function DecisionFutureConsequenceDossier({
-    options,
-    showDiagnostics,
-}: {
-    options: readonly EventResponseOption[];
-    showDiagnostics: boolean;
-}) {
-    const [expandedOptionIds, setExpandedOptionIds] = useState<ReadonlySet<string>>(() => new Set());
-    const optionsWithConsequences = options.filter((option) => (option.future_consequences ?? []).length > 0);
-    if (optionsWithConsequences.length === 0) return null;
-    const consequenceCount = optionsWithConsequences.reduce(
-        (total, option) => total + (option.future_consequences ?? []).length,
-        0,
-    );
-    const toggleOption = (optionId: string) => {
-        setExpandedOptionIds((current) => {
-            const next = new Set(current);
-            if (next.has(optionId)) next.delete(optionId);
-            else next.add(optionId);
-            return next;
-        });
-    };
-    return (
-        <section className="mb-4 rounded border border-panel-border bg-panel-card/70 p-4">
-            <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-accent-gold">
-                {t('eventDecision.downstreamImpactPreview')}
-            </div>
-            <p className="mb-3 text-[11px] leading-relaxed text-text-secondary">
-                {t(
-                    consequenceCount === 1
-                        ? 'eventDecision.downstreamSummary.one'
-                        : 'eventDecision.downstreamSummary.many',
-                    {
-                        consequenceCount,
-                        optionCount: optionsWithConsequences.length,
-                        optionNoun: t(optionsWithConsequences.length === 1
-                            ? 'eventDecision.responseOption.one'
-                            : 'eventDecision.responseOption.many'),
-                    },
-                )}
-            </p>
-            <div className="space-y-3">
-                {optionsWithConsequences.map((option) => {
-                    const optionConsequenceCount = option.future_consequences?.length ?? 0;
-                    const expanded = expandedOptionIds.has(option.id);
-                    return (
-                    <div key={option.id} className="rounded border border-panel-border/70 bg-panel-bg/50 p-3">
-                        <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">
-                            {option.label}
-                        </div>
-                        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                            <p className="text-[11px] text-text-muted">
-                                {t(optionConsequenceCount === 1
-                                    ? 'eventDecision.downstreamBranchNote.one'
-                                    : 'eventDecision.downstreamBranchNote.many', { count: optionConsequenceCount })}
-                            </p>
-                            <button
-                                type="button"
-                                className="rounded border border-panel-border bg-panel-card px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/60 hover:text-accent-gold"
-                                aria-expanded={expanded}
-                                onClick={() => toggleOption(option.id)}
-                            >
-                                {expanded ? t('eventDecision.hideDetails') : t('eventDecision.showDetails')}
-                            </button>
-                        </div>
-                        {expanded && <FutureConsequencePreview option={option} showDiagnostics={showDiagnostics} />}
-                    </div>
-                    );
-                })}
-            </div>
-        </section>
-    );
 }
 
 function isHistoricalOption(option: EventResponseOption, decision: EventDecisionDossier): boolean {
@@ -866,11 +675,6 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                     ))}
                     </div>
                 </div>
-
-                <DecisionFutureConsequenceDossier
-                    options={localizedDecision.response_options}
-                    showDiagnostics={diagMode}
-                />
 
                 <div className="rounded border border-panel-border bg-panel-card/70 px-4 py-3 text-[11px] leading-relaxed text-text-secondary">
                     {t('eventDecision.recordTrail')}

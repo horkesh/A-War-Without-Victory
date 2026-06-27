@@ -4,6 +4,8 @@
 **Status:** Implemented
 **Owner lane:** Event-system product/engine lane
 
+**Supersession note (P17, 2026-06-27):** This report records the historical implementation of pre-choice future-consequence cards. P17 retired that modal display. `future_consequences[]` metadata remains authored and validated, but it is now diagnostic/post-choice receipt substrate and must not be exposed as future-branch preview/detail copy before the player chooses.
+
 ## Summary
 
 - Added behavior-neutral `future_consequences` metadata to the four approved first-packet presidential decision rows: `rbih_state_identity`, `hrhb_political_goal`, `rs_assembly_rejects_voplan_1993`, and `belgrade_embargo_rs_1994`.
@@ -23,7 +25,7 @@ The metadata uses existing `future_consequences` fields only. It does not change
 
 ### Modal Rendering
 
-- `EventDecisionModal` now renders future-consequence cards only when a response option carries metadata.
+- Historical note: `EventDecisionModal` rendered future-consequence cards only when a response option carried metadata. P17 supersedes this display behavior.
 - Cards display the consequence label, timing, certainty, explanation, and reference rows for later eligible events, later suppressed events, recorded flag context, and suppressed flag context.
 - UI wording deliberately avoids saying the response directly opens or closes runtime chains, because current metadata is branch visibility, not runtime gating.
 
