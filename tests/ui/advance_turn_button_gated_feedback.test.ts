@@ -222,6 +222,19 @@ describe('ADVANCE_TURN gated feedback', () => {
     expect(useGameStore.getState().advanceTurnPending).toBe(false);
   });
 
+  it('Warroom status dock explains disabled priority review controls', () => {
+    const onReviewPriorities = vi.fn();
+    setLoadedState(makeState({ player_faction: null as never }));
+
+    render(createElement(WarroomStatusBar, { onReviewPriorities }));
+
+    const prioritiesButton = screen.getByRole('button', { name: /Review priorities unavailable: no campaign side selected/i });
+    expect(prioritiesButton.hasAttribute('disabled')).toBe(true);
+    expect(prioritiesButton.getAttribute('title')).toBe('Review priorities unavailable: no campaign side selected');
+    fireEvent.click(prioritiesButton);
+    expect(onReviewPriorities).not.toHaveBeenCalled();
+  });
+
   it('advance clearance opens a single hard blocker resolver directly', async () => {
     const onResolveBlocker = vi.fn();
     setLoadedState(makeState({
@@ -278,7 +291,7 @@ describe('ADVANCE_TURN gated feedback', () => {
     fireEvent.click(screen.getByText('PRIORITETI'));
 
     expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
-    expect(screen.getByText('Nijedna živa stavka stola neće biti zakopana sljedećim potezom.')).toBeTruthy();
+    expect(screen.getByText('Nijedna živa stavka Sobe odluka ne zahtijeva pregled prije nastavka.')).toBeTruthy();
     expect(screen.getByText('Predaje izvora')).toBeTruthy();
   });
 

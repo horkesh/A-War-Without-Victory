@@ -142,6 +142,25 @@ describe('SituationBriefing progressive disclosure (UI-4 / Batch 43)', () => {
         expect(container.textContent).not.toContain('-> CORPS');
     });
 
+    it('explains disabled briefing cards with title, aria label, and visible reason', () => {
+        const items: BriefingItem[] = [
+            makeItem({
+                id: 'unrouted',
+                title: 'Unrouted briefing',
+                actionChipLabel: 'Inspect route',
+                target: { type: 'none' },
+            }),
+        ];
+
+        const { container } = render(createElement(SituationBriefing, { items, onNavigate: () => undefined }));
+        const button = container.querySelector('button[disabled]') as HTMLButtonElement | null;
+
+        expect(button).toBeTruthy();
+        expect(button?.getAttribute('title')).toBe('No route is available for this briefing item.');
+        expect(button?.getAttribute('aria-label')).toBe('Unrouted briefing - No route is available for this briefing item.');
+        expect(container.textContent).toContain('No route is available for this briefing item.');
+    });
+
     it('localizes collector fallback copy in BCS mode', () => {
         setLocale('bcs');
         const items: BriefingItem[] = [

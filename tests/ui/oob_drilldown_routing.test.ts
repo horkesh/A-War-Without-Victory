@@ -103,6 +103,23 @@ afterEach(() => {
 });
 
 describe('OOBSidebar drilldown routing', () => {
+  it('labels section accordions with explicit expand and collapse actions', () => {
+    render(React.createElement(OOBSidebar));
+
+    const sectorsToggle = screen.getByTestId('oob-section-sectors-toggle');
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Expand Sectors');
+    expect(sectorsToggle.getAttribute('title')).toBe('Expand Sectors');
+    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(sectorsToggle.textContent).toContain('Sectors');
+    expect(sectorsToggle.textContent).toContain('1');
+
+    fireEvent.click(sectorsToggle);
+
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Collapse Sectors');
+    expect(sectorsToggle.getAttribute('title')).toBe('Collapse Sectors');
+    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('true');
+  });
+
   it('renders HQ reserve brigades and routes their labels to Army HQ formation drilldown', () => {
     useGameStore.setState({
       codexOpen: true,
@@ -131,6 +148,14 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
     expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
+  });
+
+  it('surfaces missing army commander source and splits fielded versus reserve counts', () => {
+    const { container } = render(React.createElement(OOBSidebar));
+
+    expect(container.textContent).toContain('Army commander unreported');
+    expect(container.textContent).toContain('0 fielded / 1 reserve');
+    expect(container.textContent).not.toContain('1 formations');
   });
 
   it('renders command nodes even when their only subordinates are non-fielded phantom rows', () => {
@@ -168,7 +193,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).toContain('0 fielded brigades');
     expect(container.textContent).not.toContain('JNA phantom battalion');
     expect(container.textContent).not.toContain('No formations.');
-    expect(screen.getByRole('button', { name: /^JNA Herzegovina Command\s+0\s+0 fielded brigades$/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Inspect JNA Herzegovina Command command card: 0 personnel; 0 fielded brigades' })).toBeTruthy();
   });
 
   it('routes sector rows with their corps context preserved', () => {
@@ -405,8 +430,9 @@ describe('OOBSidebar drilldown routing', () => {
 
     const { container } = render(React.createElement(OOBSidebar));
 
-    const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
+    const orbatButtons = screen.getAllByRole('button', { name: 'Open Field Corps order of battle' });
     expect(orbatButtons).toHaveLength(1);
+    expect(orbatButtons[0].textContent).toContain('Order of battle');
     expect(screen.queryByRole('button', { name: /^Ungrouped/i })).toBeNull();
     const ungroupedCard = Array.from(container.querySelectorAll('.rounded-lg'))
       .find((card) => (card.textContent ?? '').includes('Ungrouped'));

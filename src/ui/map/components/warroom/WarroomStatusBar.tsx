@@ -97,31 +97,37 @@ function PriorityDocketPanel({
           <div className="rounded border border-amber-900/45 bg-black/40 px-2 py-2 text-[10px] leading-snug text-amber-200/75">
             {t('decisionRoom.noBuriedItems')}
           </div>
-        ) : docket.items.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => onReviewItem(item)}
-            disabled={item.navigationTarget.kind === 'none'}
-            className="flex w-full min-w-0 items-start justify-between gap-2 rounded border border-amber-900/45 bg-black/40 px-2 py-1.5 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
-          >
-            <span className="min-w-0">
-              <span className="flex min-w-0 flex-wrap items-center gap-1">
-                <span className="rounded border border-amber-900/50 bg-amber-950/35 px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] text-amber-300">
-                  {categoryLabel(item.category)}
+        ) : docket.items.map((item) => {
+          const disabled = item.navigationTarget.kind === 'none';
+          const disabledReason = t('warroom.priorityItemUnavailable', { reason: docket.statusLabel });
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onReviewItem(item)}
+              disabled={disabled}
+              title={disabled ? disabledReason : item.actionLabel}
+              aria-label={disabled ? disabledReason : undefined}
+              className="flex w-full min-w-0 items-start justify-between gap-2 rounded border border-amber-900/45 bg-black/40 px-2 py-1.5 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
+            >
+              <span className="min-w-0">
+                <span className="flex min-w-0 flex-wrap items-center gap-1">
+                  <span className="rounded border border-amber-900/50 bg-amber-950/35 px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] text-amber-300">
+                    {categoryLabel(item.category)}
+                  </span>
+                  <span className="rounded border border-neutral-700/60 bg-neutral-950/50 px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] text-neutral-300">
+                    {severityLabel(item.severity)}
+                  </span>
                 </span>
-                <span className="rounded border border-neutral-700/60 bg-neutral-950/50 px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] text-neutral-300">
-                  {severityLabel(item.severity)}
-                </span>
+                <span className="mt-1 block truncate text-[10px] font-bold text-amber-50">{item.title}</span>
+                <span className="mt-0.5 block truncate text-[8px] uppercase tracking-[0.09em] text-amber-300/60">{item.sourceOwner}</span>
               </span>
-              <span className="mt-1 block truncate text-[10px] font-bold text-amber-50">{item.title}</span>
-              <span className="mt-0.5 block truncate text-[8px] uppercase tracking-[0.09em] text-amber-300/60">{item.sourceOwner}</span>
-            </span>
-            <span className="shrink-0 rounded border border-amber-700/55 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.09em] text-amber-300">
-              {item.actionLabel}
-            </span>
-          </button>
-        ))}
+              <span className="shrink-0 rounded border border-amber-700/55 px-1.5 py-0.5 text-[7px] font-bold uppercase tracking-[0.09em] text-amber-300">
+                {item.actionLabel}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-2 border-t border-amber-900/45 pt-2">
@@ -133,18 +139,24 @@ function PriorityDocketPanel({
         </div>
         {docket.sourceHandoffs.length > 0 && (
           <div className="mt-1 grid gap-1 sm:grid-cols-2">
-            {docket.sourceHandoffs.map((handoff) => (
-              <button
-                key={handoff.id}
-                type="button"
-                onClick={() => onReviewTarget(handoff.navigationTarget)}
-                disabled={handoff.navigationTarget.kind === 'none'}
-                className="min-w-0 rounded border border-amber-900/35 bg-black/35 px-2 py-1 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
-              >
-                <div className="truncate text-[9px] font-bold text-amber-100">{handoff.label}</div>
-                <div className="truncate text-[7px] uppercase tracking-[0.08em] text-amber-300/60">{handoff.summary}</div>
-              </button>
-            ))}
+            {docket.sourceHandoffs.map((handoff) => {
+              const disabled = handoff.navigationTarget.kind === 'none';
+              const disabledReason = t('warroom.sourceHandoffUnavailable', { reason: docket.statusLabel });
+              return (
+                <button
+                  key={handoff.id}
+                  type="button"
+                  onClick={() => onReviewTarget(handoff.navigationTarget)}
+                  disabled={disabled}
+                  title={disabled ? disabledReason : handoff.label}
+                  aria-label={disabled ? disabledReason : undefined}
+                  className="min-w-0 rounded border border-amber-900/35 bg-black/35 px-2 py-1 text-left transition-colors hover:border-amber-600/55 hover:bg-amber-950/30 disabled:cursor-default disabled:opacity-55"
+                >
+                  <div className="truncate text-[9px] font-bold text-amber-100">{handoff.label}</div>
+                  <div className="truncate text-[7px] uppercase tracking-[0.08em] text-amber-300/60">{handoff.summary}</div>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
@@ -154,7 +166,8 @@ function PriorityDocketPanel({
           type="button"
           onClick={onOpenBoard}
           disabled={!canReviewPriorities}
-          aria-label={docket.openBoardLabel}
+          title={canReviewPriorities ? docket.openBoardLabel : t('warroom.openBoardUnavailable', { reason: docket.statusLabel })}
+          aria-label={canReviewPriorities ? docket.openBoardLabel : t('warroom.openBoardUnavailable', { reason: docket.statusLabel })}
           className="rounded border border-amber-700/60 bg-amber-950/45 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.11em] text-amber-300 transition-colors hover:bg-amber-900/45 disabled:cursor-default disabled:border-neutral-700 disabled:bg-neutral-950/45 disabled:text-neutral-500"
         >
           {docket.openBoardLabel}
@@ -182,6 +195,12 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
   const hasPendingReviews = pendingReviewCount > 0;
   const { advanceReviewCount, urgentCount } = docket.metrics;
   const canReviewPriorities = docket.canOpenBoard && Boolean(onReviewPriorities);
+  const reviewPrioritiesLabel = canReviewPriorities
+    ? t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })
+    : t('warroom.reviewPrioritiesUnavailableAria', { reason: docket.statusLabel });
+  const reviewPrioritiesTitle = canReviewPriorities
+    ? t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })
+    : t('warroom.reviewPrioritiesUnavailableTitle', { reason: docket.statusLabel });
 
   const handleOpenBoard = () => {
     setPriorityDocketOpen(false);
@@ -230,9 +249,9 @@ export function WarroomStatusBar({ onReviewPriorities, onReviewItem, onReviewTar
         type="button"
         onClick={() => setPriorityDocketOpen((open) => !open)}
         disabled={!canReviewPriorities}
-        title={t('warroom.reviewPrioritiesTitle', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
+        title={reviewPrioritiesTitle}
         className={`flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest transition-colors disabled:cursor-default disabled:opacity-60 ${priorityClass(docket.tone)}`}
-        aria-label={t('warroom.reviewPrioritiesAria', { advance: advanceReviewCount, urgent: urgentCount, pending: pendingReviewCount })}
+        aria-label={reviewPrioritiesLabel}
         aria-controls="warroom-priority-docket-panel"
         aria-expanded={priorityDocketOpen}
       >

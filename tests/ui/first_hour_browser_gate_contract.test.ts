@@ -99,7 +99,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('Records');
     expect(tool).toContain('Chronicle');
     expect(tool).toContain('Codex');
-    expect(tool).toContain('Latest Decision');
+    expect(tool).toContain('Latest Filed Decision');
     expect(tool).toContain('data-testid="codex-panel"');
     expect(tool).toContain('assertSingleShellSurface');
     expect(tool).toContain('assertNoRawTechnicalTokens');
@@ -322,7 +322,7 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-testid="chronicle-dossier-entry"');
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-testid="chronicle-open-record"');
     expect(read('src/ui/map/components/chronicle/ChronicleOverlay.tsx')).toContain('data-decision-record-id={entry.metadata?.decisionRecordId ?? undefined}');
-    expect(read('src/ui/map/i18n/messages.en.ts')).toContain("'chronicle.openDecisionRecord': 'Open Decision Record'");
+    expect(read('src/ui/map/i18n/messages.en.ts')).toContain("'chronicle.openDecisionRecord': 'Focus Chronicle Decision'");
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-testid="presidential-inbox"');
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-testid="presidential-inbox-card"');
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain("onAction('decision_room', 'opening-brief:desk')");

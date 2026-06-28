@@ -151,10 +151,12 @@ export function ChronicleViewModeToggle({
 
 function ChronicleChapterView({
     chapters,
+    aftermathTurns,
     onSelectTurn,
     onOpenTurnRecord,
 }: {
     chapters: ChronicleChapter[];
+    aftermathTurns: ReadonlySet<number>;
     onSelectTurn: (turn: number) => void;
     onOpenTurnRecord: (turn: number) => void;
 }) {
@@ -248,15 +250,25 @@ function ChronicleChapterView({
                                     >
                                         {t('chronicle.select')}
                                     </button>
-                                    <button
-                                        type="button"
-                                        data-testid="chronicle-chapter-open-turn-record"
-                                        data-turn={ref.turn}
-                                        onClick={() => onOpenTurnRecord(ref.turn)}
-                                        className="h-6 rounded-sm border border-amber-400/25 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
-                                    >
-                                        {t('chronicle.openTurnRecord')}
-                                    </button>
+                                    {aftermathTurns.has(ref.turn) ? (
+                                        <button
+                                            type="button"
+                                            data-testid="chronicle-chapter-open-turn-record"
+                                            data-turn={ref.turn}
+                                            onClick={() => onOpenTurnRecord(ref.turn)}
+                                            className="h-6 rounded-sm border border-amber-400/25 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-200 hover:border-amber-300/70"
+                                        >
+                                            {t('chronicle.openTurnRecord')}
+                                        </button>
+                                    ) : (
+                                        <span
+                                            data-testid="chronicle-chapter-entry-only"
+                                            data-turn={ref.turn}
+                                            className="inline-flex h-6 items-center rounded-sm border border-white/10 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-stone-500"
+                                        >
+                                            {t('chronicle.chronicleOnlyEntry')}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -304,6 +316,10 @@ export function ChronicleOverlay() {
     const narratedTurnSummaries = useMemo(
         () => getNarratedChronicleTurnSummaries(turnSummaries),
         [turnSummaries],
+    );
+    const aftermathTurns = useMemo(
+        () => new Set(narratedTurnSummaries.map((summary) => summary.turn)),
+        [narratedTurnSummaries],
     );
 
     const focusedChronicleEntry = useMemo(
@@ -496,16 +512,18 @@ export function ChronicleOverlay() {
             openArmyHQDecisionConsequenceRecord(useGameStore.getState(), entry.metadata.decisionRecordId);
             return;
         }
-        handleOpenTurnRecord(entry.turn);
-    }, [handleOpenTurnRecord]);
+        if (aftermathTurns.has(entry.turn)) handleOpenTurnRecord(entry.turn);
+    }, [aftermathTurns, handleOpenTurnRecord]);
 
     const actionLabelForEntry = useCallback((entry: ChronicleEntry) => (
         entry.metadata?.operationAarId
             ? t('chronicle.openOperationRecord')
             : entry.metadata?.decisionRecordId
                 ? t('chronicle.openDecisionRecord')
-                : t('chronicle.openTurnRecord')
-    ), []);
+                : aftermathTurns.has(entry.turn)
+                    ? t('chronicle.openTurnRecord')
+                    : t('chronicle.chronicleOnlyEntry')
+    ), [aftermathTurns]);
 
     if (!open || !state) return null;
 
@@ -699,6 +717,7 @@ export function ChronicleOverlay() {
                     ) : viewMode === 'chapters' ? (
                         <ChronicleChapterView
                             chapters={chapters}
+                            aftermathTurns={aftermathTurns}
                             onSelectTurn={setSelectedTurn}
                             onOpenTurnRecord={handleOpenTurnRecord}
                         />
@@ -803,7 +822,13 @@ export function ChronicleOverlay() {
                                         data-operation-aar-id={entry.metadata?.operationAarId ?? undefined}
                                         data-decision-record-id={entry.metadata?.decisionRecordId ?? undefined}
                                         onClick={() => handleOpenEntryRecord(entry)}
-                                        className="mt-2 h-7 w-full rounded-sm border border-amber-400/30 bg-amber-400/10 px-2 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-200 transition-colors hover:border-amber-300/70 hover:bg-amber-400/15"
+                                        disabled={!entry.metadata?.operationAarId && !entry.metadata?.decisionRecordId && !aftermathTurns.has(entry.turn)}
+                                        className={[
+                                            'mt-2 h-7 w-full rounded-sm border px-2 text-[9px] font-bold uppercase tracking-[0.12em] transition-colors',
+                                            !entry.metadata?.operationAarId && !entry.metadata?.decisionRecordId && !aftermathTurns.has(entry.turn)
+                                                ? 'cursor-default border-white/10 bg-white/5 text-stone-500'
+                                                : 'border-amber-400/30 bg-amber-400/10 text-amber-200 hover:border-amber-300/70 hover:bg-amber-400/15',
+                                        ].join(' ')}
                                     >
                                         {actionLabelForEntry(entry)}
                                     </button>

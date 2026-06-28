@@ -90,7 +90,7 @@ const LIVE_SURFACES = [
     open: async (page) => {
       await clickByText(page, 'Records');
       await waitForVisibleText(page, 'Archive Routes');
-      await waitForVisibleText(page, 'Latest Decision');
+      await waitForVisibleText(page, 'Latest Filed Decision');
     },
     expectedSurface: 'Records',
   },

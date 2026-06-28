@@ -89,6 +89,43 @@ describe('Settlement Timeline Provenance — Turn-0 Control Truth', () => {
         expect(controlFlips[0].detail).toBe('initial control');
     });
 
+    it('renders setup control mechanisms as scenario-start provenance even after turn zero', () => {
+        const osid = 'op:test:test_1';
+        const events = callTimeline(osid, {
+            controlEvents: [
+                { turn: 1, settlementId: osid, from: null, to: 'RS', mechanism: 'setup_control' },
+            ],
+        });
+
+        const controlFlips = events.filter(e => e.type === 'control_flip');
+        expect(controlFlips).toHaveLength(1);
+        expect(controlFlips[0].turn).toBe(1);
+        expect(controlFlips[0].title).toBe('Controlled by VRS at scenario start');
+        expect(controlFlips[0].title).not.toContain('took control');
+        expect(controlFlips[0].detail).toBe('initial control');
+    });
+
+    it('sanitizes direct movement rows before rendering timeline copy', () => {
+        const events = buildSettlementTimeline(
+            'op:test:test_1',
+            null,
+            [],
+            [],
+            [],
+            [],
+            [{ turn: 2, formation_id: 'arbih_101_bde', formation_name: 'arbih_101_bde', type: 'arrived' }],
+            [],
+            [],
+            null,
+            null,
+        );
+
+        const movement = events.find(e => e.type === 'brigade_arrived');
+        expect(movement?.title).toBe('Arbih 101 Bde stationed at settlement');
+        expect(movement?.brigadeName).toBe('Arbih 101 Bde');
+        expect(`${movement?.title} ${movement?.brigadeName}`).not.toContain('arbih_101_bde');
+    });
+
     it('dedupes matching scenario-start snapshot and persisted turn-0 control', () => {
         const osid = 'op:test:test_1';
         const events = callTimeline(osid, {

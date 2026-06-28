@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import type { FormationView } from '../data/types';
-import { FACTION_COLORS } from '../utils/theme';
+import { FACTION_HEX_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
 import { formationIconId } from '../map/builders/buildFormationsGeoJSON';
 import { Z } from '../../shared/zIndex';
@@ -56,6 +56,17 @@ const FormationIconCanvas: React.FC<{ formation: FormationView; className?: stri
         />
     );
 };
+
+const EnemyContactGlyph: React.FC<{ className?: string }> = ({ className }) => (
+    <div
+        data-contact-redacted="true"
+        aria-hidden="true"
+        className={`flex items-center justify-center rounded border border-white/25 bg-neutral-700/90 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-lg ${className ?? ''}`}
+        style={{ width: '80px', height: '40px' }}
+    >
+        {t('tooltip.enemyContactTitle')}
+    </div>
+);
 
 /**
  * Premium animated overlay for fanning out a stack of formations.
@@ -187,6 +198,9 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                     const isEnemyContact = Boolean(playerFaction && f.faction !== playerFaction);
                     const name = isEnemyContact ? t('tooltip.enemyContactTitle') : getLocalizedFormationName(f, locale);
                     const selectionId = isEnemyContact ? `enemy_contact:${f.location_osid ?? osid}:${i}` : f.id;
+                    const glowColor = isEnemyContact
+                        ? 'rgba(180, 190, 200, 0.18)'
+                        : FACTION_HEX_COLORS[f.faction] ? `${FACTION_HEX_COLORS[f.faction]}22` : 'rgba(255,255,255,0.1)';
 
                     // Staggered delay for each unit
                     const delay = i * 60;
@@ -217,13 +231,17 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 {/* Shield Glow */}
                                 <div
                                     className="absolute -inset-4 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"
-                                    style={{ backgroundColor: FACTION_COLORS[f.faction] ? `${FACTION_COLORS[f.faction]}22` : 'rgba(255,255,255,0.1)' }}
+                                    style={{ backgroundColor: glowColor }}
                                 />
 
-                                <FormationIconCanvas
-                                    formation={f}
-                                    className="drop-shadow-lg group-hover:scale-110 transition-transform"
-                                />
+                                {isEnemyContact ? (
+                                    <EnemyContactGlyph className="group-hover:scale-110 transition-transform" />
+                                ) : (
+                                    <FormationIconCanvas
+                                        formation={f}
+                                        className="drop-shadow-lg group-hover:scale-110 transition-transform"
+                                    />
+                                )}
 
                                 <div className="bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono text-white whitespace-nowrap shadow-xl group-hover:bg-accent-gold group-hover:text-black transition-colors">
                                     {name}

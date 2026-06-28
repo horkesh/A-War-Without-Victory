@@ -1,31 +1,91 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; P17 player-start hardening is closed on `main`, and P18 command-surface truth is the active local candidate on `codex/p18-command-surface-truth`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; P18 command-surface truth is merged on `main` through PR #459 at `3a67397ce`, and P19 is the active follow-up scout/fix packet on `codex/p19-d2-polish-continuation`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
 **Why now:** `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` make D2 owner playthrough the remaining 1.0 gate. The closed June 22 sector-truth plan established the rules; this sweep verifies the current live surfaces again and closes the next coherent set before another long CI wait.
 
-## Current Queue 2026-06-27
+## Current Queue 2026-06-28
 
-P18 command-surface truth is implemented locally before final closeout:
+P18 command-surface truth is closed on `main`:
 
-- Decision Room command/loop actions with no route now expose unavailable reasons in visible, title, and accessible copy.
-- Generic Decision Room navigation returns false for Desk inbox targets so App-level Desk handlers retain ownership.
-- Stale `Advanced Desk` / `Product Loop` English copy is replaced with `Advanced Review` / `Decision Loop`.
-- Army HQ, OOB, and Corps Detail sector coverage tiers use live line-holder count over `length_edges` when that denominator exists.
-- Corps Front missing reserve-personnel denominators and sector-security state render as unreported/neutral instead of exact zero or inactive truth.
-- Opening corps commander projections are turn-zero only and still skip operation-assigned officers.
-- Formation Detail war narratives are sanitized through the same player-safe settlement-label pass as notable moments.
-- Scope is UI/read-model/i18n/test/docs only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt changes.
+- PR #459 merged to `main` at `3a67397ce`; GitHub was green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression, structural fingerprint, Typecheck, and Full Suite.
+- Local and remote `codex/p18-command-surface-truth` refs and the P18 worktree were removed; one clean `main` worktree remained after closeout.
+- P18 closed Decision Room disabled-action reasons, generic inbox route ownership, stale Advanced Desk/Product Loop copy, live line-holder sector coverage density, Corps Front missing reserve/security truth, turn-zero-only opening commander projections, Formation Detail raw-token sanitization, and the packaged-runtime data-route teardown abort false positive.
+- Scope remained UI/read-model/i18n/test/docs plus packaged-probe guardrail only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt behavior changed.
 
-P18 local proof is green: focused Decision Room/sector/Corps Front proof 6 files / 127 tests; focused commander/Formation Detail proof 3 files / 57 tests; combined focused pack 9 files / 184 tests; shell-navigation follow-up 2 files / 20 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 681 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; manual in-app browser proof on `http://127.0.0.1:3006/`; and `git diff --check`. Remaining closeout: GitHub proof, merge, and branch/worktree cleanup.
-
-Next queue after P18 remains non-BCS owner-playthrough polish:
+P19 remains non-BCS owner-playthrough polish:
 
 - Fresh live-browser inspection of Records, Chronicle, settlement timelines, operation planning, tactical-map selection/stack behavior, and any remaining Army HQ/OOB/Corps Front confusion not covered by P18.
 - Prioritize information-density gaps, sparse-source truth, route ownership, and owner-playthrough confusion found in live browser checks.
 - Keep batching substantial coherent fixes before CI, rather than small one-off PRs.
+
+First P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- EventDecisionModal record-trail copy now states the true ownership boundary: Chronicle owns the decision ledger, while Army HQ Records owns consequences, opportunities, operations, and turn aftermath.
+- Records archive summary labels now say `Latest Filed Decision`, matching the fact that Chronicle-filed decisions are counted separately from Records-routed decision receipts.
+- Chronicle decision entries now use `Focus Chronicle Decision`; Chronicle entries without a narrated turn aftermath record render disabled `Chronicle Entry Only` instead of routing to an empty Army HQ Records tab.
+- CorpsCard Order of Battle buttons keep compact visible copy but expose corps-specific aria/title labels, removing the repeated indistinguishable `Order of battle` control problem in live browser and assistive navigation.
+- Verification passed: focused Vitest proof 4 files / 42 tests, `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through RBiH start, war-start splash, opening brief, foundational decision, Records, Chronicle, and OOB labels.
+
+Second P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Shared `TabBar` now keeps compact visible badges while exposing domain-specific accessible count labels; Corps Detail tabs read `Order of battle, 34 brigades`, `Sectors, 21 sectors`, and operation counts instead of glued label/count strings.
+- Ops Planning phase controls now expose step/locked/current state through `aria-label`, `title`, and `aria-current`; decorative step numerals and separators no longer pollute the control name.
+- Ops Planning commander cards now expose concise selection labels with rank, name, regional fit, preparation turns, and `aria-pressed` selected state.
+- Army HQ corps-card header actions now expose an explicit command-card inspection label with personnel and fielded-brigade truth, rather than relying on compact flex text such as `1st Corps21,70034 fielded brigades`.
+- Verification passed: focused Vitest proof 3 files / 55 tests, `npm.cmd run typecheck`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through fresh RBiH start, Army HQ, 1st Corps Corps Detail tabs, Ops Snapshot, operation-planning phase rail, and commander selection.
+
+Third P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Settlement timelines now render turn-zero control rows and setup-control mechanisms as scenario-start provenance, not as player-era takeover history.
+- Setup/provenance turn summaries no longer inject movement or supply rows into settlement history, while live turn movement/supply rows remain visible.
+- Sparse battle rows with `casualties_reported === false` keep casualties unreported even when source placeholders carry `0`.
+- Direct movement timeline rows sanitize raw formation ids before player-facing copy.
+- Shared OOB section accordions now expose explicit expand/collapse aria/title labels and hide decorative count/chevron fragments from the control name.
+- Expanded tactical-map stacks now render hidden enemy contacts with a neutral contact glyph/glow instead of raw enemy formation icon, faction, or posture presentation.
+- Event decision response buttons now expose explicit `Choose response: ...` aria/title labels.
+- Verification passed: focused Vitest proof 7 files / 144 tests, `npm.cmd run typecheck`, and `git diff --check`.
+
+Fourth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Army HQ corps-card front faces now render missing command-strain source as `Command strain unreported` instead of hiding the missing source behind healthy zero behavior.
+- Corps Detail exhaustion copy uses localized `corpsDetail.exhaustion` for reported values, matching the existing unreported path.
+- Formation Detail AA systems render the count plus `Condition unreported` when no AA-condition source exists, removing the misleading full green condition bar.
+- Army HQ Situation briefing disabled cards now expose a visible reason plus `title` and accessible name for no-route/no-navigation cases.
+- OOB faction headers now surface `Army commander unreported` when the army commander source is absent and split fielded/reserve counts (`0 fielded / 1 reserve`) instead of a single ambiguous formation count.
+- Verification passed: focused Vitest proof 5 files / 116 tests and `npm.cmd run typecheck`.
+
+Fifth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- MapLibre formation hover now passes marker properties to the `MapContainer` hover handler instead of only the marker id.
+- Synthetic `enemy_contact:*` markers use `location_osid` (or the encoded marker id fallback) to keep hovered-sector context, preserving map highlight context without revealing hidden formation identity.
+- Synthetic enemy-contact tooltip models recover the encoded contact OSID and render the player-safe settlement subtitle while keeping personnel, posture, cohesion, and orders redacted.
+- Verification passed: focused Vitest proof 2 files / 39 tests and `npm.cmd run typecheck`.
+
+Sixth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Operation opportunity footprint highlighting now filters empty OSID placeholders before deciding whether there is a real map footprint.
+- Disabled opportunity highlight controls now expose a reason in `title` and accessible copy when no map footprint is reported.
+- Disabled opportunity action and redirect controls now expose reasoned `title` and accessible copy when an action is not staff-cleared or another opportunity decision is being sent.
+- Verification passed: red/green focused Vitest proof `tests/ui/army_hq_timing_copy.test.ts` (17 tests) and `npm.cmd run typecheck`.
+
+Seventh P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Battle-marker tooltip copy now describes the actual settlement battle-context route rather than promising an unavailable After-Action Report route.
+- Battle markers now participate in map context-menu hit-testing as settlement context, and battle hover clears lower-priority delayed OSID/front/sector hover state before rendering the battle tooltip.
+- Army HQ corps-card and ORBAT cohesion visuals now preserve missing cohesion as unreported instead of healthy fill or empty zero segments.
+- Army HQ sector density/frontage rows now render frontage unreported when a line holder exists but the sector reports no front segments, instead of showing `density 0.00`.
+- Turn Aftermath next-action blocker counts and top rows use effective inbox severity, so modal-required convoy/peace/Dayton families surface as blockers consistently.
+- Warroom priority review, priority row, source handoff, and open-board disabled states now expose reasoned `title` and accessible copy, including the loaded-state/no-campaign-side case.
+- Decision Room quiet-state copy now uses present-state review language instead of future buried-item language.
+- Verification passed: red/green focused Vitest proof 6 files / 141 tests (`tests/ui_map_interactions.test.ts`, `tests/ui_map_tooltip_player_visibility.test.ts`, `tests/ui/gui_audit_label_discipline.test.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `tests/ui/operation_aar_records_review.test.ts`), `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, and `git diff --check`. The focused pack covers the prior GitHub failure in `tests/ui/operation_aar_records_review.test.ts`.
+
+Remaining P19 queue before broad CI/push:
+
+- Re-run final local/browser hygiene for the seventh packet and any later UI deltas.
+- PR #460 closeout: update the branch, inspect GitHub checks/comments, merge only once green, then delete the branch/worktree and clean temporary evidence.
 
 ## Prior Queue 2026-06-26
 

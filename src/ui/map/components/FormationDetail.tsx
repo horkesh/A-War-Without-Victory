@@ -600,11 +600,14 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   )}
                   {formation.composition.aa_systems > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-text-secondary w-16">{t('formationDetail.aaSysShort')}</span>
+                      <span className="text-text-secondary w-24">{t('formationDetail.aaSys')}</span>
                       <div className="flex-1 flex items-center gap-2">
-                        <div className="flex-1 h-1.5 bg-black/40 rounded flex overflow-hidden">
-                          <div style={{ width: '100%' }} className="bg-[#55d48a]" />
-                        </div>
+                        <span
+                          data-testid="formation-aa-condition-unreported"
+                          className="flex-1 text-[10px] italic text-text-secondary"
+                        >
+                          {t('formationDetail.conditionUnreported')}
+                        </span>
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
                       </div>
                     </div>

@@ -82,6 +82,7 @@ describe('player-safe tooltip models', () => {
 
     expect(contact.classification).toBe('enemy_contact');
     expect(contact.title).toBe('Enemy contact');
+    expect(contact.subtitle).toBe('Doboj');
     expect(contact.statusLine).toBe('Observed unit');
     expect(contact.personnel).toBeNull();
     expect(contact.orderLine).toBeNull();
@@ -563,5 +564,14 @@ describe('player-safe tooltip models', () => {
     expect(tooltipSource).toContain('frontEdgesOsid={loadedGameState?.frontEdgesOsid}');
     expect(tooltipSource).not.toContain('sectors={loadedGameState?.corpsFrontSectors}');
     expect(tooltipSource).not.toContain("eid.split('::')");
+  });
+
+  it('describes battle-marker clicks as settlement battle context, not unavailable AAR routing', () => {
+    const tooltipSource = readFileSync('src/ui/map/components/Tooltip.tsx', 'utf8');
+    const englishMessages = readFileSync('src/ui/map/i18n/messages.en.ts', 'utf8');
+
+    expect(tooltipSource).toContain("t('tooltip.clickForBattleSettlement')");
+    expect(englishMessages).toContain("'tooltip.clickForBattleSettlement': 'Click for settlement battle context'");
+    expect(englishMessages).not.toContain("'tooltip.clickForAar': 'Click for After-Action Report'");
   });
 });

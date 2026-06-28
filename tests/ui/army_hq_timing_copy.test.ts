@@ -11,6 +11,11 @@ import type { LoadedGameState, OperationOpportunityProposalView, OperationView }
 import { setLocale } from '../../src/ui/map/i18n';
 import { turnToDateString } from '../../src/ui/map/utils/formatters';
 
+const ipcMockState = vi.hoisted(() => ({
+  isAvailable: false,
+  resolveOperationOpportunityDecision: vi.fn(async () => ({ ok: true })),
+}));
+
 const storeState: Record<string, any> = {
   armyHQExpandedSections: {},
   toggleArmyHQSection: (sectionKey: string) => {
@@ -50,7 +55,10 @@ vi.mock('../../src/ui/map/store/gameStore', () => ({
 }));
 
 vi.mock('../../src/ui/map/desktop/useIPC', () => ({
-  useIPC: () => ({ isAvailable: false }),
+  useIPC: () => ({
+    isAvailable: ipcMockState.isAvailable,
+    resolveOperationOpportunityDecision: ipcMockState.resolveOperationOpportunityDecision,
+  }),
 }));
 
 function makeOperation(overrides: Partial<OperationView> = {}): OperationView {
@@ -135,6 +143,8 @@ function makeOpportunity(overrides: Partial<OperationOpportunityProposalView> = 
 
 afterEach(() => {
   cleanup();
+  ipcMockState.isAvailable = false;
+  ipcMockState.resolveOperationOpportunityDecision.mockClear();
   storeState.armyHQExpandedSections = {};
   storeState.selectedFormationId = null;
   storeState.selectedCorpsId = null;
@@ -518,6 +528,33 @@ describe('Army HQ timing copy', () => {
     expect(screen.queryByRole('button', { name: 'Authorize' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Delay' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Decline' })).toBeNull();
+  });
+
+  it('explains disabled opportunity footprint and action controls', () => {
+    ipcMockState.isAvailable = true;
+
+    render(React.createElement(OperationOpportunityDossierPanel, {
+      gameState: makeGameState({
+        operationOpportunityProposals: [makeOpportunity({
+          status: 'eligible_pending_review',
+          recommendation: 'approve',
+          objectives: [{ osid: '', label: 'Unreported objective', role: 'objective' }],
+          available_actions: [
+            { id: 'approve', label: 'Authorize', enabled: false },
+            { id: 'delay', label: 'Delay', enabled: true },
+          ],
+        })],
+      }),
+      playerFaction: 'RBiH',
+    }));
+
+    const highlight = screen.getByRole('button', { name: /Highlight unavailable/i }) as HTMLButtonElement;
+    expect(highlight.disabled).toBe(true);
+    expect(highlight.getAttribute('title')).toBe('No map footprint is reported for this opportunity.');
+
+    const authorize = screen.getByRole('button', { name: /Authorize unavailable/i }) as HTMLButtonElement;
+    expect(authorize.disabled).toBe(true);
+    expect(authorize.getAttribute('title')).toBe('Authorize unavailable: staff has not cleared this action.');
   });
 
   it('localizes opportunity dossier labels in BCS without raw proposal enums', () => {

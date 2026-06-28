@@ -409,6 +409,10 @@ describe('ops planning target discovery', () => {
 
         expect(modalSource).not.toContain('PHASE_LABELS[p]');
         expect(typesSource).not.toContain('PHASE_LABELS');
+        expect(modalSource).toContain("t('opsPlanning.phaseNav.aria'");
+        expect(modalSource).toContain("t('opsPlanning.phaseNav.lockedAria'");
+        expect(modalSource).toContain('aria-label={phaseAriaLabel}');
+        expect(modalSource).toContain('aria-current={i === currentIdx ? \'step\' : undefined}');
     });
 
     it('localizes G2Phase clipboard chrome in BCS mode', () => {
@@ -634,6 +638,24 @@ describe('ops planning target discovery', () => {
         expect(screen.getAllByText('Vrijeme pripreme:').length).toBeGreaterThan(0);
         expect(screen.getByText('2 operacije komandovao')).toBeTruthy();
         expect(screen.queryByText('Select Operations Commander')).toBeNull();
+    });
+
+    it('gives commander option cards concise accessible names and selected state', () => {
+        useGameStore.setState({
+            loadedGameState: makeState(),
+            opsPlanningCorpsId: 'rs_1st_krajina',
+        });
+
+        render(createElement(CommanderPhase, { onAdvance: vi.fn() }));
+
+        const commanderButton = screen.getByRole('button', {
+            name: /Select operations commander.*Petar Testic.*HOME CORPS.*turns preparation/i,
+        });
+        expect(commanderButton.getAttribute('title')).toMatch(/Petar Testic/);
+        expect(commanderButton.getAttribute('aria-pressed')).toBe('false');
+
+        fireEvent.click(commanderButton);
+        expect(commanderButton.getAttribute('aria-pressed')).toBe('true');
     });
 
     it('excludes active-but-forming brigades from commander-phase corps strength', () => {

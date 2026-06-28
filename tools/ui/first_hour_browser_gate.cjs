@@ -684,7 +684,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   await waitForVisibleText(page, 'Archive Routes');
   await assertTurnZeroRecordsProvenanceCounts(page, summary, flow);
   await captureEvidence(page, summary, 'army_hq_records');
-  await waitForVisibleText(page, 'Latest Decision');
+  await waitForVisibleText(page, 'Latest Filed Decision');
   await waitForVisibleText(page, flow.decisionTitle);
   await waitForVisibleText(page, 'Chronicle Filed');
   await waitForVisibleText(page, '1');

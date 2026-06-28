@@ -409,7 +409,9 @@ function SectorExpandedDetail({
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
                 {hasCurrentFieldedLine && (
                     <>
-                        <span>{t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
+                        <span>{projectedDensity == null
+                            ? t('sectorsSection.frontageUnreported')
+                            : t('sectorsSection.bdePerFrontSegment', { value: projectedDensity })}</span>
                     </>
                 )}
                 {sector.sub_segments && <span>{t('sectorsSection.segments', { count: sector.sub_segments.length })}</span>}
@@ -418,15 +420,15 @@ function SectorExpandedDetail({
     );
 }
 
-function computeCurrentFrontDensity(sector: CorpsFrontSectorView, frontlineCount: number): string {
-    return sector.length_edges > 0 ? (frontlineCount / sector.length_edges).toFixed(2) : '0.00';
+function computeCurrentFrontDensity(sector: CorpsFrontSectorView, frontlineCount: number): string | null {
+    return sector.length_edges > 0 ? (frontlineCount / sector.length_edges).toFixed(2) : null;
 }
 
 function sectorSummaryLine(
     lineHoldingCount: number,
     reserveCount: number,
     frontSegmentCount: number,
-    projectedDensity: string,
+    projectedDensity: string | null,
 ): string {
     const lineSegment = lineHoldingCount > 0
         ? t('sectorsSection.lineSegment', { count: lineHoldingCount })
@@ -435,11 +437,14 @@ function sectorSummaryLine(
         frontSegmentCount === 1 ? 'sectorsSection.frontSegment.one' : 'sectorsSection.frontSegment.many',
         { count: frontSegmentCount },
     );
-    const densitySegment = lineHoldingCount > 0
+    const densitySegment = lineHoldingCount > 0 && projectedDensity != null
         ? t('sectorsSection.densitySegment', { density: projectedDensity })
         : '';
+    const frontageUnreportedSegment = lineHoldingCount > 0 && projectedDensity == null
+        ? `; ${t('sectorsSection.frontageUnreported')}`
+        : '';
     const reserveSegment = reserveCount > 0 ? `; ${t('sectorsSection.reserveSegment', { count: reserveCount })}` : '';
-    return `${lineSegment}${reserveSegment}; ${frontSegment}${densitySegment}`;
+    return `${lineSegment}${reserveSegment}; ${frontSegment}${densitySegment}${frontageUnreportedSegment}`;
 }
 
 function compareText(a: string, b: string): number {

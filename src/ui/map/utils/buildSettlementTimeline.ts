@@ -14,7 +14,7 @@
  */
 
 import { t, type MessageKey } from '../i18n/index.js';
-import { getPlayerSafeOperationName, looksLikeRawPlayerFacingToken } from './playerSafeText.js';
+import { getPlayerSafeDisplayLabel, getPlayerSafeOperationName, looksLikeRawPlayerFacingToken } from './playerSafeText.js';
 
 export type TimelineEventType =
     | 'control_flip'
@@ -130,12 +130,11 @@ function controlMechanismLabel(mechanism: string): string | undefined {
 
 function isInitialControlEvent(event: ControlEvent): boolean {
     const mechanism = event.mechanism.trim();
-    return event.turn === 0 && (
-        mechanism === 'initial_control'
+    return event.turn === 0
+        || mechanism === 'initial_control'
         || mechanism === 'setup_control'
         || mechanism === 'scenario_start'
-        || mechanism === 'scenario_setup'
-    );
+        || mechanism === 'scenario_setup';
 }
 
 const BATTLE_OUTCOME_LABEL_KEYS: Record<string, MessageKey> = {
@@ -233,13 +232,16 @@ export function buildSettlementTimeline(
                 defender: factionName(b.defender_faction),
                 captureSuffix: b.territory_flipped ? t('settlementTimeline.battle.captureSuffix') : '',
             }),
-            casualties: { attacker: b.attacker_casualties, defender: b.defender_casualties },
+            casualties: b.casualties_reported === false
+                ? { attacker: null, defender: null }
+                : { attacker: b.attacker_casualties, defender: b.defender_casualties },
             outcome: b.outcome,
         });
     }
 
     // --- Brigade movements ---
     for (const m of movements) {
+        const brigadeName = getPlayerSafeDisplayLabel(m.formation_name, 'Formation');
         events.push({
             turn: m.turn,
             type: m.type === 'arrived' ? 'brigade_arrived' : 'brigade_departed',
@@ -247,9 +249,9 @@ export function buildSettlementTimeline(
                 m.type === 'arrived'
                     ? 'settlementTimeline.movement.arrived'
                     : 'settlementTimeline.movement.departed',
-                { brigade: m.formation_name },
+                { brigade: brigadeName },
             ),
-            brigadeName: m.formation_name,
+            brigadeName,
         });
     }
 

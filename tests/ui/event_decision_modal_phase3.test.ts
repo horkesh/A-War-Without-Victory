@@ -239,7 +239,10 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.getByText('Herzeg-Bosna patron pressure -2')).toBeTruthy();
     expect(screen.getByText('Herzeg-Bosna Patron Confidence +6')).toBeTruthy();
     expect(screen.getByText('No immediate mechanical effects.')).toBeTruthy();
-    expect(screen.getByText(/Chronicle decision ledger and Army HQ Records/i)).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choose response: Maintain the separate project' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choose response: Seek a joint front' })).toBeTruthy();
+    expect(screen.getByText(/filed in the Chronicle decision ledger/i)).toBeTruthy();
+    expect(screen.getByText(/Army HQ Records keeps consequences, opportunities, operations, and turn aftermath/i)).toBeTruthy();
     expect(screen.queryByText(/source review required/i)).toBeNull();
     expect(screen.queryByText('Rationale')).toBeNull();
   });

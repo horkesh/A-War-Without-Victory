@@ -1,4 +1,88 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): align battle markers, sparse Army HQ truth, and Warroom priority reasons
+
+**Type:** UI/map-interaction/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the seventh P19 owner-playthrough polish packet from the Averroes/Carver/Schrodinger scout findings. Battle-marker tooltips now describe the real click behavior as settlement battle context instead of promising an unavailable AAR route; battle markers participate in right-click hit-testing as settlement context and clear lower-priority delayed hovers so stale OSID/front hover cannot overwrite battle hover. Army HQ corps-card and ORBAT cohesion now render missing cohesion as unreported rather than healthy/zero visual bars, and sector density/frontage rows show frontage unreported when line holders exist but the sector reports no front segments. Turn Aftermath next-action blockers now use effective inbox severity, and Warroom priority controls explain disabled review, docket, and source-handoff reasons. Decision Room quiet-state copy now uses present-state language instead of future buried-item wording.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui_map_interactions.test.ts tests/ui_map_tooltip_player_visibility.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/turn_aftermath.test.ts tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` (6 files / 141 tests). `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, and `git diff --check` passed. The focused pack includes the prior GitHub failure in `tests/ui/operation_aar_records_review.test.ts`.
+
+**Scope/determinism:** UI/map-interaction/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_BATTLE_MARKER_SPARSE_PRIORITY_TRUTH.md`.
+
+---
+
+## [2026-06-28] fix(ui): explain operation-opportunity disabled controls
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the remaining Kepler operation-opportunity control residual on the P19 owner-playthrough branch. Operation opportunity footprint highlight controls now filter empty OSID placeholders before deciding whether a map footprint exists, and disabled highlight controls expose a title and accessible label explaining that no map footprint is reported. Operation opportunity action and redirect buttons now carry disabled-state titles and accessible labels when an action is not staff-cleared or another opportunity decision is being sent, instead of rendering no-reason disabled controls.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` (17 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_OPERATION_OPPORTUNITY_DISABLED_REASONS.md`.
+
+---
+
+## [2026-06-28] fix(ui): preserve enemy-contact hover context
+
+**Type:** UI/map-interaction/read-model/test/docs polish.
+
+**Fix:** Closed the Confucius P19 residual where synthetic `enemy_contact:*` marker hover could lose settlement/sector context. MapLibre formation hover now passes marker properties through the interaction callback. `MapContainer` uses `location_osid`, with a synthetic-id fallback, to keep hovered-sector context for redacted enemy contacts. The player-safe formation tooltip model also recovers the encoded contact OSID and renders the settlement subtitle while preserving redacted enemy identity, personnel, posture, cohesion, and orders.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui_map_interactions.test.ts tests/ui_map_tooltip_player_visibility.test.ts --pool=forks --reporter=dot` (2 files / 39 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/map-interaction/read-model/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_ENEMY_CONTACT_HOVER_CONTEXT.md`.
+
+---
+
+## [2026-06-28] fix(ui): close P19 sparse command and OOB clarity residuals
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the next Kepler residual batch on the local P19 owner-playthrough branch. Army HQ corps-card front faces now show `Command strain unreported` when the command-strain source row is absent instead of silently treating the missing source as healthy zero. Corps Detail reported exhaustion copy now uses the localized `corpsDetail.exhaustion` key. Formation Detail AA systems no longer render a fabricated 100% operational condition bar when no AA-condition source exists; they show the AA count with `Condition unreported`. Army HQ Situation briefing disabled cards now include visible, title, and accessible-name reasons. OOB faction headers now surface missing army-commander source and split fielded/reserve counts instead of an ambiguous single formation count.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui/command_drilldown_routing.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/situation_briefing_progressive_disclosure.test.ts tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (5 files / 116 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_SPARSE_COMMAND_OOB_CLARITY.md`.
+
+---
+
+## [2026-06-28] fix(ui): harden P19 settlement timelines and OOB accordions
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Continued the local P19 owner-playthrough polish branch with settlement, OOB, tactical-stack, and decision-modal findings from live browser checking plus the Kant/Confucius/Kepler scout reports. Settlement timelines now treat every turn-zero control row, and setup-control mechanisms at any turn, as scenario-start provenance instead of player-era takeover history. Setup/provenance turn summaries no longer feed movement or supply rows into settlement history. Battle rows honor `casualties_reported === false` even when sparse sources encode zero placeholders, and direct movement timeline rows sanitize raw formation identifiers before rendering. The shared OOB accordion header now exposes explicit expand/collapse aria/title labels and separates decorative counts/chevrons from the control name. Expanded tactical-map stacks now render hidden enemy contacts with a neutral redacted contact glyph/glow instead of raw enemy formation icon/faction/posture presentation. Event decision response buttons now expose explicit `Choose response: ...` labels.
+
+**Verification:** Focused proof passed `npm.cmd exec -- vitest run tests/ui_map_game_state_adapter.test.ts tests/settlement_timeline_provenance.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/ui/settlement_supply_status.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/stack_expansion_overlay_viewport.test.ts tests/ui/event_decision_modal_phase3.test.ts --pool=forks --reporter=dot` (7 files / 144 tests). `npm.cmd run typecheck` and `git diff --check` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_SETTLEMENT_TIMELINE_OOB_A11Y.md`.
+
+---
+
+## [2026-06-28] fix(ui): clarify Chronicle and Records ownership in P19
+
+**Type:** UI/read-model/i18n/test/browser-QA/docs polish.
+
+**Fix:** Implemented the first P19 owner-playthrough polish packet. Event decisions no longer promise that Chronicle-filed presidential decisions appear in both the Chronicle decision ledger and Army HQ Records; the modal now says Chronicle owns the decision ledger while Army HQ Records owns consequences, opportunities, operations, and turn aftermath. Records summary copy now says `Latest Filed Decision`. Chronicle decision actions now say `Focus Chronicle Decision`, and Chronicle entries without a real turn aftermath record render a disabled `Chronicle Entry Only` action instead of routing to an empty Army HQ Records aftermath tab. CorpsCard order-of-battle buttons keep the compact visible label but expose corps-specific aria/title labels such as `Open 1st Corps order of battle`.
+
+**Verification:** Focused proof passed `npm.cmd exec -- vitest run tests/ui_chronicle_operation_aar_link.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (4 files / 42 tests). `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, and `git diff --check` passed. Manual in-app browser proof on `http://127.0.0.1:3007/` verified fresh RBiH start, `WAR HAS STARTED`, `WAR BEGINS: 6 APR 1992`, the foundational `What Is Bosnia?` decision with corrected record-trail copy, Army HQ Records `Latest Filed Decision` with Decisions 0 / Chronicle Filed 1, Chronicle `Focus Chronicle Decision`, disabled turn-zero `Chronicle Entry Only` for Sarajevo, and corps-specific OOB labels. Only the expected dev-map desktop-bridge fallback warning was present.
+
+**Scope/determinism:** UI/read-model/i18n/test/browser-QA/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
+## [2026-06-28] docs: open P19 after P18 command-surface closeout
+
+**Type:** Docs/process synchronization.
+
+**Fix:** Synchronized the Command Board, Master Roadmap, and active Army HQ / sector / brigade information-quality sweep plan after PR #459 merged P18 to `main` at `3a67397ce`. The docs now record that P18 is green, merged, and cleaned, and that P19 is the active next non-packaging D2 owner-playthrough scout/fix packet for Records, Chronicle, settlement timelines, operation planning, tactical-map selection/stack behavior, and remaining command-surface confusion.
+
+**Verification:** Docs-only edit. `git diff --check` passed before commit.
+
+**Scope/determinism:** Documentation/process sync only. No code, simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] fix(ui): preserve P18 command-surface follow-up assertions
 
 **Type:** UI/read-model/test/docs polish.
@@ -23228,3 +23312,11 @@ The packaged desktop runtime probe now records renderer and network failure obse
 Verification so far: UI red phase failed the expected 4 assertions before implementation; desktop red phase failed the expected 3 assertions before implementation. Reviewer-fix red phase failed the expected assertions for missing-strain coercion, generic request-abort filtering, and missing exact PMTiles range matching. Green proof passed focused UI (4 files / 80 tests), focused desktop (2 files / 12 tests), combined focused proof (6 files / 92 tests), reviewer-fix proof (2 files / 35 tests), expanded P16 focused proof (7 files / 122 tests), `npm.cmd run typecheck`, `node --check src\desktop\electron-main.cjs`, `node --check tools\desktop_packaged_runtime_probe.mjs`, `git diff --check`, `npm.cmd run qa:player-journeys` (43 files / 677 tests), `npm.cmd run desktop:release:check` with existing non-fatal Vite warnings, `npm.cmd run qa:first-hour:browser`, and `npm.cmd run qa:live-surface:browser`. Live in-app browser proof on `http://127.0.0.1:3004/` verified fresh RBiH start, war-start briefing, Army HQ, 1st Corps sector expansion, sanitized sector ARIA ids with raw sector data ids preserved, visible `Unreported` sector truth, no alert banners, no visible `NaN` / `Infinity` / `undefined` / `null`, and console health with only the expected dev-map desktop-bridge fallback warning. A broad `npm.cmd run test:ui` attempt exceeded the local 4-minute timeout and is not counted as proof.
 
 Determinism/scope: UI/read-model/platform probe/test/docs polish only. No simulation control logic, event evaluator mechanics, scenario data, startup artifact, save schema migration, baseline/golden manifest, structural fingerprint artifact, calibration floor, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or Srebrenica/Zepa event-owned fall receipt behavior changed. Report: `docs/40_reports/implemented/20260626_P16_PROVENANCE_RUNTIME_HARDENING.md`.
+
+## 2026-06-28 - P19 operation planning and command-card accessibility polish
+
+Continued the local P19 owner-playthrough polish branch after live browser checking exposed glued Corps Detail tab labels, ambiguous operation-planning phase controls, oversized commander-card accessible names, and compact Army HQ corps-card header names. Shared TabBar count badges now have visible spacing plus domain-specific accessible labels; Corps Detail provides brigade/sector/operation count phrases. Ops Planning phase buttons expose step, locked, and current-state labels; commander option cards expose concise selection labels and `aria-pressed`. CorpsCard header buttons now expose explicit command-card inspection labels with personnel and fielded-brigade truth.
+
+Verification: focused UI proof passed `npm.cmd exec -- vitest run tests/ui/ops_planning_target_discovery.test.ts tests/ui/command_drilldown_routing.test.ts tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (3 files / 55 tests), `npm.cmd run typecheck` passed, `git diff --check` passed, and manual in-app browser proof on `http://127.0.0.1:3007/` verified fresh RBiH start, opening brief, Army HQ 1st Corps command-card label, Corps Detail tab labels/counts, Ops Snapshot operation planning handoff, phase rail labels, and commander selected-state behavior.
+
+Determinism/scope: UI/accessibility/i18n/test/docs polish only. No simulation logic, event evaluator mechanics, scenario data, startup artifact, save schema, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or Srebrenica/Zepa event-owned fall receipt behavior changed. Report: `docs/40_reports/implemented/20260628_P19_OPERATION_PLANNING_COMMAND_A11Y.md`.

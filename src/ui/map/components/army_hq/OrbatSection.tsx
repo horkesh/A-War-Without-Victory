@@ -392,15 +392,31 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                     </span>
 
                                     {/* Cohesion segments */}
-                                    <div className="flex gap-1 w-20 justify-center shrink-0">
-                                        {Array.from({ length: 5 }, (_, i) => (
-                                            <div
-                                                key={i}
-                                                className={`h-2.5 w-2 border border-black/40 ${i < filledSegments ? '' : 'bg-panel-card opacity-20'}`}
-                                                style={{ backgroundColor: i < filledSegments ? cohesionColor : undefined }}
-                                            />
-                                        ))}
-                                    </div>
+                                    {cohesion == null ? (
+                                        <span
+                                            data-testid="army-hq-orbat-cohesion"
+                                            title={t('orbat.cohesionUnreported')}
+                                            aria-label={t('orbat.cohesionUnreported')}
+                                            className="w-20 shrink-0 text-center text-[9px] italic text-text-secondary/50"
+                                        >
+                                            {t('orbat.metricUnreported')}
+                                        </span>
+                                    ) : (
+                                        <div
+                                            data-testid="army-hq-orbat-cohesion"
+                                            title={t('orbat.cohesionReported', { value: cohesion })}
+                                            aria-label={t('orbat.cohesionReported', { value: cohesion })}
+                                            className="flex gap-1 w-20 justify-center shrink-0"
+                                        >
+                                            {Array.from({ length: 5 }, (_, i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`h-2.5 w-2 border border-black/40 ${i < filledSegments ? '' : 'bg-panel-card opacity-20'}`}
+                                                    style={{ backgroundColor: i < filledSegments ? cohesionColor : undefined }}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
 
                                     {/* Fatigue */}
                                     <span className={`text-[11px] tabular-nums w-10 text-right shrink-0 font-bold ${fatigueClass}`}>

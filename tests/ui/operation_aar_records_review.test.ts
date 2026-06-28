@@ -623,7 +623,7 @@ describe('Army HQ Records operation AAR review', () => {
 
         expect(screen.getByRole('region', { name: 'Sažetak arhive zapisa' })).toBeTruthy();
         expect(screen.getByText('Putevi arhive')).toBeTruthy();
-        expect(screen.getByText('Najnovija odluka')).toBeTruthy();
+        expect(screen.getByText('Najnovija arhivirana odluka')).toBeTruthy();
         expect(screen.getByText('U Hronici')).toBeTruthy();
         expect(screen.queryByText('Archive Routes')).toBeNull();
     });

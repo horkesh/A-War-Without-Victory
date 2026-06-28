@@ -319,6 +319,57 @@ test('parseGameState suppresses setup-control battle rows from settlement battle
     assert.strictEqual(parsed.battlesByOsid['op:test:combat']?.[0]?.turn, 1);
 });
 
+test('parseGameState suppresses setup movement and supply rows from settlement history', () => {
+    const parsed = parseGameState({
+        meta: { turn: 3, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {},
+        },
+        political: {
+            political_controllers: {},
+        },
+        turn_summaries: [{
+            turn: 1,
+            mechanism: 'setup_control',
+            movements: [{
+                formation_id: 'setup_bde',
+                formation_name: 'setup_bde',
+                from_osid: 'op:test:setup_from',
+                to_osid: 'op:test:setup_to',
+            }],
+            supply_transitions: [{
+                osid: 'op:test:setup_supply',
+                from: 'adequate',
+                to: 'critical',
+            }],
+        }, {
+            turn: 2,
+            movements: [{
+                formation_id: 'live_bde',
+                formation_name: 'Live Brigade',
+                from_osid: 'op:test:live_from',
+                to_osid: 'op:test:live_to',
+            }],
+            supply_transitions: [{
+                osid: 'op:test:live_supply',
+                from: 'adequate',
+                to: 'strained',
+            }],
+        }],
+    } as any);
+
+    assert.strictEqual(parsed.movementsByOsid['op:test:setup_from'], undefined);
+    assert.strictEqual(parsed.movementsByOsid['op:test:setup_to'], undefined);
+    assert.strictEqual(parsed.supplyTransitionsByOsid['op:test:setup_supply'], undefined);
+    assert.strictEqual(parsed.movementsByOsid['op:test:live_from']?.[0]?.formation_name, 'Live Brigade');
+    assert.strictEqual(parsed.movementsByOsid['op:test:live_to']?.[0]?.type, 'arrived');
+    assert.deepStrictEqual(parsed.supplyTransitionsByOsid['op:test:live_supply']?.[0], {
+        turn: 2,
+        from: 'adequate',
+        to: 'strained',
+    });
+});
+
 test('parseGameState does not promote sparse brigade engagements to displayed battle history', () => {
     const parsed = parseGameState({
         meta: { turn: 4, phase: 'war' },

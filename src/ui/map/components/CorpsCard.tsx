@@ -171,6 +171,12 @@ export function CorpsCard({
   );
   const flipToDetailsLabel = t('corpsCard.showDetails', { corps: displayName });
   const flipToSummaryLabel = t('corpsCard.showSummary', { corps: displayName });
+  const openOrbatLabel = t('corpsCard.openOrbat', { corps: displayName });
+  const corpsHeaderLabel = t('corpsCard.headerAria', {
+    corps: displayName,
+    personnel: totalPersonnelLabel,
+    brigades: brigadeCountLabel,
+  });
   const corpsOsids = Array.from(
     new Set(
       brigades
@@ -217,6 +223,8 @@ export function CorpsCard({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onHeaderClick(); }}
+          aria-label={corpsHeaderLabel}
+          title={corpsHeaderLabel}
           className="w-full px-3 py-2 bg-panel-bg border-b border-panel-border flex items-center justify-between gap-2 hover:bg-panel-hover transition-colors cursor-pointer"
         >
           {headerContent}
@@ -312,6 +320,8 @@ export function CorpsCard({
         {onOrbatClick && (
           <button
             type="button"
+            aria-label={openOrbatLabel}
+            title={openOrbatLabel}
             onClick={(e) => { e.stopPropagation(); onOrbatClick(); }}
             className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
           >

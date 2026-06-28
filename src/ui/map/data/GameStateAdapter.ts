@@ -2667,10 +2667,11 @@ function deriveBattlesByOsid(state: any): LoadedGameState['battlesByOsid'] {
 
 function deriveMovementsByOsid(state: any): LoadedGameState['movementsByOsid'] {
     const result: LoadedGameState['movementsByOsid'] = {};
-    const summaries = state.turn_summaries as Array<{ turn?: number; movements?: Array<Record<string, unknown>> }> | undefined;
+    const summaries = state.turn_summaries as Array<{ turn?: number; movements?: Array<Record<string, unknown>>; mechanism?: unknown; provenance?: unknown; source?: unknown; summary_kind?: unknown; kind?: unknown; is_setup?: unknown }> | undefined;
     if (!Array.isArray(summaries)) return result;
     for (const summary of summaries) {
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!shouldNarrateTerritorySummary(summary)) continue;
         if (!Array.isArray(summary.movements)) continue;
         for (const m of summary.movements) {
             const fid = String(m.formation_id ?? '');
@@ -2790,10 +2791,11 @@ function deriveHistoricalEvents(state: any): LoadedGameState['historicalEventsBy
 
 function deriveSupplyTransitionsByOsid(state: any): LoadedGameState['supplyTransitionsByOsid'] {
     const result: LoadedGameState['supplyTransitionsByOsid'] = {};
-    const summaries = state.turn_summaries as Array<{ turn?: number; supply_transitions?: Array<Record<string, unknown>> }> | undefined;
+    const summaries = state.turn_summaries as Array<{ turn?: number; supply_transitions?: Array<Record<string, unknown>>; mechanism?: unknown; provenance?: unknown; source?: unknown; summary_kind?: unknown; kind?: unknown; is_setup?: unknown }> | undefined;
     if (!Array.isArray(summaries)) return result;
     for (const summary of summaries) {
         const turn = typeof summary.turn === 'number' ? summary.turn : 0;
+        if (!shouldNarrateTerritorySummary(summary)) continue;
         if (!Array.isArray(summary.supply_transitions)) continue;
         for (const t of summary.supply_transitions) {
             const osid = String(t.osid ?? '');
