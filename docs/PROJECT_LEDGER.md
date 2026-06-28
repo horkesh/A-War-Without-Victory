@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): explain operation-opportunity disabled controls
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the remaining Kepler operation-opportunity control residual on the P19 owner-playthrough branch. Operation opportunity footprint highlight controls now filter empty OSID placeholders before deciding whether a map footprint exists, and disabled highlight controls expose a title and accessible label explaining that no map footprint is reported. Operation opportunity action and redirect buttons now carry disabled-state titles and accessible labels when an action is not staff-cleared or another opportunity decision is being sent, instead of rendering no-reason disabled controls.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui/army_hq_timing_copy.test.ts --pool=forks --reporter=dot` (17 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_OPERATION_OPPORTUNITY_DISABLED_REASONS.md`.
+
+---
+
 ## [2026-06-28] fix(ui): preserve enemy-contact hover context
 
 **Type:** UI/map-interaction/read-model/test/docs polish.

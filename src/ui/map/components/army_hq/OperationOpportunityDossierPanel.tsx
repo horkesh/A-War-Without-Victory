@@ -169,6 +169,15 @@ function FootprintPill({ label, muted = false }: { label: string; muted?: boolea
     );
 }
 
+function opportunityActionDisabledReason(
+    action: OperationOpportunityProposalView['available_actions'][number],
+    busy: boolean,
+): string | null {
+    if (busy) return t('opportunity.actionBusy', { action: action.label });
+    if (!action.enabled) return t('opportunity.actionUnavailable', { action: action.label });
+    return null;
+}
+
 function DossierCard({
     proposal,
     backTheOfficer,
@@ -197,7 +206,10 @@ function DossierCard({
     const footprintOsids = [
         ...proposal.objectives.map((objective) => objective.osid),
         ...proposal.staging.map((staging) => staging.osid),
-    ];
+    ].filter((osid): osid is string => Boolean(osid?.trim()));
+    const highlightUnavailableReason = footprintOsids.length === 0
+        ? t('opportunity.highlightUnavailable')
+        : null;
 
     return (
         <div className="rounded border border-panel-border bg-panel-bg p-3 space-y-3">
@@ -274,7 +286,11 @@ function DossierCard({
                             <button
                                 type="button"
                                 onClick={() => onHighlightFootprint(proposal)}
-                                disabled={footprintOsids.length === 0}
+                                disabled={Boolean(highlightUnavailableReason)}
+                                title={highlightUnavailableReason ?? t('opportunity.highlight')}
+                                aria-label={highlightUnavailableReason
+                                    ? t('opportunity.highlightUnavailableAria', { reason: highlightUnavailableReason })
+                                    : t('opportunity.highlight')}
                                 className="rounded border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
                             >
                                 {t('opportunity.highlight')}
@@ -343,13 +359,15 @@ function DossierCard({
                                 ...variant.objectives.map((objective) => objective.label),
                                 ...variant.staging.map((staging) => staging.label),
                             ].join(', ');
+                            const disabledReason = busy ? t('opportunity.redirectBusy', { action: variant.label }) : null;
                             return (
                                 <button
                                     key={`${proposal.proposal_id}:redirect:${variant.variant_id}`}
                                     type="button"
                                     onClick={() => onResolve(proposal, 'redirect', { redirectVariantId: variant.variant_id })}
                                     disabled={busy}
-                                    title={detail || variant.label}
+                                    title={disabledReason ?? (detail || variant.label)}
+                                    aria-label={disabledReason ?? variant.label}
                                     className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
                                 >
                                     {variant.label}
@@ -362,17 +380,22 @@ function DossierCard({
 
             {canAct && (
                 <div className="flex flex-wrap justify-end gap-2">
-                    {proposal.available_actions.filter((action) => action.id !== 'redirect').map((action) => (
-                        <button
-                            key={`${proposal.proposal_id}:${action.id}`}
-                            type="button"
-                            onClick={() => onResolve(proposal, action.id)}
-                            disabled={busy || !action.enabled}
-                            className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border transition-colors disabled:opacity-50 ${actionButtonClass(action.id)}`}
-                        >
-                            {action.label}
-                        </button>
-                    ))}
+                    {proposal.available_actions.filter((action) => action.id !== 'redirect').map((action) => {
+                        const disabledReason = opportunityActionDisabledReason(action, busy);
+                        return (
+                            <button
+                                key={`${proposal.proposal_id}:${action.id}`}
+                                type="button"
+                                onClick={() => onResolve(proposal, action.id)}
+                                disabled={Boolean(disabledReason)}
+                                title={disabledReason ?? action.label}
+                                aria-label={disabledReason ?? action.label}
+                                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border transition-colors disabled:opacity-50 ${actionButtonClass(action.id)}`}
+                            >
+                                {action.label}
+                            </button>
+                        );
+                    })}
                 </div>
             )}
             {hasEnabledActions && !commandBridgeAvailable && (

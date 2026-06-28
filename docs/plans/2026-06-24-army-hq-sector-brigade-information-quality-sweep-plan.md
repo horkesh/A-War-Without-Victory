@@ -64,10 +64,17 @@ Fifth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - Synthetic enemy-contact tooltip models recover the encoded contact OSID and render the player-safe settlement subtitle while keeping personnel, posture, cohesion, and orders redacted.
 - Verification passed: focused Vitest proof 2 files / 39 tests and `npm.cmd run typecheck`.
 
+Sixth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Operation opportunity footprint highlighting now filters empty OSID placeholders before deciding whether there is a real map footprint.
+- Disabled opportunity highlight controls now expose a reason in `title` and accessible copy when no map footprint is reported.
+- Disabled opportunity action and redirect controls now expose reasoned `title` and accessible copy when an action is not staff-cleared or another opportunity decision is being sent.
+- Verification passed: red/green focused Vitest proof `tests/ui/army_hq_timing_copy.test.ts` (17 tests) and `npm.cmd run typecheck`.
+
 Remaining P19 queue before broad CI/push:
 
-- Run final live-browser hygiene after the fifth packet.
-- If no new reproducible residual appears, move to broad gates before push/merge: `qa:player-journeys`, `qa:first-hour:browser`, `qa:live-surface:browser`, `git diff --check`, GitHub PR checks/comments, merge, branch/worktree cleanup.
+- Re-run final local hygiene for the sixth packet: `git diff --check`, focused proof, typecheck, and at least one live-browser sanity pass if the branch receives further UI deltas.
+- PR #460 closeout: update the branch, inspect GitHub checks/comments, merge only once green, then delete the branch/worktree and clean temporary evidence.
 
 ## Prior Queue 2026-06-26
 
