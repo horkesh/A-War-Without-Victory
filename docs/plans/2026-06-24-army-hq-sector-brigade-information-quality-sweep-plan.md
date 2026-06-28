@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; P18 command-surface truth is merged on `main` through PR #459 at `3a67397ce`, and P19 is the active follow-up scout/fix packet on `codex/p19-d2-polish-continuation`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; P19 is merged on `main` through PR #460 at `0043d1edd`, with the P19 branch/worktree cleaned. The current follow-up is the narrow post-merge browser-gate teardown repair on `codex/p19-main-full-suite-teardown-fix`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -82,10 +82,12 @@ Seventh P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - Decision Room quiet-state copy now uses present-state review language instead of future buried-item language.
 - Verification passed: red/green focused Vitest proof 6 files / 141 tests (`tests/ui_map_interactions.test.ts`, `tests/ui_map_tooltip_player_visibility.test.ts`, `tests/ui/gui_audit_label_discipline.test.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `tests/ui/operation_aar_records_review.test.ts`), `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, and `git diff --check`. The focused pack covers the prior GitHub failure in `tests/ui/operation_aar_records_review.test.ts`.
 
-Remaining P19 queue before broad CI/push:
+P19 closeout:
 
-- Re-run final local/browser hygiene for the seventh packet and any later UI deltas.
-- PR #460 closeout: update the branch, inspect GitHub checks/comments, merge only once green, then delete the branch/worktree and clean temporary evidence.
+- PR #460 merged to `main` at `0043d1edd` after green PR checks; comments/reviews/review threads were empty.
+- Local/remote `codex/p19-d2-polish-continuation` refs and the P19 worktree were deleted; generated browser evidence was removed.
+- Post-merge `main` exposed a Full Suite `qa:first-hour:browser` teardown-noise failure after the player-flow proof and dev-server cleanup: exact `deck: Failed to fetch` messages from Vite's optimized `@deck__gl_layers.js`.
+- Follow-up branch `codex/p19-main-full-suite-teardown-fix` adds a narrow first-hour/live-surface browser-gate classifier and contract coverage; local proof passed the red/green contract test, `qa:first-hour:browser`, `qa:live-surface:browser`, and `git diff --check`.
 
 ## Prior Queue 2026-06-26
 

@@ -24,6 +24,11 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain("page.on('requestfailed'");
     expect(tool).toContain("page.on('response'");
     expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('isIgnoredConsoleError');
+    expect(tool).toContain('browserGatePhase');
+    expect(tool).toContain("browserGatePhase === 'teardown'");
+    expect(tool).toContain('deck: Failed to fetch');
+    expect(tool).toContain('@deck__gl_layers');
     expect(tool).toContain('cleanBrowserGateOutputDir');
     expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
@@ -86,6 +91,11 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("page.on('requestfailed'");
     expect(tool).toContain("page.on('response'");
     expect(tool).toContain('isIgnoredNetworkFailure');
+    expect(tool).toContain('isIgnoredConsoleError');
+    expect(tool).toContain('browserGatePhase');
+    expect(tool).toContain("browserGatePhase === 'teardown'");
+    expect(tool).toContain('deck: Failed to fetch');
+    expect(tool).toContain('@deck__gl_layers');
     expect(tool).toContain('cleanBrowserGateOutputDir');
     expect(tool).toContain("fs.rmSync(SCREENSHOT_DIR");
     expect(tool).toContain('resolveBrowserGateEnv');
