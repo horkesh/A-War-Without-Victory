@@ -125,7 +125,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
             : ''}
         </div>
       )}
-      <div className="mt-1.5 text-[9px] text-text-muted italic">{t('tooltip.clickForAar')}</div>
+      <div className="mt-1.5 text-[9px] text-text-muted italic">{t('tooltip.clickForBattleSettlement')}</div>
     </div>
   );
 }

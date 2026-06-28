@@ -642,6 +642,65 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toContain('Avg Cohesion0%');
   });
 
+  it('renders unreported Army HQ corps cohesion as unreported instead of a healthy visual fill', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 0,
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      createdTurn: 0,
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps, brigade] });
+
+    const { container: frontContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [brigade],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    const frontStripe = frontContainer.querySelector('[data-testid="army-hq-corps-cohesion-stripe"]') as HTMLElement | null;
+    expect(frontStripe?.getAttribute('data-report-state')).toBe('unreported');
+    expect(frontStripe?.getAttribute('title')).toBe('Cohesion unreported');
+    expect(frontStripe?.style.width).not.toBe('70%');
+    expect(frontStripe?.style.width).not.toBe('100%');
+    cleanup();
+
+    const { container: compressedContainer } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [brigade],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: true,
+      onToggleExpand: vi.fn(),
+    }));
+
+    const compressedStripe = compressedContainer.querySelector('[data-testid="army-hq-corps-cohesion-stripe"]') as HTMLElement | null;
+    expect(compressedStripe?.getAttribute('data-report-state')).toBe('unreported');
+    expect(compressedStripe?.style.width).not.toBe('100%');
+  });
+
   it('renders missing command strain and corps exhaustion as unreported instead of healthy silence', () => {
     const corps = {
       id: 'arbih_1st_corps',
@@ -1016,6 +1075,29 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toMatch(/\borigin\b|\bmilitary\b/i);
   });
 
+  it('renders missing Army HQ ORBAT brigade cohesion as unreported instead of empty zero segments', () => {
+    const brigade = {
+      id: 'arbih_101_brigade',
+      faction: 'RBiH',
+      name: '101st Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1200,
+      fatigue: 4,
+      posture: 'defend',
+      createdTurn: 0,
+    } as unknown as FormationView;
+
+    useGameStore.setState({ armyHQExpandedSections: { 'orbat-arbih_1st_corps': true } });
+    const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
+
+    const cohesionCell = container.querySelector('[data-testid="army-hq-orbat-cohesion"]');
+    expect(cohesionCell?.textContent).toContain('Unreported');
+    expect(cohesionCell?.getAttribute('title')).toBe('Cohesion unreported');
+    expect(container.textContent).not.toContain('0% cohesion');
+  });
+
   it('renders Army HQ equipment condition fractions as operational equipment counts', () => {
     const corps = {
       id: 'arbih_1st_corps',
@@ -1310,6 +1392,60 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).toMatch(/Front segments: 4/i);
     expect(container.textContent).toMatch(/Brigades per front segment: 0\.25/i);
     expect(container.textContent).not.toMatch(/\bKM\b|per km|FRONTAGE/i);
+  });
+
+  it('renders Army HQ sector density as unreported when frontage is missing', () => {
+    const brigade = {
+      id: 'arbih_102_brigade',
+      faction: 'RBiH',
+      name: '102nd Brigade',
+      kind: 'brigade',
+      status: 'active',
+      readiness: 'ready',
+      personnel: 1100,
+      cohesion: 65,
+      fatigue: 6,
+      morale: 58,
+      createdTurn: 0,
+      location_osid: 'op:sarajevo:alipasino_1',
+    } as unknown as FormationView;
+    const sector = {
+      sector_id: 'sector:arbih_1st_corps:missing_frontage',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      display_name: 'Ali Pasino sector',
+      edge_ids: [],
+      assigned_brigade_ids: [brigade.id],
+      reserve_brigade_ids: [],
+      length_edges: 0,
+      sub_segment_count: 1,
+      defensive_power: 1100,
+      density: 0,
+      threat_ratio: 1.0,
+      intel_confidence: 0.7,
+      offensive_signs: false,
+      combat_strength_class: 'adequate',
+      sub_segments: [{ sub_segment_id: 's1', friendly_osids: ['op:sarajevo:alipasino_1'], enemy_osids: [] }],
+    } as unknown as CorpsFrontSectorView;
+
+    useGameStore.setState({
+      loadedGameState: makeState({ formations: [brigade] }),
+      armyHQExpandedSections: { 'sec-arbih_1st_corps': true },
+      osidDisplayNames: { 'op:sarajevo:alipasino_1': 'Ali Pasino' },
+    });
+
+    const { container } = render(createElement(SectorsSection, {
+      corpsId: 'arbih_1st_corps',
+      sectors: [sector],
+      factionBattles: [],
+      defaultOpen: true,
+    }));
+
+    expect(container.textContent).toMatch(/Frontage unreported/i);
+    expect(container.textContent).not.toMatch(/density 0\.00/i);
+    expect(container.textContent).not.toMatch(/Brigades per front segment: 0\.00/i);
   });
 
   it('offers separate field-inspection controls for Army HQ sector and ORBAT rows', () => {

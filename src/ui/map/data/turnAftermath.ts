@@ -1,6 +1,6 @@
 import type { LoadedGameState } from './types';
 import type { TurnBattle, TurnSummary } from '../../../state/turn_summary.js';
-import { countActionableItems, deriveInboxItems, type InboxItem } from './inboxItems';
+import { countActionableItems, deriveInboxItems, effectiveInboxSeverity, type InboxItem } from './inboxItems';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
@@ -312,18 +312,22 @@ function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | n
 function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, string> | null): TurnAftermathView['nextActions'] {
   const inboxItems = deriveInboxItems(state, osidNameMap);
   const actionableItems = inboxItems.filter((item) => item.type !== 'situation');
+  const actionableItemsWithSeverity = actionableItems.map((item) => ({
+    item,
+    severity: effectiveInboxSeverity(item),
+  }));
   return {
     actionableCount: countActionableItems(inboxItems),
-    blockingCount: actionableItems.filter((item) => item.severity === 'blocking').length,
+    blockingCount: actionableItemsWithSeverity.filter(({ severity }) => severity === 'blocking').length,
     opportunityCount: actionableItems.filter((item) => item.type === 'operation_opportunity').length,
     reserveCount: actionableItems.filter((item) => item.type === 'reserve_request').length,
     officerCount: actionableItems.filter((item) => item.type === 'officer_event').length,
     eventDecisionCount: actionableItems.filter((item) => item.type === 'event_decision').length,
     peaceCount: actionableItems.filter((item) => item.type === 'peace_plan').length,
-    topItems: actionableItems.slice(0, 3).map((item) => ({
+    topItems: actionableItemsWithSeverity.slice(0, 3).map(({ item, severity }) => ({
       id: item.id,
       type: item.type,
-      severity: item.severity,
+      severity,
       title: item.title,
       action: item.action,
     })),

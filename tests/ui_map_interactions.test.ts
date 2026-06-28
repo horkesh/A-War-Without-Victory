@@ -6,6 +6,7 @@ type MapLayerMouseEvent = {
   features?: TestFeature[];
   originalEvent?: { clientX: number; clientY: number };
   point?: { x: number; y: number };
+  preventDefault?: () => void;
 };
 
 describe('useMapInteractions', () => {
@@ -81,6 +82,81 @@ describe('useMapInteractions', () => {
     const battleOff = offCalls.filter(([, layer]) => layer === 'battle-markers-pulse');
     expect(battleOff).toHaveLength(2);
     expect(battleOff).toEqual(expect.arrayContaining(battleOn));
+  });
+
+  it('routes battle marker context menus to settlement context instead of falling through to lower layers', () => {
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onContextMenu = vi.fn();
+    const battleFeature = {
+      layer: { id: 'battle-markers-pulse' },
+      properties: { osid: 'op:test:battlefield', battle_count: 1 },
+    };
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') mapHandlers.set(event, layerOrHandler);
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures: (_point: unknown, opts?: { layers?: string[] }) => {
+        expect(opts?.layers).toContain('battle-markers-pulse');
+        return [battleFeature];
+      },
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onContextMenu });
+    mapHandlers.get('contextmenu')?.({
+      preventDefault: vi.fn(),
+      point: { x: 10, y: 10 },
+      originalEvent: { clientX: 10, clientY: 10 },
+    });
+
+    expect(onContextMenu).toHaveBeenCalledWith(
+      'osid',
+      expect.objectContaining({ osid: 'op:test:battlefield' }),
+      { x: 10, y: 10 },
+    );
+  });
+
+  it('keeps battle hover from being overwritten by a pending lower-priority hover timer', () => {
+    vi.useFakeTimers();
+    const layerHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent & { lngLat?: { lng: number; lat: number } }) => void>();
+    const onOsidHover = vi.fn();
+    const onBattleHover = vi.fn();
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') {
+          mapHandlers.set(event, layerOrHandler as (e: MapLayerMouseEvent & { lngLat?: { lng: number; lat: number } }) => void);
+        } else if (handler) {
+          layerHandlers.set(`${event}:${layerOrHandler}`, handler);
+        }
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures: () => [{
+        layer: { id: 'osid-control-fill' },
+        properties: { osid: 'op:test:lower' },
+      }],
+      setFilter: () => {},
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onOsidHover, onBattleHover });
+    mapHandlers.get('mousemove')?.({
+      point: { x: 1, y: 1 },
+      originalEvent: { clientX: 1, clientY: 1 },
+      lngLat: { lng: 18, lat: 44 },
+    });
+    layerHandlers.get('mousemove:battle-markers-pulse')?.({
+      features: [{ layer: { id: 'battle-markers-pulse' }, properties: { osid: 'op:test:battle' } }],
+      originalEvent: { clientX: 2, clientY: 2 },
+    });
+    vi.advanceTimersByTime(301);
+
+    expect(onBattleHover).toHaveBeenCalledWith('op:test:battle', { x: 2, y: 2 });
+    expect(onOsidHover).not.toHaveBeenCalledWith('op:test:lower', expect.anything());
+    vi.useRealTimers();
   });
 
   it('selects a sector when the top front-line hit is the white highlight layer without edge_id', () => {

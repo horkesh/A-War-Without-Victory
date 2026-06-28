@@ -71,9 +71,20 @@ Sixth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - Disabled opportunity action and redirect controls now expose reasoned `title` and accessible copy when an action is not staff-cleared or another opportunity decision is being sent.
 - Verification passed: red/green focused Vitest proof `tests/ui/army_hq_timing_copy.test.ts` (17 tests) and `npm.cmd run typecheck`.
 
+Seventh P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Battle-marker tooltip copy now describes the actual settlement battle-context route rather than promising an unavailable After-Action Report route.
+- Battle markers now participate in map context-menu hit-testing as settlement context, and battle hover clears lower-priority delayed OSID/front/sector hover state before rendering the battle tooltip.
+- Army HQ corps-card and ORBAT cohesion visuals now preserve missing cohesion as unreported instead of healthy fill or empty zero segments.
+- Army HQ sector density/frontage rows now render frontage unreported when a line holder exists but the sector reports no front segments, instead of showing `density 0.00`.
+- Turn Aftermath next-action blocker counts and top rows use effective inbox severity, so modal-required convoy/peace/Dayton families surface as blockers consistently.
+- Warroom priority review, priority row, source handoff, and open-board disabled states now expose reasoned `title` and accessible copy, including the loaded-state/no-campaign-side case.
+- Decision Room quiet-state copy now uses present-state review language instead of future buried-item language.
+- Verification passed: red/green focused Vitest proof 6 files / 141 tests (`tests/ui_map_interactions.test.ts`, `tests/ui_map_tooltip_player_visibility.test.ts`, `tests/ui/gui_audit_label_discipline.test.ts`, `tests/ui/turn_aftermath.test.ts`, `tests/ui/advance_turn_button_gated_feedback.test.ts`, `tests/ui/operation_aar_records_review.test.ts`), `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, and `git diff --check`. The focused pack covers the prior GitHub failure in `tests/ui/operation_aar_records_review.test.ts`.
+
 Remaining P19 queue before broad CI/push:
 
-- Re-run final local hygiene for the sixth packet: `git diff --check`, focused proof, typecheck, and at least one live-browser sanity pass if the branch receives further UI deltas.
+- Re-run final local/browser hygiene for the seventh packet and any later UI deltas.
 - PR #460 closeout: update the branch, inspect GitHub checks/comments, merge only once green, then delete the branch/worktree and clean temporary evidence.
 
 ## Prior Queue 2026-06-26

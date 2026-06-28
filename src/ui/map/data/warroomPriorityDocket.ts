@@ -62,10 +62,11 @@ function formatSourceHandoffSummary(
   });
 }
 
-function statusLabel(status: PreAdvanceCommandReviewStatus): string {
+function statusLabel(status: PreAdvanceCommandReviewStatus, hasLoadedState: boolean): string {
   if (status === 'blocked') return t('warroom.docket.status.blocked');
   if (status === 'review') return t('warroom.docket.status.review');
   if (status === 'clear') return t('warroom.docket.status.clear');
+  if (hasLoadedState) return t('warroom.docket.status.noCampaignSide');
   return t('warroom.docket.status.unavailable');
 }
 
@@ -76,7 +77,7 @@ export function buildWarroomPriorityDocketView(input: WarroomPriorityDocketInput
 
   return {
     status: review.status,
-    statusLabel: statusLabel(review.status),
+    statusLabel: statusLabel(review.status, input.state != null),
     tone: docketTone(review.status, review.metrics.urgentCount),
     headline: review.headline,
     summary: formatSummary(review.metrics),

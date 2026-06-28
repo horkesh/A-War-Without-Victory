@@ -508,7 +508,8 @@ export function useMapInteractions(
     if (!onContextMenu) return;
     const point = { x: e.originalEvent.clientX, y: e.originalEvent.clientY };
 
-    const contextLayerIds = ['formation-markers',
+    const contextLayerIds = ['battle-markers-pulse',
+      'formation-markers',
       'front-edges-hover-pos', 'front-edges-hover-neg',
       'front-edges-highlight-pos', 'front-edges-highlight-neg',
       SECTOR_EDGE_GLOW_POS_LAYER, SECTOR_EDGE_GLOW_NEG_LAYER,
@@ -517,6 +518,11 @@ export function useMapInteractions(
 
     const hits = map.queryRenderedFeatures(e.point, { layers: contextLayerIds });
     const first = hits[0];
+    if (first?.layer.id === 'battle-markers-pulse') {
+      const props = first.properties as Record<string, unknown>;
+      onContextMenu('osid', props, point);
+      return;
+    }
     if (first?.layer.id === 'formation-markers') {
       const props = first.properties as Record<string, unknown>;
       onContextMenu('formation', props, point);
@@ -598,6 +604,14 @@ export function useMapInteractions(
 
   const handleBattleMouseMove = (e: MapLayerMouseEvent) => {
     map.getCanvas().style.cursor = 'pointer';
+    if (hoverTimeout) {
+      clearTimeout(hoverTimeout);
+      hoverTimeout = undefined;
+    }
+    onOsidHover?.(null, null);
+    onFormationHover?.(null, null, null);
+    onFrontEdgeHover?.(null, null);
+    onSectorHover?.(null, null);
     const osid = e.features?.[0]?.properties?.osid as string | undefined;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     if (osid) onBattleHover?.(osid, point);

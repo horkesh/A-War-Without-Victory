@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): align battle markers, sparse Army HQ truth, and Warroom priority reasons
+
+**Type:** UI/map-interaction/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the seventh P19 owner-playthrough polish packet from the Averroes/Carver/Schrodinger scout findings. Battle-marker tooltips now describe the real click behavior as settlement battle context instead of promising an unavailable AAR route; battle markers participate in right-click hit-testing as settlement context and clear lower-priority delayed hovers so stale OSID/front hover cannot overwrite battle hover. Army HQ corps-card and ORBAT cohesion now render missing cohesion as unreported rather than healthy/zero visual bars, and sector density/frontage rows show frontage unreported when line holders exist but the sector reports no front segments. Turn Aftermath next-action blockers now use effective inbox severity, and Warroom priority controls explain disabled review, docket, and source-handoff reasons. Decision Room quiet-state copy now uses present-state language instead of future buried-item wording.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui_map_interactions.test.ts tests/ui_map_tooltip_player_visibility.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/turn_aftermath.test.ts tests/ui/advance_turn_button_gated_feedback.test.ts tests/ui/operation_aar_records_review.test.ts --pool=forks --reporter=dot` (6 files / 141 tests). `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, and `git diff --check` passed. The focused pack includes the prior GitHub failure in `tests/ui/operation_aar_records_review.test.ts`.
+
+**Scope/determinism:** UI/map-interaction/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_BATTLE_MARKER_SPARSE_PRIORITY_TRUTH.md`.
+
+---
+
 ## [2026-06-28] fix(ui): explain operation-opportunity disabled controls
 
 **Type:** UI/read-model/i18n/test/docs polish.

@@ -246,7 +246,7 @@ describe('buildTurnAftermathView', () => {
     });
     expect(view?.nextActions).toMatchObject({
       actionableCount: 5,
-      blockingCount: 1,
+      blockingCount: 2,
       eventDecisionCount: 1,
       peaceCount: 1,
       opportunityCount: 1,
@@ -258,6 +258,28 @@ describe('buildTurnAftermathView', () => {
       'peace:vance',
       'opportunity:OPP_12_una',
     ]);
+  });
+
+  it('uses effective inbox severity for next-action blockers and top rows', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_srebrenica',
+            target_enclave: 'srebrenica',
+            route_faction: 'RBiH',
+            supply_amount: 20,
+          },
+        ],
+      }),
+      osidNameMap: null,
+    });
+
+    expect(view?.nextActions.blockingCount).toBe(1);
+    expect(view?.nextActions.topItems[0]).toMatchObject({
+      id: 'convoy:convoy_srebrenica',
+      severity: 'blocking',
+    });
   });
 
   it('keeps sparse battle casualties and absent displacement from becoming exact cost drivers', () => {

@@ -191,6 +191,14 @@ export function ArmyHQCorpsCard({
     const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
     const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
     const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });
+    const reportedCohesion = data.avgCohesion;
+    const cohesionReported = reportedCohesion != null;
+    const cohesionReportState = cohesionReported ? 'reported' : 'unreported';
+    const cohesionTitle = reportedCohesion != null
+        ? t('armyHqCorps.cohesionReported', { value: Math.round(reportedCohesion) })
+        : t('armyHqCorps.cohesionUnreported');
+    const compressedCohesionWidth = reportedCohesion != null ? Math.min(100, reportedCohesion) : 0;
+    const frontCohesionWidth = reportedCohesion != null ? Math.min(70, reportedCohesion * 0.7) : 0;
 
     // Compressed: single line when another card is flipped
     if (isCompressed) {
@@ -214,8 +222,12 @@ export function ArmyHQCorpsCard({
                 {/* Thin cohesion bar */}
                 <div className="h-[1px] bg-white/5">
                     <div
+                        data-testid="army-hq-corps-cohesion-stripe"
+                        data-report-state={cohesionReportState}
+                        title={cohesionTitle}
+                        aria-label={cohesionTitle}
                         className={`h-full ${data.avgCohesion == null ? 'bg-panel-border/40' : data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400/60' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold/60' : 'bg-red-500/60'}`}
-                        style={{ width: `${data.avgCohesion == null ? 100 : Math.min(100, data.avgCohesion)}%` }}
+                        style={{ width: `${compressedCohesionWidth}%` }}
                     />
                 </div>
             </button>
@@ -412,9 +424,15 @@ export function ArmyHQCorpsCard({
 
             {/* Health stripe: cohesion (green/amber/red) + fatigue (blue) */}
             <div className="flex h-[4px] bg-panel-bg w-full">
-                <div className={`h-full transition-all duration-500 ${data.avgCohesion == null ? 'bg-panel-border/40' : data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
+                <div
+                    data-testid="army-hq-corps-cohesion-stripe"
+                    data-report-state={cohesionReportState}
+                    title={cohesionTitle}
+                    aria-label={cohesionTitle}
+                    className={`h-full transition-all duration-500 ${data.avgCohesion == null ? 'bg-panel-border/40' : data.avgCohesion >= COHESION_HEALTHY ? 'bg-emerald-400' : data.avgCohesion >= COHESION_CRITICAL ? 'bg-accent-gold' : 'bg-red-500'
                     }`}
-                    style={{ width: `${data.avgCohesion == null ? 70 : Math.min(70, data.avgCohesion * 0.7)}%` }} />
+                    style={{ width: `${frontCohesionWidth}%` }}
+                />
                 <div className="h-full bg-blue-500/60 transition-all duration-500"
                     style={{ width: `${data.avgFatigue == null ? 0 : Math.min(30, (data.avgFatigue / 30) * 30)}%` }} />
             </div>
