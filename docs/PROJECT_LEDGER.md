@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] docs: open P19 after P18 command-surface closeout
+
+**Type:** Docs/process synchronization.
+
+**Fix:** Synchronized the Command Board, Master Roadmap, and active Army HQ / sector / brigade information-quality sweep plan after PR #459 merged P18 to `main` at `3a67397ce`. The docs now record that P18 is green, merged, and cleaned, and that P19 is the active next non-packaging D2 owner-playthrough scout/fix packet for Records, Chronicle, settlement timelines, operation planning, tactical-map selection/stack behavior, and remaining command-surface confusion.
+
+**Verification:** Docs-only edit. `git diff --check` passed before commit.
+
+**Scope/determinism:** Documentation/process sync only. No code, simulation logic, event evaluator mechanics, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-27] fix(ui): preserve P18 command-surface follow-up assertions
 
 **Type:** UI/read-model/test/docs polish.

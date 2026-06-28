@@ -1,27 +1,21 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; P17 player-start hardening is closed on `main`, and P18 command-surface truth is the active local candidate on `codex/p18-command-surface-truth`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; P18 command-surface truth is merged on `main` through PR #459 at `3a67397ce`, and P19 is the active follow-up scout/fix packet on `codex/p19-d2-polish-continuation`. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
 **Why now:** `MASTER_ROADMAP.md` and `COMMAND_BOARD.md` make D2 owner playthrough the remaining 1.0 gate. The closed June 22 sector-truth plan established the rules; this sweep verifies the current live surfaces again and closes the next coherent set before another long CI wait.
 
-## Current Queue 2026-06-27
+## Current Queue 2026-06-28
 
-P18 command-surface truth is implemented locally before final closeout:
+P18 command-surface truth is closed on `main`:
 
-- Decision Room command/loop actions with no route now expose unavailable reasons in visible, title, and accessible copy.
-- Generic Decision Room navigation returns false for Desk inbox targets so App-level Desk handlers retain ownership.
-- Stale `Advanced Desk` / `Product Loop` English copy is replaced with `Advanced Review` / `Decision Loop`.
-- Army HQ, OOB, and Corps Detail sector coverage tiers use live line-holder count over `length_edges` when that denominator exists.
-- Corps Front missing reserve-personnel denominators and sector-security state render as unreported/neutral instead of exact zero or inactive truth.
-- Opening corps commander projections are turn-zero only and still skip operation-assigned officers.
-- Formation Detail war narratives are sanitized through the same player-safe settlement-label pass as notable moments.
-- Scope is UI/read-model/i18n/test/docs only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt changes.
+- PR #459 merged to `main` at `3a67397ce`; GitHub was green across Event System validation x2, Desktop Release Guard, desktop packaged runtime probe, Baseline Regression, structural fingerprint, Typecheck, and Full Suite.
+- Local and remote `codex/p18-command-surface-truth` refs and the P18 worktree were removed; one clean `main` worktree remained after closeout.
+- P18 closed Decision Room disabled-action reasons, generic inbox route ownership, stale Advanced Desk/Product Loop copy, live line-holder sector coverage density, Corps Front missing reserve/security truth, turn-zero-only opening commander projections, Formation Detail raw-token sanitization, and the packaged-runtime data-route teardown abort false positive.
+- Scope remained UI/read-model/i18n/test/docs plus packaged-probe guardrail only: no event JSON, evaluator mechanics, simulation behavior, startup artifact, save schema, calibration, packaging, or Srebrenica/Zepa event-owned receipt behavior changed.
 
-P18 local proof is green: focused Decision Room/sector/Corps Front proof 6 files / 127 tests; focused commander/Formation Detail proof 3 files / 57 tests; combined focused pack 9 files / 184 tests; shell-navigation follow-up 2 files / 20 tests; `npm.cmd run typecheck -- --pretty false`; `npm.cmd run qa:player-journeys` 43 files / 681 tests; `npm.cmd run qa:first-hour:browser`; `npm.cmd run qa:live-surface:browser`; manual in-app browser proof on `http://127.0.0.1:3006/`; and `git diff --check`. Remaining closeout: GitHub proof, merge, and branch/worktree cleanup.
-
-Next queue after P18 remains non-BCS owner-playthrough polish:
+P19 remains non-BCS owner-playthrough polish:
 
 - Fresh live-browser inspection of Records, Chronicle, settlement timelines, operation planning, tactical-map selection/stack behavior, and any remaining Army HQ/OOB/Corps Front confusion not covered by P18.
 - Prioritize information-density gaps, sparse-source truth, route ownership, and owner-playthrough confusion found in live browser checks.
