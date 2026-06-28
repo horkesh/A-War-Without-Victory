@@ -171,6 +171,7 @@ export function CorpsCard({
   );
   const flipToDetailsLabel = t('corpsCard.showDetails', { corps: displayName });
   const flipToSummaryLabel = t('corpsCard.showSummary', { corps: displayName });
+  const openOrbatLabel = t('corpsCard.openOrbat', { corps: displayName });
   const corpsOsids = Array.from(
     new Set(
       brigades
@@ -312,6 +313,8 @@ export function CorpsCard({
         {onOrbatClick && (
           <button
             type="button"
+            aria-label={openOrbatLabel}
+            title={openOrbatLabel}
             onClick={(e) => { e.stopPropagation(); onOrbatClick(); }}
             className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
           >

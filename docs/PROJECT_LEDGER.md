@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): clarify Chronicle and Records ownership in P19
+
+**Type:** UI/read-model/i18n/test/browser-QA/docs polish.
+
+**Fix:** Implemented the first P19 owner-playthrough polish packet. Event decisions no longer promise that Chronicle-filed presidential decisions appear in both the Chronicle decision ledger and Army HQ Records; the modal now says Chronicle owns the decision ledger while Army HQ Records owns consequences, opportunities, operations, and turn aftermath. Records summary copy now says `Latest Filed Decision`. Chronicle decision actions now say `Focus Chronicle Decision`, and Chronicle entries without a real turn aftermath record render a disabled `Chronicle Entry Only` action instead of routing to an empty Army HQ Records aftermath tab. CorpsCard order-of-battle buttons keep the compact visible label but expose corps-specific aria/title labels such as `Open 1st Corps order of battle`.
+
+**Verification:** Focused proof passed `npm.cmd exec -- vitest run tests/ui_chronicle_operation_aar_link.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/first_hour_browser_gate_contract.test.ts --pool=forks --reporter=dot` (4 files / 42 tests). `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, and `git diff --check` passed. Manual in-app browser proof on `http://127.0.0.1:3007/` verified fresh RBiH start, `WAR HAS STARTED`, `WAR BEGINS: 6 APR 1992`, the foundational `What Is Bosnia?` decision with corrected record-trail copy, Army HQ Records `Latest Filed Decision` with Decisions 0 / Chronicle Filed 1, Chronicle `Focus Chronicle Decision`, disabled turn-zero `Chronicle Entry Only` for Sarajevo, and corps-specific OOB labels. Only the expected dev-map desktop-bridge fallback warning was present.
+
+**Scope/determinism:** UI/read-model/i18n/test/browser-QA/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed.
+
+---
+
 ## [2026-06-28] docs: open P19 after P18 command-surface closeout
 
 **Type:** Docs/process synchronization.

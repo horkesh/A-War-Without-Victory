@@ -21,6 +21,19 @@ P19 remains non-BCS owner-playthrough polish:
 - Prioritize information-density gaps, sparse-source truth, route ownership, and owner-playthrough confusion found in live browser checks.
 - Keep batching substantial coherent fixes before CI, rather than small one-off PRs.
 
+First P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- EventDecisionModal record-trail copy now states the true ownership boundary: Chronicle owns the decision ledger, while Army HQ Records owns consequences, opportunities, operations, and turn aftermath.
+- Records archive summary labels now say `Latest Filed Decision`, matching the fact that Chronicle-filed decisions are counted separately from Records-routed decision receipts.
+- Chronicle decision entries now use `Focus Chronicle Decision`; Chronicle entries without a narrated turn aftermath record render disabled `Chronicle Entry Only` instead of routing to an empty Army HQ Records tab.
+- CorpsCard Order of Battle buttons keep compact visible copy but expose corps-specific aria/title labels, removing the repeated indistinguishable `Order of battle` control problem in live browser and assistive navigation.
+- Verification passed: focused Vitest proof 4 files / 42 tests, `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through RBiH start, war-start splash, opening brief, foundational decision, Records, Chronicle, and OOB labels.
+
+Remaining P19 queue before broad CI/push:
+
+- Continue live-browser sweep of settlement timelines, operation planning, tactical-map selection/stack behavior, and residual Army HQ/OOB/Corps Front confusion.
+- Batch the next coherent fixes before invoking the slower broad gates.
+
 ## Prior Queue 2026-06-26
 
 P16 is merged and green. It closed the post-P15 queue without reopening packaging, BCS-only cleanup, calibration, save schema, startup construction, scenario data, or Srebrenica/Zepa scripted-operation calibration:

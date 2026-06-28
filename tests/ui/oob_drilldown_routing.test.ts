@@ -405,8 +405,9 @@ describe('OOBSidebar drilldown routing', () => {
 
     const { container } = render(React.createElement(OOBSidebar));
 
-    const orbatButtons = screen.getAllByRole('button', { name: 'Order of battle' });
+    const orbatButtons = screen.getAllByRole('button', { name: 'Open Field Corps order of battle' });
     expect(orbatButtons).toHaveLength(1);
+    expect(orbatButtons[0].textContent).toContain('Order of battle');
     expect(screen.queryByRole('button', { name: /^Ungrouped/i })).toBeNull();
     const ungroupedCard = Array.from(container.querySelectorAll('.rounded-lg'))
       .find((card) => (card.textContent ?? '').includes('Ungrouped'));

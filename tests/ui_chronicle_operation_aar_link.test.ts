@@ -219,7 +219,7 @@ describe('Chronicle completed-operation AAR visibility', () => {
     render(createElement(ChronicleOverlay));
 
     expect(await screen.findAllByText('What Is Bosnia?')).toHaveLength(2);
-    const action = await screen.findByRole('button', { name: /Open Decision Record/i });
+    const action = await screen.findByRole('button', { name: /Focus Chronicle Decision/i });
     expect(action.getAttribute('data-record-target')).toBe('decision');
     expect(action.getAttribute('data-decision-record-id')).toBe('event:rbih_state_identity');
     fireEvent.click(action);
@@ -231,5 +231,38 @@ describe('Chronicle completed-operation AAR visibility', () => {
       expect(state.focusedDecisionConsequenceId).toBeNull();
       expect(state.focusedChronicleDecisionRecordId).toBe('event:rbih_state_identity');
     });
+  });
+
+  it('does not route Chronicle-only events to empty turn aftermath records', async () => {
+    useGameStore.setState({
+      ...useGameStore.getInitialState(),
+      chronicleOpen: true,
+      loadedGameState: {
+        player_faction: 'RBiH',
+        turn: 12,
+        gameOver: true,
+        historicalComparison: {
+          divergence_notes: ['A test-only Chronicle entry remained in the campaign ledger.'],
+          rupture_divergence: [],
+        },
+        turnSummaries: [],
+      } as any,
+    });
+
+    render(createElement(ChronicleOverlay));
+
+    expect(await screen.findByText('A test-only Chronicle entry remained in the campaign ledger.')).toBeTruthy();
+    const actions = await screen.findAllByRole('button', { name: /Chronicle Entry Only/i });
+    expect(actions.length).toBeGreaterThan(0);
+    for (const action of actions) {
+      expect(action.hasAttribute('disabled')).toBe(true);
+    }
+    const action = actions[0];
+    fireEvent.click(action);
+
+    const state = useGameStore.getState();
+    expect(state.chronicleOpen).toBe(true);
+    expect(state.armyHQOpen).toBe(false);
+    expect(state.armyHQRecordsSubTab).toBe('aftermath');
   });
 });
