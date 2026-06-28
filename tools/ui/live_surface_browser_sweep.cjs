@@ -1084,13 +1084,19 @@ async function captureEvidence(page, summary, id) {
   return step;
 }
 
+function isIgnoredConsoleError(message) {
+  const url = message.location?.url ?? '';
+  if (/Failed to load resource/i.test(message.text) && /\/favicon\.ico$/i.test(url)) return true;
+  return message.text === 'deck: Failed to fetch'
+    && message.browserGatePhase === 'teardown'
+    && /\/node_modules\/\.vite\/deps\/@deck__gl_layers\.js(?:\?|$)/i.test(url);
+}
+
 function assertNoConsoleErrors(consoleMessages) {
   const errors = consoleMessages.filter((message) => {
     if (message.kind === 'pageerror') return true;
     if (message.type !== 'error') return false;
-    const url = message.location?.url ?? '';
-    const isMissingFavicon = /Failed to load resource/i.test(message.text) && /\/favicon\.ico$/i.test(url);
-    return !isMissingFavicon;
+    return !isIgnoredConsoleError(message);
   });
   if (errors.length > 0) {
     throw new Error(`Browser console errors detected: ${JSON.stringify(errors.slice(0, 10), null, 2)}`);
@@ -1928,6 +1934,7 @@ async function run() {
     consoleMessages: [],
     requestFailures: [],
     httpFailures: [],
+    browserGatePhase: 'setup',
   };
   const server = process.env.AWWV_LIVE_SURFACE_BROWSER_URL ? null : startDevServer();
   let caughtError = null;
@@ -1956,10 +1963,12 @@ async function run() {
         type: message.type(),
         text: message.text(),
         location: message.location(),
+        browserGatePhase: summary.browserGatePhase,
       }));
       page.on('pageerror', (error) => summary.consoleMessages.push({
         kind: 'pageerror',
         text: error.message,
+        browserGatePhase: summary.browserGatePhase,
       }));
       page.on('requestfailed', (request) => summary.requestFailures.push({
         url: request.url(),
@@ -1981,30 +1990,41 @@ async function run() {
         }
       });
 
-    await runFoundationalFlow(page, summary);
-    await runSurfaceSweep(page, summary);
-    await runArmyHqInternalDrilldown(page, summary);
-    await runArmyHqPersonnelBrigadeLiveProof(page, summary);
-    await runArmyHqSectorFrontSegmentLiveProof(page, summary);
-    await runMapContextMenuLiveProof(page, summary);
-    await runOwnerJourneyDrilldown(page, summary);
-    await runArchiveInboxDrilldown(page, summary);
-    await runCodexInternalDrilldown(page, summary);
-    await loadPlayerFactionStartupFixture(page, summary, 'RS');
-    await runOwnerJourneyDrilldown(page, summary, 'RS');
-    await runTurnZeroSetupProvenanceLiveProof(page, summary);
-    await loadOperationOpportunityLiveProofFixture(page, summary);
-    await runPresidentialInboxRoutingLiveProof(page, summary);
-    await runOperationOpportunityLedgerLiveProof(page, summary);
-    await loadRecordsAarLiveProofFixture(page, summary);
-    await runBattleMarkerLiveProof(page, summary);
-    await runRecordsAarFormationLinkLiveProof(page, summary);
-      assertNoConsoleErrors(summary.consoleMessages);
-      assertNoNetworkFailures(summary.requestFailures, summary.httpFailures);
-      summary.ok = true;
+      summary.browserGatePhase = 'proof:foundational';
+      await runFoundationalFlow(page, summary);
+      summary.browserGatePhase = 'proof:surface-sweep';
+      await runSurfaceSweep(page, summary);
+      summary.browserGatePhase = 'proof:army-hq';
+      await runArmyHqInternalDrilldown(page, summary);
+      await runArmyHqPersonnelBrigadeLiveProof(page, summary);
+      await runArmyHqSectorFrontSegmentLiveProof(page, summary);
+      summary.browserGatePhase = 'proof:map-context';
+      await runMapContextMenuLiveProof(page, summary);
+      summary.browserGatePhase = 'proof:owner-journey';
+      await runOwnerJourneyDrilldown(page, summary);
+      summary.browserGatePhase = 'proof:archive';
+      await runArchiveInboxDrilldown(page, summary);
+      summary.browserGatePhase = 'proof:codex';
+      await runCodexInternalDrilldown(page, summary);
+      summary.browserGatePhase = 'proof:rs-fixture';
+      await loadPlayerFactionStartupFixture(page, summary, 'RS');
+      await runOwnerJourneyDrilldown(page, summary, 'RS');
+      await runTurnZeroSetupProvenanceLiveProof(page, summary);
+      summary.browserGatePhase = 'proof:opportunity';
+      await loadOperationOpportunityLiveProofFixture(page, summary);
+      await runPresidentialInboxRoutingLiveProof(page, summary);
+      await runOperationOpportunityLedgerLiveProof(page, summary);
+      summary.browserGatePhase = 'proof:records-aar';
+      await loadRecordsAarLiveProofFixture(page, summary);
+      await runBattleMarkerLiveProof(page, summary);
+      await runRecordsAarFormationLinkLiveProof(page, summary);
+      summary.browserGatePhase = 'teardown';
     } finally {
       await browser.close();
     }
+    assertNoConsoleErrors(summary.consoleMessages);
+    assertNoNetworkFailures(summary.requestFailures, summary.httpFailures);
+    summary.ok = true;
   } catch (error) {
     caughtError = error;
     summary.ok = false;
