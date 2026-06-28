@@ -57,11 +57,17 @@ Fourth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - OOB faction headers now surface `Army commander unreported` when the army commander source is absent and split fielded/reserve counts (`0 fielded / 1 reserve`) instead of a single ambiguous formation count.
 - Verification passed: focused Vitest proof 5 files / 116 tests and `npm.cmd run typecheck`.
 
+Fifth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- MapLibre formation hover now passes marker properties to the `MapContainer` hover handler instead of only the marker id.
+- Synthetic `enemy_contact:*` markers use `location_osid` (or the encoded marker id fallback) to keep hovered-sector context, preserving map highlight context without revealing hidden formation identity.
+- Synthetic enemy-contact tooltip models recover the encoded contact OSID and render the player-safe settlement subtitle while keeping personnel, posture, cohesion, and orders redacted.
+- Verification passed: focused Vitest proof 2 files / 39 tests and `npm.cmd run typecheck`.
+
 Remaining P19 queue before broad CI/push:
 
-- Run live-browser proof for the fourth packet, then continue tactical-map hover/selection confusion.
-- Confucius's enemy-contact hover-context finding remains the next targeted investigation if still reproducible.
-- After one more coherent fix/proof packet or if no reproducible residual remains, run broad gates before push/merge: `qa:player-journeys`, `qa:first-hour:browser`, `qa:live-surface:browser`, `git diff --check`, GitHub PR checks/comments, merge, branch/worktree cleanup.
+- Run final live-browser hygiene after the fifth packet.
+- If no new reproducible residual appears, move to broad gates before push/merge: `qa:player-journeys`, `qa:first-hour:browser`, `qa:live-surface:browser`, `git diff --check`, GitHub PR checks/comments, merge, branch/worktree cleanup.
 
 ## Prior Queue 2026-06-26
 

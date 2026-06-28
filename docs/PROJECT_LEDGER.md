@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): preserve enemy-contact hover context
+
+**Type:** UI/map-interaction/read-model/test/docs polish.
+
+**Fix:** Closed the Confucius P19 residual where synthetic `enemy_contact:*` marker hover could lose settlement/sector context. MapLibre formation hover now passes marker properties through the interaction callback. `MapContainer` uses `location_osid`, with a synthetic-id fallback, to keep hovered-sector context for redacted enemy contacts. The player-safe formation tooltip model also recovers the encoded contact OSID and renders the settlement subtitle while preserving redacted enemy identity, personnel, posture, cohesion, and orders.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui_map_interactions.test.ts tests/ui_map_tooltip_player_visibility.test.ts --pool=forks --reporter=dot` (2 files / 39 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/map-interaction/read-model/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_ENEMY_CONTACT_HOVER_CONTEXT.md`.
+
+---
+
 ## [2026-06-28] fix(ui): close P19 sparse command and OOB clarity residuals
 
 **Type:** UI/read-model/i18n/test/docs polish.

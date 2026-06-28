@@ -789,6 +789,41 @@ describe('useMapInteractions', () => {
     vi.useRealTimers();
   });
 
+  it('passes formation hover feature properties so synthetic enemy contacts keep OSID context', () => {
+    vi.useFakeTimers();
+    const layerHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onFormationHover = vi.fn();
+    const queryRenderedFeatures = vi.fn(() => []);
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'string' && handler) {
+          layerHandlers.set(`${event}:${layerOrHandler}`, handler);
+        }
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: () => true,
+      queryRenderedFeatures,
+      setFilter: () => {},
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onFormationHover });
+    const properties = {
+      id: 'enemy_contact:op:doboj:0',
+      is_enemy_contact: true,
+      location_osid: 'op:doboj',
+    };
+    layerHandlers.get('mousemove:formation-markers')?.({
+      features: [{ layer: { id: 'formation-markers' }, properties }],
+      point: { x: 10, y: 10 },
+      originalEvent: { clientX: 10, clientY: 10 },
+    });
+
+    vi.advanceTimersByTime(300);
+    expect(onFormationHover).toHaveBeenCalledWith('enemy_contact:op:doboj:0', { x: 10, y: 10 }, properties);
+    vi.useRealTimers();
+  });
+
   it('deckHandledFormationClick guard prevents MapLibre front-edge fallthrough', () => {
     const clickHandlers: Record<string, (e: MapLayerMouseEvent) => void> = {};
     const noop = () => {};

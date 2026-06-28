@@ -8,7 +8,11 @@ export interface MapInteractionCallbacks {
   onBattleClick?: (osid: string, properties: Record<string, unknown>) => void;
   /** Tooltip: set after 300ms hover; position from event. */
   onOsidHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
-  onFormationHover?: (formationId: string | null, point: { x: number; y: number } | null) => void;
+  onFormationHover?: (
+    formationId: string | null,
+    point: { x: number; y: number } | null,
+    properties?: Record<string, unknown> | null,
+  ) => void;
   onFrontEdgeHover?: (edgeId: string | null, point: { x: number; y: number } | null) => void;
   onBattleHover?: (osid: string | null, point: { x: number; y: number } | null) => void;
   onSectorHover?: (sectorId: string | null, point: { x: number; y: number } | null) => void;
@@ -262,12 +266,13 @@ export function useMapInteractions(
     }
     const feature = e.features?.[0];
     const id = feature?.properties?.id as string | undefined;
+    const properties = feature?.properties ? { ...(feature.properties as Record<string, unknown>) } : null;
     const point = e.originalEvent ? { x: e.originalEvent.clientX, y: e.originalEvent.clientY } : null;
     if (onFormationHover) {
       if (id) {
         if (hoverTimeout) clearTimeout(hoverTimeout);
         hoverTimeout = globalThis.setTimeout(() => {
-          onFormationHover!(id, point);
+          onFormationHover!(id, point, properties);
           hoverTimeout = undefined;
         }, HOVER_DELAY_MS);
       } else {

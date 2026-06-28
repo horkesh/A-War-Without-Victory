@@ -193,6 +193,7 @@ import {
   resolveMapSectorInspectionTarget,
   resolveMapSettlementInspectionTarget,
 } from './mapSelectionRouting';
+import { getSyntheticEnemyContactOsid } from '../components/tooltipPlayerSafe';
 import {
   deckLayerRenderInputsChanged,
   shouldRunPulseAnimation,
@@ -1146,11 +1147,22 @@ export function MapContainer() {
             setHoveredSectorId(null);
           }
         },
-        onFormationHover: (id, point) => {
+        onFormationHover: (id, point, properties) => {
           if (id) {
             const formation = loadedGameState?.formations.find((candidate) => candidate.id === id);
             setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-            setHoveredSectorId(resolveCurrentSectorForFormation(formation, loadedGameState?.corpsFrontSectors)?.sector_id ?? null);
+            const contactOsid = id.startsWith('enemy_contact:')
+              ? (
+                typeof properties?.location_osid === 'string'
+                  ? properties.location_osid
+                  : getSyntheticEnemyContactOsid(id)
+              )
+              : null;
+            setHoveredSectorId(
+              contactOsid
+                ? (osidToSector.get(contactOsid) ?? null)
+                : (resolveCurrentSectorForFormation(formation, loadedGameState?.corpsFrontSectors)?.sector_id ?? null),
+            );
           } else {
             clearTooltipTarget();
             setHoveredSectorId(null);

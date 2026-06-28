@@ -82,6 +82,7 @@ describe('player-safe tooltip models', () => {
 
     expect(contact.classification).toBe('enemy_contact');
     expect(contact.title).toBe('Enemy contact');
+    expect(contact.subtitle).toBe('Doboj');
     expect(contact.statusLine).toBe('Observed unit');
     expect(contact.personnel).toBeNull();
     expect(contact.orderLine).toBeNull();

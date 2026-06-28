@@ -70,6 +70,14 @@ function isOwnFormation(formation: Pick<FormationView, 'faction'>, playerFaction
   return Boolean(playerFaction && formation.faction === playerFaction);
 }
 
+export function getSyntheticEnemyContactOsid(formationId: string): string | null {
+  if (!formationId.startsWith('enemy_contact:')) return null;
+  const encoded = formationId.slice('enemy_contact:'.length);
+  const indexSeparator = encoded.lastIndexOf(':');
+  const osid = indexSeparator > 0 ? encoded.slice(0, indexSeparator) : encoded;
+  return osid.length > 0 ? osid : null;
+}
+
 export function getPlayerSafeSettlementTooltipFormations(
   state: LoadedGameState | null | undefined,
   osid: string,
@@ -99,10 +107,11 @@ export function buildPlayerSafeFormationTooltipModel(args: {
   const formation = args.formations?.find((entry) => entry.id === args.formationId);
   const locale = args.locale ?? 'en';
   if (args.formationId.startsWith('enemy_contact:')) {
+    const contactOsid = getSyntheticEnemyContactOsid(args.formationId);
     return {
       classification: 'enemy_contact',
       title: t('tooltip.enemyContactTitle', undefined, locale),
-      subtitle: null,
+      subtitle: contactOsid ? (getOsidDisplayName(contactOsid, args.osidDisplayNames) ?? null) : null,
       personnel: null,
       cohesion: null,
       posture: null,
