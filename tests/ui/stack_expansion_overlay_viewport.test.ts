@@ -161,4 +161,37 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(onSelect).toHaveBeenCalledWith('enemy_contact:op:stacked:1');
     expect(onSelect).not.toHaveBeenCalledWith('vrs_secret_brigade');
   });
+
+  it('renders enemy contact stack icons with neutral contact presentation instead of raw faction identity', () => {
+    vi.useFakeTimers();
+
+    render(createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 300,
+      anchorY: 300,
+      formations: [
+        formations()[0]!,
+        {
+          ...formations()[1]!,
+          id: 'vrs_secret_brigade',
+          name: 'Secret Enemy Brigade',
+          faction: 'RS',
+          posture: 'attack',
+        },
+      ],
+      playerFaction: 'RBiH',
+      onClose: vi.fn(),
+      onSelect: vi.fn(),
+    }));
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    const contact = screen.getByRole('button', { name: /Inspect enemy contact at settlement/i });
+    expect(contact.querySelector('[data-contact-redacted="true"]')).toBeTruthy();
+    expect(contact.querySelector('[data-raw-faction="RS"]')).toBeNull();
+    expect(contact.querySelector('[data-raw-posture="attack"]')).toBeNull();
+    expect(contact.querySelector('canvas')).toBeNull();
+  });
 });

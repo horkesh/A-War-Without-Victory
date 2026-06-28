@@ -391,6 +391,7 @@ function ResponseButton({
     const historical = isHistoricalOption(option, decision);
     const staffRecommended = !historical && isStaffRecommendedOption(option, decision);
     const historicalDescription = `${t('eventDecision.historicalDefaultDescription')}${sourceNote ? ` ${t('eventDecision.sourceInline', { source: sourceNote.replace(/[.。]+$/u, '') })}` : ''}`;
+    const chooseLabel = t('eventDecision.chooseResponseAria', { response: option.label });
     return (
         <div className="rounded border border-panel-border bg-panel-card/90 p-3">
             <button
@@ -398,6 +399,8 @@ function ResponseButton({
                 data-testid="event-decision-response"
                 data-event-id={decision.event_id}
                 data-response-id={option.id}
+                aria-label={chooseLabel}
+                title={chooseLabel}
                 onClick={onChoose}
                 className="w-full text-left rounded border border-panel-border
                            bg-panel-bg px-4 py-2.5 font-sans text-[13px] font-semibold text-text-primary

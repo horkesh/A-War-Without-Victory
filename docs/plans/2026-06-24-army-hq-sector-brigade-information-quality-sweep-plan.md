@@ -37,10 +37,21 @@ Second P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - Army HQ corps-card header actions now expose an explicit command-card inspection label with personnel and fielded-brigade truth, rather than relying on compact flex text such as `1st Corps21,70034 fielded brigades`.
 - Verification passed: focused Vitest proof 3 files / 55 tests, `npm.cmd run typecheck`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through fresh RBiH start, Army HQ, 1st Corps Corps Detail tabs, Ops Snapshot, operation-planning phase rail, and commander selection.
 
+Third P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Settlement timelines now render turn-zero control rows and setup-control mechanisms as scenario-start provenance, not as player-era takeover history.
+- Setup/provenance turn summaries no longer inject movement or supply rows into settlement history, while live turn movement/supply rows remain visible.
+- Sparse battle rows with `casualties_reported === false` keep casualties unreported even when source placeholders carry `0`.
+- Direct movement timeline rows sanitize raw formation ids before player-facing copy.
+- Shared OOB section accordions now expose explicit expand/collapse aria/title labels and hide decorative count/chevron fragments from the control name.
+- Expanded tactical-map stacks now render hidden enemy contacts with a neutral contact glyph/glow instead of raw enemy formation icon, faction, or posture presentation.
+- Event decision response buttons now expose explicit `Choose response: ...` aria/title labels.
+- Verification passed: focused Vitest proof 7 files / 144 tests, `npm.cmd run typecheck`, and `git diff --check`.
+
 Remaining P19 queue before broad CI/push:
 
-- Continue live-browser sweep of settlement timelines, tactical-map selection/stack behavior, and residual Army HQ/OOB/Corps Front confusion.
-- Batch the next coherent fixes before invoking the slower broad gates.
+- Continue live-browser sweep of residual Army HQ/OOB/Corps Front, Formation Detail, and tactical-map hover/selection confusion.
+- Next coherent batch should prioritize Kepler's residual sparse-command/disabled-reason findings and Confucius's enemy-contact hover-context finding before invoking the slower broad gates.
 
 ## Prior Queue 2026-06-26
 

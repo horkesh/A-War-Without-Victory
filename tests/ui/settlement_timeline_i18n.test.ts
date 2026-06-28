@@ -231,6 +231,34 @@ describe('SettlementTimeline localization', () => {
     expect(container.textContent).not.toMatch(/raw_unknown_force|raw_mechanism_id|raw_attacker_force|raw_battle_outcome/);
   });
 
+  it('renders every turn-zero control row as scenario-start provenance', () => {
+    setLocale('en');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [],
+      [
+        { turn: 0, settlementId: 'op:test:test_1', from: null, to: 'RS', mechanism: 'control_change' },
+        { turn: 0, settlementId: 'op:test:test_1', from: 'RBiH', to: 'HRHB', mechanism: 'combat' },
+      ],
+      [],
+      [],
+      [],
+      [],
+      [],
+      null,
+      null,
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+
+    expect(container.textContent).toContain('Controlled by VRS at scenario start');
+    expect(container.textContent).toContain('Controlled by HVO at scenario start');
+    expect(container.textContent).not.toContain('VRS took control');
+    expect(container.textContent).not.toContain('HVO took control');
+  });
+
   it('renders missing battle casualties as unreported instead of zero', () => {
     setLocale('en');
 
@@ -247,6 +275,38 @@ describe('SettlementTimeline localization', () => {
         outcome: 'stalemate',
         attacker_casualties: null,
         defender_casualties: null,
+        casualties_reported: false,
+        territory_flipped: false,
+      }],
+      [],
+      [],
+      [],
+      null,
+      null,
+    );
+
+    const { container } = render(createElement(SettlementTimeline, { events }));
+
+    expect(container.textContent).toContain('Casualties: Unreported attacker / Unreported defender');
+    expect(container.textContent).not.toContain('Casualties: 0 attacker / 0 defender');
+  });
+
+  it('honors casualties_reported false even when sparse sources encode zeroes', () => {
+    setLocale('en');
+
+    const events = buildSettlementTimeline(
+      'op:test:test_1',
+      null,
+      [],
+      [],
+      [],
+      [{
+        turn: 3,
+        attacker_faction: 'RS',
+        defender_faction: 'RBiH',
+        outcome: 'stalemate',
+        attacker_casualties: 0,
+        defender_casualties: 0,
         casualties_reported: false,
         territory_flipped: false,
       }],

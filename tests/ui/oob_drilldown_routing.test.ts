@@ -103,6 +103,23 @@ afterEach(() => {
 });
 
 describe('OOBSidebar drilldown routing', () => {
+  it('labels section accordions with explicit expand and collapse actions', () => {
+    render(React.createElement(OOBSidebar));
+
+    const sectorsToggle = screen.getByTestId('oob-section-sectors-toggle');
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Expand Sectors');
+    expect(sectorsToggle.getAttribute('title')).toBe('Expand Sectors');
+    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(sectorsToggle.textContent).toContain('Sectors');
+    expect(sectorsToggle.textContent).toContain('1');
+
+    fireEvent.click(sectorsToggle);
+
+    expect(sectorsToggle.getAttribute('aria-label')).toBe('Collapse Sectors');
+    expect(sectorsToggle.getAttribute('title')).toBe('Collapse Sectors');
+    expect(sectorsToggle.getAttribute('aria-expanded')).toBe('true');
+  });
+
   it('renders HQ reserve brigades and routes their labels to Army HQ formation drilldown', () => {
     useGameStore.setState({
       codexOpen: true,

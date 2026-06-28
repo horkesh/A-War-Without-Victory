@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): harden P19 settlement timelines and OOB accordions
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Continued the local P19 owner-playthrough polish branch with settlement, OOB, tactical-stack, and decision-modal findings from live browser checking plus the Kant/Confucius/Kepler scout reports. Settlement timelines now treat every turn-zero control row, and setup-control mechanisms at any turn, as scenario-start provenance instead of player-era takeover history. Setup/provenance turn summaries no longer feed movement or supply rows into settlement history. Battle rows honor `casualties_reported === false` even when sparse sources encode zero placeholders, and direct movement timeline rows sanitize raw formation identifiers before rendering. The shared OOB accordion header now exposes explicit expand/collapse aria/title labels and separates decorative counts/chevrons from the control name. Expanded tactical-map stacks now render hidden enemy contacts with a neutral redacted contact glyph/glow instead of raw enemy formation icon/faction/posture presentation. Event decision response buttons now expose explicit `Choose response: ...` labels.
+
+**Verification:** Focused proof passed `npm.cmd exec -- vitest run tests/ui_map_game_state_adapter.test.ts tests/settlement_timeline_provenance.test.ts tests/ui/settlement_timeline_i18n.test.ts tests/ui/settlement_supply_status.test.ts tests/ui/oob_drilldown_routing.test.ts tests/ui/stack_expansion_overlay_viewport.test.ts tests/ui/event_decision_modal_phase3.test.ts --pool=forks --reporter=dot` (7 files / 144 tests). `npm.cmd run typecheck` and `git diff --check` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_SETTLEMENT_TIMELINE_OOB_A11Y.md`.
+
+---
+
 ## [2026-06-28] fix(ui): clarify Chronicle and Records ownership in P19
 
 **Type:** UI/read-model/i18n/test/browser-QA/docs polish.
