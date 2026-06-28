@@ -150,6 +150,14 @@ describe('OOBSidebar drilldown routing', () => {
     expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
   });
 
+  it('surfaces missing army commander source and splits fielded versus reserve counts', () => {
+    const { container } = render(React.createElement(OOBSidebar));
+
+    expect(container.textContent).toContain('Army commander unreported');
+    expect(container.textContent).toContain('0 fielded / 1 reserve');
+    expect(container.textContent).not.toContain('1 formations');
+  });
+
   it('renders command nodes even when their only subordinates are non-fielded phantom rows', () => {
     const state = makeState();
     state.formations = [

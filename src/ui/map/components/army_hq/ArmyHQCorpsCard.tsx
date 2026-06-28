@@ -164,7 +164,8 @@ export function ArmyHQCorpsCard({
         };
 
         const strain = corps.commandStrain;
-        const displayedStrain = typeof strain === 'number' && Number.isFinite(strain) ? strain : 0;
+        const commandStrainReported = typeof strain === 'number' && Number.isFinite(strain);
+        const displayedStrain = commandStrainReported ? strain : 0;
         const strainLabel = normalizeCommandStrainLabel(displayedStrain, corps.commandStrainLabel);
         const frictionTypes = corps.activeFrictionTypes ?? [];
         const frictionEvents = corps.frictionEvents ?? [];
@@ -177,7 +178,7 @@ export function ArmyHQCorpsCard({
         const recoveryForecastToken = corps.recoveryForecastToken ?? null;
         // Delegation Visibility Wave 1: standing delegation summary from active ops
         const delegationSummary = deriveCorpsDelegationSummary(operations);
-        return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
+        return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, commandStrainReported, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
@@ -351,6 +352,17 @@ export function ArmyHQCorpsCard({
                     <div className="mt-2.5 flex gap-2">
                         <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-[9px] font-bold tracking-widest animate-pulse">
                             {t('armyHqCorps.contactEngagements', { count: data.corpsBattles.length })}
+                        </div>
+                    </div>
+                )}
+
+                {!data.commandStrainReported && (
+                    <div className="mt-2.5">
+                        <div
+                            className="inline-flex px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-panel-bg/60 border-panel-border/60 text-text-secondary"
+                            title={t('armyHqCorps.commandStrainUnreported')}
+                        >
+                            {t('armyHqCorps.commandStrainUnreported')}
                         </div>
                     </div>
                 )}

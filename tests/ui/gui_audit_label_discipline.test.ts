@@ -675,6 +675,37 @@ describe('GUI audit label discipline', () => {
     expect(container.textContent).not.toContain('Corps exhaustion (0%)');
   });
 
+  it('shows missing command strain on the Army HQ corps-card face instead of healthy silence', () => {
+    const corps = {
+      id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      name: '1st Corps',
+      kind: 'corps',
+      status: 'active',
+      readiness: 'ready',
+      corpsStance: 'defensive',
+      createdTurn: 0,
+      tags: [],
+    } as unknown as FormationView;
+    const gameState = makeState({ formations: [corps] });
+
+    const { container } = render(createElement(ArmyHQCorpsCard, {
+      corps,
+      brigades: [],
+      sectors: [],
+      operations: [],
+      factionBattles: [],
+      gameState,
+      isExpanded: false,
+      isCompressed: false,
+      onToggleExpand: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('Command strain unreported');
+    expect(container.textContent).not.toContain('WARNING COMMAND STRAINED');
+    expect(container.textContent).not.toContain('WARNING COMMAND COMPROMISED');
+  });
+
   it('uses neutral, partial, and threshold strength colors for corps personnel reports', () => {
     const corps = {
       id: 'arbih_1st_corps',

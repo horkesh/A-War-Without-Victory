@@ -39,6 +39,10 @@ function sectorCoverageLabel(tier: SectorCoverageTier): string {
   return t(SECTOR_COVERAGE_KEYS[tier]);
 }
 
+function formatFactionFormationCount(fieldedCount: number, reserveCount: number): string {
+  return t('oob.factionFormationSplit', { fielded: fieldedCount, reserve: reserveCount });
+}
+
 function formatReportedWhole(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value)
     ? Math.max(0, Math.round(value)).toLocaleString()
@@ -426,7 +430,11 @@ export function OOBSidebar() {
                                 </span>
                               );
                             }
-                            return null;
+                            return (
+                              <span className="block text-[9px] text-text-secondary pl-6 italic">
+                                {t('oob.armyCommanderUnreported')}
+                              </span>
+                            );
                           })()}
                         </button>
                         <button
@@ -438,7 +446,9 @@ export function OOBSidebar() {
                             ? t('oob.expandFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })
                             : t('oob.collapseFaction', { faction: getPlayerSafeMilitaryFactionName(faction) })}
                         >
-                          <span className="text-text-secondary tabular-nums text-[9px]">{t('oob.formationCount', { count: formations.length + reserves.length })}</span>
+                          <span className="text-text-secondary tabular-nums text-[9px]">
+                            {formatFactionFormationCount(formations.length, reserves.length)}
+                          </span>
                           <span
                             className="text-text-secondary group-hover/faction:text-text-primary transition-colors"
                           >

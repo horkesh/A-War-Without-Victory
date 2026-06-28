@@ -6,6 +6,7 @@ import { createElement } from 'react';
 import { CorpsDetail } from '../../src/ui/map/components/CorpsDetail.js';
 import { derivePanelRailState } from '../../src/ui/map/components/panelRail.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 
 function makeState(): LoadedGameState {
@@ -106,7 +107,29 @@ function makeState(): LoadedGameState {
 describe('command drilldown routing', () => {
   afterEach(() => {
     cleanup();
+    setLocale('en');
     useGameStore.setState(useGameStore.getInitialState());
+  });
+
+  it('localizes CorpsDetail exhaustion copy instead of hardcoding English', () => {
+    const state = makeState();
+    state.formations = state.formations.map((formation) => (
+      formation.id === 'rbih_1_corps'
+        ? { ...formation, corpsExhaustion: 12 }
+        : formation
+    )) as LoadedGameState['formations'];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyId: 'RBiH',
+      selectedCorpsId: 'rbih_1_corps',
+    });
+    setLocale('bcs');
+
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
+    const copy = container.textContent ?? '';
+
+    expect(copy).toContain('Iscrpljenost:');
+    expect(copy).not.toContain('Exhaustion:');
   });
 
   it('keeps CorpsDetail order-of-battle brigade clicks inside the corps formation route', () => {

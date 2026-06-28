@@ -274,7 +274,8 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               )}
               {corpsFormation.corpsExhaustion != null && (
                 <span>
-                  {' · Exhaustion: '}
+                  {' · '}
+                  {t('corpsDetail.exhaustion')} {' '}
                   <span className={
                     corpsFormation.corpsExhaustion <= 20 ? 'text-emerald-400'
                     : corpsFormation.corpsExhaustion <= 50 ? 'text-amber-400'

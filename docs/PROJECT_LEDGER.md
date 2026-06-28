@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-06-28] fix(ui): close P19 sparse command and OOB clarity residuals
+
+**Type:** UI/read-model/i18n/test/docs polish.
+
+**Fix:** Closed the next Kepler residual batch on the local P19 owner-playthrough branch. Army HQ corps-card front faces now show `Command strain unreported` when the command-strain source row is absent instead of silently treating the missing source as healthy zero. Corps Detail reported exhaustion copy now uses the localized `corpsDetail.exhaustion` key. Formation Detail AA systems no longer render a fabricated 100% operational condition bar when no AA-condition source exists; they show the AA count with `Condition unreported`. Army HQ Situation briefing disabled cards now include visible, title, and accessible-name reasons. OOB faction headers now surface missing army-commander source and split fielded/reserve counts instead of an ambiguous single formation count.
+
+**Verification:** Red/green focused proof passed `npm.cmd exec -- vitest run tests/ui/command_drilldown_routing.test.ts tests/ui/gui_audit_label_discipline.test.ts tests/ui/formation_detail_parity.test.ts tests/ui/situation_briefing_progressive_disclosure.test.ts tests/ui/oob_drilldown_routing.test.ts --pool=forks --reporter=dot` (5 files / 116 tests). `npm.cmd run typecheck` passed.
+
+**Scope/determinism:** UI/read-model/i18n/test/docs only. No simulation logic, event evaluator mechanics, event JSON, scenario source data, startup snapshot construction, save schema, calibration threshold, golden manifest, structural fingerprint artifact, Srebrenica/Zepa event ownership, randomness, timestamps, locale sorting, installer artifact, or persisted output ordering changed. Report: `docs/40_reports/implemented/20260628_P19_SPARSE_COMMAND_OOB_CLARITY.md`.
+
+---
+
 ## [2026-06-28] fix(ui): harden P19 settlement timelines and OOB accordions
 
 **Type:** UI/read-model/i18n/test/docs polish.

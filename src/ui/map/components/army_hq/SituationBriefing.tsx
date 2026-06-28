@@ -94,6 +94,11 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                         const target = enrichTargetWithItemContext(item);
                         const hasTarget = target.type !== 'none';
                         const targetLabel = copy.actionChipLabel ?? target.label ?? fallbackTargetLabel(target.type);
+                        const disabledReason = !hasTarget
+                            ? t('situationBriefing.routeUnavailable')
+                            : !onNavigate
+                                ? t('situationBriefing.navigationUnavailable')
+                                : null;
 
                         return (
                             <button
@@ -101,6 +106,8 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 type="button"
                                 onClick={() => hasTarget && onNavigate?.(target)}
                                 disabled={!hasTarget || !onNavigate}
+                                title={disabledReason ?? undefined}
+                                aria-label={disabledReason ? `${copy.title} - ${disabledReason}` : copy.title}
                                 className={`text-left rounded-md border ${borderColor} bg-panel-bg p-2.5 transition-colors group disabled:cursor-default`}
                             >
                                 <div className="flex items-start gap-2">
@@ -112,6 +119,11 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                         {copy.detail && (
                                             <div className="text-[10px] text-text-secondary leading-snug mt-0.5">
                                                 {copy.detail}
+                                            </div>
+                                        )}
+                                        {disabledReason && (
+                                            <div className="text-[9px] text-text-secondary/70 leading-snug mt-1">
+                                                {disabledReason}
                                             </div>
                                         )}
                                     </div>

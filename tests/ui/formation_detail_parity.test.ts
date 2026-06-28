@@ -834,6 +834,29 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toMatch(/NaN|undefined|\[object Object\]/);
   });
 
+  it('renders AA systems without inventing a fully operational condition bar', () => {
+    const state = makeFormationDetailState();
+    state.formations = state.formations.map((formation) => formation.id === 'rbih_heroic_brigade'
+      ? {
+        ...formation,
+        composition: {
+          tanks: 0,
+          artillery: 0,
+          aa_systems: 4,
+        },
+      } as unknown as LoadedGameState['formations'][number]
+      : formation);
+    useGameStore.setState({ loadedGameState: state, selectedFormationId: 'rbih_heroic_brigade' });
+
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const copy = view.container.textContent ?? '';
+
+    expect(copy).toContain('AA Systems');
+    expect(copy).toContain('Condition unreported');
+    expect(view.container.querySelector('[data-testid="formation-aa-condition-unreported"]')).toBeTruthy();
+    expect(view.container.querySelector('[data-testid="formation-aa-condition-operational"]')).toBeNull();
+  });
+
   it('labels rear sector ownership distinctly and recognizes forming readiness', () => {
     useGameStore.setState({ selectedFormationId: 'rbih_rear_brigade' });
 

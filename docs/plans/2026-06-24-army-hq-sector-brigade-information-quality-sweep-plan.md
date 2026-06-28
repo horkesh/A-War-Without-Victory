@@ -48,10 +48,20 @@ Third P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - Event decision response buttons now expose explicit `Choose response: ...` aria/title labels.
 - Verification passed: focused Vitest proof 7 files / 144 tests, `npm.cmd run typecheck`, and `git diff --check`.
 
+Fourth P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Army HQ corps-card front faces now render missing command-strain source as `Command strain unreported` instead of hiding the missing source behind healthy zero behavior.
+- Corps Detail exhaustion copy uses localized `corpsDetail.exhaustion` for reported values, matching the existing unreported path.
+- Formation Detail AA systems render the count plus `Condition unreported` when no AA-condition source exists, removing the misleading full green condition bar.
+- Army HQ Situation briefing disabled cards now expose a visible reason plus `title` and accessible name for no-route/no-navigation cases.
+- OOB faction headers now surface `Army commander unreported` when the army commander source is absent and split fielded/reserve counts (`0 fielded / 1 reserve`) instead of a single ambiguous formation count.
+- Verification passed: focused Vitest proof 5 files / 116 tests and `npm.cmd run typecheck`.
+
 Remaining P19 queue before broad CI/push:
 
-- Continue live-browser sweep of residual Army HQ/OOB/Corps Front, Formation Detail, and tactical-map hover/selection confusion.
-- Next coherent batch should prioritize Kepler's residual sparse-command/disabled-reason findings and Confucius's enemy-contact hover-context finding before invoking the slower broad gates.
+- Run live-browser proof for the fourth packet, then continue tactical-map hover/selection confusion.
+- Confucius's enemy-contact hover-context finding remains the next targeted investigation if still reproducible.
+- After one more coherent fix/proof packet or if no reproducible residual remains, run broad gates before push/merge: `qa:player-journeys`, `qa:first-hour:browser`, `qa:live-surface:browser`, `git diff --check`, GitHub PR checks/comments, merge, branch/worktree cleanup.
 
 ## Prior Queue 2026-06-26
 
