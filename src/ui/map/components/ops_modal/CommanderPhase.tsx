@@ -213,11 +213,22 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                         {availableOfficers.map(({ officer, fit }) => {
                             const prepTurns = getPreparationMaxTurns(preparationAggressiveness(officer.aggressiveness));
+                            const rankLabel = formatRank(officer.rank);
+                            const fitLabel = localizeRegionalFit(fit.label);
+                            const commanderOptionLabel = t('opsPlanning.commander.optionAria', {
+                                rank: rankLabel,
+                                name: officer.name,
+                                fit: fitLabel,
+                                turns: prepTurns,
+                            });
                             return (
                                 <button
                                     key={officer.id}
                                     type="button"
                                     onClick={() => handleSelectOfficer(officer.id)}
+                                    aria-label={commanderOptionLabel}
+                                    aria-pressed={pendingOfficerId === officer.id}
+                                    title={commanderOptionLabel}
                                     className={`text-left p-3 rounded-md border transition-all group
                                         ${pendingOfficerId === officer.id
                                             ? 'border-accent-gold bg-[rgba(60,54,44,0.8)] shadow-[0_0_12px_rgba(196,163,90,0.25)]'
@@ -227,14 +238,14 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
                                             <div className="text-[10px] text-text-secondary uppercase tracking-wider">
-                                                {formatRank(officer.rank)}
+                                                {rankLabel}
                                             </div>
                                             <div className="text-sm font-bold text-white truncate group-hover:text-accent-gold transition-colors">
                                                 {officer.name}
                                             </div>
                                         </div>
                                         <div className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${fit.colorClass} bg-white/5`}>
-                                            {localizeRegionalFit(fit.label)}
+                                            {fitLabel}
                                         </div>
                                     </div>
 

@@ -29,9 +29,17 @@ First P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
 - CorpsCard Order of Battle buttons keep compact visible copy but expose corps-specific aria/title labels, removing the repeated indistinguishable `Order of battle` control problem in live browser and assistive navigation.
 - Verification passed: focused Vitest proof 4 files / 42 tests, `npm.cmd run typecheck`, `npm.cmd run qa:first-hour:browser`, `npm.cmd run qa:live-surface:browser`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through RBiH start, war-start splash, opening brief, foundational decision, Records, Chronicle, and OOB labels.
 
+Second P19 packet implemented locally on `codex/p19-d2-polish-continuation`:
+
+- Shared `TabBar` now keeps compact visible badges while exposing domain-specific accessible count labels; Corps Detail tabs read `Order of battle, 34 brigades`, `Sectors, 21 sectors`, and operation counts instead of glued label/count strings.
+- Ops Planning phase controls now expose step/locked/current state through `aria-label`, `title`, and `aria-current`; decorative step numerals and separators no longer pollute the control name.
+- Ops Planning commander cards now expose concise selection labels with rank, name, regional fit, preparation turns, and `aria-pressed` selected state.
+- Army HQ corps-card header actions now expose an explicit command-card inspection label with personnel and fielded-brigade truth, rather than relying on compact flex text such as `1st Corps21,70034 fielded brigades`.
+- Verification passed: focused Vitest proof 3 files / 55 tests, `npm.cmd run typecheck`, `git diff --check`, and manual in-app browser proof on `http://127.0.0.1:3007/` through fresh RBiH start, Army HQ, 1st Corps Corps Detail tabs, Ops Snapshot, operation-planning phase rail, and commander selection.
+
 Remaining P19 queue before broad CI/push:
 
-- Continue live-browser sweep of settlement timelines, operation planning, tactical-map selection/stack behavior, and residual Army HQ/OOB/Corps Front confusion.
+- Continue live-browser sweep of settlement timelines, tactical-map selection/stack behavior, and residual Army HQ/OOB/Corps Front confusion.
 - Batch the next coherent fixes before invoking the slower broad gates.
 
 ## Prior Queue 2026-06-26

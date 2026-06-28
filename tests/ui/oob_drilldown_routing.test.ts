@@ -168,7 +168,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(container.textContent).toContain('0 fielded brigades');
     expect(container.textContent).not.toContain('JNA phantom battalion');
     expect(container.textContent).not.toContain('No formations.');
-    expect(screen.getByRole('button', { name: /^JNA Herzegovina Command\s+0\s+0 fielded brigades$/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Inspect JNA Herzegovina Command command card: 0 personnel; 0 fielded brigades' })).toBeTruthy();
   });
 
   it('routes sector rows with their corps context preserved', () => {

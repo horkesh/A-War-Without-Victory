@@ -17,6 +17,8 @@ interface Tab<T extends string> {
   label: string;
   /** Show a count badge when > 0. */
   count?: number;
+  /** Accessible count phrase when the badge has domain meaning, e.g. "34 brigades". */
+  countLabel?: string;
 }
 
 interface TabBarProps<T extends string> {
@@ -74,6 +76,9 @@ export function TabBar<T extends string>({
     >
       {tabs.map((tab, idx) => {
         const isActive = activeTab === tab.id;
+        const tabAriaLabel = tab.count != null && tab.count > 0
+          ? `${tab.label}, ${tab.countLabel ?? tab.count}`
+          : tab.label;
         return (
           <button
             key={tab.id}
@@ -85,6 +90,8 @@ export function TabBar<T extends string>({
             role="tab"
             aria-selected={isActive}
             aria-controls={tabPanelId(idPrefix, tab.id)}
+            aria-label={tabAriaLabel}
+            title={tabAriaLabel}
             tabIndex={isActive ? 0 : -1}
             onClick={() => onTabChange(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
@@ -96,7 +103,7 @@ export function TabBar<T extends string>({
           >
             {tab.label}
             {tab.count != null && tab.count > 0 && (
-              <span className="ml-1 text-[9px] opacity-60">{tab.count}</span>
+              <span aria-hidden="true" className="ml-1 text-[9px] opacity-60">{` ${tab.count}`}</span>
             )}
           </button>
         );

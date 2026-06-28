@@ -157,9 +157,24 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
   const tabs = [
     { id: 'overview' as const, label: t('settlement.tab.overview') },
-    { id: 'orbat'    as const, label: t('orbat.title'), count: subordinates.length },
-    { id: 'sectors'  as const, label: t('sectorsSection.title'), count: corpsSectors.length },
-    { id: 'ops'      as const, label: t('corpsDetail.opsSnapshot'), count: corpsOps.length },
+    {
+      id: 'orbat'    as const,
+      label: t('orbat.title'),
+      count: subordinates.length,
+      countLabel: t('corpsDetail.tabCount.brigades', { count: subordinates.length }),
+    },
+    {
+      id: 'sectors'  as const,
+      label: t('sectorsSection.title'),
+      count: corpsSectors.length,
+      countLabel: t('corpsDetail.tabCount.sectors', { count: corpsSectors.length }),
+    },
+    {
+      id: 'ops'      as const,
+      label: t('corpsDetail.opsSnapshot'),
+      count: corpsOps.length,
+      countLabel: t('corpsDetail.tabCount.operations', { count: corpsOps.length }),
+    },
     { id: 'orders'   as const, label: t('corpsDetail.orders') },
   ];
   const primaryOpsPlanningSector = chooseOpsPlanningSector(corpsSectors);

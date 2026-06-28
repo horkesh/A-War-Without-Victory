@@ -118,6 +118,12 @@ describe('command drilldown routing', () => {
 
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
+    expect(screen.getByRole('tab', { name: 'Order of battle, 1 brigades' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Sectors, 1 sectors' })).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Ops Snapshot, 1 operations' })).toBeTruthy();
+    expect(container.textContent).toContain('Order of battle 1');
+    expect(container.textContent).not.toContain('Order of battle1');
+
     fireEvent.click(screen.getByRole('tab', { name: /Order of battle/i }));
     const brigadeRow = container.querySelector('[data-formation-id="rbih_1_brigade"]');
     expect(brigadeRow).toBeTruthy();

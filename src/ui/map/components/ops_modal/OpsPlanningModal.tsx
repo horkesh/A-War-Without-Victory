@@ -371,14 +371,23 @@ export function OpsPlanningModal() {
             <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2
                             bg-[rgba(20,18,15,0.88)] backdrop-blur-xl rounded-full px-4 py-2
                             border border-[rgba(180,160,130,0.15)]">
-                {PHASE_ORDER.map((p, i) => (
+                {PHASE_ORDER.map((p, i) => {
+                    const phaseLabel = t(PHASE_LABEL_KEYS[p]);
+                    const locked = i > highestPhase;
+                    const phaseAriaLabel = locked
+                        ? t('opsPlanning.phaseNav.lockedAria', { phase: phaseLabel, step: i + 1 })
+                        : t('opsPlanning.phaseNav.aria', { phase: phaseLabel, step: i + 1 });
+                    return (
                     <button
                         key={p}
                         type="button"
                         onClick={() => goToPhase(p)}
                         data-testid={`ops-planning-phase-${p}`}
                         data-phase={p}
-                        data-locked={i > highestPhase ? 'true' : undefined}
+                        data-locked={locked ? 'true' : undefined}
+                        aria-label={phaseAriaLabel}
+                        title={phaseAriaLabel}
+                        aria-current={i === currentIdx ? 'step' : undefined}
                         className="flex items-center gap-2 group"
                     >
                         {/* WP4c: Enlarged phase dots */}
@@ -392,14 +401,15 @@ export function OpsPlanningModal() {
                         <span className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors ${
                             i === currentIdx ? 'text-accent-gold' : i <= highestPhase ? 'text-text-secondary' : 'text-text-secondary/30'
                         }`}>
-                            {t(PHASE_LABEL_KEYS[p])}
-                            <span className="text-[7px] text-text-secondary/30 ml-1">{i + 1}</span>
+                            {phaseLabel}
+                            <span aria-hidden="true" className="text-[7px] text-text-secondary/30 ml-1">{` ${i + 1}`}</span>
                         </span>
                         {i < PHASE_ORDER.length - 1 && (
-                            <div className={`w-6 h-px ${i < currentIdx ? 'bg-accent-gold/40' : 'bg-[rgba(180,160,130,0.1)]'}`} />
+                            <div aria-hidden="true" className={`w-6 h-px ${i < currentIdx ? 'bg-accent-gold/40' : 'bg-[rgba(180,160,130,0.1)]'}`} />
                         )}
                     </button>
-                ))}
+                    );
+                })}
             </div>
 
             {phaseGateMessage && (
