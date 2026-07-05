@@ -292,6 +292,7 @@ export function OOBSidebar() {
   if (!loadedGameState) {
     return (
       <div
+        data-awwv-counter-occluder="true"
         className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
         style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
       >
@@ -305,6 +306,7 @@ export function OOBSidebar() {
 
   return (
     <div
+        data-awwv-counter-occluder="true"
         className="absolute left-0 z-10 w-[15.5rem] flex flex-col bg-panel-bg/95 backdrop-blur-sm border-r border-panel-border overflow-hidden"
       style={{ direction: 'ltr', top: 'var(--awwv-toolbar-clearance, 5.5rem)', bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)' }}
     >
@@ -416,22 +418,16 @@ export function OOBSidebar() {
                             const commander = getFactionArmyCommander(faction, loadedGameState);
                             if (commander) {
                               return (
-                                <span className="block text-[9px] text-text-secondary pl-6">
-                                  <span className="block">{t('oob.co')}</span>
-                                  <span className="block text-accent-gold font-semibold">{formatRank(commander.rank)} {commander.name}</span>
-                                  <span className="block mt-0.5 leading-snug text-text-secondary">
-                                    {commander.bio_short ?? t('oob.serviceRecordPending')}
+                                <span className="block truncate pl-6 text-[9px] text-text-secondary">
+                                  {t('oob.co')}{' '}
+                                  <span className="text-accent-gold font-semibold">
+                                    {formatRank(commander.rank)} {commander.name}
                                   </span>
-                                  {commander.command_style && (
-                                    <span className="block mt-0.5 text-[8px] uppercase tracking-wide text-text-secondary/80">
-                                      {t('oob.style')} <span className="normal-case tracking-normal text-text-secondary">{commander.command_style}</span>
-                                    </span>
-                                  )}
                                 </span>
                               );
                             }
                             return (
-                              <span className="block text-[9px] text-text-secondary pl-6 italic">
+                              <span className="block truncate pl-6 text-[9px] text-text-secondary italic">
                                 {t('oob.armyCommanderUnreported')}
                               </span>
                             );

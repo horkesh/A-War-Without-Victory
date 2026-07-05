@@ -1,6 +1,6 @@
 # Army HQ Sector Brigade Information Quality Sweep
 
-**Status:** ACTIVE rolling D2 polish plan; P19 is merged on `main` through PR #460 at `0043d1edd`, with the P19 branch/worktree cleaned. The current follow-up is the narrow post-merge browser-gate teardown repair on `codex/p19-main-full-suite-teardown-fix`. Packaging remains paused.
+**Status:** ACTIVE rolling D2 polish plan; P19 is merged on `main` through PR #460 at `0043d1edd`, with the P19 branch/worktree cleaned. The current guardrail follow-up is the consolidated `qa:player-experience` gate: required full-suite now runs the self-scanning player-facing wrapper, which includes first-hour/live-surface browser proof, Electron runtime contracts, shipped builds, and warning/output scans. Packaging remains paused.
 
 **Goal:** Turn the next owner-facing polish pass into a single substantial batch: live-click Army HQ, OOB, Corps Front, sector, brigade, formation detail, settlement, and command handoff surfaces; fix confirmed information-quality defects without reopening packaging, BCS-only cleanup, or calibration.
 
@@ -87,7 +87,7 @@ P19 closeout:
 - PR #460 merged to `main` at `0043d1edd` after green PR checks; comments/reviews/review threads were empty.
 - Local/remote `codex/p19-d2-polish-continuation` refs and the P19 worktree were deleted; generated browser evidence was removed.
 - Post-merge `main` exposed a Full Suite `qa:first-hour:browser` teardown-noise failure after the player-flow proof and dev-server cleanup: exact `deck: Failed to fetch` messages from Vite's optimized `@deck__gl_layers.js`.
-- Follow-up branch `codex/p19-main-full-suite-teardown-fix` adds a narrow first-hour/live-surface browser-gate classifier and contract coverage; local proof passed the red/green contract test, `qa:first-hour:browser`, `qa:live-surface:browser`, and `git diff --check`.
+- The older narrow browser-gate teardown classifier is superseded by the July 2 `qa:player-experience` guardrail wiring: direct browser gates still exist as focused local proofs, but release-polish verification now runs through the consolidated wrapper and its warning/runtime scan.
 
 ## Prior Queue 2026-06-26
 

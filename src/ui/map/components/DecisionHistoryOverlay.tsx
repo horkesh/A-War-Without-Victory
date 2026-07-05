@@ -161,7 +161,7 @@ function DecisionRow({
     const def = eventCatalog?.get(decision.event_id);
     const family = def?.family ?? 'unknown';
     const diverged = isDivergenceFromHistorical(decision, eventCatalog);
-    const rawSourceNote = def?.source_note ?? def?.historical_source ?? null;
+    const rawSourceNote = diagMode ? (def?.source_note ?? def?.historical_source ?? null) : null;
     const sourceNoteExcerpt = rawSourceNote ? truncateSourceNote(rawSourceNote) : null;
     const decisionTitle = resolveDecisionTitle(decision, eventCatalog);
     const optionLabel = resolveOptionLabel(decision, eventCatalog);
@@ -178,8 +178,7 @@ function DecisionRow({
     return (
         <li
             data-testid="decision-history-row"
-            data-event-id={decision.event_id}
-            data-response-id={decision.response_id}
+            {...(diagMode ? { 'data-event-id': decision.event_id, 'data-response-id': decision.response_id } : {})}
             data-turn={decision.turn}
             className="border-b border-neutral-700/40 bg-[#0d0f16]"
         >
@@ -197,7 +196,7 @@ function DecisionRow({
                 <span className="flex-1 min-w-0">
                     <span
                         data-testid="decision-history-event-id"
-                        data-event-id={decision.event_id}
+                        {...(diagMode ? { 'data-event-id': decision.event_id } : {})}
                         className="block text-[10px] text-neutral-200 font-semibold leading-snug truncate"
                         title={decisionTitle}
                     >
@@ -205,7 +204,7 @@ function DecisionRow({
                     </span>
                     <span
                         data-testid="decision-history-chosen-option"
-                        data-response-id={decision.response_id}
+                        {...(diagMode ? { 'data-response-id': decision.response_id } : {})}
                         className="block text-[9px] text-neutral-400 leading-snug truncate mt-0.5"
                         title={optionLabel}
                     >
@@ -273,7 +272,7 @@ function DecisionRow({
                                 <li
                                     key={id}
                                     data-testid="decision-history-descendant-row"
-                                    data-event-id={id}
+                                    {...(diagMode ? { 'data-event-id': id } : {})}
                                     className="text-[9px] text-neutral-300 leading-snug"
                                 >
                                     {resolveDescendantLabel(id, eventCatalog)}

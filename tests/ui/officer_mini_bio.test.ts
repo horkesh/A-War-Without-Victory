@@ -148,12 +148,13 @@ describe('officer mini-bio UI', () => {
         expect(screen.queryByText('No commander data available')).toBeNull();
     });
 
-    it('wires OOB commander rows to the same authored mini-bio fields', () => {
+    it('keeps authored mini-bio prose out of the narrow OOB faction summary row', () => {
         const source = fs.readFileSync('src/ui/map/components/OOBSidebar.tsx', 'utf8');
 
-        expect(source).toContain('commander.bio_short');
-        expect(source).toContain('commander.command_style');
-        expect(source).toContain("t('oob.serviceRecordPending')");
+        expect(source).not.toContain('commander.bio_short');
+        expect(source).not.toContain('commander.command_style');
+        expect(source).not.toContain("t('oob.serviceRecordPending')");
+        expect(source).toContain("t('oob.co')");
     });
 
     it('surfaces command-style and known-for traits in the Personnel roster', () => {

@@ -2,6 +2,7 @@
 import React from 'react';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { ReserveRequestModal } from '../../src/ui/map/components/ReserveRequestModal.js';
 import { OfficerMatterModal } from '../../src/ui/map/components/OfficerMatterModal.js';
 import { IntelligenceBriefModal } from '../../src/ui/map/components/IntelligenceBriefModal.js';
@@ -100,6 +101,59 @@ describe('decision family modals', () => {
 
     expect(screen.getByText('Defensive Gap')).toBeTruthy();
     expect(container.textContent).not.toContain('defensive_gap');
+  });
+
+  it('accepts a reserve request directly when staff has suggested a brigade', async () => {
+    const approveReserveRequest = vi.fn(async () => ({ ok: true }));
+    Object.defineProperty(window, 'awwv', {
+      value: { approveReserveRequest },
+      configurable: true,
+    });
+    const onClose = vi.fn();
+
+    render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-accept',
+      state: makeState({
+        formations: [
+          { id: 'drina_corps', name: 'Drina Corps' },
+          { id: 'elite_1', name: '1st Guards Motorized' },
+        ] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-accept',
+          corps_id: 'drina_corps',
+          faction: 'RS',
+          reason: 'defensive_gap',
+          purpose: 'defensive',
+          priority: 80,
+          severityBand: 'critical',
+          travel_hops: 2,
+          description: 'Drina Corps requests reinforcement.',
+          suggested_brigade_id: 'elite_1',
+          turn_requested: 1,
+        }],
+      }),
+      onClose,
+      onOpenReservePanel: vi.fn(),
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept 1st Guards Motorized' }));
+
+    await waitFor(() => expect(approveReserveRequest).toHaveBeenCalledWith(
+      'req-accept',
+      'elite_1',
+      'President accepted the Army HQ reserve recommendation.',
+    ));
+    expect(onClose).toHaveBeenCalled();
+    delete (window as unknown as { awwv?: unknown }).awwv;
+  });
+
+  it('uses high-contrast decision header treatment over bright packet images', () => {
+    const source = readFileSync('src/ui/map/components/DecisionModalImageHeader.tsx', 'utf8');
+
+    expect(source).toContain('from-black/92');
+    expect(source).toContain('text-[#d8d1c3]');
+    expect(source).not.toContain('from-black/82 via-black/58 to-black/18');
+    expect(source).not.toContain('text-text-secondary">{description}</p>');
   });
 
   it('hides unknown reserve reason and purpose ids behind neutral player copy', () => {
@@ -370,5 +424,23 @@ describe('decision family modals', () => {
     expect(screen.getByText('Unspecified response')).toBeTruthy();
     expect(screen.getByText('Unspecified institutional model')).toBeTruthy();
     expect(container.textContent).not.toMatch(/surprise[_ ]counter[_ ]offer|union[_ ]3[_ ]republics[_ ]extra/i);
+  });
+
+  it('explains stale counter-offers and keeps the submit action non-executable', () => {
+    const onClose = vi.fn();
+    render(React.createElement(CounterOfferModal, {
+      offerId: 'counter-offer:STALE_001',
+      state: makeState({ pendingCounterOffers: [] }),
+      onClose,
+    }));
+
+    expect(screen.getAllByText('This counter-offer is no longer pending.').length).toBeGreaterThan(0);
+    const submit = screen.getByRole('button', { name: 'Submit as counter-proposal' });
+    expect(submit.getAttribute('disabled')).not.toBeNull();
+    expect(submit.getAttribute('title')).toBe('This counter-offer is no longer pending.');
+    expect(submit.getAttribute('aria-describedby')).toBe('counter-offer-unavailable-reason');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Review later' }));
+    expect(onClose).toHaveBeenCalledOnce();
   });
 });

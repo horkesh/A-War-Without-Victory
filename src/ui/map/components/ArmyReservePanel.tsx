@@ -147,6 +147,19 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         if (!result.ok) setLoadError(result.error ?? 'Decline failed');
     }
 
+    async function handleApprove(requestId: string, brigadeId: string) {
+        if (!ipc.isAvailable) {
+            setLoadError(t('formationDetail.commandBridgeUnavailable'));
+            return;
+        }
+        const result = await ipc.approveReserveRequest(
+            requestId,
+            brigadeId,
+            'President assigned a reserve brigade from the Army Reserve pool.',
+        );
+        if (!result.ok) setLoadError(result.error ?? 'Approve failed');
+    }
+
     async function handleRecall(brigadeId: string) {
         if (!ipc.isAvailable) {
             setLoadError(t('formationDetail.commandBridgeUnavailable'));
@@ -206,6 +219,7 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                 const brigadeName = getLocalizedFormationName(brigade, locale);
                                 const loanedToCorps = loanedCorpsLabel(ls.loaned_to_corps);
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : null;
+                                const canAssignToPendingRequest = !ls.on_loan && !ls.in_cooldown && !ls.permanently_degraded;
                                 return (
                                     <div
                                         key={brigade.id}
@@ -284,6 +298,40 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
                                         {!ls.on_loan && ls.base_osid && (
                                             <div className="text-[10px] text-text-secondary">
                                                 {t('armyReserve.base', { base: getOsidDisplayName(ls.base_osid, osidDisplayNames) })}
+                                            </div>
+                                        )}
+                                        {canAssignToPendingRequest && pendingRequests.length > 0 && (
+                                            <div className="space-y-1 rounded border border-panel-border/35 bg-black/15 px-2 py-1.5">
+                                                <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary">
+                                                    {t('armyReserve.assignToRequest')}
+                                                </div>
+                                                <div className="flex flex-col gap-1">
+                                                    {pendingRequests.map((request) => {
+                                                        const requestCorpsName = getCorpsName(request.corps_id);
+                                                        const disabled = !ipc.isAvailable || commandAuthorityStatus === 'insufficient';
+                                                        return (
+                                                            <button
+                                                                key={`${brigade.id}:${request.request_id}`}
+                                                                type="button"
+                                                                disabled={disabled}
+                                                                onClick={() => { void handleApprove(request.request_id, brigade.id); }}
+                                                                aria-label={t('armyReserve.assignReserveToRequestAria', { brigade: brigadeName, corps: requestCorpsName })}
+                                                                title={!ipc.isAvailable
+                                                                    ? t('formationDetail.commandBridgeUnavailable')
+                                                                    : commandAuthorityStatus === 'insufficient'
+                                                                        ? t('armyReserve.insufficientAuthority')
+                                                                        : undefined}
+                                                                className={`rounded border px-2 py-1 text-left text-[10px] font-semibold transition-colors ${
+                                                                    disabled
+                                                                        ? 'cursor-not-allowed border-white/10 bg-white/5 text-text-secondary'
+                                                                        : 'border-emerald-400/35 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18'
+                                                                }`}
+                                                            >
+                                                                {t('armyReserve.assignToCorps', { corps: requestCorpsName })}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
                                             </div>
                                         )}
                                     </div>

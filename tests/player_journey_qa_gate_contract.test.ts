@@ -2,6 +2,32 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 describe('player journey QA gate contract', () => {
+  it('exposes a broad player-experience gate for release-facing sweeps', () => {
+    const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const script = pkg.scripts?.['qa:player-experience'] ?? '';
+
+    expect(script).toBe('node tools/ui/player_experience_gate.cjs');
+  });
+
+  it('exposes an Electron runtime contract slice for live-start regressions', () => {
+    const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
+      scripts?: Record<string, string>;
+    };
+    const script = pkg.scripts?.['qa:electron-runtime-contracts'] ?? '';
+
+    expect(script).toContain('vitest run');
+    expect(script).toContain('tests/desktop_persistence_contract.test.ts');
+    expect(script).toContain('tests/desktop_sim_bundle_smoke.test.ts');
+    expect(script).toContain('tests/desktop_packaged_runtime_probe.test.ts');
+    expect(script).toContain('tests/warroom_new_campaign_flow_truth.test.ts');
+    expect(script).toContain('tests/ui/warroom_launch_screen_contract.test.ts');
+    expect(script).toContain('tests/ui/decision_family_modals.test.ts');
+    expect(script).toContain('tests/ui/command_briefing_banner_contract.test.ts');
+    expect(script).toContain('tests/ui_map_deck_counter_visibility.test.ts');
+  });
+
   it('exposes a focused release-polish gate for first-hour and stale-state risks', () => {
     const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
       scripts?: Record<string, string>;
@@ -29,6 +55,8 @@ describe('player journey QA gate contract', () => {
     expect(script).toContain('tests/ui_shell_navigation.test.ts');
     expect(script).toContain('tests/ui/president_desk_shell.test.ts');
     expect(script).toContain('tests/ui/presidential_decision_room.test.ts');
+    expect(script).toContain('tests/ui/turn_aftermath_modal_i18n.test.ts');
+    expect(script).toContain('tests/ui/pre_advance_command_review.test.ts');
     expect(script).toContain('tests/ui/oob_operations_panel.test.ts');
     expect(script).toContain('tests/ui/commander_read_model_surfaces.test.ts');
     expect(script).toContain('tests/ui/army_hq_sector_truth.test.ts');

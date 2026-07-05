@@ -534,6 +534,45 @@ describe('useMapInteractions', () => {
     );
   });
 
+  it('selects the OSID fill on normal map click even when a nearby front hitbox exists', () => {
+    const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
+    const onOsidClick = vi.fn();
+    const onFrontEdgeClick = vi.fn();
+    const osidFeature: TestFeature = {
+      layer: { id: 'osid-control-fill' },
+      properties: { osid: 'op:test:settlement' },
+    };
+    const nearbyFront: TestFeature = {
+      layer: { id: 'sector-edge-hit-pos' },
+      properties: {
+        edge_id: 'op:test:a__op:test:b:RS',
+        sector_id: 'sector:test:0',
+        corps_id: 'corps:test',
+      },
+    };
+    const mockMap = {
+      on: (event: string, layerOrHandler: string | ((e: MapLayerMouseEvent) => void), handler?: (e: MapLayerMouseEvent) => void) => {
+        if (typeof layerOrHandler === 'function') mapHandlers.set(event, layerOrHandler);
+      },
+      off: () => {},
+      getCanvas: () => ({ style: { cursor: '' }, addEventListener: () => {}, removeEventListener: () => {} }),
+      getLayer: (id: string) => id === 'osid-control-fill' || id === 'sector-edge-hit-pos',
+      queryRenderedFeatures: (_point: unknown, opts?: { layers?: string[] }) => {
+        if (opts?.layers?.includes('sector-edge-hit-pos') && !opts.layers.includes('osid-control-fill')) {
+          return [nearbyFront];
+        }
+        return [osidFeature];
+      },
+    };
+
+    useMapInteractions(mockMap as unknown as Parameters<typeof useMapInteractions>[0], { onOsidClick, onFrontEdgeClick });
+    mapHandlers.get('click')?.({ point: { x: 10, y: 10 }, originalEvent: { clientX: 10, clientY: 10 } });
+
+    expect(onOsidClick).toHaveBeenCalledTimes(1);
+    expect(onOsidClick).toHaveBeenCalledWith('op:test:settlement', expect.objectContaining({ osid: 'op:test:settlement' }));
+    expect(onFrontEdgeClick).not.toHaveBeenCalled();
+  });
+
   it('prioritizes an exact formation hit over selectable sector-line hits on the same click', () => {
     const mapHandlers = new Map<string, (e: MapLayerMouseEvent) => void>();
     const onFrontEdgeClick = vi.fn();

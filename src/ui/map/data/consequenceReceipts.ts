@@ -215,7 +215,6 @@ export function buildConsequenceReceipts(
         return sortReceipts(patronReceipts);
     }
     const firedIds = new Set(state.military?.fired_event_ids ?? []);
-    const closedIds = new Set(state.military?.closed_event_ids ?? []);
     const lastFiredTurn = state.military?.event_last_fired_turn ?? {};
     const edges = enablesEdgeKeySet(state);
     const chosenByEvent = chosenResponseByEvent(state, playerFaction);
@@ -249,10 +248,6 @@ export function buildConsequenceReceipts(
                 if (seenPredicted.has(predictedId)) continue;
                 seenPredicted.add(predictedId);
 
-                let status: ConsequenceReceiptStatus;
-                let firedTurn: number | null = null;
-                let turnsElapsed: number | null = null;
-
                 // CONFIRMED requires the predicted event to have fired, a
                 // response-tagged enables edge, AND a fired turn AT OR AFTER the
                 // decision turn. The engine still records an enables edge when a
@@ -265,15 +260,7 @@ export function buildConsequenceReceipts(
                 const edgeKey = `${dec.event_id}::${predictedId}::${dec.response_id}`;
                 const ft = lastFiredTurn[predictedId];
                 const firedAtOrAfterDecision = typeof ft === 'number' && ft >= dec.turn;
-                if (firedIds.has(predictedId) && edges.has(edgeKey) && firedAtOrAfterDecision) {
-                    status = 'confirmed';
-                    firedTurn = ft;
-                    turnsElapsed = ft - dec.turn;
-                } else if (closedIds.has(predictedId)) {
-                    status = 'contradicted';
-                } else {
-                    status = 'pending';
-                }
+                if (!(firedIds.has(predictedId) && edges.has(edgeKey) && firedAtOrAfterDecision)) continue;
 
                 const predictedDef = catalog.get(predictedId);
                 const predictedLabel = (fc.label?.trim())
@@ -288,9 +275,9 @@ export function buildConsequenceReceipts(
                     predictedEventId: predictedId,
                     predictedLabel,
                     predictedExplanation: fc.explanation ?? '',
-                    status,
-                    firedTurn,
-                    turnsElapsed,
+                    status: 'confirmed',
+                    firedTurn: ft,
+                    turnsElapsed: ft - dec.turn,
                 });
             }
         }

@@ -71,6 +71,7 @@ export function PresidentDeskShell({
       aria-modal={onClose ? 'false' : undefined}
       tabIndex={onClose ? -1 : undefined}
       data-testid="president-desk-shell"
+      data-awwv-counter-occluder="true"
       onKeyDown={(event) => {
         if (event.key === 'Escape' && onClose) {
           event.preventDefault();

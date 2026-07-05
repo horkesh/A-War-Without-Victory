@@ -49,6 +49,7 @@ import {
     BASE_ATTACKER_LOSS_RATE,
     BASE_DEFENDER_LOSS_RATE,
     MILITIA_DEFENSE_RATIO,
+    computeMilitiaDefensePower,
     COORDINATION_PENALTY_2,
     COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
@@ -346,6 +347,13 @@ export function predictCombatOutcome(
                     )
                 : [],
         );
+        const physicalDefenders = getDefenderFormations();
+        for (const physicalDefender of physicalDefenders) {
+            if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
+                sectorBrigades.push(physicalDefender);
+            }
+        }
+        sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
         if (sectorBrigades.length > 0) {
             defenderHasBrigade = true;
             const { primary, totalPower, powerByFormationId } = predictorPerfTime(
@@ -410,7 +418,11 @@ export function predictCombatOutcome(
             const intelFog = FOG_BASE + FOG_INTEL_SCALE * sectorConf;
             // After retreat/repulse, brigade has direct combat intel — fog is at least FOG_AFTER_RETREAT_CAP
             const fogMult = learnedFromTarget ? Math.max(intelFog, FOG_AFTER_RETREAT_CAP) : intelFog;
-            defenderPower = Math.max(baseDef, minFloor) * fogMult;
+            const localMilitiaDefensePower = computeMilitiaDefensePower(osidPopulationMap?.get(targetOsid));
+            const defenderFloor = physicalDefenders.length === 0
+                ? Math.max(baseDef, minFloor, localMilitiaDefensePower)
+                : Math.max(baseDef, minFloor);
+            defenderPower = defenderFloor * fogMult;
             defenderFormation = primary;
             sectorDefBrigades = sectorBrigades;
             defenderDisrupted = ((defenderFormation as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0 || defenderFormation.disrupted === true;
@@ -433,7 +445,7 @@ export function predictCombatOutcome(
                 defenderCohesion = defenderFormation.cohesion ?? 60;
             } else {
                 // Truly undefended: no sector, no brigade — militia ghost only
-                defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+                defenderPower = computeMilitiaDefensePower(osidPopulationMap?.get(targetOsid));
             }
         }
     } else {

@@ -4,6 +4,7 @@ import type { CausalityLogEntry, FactionId, GameState } from '../../../state/gam
 import type { DimensionShift, EventDefinition, EventEffect, EventResponseOption, PendingEventDecision } from '../../../sim/events/event_types.js';
 import { applyEventEffects } from '../../../sim/events/apply_effects.js';
 import { applyDimensionShift, type DimensionStore } from '../../../sim/events/strategic_dimensions.js';
+import { deferUnauthorizedHistoricalOperationsForPlayer } from '../../../sim/combat/historical_operation_authorization.js';
 
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 const BROWSER_EVENT_CATALOG_PATH = '/data/scenarios/events/war_1992.json';
@@ -300,6 +301,7 @@ export async function startCampaignFromSidePicker(
                 headless_scenario_auto_control: false,
             };
             state.political = { ...(state.political ?? {}), control_events: [] };
+            deferUnauthorizedHistoricalOperationsForPlayer(state as GameState);
             const eventResponse = await fetch(BROWSER_EVENT_CATALOG_PATH);
             if (!eventResponse.ok) {
                 setLoadError(`Browser event catalog unavailable (${eventResponse.status}).`);

@@ -324,7 +324,7 @@ describe('player visibility helpers', () => {
     expect(contact).toMatchObject({
       name: 'Enemy contact',
       kind: 'enemy_contact',
-      faction: 'enemy_contact',
+      faction: 'RS',
       location_osid: 'op:enemy_seen',
       is_enemy_contact: true,
       corps_id: null,
@@ -344,10 +344,38 @@ describe('player visibility helpers', () => {
     expect(contact?.status).toBe('contact');
     expect(contact?.icon_id).toContain('__hunreported__munreported');
     expect(contact?.icon_id).toContain('enemy_contact');
-    expect(contact?.icon_id).not.toContain('RS');
+    expect(contact?.icon_id).toContain('RS');
     expect(contact?.icon_id).not.toContain('__m80');
     expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_seen'))).toBe(true);
     expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'own_1'))).toBe(false);
+  });
+
+  it('formation geojson redacts front-adjacent enemies as contacts when fog cache is absent', () => {
+    const state = {
+      player_faction: 'RBiH',
+      frontEdgesOsid: [
+        { edge_id: 'front:1', a: 'op:own', b: 'op:enemy_seen', side_a: 'RBiH', side_b: 'RS' },
+      ],
+      formations: [
+        { id: 'own_1', faction: 'RBiH', name: 'Own Brigade', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:own', personnel: 1200 },
+        { id: 'enemy_seen', faction: 'RS', name: 'Seen Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:enemy_seen', personnel: 1100 },
+        { id: 'enemy_rear', faction: 'RS', name: 'Rear Enemy', kind: 'brigade', readiness: 'active', cohesion: 80, fatigue: 0, status: 'active', createdTurn: 1, tags: [], location_osid: 'op:enemy_rear', personnel: 1000 },
+      ],
+    } as unknown as LoadedGameState;
+    const baseGeo = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[18, 44], [18.4, 44], [18.4, 44.4], [18, 44.4], [18, 44]]] }, properties: { osid: 'op:own' } },
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[19, 44], [19.4, 44], [19.4, 44.4], [19, 44.4], [19, 44]]] }, properties: { osid: 'op:enemy_seen' } },
+        { type: 'Feature', geometry: { type: 'Polygon', coordinates: [[[20, 44], [20.4, 44], [20.4, 44.4], [20, 44.4], [20, 44]]] }, properties: { osid: 'op:enemy_rear' } },
+      ],
+    } as const;
+
+    const geo = buildFormationsGeoJSON(state, baseGeo as any);
+
+    expect(geo.features.map((feature) => feature.properties.id)).toEqual(['enemy_contact:op:enemy_seen:0', 'own_1']);
+    expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_seen'))).toBe(true);
+    expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_rear'))).toBe(false);
   });
 
   it('formation stack expansion only includes player-visible fielded units', () => {

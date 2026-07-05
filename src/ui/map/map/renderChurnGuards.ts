@@ -17,6 +17,7 @@ export interface DeckLayerRenderInputs {
     selectedCorpsFrontSectorId: string | null;
     hoveredSectorId: string | null;
     hoveredCorpsId: string | null;
+    viewportSignature?: string;
 }
 
 export function deckLayerRenderInputsChanged(
@@ -36,7 +37,22 @@ export function deckLayerRenderInputsChanged(
         || previous.selectedCorpsId !== next.selectedCorpsId
         || previous.selectedCorpsFrontSectorId !== next.selectedCorpsFrontSectorId
         || previous.hoveredSectorId !== next.hoveredSectorId
-        || previous.hoveredCorpsId !== next.hoveredCorpsId;
+        || previous.hoveredCorpsId !== next.hoveredCorpsId
+        || previous.viewportSignature !== next.viewportSignature;
+}
+
+function featureCount(input: DeckLayerRenderInputs | null): number {
+    return input?.formationsGeoJson?.features?.length ?? 0;
+}
+
+export function shouldPreserveDeckFormationCounters(
+    previous: DeckLayerRenderInputs | null,
+    next: DeckLayerRenderInputs,
+): boolean {
+    if (!previous) return false;
+    if (!previous.formationsVisible || !next.formationsVisible) return false;
+    if (featureCount(previous) === 0 || featureCount(next) > 0) return false;
+    return (next.loadedGameState?.formations?.length ?? 0) > 0;
 }
 
 export function shouldRunPulseAnimation(args: {

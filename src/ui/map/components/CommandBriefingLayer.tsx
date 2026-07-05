@@ -39,6 +39,7 @@ const SEVERITY_BG: Record<CommandBriefingItemView['severity'], string> = {
 export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeacePlan }: CommandBriefingLayerProps) {
   const commandBriefing = useGameStore((state) => state.loadedGameState?.commandBriefing);
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
+  const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
   const devMode = useGameStore((state) => state.devMode);
   const [dismissed, setDismissed] = useState(false);
   const turn = useGameStore((state) => state.loadedGameState?.turn);
@@ -52,6 +53,10 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
   if (!commandBriefing || commandBriefing.items.length === 0 || dismissed) return null;
 
   const handleOpenItem = (item: CommandBriefingItemView) => {
+    if (item.briefingCategory === 'active_operations') {
+      setIsOperationsPanelOpen(true);
+      return;
+    }
     switch (item.target.type) {
       case 'summary':
         if (!openArmyHQTab(useGameStore.getState(), 'summary')) {
@@ -103,7 +108,10 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
   const hasCritical = criticalCount > 0;
 
   return (
-    <div className={`fixed ${topOffset} left-4 right-4 md:left-auto md:right-5 md:w-[min(32rem,calc(100vw-22rem))] z-20 pointer-events-none`}>
+    <div
+      data-awwv-counter-occluder="true"
+      className={`fixed ${topOffset} left-1/2 w-[min(34rem,calc(100vw-48rem))] -translate-x-1/2 max-[1100px]:w-[min(34rem,calc(100vw-2rem))] z-20 pointer-events-none`}
+    >
       <div
         data-testid="command-briefing-banner"
         className={`pointer-events-auto relative mt-2 rounded-md backdrop-blur-md shadow-2xl px-4 py-4 ${

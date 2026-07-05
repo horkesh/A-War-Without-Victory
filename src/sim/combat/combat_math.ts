@@ -320,9 +320,15 @@ export const BASE_DEFENDER_LOSS_RATE = 0.06;
  * League, police, armed residents. 42% of early-war VRS attacks were against ghosts
  * at trivial 37.5 defense power. Historical: JNA/VRS had to fight for villages. */
 export const MILITIA_DEFENSE_RATIO = 0.05;
+export const MILITIA_DEFENSE_POPULATION_FLOOR = 5000;
 export const COORDINATION_PENALTY_2 = 0.9;
 export const COORDINATION_PENALTY_3PLUS = 0.8;
 export const STACKING_DEFENDER_SUPPORT = 0.3;
+
+export function computeMilitiaDefensePower(osidPopulation?: number | null): number {
+    const populationBasis = Math.max(MILITIA_DEFENSE_POPULATION_FLOOR, osidPopulation ?? MILITIA_DEFENSE_POPULATION_FLOOR);
+    return populationBasis * MILITIA_DEFENSE_RATIO * 0.25;
+}
 
 /** Offensive concentration bonus — multi-brigade attacks coordinate for extra effectiveness. */
 export const CONCENTRATION_BONUS_PER_BRIGADE = 0.10;

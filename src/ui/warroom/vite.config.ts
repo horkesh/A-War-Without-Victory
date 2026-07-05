@@ -10,6 +10,7 @@ const publicDir = resolve(__dirname, 'public');
 // Fallback roots for /data/ and /assets/: config dir then cwd (so "npm run dev:warroom" from repo root finds data/)
 const projectRootFromConfig = resolve(__dirname, '../../..');
 const projectRootFromCwd = typeof process !== 'undefined' && process.cwd ? process.cwd() : projectRootFromConfig;
+const browserChildProcessShim = resolve(__dirname, '../map/shims/browserChildProcessShim.ts');
 
 const standaloneHtmlPath = resolve(__dirname, 'map_viewer_standalone.html');
 
@@ -102,6 +103,7 @@ export default defineConfig({
     build: {
         outDir: resolve(__dirname, '../../../dist/warroom'),
         emptyOutDir: true,
+        chunkSizeWarningLimit: 900,
         rollupOptions: {
             input: {
                 main: resolve(__dirname, './index.html'),
@@ -112,7 +114,9 @@ export default defineConfig({
     },
     resolve: {
         alias: [
-            { find: '@', replacement: resolve(__dirname, '../../../src') }
+            { find: '@', replacement: resolve(__dirname, '../../../src') },
+            { find: 'child_process', replacement: browserChildProcessShim },
+            { find: 'node:child_process', replacement: browserChildProcessShim }
         ]
     }
 });

@@ -397,6 +397,8 @@ export const OFFENSIVE_PARA_SPAWN_RATE: Record<string, number> = {
     HRHB: 0.15,
     RBiH: 0.0,
 };
+/** Per-faction per-turn cap for offensive paramilitary deployments. */
+export const OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN = 2;
 /** Civilian casualty rate for offensive sweeps — higher than rear pocket (systematic ethnic cleansing). */
 export const OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE = 0.05;
 /** Max defender personnel for paramilitary to overwhelm. Above this, paramilitaries retreat with heavy casualties. */
@@ -424,6 +426,8 @@ export const PARAMILITARY_SPAWN_RATE: Record<string, number> = {
     HRHB: 0.55,  // Moderate — HOS, Croatian volunteers
     RBiH: 0.30   // Low — Patriotska Liga, Green Berets (mostly integrated early)
 };
+/** Per-faction per-turn cap for rear-pocket paramilitary cleanup deployments. */
+export const PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN = 2;
 /** Paramilitary casualty rate: fraction of unit killed in action during sweep. */
 export const PARAMILITARY_CASUALTY_RATE = 0.08;
 /** Civilian casualties inflicted by paramilitary sweep (as fraction of OSID population). War crimes implicit. */

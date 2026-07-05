@@ -30,8 +30,48 @@ describe('warroom new campaign flow truth', () => {
     expect(end).toBeGreaterThan(start);
     const desktopStartBlock = warroomSource.slice(start, end);
     expect(desktopStartBlock.indexOf('this.freshCampaignIntroPending = true;')).toBeLessThan(
-      desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson);"),
+      desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson, { showShell: false });"),
     );
+    expect(desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson, { showShell: false });")).toBeLessThan(
+      desktopStartBlock.indexOf("void this.showTacticalMapScene('warroom');"),
+    );
+    expect(desktopStartBlock).toContain("void this.showTacticalMapScene('warroom');");
+  });
+
+  it('posts a fresh-campaign reset message into the embedded tactical map after iframe load or reuse', () => {
+    const warroomSource = readRepoFile('src', 'ui', 'warroom', 'warroom.ts');
+
+    expect(warroomSource).toContain('postFreshCampaignStartedToTacticalMap');
+    expect(warroomSource).toContain("type: 'awwv-shell:fresh-campaign-started'");
+
+    const loadStart = warroomSource.indexOf('iframe.onload = () => {');
+    const loadEnd = warroomSource.indexOf('};', loadStart);
+    expect(loadStart).toBeGreaterThanOrEqual(0);
+    expect(loadEnd).toBeGreaterThan(loadStart);
+    expect(warroomSource.slice(loadStart, loadEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
+
+    const readyStart = warroomSource.indexOf('} else if (this.tacticalMapReady) {');
+    const readyEnd = warroomSource.indexOf('// Scene swap', readyStart);
+    expect(readyStart).toBeGreaterThanOrEqual(0);
+    expect(readyEnd).toBeGreaterThan(readyStart);
+    expect(warroomSource.slice(readyStart, readyEnd)).toContain('this.postFreshCampaignStartedToTacticalMap();');
+  });
+
+  it('the React map handles fresh Warroom campaign messages as a hard first-hour reset without leaving the Warroom shell', () => {
+    const appSource = readRepoFile('src', 'ui', 'map', 'App.tsx');
+
+    expect(appSource).toContain("event.data?.type === 'awwv-shell:fresh-campaign-started'");
+    const handlerStart = appSource.indexOf("event.data?.type === 'awwv-shell:fresh-campaign-started'");
+    const handlerEnd = appSource.indexOf("if (event.data?.type !== 'awwv-shell:handoff') return;", handlerStart);
+    expect(handlerStart).toBeGreaterThanOrEqual(0);
+    expect(handlerEnd).toBeGreaterThan(handlerStart);
+    const handler = appSource.slice(handlerStart, handlerEnd);
+    expect(handler).toContain("view === 'warroom' ? 'warroom' : 'game'");
+    expect(handler).toContain('setOpeningBriefDismissed(false)');
+    expect(handler).toContain('setPeaceWarTransitionSeen(false)');
+    expect(handler).toContain('setActiveEventDecisionId(null)');
+    expect(handler).toContain('setRecentlyAcceptedEventDecisionId(null)');
+    expect(handler).toContain('setLoadError(null)');
   });
 
   it('does not render a dead scenario-selection overlay when only apr_1992 is live', () => {

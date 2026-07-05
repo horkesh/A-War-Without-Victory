@@ -56,7 +56,7 @@ import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from '.
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
-import { setSettlementLabelData } from '../layers/buildTacticalDeckLayers';
+import { setSettlementLabelData, type DeckViewportClip } from '../layers/buildTacticalDeckLayers';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
@@ -191,11 +191,11 @@ import { pickNearestFormationAtPoint, resolveDeckFormationClickTarget } from './
 import {
   resolveMapFormationInspectionTarget,
   resolveMapSectorInspectionTarget,
-  resolveMapSettlementInspectionTarget,
 } from './mapSelectionRouting';
 import { getSyntheticEnemyContactOsid } from '../components/tooltipPlayerSafe';
 import {
   deckLayerRenderInputsChanged,
+  shouldPreserveDeckFormationCounters,
   shouldRunPulseAnimation,
   type DeckLayerRenderInputs,
 } from './renderChurnGuards';
@@ -212,6 +212,7 @@ const BOSNIA_MAX_BOUNDS: [[number, number], [number, number]] = [
 ];
 const TACTICAL_MAP_PITCH_DEGREES = 30;
 const DEFAULT_ZOOM = 8;
+const TACTICAL_MAP_EDGE_PADDING = { top: 124, right: 420, bottom: 184, left: 380 };
 const SIDEBAR_HOVER_LAYER_ID = 'sidebar-hover-outline';
 const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
 type MapSourceSpecification = SourceSpecification | CanvasSourceSpecification;
@@ -229,9 +230,9 @@ function inspectSectorFromMap(sectorId: string, properties?: Record<string, unkn
   inspectOnField(store, target.kind === 'field-sector-in-corps' && osid ? { ...target, osid } : target);
 }
 
-function inspectSettlementFromMap(osid: string, sectorId?: string | null) {
+function inspectSettlementFromMap(osid: string, _sectorId?: string | null) {
   const store = useGameStore.getState();
-  inspectOnField(store, resolveMapSettlementInspectionTarget(osid, store.loadedGameState, sectorId));
+  inspectOnField(store, { kind: 'field-settlement', osid });
 }
 
 function isEnemyContactMarker(properties?: Record<string, unknown> | null): boolean {
@@ -294,6 +295,126 @@ function safeHasLayer(
     console.error('[MapContainer] safeHasLayer failed', { layerId, error: e });
     return false;
   }
+}
+
+function hideNativeFormationSymbolLayersWhenDeckOwnsCounters(map: maplibregl.Map): void {
+  if (!DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters) return;
+  safeSetLayoutVisibility(map, FORMATION_MARKERS_LAYER_ID, false);
+  safeSetLayoutVisibility(map, FORMATION_LABELS_LAYER_ID, false);
+  if (safeHasLayer(map, FORMATION_MARKERS_LAYER_ID)) {
+    map.setPaintProperty(FORMATION_MARKERS_LAYER_ID, 'icon-opacity', 0);
+  }
+  if (safeHasLayer(map, FORMATION_LABELS_LAYER_ID)) {
+    map.setPaintProperty(FORMATION_LABELS_LAYER_ID, 'text-opacity', 0);
+  }
+  if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+    safeSetLayoutVisibility(map, FORMATION_WHITE_OVERLAY_LAYER_ID, false);
+    map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0);
+  }
+  if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+    map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0);
+  }
+}
+
+function buildDeckCounterViewportPadding(canvas: HTMLCanvasElement): DeckViewportClip['padding'] {
+  const mapRect = canvas.getBoundingClientRect();
+  const padding = { top: 72, right: 24, bottom: 64, left: 24 };
+  const minimumVisibleBand = 220;
+  const margin = 16;
+  const blockedHorizontalIntervals: Array<[number, number]> = [];
+  const occluders = Array.from(document.querySelectorAll<HTMLElement>('[data-awwv-counter-occluder="true"]'));
+
+  for (const el of occluders) {
+    const style = window.getComputedStyle(el);
+    if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) continue;
+    const rect = el.getBoundingClientRect();
+    const overlapsX = rect.right > mapRect.left && rect.left < mapRect.right;
+    const overlapsY = rect.bottom > mapRect.top && rect.top < mapRect.bottom;
+    if (!overlapsX || !overlapsY) continue;
+
+    const relLeft = Math.max(0, rect.left - mapRect.left);
+    const relRight = Math.min(mapRect.width, rect.right - mapRect.left);
+    const relTop = Math.max(0, rect.top - mapRect.top);
+    const relBottom = Math.min(mapRect.height, rect.bottom - mapRect.top);
+    const occluderHeight = relBottom - relTop;
+    const spansTacticalBand = occluderHeight >= Math.min(360, mapRect.height * 0.35)
+      && relBottom >= padding.top + 160
+      && relTop <= mapRect.height - padding.bottom - 160;
+    if (spansTacticalBand) blockedHorizontalIntervals.push([relLeft, relRight]);
+
+    if (rect.top <= mapRect.top + 96) {
+      padding.top = Math.max(padding.top, Math.ceil(relBottom + margin));
+    }
+    if (rect.bottom >= mapRect.bottom - 96) {
+      padding.bottom = Math.max(padding.bottom, Math.ceil(mapRect.height - relTop + margin));
+    }
+  }
+
+  if (blockedHorizontalIntervals.length > 0) {
+    blockedHorizontalIntervals.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const merged: Array<[number, number]> = [];
+    for (const [left, right] of blockedHorizontalIntervals) {
+      const last = merged[merged.length - 1];
+      if (!last || left > last[1]) {
+        merged.push([left, right]);
+      } else {
+        last[1] = Math.max(last[1], right);
+      }
+    }
+
+    let bestGap: [number, number] = [padding.left, mapRect.width - padding.right];
+    let cursor = 0;
+    for (const [left, right] of merged) {
+      if (left > cursor && left - cursor > bestGap[1] - bestGap[0]) bestGap = [cursor, left];
+      cursor = Math.max(cursor, right);
+    }
+    if (mapRect.width > cursor && mapRect.width - cursor > bestGap[1] - bestGap[0]) {
+      bestGap = [cursor, mapRect.width];
+    }
+    if (bestGap[1] - bestGap[0] >= minimumVisibleBand) {
+      padding.left = Math.max(padding.left, Math.ceil(bestGap[0] + margin));
+      padding.right = Math.max(padding.right, Math.ceil(mapRect.width - bestGap[1] + margin));
+    }
+  }
+
+  if (padding.left + padding.right > mapRect.width - minimumVisibleBand) {
+    padding.right = Math.max(24, Math.floor(mapRect.width - minimumVisibleBand - padding.left));
+  }
+  if (padding.top + padding.bottom > mapRect.height - minimumVisibleBand) {
+    padding.bottom = Math.max(24, Math.floor(mapRect.height - minimumVisibleBand - padding.top));
+  }
+
+  return padding;
+}
+
+function buildDeckCounterViewportOccluders(canvas: HTMLCanvasElement): NonNullable<DeckViewportClip['occluders']> {
+  const mapRect = canvas.getBoundingClientRect();
+  const margin = 6;
+  return Array.from(document.querySelectorAll<HTMLElement>('[data-awwv-counter-occluder="true"]'))
+    .flatMap((el) => {
+      const style = window.getComputedStyle(el);
+      if (style.visibility === 'hidden' || style.display === 'none' || Number(style.opacity) === 0) return [];
+      const rect = el.getBoundingClientRect();
+      const overlapsX = rect.right > mapRect.left && rect.left < mapRect.right;
+      const overlapsY = rect.bottom > mapRect.top && rect.top < mapRect.bottom;
+      if (!overlapsX || !overlapsY) return [];
+      return [{
+        left: Math.max(0, rect.left - mapRect.left - margin),
+        top: Math.max(0, rect.top - mapRect.top - margin),
+        right: Math.min(mapRect.width, rect.right - mapRect.left + margin),
+        bottom: Math.min(mapRect.height, rect.bottom - mapRect.top + margin),
+      }];
+    });
+}
+
+function buildCounterAwareCameraPadding(map: maplibregl.Map): DeckViewportClip['padding'] {
+  const dynamic = buildDeckCounterViewportPadding(map.getCanvas());
+  return {
+    top: Math.max(TACTICAL_MAP_EDGE_PADDING.top, dynamic.top),
+    right: Math.max(TACTICAL_MAP_EDGE_PADDING.right, dynamic.right),
+    bottom: Math.max(TACTICAL_MAP_EDGE_PADDING.bottom, dynamic.bottom),
+    left: Math.max(TACTICAL_MAP_EDGE_PADDING.left, dynamic.left),
+  };
 }
 
 function stripPmtilesSourcesForCiFallback(
@@ -390,7 +511,6 @@ const FOG_FILL_LAYER_ID = 'fog-fill';
 const BATTLE_MARKERS_SOURCE_ID = 'battle-markers';
 const BATTLE_MARKERS_LAYER_ID = 'battle-markers-pulse';
 const MAJOR_CITY_LABELS_SOURCE_ID = 'major-city-labels';
-const MAJOR_CITY_LABELS_LAYER_ID = 'major-city-labels-symbols';
 /** OSID polygon outlines (settlement boundaries); toggled — default off in style + store. */
 const OSID_CONTROL_OUTLINE_LAYER_ID = 'osid-control-outline';
 /** 1990 adm3 municipality boundaries (`bih_adm3_1990.geojson`); same toggle as OSID outlines. */
@@ -433,6 +553,7 @@ function composeDeckLayersForCurrentSelection(args: {
   selectedCorpsFrontSectorId: string | null;
   hoveredSectorId: string | null;
   hoveredCorpsId: string | null;
+  viewportClip?: DeckViewportClip;
 }) {
   return composeTacticalDeckLayers({
     formationsGeoJson: args.formationsGeoJson,
@@ -461,6 +582,7 @@ function composeDeckLayersForCurrentSelection(args: {
       selectedCorpsId: args.selectedCorpsId,
       selectedCorpsFrontSectorId: args.selectedCorpsFrontSectorId,
     }),
+    viewportClip: args.viewportClip,
   });
 }
 
@@ -585,6 +707,7 @@ export function MapContainer() {
   const formationsVisible = useGameStore((s) => s.formationsVisible);
   const labelsVisible = useGameStore((s) => s.labelsVisible);
   const mapMode = useGameStore((s) => s.mapMode);
+  const minimapVisible = useGameStore((s) => s.minimapVisible);
   const sectorsVisible = useGameStore((s) => s.sectorsVisible);
   // In live mode, front line visibility follows sectorsVisible (fronts ARE sectors).
   const effectiveFrontsVisible = devMode ? frontsVisible : sectorsVisible;
@@ -628,14 +751,48 @@ export function MapContainer() {
     const overlay = deckOverlayRef.current;
     const centroidLookup = args.centroidLookup ?? osidCentroidsRef.current;
     if (!overlay) return;
+    const map = mapRef.current;
+    const canvas = map?.getCanvas();
+    const counterViewportPadding = map ? buildCounterAwareCameraPadding(map) : TACTICAL_MAP_EDGE_PADDING;
+    const counterViewportOccluders = map && canvas ? buildDeckCounterViewportOccluders(canvas) : [];
+    const counterOccluderSignature = counterViewportOccluders
+      .map((rect) => `${Math.round(rect.left)},${Math.round(rect.top)},${Math.round(rect.right)},${Math.round(rect.bottom)}`)
+      .join(';');
+    const viewportSignature = map && canvas
+      ? [
+        canvas.clientWidth,
+        canvas.clientHeight,
+        counterViewportPadding.top,
+        counterViewportPadding.right,
+        counterViewportPadding.bottom,
+        counterViewportPadding.left,
+        map.getCenter().lng.toFixed(5),
+        map.getCenter().lat.toFixed(5),
+        map.getZoom().toFixed(3),
+        counterOccluderSignature,
+      ].join('|')
+      : undefined;
 
     const nextInputs: DeckLayerRenderInputs = {
       ...args,
       centroidLookup,
+      viewportSignature,
     };
     if (!deckLayerRenderInputsChanged(lastDeckLayerInputsRef.current, nextInputs)) {
       return;
     }
+    if (shouldPreserveDeckFormationCounters(lastDeckLayerInputsRef.current, nextInputs)) {
+      return;
+    }
+    const viewportClip: DeckViewportClip | undefined = map && canvas
+      ? {
+        width: canvas.clientWidth,
+        height: canvas.clientHeight,
+        padding: counterViewportPadding,
+        occluders: counterViewportOccluders,
+        project: (coordinates) => map.project(coordinates),
+      }
+      : undefined;
 
     overlay.setProps({
       layers: composeDeckLayersForCurrentSelection({
@@ -700,6 +857,7 @@ export function MapContainer() {
         selectedCorpsFrontSectorId: nextInputs.selectedCorpsFrontSectorId,
         hoveredSectorId: nextInputs.hoveredSectorId,
         hoveredCorpsId: nextInputs.hoveredCorpsId,
+        viewportClip,
       }),
     });
     lastDeckLayerInputsRef.current = nextInputs;
@@ -904,10 +1062,11 @@ export function MapContainer() {
         console.error('[MapLibre] map error:', e.error);
       });
       mapRef.current = map;
+      map.setPadding(buildCounterAwareCameraPadding(map));
       ensureTacticalIcons(map);
 
       const deckOverlay = new MapboxOverlay({
-        interleaved: true,
+        interleaved: false,
         layers: [],
         onClick: (info: TacticalDeckPickingInfo) => {
           const store = useGameStore.getState();
@@ -979,6 +1138,33 @@ export function MapContainer() {
           center: [map.getCenter().lng, map.getCenter().lat],
           zoom: map.getZoom(),
         });
+        if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
+          const {
+            formationsVisible: fVis,
+            labelsVisible: lVis,
+            loadedGameState,
+            ghostMapVisible: gmVis,
+            selectedFormationId: deckSelectedFormationId,
+            selectedCorpsId: deckSelectedCorpsId,
+            selectedCorpsFrontSectorId: deckSelectedSectorId,
+            hoveredSectorId: deckHoveredSectorId,
+            hoveredCorpsId: deckHoveredCorpsId,
+          } = useGameStore.getState();
+          applyDeckLayerSelection({
+            formationsGeoJson: lastFormationsGeoJsonRef.current,
+            labelsVisible: lVis,
+            formationsVisible: fVis,
+            zoom: map.getZoom(),
+            loadedGameState,
+            ghostMapVisible: gmVis,
+            ghostMapData: ghostMapDataRef.current ?? undefined,
+            selectedFormationId: deckSelectedFormationId,
+            selectedCorpsId: deckSelectedCorpsId,
+            selectedCorpsFrontSectorId: deckSelectedSectorId,
+            hoveredSectorId: deckHoveredSectorId,
+            hoveredCorpsId: deckHoveredCorpsId,
+          });
+        }
       };
       map.on('moveend', reportViewport);
       map.on('load', reportViewport);
@@ -1025,14 +1211,14 @@ export function MapContainer() {
 
       // Minimap: register panToCenter callback
       useGameStore.getState().setPanToCenter((center: [number, number]) => {
-        map.easeTo({ center, duration: 400, essential: true });
+        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 400, essential: true });
       });
 
       // Operations panel: register panToOsid callback
       useGameStore.getState().setPanToOsid((osid: string) => {
         const center = osidCentroidsRef.current.get(osid);
         if (!center) return;
-        map.easeTo({ center, duration: 420, essential: true });
+        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 420, essential: true });
       });
 
       setMapReady(true);
@@ -1619,8 +1805,13 @@ export function MapContainer() {
                       });
                     }
 
-                    // Keep empty source for sector highlight rings if needed, but disable MapLibre native formation symbols
-                    if (m.getSource('formations')) (m.getSource('formations') as GeoJSONSource).setData(formationsGeoJson);
+                    // Deck owns formation counters. Keep the MapLibre formation source empty so
+                    // native symbol/pulse layers cannot draw unclamped duplicate counters.
+                    if (m.getSource('formations')) {
+                      (m.getSource('formations') as GeoJSONSource).setData(
+                        DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters ? EMPTY_GEOJSON : formationsGeoJson,
+                      );
+                    }
                     // order-arrows source stays empty (arrows removed)
 
                     // Operation arrows: sweeping military-style arrows for active operations
@@ -1843,8 +2034,7 @@ export function MapContainer() {
 
                     // Only hide MapLibre formation layers when Deck draws counters (avoids double draw + restores picks when false).
                     if (DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters) {
-                      safeSetLayoutVisibility(m, FORMATION_MARKERS_LAYER_ID, false);
-                      safeSetLayoutVisibility(m, FORMATION_LABELS_LAYER_ID, false);
+                      hideNativeFormationSymbolLayersWhenDeckOwnsCounters(m);
                     }
                     // Force render frame to process newly-added GeoJSON sources
                     // Without this, optional overlay sources like enclave-* may never tile,
@@ -1893,48 +2083,6 @@ export function MapContainer() {
       }
     };
   }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid, locale]);
-
-  // Major-mun names (game data): glyphs need local font stack; layer on top so not buried under lines.
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!mapReady || !map) return;
-
-    const ensureMajorCityLabelLayer = () => {
-      if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
-
-      safeEnsureSource(map, MAJOR_CITY_LABELS_SOURCE_ID, { type: 'geojson', data: EMPTY_GEOJSON });
-      if (!safeHasLayer(map, MAJOR_CITY_LABELS_LAYER_ID)) {
-        map.addLayer({
-          id: MAJOR_CITY_LABELS_LAYER_ID,
-          type: 'symbol',
-          source: MAJOR_CITY_LABELS_SOURCE_ID,
-          minzoom: 7,
-          layout: {
-            'text-field': ['get', 'name'],
-            'text-font': ['Open Sans Bold'],
-            'text-size': ['interpolate', ['linear'], ['zoom'], 7, 10, 9, 12, 11, 15, 14, 20],
-            'text-anchor': 'center',
-            'text-allow-overlap': true,
-            'text-ignore-placement': true,
-            'text-transform': 'uppercase',
-            'text-letter-spacing': 0.1,
-          },
-          paint: {
-            'text-color': 'rgba(235, 225, 205, 0.95)',
-            'text-halo-color': 'rgba(10, 8, 6, 0.9)',
-            'text-halo-width': 2.0,
-          },
-        });
-      }
-      return true;
-    };
-
-    if (ensureMajorCityLabelLayer()) return;
-    const poll = setInterval(() => {
-      if (ensureMajorCityLabelLayer()) clearInterval(poll);
-    }, 200);
-    return () => clearInterval(poll);
-  }, [mapReady]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -2225,7 +2373,11 @@ export function MapContainer() {
         });
       }
       // C.3c: Unit marker color pulse overlay (on formations source)
-      if (map.getSource('formations') && !safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+      if (
+        !DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters
+        && map.getSource('formations')
+        && !safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)
+      ) {
         map.addLayer({
           id: FORMATION_WHITE_OVERLAY_LAYER_ID,
           type: 'symbol',
@@ -2243,7 +2395,11 @@ export function MapContainer() {
         });
       }
       // C.3b: Sector Unit Pulse (Audit recommendation: units turn white and pulse)
-      if (map.getSource('formations') && !safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+      if (
+        !DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters
+        && map.getSource('formations')
+        && !safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)
+      ) {
         map.addLayer({
           id: SECTOR_UNIT_PULSE_LAYER_ID,
           type: 'circle',
@@ -2421,7 +2577,9 @@ export function MapContainer() {
           ? ['==', ['get', 'sector_id'], selectedCorpsFrontSectorId]
           : ['==', ['get', 'sector_id'], '__none__']) as FilterSpecification;
 
-      if (!formationOnlySelected) {
+      if (DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters) {
+        hideNativeFormationSymbolLayersWhenDeckOwnsCounters(map);
+      } else if (!formationOnlySelected) {
         try {
           if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
             map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, unitFilter);
@@ -2531,15 +2689,19 @@ export function MapContainer() {
     const fm = loadedGameState.formations.find(f => f.id === selectedFormationId);
     const subSegId = fm?.assigned_sub_segment_id;
 
-    // White icon on selected brigade
-    if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
-      map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
-      map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0.98);
-    }
-    if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
-      map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
-      map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
-      map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', ['interpolate', ['linear'], ['zoom'], 6, 12, 10, 16, 14, 22]);
+    if (DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters) {
+      hideNativeFormationSymbolLayersWhenDeckOwnsCounters(map);
+    } else {
+      // White icon on selected brigade
+      if (safeHasLayer(map, FORMATION_WHITE_OVERLAY_LAYER_ID)) {
+        map.setFilter(FORMATION_WHITE_OVERLAY_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
+        map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0.98);
+      }
+      if (safeHasLayer(map, SECTOR_UNIT_PULSE_LAYER_ID)) {
+        map.setFilter(SECTOR_UNIT_PULSE_LAYER_ID, ['==', ['get', 'id'], selectedFormationId] as maplibregl.FilterSpecification);
+        map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-opacity', 0.6);
+        map.setPaintProperty(SECTOR_UNIT_PULSE_LAYER_ID, 'circle-radius', ['interpolate', ['linear'], ['zoom'], 6, 12, 10, 16, 14, 22]);
+      }
     }
 
     // AoR sub-segment line on dedicated layers
@@ -3065,6 +3227,7 @@ export function MapContainer() {
       if (safeHasLayer(map, FORMATION_HOME_BADGE_LAYER_ID)) {
         safeSetLayoutVisibility(map, FORMATION_HOME_BADGE_LAYER_ID, formationsVisible);
       }
+      hideNativeFormationSymbolLayersWhenDeckOwnsCounters(map);
       // Map mode visibility: dedicated overlay per mode.
       const showPolitical = mapMode === 'political';
       if (!safeSetLayoutVisibility(map, 'osid-control-fill', showPolitical)) allExist = false;
@@ -3156,27 +3319,57 @@ export function MapContainer() {
     loadedGameState?.controlBySettlement,
   ]);
 
-  // Ghost Map toggle: rebuild Deck.gl layers when ghostMapVisible changes
+  // Ghost Map / map chrome changes: rebuild Deck.gl layers after React lays out
+  // panels/minimap so counter clipping uses current occluder rectangles.
   const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);
   useEffect(() => {
-    const map = mapRef.current;
-    if (!mapReady || !map || !deckOverlayRef.current || !lastFormationsGeoJsonRef.current) return;
-    const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState: gs } = useGameStore.getState();
-    applyDeckLayerSelection({
-      formationsGeoJson: lastFormationsGeoJsonRef.current,
-      labelsVisible: lVis,
-      formationsVisible: fVis,
-      zoom: map.getZoom(),
-      loadedGameState: gs,
-      ghostMapVisible,
-      ghostMapData: ghostMapDataRef.current ?? undefined,
-      selectedFormationId,
-      selectedCorpsId,
-      selectedCorpsFrontSectorId,
-      hoveredSectorId,
-      hoveredCorpsId,
+    let cancelled = false;
+    let firstFrame = 0;
+    let secondFrame = 0;
+    const timeouts: number[] = [];
+    const reapplyAfterLayout = () => {
+      const map = mapRef.current;
+      if (cancelled || !mapReady || !map || !deckOverlayRef.current || !lastFormationsGeoJsonRef.current) return;
+      const { formationsVisible: fVis, labelsVisible: lVis, loadedGameState: gs } = useGameStore.getState();
+      lastDeckLayerInputsRef.current = null;
+      applyDeckLayerSelection({
+        formationsGeoJson: lastFormationsGeoJsonRef.current,
+        labelsVisible: lVis,
+        formationsVisible: fVis,
+        zoom: map.getZoom(),
+        loadedGameState: gs,
+        ghostMapVisible,
+        ghostMapData: ghostMapDataRef.current ?? undefined,
+        selectedFormationId,
+        selectedCorpsId,
+        selectedCorpsFrontSectorId,
+        hoveredSectorId,
+        hoveredCorpsId,
+      });
+    };
+    firstFrame = requestAnimationFrame(() => {
+      secondFrame = requestAnimationFrame(reapplyAfterLayout);
     });
-  }, [mapReady, ghostMapVisible, selectedFormationId, selectedCorpsId, selectedCorpsFrontSectorId, hoveredSectorId, hoveredCorpsId]);
+    timeouts.push(window.setTimeout(reapplyAfterLayout, 120));
+    timeouts.push(window.setTimeout(reapplyAfterLayout, 320));
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(firstFrame);
+      cancelAnimationFrame(secondFrame);
+      for (const timeout of timeouts) window.clearTimeout(timeout);
+    };
+  }, [
+    mapReady,
+    ghostMapVisible,
+    minimapVisible,
+    formationsVisible,
+    labelsVisible,
+    selectedFormationId,
+    selectedCorpsId,
+    selectedCorpsFrontSectorId,
+    hoveredSectorId,
+    hoveredCorpsId,
+  ]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -3197,7 +3390,7 @@ export function MapContainer() {
       const center = lookup.get(targetOsid);
       if (center && lastPanTargetRef.current !== targetOsid) {
         lastPanTargetRef.current = targetOsid;
-        map.easeTo({ center, duration: 450, essential: true });
+        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 450, essential: true });
       }
       return;
     }
@@ -3226,7 +3419,7 @@ export function MapContainer() {
           const lats = coords.map(c => c[1]);
           map.fitBounds(
             [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
-            { padding: 80, maxZoom: 9, duration: 450 }
+            { padding: buildCounterAwareCameraPadding(map), maxZoom: 9, duration: 450 }
           );
         }
       }
@@ -3258,7 +3451,11 @@ export function MapContainer() {
             const maxLng = Math.max(...lngs);
             const minLat = Math.min(...lats);
             const maxLat = Math.max(...lats);
-            map.fitBounds([[minLng, minLat], [maxLng, maxLat]], { padding: 80, maxZoom: 10, duration: 450 });
+            map.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+              padding: buildCounterAwareCameraPadding(map),
+              maxZoom: 10,
+              duration: 450,
+            });
           }
         }
       }
@@ -3514,7 +3711,12 @@ export function MapContainer() {
       case 'Home':
       case 'End':
         e.preventDefault();
-        map.jumpTo({ center: BOSNIA_CENTER, zoom: DEFAULT_ZOOM, pitch: TACTICAL_MAP_PITCH_DEGREES });
+        map.jumpTo({
+          center: BOSNIA_CENTER,
+          zoom: DEFAULT_ZOOM,
+          pitch: TACTICAL_MAP_PITCH_DEGREES,
+          padding: buildCounterAwareCameraPadding(map),
+        });
         break;
       default:
         break;

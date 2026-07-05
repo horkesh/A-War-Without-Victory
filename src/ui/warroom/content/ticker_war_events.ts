@@ -34,14 +34,11 @@ function truncate(s: string): string {
 }
 
 /**
- * Format a settlement ID for display. Strips the "S" prefix and
- * uses the raw ID since we don't have a name lookup in ticker context.
- * Settlement IDs like "S100013" become "SECTOR 100013".
+ * Format a settlement reference for display. The ticker does not have a
+ * player-safe settlement name lookup, so never echo raw OSIDs/op ids.
  */
 function formatSettlement(sid: string | undefined): string {
-    if (!sid) return 'UNKNOWN SECTOR';
-    const numeric = sid.startsWith('S') ? sid.slice(1) : sid;
-    return `SECTOR ${numeric}`;
+    return sid ? 'A REPORTED SECTOR' : 'AN UNCONFIRMED SECTOR';
 }
 
 /**

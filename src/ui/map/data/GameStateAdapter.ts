@@ -3300,11 +3300,39 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
  * adapter only exposes it under a UI-friendly property name. Empty arrays
  * collapse to undefined to match the rest of the LoadedGameState contract.
  */
+function sanitizePendingEventDecision(decision: any): NonNullable<LoadedGameState['pendingEventDecisions']>[number] {
+    return {
+        event_id: String(decision.event_id ?? ''),
+        event_title: getPlayerSafeDecisionTitle(String(decision.event_title ?? '')),
+        ...(typeof decision.narrative === 'string' ? { narrative: decision.narrative } : {}),
+        ...(typeof decision.situation === 'string' ? { situation: decision.situation } : {}),
+        ...(typeof decision.staff_assessment === 'string' ? { staff_assessment: decision.staff_assessment } : {}),
+        ...(Array.isArray(decision.trigger_evidence) ? { trigger_evidence: decision.trigger_evidence.filter((item: unknown): item is string => typeof item === 'string') } : {}),
+        ...(typeof decision.category === 'string' ? { category: decision.category } : {}),
+        turn_fired: Number.isFinite(Number(decision.turn_fired)) ? Number(decision.turn_fired) : 0,
+        faction: String(decision.faction ?? ''),
+        requires_player_response: Boolean(decision.requires_player_response),
+        ...(typeof decision.historical_default_response_id === 'string' ? { historical_default_response_id: decision.historical_default_response_id } : {}),
+        ...(typeof decision.staff_recommended_response_id === 'string' ? { staff_recommended_response_id: decision.staff_recommended_response_id } : {}),
+        response_options: Array.isArray(decision.response_options)
+            ? decision.response_options.map((option: any) => ({
+                id: String(option.id ?? ''),
+                label: String(option.label ?? ''),
+                ...(typeof option.description === 'string' ? { description: option.description } : {}),
+                ...(option.historical_marker === 'historical_default' || option.historical_marker === 'counterfactual' ? { historical_marker: option.historical_marker } : {}),
+                effects: Array.isArray(option.effects) ? option.effects : [],
+                ...(Array.isArray(option.dimension_shifts) ? { dimension_shifts: option.dimension_shifts } : {}),
+            }))
+            : [],
+    };
+}
+
 function derivePendingEventDecisions(state: any, playerFaction: string | null): LoadedGameState['pendingEventDecisions'] {
-    const pending = state.military?.pending_event_decisions as
-        LoadedGameState['pendingEventDecisions'];
+    const pending = state.military?.pending_event_decisions as any[] | undefined;
     if (!pending || pending.length === 0) return undefined;
-    const scoped = pending.filter((decision) => playerFactionMatch(decision.faction, playerFaction));
+    const scoped = pending
+        .filter((decision) => playerFactionMatch(decision.faction, playerFaction))
+        .map(sanitizePendingEventDecision);
     return scoped.length > 0 ? scoped : undefined;
 }
 

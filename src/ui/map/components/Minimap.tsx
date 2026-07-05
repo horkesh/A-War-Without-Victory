@@ -10,6 +10,9 @@ import maplibregl from 'maplibre-gl';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection, Feature, Polygon } from 'geojson';
 import { useGameStore } from '../store/gameStore';
+import { loadOperationalSettlements } from '../data/DataLoader';
+import { buildControlGeoJSON } from '../map/builders/buildControlGeoJSON';
+import { buildFrontLinesGeoJSON } from '../map/builders/buildFrontLinesGeoJSON';
 import { Z } from '../../shared/zIndex';
 
 const MINIMAP_WIDTH = 250;
@@ -183,12 +186,9 @@ export const Minimap = React.memo(function Minimap() {
       const frontSource = map.getSource('minimap-fronts') as GeoJSONSource | undefined;
       if (!controlSource || !frontSource) return;
 
-      import('../data/DataLoader').then(async ({ loadOperationalSettlements }) => {
+      void (async () => {
         try {
           const geojson = await loadOperationalSettlements();
-          const { buildControlGeoJSON } = await import('../map/builders/buildControlGeoJSON');
-          const { buildFrontLinesGeoJSON } = await import('../map/builders/buildFrontLinesGeoJSON');
-
           const controlGeo = buildControlGeoJSON(geojson, loadedGameState.controlBySettlement);
           controlSource.setData(controlGeo);
 
@@ -197,7 +197,7 @@ export const Minimap = React.memo(function Minimap() {
         } catch (e) {
           console.warn('[Minimap] Failed to update data:', e);
         }
-      });
+      })();
     };
 
     if (map.loaded()) {
@@ -227,6 +227,7 @@ export const Minimap = React.memo(function Minimap() {
 
   return (
     <div
+      data-awwv-counter-occluder="true"
       style={{
         position: 'absolute',
         right: '1rem',

@@ -88,6 +88,93 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
     });
 
+    it('hides not-yet-faced future dilemma titles during an active campaign', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [firedEvent('rbih_state_identity')],
+                gameOver: false,
+                turn: 0,
+                dilemmaSpine: [
+                    {
+                        dilemmaId: 'rbih_state_identity',
+                        title: 'What Is Bosnia?',
+                        essayId: 'essay_independence_referendum_1992',
+                        sensitive: false,
+                        faced: true,
+                        chosenResponseId: 'civic',
+                        chosenBranchLabel: 'Civic multi-ethnic republic',
+                        decisionTurn: 0,
+                    },
+                    {
+                        dilemmaId: 'srebrenica_demilitarization',
+                        title: 'The Demilitarization of Srebrenica',
+                        essayId: null,
+                        sensitive: true,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                    {
+                        dilemmaId: 'vance_owen_plan',
+                        title: 'The Vance-Owen Peace Plan',
+                        essayId: null,
+                        sensitive: false,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                    {
+                        dilemmaId: 'contact_group_plan',
+                        title: 'The Contact Group Plan',
+                        essayId: null,
+                        sensitive: false,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                ],
+            },
+        };
+
+        renderPanel();
+
+        const panel = screen.getByTestId('codex-panel');
+        expect(screen.getByText('What Is Bosnia?')).toBeTruthy();
+        expect(panel.textContent).not.toContain('The Demilitarization of Srebrenica');
+        expect(panel.textContent).not.toContain('The Vance-Owen Peace Plan');
+        expect(panel.textContent).not.toContain('The Contact Group Plan');
+        expect(screen.queryAllByTestId('codex-dilemma-row')).toHaveLength(1);
+    });
+
+    it('allows the full dilemma spine after game over as historical reflection', () => {
+        storeState = {
+            loadedGameState: {
+                firedEvents: [],
+                gameOver: true,
+                turn: 188,
+                dilemmaSpine: [
+                    {
+                        dilemmaId: 'vance_owen_plan',
+                        title: 'The Vance-Owen Peace Plan',
+                        essayId: null,
+                        sensitive: false,
+                        faced: false,
+                        chosenResponseId: null,
+                        chosenBranchLabel: null,
+                        decisionTurn: null,
+                    },
+                ],
+            },
+        };
+
+        renderPanel();
+
+        expect(screen.getByText('The Vance-Owen Peace Plan')).toBeTruthy();
+    });
+
     it('localizes BCS Codex dilemma and history-comparison chrome without translating authored labels', () => {
         setLocale('bcs');
         storeState = {
@@ -104,26 +191,6 @@ describe('CodexPanel dynamic essay proof', () => {
                         chosenResponseId: 'appeal',
                         chosenBranchLabel: 'Appeal for relief',
                         decisionTurn: 12,
-                    },
-                    {
-                        dilemmaId: 'locked_essay',
-                        title: 'Unopened linked decision',
-                        essayId: 'essay_battle_of_the_barracks_sarajevo',
-                        sensitive: false,
-                        faced: false,
-                        chosenResponseId: null,
-                        chosenBranchLabel: null,
-                        decisionTurn: null,
-                    },
-                    {
-                        dilemmaId: 'no_essay',
-                        title: 'Decision without essay',
-                        essayId: null,
-                        sensitive: false,
-                        faced: false,
-                        chosenResponseId: null,
-                        chosenBranchLabel: null,
-                        decisionTurn: null,
                     },
                 ],
                 distanceFromHistory: {
@@ -154,11 +221,8 @@ describe('CodexPanel dynamic essay proof', () => {
         const panel = screen.getByTestId('codex-panel');
         expect(screen.getByText('Izbori koji su oblikovali ovaj rat')).toBeTruthy();
         expect(screen.getByText('Suočeno')).toBeTruthy();
-        expect(screen.getAllByText('Još ne').length).toBeGreaterThanOrEqual(1);
         expect(screen.getByText(/Izabrano:/)).toBeTruthy();
         expect(screen.getByText('Čitaj esej')).toBeTruthy();
-        expect(screen.getByText('Zaključano')).toBeTruthy();
-        expect(screen.getByText('Nema eseja')).toBeTruthy();
         expect(screen.getByText('Vaš rat i historija')).toBeTruthy();
         expect(screen.getByText('Vaše')).toBeTruthy();
 

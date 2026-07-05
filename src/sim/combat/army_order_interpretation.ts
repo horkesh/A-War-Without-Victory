@@ -52,16 +52,29 @@ import { getArmyCommander } from './officer_system.js';
 import { OPERATION_OPPORTUNITY_CATALOG, evaluateAxes, isOpportunityEligible, buildProposalId } from './operation_opportunities.js';
 import type { OperationOpportunityDef } from './operation_opportunities.js';
 
-// node:fs / node:path imported only for the env-flag-gated jsonl writer used
-// by C2 telemetry (`emitC2TelemetryEvent` / `flushC2TurnTelemetry` below).
-// They are dead-code-eliminable when the C2 flag is OFF — the writer's first
-// line is `if (C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED) return;` — but ESM
-// forbids dynamic require() so we name the modules here. UI builds (Electron
-// renderer / Vite map) never import this file; it is a sim-only module.
-// Mirrors the precedent established in src/sim/combat/corps_front_sectors.ts
-// (LANE-NIGHTSHIFT-SECTOR-PARTITION-INSTRUMENTATION).
-import * as _fsModule from 'node:fs';
-import * as _pathModule from 'node:path';
+type NodeFsSync = {
+    existsSync(path: string): boolean;
+    mkdirSync(path: string, options?: { recursive?: boolean }): unknown;
+    appendFileSync(path: string, data: string, options?: { encoding?: BufferEncoding } | BufferEncoding): void;
+};
+
+type NodePathSync = {
+    join(...paths: string[]): string;
+};
+
+type ProcessWithBuiltinModule = NodeJS.Process & {
+    getBuiltinModule?: (id: string) => unknown;
+};
+
+const nodeProcess = (globalThis as { process?: ProcessWithBuiltinModule }).process;
+
+function getNodeBuiltinModule<T>(id: string): T {
+    const mod = nodeProcess?.getBuiltinModule?.(id);
+    if (!mod) {
+        throw new Error(`Node builtin ${id} is unavailable; C2 telemetry can only flush in Node.`);
+    }
+    return mod as T;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants (DDR-locked per panel defaults table at DDR §"AI-officers
@@ -178,7 +191,8 @@ const C2_TELEMETRY_SCHEMA_VERSION = 1;
  * Exposed so tests can verify flag-gating without touching env globals.
  */
 export function isC2TelemetryDisabled(): boolean {
-    return process.env.C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED === 'true';
+    if (!nodeProcess) return true;
+    return nodeProcess.env.C_LANE_CORPS_DIRECTIVE_TELEMETRY_DISABLED === 'true';
 }
 
 /**
@@ -289,9 +303,10 @@ function flushC2TurnTelemetry(): void {
     if (!buffer) return;
     if (buffer.applications.length === 0 && buffer.factionsWithActiveChain.size === 0) return;
 
-    const fs = _fsModule;
-    const path = _pathModule;
-    const cwd = process.cwd();
+    const fs = getNodeBuiltinModule<NodeFsSync>('node:fs');
+    const path = getNodeBuiltinModule<NodePathSync>('node:path');
+    const cwd = nodeProcess?.cwd();
+    if (!cwd) return;
     const outDir = path.join(cwd, 'data', 'derived', '_debug');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
     const outPath = path.join(outDir, 'c_lane_corps_directive_telemetry.jsonl');

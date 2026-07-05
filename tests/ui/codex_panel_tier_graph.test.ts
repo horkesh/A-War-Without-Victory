@@ -87,11 +87,11 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         renderPanel();
         fireEvent.click(screen.getByText('1995'));
 
-        expect(screen.getByText('Gated Downstream Essay')).toBeTruthy();
-        expect(screen.getByText('Unlocks after: ev_not_fired')).toBeTruthy();
+        expect(screen.getByText('Locked historical entry')).toBeTruthy();
+        expect(screen.getByText('Unlocks after another campaign event')).toBeTruthy();
 
         // The hint row is rendered as a disabled button (locked-hint state).
-        const hintRow = screen.getByText('Gated Downstream Essay').closest('button');
+        const hintRow = screen.getByText('Locked historical entry').closest('button');
         expect(hintRow).toBeTruthy();
         expect((hintRow as HTMLButtonElement).disabled).toBe(true);
     });

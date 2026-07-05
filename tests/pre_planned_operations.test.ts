@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
+import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/combat/historical_operation_authorization.js';
 import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
@@ -137,6 +138,104 @@ describe('pre-planned operations', () => {
         assert.equal(state.military.corps_command?.hvo_southeast_herzegovina?.queued_operations?.[0], 'Operation Jackal');
     });
 
+    it('requires player authorization before injecting player-faction pre-planned operations', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+
+        injectPrePlannedOperations(state);
+
+        assert.equal(state.military.corps_command?.vrs_drina?.active_operations.length, 0);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
+        );
+        assert.ok(review);
+        assert.equal(review.faction, 'RS');
+        assert.equal(review.domain, 'ops');
+        assert.ok(
+            state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Visegrad'
+            ),
+            'the live Herzegovina operation should require authorization'
+        );
+        assert.ok(
+            !state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
+            ),
+            'later same-corps operations must not be revealed while the live operation awaits authorization'
+        );
+        assert.deepEqual(state.military.corps_command?.vrs_herzegovina?.queued_operations, undefined);
+
+        review!.accepted = true;
+        review!.resolved_turn = state.meta.turn;
+
+        injectPrePlannedOperations(state);
+
+        assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
+    });
+
+    it('normalizes baked startup snapshots so selected player operations become authorization reviews', () => {
+        const state = makeMinimalState();
+        injectPrePlannedOperations(state);
+        state.meta.player_faction = 'RS' as FactionId;
+
+        deferUnauthorizedHistoricalOperationsForPlayer(state);
+
+        assert.equal(state.military.corps_command?.vrs_drina?.active_operations.length, 0);
+        assert.equal(state.military.corps_command?.vrs_herzegovina?.active_operations.length, 0);
+        assert.equal(state.military.corps_command?.vrs_herzegovina?.queued_operations, undefined);
+        assert.ok(
+            state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
+            ),
+            'startup Drina operation should be converted into a presidential authorization review'
+        );
+        assert.ok(
+            !state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
+            ),
+            'normalization must not expose the future same-corps queued operation'
+        );
+    });
+
+    it('skips scenario-start completed pre-planned operations and asks the player for the next live operation', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+        const visegrad = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Visegrad');
+        assert.ok(visegrad);
+        for (const objective of visegrad!.axes.flatMap((axis) => axis.objectives)) {
+            state.political.political_controllers![objective] = 'RS';
+        }
+
+        injectPrePlannedOperations(state);
+
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        assert.equal(command.active_operations.some((op) => op.name === 'Operation Visegrad'), false);
+        assert.ok(
+            state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
+            ),
+            'the first live Herzegovina operation should require authorization'
+        );
+        assert.ok(
+            !state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Visegrad'
+            ),
+            'already-achieved setup operations must not be offered for player authorization'
+        );
+        assert.ok(
+            !(state.military.op_injection_warnings ?? []).some((warning) =>
+                warning.op_name === 'Operation Visegrad' && warning.severity === 'error'
+            ),
+            'already-achieved setup operations must not produce an op_empty injection error'
+        );
+        assert.ok(
+            state.military.preplanned_operations_satisfied_by_start?.some((entry) =>
+                entry.corps_id === 'vrs_herzegovina' && entry.operation_name === 'Operation Visegrad'
+            ),
+            'scenario-start completed operations should be available to later chain triggers without fake AARs'
+        );
+    });
+
     it('anchors injected operations to the primary sector of their participating brigades', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
@@ -255,6 +354,32 @@ describe('pre-planned operations', () => {
             ),
             'queued Foca injection should still warn about truly missing brigades'
         );
+    });
+
+    it('keeps player-faction queued operations queued until the player authorizes them', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 8;
+        state.meta.player_faction = 'RS' as FactionId;
+        const command = state.military.corps_command!.vrs_herzegovina!;
+        command.queued_operations = ['Operation Foca'];
+
+        const first = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(first, false);
+        assert.deepEqual(command.queued_operations, ['Operation Foca']);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Foca'
+        );
+        assert.ok(review);
+
+        review!.accepted = true;
+        review!.resolved_turn = state.meta.turn;
+
+        const second = injectQueuedOperation(state, 'vrs_herzegovina');
+
+        assert.equal(second, true);
+        assert.equal(command.active_operations[0]?.name, 'Operation Foca');
+        assert.deepEqual(command.queued_operations, undefined);
     });
 
     it('keeps a queued operation queued when live operations already claim every objective', () => {

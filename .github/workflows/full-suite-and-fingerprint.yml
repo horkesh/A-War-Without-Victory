@@ -40,7 +40,7 @@ jobs:
   # detection step needs the base commit in history.
   full-suite:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v5
         with:
@@ -95,13 +95,9 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         run: npx puppeteer browsers install chrome
 
-      - name: First-hour browser gate
+      - name: Player experience gate
         if: steps.changes.outputs.relevant == 'true'
-        run: npm run qa:first-hour:browser
-
-      - name: Live surface browser gate
-        if: steps.changes.outputs.relevant == 'true'
-        run: npm run qa:live-surface:browser
+        run: npm run qa:player-experience
 
       - name: No relevant changes — full suite skipped (green-fast)
         if: steps.changes.outputs.relevant != 'true'

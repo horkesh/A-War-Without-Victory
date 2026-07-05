@@ -652,7 +652,7 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 
 ### Formation layers (MapLibre default; optional Deck.gl)
 
-**Default:** Deck.gl formation counters via `buildTacticalDeckLayers.ts`. **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`true`** by default — MapLibre `formation-markers` and `formation-labels` are hidden to prevent double-draw. Deck.gl enrichment layers include: health bar, supply dot, status icons, stack badges, and op/disrupted glow rings.
+**Default:** Deck.gl formation counters via `buildTacticalDeckLayers.ts`. **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`true`** by default — MapLibre `formation-markers` and `formation-labels` are hidden to prevent double-draw. Deck.gl enrichment layers include: health bar, supply dot, status icons, stack badges, and op/disrupted glow rings. On the pitched 2.5D main map, formation counters are screen-space symbols over terrain, not terrain decals: `MapContainer.tsx` must keep the tactical `MapboxOverlay` non-interleaved (`interleaved: false`), sprites must have opaque faction bodies plus an opaque paper/ink halo, and counter/label Deck layers must set `depthTest: false`, `depthMask: false`, and `depthWriteEnabled: false` so hillshade, borders, and labels cannot physically or visually cut into units.
 
 When **`deckFormationCounters`** is **true** (the default), MapLibre formation symbol layers are hidden and Deck supplies:
 

@@ -112,6 +112,25 @@ describe('phantom spawn catalog', () => {
         assert.equal(ninthCorps.location_osid, 'op:kupres:bucovaca');
     });
 
+    it('does not spawn zero-heavy local TO phantoms as full mechanized task groups', () => {
+        const state = makeState(0);
+        spawnJnaPhantomBrigades(state);
+
+        const uzice = state.military.formations!['jna_uzice_corps_tg']!;
+        assert.equal(uzice.personnel, 2000);
+        assert.equal(uzice.equipment_class, 'mechanized');
+        assert.equal(uzice.cohesion, 85);
+        assert.equal(uzice.morale, 90);
+
+        const visegradTo = state.military.formations!['jna_visegrad_local_to_tg']!;
+        assert.equal(visegradTo.composition!.tanks, 0);
+        assert.equal(visegradTo.composition!.artillery, 0);
+        assert.equal(visegradTo.personnel, 800);
+        assert.equal(visegradTo.equipment_class, 'light_infantry');
+        assert.equal(visegradTo.cohesion, 60);
+        assert.equal(visegradTo.morale, 60);
+    });
+
     it('does not duplicate the catalog on re-spawn', () => {
         const state = makeState(0);
         spawnJnaPhantomBrigades(state);

@@ -321,13 +321,14 @@ describe('VerdictScreen mount — §6 Srebrenica rupture-receipt (#78)', () => {
         };
         const h = render();
         expect(h).toContain('Historical Record');
-        expect(h).toContain('data-awwv-rupture-receipt-id="rupture_receipt_srebrenica_genocide_1995"');
+        expect(h).toContain('data-awwv-rupture-receipt="true"');
         // Panel-approved somber summary surfaces verbatim.
         expect(h).toContain('genocide that followed');
         expect(h).toContain('permanent entry in the historical record');
         // §6: the receipt is NEVER framed as a player outcome.
         expect(h).toContain('data-awwv-rupture-receipt-variant="divergence"');
         expect(h).not.toContain('data-awwv-rupture-receipt-variant="outcome"');
+        expect(h).not.toMatch(/data-awwv-(?:rupture-receipt-id|rupture-receipt-essay|ghost-id|milestone-id)=/);
     });
 
     it('does NOT render the Historical Record when no rupture is recorded', () => {
@@ -336,7 +337,7 @@ describe('VerdictScreen mount — §6 Srebrenica rupture-receipt (#78)', () => {
         };
         const h = render();
         expect(h).not.toContain('Historical Record');
-        expect(h).not.toContain('data-awwv-rupture-receipt-id');
+        expect(h).not.toContain('data-awwv-rupture-receipt="true"');
     });
 
     it('does NOT render the Historical Record for an unwired rupture id', () => {
@@ -347,7 +348,7 @@ describe('VerdictScreen mount — §6 Srebrenica rupture-receipt (#78)', () => {
         };
         const h = render();
         expect(h).not.toContain('Historical Record');
-        expect(h).not.toContain('data-awwv-rupture-receipt-id');
+        expect(h).not.toContain('data-awwv-rupture-receipt="true"');
     });
 
     it('does NOT render the Historical Record when the raw GameState handle is absent', () => {

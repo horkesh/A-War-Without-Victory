@@ -138,7 +138,7 @@ export function filterPlayerVisibleMapFormations(state: LoadedGameState | null |
   const playerFaction = resolvePlayerFacingFaction(state);
   if (!playerFaction) return state.formations;
 
-  const visibleEnemyOsids = new Set(state.fogOfWar?.visibleEnemyOsids ?? []);
+  const visibleEnemyOsids = collectPlayerVisibleEnemyOsids(state, playerFaction);
   return state.formations.filter((formation) => (
     formation.faction === playerFaction
     || (typeof formation.location_osid === 'string' && visibleEnemyOsids.has(formation.location_osid))
@@ -152,5 +152,22 @@ export function isPlayerEnemyContactFormation(
   const playerFaction = resolvePlayerFacingFaction(state);
   if (!playerFaction || !formation || formation.faction === playerFaction) return false;
   return typeof formation.location_osid === 'string'
-    && (state?.fogOfWar?.visibleEnemyOsids ?? []).includes(formation.location_osid);
+    && collectPlayerVisibleEnemyOsids(state, playerFaction).has(formation.location_osid);
+}
+
+function collectPlayerVisibleEnemyOsids(
+  state: LoadedGameState | null | undefined,
+  playerFaction: PlayerFacingFaction,
+): Set<string> {
+  const visible = new Set(state?.fogOfWar?.visibleEnemyOsids ?? []);
+  for (const edge of state?.frontEdgesOsid ?? []) {
+    const a = typeof edge.a === 'string' ? edge.a : null;
+    const b = typeof edge.b === 'string' ? edge.b : null;
+    const sideA = typeof edge.side_a === 'string' ? edge.side_a : null;
+    const sideB = typeof edge.side_b === 'string' ? edge.side_b : null;
+    if (!a || !b || !sideA || !sideB || sideA === sideB) continue;
+    if (sideA === playerFaction && sideB !== playerFaction) visible.add(b);
+    if (sideB === playerFaction && sideA !== playerFaction) visible.add(a);
+  }
+  return visible;
 }

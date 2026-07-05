@@ -39,6 +39,17 @@ const FORBIDDEN_DECISION_LEAK_PATTERNS = [
   { label: 'speculative later-event copy', pattern: /\blater event may or may not happen\b/i },
 ];
 
+const FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS = [
+  { label: 'Srebrenica demilitarization title', pattern: /\bThe Demilitarization of Srebrenica\b/i },
+  { label: 'Vance-Owen title', pattern: /\bThe Vance-Owen Peace Plan\b/i },
+  { label: 'Owen-Stoltenberg title', pattern: /\bThe Owen-Stoltenberg Plan\b/i },
+  { label: 'Contact Group title', pattern: /\bThe Contact Group Plan\b/i },
+  { label: 'Srebrenica fall title', pattern: /\bThe Fall of Srebrenica\b/i },
+  { label: 'Dayton future settlement name', pattern: /\bDayton\b/i },
+  { label: 'Karadzic-Mladic rupture title', pattern: /\bKarad\S*\s+Moves\s+Against\s+Mlad/i },
+  { label: 'raw dated future event id', pattern: /\b[a-z][a-z0-9_]+_(?:1993|1994|1995)\b/i },
+];
+
 const FACTION_OPENING_FLOWS = [
   {
     faction: 'RBiH',
@@ -288,6 +299,25 @@ async function visibleSurfaceText(page, requiredTexts) {
   return text;
 }
 
+async function visibleSelectorText(page, selector, label) {
+  const text = await page.evaluate((targetSelector) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
+    return target?.innerText ?? target?.textContent ?? '';
+  }, selector);
+  if (!text) throw new Error(`No visible selector text found for ${label ?? selector}`);
+  return text;
+}
+
 async function dialogText(page) {
   return page.evaluate(() => {
     const dialog = document.querySelector('[role="dialog"], [aria-modal="true"]');
@@ -385,6 +415,25 @@ async function clickSelector(page, selector, label) {
     return true;
   }, selector);
   if (!clicked) throw new Error(`No visible ${label ?? selector} control found`);
+}
+
+async function clickSelectorIfVisible(page, selector) {
+  return page.evaluate((targetSelector) => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const target = Array.from(document.querySelectorAll(targetSelector)).find(isVisible);
+    if (!(target instanceof HTMLElement)) return false;
+    target.click();
+    return true;
+  }, selector);
 }
 
 async function assertToolbarRoutesDisabled(page, summary, flow) {
@@ -551,6 +600,28 @@ function assertNoDecisionKnowledgeLeaks(surfaceName, text) {
   }
 }
 
+function assertNoFutureKnowledgeLeaks(surfaceName, text) {
+  const found = [];
+  for (const { label, pattern } of FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS) {
+    const match = pattern.exec(text);
+    if (match?.index !== undefined) {
+      found.push({
+        label,
+        context: text.slice(Math.max(0, match.index - 160), Math.min(text.length, match.index + match[0].length + 160)).replace(/\s+/g, ' '),
+      });
+    }
+  }
+  if (found.length > 0) {
+    throw new Error(`${surfaceName} exposed future campaign knowledge: ${JSON.stringify(found, null, 2)}`);
+  }
+}
+
+function assertNoFirstHourKnowledgeLeaks(surfaceName, text) {
+  assertRawLabelsAbsent(surfaceName, text);
+  assertNoDecisionKnowledgeLeaks(surfaceName, text);
+  assertNoFutureKnowledgeLeaks(surfaceName, text);
+}
+
 async function dismissTutorialIfPresent(page) {
   for (let attempt = 0; attempt < 4; attempt += 1) {
     const before = await visibleText(page);
@@ -659,15 +730,12 @@ async function runFoundationalFlow(page, summary, flow) {
     throw new Error(`${flow.faction} foundational decision modal did not show expected option: ${decisionDialog}`);
   }
   assertNoDecisionKnowledgeLeaks(`${flow.faction} foundational decision modal`, decisionDialog);
+  assertNoFutureKnowledgeLeaks(`${flow.faction} foundational decision modal`, decisionDialog);
   summary.evidence.decisionKnowledgeLeaksAbsentByFaction ??= {};
   summary.evidence.decisionKnowledgeLeaksAbsentByFaction[flow.faction] = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_foundational_decision`);
 
-  await clickSelector(
-    page,
-    `[data-testid="event-decision-response"][data-event-id="${flow.eventId}"][data-response-id="${flow.responseId}"]`,
-    `${flow.faction} foundational response ${flow.responseId}`,
-  );
+  await clickByText(page, flow.responseLabel);
   await waitUntilDialogTextAbsent(page, 'Presidential Response');
   await dismissTutorialIfPresent(page);
   summary.evidence.allFactionFoundationalFlows ??= {};
@@ -681,9 +749,73 @@ async function runFoundationalFlow(page, summary, flow) {
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_after_decision_receipt`);
 }
 
+async function verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow) {
+  await clickSelector(page, '[data-testid="desk-open-command-surface"]', 'Decision Room');
+  await page.waitForSelector('[data-testid="command-card-strip"]', { timeout: 30000 });
+  const commandStripText = await visibleSelectorText(page, '[data-testid="command-card-strip"]', 'Command Surface');
+  assertNoFirstHourKnowledgeLeaks(`${flow.faction} Command Surface`, commandStripText);
+  const selectedCard = await page.evaluate(() => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const cards = Array.from(document.querySelectorAll('[data-testid^="command-card-"]'))
+      .filter((el) => el instanceof HTMLElement && isVisible(el) && !String(el.getAttribute('data-testid')).includes('fallback'))
+      .sort((a, b) => {
+        const urgentDelta = Number(b.getAttribute('data-awwv-urgent-count') ?? 0) - Number(a.getAttribute('data-awwv-urgent-count') ?? 0);
+        if (urgentDelta !== 0) return urgentDelta;
+        return Number(b.getAttribute('data-awwv-count') ?? 0) - Number(a.getAttribute('data-awwv-count') ?? 0);
+      });
+    const target = cards[0];
+    if (!(target instanceof HTMLElement)) return null;
+    const testId = target.getAttribute('data-testid');
+    target.click();
+    return testId;
+  });
+  if (!selectedCard) throw new Error(`${flow.faction} Command Surface did not expose a selectable command card`);
+  await page.waitForSelector('[data-testid="warroom-decision-room-host"], [data-testid="presidential-decision-room"]', { timeout: 30000 });
+  const decisionRoomText = await visibleSelectorText(
+    page,
+    '[data-testid="warroom-decision-room-host"], [data-testid="presidential-decision-room"]',
+    'Decision Room',
+  );
+  assertNoFirstHourKnowledgeLeaks(`${flow.faction} Decision Room`, decisionRoomText);
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction] ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction].commandSurface = true;
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction].decisionRoom = true;
+  summary.evidence.firstHourDecisionRoomCardByFaction ??= {};
+  summary.evidence.firstHourDecisionRoomCardByFaction[flow.faction] = selectedCard;
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_decision_room_knowledge_boundary`);
+  await clickSelector(page, '[data-testid="warroom-decision-room-close"]', 'Decision Room close');
+  await waitForSelectorHidden(page, '[data-testid="warroom-decision-room-host"]');
+}
+
+async function verifyFirstHourCodexKnowledgeBoundary(page, summary, flow) {
+  await clickSelector(page, '[data-testid="chronicle-close"]', 'Chronicle close');
+  await waitForSelectorHidden(page, '[data-testid="chronicle-overlay"]');
+  await clickSelector(page, '[data-testid="toolbar-route-codex"]', 'Codex toolbar route');
+  await page.waitForSelector('[data-testid="codex-panel"]', { timeout: 30000 });
+  const codexText = await visibleSelectorText(page, '[data-testid="codex-panel"]', 'Codex');
+  assertNoFirstHourKnowledgeLeaks(`${flow.faction} Codex`, codexText);
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction] ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction].codex = true;
+  await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_codex_knowledge_boundary`);
+  await clickSelector(page, '[data-testid="codex-close"]', 'Codex close');
+  await waitForSelectorHidden(page, '[data-testid="codex-panel"]');
+}
+
 async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
-  await clickSelector(page, '[data-testid="desk-close-overlay"]', 'Desk close');
-  await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
+  if (await clickSelectorIfVisible(page, '[data-testid="desk-close-overlay"]')) {
+    await waitForSelectorHidden(page, '[data-testid="desk-close-overlay"]');
+  }
   await page.keyboard.press('h');
   await waitForVisibleText(page, 'BRIEFING');
   await clickByText(page, 'RECORDS');
@@ -699,7 +831,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
     'Chronicle Filed',
     flow.decisionTitle,
   ]);
-  assertRawLabelsAbsent('Army HQ Records summary', recordsSummaryText);
+  assertNoFirstHourKnowledgeLeaks('Army HQ Records summary', recordsSummaryText);
   summary.evidence.receiptChecksByFaction ??= {};
   summary.evidence.receiptChecksByFaction[flow.faction] = {
     eventId: flow.eventId,
@@ -722,7 +854,7 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
   if (recordsText.includes(flow.responseLabel)) {
     throw new Error(`${flow.faction} Chronicle-filed response appeared inside Army HQ Records decision log`);
   }
-  assertRawLabelsAbsent('Army HQ Records', recordsText);
+  assertNoFirstHourKnowledgeLeaks('Army HQ Records', recordsText);
   summary.evidence.rawFirstHourLabelsAbsentByFaction ??= {};
   summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction] ??= {};
   summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction].records = true;
@@ -734,10 +866,14 @@ async function verifyDecisionRecordsAndChronicle(page, summary, flow) {
     'War Chronicle',
     flow.decisionTitle,
   ]);
-  assertRawLabelsAbsent('Chronicle', chronicleText);
+  assertNoFirstHourKnowledgeLeaks('Chronicle', chronicleText);
   summary.evidence.chronicleReceiptAppears = true;
   summary.evidence.receiptChecksByFaction[flow.faction].chronicle = true;
   summary.evidence.rawFirstHourLabelsAbsentByFaction[flow.faction].chronicle = true;
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction] ??= {};
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction].records = true;
+  summary.evidence.futureKnowledgeLeaksAbsentByFaction[flow.faction].chronicle = true;
   await captureEvidence(page, summary, `${flow.faction.toLowerCase()}_chronicle_decision_receipt`);
 }
 
@@ -838,8 +974,10 @@ async function run() {
       for (const flow of FACTION_OPENING_FLOWS) {
         summary.browserGatePhase = `proof:${flow.faction}`;
         await runFoundationalFlow(page, summary, flow);
+        await verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow);
         if (flow.receiptCheck) {
           await verifyDecisionRecordsAndChronicle(page, summary, flow);
+          await verifyFirstHourCodexKnowledgeBoundary(page, summary, flow);
         }
       }
 

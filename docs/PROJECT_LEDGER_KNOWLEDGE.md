@@ -320,7 +320,7 @@
 
 **Live browser sweeps should assert surfaces, not just startup:** The first-hour path can pass while Army HQ, Records, Chronicle, or Codex still expose stale command copy or shell stacking. Durable rule: run `npm run qa:live-surface:browser` after command-surface, Records, Chronicle, Codex, or top-toolbar changes; it must prove first-hour RBiH start plus Desk/War Map/Army HQ/Records/Chronicle/Codex reachability, raw-token absence, console health, shell exclusivity, and strict-port cleanup. Applied in `[2026-06-19] test(ui): add live surface browser sweep and retire SITREP command copy`; report `docs/40_reports/implemented/20260619_LIVE_SURFACE_BROWSER_SWEEP_AND_COMMAND_COPY.md`.
 
-**Browser gates are enforced through the required full-suite job:** Local browser proof is not enough for D2-entry surfaces. Durable rule: `full-suite-and-fingerprint.yml` runs `qa:first-hour:browser` and `qa:live-surface:browser` after complete Vitest when the existing full-suite path detector marks a PR relevant, so workflow changes should preserve those steps or consciously replace them with an equally branch-protected gate. Applied in `[2026-06-19] Inbox routing and browser CI closeout`; report `docs/40_reports/implemented/20260619_INBOX_ROUTING_AND_BROWSER_CI_CLOSEOUT.md`.
+**Browser gates are enforced through the required full-suite job:** Local browser proof is not enough for D2-entry surfaces. Durable rule: `full-suite-and-fingerprint.yml` must keep first-hour/live-surface proof inside the required full-suite job when the existing full-suite path detector marks a PR relevant. As of 2026-07-02, that proof is carried by the branch-protected `qa:player-experience` wrapper rather than direct `qa:first-hour:browser` / `qa:live-surface:browser` workflow calls. Applied in `[2026-06-19] Inbox routing and browser CI closeout`; superseded wiring in `[2026-07-02] CI player-experience gate wiring`; report `docs/40_reports/implemented/20260619_INBOX_ROUTING_AND_BROWSER_CI_CLOSEOUT.md`.
 
 **Shell detectors need surface-owned markers, not generic text:** Records can legitimately contain a Codex handoff card, so a global text search for `Codex` is not proof the Codex shell is open. Durable rule: browser QA should detect shells through stable surface-owned markers such as `data-testid="codex-panel"` or dialog semantics, not repeated navigation/card text.
 
@@ -3591,3 +3591,145 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 **Opening commander projection is turn-zero-only read-model truth:** projecting a historically appropriate startup commander is not a durable officer assignment and must not survive later turns. Durable rule: only use opening commander display fallback when `loadedGameState.turn <= 0`, continue skipping operation-assigned officers, and do not use the projection to seat sim command state. Applied in `[2026-06-27] P18 command-surface truth`; report `docs/40_reports/implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md`.
 
 **Sector coverage density should use live front holders when the denominator is known:** saved density can lag behind current line-holder assignment. Durable rule: if `length_edges` is reported, compute coverage tier from `lineHoldingIds.length / length_edges`; otherwise fall back to the saved density value, and treat no line holders as uncovered. Applied in `[2026-06-27] P18 command-surface truth`; report `docs/40_reports/implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md`.
+
+## 2026-06-29 - First-hour modal action affordance boundary
+
+**Review modals must expose the executable command path:** a modal that asks the player to review a pending command request cannot rely on a secondary navigation button when the underlying request has an immediately valid action. Durable rule: reserve-request and similar bridge-backed review surfaces should provide a guarded primary action that calls the real IPC command, close only after an `{ ok: true }` result, and show bridge/error copy in place when execution is unavailable. Applied in `[2026-06-29] First-hour visual and reserve-action polish`.
+
+## 2026-06-29 - Active-campaign Codex knowledge boundary
+
+**Active campaign Codex is revealed history, not a future table of contents:** Dilemma Spine, locked essay rows, and first-hour browser QA must not expose future historical titles before the player has faced the event or reached endgame reflection. Durable rule: active campaigns show only faced Dilemma Spine rows; locked graph-gated Codex rows use neutral copy and generic unlock hints; first-hour and live-surface browser gates should include explicit future-title sentinels for Srebrenica, peace plans, Dayton, and leadership ruptures. Applied in `[2026-06-29] First-hour Codex knowledge boundary`; report `docs/40_reports/implemented/20260629_FIRST_HOUR_CODEX_KNOWLEDGE_BOUNDARY.md`.
+
+**Static ticker chronology must not outrun live campaign receipts:** Date-scripted Warroom headlines can still leak branchable campaign history if they name a peace plan, Dayton track, or event-owned fall before the campaign surfaces it. Durable rule: ticker rows naming Vance-Owen, Owen-Stoltenberg, Contact Group plan, Dayton talks/signing, Srebrenica fall/massacre, or Zepa fall require the matching live event or rupture receipt; keep general external background date-driven only when it does not name a branchable player-facing diplomatic track. Applied in `[2026-06-29] First-hour Codex and ticker knowledge boundary`; report `docs/40_reports/implemented/20260629_FIRST_HOUR_CODEX_KNOWLEDGE_BOUNDARY.md`.
+
+## 2026-06-29 - Player-knowledge second sweep boundary
+
+**Player-visible prediction receipts are confirmed-only:** pending and foreclosed `future_consequences` are authoring contracts, not player receipts. Durable rule: consequence receipt read models may materialize only realized causal edges tagged to the player's response and fired at/after the decision; do not count or display pending/ruled-out future labels before realization. Applied in `[2026-06-29] Player-knowledge second sweep`; report `docs/40_reports/implemented/20260629_PLAYER_KNOWLEDGE_SECOND_SWEEP.md`.
+
+**First-hour copy must not name future settlements or historical endpoints:** opening briefs, onboarding, command briefing, and browser-gated first-hour surfaces may teach the scoring premise without naming Dayton, Srebrenica, Zepa, named peace plans, or later rupture titles before receipts. Durable rule: use unnamed final-settlement language until the live campaign surfaces the event. Applied in `[2026-06-29] Player-knowledge second sweep`; report `docs/40_reports/implemented/20260629_PLAYER_KNOWLEDGE_SECOND_SWEEP.md`.
+
+**Player-facing data contracts must be sanitized before they reach consumers:** UI adapter state, AI-as-player context, and production DOM attributes are player surfaces even when the text is not visible. Durable rule: strip `future_consequences`, `opens_events`, `closes_events`, `branch_tag`, source-note contracts, raw future ids, and raw decision ids from non-diagnostic player DTOs/DOM; keep raw ids only in closures, engine state, catalog authoring data, or explicit diagnostics. Applied in `[2026-06-29] Player-knowledge second sweep`; report `docs/40_reports/implemented/20260629_PLAYER_KNOWLEDGE_SECOND_SWEEP.md`.
+
+**Ticker fallback labels must not humanize internal ids:** when a ticker or other player read model lacks a player-safe settlement/operation name lookup, use generic sector language rather than rendering `S100013`, `op:*`, or other internal identifiers. Applied in `[2026-06-29] Player-knowledge second sweep`; report `docs/40_reports/implemented/20260629_PLAYER_KNOWLEDGE_SECOND_SWEEP.md`.
+
+## 2026-06-29 - Player operation authorization boundary
+
+**Player-faction historical operations require a launch authorization gate:** preplanned, queued, triggered, and Army HQ operations are not just staff mail after the fact when they belong to the loaded player faction. Durable rule: create a deterministic pending proposal review before injection, launch only after acceptance, leave non-player automation unchanged, and ensure a pending operation blocks later same-corps chain prompts so future operation names are not exposed before the current plan is resolved. Applied in `[2026-06-29] Map selection, contact visibility, and operation authorization repair`.
+
+**Point map markers should be preserved at viewport edges, not filtered away:** hiding counters or labels near the screen boundary makes units look absent and breaks trust in the map. Durable rule: keep the feature in the render set and apply a viewport-safe pixel offset or camera padding; use filtering only for truly invalid geometry or impossible viewport bounds. Applied in `[2026-06-29] Map selection, contact visibility, and operation authorization repair`.
+
+## 2026-06-29 - Operation authorization handoff boundary
+
+**Authorization review cards must route to command context, not generic tabs:** a pending operation plan is actionable only if the player can inspect the responsible corps and line situation. Durable rule: `HISTORICAL_OP` proposal reviews should use the parsed operation corps id for source handoff/navigation, falling back to generic staff tabs only when the action cannot be parsed. Applied in `[2026-06-29] Historical operation review handoff and force-presence diagnostic`.
+
+**Absent counters on the live map are not proof of absent formations:** first distinguish persisted formation truth, player-visible read-model projection, and Deck/MapLibre rendering. Durable rule: when a side appears empty on the map, check active located brigades, front assignments, player-visible contacts, and rendered counter layers separately before changing scenario formation data or combat balance. Applied in `[2026-06-29] Historical operation review handoff and force-presence diagnostic`.
+
+## 2026-06-29 - Early-war combat coverage boundary
+
+**Autonomous paramilitary sweeps must be deployment-capped:** iterating every eligible OSID in deterministic order is still mechanically unbounded if each eligible target can spawn a new autonomous formation. Durable rule: cap bot paramilitary deployments per faction per turn for each mode, count already-created same-turn formations, and treat pending player requests as consuming the same deployment budget. Applied in `[2026-06-29] Early-war combat coverage correction`.
+
+**Sector defense must not hide physical target defenders:** sector rosters and Standing OG coverage are command abstractions; a fielded formation physically located on the attacked OSID is direct combat truth. Durable rule: merge active physical target defenders into the sector defender list before ranking and sort the merged list deterministically. Mirror this in the predictor. Applied in `[2026-06-29] Early-war combat coverage correction`.
+
+**Sector coverage cannot reduce an unoccupied OSID below local militia defense:** a nominal sector reserve at distance should not make an attacked front OSID easier to seize than the no-sector fallback. Durable rule: when no physical target defender exists, preserve a shared local militia floor in both resolver and predictor; use a population basis floor because the operational OSID population map divides municipality population across many OSIDs and can otherwise understate local defense. Applied in `[2026-06-29] Early-war combat coverage correction`.
+
+## 2026-06-29 - Early-war start-control and operation-chain boundary
+
+**Factual start-control corrections must patch the active scenario controller map:** `osid_control_overrides` is not applied when a scenario defines `initial_osid_controllers`. Durable rule: source-backed April 1992 start-control fixes belong in `initial_osid_controllers`; do not add dead overrides and do not use start-control patches as calibration suppression. Applied in `[2026-06-29] Early-war start-control and operation-chain correction`.
+
+**Already-satisfied preplanned operations are prerequisites, not fake AARs:** an operation whose objectives are already held at scenario injection should not launch, should not ask the player to authorize a moot plan, and should not be recorded as a completed battle AAR. Durable rule: record a deterministic internal satisfied-by-start marker and let later chain triggers read it alongside real operation history. Applied in `[2026-06-29] Early-war start-control and operation-chain correction`.
+
+**Empty sector holes may borrow only legal nearby defenders:** if a defending sector roster is empty, use an active same-corps defender only when it is on friendly-controlled sector territory and one friendly graph hop from the attacked OSID. Durable rule: do not teleport brigades into isolated pockets; pockets without a legal nearby formation remain militia-only until scenario data or sector assignment is explicitly changed. Applied in `[2026-06-29] Early-war start-control and operation-chain correction`.
+
+## 2026-06-30 - Sector coverage legality boundary
+
+**Empty-front correction must try own-sector rear before external donors:** a sector can be front-empty while already owning reachable rear brigades. Durable rule: promote reachable own reserve and own rear brigades onto vacant front OSIDs before borrowing from sibling sectors; only then consider same-component rear/reserve/front donors. Applied in `[2026-06-30] Sector coverage legality and consistency-gate refinement`.
+
+**Coverage QA must distinguish missed legal donors from unavoidable scarcity:** empty sectors, wide gap subsegments, and adjacent exposed OSIDs are not automatically actionable bugs when no active same-corps donor can legally reach the target without violating component, operation-participant, or home-distance guards. Durable rule: hard-fail the validator only for missed legal donors, stale partial-sector gaps, or missing sector ownership; log no-donor exposure as diagnostic scarcity. Applied in `[2026-06-30] Sector coverage legality and consistency-gate refinement`.
+
+## 2026-06-30 - War-phase spawn and final-sector projection boundary
+
+**Active War-phase spawn directives must run in War turns, not only startup:** a persisted `formation_spawn_directive` means the War pipeline may need to convert eligible pools into formations before reinforcement. Durable rule: when `formation_spawn_directive.kind` allows militia/brigade spawn, run the deterministic spawn step in War phase before brigade reinforcement; stranded pools above the batch threshold are actionable unless suppressed by a real cap or same-faction formation rule. Applied in `[2026-06-30] War-phase formation spawn and final sector projection recovery`.
+
+**Final-save geometry may reintroduce missing front-sector coverage:** side-coverage recovery before final geometry is not sufficient when the projection pass splits or prunes sectors afterward. Durable rule: after final-save geometry projection, rerun dropped-front recovery and allow unstaffed sectors for politically real front sides that have no legal fielded donor; do not fabricate a fielded counter from a forming brigade. Applied in `[2026-06-30] War-phase formation spawn and final sector projection recovery`.
+
+**Coverage donors are target-specific, not just nearby:** a brigade can be close to one front OSID while every actually vacant target is outside its home-distance guard or already occupied. Durable rule: coverage validators must choose a specific vacant legal target and apply home-distance checks to that target before reporting an actionable donor. Applied in `[2026-06-30] War-phase formation spawn and final sector projection recovery`.
+
+## 2026-06-30 - Presidential turn loop actionability boundary
+
+**Post-turn priority rows must be executable presidential routes:** a turn aftermath report is not just a receipt; it is the next turn's command handoff. Durable rule: every top Command Desk item shown after a turn must carry a player-facing action label from the decision-surface registry and route through the same owning-surface handler as the President's Desk. Inert rows are a regression because they force the player to hunt for the real decision. Applied in `[2026-06-30] Presidential turn loop actionability pass`.
+
+**Operation authorization labels must survive Decision Room normalization:** historical operation proposals are not generic review cards; they represent presidential launch authority. Durable rule: `HISTORICAL_OP` proposal review cards should preserve a specific authorization label and copy through finalization while still handing off to the responsible corps briefing. Generic `Review` is acceptable for broad Decision Room-owned cards, not for launch-authorization cards. Applied in `[2026-06-30] Presidential turn loop actionability pass`.
+
+## 2026-06-30 - Build-warning and aftermath docket boundary
+
+**Tactical-map Vite warnings are release-surface failures:** warnings about Node builtin externalization, browser-only package re-exports, static/dynamic import overlap, chunk cycles, or oversized app chunks can mask real Electron packaging/runtime defects. Durable rule: either remove the bad browser edge, provide a browser shim, or split the bundle with explicit chunk boundaries; do not classify a warning as "non-fatal" without a regression contract. Applied in `[2026-06-30] Vite warning cleanup and aftermath docket priority`.
+
+**Browser-reachable sim modules cannot statically import Node builtins:** telemetry or perf writers that are env-flagged still poison Vite's browser graph if they import `node:fs`, `node:path`, or similar at module top level. Durable rule: keep browser default disabled and resolve Node builtins lazily at the guarded write site through `process.getBuiltinModule`. Applied in `[2026-06-30] Vite warning cleanup and aftermath docket priority`.
+
+**Post-turn dockets sort by effective presidential urgency:** an aftermath report is the next command handoff, so top rows must use effective blocker severity before normal inbox priority and show enough rows to keep reserves/officers/opportunities visible. Durable rule: count and sort with `effectiveInboxSeverity`, then stable priority/id fallback; do not cap the post-turn handoff so tightly that actionable presidential work disappears. Applied in `[2026-06-30] Vite warning cleanup and aftermath docket priority`.
+
+## 2026-07-01 - Presidential handoff gate boundary
+
+**Persistent aftermath CTAs must point at the top presidential action:** the post-turn report footer is always visible even when Command Desk rows are below the scroll fold. Durable rule: when `nextActions.topItems[0]` exists, the footer primary action must use that item's specific action label and route through the same owning-surface handler; the generic inbox footer is only a no-top-action fallback. Applied in `[2026-07-01] Presidential pass footer action and operation authorization gate`.
+
+**Player-faction historical operation authorization is advance-blocking:** an operation that cannot launch without presidential authority is not optional staff mail. Durable rule: pending `HISTORICAL_OP:*` proposal-review cards must be `blocking`, preserve `Review authorization` copy, hand off to the responsible corps briefing for context, and remain in the pre-advance packet until accepted or withheld. Applied in `[2026-07-01] Presidential pass footer action and operation authorization gate`.
+
+## 2026-07-01 - Presidential player-journey gate boundary
+
+**Presidential handoff regressions belong in the standard player journey gate:** a focused green test is not enough for first-hour/presidential agency failures, because they previously slipped through ordinary sweeps. Durable rule: `qa:player-journeys` must include both `tests/ui/turn_aftermath_modal_i18n.test.ts` and `tests/ui/pre_advance_command_review.test.ts`, and `tests/player_journey_qa_gate_contract.test.ts` must guard those inclusions. Applied in `[2026-07-01] Presidential player-journey gate coverage`.
+
+## 2026-07-01 - Broad player-experience gate boundary
+
+**Release-facing player experience needs one broad command:** first-hour agency regressions span TypeScript, shipped builds, Warroom assets, UI regression tests, and browser flows. Durable rule: `qa:player-experience` chains `typecheck`, `desktop:release:check`, `qa:player-journeys`, `qa:first-hour:browser`, and `qa:live-surface:browser`; use it when validating broad player-facing changes. Applied in `[2026-07-01] Broad player-experience gate and warning cleanup`.
+
+**Warroom and desktop sim builds must be warning-clean:** the Warroom shell is a shipped player surface, and desktop sim is loaded by Electron main. Durable rule: Warroom Vite aliases `child_process` and `node:child_process` to the browser shim and declares its intentional chunk threshold; desktop sim bundle replaces `import.meta.url` for the CJS bundle path. Guard with `tests/map_workspace_script_contract.test.ts` and `tests/desktop_sim_bundle_smoke.test.ts`. Applied in `[2026-07-01] Broad player-experience gate and warning cleanup`.
+
+## 2026-07-01 - Self-scanning player-experience gate boundary
+
+**Broad player-experience validation must scan its own output:** a passing command with buried build/runtime warnings is not a clean player-facing proof. Durable rule: `qa:player-experience` must run through `tools/ui/player_experience_gate.cjs`, and the wrapper must fail on known warning/error signatures including `[WARNING]`, `empty-import-meta`, `__vite-browser-external`, Vite chunk-size warnings, `Cannot find module`, Node deprecation warnings, and PATH-dependent Vite command failures. Applied in `[2026-07-01] Self-scanning player-experience gate`.
+
+**Windows nested npm launch must avoid shell-args deprecation warnings:** using `spawn('npm.cmd', args, { shell: true })` can make the QA wrapper emit Node `DEP0190` warnings after otherwise clean child output. Durable rule: invoke Windows nested npm scripts through `cmd.exe /d /s /c "npm.cmd run <script>"` with `shell: false`; keep the contract in `tests/player_experience_gate_script.test.ts`. Applied in `[2026-07-01] Self-scanning player-experience gate`.
+
+## 2026-07-01 - Electron runtime contract gate boundary
+
+**Electron live-start regressions need their own player gate slice:** shipped builds alone do not prove Warroom first-hour handoff, desktop persistence IPC, bundled sim exports, packaged resource probes, modal escape/action behavior, command briefing action routing, or counter visibility. Durable rule: `qa:player-experience` must run `qa:electron-runtime-contracts` after `desktop:release:check`; guard that script with `tests/player_journey_qa_gate_contract.test.ts` and the wrapper step order with `tests/player_experience_gate_script.test.ts`. Applied in `[2026-07-01] Electron runtime contract slice in player-experience gate`.
+
+## 2026-07-02 - CI player-experience gate boundary
+
+**Required CI must run the canonical self-scanning player gate:** direct first-hour/live-surface workflow calls bypass the wrapper's warning scanner and Electron runtime contract slice. Durable rule: the required `full-suite` workflow must install Puppeteer Chrome, then run `npm run qa:player-experience` as the player-facing gate; do not wire CI directly to `qa:first-hour:browser` or `qa:live-surface:browser`. Guard with `tests/ui/first_hour_browser_gate_contract.test.ts`. Applied in `[2026-07-02] CI player-experience gate wiring`.
+
+## 2026-07-04 - Launch screen foreground-title boundary
+
+**Background art with baked text is decorative, not layout truth:** the Warroom launch background contains a large title that crops differently across fullscreen aspect ratios. Durable rule: first-screen title/menu hierarchy must be foreground DOM/CSS, with the background dimmed/cropped as atmosphere only. Guard launch composition with `tests/ui/warroom_launch_screen_contract.test.ts` and verify built-output screenshots at ultrawide plus 16:9 fullscreen-like viewports. Applied in `[2026-07-04] Warroom launch screen fullscreen composition`.
+
+## 2026-07-04 - First-hour state synchronization boundary
+
+**Baked startup snapshots must be normalized after player faction selection:** a faction-neutral startup save can already contain active historical operations before `meta.player_faction` is known. Durable rule: after setting the selected player faction, defer player-owned preplanned historical operations into `HISTORICAL_OP:*` authorization reviews and hold same-corps queued operations until the player accepts or withholds launch authority. Apply the same rule in Electron start and browser fallback start paths. Applied in `[2026-07-04] First-hour authorization and live-map state synchronization`.
+
+**Already-resolved directive rows are stale UI, not player errors:** a review row can outlive the directive state it points at after another surface resolves the same action. Durable rule: successful directive actions keep their receipt visible, but `already_resolved` rows collapse quietly instead of showing an error receipt or trapping the player on a dead action. Applied in `[2026-07-04] First-hour authorization and live-map state synchronization`.
+
+**Formation disappearance must be traced through three layers:** absent counters can mean missing persisted formations, hidden player-visible projection, or an empty render-layer update. Durable rule: verify raw formations, player-visible formation/contact features, and Deck layer props separately; preserve the previous non-empty Deck counter layer only when the next update is transiently empty while the loaded state still contains formations. Applied in `[2026-07-04] First-hour authorization and live-map state synchronization`.
+
+## 2026-07-04 - Tactical counter stack boundary
+
+**Stacked counters should not move in map coordinates:** geographic fanning makes icons drift differently by zoom/projection and can look like brigades are floating away from the front. Durable rule: keep every stacked formation feature anchored to its physical OSID coordinate, carry `stack_index` / `stack_count`, and apply only bounded Deck pixel offsets with viewport clamping at render time. Applied in `[2026-07-04] Tactical counter stack anchoring`.
+
+**Visible counter bounds must use live chrome and rendered footprint, not the raw canvas:** a counter can be inside the map canvas and still be clipped by the terrain edge, OOB rail, Corps/sector panels, command briefing, top toolbar, bottom status strip, President's Desk, or minimap. Durable rule: when Deck owns counters, keep MapLibre's native `formations` source empty, mark visible chrome with `data-awwv-counter-occluder`, recalculate after React layout, choose the actual clear horizontal band, and filter Deck counter layers using the expanded rendered-counter footprint, not merely the geographic anchor. Applied in `[2026-07-04] Tactical counter stack anchoring`.
+
+## 2026-07-05 - Tactical counter viewport clamp boundary
+
+**Deck counter pixel offsets use screen-coordinate Y:** a top-edge counter must receive a positive Y pixel offset to move down into the visible map band; a bottom-edge counter must receive a negative Y offset to move up. Durable rule: verify Deck `getPixelOffset` sign conventions with rendered screenshots, not only helper tests, whenever changing counter clamping. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+
+**Near-edge counters should clamp before they disappear:** filtering every counter whose footprint intersects chrome makes units look missing, while leaving them unclamped creates chopped symbols. Durable rule: keep counters whose projected anchor is close enough to the visible tactical band, clamp their final rendered position inward, and filter only anchors too far outside the viewport to move honestly. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+
+**Camera padding and counter padding must be one contract:** setting initial map padding is not enough if later `easeTo`, `fitBounds`, or keyboard reset calls use raw centers or ad hoc padding. Durable rule: all tactical map camera moves must call the same chrome-aware padding helper used by Deck counter clipping. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+
+## 2026-07-05 - Tactical counter occluder intersection boundary
+
+**Safe map bands are not enough for floating panels:** a counter can have an anchor inside the current clear band and still be visibly chopped by a corps card, sector intelligence sheet, minimap, toolbar, or side rail. Durable rule: Deck counter visibility must intersect-test the rendered counter footprint against every live counter-occluding UI rectangle, not only against folded edge padding. Applied in `[2026-07-05] Tactical counter occluder intersection correction`.
+
+**Panel animations must be measured after layout settles:** React can render the selected panel before its slide-in transform reaches the final on-screen box. Durable rule: any Deck counter rebuild that depends on `getBoundingClientRect()` for chrome occluders must reapply after animation-frame layout and after the panel transition window, then verify with the generated live screenshots. Applied in `[2026-07-05] Tactical counter occluder intersection correction`.
+
+## 2026-07-05 - Tactical counter terrain-compositing boundary
+
+**Deck counters on the pitched main map are screen-space command symbols, not terrain decals:** viewport/panel clipping fixes do not prevent terrain, borders, or labels from physically cutting into counters when the tactical `MapboxOverlay` is interleaved into MapLibre's pitched render stack. Durable rule: tactical counters/labels must render through a non-interleaved Deck overlay (`interleaved: false`), formation counter sprites must keep opaque faction bodies plus an opaque paper/ink halo, and the counter/label Deck layers must use `depthTest: false`, `depthMask: false`, and `depthWriteEnabled: false` on the 2.5D main map. Applied in `[2026-07-05] Tactical counter 2.5D terrain-compositing correction`.

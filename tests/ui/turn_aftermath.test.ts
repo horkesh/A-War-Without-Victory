@@ -257,6 +257,8 @@ describe('buildTurnAftermathView', () => {
       'event:evt_a',
       'peace:vance',
       'opportunity:OPP_12_una',
+      'reserve:reserve_1',
+      'officer:replacement_suggested:officer_a',
     ]);
   });
 
@@ -279,7 +281,56 @@ describe('buildTurnAftermathView', () => {
     expect(view?.nextActions.topItems[0]).toMatchObject({
       id: 'convoy:convoy_srebrenica',
       severity: 'blocking',
+      actionLabel: 'Review convoy',
     });
+  });
+
+  it('promotes effective blockers ahead of normal command opportunities in the aftermath docket', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        pendingProposalReviews: [
+          {
+            id: 'PROP_12_opportunity_0',
+            turn: 12,
+            faction: 'RBiH',
+            domain: 'ops',
+            description: 'Operation Una - staff recommendation: approve',
+            proposed_action: 'OPPORTUNITY:OPP_12_una',
+          },
+        ],
+        operationOpportunityProposals: [
+          {
+            proposal_id: 'OPP_12_una',
+            opportunity_id: 'una_window',
+            display_name: 'Operation Una',
+            faction: 'RBiH',
+            status: 'eligible_pending_review',
+            review_id: 'PROP_12_opportunity_0',
+            proposed_action: 'OPPORTUNITY:OPP_12_una',
+            prerequisite_axes: [],
+            force_quality_traits: [],
+            objectives: [],
+            staging: [],
+            redirect_variants: [],
+            available_actions: [],
+          },
+        ],
+        pendingConvoyDecisions: [
+          {
+            id: 'convoy_srebrenica',
+            target_enclave: 'srebrenica',
+            route_faction: 'RBiH',
+            supply_amount: 20,
+          },
+        ],
+      }),
+      osidNameMap: null,
+    });
+
+    expect(view?.nextActions.topItems.map((item) => item.id)).toEqual([
+      'convoy:convoy_srebrenica',
+      'opportunity:OPP_12_una',
+    ]);
   });
 
   it('keeps sparse battle casualties and absent displacement from becoming exact cost drivers', () => {

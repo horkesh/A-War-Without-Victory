@@ -162,7 +162,7 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(onSelect).not.toHaveBeenCalledWith('vrs_secret_brigade');
   });
 
-  it('renders enemy contact stack icons with neutral contact presentation instead of raw faction identity', () => {
+  it('renders enemy contact stack icons with faction color while redacting raw identity', () => {
     vi.useFakeTimers();
 
     render(createElement(StackExpansionOverlay, {
@@ -190,6 +190,7 @@ describe('StackExpansionOverlay viewport behavior', () => {
 
     const contact = screen.getByRole('button', { name: /Inspect enemy contact at settlement/i });
     expect(contact.querySelector('[data-contact-redacted="true"]')).toBeTruthy();
+    expect(contact.querySelector('[data-contact-faction-color="RS"]')).toBeTruthy();
     expect(contact.querySelector('[data-raw-faction="RS"]')).toBeNull();
     expect(contact.querySelector('[data-raw-posture="attack"]')).toBeNull();
     expect(contact.querySelector('canvas')).toBeNull();

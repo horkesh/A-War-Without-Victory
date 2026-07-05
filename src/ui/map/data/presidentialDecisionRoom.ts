@@ -30,6 +30,7 @@ import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
 import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
+import { parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
 import { deriveInboxItems } from './inboxItems';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { playerFactionMatch } from './playerFactionMatch';
@@ -336,6 +337,7 @@ type CandidateCard = Omit<PresidentialDecisionRoomCard, 'sortKey' | 'directive'>
   urgencySort: number;
   sourceSort: string;
   directive?: PresidentialDecisionRoomDirective;
+  preserveActionLabel?: boolean;
 };
 
 type ManifestModalFamilyId = 'peace_plan' | 'dayton_negotiation' | 'convoy_decision';
@@ -999,28 +1001,47 @@ function addProposalReviewDirectiveCards(state: LoadedGameState, cards: Candidat
   ).filter((review) => review.faction === playerFaction && !isOperationOpportunityReview(review));
 
   for (const review of reviews) {
+    const historicalOp = parseHistoricalOperationAuthorizationAction(review.proposed_action);
+    const domainLabel = proposalDomainLabel(review.domain);
     cards.push({
       id: `command:review-proposal:${review.id}`,
       category: 'command',
-      severity: 'warning',
-      title: t('decisionRoom.card.reviewProposal.title', {
-        domain: proposalDomainLabel(review.domain),
-      }),
-      explanation: review.description,
+      severity: historicalOp ? 'blocking' : 'warning',
+      title: historicalOp
+        ? historicalOp.operationName
+        : t('decisionRoom.card.reviewProposal.title', {
+          domain: domainLabel,
+        }),
+      explanation: historicalOp
+        ? t('decisionRoom.card.historicalOperation.explanation')
+        : review.description,
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
-      sourceLabel: t('decisionRoom.card.reviewProposal.sourceLabel'),
-      actionLabel: t('decisionRoom.action.personnel'),
-      evidence: [
-        t('decisionRoom.card.reviewProposal.evidence.domain', { domain: proposalDomainLabel(review.domain) }),
-        t('decisionRoom.card.reviewProposal.evidence.review'),
-      ],
-      navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+      sourceLabel: historicalOp
+        ? t('decisionRoom.card.historicalOperation.sourceLabel')
+        : t('decisionRoom.card.reviewProposal.sourceLabel'),
+      actionLabel: historicalOp
+        ? t('decisionRoom.action.reviewAuthorization')
+        : t('decisionRoom.action.personnel'),
+      evidence: historicalOp
+        ? [
+          t('decisionRoom.card.historicalOperation.evidence.kind'),
+          t('decisionRoom.card.historicalOperation.evidence.authority'),
+          t('decisionRoom.card.reviewProposal.evidence.review'),
+        ]
+        : [
+          t('decisionRoom.card.reviewProposal.evidence.domain', { domain: domainLabel }),
+          t('decisionRoom.card.reviewProposal.evidence.review'),
+        ],
+      navigationTarget: historicalOp
+        ? { kind: 'army-hq-corps-briefing', corpsId: historicalOp.corpsId }
+        : { kind: 'army-hq-tab', tab: 'personnel' },
       directive: {
         lever: 'review_proposal',
         cost: 0,
         payload: { proposalId: review.id },
       },
-      urgencySort: 8,
+      ...(historicalOp ? { preserveActionLabel: true } : {}),
+      urgencySort: historicalOp ? 0 : 8,
       sourceSort: `command:review-proposal:${review.id}`,
     });
   }
@@ -1558,7 +1579,7 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
         explanation: card.explanation,
         sourceOwner: card.sourceOwner,
         sourceLabel: card.sourceLabel,
-        actionLabel: decisionRoomOwned ? t('decisionRoom.action.review') : card.actionLabel,
+        actionLabel: decisionRoomOwned && !card.preserveActionLabel ? t('decisionRoom.action.review') : card.actionLabel,
         evidence: card.evidence,
         navigationTarget,
         ...(sourceHandoffTarget ? { sourceHandoffTarget } : {}),

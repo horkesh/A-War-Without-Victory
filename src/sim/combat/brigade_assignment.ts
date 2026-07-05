@@ -127,6 +127,32 @@ function friendlyDistanceToAny(
     return null;
 }
 
+function graphDistanceToAny(
+    startOsid: string,
+    targets: Set<string>,
+    adjacency: Map<Osid, Osid[]>,
+    maxHops: number,
+): number | null {
+    if (!startOsid || targets.size === 0) return null;
+    if (targets.has(startOsid)) return 0;
+    const visited = new Set<string>([startOsid]);
+    let frontier: string[] = [startOsid];
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next: string[] = [];
+        for (const osid of frontier) {
+            for (const nb of adjacency.get(osid as Osid) ?? []) {
+                if (visited.has(nb)) continue;
+                if (targets.has(nb)) return hop;
+                visited.add(nb);
+                next.push(nb);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+    return null;
+}
+
 function friendlyPathToAny(
     startOsid: string,
     targets: Set<string>,
@@ -1287,22 +1313,6 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
         const locationOsid = formation.location_osid;
         if (!locationOsid) continue;
 
-        // Drifted-brigade gate: if the brigade's home_osid is still claimed by
-        // any own-corps sector, it has merely drifted — don't rehome it cross-corps.
-        // Let recall mechanisms (evaluateHomeReturn, recall-drifted-brigades) pull it back.
-        const hasSameCorpsClaim = sectorClaims.some(({ sector, frontSet, territorySet, oneHopBehind }) =>
-            sector.corps_id === corpsId
-            && (frontSet.has(locationOsid) || territorySet.has(locationOsid) || oneHopBehind.has(locationOsid))
-        );
-        if (!hasSameCorpsClaim && formation.home_osid) {
-            const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
-            const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
-            if (homeStillOwnCorps) {
-                emitRoutineConsoleDebug(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
-                continue;
-            }
-        }
-
         const candidates = sectorClaims
             .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
                 if (sector.corps_id !== corpsId) return null;
@@ -1321,6 +1331,68 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 || a.load - b.load
                 || strictCompare(a.sector.sector_id, b.sector.sector_id)
             );
+
+        if (candidates.length === 0) {
+            const deepRearMaxHops = options?.allowDeepRearOwnership === true
+                ? Number.MAX_SAFE_INTEGER
+                : TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS;
+            const rearCandidates = sectorClaims
+                .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
+                    if (sector.corps_id !== corpsId) return null;
+                    const claimOsids = new Set<string>([
+                        ...frontSet,
+                        ...territorySet,
+                        ...oneHopBehind,
+                    ]);
+                    const path = friendlyPathToAny(
+                        locationOsid,
+                        claimOsids,
+                        adjacency,
+                        friendlyOsids,
+                        deepRearMaxHops,
+                    );
+                    if (!path) return null;
+                    const dist = path.length - 1;
+                    const load =
+                        sector.assigned_brigade_ids.length
+                        + sector.reserve_brigade_ids.length
+                        + (sector.rear_brigade_ids?.length ?? 0);
+                    return { sector, dist, load, path };
+                })
+                .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; load: number; path: string[] } => candidate != null)
+                .sort((a, b) =>
+                    a.dist - b.dist
+                    || a.load - b.load
+                    || strictCompare(a.sector.sector_id, b.sector.sector_id)
+                );
+            const rearBest = rearCandidates[0];
+            if (rearBest) {
+                rearBest.sector.rear_brigade_ids ??= [];
+                rearBest.sector.rear_brigade_ids.push(fid);
+                rearBest.sector.territory_osids = [...new Set([
+                    ...rearBest.sector.territory_osids,
+                    ...rearBest.path,
+                ])].sort(strictCompare);
+                assigned.add(fid);
+                continue;
+            }
+        }
+
+        // Drifted-brigade gate: if the brigade's home_osid is still claimed by
+        // any own-corps sector but the brigade has no same-corps physical or
+        // friendly-path owner, do not absorb it into another corps' sector.
+        const hasSameCorpsClaim = sectorClaims.some(({ sector, frontSet, territorySet, oneHopBehind }) =>
+            sector.corps_id === corpsId
+            && (frontSet.has(locationOsid) || territorySet.has(locationOsid) || oneHopBehind.has(locationOsid))
+        );
+        if (!hasSameCorpsClaim && formation.home_osid) {
+            const ownCorpsSectors = sectorClaims.filter(c => c.sector.corps_id === corpsId);
+            const homeStillOwnCorps = ownCorpsSectors.some(c => c.territorySet.has(formation.home_osid!));
+            if (homeStillOwnCorps) {
+                emitRoutineConsoleDebug(`[brigade_assignment] Skipping cross-corps rehome for drifted ${fid} — home_osid ${formation.home_osid} still in own-corps territory`);
+                continue;
+            }
+        }
 
         if (candidates.length === 0
             && options?.allowCollapsedRearGuardAbsorption === true
@@ -1359,49 +1431,6 @@ export function rehomeUnassignedBrigadesToPhysicalSectorOwners(
                 emitRoutineConsoleDebug(`[brigade_assignment] Rehomed collapsed rear-guard ${fid} into truthful sector owner ${collapsedBest.sector.sector_id} (${collapsedBest.claim})`);
                 continue;
             }
-        }
-
-        if (candidates.length === 0 && options?.allowDeepRearOwnership === true) {
-            const rearCandidates = sectorClaims
-                .map(({ sector, frontSet, territorySet, oneHopBehind }) => {
-                    if (sector.corps_id !== corpsId) return null;
-                    const claimOsids = new Set<string>([
-                        ...frontSet,
-                        ...territorySet,
-                        ...oneHopBehind,
-                    ]);
-                    const path = friendlyPathToAny(
-                        locationOsid,
-                        claimOsids,
-                        adjacency,
-                        friendlyOsids,
-                        Number.MAX_SAFE_INTEGER,
-                    );
-                    if (!path) return null;
-                    const dist = path.length - 1;
-                    const load =
-                        sector.assigned_brigade_ids.length
-                        + sector.reserve_brigade_ids.length
-                        + (sector.rear_brigade_ids?.length ?? 0);
-                    return { sector, dist, load, path };
-                })
-                .filter((candidate): candidate is { sector: CorpsFrontSector; dist: number; load: number; path: string[] } => candidate != null)
-                .sort((a, b) =>
-                    a.dist - b.dist
-                    || a.load - b.load
-                    || strictCompare(a.sector.sector_id, b.sector.sector_id)
-                );
-            const rearBest = rearCandidates[0];
-            if (!rearBest) continue;
-            rearBest.sector.rear_brigade_ids ??= [];
-            rearBest.sector.rear_brigade_ids.push(fid);
-            rearBest.sector.territory_osids = [...new Set([
-                ...rearBest.sector.territory_osids,
-                locationOsid,
-            ])].sort(strictCompare);
-            assigned.add(fid);
-            emitRoutineConsoleDebug(`[brigade_assignment] Rehomed ${fid} into truthful sector owner ${rearBest.sector.sector_id} (deep-rear)`);
-            continue;
         }
         if (candidates.length === 0) continue;
         const best = candidates[0]!;
@@ -1527,6 +1556,7 @@ export function ensureMinimumSectorCoverage(
     const brigadeMovementState = state?.military.brigade_movement_state;
     const brigadeMovementOrders = state?.military.brigade_movement_orders;
     const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
+    const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
 
     // ── Single-call-frame front-OSID memoization (perf) ──
     // `getSectorFrontOsids(sector)` rebuilds a Set by iterating every sub_segment's
@@ -1669,6 +1699,21 @@ export function ensureMinimumSectorCoverage(
         activeCounts.set(target, (activeCounts.get(target) ?? 0) + 1);
     };
 
+    const targetPreservesHomeDistance = (
+        bid: FormationId,
+        target: string,
+    ): boolean => {
+        const formation = formations[bid];
+        if (!formation?.home_osid) return true;
+        const dist = graphDistanceToAny(
+            formation.home_osid,
+            new Set([target]),
+            adjacency,
+            FRONT_DONOR_HOME_DISTANCE_MAX_HOPS,
+        );
+        return dist != null && dist <= FRONT_DONOR_HOME_DISTANCE_MAX_HOPS;
+    };
+
     const sectorsByCorps = new Map<FormationId, CorpsFrontSector[]>();
     for (const s of allSectors) {
         const list = sectorsByCorps.get(s.corps_id) ?? [];
@@ -1786,6 +1831,7 @@ export function ensureMinimumSectorCoverage(
                     const bid = sector.reserve_brigade_ids[ri]!;
                     const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
                     if (target) {
+                        if (!targetPreservesHomeDistance(bid, target.target)) continue;
                         sector.reserve_brigade_ids.splice(ri, 1);
                         moveBrigadeToFrontTarget(bid, target.target, activeCounts);
                         sector.assigned_brigade_ids.push(bid);
@@ -1796,7 +1842,29 @@ export function ensureMinimumSectorCoverage(
             });
             if (promotedReserve) continue;
 
-            // Step 1b: pull the nearest reachable same-corps rear brigade.
+            // Step 1b: promote the nearest reachable own-sector rear brigade.
+            const promotedRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:promote-rear', () => {
+                if ((sector.rear_brigade_ids?.length ?? 0) === 0) return false;
+                const activeCounts = countActiveBrigadesByOsid(formations);
+                const rearCandidates = [...(sector.rear_brigade_ids ?? [])]
+                    .sort(strictCompare)
+                    .map((bid) => {
+                        const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, activeCounts);
+                        if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
+                        return target ? { bid, dist: target.dist, target: target.target } : null;
+                    })
+                    .filter((entry): entry is { bid: FormationId; dist: number; target: string } => entry != null)
+                    .sort((a, b) => a.dist - b.dist || strictCompare(a.bid, b.bid));
+                if (rearCandidates.length === 0) return false;
+                const { bid, target } = rearCandidates[0]!;
+                sector.rear_brigade_ids = (sector.rear_brigade_ids ?? []).filter((candidate) => candidate !== bid);
+                moveBrigadeToFrontTarget(bid, target, activeCounts);
+                sector.assigned_brigade_ids.push(bid);
+                return true;
+            });
+            if (promotedRear) continue;
+
+            // Step 1c: pull the nearest reachable same-corps rear brigade.
             const pulledRear = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-rear', () => {
                 const rearDonors = sameComponentDonors
                     .filter(s => (s.rear_brigade_ids?.length ?? 0) > 0);
@@ -1814,6 +1882,7 @@ export function ensureMinimumSectorCoverage(
                             .sort(strictCompare)
                             .map((bid) => {
                                 const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })
@@ -1834,7 +1903,7 @@ export function ensureMinimumSectorCoverage(
             });
             if (pulledRear) continue;
 
-            // Step 1c: if no rear brigade exists, pull the nearest reachable same-corps reserve.
+            // Step 1d: if no rear brigade exists, pull the nearest reachable same-corps reserve.
             const pulledReserve = perfTime('ensureMinimumSectorCoverage:territory-claim-rescue:zero-assigned:pull-reserve', () => {
                 const reserveDonors = sameComponentDonors
                     .filter(s => s.reserve_brigade_ids.length > 0);
@@ -1847,6 +1916,7 @@ export function ensureMinimumSectorCoverage(
                             .sort(strictCompare)
                             .map((bid) => {
                                 const target = pickVacantLocalFrontTargetFromFrontSet(bid, sectorFrontOsids, stepActiveCounts);
+                                if (target && !targetPreservesHomeDistance(bid, target.target)) return null;
                                 return target ? { donor, bid, dist: target.dist, target: target.target } : null;
                             });
                     })
@@ -1912,6 +1982,64 @@ export function ensureMinimumSectorCoverage(
                         const idx = donor.assigned_brigade_ids.indexOf(bid);
                         if (idx >= 0) donor.assigned_brigade_ids.splice(idx, 1);
                         sector.assigned_brigade_ids.push(bid);
+                        transferred = true;
+                        break;
+                    }
+                }
+                if (!transferred) {
+                    const ZERO_FRONT_DONOR_MAX_THREAT = 250;
+                    const activeCounts = countActiveBrigadesByOsid(formations);
+                    const frontCandidates = sameCompSectors
+                        .filter((donor) =>
+                            donor.length_edges > 0
+                            && donor.assigned_brigade_ids.length > needed(donor)
+                            && (donor.threat_ratio ?? 0) <= ZERO_FRONT_DONOR_MAX_THREAT)
+                        .flatMap((donor) => donor.assigned_brigade_ids.map((bid) => ({ donor, bid })))
+                        .map((entry) => {
+                            const formation = formations[entry.bid];
+                            if (!formation?.location_osid) return null;
+                            if (formation.status !== 'active') return null;
+                            if ((formation.disrupted_turns ?? 0) > 0) return null;
+                            if (opParticipants.has(entry.bid)) return null;
+                            if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
+                            if (brigadeMovementOrders?.[entry.bid]) return null;
+                            if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
+                            if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
+                            const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
+                            if (!target) return null;
+                            if (!targetPreservesHomeDistance(entry.bid, target.target)) return null;
+                            return { ...entry, target: target.target, dist: target.dist, personnel: effectivePersonnel(formation) };
+                        })
+                        .filter((entry): entry is {
+                            donor: CorpsFrontSector;
+                            bid: FormationId;
+                            target: string;
+                            dist: number;
+                            personnel: number;
+                        } => entry != null)
+                        .sort((a, b) =>
+                            a.dist - b.dist
+                            || (a.donor.threat_ratio ?? 0) - (b.donor.threat_ratio ?? 0)
+                            || (b.donor.assigned_brigade_ids.length / Math.max(1, b.donor.length_edges))
+                                - (a.donor.assigned_brigade_ids.length / Math.max(1, a.donor.length_edges))
+                            || b.personnel - a.personnel
+                            || strictCompare(a.donor.sector_id, b.donor.sector_id)
+                            || strictCompare(a.bid, b.bid));
+
+                    for (const candidate of frontCandidates) {
+                        if (candidate.donor.assigned_brigade_ids.length <= needed(candidate.donor)) continue;
+                        const retargeted = pickVacantLocalFrontTarget(
+                            candidate.bid,
+                            sector,
+                            activeCounts,
+                            LOCAL_FRONT_RELIEF_MAX_HOPS,
+                        );
+                        if (!retargeted) continue;
+                        if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;
+                        candidate.donor.assigned_brigade_ids = candidate.donor.assigned_brigade_ids
+                            .filter((bid) => bid !== candidate.bid);
+                        moveBrigadeToFrontTarget(candidate.bid, retargeted.target, activeCounts);
+                        sector.assigned_brigade_ids.push(candidate.bid);
                         transferred = true;
                         break;
                     }
@@ -2149,6 +2277,7 @@ export function ensureMinimumSectorCoverage(
                         if (brigadeMovementOrders?.[entry.bid]) return null;
                         const target = pickVacantLocalFrontTarget(entry.bid, sector, activeCounts, LOCAL_FRONT_RELIEF_MAX_HOPS);
                         if (!target) return null;
+                        if (!targetPreservesHomeDistance(entry.bid, target.target)) return null;
                         return { ...entry, target: target.target, dist: target.dist };
                     })
                     .filter((entry): entry is { bid: FormationId; role: 'rear' | 'reserve'; target: string; dist: number } => entry != null)
@@ -2209,16 +2338,29 @@ export function ensureMinimumSectorCoverage(
             const deficit = Math.max(0, needed(recipient) - recipient.assigned_brigade_ids.length);
             let transferred = 0;
 
+            const floorCompletionRoleRank = (role: 'rear' | 'reserve' | 'front'): number => (
+                role === 'rear' ? 0 : role === 'reserve' ? 1 : 2
+            );
+
             const candidates = corpsSectors
                 .filter((donor) =>
                     donor.sector_id !== recipient.sector_id
-                    && donor.length_edges > 0
-                    && donor.assigned_brigade_ids.length > needed(donor)
-                    && (donor.threat_ratio ?? 0) <= FLOOR_COMPLETION_DONOR_MAX_THREAT
-                    && donor.assigned_brigade_ids.length / donor.length_edges
-                        >= recipientDensity + FLOOR_COMPLETION_MIN_DENSITY_ADVANTAGE
                     && componentForSector(donor) === recipComp)
-                .flatMap((donor) => donor.assigned_brigade_ids.map((bid) => ({ donor, bid })))
+                .flatMap((donor) => {
+                    const donorDensity = donor.assigned_brigade_ids.length / Math.max(1, donor.length_edges);
+                    const canDonateFront =
+                        donor.length_edges > 0
+                        && donor.assigned_brigade_ids.length > needed(donor)
+                        && (donor.threat_ratio ?? 0) <= FLOOR_COMPLETION_DONOR_MAX_THREAT
+                        && donorDensity >= recipientDensity + FLOOR_COMPLETION_MIN_DENSITY_ADVANTAGE;
+                    return [
+                        ...(donor.rear_brigade_ids ?? []).map((bid) => ({ donor, bid, donorRole: 'rear' as const })),
+                        ...donor.reserve_brigade_ids.map((bid) => ({ donor, bid, donorRole: 'reserve' as const })),
+                        ...(canDonateFront
+                            ? donor.assigned_brigade_ids.map((bid) => ({ donor, bid, donorRole: 'front' as const }))
+                            : []),
+                    ];
+                })
                 .map((entry) => {
                     const formation = formations[entry.bid];
                     if (!formation?.location_osid) return null;
@@ -2227,8 +2369,10 @@ export function ensureMinimumSectorCoverage(
                     if (opParticipants.has(entry.bid)) return null;
                     if (brigadeMovementState?.[entry.bid]?.status === 'in_transit') return null;
                     if (brigadeMovementOrders?.[entry.bid]) return null;
-                    if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
-                    if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
+                    if (entry.donorRole === 'front') {
+                        if (claimTypeForSector(entry.donor, entry.bid) !== 'front') return null;
+                        if (entry.donor.assigned_brigade_ids.length <= needed(entry.donor)) return null;
+                    }
 
                     const bestTarget = pickVacantLocalFrontTarget(
                         entry.bid,
@@ -2237,6 +2381,7 @@ export function ensureMinimumSectorCoverage(
                         FLOOR_COMPLETION_MAX_HOPS,
                     );
                     if (!bestTarget) return null;
+                    if (!targetPreservesHomeDistance(entry.bid, bestTarget.target)) return null;
 
                     return {
                         ...entry,
@@ -2249,12 +2394,14 @@ export function ensureMinimumSectorCoverage(
                 .filter((entry): entry is {
                     donor: CorpsFrontSector;
                     bid: FormationId;
+                    donorRole: 'rear' | 'reserve' | 'front';
                     target: string;
                     dist: number;
                     personnel: number;
                 } => entry != null)
                 .sort((a, b) =>
-                    a.dist - b.dist
+                    floorCompletionRoleRank(a.donorRole) - floorCompletionRoleRank(b.donorRole)
+                    || a.dist - b.dist
                     || (a.donor.threat_ratio ?? 0) - (b.donor.threat_ratio ?? 0)
                     || (b.donor.assigned_brigade_ids.length / Math.max(1, b.donor.length_edges))
                         - (a.donor.assigned_brigade_ids.length / Math.max(1, a.donor.length_edges))
@@ -2265,7 +2412,7 @@ export function ensureMinimumSectorCoverage(
             for (const candidate of candidates) {
                 if (transferred >= Math.min(deficit, FLOOR_COMPLETION_MAX_TRANSFERS)) break;
                 if (recipient.assigned_brigade_ids.includes(candidate.bid)) continue;
-                if (candidate.donor.assigned_brigade_ids.length <= needed(candidate.donor)) continue;
+                if (candidate.donorRole === 'front' && candidate.donor.assigned_brigade_ids.length <= needed(candidate.donor)) continue;
 
                 const retargeted = pickVacantLocalFrontTarget(
                     candidate.bid,
@@ -2274,9 +2421,18 @@ export function ensureMinimumSectorCoverage(
                     FLOOR_COMPLETION_MAX_HOPS,
                 );
                 if (!retargeted) continue;
+                if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;
 
-                candidate.donor.assigned_brigade_ids = candidate.donor.assigned_brigade_ids
-                    .filter((bid) => bid !== candidate.bid);
+                if (candidate.donorRole === 'rear') {
+                    candidate.donor.rear_brigade_ids = (candidate.donor.rear_brigade_ids ?? [])
+                        .filter((bid) => bid !== candidate.bid);
+                } else if (candidate.donorRole === 'reserve') {
+                    candidate.donor.reserve_brigade_ids = candidate.donor.reserve_brigade_ids
+                        .filter((bid) => bid !== candidate.bid);
+                } else {
+                    candidate.donor.assigned_brigade_ids = candidate.donor.assigned_brigade_ids
+                        .filter((bid) => bid !== candidate.bid);
+                }
                 moveBrigadeToFrontTarget(candidate.bid, retargeted.target, activeCounts);
                 recipient.assigned_brigade_ids.push(candidate.bid);
                 transferred++;
@@ -2359,6 +2515,7 @@ export function ensureMinimumSectorCoverage(
                                 SEVERE_NEARBY_RELIEF_MAX_HOPS,
                             );
                             if (!bestTarget) return null;
+                            if (!targetPreservesHomeDistance(entry.bid, bestTarget.target)) return null;
 
                             return {
                                 ...entry,
@@ -2397,6 +2554,7 @@ export function ensureMinimumSectorCoverage(
                     SEVERE_NEARBY_RELIEF_MAX_HOPS,
                 );
                 if (!retargeted) continue;
+                if (!targetPreservesHomeDistance(candidate.bid, retargeted.target)) continue;
                 const formation = formations[candidate.bid];
                 if (!formation?.location_osid) continue;
 

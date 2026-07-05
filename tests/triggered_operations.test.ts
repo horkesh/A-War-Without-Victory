@@ -201,6 +201,29 @@ describe('checkTriggeredOperations', () => {
         assert.equal(op?.axes?.length, 2);
     });
 
+    it('treats scenario-start satisfied pre-planned operations as completed chain prerequisites', () => {
+        const state = makeState(12);
+        state.military.preplanned_operations_satisfied_by_start = [
+            {
+                corps_id: 'vrs_herzegovina',
+                operation_name: 'Operation Visegrad',
+                faction: 'RS',
+                turn: 0,
+                objective_count: 3,
+            },
+        ];
+        state.operation_history = [
+            {
+                corps_id: 'vrs_herzegovina',
+                operation_name: 'Operation Foca',
+            } as any,
+        ];
+
+        const injected = checkTriggeredOperations(state);
+
+        assert.ok(injected.includes('Operation Herzegovina Consolidation'));
+    });
+
     it('does not inject Herzegovina Consolidation before Visegrad and Foca are recorded complete', () => {
         const state = makeState(12);
 
@@ -214,6 +237,29 @@ describe('checkTriggeredOperations', () => {
         const state = makeState(10);
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Kotor Varos'));
+    });
+
+    it('requires player authorization before injecting player-faction triggered operations', () => {
+        const state = makeState(10);
+        state.meta.player_faction = 'RS' as FactionId;
+
+        const first = checkTriggeredOperations(state);
+
+        assert.ok(!first.includes('Operation Kotor Varos'));
+        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations.length, 0);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
+        );
+        assert.ok(review);
+        assert.equal(review.faction, 'RS');
+
+        review!.accepted = true;
+        review!.resolved_turn = state.meta.turn;
+
+        const second = checkTriggeredOperations(state);
+
+        assert.ok(second.includes('Operation Kotor Varos'));
+        assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations[0]?.name, 'Operation Kotor Varos');
     });
 
     it('does not inject Kotor Varos once every objective is already RS-controlled', () => {

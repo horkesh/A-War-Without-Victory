@@ -47,6 +47,7 @@ class WarroomApp {
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
     private freshCampaignIntroPending = false;
+    private freshCampaignResetPending = false;
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
 
@@ -62,9 +63,9 @@ class WarroomApp {
         // Apply main menu background: image first, overlay gradient for readability
         const mainMenuEl = document.getElementById('main-menu');
         if (mainMenuEl) {
-            mainMenuEl.style.backgroundImage = `url(${gameStartBgUrl}), radial-gradient(circle at center, rgba(30, 40, 60, 0.75) 0%, rgba(5, 5, 15, 0.92) 100%)`;
-            mainMenuEl.style.backgroundSize = 'cover, auto';
-            mainMenuEl.style.backgroundPosition = 'center, center';
+            mainMenuEl.style.backgroundImage = `linear-gradient(90deg, rgba(4, 6, 10, 0.34) 0%, rgba(4, 6, 10, 0.08) 42%, rgba(4, 6, 10, 0.28) 100%), radial-gradient(circle at center, rgba(30, 40, 60, 0.18) 0%, rgba(5, 5, 15, 0.72) 100%), url(${gameStartBgUrl})`;
+            mainMenuEl.style.backgroundSize = 'auto, auto, cover';
+            mainMenuEl.style.backgroundPosition = 'center, center, center 58%';
         }
 
         // Wire overlay buttons immediately so "New Campaign" etc. work before assets finish loading
@@ -290,7 +291,7 @@ class WarroomApp {
         return (window as Window & { awwv?: DesktopBridge }).awwv ?? null;
     }
 
-    private applyGameStateFromJson(stateJson: string): void {
+    private applyGameStateFromJson(stateJson: string, options?: { showShell?: boolean }): void {
         try {
             this.gameState = deserializeState(stateJson);
             // Sync scenario epoch so date helpers produce correct calendar dates
@@ -298,6 +299,7 @@ class WarroomApp {
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
             setTimeout(() => {
                 this.updateUIOverlay();
+                if (options?.showShell === false) return;
                 // Do not switch back to warroom if the user is viewing the tactical map (or map scene).
                 // Otherwise game-state-updated (e.g. from main process) would revert the view immediately.
                 const tacticalScene = document.getElementById('tactical-map-scene');
@@ -466,8 +468,9 @@ class WarroomApp {
                     }
                     if (result.stateJson) {
                         this.freshCampaignIntroPending = true;
-                        this.applyGameStateFromJson(result.stateJson);
                         this.showScreen('none');
+                        this.applyGameStateFromJson(result.stateJson, { showShell: false });
+                        void this.showTacticalMapScene('warroom');
                     }
                 } catch (error) {
                     showError(error instanceof Error ? error.message : String(error));
@@ -637,7 +640,11 @@ class WarroomApp {
         mapBaseUrl = mapBaseUrl || 'awwv://warroom/tactical-map';
 
         const cacheBuster = `v=${Date.now()}`;
-        const introQuery = this.freshCampaignIntroPending ? '&intro=war_start' : '';
+        const freshCampaignStart = this.freshCampaignIntroPending;
+        const introQuery = freshCampaignStart ? '&intro=war_start' : '';
+        if (freshCampaignStart) {
+            this.freshCampaignResetPending = true;
+        }
         let targetSrc: string;
         if (mode === 'sandbox') {
             targetSrc = `${mapBaseUrl}/tactical_sandbox.html?embedded=1&${cacheBuster}${introQuery}`;
@@ -663,6 +670,7 @@ class WarroomApp {
             iframe.onload = () => {
                 this.tacticalMapReady = true;
                 this.injectBridgeIntoTacticalMap(iframe);
+                this.postFreshCampaignStartedToTacticalMap();
                 this.flushPendingShellHandoff();
             };
 
@@ -675,6 +683,7 @@ class WarroomApp {
         } else if (this.tacticalMapReady) {
             // Push latest game state to existing iframe
             this.injectBridgeIntoTacticalMap(this.tacticalMapIframe);
+            this.postFreshCampaignStartedToTacticalMap();
             this.flushPendingShellHandoff();
         }
 
@@ -727,6 +736,19 @@ class WarroomApp {
             }
         } catch (e) {
             console.warn('[warroom] Could not configure tactical map iframe:', e);
+        }
+    }
+
+    private postFreshCampaignStartedToTacticalMap(): void {
+        if (!this.freshCampaignResetPending || !this.tacticalMapIframe?.contentWindow) return;
+        try {
+            this.tacticalMapIframe.contentWindow.postMessage(
+                { type: 'awwv-shell:fresh-campaign-started' },
+                '*',
+            );
+            this.freshCampaignResetPending = false;
+        } catch (e) {
+            console.warn('[warroom] Failed to notify tactical map of fresh campaign start:', e);
         }
     }
 

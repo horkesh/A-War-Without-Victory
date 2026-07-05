@@ -84,13 +84,19 @@ import {
     commanderReviewAssignment,
 } from './commander_override.js';
 
-// node:fs / node:path are imported only for the env-flag-gated jsonl writer
-// in `_flushInvocation` below. They are dead-code-eliminable when the flag is
-// OFF — the writer's first line is `if (!SECTOR_PARTITION_PERF_FLAG) return null;`
-// — but ESM forbids dynamic require() so we name the modules here. UI builds
-// (Electron renderer / Vite map) never import this file; it is a sim-only module.
-import * as _fsModule from 'node:fs';
-import * as _pathModule from 'node:path';
+type NodeFsSync = {
+    existsSync(path: string): boolean;
+    mkdirSync(path: string, options?: { recursive?: boolean }): unknown;
+    appendFileSync(path: string, data: string, options?: { encoding?: BufferEncoding } | BufferEncoding): void;
+};
+
+type NodePathSync = {
+    join(...paths: string[]): string;
+};
+
+type ProcessWithBuiltinModule = NodeJS.Process & {
+    getBuiltinModule?: (id: string) => unknown;
+};
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Sector-Partition Perf Instrumentation (LANE-NIGHTSHIFT-SECTOR-PARTITION-INSTRUMENTATION)
@@ -116,7 +122,15 @@ import * as _pathModule from 'node:path';
 //     vs flag-OFF runs (verified by tests/sector_partition_instrumentation.test.ts).
 // ═══════════════════════════════════════════════════════════════════════════
 
-const nodeProcess = (globalThis as { process?: NodeJS.Process }).process;
+const nodeProcess = (globalThis as { process?: ProcessWithBuiltinModule }).process;
+
+function getNodeBuiltinModule<T>(id: string): T {
+    const mod = nodeProcess?.getBuiltinModule?.(id);
+    if (!mod) {
+        throw new Error(`Node builtin ${id} is unavailable; sector partition perf can only flush in Node.`);
+    }
+    return mod as T;
+}
 
 const SECTOR_PARTITION_PERF_FLAG: boolean =
     nodeProcess?.env?.PERF_PROFILE_SECTOR_PARTITION === 'true';
@@ -215,8 +229,8 @@ function _perfTime<T>(label: string, fn: () => T): T {
 function _flushInvocation(state: GameState, totalNs: bigint, isFinalPass: boolean): string | null {
     if (!SECTOR_PARTITION_PERF_FLAG) return null;
     if (!_activeInvocation) return null;
-    const fs = _fsModule;
-    const path = _pathModule;
+    const fs = getNodeBuiltinModule<NodeFsSync>('node:fs');
+    const path = getNodeBuiltinModule<NodePathSync>('node:path');
     const cwd = perfNodeProcess.cwd();
     const outDir = path.join(cwd, 'data', 'derived', '_debug');
     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir, { recursive: true });
@@ -609,6 +623,21 @@ export function buildCorpsFrontSectors(
         // live turn loop; it changes long-horizon calibration.
         _perfTime('enforceFinalSectorGeometryInvariants:final-save-projection', () => enforceFinalSectorGeometryInvariants(result, adjacency, globalEdgeMeta, sharedBoundaryAdj, caseBSplitAdj, centroids, formations));
         _perfTime('pruneGhostArtifactSectors:final-save-projection', () => pruneGhostArtifactSectors(result));
+        _perfTime('recoverDroppedFrontEdges:final-save-unstaffed-projection', () => recoverDroppedFrontEdges(
+            result,
+            state,
+            osidFrontEdges,
+            adjacency,
+            sharedBoundaryAdj,
+            caseBSplitAdj,
+            globalEdgeMeta,
+            formations,
+            reverseMap,
+            centroids,
+            spatial,
+            recoveredFrontClaimSetupCache,
+            { allowUnstaffedFrontSectors: true },
+        ));
     }
     _perfTime('annotateUnstaffedFrontSectors', () => annotateUnstaffedFrontSectors(result, state, formations, adjacency, spatial));
     _perfTime('recomputeMetricsByFaction:2', () => recomputeMetricsByFaction(Object.values(result), formations, state));
@@ -1461,8 +1490,22 @@ export function applyFinalSectorOwnerTruthPass(
                 adjacency,
                 friendlyOsids,
             ));
+        const componentOf = _perfTime('applyFinalSectorOwnerTruthPass:friendly-components', () =>
+            buildFriendlyComponents(adjacency, friendlyOsids));
+        _perfTime('applyFinalSectorOwnerTruthPass:ensure-coverage', () =>
+            ensureMinimumSectorCoverage(
+                factionSectors,
+                formations,
+                adjacency,
+                friendlyOsids,
+                componentOf,
+                state,
+                _perfTime,
+            ));
     }
 
+    _perfTime('applyFinalSectorOwnerTruthPass:dedup-final', () =>
+        deduplicateBrigadesAcrossSectors(sectorList));
     _perfTime('applyFinalSectorOwnerTruthPass:normalize-buckets', () =>
         normalizeFinalSectorBuckets(
             sectorList,
@@ -1470,6 +1513,17 @@ export function applyFinalSectorOwnerTruthPass(
             adjacency,
             state.political?.political_controllers,
         ));
+    _perfTime('applyFinalSectorOwnerTruthPass:recompute-power', () => {
+        const recomputeByFaction = new Map<FactionId, CorpsFrontSector[]>();
+        for (const sector of sectorList) {
+            const list = recomputeByFaction.get(sector.faction) ?? [];
+            list.push(sector);
+            recomputeByFaction.set(sector.faction, list);
+        }
+        for (const [faction, factionSectors] of recomputeByFaction) {
+            recomputeSectorPowerAndThreat(factionSectors, formations, faction, state);
+        }
+    });
     _perfTime('applyFinalSectorOwnerTruthPass:sync-sector-assignments', () =>
         syncSectorAssignmentsToFormations(
             Object.fromEntries(sectorList.map((sector) => [sector.sector_id, sector])),
@@ -1963,6 +2017,7 @@ function recoverDroppedFrontEdges(
     centroids?: OsidCentroidMap,
     spatial?: SpatialContext,
     recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>,
+    options?: { allowUnstaffedFrontSectors?: boolean },
 ): void {
     let recoveredAny = false;
 
@@ -2064,7 +2119,7 @@ function recoverDroppedFrontEdges(
                     const currentCorpsSectors = corpsSectorIds
                         .map((sectorId) => sectors[sectorId])
                         .filter((sector): sector is CorpsFrontSector => Boolean(sector && sector.corps_id === corpsId));
-                    if (!canCorpsStaffSectorFront(
+                    if (!options?.allowUnstaffedFrontSectors && !canCorpsStaffSectorFront(
                         recoveredSector,
                         [...currentCorpsSectors, recoveredSector],
                         corpsBrigadeLocations,

@@ -6,6 +6,7 @@
 
 import { expect, test } from 'vitest';
 import { runTurn } from '../src/sim/turn_pipeline.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -98,4 +99,40 @@ test('war runTurn with formation_spawn_directive remains stable', async () => {
     const { nextState, report } = await runTurn(state, { seed: 'smoke-fixture' });
     expect(report.phases.length > 0).toBeTruthy();
     expect(nextState.military.formations != null).toBeTruthy();
+});
+
+test('war formation-spawn phase consumes eligible directive pools', async () => {
+    const state = statePhaseI();
+    state.military.formation_spawn_directive = { kind: 'brigade' };
+    state.military.militia_pools = {
+        'MUN_A:RBiH': {
+            mun_id: 'MUN_A',
+            faction: 'RBiH',
+            available: 1600,
+            committed: 0,
+            exhausted: 0,
+            fatigue: 0,
+            updated_turn: 10,
+        },
+    } as any;
+    const report: any = {};
+    const phase = warPhases.find((candidate) => candidate.name === 'formation-spawn');
+    expect(phase).toBeDefined();
+
+    await phase!.run({
+        state,
+        report,
+        input: {
+            seed: 'smoke-fixture',
+        },
+    } as any);
+
+    expect(report.formation_spawn?.formations_created).toBe(1);
+    expect(Object.values(state.military.formations ?? {}).some((f: any) =>
+        f.faction === 'RBiH'
+        && f.kind === 'brigade'
+        && f.tags?.includes('generated_phase_i0')
+        && f.tags?.includes('mun:MUN_A'))).toBe(true);
+    expect(state.military.militia_pools?.['MUN_A:RBiH']?.available).toBe(800);
+    expect(state.military.militia_pools?.['MUN_A:RBiH']?.committed).toBe(800);
 });

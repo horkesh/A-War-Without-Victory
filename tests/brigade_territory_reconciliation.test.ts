@@ -17,7 +17,7 @@ import {
     syncSectorAssignmentsToFormations,
     warnUnresolvedSectorAssignments,
 } from '../src/sim/combat/brigade_assignment.js';
-import { collectUnresolvedSectorBrigades } from '../src/sim/combat/corps_front_sectors.js';
+import { applyFinalSectorOwnerTruthPass, collectUnresolvedSectorBrigades } from '../src/sim/combat/corps_front_sectors.js';
 import type {
     CorpsFrontSector,
     CorpsFrontSubSegment,
@@ -1330,6 +1330,183 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         });
     });
 
+    it('final owner truth pass deduplicates a brigade before syncing formation assignment', () => {
+        const sectorA = makeSector(
+            'sector:vrs_drina:0',
+            'vrs_drina',
+            [makeSubSeg('front_a', ['op:m:front'], ['op:m:enemy_a'], 3)],
+            ['op:m:front'],
+        );
+        const sectorB = makeSector(
+            'sector:vrs_drina:1',
+            'vrs_drina',
+            [makeSubSeg('front_b', ['op:m:front'], ['op:m:enemy_b'], 3)],
+            ['op:m:front'],
+        );
+        sectorA.assigned_brigade_ids = ['brig_duplicate'];
+        sectorB.assigned_brigade_ids = ['brig_duplicate'];
+        sectorB.defensive_power = 999;
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_duplicate: makeFormation({
+                id: 'brig_duplicate',
+                corps_id: 'vrs_drina',
+                location_osid: 'op:m:front',
+            }),
+        };
+        const sectors = {
+            [sectorA.sector_id]: sectorA,
+            [sectorB.sector_id]: sectorB,
+        };
+        const state = {
+            meta: { turn: 2 },
+            political: {
+                political_controllers: {
+                    'op:m:front': 'RS',
+                    'op:m:enemy_a': 'RBiH',
+                    'op:m:enemy_b': 'RBiH',
+                },
+            },
+            military: {
+                formations,
+                brigade_movement_orders: {},
+                corps_command: {},
+            },
+        } as unknown as GameState;
+        const adjacency = makeAdjacency([
+            ['op:m:front', 'op:m:enemy_a'],
+            ['op:m:front', 'op:m:enemy_b'],
+        ]);
+
+        applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency);
+
+        const claims = [sectorA, sectorB].flatMap((sector) => sector.assigned_brigade_ids);
+        expect(claims).toEqual(['brig_duplicate']);
+        expect(formations.brig_duplicate.assignment).toEqual({
+            kind: 'sector',
+            sector_id: 'sector:vrs_drina:0',
+            role: 'front',
+        });
+        expect(sectorB.assigned_brigade_ids).toEqual([]);
+        expect(sectorB.defensive_power).toBe(0);
+    });
+
+    it('final owner truth pass reruns minimum coverage after late rehome creates a same-corps donor', () => {
+        const recipient = makeSector(
+            'sector:vrs_1st_krajina:17',
+            'vrs_1st_krajina',
+            [makeSubSeg(
+                'recipient',
+                [
+                    'op:jajce:grdovo',
+                    'op:donji_vakuf:kutanja',
+                    'op:donji_vakuf:babin_potok_2',
+                    'op:sipovo:pribeljci_2',
+                ],
+                ['op:enemy:recipient'],
+                10,
+            )],
+            ['op:jajce:grdovo', 'op:donji_vakuf:kutanja', 'op:donji_vakuf:babin_potok_2', 'op:sipovo:pribeljci_2'],
+            10,
+        );
+        recipient.assigned_brigade_ids = ['rs_1st_sipovo_light_infantry'];
+        recipient.threat_ratio = 16;
+
+        const donor = makeSector(
+            'sector:vrs_1st_krajina:5',
+            'vrs_1st_krajina',
+            [makeSubSeg(
+                'donor',
+                ['op:kljuc:donji_vrbljani_2', 'op:titov_drvar:prekaja_2', 'op:kljuc:front'],
+                ['op:enemy:donor'],
+                12,
+            )],
+            ['op:kljuc:donji_vrbljani_2', 'op:titov_drvar:prekaja_2', 'op:kljuc:front'],
+            12,
+        );
+        donor.assigned_brigade_ids = ['rs_1st_banja_luka_light_infantry', 'rs_2nd_banja_luka_light_infantry'];
+        donor.threat_ratio = 0;
+
+        const formations: Record<FormationId, FormationState> = {
+            rs_1st_sipovo_light_infantry: makeFormation({
+                id: 'rs_1st_sipovo_light_infantry',
+                corps_id: 'vrs_1st_krajina',
+                location_osid: 'op:jajce:grdovo',
+            }),
+            rs_1st_banja_luka_light_infantry: makeFormation({
+                id: 'rs_1st_banja_luka_light_infantry',
+                corps_id: 'vrs_1st_krajina',
+                location_osid: 'op:kljuc:front',
+            }),
+            rs_2nd_banja_luka_light_infantry: makeFormation({
+                id: 'rs_2nd_banja_luka_light_infantry',
+                corps_id: 'vrs_1st_krajina',
+                location_osid: 'op:titov_drvar:prekaja_2',
+            }),
+            rs_4th_banja_luka_light_infantry: makeFormation({
+                id: 'rs_4th_banja_luka_light_infantry',
+                corps_id: 'vrs_1st_krajina',
+                location_osid: 'op:kljuc:donji_vrbljani_2',
+                home_osid: 'op:banja_luka:home',
+            }),
+        };
+
+        const sectors = {
+            [recipient.sector_id]: recipient,
+            [donor.sector_id]: donor,
+        };
+        const state = {
+            meta: { turn: 2 },
+            political: {
+                political_controllers: {
+                    'op:jajce:grdovo': 'RS',
+                    'op:donji_vakuf:kutanja': 'RS',
+                    'op:donji_vakuf:babin_potok_2': 'RS',
+                    'op:sipovo:pribeljci_2': 'RS',
+                    'op:kljuc:donji_vrbljani_2': 'RS',
+                    'op:titov_drvar:prekaja_2': 'RS',
+                    'op:kljuc:front': 'RS',
+                    'op:kljuc:relay_1': 'RS',
+                    'op:kljuc:relay_2': 'RS',
+                    'op:banja_luka:home': 'RS',
+                    'op:enemy:recipient': 'RBiH',
+                    'op:enemy:donor': 'RBiH',
+                },
+            },
+            military: {
+                formations,
+                brigade_movement_orders: {},
+                brigade_movement_state: {},
+                corps_command: {},
+            },
+        } as unknown as GameState;
+        const adjacency = makeAdjacency([
+            ['op:jajce:grdovo', 'op:enemy:recipient'],
+            ['op:jajce:grdovo', 'op:donji_vakuf:kutanja'],
+            ['op:donji_vakuf:kutanja', 'op:donji_vakuf:babin_potok_2'],
+            ['op:donji_vakuf:babin_potok_2', 'op:sipovo:pribeljci_2'],
+            ['op:kljuc:front', 'op:enemy:donor'],
+            ['op:kljuc:donji_vrbljani_2', 'op:kljuc:relay_1'],
+            ['op:kljuc:relay_1', 'op:kljuc:relay_2'],
+            ['op:kljuc:relay_2', 'op:donji_vakuf:kutanja'],
+            ['op:kljuc:donji_vrbljani_2', 'op:kljuc:front'],
+            ['op:titov_drvar:prekaja_2', 'op:kljuc:front'],
+            ['op:kljuc:front', 'op:banja_luka:home'],
+            ['op:banja_luka:home', 'op:kljuc:relay_1'],
+        ]);
+
+        applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency);
+
+        expect(donor.assigned_brigade_ids).not.toContain('rs_4th_banja_luka_light_infantry');
+        expect(recipient.assigned_brigade_ids).toContain('rs_4th_banja_luka_light_infantry');
+        expect(formations.rs_4th_banja_luka_light_infantry.location_osid).toBe('op:donji_vakuf:kutanja');
+        expect(formations.rs_4th_banja_luka_light_infantry.assignment).toEqual({
+            kind: 'sector',
+            sector_id: recipient.sector_id,
+            role: 'front',
+        });
+    });
+
     it('rehome skips drifted brigade whose home_osid is still in own-corps territory', () => {
         // Brigade at foreign-corps territory but home_osid is in own-corps sector
         const ownCorpsSector = makeSector(
@@ -1380,6 +1557,50 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         // Should NOT be assigned to own corps sector either (it's not physically there)
         expect(ownCorpsSector.assigned_brigade_ids).not.toContain('brig_drifted');
         expect(ownCorpsSector.reserve_brigade_ids).not.toContain('brig_drifted');
+    });
+
+    it('rehome keeps same-corps friendly-reachable brigades as deep rear even when home remains in own-corps territory', () => {
+        const sector = makeSector(
+            'sector:vrs_1st_krajina:0',
+            'vrs_1st_krajina',
+            [makeSubSeg('front_own', ['op:prijedor:front'], ['op:enemy:a'], 3)],
+            ['op:prijedor:front', 'op:banja_luka:home'],
+        );
+
+        const brigade = makeFormation({
+            id: 'brig_same_corps_rear',
+            corps_id: 'vrs_1st_krajina',
+            location_osid: 'op:kljuc:rear',
+            home_osid: 'op:banja_luka:home',
+        });
+
+        const formations: Record<FormationId, FormationState> = {
+            brig_same_corps_rear: brigade,
+        };
+        const adjacency = makeAdjacency([
+            ['op:kljuc:rear', 'op:kljuc:bridge'],
+            ['op:kljuc:bridge', 'op:prijedor:front'],
+            ['op:prijedor:front', 'op:banja_luka:home'],
+            ['op:prijedor:front', 'op:enemy:a'],
+        ]);
+        const friendlyOsids = new Set<string>([
+            'op:kljuc:rear',
+            'op:kljuc:bridge',
+            'op:prijedor:front',
+            'op:banja_luka:home',
+        ]);
+
+        rehomeUnassignedBrigadesToPhysicalSectorOwners(
+            [sector],
+            formations,
+            'RS' as FactionId,
+            adjacency,
+            friendlyOsids,
+        );
+
+        expect(sector.rear_brigade_ids).toEqual(['brig_same_corps_rear']);
+        expect(sector.territory_osids).toContain('op:kljuc:rear');
+        expect(sector.territory_osids).toContain('op:kljuc:bridge');
     });
 
     it('does not warn when a rear-guard brigade is movement-owned on a column return home', () => {

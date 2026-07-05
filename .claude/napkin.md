@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**2.5D MAP COUNTERS ARE SCREEN SYMBOLS, NOT TERRAIN DECALS (2026-07-05).** Pitched relief can physically obstruct Deck counters when `MapboxOverlay` is interleaved into MapLibre's 3D render stack. Do instead: keep the tactical Deck overlay non-interleaved (`interleaved: false`), keep formation counter bodies/halo opaque, and keep counter/label Deck layers at `depthTest: false, depthMask: false, depthWriteEnabled: false`.
+
 **MISSING CORPS COMMAND ROWS ARE UNREPORTED (2026-06-26).** A corps without `state.military.corps_command[corpsId]` has no reported command-strain/exhaustion/assessment source; it is not healthy zero. Do instead: preserve explicit reported zeroes, but render missing command strain, corps exhaustion, and Corps Situation assessment as `Unreported`.
 
 **RELEASE GATES MUST WATCH PACKAGED RUNTIME RESOURCES (2026-06-26).** Desktop/package regressions can come from data and asset changes, not just Electron source. Do instead: keep desktop/full-suite path filters covering `data/derived/`, `data/ui/`, event scenario data, `assets/`, `build/icon.png`, `package-lock.json`, and release workflow edits; run the packaged runtime probe before publishing Windows artifacts.
@@ -370,7 +372,7 @@
 
 **LIVE SURFACE BROWSER GATE (2026-06-19).** `qa:first-hour:browser` proves the opening path, but not every major command surface or drilldown. Do instead: after Desk/War Map/Army HQ/Records/Chronicle/Codex, toolbar/shell, OOB, Corps Front, formation, settlement, or Records-tab changes, run `npm run qa:live-surface:browser`; it must prove first-hour RBiH flow, major-surface reachability, owner drilldown through Decision Room -> sector -> formation -> settlement -> Records subtabs, shell exclusivity, raw-token absence, console health, and strict-port cleanup.
 
-**BROWSER GATES ARE CI-BLOCKING (2026-06-19).** The required `full-suite` GitHub Actions job now runs `qa:first-hour:browser` and `qa:live-surface:browser` after full Vitest on relevant code-contract changes. Do instead: treat local browser gate failures as merge blockers; do not reclassify first-hour/live-surface defects as manual-only unless the workflow itself proves unrelated infrastructure failure.
+**PLAYER EXPERIENCE GATE IS CI-BLOCKING (2026-07-02).** The required `full-suite` GitHub Actions job runs `qa:player-experience` after full Vitest on relevant code-contract changes. Do instead: treat local `qa:player-experience` failures as merge blockers; this is the canonical self-scanning gate for first-hour/live-surface proof, shipped builds, Electron runtime contracts, and warning signatures.
 
 **INBOX AND BRIEFING ROUTE OWNERSHIP (2026-06-19).** Operation opportunities are presidential Decision Room items with Army HQ as source evidence, not Army HQ briefing actions. Command briefing operation/sector/settlement chips must route to tactical field inspection from Decision Room and Army HQ recap. Do instead: use `decision_room`/`field` navigation targets for those cases; keep only reserve/personnel as Army HQ staff handoffs.
 
@@ -394,7 +396,9 @@
 
 **FIRST-HOUR BROWSER GATE (2026-06-18).** The first-hour RBiH browser path now has a command gate. Do instead: run `npm run qa:first-hour:browser` after shell/Records/Chronicle/onboarding changes; it proves splash -> identity -> foundational decision -> Desk blocking -> Records/Chronicle receipts, raw-label absence, console health, and strict-port cleanup.
 
-**FIRST-HOUR ALL-FACTION GATE (2026-06-20).** War-start intro state is campaign-handoff scoped, not component-global, and required decisions own top-level toolbar plus shell-hotkey focus. Do instead: after first-hour modal/toolbar/New Game changes, run `npm run qa:first-hour:browser`; it must verify RBiH/RS/HRHB splash -> identity -> foundational decision, keep DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX and shell hotkeys locked while `EventDecisionModal` is active, and reset opening-brief dismissal on fresh same-faction New Game starts.
+**FIRST-HOUR ALL-FACTION GATE (2026-06-20).** War-start intro state is campaign-handoff scoped, not component-global, and required decisions own top-level toolbar plus shell-hotkey focus. Do instead: after first-hour modal/toolbar/New Game changes, run `npm run qa:first-hour:browser`; it must verify RBiH/RS/HRHB splash -> identity -> foundational decision, keep DESK/WAR MAP/ARMY HQ/RECORDS/CHRONICLE/CODEX and shell hotkeys locked while `EventDecisionModal` is active, reset opening-brief dismissal on fresh same-faction New Game starts, and preserve the Electron Warroom iframe `awwv-shell:fresh-campaign-started` reset path.
+
+**ELECTRON DECISION IPC USES DESKTOP SIM BUNDLE (2026-06-28).** Source-mode Electron cannot dynamic-import TS sim helpers through `../sim/.../*.js` paths. Do instead: export decision helpers from `src/desktop/desktop_sim.ts` and call them through `getDesktopSim()` in `electron-main.cjs`; pin with the desktop sim bundle smoke and persistence contract tests.
 
 **ARMY HQ FIELD-INSPECTION ROUTE CONTRACT (2026-06-18).** Command briefing, selection, formation, and Decision Room field drilldowns must use the atomic `FieldInspectionTarget` / `inspectOnField` route. Do instead: set compound tactical selections in one store action, close competing shells, and keep Records/Army HQ routes separate from Tactical Map inspection.
 
@@ -1668,8 +1672,8 @@ After EVERY scenario run, the orchestrator:
    Do instead: Use weekly `operation_combat_diagnostics[].attack_order_targets` and `participant_attack_orders` to verify emitted targets, participant locations, current-objective match, and battle counts before changing combat odds, force trajectory, or painted targets. Donji n1944 showed non-current target orders with zero battles; fix order-target boundary first.
 1. **[2026-04-30] Late-war runs need date-specific painted targets**
    Do instead: Before judging Apr 1994 / Apr 1995 / Oct 1995 scenario health, create or select the matching target in `npm run paint:control` and compare with `tools/compare_painted_vs_sim.cjs <run_dir> --target <date>`; Jan 1993 is only a smoke check for late-war runs. Built-in targets must stay on the 712-OSID sim controller universe until the political-controller substrate is intentionally expanded.
-2. **[2026-03-08] NEVER override initial OSIDs — not an option**
-   Do instead: Initial OSID control from census/referendum is NEVER manually overridden. Fix engine, OOB, operations, or scenario params instead.
+2. **[2026-06-29] Factual initial-control corrections belong in the active scenario map**
+   Do instead: Do not use initial-control overrides as calibration/bot suppression. When a source-backed April 1992 start-control correction is needed and the scenario has `initial_osid_controllers`, patch that map directly; `osid_control_overrides` is ignored by the runner in that mode.
 3. **[2026-03-14] NEVER use avoided_osids_by_faction as a calibration fix — BANNED**
    Do instead: Fix bot_corps_directives.ts target priority, OOB terrain/personnel stats, or painted targets. `avoided_osids` hides broken engine behavior. Use `osid_control_overrides` only for factual initial-control corrections.
 4. **[2026-03-04] Override direction law — CRITICAL**
@@ -1692,6 +1696,18 @@ After EVERY scenario run, the orchestrator:
    Do instead: When adding code that mutates formations, political_controllers, or operations, the pipeline assertions will catch invariant violations at runtime. If an assertion fires, fix the source — never disable the assertion. Files: `assert_control_events.ts`, `assert_operation_lifecycle.ts`, `assert_formation_territory.ts`, `corps_front_sectors.ts` (assertSectorBrigadesActive + assertBrigadeReachability).
 
 ## Engine Runtime Patterns
+1. **[2026-06-30] Vite warning blocks are build-surface failures**
+   Do instead: Remove browser Node edges with guarded builtins/shims, eliminate static/dynamic import overlap, and use explicit Rollup chunk boundaries before accepting a clean tactical map or Warroom build. Run `npm run qa:player-experience` for release-facing player experience sweeps; it must use the self-scanning wrapper, fail on build/runtime warning signatures, and include the Electron runtime contract slice for Warroom startup/persistence/packaged-resource regressions.
+1. **[2026-06-30] War spawn directives run during War turns**
+   Do instead: If `formation_spawn_directive.kind` allows militia/brigade spawn, War phase must run deterministic pool-to-formation spawning before reinforcement; stranded pools above batch size are actionable unless a real cap/suppression applies.
+1. **[2026-06-30] Final geometry can reopen front-sector coverage**
+   Do instead: After final-save geometry projection, rerun dropped-front recovery and allow unstaffed sectors for politically real front sides with no legal fielded donor; forming brigades are not fielded counters.
+1. **[2026-06-30] Coverage donors need specific legal targets**
+   Do instead: Validator donor checks must identify a vacant target OSID and apply component, local-hop, operation-participant, and home-distance guards to that exact target; proximity to an occupied front point is not enough.
+1. **[2026-06-30] Coverage gates need legal-donor classification**
+   Do instead: For empty sectors, wide gaps, and adjacent exposed OSIDs, fail only when a reachable same-corps donor exists under component, operation-participant, local-hop, and home-distance guards; log no-donor scarcity as diagnostic.
+1. **[2026-06-29] Sector defense cannot suppress local militia floor**
+   Do instead: When sector reserves cover an attacked OSID with no physical defender, merge any physical target defenders first and preserve a shared militia-defense floor in both resolver and predictor; low computed OSID population from municipality splitting must not make a covered front easier than the generic fallback.
 1. **[2026-06-23] Sector rebuild diagnostics must be isolated**
    Do instead: clone saved and rebuilt states before `buildCorpsFrontSectors(...)`; use persisted saved-sector truth as the release gate and treat rebuilt reserve-only fixes as calibration/sector-builder work unless baseline and structural gates are intentionally re-floored.
 1. **[2026-06-23] Same-faction sector edge ownership is singular**
@@ -1720,6 +1736,18 @@ After EVERY scenario run, the orchestrator:
    Do instead: No `PhaseI`, `PhaseII` identifiers. `rear_pocket_consolidation.ts` replaces deleted `consolidation_flips.ts`.
 
 ## Player Shell Discipline
+1. **[2026-07-04] Launch-screen art text is decorative**
+   Do instead: Keep first-screen title/menu hierarchy in foreground DOM/CSS, dim/crop any background art with baked text, and verify built-output screenshots at ultrawide plus 16:9 fullscreen-like sizes.
+1. **[2026-07-04] Startup snapshots need post-selection normalization**
+   Do instead: After setting `meta.player_faction`, defer player-owned preplanned operations into `HISTORICAL_OP:*` authorization reviews and apply the same normalizer in Electron and browser fallback start paths.
+1. **[2026-07-04] Missing counters have three possible fault layers**
+   Do instead: Check raw formations, player-visible/contact projection, and Deck layer props separately; preserve the last non-empty Deck counter layer only when the next empty update is transient and state still has formations.
+1. **[2026-07-04] Stack counters in pixels, not coordinates**
+   Do instead: Keep stacked formation features anchored to the OSID coordinate, carry stack metadata, make Deck the only visible counter owner, keep MapLibre's native formation source empty, and filter the expanded rendered-counter footprint against both viewport padding and every live UI occluder rectangle after panel transition layout settles. Deck pixel offsets use screen-coordinate Y: positive moves top-edge counters down, negative moves bottom-edge counters up. Verify with screenshots, not helper tests alone.
+1. **[2026-06-30] Post-turn priority rows are command handoffs**
+   Do instead: Turn Aftermath top Command Desk rows must carry decision-surface action labels, sort effective blockers before normal priority, expose up to six handoff rows, promote the top row into the persistent footer CTA, and route through the same owning-surface handler as the President's Desk; `HISTORICAL_OP` cards must preserve authorization-specific labels/copy and block advance until accepted or withheld. Keep `tests/ui/turn_aftermath_modal_i18n.test.ts` and `tests/ui/pre_advance_command_review.test.ts` inside `qa:player-journeys`.
+1. **[2026-06-29] Active player surfaces are revealed history, not future tables of contents**
+   Do instead: During active campaigns, show only faced Codex/Dilemma rows, confirmed consequence receipts, and receipt-gated ticker history. First-hour copy must use unnamed final-settlement language until receipts exist. UI adapter DTOs, AI-player context, and production DOM must strip future-consequence/source-note contracts and raw future ids unless an explicit diagnostic mode owns them.
 1. **[2026-06-23] Player-scoped decision fixtures need ownership truth**
    Do instead: When tests create pending event/convoy/officer decision rows, include `player_faction` and matching/non-matching row ownership explicitly; production Inbox/Desk/Decision Room/pre-advance surfaces scope by the player, so foreign-route fixtures should assert absence rather than expecting blockers.
 1. **[2026-06-22] Missing command-surface data is unreported, not favorable**

@@ -56,6 +56,28 @@ describe('desktop persistence contract', () => {
     expect(handler).toContain('writeCanonicalCurrentState(sim, state)');
   });
 
+  it('event-decision IPC resolves through the desktop sim bundle instead of source-only dynamic imports', () => {
+    const electronMain = readFileSync(
+      resolve(process.cwd(), 'src/desktop/electron-main.cjs'),
+      'utf8',
+    );
+    const desktopSim = readFileSync(
+      resolve(process.cwd(), 'src/desktop/desktop_sim.ts'),
+      'utf8',
+    );
+
+    const handlerStart = electronMain.indexOf("ipcMain.handle('respond-to-event-decision'");
+    const handlerEnd = electronMain.indexOf("ipcMain.handle('dismiss-event-notification'", handlerStart);
+    const handler = electronMain.slice(handlerStart, handlerEnd);
+
+    expect(handler).toContain('const state = readCanonicalCurrentState(sim);');
+    expect(handler).toContain('sim.resolveEventDecision(state, eventId, responseId)');
+    expect(handler).toContain('writeCanonicalCurrentState(sim, state);');
+    expect(handler).not.toContain("import('../sim/events/resolve_decision.js')");
+    expect(desktopSim).toContain("from '../sim/events/resolve_decision.js'");
+    expect(desktopSim).toContain('resolveEventDecision');
+  });
+
   it('advance-turn gate uses the shared player decision manifest', () => {
     const electronMain = readFileSync(
       resolve(process.cwd(), 'src/desktop/electron-main.cjs'),

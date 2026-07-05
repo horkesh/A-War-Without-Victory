@@ -119,7 +119,7 @@ describe('buildConsequenceReceipts', () => {
         expect(buildConsequenceReceipts(state, undefined)).toEqual([]);
     });
 
-    it('classifies CONFIRMED, PENDING, and CONTRADICTED on one constructed state', () => {
+    it('materializes only CONFIRMED downstream receipts on one constructed state', () => {
         // Decision E@turn 3, chose opt_a, predicts opening: p_confirmed, p_pending, p_closed.
         const catalog = new Map<string, EventDefinition>([
             ['E', buildEventDef('E', ['p_confirmed', 'p_pending', 'p_closed'], {
@@ -143,7 +143,7 @@ describe('buildConsequenceReceipts', () => {
         });
 
         const receipts = buildConsequenceReceipts(state, catalog);
-        expect(receipts).toHaveLength(3);
+        expect(receipts).toHaveLength(1);
 
         const byPredicted = new Map(receipts.map((r) => [r.predictedEventId, r]));
 
@@ -157,11 +157,34 @@ describe('buildConsequenceReceipts', () => {
         expect(confirmed.predictedLabel).toBe('A counter-offensive on the Drina');
         expect(confirmed.predictedExplanation).toContain('dossier');
 
-        expect(byPredicted.get('p_pending')!.status).toBe('pending');
-        expect(byPredicted.get('p_pending')!.firedTurn).toBeNull();
+        expect(byPredicted.has('p_pending')).toBe(false);
+        expect(byPredicted.has('p_closed')).toBe(false);
+    });
 
-        expect(byPredicted.get('p_closed')!.status).toBe('contradicted');
-        expect(byPredicted.get('p_closed')!.firedTurn).toBeNull();
+    it('does not materialize pending or foreclosed future consequence labels before realization', () => {
+        const catalog = new Map<string, EventDefinition>([
+            ['E', buildEventDef('E', ['future_peace_plan', 'foreclosed_peace_plan'], {
+                consequenceLabel: 'The Vance-Owen Peace Plan',
+                explanation: 'Would expose a future diplomatic track.',
+            })],
+            ['future_peace_plan', buildTargetDef('future_peace_plan', 'The Vance-Owen Peace Plan')],
+            ['foreclosed_peace_plan', buildTargetDef('foreclosed_peace_plan', 'The Contact Group Plan')],
+        ]);
+        const state = buildState({
+            decisions: [{ event_id: 'E', response_id: 'opt_a', turn: 3 }],
+            firedEventIds: ['E'],
+            closedEventIds: ['foreclosed_peace_plan'],
+            lastFiredTurn: { E: 3 },
+        });
+
+        const receipts = buildConsequenceReceipts(state, catalog);
+        const visibleReceiptText = receipts.map((receipt) => [
+            receipt.predictedLabel,
+            receipt.predictedExplanation,
+        ].join(' ')).join('\n');
+
+        expect(receipts).toEqual([]);
+        expect(visibleReceiptText).not.toMatch(/Vance-Owen|Contact Group|future diplomatic/i);
     });
 
     it('keeps fallback visible labels player-safe while retaining raw ids internally', () => {
@@ -223,9 +246,7 @@ describe('buildConsequenceReceipts', () => {
                 { turn: 5, from_event: 'E', to_event: 'p', to_flag: null, kind: 'enables', source_response_id: 'opt_other' },
             ],
         });
-        const receipts = buildConsequenceReceipts(state, catalog);
-        expect(receipts).toHaveLength(1);
-        expect(receipts[0].status).toBe('pending');
+        expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
     });
 
     it('does NOT confirm when P fired BEFORE the decision turn (no false causality)', () => {
@@ -245,11 +266,7 @@ describe('buildConsequenceReceipts', () => {
                 { turn: 14, from_event: 'E', to_event: 'p_early', to_flag: null, kind: 'enables', source_response_id: 'opt_a' },
             ],
         });
-        const receipts = buildConsequenceReceipts(state, catalog);
-        expect(receipts).toHaveLength(1);
-        expect(receipts[0].status).toBe('pending');
-        expect(receipts[0].firedTurn).toBeNull();
-        expect(receipts[0].turnsElapsed).toBeNull();
+        expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
     });
 
     it('confirms (with correct non-negative elapsed) when P fired AT/AFTER the decision turn', () => {
@@ -309,7 +326,7 @@ describe('buildConsequenceReceipts', () => {
         expect(buildConsequenceReceipts(state, catalog)).toEqual([]);
     });
 
-    it('sorts CONFIRMED by fired turn ascending, pending/contradicted last, deterministic by id', () => {
+    it('sorts CONFIRMED by fired turn ascending and omits pending rows', () => {
         const catalog = new Map<string, EventDefinition>([
             ['E', buildEventDef('E', ['p_late', 'p_early', 'p_pending'])],
             ['p_late', buildTargetDef('p_late')],
@@ -326,7 +343,7 @@ describe('buildConsequenceReceipts', () => {
             ],
         });
         const receipts = buildConsequenceReceipts(state, catalog);
-        expect(receipts.map((r) => r.predictedEventId)).toEqual(['p_early', 'p_late', 'p_pending']);
+        expect(receipts.map((r) => r.predictedEventId)).toEqual(['p_early', 'p_late']);
     });
 
     it('receiptsRealizedOnTurn filters to CONFIRMED rows firing on the given turn', () => {

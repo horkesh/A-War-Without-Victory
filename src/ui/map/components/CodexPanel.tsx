@@ -79,7 +79,7 @@ function tierLabel(tier: CodexTier): string {
 function lockHint(lockReason: CodexLockReason | null): string | null {
     if (!lockReason) return null;
     switch (lockReason.kind) {
-        case 'event': return t('codex.unlocksAfterEvent', { event: lockReason.detail ?? '' });
+        case 'event': return t('codex.unlocksAfterEvent');
         case 'essay': return t('codex.unlocksAfterEssay');
         case 'turn': return t('codex.unlocksAfterTurn', { date: turnToDateString(lockReason.turn ?? 0) });
         case 'event_fire':
@@ -113,6 +113,7 @@ function TierBadge({ tier }: { tier: CodexTier }) {
 interface CodexPanelProps {
     isOpen: boolean;
     onClose: () => void;
+    requestedEventId?: string | null;
     /**
      * Phase H Packet 5 (Component C) — optional event catalog for the
      * Unlock State section (family + source_tier lookups + aggregate
@@ -152,7 +153,7 @@ function formatUnlockRow(
     return { family, sourceTier };
 }
 
-export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelProps) {
+export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, state }: CodexPanelProps) {
     const loadedGameState = useGameStore((s) => s.loadedGameState);
     // Diagnostics gate (NOT generic dev mode): raw event IDs / unlock diagnostics
     // must never surface in dev:map for playtesters. Requires explicit ?diag=1.
@@ -189,6 +190,10 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
     // adapter. Empty array when absent (flag-off / pre-Thread-2 saves) so the
     // section degrades gracefully.
     const dilemmaSpine = loadedGameState?.dilemmaSpine ?? [];
+    const visibleDilemmaSpine = useMemo(
+        () => dilemmaSpine.filter((dilemma) => dilemma.faced || Boolean(loadedGameState?.gameOver)),
+        [dilemmaSpine, loadedGameState?.gameOver],
+    );
 
     // Distance-from-history read-model v1: how far the player's emergent war has
     // drifted from the historical 1992-95 (event-decision divergence). Absent on
@@ -241,6 +246,16 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
         }
         return grouped;
     }, [essays, resolvedEssays]);
+
+    useEffect(() => {
+        if (!isOpen || !requestedEventId) return;
+        const target = essays.find((essay) => essay.event_id === requestedEventId);
+        if (!target) return;
+        const resolved = resolvedEssays.get(target.id);
+        if (!resolved?.isUnlocked) return;
+        setSelectedEssayId(target.id);
+        setExpandedYear(target.year);
+    }, [isOpen, requestedEventId, essays, resolvedEssays]);
 
     const availableCount = useMemo(
         () => essays.filter((essay) => resolvedEssays.get(essay.id)?.isUnlocked).length,
@@ -307,7 +322,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                     the linked codex essay. Rows with a null essayId surface the
                     dilemma without an essay link. Renders nothing when the spine
                     is empty/absent (flag-off / pre-Thread-2 saves). */}
-                {dilemmaSpine.length > 0 && (
+                {visibleDilemmaSpine.length > 0 && (
                     <div
                         data-testid="codex-dilemma-spine-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
@@ -316,7 +331,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                             {t('codex.dilemmaSpine.title')}
                         </div>
                         <ul className="space-y-1">
-                            {dilemmaSpine.map((dilemma) => {
+                            {visibleDilemmaSpine.map((dilemma) => {
                                 const essayUnlocked = dilemma.essayId
                                     ? Boolean(resolvedEssays.get(dilemma.essayId)?.isUnlocked)
                                     : false;
@@ -644,7 +659,7 @@ export function CodexPanel({ isOpen, onClose, eventCatalog, state }: CodexPanelP
                                                         )}
                                                     </div>
                                                     <div className={`text-[10px] leading-snug ${row.unlocked ? 'text-neutral-200' : 'text-neutral-400'}`}>
-                                                        {row.unlocked ? (resolved?.title ?? essay.title) : essay.title}
+                                                        {row.unlocked ? (resolved?.title ?? essay.title) : t('codex.lockedHistoricalEntry')}
                                                     </div>
                                                     {!row.unlocked && row.hint && (
                                                         <div

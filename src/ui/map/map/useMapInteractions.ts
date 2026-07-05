@@ -80,6 +80,10 @@ export const isSelectableFrontFeature = (feature: { layer?: { id?: string }; pro
 const isOsidFillLayer = (layerId: string | undefined): boolean =>
   !!layerId && OSID_INTERACTIVE_FILL_LAYERS.includes(layerId);
 
+const getOsidFillFeature = (
+  features: Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined,
+) => features?.find((feature) => isOsidFillLayer(feature.layer?.id) && typeof feature.properties?.osid === 'string');
+
 const frontFeatureInteractionPriority = (feature: { layer?: { id?: string } } | undefined): number => {
   const layerId = feature?.layer?.id ?? '';
   if (layerId === SECTOR_EDGE_HIT_POS_LAYER || layerId === SECTOR_EDGE_HIT_NEG_LAYER) return 1;
@@ -452,6 +456,15 @@ export function useMapInteractions(
         const id = formationFeature.properties?.id as string | undefined;
         if (id) {
           onFormationClick?.(id, formationFeature.properties as Record<string, unknown>, e.point);
+          return;
+        }
+      }
+
+      const osidFillFeature = getOsidFillFeature(features as Array<{ layer?: { id?: string }; properties?: Record<string, unknown> }> | undefined);
+      if (osidFillFeature) {
+        const osid = osidFillFeature.properties?.osid as string | undefined;
+        if (osid) {
+          onOsidClick?.(osid, osidFillFeature.properties as Record<string, unknown>);
           return;
         }
       }
