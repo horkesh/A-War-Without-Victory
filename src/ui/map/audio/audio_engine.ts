@@ -17,6 +17,7 @@ export type AudioVolumeKind = 'master' | AudioCueCategory;
 interface AudioBusState {
     enabled: boolean;
     muted: boolean;
+    userGestureUnlocked: boolean;
     lastCueId: string | null;
     /**
      * Resolved playback URL for the last accepted cue, via the `audioAssets.ts`
@@ -43,6 +44,7 @@ const DEFAULT_VOLUMES: Record<AudioVolumeKind, number> = {
 let state: AudioBusState = {
     enabled: false,
     muted: true,
+    userGestureUnlocked: false,
     lastCueId: null,
     lastResolvedAssetUrl: null,
     currentMusicId: null,
@@ -58,6 +60,24 @@ function clampVolume(value: number): number {
 
 export function initAudio(): void {
     // Stub: intentionally no browser audio initialization.
+}
+
+export function unlockAudioForUserGesture(): void {
+    state = { ...state, userGestureUnlocked: true };
+}
+
+export function installAudioGestureUnlockListeners(
+    target: Pick<EventTarget, 'addEventListener' | 'removeEventListener'> | null =
+        typeof window === 'undefined' ? null : window,
+): () => void {
+    if (!target) return () => undefined;
+    const unlock = () => unlockAudioForUserGesture();
+    target.addEventListener('pointerdown', unlock, { once: true });
+    target.addEventListener('keydown', unlock, { once: true });
+    return () => {
+        target.removeEventListener('pointerdown', unlock);
+        target.removeEventListener('keydown', unlock);
+    };
 }
 
 export function setEnabled(enabled: boolean): void {
@@ -86,7 +106,7 @@ export function setVolume(kind: AudioVolumeKind, value: number): void {
 }
 
 export async function playCue(id: string, nowMs?: number): Promise<void> {
-    if (!state.enabled || state.muted) return;
+    if (!state.enabled || state.muted || !state.userGestureUnlocked) return;
     const cue = getCueConfig(id);
     if (!cue) return;
     const normalizedNowMs = Number.isFinite(nowMs) ? Math.max(0, Math.floor(nowMs as number)) : null;
@@ -170,6 +190,7 @@ export function resetAudioForTests(): void {
     state = {
         enabled: false,
         muted: true,
+        userGestureUnlocked: false,
         lastCueId: null,
         lastResolvedAssetUrl: null,
         currentMusicId: null,

@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     getAudioState,
+    installAudioGestureUnlockListeners,
     isAudioEnabled,
     playCue,
     resetAudioForTests,
     setEnabled,
     setVolume,
+    unlockAudioForUserGesture,
 } from '../../src/ui/map/audio/audio_engine.js';
 
 describe('audio bus stub', () => {
@@ -24,8 +26,12 @@ describe('audio bus stub', () => {
         expect(globalThis.AudioContext).not.toHaveBeenCalled();
     });
 
-    it('records requested cues only after explicit enablement but still performs no playback IO', async () => {
+    it('records requested cues only after explicit enablement and user gesture unlock', async () => {
         setEnabled(true);
+        await playCue('peace_plan_offered', 1000);
+        expect(getAudioState().acceptedCueCount).toBe(0);
+
+        unlockAudioForUserGesture();
         await playCue('peace_plan_offered', 1000);
 
         expect(isAudioEnabled()).toBe(true);
@@ -37,6 +43,7 @@ describe('audio bus stub', () => {
 
     it('suppresses repeated cues inside their deterministic cooldown window', async () => {
         setEnabled(true);
+        unlockAudioForUserGesture();
 
         await playCue('stinger_dayton_ceasefire', 1000);
         await playCue('stinger_dayton_ceasefire', 1200);
@@ -44,6 +51,24 @@ describe('audio bus stub', () => {
 
         expect(getAudioState().lastCueId).toBe('stinger_dayton_ceasefire');
         expect(getAudioState().acceptedCueCount).toBe(2);
+    });
+
+    it('can install browser gesture unlock listeners without initializing browser audio', async () => {
+        setEnabled(true);
+        const target = new EventTarget();
+        const cleanup = installAudioGestureUnlockListeners(target);
+
+        target.dispatchEvent(new Event('keydown'));
+        await playCue('ui_click', 1000);
+        cleanup();
+
+        expect(getAudioState()).toMatchObject({
+            userGestureUnlocked: true,
+            lastCueId: 'ui_click',
+            acceptedCueCount: 1,
+        });
+        expect(globalThis.fetch).not.toHaveBeenCalled();
+        expect(globalThis.AudioContext).not.toHaveBeenCalled();
     });
 
     it('clamps bus volumes deterministically by kind', () => {
