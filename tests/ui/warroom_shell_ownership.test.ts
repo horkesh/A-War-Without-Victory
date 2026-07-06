@@ -140,7 +140,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const app = read('src/ui/map/App.tsx');
 
         expect(app).toContain('const leaveWarroomForGame =');
-        expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(false\);[\s\S]*setSummaryOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
+        expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setSummaryOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
         expect(app).toMatch(/if \(event\.data\?\.type === 'awwv-shell:show-warroom'\) \{[\s\S]*returnToWarroomShell\(\);[\s\S]*return;[\s\S]*\}/);
         expect(app).toMatch(/const applyShellCommand = \(command: ShellHandoffCommand\): boolean => applyShellHandoffCommand\(\{[\s\S]*\.\.\.useGameStore\.getState\(\),[\s\S]*advanceTurnNow:[\s\S]*\}, command\);/);
         expect(app).toMatch(/applyShellCommand\(command\);[\s\S]*if \(!warroomCommandStaysInRoom\(command\)\) \{[\s\S]*leaveWarroomForGame\(\);[\s\S]*\}/);
@@ -192,14 +192,14 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app.slice(openCommandStripStart, openCommandStripEnd)).toContain('setWarroomDeskOpen(false);');
     });
 
-    it('makes Decision History a mutually exclusive top-level overlay', () => {
+    it('routes Authored Choices shortcuts to the Records archive spine', () => {
         const app = read('src/ui/map/App.tsx');
 
-        expect(app).toContain('const openDecisionHistoryOverlay =');
-        expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*if \(appScreen !== 'game'\) return;/);
-        expect(app).toMatch(/const openDecisionHistoryOverlay = \(\) => \{[\s\S]*gs\.setArmyHQOpen\(false\);[\s\S]*gs\.setChronicleOpen\(false\);[\s\S]*gs\.setCodexOpen\(false\);[\s\S]*gs\.setIsOperationsPanelOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(true\);[\s\S]*\};/);
-        expect(app).not.toContain('setIsDecisionHistoryOpen((prev) => {');
-        expect(app).toContain('}, [appScreen, activeEventDecisionId, isDecisionHistoryOpen]);');
+        expect(app).not.toContain('const openDecisionHistoryOverlay =');
+        expect(app).not.toContain('DecisionHistoryOverlay');
+        expect(app).toMatch(/e\.key === 'e'[\s\S]*openArmyHQRecordsSubTab\(useGameStore\.getState\(\), 'decisions'\)/);
+        expect(app).toMatch(/e\.key === 'd'[\s\S]*openArmyHQRecordsSubTab\(useGameStore\.getState\(\), 'decisions'\)/);
+        expect(app).toContain('}, [appScreen, activeEventDecisionId]);');
     });
 
     it('returns presidential inbox handoffs to the Desk owner instead of the map inbox rail', () => {
@@ -249,7 +249,6 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
 
         const chronicleRoute = app.slice(routeStart, routeEnd);
         expect(chronicleRoute).toContain('openChronicle(useGameStore.getState())');
-        expect(chronicleRoute).toContain('setIsDecisionHistoryOpen(false)');
-        expect(chronicleRoute).not.toContain('setIsDecisionHistoryOpen(true)');
+        expect(chronicleRoute).not.toContain('setIsDecisionHistoryOpen');
     });
 });

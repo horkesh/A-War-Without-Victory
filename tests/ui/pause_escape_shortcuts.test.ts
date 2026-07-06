@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render } from '@testing-library/react';
 import { createElement } from 'react';
 import { CodexPanel } from '../../src/ui/map/components/CodexPanel.js';
-import { DecisionHistoryOverlay } from '../../src/ui/map/components/DecisionHistoryOverlay.js';
 import { useKeyboardShortcuts } from '../../src/ui/map/hooks/useKeyboardShortcuts.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
@@ -22,14 +21,6 @@ function CodexWithKeyboardShortcuts() {
     return createElement(CodexPanel, {
         isOpen: true,
         onClose: () => useGameStore.getState().setCodexOpen(false),
-    });
-}
-
-function DecisionHistoryWithKeyboardShortcuts() {
-    useKeyboardShortcuts();
-    return createElement(DecisionHistoryOverlay, {
-        isOpen: true,
-        onClose: () => useGameStore.setState({ decisionHistoryProbeOpen: false } as any),
     });
 }
 
@@ -159,17 +150,4 @@ describe('Pause Escape shortcuts', () => {
         expect(useGameStore.getState().pauseMenuOpen).toBe(false);
     });
 
-    it('leaves Escape to Decision History without opening the pause menu behind it', () => {
-        useGameStore.setState({
-            ...useGameStore.getInitialState(),
-            pauseMenuOpen: false,
-            decisionHistoryProbeOpen: true,
-        } as any);
-        render(createElement(DecisionHistoryWithKeyboardShortcuts));
-
-        fireEvent.keyDown(window, { key: 'Escape' });
-
-        expect((useGameStore.getState() as any).decisionHistoryProbeOpen).toBe(false);
-        expect(useGameStore.getState().pauseMenuOpen).toBe(false);
-    });
 });

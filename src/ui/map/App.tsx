@@ -54,7 +54,6 @@ import { PeaceWarTransitionOverlay } from './components/PeaceWarTransitionOverla
 import { ChronicleOverlay } from './components/chronicle/ChronicleOverlay';
 import { WrappedOverlay } from './components/chronicle/WrappedOverlay';
 import { CodexPanel } from './components/CodexPanel';
-import { DecisionHistoryOverlay } from './components/DecisionHistoryOverlay';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { LoadErrorToast } from './components/LoadErrorToast';
 import { VerdictScreen } from './components/VerdictScreen';
@@ -587,13 +586,6 @@ function App() {
   const [requestedCodexEventId, setRequestedCodexEventId] = useState<string | null>(null);
   const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
-  /**
-   * Phase H Packet 8 — Decision History overlay open state. Owned at App
-   * root because the overlay is full-screen and may be triggered from
-   * multiple places (currently: 'D' hotkey + future inbox / records
-   * actions). Default closed. See `DecisionHistoryOverlay.tsx`.
-   */
-  const [isDecisionHistoryOpen, setIsDecisionHistoryOpen] = useState(false);
   /** Active blocking event decision id surfaced as a modal. `null` = no modal.
    *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
    *  below when a new turn surfaces pending decisions for the player faction. */
@@ -1098,25 +1090,6 @@ function App() {
     setSummaryOpen(true);
   };
 
-  const openDecisionHistoryOverlay = () => {
-    if (appScreen !== 'game') return;
-    const gs = useGameStore.getState();
-    gs.setArmyHQOpen(false);
-    gs.setChronicleOpen(false);
-    gs.setCodexOpen(false);
-    gs.setIsOperationsPanelOpen(false);
-    setSummaryOpen(false);
-    setIsDecisionHistoryOpen(true);
-  };
-
-  const toggleDecisionHistoryOverlay = () => {
-    if (isDecisionHistoryOpen) {
-      setIsDecisionHistoryOpen(false);
-      return;
-    }
-    openDecisionHistoryOverlay();
-  };
-
   // Keyboard shortcuts for Army HQ tabs + orphaned modals
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1138,14 +1111,14 @@ function App() {
       } else if (e.key === 'e' || e.key === 'E') {
         // Authored Choices ledger shortcut. Mirrors the 'D' hotkey.
         e.preventDefault();
-        toggleDecisionHistoryOverlay();
+        openArmyHQRecordsSubTab(useGameStore.getState(), 'decisions');
+        setSummaryOpen(false);
       } else if (e.key === 'c' || e.key === 'C') {
         e.preventDefault();
         const gs = useGameStore.getState();
         if (gs.chronicleOpen) {
           gs.setChronicleOpen(false);
         } else {
-          setIsDecisionHistoryOpen(false);
           openChronicle(gs);
         }
       } else if (e.key === 'x' || e.key === 'X') {
@@ -1154,7 +1127,6 @@ function App() {
         if (gs.codexOpen) {
           gs.setCodexOpen(false);
         } else {
-          setIsDecisionHistoryOpen(false);
           openCodex(gs);
         }
       } else if (e.key === 'd' || e.key === 'D') {
@@ -1163,7 +1135,8 @@ function App() {
         // ESC handler is the canonical close path; this is the second-open
         // path so the player can dismiss via the same key they opened with.
         e.preventDefault();
-        toggleDecisionHistoryOverlay();
+        openArmyHQRecordsSubTab(useGameStore.getState(), 'decisions');
+        setSummaryOpen(false);
       } else if (e.key === 'u' || e.key === 'U') {
         // Item 2 — National Humanitarian Ledger. Toggle mirrors Codex (X) /
         // Chronicle (C) / Decision History (D). Read-model only.
@@ -1173,7 +1146,7 @@ function App() {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [appScreen, activeEventDecisionId, isDecisionHistoryOpen]);
+  }, [appScreen, activeEventDecisionId]);
 
   const openOrbat = () => {
     // If no corps selected for orbat, pick the first player corps
@@ -1205,7 +1178,6 @@ function App() {
     setWarroomDecisionRoomOpen(true);
     closeCommandStrip(false);
     setDiplomacyOpen(false);
-    setIsDecisionHistoryOpen(false);
     setAppScreen('warroom');
     setSummaryOpen(false);
   };
@@ -1356,7 +1328,6 @@ function App() {
     setWarroomOverlaySurface(null);
     closeCommandStrip(false);
     setDiplomacyOpen(false);
-    setIsDecisionHistoryOpen(false);
     setSummaryOpen(false);
     setAppScreen('game');
   };
@@ -1375,7 +1346,6 @@ function App() {
     gs.setSelectedOperationKey(null);
     gs.setSelectedOrbatCorpsId(null);
     setSummaryOpen(false);
-    setIsDecisionHistoryOpen(false);
     setDiplomacyOpen(false);
     setWarroomDeskOpen(false);
     setWarroomDecisionRoomOpen(false);
@@ -1391,7 +1361,6 @@ function App() {
     gs.setChronicleOpen(false);
     gs.setIsOperationsPanelOpen(false);
     setSummaryOpen(false);
-    setIsDecisionHistoryOpen(false);
     setWarroomOverlaySurface(null);
     setWarroomDeskOpen(true);
     setWarroomDecisionRoomOpen(false);
@@ -1429,7 +1398,6 @@ function App() {
       setWarroomDecisionRoomOpen(false);
       setWarroomOverlaySurface(null);
       closeCommandStrip(false);
-      setIsDecisionHistoryOpen(false);
       setDiplomacyOpen(true);
       return;
     }
@@ -1439,7 +1407,6 @@ function App() {
       setWarroomOverlaySurface(null);
       closeCommandStrip(false);
       setDiplomacyOpen(false);
-      setIsDecisionHistoryOpen(false);
       openChronicle(useGameStore.getState());
       leaveWarroomForGame();
       return;
@@ -1550,7 +1517,6 @@ function App() {
     const gs = useGameStore.getState();
     setTurnAftermathOpen(false);
     setSummaryOpen(false);
-    setIsDecisionHistoryOpen(false);
     openWarroomDeskFromField();
     gs.setSelectedOsid(null);
     gs.setSelectedFormationId(null);
@@ -1821,22 +1787,11 @@ function App() {
         }}
       />
       <RootErrorBoundary zone="army hq">
-        <ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} />
+        <ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} eventCatalog={eventCatalogFull} />
       </RootErrorBoundary>
       <ChronicleOverlay />
       <WrappedOverlay eventCatalog={eventCatalogFull} />
       <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
-      {/* Phase H Packet 8 — Decision History overlay (Component B per H1 §4.2B).
-          Consumes H2 wave 1 helpers (getPlayerDecisionHistory +
-          getCausalDescendants); same catalog + raw state as CodexPanelWrapper.
-          Trigger: 'D' hotkey (see keyboard shortcut handler). The overlay
-          gracefully degrades when catalog or state is absent. */}
-      <DecisionHistoryOverlay
-        isOpen={isDecisionHistoryOpen}
-        onClose={() => setIsDecisionHistoryOpen(false)}
-        eventCatalog={eventCatalogFull}
-        state={loadedGameState?.rawGameState}
-      />
       <RootErrorBoundary zone="ops planning">
         <OpsPlanningModal />
       </RootErrorBoundary>

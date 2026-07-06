@@ -192,7 +192,7 @@ describe('field toolbar navigation ownership', () => {
 
     expect(appSource).toContain('if (activeEventDecisionIdRef.current !== null) return;');
     expect(appSource).toMatch(/window\.addEventListener\('keydown', handler\)[\s\S]*activeEventDecisionId/);
-    expect(appSource).toMatch(/}, \[appScreen, activeEventDecisionId, isDecisionHistoryOpen\]\);/);
+    expect(appSource).toMatch(/}, \[appScreen, activeEventDecisionId\]\);/);
   });
 
   it('mounts tactical map chrome only while the game shell owns the screen', () => {
