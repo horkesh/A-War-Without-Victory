@@ -10,11 +10,14 @@
  */
 import type { ArmyHQRecordsSubTab, ArmyHQTab, ShellHandoffCommand } from '../../shared/shellHandoff';
 import { buildDecisionConsequenceLedger } from '../data/decisionConsequenceLedger';
+import { buildPreAdvanceCommandReviewView } from '../data/preAdvanceCommandReview';
 import type { LoadedGameState } from '../data/types';
 import type { FieldInspectionTarget } from './fieldInspectionTarget';
 
+type ShellLoadedGameState = LoadedGameState | { player_faction: string | null | undefined };
+
 export interface ShellNavigationState {
-  loadedGameState?: { player_faction?: string | null } | null;
+  loadedGameState?: ShellLoadedGameState | null;
   setSelectedArmyId: (id: string | null) => void;
   setArmyHQOpen: (open: boolean) => void;
   setArmyHQTab: (tab: ArmyHQTab) => void;
@@ -32,6 +35,8 @@ export interface ShellNavigationState {
   setChronicleOpen: (open: boolean) => void;
   /** Optional: set by gameStore when advance-turn handoff is received from the Warroom shell. */
   setAdvanceTurnPending?: (v: boolean) => void;
+  /** Optional: Warroom calendar fast path when pre-advance review is not blocked. */
+  advanceTurnNow?: () => void | Promise<void>;
   /** Optional: close the map-local field operations snapshot when returning to desk-owned surfaces. */
   setIsOperationsPanelOpen?: (open: boolean) => void;
   /** Optional: clear tactical selections to return to Presidential Inbox. */
@@ -48,6 +53,19 @@ export interface ShellNavigationState {
 
 function getPlayerFaction(state: ShellNavigationState): string | null {
   return state.loadedGameState?.player_faction ?? null;
+}
+
+function isLoadedGameState(state: ShellLoadedGameState | null | undefined): state is LoadedGameState {
+  return Boolean(
+    state
+    && 'turn' in state
+    && typeof state.turn === 'number'
+    && 'formations' in state
+    && Array.isArray(state.formations)
+    && 'controlBySettlement' in state
+    && state.controlBySettlement
+    && typeof state.controlBySettlement === 'object',
+  );
 }
 
 function closeReferenceOverlays(state: ShellNavigationState): void {
@@ -203,6 +221,15 @@ export function applyShellHandoffCommand(state: ShellNavigationState, command: S
   if (command.kind === 'advance-turn') {
     // Warroom wall calendar hotspot — show the React advance-turn confirmation modal.
     // setAdvanceTurnPending is optional on ShellNavigationState; gameStore always provides it.
+    const loadedState = isLoadedGameState(state.loadedGameState) ? state.loadedGameState : null;
+    const review = buildPreAdvanceCommandReviewView({
+      state: loadedState,
+      osidNameMap: null,
+    });
+    if (review.status !== 'blocked' && loadedState && state.advanceTurnNow) {
+      void state.advanceTurnNow();
+      return true;
+    }
     if (!state.setAdvanceTurnPending) return false;
     state.setAdvanceTurnPending(true);
     return true;

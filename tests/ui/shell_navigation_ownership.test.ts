@@ -13,8 +13,8 @@ import {
   type ShellNavigationState,
 } from '../../src/ui/map/utils/shellNavigation.js';
 
-function makeState(): LoadedGameState {
-  return {
+function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
+  const state: LoadedGameState = {
     label: 'RS turn 12',
     turn: 12,
     phase: 'war',
@@ -37,7 +37,9 @@ function makeState(): LoadedGameState {
     turnSummaries: [],
     player_faction: 'RS',
     commandAuthority: { current: 100, max: 100, spentThisTurn: 0, lifetimeSpent: 0 },
-  } as LoadedGameState;
+    ...overrides,
+  };
+  return state;
 }
 
 function renderToolbar(props: Partial<React.ComponentProps<typeof PresidentialToolbar>> = {}) {
@@ -51,11 +53,16 @@ function renderToolbar(props: Partial<React.ComponentProps<typeof PresidentialTo
   }));
 }
 
-function createShellState(withAdvanceHandler = true): ShellNavigationState & { calls: Array<[string, unknown]> } {
+function createShellState(
+  withAdvanceHandler = true,
+  loadedGameState: LoadedGameState = makeState(),
+): ShellNavigationState & { calls: Array<[string, unknown]>; advanceTurnNow?: ReturnType<typeof vi.fn> } {
   const calls: Array<[string, unknown]> = [];
-  const state: ShellNavigationState & { calls: Array<[string, unknown]> } = {
-    loadedGameState: { player_faction: 'RS' },
+  const advanceTurnNow = vi.fn();
+  const state: ShellNavigationState & { calls: Array<[string, unknown]>; advanceTurnNow?: ReturnType<typeof vi.fn> } = {
+    loadedGameState,
     calls,
+    advanceTurnNow,
     setSelectedArmyId: (id) => { calls.push(['setSelectedArmyId', id]); },
     setArmyHQOpen: (open) => { calls.push(['setArmyHQOpen', open]); },
     setArmyHQTab: (tab) => { calls.push(['setArmyHQTab', tab]); },
@@ -237,14 +244,38 @@ describe('field toolbar navigation ownership', () => {
     expect(wrappedOverlaySource).toContain('openChronicle(useGameStore.getState())');
   });
 
-  it('does not report advance-turn handoff success without an advance modal surface', () => {
+  it('does not report advance-turn handoff success without an advance surface', () => {
     const stateWithoutModal = createShellState(false);
     const stateWithModal = createShellState(true);
+    delete stateWithoutModal.advanceTurnNow;
+    delete stateWithModal.advanceTurnNow;
 
     expect(applyShellHandoffCommand(stateWithoutModal, { kind: 'advance-turn' })).toBe(false);
     expect(stateWithoutModal.calls).toEqual([]);
 
     expect(applyShellHandoffCommand(stateWithModal, { kind: 'advance-turn' })).toBe(true);
     expect(stateWithModal.calls).toEqual([['setAdvanceTurnPending', true]]);
+  });
+
+  it('advances directly from the Warroom calendar when pre-advance review is clear', () => {
+    const state = createShellState(true, makeState());
+
+    expect(applyShellHandoffCommand(state, { kind: 'advance-turn' })).toBe(true);
+
+    expect(state.advanceTurnNow).toHaveBeenCalledTimes(1);
+    expect(state.calls).not.toContainEqual(['setAdvanceTurnPending', true]);
+  });
+
+  it('keeps blocked Warroom calendar advances on the review modal path', () => {
+    const state = createShellState(true, makeState({
+      pendingParamilitaryRequests: [
+        { faction: 'RS', strength: 600, target_osid: 'op:zvornik:zvornik_2', estimated_civilian_risk: 42, mode: 'offensive' },
+      ],
+    }));
+
+    expect(applyShellHandoffCommand(state, { kind: 'advance-turn' })).toBe(true);
+
+    expect(state.advanceTurnNow).not.toHaveBeenCalled();
+    expect(state.calls).toContainEqual(['setAdvanceTurnPending', true]);
   });
 });

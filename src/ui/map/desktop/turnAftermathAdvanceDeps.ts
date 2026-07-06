@@ -1,5 +1,5 @@
 import { useGameStore } from '../store/gameStore';
-import type { TurnAftermathView } from '../data/turnAftermath';
+import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
 import type { LastTurnReport } from '../store/gameStore';
 import type { LoadedGameState } from '../data/types';
 
@@ -9,6 +9,7 @@ export interface TurnAftermathAdvanceDeps {
   setLastTurnReport: (report: LastTurnReport | null) => void;
   setTurnAftermath: (view: TurnAftermathView | null) => void;
   setTurnAftermathOpen: (open: boolean) => void;
+  setTurnAftermathDigest: (digest: TurnAftermathDigest | null) => void;
 }
 
 export function getTurnAftermathAdvanceDeps(): TurnAftermathAdvanceDeps {
@@ -18,5 +19,6 @@ export function getTurnAftermathAdvanceDeps(): TurnAftermathAdvanceDeps {
     setLastTurnReport: (report) => useGameStore.getState().setLastTurnReport(report),
     setTurnAftermath: (view) => useGameStore.getState().setTurnAftermath(view),
     setTurnAftermathOpen: (open) => useGameStore.getState().setTurnAftermathOpen(open),
+    setTurnAftermathDigest: (digest) => useGameStore.getState().setTurnAftermathDigest(digest),
   };
 }

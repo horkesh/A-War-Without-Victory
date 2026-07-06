@@ -607,3 +607,10 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Warroom desk props for faction overview, command briefing, and report review now hand off into the embedded tactical shell instead of opening parallel Warroom-local staff packets.
 - Tactical-shell receipt is handled through `awwv-shell:handoff` plus the canonical Army HQ navigation helpers in `src/ui/map/utils/shellNavigation.ts`.
 - See `docs/40_reports/implemented/20260403_WARROOM_ARMYHQ_SHELL_HANDOFF.md`.
+
+## 2026-07-06 - WP-2 quiet-turn advance digest
+
+- Quiet turns now advance through the existing one-click path and file a retained Turn Aftermath report without opening the full aftermath modal. The bottom status strip shows a one-line digest with Review and Dismiss actions; Review reopens the retained report on demand.
+- Heavy aftermath remains modal-first. The classifier defaults unknown aftermath content to heavy and treats actions, blockers, strategic signals, territory movement, battles, casualties, displacement, and own formation losses as heavy.
+- Warroom calendar advance now mirrors the toolbar gate: clear/review states advance directly through `advanceTurnAndSync`, while blocked states still open the pre-advance review modal and cannot bypass required decisions.
+- See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-2 quiet-turn advance digest`.
