@@ -420,7 +420,8 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Stance unreported');
+    expect(copy).toContain('Awaiting first posture order');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('posture');
     expect(copy).toContain('13%');
     expect(copy).not.toContain('Hold');
     expect(copy).not.toContain('1250%');
@@ -436,8 +437,9 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('ExhaustionUnreported');
-    expect(copy).toContain('Command SpanUnreported');
+    expect(copy).toContain('Staff returns incomplete');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('posture');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).not.toContain('0');
   });
 
   it('does not invent a field posture for army headquarters', () => {
@@ -446,7 +448,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('Command posture unreported');
+    expect(copy).toContain('Awaiting first posture order');
     expect(copy).not.toContain('Hold');
   });
 
@@ -709,9 +711,10 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Lifecycle:Unreported');
-    expect(copy).toContain('CohesionUnreported');
-    expect(copy).toContain('FatigueUnreported');
+    expect(copy).toContain('Staff returns incomplete');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('readiness');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('cohesion');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('fatigue');
     expect(copy).not.toContain('Readiness pending');
     expect(copy).not.toContain('Cohesion0');
     expect(copy).not.toContain('Fatigue0');
@@ -731,8 +734,9 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('MoraleUnreported');
-    expect(copy).toContain('PersonnelUnreported');
+    expect(copy).toContain('Staff returns incomplete');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('morale');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('personnel');
   });
 
   it('does not synthesize zero combat or loss records when brigade records are absent', () => {
@@ -830,7 +834,8 @@ describe('Formation Detail parity display', () => {
     expect(copy).toContain('TO&E (Equipment)');
     expect(copy).toContain('Tanks');
     expect(copy).toContain('Artillery');
-    expect(copy).toContain('Condition unreported');
+    expect(copy).toContain('Staff returns incomplete');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('tank condition');
     expect(copy).not.toMatch(/NaN|undefined|\[object Object\]/);
   });
 
@@ -852,7 +857,8 @@ describe('Formation Detail parity display', () => {
     const copy = view.container.textContent ?? '';
 
     expect(copy).toContain('AA Systems');
-    expect(copy).toContain('Condition unreported');
+    expect(copy).toContain('Staff returns incomplete');
+    expect(view.container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('air defense condition');
     expect(view.container.querySelector('[data-testid="formation-aa-condition-unreported"]')).toBeTruthy();
     expect(view.container.querySelector('[data-testid="formation-aa-condition-operational"]')).toBeNull();
   });

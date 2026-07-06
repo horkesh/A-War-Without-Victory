@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { CorpsCard } from './CorpsCard';
+import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
 import { FACTION_COLORS } from '../utils/theme';
 import type { CorpsFrontSectorView, FormationView, OperationView } from '../data/types';
 import { SituationTab } from './SituationTab';
@@ -46,13 +47,17 @@ function formatFactionFormationCount(fieldedCount: number, reserveCount: number)
 function formatReportedWhole(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value)
     ? Math.max(0, Math.round(value)).toLocaleString()
-    : t('orbat.metricUnreported');
+    : '--';
 }
 
 function formatReportedPercent(value: number | null | undefined): string {
   return typeof value === 'number' && Number.isFinite(value)
     ? `${Math.max(0, value).toFixed(1)}%`
-    : t('orbat.metricUnreported');
+    : '--';
+}
+
+function isReportedNumber(value: number | null | undefined): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
 }
 
 function pickOobSectorInspectAnchorOsid(sector: CorpsFrontSectorView): string | undefined {
@@ -426,11 +431,7 @@ export function OOBSidebar() {
                                 </span>
                               );
                             }
-                            return (
-                              <span className="block truncate pl-6 text-[9px] text-text-secondary italic">
-                                {t('oob.armyCommanderUnreported')}
-                              </span>
-                            );
+                            return null;
                           })()}
                         </button>
                         <button
@@ -592,6 +593,13 @@ export function OOBSidebar() {
               ) : (
                 FACTION_ORDER.filter((faction) => faction === playerFaction && Boolean(mobilizationSummary[faction])).map((faction) => {
                   const summary = mobilizationSummary[faction]!;
+                  const mobilizationReportGaps = [
+                    !isReportedNumber(summary.total_available) ? t('oob.available') : null,
+                    !isReportedNumber(summary.total_committed) ? t('oob.committed') : null,
+                    !isReportedNumber(summary.total_exhausted) ? t('oob.exhausted') : null,
+                    !isReportedNumber(summary.exhaustion_pct) ? t('corpsDetail.exhaustion') : null,
+                    !isReportedNumber(summary.strategic_reserve) ? t('oob.strategicReserve') : null,
+                  ].filter((field): field is string => Boolean(field));
                   return (
                     <div key={faction} className="rounded border border-panel-border bg-panel-card p-1.5 space-y-1">
                       <div className={`font-mono text-[10px] font-medium ${FACTION_COLORS[faction] ?? 'text-text-primary'}`}>
@@ -609,6 +617,7 @@ export function OOBSidebar() {
                         <span className="text-text-secondary">{t('oob.strategicReserve')}</span>
                         <span className="text-text-primary tabular-nums">{formatReportedWhole(summary.strategic_reserve)}</span>
                       </div>
+                      <OwnForceReportGapNotice fields={mobilizationReportGaps} />
                       {Array.isArray(summary.top_pools) && summary.top_pools.length > 0 && (
                         <div className="pt-1 border-t border-panel-border/50">
                           <div className="text-[10px] uppercase tracking-wide text-text-secondary mb-1">{t('oob.topPools')}</div>
@@ -654,6 +663,11 @@ export function OOBSidebar() {
                         const objDisplayCurrent = objTotal > 0 && typeof op.current_objective_index === 'number'
                           ? Math.min(objTotal, Math.max(1, op.current_objective_index + 1))
                           : null;
+                        const operationReportGaps = [
+                          op.momentum == null ? t('operationsSection.momShort') : null,
+                          objTotal > 0 && objDisplayCurrent == null ? t('operationsPanel.objShort') : null,
+                          op.supply_readiness == null ? t('operationsPanel.supply') : null,
+                        ].filter((field): field is string => Boolean(field));
                         const opKey = `${op.corps_id}|${op.name}`;
                         const isSelected = selectedOperationKey === opKey;
                         return (
@@ -681,7 +695,7 @@ export function OOBSidebar() {
                               {objTotal > 0 && (
                                 <span className="text-text-secondary">
                                   {objDisplayCurrent == null
-                                    ? t('operationsSection.objectiveProgressUnreported')
+                                    ? '--'
                                     : `${t('operationsPanel.objShort')} ${objDisplayCurrent}/${objTotal}`}
                                 </span>
                               )}
@@ -691,10 +705,11 @@ export function OOBSidebar() {
                                   {(op.supply_readiness * 100).toFixed(0)}%
                                 </span>
                               ) : (
-                                <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>{t('corpsFront.unreported')}</span>
+                                <span className="text-text-secondary italic" title={t('operationsPanel.supplyNotAssessed')}>--</span>
                               )}
                               <span className="text-text-secondary"> - {t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                             </div>
+                            <OwnForceReportGapNotice fields={operationReportGaps} />
                           </button>
                         );
                       })}

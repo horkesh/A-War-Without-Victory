@@ -153,7 +153,7 @@ describe('OOBSidebar drilldown routing', () => {
   it('surfaces missing army commander source and splits fielded versus reserve counts', () => {
     const { container } = render(React.createElement(OOBSidebar));
 
-    expect(container.textContent).toContain('Army commander unreported');
+    expect(container.textContent).not.toContain('Army commander unreported');
     expect(container.textContent).toContain('0 fielded / 1 reserve');
     expect(container.textContent).not.toContain('1 formations');
   });
@@ -522,11 +522,11 @@ describe('OOBSidebar drilldown routing', () => {
     const copy = container.textContent ?? '';
 
     expect(copy).toContain('Available0');
-    expect(copy).toContain('CommittedUnreported');
+    expect(copy).toContain('Committed--');
     expect(copy).toContain('Exhausted0');
-    expect(copy).toContain('Exhaustion:Unreported');
-    expect(copy).toContain('Strategic reserveUnreported');
-    expect(copy).toContain('Dobrinja 1Unreported');
+    expect(copy).toContain('Exhaustion:--');
+    expect(copy).toContain('Strategic reserve--');
+    expect(copy).toContain('Dobrinja 1--');
     expect(copy).toContain('Ilidza 10');
     expect(copy).not.toMatch(/NaN|undefined/);
   });

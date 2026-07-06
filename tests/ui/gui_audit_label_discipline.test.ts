@@ -485,7 +485,8 @@ describe('GUI audit label discipline', () => {
 
     const { container } = render(createElement(FormationDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('EffectivenessUnreported');
+    expect(container.textContent).toContain('Staff returns incomplete');
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('effectiveness');
     expect(container.textContent).not.toMatch(/Effectiveness\d/);
     const panel = container.querySelector('[role="tabpanel"]');
     expect(panel?.getAttribute('id')).toBe('formation-detail-tabpanel-overview');
@@ -1103,8 +1104,8 @@ describe('GUI audit label discipline', () => {
     const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
 
     const cohesionCell = container.querySelector('[data-testid="army-hq-orbat-cohesion"]');
-    expect(cohesionCell?.textContent).toContain('Unreported');
-    expect(cohesionCell?.getAttribute('title')).toBe('Cohesion unreported');
+    expect(cohesionCell?.textContent).toContain('--');
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('cohesion');
     expect(container.textContent).not.toContain('0% cohesion');
   });
 
@@ -1246,14 +1247,13 @@ describe('GUI audit label discipline', () => {
     const { container } = render(createElement(OrbatSection, { corpsId: 'arbih_1st_corps', brigades: [brigade] }));
 
     expect(container.textContent).toContain('--');
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('Staff returns incomplete');
     expect(container.textContent).not.toMatch(/\b0\b/);
-    const posture = Array.from(container.querySelectorAll('span')).find((node) => node.textContent === 'Unreported');
-    expect(posture?.className).toContain('text-text-secondary/50');
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('posture');
 
     fireEvent.click(screen.getAllByRole('button', { name: /Sparse Brigade/i })[0]);
 
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('Staff returns incomplete');
     expect(container.textContent).not.toMatch(/\b0\b/);
   });
 
@@ -1340,7 +1340,8 @@ describe('GUI audit label discipline', () => {
 
     fireEvent.click(screen.getAllByRole('button', { name: /Sparse Equipment Brigade/i })[0]);
 
-    expect(container.textContent).toContain('Unreported');
+    expect(container.textContent).toContain('Staff returns incomplete');
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('armour condition');
     expect(container.textContent).not.toContain('10/10 operational');
     expect(container.textContent).not.toContain('5/5 operational');
   });

@@ -18,6 +18,7 @@ import { formatReportedPersonnel, sumReportedPersonnel } from '../utils/reported
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { inspectOnField } from '../utils/shellNavigation';
 import { getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
+import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
 
 /** Strength class badge with color coding. */
 function StrengthBadge({
@@ -73,7 +74,7 @@ function FuzzyIntel({
     return <span className="bg-neutral-800 text-neutral-800 select-none px-1 rounded-sm">{t('corpsFront.redacted')}</span>;
   }
 
-  if (value == null) return <span className="text-neutral-500 italic">{t('corpsFront.unreported')}</span>;
+  if (value == null || value === t('corpsFront.unreported')) return null;
 
   if (confidence < fuzzyThreshold && typeof value === 'number') {
     const variance = (1 - confidence) * 0.4; // up to 40% variance at low confidence
@@ -141,6 +142,11 @@ function stanceLabel(stance: string | null | undefined): string {
   return Object.prototype.hasOwnProperty.call(STANCE_LABEL_KEYS, key)
     ? t(STANCE_LABEL_KEYS[key as SectorStanceType])
     : t('corpsFront.unreported');
+}
+
+function hasReportedStance(stance: string | null | undefined): boolean {
+  const key = (stance ?? '').trim();
+  return Object.prototype.hasOwnProperty.call(STANCE_LABEL_KEYS, key);
 }
 
 function prepLabel(subPhase: string): string {
@@ -264,6 +270,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
 
   const corpsFormation = loadedGameState.formations.find((f) => f.id === sector.corps_id);
   const corpsStance = corpsFormation?.corpsStance ?? 'unknown';
+  const hasReportedCorpsStance = hasReportedStance(corpsFormation?.corpsStance);
   const corpsColorMap = buildCorpsColorMap(loadedGameState.corpsFrontSectors);
   const corpsColor = corpsColorMap[sector.corps_id] ?? '#888';
 
@@ -372,6 +379,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   };
   const currentSectorStance = sector.sector_stance ?? null;
   const currentStanceSource = sector.stance_source ?? 'bot';
+  const hasReportedSectorStance = hasReportedStance(currentSectorStance);
   const sectorStanceLabel = stanceLabel(currentSectorStance);
   const hasReportedLogisticsPriority = typeof sector.logistics_priority === 'number' && Number.isFinite(sector.logistics_priority);
   const effectiveLogisticsPriority = Math.max(0.5, Math.min(1.5, hasReportedLogisticsPriority ? sector.logistics_priority! : 1));
@@ -401,6 +409,20 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
   const displayDate = metadataDate && metadataDate !== 'UNKNOWN'
     ? metadataDate
     : turnToDateString(loadedGameState.turn);
+  const reportGaps = [
+    ...(hasReportedCorpsStance ? [] : ['corps stance']),
+    ...(hasReportedSectorStance ? [] : ['sector stance']),
+    ...(hasReportedOpsec ? [] : ['operational security']),
+    ...(hasReportedIntelConfidence ? [] : ['confidence']),
+    ...(hasReportedLogisticsPriority ? [] : ['supply priority']),
+    ...(displayCombatPersonnel == null ? ['personnel'] : []),
+    ...(displayOffensivePower == null ? ['offensive power'] : []),
+    ...(displayDefensivePower == null ? ['defensive power'] : []),
+    ...(displayDefensePerEdge == null ? ['defense per front segment'] : []),
+    ...(displayMoraleAvg == null ? ['morale'] : []),
+    ...(displayCohesionAvg == null ? ['cohesion'] : []),
+    ...(displayFatigueAvg == null ? ['fatigue'] : []),
+  ];
 
   const issueLogisticsPriority = async (priority: number) => {
     const result = await ipc.stageLogisticsPriority(sector.faction, sector.sector_id, priority);
@@ -490,20 +512,25 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           </div>
           <div className="text-neutral-600 mt-2 text-[10px] space-y-0.5 uppercase">
             <div><span className="font-bold text-neutral-800">{t('corpsFront.faction')}:</span> <span className={FACTION_COLORS[sector.faction] ?? 'text-neutral-800'}>{getPlayerSafeMilitaryFactionName(sector.faction)}</span></div>
-            <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {stanceLabel(corpsStance)}</div>
-            <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>
-            <div>
-              <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
-              <span className={opsecActive ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
-                {hasReportedOpsec ? (opsecActive ? t('corpsFront.active') : t('corpsFront.inactive')) : t('corpsFront.unreported')}
-              </span>
-            </div>
-            <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
-              <span><span className="font-bold text-neutral-800">{t('corpsFront.confidence')}:</span> {intelConfidence != null ? `${(intelConfidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}</span>
-              {intelConfidence != null && intelConfidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">{t('corpsFront.low')}</span>}
-              {intelConfidence != null && intelConfidence >= 0.3 && intelConfidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">{t('corpsFront.med')}</span>}
-              {intelConfidence != null && intelConfidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.high')}</span>}
-            </div>
+            {hasReportedCorpsStance && <div><span className="font-bold text-neutral-800">{t('corpsFront.corpsStance')}:</span> {stanceLabel(corpsStance)}</div>}
+            {hasReportedSectorStance && <div><span className="font-bold text-neutral-800">{t('corpsFront.sectorStance')}:</span> {sectorStanceLabel}{currentStanceSource === 'player' ? ` (${t('corpsFront.manual')})` : ''}</div>}
+            {hasReportedOpsec && (
+              <div>
+                <span className="font-bold text-neutral-800">{t('corpsFront.opsec')}:</span>{' '}
+                <span className={opsecActive ? 'text-amber-700 font-bold' : 'text-neutral-700'}>
+                  {opsecActive ? t('corpsFront.active') : t('corpsFront.inactive')}
+                </span>
+              </div>
+            )}
+            {intelConfidence != null && (
+              <div className="mt-1 pt-1 border-t border-neutral-300/50 flex items-center justify-between">
+                <span><span className="font-bold text-neutral-800">{t('corpsFront.confidence')}:</span> {(intelConfidence * 100).toFixed(0)}%</span>
+                {intelConfidence < 0.3 && <span className="text-red-700 font-bold bg-red-100 px-1 rounded">{t('corpsFront.low')}</span>}
+                {intelConfidence >= 0.3 && intelConfidence < 0.7 && <span className="text-amber-700 font-bold bg-amber-100 px-1 rounded">{t('corpsFront.med')}</span>}
+                {intelConfidence >= 0.7 && <span className="text-green-700 font-bold bg-green-100 px-1 rounded">{t('corpsFront.high')}</span>}
+              </div>
+            )}
+            <OwnForceReportGapNotice fields={reportGaps} className="mt-2 normal-case" />
           </div>
         </div>
 
@@ -642,25 +669,22 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                     </span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.sectorStance')}</span>
-                    <span className="font-medium uppercase">
-                      {sectorStanceLabel}
-                      {currentStanceSource === 'player' && <span className="ml-1 text-[8px] text-amber-700 bg-amber-100 px-0.5 rounded font-bold">{t('corpsFront.manual')}</span>}
-                    </span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>
-                    <span className="font-medium" title={logisticsPriorityTitle}>
-                      {hasReportedLogisticsPriority
-                        ? `${effectiveLogisticsPriority.toFixed(1)}x${effectiveLogisticsPriority === 1 ? ` (${t('corpsFront.neutral')})` : ''}`
-                        : t('corpsFront.unreported')}
-                    </span>
-                    {!hasReportedLogisticsPriority && (
-                      <span className="mt-0.5 text-[8px] leading-tight text-neutral-500 normal-case">
-                        {t('corpsFront.logisticsPriorityUnreported')}
+                      <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.sectorStance')}</span>
+                    {hasReportedSectorStance && (
+                      <span className="font-medium uppercase">
+                        {sectorStanceLabel}
+                        {currentStanceSource === 'player' && <span className="ml-1 text-[8px] text-amber-700 bg-amber-100 px-0.5 rounded font-bold">{t('corpsFront.manual')}</span>}
                       </span>
                     )}
                   </div>
+                  {hasReportedLogisticsPriority && (
+                    <div className="flex flex-col">
+                      <span className="text-[9px] uppercase font-bold text-neutral-500" title={logisticsPriorityTitle}>{t('corpsFront.supplyPriority')}</span>
+                      <span className="font-medium" title={logisticsPriorityTitle}>
+                        {`${effectiveLogisticsPriority.toFixed(1)}x${effectiveLogisticsPriority === 1 ? ` (${t('corpsFront.neutral')})` : ''}`}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex flex-col col-span-2">
                     <span className="text-[9px] uppercase font-bold text-neutral-500">{t('corpsFront.linkedSettlements')}</span>
                     <span className="font-medium">{sectorFriendlyOsids.length}</span>
@@ -918,14 +942,14 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.reserveRatio')}</span>
                   <span className="font-medium">
-                    {reserveRatio == null ? t('corpsFront.unreported') : `${Math.round(reserveRatio * 100)}%`}
+                    {reserveRatio == null ? '--' : `${Math.round(reserveRatio * 100)}%`}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-neutral-300/50 pb-1">
                   <span className="text-[10px] uppercase font-bold text-neutral-500">{t('corpsFront.opsSupplyReadiness')}</span>
                   <span className="font-medium">
                     {avgOperationSupply == null
-                      ? t('corpsFront.unreported')
+                      ? '--'
                       : intelConfidence == null || intelConfidence < 0.6
                         ? <span className="bg-black text-black select-none">{t('corpsFront.redacted')}</span>
                         : `${Math.round(avgOperationSupply * 100)}%`}

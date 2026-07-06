@@ -9,6 +9,7 @@ import type { FormationView, OperationView } from '../../data/types';
 import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
 import { t, type MessageKey } from '../../i18n';
+import { OwnForceReportGapNotice } from '../OwnForceReportGapNotice';
 
 // ── Types ────────────────────────────────────────────────────────────────
 
@@ -241,8 +242,8 @@ function recommendationLabel(item: CorpsReadiness): string {
     return t('forceReadiness.recommendation.recorded', { recommendation: item.recommendation });
 }
 
-function fatigueLabel(item: CorpsReadiness): string {
-    if (item.avgFatigue == null) return t('forceReadiness.fatigueUnreported');
+function fatigueLabel(item: CorpsReadiness): string | null {
+    if (item.avgFatigue == null) return null;
     return t('forceReadiness.fatigue', { value: item.avgFatigue, max: FATIGUE_MAX });
 }
 
@@ -282,7 +283,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                 {item.ineffectiveCount > 0 && (
                                     <span>{t('forceReadiness.ineffectiveCount', { count: item.ineffectiveCount })}</span>
                                 )}
-                                <span>{fatigueLabel(item)}</span>
+                                {fatigueLabel(item) && <span>{fatigueLabel(item)}</span>}
                                 {item.disruptedCount > 0 && (
                                     <span>{t('forceReadiness.disruptedCount', { count: item.disruptedCount })}</span>
                                 )}
@@ -299,6 +300,14 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                                             : t('forceReadiness.activeOperation', { name: item.activeOpName })}
                                     </span>
                                 )}
+                                <OwnForceReportGapNotice
+                                    fields={[
+                                        ...(item.avgFatigue == null ? ['fatigue'] : []),
+                                        ...(item.avgCohesion == null ? ['cohesion'] : []),
+                                        ...item.missingAssessmentFields,
+                                    ]}
+                                    className="basis-full mt-1"
+                                />
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">

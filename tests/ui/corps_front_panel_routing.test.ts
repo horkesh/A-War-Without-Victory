@@ -235,8 +235,11 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Operational security:\s*Unreported/i);
-    expect(container.textContent).toMatch(/Supply Priority\s*Unreported/i);
+    const reportGap = container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap') ?? '';
+    expect(reportGap).toContain('operational security');
+    expect(reportGap).toContain('supply priority');
+    expect(container.textContent).not.toMatch(/Operational security:\s*Unreported/i);
+    expect(container.textContent).not.toMatch(/Supply Priority\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Supply Priority\s*1\.0x\s*\(neutral\)/i);
   });
 
@@ -301,7 +304,7 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
-    expect(container.textContent).toMatch(/Ops Supply Readiness\s*Unreported/i);
+    expect(container.textContent).toMatch(/Ops Supply Readiness\s*--/i);
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*0%/);
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
@@ -349,9 +352,10 @@ describe('CorpsFrontPanel field routing', () => {
 
     render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('Unreported');
-    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('Unreported');
-    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('Unreported');
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-panel').querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('morale');
   });
 
   it('preserves explicit zero condition and supply readiness reports', () => {
@@ -407,7 +411,8 @@ describe('CorpsFrontPanel field routing', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
-    expect(container.textContent).toMatch(/Ops Supply Readiness\s*Unreported/i);
+    expect(container.textContent).toMatch(/Ops Supply Readiness/i);
+    expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Ops Supply Readiness\s*80%/i);
   });
 
@@ -645,7 +650,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Total manpower\s*Partial 500/i);
-    expect(container.textContent).toMatch(/Reserve ratio\s*Unreported/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*--/i);
     expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
   });
 
@@ -668,7 +673,7 @@ describe('CorpsFrontPanel field routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Logistics/i }));
     expect(container.textContent).toMatch(/Total manpower\s*0/i);
-    expect(container.textContent).toMatch(/Reserve ratio\s*Unreported/i);
+    expect(container.textContent).toMatch(/Reserve ratio\s*--/i);
     expect(container.textContent).not.toMatch(/Reserve ratio\s*0%/i);
   });
 
@@ -784,7 +789,8 @@ describe('CorpsFrontPanel field routing', () => {
   it('does not invent a defensive stance when sector stance is unreported', () => {
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Sector Stance:\s*Unreported/i);
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('sector stance');
+    expect(container.textContent).not.toMatch(/Sector Stance:\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Sector Stance:\s*Defend/i);
   });
 
@@ -863,7 +869,8 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Confidence:\s*Unreported/i);
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('confidence');
+    expect(container.textContent).not.toMatch(/Confidence:\s*Unreported/i);
     expect(screen.getByTestId('corps-front-combat-personnel').textContent).toMatch(/1[,.]200/);
     expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('64');
     expect(container.textContent).toMatch(/Force Balance\s*Redacted/i);
@@ -892,15 +899,18 @@ describe('CorpsFrontPanel field routing', () => {
       selectedCorpsFrontSectorId: 'sector:arbih_1st_corps:0',
     });
 
-    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+    const reportGap = container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap') ?? '';
 
-    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-offensive-power').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-defensive-power').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-defense-per-edge').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-morale').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toContain('Unreported');
-    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toContain('Unreported');
+    expect(screen.getByTestId('corps-front-combat-personnel').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-offensive-power').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-defensive-power').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-defense-per-edge').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-morale').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-cohesion').textContent).toBe('');
+    expect(screen.getByTestId('corps-front-combat-fatigue').textContent).toBe('');
+    expect(reportGap).toContain('offensive power');
+    expect(reportGap).toContain('fatigue');
   });
 
   it('does not collapse known friendly line strength to a dash when strength class is unreported', () => {
@@ -1301,7 +1311,8 @@ describe('CorpsFrontPanel field routing', () => {
 
     const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Corps Stance:\s*Unreported/i);
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('corps stance');
+    expect(container.textContent).not.toMatch(/Corps Stance:\s*Unreported/i);
     expect(container.textContent).not.toMatch(/Wait For Orders|wait_for_orders/i);
   });
 

@@ -230,11 +230,11 @@ describe('CorpsDetail sector truth', () => {
 
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toContain('UNREPORTED');
+    expect(container.textContent).toContain('Awaiting first posture order');
     expect(container.textContent).not.toMatch(/Wait For Weather|wait_for_weather/i);
 
     fireEvent.click(screen.getByRole('tab', { name: /Sectors/i }));
-    expect(container.textContent).toContain('UNREPORTED');
+    expect(container.textContent).toContain('Awaiting first posture order');
     expect(container.textContent).not.toMatch(/Probe Then Pause|probe_then_pause/i);
   });
 
@@ -247,7 +247,8 @@ describe('CorpsDetail sector truth', () => {
 
     const { container } = render(React.createElement(CorpsDetail, { railSlot: 'primary' }));
 
-    expect(container.textContent).toMatch(/Exhaustion:\s*Unreported/);
+    expect(container.querySelector('[data-awwv-report-gap]')?.getAttribute('data-awwv-report-gap')).toContain('exhaustion');
+    expect(container.textContent).not.toMatch(/Exhaustion:\s*Unreported/);
     expect(container.textContent).not.toContain('Exhaustion: 0');
   });
 });
