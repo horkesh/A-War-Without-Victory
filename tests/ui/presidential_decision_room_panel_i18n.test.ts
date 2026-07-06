@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 
-import { afterEach, describe, expect, it } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { createElement } from 'react';
+import { afterEach, describe, expect, it } from 'vitest';
+import type { TurnSummary } from '../../src/state/turn_summary.js';
 import { PresidentialDecisionRoomPanel } from '../../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.js';
+import type { LoadedGameState } from '../../src/ui/map/data/types.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
-import type { LoadedGameState } from '../../src/ui/map/data/types.js';
-import type { TurnSummary } from '../../src/state/turn_summary.js';
 import {
   __resetDecisionRoomLensRequestForTest,
   requestDecisionRoomLens,
@@ -73,7 +73,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     __resetDecisionRoomLensRequestForTest();
   });
 
-  it('localizes static Decision Room panel chrome in BCS mode', () => {
+  it('localizes static flat Decision Room panel chrome in BCS mode', () => {
     setLocale('bcs');
     useGameStore.setState({
       loadedGameState: makeState(),
@@ -82,21 +82,12 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     render(createElement(PresidentialDecisionRoomPanel));
 
-    expect(screen.getAllByText('Strateški prioriteti').length).toBeGreaterThan(0);
-    expect(screen.getByRole('button', { name: 'Prikaži napredno' })).toBeTruthy();
-    expect(screen.getByText('Obavezne odluke i najsigurniji sljedeći pregledi')).toBeTruthy();
-    expect(screen.getByText('Šta se očekuje od mene?')).toBeTruthy();
-    expect(screen.getByText('Prioritetne trake')).toBeTruthy();
-    expect(screen.getByText('Pregled prije nastavka')).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Sve 3 stavki/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Komanda 3 stavki/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /napredno/i })).toBeNull();
     expect(screen.queryByText('Strategic Priorities')).toBeNull();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Prikaži napredno' }));
-
-    expect(screen.getByRole('button', { name: 'Sakrij napredno' })).toBeTruthy();
-    expect(screen.getByText('Napredni sto')).toBeTruthy();
-    expect(screen.getAllByText('Hitno').length).toBeGreaterThan(0);
-    expect(screen.getByText('Pregled nastavka')).toBeTruthy();
-    expect(screen.getByText('Predaje izvora')).toBeTruthy();
+    expect(screen.queryByText(/ocekivano|ocekivanje|ocekove/i)).toBeNull();
+    expect(screen.queryByText(/napredni/i)).toBeNull();
   });
 
   it('opens an exact command category filter from a command-card request', async () => {
@@ -125,7 +116,8 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
 
     expect(await screen.findByTestId('decision-room-priority-card-paramilitary:pending')).toBeTruthy();
     expect(screen.queryByTestId('decision-room-priority-card-manifest:peace_plan')).toBeNull();
-    expect(screen.getByRole('button', { name: 'Hide Advanced' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Hide Advanced' })).toBeNull();
+    expect(screen.queryByText('Advanced Review')).toBeNull();
   });
 
   it('clears a stale requested card id instead of leaving a blank dossier', async () => {
@@ -193,7 +185,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     });
   });
 
-  it('explains disabled quiet-state actions instead of rendering dead controls', () => {
+  it('does not render disabled quiet-state controls after removing meta scaffolding', () => {
     useGameStore.setState({
       loadedGameState: makeState(),
       osidDisplayNames: null,
@@ -202,20 +194,9 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     const { container } = render(createElement(PresidentialDecisionRoomPanel));
 
     const disabledButtons = [...container.querySelectorAll('button[disabled]')];
-    expect(disabledButtons.length).toBeGreaterThan(0);
-    for (const button of disabledButtons) {
-      expect(button.getAttribute('title')).toBe('No current item is available for this action.');
-      expect(button.getAttribute('aria-label')).toMatch(/No current item is available for this action\.$/);
-    }
-    expect(container.textContent).toContain('No current item is available for this action.');
-
-    fireEvent.click(screen.getByRole('button', { name: 'View Advanced' }));
-    const advancedDisabledButtons = [...container.querySelectorAll('button[disabled]')];
-    expect(advancedDisabledButtons.length).toBeGreaterThan(disabledButtons.length);
-    for (const button of advancedDisabledButtons) {
-      expect(button.getAttribute('title')).toBe('No current item is available for this action.');
-      expect(button.getAttribute('aria-label')).toMatch(/No current item is available for this action\.$/);
-    }
+    expect(disabledButtons).toHaveLength(0);
+    expect(container.textContent).not.toContain('No current item is available for this action.');
+    expect(screen.queryByRole('button', { name: 'View Advanced' })).toBeNull();
   });
 
   it('localizes priority-card severity badges in BCS mode', async () => {

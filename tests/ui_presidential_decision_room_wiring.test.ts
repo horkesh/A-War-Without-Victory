@@ -179,7 +179,7 @@ describe('Presidential Decision Room wiring', () => {
 
     expect(panel).toContain('onNavigateTarget?:');
     expect(panel).toContain('navigateTarget(dossier.navigationTarget)');
-    expect(panel).toContain('navigateTarget(handoff.navigationTarget)');
+    expect(panel).toContain('navigateTarget(card.navigationTarget)');
     expect(app).toContain('const openDecisionRoomTarget =');
     expect(app).toContain("if (target.kind === 'counter-offer')");
     expect(app).toContain('setSelectedCounterOfferId(target.counterOfferId)');
@@ -216,59 +216,52 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).toContain("lens.id === 'all'");
   });
 
-  it('keeps advanced decision-room telemetry behind an explicit progressive-disclosure control', () => {
+  it('renders a flat decision-room card list without progressive-disclosure scaffolding', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
 
-    expect(panel).toContain('showAdvanced');
-    expect(panel).toContain('setShowAdvanced');
-    expect(panel).toContain("t('decisionRoom.viewAdvanced')");
-    expect(panel).toContain("t('decisionRoom.hideAdvanced')");
-    expect(panel).toContain('data-testid="decision-room-advanced"');
-    expect(panel).toContain('{showAdvanced && view.lenses.length > 0');
-    expect(panel).toContain('{showAdvanced && (');
+    expect(panel).not.toContain('showAdvanced');
+    expect(panel).not.toContain('setShowAdvanced');
+    expect(panel).not.toContain("t('decisionRoom.viewAdvanced')");
+    expect(panel).not.toContain("t('decisionRoom.hideAdvanced')");
+    expect(panel).not.toContain('data-testid="decision-room-advanced"');
+    expect(panel).toContain('{view.lenses.length > 0 && (');
+    expect(panel).toContain('filteredCards.map((card) => (');
+    expect(panel).not.toContain('filteredCards.slice');
   });
 
-  it('renders command-loop lanes without creating another queue owner', () => {
+  it('does not render command-loop lanes as another queue owner', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
-    const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
-    expect(model).toContain('commandQuestions');
-    expect(model).toContain('buildCommandQuestions');
-    expect(panel).toContain('CommandQuestionLane');
-    expect(panel).toContain('view.commandQuestions.map');
-    expect(panel).toContain("t('decisionRoom.commandLoop')");
-    expect(panel).toContain('navigateTarget(question.navigationTarget)');
+    expect(panel).not.toContain('CommandQuestionLane');
+    expect(panel).not.toContain('view.commandQuestions.map');
+    expect(panel).not.toContain("t('decisionRoom.commandLoop')");
+    expect(panel).not.toContain('navigateTarget(question.navigationTarget)');
     expect(panel).not.toContain('commandLoopQueue');
   });
 
-  it('renders product-loop handoffs without creating another history owner', () => {
+  it('does not render product-loop handoffs as another history owner', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
-    expect(model).toContain('loopSteps');
-    expect(model).toContain('buildLoopSteps');
-    expect(model).toContain('buildReportLoopStep');
-    expect(model).toContain('buildCostLoopStep');
-    expect(model).toContain('buildJudgeLoopStep');
-    expect(panel).toContain('ProductLoopStep');
-    expect(panel).toContain('view.loopSteps.map');
-    expect(panel).toContain("t('decisionRoom.productLoop')");
-    expect(panel).toContain('navigateTarget(step.navigationTarget)');
+    expect(panel).not.toContain('ProductLoopStep');
+    expect(panel).not.toContain('view.loopSteps.map');
+    expect(panel).not.toContain("t('decisionRoom.productLoop')");
+    expect(panel).not.toContain('navigateTarget(step.navigationTarget)');
     expect(panel).not.toContain('productLoopQueue');
     expect(panel).not.toContain('historyOwner');
     expect(model).not.toContain('productLoopLedger');
   });
 
-  it('renders source handoffs as grouped shell routes without creating another records owner', () => {
+  it('does not render source handoffs as another records owner', () => {
     const panel = read('../src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
     const model = read('../src/ui/map/data/presidentialDecisionRoom.ts');
 
     expect(model).toContain('sourceHandoffs');
     expect(model).toContain('buildPresidentialDecisionRoomSourceHandoffs');
-    expect(panel).toContain('SourceHandoffLink');
-    expect(panel).toContain('view.sourceHandoffs.map');
-    expect(panel).toContain("t('decisionRoom.sourceHandoffs')");
-    expect(panel).toContain('navigateTarget(handoff.navigationTarget)');
+    expect(panel).not.toContain('SourceHandoffLink');
+    expect(panel).not.toContain('view.sourceHandoffs.map');
+    expect(panel).not.toContain("t('decisionRoom.sourceHandoffs')");
+    expect(panel).not.toContain('navigateTarget(handoff.navigationTarget)');
     expect(panel).not.toContain('sourceHandoffQueue');
     expect(panel).not.toContain('sourceHandoffLedger');
   });
