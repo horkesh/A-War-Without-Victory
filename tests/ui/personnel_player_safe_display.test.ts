@@ -487,7 +487,10 @@ describe('PersonnelContent player-facing display', () => {
     expect(store.selectedCorpsId).toBeNull();
     expect(store.selectedFormationId).toBe('vrs_guard_bde');
     expect(store.armyHQOpen).toBe(false);
-    expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [{ panel: 'army_reserve', id: 'vrs_main_staff' }],
+    });
     expect(shouldRenderTacticalDetailRails({
       operationsPanelOpen: store.isOperationsPanelOpen,
       armyHQOpen: store.armyHQOpen,

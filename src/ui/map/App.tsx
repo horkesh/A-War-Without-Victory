@@ -68,6 +68,7 @@ import type { PresidentialCommandCategoryId } from './data/presidentialCategorie
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
 import { PresidentialDecisionRoomPanel } from './components/army_hq/PresidentialDecisionRoomPanel';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
+import { PanelBreadcrumb } from './components/PanelBreadcrumb';
 import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
@@ -546,6 +547,7 @@ function App() {
     codexOpen,
     chronicleOpen,
   });
+  const panelBreadcrumb = <PanelBreadcrumb railState={railState} />;
 
   // Task #80 — boot to the Main Menu first. Faction choice is offered ONLY via
   // the menu (New Game / Load → SidePicker), never an auto-popping modal. The
@@ -1719,26 +1721,21 @@ function App() {
           </aside>
         </>
       )}
-      {/* Tactical Detail Panels (Nested Rail Architecture) */}
+      {/* Tactical Detail Panel */}
       {tacticalChromeVisible && (
         <RootErrorBoundary zone="right panel">
         <OperationsPanel />
         <OrderQueue />
-        {tacticalDetailRailsVisible && shouldRenderInboxPanel(railState.primary, isOperationsPanelOpen) && (
+        {tacticalDetailRailsVisible && shouldRenderInboxPanel(railState.panel, isOperationsPanelOpen) && (
           <PresidentialInbox onAction={handlePresidentialInboxAction} eventCatalog={eventCatalogFull} />
         )}
-        {tacticalDetailRailsVisible && railState.primary === 'settlement' && <SelectionPanel railSlot="primary" />}
-        {tacticalDetailRailsVisible && railState.primary === 'sector' && <CorpsFrontPanel railSlot="primary" />}
-        {tacticalDetailRailsVisible && railState.primary === 'corps' && <CorpsDetail railSlot="primary" />}
+        {tacticalDetailRailsVisible && railState.panel === 'settlement' && <SelectionPanel breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'sector' && <CorpsFrontPanel breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'corps' && <CorpsDetail breadcrumb={panelBreadcrumb} />}
         {/* ArmyDetail retired — faction click opens Army HQ modal */}
-        {tacticalDetailRailsVisible && railState.primary === 'army_reserve' && <ArmyReservePanel railSlot="primary" />}
-        {tacticalDetailRailsVisible && railState.primary === 'formation' && <FormationDetail railSlot="primary" />}
-        {tacticalDetailRailsVisible && railState.primary === 'orbat' && <OrbatPanel />}
-
-        {tacticalDetailRailsVisible && railState.secondary === 'settlement' && <SelectionPanel railSlot="secondary" />}
-        {tacticalDetailRailsVisible && railState.secondary === 'sector' && <CorpsFrontPanel railSlot="secondary" />}
-        {tacticalDetailRailsVisible && railState.secondary === 'corps' && <CorpsDetail railSlot="secondary" />}
-        {tacticalDetailRailsVisible && railState.secondary === 'formation' && <FormationDetail railSlot="secondary" />}
+        {tacticalDetailRailsVisible && railState.panel === 'army_reserve' && <ArmyReservePanel breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'formation' && <FormationDetail breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'orbat' && <OrbatPanel />}
         </RootErrorBoundary>
       )}
       <Tooltip />

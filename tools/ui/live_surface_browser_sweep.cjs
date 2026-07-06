@@ -1509,14 +1509,30 @@ async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
   await waitForVisibleSelector(page, '[data-testid="formation-location-link"][data-osid]');
   await waitForVisibleSelectorAttribute(page, '[data-testid="formation-location-link"][data-osid]', 'data-osid', locationOsid, 'formation location link');
   await activateVisibleControl(page, '[data-testid="formation-location-link"][data-osid]');
-  await waitForVisibleSelectorAttribute(page, '[data-testid="settlement-detail-panel"]', 'data-osid', locationOsid, 'settlement detail panel');
-  await waitForVisibleSelector(page, '#settlement-tab-overview');
-  await waitForVisibleSelector(page, '[data-testid="settlement-panel-overview"]');
-  await activateVisibleControl(page, '#settlement-tab-municipality');
-  await waitForVisibleSelector(page, '[data-testid="settlement-panel-municipality"]');
-  await activateVisibleControl(page, '#settlement-tab-timeline');
-  await waitForVisibleSelector(page, '[data-testid="settlement-panel-timeline"]');
-  await captureEvidence(page, summary, evidenceId('owner_journey_settlement_detail'));
+  await waitForVisibleSelectorAttribute(page, '[data-testid="formation-detail-panel"]', 'data-formation-id', formationId, 'formation detail panel');
+  await page.waitForFunction(() => {
+    const isVisible = (el) => {
+      if (!(el instanceof HTMLElement)) return false;
+      const rect = el.getBoundingClientRect();
+      const style = window.getComputedStyle(el);
+      return rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden'
+        && Number(style.opacity || '1') > 0;
+    };
+    const visibleDetailPanels = Array.from(document.querySelectorAll([
+      '[data-testid="formation-detail-panel"]',
+      '[data-testid="corps-front-panel"]',
+      '[data-testid="corps-detail-panel"]',
+      '[data-testid="army-reserve-panel"]',
+      '[data-testid="settlement-detail-panel"]',
+      '[data-testid="orbat-panel"]',
+    ].join(','))).filter(isVisible);
+    return visibleDetailPanels.length === 1
+      && visibleDetailPanels[0]?.getAttribute('data-testid') === 'formation-detail-panel';
+  }, { timeout: 15000 });
+  await captureEvidence(page, summary, evidenceId('owner_journey_formation_location_context'));
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-records"]');
   await waitForVisibleSelector(page, '#army-hq-tab-records');

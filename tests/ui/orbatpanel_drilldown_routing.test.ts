@@ -129,7 +129,13 @@ describe('OrbatPanel drilldown routing', () => {
     expect(store.selectedCorpsFrontSectorId).toBe('sector_south');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
     expect(store.selectedOsid).toBe('op:sarajevo:centar_1');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [
+        { panel: 'corps', id: 'rbih_1_corps' },
+        { panel: 'sector', id: 'sector_south' },
+      ],
+    });
   });
 
   it('renders partial personnel totals when ORBAT brigade reports are incomplete', () => {

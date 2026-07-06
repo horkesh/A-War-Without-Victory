@@ -191,7 +191,13 @@ describe('CorpsFrontPanel field routing', () => {
     expect(store.selectedCorpsFrontSectorId).toBe('sector:arbih_1st_corps:0');
     expect(store.selectedFormationId).toBe('arbih_101_brigade');
     expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [
+        { panel: 'corps', id: 'arbih_1st_corps' },
+        { panel: 'sector', id: 'sector:arbih_1st_corps:0' },
+      ],
+    });
   });
 
   it('exposes unresolved brigade proof hooks and preserves its field route', () => {

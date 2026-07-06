@@ -155,7 +155,10 @@ describe('command drilldown routing', () => {
     const store = useGameStore.getState();
     expect(store.selectedCorpsId).toBe('rbih_1_corps');
     expect(store.selectedFormationId).toBe('rbih_1_brigade');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [{ panel: 'corps', id: 'rbih_1_corps' }],
+    });
   });
 
   it('filters non-fielded brigades from CorpsDetail order of battle and active totals', () => {
@@ -243,7 +246,10 @@ describe('command drilldown routing', () => {
     expect(store.chronicleOpen).toBe(false);
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
-    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'sector',
+      trail: [{ panel: 'corps', id: 'rbih_1_corps' }],
+    });
   });
 
   it('routes CorpsDetail operation rows through canonical field inspection', () => {

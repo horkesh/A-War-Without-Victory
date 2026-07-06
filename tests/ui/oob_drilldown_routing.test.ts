@@ -147,7 +147,10 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.chronicleOpen).toBe(false);
     expect(store.focusedAftermathTurn).toBeNull();
     expect(store.focusedOperationHistoryId).toBeNull();
-    expect(derivePanelRailState(store)).toEqual({ primary: 'army_reserve', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [{ panel: 'army_reserve', id: 'vrs_main_staff' }],
+    });
   });
 
   it('surfaces missing army commander source and splits fielded versus reserve counts', () => {
@@ -210,7 +213,10 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('vrs_main_staff');
     expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
     expect(store.selectedOsid).toBe('op:sarajevo:dobrinja_1');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'sector',
+      trail: [{ panel: 'corps', id: 'vrs_main_staff' }],
+    });
   });
 
   it('sanitizes raw command ids in OOB sector owner copy', () => {
@@ -256,7 +262,10 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('vrs_main_staff');
     expect(store.selectedCorpsFrontSectorId).toBe('sector_vrs_main_staff_north');
     expect(store.selectedOsid).toBeNull();
-    expect(derivePanelRailState(store)).toEqual({ primary: 'corps', secondary: 'sector' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'sector',
+      trail: [{ panel: 'corps', id: 'vrs_main_staff' }],
+    });
   });
 
   it('does not label zero-formation sectors as held coverage in OOB', () => {
@@ -454,7 +463,7 @@ describe('OOBSidebar drilldown routing', () => {
     expect(store.selectedFormationId).toBe('independent_bde');
     expect(store.selectedOrbatCorpsId).toBeNull();
     expect(store.selectedCorpsId).toBeNull();
-    expect(derivePanelRailState(store)).toEqual({ primary: 'formation', secondary: null });
+    expect(derivePanelRailState(store)).toEqual({ panel: 'formation', trail: [] });
   });
 
   it('names corps card flip actions as details and summary affordances', () => {

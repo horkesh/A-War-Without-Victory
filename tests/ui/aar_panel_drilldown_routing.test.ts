@@ -108,7 +108,13 @@ describe('AARPanel drilldown routing', () => {
     expect(store.selectedCorpsId).toBe('corps_alpha');
     expect(store.selectedOsid).toBe('op:test:a');
     expect(store.armyHQOpen).toBe(false);
-    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [
+        { panel: 'corps', id: 'corps_alpha' },
+        { panel: 'sector', id: 'sector_alpha' },
+      ],
+    });
   });
 
   it('marks AAR battle casualties unreported when the turn summary lacks casualty sources', () => {

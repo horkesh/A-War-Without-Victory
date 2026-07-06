@@ -6,7 +6,7 @@
  *  2. Pending Requests — corps requests awaiting player decision (approve/dismiss)
  *  3. Campaign History — collapsible per-brigade episode log
  */
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
 import { getPanelRailStyle } from './panelRail';
@@ -72,10 +72,11 @@ function episodeDateRange(startTurn: number, endTurn: number | null | undefined)
 }
 
 interface ArmyReservePanelProps {
-    railSlot: 'primary' | 'secondary';
+    railSlot?: 'primary' | 'secondary';
+    breadcrumb?: ReactNode;
 }
 
-export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
+export function ArmyReservePanel({ railSlot = 'primary', breadcrumb }: ArmyReservePanelProps) {
     const [locale] = useLocale();
     const ipc = useIPC();
     const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
@@ -182,9 +183,10 @@ export function ArmyReservePanel({ railSlot }: ArmyReservePanelProps) {
         >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border/60 bg-black/30 shrink-0">
-                <div>
+                <div className="min-w-0">
                     <div className="text-[11px] font-bold text-text-primary tracking-wide uppercase">{t('armyReserve.title')}</div>
                     <div className="text-[10px] text-text-secondary">{armyHq.name}</div>
+                    {breadcrumb}
                 </div>
                 <button
                     type="button"

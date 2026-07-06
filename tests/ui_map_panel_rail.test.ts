@@ -7,29 +7,36 @@ it('left rail panels align to the visible command sidebar without the old blank 
     const secondary = panelRail.getPanelRailStyle('secondary', '24rem', 'left');
 
     expect(primary.left).toBe('calc(15.5rem + 0.5rem)');
-    expect(secondary.left).toBe('calc(calc(15.5rem + 0.5rem) + 24rem + 0.5rem)');
+    expect(secondary.left).toBe('calc(15.5rem + 0.5rem)');
 });
 
-it('derivePanelRailState keeps sector as primary when a brigade drills in from it', () => {
+it('derivePanelRailState keeps formation as the single leaf when a brigade drills in from a sector', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
             selectedArmyId: string | null;
+            selectedArmyHqId: string | null;
             selectedCorpsId: string | null;
             selectedCorpsFrontSectorId: string | null;
             selectedFormationId: string | null;
             selectedOperationKey: string | null;
-        }) => { primary: string | null; secondary: string | null; };
+            selectedOrbatCorpsId: string | null;
+        }) => { panel: string | null; trail: Array<{ panel: string; id: string }> };
     }).derivePanelRailState?.({
         selectedOsid: null,
         selectedArmyId: null,
+        selectedArmyHqId: null,
         selectedCorpsId: null,
         selectedCorpsFrontSectorId: 'rbih_sector_1',
         selectedFormationId: 'b1',
         selectedOperationKey: null,
+        selectedOrbatCorpsId: null,
     });
 
-    expect(rail).toEqual({ primary: 'sector', secondary: 'formation' });
+    expect(rail).toEqual({
+        panel: 'formation',
+        trail: [{ panel: 'sector', id: 'rbih_sector_1' }],
+    });
 });
 
 it('derivePanelRailState shows standalone brigade selection without stale parent context', () => {
@@ -37,43 +44,54 @@ it('derivePanelRailState shows standalone brigade selection without stale parent
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
             selectedArmyId: string | null;
+            selectedArmyHqId: string | null;
             selectedCorpsId: string | null;
             selectedCorpsFrontSectorId: string | null;
             selectedFormationId: string | null;
             selectedOperationKey: string | null;
-        }) => { primary: string | null; secondary: string | null; };
+            selectedOrbatCorpsId: string | null;
+        }) => { panel: string | null; trail: Array<{ panel: string; id: string }> };
     }).derivePanelRailState?.({
         selectedOsid: null,
         selectedArmyId: null,
+        selectedArmyHqId: null,
         selectedCorpsId: null,
         selectedCorpsFrontSectorId: null,
         selectedFormationId: 'brigade:standalone',
         selectedOperationKey: null,
+        selectedOrbatCorpsId: null,
     });
 
-    expect(rail).toEqual({ primary: 'formation', secondary: null });
+    expect(rail).toEqual({ panel: 'formation', trail: [] });
 });
 
-it('derivePanelRailState keeps army as primary when corps drills in from it', () => {
+it('derivePanelRailState keeps corps as the single leaf when drilling in from army', () => {
     const rail = (panelRail as typeof panelRail & {
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
             selectedArmyId: string | null;
+            selectedArmyHqId: string | null;
             selectedCorpsId: string | null;
             selectedCorpsFrontSectorId: string | null;
             selectedFormationId: string | null;
             selectedOperationKey: string | null;
-        }) => { primary: string | null; secondary: string | null; };
+            selectedOrbatCorpsId: string | null;
+        }) => { panel: string | null; trail: Array<{ panel: string; id: string }> };
     }).derivePanelRailState?.({
         selectedOsid: null,
         selectedArmyId: 'RBiH',
+        selectedArmyHqId: null,
         selectedCorpsId: 'rbih_corps',
         selectedCorpsFrontSectorId: null,
         selectedFormationId: null,
         selectedOperationKey: null,
+        selectedOrbatCorpsId: null,
     });
 
-    expect(rail).toEqual({ primary: 'army', secondary: 'corps' });
+    expect(rail).toEqual({
+        panel: 'corps',
+        trail: [{ panel: 'army', id: 'RBiH' }],
+    });
 });
 
 it('derivePanelRailState falls back to inbox when operation selection has no panel-rail owner', () => {
@@ -81,21 +99,25 @@ it('derivePanelRailState falls back to inbox when operation selection has no pan
         derivePanelRailState?: (state: {
             selectedOsid: string | null;
             selectedArmyId: string | null;
+            selectedArmyHqId: string | null;
             selectedCorpsId: string | null;
             selectedCorpsFrontSectorId: string | null;
             selectedFormationId: string | null;
             selectedOperationKey: string | null;
-        }) => { primary: string | null; secondary: string | null; };
+            selectedOrbatCorpsId: string | null;
+        }) => { panel: string | null; trail: Array<{ panel: string; id: string }> };
     }).derivePanelRailState?.({
         selectedOsid: null,
         selectedArmyId: null,
+        selectedArmyHqId: null,
         selectedCorpsId: null,
         selectedCorpsFrontSectorId: null,
         selectedFormationId: null,
         selectedOperationKey: 'rbih_corps|Operation Drina',
+        selectedOrbatCorpsId: null,
     });
 
-    expect(rail).toEqual({ primary: 'inbox', secondary: null });
+    expect(rail).toEqual({ panel: 'inbox', trail: [] });
 });
 
 it('suppresses the Presidential Inbox while the map-local Operations panel owns the right rail', () => {

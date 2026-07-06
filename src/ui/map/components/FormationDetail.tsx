@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import { sortRecentEngagements } from '../utils/recentEngagements';
@@ -188,10 +188,11 @@ function EquipmentConditionBar({ condition }: { condition: EquipmentConditionRep
  * Right panel when a formation marker is clicked: name, kind, faction, strength, fatigue, orders.
  */
 interface FormationDetailProps {
-  railSlot: 'primary' | 'secondary';
+  railSlot?: 'primary' | 'secondary';
+  breadcrumb?: ReactNode;
 }
 
-export function FormationDetail({ railSlot }: FormationDetailProps) {
+export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationDetailProps) {
   const ipc = useIPC();
   const [locale] = useLocale();
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
@@ -324,13 +325,14 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
     >
       {/* Header */}
       <div className={`flex items-center justify-between px-3 py-2 ${headerBgClass} rounded-t-lg border-b border-panel-border shrink-0`}>
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {getArmyCrest(formation.faction) && (
             <img src={getArmyCrest(formation.faction)} alt="" className="w-4 h-4 object-contain" />
           )}
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             {t('formationDetail.formation')}
           </span>
+          {breadcrumb}
           {isBrigade && decorations.length > 0 && (
             <div className="flex items-center gap-px ml-0.5" title={t('formationDetail.decorationsEarned', { count: decorations.length })}>
               {decorations.slice(0, 5).map((dec, i) => (
