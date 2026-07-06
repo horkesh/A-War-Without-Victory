@@ -20,7 +20,7 @@ import {
   getPlayerSafeMilitaryFactionName,
   getPlayerSafeSectorStanceLabel,
 } from '../utils/playerSafeText';
-import { aggregateEffectiveness } from '../utils/combatEffectiveness';
+import { aggregateEffectiveness, effectivenessBandLabel } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
 import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
@@ -308,18 +308,23 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                 const agg = aggregateEffectiveness(subordinates);
                 if (agg.brigadeCount === 0) return null;
                 if (agg.grade === 'UNREPORTED') return null;
-                const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : agg.grade === 'UNREPORTED' ? '#9ca3af' : '#f47068';
+                const band = effectivenessBandLabel(agg);
+                const gradeColor = band.grade === 'A' ? '#56d364' : band.grade === 'B' ? '#e8c56d' : band.grade === 'C' ? '#e8a838' : band.grade === 'UNREPORTED' ? '#9ca3af' : '#f47068';
                 return (
                   <div className="flex justify-between">
                     <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('corpsDetail.combatEff')}</span>
-                    <span className="tabular-nums">
-                      <span className="text-text-primary">
-                        {agg.totalEffectiveness.toLocaleString()}
+                    <span
+                      data-testid="corps-detail-effectiveness"
+                      className="font-semibold"
+                      title={t('effectiveness.exactTooltip', { value: agg.totalEffectiveness.toLocaleString() })}
+                    >
+                      <span className="text-[10px] font-bold" style={{ color: gradeColor }}>
+                        {band.grade}
                       </span>
-                      <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
-                        {agg.grade}
+                      <span className="ml-1 text-text-primary">
+                        {t(band.labelKey)}
                       </span>
-                      {agg.grade !== 'UNREPORTED' && agg.ineffectiveCount > 0 && (
+                      {band.grade !== 'UNREPORTED' && agg.ineffectiveCount > 0 && (
                         <span className="text-[9px] text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
                       )}
                     </span>
@@ -337,8 +342,13 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
               {corpsFormation.corpsOgSlots != null && (
                 <div className="flex justify-between">
                   <span className="text-text-secondary" title={t('corpsDetail.opSlotsTitle')}>{t('corpsDetail.opSlots')}</span>
-                  <span className="text-text-primary tabular-nums">
-                    {corpsFormation.corpsActiveOgIds?.length ?? 0}/{corpsFormation.corpsOgSlots}
+                  <span className="text-text-primary text-right">
+                    {t((corpsFormation.corpsActiveOgIds?.length ?? 0) === 0
+                      ? 'corpsDetail.opSlotsSentence.none'
+                      : 'corpsDetail.opSlotsSentence.some', {
+                        active: corpsFormation.corpsActiveOgIds?.length ?? 0,
+                        capacity: corpsFormation.corpsOgSlots,
+                      })}
                   </span>
                 </div>
               )}
@@ -447,6 +457,9 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                 const sectorBrigadeIds = new Set(sectorAssignment.lineHoldingIds);
                 const sectorBrigades = subordinates.filter((b) => sectorBrigadeIds.has(b.id));
                 const sectorEff = aggregateEffectiveness(sectorBrigades);
+                const sectorBand = sectorEff.brigadeCount > 0 && sectorEff.grade !== 'UNREPORTED'
+                  ? effectivenessBandLabel(sectorEff)
+                  : null;
                 const sectorPers = formatReportedPersonnel(sumReportedPersonnel(sectorBrigades), {
                   partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
                   unreported: t('corpsFront.unreported'),
@@ -488,8 +501,11 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                   <div className="shrink-0 ml-2 text-right">
                     <div className="text-[10px] tabular-nums">
                       <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
-                      <span className="text-text-primary">
-                        {sectorEff.grade === 'UNREPORTED' ? '--' : sectorEff.totalEffectiveness.toLocaleString()}
+                      <span
+                        className="text-text-primary"
+                        title={sectorBand ? t('effectiveness.exactTooltip', { value: sectorEff.totalEffectiveness.toLocaleString() }) : undefined}
+                      >
+                        {sectorBand ? `${sectorBand.grade} ${t(sectorBand.labelKey)}` : '--'}
                       </span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">

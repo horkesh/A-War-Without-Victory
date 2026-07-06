@@ -15,7 +15,7 @@ import {
     type EquipmentConditionSummary,
     type ReportedMetricSummary,
 } from '../../utils/reportedMetrics';
-import { aggregateEffectiveness } from '../../utils/combatEffectiveness';
+import { aggregateEffectiveness, effectivenessBandLabel } from '../../utils/combatEffectiveness';
 import { getFormationCommander, getSyntheticJnaCommandPresentation, resolveCorpsCommanderDisplay } from '../../utils/officerUtils';
 import { Icon } from '../icons/Icon';
 import { CommanderSection } from './CommanderSection';
@@ -188,7 +188,8 @@ export function ArmyHQCorpsCard({
     const displayCommanderName = commanderSourceUnreported ? undefined : data.syntheticCommand?.commanderName ?? data.commanderDisplay?.name;
     const stanceClass = STANCE_COLORS[data.stance] ?? STANCE_COLORS.unreported;
     const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.unreported');
-    const gradeColor = GRADE_COLORS[data.eff.grade] ?? 'text-text-secondary';
+    const effectivenessBand = effectivenessBandLabel(data.eff);
+    const gradeColor = GRADE_COLORS[effectivenessBand.grade] ?? 'text-text-secondary';
     const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
     const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });
     const reportedCohesion = data.avgCohesion;
@@ -279,7 +280,16 @@ export function ArmyHQCorpsCard({
                         </span>
                     )}
                     <div className="w-1 h-3 border-l border-panel-border" />
-                    <span className={`font-bold ${gradeColor}`}>{t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}</span>
+                    <span
+                        data-testid="army-hq-corps-effectiveness"
+                        className={`font-bold ${gradeColor}`}
+                        title={t('effectiveness.exactTooltip', { value: data.eff.totalEffectiveness.toLocaleString() })}
+                    >
+                        {t('armyHqCorps.effectivenessShort', {
+                            grade: effectivenessBand.grade,
+                            label: t(effectivenessBand.labelKey),
+                        })}
+                    </span>
                     {readinessGrade && (
                         <>
                             <div className="w-1 h-3 border-l border-panel-border" />
@@ -459,7 +469,10 @@ export function ArmyHQCorpsCard({
                         {displayName}
                     </div>
                     <span className={`text-[14px] font-bold font-mono px-2 py-0.5 border border-panel-border bg-panel-bg ${gradeColor}`}>
-                        {t('armyHqCorps.effectivenessShort', { grade: data.eff.grade })}
+                        {t('armyHqCorps.effectivenessShort', {
+                            grade: effectivenessBand.grade,
+                            label: t(effectivenessBand.labelKey),
+                        })}
                     </span>
                 </button>
                 <div className="flex items-center gap-4">

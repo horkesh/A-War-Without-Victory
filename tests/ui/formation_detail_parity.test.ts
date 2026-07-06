@@ -881,7 +881,7 @@ describe('Formation Detail parity display', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     const copy = view.container.textContent ?? '';
 
-    expect(copy).toContain('Distance from home 70%');
+    expect(view.container.querySelector('[data-testid="formation-detail-effectiveness"]')?.getAttribute('title')).toContain('Distance from home 70%');
     expect(copy).not.toContain('homeDistance');
   });
 

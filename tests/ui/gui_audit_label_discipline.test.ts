@@ -1735,7 +1735,7 @@ describe('GUI audit label discipline', () => {
     expect(bcsMessages['formationDetail.kia']).not.toMatch(/\bKIA\b/);
     expect(bcsMessages['formationDetail.wia']).not.toMatch(/\bWIA\b/);
     expect(bcsMessages['formationDetail.miaPow']).not.toMatch(/\bMIA\b|\bPOW\b/);
-    expect(bcsMessages['armyHq.commandAccessOps']).not.toMatch(/\bops\b/i);
+    expect(bcsMessages['corpsDetail.opSlotsSentence.none']).not.toMatch(/\bops\b/i);
     expect(bcsMessages['armyHq.activeOps']).not.toMatch(/\bops\b/i);
     expect(bcsMessages['presidentialToolbar.ops']).not.toMatch(/\bOPS\b/);
     expect(bcsMessages['toolbar.ops']).not.toMatch(/\bOPS\b/);

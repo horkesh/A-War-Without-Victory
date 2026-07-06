@@ -13,6 +13,7 @@
  */
 import type { FormationView } from '../data/types';
 import { isFieldedTacticalFormation } from '../../shared/playerVisibility';
+import type { MessageKey } from '../i18n';
 
 // --- Constants matching sim/combat/combat_math.ts ---
 const EXPERIENCE_BASE = 0.6;
@@ -39,6 +40,13 @@ export interface EffectivenessBreakdown {
     personnel: number;
     /** Grade-critical source fields missing from this formation. */
     missingFields: string[];
+}
+
+export type EffectivenessGrade = 'A' | 'B' | 'C' | 'D' | 'F' | 'UNREPORTED';
+
+export interface EffectivenessBandLabel {
+    grade: EffectivenessGrade;
+    labelKey: MessageKey;
 }
 
 const GRADE_CRITICAL_FIELDS = ['personnel', 'fatigue', 'cohesion', 'morale', 'officer_quality'] as const;
@@ -109,6 +117,28 @@ function getSupplyMult(f: FormationView): number {
     return Math.max(0.6, 1.0 - decay * 0.3);
 }
 
+function modifierProductFromBreakdown(breakdown: EffectivenessBreakdown): number {
+    return breakdown.modifiers.fatigue * breakdown.modifiers.officer * breakdown.modifiers.homeDistance
+        * breakdown.modifiers.morale * breakdown.modifiers.disruption * breakdown.modifiers.supply;
+}
+
+function gradeFromModifierProduct(modProduct: number): EffectivenessGrade {
+    return modProduct >= 0.85 ? 'A' : modProduct >= 0.70 ? 'B' : modProduct >= 0.55 ? 'C' : modProduct >= 0.40 ? 'D' : 'F';
+}
+
+function labelKeyForGrade(grade: EffectivenessGrade): MessageKey {
+    switch (grade) {
+        case 'A': return 'effectiveness.band.combatReady';
+        case 'B': return 'effectiveness.band.capable';
+        case 'C': return 'effectiveness.band.degraded';
+        case 'D': return 'effectiveness.band.marginal';
+        case 'F': return 'effectiveness.band.ineffective';
+        case 'UNREPORTED':
+        default:
+            return 'effectiveness.band.unreported';
+    }
+}
+
 export function computeBrigadeEffectiveness(f: FormationView): EffectivenessBreakdown {
     const missingFields = missingGradeCriticalFields(f);
     const personnel = reportedNumber(f.personnel) ? f.personnel : 0;
@@ -149,7 +179,7 @@ export interface AggregateEffectiveness {
     /** Number of disrupted brigades. */
     disruptedCount: number;
     /** Overall readiness grade: A/B/C/D/F based on average modifier product, or UNREPORTED when grade-critical fields are sparse. */
-    grade: string;
+    grade: EffectivenessGrade;
     /** Number of included brigades missing grade-critical effectiveness inputs. */
     incompleteCount: number;
     /** Sorted grade-critical source fields missing from at least one included brigade. */
@@ -176,16 +206,14 @@ export function aggregateEffectiveness(formations: FormationView[]): AggregateEf
             incompleteCount++;
             for (const field of eff.missingFields) missingFields.add(field);
         }
-        const modProduct = eff.modifiers.fatigue * eff.modifiers.officer * eff.modifiers.homeDistance
-            * eff.modifiers.morale * eff.modifiers.disruption * eff.modifiers.supply;
-        modifierSum += modProduct;
+        modifierSum += modifierProductFromBreakdown(eff);
     }
 
     const count = brigades.length;
     const avgMod = count > 0 ? modifierSum / count : 0;
-    const grade = incompleteCount > 0
+    const grade = count === 0 || incompleteCount > 0
         ? 'UNREPORTED'
-        : avgMod >= 0.85 ? 'A' : avgMod >= 0.70 ? 'B' : avgMod >= 0.55 ? 'C' : avgMod >= 0.40 ? 'D' : 'F';
+        : gradeFromModifierProduct(avgMod);
 
     return {
         totalEffectiveness: Math.round(totalEff),
@@ -198,4 +226,18 @@ export function aggregateEffectiveness(formations: FormationView[]): AggregateEf
         incompleteCount,
         missingFields: [...missingFields].sort(),
     };
+}
+
+export function effectivenessBandLabel(
+    breakdown: EffectivenessBreakdown | AggregateEffectiveness,
+): EffectivenessBandLabel {
+    if (breakdown.missingFields.length > 0) {
+        return { grade: 'UNREPORTED', labelKey: labelKeyForGrade('UNREPORTED') };
+    }
+    if ('grade' in breakdown) {
+        const grade = breakdown.brigadeCount === 0 ? 'UNREPORTED' : breakdown.grade;
+        return { grade, labelKey: labelKeyForGrade(grade) };
+    }
+    const grade = gradeFromModifierProduct(modifierProductFromBreakdown(breakdown));
+    return { grade, labelKey: labelKeyForGrade(grade) };
 }
