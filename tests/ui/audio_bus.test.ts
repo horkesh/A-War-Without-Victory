@@ -71,6 +71,41 @@ describe('audio bus stub', () => {
         expect(globalThis.AudioContext).not.toHaveBeenCalled();
     });
 
+    it('plays a resolved cue asset only after gesture unlock', async () => {
+        const play = vi.fn(() => Promise.resolve());
+        const pause = vi.fn();
+        class FakeAudio {
+            src: string;
+            preload = '';
+            loop = false;
+            volume = 0;
+            currentTime = 0;
+
+            constructor(src: string) {
+                this.src = src;
+            }
+
+            play = play;
+            pause = pause;
+        }
+        vi.stubGlobal('Audio', FakeAudio);
+        setEnabled(true);
+        setVolume('master', 0.5);
+
+        await playCue('ui_click', 1000);
+        expect(play).not.toHaveBeenCalled();
+
+        unlockAudioForUserGesture();
+        await playCue('ui_click', 1000);
+
+        expect(play).toHaveBeenCalledTimes(1);
+        expect(pause).not.toHaveBeenCalled();
+        expect(getAudioState()).toMatchObject({
+            lastCueId: 'ui_click',
+            lastResolvedAssetUrl: expect.stringContaining('ui_click'),
+        });
+    });
+
     it('clamps bus volumes deterministically by kind', () => {
         setVolume('master', 2);
         setVolume('music', -1);

@@ -158,6 +158,9 @@ registerSFX({ id: 'tutorial_objective_complete', src: 'audio/ui/tutorial_complet
 registerCue({ id: 'ambient_peace_spring', category: 'ambient', defaultVolume: 0.2, filePath: 'audio/ambient/peace_spring.mp3', loop: true });
 registerCue({ id: 'ambient_war_winter', category: 'ambient', defaultVolume: 0.18, filePath: 'audio/ambient/war_winter.mp3', loop: true });
 registerCue({ id: 'ambient_siege_distant', category: 'ambient', defaultVolume: 0.16, filePath: 'audio/ambient/siege_distant.mp3', loop: true });
+registerCue({ id: 'ambient_warroom', category: 'ambient', defaultVolume: 0.14, filePath: 'audio/ambient/ambient_warroom.ogg', loop: true });
+registerCue({ id: 'ambient_field', category: 'ambient', defaultVolume: 0.12, filePath: 'audio/ambient/ambient_field.ogg', loop: true });
+registerCue({ id: 'ambient_archive', category: 'ambient', defaultVolume: 0.1, filePath: 'audio/ambient/ambient_archive.ogg', loop: true });
 // Briefed-but-unregistered ambient beds (composer brief; packet §2A). Manifest slots only — no binaries.
 registerCue({ id: 'ambient_diplomatic_table', category: 'ambient', defaultVolume: 0.18, filePath: 'audio/ambient/diplomatic_table.mp3', loop: true });
 registerCue({ id: 'ambient_late_war_exhaustion', category: 'ambient', defaultVolume: 0.16, filePath: 'audio/ambient/late_war_exhaustion.mp3', loop: true });

@@ -629,3 +629,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Corps Detail, Formation Detail, and Army HQ corps cards now show effectiveness as grade plus qualitative band copy; exact numeric values are retained in tooltips and deep record surfaces.
 - Command Access chips in Army HQ now carry navigation plus readiness only, leaving sector counts, operation counts, and effectiveness on the corps cards below.
 - See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-7 qualitative effectiveness bands and Army HQ dedup`.
+
+## 2026-07-06 - WP-8 ambient audio floor
+
+- Fresh profiles now start with soundscape enabled at conservative master volume, but playback stays gated behind first user gesture.
+- Provided `.ogg` cues play through the bundled audio asset map after unlock; Warroom, tactical map, Chronicle, and Records now request placeholder ambient beds that remain silent until owner assets land.
+- See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-8 ambient audio floor`.
