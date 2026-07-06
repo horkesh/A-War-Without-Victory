@@ -750,7 +750,7 @@ async function runFoundationalFlow(page, summary, flow) {
 }
 
 async function verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow) {
-  await clickSelector(page, '[data-testid="desk-open-command-surface"]', 'Decision Room');
+  await clickSelector(page, '[data-testid="warroom-toolbar-command-surface"]', 'Decision Room');
   await page.waitForSelector('[data-testid="command-card-strip"]', { timeout: 30000 });
   const commandStripText = await visibleSelectorText(page, '[data-testid="command-card-strip"]', 'Command Surface');
   assertNoFirstHourKnowledgeLeaks(`${flow.faction} Command Surface`, commandStripText);

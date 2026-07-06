@@ -142,7 +142,8 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toContain('const leaveWarroomForGame =');
         expect(app).toMatch(/const leaveWarroomForGame = \(\) => \{[\s\S]*setWarroomDeskOpen\(false\);[\s\S]*setWarroomDecisionRoomOpen\(false\);[\s\S]*setWarroomOverlaySurface\(null\);[\s\S]*closeCommandStrip\(false\);[\s\S]*setDiplomacyOpen\(false\);[\s\S]*setIsDecisionHistoryOpen\(false\);[\s\S]*setSummaryOpen\(false\);[\s\S]*setAppScreen\('game'\);[\s\S]*\};/);
         expect(app).toMatch(/if \(event\.data\?\.type === 'awwv-shell:show-warroom'\) \{[\s\S]*returnToWarroomShell\(\);[\s\S]*return;[\s\S]*\}/);
-        expect(app).toMatch(/const handled = applyShellHandoffCommand\(useGameStore\.getState\(\), command\);[\s\S]*if \(!handled\) return;[\s\S]*leaveWarroomForGame\(\);/);
+        expect(app).toMatch(/const applyShellCommand = \(command: ShellHandoffCommand\): boolean => applyShellHandoffCommand\(\{[\s\S]*\.\.\.useGameStore\.getState\(\),[\s\S]*advanceTurnNow:[\s\S]*\}, command\);/);
+        expect(app).toMatch(/applyShellCommand\(command\);[\s\S]*if \(!warroomCommandStaysInRoom\(command\)\) \{[\s\S]*leaveWarroomForGame\(\);[\s\S]*\}/);
         expect(app).not.toContain("onOpenMap={() => setAppScreen('game')}");
         expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
     });

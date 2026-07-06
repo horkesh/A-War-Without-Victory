@@ -43,7 +43,6 @@ function renderDesk(
     onAction: vi.fn(),
     onAdvance: vi.fn(),
     onOpenArmyHQ: vi.fn(),
-    onOpenMap: vi.fn(),
     onOpenRecords: vi.fn(),
     onOpenChronicle: vi.fn(),
     ...props,
@@ -75,30 +74,25 @@ describe('PresidentDeskShell', () => {
     expect(onAction).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:1');
   });
 
-  it('keeps Army HQ and map inspection as explicit handoffs, not stacked panels', () => {
+  it('keeps Army HQ as the explicit command handoff', () => {
     const onOpenArmyHQ = vi.fn();
-    const onOpenMap = vi.fn();
-    renderDesk({ onOpenArmyHQ, onOpenMap });
+    renderDesk({ onOpenArmyHQ });
 
     fireEvent.click(screen.getByText('Call Army HQ'));
-    fireEvent.click(screen.getByText('War Map'));
 
     expect(onOpenArmyHQ).toHaveBeenCalledOnce();
-    expect(onOpenMap).toHaveBeenCalledOnce();
+    expect(screen.queryByTestId('desk-action-war-map')).toBeNull();
   });
 
-  it('exposes stable live-browser hooks for desk shell handoffs', () => {
+  it('exposes stable live-browser hooks for the remaining desk shell handoffs', () => {
     const onOpenRecords = vi.fn();
     const { container } = renderDesk({ onOpenRecords });
 
     expect(screen.getByTestId('president-desk-shell')).toBeTruthy();
     expect(screen.getByTestId('desk-action-army-hq')).toBeTruthy();
-    expect(screen.getByTestId('desk-action-war-map')).toBeTruthy();
     expect(screen.getByTestId('desk-action-advance-clearance')).toBeTruthy();
-
-    fireEvent.click(screen.getByTestId('desk-action-records'));
-
-    expect(onOpenRecords).toHaveBeenCalledOnce();
+    expect(screen.queryByTestId('desk-action-records')).toBeNull();
+    expect(screen.queryByTestId('desk-open-command-surface')).toBeNull();
     expect(container.querySelector('[data-testid="desk-consequence-strip"]')).toBeTruthy();
     expect(container.querySelector('[data-testid="desk-consequence-open-records"]')).toBeTruthy();
   });
@@ -305,11 +299,9 @@ describe('PresidentDeskShell', () => {
   it('routes the blocked advance action to advance review instead of generic command cards', () => {
     const onAdvance = vi.fn();
     const onReviewAdvance = vi.fn();
-    const onOpenCommandSurface = vi.fn();
     renderDesk({
       onAdvance,
       onReviewAdvance,
-      onOpenCommandSurface,
       state: makeState({
         pendingCounterOffers: [
           {
@@ -331,10 +323,10 @@ describe('PresidentDeskShell', () => {
     });
 
     expect(screen.queryByTestId('desk-action-advance-clearance')).toBeNull();
+    expect(screen.queryByTestId('desk-open-command-surface')).toBeNull();
     fireEvent.click(screen.getByTestId('desk-action-review-blockers'));
 
     expect(onReviewAdvance).toHaveBeenCalledOnce();
-    expect(onOpenCommandSurface).not.toHaveBeenCalled();
     expect(onAdvance).not.toHaveBeenCalled();
   });
 

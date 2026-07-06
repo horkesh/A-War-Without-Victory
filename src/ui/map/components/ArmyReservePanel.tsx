@@ -27,6 +27,7 @@ import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
 import { turnToDateString } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
 import { EliteCommanderSummary } from './EliteCommanderSummary';
+import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -74,9 +75,14 @@ function episodeDateRange(startTurn: number, endTurn: number | null | undefined)
 interface ArmyReservePanelProps {
     railSlot?: 'primary' | 'secondary';
     breadcrumb?: ReactNode;
+    onOpenDecisionRoomTarget?: (target: PresidentialDecisionRoomNavigationTarget) => void;
 }
 
-export function ArmyReservePanel({ railSlot = 'primary', breadcrumb }: ArmyReservePanelProps) {
+function eliteDeployCardId(requestId: string): string {
+    return `command:elite-deploy:${requestId}`;
+}
+
+export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecisionRoomTarget }: ArmyReservePanelProps) {
     const [locale] = useLocale();
     const ipc = useIPC();
     const selectedArmyHqId = useGameStore((s) => s.selectedArmyHqId);
@@ -148,17 +154,12 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb }: ArmyReser
         if (!result.ok) setLoadError(result.error ?? 'Decline failed');
     }
 
-    async function handleApprove(requestId: string, brigadeId: string) {
-        if (!ipc.isAvailable) {
-            setLoadError(t('formationDetail.commandBridgeUnavailable'));
-            return;
-        }
-        const result = await ipc.approveReserveRequest(
-            requestId,
-            brigadeId,
-            'President assigned a reserve brigade from the Army Reserve pool.',
-        );
-        if (!result.ok) setLoadError(result.error ?? 'Approve failed');
+    function handleReviewInDecisionRoom(requestId: string) {
+        onOpenDecisionRoomTarget?.({
+            kind: 'decision-room',
+            lens: 'command',
+            cardId: eliteDeployCardId(requestId),
+        });
     }
 
     async function handleRecall(brigadeId: string) {
@@ -222,6 +223,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb }: ArmyReser
                                 const loanedToCorps = loanedCorpsLabel(ls.loaned_to_corps);
                                 const pct = brigade.personnel != null ? Math.min(100, Math.round((brigade.personnel / 2200) * 100)) : null;
                                 const canAssignToPendingRequest = !ls.on_loan && !ls.in_cooldown && !ls.permanently_degraded;
+                                const reviewablePendingRequests = pendingRequests.filter((request) => request.suggested_brigade_id === brigade.id);
                                 return (
                                     <div
                                         key={brigade.id}
@@ -302,25 +304,23 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb }: ArmyReser
                                                 {t('armyReserve.base', { base: getOsidDisplayName(ls.base_osid, osidDisplayNames) })}
                                             </div>
                                         )}
-                                        {canAssignToPendingRequest && pendingRequests.length > 0 && (
+                                        {canAssignToPendingRequest && reviewablePendingRequests.length > 0 && (
                                             <div className="space-y-1 rounded border border-panel-border/35 bg-black/15 px-2 py-1.5">
                                                 <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary">
                                                     {t('armyReserve.assignToRequest')}
                                                 </div>
                                                 <div className="flex flex-col gap-1">
-                                                    {pendingRequests.map((request) => {
+                                                    {reviewablePendingRequests.map((request) => {
                                                         const requestCorpsName = getCorpsName(request.corps_id);
-                                                        const disabled = !ipc.isAvailable || commandAuthorityStatus === 'insufficient';
+                                                        const disabled = commandAuthorityStatus === 'insufficient';
                                                         return (
                                                             <button
                                                                 key={`${brigade.id}:${request.request_id}`}
                                                                 type="button"
                                                                 disabled={disabled}
-                                                                onClick={() => { void handleApprove(request.request_id, brigade.id); }}
+                                                                onClick={() => { handleReviewInDecisionRoom(request.request_id); }}
                                                                 aria-label={t('armyReserve.assignReserveToRequestAria', { brigade: brigadeName, corps: requestCorpsName })}
-                                                                title={!ipc.isAvailable
-                                                                    ? t('formationDetail.commandBridgeUnavailable')
-                                                                    : commandAuthorityStatus === 'insufficient'
+                                                                title={commandAuthorityStatus === 'insufficient'
                                                                         ? t('armyReserve.insufficientAuthority')
                                                                         : undefined}
                                                                 className={`rounded border px-2 py-1 text-left text-[10px] font-semibold transition-colors ${

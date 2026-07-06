@@ -1432,8 +1432,8 @@ async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
   await resetToWarMap(page);
 
   await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
-  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
-  await clickVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
+  await waitForVisibleSelector(page, '[data-testid="warroom-toolbar-command-surface"]');
+  await clickVisibleSelector(page, '[data-testid="warroom-toolbar-command-surface"]');
   await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
   await clickVisibleSelector(page, '[data-testid="command-card-cat_war_direction"]');
   await waitForVisibleSelector(page, '[data-testid="warroom-decision-room-host"]');
@@ -1725,8 +1725,8 @@ async function runTurnZeroSetupProvenanceLiveProof(page, summary) {
     throw new Error('Desk consequence strip treated turn-zero setup as a filed record');
   }
 
-  await waitForVisibleSelector(page, '[data-testid="desk-open-command-surface"]');
-  await activateVisibleControl(page, '[data-testid="desk-open-command-surface"]');
+  await waitForVisibleSelector(page, '[data-testid="warroom-toolbar-command-surface"]');
+  await activateVisibleControl(page, '[data-testid="warroom-toolbar-command-surface"]');
   await waitForVisibleSelector(page, '[data-testid="command-card-strip"]');
   await waitForVisibleSelector(page, '[data-testid="command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
   await captureEvidence(page, summary, 'turn_zero_setup_provenance_live_proof');
@@ -1841,7 +1841,7 @@ async function runArchiveInboxDrilldown(page, summary) {
   summary.evidence.presidentialInboxVisible = true;
   await activateVisibleControl(page, '[data-testid="toolbar-route-desk"]');
   await waitForVisibleSelector(page, '[data-testid="president-desk-shell"]');
-  await activateVisibleControl(page, '[data-testid="desk-action-records"]');
+  await activateVisibleControl(page, '[data-testid="desk-consequence-open-records"]');
   await waitForVisibleSelector(page, '[data-testid="records-content"]');
   await waitForVisibleSelector(page, '[data-testid="records-subtab-aftermath"][data-selected="true"]');
   await assertSingleShellSurface(page, 'Records');
