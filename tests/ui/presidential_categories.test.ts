@@ -55,12 +55,7 @@ function makeView(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRo
     emptyState: null,
     cards,
     lenses: [],
-    nextOrders: [],
-    commandQuestions: [],
-    loopSteps: [],
-    sourceHandoffs: [],
     activeDossier: null,
-    inspectNext: [],
     advanceReadiness: { headline: '', blockedByExistingSystems: false, items: [] },
     metrics: { urgentCount: 0, pendingReviews: 0, opportunities: 0, hardTurns: 0, advanceReviewCount: 0 },
   };

@@ -57,44 +57,6 @@ vi.mock('../../src/ui/map/data/presidentialDecisionRoom.js', () => {
       emptyState: mockModel.cards.length === 0 ? mockModel.emptyState : null,
       cards: mockModel.cards,
       lenses: [lensFor('all'), ...categories.map(lensFor).filter((lens) => lens.count > 0)],
-      nextOrders: mockModel.cards.length > 0
-        ? [{
-            id: 'next-order-artifact',
-            role: 'act',
-            label: 'Act',
-            headline: 'Meta next order',
-            instruction: 'Resolve this before advancing the turn.',
-            cardId: 'urgent-alpha',
-            urgent: true,
-            actionLabel: 'Open',
-            navigationTarget: { kind: 'none' },
-          }]
-        : [],
-      commandQuestions: mockModel.cards.length > 0
-        ? [{
-            id: 'urgent',
-            label: 'Urgent',
-            headline: 'Meta command question',
-            summary: '1 urgent',
-            count: 1,
-            urgentCount: 1,
-            cardIds: ['urgent-alpha'],
-            actionLabel: 'Review',
-            navigationTarget: { kind: 'none' },
-          }]
-        : [],
-      loopSteps: [{
-        id: 'decide',
-        label: 'Decide',
-        headline: 'Meta loop step',
-        summary: '1 item',
-        count: 1,
-        urgentCount: 1,
-        cardIds: ['urgent-alpha'],
-        actionLabel: 'Review',
-        navigationTarget: { kind: 'none' },
-      }],
-      sourceHandoffs: [],
       activeDossier: selectedCard
         ? {
             id: `dossier:${selectedCard.id as string}`,
@@ -112,9 +74,8 @@ vi.mock('../../src/ui/map/data/presidentialDecisionRoom.js', () => {
             relatedCardIds: [],
             advanceSensitive: selectedCard.id === 'advance-sensitive',
             advanceLabel: selectedCard.id === 'advance-sensitive' ? 'Review before advance' : 'Not in advance review',
-          }
+        }
         : null,
-      inspectNext: mockModel.cards,
       advanceReadiness: {
         headline: 'Advance review required',
         blockedByExistingSystems: true,

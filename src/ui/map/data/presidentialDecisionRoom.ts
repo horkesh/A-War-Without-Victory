@@ -222,65 +222,6 @@ export interface PresidentialDecisionRoomLens {
   navigationTarget: PresidentialDecisionRoomNavigationTarget;
 }
 
-export type PresidentialDecisionRoomNextOrderRole = 'act' | 'inspect' | 'monitor';
-
-export interface PresidentialDecisionRoomNextOrder {
-  id: string;
-  role: PresidentialDecisionRoomNextOrderRole;
-  label: string;
-  headline: string;
-  instruction: string;
-  cardId: string | null;
-  urgent: boolean;
-  actionLabel: string;
-  navigationTarget: PresidentialDecisionRoomNavigationTarget;
-  unavailableReason?: string;
-}
-
-export type PresidentialDecisionRoomCommandQuestionId =
-  | 'urgent'
-  | 'pending'
-  | 'fronts'
-  | 'inspect'
-  | 'advance';
-
-export type PresidentialDecisionRoomLoopStepId =
-  | 'brief'
-  | 'inspect'
-  | 'decide'
-  | 'execute'
-  | 'report'
-  | 'cost'
-  | 'judge'
-  | 'next';
-
-export interface PresidentialDecisionRoomCommandQuestion {
-  id: PresidentialDecisionRoomCommandQuestionId;
-  label: string;
-  headline: string;
-  summary: string;
-  count: number;
-  urgentCount: number;
-  cardIds: string[];
-  actionLabel: string;
-  navigationTarget: PresidentialDecisionRoomNavigationTarget;
-  unavailableReason?: string;
-}
-
-export interface PresidentialDecisionRoomLoopStep {
-  id: PresidentialDecisionRoomLoopStepId;
-  label: string;
-  headline: string;
-  summary: string;
-  count: number;
-  urgentCount: number;
-  cardIds: string[];
-  actionLabel: string;
-  navigationTarget: PresidentialDecisionRoomNavigationTarget;
-  sourceHandoffTarget?: PresidentialDecisionRoomNavigationTarget;
-  unavailableReason?: string;
-}
-
 export interface PresidentialDecisionRoomSourceHandoff {
   id: string;
   label: string;
@@ -317,12 +258,7 @@ export interface PresidentialDecisionRoomView {
   emptyState: string | null;
   cards: PresidentialDecisionRoomCard[];
   lenses: PresidentialDecisionRoomLens[];
-  nextOrders: PresidentialDecisionRoomNextOrder[];
-  commandQuestions: PresidentialDecisionRoomCommandQuestion[];
-  loopSteps: PresidentialDecisionRoomLoopStep[];
-  sourceHandoffs: PresidentialDecisionRoomSourceHandoff[];
   activeDossier: PresidentialDecisionRoomDossier | null;
-  inspectNext: PresidentialDecisionRoomCard[];
   advanceReadiness: PresidentialDecisionRoomAdvanceReadiness;
   metrics: PresidentialDecisionRoomMetrics;
 }
@@ -1829,357 +1765,6 @@ function buildLenses(cards: PresidentialDecisionRoomCard[]): PresidentialDecisio
   return lenses;
 }
 
-function localizedNoun(nounKey: MessageKey, count: number): string {
-  return t(nounKey, { count });
-}
-
-function summaryCount(totalCount: number, urgentCount: number, nounKey: MessageKey): string {
-  const noun = localizedNoun(nounKey, totalCount);
-  if (urgentCount > 0 && totalCount > 0) {
-    return t('decisionRoom.summary.withUrgent', { count: totalCount, noun, urgentCount });
-  }
-  return t('decisionRoom.summary.countOnly', { count: totalCount, noun });
-}
-
-function buildCommandQuestion(
-  id: PresidentialDecisionRoomCommandQuestionId,
-  label: string,
-  cards: PresidentialDecisionRoomCard[],
-  options: {
-    fallbackHeadline: string;
-    fallbackSummary: string;
-    fallbackActionLabel?: string;
-    limit?: number;
-    headlineOverride?: string;
-    nounKey?: MessageKey;
-  },
-): PresidentialDecisionRoomCommandQuestion {
-  const visibleCards = cards.slice(0, options.limit ?? 3);
-  const topCard = visibleCards[0] ?? null;
-  const count = weightedCardCount(cards);
-  const urgentCount = weightedUrgentCount(cards);
-  const navigationTarget = topCard?.navigationTarget ?? { kind: 'none' as const };
-  return {
-    id,
-    label,
-    headline: options.headlineOverride ?? topCard?.title ?? options.fallbackHeadline,
-    summary: cards.length > 0
-      ? summaryCount(count, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
-      : options.fallbackSummary,
-    count,
-    urgentCount,
-    cardIds: visibleCards.map((card) => card.id),
-    actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel ?? t('decisionRoom.action.review'),
-    navigationTarget,
-    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
-  };
-}
-
-function dedupeCommandQuestionHeadlines(
-  questions: PresidentialDecisionRoomCommandQuestion[],
-): PresidentialDecisionRoomCommandQuestion[] {
-  const seenHeadlines = new Set<string>();
-  return questions.map((question) => {
-    if (!seenHeadlines.has(question.headline)) {
-      seenHeadlines.add(question.headline);
-      return question;
-    }
-    const headline = t('decisionRoom.duplicateHeadline', { label: question.label, headline: question.headline });
-    seenHeadlines.add(headline);
-    return { ...question, headline };
-  });
-}
-
-function buildCommandQuestions(
-  cards: PresidentialDecisionRoomCard[],
-  inspectNext: PresidentialDecisionRoomCard[],
-  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
-): PresidentialDecisionRoomCommandQuestion[] {
-  const urgentCards = cards.filter(isUrgentCard);
-  const pendingCards = cards.filter((card) => card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity');
-  const frontCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
-
-  return dedupeCommandQuestionHeadlines([
-    buildCommandQuestion('urgent', t('decisionRoom.command.urgent'), urgentCards, {
-      fallbackHeadline: t('decisionRoom.command.noUrgentDeskItem'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.urgent'),
-      nounKey: 'decisionRoom.noun.urgent',
-    }),
-    buildCommandQuestion('pending', t('decisionRoom.command.decisions'), pendingCards, {
-      fallbackHeadline: t('decisionRoom.command.noPendingDecision'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.decision.many'),
-      nounKey: 'decisionRoom.noun.decision.many',
-    }),
-    buildCommandQuestion('fronts', t('decisionRoom.command.fronts'), frontCards, {
-      fallbackHeadline: t('decisionRoom.command.noFrontAlarm'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.frontCue.many'),
-      nounKey: 'decisionRoom.noun.frontCue.many',
-    }),
-    buildCommandQuestion('inspect', t('decisionRoom.command.inspect'), inspectNext, {
-      fallbackHeadline: t('decisionRoom.command.noInspectionHandoff'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.handoff.many'),
-      fallbackActionLabel: t('decisionRoom.action.inspect'),
-      limit: 5,
-      nounKey: 'decisionRoom.noun.handoff.many',
-    }),
-    buildCommandQuestion('advance', t('decisionRoom.command.advance'), advanceReadiness.items, {
-      fallbackHeadline: advanceReadiness.headline,
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.advanceItem.many'),
-      fallbackActionLabel: t('decisionRoom.action.reviewAdvance'),
-      limit: 4,
-      headlineOverride: advanceReadiness.headline,
-      nounKey: 'decisionRoom.noun.advanceItem.many',
-    }),
-  ]);
-}
-
-function firstNavigableCard(
-  cards: PresidentialDecisionRoomCard[],
-  excludedCardIds: Set<string>,
-): PresidentialDecisionRoomCard | null {
-  return cards.find((card) => card.navigationTarget.kind !== 'none' && !excludedCardIds.has(card.id)) ?? null;
-}
-
-function buildNextOrders(
-  cards: PresidentialDecisionRoomCard[],
-  inspectNext: PresidentialDecisionRoomCard[],
-  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
-): PresidentialDecisionRoomNextOrder[] {
-  const selectedIds = new Set<string>();
-  const decisionCards = cards.filter((card) =>
-    card.category === 'decision'
-    || card.category === 'counter_offer'
-    || card.category === 'opportunity'
-    || card.directive != null
-    || isUrgentCard(card),
-  );
-  const actCard = firstNavigableCard(decisionCards, selectedIds) ?? firstNavigableCard(cards, selectedIds);
-  if (actCard) selectedIds.add(actCard.id);
-
-  const inspectCards = [
-    ...inspectNext,
-    ...cards.filter((card) =>
-      card.category === 'operational'
-      || card.category === 'briefing'
-      || card.category === 'command'
-      || card.category === 'cost'
-      || card.category === 'turn',
-    ),
-  ];
-  const inspectCard = firstNavigableCard(inspectCards, selectedIds);
-  if (inspectCard) selectedIds.add(inspectCard.id);
-
-  const monitorCard = firstNavigableCard(advanceReadiness.items, selectedIds)
-    ?? firstNavigableCard(cards.filter((card) => card.category === 'turn' || card.category === 'cost' || card.category === 'memory'), selectedIds);
-
-  const orders: PresidentialDecisionRoomNextOrder[] = [];
-  if (actCard) {
-    orders.push({
-      id: `act:${actCard.id}`,
-      role: 'act',
-      label: t('decisionRoom.nextOrders.act'),
-      headline: actCard.title,
-      instruction: t('decisionRoom.nextOrders.actInstruction'),
-      cardId: actCard.id,
-      urgent: isUrgentCard(actCard),
-      actionLabel: actCard.actionLabel,
-      navigationTarget: actCard.navigationTarget,
-    });
-  }
-  if (inspectCard) {
-    orders.push({
-      id: `inspect:${inspectCard.id}`,
-      role: 'inspect',
-      label: t('decisionRoom.nextOrders.inspect'),
-      headline: inspectCard.title,
-      instruction: t('decisionRoom.nextOrders.inspectInstruction'),
-      cardId: inspectCard.id,
-      urgent: isUrgentCard(inspectCard),
-      actionLabel: inspectCard.actionLabel,
-      navigationTarget: inspectCard.navigationTarget,
-    });
-  }
-  orders.push({
-    id: monitorCard ? `monitor:${monitorCard.id}` : 'monitor:advance-readiness',
-    role: 'monitor',
-    label: t('decisionRoom.nextOrders.monitor'),
-    headline: advanceReadiness.headline,
-    instruction: t('decisionRoom.nextOrders.monitorInstruction'),
-    cardId: monitorCard?.id ?? null,
-    urgent: advanceReadiness.blockedByExistingSystems || (monitorCard ? isUrgentCard(monitorCard) : false),
-    actionLabel: monitorCard?.actionLabel ?? t('decisionRoom.action.reviewAdvance'),
-    navigationTarget: monitorCard?.navigationTarget ?? { kind: 'none' },
-    ...(monitorCard?.navigationTarget ? {} : { unavailableReason: t('decisionRoom.actionUnavailable') }),
-  });
-
-  return orders;
-}
-
-function loopStepSummary(count: number, urgentCount: number, nounKey: MessageKey): string {
-  return summaryCount(count, urgentCount, nounKey);
-}
-
-function buildCardLoopStep(
-  id: PresidentialDecisionRoomLoopStepId,
-  label: string,
-  cards: PresidentialDecisionRoomCard[],
-  options: {
-    fallbackHeadline: string;
-    fallbackSummary: string;
-    fallbackActionLabel: string;
-    fallbackNavigationTarget?: PresidentialDecisionRoomNavigationTarget;
-    nounKey?: MessageKey;
-  },
-): PresidentialDecisionRoomLoopStep {
-  const topCard = cards[0] ?? null;
-  const count = weightedCardCount(cards);
-  const urgentCount = weightedUrgentCount(cards);
-  const navigationTarget = topCard?.navigationTarget ?? options.fallbackNavigationTarget ?? { kind: 'none' as const };
-  return {
-    id,
-    label,
-    headline: topCard?.title ?? options.fallbackHeadline,
-    summary: cards.length > 0
-      ? loopStepSummary(count, urgentCount, options.nounKey ?? 'decisionRoom.noun.item.many')
-      : options.fallbackSummary,
-    count,
-    urgentCount,
-    cardIds: cards.map((card) => card.id),
-    actionLabel: topCard?.actionLabel ?? options.fallbackActionLabel,
-    navigationTarget,
-    ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
-    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
-  };
-}
-
-function buildReportLoopStep(
-  state: LoadedGameState,
-  turnCards: PresidentialDecisionRoomCard[],
-): PresidentialDecisionRoomLoopStep {
-  const filedTurns = filedTurnRecordTurns(state);
-  const recordCount = filedTurns.length;
-  const latestTurn = filedTurns[filedTurns.length - 1] ?? null;
-  const topCard = turnCards[0] ?? null;
-  const urgentCount = turnCards.filter(isUrgentCard).length;
-  const navigationTarget = topCard?.navigationTarget ?? (recordCount > 0 ? { kind: 'army-hq-records' as const, recordsSubTab: 'aftermath' as const } : { kind: 'none' as const });
-  return {
-    id: 'report',
-    label: t('decisionRoom.loop.report'),
-    headline: topCard?.title ?? (latestTurn != null ? t('decisionRoom.loop.latestTurnRecord', { dateLabel: turnToDateString(latestTurn) }) : t('decisionRoom.loop.noTurnRecordsYet')),
-    summary: recordCount > 0
-      ? summaryCount(recordCount, urgentCount, 'decisionRoom.noun.recordedTurn.many')
-      : summaryCount(0, 0, 'decisionRoom.noun.record.many'),
-    count: recordCount,
-    urgentCount,
-    cardIds: turnCards.map((card) => card.id),
-    actionLabel: topCard?.actionLabel ?? t('decisionRoom.action.turnRecords'),
-    navigationTarget,
-    ...(topCard?.sourceHandoffTarget ? { sourceHandoffTarget: topCard.sourceHandoffTarget } : {}),
-    ...(navigationTarget.kind === 'none' ? { unavailableReason: t('decisionRoom.actionUnavailable') } : {}),
-  };
-}
-
-function buildCostLoopStep(
-  state: LoadedGameState,
-  costCards: PresidentialDecisionRoomCard[],
-): PresidentialDecisionRoomLoopStep {
-  const recordCount = countFiledTurnRecords(state);
-  const cardStep = buildCardLoopStep('cost', t('decisionRoom.loop.cost'), costCards, {
-    fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.campaignCostArchiveAvailable') : t('decisionRoom.loop.noCampaignCostYet'),
-    fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.costRecord.many'),
-    fallbackActionLabel: t('decisionRoom.action.turnRecords'),
-    fallbackNavigationTarget: recordCount > 0 ? { kind: 'army-hq-records', recordsSubTab: 'aftermath' } : { kind: 'none' },
-    nounKey: 'decisionRoom.noun.costItem.many',
-  });
-  if (costCards.length > 0) return cardStep;
-  return {
-    ...cardStep,
-    count: recordCount,
-  };
-}
-
-function buildJudgeLoopStep(
-  state: LoadedGameState,
-  memoryCards: PresidentialDecisionRoomCard[],
-): PresidentialDecisionRoomLoopStep {
-  const recordCount = countFiledTurnRecords(state);
-  const cardStep = buildCardLoopStep('judge', t('decisionRoom.loop.judge'), memoryCards, {
-    fallbackHeadline: recordCount > 0 ? t('decisionRoom.loop.chronicleMemoryAvailable') : t('decisionRoom.loop.noCampaignMemoryYet'),
-    fallbackSummary: recordCount > 0 ? summaryCount(recordCount, 0, 'decisionRoom.noun.recordedTurn.many') : summaryCount(0, 0, 'decisionRoom.noun.memoryRecord.many'),
-    fallbackActionLabel: t('decisionRoom.action.showChronicle'),
-    fallbackNavigationTarget: recordCount > 0 ? { kind: 'chronicle' } : { kind: 'none' },
-    nounKey: 'decisionRoom.noun.memoryItem.many',
-  });
-  if (memoryCards.length > 0) return cardStep;
-  return {
-    ...cardStep,
-    count: recordCount,
-  };
-}
-
-function buildNextLoopStep(cards: PresidentialDecisionRoomCard[]): PresidentialDecisionRoomLoopStep {
-  const nextCards = cards.filter((card) =>
-    card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity' || isUrgentCard(card),
-  );
-  return buildCardLoopStep('next', t('decisionRoom.loop.next'), nextCards.length > 0 ? nextCards : cards.slice(0, 1), {
-    fallbackHeadline: t('decisionRoom.loop.returnToBriefing'),
-    fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.nextAction.many'),
-    fallbackActionLabel: t('decisionRoom.action.briefing'),
-    fallbackNavigationTarget: { kind: 'decision-room', lens: 'all' },
-    nounKey: 'decisionRoom.noun.nextItem.many',
-  });
-}
-
-function buildLoopSteps(
-  state: LoadedGameState,
-  cards: PresidentialDecisionRoomCard[],
-  inspectNext: PresidentialDecisionRoomCard[],
-  advanceReadiness: PresidentialDecisionRoomAdvanceReadiness,
-): PresidentialDecisionRoomLoopStep[] {
-  const briefCards = cards.filter((card) => card.category === 'operational' || card.category === 'briefing');
-  const decideCards = cards.filter((card) => card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity');
-  const turnCards = cards.filter((card) => card.category === 'turn');
-  const costCards = cards.filter((card) => card.category === 'cost');
-  const memoryCards = cards.filter((card) => card.category === 'memory');
-
-  return [
-    buildCardLoopStep('brief', t('decisionRoom.loop.brief'), briefCards, {
-      fallbackHeadline: t('decisionRoom.loop.openStrategicBriefing'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.briefCue.many'),
-      fallbackActionLabel: t('decisionRoom.action.warSummary'),
-      fallbackNavigationTarget: { kind: 'decision-room', lens: 'briefing' },
-      nounKey: 'decisionRoom.noun.briefCue.many',
-    }),
-    buildCardLoopStep('inspect', t('decisionRoom.loop.inspect'), inspectNext, {
-      fallbackHeadline: t('decisionRoom.command.noInspectionHandoff'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.handoff.many'),
-      fallbackActionLabel: t('decisionRoom.action.inspect'),
-      nounKey: 'decisionRoom.noun.handoff.many',
-    }),
-    buildCardLoopStep('decide', t('decisionRoom.loop.decide'), decideCards, {
-      fallbackHeadline: t('decisionRoom.command.noPendingDecision'),
-      fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.decision.many'),
-      fallbackActionLabel: t('decisionRoom.action.reviewQueue'),
-      fallbackNavigationTarget: { kind: 'inbox' },
-      nounKey: 'decisionRoom.noun.decision.many',
-    }),
-    {
-      ...buildCardLoopStep('execute', t('decisionRoom.loop.execute'), advanceReadiness.items, {
-        fallbackHeadline: advanceReadiness.headline,
-        fallbackSummary: summaryCount(0, 0, 'decisionRoom.noun.advanceItem.many'),
-        fallbackActionLabel: t('decisionRoom.action.reviewAdvance'),
-        fallbackNavigationTarget: { kind: 'none' },
-        nounKey: 'decisionRoom.noun.advanceItem.many',
-      }),
-      headline: advanceReadiness.headline,
-    },
-    buildReportLoopStep(state, turnCards),
-    buildCostLoopStep(state, costCards),
-    buildJudgeLoopStep(state, memoryCards),
-    buildNextLoopStep(cards),
-  ];
-}
-
 function buildActiveDossier(
   cards: PresidentialDecisionRoomCard[],
   sourceHandoffs: PresidentialDecisionRoomSourceHandoff[],
@@ -2232,12 +1817,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       emptyState: t('decisionRoom.empty.noGameState'),
       cards: [],
       lenses: [],
-      nextOrders: [],
-      commandQuestions: [],
-      loopSteps: [],
-      sourceHandoffs: [],
       activeDossier: null,
-      inspectNext: [],
       advanceReadiness: {
         headline: t('decisionRoom.advance.noStateLoaded'),
         blockedByExistingSystems: false,
@@ -2258,12 +1838,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
       emptyState: t('decisionRoom.empty.noPlayerFaction'),
       cards: [],
       lenses: [],
-      nextOrders: [],
-      commandQuestions: [],
-      loopSteps: [],
-      sourceHandoffs: [],
       activeDossier: null,
-      inspectNext: [],
       advanceReadiness: {
         headline: t('decisionRoom.advance.noPlayerFaction'),
         blockedByExistingSystems: false,
@@ -2303,11 +1878,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   const cards = finalizeCards(candidates);
   const advanceReadiness = buildAdvanceReadiness(state, cards);
   const lenses = buildLenses(cards);
-  const inspectNext = cards.filter((card) => card.navigationTarget.kind !== 'none').slice(0, 5);
-  const nextOrders = buildNextOrders(cards, inspectNext, advanceReadiness);
   const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(cards);
-  const commandQuestions = buildCommandQuestions(cards, inspectNext, advanceReadiness);
-  const loopSteps = buildLoopSteps(state, cards, inspectNext, advanceReadiness);
   const activeDossier = buildActiveDossier(cards, sourceHandoffs, advanceReadiness, input.selectedCardId);
   const livePendingReviewCards = cards.filter((card) => (
     card.category === 'decision' || card.category === 'counter_offer' || card.category === 'opportunity'
@@ -2318,12 +1889,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     emptyState: cards.length === 0 ? 'No urgent command priorities.' : null,
     cards,
     lenses,
-    nextOrders,
-    commandQuestions,
-    loopSteps,
-    sourceHandoffs,
     activeDossier,
-    inspectNext,
     advanceReadiness,
     metrics: {
       urgentCount: weightedUrgentCount(cards),

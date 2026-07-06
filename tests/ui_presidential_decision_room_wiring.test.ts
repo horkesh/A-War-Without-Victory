@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { buildPresidentialDecisionRoomView } from '../src/ui/map/data/presidentialDecisionRoom.js';
+import {
+  buildPresidentialDecisionRoomSourceHandoffs,
+  buildPresidentialDecisionRoomView,
+} from '../src/ui/map/data/presidentialDecisionRoom.js';
 import { openPresidentialDecisionRoomNavigationTarget } from '../src/ui/map/utils/presidentialDecisionRoomNavigation.js';
 import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import type { TurnSummary } from '../src/state/turn_summary.js';
@@ -295,7 +298,7 @@ describe('Presidential Decision Room wiring', () => {
 
   it('opens Decision Room source handoff targets on their existing owner surfaces', () => {
     const view = buildPresidentialDecisionRoomView({ state: makeLoadedState() });
-    const handoffs = Object.fromEntries(view.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+    const handoffs = Object.fromEntries(buildPresidentialDecisionRoomSourceHandoffs(view.cards).map((handoff) => [handoff.id, handoff]));
 
     const summaryState = createNavigationState();
     expect(openPresidentialDecisionRoomNavigationTarget(handoffs['army-hq-summary'].navigationTarget, summaryState)).toBe(true);
