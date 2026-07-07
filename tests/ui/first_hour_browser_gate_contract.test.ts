@@ -250,7 +250,8 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('owner_journey_sector_overview');
     expect(tool).toContain('owner_journey_formation_detail');
     expect(tool).toContain('owner_journey_ops_planning_modal');
-    expect(tool).toContain('owner_journey_settlement_detail');
+    expect(tool).toContain('owner_journey_formation_location_context');
+    expect(tool).toContain("visibleDetailPanels.length === 1");
     expect(tool).toContain('owner_journey_records_tabs');
     expect(tool).toContain('ownerJourneyDrilldownByFaction');
     expect(tool).toContain('ownerJourneyOpsPlanningModalByFaction');

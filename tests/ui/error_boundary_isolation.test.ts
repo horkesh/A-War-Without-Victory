@@ -73,7 +73,7 @@ describe('RootErrorBoundary panel isolation', () => {
 
     expect(appSource).toContain("import { RootErrorBoundary } from './components/RootErrorBoundary';");
     expect(appSource).toMatch(
-      /<RootErrorBoundary zone="right panel">[\s\S]*railState\.primary[\s\S]*railState\.secondary[\s\S]*<\/RootErrorBoundary>/,
+      /<RootErrorBoundary zone="right panel">[\s\S]*railState\.panel[\s\S]*<\/RootErrorBoundary>/,
     );
     expect(appSource).toMatch(/<RootErrorBoundary zone="map">[\s\S]*<MapContainer \/>[\s\S]*<\/RootErrorBoundary>/);
     expect(appSource).toMatch(/<RootErrorBoundary zone="toolbar">[\s\S]*<PresidentialToolbar/);

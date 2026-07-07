@@ -23,9 +23,14 @@ export interface PanelRailSelectionState {
   selectedOrbatCorpsId: string | null;
 }
 
+export interface BreadcrumbLevel {
+  panel: PanelRailPanel;
+  id: string;
+}
+
 export interface PanelRailState {
-  primary: PanelRailPanel | null;
-  secondary: PanelRailPanel | null;
+  panel: PanelRailPanel | null;
+  trail: BreadcrumbLevel[];
 }
 
 /**
@@ -49,7 +54,6 @@ export const DETAIL_PANEL_STYLE: CSSProperties = {
 const LEFT_SIDEBAR_WIDTH = '15.5rem';
 const PANEL_GAP = '0.5rem';
 const LEFT_PRIMARY_OFFSET = `calc(${LEFT_SIDEBAR_WIDTH} + ${PANEL_GAP})`;
-const LEFT_SECONDARY_OFFSET = `calc(${LEFT_PRIMARY_OFFSET} + 24rem + ${PANEL_GAP})`;
 
 export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   position: 'absolute',
@@ -57,31 +61,6 @@ export const LEFT_DETAIL_PANEL_STYLE: CSSProperties = {
   top: 'var(--awwv-toolbar-clearance, 5.5rem)',
   bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
   zIndex: Z.PANEL_RAIL_PRIMARY,
-  overflow: 'hidden',
-};
-
-/**
- * Secondary panel — slides out to the LEFT of the primary panel.
- */
-export const SECONDARY_PANEL_STYLE: CSSProperties = {
-  position: 'absolute',
-  right: '25.5rem', // Offset by primary panel width (24rem + 1rem padding + 0.5rem gap)
-  top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
-  zIndex: Z.PANEL_RAIL_SECONDARY, // Slightly behind primary
-  overflow: 'hidden',
-};
-
-/**
- * Secondary nested panel anchored to the LEFT.
- * Appears to the right of LEFT_DETAIL_PANEL_STYLE.
- */
-export const LEFT_SECONDARY_PANEL_STYLE: CSSProperties = {
-  position: 'absolute',
-  left: LEFT_SECONDARY_OFFSET,
-  top: 'var(--awwv-toolbar-clearance, 5.5rem)',
-  bottom: 'var(--awwv-bottom-bar-clearance, 2.5rem)',
-  zIndex: Z.PANEL_RAIL_SECONDARY,
   overflow: 'hidden',
 };
 
@@ -98,59 +77,54 @@ export const RIGHT_PANEL_STYLE: CSSProperties = {
 };
 
 export function derivePanelRailState(state: PanelRailSelectionState): PanelRailState {
-  if (state.selectedOrbatCorpsId) return { primary: 'orbat', secondary: null };
+  if (state.selectedOrbatCorpsId) return { panel: 'orbat', trail: [] };
 
-  // Army HQ reserve panel (elite brigades) — drill-down to brigade as secondary
   if (state.selectedArmyHqId) {
-    if (state.selectedFormationId) return { primary: 'army_reserve', secondary: 'formation' };
-    return { primary: 'army_reserve', secondary: null };
+    if (state.selectedFormationId) {
+      return {
+        panel: 'formation',
+        trail: [{ panel: 'army_reserve', id: state.selectedArmyHqId }],
+      };
+    }
+    return { panel: 'army_reserve', trail: [] };
   }
 
-  // Priority 1: Selection with Parent context (Drill-down)
   if (state.selectedFormationId) {
-    if (state.selectedCorpsFrontSectorId) return { primary: 'sector', secondary: 'formation' };
-    if (state.selectedCorpsId) return { primary: 'corps', secondary: 'formation' };
-    if (state.selectedArmyId) return { primary: 'army', secondary: 'formation' };
-
-    // Formation + Settlement
-    if (state.selectedOsid) return { primary: 'formation', secondary: 'settlement' };
-    return { primary: 'formation', secondary: null };
+    const trail: BreadcrumbLevel[] = [];
+    if (state.selectedArmyId) trail.push({ panel: 'army', id: state.selectedArmyId });
+    if (state.selectedCorpsId) trail.push({ panel: 'corps', id: state.selectedCorpsId });
+    if (state.selectedCorpsFrontSectorId) trail.push({ panel: 'sector', id: state.selectedCorpsFrontSectorId });
+    return { panel: 'formation', trail };
   }
 
   if (state.selectedCorpsFrontSectorId) {
-    if (state.selectedCorpsId) return { primary: 'corps', secondary: 'sector' };
-
-    // Sector + Settlement
-    if (state.selectedOsid) return { primary: 'sector', secondary: 'settlement' };
-    return { primary: 'sector', secondary: null };
+    return {
+      panel: 'sector',
+      trail: state.selectedCorpsId ? [{ panel: 'corps', id: state.selectedCorpsId }] : [],
+    };
   }
 
   if (state.selectedCorpsId) {
-    if (state.selectedArmyId) return { primary: 'army', secondary: 'corps' };
-
-    // Corps + Settlement
-    if (state.selectedOsid) return { primary: 'corps', secondary: 'settlement' };
-    return { primary: 'corps', secondary: null };
+    return {
+      panel: 'corps',
+      trail: state.selectedArmyId ? [{ panel: 'army', id: state.selectedArmyId }] : [],
+    };
   }
 
   if (state.selectedArmyId) {
-    if (state.selectedOsid) return { primary: 'army', secondary: 'settlement' };
-    return { primary: 'army', secondary: null };
+    return { panel: 'army', trail: [] };
   }
 
-  // Priority 2: Pure Settlement Selection (No parent context)
-  // FIX: Assign to primary instead of secondary to avoid starting with a gap
-  if (state.selectedOsid) return { primary: 'settlement', secondary: null };
+  if (state.selectedOsid) return { panel: 'settlement', trail: [] };
 
-  // Default: Presidential Inbox when nothing is selected
-  return { primary: 'inbox', secondary: null };
+  return { panel: 'inbox', trail: [] };
 }
 
 export function shouldRenderInboxPanel(
-  primary: PanelRailPanel | null,
+  panel: PanelRailPanel | null,
   operationsPanelOpen: boolean,
 ): boolean {
-  return primary === 'inbox' && !operationsPanelOpen;
+  return panel === 'inbox' && !operationsPanelOpen;
 }
 
 export interface TacticalDetailRailOwnerState {
@@ -168,18 +142,18 @@ export function shouldRenderTacticalDetailRails(state: TacticalDetailRailOwnerSt
 }
 
 export function getPanelRailStyle(
-  slot: 'primary' | 'secondary',
+  _slot: 'primary' | 'secondary',
   width: string,
   anchor: 'left' | 'right' = 'right'
 ): CSSProperties {
   if (anchor === 'left') {
     return {
-      ...(slot === 'secondary' ? LEFT_SECONDARY_PANEL_STYLE : LEFT_DETAIL_PANEL_STYLE),
+      ...LEFT_DETAIL_PANEL_STYLE,
       width,
     };
   }
   return {
-    ...(slot === 'secondary' ? SECONDARY_PANEL_STYLE : DETAIL_PANEL_STYLE),
+    ...DETAIL_PANEL_STYLE,
     width,
   };
 }

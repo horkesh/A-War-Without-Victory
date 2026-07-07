@@ -358,7 +358,13 @@ describe('SettlementDetailContent supply status surface', () => {
     expect(store.selectedCorpsFrontSectorId).toBe('sector_alpha');
     expect(store.selectedCorpsId).toBe('corps_alpha');
     expect(store.selectedOsid).toBe('op:test:a');
-    expect(derivePanelRailState(store)).toEqual({ primary: 'sector', secondary: 'formation' });
+    expect(derivePanelRailState(store)).toEqual({
+      panel: 'formation',
+      trail: [
+        { panel: 'corps', id: 'corps_alpha' },
+        { panel: 'sector', id: 'sector_alpha' },
+      ],
+    });
   });
 
   it('SelectionPanel counts fog-visible enemy formations as redacted contacts, not stationed units', () => {

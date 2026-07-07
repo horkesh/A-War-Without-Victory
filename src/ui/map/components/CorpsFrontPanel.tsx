@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { OperationView } from '../data/types';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
@@ -195,10 +195,11 @@ function compareOperations(a: OperationView, b: OperationView): number {
 }
 
 interface CorpsFrontPanelProps {
-  railSlot: 'primary' | 'secondary';
+  railSlot?: 'primary' | 'secondary';
+  breadcrumb?: ReactNode;
 }
 
-export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
+export function CorpsFrontPanel({ railSlot = 'primary', breadcrumb }: CorpsFrontPanelProps) {
   const ipc = useIPC();
   const [locale] = useLocale();
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
@@ -457,7 +458,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           <span
             className="inline-block w-3 h-3 rounded-sm"
             style={{ backgroundColor: corpsColor }}
@@ -465,6 +466,7 @@ export function CorpsFrontPanel({ railSlot }: CorpsFrontPanelProps) {
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             {t('corpsFront.title')}
           </span>
+          {breadcrumb}
           {opsecActive && (
             <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-amber-900/40 border border-amber-500/50 text-amber-400">
               {t('corpsFront.opsec')}

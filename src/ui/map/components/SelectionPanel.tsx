@@ -3,7 +3,7 @@ import { getFormationsAtOsid } from '../utils/formationAtOsid';
 import { SettlementDetailContent } from './SettlementDetailContent';
 import { getFactionFlag } from '../utils/factionAssets';
 import { useIPC } from '../desktop/useIPC';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { getPanelRailStyle } from './panelRail';
 import { buildOsidToSectorMap } from '../utils/sectorUtils';
 import { getOperationId } from '../utils/operations';
@@ -28,6 +28,7 @@ import { getPlayerFacingSectorName, getPlayerVisibleOperations } from '../../sha
 
 interface SelectionPanelProps {
   railSlot?: 'primary' | 'secondary';
+  breadcrumb?: ReactNode;
 }
 
 type SettlementPropertiesForMunicipality = {
@@ -55,7 +56,7 @@ export function resolveSelectionPanelMunicipalityId(
     ?? normalizeMunicipalityId(selectedOsid.split(':')[1]);
 }
 
-export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) {
+export function SelectionPanel({ railSlot = 'primary', breadcrumb }: SelectionPanelProps) {
   const ipc = useIPC();
   const [locale] = useLocale();
   const selectedOsid = useGameStore((s) => s.selectedOsid);
@@ -289,7 +290,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
       style={{ ...getPanelRailStyle(railSlot, '20rem'), direction: 'ltr' }}
     >
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0">
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
           {loadedGameState?.controlBySettlement?.[selectedOsid] && getFactionFlag(loadedGameState.controlBySettlement[selectedOsid]) && (
             <img
               src={getFactionFlag(loadedGameState.controlBySettlement[selectedOsid])}
@@ -300,6 +301,7 @@ export function SelectionPanel({ railSlot = 'secondary' }: SelectionPanelProps) 
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             {t('selection.settlementInfo')}
           </span>
+          {breadcrumb}
         </div>
         <button
           type="button"

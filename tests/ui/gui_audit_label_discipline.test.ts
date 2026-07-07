@@ -218,12 +218,12 @@ describe('GUI audit label discipline', () => {
       osidPropertiesMap: properties,
     });
 
-    const selection = render(createElement(SelectionPanel, { railSlot: 'secondary' }));
+    const selection = render(createElement(SelectionPanel));
     const panel = selection.container.querySelector('[data-testid="selection-panel"]') as HTMLElement | null;
     const localSupport = selection.container.querySelector('[data-testid="settlement-local-support"]');
 
-    expect(panel?.getAttribute('data-rail-slot')).toBe('secondary');
-    expect(panel?.style.right).toBe('25.5rem');
+    expect(panel?.getAttribute('data-rail-slot')).toBe('primary');
+    expect(panel?.style.right).toBe('0px');
     expect(localSupport?.getAttribute('data-target-mun-id')).toBe('actual_municipality');
     expect(selection.container.textContent).toContain('Actual Municipality');
     expect(selection.container.textContent).toContain('Desktop command bridge unavailable. Local support orders are read-only in this browser view.');

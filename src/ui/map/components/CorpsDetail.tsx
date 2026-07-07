@@ -2,7 +2,7 @@
  * Corps detail panel. Shows when a corps is selected via header click.
  * Tabs: Overview · order of battle · Sectors · Ops · Orders
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { FACTION_COLORS } from '../utils/theme';
 import { getOperationId, getOperationPhaseLabel } from '../utils/operations';
@@ -57,10 +57,11 @@ function formatCorpsDetailStance(stance: string | null | undefined): string {
 }
 
 interface CorpsDetailProps {
-  railSlot: 'primary' | 'secondary';
+  railSlot?: 'primary' | 'secondary';
+  breadcrumb?: ReactNode;
 }
 
-export function CorpsDetail({ railSlot }: CorpsDetailProps) {
+export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailProps) {
   const [activeTab, setActiveTab] = useState<CorpsTab>('overview');
   const [locale] = useLocale();
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
@@ -243,6 +244,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
           <span className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold truncate">
             {corpsDisplayName}
           </span>
+          {breadcrumb}
         </div>
         <button
           onClick={() => useGameStore.setState({
