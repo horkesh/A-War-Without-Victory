@@ -1167,7 +1167,7 @@
 }
 #main-menu .mm-stage {
     position: relative;
-    z-index: 1;
+    z-index: 1; /* canonical: Z.BACKDROP_GRAIN = 1 (src/ui/shared/zIndex.ts) */
     display: grid;
     justify-items: center;
     gap: calc(28px * var(--mm-scale));

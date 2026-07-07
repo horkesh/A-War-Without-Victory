@@ -288,7 +288,7 @@ test('baked April 1992 startup sector truth audits clean without rebuilt-state m
     const rebuiltSectors = Object.values(buildCorpsFrontSectors(rebuiltState, edges, null));
     const rebuiltAudit = auditSectorTruth(rebuiltState, rebuiltSectors, edges);
     const releaseGateCounts = {
-        reserve_only_live_sectors: 1,
+        reserve_only_live_sectors: 0,
         stale_density_sectors: 0,
         same_corps_front_overlaps: 0,
         untruthful_assigned_brigades: 0,

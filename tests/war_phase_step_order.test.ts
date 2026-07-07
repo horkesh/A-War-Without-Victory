@@ -209,6 +209,11 @@ describe('war-phase step ordering', () => {
         //        performs ZERO state mutation when no active op carries an un-charged
         //        force-launch-over-objection (was_force_launched is never set on the bot/headless
         //        path), so the step is byte-identical-inert on all baselines.
-        expect(stepNames.length).toBe(188);
+        // +1 from formation-spawn (War-turn pool-to-formation directive executor, 2026-07-07).
+        //        After reroute-pool-surplus and before brigade-reinforcement so stranded eligible
+        //        pools can materialize deterministically before reinforcement consumes them.
+        //        DETERMINISM EARLY-OUT: performs ZERO state mutation when no active
+        //        formation_spawn_directive is present.
+        expect(stepNames.length).toBe(189);
     });
 });

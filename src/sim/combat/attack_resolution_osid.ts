@@ -358,7 +358,7 @@ function getAttackIntelConfidence(
 
 function formationBelongsToCorps(formation: FormationState, corpsId: string): boolean {
     if ((formation as { corps_id?: string }).corps_id === corpsId) return true;
-    return (formation.tags ?? []).includes(`corps:${corpsId}` as any);
+    return (formation.tags ?? []).includes(`corps:${corpsId}`);
 }
 
 function findEmptySectorAdjacentDefenders(
