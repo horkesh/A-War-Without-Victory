@@ -17,7 +17,7 @@ import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar, tabId, tabPanelId } from './TabBar';
-import { computeBrigadeEffectiveness } from '../utils/combatEffectiveness';
+import { computeBrigadeEffectiveness, effectivenessBandLabel } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { getPlayerFacingCorpsName, getPlayerFacingSectorName } from '../../shared/playerFacingLabels';
 import {
@@ -701,19 +701,27 @@ export function FormationDetail({ railSlot = 'primary', breadcrumb }: FormationD
                 if (eff.missingFields.length > 0) {
                   return null;
                 }
-                const color = eff.value >= 600 ? '#56d364' : eff.value >= 300 ? '#e8a838' : '#f47068';
+                const band = effectivenessBandLabel(eff);
+                const color = band.grade === 'A' ? '#56d364' : band.grade === 'B' ? '#e8c56d' : band.grade === 'C' ? '#e8a838' : '#f47068';
                 // Find the worst modifier to highlight
                 const mods = eff.modifiers;
                 const worst = Object.entries(mods).reduce((a, b) => b[1] < a[1] ? b : a);
                 const worstLabel = worst[1] < 0.85
-                  ? ` (${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%)`
+                  ? `${formatEffectivenessModifierLabel(worst[0])} ${Math.round(worst[1] * 100)}%`
                   : '';
+                const title = worstLabel
+                  ? `${t('effectiveness.exactTooltip', { value: Math.round(eff.value).toLocaleString() })} - ${worstLabel}`
+                  : t('effectiveness.exactTooltip', { value: Math.round(eff.value).toLocaleString() });
                 return (
                   <>
                     <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
-                    <span className="tabular-nums font-semibold" style={{ color }}>
-                      {Math.round(eff.value).toLocaleString()}
-                      <span className="text-[9px] font-normal text-text-secondary">{worstLabel}</span>
+                    <span
+                      data-testid="formation-detail-effectiveness"
+                      className="font-semibold"
+                      style={{ color }}
+                      title={title}
+                    >
+                      {band.grade} <span className="text-text-primary">{t(band.labelKey)}</span>
                     </span>
                   </>
                 );

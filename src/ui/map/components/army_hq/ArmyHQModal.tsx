@@ -138,8 +138,6 @@ function CommandAccessStrip({
             <div className="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-1.5">
                 {corpsFormations.map((corps) => {
                     const readiness = readinessByCorps.get(corps.id);
-                    const sectors = sectorsByCorps.get(corps.id) ?? [];
-                    const operations = opsByCorps.get(corps.id) ?? [];
                     return (
                         <button
                             key={corps.id}
@@ -155,10 +153,6 @@ function CommandAccessStrip({
                                 <span className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold text-accent-gold">
                                     {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ? readinessGradeLabel(readiness.grade) : '--' })}
                                 </span>
-                            </div>
-                            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[9px] uppercase tracking-[0.12em] text-text-secondary">
-                                <span>{t('armyHq.commandAccessSectors', { count: sectors.length })}</span>
-                                <span>{t('armyHq.commandAccessOps', { count: operations.length })}</span>
                             </div>
                         </button>
                     );

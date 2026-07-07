@@ -188,7 +188,7 @@ describe('CorpsDetail sector truth', () => {
     expect(container.textContent).toContain('0 on line');
     expect(container.textContent).toContain('1 held back');
     expect(container.textContent).toContain('0 personnel');
-    expect(container.textContent).toContain('Eff: 0');
+    expect(container.textContent).toContain('Eff: --');
     expect(container.textContent).toContain('Coverage: No coverage');
     expect(row.getAttribute('data-current-brigade-count')).toBe('1');
     expect(row.getAttribute('data-reserve-brigade-count')).toBe('1');

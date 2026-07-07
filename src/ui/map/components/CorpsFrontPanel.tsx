@@ -49,7 +49,11 @@ function ThreatBadge({ ratio }: { ratio: number | undefined | null }) {
   const { label, summary, toneClass } = getPlayerSafeThreatPresentation(ratio);
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" title={t('corpsFront.forceBalanceTitle', { label, summary })}>
+      <div className="mb-0.5 flex items-center justify-between gap-3 text-[8px] uppercase tracking-[0.12em] text-neutral-500">
+        <span>{t('corpsFront.forceBalanceFriendly')}</span>
+        <span>{t('corpsFront.forceBalanceHostile')}</span>
+      </div>
       <span className={`${toneClass} text-[10px] tracking-tighter leading-none mb-0.5`}>{label}</span>
       <span className={`${toneClass} font-mono text-[10px] uppercase tracking-tight`}>{summary}</span>
     </div>

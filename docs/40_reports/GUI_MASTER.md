@@ -623,3 +623,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - The standalone Authored Choices / Decision History overlay is retired; authored event choices now live in Army HQ Records -> Decision Consequences with the same title, chosen option, historical/diverged, receipt-count, and downstream descendant fields.
 - D/E authored-choice shortcuts now route to the Records `decisions` subtab. Chronicle remains the campaign memory archive; Records remains the reference archive.
 - See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-6 archive spine retired Decision History overlay`.
+
+## 2026-07-06 - WP-7 qualitative effectiveness bands
+
+- Corps Detail, Formation Detail, and Army HQ corps cards now show effectiveness as grade plus qualitative band copy; exact numeric values are retained in tooltips and deep record surfaces.
+- Command Access chips in Army HQ now carry navigation plus readiness only, leaving sector counts, operation counts, and effectiveness on the corps cards below.
+- See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-7 qualitative effectiveness bands and Army HQ dedup`.
