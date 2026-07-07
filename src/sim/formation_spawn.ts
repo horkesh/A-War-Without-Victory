@@ -120,6 +120,8 @@ export interface SpawnFormationsOptions {
     municipalityHqSettlement?: Record<string, string> | null;
     /** When set, emergent brigades get historical name for (faction, mun_id, ordinal) from OOB when available. */
     historicalNameLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
+    /** When set, emergent brigades get historical corps for (faction, mun_id, ordinal) from OOB when available. */
+    historicalCorpsLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent brigades get historical HQ settlement ID for (faction, mun_id, ordinal) from OOB when available. */
     historicalHqLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent spawn is gated by demographics: skip (mun, faction) where 1991 eligible population < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE. */
@@ -739,6 +741,7 @@ export function spawnFormationsFromPools(
             // Lookups for historical accuracy
             const ordinal = existingInMun + k;
             const historicalName = options.historicalNameLookup?.(faction, mun_id, ordinal) ?? null;
+            const historicalCorps = options.historicalCorpsLookup?.(faction, mun_id, ordinal) ?? null;
             const historicalHqSid = options.historicalHqLookup?.(faction, mun_id, ordinal) ?? null;
 
             const name = historicalName ?? resolveFormationName(faction, mun_id, kind, ordinal);
@@ -768,6 +771,7 @@ export function spawnFormationsFromPools(
                 activation_turn: null,
                 origin_mun: mun_id,
                 officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
+                ...(historicalCorps ? { corps_id: historicalCorps } : {}),
                 ...(hq_sid ? { hq_sid } : {}),
                 ...(location_osid != null ? { location_osid } : {})
             };
