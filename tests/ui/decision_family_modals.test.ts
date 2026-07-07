@@ -65,6 +65,7 @@ describe('decision family modals', () => {
       }),
       onClose: vi.fn(),
       onOpenReservePanel,
+      onOpenDecisionRoomTarget: vi.fn(),
     }));
 
     expect(screen.getByRole('dialog', { name: 'Reserve request' })).toBeTruthy();
@@ -97,19 +98,21 @@ describe('decision family modals', () => {
       }),
       onClose: vi.fn(),
       onOpenReservePanel,
+      onOpenDecisionRoomTarget: vi.fn(),
     }));
 
     expect(screen.getByText('Defensive Gap')).toBeTruthy();
     expect(container.textContent).not.toContain('defensive_gap');
   });
 
-  it('accepts a reserve request directly when staff has suggested a brigade', async () => {
+  it('routes a suggested reserve request to its Decision Room card', async () => {
     const approveReserveRequest = vi.fn(async () => ({ ok: true }));
     Object.defineProperty(window, 'awwv', {
       value: { approveReserveRequest },
       configurable: true,
     });
     const onClose = vi.fn();
+    const onOpenDecisionRoomTarget = vi.fn();
 
     render(React.createElement(ReserveRequestModal, {
       requestId: 'reserve:req-accept',
@@ -134,15 +137,17 @@ describe('decision family modals', () => {
       }),
       onClose,
       onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget,
     }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Accept 1st Guards Motorized' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Review 1st Guards Motorized' }));
 
-    await waitFor(() => expect(approveReserveRequest).toHaveBeenCalledWith(
-      'req-accept',
-      'elite_1',
-      'President accepted the Army HQ reserve recommendation.',
-    ));
+    await waitFor(() => expect(onOpenDecisionRoomTarget).toHaveBeenCalledWith({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'command:elite-deploy:req-accept',
+    }));
+    expect(approveReserveRequest).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
     delete (window as unknown as { awwv?: unknown }).awwv;
   });
@@ -177,6 +182,7 @@ describe('decision family modals', () => {
       }),
       onClose: vi.fn(),
       onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget: vi.fn(),
     }));
 
     expect(screen.getByText('Reserve need recorded')).toBeTruthy();
@@ -207,6 +213,7 @@ describe('decision family modals', () => {
       }),
       onClose: vi.fn(),
       onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget: vi.fn(),
     }));
 
     expect(screen.getByText('Zabilježena potreba za rezervom')).toBeTruthy();

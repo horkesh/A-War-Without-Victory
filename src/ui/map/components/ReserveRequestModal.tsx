@@ -9,12 +9,14 @@ import { t, type MessageKey } from '../i18n';
 import { getArmyReserveRequestCauseCopy } from '../utils/armyReserveSeverity';
 import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
+import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
 
 interface ReserveRequestModalProps {
   requestId: string | null;
   state: LoadedGameState | null;
   onClose: () => void;
   onOpenReservePanel: () => void;
+  onOpenDecisionRoomTarget: (target: PresidentialDecisionRoomNavigationTarget) => void;
 }
 
 function stripReservePrefix(requestId: string): string {
@@ -45,7 +47,11 @@ function getReserveRequestPurposeLabel(purpose: string | null | undefined, reaso
   return t('armyReserve.purpose.unknown');
 }
 
-export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePanel }: ReserveRequestModalProps) {
+function eliteDeployCardId(requestId: string): string {
+  return `command:elite-deploy:${requestId}`;
+}
+
+export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePanel, onOpenDecisionRoomTarget }: ReserveRequestModalProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const rawId = requestId ? stripReservePrefix(requestId) : null;
@@ -59,21 +65,13 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
     : null;
   const suggestedBrigadeName = suggestedBrigade ? getPlayerSafeBrigadeName(suggestedBrigade.name) : null;
 
-  const acceptSuggested = async () => {
+  const reviewSuggested = () => {
     if (!request || !request.suggested_brigade_id) return;
-    if (!ipc.isAvailable) {
-      setLoadError(t('formationDetail.commandBridgeUnavailable'));
-      return;
-    }
-    const result = await ipc.approveReserveRequest(
-      request.request_id,
-      request.suggested_brigade_id,
-      'President accepted the Army HQ reserve recommendation.',
-    );
-    if (!result.ok) {
-      setLoadError(result.error ?? 'Reserve request could not be accepted.');
-      return;
-    }
+    onOpenDecisionRoomTarget({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: eliteDeployCardId(request.request_id),
+    });
     onClose();
   };
 
@@ -138,9 +136,8 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
         {request?.suggested_brigade_id && suggestedBrigadeName && (
           <button
             type="button"
-            onClick={acceptSuggested}
-            disabled={!request || !ipc.isAvailable}
-            title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+            onClick={reviewSuggested}
+            disabled={!request}
             className="border border-emerald-400/45 bg-emerald-500/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-200 disabled:opacity-40"
           >
             {t('decisionModal.reserve.acceptSuggested', { brigade: suggestedBrigadeName })}

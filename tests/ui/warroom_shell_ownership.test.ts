@@ -144,6 +144,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).toMatch(/if \(event\.data\?\.type === 'awwv-shell:show-warroom'\) \{[\s\S]*returnToWarroomShell\(\);[\s\S]*return;[\s\S]*\}/);
         expect(app).toMatch(/const applyShellCommand = \(command: ShellHandoffCommand\): boolean => applyShellHandoffCommand\(\{[\s\S]*\.\.\.useGameStore\.getState\(\),[\s\S]*advanceTurnNow: \(\) => advanceTurnAndSync\(\{[\s\S]*\.\.\.getTurnAftermathAdvanceDeps\(\),[\s\S]*\}, command\);/);
         expect(app).toMatch(/const handled = applyShellCommand\(command\);[\s\S]*if \(!handled\) return;[\s\S]*leaveWarroomForGame\(\);/);
+        expect(app).toMatch(/applyShellCommand\(command\);[\s\S]*if \(!warroomCommandStaysInRoom\(command\)\) \{[\s\S]*leaveWarroomForGame\(\);[\s\S]*\}/);
         expect(app).not.toContain("onOpenMap={() => setAppScreen('game')}");
         expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
     });

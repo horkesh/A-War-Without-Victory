@@ -18,15 +18,12 @@ export interface PresidentDeskShellProps {
   onAction: (action: InboxItem['action'], itemId: string) => void;
   onAdvance: () => void;
   onOpenArmyHQ: () => void;
-  onOpenMap: () => void;
   onOpenRecords: () => void;
   onOpenDecisionRecords?: (recordId?: string) => void;
   onOpenChronicle?: (recordId?: string) => void;
   onClose?: () => void;
   /** Open the advance-turn review modal; blocked state explains blockers there. */
   onReviewAdvance?: () => void;
-  /** Open the presidential command-surface card strip directly (accessibility). */
-  onOpenCommandSurface?: () => void;
 }
 
 function factionTitle(state: LoadedGameState | null): string {
@@ -43,13 +40,11 @@ export function PresidentDeskShell({
   onAction,
   onAdvance,
   onOpenArmyHQ,
-  onOpenMap,
   onOpenRecords,
   onOpenDecisionRecords,
   onOpenChronicle,
   onClose,
   onReviewAdvance,
-  onOpenCommandSurface,
 }: PresidentDeskShellProps) {
   const shellRef = useRef<HTMLElement | null>(null);
   const items = deriveInboxItems(state, osidNameMap, eventCatalog);
@@ -133,14 +128,6 @@ export function PresidentDeskShell({
           </button>
           <button
             type="button"
-            onClick={onOpenMap}
-            data-testid="desk-action-war-map"
-            className="border border-panel-border bg-black/20 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
-          >
-            {t('desk.action.warMap')}
-          </button>
-          <button
-            type="button"
             onClick={blocked && onReviewAdvance ? onReviewAdvance : onAdvance}
             data-testid={blocked ? 'desk-action-review-blockers' : 'desk-action-advance-clearance'}
             className={[
@@ -152,26 +139,7 @@ export function PresidentDeskShell({
           >
             {blocked ? t('desk.action.reviewBlockers') : t('desk.action.advanceClearance')}
           </button>
-          <button
-            type="button"
-            onClick={onOpenRecords}
-            data-testid="desk-action-records"
-            className="border border-panel-border bg-black/20 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
-          >
-            {t('desk.action.records')}
-          </button>
         </div>
-
-        {onOpenCommandSurface && (
-          <button
-            type="button"
-            onClick={onOpenCommandSurface}
-            data-testid="desk-open-command-surface"
-            className="mt-3 w-full border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
-          >
-            {t('desk.action.commandSurface')}
-          </button>
-        )}
 
         <div className="mt-4">
           <ConsequenceStrip

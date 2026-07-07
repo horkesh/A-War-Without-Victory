@@ -1733,7 +1733,7 @@ function App() {
         {tacticalDetailRailsVisible && railState.panel === 'sector' && <CorpsFrontPanel breadcrumb={panelBreadcrumb} />}
         {tacticalDetailRailsVisible && railState.panel === 'corps' && <CorpsDetail breadcrumb={panelBreadcrumb} />}
         {/* ArmyDetail retired — faction click opens Army HQ modal */}
-        {tacticalDetailRailsVisible && railState.panel === 'army_reserve' && <ArmyReservePanel breadcrumb={panelBreadcrumb} />}
+        {tacticalDetailRailsVisible && railState.panel === 'army_reserve' && <ArmyReservePanel breadcrumb={panelBreadcrumb} onOpenDecisionRoomTarget={openDecisionRoomTarget} />}
         {tacticalDetailRailsVisible && railState.panel === 'formation' && <FormationDetail breadcrumb={panelBreadcrumb} />}
         {tacticalDetailRailsVisible && railState.panel === 'orbat' && <OrbatPanel />}
         </RootErrorBoundary>
@@ -1968,6 +1968,7 @@ function App() {
         state={loadedGameState}
         onClose={() => setSelectedReserveRequestId(null)}
         onOpenReservePanel={openReservePanelFromDesk}
+        onOpenDecisionRoomTarget={openDecisionRoomTarget}
       />
       <OfficerMatterModal
         itemId={selectedOfficerMatterId}
@@ -2067,7 +2068,6 @@ function App() {
                 openArmyHQTab(useGameStore.getState(), 'briefing');
                 leaveWarroomForGame();
               }}
-              onOpenMap={leaveWarroomForGame}
               onOpenRecords={() => {
                 openArmyHQRecordsSubTab(useGameStore.getState(), 'aftermath');
                 leaveWarroomForGame();
@@ -2088,7 +2088,6 @@ function App() {
                 closeWarroomDesk();
               }}
               onReviewAdvance={() => useGameStore.getState().setAdvanceTurnPending(true)}
-              onOpenCommandSurface={() => openCommandStrip(null)}
             />
           )}
           {commandStripOpen && (

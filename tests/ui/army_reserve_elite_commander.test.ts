@@ -239,12 +239,8 @@ describe('ArmyReservePanel elite commander identity', () => {
     expect(screen.getByRole('button', { name: 'Expand campaign history' }).getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('can approve a pending reserve request with an available reserve brigade', async () => {
-    const approveReserveRequest = vi.fn(async () => ({ ok: true }));
-    Object.defineProperty(window, 'awwv', {
-      value: { approveReserveRequest },
-      configurable: true,
-    });
+  it('routes a suggested pending reserve request to the Decision Room release card', () => {
+    const onOpenDecisionRoomTarget = vi.fn();
     const state = makeReserveState(false);
     state.commandAuthority = { current: 30, max: 100, spentThisTurn: 0, lifetimeSpent: 0 } as LoadedGameState['commandAuthority'];
     state.pendingReserveRequests = [{
@@ -257,7 +253,7 @@ describe('ArmyReservePanel elite commander identity', () => {
       severityBand: 'critical',
       travel_hops: 2,
       description: '1st Corps requests reserve support.',
-      suggested_brigade_id: null,
+      suggested_brigade_id: 'arbih_guards_brigade',
       turn_requested: 16,
     }];
     useGameStore.setState({
@@ -266,17 +262,16 @@ describe('ArmyReservePanel elite commander identity', () => {
       selectedFormationId: 'arbih_general_staff',
     });
 
-    render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+    render(React.createElement(ArmyReservePanel, { railSlot: 'primary', onOpenDecisionRoomTarget }));
 
     fireEvent.click(screen.getByRole('button', {
-      name: 'Assign Guards Brigade to 1st Corps reserve request',
+      name: 'Review Guards Brigade reserve release for 1st Corps',
     }));
 
-    await waitFor(() => expect(approveReserveRequest).toHaveBeenCalledWith(
-      'req-arbih-1',
-      'arbih_guards_brigade',
-      'President assigned a reserve brigade from the Army Reserve pool.',
-    ));
-    delete (window as unknown as { awwv?: unknown }).awwv;
+    expect(onOpenDecisionRoomTarget).toHaveBeenCalledWith({
+      kind: 'decision-room',
+      lens: 'command',
+      cardId: 'command:elite-deploy:req-arbih-1',
+    });
   });
 });

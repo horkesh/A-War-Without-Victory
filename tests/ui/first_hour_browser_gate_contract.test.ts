@@ -234,7 +234,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).not.toContain('skipped:no-chronicle-target');
     expect(tool).toContain('presidential-inbox');
     expect(tool).toContain('president-desk-shell');
-    expect(tool).toContain('desk-action-records');
+    expect(tool).toContain('desk-consequence-open-records');
     expect(tool).toContain('runCodexInternalDrilldown');
     expect(tool).toContain('codexInternalDrilldown');
     expect(tool).toContain('codexInternalDrilldown: false');
@@ -261,7 +261,7 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('runTurnZeroSetupProvenanceLiveProof');
     expect(tool).toContain('turnZeroSetupProvenanceLiveProof');
     expect(tool).toContain('command-card-cat_record"][data-awwv-count="0"][data-awwv-urgent-count="0"]');
-    expect(tool).toContain('data-testid="desk-open-command-surface"');
+    expect(tool).toContain('warroom-toolbar-command-surface');
     expect(tool).toContain('toolbar-route-desk');
     expect(tool).toContain('toolbar-route-war-map');
     expect(tool).toContain('[data-testid="tactical-map"]');
@@ -355,7 +355,10 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain("onAction('decision_room', 'opening-brief:desk')");
     expect(read('src/ui/map/components/PresidentialInbox.tsx')).toContain('data-inbox-action={item.action}');
     expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).toContain('data-testid="president-desk-shell"');
-    expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).toContain('data-testid="desk-action-records"');
+    expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).not.toContain('data-testid="desk-action-records"');
+    expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).not.toContain('data-testid="desk-action-war-map"');
+    expect(read('src/ui/map/components/presidential_desk/PresidentDeskShell.tsx')).not.toContain('data-testid="desk-open-command-surface"');
+    expect(read('src/ui/map/components/presidential_desk/ConsequenceStrip.tsx')).toContain('data-testid="desk-consequence-open-records"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-testid="army-hq-corps-card-detail"');
     expect(read('src/ui/map/components/army_hq/ArmyHQCorpsCard.tsx')).toContain('data-commander-source={data.commanderDisplay?.source ?? \'none\'}');
