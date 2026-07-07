@@ -4,6 +4,10 @@ import {
   playAmbientBed,
   stopAmbientBed,
 } from '../audio/audio_engine.js';
+import {
+  applyAudioPreferences,
+  loadAudioPreferences,
+} from '../audio/audio_preferences.js';
 import { useGameStore } from '../store/gameStore.js';
 
 type AppAudioSurface = 'mainMenu' | 'game' | 'warroom';
@@ -28,6 +32,10 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
   const armyHQTab = useGameStore((state) => state.armyHQTab);
   const archiveOpen = chronicleOpen || (armyHQOpen && armyHQTab === 'records');
   const bedId = useMemo(() => selectAmbientBed(appScreen, archiveOpen), [appScreen, archiveOpen]);
+
+  useEffect(() => {
+    applyAudioPreferences(loadAudioPreferences());
+  }, []);
 
   useEffect(() => {
     if (!bedId) {
