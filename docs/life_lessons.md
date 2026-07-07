@@ -4,6 +4,11 @@
 > **Read this index every session.** Then load ONLY the topic files relevant to your current task.
 > When adding new lessons, add them to the appropriate topic file and update the count here.
 
+## New Lessons (2026-07-06) — release-review batch (gate-blind player state + campaign integrals)
+
+### [Testing] Player-only state is invisible to EVERY automated gate — campaign integrals must be contract tests — see `docs/life_lessons/process.md`
+- `command_authority` exists only in player sessions (absent headless by design), so 2,000+ calibration runs, the 188w engine-health gate, per-action unit tests, and browser gates were ALL structurally blind to a broken campaign-length economy: ≤476 CA lifetime income vs 25-per-lever costs ⇒ ~19 max / ~4 hoard-case presidential acts per 188w campaign, cap-waste (recovery evaporates at 100/100), and a self-penalizing spiral (force-launch + friction cut recovery). Each constant had a rationale comment; NOTHING owned their product over the horizon. Rule: (a) inventory state fields that exist only in player/desktop sessions — every one is outside all sim gates; (b) for any meter among them, a contract test must COMPUTE the campaign integral (lifetime income vs costs vs cap at full scenario length) so constant drift fails a test, not a reviewer's arithmetic; (c) the FEEL of such systems is only measurable by played sessions (friction diaries) — a green gate wall is not evidence. Repair lane: `docs/plans/2026-07-06-command-authority-economy-plan.md`.
+
 ## New Lessons (2026-06-15) — D2-legibility batch (cadence beats + siege + generals' digest + verdict-UI)
 
 ### [Testing] Chronicle / shared-render-surface / UI-list changes need the FULL relevant UI suite — a builder's own targeted tests cannot see the interaction — see `docs/life_lessons/process.md`

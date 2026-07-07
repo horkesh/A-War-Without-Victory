@@ -1,5 +1,7 @@
 # Napkin Runbook
 
+**PLAYER-ONLY STATE IS GATE-INVISIBLE — CAMPAIGN INTEGRALS MUST BE TESTS (2026-07-06).** `command_authority` is absent in headless/calibration, so 2,000+ runs + engine-health + unit + browser gates all missed a broken campaign-length economy (~4-19 lifetime presidential acts, cap-waste, recovery spiral). Do instead: for any player-only meter, pin the campaign integral (lifetime income vs costs vs cap over the full horizon) in a contract test (`docs/plans/2026-07-06-command-authority-economy-plan.md` CA-0); feel-validate via owner friction diaries, never via green gates.
+
 **2.5D MAP COUNTERS ARE SCREEN SYMBOLS, NOT TERRAIN DECALS (2026-07-05).** Pitched relief can physically obstruct Deck counters when `MapboxOverlay` is interleaved into MapLibre's 3D render stack. Do instead: keep the tactical Deck overlay non-interleaved (`interleaved: false`), keep formation counter bodies/halo opaque, and keep counter/label Deck layers at `depthTest: false, depthMask: false, depthWriteEnabled: false`.
 
 **MISSING CORPS COMMAND ROWS ARE UNREPORTED (2026-06-26).** A corps without `state.military.corps_command[corpsId]` has no reported command-strain/exhaustion/assessment source; it is not healthy zero. Do instead: preserve explicit reported zeroes, but render missing command strain, corps exhaustion, and Corps Situation assessment as `Unreported`.
