@@ -243,8 +243,10 @@ describe('final sector reserve-band truth', () => {
 
         applyFinalSectorOwnerTruthPass(sectors, state, state.military.formations, adjacency);
 
+        expect(sectors['sector:corps_a:0']?.assigned_brigade_ids ?? []).toEqual(['brig_heavy']);
         expect(sectors['sector:corps_a:0']?.reserve_brigade_ids ?? []).toEqual([]);
-        expect(sectors['sector:corps_a:0']?.rear_brigade_ids ?? []).toEqual(['brig_heavy', 'brig_light']);
+        expect(sectors['sector:corps_a:0']?.rear_brigade_ids ?? []).toEqual(['brig_light']);
+        expect(state.military.formations.brig_heavy?.location_osid).toBe('op:front');
     });
 
     it('rescues an empty sibling front pocket by rehoming a same-corps adjacent owner into its truthful one-hop reserve band', () => {
@@ -382,9 +384,10 @@ describe('final sector reserve-band truth', () => {
 
         applyFinalSectorOwnerTruthPass(sectors, state, state.military.formations, adjacency);
 
-        expect(sectors['sector:corps_a:1']?.assigned_brigade_ids ?? []).toEqual([]);
-        expect(sectors['sector:corps_a:1']?.reserve_brigade_ids ?? []).toEqual(['brig_donor_front']);
+        expect(sectors['sector:corps_a:1']?.assigned_brigade_ids ?? []).toEqual(['brig_donor_front']);
+        expect(sectors['sector:corps_a:1']?.reserve_brigade_ids ?? []).toEqual([]);
         expect(sectors['sector:corps_a:0']?.assigned_brigade_ids ?? []).toEqual([]);
         expect(sectors['sector:corps_a:0']?.reserve_brigade_ids ?? []).toEqual(['brig_donor_reserve']);
+        expect(state.military.formations.brig_donor_front?.location_osid).toBe('op:empty_front');
     });
 });
