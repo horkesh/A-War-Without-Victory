@@ -91,7 +91,8 @@ describe('onboarding spotlight targets', () => {
         const judge = byId.get('08_judge')?.body ?? '';
         expect(judge.toLowerCase()).toContain('scoreboard');
         expect(judge.toLowerCase()).toContain('atrocity');
-        expect(judge).toContain('Dayton');
+        expect(judge.toLowerCase()).toContain('settlement');
+        expect(judge.toLowerCase()).toContain('history judges');
     });
 
     it('has a rendered data-tutorial-step emitter for every non-null step target', () => {

@@ -59,6 +59,7 @@ import { DIMENSION_WEIGHTS } from '../../../sim/events/strategic_dimensions.js';
 import type { GameVerdict } from '../../../state/negotiation_types.js';
 import { buildCostLedger } from '../../../sim/endgame/cost_ledger.js';
 import { compareToHistorical } from '../../../sim/endgame/endgame_comparison.js';
+import type { DimensionShift, EventCategory, EventEffect } from '../../../sim/events/event_types.js';
 import historicalBaseline from '../../../../data/reference/historical_baseline.json';
 import { computeCorpsCommandStrain, getCommandStrainLabel, projectStrainDecay, deriveRecoveryForecast, deriveRecoveryForecastToken, deriveCorpsSituationAssessment, deriveReadinessTrend } from './command_strain.js';
 import type { GameState } from '../../../state/game_state.js';
@@ -3300,7 +3301,38 @@ function deriveFiredEvents(state: any, playerFaction: string | null): LoadedGame
  * adapter only exposes it under a UI-friendly property name. Empty arrays
  * collapse to undefined to match the rest of the LoadedGameState contract.
  */
-function sanitizePendingEventDecision(decision: any): NonNullable<LoadedGameState['pendingEventDecisions']>[number] {
+type PendingEventDecisionView = NonNullable<LoadedGameState['pendingEventDecisions']>[number];
+
+interface RawPendingEventOption {
+    id?: unknown;
+    label?: unknown;
+    description?: unknown;
+    historical_marker?: unknown;
+    effects?: unknown;
+    dimension_shifts?: unknown;
+}
+
+interface RawPendingEventDecision {
+    event_id?: unknown;
+    event_title?: unknown;
+    narrative?: unknown;
+    situation?: unknown;
+    staff_assessment?: unknown;
+    trigger_evidence?: unknown;
+    category?: unknown;
+    turn_fired?: unknown;
+    faction?: unknown;
+    requires_player_response?: unknown;
+    historical_default_response_id?: unknown;
+    staff_recommended_response_id?: unknown;
+    response_options?: unknown;
+}
+
+function isPendingEventCategory(value: unknown): value is EventCategory {
+    return typeof value === 'string';
+}
+
+function sanitizePendingEventDecision(decision: RawPendingEventDecision): PendingEventDecisionView {
     return {
         event_id: String(decision.event_id ?? ''),
         event_title: getPlayerSafeDecisionTitle(String(decision.event_title ?? '')),
@@ -3308,30 +3340,33 @@ function sanitizePendingEventDecision(decision: any): NonNullable<LoadedGameStat
         ...(typeof decision.situation === 'string' ? { situation: decision.situation } : {}),
         ...(typeof decision.staff_assessment === 'string' ? { staff_assessment: decision.staff_assessment } : {}),
         ...(Array.isArray(decision.trigger_evidence) ? { trigger_evidence: decision.trigger_evidence.filter((item: unknown): item is string => typeof item === 'string') } : {}),
-        ...(typeof decision.category === 'string' ? { category: decision.category } : {}),
+        ...(isPendingEventCategory(decision.category) ? { category: decision.category } : {}),
         turn_fired: Number.isFinite(Number(decision.turn_fired)) ? Number(decision.turn_fired) : 0,
         faction: String(decision.faction ?? ''),
         requires_player_response: Boolean(decision.requires_player_response),
         ...(typeof decision.historical_default_response_id === 'string' ? { historical_default_response_id: decision.historical_default_response_id } : {}),
         ...(typeof decision.staff_recommended_response_id === 'string' ? { staff_recommended_response_id: decision.staff_recommended_response_id } : {}),
         response_options: Array.isArray(decision.response_options)
-            ? decision.response_options.map((option: any) => ({
+            ? decision.response_options.map((option: RawPendingEventOption) => ({
                 id: String(option.id ?? ''),
                 label: String(option.label ?? ''),
                 ...(typeof option.description === 'string' ? { description: option.description } : {}),
                 ...(option.historical_marker === 'historical_default' || option.historical_marker === 'counterfactual' ? { historical_marker: option.historical_marker } : {}),
-                effects: Array.isArray(option.effects) ? option.effects : [],
-                ...(Array.isArray(option.dimension_shifts) ? { dimension_shifts: option.dimension_shifts } : {}),
+                effects: Array.isArray(option.effects) ? option.effects as EventEffect[] : [],
+                ...(Array.isArray(option.dimension_shifts) ? { dimension_shifts: option.dimension_shifts as DimensionShift[] } : {}),
             }))
             : [],
     };
 }
 
 function derivePendingEventDecisions(state: any, playerFaction: string | null): LoadedGameState['pendingEventDecisions'] {
-    const pending = state.military?.pending_event_decisions as any[] | undefined;
+    const pending = state.military?.pending_event_decisions as RawPendingEventDecision[] | undefined;
     if (!pending || pending.length === 0) return undefined;
     const scoped = pending
-        .filter((decision) => playerFactionMatch(decision.faction, playerFaction))
+        .filter((decision) => playerFactionMatch(
+            typeof decision.faction === 'string' ? decision.faction : undefined,
+            playerFaction,
+        ))
         .map(sanitizePendingEventDecision);
     return scoped.length > 0 ? scoped : undefined;
 }
