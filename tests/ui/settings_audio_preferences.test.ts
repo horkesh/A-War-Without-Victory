@@ -38,7 +38,7 @@ describe('SettingsScreen audio preferences', () => {
         });
 
         expect(loadAudioPreferences(window.localStorage)).toEqual({
-            muted: false,
+            muted: true,
             masterVolume: 0.25,
         });
     });

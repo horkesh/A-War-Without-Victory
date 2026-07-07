@@ -17,7 +17,7 @@ interface StorageLike {
 
 export const AUDIO_PREFERENCES_STORAGE_KEY = 'awwv.audio.preferences.v1';
 export const DEFAULT_AUDIO_PREFERENCES: AudioPreferences = {
-    muted: true,
+    muted: false,
     masterVolume: 0.5,
 };
 

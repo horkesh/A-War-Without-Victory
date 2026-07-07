@@ -29,10 +29,10 @@ describe('audio preference persistence', () => {
         vi.stubGlobal('AudioContext', vi.fn());
     });
 
-    it('defaults to muted with a clamped nonzero master volume preference', () => {
+    it('defaults to enabled soundscape with a conservative master volume preference', () => {
         const prefs = loadAudioPreferences(new MemoryStorage());
 
-        expect(prefs).toEqual({ muted: true, masterVolume: 0.5 });
+        expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
     });
 
     it('persists normalized mute and master volume preferences', () => {
