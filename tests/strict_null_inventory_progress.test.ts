@@ -648,14 +648,19 @@ describe('strict null inventory progress', () => {
             // tactical field presence and is absent-safe via existing location fallback, so
             // calibration stays byte-identical when unset. 517->518 / sim 330->331. No new
             // type-escape casts.
-            optional_fields_game_state: 518,
+            // Pre-planned op satisfaction trace: +1 optional field
+            // `MilitaryState.preplanned_operations_satisfied_by_start`, an observability-only
+            // list of pre-planned operations already satisfied at scenario injection. sim domain;
+            // no sim reader consumes it for behavior, so absent legacy saves and non-satisfied
+            // injections remain byte-identical. 518->519 / sim 331->332. No new type-escape casts.
+            optional_fields_game_state: 519,
         });
-        expect(current.optional_field_domains.total).toBe(518);
+        expect(current.optional_field_domains.total).toBe(519);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 331,
+            sim: 332,
             state: 177,
             ui_adapter: 0,
             unknown: 0,
