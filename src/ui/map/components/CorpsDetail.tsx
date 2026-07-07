@@ -13,6 +13,7 @@ import { getFormationCommander, resolveCorpsCommanderDisplay } from '../utils/of
 import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import { BrigadeRow } from './BrigadeRow';
+import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
 import { TabBar } from './TabBar';
 import {
   getPlayerSafeCorpsName,
@@ -46,13 +47,13 @@ const SECTOR_COVERAGE_KEYS: Record<SectorCoverageTier, Parameters<typeof t>[0]> 
 };
 
 function formatEquipmentSummary(summary: EquipmentConditionSummary): string {
-  if (summary.unreportedCount > 0 && summary.reportedCount === 0) return t('corpsFront.unreported');
+  if (summary.unreportedCount > 0 && summary.reportedCount === 0) return '--';
   const value = `${Math.round(summary.operational)}/${Math.round(summary.total)}`;
   return summary.unreportedCount > 0 ? t('corpsFront.partialEquipment', { value }) : value;
 }
 
 function formatCorpsDetailStance(stance: string | null | undefined): string {
-  return getPlayerSafeSectorStanceLabel(stance, t('armyHqCorps.stance.unreported'));
+  return getPlayerSafeSectorStanceLabel(stance, t('formationDetail.postureAwaitingOrder'));
 }
 
 interface CorpsDetailProps {
@@ -152,6 +153,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
     partial: (personnel) => t('corpsFront.partialPersonnel', { personnel }),
     unreported: t('corpsFront.unreported'),
   });
+  const corpsReportGaps = [
+    ...(corpsFormation.corpsStance ? [] : ['corps stance']),
+    ...(corpsFormation.corpsExhaustion == null ? ['exhaustion'] : []),
+    ...(totalPersonnelLabel === t('corpsFront.unreported') ? ['personnel'] : []),
+  ];
   const corpsDisplayName = corpsFormation.name === corpsFormation.id
     ? getPlayerSafeCorpsName(null, corpsFormation.id)
     : corpsFormation.name;
@@ -267,13 +273,6 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
               </span>
               {' · '}
               <span>{formatCorpsDetailStance(corpsFormation.corpsStance)}</span>
-              {corpsFormation.corpsExhaustion == null && (
-                <span>
-                  {' - '}
-                  {t('corpsDetail.exhaustion')} {' '}
-                  <span className="italic text-text-secondary/80">{t('corpsFront.unreported')}</span>
-                </span>
-              )}
               {corpsFormation.corpsExhaustion != null && (
                 <span>
                   {' · '}
@@ -288,6 +287,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 </span>
               )}
             </div>
+            <OwnForceReportGapNotice fields={corpsReportGaps} />
 
             {(() => {
               const commander = getFormationCommander(corpsFormation, loadedGameState);
@@ -300,18 +300,19 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
             <div className="border-t border-panel-border pt-3 space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('corpsCard.personnel')}</span>
-                <span className="text-text-primary tabular-nums">{totalPersonnelLabel}</span>
+                <span className="text-text-primary tabular-nums">{totalPersonnelLabel === t('corpsFront.unreported') ? '--' : totalPersonnelLabel}</span>
               </div>
               {(() => {
                 const agg = aggregateEffectiveness(subordinates);
                 if (agg.brigadeCount === 0) return null;
+                if (agg.grade === 'UNREPORTED') return null;
                 const gradeColor = agg.grade === 'A' ? '#56d364' : agg.grade === 'B' ? '#e8c56d' : agg.grade === 'C' ? '#e8a838' : agg.grade === 'UNREPORTED' ? '#9ca3af' : '#f47068';
                 return (
                   <div className="flex justify-between">
                     <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('corpsDetail.combatEff')}</span>
                     <span className="tabular-nums">
                       <span className="text-text-primary">
-                        {agg.grade === 'UNREPORTED' ? t('corpsFront.unreported') : agg.totalEffectiveness.toLocaleString()}
+                        {agg.totalEffectiveness.toLocaleString()}
                       </span>
                       <span className="text-[10px] ml-1 font-bold" style={{ color: gradeColor }}>
                         {agg.grade}
@@ -450,6 +451,11 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                 });
                 const coverageTier = getSectorCoverageTier(s.density, sectorAssignment, s.length_edges);
                 const sectorLabel = getPlayerFacingSectorName(s.sector_id, [s]);
+                const sectorReportGaps = [
+                  ...(sectorPers === t('corpsFront.unreported') ? ['personnel'] : []),
+                  ...(sectorEff.grade === 'UNREPORTED' ? ['effectiveness'] : []),
+                  ...(s.sector_stance ? [] : ['sector stance']),
+                ];
                 return (
                 <button
                   key={s.sector_id}
@@ -462,6 +468,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                   data-reserve-brigade-count={sectorAssignment.reserveIds.length}
                   data-rear-brigade-count={sectorAssignment.rearIds.length}
                   data-command-directed-brigade-count={sectorAssignment.overrideIds.length}
+                  data-awwv-report-gap={sectorReportGaps.length > 0 ? sectorReportGaps.join('|') : undefined}
                   onClick={() => inspectSectorInCorps(s.sector_id)}
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
@@ -480,7 +487,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                     <div className="text-[10px] tabular-nums">
                       <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
                       <span className="text-text-primary">
-                        {sectorEff.grade === 'UNREPORTED' ? t('corpsFront.unreported') : sectorEff.totalEffectiveness.toLocaleString()}
+                        {sectorEff.grade === 'UNREPORTED' ? '--' : sectorEff.totalEffectiveness.toLocaleString()}
                       </span>
                     </div>
                     <div className="text-[10px] text-text-secondary tabular-nums">
@@ -547,9 +554,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
                       <div className="mt-2 space-y-1">
                         <div className="flex justify-between text-[10px] text-text-secondary">
                           <span>{t('operationsPanel.momentum')}</span>
-                          {momentum == null ? (
-                            <span className="italic text-text-secondary/80">{t('operationsSection.metricUnreported')}</span>
-                          ) : (
+                          {momentum != null && (
                             <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
                               {momentum > 0 ? '+' : ''}{momentum.toFixed(1)}
                             </span>

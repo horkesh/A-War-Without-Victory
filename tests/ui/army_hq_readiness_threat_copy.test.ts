@@ -212,7 +212,9 @@ describe('Army HQ readiness and threat copy', () => {
 
         const html = renderToStaticMarkup(createElement(ForceReadiness, { items }));
         expect(html).toContain('ASSESSMENT INCOMPLETE');
-        expect(html).toContain('fatigue unreported');
+        expect(html).toContain('data-awwv-report-gap="fatigue|cohesion"');
+        expect(html).toContain('Staff returns incomplete');
+        expect(html).not.toContain('fatigue unreported');
         expect(html).not.toContain('INEFFECTIVE');
         expect(html).not.toContain('fatigue 0/30');
     });
@@ -280,7 +282,8 @@ describe('Army HQ readiness and threat copy', () => {
         };
 
         const html = renderToStaticMarkup(createElement(ForceReadiness, { items: [item] }));
-        expect(html).toContain('fatigue unreported');
+        expect(html).toContain('data-awwv-report-gap="fatigue|cohesion"');
+        expect(html).not.toContain('fatigue unreported');
         expect(html).toContain('ASSESSMENT INCOMPLETE');
         expect(html).not.toContain('fatigue 0/30');
     });

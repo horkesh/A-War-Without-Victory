@@ -581,7 +581,8 @@ describe('OOB and operations panel operation labels', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
 
-    expect(container.textContent).toContain('Objective progress unreported');
+    expect(container.textContent).toContain('--');
+    expect(container.textContent).not.toContain('Objective progress unreported');
     expect(container.textContent).not.toContain('1/2');
   });
 
@@ -600,7 +601,8 @@ describe('OOB and operations panel operation labels', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /Operations/i }));
 
-    expect(container.textContent).toContain('Supply: Unreported');
+    expect(container.textContent).toContain('Supply: --');
+    expect(container.textContent).not.toContain('Supply: Unreported');
     expect(container.textContent).not.toContain('Supply N/A');
   });
 

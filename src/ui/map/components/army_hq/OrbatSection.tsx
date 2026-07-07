@@ -17,6 +17,7 @@ import { addEquipmentCondition, emptyEquipmentConditionSummary } from '../../uti
 import { CollapsibleSection } from './CollapsibleSection';
 import { EmptyState } from '../EmptyState';
 import { EliteCommanderSummary } from '../EliteCommanderSummary';
+import { OwnForceReportGapNotice } from '../OwnForceReportGapNotice';
 import { t, useLocale, type MessageKey } from '../../i18n';
 import { compareLocalizedFormationNames, getLocalizedFormationName } from '../../data/formationNameLocalizations';
 
@@ -63,7 +64,7 @@ function MiniBar({ value, max, color, width = 60 }: { value: number | null; max:
                 <div className="absolute inset-y-0 left-0" style={{ width: `${pct * 100}%`, backgroundColor: color }} />
             </div>
             <span className="text-[10px] tabular-nums" style={{ color }}>
-                {value == null ? t('orbat.metricUnreported') : Math.round(value)}
+                {value == null ? '--' : Math.round(value)}
             </span>
         </div>
     );
@@ -102,7 +103,7 @@ function getCampaignLossesHelp(derived: boolean): string | null {
 function formatOperationalEquipment(total: number | undefined, operational: number | undefined): { label: string; reported: boolean } | null {
     const summary = addEquipmentCondition(emptyEquipmentConditionSummary(), total, operational);
     if (summary.total <= 0) return null;
-    if (summary.unreportedCount > 0) return { label: t('orbat.metricUnreported'), reported: false };
+    if (summary.unreportedCount > 0) return { label: '--', reported: false };
     return {
         label: t('orbat.operationalCount', {
             current: Math.round(summary.operational),
@@ -154,6 +155,16 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
         return formatCampaignLossValue(value, campaignLossesEstimated);
     };
     const campaignLossesHelp = getCampaignLossesHelp(campaignLossesEstimated);
+    const reportGaps = [
+        ...(personnel == null ? ['personnel'] : []),
+        ...(morale == null ? ['morale'] : []),
+        ...(cohesion == null ? ['cohesion'] : []),
+        ...(reportedPercent(b.fatigue) == null ? ['fatigue'] : []),
+        ...(!b.posture ? ['posture'] : []),
+        ...(entrenchment == null ? ['entrenchment'] : []),
+        ...(tankStatus && !tankStatus.reported ? ['armour condition'] : []),
+        ...(artilleryStatus && !artilleryStatus.reported ? ['artillery condition'] : []),
+    ];
 
     return (
         <div className="px-4 py-3 space-y-3 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
@@ -181,26 +192,30 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
 
             {/* Stats grid with inline bars */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2 uppercase tracking-tight">
-                <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] text-text-secondary/50">{t('orbat.personnel')}</span>
-                    <span className="text-text-secondary font-bold">
-                        {personnel == null ? t('orbat.metricUnreported') : formatPersonnel(personnel)}
-                    </span>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] text-text-secondary/50">{t('orbat.morale')}</span>
-                    <MiniBar value={morale} max={100} color={moraleColor} />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] text-text-secondary/50">{t('orbat.cohesion')}</span>
-                    <MiniBar value={cohesion} max={100} color={cohesionColor} />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] text-text-secondary/50">{t('orbat.entrench')}</span>
-                    <span className="text-text-secondary">
-                        {entrenchment == null ? t('orbat.metricUnreported') : t('orbat.turnsShort', { value: entrenchment.toFixed(1) })}
-                    </span>
-                </div>
+                {personnel != null && (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] text-text-secondary/50">{t('orbat.personnel')}</span>
+                        <span className="text-text-secondary font-bold">{formatPersonnel(personnel)}</span>
+                    </div>
+                )}
+                {morale != null && (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] text-text-secondary/50">{t('orbat.morale')}</span>
+                        <MiniBar value={morale} max={100} color={moraleColor} />
+                    </div>
+                )}
+                {cohesion != null && (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] text-text-secondary/50">{t('orbat.cohesion')}</span>
+                        <MiniBar value={cohesion} max={100} color={cohesionColor} />
+                    </div>
+                )}
+                {entrenchment != null && (
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] text-text-secondary/50">{t('orbat.entrench')}</span>
+                        <span className="text-text-secondary">{t('orbat.turnsShort', { value: entrenchment.toFixed(1) })}</span>
+                    </div>
+                )}
                 {officerQuality != null && (
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] text-text-secondary/50">{t('orbat.officers')}</span>
@@ -231,17 +246,17 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
             )}
 
             {/* Equipment */}
-            {(tankStatus || artilleryStatus) && (
+            {((tankStatus?.reported ?? false) || (artilleryStatus?.reported ?? false)) && (
                 <div className="space-y-1.5">
                     <div className="text-[9px] font-bold uppercase text-text-secondary/50 tracking-widest">{t('orbat.materialStatus')}</div>
                     <div className="grid grid-cols-2 gap-4">
-                        {tankStatus && (
+                        {tankStatus?.reported && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.armour')}</span>
                                 <span className={`${tankStatus.reported ? 'text-emerald-400' : 'text-text-secondary/60'} font-bold`}>{tankStatus.label}</span>
                             </div>
                         )}
-                        {artilleryStatus && (
+                        {artilleryStatus?.reported && (
                             <div className="flex flex-col gap-0.5">
                                 <span className="text-[9px] text-text-secondary/50 uppercase">{t('orbat.artillery')}</span>
                                 <span className={`${artilleryStatus.reported ? 'text-emerald-400' : 'text-text-secondary/60'} font-bold`}>{artilleryStatus.label}</span>
@@ -250,6 +265,8 @@ function BrigadeExpandedDetail({ b }: { b: FormationView }) {
                     </div>
                 </div>
             )}
+
+            <OwnForceReportGapNotice fields={reportGaps} />
 
             {/* Decorations */}
             {decorations && decorations.length > 0 && (
@@ -358,6 +375,12 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                     const isExpanded = expandedId === b.id;
                     const formationName = getLocalizedFormationName(b, locale);
                     const detailId = `army-hq-formation-detail-${b.id}`;
+                    const rowReportGaps = [
+                        ...(personnel == null ? ['personnel'] : []),
+                        ...(cohesion == null ? ['cohesion'] : []),
+                        ...(fatigue == null ? ['fatigue'] : []),
+                        ...(!b.posture ? ['posture'] : []),
+                    ];
                     const toggleLabel = isExpanded
                         ? t('orbat.collapseFormationAria', { formation: formationName })
                         : t('orbat.expandFormationAria', { formation: formationName });
@@ -395,11 +418,11 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                     {cohesion == null ? (
                                         <span
                                             data-testid="army-hq-orbat-cohesion"
-                                            title={t('orbat.cohesionUnreported')}
-                                            aria-label={t('orbat.cohesionUnreported')}
+                                            title=""
+                                            aria-label={t('reportGap.notice', { fields: 'cohesion' })}
                                             className="w-20 shrink-0 text-center text-[9px] italic text-text-secondary/50"
                                         >
-                                            {t('orbat.metricUnreported')}
+                                            --
                                         </span>
                                     ) : (
                                         <div
@@ -425,7 +448,7 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
 
                                     {/* Status posture */}
                                     <span className={`text-[10px] font-bold uppercase w-14 text-right shrink-0 ${statusColor}`}>
-                                        {isDisrupted ? t('orbat.disruptedShort') : getPlayerSafeFormationPostureLabel(b.posture, t('orbat.postureUnreported'))}
+                                        {isDisrupted ? t('orbat.disruptedShort') : b.posture ? getPlayerSafeFormationPostureLabel(b.posture) : '--'}
                                     </span>
                                 </button>
                                 <button
@@ -460,6 +483,9 @@ export function OrbatSection({ corpsId, brigades, sectors }: OrbatSectionProps) 
                                 <div id={detailId} data-testid="army-hq-formation-detail">
                                     <BrigadeExpandedDetail b={b} />
                                 </div>
+                            )}
+                            {!isExpanded && (
+                                <OwnForceReportGapNotice fields={rowReportGaps} className="mx-4 mb-2" />
                             )}
                         </div>
                     );

@@ -13,6 +13,7 @@ import { OfficerProfile } from './OfficerProfile';
 import { CommanderDisplayPanel } from './CommanderDisplayPanel';
 import { CombatSummaryPanel } from './CombatSummaryPanel';
 import { EliteCommanderSummary } from './EliteCommanderSummary';
+import { OwnForceReportGapNotice } from './OwnForceReportGapNotice';
 import type { FormationView } from '../data/types';
 import { getPrestigeTier, getPrestigeTierColor, getHighestTier, getDecorationName } from '../utils/decorationUtils';
 import { TabBar, tabId, tabPanelId } from './TabBar';
@@ -171,11 +172,7 @@ function isReportedEquipmentCondition(condition: EquipmentConditionReport): cond
 
 function EquipmentConditionBar({ condition }: { condition: EquipmentConditionReport }) {
   if (!isReportedEquipmentCondition(condition)) {
-    return (
-      <span className="flex-1 text-[10px] italic text-text-secondary">
-        {t('formationDetail.conditionUnreported')}
-      </span>
-    );
+    return null;
   }
 
   return (
@@ -238,18 +235,31 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
   const isBrigade = formation.kind === 'brigade';
   const isFieldedSelectedBrigade = formation.kind === 'brigade' && isFieldedTacticalFormation(formation);
   const postureValue = (() => {
-    if (isBrigade) return getPlayerSafeFormationPostureLabel(formation.posture);
+    if (isBrigade) return getPlayerSafeFormationPostureLabel(formation.posture, t('formationDetail.postureAwaitingOrder'));
     if (formation.kind === 'corps' || formation.kind === 'corps_asset') {
       return formation.corpsStance
         ? getPlayerSafeSectorStanceLabel(formation.corpsStance)
-        : t('formationDetail.corpsStanceUnreported');
+        : t('formationDetail.postureAwaitingOrder');
     }
-    if (formation.kind === 'army_hq') return t('formationDetail.commandPostureUnreported');
-    return formation.posture ? getPlayerSafeFormationPostureLabel(formation.posture) : t('formationDetail.commandPostureUnreported');
+    if (formation.kind === 'army_hq') return t('formationDetail.postureAwaitingOrder');
+    return formation.posture ? getPlayerSafeFormationPostureLabel(formation.posture) : t('formationDetail.postureAwaitingOrder');
   })();
   const lifecycleValue = formation.readiness && formation.readiness !== 'unreported'
     ? getPlayerSafeFormationReadinessLabel(formation.readiness)
-    : t('corpsFront.unreported');
+    : null;
+  const brigadeEffectiveness = formation.kind === 'brigade' ? computeBrigadeEffectiveness(formation) : null;
+  const reportGaps = [
+    ...((isBrigade && !formation.posture) || (!isBrigade && !formation.corpsStance) ? ['posture'] : []),
+    ...(lifecycleValue == null ? ['readiness'] : []),
+    ...(Number.isFinite(formation.cohesion) ? [] : ['cohesion']),
+    ...(Number.isFinite(formation.morale) ? [] : ['morale']),
+    ...(typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) ? [] : ['fatigue']),
+    ...(formation.personnel != null ? [] : ['personnel']),
+    ...(brigadeEffectiveness?.missingFields.length ? ['effectiveness'] : []),
+    ...(formation.composition?.tanks && !isReportedEquipmentCondition(formation.composition.tank_condition) ? ['tank condition'] : []),
+    ...(formation.composition?.artillery && !isReportedEquipmentCondition(formation.composition.artillery_condition) ? ['artillery condition'] : []),
+    ...(formation.composition?.aa_systems ? ['air defense condition'] : []),
+  ];
   const formationName = getLocalizedFormationName(formation, locale);
   const casualtySplitIsDerived = formation.campaignCasualtySplitProvenance === 'derived_from_total';
   const casualtySplitIsExact = formation.campaignCasualtySplitProvenance === 'exact_ledger';
@@ -481,9 +491,14 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs px-2 py-1 bg-black/20 rounded border border-panel-border/30">
               <span className="text-text-secondary">{t('formationDetail.posture')}</span>
               <span className="text-text-primary font-semibold">{postureValue}</span>
-              <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
-              <span className="text-text-primary">{lifecycleValue}</span>
+              {lifecycleValue && (
+                <>
+                  <span className="text-text-secondary ml-1">{t('formationDetail.readiness')}</span>
+                  <span className="text-text-primary">{lifecycleValue}</span>
+                </>
+              )}
             </div>
+            <OwnForceReportGapNotice fields={reportGaps} />
 
             {/* Stranded (Isolated) indicator */}
             {formation.strandedStatus === 'holding' && (
@@ -605,9 +620,7 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                         <span
                           data-testid="formation-aa-condition-unreported"
                           className="flex-1 text-[10px] italic text-text-secondary"
-                        >
-                          {t('formationDetail.conditionUnreported')}
-                        </span>
+                        />
                         <span className="text-text-primary tabular-nums w-6 text-right font-mono">{formation.composition.aa_systems}</span>
                       </div>
                     </div>
@@ -624,11 +637,12 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
 
             {/* Stats grid */}
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs px-2 py-1 bg-black/10 rounded">
-              <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
-              <span className="text-text-primary tabular-nums flex items-center gap-1">
-                {(() => {
-                  const c = Number.isFinite(formation.cohesion) ? formation.cohesion : null;
-                  if (c == null) return <span className="text-text-secondary text-[10px] italic">{t('corpsFront.unreported')}</span>;
+              {Number.isFinite(formation.cohesion) && (
+                <>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="cohesion" size={12} /> {t('formationDetail.cohesion')}</span>
+                  <span className="text-text-primary tabular-nums flex items-center gap-1">
+                    {(() => {
+                  const c = formation.cohesion as number;
                   const blocks = 10;
                   const filled = Math.round((c / 100) * blocks);
                   const color = c >= 70 ? '#d4a055' : c >= 40 ? '#d48a55' : '#d45555';
@@ -640,14 +654,16 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                       <span className="text-text-secondary text-[10px]">{Math.round(c)}</span>
                     </>
                   );
-                })()}
-              </span>
-              {formation.morale != null && (
+                    })()}
+                  </span>
+                </>
+              )}
+              {Number.isFinite(formation.morale) && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> {t('formationDetail.morale')}</span>
                   <span className="text-text-primary tabular-nums flex items-center gap-1">
                     {(() => {
-                      const m = formation.morale!;
+                      const m = formation.morale as number;
                       const blocks = 10;
                       const filled = Math.round((m / 100) * blocks);
                       const color = m >= 60 ? '#55d48a' : m >= 30 ? '#d4d455' : '#d45555';
@@ -663,33 +679,25 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
-              {formation.morale == null && (
+              {typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue) && (
                 <>
-                  <span className="text-text-secondary flex items-center gap-1"><Icon name="morale" size={12} /> {t('formationDetail.morale')}</span>
-                  <span className="text-text-secondary tabular-nums">{t('corpsFront.unreported')}</span>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
+                  <span className="text-text-primary tabular-nums">{Math.round(formation.fatigue)}</span>
                 </>
               )}
-              <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.fatigue')}</span>
-              <span className="text-text-primary tabular-nums">
-                {typeof formation.fatigue === 'number' && Number.isFinite(formation.fatigue)
-                  ? Math.round(formation.fatigue)
-                  : t('corpsFront.unreported')}
-              </span>
-              <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
-              <span className="text-text-primary tabular-nums">
-                {formation.personnel != null
-                  ? t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })
-                  : t('corpsFront.unreported')}
-              </span>
+              {formation.personnel != null && (
+                <>
+                  <span className="text-text-secondary flex items-center gap-1"><Icon name="personnel" size={12} /> {t('formationDetail.personnel')}</span>
+                  <span className="text-text-primary tabular-nums">
+                    {t('formationDetail.personnelMen', { count: formation.personnel.toLocaleString() })}
+                  </span>
+                </>
+              )}
               {formation.kind === 'brigade' && (() => {
-                const eff = computeBrigadeEffectiveness(formation);
+                const eff = brigadeEffectiveness;
+                if (!eff) return null;
                 if (eff.missingFields.length > 0) {
-                  return (
-                    <>
-                      <span className="text-text-secondary flex items-center gap-1"><Icon name="star" size={12} /> {t('formationDetail.effectiveness')}</span>
-                      <span className="text-text-secondary tabular-nums">{t('corpsFront.unreported')}</span>
-                    </>
-                  );
+                  return null;
                 }
                 const color = eff.value >= 600 ? '#56d364' : eff.value >= 300 ? '#e8a838' : '#f47068';
                 // Find the worst modifier to highlight
@@ -728,13 +736,13 @@ export function FormationDetail({ railSlot }: FormationDetailProps) {
                   </span>
                 </>
               )}
-              {isCommandFormation(formation) && (
+              {isCommandFormation(formation) && formation.corpsExhaustion != null && (
                 <>
                   <span className="text-text-secondary flex items-center gap-1"><Icon name="fatigue" size={12} /> {t('formationDetail.exhaustion')}</span>
                   <span className="text-text-primary tabular-nums">{formatReportedPercentValue(formation.corpsExhaustion)}</span>
                 </>
               )}
-              {isCommandFormation(formation) && (
+              {isCommandFormation(formation) && formation.corpsCommandSpan != null && (
                 <>
                   <span className="text-text-secondary">{t('formationDetail.commandSpan')}</span>
                   <span className="text-text-primary tabular-nums">{formatReportedCommandSpan(formation.corpsCommandSpan)}</span>

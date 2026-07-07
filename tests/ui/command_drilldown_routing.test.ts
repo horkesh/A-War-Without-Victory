@@ -316,7 +316,9 @@ describe('command drilldown routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
 
-    expect(container.textContent).toContain('Unreported');
+    const rowCopy = screen.getByTestId('corps-detail-operation-row').textContent ?? '';
+    expect(rowCopy).toContain('Momentum');
+    expect(rowCopy).not.toContain('Unreported');
     expect(container.textContent).not.toContain('0.0');
   });
 
@@ -337,7 +339,9 @@ describe('command drilldown routing', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops/i }));
 
-    expect(container.textContent).toContain('Unreported');
+    const rowCopy = screen.getByTestId('corps-detail-operation-row').textContent ?? '';
+    expect(rowCopy).toContain('Momentum');
+    expect(rowCopy).not.toContain('Unreported');
     expect(container.textContent).not.toContain('Infinity');
   });
 
