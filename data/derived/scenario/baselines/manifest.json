@@ -22,14 +22,14 @@
         "weekly_report.jsonl"
       ],
       "hashes": {
-        "activity_summary.json": "ef69e715fea07f01eb1664c073ba9083ea1c1d215b53de968dfbee01ecc69df8",
-        "control_delta.json": "99841f751235d48d9fd00ae8a1b7ed72b182d77337ad831463325c84d187df94",
-        "end_report.md": "7d18fae2084c7cf5a5c9dbe77f3b43d72e205ef26292dedd3add163194830eca",
-        "final_save.json": "2dd96eff8ce8139c003e4997b7850cc0d43cbac8151539c8c1bae7c1e898f21e",
-        "formation_delta.json": "5fdbb44df9d0a3f7b6e509687b264ebbf9697a69b1d950b04abb66ce0423cffd",
-        "run_summary.json": "63ada5a0c8fb21420941147ceae29a172c5b2069d7f8d3cdaea9059120cf4014",
-        "watched_operations.json": "713dfb37fbfeeca61e14cac6c210063fa746c87993c1dd0ba3cf04002c3a0fe7",
-        "weekly_report.jsonl": "5d33b39660d9a9a4e2ba21d4c469851e91ea51cc1c57bfed3eb6b6d282812664"
+        "activity_summary.json": "f7bd14a3b9349dc98c41c320020ebf3f91ef411c1e081f274e7d92034f305040",
+        "control_delta.json": "baf1c2086279db647648044e79b8d7af57b035a1cf2fdce404fc7e9e84a2499a",
+        "end_report.md": "5ec5611b655022598573a8c06336df00357668d52130395012283481c94c580b",
+        "final_save.json": "ef6561102515edba920304ffb70003fe91e1db4e83451626e5351aa6a301f62c",
+        "formation_delta.json": "0f9259b4acd7c47d99b1f0bf2fe9c7e985af10fa94c8d2ace12563faea9f72fa",
+        "run_summary.json": "bfead04ca19364248ffbef792ef38bc987a6c4adccf816464c7ec0b417080b38",
+        "watched_operations.json": "e41c516d934236198f0a0d5a492449f28f514dc60d34b4f47487ba0eb2d76c72",
+        "weekly_report.jsonl": "490fa40cd397be1cf30f7f5be445763ff5aefe5a3d1e42dc1a86919543f40408"
       },
       "id": "apr1992_52w",
       "scenario_path": "data/scenarios/apr1992_definitive_52w.json",
