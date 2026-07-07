@@ -251,7 +251,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
 
         expect(beforeBuild).not.toContain('recoveredFrontClaimSetupCache');
         expect(buildRegion).toContain('const recoveredFrontClaimSetupCache');
-        expect(buildRegion.match(/recoverDroppedFrontEdges\(/g)?.length).toBe(2);
+        expect(buildRegion.match(/recoverDroppedFrontEdges\(/g)?.length).toBe(3);
         expect(buildRegion.match(/recoveredFrontClaimSetupCache/g)?.length).toBeGreaterThanOrEqual(3);
         expect(recoverRegion).toContain('recoveredFrontClaimSetupCache?: Map<FactionId, RecoveredFrontClaimSetup>');
         expect(recoverRegion).toContain('getRecoveredFrontClaimSetup(');

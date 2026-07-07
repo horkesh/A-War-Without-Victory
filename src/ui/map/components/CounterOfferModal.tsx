@@ -51,6 +51,7 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
     : '';
   const title = offer ? t('decisionModal.counterOffer.titleFrom', { author: authorLabel }) : t('decisionModal.counterOffer.titleFallback');
   const headerImage = getDecisionHeaderForFamily('counter_offer');
+  const unavailableReason = t('decisionModal.counterOffer.descriptionResolved');
 
   const submitAsCounter = async () => {
     if (!offer) return;
@@ -141,6 +142,15 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
         </div>
       )}
 
+      {!offer && (
+        <div
+          id="counter-offer-unavailable-reason"
+          className="px-5 py-4 text-[12px] leading-relaxed text-text-secondary"
+        >
+          {unavailableReason}
+        </div>
+      )}
+
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
         <button
           type="button"
@@ -153,6 +163,8 @@ export function CounterOfferModal({ offerId, state, onClose }: CounterOfferModal
           type="button"
           onClick={() => void submitAsCounter()}
           disabled={!offer}
+          aria-describedby={!offer ? 'counter-offer-unavailable-reason' : undefined}
+          title={!offer ? unavailableReason : undefined}
           className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40"
         >
           {t('decisionModal.counterOffer.submit')}

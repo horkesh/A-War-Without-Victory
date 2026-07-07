@@ -58,6 +58,17 @@ const BCS_ENGLISH_LEAK_TOKENS = [
   { label: 'Command briefing EN modal fallback', pattern: /\bNo command briefing packet is available yet\b/i },
 ];
 
+const FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS = [
+  { label: 'Srebrenica demilitarization title', pattern: /\bThe Demilitarization of Srebrenica\b/i },
+  { label: 'Vance-Owen title', pattern: /\bThe Vance-Owen Peace Plan\b/i },
+  { label: 'Owen-Stoltenberg title', pattern: /\bThe Owen-Stoltenberg Plan\b/i },
+  { label: 'Contact Group title', pattern: /\bThe Contact Group Plan\b/i },
+  { label: 'Srebrenica fall title', pattern: /\bThe Fall of Srebrenica\b/i },
+  { label: 'Dayton title', pattern: /\bThe Dayton Agreement\b/i },
+  { label: 'Karadzic-Mladic rupture title', pattern: /\bKarad\S*\s+Moves\s+Against\s+Mlad/i },
+  { label: 'raw dated future event id', pattern: /\b[a-z][a-z0-9_]+_(?:1993|1994|1995)\b/i },
+];
+
 const LIVE_SURFACES = [
   {
     name: 'Desk',
@@ -1140,6 +1151,22 @@ function assertNoRawTechnicalTokens(surfaceName, text) {
   }
 }
 
+function assertNoFutureKnowledgeLeaks(surfaceName, text) {
+  const found = [];
+  for (const { label, pattern } of FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS) {
+    const match = pattern.exec(text);
+    if (match?.index !== undefined) {
+      found.push({
+        label,
+        context: text.slice(Math.max(0, match.index - 160), Math.min(text.length, match.index + match[0].length + 160)).replace(/\s+/g, ' '),
+      });
+    }
+  }
+  if (found.length > 0) {
+    throw new Error(`${surfaceName} exposed future campaign knowledge: ${JSON.stringify(found, null, 2)}`);
+  }
+}
+
 function assertNoBcsEnglishLeakTokens(surfaceName, text) {
   const found = [];
   for (const { label, pattern } of BCS_ENGLISH_LEAK_TOKENS) {
@@ -1267,6 +1294,7 @@ async function runSurfaceSweep(page, summary) {
     if (surface.name === 'Army HQ') summary.evidence.armyHqReachable = true;
     if (surface.name === 'Records') summary.evidence.recordsReachable = true;
     assertNoRawTechnicalTokens(surface.name, text);
+    assertNoFutureKnowledgeLeaks(surface.name, text);
     await resetToWarMap(page);
   }
 }
@@ -1891,6 +1919,7 @@ async function runCodexInternalDrilldown(page, summary) {
   await captureEvidence(page, summary, 'codex_internal_selected_essay');
   const text = await visibleText(page);
   assertNoRawTechnicalTokens('Codex Internal Drilldown', text);
+  assertNoFutureKnowledgeLeaks('Codex Internal Drilldown', text);
   summary.evidence.codexInternalDrilldown = true;
 }
 

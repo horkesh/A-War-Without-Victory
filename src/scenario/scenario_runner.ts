@@ -1313,6 +1313,7 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
 }
 
 type HistoricalNameLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
+type HistoricalCorpsLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
 
 interface ScenarioStartupBuildResult {
     state: GameState;
@@ -1326,6 +1327,7 @@ interface ScenarioStartupBuildResult {
     operationalData: Awaited<ReturnType<typeof loadOperationalData>> | null;
     operationalCentroids: Awaited<ReturnType<typeof loadOperationalCentroids>> | undefined;
     historicalNameLookup?: HistoricalNameLookup;
+    historicalCorpsLookup?: HistoricalCorpsLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
 }
@@ -1456,23 +1458,29 @@ export async function buildScenarioStartupState(
     } else if (scenario.formation_spawn_directive) {
         oobBrigades = await loadOobBrigades(baseDir);
     }
-    /** Historical names for emergent brigades: (faction, home_mun) -> names[] in deterministic order. */
-    const oobNamesByFactionMun = new Map<string, string[]>();
+    /** Historical emergent brigade data: (faction, home_mun) -> entries in deterministic name order. */
+    const oobEntriesByFactionMun = new Map<string, Array<{ name: string; corps: string | null }>>();
     for (const b of oobBrigades) {
         const key = `${b.faction}:${b.home_mun}`;
-        const list = oobNamesByFactionMun.get(key) ?? [];
-        list.push(b.name);
-        oobNamesByFactionMun.set(key, list);
+        const list = oobEntriesByFactionMun.get(key) ?? [];
+        list.push({ name: b.name, corps: b.corps ?? null });
+        oobEntriesByFactionMun.set(key, list);
     }
-    for (const list of oobNamesByFactionMun.values()) {
-        list.sort((a, b) => a.localeCompare(b));
+    for (const list of oobEntriesByFactionMun.values()) {
+        list.sort((a, b) => a.name.localeCompare(b.name));
     }
     const historicalNameLookup =
-        oobNamesByFactionMun.size > 0
+        oobEntriesByFactionMun.size > 0
             ? (faction: string, mun_id: string, ordinal: number): string | null => {
-                const list = oobNamesByFactionMun.get(`${faction}:${mun_id}`);
-                const name = list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1] : null;
-                return name ?? null;
+                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
+                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.name ?? null : null;
+            }
+            : undefined;
+    const historicalCorpsLookup =
+        oobEntriesByFactionMun.size > 0
+            ? (faction: string, mun_id: string, ordinal: number): string | null => {
+                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
+                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.corps ?? null : null;
             }
             : undefined;
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
@@ -1913,6 +1921,7 @@ export async function buildScenarioStartupState(
         operationalData,
         operationalCentroids,
         historicalNameLookup,
+        historicalCorpsLookup,
         sidToMun,
         initOverrideChangeCount
     };
@@ -2030,6 +2039,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             operationalData,
             operationalCentroids,
             historicalNameLookup,
+            historicalCorpsLookup,
             sidToMun,
             initOverrideChangeCount
         } = startup;
@@ -2347,6 +2357,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     settlementDataRaw,
                     municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
                     historicalNameLookup,
+                    historicalCorpsLookup,
                     eventDefinitions,
                     // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
                     // Engine clear-displacement-event-log step calls this with the

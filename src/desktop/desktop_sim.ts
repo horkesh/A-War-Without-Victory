@@ -22,6 +22,8 @@ import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from
 import { runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
+import { resolveEventDecision } from '../sim/events/resolve_decision.js';
+import { deferUnauthorizedHistoricalOperationsForPlayer } from '../sim/combat/historical_operation_authorization.js';
 import {
     applyDefinitionDimensionShifts,
     applyDefinitionFlags,
@@ -262,6 +264,7 @@ export async function startNewCampaign(
         // through this entry, so it stays unset = historical = byte-identical.
         state.meta.decision_mode = 'emergent';
     }
+    deferUnauthorizedHistoricalOperationsForPlayer(state);
     const canonicalState = canonicalizeStartupState(state).state;
     canonicalState.political.control_events = [];
     if (key === 'apr_1992') {
@@ -555,7 +558,7 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
 }
 
 /** Re-export for main process (serialize/deserialize state for IPC). */
-export { deserializeState, resolvePlayerParamilitaryDecisions, serializeState };
+export { deserializeState, resolveEventDecision, resolvePlayerParamilitaryDecisions, serializeState };
 export {
     PLAYER_DECISION_FAMILIES,
     summarizePlayerDecisions,

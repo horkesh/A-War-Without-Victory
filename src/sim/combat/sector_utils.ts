@@ -30,6 +30,31 @@ import {
 export const REASSIGNMENT_ENTRENCHMENT_RETAIN = 0.3;
 export type SectorDefenseByFactionAndOsid = Map<string, Map<string, CorpsFrontSector>>;
 
+function activeAssignedDefenseCount(
+    sector: Pick<CorpsFrontSector, 'assigned_brigade_ids'>,
+    formations?: Record<FormationId, FormationState>,
+): number {
+    if (!formations) return sector.assigned_brigade_ids.length;
+    let count = 0;
+    for (const brigadeId of sector.assigned_brigade_ids) {
+        const formation = formations[brigadeId];
+        if (formation?.status === 'active') count += 1;
+    }
+    return count;
+}
+
+function preferLiveDefendedSector(
+    current: CorpsFrontSector | undefined,
+    candidate: CorpsFrontSector,
+    formations?: Record<FormationId, FormationState>,
+): CorpsFrontSector {
+    if (!current) return candidate;
+    const currentCount = activeAssignedDefenseCount(current, formations);
+    const candidateCount = activeAssignedDefenseCount(candidate, formations);
+    if (currentCount === 0 && candidateCount > 0) return candidate;
+    return current;
+}
+
 /**
  * Partition friendly OSIDs into connected components via BFS.
  * Returns a map from OSID → component index (0-based).
@@ -95,21 +120,29 @@ export function findSectorForEnemyOsid(
 ): CorpsFrontSector | null {
     const sectors = state.military.corps_front_sectors;
     if (!sectors) return null;
+    const formations = state.military.formations;
     // First pass: check front-edge friendly_osids (primary — direct front defense)
+    let match: CorpsFrontSector | undefined;
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
         if (defenderFaction && sector.faction !== defenderFaction) continue;
         for (const sub of sector.sub_segments) {
-            if (sub.friendly_osids.includes(targetOsid)) return sector;
+            if (sub.friendly_osids.includes(targetOsid)) {
+                match = preferLiveDefendedSector(match, sector, formations);
+            }
         }
     }
+    if (match) return match;
+
     // Second pass: check territory_osids (fallback — depth territory claimed by post-Voronoi sweep)
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
         if (defenderFaction && sector.faction !== defenderFaction) continue;
-        if (sector.territory_osids?.includes(targetOsid)) return sector;
+        if (sector.territory_osids?.includes(targetOsid)) {
+            match = preferLiveDefendedSector(match, sector, formations);
+        }
     }
-    return null;
+    return match ?? null;
 }
 
 export function buildSectorDefenseByFactionAndOsid(state: GameState): SectorDefenseByFactionAndOsid {
@@ -117,25 +150,25 @@ export function buildSectorDefenseByFactionAndOsid(state: GameState): SectorDefe
     const byFaction: SectorDefenseByFactionAndOsid = new Map();
     if (!sectors) return byFaction;
 
-    const setFirst = (sector: CorpsFrontSector, osid: string): void => {
+    const setBest = (sector: CorpsFrontSector, osid: string): void => {
         if (!sector.faction) return;
         let byOsid = byFaction.get(sector.faction);
         if (!byOsid) {
             byOsid = new Map();
             byFaction.set(sector.faction, byOsid);
         }
-        if (!byOsid.has(osid)) byOsid.set(osid, sector);
+        byOsid.set(osid, preferLiveDefendedSector(byOsid.get(osid), sector, state.military.formations));
     };
 
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
         for (const sub of sector.sub_segments) {
-            for (const osid of sub.friendly_osids) setFirst(sector, osid);
+            for (const osid of sub.friendly_osids) setBest(sector, osid);
         }
     }
     for (const sid of Object.keys(sectors).sort(strictCompare)) {
         const sector = sectors[sid]!;
-        for (const osid of sector.territory_osids ?? []) setFirst(sector, osid);
+        for (const osid of sector.territory_osids ?? []) setBest(sector, osid);
     }
 
     return byFaction;

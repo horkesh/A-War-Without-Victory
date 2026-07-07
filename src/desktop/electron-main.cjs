@@ -351,6 +351,7 @@ function fetchLocalText(url, options = {}) {
 
 const RUNTIME_PROBE_TEARDOWN_SAFE_ROUTES = new Set([
   '/data/derived/operational/operational_settlements.geojson',
+  '/data/derived/settlements_wgs84_1990.geojson',
   '/data/source/boundaries/bih_adm3_1990.geojson',
 ]);
 
@@ -1016,6 +1017,7 @@ async function runPackagedRuntimeProbe() {
   ];
   const packagedRouteInventory = [
     { route: '/data/derived/operational/operational_settlements.geojson', expected_status: 200 },
+    { route: '/data/derived/settlements_wgs84_1990.geojson', expected_status: 200 },
     { route: '/data/derived/terrain/settlements_terrain_scalars.json', expected_status: 200 },
     { route: '/data/derived/tiles/osm.pmtiles', expected_status: 206, range: 'bytes=0-15' },
     { route: '/font/Open%20Sans%20Bold/0-255.pbf', expected_status: 200 },
@@ -2941,11 +2943,9 @@ app.whenReady().then(() => {
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const { resolveEventDecision } = await import('../sim/events/resolve_decision.js');
-      resolveEventDecision(state, eventId, responseId);
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      const state = readCanonicalCurrentState(sim);
+      sim.resolveEventDecision(state, eventId, responseId);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };

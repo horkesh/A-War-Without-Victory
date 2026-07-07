@@ -190,16 +190,23 @@
 
     <!-- STEP 1: Main Menu title screen -->
     <div id="main-menu" class="mm-overlay" aria-live="polite">
-        <div class="mm-card">
-            <input type="file" id="mm-file-input" style="display: none;" accept=".json">
-            <h1 class="mm-title">A WAR WITHOUT VICTORY</h1>
-            <div class="mm-subtitle">Bosnia-Herzegovina, 1992&ndash;1995</div>
-            <div class="mm-buttons">
-                <button type="button" class="mm-btn" id="mm-new-campaign">New Campaign</button>
-                <button type="button" class="mm-btn" id="mm-load-save">Load Save</button>
-                <button type="button" class="mm-btn" id="mm-continue" disabled>Continue</button>
+        <div class="mm-stage">
+            <div class="mm-brand" aria-hidden="true">
+                <div class="mm-brand-kicker">Bosnia-Herzegovina, 1992&ndash;1995</div>
+                <h1 class="mm-title">A War Without Victory</h1>
+                <div class="mm-brand-rule"></div>
             </div>
-            <div class="mm-version">Pre-Alpha &mdash; War phase</div>
+            <div class="mm-card">
+                <input type="file" id="mm-file-input" style="display: none;" accept=".json">
+                <div class="mm-card-heading">Command Post</div>
+                <div class="mm-subtitle">War phase</div>
+                <div class="mm-buttons">
+                    <button type="button" class="mm-btn" id="mm-new-campaign">New Campaign</button>
+                    <button type="button" class="mm-btn" id="mm-load-save">Load Save</button>
+                    <button type="button" class="mm-btn" id="mm-continue" disabled>Continue</button>
+                </div>
+                <div class="mm-version">Pre-Alpha &mdash; War phase</div>
+            </div>
         </div>
     </div>
 

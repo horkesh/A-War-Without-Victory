@@ -179,6 +179,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
 
   return (
     <div
+      data-awwv-counter-occluder="true"
       className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
       style={{ zIndex: Z.SHELL_FLOATING }}
     >

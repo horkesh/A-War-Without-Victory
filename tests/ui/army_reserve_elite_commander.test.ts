@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 
 import React from 'react';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArmyReservePanel } from '../../src/ui/map/components/ArmyReservePanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
@@ -237,5 +237,46 @@ describe('ArmyReservePanel elite commander identity', () => {
     fireEvent.click(toggle);
 
     expect(screen.getByRole('button', { name: 'Expand campaign history' }).getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('can approve a pending reserve request with an available reserve brigade', async () => {
+    const approveReserveRequest = vi.fn(async () => ({ ok: true }));
+    Object.defineProperty(window, 'awwv', {
+      value: { approveReserveRequest },
+      configurable: true,
+    });
+    const state = makeReserveState(false);
+    state.commandAuthority = { current: 30, max: 100, spentThisTurn: 0, lifetimeSpent: 0 } as LoadedGameState['commandAuthority'];
+    state.pendingReserveRequests = [{
+      request_id: 'req-arbih-1',
+      corps_id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      reason: 'defensive_gap',
+      purpose: 'defensive',
+      priority: 82,
+      severityBand: 'critical',
+      travel_hops: 2,
+      description: '1st Corps requests reserve support.',
+      suggested_brigade_id: null,
+      turn_requested: 16,
+    }];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+    });
+
+    render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    fireEvent.click(screen.getByRole('button', {
+      name: 'Assign Guards Brigade to 1st Corps reserve request',
+    }));
+
+    await waitFor(() => expect(approveReserveRequest).toHaveBeenCalledWith(
+      'req-arbih-1',
+      'arbih_guards_brigade',
+      'President assigned a reserve brigade from the Army Reserve pool.',
+    ));
+    delete (window as unknown as { awwv?: unknown }).awwv;
   });
 });

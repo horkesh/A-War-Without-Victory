@@ -27,7 +27,6 @@ import type { FactionId, GameState } from '../../src/state/game_state.js';
 import type {
     PendingEventDecision,
     DimensionShift,
-    EventFutureConsequence,
 } from '../../src/sim/events/event_types.js';
 
 // ── Repo base dir ────────────────────────────────────────────────────────────
@@ -49,7 +48,6 @@ export interface DecisionOptionView {
     is_staff_recommended: boolean;
     /** Quantified per-option stakes the human modal shows; omitted when the option carries none. */
     dimension_shifts?: DimensionShift[];
-    future_consequences?: EventFutureConsequence[];
 }
 
 /** One pending event decision, flattened for the player. */
@@ -61,7 +59,6 @@ export interface DecisionView {
     situation?: string;
     staff_assessment?: string;
     trigger_evidence?: string[];
-    historical_source?: string;
     requires_player_response: boolean;
     historical_default_response_id?: string;
     staff_recommended_response_id?: string;
@@ -131,7 +128,6 @@ function viewDecision(d: PendingEventDecision): DecisionView {
         situation: d.situation,
         staff_assessment: d.staff_assessment,
         trigger_evidence: d.trigger_evidence,
-        historical_source: d.historical_source,
         requires_player_response: d.requires_player_response ?? false,
         historical_default_response_id: d.historical_default_response_id,
         staff_recommended_response_id: d.staff_recommended_response_id,
@@ -143,7 +139,6 @@ function viewDecision(d: PendingEventDecision): DecisionView {
             is_historical_default: o.id === d.historical_default_response_id,
             is_staff_recommended: o.id === d.staff_recommended_response_id,
             dimension_shifts: o.dimension_shifts,
-            future_consequences: o.future_consequences,
         })),
     };
 }

@@ -57,16 +57,25 @@ const FormationIconCanvas: React.FC<{ formation: FormationView; className?: stri
     );
 };
 
-const EnemyContactGlyph: React.FC<{ className?: string }> = ({ className }) => (
-    <div
-        data-contact-redacted="true"
-        aria-hidden="true"
-        className={`flex items-center justify-center rounded border border-white/25 bg-neutral-700/90 font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-white/75 shadow-lg ${className ?? ''}`}
-        style={{ width: '80px', height: '40px' }}
-    >
-        {t('tooltip.enemyContactTitle')}
-    </div>
-);
+const EnemyContactGlyph: React.FC<{ faction: string; className?: string }> = ({ faction, className }) => {
+    const factionColor = FACTION_HEX_COLORS[faction] ?? '#4b5563';
+    return (
+        <div
+            data-contact-redacted="true"
+            data-contact-faction-color={faction}
+            aria-hidden="true"
+            className={`flex items-center justify-center rounded border font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-white/85 shadow-lg ${className ?? ''}`}
+            style={{
+                width: '80px',
+                height: '40px',
+                backgroundColor: factionColor,
+                borderColor: 'rgba(255,255,255,0.35)',
+            }}
+        >
+            {t('tooltip.enemyContactTitle')}
+        </div>
+    );
+};
 
 /**
  * Premium animated overlay for fanning out a stack of formations.
@@ -235,7 +244,7 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                                 />
 
                                 {isEnemyContact ? (
-                                    <EnemyContactGlyph className="group-hover:scale-110 transition-transform" />
+                                    <EnemyContactGlyph faction={f.faction} className="group-hover:scale-110 transition-transform" />
                                 ) : (
                                     <FormationIconCanvas
                                         formation={f}

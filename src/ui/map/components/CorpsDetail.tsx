@@ -125,6 +125,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
   if (!loadedGameState || !corpsFormation) {
     return (
       <div
+        data-awwv-counter-occluder="true"
         className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
         style={getPanelRailStyle(railSlot, '24rem', 'left')}
       >
@@ -225,6 +226,7 @@ export function CorpsDetail({ railSlot }: CorpsDetailProps) {
 
   return (
     <div
+      data-awwv-counter-occluder="true"
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
     >

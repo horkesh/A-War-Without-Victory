@@ -11,13 +11,13 @@
   },
   "_note": "Engine-health gate thresholds (EH-1 Part B). Counts = ratcheting ceilings (+15%/+3 headroom); matched_osids = floor (no headroom); kw_ratio = advisory band. Re-bless via: node tools/engine_health_gate.cjs <run_dir> --horizon <h> --update",
   "188w": {
-    "zero_eligible_ops_max": 4,
-    "dead_ops_max": 25,
-    "ghost_destroyed_max": 4,
-    "stranded_brigades_max": 3,
-    "consistency_failures_max": 42,
-    "matched_osids_min": 609,
-    "kw_ratio_lo": 3.318,
-    "kw_ratio_hi": 4.488
+    "zero_eligible_ops_max": 5,
+    "dead_ops_max": 15,
+    "ghost_destroyed_max": 5,
+    "stranded_brigades_max": 7,
+    "consistency_failures_max": 3,
+    "matched_osids_min": 646,
+    "kw_ratio_lo": 3.272,
+    "kw_ratio_hi": 4.427
   }
 }

@@ -255,6 +255,111 @@ describe('attack resolution intel execution friction', () => {
         expect(report.battles[0]?.target_osid).toBe('op:rbih:target');
     });
 
+    it('includes physical target defenders when sector reserve defense also exists', () => {
+        const { state, edges } = makeScenario();
+        const sectorDefender = state.military.formations.brig_rbih_1!;
+        sectorDefender.location_osid = 'op:rbih:rear';
+        sectorDefender.personnel = 300;
+        sectorDefender.cohesion = 30;
+        state.political.political_controllers!['op:rbih:rear'] = 'RBiH';
+        state.military.formations.brig_rbih_physical = makeFormation(
+            'brig_rbih_physical',
+            'RBiH',
+            'brigade',
+            'op:rbih:target',
+            {
+                corps_id: 'rbih_corps',
+                personnel: 2000,
+                cohesion: 80,
+                morale: 80,
+                posture: 'defend' as any,
+            },
+        );
+        const defenderSector = state.military.corps_front_sectors!['sector:rbih_defense:0']!;
+        defenderSector.sub_segments[0]!.friendly_osids = ['op:rbih:target', 'op:rbih:rear'];
+        defenderSector.territory_osids = ['op:rbih:target', 'op:rbih:rear'] as any;
+        edges.push({ edge_id: 'e2', a: 'op:rbih:target', b: 'op:rbih:rear' } as EdgeRecord);
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            edges,
+            new Map<string, string[]>(),
+            null,
+            undefined,
+            new Map(),
+        );
+
+        expect(report.battles[0]?.defender_brigade).toBe('brig_rbih_physical');
+    });
+
+    it('keeps local militia defense floor when only sector reserves cover the target', () => {
+        const { state, edges } = makeScenario();
+        const attacker = state.military.formations.brig_rs_1!;
+        attacker.personnel = 500;
+        attacker.cohesion = 60;
+        attacker.experience = 0.2;
+        attacker.composition = {
+            infantry: 500,
+            tanks: 0,
+            artillery: 0,
+            aa_systems: 0,
+            tank_condition: { operational: 0, degraded: 0, non_operational: 0 },
+            artillery_condition: { operational: 0, degraded: 0, non_operational: 0 },
+        };
+        const sectorReserve = state.military.formations.brig_rbih_1!;
+        sectorReserve.location_osid = 'op:rbih:rear';
+        sectorReserve.personnel = 5;
+        sectorReserve.cohesion = 20;
+        sectorReserve.composition = {
+            infantry: 5,
+            tanks: 0,
+            artillery: 0,
+            aa_systems: 0,
+            tank_condition: { operational: 0, degraded: 0, non_operational: 0 },
+            artillery_condition: { operational: 0, degraded: 0, non_operational: 0 },
+        };
+        state.political.political_controllers!['op:rbih:rear'] = 'RBiH';
+        const defenderSector = state.military.corps_front_sectors!['sector:rbih_defense:0']!;
+        defenderSector.sub_segments[0]!.friendly_osids = ['op:rbih:target', 'op:rbih:rear'];
+        defenderSector.territory_osids = ['op:rbih:target', 'op:rbih:rear'] as any;
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            edges,
+            new Map<string, string[]>(),
+            null,
+            undefined,
+            new Map([['op:rbih:target', 100]]),
+        );
+
+        expect(report.battles[0]?.power_ratio).toBeLessThan(4);
+    });
+
+    it('uses adjacent same-corps defenders when the responsible defending sector is empty', () => {
+        const { state, edges } = makeScenario();
+        const adjacentDefender = state.military.formations.brig_rbih_1!;
+        adjacentDefender.location_osid = 'op:rbih:rear';
+        adjacentDefender.personnel = 1200;
+        state.political.political_controllers!['op:rbih:rear'] = 'RBiH';
+        const defenderSector = state.military.corps_front_sectors!['sector:rbih_defense:0']!;
+        defenderSector.assigned_brigade_ids = [];
+        defenderSector.reserve_brigade_ids = [];
+        defenderSector.sub_segments[0]!.friendly_osids = ['op:rbih:target', 'op:rbih:rear'];
+        defenderSector.territory_osids = ['op:rbih:target', 'op:rbih:rear'] as any;
+        edges.push({ edge_id: 'e2', a: 'op:rbih:target', b: 'op:rbih:rear' } as EdgeRecord);
+
+        const report = resolveAttackOrdersOsid(
+            state,
+            edges,
+            new Map<string, string[]>(),
+            null,
+            undefined,
+            new Map(),
+        );
+
+        expect(report.battles[0]?.defender_brigade).toBe('brig_rbih_1');
+    });
+
     it('computes deterministic stale-intel attack and OPSEC defense multipliers', () => {
         expect(getIntelExecutionFrictionMultipliers(1, false)).toEqual({
             attackerPowerMult: 1,

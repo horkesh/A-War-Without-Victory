@@ -8,6 +8,46 @@ const runsDir = path.resolve(__dirname, '../../../runs');
 const mapRoot = path.resolve(__dirname, '.');
 const mapPublicFontDir = path.resolve(mapRoot, 'public', 'font');
 const mapBuildFontDir = path.resolve(__dirname, '../../../dist/tactical-map/font');
+const browserChildProcessShim = path.resolve(mapRoot, 'shims', 'browserChildProcessShim.ts');
+
+function tacticalMapManualChunks(id: string): string | undefined {
+  const normalized = id.replace(/\\/g, '/');
+  const eventCatalogMatch = normalized.match(/\/data\/scenarios\/events\/([^/]+)\.json$/);
+  if (eventCatalogMatch) return `event-catalog-${eventCatalogMatch[1].replace(/[^a-z0-9_-]/gi, '-')}`;
+  if (normalized.endsWith('/data/scenarios/essays/essay_index.json')) return 'codex-essay-index';
+  if (normalized.endsWith('/data/source/oob_brigades.json')) return 'oob-brigades';
+  if (normalized.endsWith('/data/source/oob_brigade_designations.json')) return 'oob-brigade-designations';
+  if (normalized.endsWith('/data/derived/operational/osid_areas.json')) return 'operational-osid-areas';
+
+  if (normalized.includes('/node_modules/')) {
+    if (normalized.includes('/react/') || normalized.includes('/react-dom/') || normalized.includes('/scheduler/')) {
+      return 'vendor-react';
+    }
+    if (normalized.includes('/maplibre-gl/')) return 'vendor-maplibre';
+    if (normalized.includes('/@deck.gl/') || normalized.includes('/deck.gl/')) return 'vendor-deck';
+    if (normalized.includes('/@luma.gl/')) return 'vendor-luma';
+    if (normalized.includes('/@loaders.gl/')) return 'vendor-loaders';
+    if (normalized.includes('/@turf/')) return 'vendor-turf';
+    if (normalized.includes('/zustand/')) return 'vendor-state';
+    return 'vendor-misc';
+  }
+
+  if (normalized.includes('/src/sim/')) return 'map-sim';
+  if (
+    normalized.includes('/src/ui/map/components/warroom/') ||
+    normalized.includes('/src/ui/map/components/army_hq/') ||
+    normalized.includes('/src/ui/map/components/chronicle/')
+  ) {
+    return 'feature-command-ui';
+  }
+  if (normalized.includes('/src/ui/map/components/ops_modal/')) return 'feature-ops-planning';
+  if (normalized.includes('/src/ui/map/components/presidential_desk/')) return 'feature-presidential-desk';
+  if (normalized.includes('/src/ui/map/components/onboarding/')) return 'feature-onboarding';
+  if (normalized.includes('/src/ui/map/components/plan_ui/')) return 'feature-plan-ui';
+  if (normalized.includes('/src/ui/map/components/verdict/')) return 'feature-verdict';
+  if (normalized.includes('/src/ui/map/map/')) return 'map-rendering';
+  return undefined;
+}
 
 export default defineConfig({
   plugins: [
@@ -135,9 +175,13 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../../../dist/tactical-map'),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 1200,
     rollupOptions: {
       input: {
         tactical_map: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        manualChunks: tacticalMapManualChunks,
       },
     },
     copyPublicDir: false,
@@ -145,6 +189,8 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, '.'),
+      'child_process': browserChildProcessShim,
+      'node:child_process': browserChildProcessShim,
     },
   },
 });

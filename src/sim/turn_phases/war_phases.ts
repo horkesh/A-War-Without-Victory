@@ -96,7 +96,12 @@ import { applyPhase3DCollapseResolution } from '../collapse/phase3d_collapse_res
 import { evaluateEvents } from '../events/evaluate_events.js';
 import { updateEventReadiness } from '../events/pressure_system.js';
 import { collectStrategicReserves, reinforceFromStrategicReserves } from '../combat/strategic_reserve.js';
-import { reinforceBrigadesFromPools, applyWiaTrickleback } from '../formation_spawn.js';
+import {
+    applyWiaTrickleback,
+    getActiveFormationSpawnDirective,
+    reinforceBrigadesFromPools,
+    spawnFormationsFromPools
+} from '../formation_spawn.js';
 import { runFormationHqRelocation } from '../formation_hq_relocation.js';
 import { ensureRbihHrhbState, updateAllianceValue, countBilateralFlips, countTerritorialIncidents } from '../early_war/alliance_update.js';
 import { checkAndApplyCeasefire } from '../early_war/bilateral_ceasefire.js';
@@ -3227,6 +3232,40 @@ export const warPhases: NamedPhase[] = [
                 }
                 reroutePoolSurplus(context.state, faction, unspawnedByMun);
             }
+        }
+    },
+    {
+        name: 'formation-spawn',
+        run: async (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            const directive = getActiveFormationSpawnDirective(context.state);
+            if (!directive) return;
+            const kind = directive.kind === 'both' || directive.kind === 'militia'
+                ? 'brigade'
+                : (directive.kind ?? 'brigade');
+            let canonicalToOperational: import('../../data/operational_data.js').CanonicalToOperationalMap | undefined;
+            try {
+                const baseDir = typeof process !== 'undefined' && typeof process.cwd === 'function' ? process.cwd() : '';
+                if (baseDir) {
+                    const opData = await loadOperationalData(baseDir);
+                    canonicalToOperational = opData.canonicalToOperational;
+                }
+            } catch {
+                // Keep formation spawn deterministic if optional operational data is unavailable.
+            }
+            context.report.formation_spawn = spawnFormationsFromPools(context.state, {
+                factionFilter: null,
+                munFilter: null,
+                maxPerMun: null,
+                customTags: [],
+                applyChanges: true,
+                formationKind: kind,
+                municipalityHqSettlement: context.input.municipalityHqSettlement ?? undefined,
+                historicalNameLookup: context.input.historicalNameLookup ?? undefined,
+                historicalCorpsLookup: context.input.historicalCorpsLookup ?? undefined,
+                population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
+                canonicalToOperational
+            }, getSiegeStateCache(context)?.siegeRatios);
         }
     },
     {

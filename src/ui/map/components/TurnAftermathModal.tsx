@@ -23,7 +23,8 @@ interface TurnAftermathModalProps {
   onOpenSummary: () => void;
   onOpenRecords: () => void;
   onOpenChronicle: () => void;
-  onOpenCodex: () => void;
+  onOpenCodex: (eventId?: string) => void;
+  onReviewAction?: (action: TurnAftermathTopAction) => void;
   /**
    * Realized consequence receipts whose CONFIRMED firing landed on this turn.
    * Closes the promise→receipt loop: each entry pairs the player's originating
@@ -87,6 +88,10 @@ function signalDetailCopy(detail: string): string {
   return detail;
 }
 
+function signalEventId(signalId: string): string | undefined {
+  return signalId.startsWith('event:') ? signalId.slice('event:'.length) : undefined;
+}
+
 function enumLabel(prefix: string, value: string): string {
   return t(`${prefix}.${value}` as MessageKey);
 }
@@ -139,6 +144,7 @@ export function TurnAftermathModal({
   onOpenRecords,
   onOpenChronicle,
   onOpenCodex,
+  onReviewAction,
   consequences,
   forcedOps,
   officerResentment,
@@ -146,10 +152,18 @@ export function TurnAftermathModal({
   if (!view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
+  const primaryAction = view.nextActions.topItems[0] ?? null;
   const signalPreview = view.signals.slice(0, 4);
   const realizedConsequences = consequences ?? [];
   const realizedForcedOps = forcedOps ?? [];
   const realizedOfficerResentment = officerResentment ?? [];
+  const triggerActionReview = (item: TurnAftermathTopAction) => {
+    if (onReviewAction) {
+      onReviewAction(item);
+    } else {
+      onOpenInbox();
+    }
+  };
 
   return (
     <Modal
@@ -230,7 +244,6 @@ export function TurnAftermathModal({
                     <div
                       key={receipt.id}
                       data-testid="turn-aftermath-consequence-row"
-                      data-receipt-id={receipt.id}
                       className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
                     >
                       {t('turnAftermath.consequenceWarned', {
@@ -262,7 +275,6 @@ export function TurnAftermathModal({
                     <div
                       key={receipt.id}
                       data-testid="turn-aftermath-forced-op-row"
-                      data-receipt-id={receipt.id}
                       className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
                     >
                       {t('turnAftermath.forcedOpForced', {
@@ -298,7 +310,6 @@ export function TurnAftermathModal({
                     <div
                       key={receipt.id}
                       data-testid="turn-aftermath-officer-resentment-row"
-                      data-receipt-id={receipt.id}
                       className="px-3 py-2.5 text-[12px] leading-5 text-text-primary/85"
                     >
                       {t('officerResentment.overrode', {
@@ -329,10 +340,16 @@ export function TurnAftermathModal({
                 {signalPreview.length === 0 ? (
                   <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noSignals')}</div>
                 ) : signalPreview.map((signal) => (
-                  <div key={signal.id} className={`px-3 py-2 ${signalTone(signal.severity)}`}>
+                  <button
+                    key={signal.id}
+                    type="button"
+                    onClick={() => onOpenCodex(signalEventId(signal.id))}
+                    data-testid="turn-aftermath-signal-row"
+                    className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${signalTone(signal.severity)}`}
+                  >
                     <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
                     <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signalDetailCopy(signal.detail)}</div>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -372,7 +389,7 @@ export function TurnAftermathModal({
                 <button type="button" onClick={onOpenChronicle} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
                   {t('turnAftermath.chronicle')}
                 </button>
-                <button type="button" onClick={onOpenCodex} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
+                <button type="button" onClick={() => onOpenCodex()} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
                   {t('turnAftermath.codex')}
                 </button>
               </div>
@@ -392,10 +409,22 @@ export function TurnAftermathModal({
                 {!hasTopActions ? (
                   <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noDecisions')}</div>
                 ) : view.nextActions.topItems.map((item) => (
-                  <div key={item.id} className={`px-3 py-2 ${actionTone(item)}`}>
-                    <div className="truncate text-sm font-semibold">{item.title}</div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{actionTypeLabel(item.type)}</div>
-                  </div>
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => triggerActionReview(item)}
+                    className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${actionTone(item)}`}
+                  >
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{item.title}</div>
+                        <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{actionTypeLabel(item.type)}</div>
+                      </div>
+                      <span className="shrink-0 rounded border border-current/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.12em] opacity-90">
+                        {item.actionLabel}
+                      </span>
+                    </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -414,9 +443,33 @@ export function TurnAftermathModal({
           <button type="button" onClick={onOpenRecords} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
             {t('turnAftermath.turnRecords')}
           </button>
-          <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]">
-            {t('turnAftermath.reviewInbox')}
-          </button>
+          {primaryAction ? (
+            <button
+              type="button"
+              data-testid="turn-aftermath-primary-action"
+              onClick={() => triggerActionReview(primaryAction)}
+              aria-label={t('turnAftermath.primaryAction.aria', {
+                action: primaryAction.actionLabel,
+                title: primaryAction.title,
+              })}
+              title={t('turnAftermath.primaryAction.aria', {
+                action: primaryAction.actionLabel,
+                title: primaryAction.title,
+              })}
+              className="min-w-0 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-2 text-left text-amber-200 hover:bg-amber-400/25 focus:outline-none focus:ring-1 focus:ring-amber-300 sm:px-4"
+            >
+              <span className="block truncate text-[8px] font-mono uppercase tracking-[0.14em] text-amber-300/70 sm:text-[9px]">
+                {t('turnAftermath.primaryAction.label')}
+              </span>
+              <span className="mt-0.5 block truncate text-[10px] font-mono uppercase tracking-[0.12em] sm:text-[11px]">
+                {primaryAction.actionLabel}
+              </span>
+            </button>
+          ) : (
+            <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]">
+              {t('turnAftermath.reviewInbox')}
+            </button>
+          )}
         </div>
       </>
     </Modal>

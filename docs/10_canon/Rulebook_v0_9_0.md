@@ -258,7 +258,7 @@ When a sector is attacked, the defense is not limited to brigades physically pre
 
 **Reactive defense ratio:** The defender mobilizes up to 1.5 brigade-equivalents of reserves per attacking brigade (capped at available reserve power). This prevents massed attacks from automatically overwhelming defenders — the defense reacts proportionally to the threat.
 
-**Minimum defense floor:** Even if no brigade is physically present, the defense at any sector edge is at least 75% of one brigade's average power, representing the continuous locked front line.
+**Minimum defense floor:** Even if no brigade is physically present, local militia defense remains in force. Sector coverage cannot reduce an attacked OSID below the militia-only fallback. If a sector roster is empty but an active same-corps defender is one friendly hop from the target, that unit can react; otherwise isolated pockets without a legal nearby formation are militia-only defenses.
 
 **Casualty distribution:** When reserves contribute to defense, casualties are distributed proportionally to each brigade's contribution weight. Brigades closer to the fight and with home-municipality motivation absorb more casualties. A casualty engagement cap (1.5x attacker personnel) prevents defenders from taking disproportionate losses when they have overwhelming local superiority.
 

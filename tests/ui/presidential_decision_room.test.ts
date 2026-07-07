@@ -2062,6 +2062,31 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     expect(`${reviewCard?.title} ${reviewCard?.evidence.join(' ')}`).not.toMatch(/\bops\b|Ops/);
   });
 
+  it('labels historical operation authorization reviews as operation plan decisions', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeRawWithHeldPlan({
+        playerFaction: 'RBiH',
+        proposedAction: 'HISTORICAL_OP:triggered:arbih_1st_corps:Operation Test Plan',
+      }),
+    });
+
+    const reviewCard = view.cards.find((c) => c.id === 'command:review-proposal:rev_1');
+
+    expect(reviewCard?.title).toBe('Operation Test Plan');
+    expect(reviewCard?.severity).toBe('blocking');
+    expect(reviewCard?.actionLabel).toBe('Review authorization');
+    expect(reviewCard?.sourceLabel).toBe('Operation authorization');
+    expect(reviewCard?.explanation).toBe('Your staff is asking for authority to open this operation. It will not launch until you approve or withhold it.');
+    expect(reviewCard?.evidence.join(' ')).toContain('Historical operation awaiting presidential authorization');
+    expect(reviewCard?.evidence.join(' ')).toContain('Presidential launch authority required');
+    expect(reviewCard?.sourceHandoffTarget).toEqual({
+      kind: 'army-hq-corps-briefing',
+      corpsId: 'arbih_1st_corps',
+    });
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+    expect(view.advanceReadiness.items.map((item) => item.id)).toContain('command:review-proposal:rev_1');
+  });
+
   it('emits no proactive cards when there is no player faction', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeRawWithHeldPlan({ playerFaction: null }),

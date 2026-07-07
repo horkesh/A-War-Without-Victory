@@ -174,6 +174,31 @@ describe('findSectorForEnemyOsid', () => {
 
         expect(findSectorForEnemyOsid(state, 'op:rs:shared')?.sector_id).toBe('sector:aaa:0');
     });
+
+    it('prefers a live defended sector over an empty overlapping sector claim', () => {
+        const emptySector = makeSector(
+            'sector:aaa_empty:0',
+            'aaa_empty',
+            'RBiH',
+            [],
+            [makeSubSegment('subEmpty', ['op:rbih:shared'], ['op:rs:1'], ['e1'])],
+        );
+        const defendedSector = makeSector(
+            'sector:zzz_defended:0',
+            'zzz_defended',
+            'RBiH',
+            ['arbih_line'],
+            [makeSubSegment('subDefended', ['op:rbih:shared'], ['op:rs:2'], ['e2'])],
+        );
+        const defender = makeFormation('arbih_line', 'RBiH', 'brigade', 'op:rbih:rear');
+        const state = makeState({ arbih_line: defender }, { 'op:rbih:shared': 'RBiH' }, {
+            'sector:aaa_empty:0': emptySector,
+            'sector:zzz_defended:0': defendedSector,
+        });
+
+        expect(findSectorForEnemyOsid(state, 'op:rbih:shared', 'RBiH')?.sector_id)
+            .toBe('sector:zzz_defended:0');
+    });
 });
 
 describe('getCorpsHqOsid', () => {

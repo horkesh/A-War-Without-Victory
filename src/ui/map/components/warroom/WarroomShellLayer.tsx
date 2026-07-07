@@ -308,6 +308,7 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
   playerFaction: string | null;
 }) {
   const box = getWarroomRegionBoxStyle(region);
+  const playerInk = factionInkColor(playerFaction);
   return (
     <div
       aria-hidden="true"
@@ -316,31 +317,114 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
         ...box,
         pointerEvents: 'none',
         zIndex: 1,
-        padding: '0.9%',
+        padding: '0.74%',
       }}
     >
       <div
+        data-testid="warroom-wall-map-paper"
         style={{
+          position: 'relative',
           width: '100%',
           height: '100%',
-          background: 'linear-gradient(135deg, rgba(242,232,198,0.98), rgba(212,194,150,0.96))',
-          border: '2px solid rgba(68,48,30,0.62)',
-          boxShadow: '0 5px 14px rgba(0,0,0,0.34), inset 0 0 18px rgba(84,59,35,0.24)',
-          transform: 'rotate(-0.6deg)',
+          background: [
+            'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.26), transparent 18%)',
+            'radial-gradient(circle at 82% 78%, rgba(95,62,32,0.13), transparent 24%)',
+            'repeating-linear-gradient(0deg, rgba(78,58,38,0.05) 0 1px, transparent 1px 9px)',
+            'linear-gradient(135deg, rgba(242,232,198,0.98), rgba(212,194,150,0.96))',
+          ].join(', '),
+          border: '3px solid rgba(83,55,31,0.78)',
+          outline: '1px solid rgba(236,204,143,0.42)',
+          boxShadow: [
+            '0 9px 18px rgba(0,0,0,0.46)',
+            '0 1px 0 rgba(255,236,184,0.42) inset',
+            '0 0 0 7px rgba(129,85,45,0.28)',
+            '0 0 22px rgba(20,12,6,0.28) inset',
+          ].join(', '),
+          transform: 'perspective(700px) rotateX(0.8deg) rotateY(-1.1deg) rotate(-0.55deg)',
+          transformOrigin: '52% 45%',
           overflow: 'hidden',
         }}
       >
+        <div
+          data-testid="warroom-wall-map-hanging-hardware"
+          style={{
+            position: 'absolute',
+            inset: '2.5% 2.2% auto 2.2%',
+            height: '5.6%',
+            zIndex: 3,
+            borderTop: '1px solid rgba(79,49,24,0.44)',
+            boxShadow: '0 1px 0 rgba(255,242,198,0.22) inset',
+          }}
+        >
+          {[
+            ['5%', 'rgba(115,48,38,0.92)'],
+            ['35%', 'rgba(54,91,61,0.92)'],
+            ['64%', 'rgba(128,96,42,0.9)'],
+            ['93%', 'rgba(115,48,38,0.92)'],
+          ].map(([left, color]) => (
+            <span
+              key={left}
+              style={{
+                position: 'absolute',
+                left,
+                top: '-5px',
+                width: 9,
+                height: 9,
+                borderRadius: '50%',
+                background: color,
+                border: '1px solid rgba(31,20,13,0.68)',
+                boxShadow: '0 2px 5px rgba(0,0,0,0.38), 0 0 0 1px rgba(255,235,185,0.18) inset',
+              }}
+            />
+          ))}
+        </div>
         {model ? (
-          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style={{ display: 'block', width: '100%', height: '100%' }}>
+          <svg
+            viewBox="0 0 100 100"
+            preserveAspectRatio="xMidYMid meet"
+            style={{
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              filter: 'sepia(0.16) saturate(0.92) contrast(1.03)',
+            }}
+          >
+            <defs>
+              <filter id="warroom-wall-map-roughen">
+                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" seed="12" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.18" />
+              </filter>
+              <pattern id="warroom-wall-map-fold-grid" width="12.5" height="12.5" patternUnits="userSpaceOnUse">
+                <path d="M12.5 0H0V12.5" fill="none" stroke="rgba(75,58,40,0.08)" strokeWidth="0.16" />
+              </pattern>
+            </defs>
             <rect x="0" y="0" width="100" height="100" fill="rgba(233,222,190,0.9)" />
+            <rect x="0" y="0" width="100" height="100" fill="url(#warroom-wall-map-fold-grid)" />
+            <path d="M49.8 0V100" stroke="rgba(84,62,39,0.16)" strokeWidth="0.34" />
+            <path d="M0 50.1H100" stroke="rgba(84,62,39,0.11)" strokeWidth="0.28" />
             <g fill="none" stroke="rgba(66,58,45,0.26)" strokeWidth="0.22">
               {model.outlinePaths.map((path, index) => <path key={`outline-${index}`} d={path} />)}
             </g>
-            <g fill={factionInkColor(playerFaction)} stroke="rgba(48,40,31,0.32)" strokeWidth="0.16">
+            <g fill={playerInk} stroke="rgba(48,40,31,0.32)" strokeWidth="0.16" filter="url(#warroom-wall-map-roughen)">
               {model.territoryPaths.map((path, index) => <path key={`territory-${index}`} d={path} />)}
             </g>
             <g fill="none" stroke="rgba(26,22,18,0.9)" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" strokeDasharray="1.7 1.1">
               {model.frontLinePaths.map((path, index) => <path key={`front-${index}`} d={path} />)}
+            </g>
+            <g
+              data-testid="warroom-wall-map-staff-marks"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{ mixBlendMode: 'multiply' }}
+            >
+              <path d="M27 31C36 26 44 28 51 36" stroke="rgba(91,37,32,0.62)" strokeWidth="0.62" strokeDasharray="1.4 1.3" />
+              <path d="M52 42C62 46 68 54 73 66" stroke="rgba(41,74,58,0.54)" strokeWidth="0.54" strokeDasharray="2 1.5" />
+              <path d="M36 72C47 69 55 72 64 79" stroke="rgba(39,51,88,0.42)" strokeWidth="0.46" strokeDasharray="1.1 1.2" />
+              <circle cx="27" cy="31" r="1.2" fill="rgba(115,48,38,0.88)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
+              <circle cx="51" cy="36" r="1.05" fill="rgba(115,48,38,0.82)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
+              <circle cx="73" cy="66" r="1.15" fill="rgba(49,93,61,0.82)" stroke="rgba(39,23,18,0.5)" strokeWidth="0.2" />
+              <circle cx="64" cy="79" r="1" fill="rgba(42,71,130,0.7)" stroke="rgba(39,23,18,0.46)" strokeWidth="0.2" />
             </g>
           </svg>
         ) : (
@@ -361,6 +445,21 @@ function WarroomProjectedMap({ region, model, playerFaction }: {
             {t('warroomShell.mapUpdating')}
           </div>
         )}
+        <div
+          data-testid="warroom-wall-map-glare"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            zIndex: 4,
+            pointerEvents: 'none',
+            background: [
+              'linear-gradient(92deg, transparent 0 38%, rgba(255,255,255,0.2) 47%, rgba(255,255,255,0.05) 55%, transparent 68%)',
+              'radial-gradient(ellipse at 42% 8%, rgba(255,247,210,0.22), transparent 35%)',
+              'linear-gradient(180deg, rgba(30,18,8,0.13), transparent 22%, transparent 76%, rgba(58,35,16,0.14))',
+            ].join(', '),
+            mixBlendMode: 'screen',
+          }}
+        />
       </div>
     </div>
   );

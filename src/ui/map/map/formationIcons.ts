@@ -7,17 +7,24 @@ export const ICON_WIDTH = 160;
 export const ICON_HEIGHT = 80;
 const PIXEL_RATIO = 2;
 const CORNER_RADIUS = 8; // 4 CSS px at pixelRatio 2
+const COUNTER_BODY_INSET = 6;
+const COUNTER_BODY_X = COUNTER_BODY_INSET;
+const COUNTER_BODY_Y = COUNTER_BODY_INSET;
+const COUNTER_BODY_WIDTH = ICON_WIDTH - COUNTER_BODY_INSET * 2;
+const COUNTER_BODY_HEIGHT = ICON_HEIGHT - COUNTER_BODY_INSET * 2;
+const COUNTER_HALO_FILL = 'rgba(235, 225, 205, 0.98)';
+const COUNTER_HALO_BORDER = 'rgba(18, 14, 10, 0.72)';
 
 const FACTION_FILL: Record<string, string> = {
-  RS: 'rgba(178, 60, 60, 0.92)',
-  RBiH: 'rgba(55, 135, 70, 0.92)',
-  HRHB: 'rgba(50, 108, 168, 0.92)',
+  RS: 'rgba(178, 60, 60, 1)',
+  RBiH: 'rgba(55, 135, 70, 1)',
+  HRHB: 'rgba(50, 108, 168, 1)',
 };
 
 const FACTION_BORDER: Record<string, string> = {
-  RS: 'rgba(120, 30, 30, 0.95)',
-  RBiH: 'rgba(30, 90, 45, 0.95)',
-  HRHB: 'rgba(25, 65, 115, 0.95)',
+  RS: 'rgba(120, 30, 30, 1)',
+  RBiH: 'rgba(30, 90, 45, 1)',
+  HRHB: 'rgba(25, 65, 115, 1)',
 };
 
 export function drawTacticalSymbol(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number): void {
@@ -117,14 +124,22 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
   const actualIconId = isWhiteVariant ? iconId.slice(7) : iconId;
   const { kind, faction, posture } = parseIconId(actualIconId);
   const canonicalFaction = normalizeFactionId(faction);
-  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 0.98)' : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 0.92)');
-  const border = isWhiteVariant ? 'rgba(20, 20, 20, 0.95)' : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 0.95)');
-  const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 0.95)' : 'rgba(255, 255, 255, 0.97)';
+  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)');
+  const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)');
+  const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : 'rgba(255, 255, 255, 1)';
 
   ctx.clearRect(0, 0, ICON_WIDTH, ICON_HEIGHT);
 
+  // Screen-space counters need their own opaque backing over pitched relief.
+  roundedRect(ctx, 0, 0, ICON_WIDTH, ICON_HEIGHT, CORNER_RADIUS + 4);
+  ctx.fillStyle = COUNTER_HALO_FILL;
+  ctx.fill();
+  ctx.strokeStyle = COUNTER_HALO_BORDER;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
   // Background fill
-  roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
+  roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS);
   ctx.fillStyle = fill;
   ctx.fill();
 
@@ -132,15 +147,15 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
   const stripeColor = posture ? (POSTURE_STRIPE[posture] ?? null) : null;
   if (stripeColor) {
     ctx.save();
-    roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
+    roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS);
     ctx.clip();
     ctx.fillStyle = stripeColor;
-    ctx.fillRect(2, 2, 12, ICON_HEIGHT - 4);
+    ctx.fillRect(COUNTER_BODY_X, COUNTER_BODY_Y, 12, COUNTER_BODY_HEIGHT);
     ctx.restore();
   }
 
   // Border
-  roundedRect(ctx, 2, 2, ICON_WIDTH - 4, ICON_HEIGHT - 4, CORNER_RADIUS);
+  roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS);
   ctx.strokeStyle = border;
   ctx.lineWidth = 4;
   ctx.stroke();
@@ -148,25 +163,26 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
   // Status Bars: bottom 16px (15-20% of counter)
   const { health, morale } = parseIconId(actualIconId);
   if (health !== undefined || morale !== undefined) {
-    const barY = ICON_HEIGHT - 12;
+    const barY = COUNTER_BODY_Y + COUNTER_BODY_HEIGHT - 10;
     const barH = 6;
-    const totalW = ICON_WIDTH - 24; // Account for posture stripe and padding
+    const barX = COUNTER_BODY_X + 16;
+    const totalW = COUNTER_BODY_WIDTH - 24; // Account for posture stripe and padding
 
     // Health (Green/Red)
     if (health !== undefined) {
       const hW = (totalW / 2) - 4;
       const hPct = health / 100;
       ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
-      ctx.fillRect(18, barY, hW, barH);
+      ctx.fillRect(barX, barY, hW, barH);
       ctx.fillStyle = hPct > 0.4 ? 'rgba(50, 200, 50, 0.9)' : 'rgba(200, 50, 50, 0.9)';
-      ctx.fillRect(18, barY, hW * hPct, barH);
+      ctx.fillRect(barX, barY, hW * hPct, barH);
     }
 
     // Morale (Cyan)
     if (morale !== undefined) {
       const mW = (totalW / 2) - 4;
       const mPct = morale / 100;
-      const mX = 18 + (totalW / 2) + 4;
+      const mX = barX + (totalW / 2) + 4;
       ctx.fillStyle = 'rgba(20, 20, 20, 0.6)';
       ctx.fillRect(mX, barY, mW, barH);
       ctx.fillStyle = 'rgba(50, 200, 255, 0.9)';

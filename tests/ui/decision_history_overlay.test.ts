@@ -84,6 +84,10 @@ function renderOverlay(props: {
     }));
 }
 
+function rowTitle(row: HTMLElement): string {
+    return row.querySelector('[data-testid="decision-history-event-id"]')?.textContent ?? '';
+}
+
 describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
     it('renders nothing when isOpen is false', () => {
         const state = buildState({
@@ -101,8 +105,8 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
             { event_id: 'evt_bravo', response_id: 'opt_b', turn: 7 },
         ];
         const catalog = new Map<string, EventDefinition>([
-            ['evt_alpha', buildEventDef('evt_alpha', { family: 'family_alpha' })],
-            ['evt_bravo', buildEventDef('evt_bravo', { family: 'family_bravo' })],
+            ['evt_alpha', buildEventDef('evt_alpha', { family: 'family_alpha', title: 'Alpha decision' })],
+            ['evt_bravo', buildEventDef('evt_bravo', { family: 'family_bravo', title: 'Bravo decision' })],
         ]);
         const state = buildState({ decisions });
         renderOverlay({ eventCatalog: catalog, state });
@@ -110,8 +114,9 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(screen.getByTestId('decision-history-overlay')).toBeTruthy();
         const rows = screen.getAllByTestId('decision-history-row');
         expect(rows).toHaveLength(2);
-        expect(rows[0].getAttribute('data-event-id')).toBe('evt_alpha');
-        expect(rows[1].getAttribute('data-event-id')).toBe('evt_bravo');
+        expect(rows.map(rowTitle)).toEqual(['Alpha decision', 'Bravo decision']);
+        expect(rows[0].getAttribute('data-event-id')).toBeNull();
+        expect(rows[1].getAttribute('data-event-id')).toBeNull();
         // Header count reflects total.
         expect(screen.getByTestId('decision-history-count').textContent).toContain('2 decisions');
     });
@@ -159,7 +164,9 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
             { turn: 1, from_event: 'evt_root', to_event: 'evt_child_b', to_flag: null, kind: 'enables' },
         ];
         const catalog = new Map<string, EventDefinition>([
-            ['evt_root', buildEventDef('evt_root')],
+            ['evt_root', buildEventDef('evt_root', { title: 'Root decision' })],
+            ['evt_child_a', buildEventDef('evt_child_a', { title: 'Child event A' })],
+            ['evt_child_b', buildEventDef('evt_child_b', { title: 'Child event B' })],
         ]);
         const state = buildState({
             decisions: [{ event_id: 'evt_root', response_id: 'opt_b', turn: 4 }],
@@ -180,16 +187,17 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         expect(screen.getByTestId('decision-history-row-expanded')).toBeTruthy();
         const descRows = screen.getAllByTestId('decision-history-descendant-row');
         expect(descRows).toHaveLength(2);
-        const descIds = descRows.map((r) => r.getAttribute('data-event-id')).sort();
-        expect(descIds).toEqual(['evt_child_a', 'evt_child_b']);
+        const descLabels = descRows.map((r) => r.textContent ?? '').sort();
+        expect(descLabels).toEqual(['Child event A', 'Child event B']);
+        expect(descRows.map((r) => r.getAttribute('data-event-id'))).toEqual([null, null]);
     });
 
     it('renders Diverged badge when chosen option differs from historical_default_response_id', () => {
         const catalog = new Map<string, EventDefinition>([
             // Historical default is opt_a; player chose opt_b.
-            ['evt_diverged', buildEventDef('evt_diverged', { historical_default_response_id: 'opt_a' })],
+            ['evt_diverged', buildEventDef('evt_diverged', { historical_default_response_id: 'opt_a', title: 'Diverged decision' })],
             // Historical default is opt_a; player chose opt_a.
-            ['evt_historical', buildEventDef('evt_historical', { historical_default_response_id: 'opt_a' })],
+            ['evt_historical', buildEventDef('evt_historical', { historical_default_response_id: 'opt_a', title: 'Historical decision' })],
         ]);
         const state = buildState({
             decisions: [
@@ -200,8 +208,8 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         renderOverlay({ eventCatalog: catalog, state });
 
         const rows = screen.getAllByTestId('decision-history-row');
-        const divergedRow = rows.find((r) => r.getAttribute('data-event-id') === 'evt_diverged')!;
-        const historicalRow = rows.find((r) => r.getAttribute('data-event-id') === 'evt_historical')!;
+        const divergedRow = rows.find((r) => rowTitle(r) === 'Diverged decision')!;
+        const historicalRow = rows.find((r) => rowTitle(r) === 'Historical decision')!;
         expect(divergedRow.querySelector('[data-testid="decision-history-divergence-badge"]')).toBeTruthy();
         expect(divergedRow.querySelector('[data-testid="decision-history-historical-badge"]')).toBeNull();
         expect(historicalRow.querySelector('[data-testid="decision-history-historical-badge"]')).toBeTruthy();
@@ -233,14 +241,13 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
             { event_id: 'evt_mid', response_id: 'opt_a', turn: 10 },
         ];
         const catalog = new Map<string, EventDefinition>(
-            decisions.map((d) => [d.event_id, buildEventDef(d.event_id)]),
+            decisions.map((d) => [d.event_id, buildEventDef(d.event_id, { title: d.event_id.replace('evt_', '') })]),
         );
         const state = buildState({ decisions });
         renderOverlay({ eventCatalog: catalog, state });
 
         const rows = screen.getAllByTestId('decision-history-row');
-        const order = rows.map((r) => r.getAttribute('data-event-id'));
-        expect(order).toEqual(['evt_early', 'evt_mid', 'evt_late']);
+        expect(rows.map(rowTitle)).toEqual(['early', 'mid', 'late']);
     });
 
     it('row content surfaces resolved title, option prose, and date without player-facing family taxonomy', () => {
@@ -253,16 +260,16 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
         renderOverlay({ eventCatalog: catalog, state });
 
         const row = screen.getByTestId('decision-history-row');
-        expect(row.getAttribute('data-event-id')).toBe('evt_z');
-        expect(row.getAttribute('data-response-id')).toBe('opt_b');
+        expect(row.getAttribute('data-event-id')).toBeNull();
+        expect(row.getAttribute('data-response-id')).toBeNull();
         expect(row.getAttribute('data-turn')).toBe('17');
         // Raw ids upgraded to resolved player-facing prose (title + option label).
         expect(screen.getByTestId('decision-history-event-id').textContent).toBe('The Sarajevo siege tightens');
-        expect(screen.getByTestId('decision-history-event-id').getAttribute('data-event-id')).toBe('evt_z');
+        expect(screen.getByTestId('decision-history-event-id').getAttribute('data-event-id')).toBeNull();
         expect(screen.queryByTestId('decision-history-family')).toBeNull();
         // Option prose resolved from catalog (label 'Option B'), not raw 'opt_b'.
         expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Option B');
-        expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBe('opt_b');
+        expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBeNull();
         const copy = row.textContent ?? '';
         expect(screen.getByTestId('decision-history-turn').textContent).toBe(turnToDateString(17));
         expect(copy).not.toMatch(/\bT17\b|\bTurn 17\b|\bweek 17\b/i);
@@ -270,7 +277,7 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
 
     it('filters out non-player decisions from the rendered list', () => {
         const catalog = new Map<string, EventDefinition>([
-            ['evt_player', buildEventDef('evt_player')],
+            ['evt_player', buildEventDef('evt_player', { title: 'Player decision' })],
             ['evt_bot_pol', buildEventDef('evt_bot_pol')],
             ['evt_bot_v1', buildEventDef('evt_bot_v1')],
             ['evt_bot_default', buildEventDef('evt_bot_default')],
@@ -287,6 +294,7 @@ describe('DecisionHistoryOverlay (Phase H Packet 8)', () => {
 
         const rows = screen.getAllByTestId('decision-history-row');
         expect(rows).toHaveLength(1);
-        expect(rows[0].getAttribute('data-event-id')).toBe('evt_player');
+        expect(rowTitle(rows[0])).toBe('Player decision');
+        expect(rows[0].getAttribute('data-event-id')).toBeNull();
     });
 });

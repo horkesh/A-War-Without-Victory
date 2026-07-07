@@ -119,7 +119,7 @@ const AUTHORED_STEPS: ReadonlyArray<OnboardingStepDef> = [
         title: 'The Cost Ledger Is the Scoreboard',
         titleKey: 'onboarding.08.title',
         bodyKey: 'onboarding.08.body',
-        body: 'The war-cost ledger is your real scoreboard, not the map. Seizing territory can lower your final grade; the displaced and the exhausted weigh against you, and atrocity taints the verdict permanently — it is never rewarded. The war climaxes at the Dayton table, where you spend hard-won leverage across the peace. That settlement is where you are judged.',
+        body: 'The war-cost ledger is your real scoreboard, not the map. Seizing territory can lower your final grade; the displaced and the exhausted weigh against you, and atrocity taints the verdict permanently — it is never rewarded. When diplomacy finally forces a settlement, hard-won leverage and human cost decide how history judges your presidency.',
         target_ui_element: 'cost-ledger',
     },
 ];

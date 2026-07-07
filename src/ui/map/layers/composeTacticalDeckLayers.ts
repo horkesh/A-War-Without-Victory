@@ -3,7 +3,7 @@ import type { Layer } from '@deck.gl/core';
 import type { LoadedGameState } from '../data/types';
 import type { OsidCentroidLookup } from '../map/builders/geojsonLookup';
 import { buildExperimentalDeckLayers } from './buildExperimentalDeckLayers';
-import { buildTacticalDeckLayers } from './buildTacticalDeckLayers';
+import { buildTacticalDeckLayers, type DeckViewportClip } from './buildTacticalDeckLayers';
 import { buildGhostMapLayer, type GhostMapDatum } from './buildGhostMapLayer';
 import { buildOsidDamageOverlay, type OsidDamageDatum } from './buildOsidDamageOverlay';
 import { buildForceQualityOverlay, type ForceQualityDatum } from './buildForceQualityOverlay';
@@ -31,6 +31,7 @@ export function composeTacticalDeckLayers(args: {
   centroidLookup: OsidCentroidLookup;
   /** Omit to use {@link DEFAULT_DECK_LAYER_CAPABILITIES} (all off). */
   capabilities?: DeckLayerCapabilities;
+  viewportClip?: DeckViewportClip;
   /** Pre-computed ghost map census data (pass when ghostMapVisible is true). */
   ghostMapData?: GhostMapDatum[];
   /** Pre-computed Map That Scars per-OSID damage data (pass when mapScarsVisible is true). */
@@ -109,6 +110,7 @@ export function composeTacticalDeckLayers(args: {
         args.formationsVisible,
         args.zoom,
         args.highlightedFormationIds,
+        args.viewportClip,
       )
     : [];
   // Layer order (bottom → top): ghost → scars → forceQuality → refugeeColumn → corridorHeartbeat → experimental (front lines, ops arcs, unit dots) → counters.

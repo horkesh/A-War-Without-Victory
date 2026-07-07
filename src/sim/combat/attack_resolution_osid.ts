@@ -71,6 +71,7 @@ import {
     type CombatOutcome,
     // Constants used directly in resolver
     MILITIA_DEFENSE_RATIO,
+    computeMilitiaDefensePower,
     COORDINATION_PENALTY_2,
     COORDINATION_PENALTY_3PLUS,
     STACKING_DEFENDER_SUPPORT,
@@ -355,6 +356,39 @@ function getAttackIntelConfidence(
     return osidConfidence ?? record.confidence;
 }
 
+function formationBelongsToCorps(formation: FormationState, corpsId: string): boolean {
+    if ((formation as { corps_id?: string }).corps_id === corpsId) return true;
+    return (formation.tags ?? []).includes(`corps:${corpsId}`);
+}
+
+function findEmptySectorAdjacentDefenders(
+    state: GameState,
+    sector: NonNullable<GameState['military']['corps_front_sectors']>[string] | undefined,
+    targetOsid: string,
+    controller: FactionId,
+    adjacency: Map<string, string[]>,
+): FormationState[] {
+    if (!sector) return [];
+    const territory = new Set<string>(sector.territory_osids ?? []);
+    for (const segment of sector.sub_segments ?? []) {
+        for (const osid of segment.friendly_osids ?? []) territory.add(osid);
+    }
+
+    return Object.values(state.military.formations ?? {})
+        .filter((formation): formation is FormationState => {
+            if (!formation || formation.status !== 'active') return false;
+            if (formation.faction !== controller) return false;
+            if (!formationBelongsToCorps(formation, sector.corps_id)) return false;
+            if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) return false;
+            const locOsid = (formation as { location_osid?: string }).location_osid;
+            if (!locOsid || locOsid === targetOsid) return false;
+            if (!territory.has(locOsid)) return false;
+            if (getPoliticalControllerOSID(state, locOsid, undefined) !== controller) return false;
+            return bfsDistanceFriendly(locOsid, targetOsid, adjacency, state.political?.political_controllers ?? {}, controller) === 1;
+        })
+        .sort((a, b) => strictCompare(a.id, b.id));
+}
+
 function getIntelConfidenceBand(confidence: number): IntelConfidenceBand {
     if (confidence < 1 / 3) return 'low';
     if (confidence < 2 / 3) return 'medium';
@@ -630,6 +664,7 @@ export function resolveAttackOrdersOsid(
         const artSuppression = getArtillerySuppression(attackerFormations, attackerFaction, state);
         const ethBonus = (d: FormationState) => getEthnicDefenseBonus(getCoEthnicShare(targetOsid, d.faction, ethnicComposition));
         const pc = state.political?.political_controllers ?? {};
+        const localMilitiaDefensePower = computeMilitiaDefensePower(osidPopulationMap?.get(targetOsid));
 
         // ── Distance-weighted sector defense model ───────────────────
         // Physical defenders at the OSID fight at full power.
@@ -651,6 +686,21 @@ export function resolveAttackOrdersOsid(
                         && isStandingOgDefenseBrigadeAvailable(state, f.id)
                     )
                 : [];
+            for (const physicalDefender of defenderFormations) {
+                if (!sectorBrigades.some((brigade) => brigade.id === physicalDefender.id)) {
+                    sectorBrigades.push(physicalDefender);
+                }
+            }
+            if (sectorBrigades.length === 0 && sector) {
+                sectorBrigades.push(...findEmptySectorAdjacentDefenders(
+                    state,
+                    sector,
+                    targetOsid,
+                    controller!,
+                    adjacency,
+                ));
+            }
+            sectorBrigades.sort((a, b) => strictCompare(a.id, b.id));
             if (sectorBrigades.length > 0) {
                 const { primary, totalPower } = rankDefendersByPower(sectorBrigades, state, targetOsid, terrainMultByOsid, artSuppression, supplyStateByOsid, ethBonus);
                 const avgBrigadePower = totalPower / sectorBrigades.length;
@@ -700,6 +750,9 @@ export function resolveAttackOrdersOsid(
                 defenderPower = physicalPower + reactiveResponse;
                 const minFloor = avgReactivePower * MIN_DEFENSE_FLOOR_FRACTION;
                 defenderPower = Math.max(defenderPower, minFloor);
+                if (defenderFormations.length === 0) {
+                    defenderPower = Math.max(defenderPower, localMilitiaDefensePower);
+                }
                 defenderFormation = primary;
                 isSectorCoverageDefense = true;
                 sectorDefenseBrigades = sectorBrigades;
@@ -724,7 +777,7 @@ export function resolveAttackOrdersOsid(
                 }
             } else {
                 // Truly undefended: no sector, no brigade — militia ghost only
-                defenderPower = (osidPopulationMap?.get(targetOsid) ?? 5000) * MILITIA_DEFENSE_RATIO * 0.25;
+                defenderPower = localMilitiaDefensePower;
             }
         } else if (defenderFormations.length > 0) {
             // Non-enemy OSID with defenders (shouldn't happen, but safe fallback)

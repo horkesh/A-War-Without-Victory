@@ -254,8 +254,20 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(statusSource).toContain("aria-label={t('warroom.priorityDocketAria')}");
         expect(statusSource).toContain("if (category === 'command') return t('warroom.status.category.command')");
         expect(statusSource).toContain("if (category === 'counter_offer') return t('warroom.status.category.counterOffer')");
-        expect(source).toContain('<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet"');
+        expect(source).toMatch(/<svg[\s\S]*viewBox="0 0 100 100"[\s\S]*preserveAspectRatio="xMidYMid meet"/);
         expect(source).not.toContain('preserveAspectRatio="xMidYMid slice"');
+    });
+
+    it('renders the projected wall map as a physical staff-room object', () => {
+        const source = readFileSync('src/ui/map/components/warroom/WarroomShellLayer.tsx', 'utf8');
+
+        expect(source).toContain('data-testid="warroom-wall-map-paper"');
+        expect(source).toContain('data-testid="warroom-wall-map-hanging-hardware"');
+        expect(source).toContain('data-testid="warroom-wall-map-staff-marks"');
+        expect(source).toContain('data-testid="warroom-wall-map-glare"');
+        expect(source).toContain('perspective(700px) rotateX(0.8deg) rotateY(-1.1deg)');
+        expect(source).toContain('feTurbulence');
+        expect(source).toContain('warroom-wall-map-fold-grid');
     });
 
     it('opens command-surface cards into a Warroom-native Decision Room host, not generic Army HQ briefing', () => {

@@ -203,6 +203,21 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
     );
   });
 
+  it('collapses stale already-resolved proposal rows instead of showing an error receipt', async () => {
+    installIpc({ acceptProposal: vi.fn(async () => ({ ok: false, error: 'already_resolved' })) });
+
+    render(React.createElement(DirectiveCard, { directive: reviewProposalDirective, gameState: baseGameState }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText('Issue directive')).toBeNull();
+    });
+    expect(screen.queryByRole('status', { name: 'Directive receipt' })?.textContent ?? '').not.toContain(
+      'Directive was not staged',
+    );
+  });
+
   it('Cancel issues neither accept nor withhold', () => {
     const { acceptProposal, rejectProposal } = installIpc();
 

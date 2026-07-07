@@ -1831,10 +1831,10 @@
     "corps_front_sectors": {
       "sector:arbih_1st_corps:0": {
         "assigned_brigade_ids": [
-          "arbih_146th_light"
+          "arbih_165th_mountain"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 10.266666666666666,
+        "defensive_power": 36.666666666666664,
         "density": 0.16666666666666666,
         "edge_ids": [
           "op:breza:mahala__op:visoko:gornja_vratnica_2",
@@ -1854,7 +1854,7 @@
           "arbih_131st_light"
         ],
         "reserve_brigade_ids": [
-          "arbih_165th_mountain"
+          "arbih_164th_mountain"
         ],
         "sector_id": "sector:arbih_1st_corps:0",
         "sector_stance": "defend",
@@ -1916,8 +1916,8 @@
           "arbih_162nd_mountain"
         ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 4.2745562130177515,
-        "density": 0.07692307692307693,
+        "defensive_power": 3.6586666666666665,
+        "density": 0.06666666666666667,
         "edge_ids": [
           "op:ilijas:krivajevici__op:vares:toljenak",
           "op:ilijas:medojevici__op:ilijas:srednje",
@@ -1928,13 +1928,15 @@
           "op:ilijas:sirovine__op:sokolac:sasevci_2",
           "op:kladanj:kladanj_3__op:kladanj:vucinici_2",
           "op:kladanj:staric_2__op:kladanj:vucinici_2",
+          "op:kladanj:tuholj_2__op:kladanj:vucinici_2",
           "op:kladanj:vucinici_2__op:olovo:gurdici_2",
+          "op:kladanj:vucinici_2__op:olovo:olovo_2",
           "op:olovo:gurdici_2__op:olovo:slivnje",
           "op:olovo:gurdici_2__op:sokolac:sasevci_2",
           "op:vares:ravne__op:vares:toljenak"
         ],
         "faction": "RBiH",
-        "length_edges": 13,
+        "length_edges": 15,
         "opposing_factions": [
           "RS"
         ],
@@ -1955,7 +1957,9 @@
               "op:ilijas:sirovine__op:sokolac:sasevci_2",
               "op:kladanj:kladanj_3__op:kladanj:vucinici_2",
               "op:kladanj:staric_2__op:kladanj:vucinici_2",
+              "op:kladanj:tuholj_2__op:kladanj:vucinici_2",
               "op:kladanj:vucinici_2__op:olovo:gurdici_2",
+              "op:kladanj:vucinici_2__op:olovo:olovo_2",
               "op:olovo:gurdici_2__op:olovo:slivnje",
               "op:olovo:gurdici_2__op:sokolac:sasevci_2",
               "op:vares:ravne__op:vares:toljenak"
@@ -1975,10 +1979,12 @@
               "op:ilijas:sirovine",
               "op:kladanj:kladanj_3",
               "op:kladanj:staric_2",
+              "op:kladanj:tuholj_2",
               "op:olovo:gurdici_2",
+              "op:olovo:olovo_2",
               "op:vares:ravne"
             ],
-            "length_edges": 13,
+            "length_edges": 15,
             "primary_brigade_ids": [],
             "sub_segment_id": "subseg:sector:arbih_1st_corps:1:0"
           }
@@ -1990,10 +1996,12 @@
           "op:ilijas:sirovine",
           "op:kladanj:kladanj_3",
           "op:kladanj:staric_2",
+          "op:kladanj:tuholj_2",
           "op:olovo:gurdici_2",
+          "op:olovo:olovo_2",
           "op:vares:ravne"
         ],
-        "threat_ratio": 350.9136212624585
+        "threat_ratio": 737.9737609329446
       },
       "sector:arbih_1st_corps:10": {
         "assigned_brigade_ids": [],
@@ -2582,7 +2590,7 @@
       },
       "sector:arbih_1st_corps:18": {
         "assigned_brigade_ids": [
-          "arbih_164th_mountain"
+          "arbih_146th_light"
         ],
         "corps_id": "arbih_1st_corps",
         "defensive_power": 16.8,
@@ -2707,10 +2715,12 @@
         "threat_ratio": 136.8421052631579
       },
       "sector:arbih_1st_corps:2": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "arbih_161st_slavna_olovo_mountain"
+        ],
         "corps_id": "arbih_1st_corps",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 4.666666666666667,
+        "density": 0.08333333333333333,
         "edge_ids": [
           "op:kalesija:gojcin_2__op:kalesija:kalesija_grad_2",
           "op:kalesija:gojcin_2__op:kalesija:kalesija_selo",
@@ -2783,7 +2793,7 @@
           "op:zivinice:basigovci_2",
           "op:zivinice:gracanica_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 835.7142857142857
       },
       "sector:arbih_1st_corps:20": {
         "assigned_brigade_ids": [],
@@ -2835,52 +2845,6 @@
           "op:olovo:kamensko_2",
           "op:olovo:milankovici_2",
           "op:zivinice:zivinice_grad_2"
-        ],
-        "threat_ratio": 0
-      },
-      "sector:arbih_1st_corps:3": {
-        "assigned_brigade_ids": [],
-        "corps_id": "arbih_1st_corps",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:kladanj:tuholj_2__op:kladanj:vucinici_2",
-          "op:kladanj:vucinici_2__op:olovo:olovo_2"
-        ],
-        "faction": "RBiH",
-        "length_edges": 2,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [
-          "arbih_161st_slavna_olovo_mountain"
-        ],
-        "sector_id": "sector:arbih_1st_corps:3",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:kladanj:tuholj_2__op:kladanj:vucinici_2",
-              "op:kladanj:vucinici_2__op:olovo:olovo_2"
-            ],
-            "enemy_osids": [
-              "op:kladanj:vucinici_2"
-            ],
-            "friendly_osids": [
-              "op:kladanj:tuholj_2",
-              "op:olovo:olovo_2"
-            ],
-            "length_edges": 2,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:arbih_1st_corps:3:0"
-          }
-        ],
-        "territory_osids": [
-          "op:kladanj:tuholj_2",
-          "op:olovo:gurdici_2",
-          "op:olovo:olovo_2"
         ],
         "threat_ratio": 0
       },
@@ -4264,7 +4228,7 @@
           "op:visegrad:prelovo_2",
           "op:vlasenica:pomol_2"
         ],
-        "threat_ratio": 473.68421052631584
+        "threat_ratio": 368.421052631579
       },
       "sector:arbih_3rd_corps:0": {
         "assigned_brigade_ids": [],
@@ -4407,7 +4371,7 @@
         "territory_osids": [
           "op:bosanska_gradiska:orahova"
         ],
-        "threat_ratio": 0,
+        "threat_ratio": 9999,
         "unstaffed_front": true
       },
       "sector:arbih_3rd_corps:10": {
@@ -4470,12 +4434,11 @@
       },
       "sector:arbih_3rd_corps:11": {
         "assigned_brigade_ids": [
-          "arbih_330th_liberation",
-          "arbih_7th_vitezka_muslim_liberation"
+          "arbih_330th_liberation"
         ],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 36.91776,
-        "density": 0.4,
+        "defensive_power": 15.24864,
+        "density": 0.2,
         "edge_ids": [
           "op:kakanj:biljesevo__op:kakanj:donja_papratnica",
           "op:kakanj:biljesevo__op:kakanj:sopotnica",
@@ -4533,10 +4496,12 @@
         "threat_ratio": 0
       },
       "sector:arbih_3rd_corps:12": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "arbih_7th_vitezka_muslim_liberation"
+        ],
         "corps_id": "arbih_3rd_corps",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 15.24864,
+        "density": 0.2,
         "edge_ids": [
           "op:maglaj:donja_bocinja_2__op:maglaj:lijesnica",
           "op:maglaj:donja_bocinja_2__op:zavidovici:cinovici",
@@ -4583,7 +4548,7 @@
           "op:zavidovici:cinovici",
           "op:zavidovici:hajderovici_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 65.57961890371863
       },
       "sector:arbih_3rd_corps:13": {
         "assigned_brigade_ids": [],
@@ -4814,7 +4779,7 @@
           "op:zenica:serici_2",
           "op:zenica:stranjani_2"
         ],
-        "threat_ratio": 196.73885671115588
+        "threat_ratio": 131.15923780743725
       },
       "sector:arbih_3rd_corps:17": {
         "assigned_brigade_ids": [],
@@ -5278,7 +5243,7 @@
           "op:tesanj:tesanj_2",
           "op:tesanj:ularice_2"
         ],
-        "threat_ratio": 1144.2974318914169
+        "threat_ratio": 1373.1569182697
       },
       "sector:arbih_3rd_corps:7": {
         "assigned_brigade_ids": [
@@ -6461,14 +6426,16 @@
         "territory_osids": [
           "op:bosanska_gradiska:mackovac"
         ],
-        "threat_ratio": 0,
+        "threat_ratio": 9999,
         "unstaffed_front": true
       },
       "sector:hvo_central_bosnia:2": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "hrhb_stjepan_tomaevi_brigade"
+        ],
         "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 231.00000000000003,
+        "density": 1,
         "edge_ids": [
           "op:bugojno:medini__op:donji_vakuf:komar_2"
         ],
@@ -6479,7 +6446,6 @@
         ],
         "rear_brigade_ids": [
           "hrhb_jure_franceti_brigade",
-          "hrhb_stjepan_tomaevi_brigade",
           "hrhb_vitezovi_brigade_vitez"
         ],
         "reserve_brigade_ids": [],
@@ -6513,7 +6479,7 @@
           "op:travnik:puticevo_2",
           "op:vitez:vitez_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 4.329004329004328
       },
       "sector:hvo_central_bosnia:3": {
         "assigned_brigade_ids": [],
@@ -7103,7 +7069,7 @@
           "op:odzak:donja_dubica",
           "op:odzak:potocani_2"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 9999
       },
       "sector:hvo_northwest_bosnia:5": {
         "assigned_brigade_ids": [
@@ -7162,14 +7128,13 @@
       "sector:hvo_southeast_herzegovina:0": {
         "assigned_brigade_ids": [
           "hrhb_1st_brigade_mostar",
-          "hrhb_1st_herzegovina_brigade_knez_domagoj",
           "hrhb_apljina_brigade",
           "hrhb_mostar_brigade",
           "hrhb_stolac_units"
         ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 151.90413223140496,
-        "density": 0.45454545454545453,
+        "defensive_power": 113.32363636363635,
+        "density": 0.36363636363636365,
         "edge_ids": [
           "op:capljina:capljina_2__op:capljina:tasovcici_2",
           "op:capljina:tasovcici_2__op:capljina:visici_2",
@@ -7246,6 +7211,7 @@
           "op:citluk:krehin_gradac_2",
           "op:citluk:veliki_ogradjenik_2",
           "op:duvno:dobrici",
+          "op:duvno:kongora",
           "op:duvno:rosko_polje_2",
           "op:duvno:vinica_2",
           "op:grude:grude_2",
@@ -7267,16 +7233,21 @@
           "op:posusje:posusje_2",
           "op:posusje:sutina_2",
           "op:posusje:vir_2",
+          "op:prozor:jaklici",
           "op:prozor:ljubunci_2",
+          "op:prozor:prozor_2",
+          "op:prozor:rumboci_2",
           "op:stolac:prenj"
         ],
         "threat_ratio": 0
       },
       "sector:hvo_southeast_herzegovina:1": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "hrhb_1st_herzegovina_brigade_knez_domagoj"
+        ],
         "corps_id": "hvo_southeast_herzegovina",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 96.72000000000001,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:trebinje:ivanica__op:trebinje:trebimlja_2",
           "op:trebinje:trebimlja_2__op:trebinje:velicani",
@@ -7315,7 +7286,7 @@
         "territory_osids": [
           "op:trebinje:trebimlja_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 10.339123242349048
       },
       "sector:hvo_tomislavgrad:0": {
         "assigned_brigade_ids": [],
@@ -7441,7 +7412,7 @@
         "territory_osids": [
           "op:sanski_most:stari_majdan"
         ],
-        "threat_ratio": 9999,
+        "threat_ratio": 0,
         "unstaffed_front": true
       },
       "sector:hvo_tomislavgrad:3": {
@@ -7529,7 +7500,7 @@
           "op:prozor:prozor_2",
           "op:prozor:rumboci_2"
         ],
-        "threat_ratio": 129.21326498912705
+        "threat_ratio": 187.9465672569121
       },
       "sector:vrs_1st_krajina:0": {
         "assigned_brigade_ids": [
@@ -7615,10 +7586,10 @@
       },
       "sector:vrs_1st_krajina:1": {
         "assigned_brigade_ids": [
-          "rs_1st_srbac_light_infantry"
+          "rs_27th_derventa_motorized"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 80.4,
+        "defensive_power": 103.68,
         "density": 0.25,
         "edge_ids": [
           "op:prnjavor:donji_strpci_2__op:prnjavor:konjuhovci_2",
@@ -7720,10 +7691,12 @@
         "threat_ratio": 0
       },
       "sector:vrs_1st_krajina:11": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "rs_16th_krajina_motorized"
+        ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 518.4,
+        "density": 1,
         "edge_ids": [
           "op:bosanska_dubica:medjedja_2__op:bosanska_gradiska:orahova"
         ],
@@ -7813,7 +7786,7 @@
           "op:donji_vakuf:komar_2",
           "op:travnik:varosluk"
         ],
-        "threat_ratio": 17.910447761194032
+        "threat_ratio": 32.15739484396201
       },
       "sector:vrs_1st_krajina:13": {
         "assigned_brigade_ids": [
@@ -7925,11 +7898,12 @@
       },
       "sector:vrs_1st_krajina:15": {
         "assigned_brigade_ids": [
-          "rs_1st_trebava_infantry"
+          "rs_1st_trebava_infantry",
+          "rs_1st_vujak_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 35.175,
-        "density": 0.125,
+        "defensive_power": 80.4,
+        "density": 0.25,
         "edge_ids": [
           "op:gradacac:gradacac_2__op:modrica:skugric_gornji_2",
           "op:gradacac:zelinja_donja_2__op:modrica:skugric_gornji_2",
@@ -7986,7 +7960,7 @@
           "op:modrica:vranjak_2",
           "op:odzak:gornji_svilaj"
         ],
-        "threat_ratio": 22.74342572850036
+        "threat_ratio": 9.950248756218905
       },
       "sector:vrs_1st_krajina:16": {
         "assigned_brigade_ids": [],
@@ -8043,10 +8017,10 @@
       },
       "sector:vrs_1st_krajina:17": {
         "assigned_brigade_ids": [
-          "rs_16th_krajina_motorized"
+          "rs_6th_sanske_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 22.5792,
+        "defensive_power": 17.509333333333334,
         "density": 0.06666666666666667,
         "edge_ids": [
           "op:bosanski_novi:blagaj_japra__op:bosanski_novi:dobrljin_2",
@@ -8134,7 +8108,7 @@
       },
       "sector:vrs_1st_krajina:18": {
         "assigned_brigade_ids": [
-          "rs_1st_banja_luka_light_infantry",
+          "rs_2nd_banja_luka_light_infantry",
           "rs_4th_banja_luka_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
@@ -8336,7 +8310,7 @@
       },
       "sector:vrs_1st_krajina:20": {
         "assigned_brigade_ids": [
-          "rs_1st_doboj_light_infantry",
+          "rs_12th_kotorsko_light_infantry",
           "rs_1st_kotor_varo_light_infantry",
           "rs_2nd_armored"
         ],
@@ -8433,10 +8407,12 @@
         "threat_ratio": 21.6812761588881
       },
       "sector:vrs_1st_krajina:21": {
-        "assigned_brigade_ids": [],
+        "assigned_brigade_ids": [
+          "rs_1st_celinac_light_infantry"
+        ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 0,
-        "density": 0,
+        "defensive_power": 116.13333333333334,
+        "density": 0.3333333333333333,
         "edge_ids": [
           "op:bosanska_gradiska:kozinci__op:bosanska_gradiska:mackovac",
           "op:bosanska_gradiska:mackovac__op:bosanska_gradiska:nova_topola_2",
@@ -8546,13 +8522,12 @@
       },
       "sector:vrs_1st_krajina:23": {
         "assigned_brigade_ids": [
-          "rs_2nd_banja_luka_light_infantry",
-          "rs_43rd_prijedor_motorized",
-          "rs_6th_sanske_infantry"
+          "rs_2nd_krajina_infantry",
+          "rs_43rd_prijedor_motorized"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 88.16000000000001,
-        "density": 0.25,
+        "defensive_power": 56.24666666666666,
+        "density": 0.16666666666666666,
         "edge_ids": [
           "op:banja_luka:melina_2__op:sanski_most:ilidza_2",
           "op:kljuc:donje_ratkovo_2__op:kljuc:kljuc_2",
@@ -8781,12 +8756,12 @@
       },
       "sector:vrs_1st_krajina:5": {
         "assigned_brigade_ids": [
+          "rs_1st_doboj_light_infantry",
           "rs_1st_krnjin_light_infantry",
-          "rs_1st_vujak_light_infantry",
-          "rs_27th_derventa_motorized"
+          "rs_1st_srbac_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 57.654809688581324,
+        "defensive_power": 52.57993079584775,
         "density": 0.17647058823529413,
         "edge_ids": [
           "op:bosanski_brod:brod__op:bosanski_brod:donja_vrela",
@@ -8992,11 +8967,11 @@
           "op:maglaj:gornja_bocinja",
           "op:zavidovici:vozuca_2"
         ],
-        "threat_ratio": 47.38396494891796
+        "threat_ratio": 59.29764756464591
       },
       "sector:vrs_1st_krajina:7": {
         "assigned_brigade_ids": [
-          "rs_12th_kotorsko_light_infantry",
+          "rs_1st_banja_luka_light_infantry",
           "rs_22nd_krajina_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
@@ -9083,12 +9058,11 @@
       "sector:vrs_1st_krajina:8": {
         "assigned_brigade_ids": [
           "rs_11th_mrkonji_light_infantry",
-          "rs_1st_sipovo_light_infantry",
-          "rs_2nd_krajina_infantry"
+          "rs_1st_sipovo_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 36.932325141776936,
-        "density": 0.13043478260869565,
+        "defensive_power": 23.405671077504724,
+        "density": 0.08695652173913043,
         "edge_ids": [
           "op:donji_vakuf:babin_potok_2__op:donji_vakuf:torlakovac_2",
           "op:donji_vakuf:kutanja__op:donji_vakuf:torlakovac_2",
@@ -9193,16 +9167,15 @@
           "op:sipovo:pribeljci_2",
           "op:sipovo:sipovo_2"
         ],
-        "threat_ratio": 11.913682615727945
+        "threat_ratio": 18.798862828713577
       },
       "sector:vrs_1st_krajina:9": {
         "assigned_brigade_ids": [
-          "rs_1st_celinac_light_infantry",
           "rs_2nd_tesli_light_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 80.4,
-        "density": 0.25,
+        "defensive_power": 35.175,
+        "density": 0.125,
         "edge_ids": [
           "op:celinac:celinac_2__op:kotor_varos:kotor_varos_2",
           "op:celinac:josavka_donja_2__op:kotor_varos:kotor_varos_2",
@@ -9316,11 +9289,12 @@
       },
       "sector:vrs_2nd_krajina:1": {
         "assigned_brigade_ids": [
-          "rs_7th_krajina_motorized"
+          "rs_7th_krajina_motorized",
+          "rs_9th_grahovo_light_infantry"
         ],
         "corps_id": "vrs_2nd_krajina",
-        "defensive_power": 18.559999999999995,
-        "density": 0.05555555555555555,
+        "defensive_power": 35.22518518518518,
+        "density": 0.1111111111111111,
         "edge_ids": [
           "op:bugojno:vesela_2__op:kupres:goravci",
           "op:bugojno:vesela_2__op:kupres:kupres_2",
@@ -9412,7 +9386,7 @@
           "op:kupres:kupres_2",
           "op:livno:gubin_2"
         ],
-        "threat_ratio": 66.81034482758622
+        "threat_ratio": 35.20208604954368
       },
       "sector:vrs_2nd_krajina:2": {
         "assigned_brigade_ids": [
@@ -9465,6 +9439,8 @@
           "op:glamoc:pribelja",
           "op:glamoc:stekerovci_2",
           "op:kljuc:cadjavica",
+          "op:kljuc:donje_ratkovo_2",
+          "op:kljuc:donji_vrbljani_2",
           "op:kupres:novo_selo_2"
         ],
         "threat_ratio": 0
@@ -9488,9 +9464,7 @@
           "RBiH"
         ],
         "rear_brigade_ids": [],
-        "reserve_brigade_ids": [
-          "rs_9th_grahovo_light_infantry"
-        ],
+        "reserve_brigade_ids": [],
         "sector_id": "sector:vrs_2nd_krajina:3",
         "sector_stance": "defend",
         "stance_source": "bot",
@@ -9762,11 +9736,11 @@
           "op:sekovici:kastijelj_2",
           "op:vlasenica:grabovica"
         ],
-        "threat_ratio": 0
+        "threat_ratio": 11.940298507462687
       },
       "sector:vrs_drina:10": {
         "assigned_brigade_ids": [
-          "rs_1st_milii"
+          "rs_5th_podrinje"
         ],
         "corps_id": "vrs_drina",
         "defensive_power": 36.92444444444445,
@@ -10038,7 +10012,7 @@
         "territory_osids": [
           "op:kladanj:olovci_2"
         ],
-        "threat_ratio": 0,
+        "threat_ratio": 9999,
         "unstaffed_front": true
       },
       "sector:vrs_drina:3": {
@@ -10298,7 +10272,7 @@
       },
       "sector:vrs_drina:8": {
         "assigned_brigade_ids": [
-          "rs_5th_podrinje"
+          "rs_1st_milii"
         ],
         "corps_id": "vrs_drina",
         "defensive_power": 22.64326530612245,
@@ -10450,7 +10424,7 @@
       },
       "sector:vrs_east_bosnian:0": {
         "assigned_brigade_ids": [
-          "rs_3rd_semberija_light_infantry"
+          "rs_1st_majevica_light_infantry"
         ],
         "corps_id": "vrs_east_bosnian",
         "defensive_power": 201,
@@ -10544,9 +10518,9 @@
       },
       "sector:vrs_east_bosnian:2": {
         "assigned_brigade_ids": [
-          "rs_1st_majevica_light_infantry",
           "rs_2nd_majevica_light_infantry",
-          "rs_2nd_semberija_light_infantry"
+          "rs_2nd_semberija_light_infantry",
+          "rs_3rd_semberija_light_infantry"
         ],
         "corps_id": "vrs_east_bosnian",
         "defensive_power": 49.13333333333333,
@@ -11323,7 +11297,7 @@
           "op:stolac:rotimlja_2",
           "op:trnovo:tosici"
         ],
-        "threat_ratio": 799.8407960199005
+        "threat_ratio": 685.2139303482587
       },
       "sector:vrs_herzegovina:6": {
         "assigned_brigade_ids": [],
@@ -11505,7 +11479,7 @@
           "op:trebinje:velicani",
           "op:trebinje:zakovo_2"
         ],
-        "threat_ratio": 14.728986645718775
+        "threat_ratio": 29.45797329143755
       },
       "sector:vrs_herzegovina:9": {
         "assigned_brigade_ids": [
@@ -13251,7 +13225,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_1st_corps:0"
+          "sector_id": "sector:arbih_1st_corps:18"
         },
         "cohesion": 35,
         "composition": {
@@ -13284,6 +13258,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -13299,7 +13274,7 @@
         "hq_sid": "op:visoko:bradve_2",
         "id": "arbih_146th_light",
         "kind": "brigade",
-        "location_osid": "op:visoko:visoko_2",
+        "location_osid": "op:visoko:rajcici_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "146th Light",
@@ -13546,8 +13521,8 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
-          "sector_id": "sector:arbih_1st_corps:3"
+          "role": "front",
+          "sector_id": "sector:arbih_1st_corps:2"
         },
         "cohesion": 35,
         "composition": {
@@ -13580,6 +13555,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -13595,7 +13571,7 @@
         "hq_sid": "op:olovo:gurdici_2",
         "id": "arbih_161st_slavna_olovo_mountain",
         "kind": "brigade",
-        "location_osid": "op:olovo:gurdici_2",
+        "location_osid": "op:kladanj:kladanj_3",
         "max_personnel": 1800,
         "morale": 60,
         "name": "161st Slavna Olovo Mountain",
@@ -13694,8 +13670,8 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
-          "sector_id": "sector:arbih_1st_corps:18"
+          "role": "reserve",
+          "sector_id": "sector:arbih_1st_corps:0"
         },
         "cohesion": 35,
         "composition": {
@@ -13728,7 +13704,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -13744,7 +13719,7 @@
         "hq_sid": "op:breza:koritnik",
         "id": "arbih_164th_mountain",
         "kind": "brigade",
-        "location_osid": "op:visoko:stuparici_2",
+        "location_osid": "op:breza:koritnik",
         "max_personnel": 1800,
         "morale": 60,
         "name": "164th Mountain",
@@ -13769,7 +13744,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
+          "role": "front",
           "sector_id": "sector:arbih_1st_corps:0"
         },
         "cohesion": 50,
@@ -13804,6 +13779,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -13819,7 +13795,7 @@
         "hq_sid": "op:visoko:bradve_2",
         "id": "arbih_165th_mountain",
         "kind": "brigade",
-        "location_osid": "op:visoko:bradve_2",
+        "location_osid": "op:visoko:visoko_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "165th Mountain",
@@ -17547,7 +17523,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:arbih_3rd_corps:11"
+          "sector_id": "sector:arbih_3rd_corps:12"
         },
         "cohesion": 38,
         "composition": {
@@ -17580,6 +17556,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -17595,7 +17572,7 @@
         "hq_sid": "op:zenica:briznik_2",
         "id": "arbih_7th_vitezka_muslim_liberation",
         "kind": "brigade",
-        "location_osid": "op:zenica:briznik_2",
+        "location_osid": "op:zavidovici:hajderovici_2",
         "max_personnel": 2200,
         "morale": 60,
         "name": "7th Vitezka Muslim Liberation",
@@ -18553,7 +18530,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:hvo_southeast_herzegovina:0"
+          "sector_id": "sector:hvo_southeast_herzegovina:1"
         },
         "cohesion": 62,
         "composition": {
@@ -18586,6 +18563,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -18601,7 +18579,7 @@
         "hq_sid": "op:capljina:capljina_2",
         "id": "hrhb_1st_herzegovina_brigade_knez_domagoj",
         "kind": "brigade",
-        "location_osid": "op:capljina:visici_2",
+        "location_osid": "op:trebinje:trebimlja_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "1st Herzegovina Brigade \"Knez Domagoj\"",
@@ -19886,7 +19864,7 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "rear",
+          "role": "front",
           "sector_id": "sector:hvo_central_bosnia:2"
         },
         "cohesion": 55,
@@ -19920,6 +19898,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -19935,7 +19914,7 @@
         "hq_sid": "op:novi_travnik:rankovici_2",
         "id": "hrhb_stjepan_tomaevi_brigade",
         "kind": "brigade",
-        "location_osid": "op:novi_travnik:rankovici_2",
+        "location_osid": "op:bugojno:medini",
         "max_personnel": 1500,
         "morale": 60,
         "name": "\"Stjepan Tomašević\" Brigade",
@@ -20895,7 +20874,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -20904,7 +20883,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -20914,20 +20893,20 @@
         },
         "corps_id": "jna_herzegovina_command",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_foca_paramilitaries",
         "kind": "jna_phantom",
         "location_osid": "op:foca:foca_3",
-        "morale": 90,
+        "morale": 60,
         "name": "Foča Serb Paramilitaries",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -20967,7 +20946,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -20976,7 +20955,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -20986,20 +20965,20 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_ilijas_garrison_det",
         "kind": "jna_phantom",
         "location_osid": "op:ilijas:srednje",
-        "morale": 90,
+        "morale": 60,
         "name": "JNA Ilijaš Garrison Detachment",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21013,7 +20992,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21022,7 +21001,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21032,20 +21011,20 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_ilijas_north_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:sokolac:meljine_2",
-        "morale": 90,
+        "morale": 60,
         "name": "Ilijaš North TO Tactical Group",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21059,7 +21038,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21068,7 +21047,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21078,20 +21057,20 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_ilijas_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:ilijas:podlugovi",
-        "morale": 90,
+        "morale": 60,
         "name": "Ilijaš TO Tactical Group",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21105,7 +21084,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21114,7 +21093,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21124,20 +21103,20 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_kalinovik_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:kalinovik:kalinovik_2",
-        "morale": 90,
+        "morale": 60,
         "name": "Kalinovik TO Tactical Group",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21151,7 +21130,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21160,7 +21139,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21170,20 +21149,20 @@
         },
         "corps_id": "jna_herzegovina_command",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_konjic_south_tg",
         "kind": "jna_phantom",
         "location_osid": "op:konjic:bijela_2",
-        "morale": 90,
+        "morale": 60,
         "name": "Konjic-South Serb TO",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21296,7 +21275,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21305,7 +21284,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21315,20 +21294,20 @@
         },
         "corps_id": "jna_herzegovina_command",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_nevesinje_garrison",
         "kind": "jna_phantom",
         "location_osid": "op:nevesinje:sopilja",
-        "morale": 90,
+        "morale": 60,
         "name": "JNA Nevesinje Garrison",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21342,7 +21321,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21351,7 +21330,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21361,20 +21340,20 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_rajlovac_barracks_tg",
         "kind": "jna_phantom",
         "location_osid": "op:ilijas:srednje",
-        "morale": 90,
+        "morale": 60,
         "name": "JNA Rajlovac Barracks TG",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21388,7 +21367,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21397,7 +21376,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21407,20 +21386,20 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_rudo_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:visegrad:donji_dobrun_2",
-        "morale": 90,
+        "morale": 60,
         "name": "Rudo Serb TO",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21480,7 +21459,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21489,7 +21468,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21499,20 +21478,20 @@
         },
         "corps_id": "vrs_herzegovina",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_visegrad_local_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:visegrad:okrugla",
-        "morale": 90,
+        "morale": 60,
         "name": "Višegrad Serb TO",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21526,7 +21505,7 @@
         "activation_gated": false,
         "activation_turn": null,
         "assignment": null,
-        "cohesion": 85,
+        "cohesion": 60,
         "composition": {
           "aa_systems": 2,
           "artillery": 0,
@@ -21535,7 +21514,7 @@
             "non_operational": 0.01,
             "operational": 0.95
           },
-          "infantry": 1200,
+          "infantry": 800,
           "tank_condition": {
             "degraded": 0.04,
             "non_operational": 0.01,
@@ -21545,20 +21524,20 @@
         },
         "corps_id": "vrs_sarajevo_romanija",
         "created_turn": 0,
-        "equipment_class": "mechanized",
-        "experience": 0.6,
+        "equipment_class": "light_infantry",
+        "experience": 0.25,
         "faction": "RS",
         "force_label": "VRS",
         "id": "jna_vogosca_to_tg",
         "kind": "jna_phantom",
         "location_osid": "op:vogosca:vogosca_3",
-        "morale": 90,
+        "morale": 60,
         "name": "Vogošća TO Tactical Group",
         "ops": {
           "fatigue": 0,
           "last_supplied_turn": null
         },
-        "personnel": 2000,
+        "personnel": 800,
         "posture": "attack",
         "readiness": "active",
         "status": "active",
@@ -21796,7 +21775,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:7"
+          "sector_id": "sector:vrs_1st_krajina:20"
         },
         "cohesion": 67,
         "composition": {
@@ -21829,6 +21808,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -21844,7 +21824,7 @@
         "hq_sid": "op:kotor_varos:krusevo_brdo_i",
         "id": "rs_12th_kotorsko_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:kotor_varos:krusevo_brdo_i",
+        "location_osid": "op:teslic:kamenica_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "12th Kotorsko Light Infantry",
@@ -21945,7 +21925,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:17"
+          "sector_id": "sector:vrs_1st_krajina:11"
         },
         "cohesion": 72,
         "composition": {
@@ -21994,7 +21974,7 @@
         "hq_sid": "op:banja_luka:banja_luka_2",
         "id": "rs_16th_krajina_motorized",
         "kind": "brigade",
-        "location_osid": "op:prijedor:brezicani",
+        "location_osid": "op:bosanska_dubica:medjedja_2",
         "max_personnel": 2200,
         "morale": 60,
         "name": "16th Krajina Motorized",
@@ -22242,7 +22222,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:18"
+          "sector_id": "sector:vrs_1st_krajina:7"
         },
         "cohesion": 67,
         "composition": {
@@ -22291,7 +22271,7 @@
         "hq_sid": "op:banja_luka:banja_luka_2",
         "id": "rs_1st_banja_luka_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:kljuc:donji_vrbljani_2",
+        "location_osid": "op:banja_luka:rekavice_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Banja Luka Light Infantry",
@@ -22539,81 +22519,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:9"
-        },
-        "cohesion": 67,
-        "composition": {
-          "aa_systems": 2,
-          "artillery": 15,
-          "artillery_condition": {
-            "degraded": 0,
-            "non_operational": 0,
-            "operational": 1
-          },
-          "infantry": 800,
-          "tank_condition": {
-            "degraded": 0,
-            "non_operational": 0,
-            "operational": 1
-          },
-          "tanks": 0
-        },
-        "corps_id": "vrs_1st_krajina",
-        "created_turn": 0,
-        "doctrine_state": {
-          "active": null,
-          "active_turns": 0,
-          "eligible": {
-            "ARTILLERY_COUNTER": false,
-            "ATTACK": false,
-            "COORDINATED_STRIKE": false,
-            "DEFEND": false,
-            "INFILTRATE": false,
-            "STATIC_DEFENSE": false
-          }
-        },
-        "equipment_class": "mountain",
-        "equipment_state": {
-          "degraded_heavy": 0,
-          "last_maintenance": null,
-          "maintenance_deficit": 0,
-          "non_operational_heavy": 0,
-          "operational_heavy": 57,
-          "total_heavy": 57
-        },
-        "faction": "RS",
-        "force_label": "VRS",
-        "home_osid": "op:celinac:celinac_2",
-        "hq_sid": "op:celinac:celinac_2",
-        "id": "rs_1st_celinac_light_infantry",
-        "kind": "brigade",
-        "location_osid": "op:celinac:celinac_2",
-        "max_personnel": 2000,
-        "morale": 60,
-        "name": "1st Celinac Light Infantry",
-        "officer_quality": 0.55,
-        "ops": {
-          "fatigue": 0,
-          "last_supplied_turn": null
-        },
-        "origin_mun": "celinac",
-        "personnel": 1000,
-        "readiness": "active",
-        "status": "active",
-        "tags": [
-          "corps:vrs_1st_krajina",
-          "equip:mountain",
-          "mun:celinac",
-          "placement:fixed_home_osid"
-        ]
-      },
-      "rs_1st_doboj_light_infantry": {
-        "activation_gated": false,
-        "activation_turn": null,
-        "assignment": {
-          "kind": "sector",
-          "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:20"
+          "sector_id": "sector:vrs_1st_krajina:21"
         },
         "cohesion": 67,
         "composition": {
@@ -22658,11 +22564,85 @@
         },
         "faction": "RS",
         "force_label": "VRS",
+        "home_osid": "op:celinac:celinac_2",
+        "hq_sid": "op:celinac:celinac_2",
+        "id": "rs_1st_celinac_light_infantry",
+        "kind": "brigade",
+        "location_osid": "op:bosanska_gradiska:nova_topola_2",
+        "max_personnel": 2000,
+        "morale": 60,
+        "name": "1st Celinac Light Infantry",
+        "officer_quality": 0.55,
+        "ops": {
+          "fatigue": 0,
+          "last_supplied_turn": null
+        },
+        "origin_mun": "celinac",
+        "personnel": 1000,
+        "readiness": "active",
+        "status": "active",
+        "tags": [
+          "corps:vrs_1st_krajina",
+          "equip:mountain",
+          "mun:celinac",
+          "placement:fixed_home_osid"
+        ]
+      },
+      "rs_1st_doboj_light_infantry": {
+        "activation_gated": false,
+        "activation_turn": null,
+        "assignment": {
+          "kind": "sector",
+          "role": "front",
+          "sector_id": "sector:vrs_1st_krajina:5"
+        },
+        "cohesion": 67,
+        "composition": {
+          "aa_systems": 2,
+          "artillery": 15,
+          "artillery_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "infantry": 800,
+          "tank_condition": {
+            "degraded": 0,
+            "non_operational": 0,
+            "operational": 1
+          },
+          "tanks": 0
+        },
+        "corps_id": "vrs_1st_krajina",
+        "created_turn": 0,
+        "doctrine_state": {
+          "active": null,
+          "active_turns": 0,
+          "eligible": {
+            "ARTILLERY_COUNTER": false,
+            "ATTACK": false,
+            "COORDINATED_STRIKE": false,
+            "DEFEND": false,
+            "INFILTRATE": false,
+            "STATIC_DEFENSE": false
+          }
+        },
+        "equipment_class": "mountain",
+        "equipment_state": {
+          "degraded_heavy": 0,
+          "last_maintenance": null,
+          "maintenance_deficit": 0,
+          "non_operational_heavy": 0,
+          "operational_heavy": 57,
+          "total_heavy": 57
+        },
+        "faction": "RS",
+        "force_label": "VRS",
         "home_osid": "op:doboj:bukovica_velika_2",
         "hq_sid": "op:doboj:boljanic_2",
         "id": "rs_1st_doboj_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:doboj:makljenovac",
+        "location_osid": "op:doboj:bukovica_velika_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Doboj Light Infantry",
@@ -22965,7 +22945,7 @@
         "hq_sid": "op:kotor_varos:krusevo_brdo_i",
         "id": "rs_1st_kotor_varo_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:teslic:kamenica_2",
+        "location_osid": "op:teslic:vitkovci",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Kotor Varoš Light Infantry",
@@ -23065,7 +23045,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_east_bosnian:2"
+          "sector_id": "sector:vrs_east_bosnian:0"
         },
         "cohesion": 67,
         "composition": {
@@ -23098,6 +23078,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -23113,7 +23094,7 @@
         "hq_sid": "op:ugljevik:donja_trnova_2",
         "id": "rs_1st_majevica_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:ugljevik:donja_trnova_2",
+        "location_osid": "op:bijeljina:pucile_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Majevica Light Infantry",
@@ -23139,7 +23120,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_drina:10"
+          "sector_id": "sector:vrs_drina:8"
         },
         "cohesion": 67,
         "composition": {
@@ -23413,7 +23394,7 @@
         "hq_sid": "op:rogatica:pljesevica",
         "id": "rs_1st_podrinje",
         "kind": "brigade",
-        "location_osid": "op:olovo:slivnje",
+        "location_osid": "op:sokolac:sasevci_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Podrinje Light Infantry Brigade",
@@ -23885,7 +23866,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:1"
+          "sector_id": "sector:vrs_1st_krajina:5"
         },
         "cohesion": 67,
         "composition": {
@@ -23934,7 +23915,7 @@
         "hq_sid": "op:srbac:kobas",
         "id": "rs_1st_srbac_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:prnjavor:gornji_smrtici",
+        "location_osid": "op:derventa:lug",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Srbac Light Infantry",
@@ -24183,7 +24164,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:5"
+          "sector_id": "sector:vrs_1st_krajina:15"
         },
         "cohesion": 67,
         "composition": {
@@ -24216,7 +24197,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -24232,7 +24212,7 @@
         "hq_sid": "op:modrica:skugric_gornji_2",
         "id": "rs_1st_vujak_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:bosanski_brod:donja_vrela",
+        "location_osid": "op:modrica:vranjak_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Vučjak Light Infantry",
@@ -24406,7 +24386,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:5"
+          "sector_id": "sector:vrs_1st_krajina:1"
         },
         "cohesion": 72,
         "composition": {
@@ -24439,6 +24419,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "motorized",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -24454,7 +24435,7 @@
         "hq_sid": "op:derventa:cerani_2",
         "id": "rs_27th_derventa_motorized",
         "kind": "brigade",
-        "location_osid": "op:derventa:cerani_2",
+        "location_osid": "op:prnjavor:donji_strpci_2",
         "max_personnel": 2200,
         "morale": 60,
         "name": "27th Derventa Motorized",
@@ -24554,7 +24535,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:23"
+          "sector_id": "sector:vrs_1st_krajina:18"
         },
         "cohesion": 67,
         "composition": {
@@ -24587,6 +24568,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -24602,7 +24584,7 @@
         "hq_sid": "op:banja_luka:banja_luka_2",
         "id": "rs_2nd_banja_luka_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:banja_luka:melina_2",
+        "location_osid": "op:kljuc:donji_vrbljani_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "2nd Banja Luka Light Infantry",
@@ -24628,7 +24610,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:8"
+          "sector_id": "sector:vrs_1st_krajina:23"
         },
         "cohesion": 67,
         "composition": {
@@ -24677,7 +24659,7 @@
         "hq_sid": "op:banja_luka:banja_luka_2",
         "id": "rs_2nd_krajina_infantry",
         "kind": "brigade",
-        "location_osid": "op:jajce:prisoje",
+        "location_osid": "op:kljuc:donje_ratkovo_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "2nd Krajina Infantry",
@@ -25666,7 +25648,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_east_bosnian:0"
+          "sector_id": "sector:vrs_east_bosnian:2"
         },
         "cohesion": 67,
         "composition": {
@@ -25715,7 +25697,7 @@
         "hq_sid": "op:bijeljina:bukovica_donja",
         "id": "rs_3rd_semberija_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:bijeljina:velika_obarska_2",
+        "location_osid": "op:bijeljina:suho_polje_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "3rd Semberija Light Infantry",
@@ -26186,7 +26168,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_drina:8"
+          "sector_id": "sector:vrs_drina:10"
         },
         "cohesion": 67,
         "composition": {
@@ -26235,7 +26217,7 @@
         "hq_sid": "op:vlasenica:bacici",
         "id": "rs_5th_podrinje",
         "kind": "brigade",
-        "location_osid": "op:bratunac:jezestica_2",
+        "location_osid": "op:olovo:slivnje",
         "max_personnel": 2000,
         "morale": 60,
         "name": "5th Podrinje",
@@ -26339,7 +26321,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:23"
+          "sector_id": "sector:vrs_1st_krajina:17"
         },
         "cohesion": 67,
         "composition": {
@@ -26372,6 +26354,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -26387,7 +26370,7 @@
         "hq_sid": "op:sanski_most:budimlic_japra_2",
         "id": "rs_6th_sanske_infantry",
         "kind": "brigade",
-        "location_osid": "op:sanski_most:ostra_luka",
+        "location_osid": "op:prijedor:brezicani",
         "max_personnel": 2000,
         "morale": 60,
         "name": "6th Sanske Infantry",
@@ -26486,8 +26469,8 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "reserve",
-          "sector_id": "sector:vrs_2nd_krajina:3"
+          "role": "front",
+          "sector_id": "sector:vrs_2nd_krajina:1"
         },
         "cohesion": 67,
         "composition": {
@@ -26520,6 +26503,7 @@
             "STATIC_DEFENSE": false
           }
         },
+        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -26535,7 +26519,7 @@
         "hq_sid": "op:bosansko_grahovo:bosansko_grahovo_2",
         "id": "rs_9th_grahovo_light_infantry",
         "kind": "brigade",
-        "location_osid": "op:bosansko_grahovo:bosansko_grahovo_2",
+        "location_osid": "op:livno:gubin_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "9th Grahovo Light Infantry",

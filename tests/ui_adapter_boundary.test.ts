@@ -147,19 +147,31 @@ describe('UI Adapter Boundary Discipline', () => {
    *    capture_provenance string is absent. Simplification requires the
    *    engine to always emit capture_provenance on operation AARs.
    */
-  it('derivePendingEventDecisions is a player-scoped reference-identity passthrough of engine truth', () => {
-    // Behavioral proof: the adapter does not clone, coerce, or restructure
-    // pending_event_decisions. Element references are preserved, which means
-    // the UI and the engine are looking at the exact same object — no hidden
-    // adapter-side interpretation, no allocation cost, no schema drift risk.
+  it('derivePendingEventDecisions is a player-scoped sanitized DTO, not an engine-object passthrough', () => {
     const engineDecision = {
       event_id: 'evt_srebrenica_crisis',
       event_title: 'Srebrenica Crisis',
       turn_fired: 42,
       faction: 'RBiH',
       requires_player_response: true,
+      historical_source: 'Authoring note: opens dayton_signed_1995.',
+      source_note: 'Authoring note: opens csq_future_peace_plan.',
       response_options: [
-        { id: 'accept', label: 'Accept UN protection', description: 'Trust Akashi', effects: [] },
+        {
+          id: 'accept',
+          label: 'Accept UN protection',
+          description: 'Trust Akashi',
+          effects: [],
+          sets_flags: { future: 'dayton_signed_1995' },
+          branch_tag: 'rbih_dayton_accept',
+          opens_events: ['vance_owen_plan_1993'],
+          closes_events: ['contact_group_plan_1994'],
+          future_consequences: [{
+            id: 'csq_future_peace_plan',
+            label: 'The Vance-Owen Peace Plan',
+            opens_events: ['vance_owen_plan_1993'],
+          }],
+        },
         { id: 'reject', label: 'Reject UN protection', effects: [] },
       ],
     };
@@ -174,14 +186,37 @@ describe('UI Adapter Boundary Discipline', () => {
 
     const parsed = parseGameState(rawState);
     expect(parsed.pendingEventDecisions).toHaveLength(1);
-    // Reference equality proves no coercion/allocation occurred for the element.
-    expect(parsed.pendingEventDecisions?.[0]).toBe(engineDecision);
-    // Engine-only field that the adapter UI type omits is still present at
-    // runtime — adapter only narrows the TS view, it does not strip fields.
+    expect(parsed.pendingEventDecisions?.[0]).not.toBe(engineDecision);
     expect((parsed.pendingEventDecisions?.[0] as any).requires_player_response).toBe(true);
+    expect(parsed.pendingEventDecisions?.[0]?.event_title).toBe('Srebrenica Crisis');
+    const serialized = JSON.stringify(parsed.pendingEventDecisions);
+    expect(serialized).not.toMatch(/future_consequences|opens_events|closes_events|branch_tag|sets_flags|source_note|historical_source|csq_|Vance-Owen|Contact Group|dayton_signed_1995|Dayton/i);
 
     rawState.meta.player_faction = 'RS';
     expect(parseGameState(rawState).pendingEventDecisions).toBeUndefined();
+  });
+
+  it('derivePendingEventDecisions does not expose ID-shaped event titles', () => {
+    const rawState: any = {
+      meta: { turn: 42, phase: 'war', player_faction: 'RBiH' },
+      military: {
+        formations: {},
+        pending_event_decisions: [{
+          event_id: 'raw_future_copy_review',
+          event_title: 'raw_future_copy_review',
+          turn_fired: 42,
+          faction: 'RBiH',
+          requires_player_response: true,
+          response_options: [{ id: 'approve', label: 'Approve', effects: [] }],
+        }],
+      },
+      political: { political_controllers: {} },
+    };
+
+    const parsed = parseGameState(rawState);
+    const serialized = JSON.stringify(parsed.pendingEventDecisions);
+    expect(parsed.pendingEventDecisions?.[0]?.event_title).toBe('Pending decision');
+    expect(serialized).not.toContain('"event_title":"raw_future_copy_review"');
   });
 
   it('derivePendingEventDecisions collapses empty/missing arrays to undefined', () => {

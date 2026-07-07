@@ -25,6 +25,8 @@ import {
     TUTORIAL_SPOTLIGHT_TARGETS,
     compareStepsById,
 } from '../src/ui/map/components/onboarding/onboardingSteps.js';
+import { enMessages } from '../src/ui/map/i18n/messages.en.js';
+import { bcsMessages } from '../src/ui/map/i18n/messages.bcs.js';
 import {
     applyDismissPure,
     applyRestart,
@@ -182,5 +184,21 @@ describe('LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1 — 8-step campaign-loop tutorial'
         expect(restartedAfter.dismissed).toBe(false);
         expect(restartedAfter.completed_steps).toEqual([]);
         expect(restartedAfter.current_step).toBeUndefined();
+    });
+});
+
+describe('first-hour tutorial knowledge boundary', () => {
+    it('does not name future historical outcomes in tutorial or opening brief copy', () => {
+        const text = [
+            ...ONBOARDING_STEPS.flatMap((step) => [step.title, step.body]),
+            enMessages['onboarding.08.body'],
+            enMessages['inbox.openingBrief.thesis'],
+            enMessages['commandBriefing.item.patronOverride.detail'],
+            bcsMessages['onboarding.08.body'],
+            bcsMessages['inbox.openingBrief.thesis'],
+            bcsMessages['commandBriefing.item.patronOverride.detail'],
+        ].join('\n');
+
+        expect(text).not.toMatch(/\bDayton\b|Daytonu|Srebrenica|Žepa|Zepa|Vance-Owen|Owen-Stoltenberg|Contact Group|Karadzic|Mladic|massacre|genocide|falls?/i);
     });
 });

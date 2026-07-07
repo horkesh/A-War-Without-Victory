@@ -41,6 +41,38 @@ function getEquipmentCeiling(equipmentClass: string | undefined) {
         ?? EQUIPMENT_CEILINGS['light_infantry']!;
 }
 
+function hasHeavyPhantomEquipment(def: Pick<PhantomDef, 'tanks' | 'artillery' | 'apcs'>): boolean {
+    return (def.tanks ?? 0) > 0 || (def.artillery ?? 0) > 0 || (def.apcs ?? 0) > 0;
+}
+
+function getPhantomSpawnProfile(def: PhantomDef): {
+    personnel: number;
+    infantry: number;
+    cohesion: number;
+    morale: number;
+    experience: number;
+    equipmentClass: string;
+} {
+    if (hasHeavyPhantomEquipment(def)) {
+        return {
+            personnel: 2000,
+            infantry: 1200,
+            cohesion: 85,
+            morale: 90,
+            experience: 0.6,
+            equipmentClass: 'mechanized',
+        };
+    }
+    return {
+        personnel: 800,
+        infantry: 800,
+        cohesion: 60,
+        morale: 60,
+        experience: 0.25,
+        equipmentClass: 'light_infantry',
+    };
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Phantom brigade definitions
 // ═══════════════════════════════════════════════════════════════════════════
@@ -499,6 +531,7 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
 
         const faction: FactionId = def.faction ?? 'RS';
         const kindTag = def.kind_tag ?? 'jna_phantom';
+        const spawnProfile = getPhantomSpawnProfile(def);
 
         const formation: FormationState = {
             id: def.id,
@@ -508,18 +541,18 @@ export function spawnJnaPhantomBrigades(state: GameState, options: SpawnJnaPhant
             status: 'active',
             assignment: null,
             kind: kindTag,
-            personnel: 2000,
+            personnel: spawnProfile.personnel,
             corps_id: def.corps_id,
             location_osid: def.location_osid,
             withdrawal_turn: def.withdrawal_turn,
             posture: 'attack',
-            cohesion: 85,
-            morale: 90,
-            experience: 0.6,
-            equipment_class: 'mechanized',
+            cohesion: spawnProfile.cohesion,
+            morale: spawnProfile.morale,
+            experience: spawnProfile.experience,
+            equipment_class: spawnProfile.equipmentClass,
             tags: [kindTag, `corps:${def.corps_id}`],
             composition: {
-                infantry: 1200,
+                infantry: spawnProfile.infantry,
                 tanks: def.tanks,
                 artillery: def.artillery,
                 aa_systems: 2,

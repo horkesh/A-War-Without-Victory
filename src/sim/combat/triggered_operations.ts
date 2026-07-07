@@ -41,6 +41,7 @@ import {
     hasActiveOperation,
     hasAvailableSlot,
 } from './corps_operation_helpers.js';
+import { ensureHistoricalOperationAuthorizationReview } from './historical_operation_authorization.js';
 import { evaluateLaunchFeasibility, type LaunchFeasibilityResult } from './sector_offensive_launch_helpers.js';
 // ADR-0005 v3.0 Army HQ Operations: faction-wide cross-corps offensives, frequency-gated.
 import {
@@ -109,8 +110,10 @@ function corpsOpFinished(state: GameState, corpsId: string): boolean {
 /** Check whether a corps has completed a specific operation (by name) in the AAR history. */
 function corpsCompletedOp(state: GameState, corpsId: string, opName: string): boolean {
     const history = state.operation_history;
-    if (!history) return false;
-    return history.some(aar => aar.corps_id === corpsId && aar.operation_name === opName);
+    if (history?.some(aar => aar.corps_id === corpsId && aar.operation_name === opName)) return true;
+    return (state.military.preplanned_operations_satisfied_by_start ?? []).some((entry) =>
+        entry.corps_id === corpsId && entry.operation_name === opName
+    );
 }
 
 function hasEnemyObjective(
@@ -1134,6 +1137,20 @@ export function checkTriggeredOperations(state: GameState): string[] {
             continue;
         }
 
+        const authorization = ensureHistoricalOperationAuthorizationReview(state, {
+            kind: 'triggered',
+            faction: effectiveDef.faction,
+            corpsId: effectiveDef.primary_corps,
+            operationName: effectiveDef.name,
+        });
+        if (authorization === 'pending' || authorization === 'declined') {
+            recordWatchedOperationTrace(state, def, turn, {
+                launch_status: 'not_launched',
+                blocker_code: authorization === 'pending' ? 'pending_player_authorization' : 'declined_player_authorization',
+            });
+            continue;
+        }
+
         // Bot auto-accept: build and inject the operation
         const result = buildOperation(effectiveDef, state, turn);
         if ('failure' in result) {
@@ -1284,6 +1301,14 @@ export function injectArmyHqOperations(state: GameState): string[] {
         const trigWarnings = validateOpAtInjection(validatable, state, undefined, primaryCmd);
         collectOpInjectionWarnings(state, trigWarnings);
         if (hasBlockingOpInjectionWarnings(trigWarnings)) continue;
+
+        const authorization = ensureHistoricalOperationAuthorizationReview(state, {
+            kind: 'army_hq',
+            faction: effectiveDef.faction,
+            corpsId: effectiveDef.primary_corps,
+            operationName: effectiveDef.name,
+        });
+        if (authorization === 'pending' || authorization === 'declined') continue;
 
         const result = buildOperation(effectiveDef, state, turn);
         if ('failure' in result) continue;

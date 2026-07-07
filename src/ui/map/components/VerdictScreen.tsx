@@ -533,9 +533,8 @@ export function VerdictScreen() {
                         <ul className="space-y-3">
                             {ruptureReceipts.map((r) => (
                                 <li key={r.id} className="text-[11px] text-text-secondary leading-relaxed"
-                                    data-awwv-rupture-receipt-id={r.id}
-                                    data-awwv-rupture-receipt-variant={r.variant}
-                                    data-awwv-rupture-receipt-essay={r.target_essay_event_id}>
+                                    data-awwv-rupture-receipt="true"
+                                    data-awwv-rupture-receipt-variant={r.variant}>
                                     {r.content}
                                 </li>
                             ))}
@@ -575,9 +574,7 @@ export function VerdictScreen() {
                                 const prose = resolveGhostEntryProse(g.ghost_id, locale);
                                 return (
                                 <li key={g.ghost_id} className="text-[10px] text-text-secondary"
-                                    data-awwv-ghost-id={g.ghost_id}
                                     data-awwv-ghost-variant={g.variant}
-                                    data-awwv-ghost-ring={g.ring_classification}
                                     data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
                                     <div className="text-text-primary font-semibold">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</div>
                                     {prose !== null && (
@@ -661,7 +658,6 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
                 {rows.map(row => (
                     <div key={row.id}
                          className="grid grid-cols-[1.4fr_0.6fr_0.6fr_0.7fr_0.7fr] gap-3 items-start rounded border border-panel-border bg-panel-card/30 px-3 py-2"
-                         data-awwv-milestone-id={row.id}
                          data-awwv-milestone-status={row.status}>
                         <div>
                             <div className="text-[11px] text-text-primary font-semibold">

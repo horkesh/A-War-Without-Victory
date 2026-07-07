@@ -145,6 +145,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // forceable; we surface "cannot issue" and never stage / debit CA.
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [receipt, setReceipt] = useState<{ kind: 'success' | 'error' | 'cancelled'; message: string } | null>(null);
 
   // REQUEST-OP in-card target OSID (Decision-Room request-op cards carry an EMPTY
@@ -377,6 +378,10 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   };
 
   const markFailed = (reason: string) => {
+    if (reason === 'already_resolved') {
+      setCollapsed(true);
+      return;
+    }
     setLoadError(reason);
     setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
   };
@@ -564,6 +569,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   // When nothing resolves the card renders its text-only header below — the act
   // surface always works with zero art.
   const headerArt = resolveDirectiveActArt(directive.lever, gameState.player_faction);
+
+  if (collapsed) return null;
 
   return (
     <section

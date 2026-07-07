@@ -40,6 +40,15 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('Decision consequence records');
     expect(tool).toContain('War Chronicle');
     expect(tool).toContain('rawFirstHourLabelsAbsentByFaction');
+    expect(tool).toContain('FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS');
+    expect(tool).toContain('assertNoFirstHourKnowledgeLeaks');
+    expect(tool).toContain('verifyFirstHourCodexKnowledgeBoundary(page, summary, flow)');
+    expect(tool).toContain('verifyFirstHourDecisionRoomKnowledgeBoundary(page, summary, flow)');
+    expect(tool).toContain('The Demilitarization of Srebrenica');
+    expect(tool).toContain('The Vance-Owen Peace Plan');
+    expect(tool).toContain('The Owen-Stoltenberg Plan');
+    expect(tool).toContain('The Contact Group Plan');
+    expect(tool).toContain('Karad');
     expect(tool).toContain('serverPortCleanupVerified');
     expect(tool).toContain('rbih_state_identity');
     expect(tool).toContain('turn_fired');
@@ -47,9 +56,9 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain("responseId: 'civic'");
     expect(tool).toContain("responseId: 'all_six'");
     expect(tool).toContain("responseId: 'croat_republic'");
-    expect(tool).toContain('data-testid="event-decision-response"');
-    expect(tool).toContain('data-event-id="${flow.eventId}"');
-    expect(tool).toContain('data-response-id="${flow.responseId}"');
+    expect(tool).toContain('clickByText(page, flow.responseLabel)');
+    expect(tool).not.toContain('data-event-id="${flow.eventId}"');
+    expect(tool).not.toContain('data-response-id="${flow.responseId}"');
     expect(tool).toContain('FACTION_OPENING_FLOWS');
     expect(tool).toContain("faction: 'RBiH'");
     expect(tool).toContain("faction: 'RS'");
@@ -67,6 +76,7 @@ describe('first-hour browser QA gate contract', () => {
     expect(tool).toContain('turnZeroRecordsProvenanceCountsByFaction');
     expect(tool).toContain('records-subtab-${id}');
     expect(tool).toContain('receiptChecksByFaction');
+    expect(tool).toContain('futureKnowledgeLeaksAbsentByFaction');
     expect(tool).not.toContain('receiptCheck: false');
     expect(tool).not.toContain('verifyRbihRecordsAndChronicle');
   });
@@ -113,6 +123,12 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('data-testid="codex-panel"');
     expect(tool).toContain('assertSingleShellSurface');
     expect(tool).toContain('assertNoRawTechnicalTokens');
+    expect(tool).toContain('FORBIDDEN_FUTURE_KNOWLEDGE_PATTERNS');
+    expect(tool).toContain('assertNoFutureKnowledgeLeaks');
+    expect(tool).toContain('The Demilitarization of Srebrenica');
+    expect(tool).toContain('The Vance-Owen Peace Plan');
+    expect(tool).toContain('The Owen-Stoltenberg Plan');
+    expect(tool).toContain('The Contact Group Plan');
     expect(tool).toContain("label: 'OSID'");
     expect(tool).toContain("label: 'ATK'");
     expect(tool).toContain("label: 'raw planning ids'");
@@ -321,8 +337,8 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-record-target={record.recordTarget}');
     expect(read('src/ui/map/components/army_hq/DecisionConsequenceRecordsPanel.tsx')).toContain('data-testid="decision-consequence-open-chronicle"');
     expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-testid="event-decision-response"');
-    expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-event-id={decision.event_id}');
-    expect(read('src/ui/map/components/EventDecisionModal.tsx')).toContain('data-response-id={option.id}');
+    expect(read('src/ui/map/components/EventDecisionModal.tsx')).not.toContain('data-event-id={decision.event_id}');
+    expect(read('src/ui/map/components/EventDecisionModal.tsx')).not.toContain('data-response-id={option.id}');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-testid="opportunity-ledger-record"');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-proposal-id={record.proposal_id}');
     expect(read('src/ui/map/components/army_hq/OpportunityLedgerPanel.tsx')).toContain('data-status={record.status}');
@@ -375,7 +391,7 @@ describe('browser QA CI wiring contract', () => {
     expect(detector).toContain('"build/icon.png"');
   });
 
-  it('runs first-hour and live-surface browser gates in the required full-suite job', () => {
+  it('runs the self-scanning player-experience gate in the required full-suite job', () => {
     const workflow = read('.github/workflows/full-suite-and-fingerprint.yml');
 
     const fullSuiteJobStart = workflow.indexOf('  full-suite:');
@@ -383,10 +399,11 @@ describe('browser QA CI wiring contract', () => {
     const fullSuiteJob = workflow.slice(fullSuiteJobStart, structuralFingerprintStart);
     expect(fullSuiteJob).not.toContain('lfs: true');
     expect(read('.github/workflows/README.md')).toContain('does not eager-fetch Git LFS before path');
-    expect(workflow).toContain('name: First-hour browser gate');
-    expect(workflow).toContain('run: npm run qa:first-hour:browser');
-    expect(workflow).toContain('name: Live surface browser gate');
-    expect(workflow).toContain('run: npm run qa:live-surface:browser');
+    expect(fullSuiteJob).toContain('timeout-minutes: 75');
+    expect(workflow).toContain('name: Player experience gate');
+    expect(workflow).toContain('run: npm run qa:player-experience');
+    expect(workflow).not.toContain('run: npm run qa:first-hour:browser');
+    expect(workflow).not.toContain('run: npm run qa:live-surface:browser');
     expect(workflow).toContain('name: Install Puppeteer Chrome for browser gates');
     expect(workflow).toContain('run: npx puppeteer browsers install chrome');
     expect(read('tools/ui/browser_gate_pmtiles_env.cjs')).toContain('VITE_AWWV_DISABLE_PMTILES');
@@ -394,19 +411,15 @@ describe('browser QA CI wiring contract', () => {
 
     const fullSuiteStart = workflow.indexOf('name: Full vitest suite');
     const chromeInstallStart = workflow.indexOf('name: Install Puppeteer Chrome for browser gates');
-    const firstHourStart = workflow.indexOf('name: First-hour browser gate');
-    const liveSurfaceStart = workflow.indexOf('name: Live surface browser gate');
+    const playerExperienceStart = workflow.indexOf('name: Player experience gate');
     const skippedStart = workflow.indexOf('name: No relevant changes');
     expect(chromeInstallStart).toBeGreaterThan(fullSuiteStart);
-    expect(firstHourStart).toBeGreaterThan(chromeInstallStart);
-    expect(liveSurfaceStart).toBeGreaterThan(firstHourStart);
-    expect(skippedStart).toBeGreaterThan(liveSurfaceStart);
+    expect(playerExperienceStart).toBeGreaterThan(chromeInstallStart);
+    expect(skippedStart).toBeGreaterThan(playerExperienceStart);
 
-    const chromeInstallBlock = workflow.slice(chromeInstallStart, firstHourStart);
-    const firstHourBlock = workflow.slice(firstHourStart, liveSurfaceStart);
-    const liveSurfaceBlock = workflow.slice(liveSurfaceStart, skippedStart);
+    const chromeInstallBlock = workflow.slice(chromeInstallStart, playerExperienceStart);
+    const playerExperienceBlock = workflow.slice(playerExperienceStart, skippedStart);
     expect(chromeInstallBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
-    expect(firstHourBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
-    expect(liveSurfaceBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
+    expect(playerExperienceBlock).toContain("if: steps.changes.outputs.relevant == 'true'");
   });
 });

@@ -1345,6 +1345,14 @@ export interface WatchedOperationTraceRow {
     launch_defender_power?: number;
 }
 
+export interface PreplannedOperationSatisfiedByStart {
+    corps_id: FormationId;
+    operation_name: string;
+    faction: FactionId;
+    turn: number;
+    objective_count: number;
+}
+
 export type DoctrineType = 'INFILTRATE' | 'ARTILLERY_COUNTER' | 'COORDINATED_STRIKE' | 'STATIC_DEFENSE' | 'ATTACK' | 'DEFEND';
 
 export interface DoctrineState {
@@ -2432,6 +2440,8 @@ corps_command?: Record<FormationId, CorpsCommandState>;
 corps_equipment_reserve?: Record<FormationId, { tanks: number; artillery: number; apcs: number }>;
 /** Operation injection validation warnings (collected at injection time, surfaced in run_summary). */
 op_injection_warnings?: OpInjectionWarning[];
+/** Pre-planned operations whose objectives were already faction-held at scenario injection. */
+preplanned_operations_satisfied_by_start?: PreplannedOperationSatisfiedByStart[];
 /** Compact triggered-operation lifecycle diagnostics. Observability only; does not affect launch behavior. */
 watched_operations?: WatchedOperationTraceRow[];
 /** Triggered operations that have been offered and accepted (operation name → turn accepted). */

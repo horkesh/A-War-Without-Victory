@@ -7,6 +7,7 @@ import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { t, type MessageKey } from '../i18n';
 import { getArmyReserveRequestCauseCopy } from '../utils/armyReserveSeverity';
+import { getPlayerSafeBrigadeName } from '../utils/playerSafeText';
 import { DecisionModalImageHeader } from './DecisionModalImageHeader';
 
 interface ReserveRequestModalProps {
@@ -53,6 +54,28 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
   const corpsName = request ? getPlayerFacingCorpsName(request.corps_id, state?.formations ?? [], commandFallback) : commandFallback;
   const causeCopy = request ? getArmyReserveRequestCauseCopy(request) : null;
   const headerImage = getDecisionHeaderForFamily('reserve_request');
+  const suggestedBrigade = request?.suggested_brigade_id
+    ? state?.formations?.find((formation) => formation.id === request.suggested_brigade_id)
+    : null;
+  const suggestedBrigadeName = suggestedBrigade ? getPlayerSafeBrigadeName(suggestedBrigade.name) : null;
+
+  const acceptSuggested = async () => {
+    if (!request || !request.suggested_brigade_id) return;
+    if (!ipc.isAvailable) {
+      setLoadError(t('formationDetail.commandBridgeUnavailable'));
+      return;
+    }
+    const result = await ipc.approveReserveRequest(
+      request.request_id,
+      request.suggested_brigade_id,
+      'President accepted the Army HQ reserve recommendation.',
+    );
+    if (!result.ok) {
+      setLoadError(result.error ?? 'Reserve request could not be accepted.');
+      return;
+    }
+    onClose();
+  };
 
   const decline = async () => {
     if (!request) return;
@@ -112,6 +135,17 @@ export function ReserveRequestModal({ requestId, state, onClose, onOpenReservePa
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
         <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.reserve.close')}</button>
         <button type="button" onClick={decline} disabled={!request} className="border border-red-400/45 bg-red-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-red-200 disabled:opacity-40">{t('decisionModal.reserve.decline')}</button>
+        {request?.suggested_brigade_id && suggestedBrigadeName && (
+          <button
+            type="button"
+            onClick={acceptSuggested}
+            disabled={!request || !ipc.isAvailable}
+            title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
+            className="border border-emerald-400/45 bg-emerald-500/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-200 disabled:opacity-40"
+          >
+            {t('decisionModal.reserve.acceptSuggested', { brigade: suggestedBrigadeName })}
+          </button>
+        )}
         <button type="button" onClick={onOpenReservePanel} disabled={!request} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.reserve.openReservePool')}</button>
       </div>
     </Modal>

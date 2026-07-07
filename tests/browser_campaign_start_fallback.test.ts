@@ -63,11 +63,16 @@ describe('browser new-campaign fallback', () => {
           player_faction: string;
           decision_mode?: string;
           headless_scenario_auto_control?: boolean;
+          pending_proposal_reviews?: Array<{ proposed_action?: string; faction?: string }>;
         };
         political?: { control_events?: unknown[] };
         military: {
           pending_event_decisions?: Array<{ event_id: string; faction: string; requires_player_response?: boolean }>;
           fired_event_ids: string[];
+          corps_command?: Record<string, {
+            active_operations?: Array<{ name?: string; is_pre_planned?: boolean }>;
+            queued_operations?: string[];
+          }>;
         };
       };
       const pending = state.military.pending_event_decisions ?? [];
@@ -82,6 +87,27 @@ describe('browser new-campaign fallback', () => {
         requires_player_response: true,
       });
       expect(state.military.fired_event_ids).toContain(eventId);
+      const playerCorpsOps = Object.entries(state.military.corps_command ?? {})
+        .flatMap(([corpsId, command]) => (command.active_operations ?? [])
+          .map((operation) => ({ corpsId, operation })))
+        .filter(({ operation }) => operation.is_pre_planned === true)
+        .filter(({ corpsId }) =>
+          (faction === 'RS' && corpsId.startsWith('vrs_'))
+          || (faction === 'HRHB' && corpsId.startsWith('hvo_'))
+          || (faction === 'RBiH' && corpsId.startsWith('arbih_'))
+        );
+      expect(playerCorpsOps).toEqual([]);
+      if (faction === 'RS') {
+        expect(state.meta.pending_proposal_reviews).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              faction: 'RS',
+              proposed_action: 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina',
+            }),
+          ]),
+        );
+        expect(state.military.corps_command?.vrs_drina?.queued_operations).toBeUndefined();
+      }
     }
   });
 

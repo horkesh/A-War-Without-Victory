@@ -122,6 +122,11 @@ describe('event decision modal auto-launch contract', () => {
     expect(modalRenderBlock).toContain('resolveBrowserEventDecision(nextState, eventId, responseId)');
     expect(modalRenderBlock).toContain('console.warn(\'[EventDecisionModal] browser fallback failed\', err)');
     expect(modalRenderBlock).toContain('setLoadError(\'Failed to record event decision.\')');
+    expect(modalRenderBlock).toContain('errorMessage={loadError}');
+    expect(modalRenderBlock).toContain('onDismissError={dismissActiveEventDecisionError}');
+    expect(app).toContain('const dismissActiveEventDecisionError = () => {');
+    expect(app).toContain('setActiveEventDecisionId(null);');
+    expect(app).toContain('setLoadError(null);');
     expect(modalRenderBlock).not.toContain('setLoadError(err instanceof Error ? err.message : String(err))');
   });
 
@@ -138,6 +143,19 @@ describe('event decision modal auto-launch contract', () => {
     expect(modalRenderBlock).not.toContain('setActiveEventDecisionId(null);');
   });
 
+  it('queues non-decision event essays only for the latest turn and remembers shown ids', () => {
+    const app = readApp();
+    const eventQueueEffect = app.slice(
+      app.indexOf('detect new events from game state and queue for display'),
+      app.indexOf('const pendingPeacePlan = loadedGameState?.pendingPeacePlan'),
+    );
+
+    expect(eventQueueEffect).toContain('shownEventModalIds');
+    expect(eventQueueEffect).toContain('e.turn === loadedGameState.turn');
+    expect(eventQueueEffect).toContain('setShownEventModalIds');
+    expect(eventQueueEffect).not.toContain('!acknowledgedEventIds.has(e.id) && !e.isDecision');
+  });
+
   it('keeps PresidentialAttentionPanel as a summary surface, not an event response executor', () => {
     const panel = readPresidentialAttentionPanel();
     const pendingDecisionBlock = panel.slice(
@@ -148,5 +166,13 @@ describe('event decision modal auto-launch contract', () => {
     expect(panel).not.toContain('respondToEventDecision');
     expect(pendingDecisionBlock).not.toContain('decision.response_options.map');
     expect(pendingDecisionBlock).not.toContain('handleDecisionResponse');
+  });
+
+  it('passes Codex signal event ids through to the Codex panel selector', () => {
+    const app = readApp();
+
+    expect(app).toContain('setRequestedCodexEventId');
+    expect(app).toContain('onOpenCodex={(eventId) => {');
+    expect(app).toContain('requestedEventId={requestedCodexEventId}');
   });
 });

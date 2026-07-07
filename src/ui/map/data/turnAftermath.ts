@@ -1,6 +1,7 @@
 import type { LoadedGameState } from './types';
 import type { TurnBattle, TurnSummary } from '../../../state/turn_summary.js';
 import { countActionableItems, deriveInboxItems, effectiveInboxSeverity, type InboxItem } from './inboxItems';
+import { getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
@@ -50,6 +51,7 @@ export interface TurnAftermathTopAction {
   severity: InboxItem['severity'];
   title: string;
   action: InboxItem['action'];
+  actionLabel: string;
 }
 
 export interface TurnAftermathCostView {
@@ -312,10 +314,20 @@ function summarizeBattleForFaction(battle: TurnBattle, playerFaction: string | n
 function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, string> | null): TurnAftermathView['nextActions'] {
   const inboxItems = deriveInboxItems(state, osidNameMap);
   const actionableItems = inboxItems.filter((item) => item.type !== 'situation');
+  const severityPriority: Record<InboxItem['severity'], number> = {
+    blocking: 0,
+    urgent: 1,
+    normal: 2,
+    info: 3,
+  };
   const actionableItemsWithSeverity = actionableItems.map((item) => ({
     item,
     severity: effectiveInboxSeverity(item),
-  }));
+  })).sort((a, b) => (
+    severityPriority[a.severity] - severityPriority[b.severity]
+    || a.item.priority - b.item.priority
+    || strictStringCompare(a.item.id, b.item.id)
+  ));
   return {
     actionableCount: countActionableItems(inboxItems),
     blockingCount: actionableItemsWithSeverity.filter(({ severity }) => severity === 'blocking').length,
@@ -324,12 +336,13 @@ function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, st
     officerCount: actionableItems.filter((item) => item.type === 'officer_event').length,
     eventDecisionCount: actionableItems.filter((item) => item.type === 'event_decision').length,
     peaceCount: actionableItems.filter((item) => item.type === 'peace_plan').length,
-    topItems: actionableItemsWithSeverity.slice(0, 3).map(({ item, severity }) => ({
+    topItems: actionableItemsWithSeverity.slice(0, 6).map(({ item, severity }) => ({
       id: item.id,
       type: item.type,
       severity,
       title: item.title,
       action: item.action,
+      actionLabel: getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('records.actionType.reviewItem'),
     })),
   };
 }

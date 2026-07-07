@@ -749,6 +749,32 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(items.filter(i => i.type === 'autonomy_proposal')).toHaveLength(0);
     });
 
+    it('shows historical operation authorizations as operation-specific review items', () => {
+        const state = makeStub({
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_10_historical_op_triggered_vrs_1st_krajina_operation_kotor_varos',
+                    turn: 10,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Operation Kotor Varos - staff requests authorization to proceed.',
+                    proposed_action: 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos',
+                    current_value: 'awaiting_authorization',
+                    proposed_value: 'authorize',
+                },
+            ],
+            player_faction: 'RS',
+        });
+
+        const items = deriveInboxItems(state, null);
+        const proposal = items.find(i => i.id.startsWith('command:review-proposal:'))!;
+
+        expect(proposal.type).toBe('autonomy_proposal');
+        expect(proposal.title).toBe('Operation Kotor Varos');
+        expect(proposal.subtitle).toBe('Operation launch requires your authorization.');
+        expect(proposal.action).toBe('decision_room');
+    });
+
     it('suppresses operation-opportunity inbox rows when no Decision Room dossier exists', () => {
         const state = makeStub({
             pendingProposalReviews: [

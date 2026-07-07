@@ -308,8 +308,10 @@ function OperationBriefingModalWrapper() {
 
 function CodexPanelWrapper({
   eventCatalog,
+  requestedEventId,
 }: {
   eventCatalog?: ReadonlyMap<string, EventDefinition>;
+  requestedEventId?: string | null;
 }) {
   const codexOpen = useGameStore((s) => s.codexOpen);
   const setCodexOpen = useGameStore((s) => s.setCodexOpen);
@@ -322,6 +324,7 @@ function CodexPanelWrapper({
     <CodexPanel
       isOpen={codexOpen}
       onClose={() => setCodexOpen(false)}
+      requestedEventId={requestedEventId}
       eventCatalog={eventCatalog}
       state={rawGameState}
     />
@@ -517,6 +520,7 @@ function App() {
   const turnAftermathOpen = useGameStore((s) => s.turnAftermathOpen);
   const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
   const peaceWarTransitionSeen = useGameStore((s) => s.peaceWarTransitionSeen);
+  const setPeaceWarTransitionSeen = useGameStore((s) => s.setPeaceWarTransitionSeen);
   const playerFaction = resolvePlayerFacingFaction(loadedGameState);
   const mapMode = useGameStore((s) => s.mapMode);
   const isOperationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
@@ -574,6 +578,8 @@ function App() {
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
   const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
+  const [shownEventModalIds, setShownEventModalIds] = useState<Set<string>>(new Set());
+  const [requestedCodexEventId, setRequestedCodexEventId] = useState<string | null>(null);
   const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
   /**
@@ -605,13 +611,19 @@ function App() {
     if (!loadedGameState || typeof window === 'undefined') return;
     const params = new URLSearchParams(window.location.search);
     if (params.get('intro') === 'war_start') {
-      useGameStore.getState().setPeaceWarTransitionSeen(false);
+      const view = params.get('view');
+      setAppScreen(view === 'warroom' ? 'warroom' : 'game');
+      setOpeningBriefDismissed(false);
+      setPeaceWarTransitionSeen(false);
+      setActiveEventDecisionId(null);
+      setRecentlyAcceptedEventDecisionId(null);
+      setLoadError(null);
       params.delete('intro');
       const nextQuery = params.toString();
       const nextUrl = `${window.location.pathname}${nextQuery ? `?${nextQuery}` : ''}${window.location.hash}`;
       window.history.replaceState(null, '', nextUrl);
     }
-  }, [loadedGameState]);
+  }, [loadedGameState, setLoadError, setOpeningBriefDismissed, setPeaceWarTransitionSeen]);
 
   /**
    * Phase H Packet 7 — runtime catalog of full canonical `EventDefinition`
@@ -688,6 +700,8 @@ function App() {
   useEffect(() => {
     setDismissedPeacePlanKey(null);
     setAcknowledgedEventIds(new Set());
+    setShownEventModalIds(new Set());
+    setRequestedCodexEventId(null);
     setActiveEventDecisionId(null);
     setRecentlyAcceptedEventDecisionId(null);
   }, [stateFingerprint]);
@@ -798,8 +812,8 @@ function App() {
     const fired = loadedGameState.firedEvents;
     if (!fired || fired.length === 0) return;
 
-    // Find events not yet acknowledged
-    const newEvents = fired.filter(e => !acknowledgedEventIds.has(e.id) && !e.isDecision);
+    // Find current-turn events not yet shown in this campaign session.
+    const newEvents = fired.filter(e => e.turn === loadedGameState.turn && !shownEventModalIds.has(e.id) && !e.isDecision);
     if (newEvents.length === 0) return;
 
     // Load full definitions to enrich title/narrative/category
@@ -824,12 +838,17 @@ function App() {
 
       // Only show if we have new events that aren't already in queue
       if (displayData.length > 0 && eventQueue.length === 0) {
+        setShownEventModalIds(prev => {
+          const next = new Set(prev);
+          for (const event of displayData) next.add(event.id);
+          return next;
+        });
         setEventQueue(displayData);
         setEventQueueIndex(0);
       }
     });
     return () => { stale = true; };
-  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length, appScreen]);
+  }, [loadedGameState?.turn, loadedGameState?.firedEvents?.length, appScreen, shownEventModalIds, eventQueue.length]);
 
   const pendingPeacePlan = loadedGameState?.pendingPeacePlan;
   const showPeacePlanModal = shouldShowPeacePlanModal(pendingPeacePlan, dismissedPeacePlanKey);
@@ -1046,6 +1065,11 @@ function App() {
       console.error('Failed to load manual save:', err);
       setLoadError(err instanceof Error ? err.message : String(err));
     }
+  };
+
+  const dismissActiveEventDecisionError = () => {
+    setActiveEventDecisionId(null);
+    setLoadError(null);
   };
 
   const handleApplyRecruitment = async (brigadeId: string, equipmentClass: string) => {
@@ -1545,6 +1569,17 @@ function App() {
         return;
       }
 
+      if (event.data?.type === 'awwv-shell:fresh-campaign-started') {
+        const view = new URLSearchParams(window.location.search).get('view');
+        setAppScreen(view === 'warroom' ? 'warroom' : 'game');
+        setOpeningBriefDismissed(false);
+        setPeaceWarTransitionSeen(false);
+        setActiveEventDecisionId(null);
+        setRecentlyAcceptedEventDecisionId(null);
+        setLoadError(null);
+        return;
+      }
+
       if (event.data?.type !== 'awwv-shell:handoff') return;
       const command = event.data?.command;
       if (!isShellHandoffCommand(command)) return;
@@ -1648,7 +1683,7 @@ function App() {
             onOpenSummary={() => openSummary()}
             onOpenRecords={() => openArmyHQRecords('aftermath')}
             onOpenOpsHistory={() => useGameStore.getState().setIsOperationsPanelOpen(true)}
-            onOpenCodex={() => openCodex(useGameStore.getState())}
+        onOpenCodex={() => openCodex(useGameStore.getState())}
             onReviewPriorities={reviewPreAdvancePriorities}
           />
         </RootErrorBoundary>
@@ -1764,9 +1799,14 @@ function App() {
           setTurnAftermathOpen(false);
           openChronicle(useGameStore.getState());
         }}
-        onOpenCodex={() => {
+        onOpenCodex={(eventId) => {
           setTurnAftermathOpen(false);
+          setRequestedCodexEventId(eventId ?? null);
           openCodex(useGameStore.getState());
+        }}
+        onReviewAction={(item) => {
+          setTurnAftermathOpen(false);
+          handlePresidentialInboxAction(item.action, item.id);
         }}
       />
       <RootErrorBoundary zone="army hq">
@@ -1774,7 +1814,7 @@ function App() {
       </RootErrorBoundary>
       <ChronicleOverlay />
       <WrappedOverlay eventCatalog={eventCatalogFull} />
-      <CodexPanelWrapper eventCatalog={eventCatalogFull} />
+      <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
       {/* Phase H Packet 8 — Decision History overlay (Component B per H1 §4.2B).
           Consumes H2 wave 1 helpers (getPlayerDecisionHistory +
           getCausalDescendants); same catalog + raw state as CodexPanelWrapper.
@@ -1871,6 +1911,8 @@ function App() {
             eventCatalog={eventCatalogFull}
             state={loadedGameState?.rawGameState}
             advisor={resolveEventDecisionAdvisor(decision, loadedGameState?.namedOfficerData, playerFaction)}
+            errorMessage={loadError}
+            onDismissError={dismissActiveEventDecisionError}
             onRespond={async (eventId, responseId) => {
               if (ipc.isAvailable) {
                 const result = await ipc.respondToEventDecision(eventId, responseId);

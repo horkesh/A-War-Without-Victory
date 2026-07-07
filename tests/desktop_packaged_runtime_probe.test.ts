@@ -350,6 +350,11 @@ test('electron main exposes a packaged runtime probe mode instead of a second la
     );
     assert.match(
         source,
+        /\/data\/derived\/settlements_wgs84_1990\.geojson/,
+        'packaged runtime probe should verify canonical settlements GeoJSON is served',
+    );
+    assert.match(
+        source,
         /\/data\/derived\/terrain\/settlements_terrain_scalars\.json/,
         'packaged runtime probe should verify terrain scalar JSON is served',
     );
@@ -507,6 +512,11 @@ test('probe tool launches the unpacked packaged executable with the runtime prob
         source,
         /\/data\/derived\/operational\/operational_settlements\.geojson/,
         'probe tool should require operational GeoJSON route proof',
+    );
+    assert.match(
+        source,
+        /\/data\/derived\/settlements_wgs84_1990\.geojson/,
+        'probe tool should require canonical settlements GeoJSON route proof',
     );
     assert.match(
         source,

@@ -207,6 +207,68 @@ describe('Tactical map render smoke', () => {
     }
   });
 
+  it('buildFormationsGeoJSON keeps stacked counters anchored to the OSID coordinate', () => {
+    const state: LoadedGameState = {
+      label: 'Turn 1',
+      turn: 1,
+      phase: 'war',
+      player_faction: 'RBiH',
+      militiaPools: [],
+      controlBySettlement: { 'op:sarajevo': 'RBiH' },
+      statusBySettlement: {},
+      brigadeAorByFormationId: {},
+      attackOrders: [],
+      aorOrders: [],
+      recentControlEvents: [],
+      allControlEvents: [],
+      displacementEventLog: [],
+      battlesByOsid: {},
+      movementsByOsid: {},
+      supplyTransitionsByOsid: {},
+      historicalEventsByTurn: [],
+      latestTurnSummary: null,
+      turnSummaries: [],
+      pressureWarning: false,
+      formations: [
+        {
+          id: 'b1',
+          faction: 'RBiH',
+          name: '1st Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          personnel: 2000,
+        },
+        {
+          id: 'b2',
+          faction: 'RBiH',
+          name: '2nd Brigade',
+          kind: 'brigade',
+          readiness: 'active',
+          cohesion: 80,
+          fatigue: 0,
+          status: 'active',
+          createdTurn: 1,
+          tags: [],
+          location_osid: 'op:sarajevo',
+          personnel: 2000,
+        },
+      ],
+    };
+
+    const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
+    const features = buildFormationsGeoJSON(state, controlledGeo).features;
+    expect(features).toHaveLength(2);
+    expect(features[0]?.geometry.coordinates).toEqual(features[1]?.geometry.coordinates);
+    expect(features.map((feature) => feature.properties.stack_index)).toEqual([0, 1]);
+    expect(features.map((feature) => feature.properties.stack_count)).toEqual([2, 2]);
+  });
+
   it('buildFormationsGeoJSON does not infer unreported supply state from fatigue or cohesion', () => {
     const state: LoadedGameState = {
       label: 'Turn 1',

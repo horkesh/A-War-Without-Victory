@@ -221,7 +221,9 @@ export function getPlayerSafeCorpsName(
 }
 
 export function getPlayerSafeDecisionTitle(eventTitle: string | null | undefined): string {
-    return (eventTitle ?? '').trim() || 'Pending decision';
+    const title = (eventTitle ?? '').trim();
+    if (!title || looksLikeRawPlayerFacingToken(title)) return 'Pending decision';
+    return title;
 }
 
 // Faction prefixes that begin a corps id (engine + display aliases).

@@ -41,6 +41,8 @@ export interface FormationMarkerProperties {
   movement_stance: 'combat' | 'column' | null;
   /** True when this is the topmost (first) unit at its OSID. */
   is_stack_top: boolean;
+  /** Zero-based visual stack order for bounded pixel fanning. */
+  stack_index: number;
   /** Number of units at same OSID. */
   stack_count: number;
   /** Enemy contact is visible only as a reduced observation, not a formation dossier. */
@@ -61,10 +63,6 @@ function getFormationMarkerType(formation: { id: string; kind?: string | null; n
   if (unitType === 'motorized' || unitType === 'mechanized' || unitType === 'armored') return 'motorized';
   return 'brigade';
 }
-
-// Tiny offset in degrees (approx 30m east, 20m south per unit) to create a 'fanned' stack effect
-const STACK_OFFSET_LNG = 0.00045;
-const STACK_OFFSET_LAT = 0.0003;
 
 export function buildFormationsGeoJSON(
   state: LoadedGameState,
@@ -114,18 +112,6 @@ export function buildFormationsGeoJSON(
     const point: [number, number] = [osidCenter[0], osidCenter[1]];
     const totalInStack = countsPerOsid.get(osid) || 1;
 
-    if (osid === expandedStackOsid && totalInStack > 1) {
-      // Radial expansion for high-density areas
-      const radius = 0.0008;
-      const angle = (stackIndex / totalInStack) * Math.PI * 2 - (Math.PI / 2);
-      point[0] += Math.cos(angle) * radius;
-      point[1] += Math.sin(angle) * radius;
-    } else {
-      // Standard linear fanning
-      point[0] += stackIndex * STACK_OFFSET_LNG;
-      point[1] -= stackIndex * STACK_OFFSET_LAT;
-    }
-
     const type = getFormationMarkerType(formation);
     const isEnemyContact = isPlayerEnemyContactFormation(state, formation);
     const displayName = isEnemyContact
@@ -144,7 +130,7 @@ export function buildFormationsGeoJSON(
       ? '__hunreported__munreported'
       : `__hunreported__m${Math.round(reportedMorale / 10) * 10}`;
 
-    const markerFaction = isEnemyContact ? 'enemy_contact' : formation.faction;
+    const markerFaction = formation.faction;
     const markerType = isEnemyContact ? 'enemy_contact' : type;
     const icon_id = `${markerType}__${markerFaction}${postureSuffix}${statusSuffix}`;
 
@@ -175,6 +161,7 @@ export function buildFormationsGeoJSON(
         is_disrupted: isEnemyContact ? false : (formation.disrupted_turns ?? 0) > 0,
         movement_stance: isEnemyContact ? null : formation.movementStance ?? null,
         is_stack_top: stackIndex === 0,
+        stack_index: stackIndex,
         stack_count: totalInStack,
         is_enemy_contact: isEnemyContact,
       },

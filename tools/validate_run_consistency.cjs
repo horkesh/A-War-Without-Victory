@@ -186,8 +186,180 @@ function friendlyDistanceToAny(startOsid, targets, adjacency, friendlyOsids, max
     return null;
 }
 
+function graphDistanceToAny(startOsid, targets, adjacency, maxHops = 30) {
+    if (!startOsid || targets.size === 0) return null;
+    if (targets.has(startOsid)) return 0;
+    const visited = new Set([startOsid]);
+    let frontier = [startOsid];
+    for (let hop = 1; hop <= maxHops; hop++) {
+        const next = [];
+        for (const osid of frontier) {
+            for (const neighbor of adjacency.get(osid) ?? []) {
+                if (visited.has(neighbor)) continue;
+                visited.add(neighbor);
+                if (targets.has(neighbor)) return hop;
+                next.push(neighbor);
+            }
+        }
+        if (next.length === 0) break;
+        frontier = next;
+    }
+    return null;
+}
+
 function computeNeededFrontBrigades(sector) {
     return Math.max(1, Math.ceil((sector?.length_edges || 0) / 8));
+}
+
+const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
+const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
+
+function buildSectorCoverageDonorContext(state) {
+    const sectors = Object.values(state.military?.corps_front_sectors ?? {});
+    const adjacency = loadOperationalAdjacency(state);
+    const byFaction = new Map();
+    for (const sector of sectors) {
+        const list = byFaction.get(sector.faction) ?? [];
+        list.push(sector);
+        byFaction.set(sector.faction, list);
+    }
+
+    const factionContext = new Map();
+    for (const [faction, factionSectors] of byFaction.entries()) {
+        const friendlyOsids = buildFactionFriendlyOsids(state, faction);
+        const componentOf = buildFactionComponents(adjacency, friendlyOsids);
+        const sectorContext = new Map();
+        for (const sector of factionSectors) {
+            const frontOsids = getSectorFrontOsids(sector);
+            const territoryOsids = new Set(sector.territory_osids || []);
+            const reserveBand = buildOneHopReserveBand(frontOsids, adjacency, friendlyOsids);
+            sectorContext.set(sector.sector_id, {
+                frontOsids,
+                territoryOsids,
+                reserveBand,
+                component: getSectorComponent(sector, componentOf),
+            });
+        }
+        factionContext.set(faction, { friendlyOsids, componentOf, sectorContext });
+    }
+
+    return {
+        sectors,
+        formations: state.military?.formations ?? {},
+        adjacency,
+        opParticipants: buildOperationParticipantSet(state),
+        activeCounts: countActiveFieldBrigadesByOsid(state),
+        factionContext,
+    };
+}
+
+function targetPreservesHomeDistance(formation, targetOsid, adjacency) {
+    if (!formation?.home_osid) return true;
+    const dist = graphDistanceToAny(
+        formation.home_osid,
+        new Set([targetOsid]),
+        adjacency,
+        FRONT_DONOR_HOME_DISTANCE_MAX_HOPS,
+    );
+    return dist != null && dist <= FRONT_DONOR_HOME_DISTANCE_MAX_HOPS;
+}
+
+function findLegalReliefTarget(formation, targetOsids, ctx, maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS) {
+    for (const targetOsid of targetOsids) {
+        if (!targetPreservesHomeDistance(formation, targetOsid, ctx.adjacency)) continue;
+        const dist = friendlyDistanceToAny(
+            formation.location_osid,
+            new Set([targetOsid]),
+            ctx.adjacency,
+            ctx.friendlyOsids,
+            maxHops,
+        );
+        if (dist != null) {
+            return { target_osid: targetOsid, distance: dist };
+        }
+    }
+    return null;
+}
+
+function collectLegalSectorDonorCandidates(state, recipientSector, targetOsids) {
+    const strictCompare = (a, b) => String(a).localeCompare(String(b));
+    const donorCtx = buildSectorCoverageDonorContext(state);
+    const factionCtx = donorCtx.factionContext.get(recipientSector.faction);
+    const recipientContext = factionCtx?.sectorContext.get(recipientSector.sector_id);
+    if (!factionCtx || !recipientContext) return [];
+
+    const vacantTargets = [...targetOsids]
+        .filter((osid) => (donorCtx.activeCounts.get(osid) ?? 0) === 0)
+        .sort(strictCompare);
+    if (vacantTargets.length === 0) return [];
+
+    const donorCandidates = [];
+    const inspectEntry = (entry, donor, donorContext) => {
+        const formation = donorCtx.formations[entry.bid];
+        if (!formation?.location_osid) return;
+        if (formation.status !== 'active') return;
+        if (!isFieldBrigadeKind(formation.kind)) return;
+        if ((formation.disrupted_turns ?? 0) > 0) return;
+        if (donorCtx.opParticipants.has(entry.bid)) return;
+        if (entry.donorRole === 'front') {
+            const claim = classifySectorPosition(
+                formation.location_osid,
+                donorContext.frontOsids,
+                donorContext.reserveBand,
+                donorContext.territoryOsids,
+            );
+            if (claim !== 'front') return;
+            if ((donor.assigned_brigade_ids || []).length <= computeNeededFrontBrigades(donor)) return;
+        }
+        const legalTarget = findLegalReliefTarget(formation, vacantTargets, {
+            adjacency: donorCtx.adjacency,
+            friendlyOsids: factionCtx.friendlyOsids,
+        });
+        if (!legalTarget) return;
+        donorCandidates.push({
+            donor_sector_id: donor.sector_id,
+            donor_role: entry.donorRole,
+            brigade_id: entry.bid,
+            distance: legalTarget.distance,
+            target_osid: legalTarget.target_osid,
+        });
+    };
+
+    const ownEntries = [
+        ...((recipientSector.rear_brigade_ids || []).map((bid) => ({ bid, donorRole: 'rear' }))),
+        ...((recipientSector.reserve_brigade_ids || []).map((bid) => ({ bid, donorRole: 'reserve' }))),
+    ];
+    for (const entry of ownEntries) {
+        inspectEntry(entry, recipientSector, recipientContext);
+    }
+
+    for (const donor of donorCtx.sectors
+        .filter((candidate) =>
+            candidate.faction === recipientSector.faction
+            && candidate.corps_id === recipientSector.corps_id
+            && candidate.sector_id !== recipientSector.sector_id)
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        const donorContext = factionCtx.sectorContext.get(donor.sector_id);
+        if (!donorContext || donorContext.component !== recipientContext.component) continue;
+        const donorNeeded = computeNeededFrontBrigades(donor);
+        const canDonateFront =
+            (donor.length_edges || 0) > 0
+            && (donor.assigned_brigade_ids || []).length > donorNeeded
+            && (donor.threat_ratio ?? 0) <= 250;
+        const entries = [
+            ...((donor.rear_brigade_ids || []).map((bid) => ({ bid, donorRole: 'rear' }))),
+            ...((donor.reserve_brigade_ids || []).map((bid) => ({ bid, donorRole: 'reserve' }))),
+            ...(canDonateFront ? (donor.assigned_brigade_ids || []).map((bid) => ({ bid, donorRole: 'front' })) : []),
+        ];
+        for (const entry of entries) {
+            inspectEntry(entry, donor, donorContext);
+        }
+    }
+
+    return donorCandidates.sort((a, b) =>
+        a.distance - b.distance
+        || strictCompare(a.donor_sector_id, b.donor_sector_id)
+        || strictCompare(a.brigade_id, b.brigade_id));
 }
 
 function collectSectorFloorShortfallIssues(state) {
@@ -262,20 +434,19 @@ function collectSectorFloorShortfallIssues(state) {
             if (!isFieldBrigadeKind(formation.kind)) continue;
             if ((formation.disrupted_turns ?? 0) > 0) continue;
             if (opParticipants.has(entry.bid)) continue;
-            const dist = friendlyDistanceToAny(
-                formation.location_osid,
-                new Set(vacantFrontOsids),
-                adjacency,
-                ctx.friendlyOsids,
+            const legalTarget = findLegalReliefTarget(
+                formation,
+                vacantFrontOsids,
+                { adjacency, friendlyOsids: ctx.friendlyOsids },
                 3,
             );
-            if (dist == null) continue;
+            if (!legalTarget) continue;
             donorCandidates.push({
                 donor_sector_id: sector.sector_id,
                 donor_role: entry.donorRole,
                 brigade_id: entry.bid,
-                distance: dist,
-                target_osid: vacantFrontOsids[0],
+                distance: legalTarget.distance,
+                target_osid: legalTarget.target_osid,
             });
         }
 
@@ -321,20 +492,19 @@ function collectSectorFloorShortfallIssues(state) {
                     if (claim !== 'front') continue;
                     if ((donor.assigned_brigade_ids || []).length <= donorNeeded) continue;
                 }
-                const dist = friendlyDistanceToAny(
-                    formation.location_osid,
-                    new Set(vacantFrontOsids),
-                    adjacency,
-                    ctx.friendlyOsids,
+                const legalTarget = findLegalReliefTarget(
+                    formation,
+                    vacantFrontOsids,
+                    { adjacency, friendlyOsids: ctx.friendlyOsids },
                     3,
                 );
-                if (dist == null) continue;
+                if (!legalTarget) continue;
                 donorCandidates.push({
                     donor_sector_id: donor.sector_id,
                     donor_role: entry.donorRole,
                     brigade_id: entry.bid,
-                    distance: dist,
-                    target_osid: vacantFrontOsids[0],
+                    distance: legalTarget.distance,
+                    target_osid: legalTarget.target_osid,
                 });
             }
         }
@@ -645,7 +815,8 @@ function hasCanonicalDefense(faction, osid, physicalByOsid, sectorCoverageFactio
 
 function collectEmptyContestedSectorIssues(state) {
     const sectors = state.military?.corps_front_sectors ?? {};
-    const issues = [];
+    const missedReinforcement = [];
+    const unavoidableEmpty = [];
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
         const lengthEdges = sector.length_edges ?? sector.edge_ids?.length ?? 0;
         if (lengthEdges <= 0) continue;
@@ -653,37 +824,86 @@ function collectEmptyContestedSectorIssues(state) {
         const assigned = sector.assigned_brigade_ids?.length ?? 0;
         const reserve = sector.reserve_brigade_ids?.length ?? 0;
         if (assigned + reserve === 0) {
-            issues.push({ sector: sectorId, length_edges: lengthEdges });
+            const donorCandidates = collectLegalSectorDonorCandidates(state, sector, getSectorFrontOsids(sector));
+            const issue = {
+                sector: sectorId,
+                length_edges: lengthEdges,
+                donor_candidates: donorCandidates,
+            };
+            if (donorCandidates.length > 0) {
+                missedReinforcement.push(issue);
+            } else {
+                unavoidableEmpty.push(issue);
+            }
         }
     }
-    return issues;
+    return {
+        missed_reinforcement: missedReinforcement,
+        unavoidable_empty: unavoidableEmpty,
+    };
 }
 
 function collectUndefendedFrontSubsegmentIssues(state) {
     const sectors = state.military?.corps_front_sectors ?? {};
-    const issues = [];
+    const missedReinforcement = [];
+    const unavoidableGap = [];
+    const staleGap = [];
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
         for (const subSegment of sector.sub_segments ?? []) {
             const lengthEdges = subSegment.length_edges ?? subSegment.edge_ids?.length ?? 0;
             if (subSegment.gap === true && lengthEdges > 2) {
-                issues.push({
+                const issue = {
                     sector: sectorId,
                     sub_segment_id: subSegment.sub_segment_id ?? 'unknown',
                     length_edges: lengthEdges,
-                });
+                };
+                const assigned = sector.assigned_brigade_ids?.length ?? 0;
+                const reserve = sector.reserve_brigade_ids?.length ?? 0;
+                if (assigned + reserve > 0) {
+                    staleGap.push(issue);
+                    continue;
+                }
+                const donorCandidates = collectLegalSectorDonorCandidates(
+                    state,
+                    sector,
+                    new Set(subSegment.friendly_osids || []),
+                );
+                const classifiedIssue = {
+                    ...issue,
+                    donor_candidates: donorCandidates,
+                };
+                if (donorCandidates.length > 0) {
+                    missedReinforcement.push(classifiedIssue);
+                } else {
+                    unavoidableGap.push(classifiedIssue);
+                }
             }
         }
     }
-    return issues;
+    return {
+        missed_reinforcement: missedReinforcement,
+        unavoidable_gap: unavoidableGap,
+        stale_gap: staleGap,
+    };
 }
 
 function collectAdjacentUncontestedTerritoryIssues(state) {
     const controllers = state.political?.political_controllers ?? {};
     const byOsid = activeFieldBrigadesByOsid(state);
     const sectorCoverageFactions = buildSectorCoverageFactions(state);
+    const sectors = Object.values(state.military?.corps_front_sectors ?? {});
     const grazActive = state.political?.graz_east_herzegovina_active_turn != null;
-    const issues = [];
+    const missedDefender = [];
+    const unavoidableExposure = [];
+    const unownedFront = [];
     const seen = new Set();
+    const strictCompare = (a, b) => String(a).localeCompare(String(b));
+
+    const candidateSectorsFor = (osid, faction) => sectors
+        .filter((sector) =>
+            sector.faction === faction
+            && (getSectorFrontOsids(sector).has(osid) || (sector.territory_osids || []).includes(osid)))
+        .sort((a, b) => strictCompare(a.sector_id, b.sector_id));
 
     const inspectSide = (friendlyOsid, enemyOsid, friendlyFaction, enemyFaction) => {
         if (!friendlyFaction || !enemyFaction || friendlyFaction === enemyFaction) return;
@@ -694,12 +914,46 @@ function collectAdjacentUncontestedTerritoryIssues(state) {
         const key = `${friendlyOsid}__${enemyOsid}`;
         if (seen.has(key)) return;
         seen.add(key);
-        issues.push({
+        const issue = {
             osid: friendlyOsid,
             faction: friendlyFaction,
             enemy_osid: enemyOsid,
             enemy_faction: enemyFaction,
             enemy_brigades: enemyBrigades.map(({ id }) => id),
+        };
+
+        const candidateSectors = candidateSectorsFor(friendlyOsid, friendlyFaction);
+        if (candidateSectors.length === 0) {
+            unownedFront.push(issue);
+            return;
+        }
+
+        const donorCandidates = candidateSectors.flatMap((sector) =>
+            collectLegalSectorDonorCandidates(state, sector, new Set([friendlyOsid])));
+        if (donorCandidates.length > 0) {
+            missedDefender.push({
+                ...issue,
+                donor_candidates: donorCandidates.sort((a, b) =>
+                    a.distance - b.distance
+                    || strictCompare(a.donor_sector_id, b.donor_sector_id)
+                    || strictCompare(a.brigade_id, b.brigade_id)),
+            });
+            return;
+        }
+
+        const serializedCoverageExists = candidateSectors.some((sector) =>
+            (sector.assigned_brigade_ids || []).length + (sector.reserve_brigade_ids || []).length > 0);
+        if (serializedCoverageExists) {
+            missedDefender.push({
+                ...issue,
+                donor_candidates: [],
+            });
+            return;
+        }
+
+        unavoidableExposure.push({
+            ...issue,
+            donor_candidates: [],
         });
     };
 
@@ -717,7 +971,12 @@ function collectAdjacentUncontestedTerritoryIssues(state) {
         inspectSide(b, a, sideB, sideA);
     }
 
-    return issues.sort((a, b) => String(a.osid).localeCompare(String(b.osid)) || String(a.enemy_osid).localeCompare(String(b.enemy_osid)));
+    const byLocation = (a, b) => strictCompare(a.osid, b.osid) || strictCompare(a.enemy_osid, b.enemy_osid);
+    return {
+        missed_defender: missedDefender.sort(byLocation),
+        unavoidable_exposure: unavoidableExposure.sort(byLocation),
+        unowned_front: unownedFront.sort(byLocation),
+    };
 }
 
 function validateState(state, runLabel) {
@@ -953,11 +1212,22 @@ function validateState(state, runLabel) {
     log('--- Empty Contested Sectors ---');
     const emptyContested = collectEmptyContestedSectorIssues(state);
 
-    if (emptyContested.length === 0) {
-        ok('0 empty contested sectors');
+    if (emptyContested.missed_reinforcement.length === 0) {
+        ok('0 empty contested sectors with missed legal donors');
     } else {
-        for (const issue of emptyContested) {
-            fail(`${issue.sector} has ${issue.length_edges} front edge(s) but no assigned or reserve brigades`);
+        for (const issue of emptyContested.missed_reinforcement) {
+            const donors = issue.donor_candidates
+                .map((candidate) =>
+                    `${candidate.brigade_id} from ${candidate.donor_sector_id} (${candidate.donor_role}, ${candidate.distance} hop(s))`)
+                .join('; ');
+            fail(`${issue.sector} is empty with legal donor(s) available across ${issue.length_edges} front edge(s): ${donors}`);
+        }
+    }
+    if (emptyContested.unavoidable_empty.length === 0) {
+        ok('0 unavoidable empty contested sectors');
+    } else {
+        for (const issue of emptyContested.unavoidable_empty) {
+            log(`  ~ ${issue.sector} remains empty with no legal same-corps donor under current rules (${issue.length_edges} front edge(s))`);
         }
     }
     log('');
@@ -990,11 +1260,29 @@ function validateState(state, runLabel) {
     log('--- Undefended Front Subsegments ---');
     const undefendedSubsegments = collectUndefendedFrontSubsegmentIssues(state);
 
-    if (undefendedSubsegments.length === 0) {
-        ok('0 wide gap=true subsegments');
+    if (undefendedSubsegments.missed_reinforcement.length === 0) {
+        ok('0 wide gap=true subsegments with missed legal donors');
     } else {
-        for (const issue of undefendedSubsegments) {
-            fail(`${issue.sub_segment_id} in ${issue.sector} remains gap=true across ${issue.length_edges} edge(s)`);
+        for (const issue of undefendedSubsegments.missed_reinforcement) {
+            const donors = issue.donor_candidates
+                .map((candidate) =>
+                    `${candidate.brigade_id} from ${candidate.donor_sector_id} (${candidate.donor_role}, ${candidate.distance} hop(s))`)
+                .join('; ');
+            fail(`${issue.sub_segment_id} in ${issue.sector} remains gap=true across ${issue.length_edges} edge(s) with legal donor(s) available: ${donors}`);
+        }
+    }
+    if (undefendedSubsegments.stale_gap.length === 0) {
+        ok('0 wide gap=true subsegments inside partially covered sectors');
+    } else {
+        for (const issue of undefendedSubsegments.stale_gap) {
+            fail(`${issue.sub_segment_id} in ${issue.sector} remains gap=true across ${issue.length_edges} edge(s) inside a partially covered sector`);
+        }
+    }
+    if (undefendedSubsegments.unavoidable_gap.length === 0) {
+        ok('0 unavoidable wide gap=true subsegments');
+    } else {
+        for (const issue of undefendedSubsegments.unavoidable_gap) {
+            log(`  ~ ${issue.sub_segment_id} in ${issue.sector} remains gap=true with no legal same-corps donor under current rules (${issue.length_edges} edge(s))`);
         }
     }
     log('');
@@ -1003,11 +1291,33 @@ function validateState(state, runLabel) {
     log('--- Adjacent Uncontested Territory ---');
     const adjacentUncontested = collectAdjacentUncontestedTerritoryIssues(state);
 
-    if (adjacentUncontested.length === 0) {
-        ok('0 undefended OSIDs adjacent to enemy brigades');
+    if (
+        adjacentUncontested.missed_defender.length === 0
+        && adjacentUncontested.unowned_front.length === 0
+    ) {
+        ok('0 actionable undefended OSIDs adjacent to enemy brigades');
     } else {
-        for (const issue of adjacentUncontested) {
+        for (const issue of adjacentUncontested.unowned_front) {
+            fail(`${issue.osid} (${issue.faction}) has no sector owner while ${issue.enemy_osid} (${issue.enemy_faction}) contains ${issue.enemy_brigades.join(', ')}`);
+        }
+        for (const issue of adjacentUncontested.missed_defender) {
+            if ((issue.donor_candidates || []).length === 0) {
+                fail(`${issue.osid} (${issue.faction}) has serialized coverage that is not canonical while ${issue.enemy_osid} (${issue.enemy_faction}) contains ${issue.enemy_brigades.join(', ')}`);
+                continue;
+            }
+            const donors = issue.donor_candidates
+                .map((candidate) =>
+                    `${candidate.brigade_id} from ${candidate.donor_sector_id} (${candidate.donor_role}, ${candidate.distance} hop(s))`)
+                .join('; ');
             fail(`${issue.osid} (${issue.faction}) has no local defender while ${issue.enemy_osid} (${issue.enemy_faction}) contains ${issue.enemy_brigades.join(', ')}`);
+            log(`        legal donor(s): ${donors}`);
+        }
+    }
+    if (adjacentUncontested.unavoidable_exposure.length === 0) {
+        ok('0 unavoidable adjacent exposures');
+    } else {
+        for (const issue of adjacentUncontested.unavoidable_exposure) {
+            log(`  ~ ${issue.osid} (${issue.faction}) is exposed to ${issue.enemy_osid} (${issue.enemy_faction}) with no legal same-corps donor under current rules`);
         }
     }
     log('');

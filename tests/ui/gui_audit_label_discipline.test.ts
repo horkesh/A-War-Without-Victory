@@ -93,6 +93,16 @@ describe('GUI audit label discipline', () => {
     expect(source).not.toContain('Operational Heatmap (Mode 7)');
   });
 
+  it('uses Deck.gl as the single settlement-label renderer', () => {
+    const mapSource = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const deckSource = readFileSync('src/ui/map/layers/buildTacticalDeckLayers.ts', 'utf8');
+
+    expect(deckSource).toContain("id: 'deck-settlement-labels'");
+    expect(mapSource).toContain('setSettlementLabelData(majorCityLabels.features)');
+    expect(mapSource).not.toContain("id: MAJOR_CITY_LABELS_LAYER_ID");
+    expect(mapSource).not.toContain("type: 'symbol',\n          source: MAJOR_CITY_LABELS_SOURCE_ID");
+  });
+
   it('renders SITREP priority fronts with player-facing display names instead of raw slugs', () => {
     useGameStore.setState({
       osidDisplayNames: {

@@ -13,7 +13,11 @@ import {
 } from '../src/sim/combat/paramilitary_sweep.js';
 import type { EdgeRecord } from '../src/map/settlements.js';
 import type { OperationalToCanonicalReverseMap } from '../src/data/operational_data.js';
-import { isEligibleForReinforcement } from '../src/state/formation_constants.js';
+import {
+    isEligibleForReinforcement,
+    OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN,
+    PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN,
+} from '../src/state/formation_constants.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Test helpers
@@ -27,6 +31,16 @@ function makeReverseMap(osids: string[]): OperationalToCanonicalReverseMap {
     const m = new Map<string, string[]>();
     for (const osid of osids) m.set(osid, [osid]);
     return m;
+}
+
+function makeHubAndTargets(
+    hub: string,
+    targets: string[]
+): { edges: EdgeRecord[]; reverseMap: OperationalToCanonicalReverseMap } {
+    return {
+        edges: targets.map((target) => ({ a: hub, b: target }) as EdgeRecord),
+        reverseMap: makeReverseMap([hub, ...targets]),
+    };
 }
 
 function makeBaseState(overrides?: Partial<GameState>): GameState {
@@ -245,6 +259,25 @@ describe('paramilitary_sweep', () => {
             // op:d already targeted — should not spawn another
             expect(report.spawned.filter(s => s.target_osid === 'op:d')).toHaveLength(0);
         });
+
+        it('caps rear-pocket bot deployments per faction per turn', () => {
+            const targets = Array.from({ length: 40 }, (_, i) => `op:zvornik:t${i}`);
+            const { edges, reverseMap } = makeHubAndTargets('op:zvornik:hub', targets);
+            const state = makeBaseState({
+                political: {
+                    political_controllers: Object.fromEntries([
+                        ['op:zvornik:hub', 'RS'],
+                        ...targets.map((target) => [target, 'RBiH'] as const),
+                    ]),
+                } as any,
+            });
+
+            const report = detectParamilitaryTargets(state, edges, reverseMap);
+
+            expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(
+                PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN
+            );
+        });
     });
 
     describe('advanceParamilitaries', () => {
@@ -411,6 +444,30 @@ describe('paramilitary_sweep', () => {
 
             resolvePlayerParamilitaryDecisions(state);
             expect(state.pending_paramilitary_requests).toHaveLength(0);
+        });
+
+        it('consumes stale pending player requests when a standing paramilitary policy is active', () => {
+            const state = makeBaseState({
+                paramilitary_policy: 'always_deny',
+                meta: { turn: 5, player_faction: 'RS', phase: 'war', seed: 1 } as any,
+                pending_paramilitary_requests: [
+                    { target_osid: 'D', faction: 'RS', strength: 150 },
+                ],
+            });
+
+            detectParamilitaryTargets(state, [], new Map());
+
+            expect(state.pending_paramilitary_requests).toHaveLength(0);
+            expect(state.paramilitary_decision_history).toEqual([
+                {
+                    id: 'paramilitary:5:D',
+                    turn: 5,
+                    target_osid: 'D',
+                    faction: 'RS',
+                    strength: 150,
+                    decision: 'deny',
+                },
+            ]);
         });
 
         it('tracks deployment count for consequence scaling', () => {
@@ -614,6 +671,26 @@ describe('paramilitary_sweep', () => {
             const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
             const rbihSpawns = report.spawned.filter(s => s.faction === 'RBiH');
             expect(rbihSpawns).toHaveLength(0);
+        });
+
+        it('caps offensive bot deployments per faction per turn', () => {
+            const targets = Array.from({ length: 40 }, (_, i) => `op:zvornik:t${i}`);
+            const { edges, reverseMap } = makeHubAndTargets('op:zvornik:hub', targets);
+            const state = makeBaseState({
+                meta: { turn: 5, phase: 'war', schema_version: 1, seed: 'test' } as GameState['meta'],
+                political: {
+                    political_controllers: Object.fromEntries([
+                        ['op:zvornik:hub', 'RS'],
+                        ...targets.map((target) => [target, 'RBiH'] as const),
+                    ]),
+                } as any,
+            });
+
+            const report = detectOffensiveParamilitaryTargets(state, edges, reverseMap);
+
+            expect(report.spawned.filter((spawn) => spawn.faction === 'RS')).toHaveLength(
+                OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN
+            );
         });
     });
 

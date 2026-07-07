@@ -39,6 +39,7 @@ import {
     hasActiveOperation,
     isSlot0AvailableForQueue,
 } from './corps_operation_helpers.js';
+import { ensureHistoricalOperationAuthorizationReview } from './historical_operation_authorization.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -906,6 +907,35 @@ function omitObjectivesClaimedByActiveOperations(def: PrePlannedOp, cmd: CorpsCo
     return { ...def, axes };
 }
 
+function allPrePlannedObjectivesOwnedByFaction(state: GameState, def: PrePlannedOp): boolean {
+    const objectives = def.axes.flatMap((axis) => axis.objectives);
+    return objectives.length > 0 && objectives.every((osid) =>
+        getPoliticalControllerOSID(state, osid, undefined) === def.faction
+    );
+}
+
+function recordPrePlannedSatisfiedByStart(state: GameState, def: PrePlannedOp): void {
+    const objectives = def.axes.flatMap((axis) => axis.objectives);
+    if (!state.military.preplanned_operations_satisfied_by_start) {
+        state.military.preplanned_operations_satisfied_by_start = [];
+    }
+    const existing = state.military.preplanned_operations_satisfied_by_start.some((entry) =>
+        entry.corps_id === def.corps && entry.operation_name === def.name
+    );
+    if (existing) return;
+    state.military.preplanned_operations_satisfied_by_start.push({
+        corps_id: def.corps,
+        operation_name: def.name,
+        faction: def.faction,
+        turn: state.meta?.turn ?? 0,
+        objective_count: objectives.length,
+    });
+    state.military.preplanned_operations_satisfied_by_start.sort((a, b) =>
+        strictCompare(a.corps_id, b.corps_id)
+        || strictCompare(a.operation_name, b.operation_name)
+    );
+}
+
 /**
  * Build axes and operation from a PrePlannedOp definition.
  * Shared by both initial injection and queued operation injection.
@@ -1038,14 +1068,23 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
         if (def.available_from != null && turn < def.available_from) continue;
+        if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
+            recordPrePlannedSatisfiedByStart(state, def);
+            continue;
+        }
         const cmd = corpsCommand[def.corps];
         const warnings = validateOpAtInjection(def, state, undefined, cmd ?? undefined);
         allWarnings.push(...warnings);
     }
     collectOpInjectionWarnings(state, allWarnings);
 
-    // Track which corps already got an op this injection pass
+    // Track which corps already got or deferred an op this injection pass.
+    // A pending authorization must also block later same-corps operations so the
+    // player does not see future operation-chain entries before the live plan is
+    // resolved.
     const injectedCorps = new Set<string>();
+    const injectedOperations = new Set<string>();
+    const deferredCorps = new Set<string>();
 
     for (const def of ALL_PRE_PLANNED) {
         const cmd = corpsCommand[def.corps];
@@ -1053,14 +1092,30 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
 
         // Skip if not yet available
         if (def.available_from != null && turn < def.available_from) continue;
+        if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
+            recordPrePlannedSatisfiedByStart(state, def);
+            continue;
+        }
 
         // Skip if corps already has an active operation (including from this pass)
         if (hasActiveOperation(cmd)) continue;
         if (injectedCorps.has(def.corps)) continue;
+        if (deferredCorps.has(def.corps)) continue;
 
         const warnings = validateOpAtInjection(def, state, undefined, cmd);
         collectOpInjectionWarnings(state, warnings);
         if (hasBlockingOpInjectionWarnings(warnings)) continue;
+
+        const authorization = ensureHistoricalOperationAuthorizationReview(state, {
+            kind: 'preplanned',
+            faction: def.faction,
+            corpsId: def.corps,
+            operationName: def.name,
+        });
+        if (authorization === 'pending' || authorization === 'declined') {
+            deferredCorps.add(def.corps);
+            continue;
+        }
 
         // Build axes with validated brigades and objectives
         const result = buildAxesFromDef(def, state, adjacency);
@@ -1080,11 +1135,12 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         assignOperationCommander(state, op, def.corps, def.faction);
         cmd.stance = 'offensive';
         injectedCorps.add(def.corps);
+        injectedOperations.add(def.name);
     }
 
     // Queue second Herzegovina op (Foca) if Visegrad was injected
     // This will be picked up when the first op completes
-    if (injectedCorps.has('vrs_herzegovina')) {
+    if (injectedOperations.has('Operation Visegrad')) {
         const focaDef = ALL_PRE_PLANNED.find(d => d.name === 'Operation Foca');
         const cmd = corpsCommand['vrs_herzegovina'];
         if (focaDef && cmd && !cmd.queued_operations) {
@@ -1162,6 +1218,19 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
 
     const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
     if (effectiveDef.axes.length === 0) return false;
+
+    const authorization = ensureHistoricalOperationAuthorizationReview(state, {
+        kind: 'preplanned',
+        faction: effectiveDef.faction,
+        corpsId,
+        operationName: effectiveDef.name,
+    });
+    if (authorization === 'pending') return false;
+    if (authorization === 'declined') {
+        cmd.queued_operations.shift();
+        if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        return false;
+    }
 
     // Skip if all objectives already achieved (faction-controlled) — op is moot.
     // Without this, the queue entry blocks sector offensives forever.

@@ -111,6 +111,21 @@ describe('EventDecisionModal presidential dossier', () => {
     }
   });
 
+  it('renders response errors inside the required decision modal', () => {
+    let dismissed = false;
+    render(React.createElement(EventDecisionModal, {
+      decision: buildCatalogBackedDecision('rs_strategic_goals'),
+      eventCatalog: firstHourCatalog,
+      errorMessage: 'Bridge method not found: respondToEventDecision',
+      onDismissError: () => { dismissed = true; },
+      onRespond: () => undefined,
+    }));
+
+    expect(screen.getByRole('alert').textContent).toContain('Bridge method not found: respondToEventDecision');
+    screen.getByRole('button', { name: /return to map/i }).click();
+    expect(dismissed).toBe(true);
+  });
+
   it('names General Ratko Mladic in the RS foundational decision without generic commander framing', () => {
     const eventDef = firstHourCatalog.get('rs_strategic_goals');
     expect(eventDef?.narrative).toContain('General Ratko Mladic, commander of the VRS Main Staff');
@@ -517,6 +532,27 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(container.textContent).not.toMatch(/\bRecording\b/i);
     expect(container.textContent).not.toContain('These consequence rows');
     expect(container.textContent).not.toContain('Civic platform and forecloses');
+  });
+
+  it('uses a safe fallback instead of raw pending event_title values', () => {
+    const decision = {
+      event_id: 'raw_future_copy_review',
+      event_title: 'raw_future_copy_review',
+      turn_fired: 21,
+      faction: 'RBiH',
+      historical_default_response_id: 'approve',
+      response_options: [{
+        id: 'approve',
+        label: 'Approve the memorandum',
+        effects: [],
+      }],
+    };
+    const withoutCatalog = render(React.createElement(EventDecisionModal, {
+      decision,
+      onRespond: () => undefined,
+    }));
+    expect(withoutCatalog.container.textContent).toContain('Pending decision');
+    expect(withoutCatalog.container.textContent).not.toContain('raw_future_copy_review');
   });
 
   it('keeps all response choices visible while detailed future-consequence copy stays hidden', () => {

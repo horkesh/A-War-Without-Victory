@@ -316,6 +316,7 @@ export function PresidentialToolbar({
         <>
             {/* Toolbar bar — LANE-NIGHTSHIFT-TUTORIAL-CONTENT-V1 spotlight target for step 03_brief. */}
             <div
+                data-awwv-counter-occluder="true"
                 data-tutorial-step="presidential-toolbar"
                 className="fixed top-0 left-0 right-0 grid grid-cols-[minmax(0,1fr)_7rem_minmax(0,1fr)] items-center h-12 px-4 bg-[#0a0a14]/95 backdrop-blur-sm border-b border-white/8"
                 style={{ zIndex: Z.TOOLBAR }}
@@ -518,6 +519,7 @@ export function PresidentialToolbar({
 
             {/* Army Crest — floating on top of toolbar, extends below */}
             <button
+                data-awwv-counter-occluder="true"
                 onClick={handleOpenHQ}
                 disabled={shellRouteDisabled}
                 className="fixed top-0.5 left-1/2 -translate-x-1/2 group flex flex-col items-center pointer-events-auto"

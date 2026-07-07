@@ -11,6 +11,7 @@
 import type { LoadedGameState } from './types';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
+import { parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
 import { playerFactionMatch } from './playerFactionMatch';
 import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
@@ -263,12 +264,15 @@ export function deriveInboxItems(
                 });
                 continue;
             }
+            const historicalOp = parseHistoricalOperationAuthorizationAction(prop.proposed_action);
             items.push({
                 id: `command:review-proposal:${prop.id}`,
                 type: 'autonomy_proposal',
                 severity: 'normal',
-                title: t('inbox.item.autonomyProposal.title'),
-                subtitle: formatAutonomyProposalSubtitle(prop.description, prop.domain),
+                title: historicalOp?.operationName ?? t('inbox.item.autonomyProposal.title'),
+                subtitle: historicalOp
+                    ? t('inbox.item.historicalOperation.subtitle')
+                    : formatAutonomyProposalSubtitle(prop.description, prop.domain),
                 action: autonomySurface.inboxAction,
                 priority: 35,
             });
@@ -278,8 +282,10 @@ export function deriveInboxItems(
     // 4. Paramilitary requests — defensive faction filter so RS-only items
     //    never surface to RBiH/HRHB inboxes (and vice versa). Upstream may
     //    already filter, but the inbox is presidential-scoped by contract.
-    const paramilitaryRequests = (state.pendingParamilitaryRequests ?? [])
-        .filter((request) => playerFactionMatch(request.faction, playerFaction));
+    const paramilitaryRequests = state.paramilitaryPolicy && state.paramilitaryPolicy !== 'ask'
+        ? []
+        : (state.pendingParamilitaryRequests ?? [])
+            .filter((request) => playerFactionMatch(request.faction, playerFaction));
     if (paramilitaryRequests.length > 0) {
         const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
         const projectedCivilianRisk = paramilitaryRequests.reduce((sum, request) => sum + request.estimated_civilian_risk, 0);

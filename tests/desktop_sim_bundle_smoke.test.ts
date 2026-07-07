@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
@@ -7,12 +7,17 @@ describe('desktop sim bundle smoke', () => {
     const repoRoot = process.cwd();
     const bundleScript = path.join(repoRoot, 'tools', 'desktop_bundle_sim.mjs');
 
-    execFileSync(process.execPath, [bundleScript], {
+    const build = spawnSync(process.execPath, [bundleScript], {
       cwd: repoRoot,
-      stdio: 'pipe',
+      encoding: 'utf8',
     });
+    const buildOutput = `${build.stdout ?? ''}${build.stderr ?? ''}`;
 
-    const requireBundleScript = "require('./dist/desktop/desktop_sim.cjs')";
+    expect(build.status, buildOutput).toBe(0);
+    expect(buildOutput).not.toContain('[WARNING]');
+    expect(buildOutput).not.toContain('empty-import-meta');
+
+    const requireBundleScript = "const sim = require('./dist/desktop/desktop_sim.cjs'); if (typeof sim.resolveEventDecision !== 'function') throw new Error('resolveEventDecision export missing');";
     let output = '';
     try {
       execFileSync(process.execPath, ['-e', requireBundleScript], {

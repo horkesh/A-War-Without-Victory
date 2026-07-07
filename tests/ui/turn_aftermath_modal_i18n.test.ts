@@ -2,7 +2,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import type { TurnAftermathView } from '../../src/ui/map/data/turnAftermath.js';
@@ -118,6 +118,7 @@ describe('TurnAftermathModal localization', () => {
                 severity: 'urgent',
                 title: 'Convoy to Srebrenica',
                 action: 'convoy_decision_modal',
+                actionLabel: 'Review convoy',
             }],
         };
 
@@ -134,6 +135,92 @@ describe('TurnAftermathModal localization', () => {
 
         expect(screen.getByText('Humanitarian convoy')).toBeTruthy();
         expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
+    });
+
+    it('routes top desk items as direct presidential review actions', () => {
+        const view = makeView();
+        view.nextActions = {
+            ...view.nextActions,
+            actionableCount: 1,
+            topItems: [{
+                id: 'command:review-proposal:rev_1',
+                type: 'autonomy_proposal',
+                severity: 'urgent',
+                title: 'Operation Test Plan',
+                action: 'decision_room',
+                actionLabel: 'Review authorization',
+            }],
+        };
+        const onReviewAction = vi.fn();
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onReviewAction,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        fireEvent.click(screen.getAllByRole('button', { name: /Review authorization/i })[0]);
+
+        expect(onReviewAction).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'command:review-proposal:rev_1',
+            action: 'decision_room',
+        }));
+    });
+
+    it('promotes the highest-priority desk item into the persistent footer action', () => {
+        const view = makeView();
+        view.nextActions = {
+            ...view.nextActions,
+            actionableCount: 2,
+            blockingCount: 1,
+            topItems: [{
+                id: 'convoy:convoy_srebrenica',
+                type: 'convoy_decision',
+                severity: 'blocking',
+                title: 'Convoy to Srebrenica',
+                action: 'convoy_decision_modal',
+                actionLabel: 'Review convoy',
+            }, {
+                id: 'command:review-proposal:rev_1',
+                type: 'autonomy_proposal',
+                severity: 'normal',
+                title: 'Operation Test Plan',
+                action: 'decision_room',
+                actionLabel: 'Review authorization',
+            }],
+        };
+        const onReviewAction = vi.fn();
+        const onOpenInbox = vi.fn();
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onReviewAction,
+            onClose: vi.fn(),
+            onOpenInbox,
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        const footerAction = screen.getByTestId('turn-aftermath-primary-action');
+        expect(footerAction.getAttribute('aria-label')).toContain('Next presidential action');
+        expect(footerAction.textContent).toContain('Review convoy');
+
+        fireEvent.click(footerAction);
+
+        expect(onReviewAction).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'convoy:convoy_srebrenica',
+            action: 'convoy_decision_modal',
+        }));
+        expect(onOpenInbox).not.toHaveBeenCalled();
     });
 
     it('uses the stored commander recommendation in forced-operation receipts', () => {
@@ -210,6 +297,7 @@ describe('TurnAftermathModal localization', () => {
         expect(copy).toContain(`Open the corridor" on ${turnToDateString(5)}`);
         expect(copy).toContain(`until ${turnToDateString(20)}`);
         expect(copy).not.toMatch(/\bat week\s+\d+\b|\buntil week\s+\d+\b/i);
+        expect(container.innerHTML).not.toMatch(/data-receipt-id=/);
     });
 
     it('uses neutral copy for unknown notable-territory significance values', () => {
@@ -261,5 +349,32 @@ describe('TurnAftermathModal localization', () => {
         expect(copy).toContain('Notable event');
         expect(copy).not.toContain('internal debug marker');
         expect(copy).not.toContain('internal_debug_marker');
+    });
+
+    it('opens the matching Codex essay from strategic signal rows', () => {
+        const view = makeView();
+        view.signals = [{
+            id: 'event:sarajevo_siege',
+            kind: 'event',
+            label: 'Siege of Sarajevo Intensifies',
+            detail: 'Historical event',
+            severity: 'notable',
+        }];
+        const onOpenCodex = vi.fn();
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex,
+        }));
+
+        fireEvent.click(screen.getByTestId('turn-aftermath-signal-row'));
+
+        expect(onOpenCodex).toHaveBeenCalledWith('sarajevo_siege');
     });
 });

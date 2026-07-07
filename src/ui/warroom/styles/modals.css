@@ -1140,41 +1140,106 @@
 
 /* ─── Main Menu ──────────────────────────────── */
 #main-menu {
+    --mm-scale: 1;
+    display: grid;
+    grid-template-rows: auto auto;
+    place-items: center;
+    align-content: center;
+    min-height: 100dvh;
+    box-sizing: border-box;
+    overflow: hidden;
+    isolation: isolate;
+    padding: max(32px, 5dvh) 32px max(40px, 7dvh);
+    min-height: 100dvh;
     background: rgba(5, 5, 15, 0.55);
+    background-position: center 58%;
     backdrop-filter: none;
 }
+#main-menu::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(2, 3, 7, 0.88) 0%, rgba(2, 3, 7, 0.76) 24%, rgba(2, 3, 7, 0.26) 50%, rgba(2, 3, 7, 0.72) 100%),
+        radial-gradient(circle at center, rgba(8, 14, 26, 0.06) 0%, rgba(2, 3, 7, 0.62) 76%);
+}
+#main-menu .mm-stage {
+    position: relative;
+    z-index: 1; /* canonical: Z.BACKDROP_GRAIN = 1 (src/ui/shared/zIndex.ts) */
+    display: grid;
+    justify-items: center;
+    gap: calc(28px * var(--mm-scale));
+    width: min(760px, calc(100vw - 64px));
+    transform: translateY(-1dvh);
+}
+#main-menu .mm-brand {
+    width: min(760px, 100%);
+    text-align: center;
+    color: #d8dce3;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.92);
+}
+#main-menu .mm-brand-kicker {
+    margin-bottom: 10px;
+    color: rgba(202, 214, 230, 0.72);
+    font-family: 'IBM Plex Mono', 'Consolas', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: uppercase;
+}
+#main-menu .mm-brand-rule {
+    width: min(620px, 84%);
+    height: 4px;
+    margin: 18px auto 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(224, 226, 228, 0.68) 12%, rgba(224, 226, 228, 0.68) 88%, transparent 100%);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.72);
+}
 #main-menu .mm-card {
+    width: min(560px, 100%);
     background: linear-gradient(180deg, rgba(26, 34, 51, 0.92) 0%, rgba(17, 24, 39, 0.95) 100%);
 }
 
 .mm-card {
-    width: min(380px, calc(100vw - 40px));
+    box-sizing: border-box;
+    width: min(560px, calc(100vw - 64px));
     background: linear-gradient(180deg, #1a2233 0%, #111827 100%);
     border: 1px solid #2a3a4e;
     border-radius: 8px;
     box-shadow: 0 12px 60px rgba(0, 0, 0, 0.6), 0 0 2px rgba(0, 200, 100, 0.08);
-    padding: 24px 22px 18px;
+    padding: calc(22px * var(--mm-scale)) calc(28px * var(--mm-scale)) calc(20px * var(--mm-scale));
     text-align: center;
 }
 
 .mm-title {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 16px;
+    font-size: 72px;
     font-weight: 700;
-    letter-spacing: 3px;
+    letter-spacing: 0;
+    line-height: 0.95;
+    text-transform: uppercase;
+    color: rgba(221, 224, 228, 0.82);
+    margin: 0;
+}
+
+.mm-card-heading {
+    font-family: 'IBM Plex Mono', 'Consolas', monospace;
+    font-size: calc(13px * var(--mm-scale));
+    font-weight: 700;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: #c8d6e5;
-    text-shadow: 0 0 14px rgba(180, 200, 230, 0.15);
-    margin: 0 0 6px;
+    margin: 0 0 8px;
 }
 
 .mm-subtitle {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
-    letter-spacing: 1.8px;
+    font-size: calc(11px * var(--mm-scale));
+    letter-spacing: 0;
     text-transform: uppercase;
     color: #6a7a8e;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
 }
 
 .mm-buttons {
@@ -1187,15 +1252,15 @@
 .mm-btn {
     display: block;
     width: 100%;
-    padding: 11px 16px;
+    padding: calc(12px * var(--mm-scale)) calc(16px * var(--mm-scale));
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid #2a3a4e;
     border-radius: 5px;
     color: #c0cad8;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 12px;
+    font-size: calc(12px * var(--mm-scale));
     font-weight: 600;
-    letter-spacing: 1.5px;
+    letter-spacing: 0;
     text-transform: uppercase;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -1216,9 +1281,45 @@
 .mm-version {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
     font-size: 9px;
-    letter-spacing: 1.5px;
+    letter-spacing: 0;
     text-transform: uppercase;
     color: #3a4a5e;
+}
+
+@media (min-width: 1600px) {
+    #main-menu {
+        --mm-scale: 1.1;
+    }
+    .mm-title {
+        font-size: 88px;
+    }
+}
+
+@media (max-height: 760px) {
+    #main-menu {
+        --mm-scale: 0.92;
+        padding-top: 28px;
+        padding-bottom: 30px;
+    }
+    #main-menu .mm-stage {
+        gap: 20px;
+    }
+    .mm-title {
+        font-size: 48px;
+    }
+    #main-menu .mm-brand-kicker {
+        font-size: 12px;
+        margin-bottom: 8px;
+    }
+    #main-menu .mm-brand-rule {
+        margin-top: 12px;
+    }
+}
+
+@media (max-width: 760px) {
+    .mm-title {
+        font-size: 44px;
+    }
 }
 
 /* ─── Scenario Picker ────────────────────────── */

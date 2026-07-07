@@ -186,5 +186,45 @@ describe('DecisionHistoryOverlay — Batch D player-facing hygiene', () => {
         expect(screen.getByTestId('decision-history-chosen-option').textContent).toBe('Bosniak National');
         expect(screen.getByTestId('decision-history-row').textContent).not.toContain('rbih_state_identity');
         expect(screen.getByTestId('decision-history-row').textContent).not.toContain('bosniak_national');
+        expect(screen.getByTestId('decision-history-row').getAttribute('data-event-id')).toBeNull();
+        expect(screen.getByTestId('decision-history-row').getAttribute('data-response-id')).toBeNull();
+        expect(screen.getByTestId('decision-history-event-id').getAttribute('data-event-id')).toBeNull();
+        expect(screen.getByTestId('decision-history-chosen-option').getAttribute('data-response-id')).toBeNull();
+    });
+
+    it('does not expose source-note dossier excerpts to players when diagMode is false', () => {
+        storeState = { diagMode: false };
+        const def = buildEventDef('root_event', {
+            title: 'Root Event Title',
+            source_note: 'Authoring note: opens csq_future_peace_plan and The Vance-Owen Peace Plan if selected.',
+        });
+        const catalog = new Map<string, EventDefinition>([[def.id, def]]);
+        const state = buildState({
+            decisions: [{ event_id: 'root_event', response_id: 'opt_a', turn: 1 }],
+        });
+
+        renderOverlay({ eventCatalog: catalog, state });
+        fireEvent.click(screen.getByTestId('decision-history-row').querySelector('button')!);
+
+        const expandedText = screen.getByTestId('decision-history-row-expanded').textContent ?? '';
+        expect(screen.queryByTestId('decision-history-source-note')).toBeNull();
+        expect(expandedText).not.toMatch(/csq_future|Vance-Owen|Authoring note/i);
+    });
+
+    it('keeps source-note dossier excerpts available only in diagnostics mode', () => {
+        storeState = { diagMode: true };
+        const def = buildEventDef('root_event', {
+            title: 'Root Event Title',
+            source_note: 'Authoring note: opens csq_future_peace_plan.',
+        });
+        const catalog = new Map<string, EventDefinition>([[def.id, def]]);
+        const state = buildState({
+            decisions: [{ event_id: 'root_event', response_id: 'opt_a', turn: 1 }],
+        });
+
+        renderOverlay({ eventCatalog: catalog, state });
+        fireEvent.click(screen.getByTestId('decision-history-row').querySelector('button')!);
+
+        expect(screen.getByTestId('decision-history-source-note').textContent).toContain('csq_future_peace_plan');
     });
 });

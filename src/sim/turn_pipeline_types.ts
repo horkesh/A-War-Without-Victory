@@ -110,6 +110,8 @@ export interface TurnInput {
     municipalityHqSettlement?: Record<string, string>;
     /** When provided, emergent brigade names use historical OOB name for (faction, mun_id, ordinal). */
     historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
+    /** When provided, emergent brigades inherit historical OOB corps for (faction, mun_id, ordinal). */
+    historicalCorpsLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */

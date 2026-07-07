@@ -36,6 +36,9 @@ await esbuild.build({
   bundle: true,
   platform: 'node',
   format: 'cjs',
+  define: {
+    'import.meta.url': 'undefined',
+  },
   outfile: outFile,
   sourcemap: true,
   target: 'node18',

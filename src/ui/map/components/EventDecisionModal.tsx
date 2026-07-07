@@ -20,7 +20,7 @@ import type {
 } from '../../../sim/events/event_types';
 import type { GameState } from '../../../state/game_state';
 import { getCausalAncestors } from '../../../sim/events/causality_query';
-import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName } from '../utils/playerSafeText';
+import { getPlayerSafePoliticalFactionName, getPlayerSafeOfficerName, getPlayerSafeDecisionTitle } from '../utils/playerSafeText';
 import { useGameStore } from '../store/gameStore';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
@@ -87,9 +87,10 @@ function resolveLocalizedDecisionDossier(
     locale: Locale,
 ): EventDecisionDossier {
     const def = eventCatalog?.get(decision.event_id);
+    const localizedTitle = localizedField(decision.event_title, def, locale, 'title');
     return {
         ...decision,
-        event_title: localizedField(decision.event_title, def, locale, 'title') ?? decision.event_title,
+        event_title: getPlayerSafeDecisionTitle(localizedTitle ?? def?.title ?? decision.event_title),
         narrative: localizedField(decision.narrative, def, locale, 'narrative'),
         situation: localizedField(decision.situation, def, locale, 'situation'),
         staff_assessment: localizedField(decision.staff_assessment, def, locale, 'staff_assessment'),
@@ -141,8 +142,10 @@ export interface EventDecisionModalProps {
      * instead of the generic "Staff assessment". Backward compatible — omit to
      * keep the generic label. Names are already player-safe via the roster, but
      * sanitised defensively here too.
-     */
+    */
     advisor?: { name: string | null | undefined; rank?: string };
+    errorMessage?: string | null;
+    onDismissError?: () => void;
 }
 
 /** Phase H Packet 3 — Maximum chars of source dossier excerpt rendered in
@@ -397,8 +400,6 @@ function ResponseButton({
             <button
                 type="button"
                 data-testid="event-decision-response"
-                data-event-id={decision.event_id}
-                data-response-id={option.id}
                 aria-label={chooseLabel}
                 title={chooseLabel}
                 onClick={onChoose}
@@ -537,7 +538,7 @@ function DecisionContextSection({
     );
 }
 
-export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor }: EventDecisionModalProps) {
+export function EventDecisionModal({ decision, onRespond, eventCatalog, state, advisor, errorMessage, onDismissError }: EventDecisionModalProps) {
     const [locale] = useLocale();
     const localizedDecision = resolveLocalizedDecisionDossier(decision, eventCatalog, locale);
     const factionColor = FACTION_TEXT_CLASS[localizedDecision.faction ?? ''] ?? 'text-accent-gold';
@@ -657,6 +658,23 @@ export function EventDecisionModal({ decision, onRespond, eventCatalog, state, a
                 {!hasHistoricalDefault && (
                     <div className="mb-4 rounded border border-accent-gold/30 bg-accent-gold/10 px-4 py-3 text-[12px] leading-relaxed text-text-secondary">
                         {t('eventDecision.historicalDefaultSourceReview')}
+                    </div>
+                )}
+
+                {errorMessage && (
+                    <div className="mb-4 rounded border border-red-400/45 bg-red-950/35 px-4 py-3">
+                        <div role="alert" className="text-[12px] leading-relaxed text-red-100">
+                            {errorMessage}
+                        </div>
+                        {onDismissError && (
+                            <button
+                                type="button"
+                                className="mt-3 rounded border border-red-300/45 bg-black/25 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-red-50 transition-colors hover:border-red-200 hover:bg-red-900/35"
+                                onClick={onDismissError}
+                            >
+                                Return to map
+                            </button>
+                        )}
                     </div>
                 )}
 

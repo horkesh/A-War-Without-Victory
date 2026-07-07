@@ -16,6 +16,8 @@ export interface TickerEvent {
     category?: 'international' | 'military' | 'political' | 'humanitarian' | 'bih_international' | 'world' | 'regional';
     /** Live campaign event receipt required before this static historical row may be shown. */
     requiresEventId?: string;
+    /** Any one of these live campaign event receipts may unlock the row. */
+    requiresAnyEventId?: readonly string[];
     /** Live campaign rupture/cost receipt required before this static historical row may be shown. */
     requiresRuptureId?: string;
 }
@@ -29,6 +31,7 @@ const MAX_VISIBLE_EVENTS = 8;
 
 function hasReceipt(event: TickerEvent, context?: TickerReceiptContext): boolean {
     if (event.requiresEventId && !context?.firedEventIds?.includes(event.requiresEventId)) return false;
+    if (event.requiresAnyEventId && !event.requiresAnyEventId.some((id) => context?.firedEventIds?.includes(id))) return false;
     if (event.requiresRuptureId && !context?.ruptureIds?.includes(event.requiresRuptureId)) return false;
     return true;
 }
@@ -153,7 +156,7 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     // October 1992 (Turns 52-55)
     { turn: 52, text: 'JAJCE FALLS TO VRS AFTER PROLONGED SIEGE', category: 'military' },
     { turn: 52, text: 'TORONTO BLUE JAYS WIN WORLD SERIES — FIRST NON-US TEAM', category: 'world' },
-    { turn: 53, text: 'VANCE-OWEN PEACE PLAN PROPOSED — 10 SEMI-AUTONOMOUS PROVINCES', category: 'international' },
+    { turn: 53, text: 'VANCE-OWEN PEACE PLAN PROPOSED — 10 SEMI-AUTONOMOUS PROVINCES', category: 'international', requiresEventId: 'vance_owen_plan_1993' },
     { turn: 54, text: 'UN ESTABLISHES WAR CRIMES COMMISSION FOR YUGOSLAVIA', category: 'international' },
     { turn: 55, text: 'HUMANITARIAN CORRIDOR TO EASTERN BOSNIA DEMANDED BY UN', category: 'bih_international' },
 
@@ -162,19 +165,19 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 57, text: 'FIGHTING INTENSIFIES IN CENTRAL BOSNIA — HVO-ARBIH TENSIONS GROW', category: 'military' },
     { turn: 57, text: 'WHITNEY HOUSTON\'S BODYGUARD TOPS US BOX OFFICE', category: 'world' },
     { turn: 58, text: 'UN REPORT DOCUMENTS SYSTEMATIC RAPE AS WEAPON OF WAR', category: 'humanitarian' },
-    { turn: 59, text: 'SREBRENICA UNDER SIEGE — REFUGEES FLOOD INTO ENCLAVE', category: 'humanitarian' },
+    { turn: 59, text: 'SREBRENICA UNDER SIEGE - REFUGEES FLOOD INTO ENCLAVE', category: 'humanitarian', requiresEventId: 'srebrenica_demilitarization_1993' },
 
     // December 1992 (Turns 60-63)
     { turn: 60, text: 'BUSH WARNS SERBIA OF MILITARY ACTION IF CONFLICT SPREADS TO KOSOVO', category: 'international' },
     { turn: 60, text: 'PRINCESS DIANA AND PRINCE CHARLES ANNOUNCE SEPARATION', category: 'world' },
     { turn: 61, text: 'EC SUMMIT DEMANDS CLOSURE OF DETENTION CAMPS', category: 'international' },
     { turn: 62, text: 'UNHCR REPORTS 1 MILLION BOSNIAN REFUGEES', category: 'humanitarian' },
-    { turn: 63, text: 'VANCE-OWEN PLAN NEGOTIATIONS CONTINUE IN GENEVA', category: 'international' },
+    { turn: 63, text: 'VANCE-OWEN PLAN NEGOTIATIONS CONTINUE IN GENEVA', category: 'international', requiresEventId: 'vance_owen_plan_1993' },
 
     // January 1993 (Turns 64-67)
     { turn: 64, text: 'DEPUTY PM HAKIJA TURAJLIC KILLED AT UN CHECKPOINT IN SARAJEVO', category: 'political' },
     { turn: 64, text: 'DALLAS COWBOYS WIN SUPER BOWL XXVII — ROUT BUFFALO BILLS 52-17', category: 'world' },
-    { turn: 65, text: 'VANCE-OWEN PLAN MAPS PRESENTED — ALL SIDES OBJECT', category: 'international' },
+    { turn: 65, text: 'VANCE-OWEN PLAN MAPS PRESENTED — ALL SIDES OBJECT', category: 'international', requiresEventId: 'vance_owen_plan_1993' },
     { turn: 66, text: 'INAUGURATION OF PRESIDENT CLINTON — PLEDGES ROBUST BOSNIA POLICY', category: 'international' },
     { turn: 67, text: 'NATO PLANS ENFORCEMENT OF NO-FLY ZONE OVER BOSNIA', category: 'bih_international' },
     { turn: 67, text: 'AUDREY HEPBURN DIES AT 63 — WORLD MOURNS SCREEN ICON', category: 'world' },
@@ -187,28 +190,28 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 71, text: 'FIGHTING BETWEEN HVO AND ARBIH ERUPTS IN GORNJI VAKUF', category: 'military' },
 
     // March 1993 (Turns 72-75)
-    { turn: 72, text: 'SREBRENICA OFFENSIVE — VRS ADVANCES ON ENCLAVE', category: 'military' },
+    { turn: 72, text: 'SREBRENICA OFFENSIVE - VRS ADVANCES ON ENCLAVE', category: 'military', requiresEventId: 'srebrenica_demilitarization_1993' },
     { turn: 72, text: 'UNFORGIVEN WINS BEST PICTURE AT ACADEMY AWARDS', category: 'world' },
-    { turn: 73, text: 'BOSNIAN PRESIDENT IZETBEGOVIC SIGNS VANCE-OWEN PLAN', category: 'political' },
-    { turn: 74, text: 'GENERAL MORILLON ENTERS SREBRENICA — PROMISES PROTECTION', category: 'bih_international' },
+    { turn: 73, text: 'BOSNIAN PRESIDENT IZETBEGOVIC SIGNS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
+    { turn: 74, text: 'GENERAL MORILLON ENTERS SREBRENICA - PROMISES PROTECTION', category: 'bih_international', requiresEventId: 'srebrenica_demilitarization_1993' },
     { turn: 74, text: 'DEPECHE MODE RELEASES SONGS OF FAITH AND DEVOTION — TOPS CHARTS', category: 'world' },
     { turn: 75, text: 'BOSNIAN CROAT-BOSNIAK WAR INTENSIFIES IN CENTRAL BOSNIA', category: 'military' },
 
     // April 1993 (Turns 76-79)
     { turn: 76, text: 'NATO BEGINS ENFORCING NO-FLY ZONE — OPERATION DENY FLIGHT', category: 'bih_international' },
-    { turn: 77, text: 'SREBRENICA DECLARED SAFE AREA BY UN — UNSCR 819', category: 'bih_international' },
+    { turn: 77, text: 'SREBRENICA DECLARED SAFE AREA BY UN - UNSCR 819', category: 'bih_international', requiresEventId: 'srebrenica_demilitarization_1993' },
     { turn: 78, text: 'AHMICI MASSACRE — HVO KILLS BOSNIAK CIVILIANS IN CENTRAL BOSNIA', category: 'humanitarian' },
-    { turn: 79, text: 'BOSNIAN SERB ASSEMBLY REJECTS VANCE-OWEN PLAN', category: 'political' },
+    { turn: 79, text: 'BOSNIAN SERB ASSEMBLY REJECTS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
 
     // May 1993 (Turns 80-83)
-    { turn: 80, text: 'FIVE MORE SAFE AREAS DECLARED — SARAJEVO, TUZLA, ZEPA, GORAZDE, BIHAC', category: 'bih_international' },
-    { turn: 81, text: 'BOSNIAN SERB REFERENDUM REJECTS VANCE-OWEN PLAN', category: 'political' },
+    { turn: 80, text: 'FIVE MORE SAFE AREAS DECLARED - SARAJEVO, TUZLA, ZEPA, GORAZDE, BIHAC', category: 'bih_international', requiresEventId: 'un_safe_areas_declared_1993' },
+    { turn: 81, text: 'BOSNIAN SERB REFERENDUM REJECTS VANCE-OWEN PLAN', category: 'political', requiresEventId: 'vance_owen_plan_1993' },
     { turn: 82, text: 'JOINT ACTION PROGRAMME PROPOSED — LIFT AND STRIKE DEBATED', category: 'international' },
     { turn: 82, text: 'MARSEILLE WINS FIRST CHAMPIONS LEAGUE TITLE IN MUNICH', category: 'world' },
     { turn: 83, text: 'MOSTAR BRIDGE SHELLED — OLD BRIDGE STILL STANDING', category: 'military' },
 
     // June 1993 (Turns 84-87)
-    { turn: 84, text: 'OWEN-STOLTENBERG PLAN PROPOSED — UNION OF THREE REPUBLICS', category: 'international' },
+    { turn: 84, text: 'OWEN-STOLTENBERG PLAN PROPOSED — UNION OF THREE REPUBLICS', category: 'international', requiresEventId: 'owen_stoltenberg_plan_1993' },
     { turn: 84, text: 'JURASSIC PARK OPENS IN CINEMAS — SHATTERS BOX OFFICE RECORDS', category: 'world' },
     { turn: 85, text: 'FIGHTING IN MOSTAR — HVO BESIEGES EAST MOSTAR', category: 'military' },
     { turn: 85, text: 'CHICAGO BULLS WIN THIRD STRAIGHT NBA TITLE — JORDAN THREE-PEAT', category: 'world' },
@@ -218,12 +221,12 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     // July 1993 (Turns 88-91)
     { turn: 88, text: 'VRS OFFENSIVE ON MOUNT IGMAN ABOVE SARAJEVO', category: 'military' },
     { turn: 89, text: 'NATO THREATENS AIR STRIKES IF VRS DOES NOT WITHDRAW FROM IGMAN', category: 'bih_international' },
-    { turn: 90, text: 'OWEN-STOLTENBERG NEGOTIATIONS ON HMS INVINCIBLE', category: 'international' },
+    { turn: 90, text: 'OWEN-STOLTENBERG NEGOTIATIONS ON HMS INVINCIBLE', category: 'international', requiresEventId: 'owen_stoltenberg_plan_1993' },
     { turn: 91, text: 'VRS WITHDRAWS FROM IGMAN AND BJELASNICA UNDER NATO PRESSURE', category: 'military' },
     { turn: 91, text: 'MIGUEL INDURAIN WINS THIRD CONSECUTIVE TOUR DE FRANCE', category: 'world' },
 
     // August 1993 (Turns 92-95)
-    { turn: 92, text: 'OWEN-STOLTENBERG PLAN REJECTED BY BOSNIAN PARLIAMENT', category: 'political' },
+    { turn: 92, text: 'OWEN-STOLTENBERG PLAN REJECTED BY BOSNIAN PARLIAMENT', category: 'political', requiresEventId: 'owen_stoltenberg_plan_1993' },
     { turn: 93, text: 'SIEGE OF EAST MOSTAR BY HVO CONTINUES — HUMANITARIAN CRISIS', category: 'humanitarian' },
     { turn: 94, text: 'MT IGMAN ROAD UNDER UN CONTROL — SOLE LINK TO SARAJEVO', category: 'bih_international' },
     { turn: 95, text: 'EU ACTION PLAN FOR BOSNIA PROPOSED', category: 'international' },
@@ -273,10 +276,10 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 119, text: 'VRS BEGINS HEAVY WEAPON WITHDRAWAL FROM SARAJEVO EXCLUSION ZONE', category: 'military' },
 
     // March 1994 (Turns 120-123)
-    { turn: 120, text: 'WASHINGTON AGREEMENT SIGNED — CROAT-BOSNIAK FEDERATION ESTABLISHED', category: 'international' },
+    { turn: 120, text: 'WASHINGTON AGREEMENT SIGNED - CROAT-BOSNIAK FEDERATION ESTABLISHED', category: 'international', requiresAnyEventId: ['rbih_washington_agreement_1994', 'hrhb_washington_agreement_1994'] },
     { turn: 120, text: 'SCHINDLER\'S LIST WINS 7 ACADEMY AWARDS INCLUDING BEST PICTURE', category: 'world' },
-    { turn: 121, text: 'HVO-ARBIH CEASEFIRE TAKES EFFECT — JOINT COMMAND STRUCTURES PLANNED', category: 'military' },
-    { turn: 122, text: 'FEDERATION OF BOSNIA AND HERZEGOVINA FORMALLY CONSTITUTED', category: 'political' },
+    { turn: 121, text: 'HVO-ARBIH CEASEFIRE TAKES EFFECT - JOINT COMMAND STRUCTURES PLANNED', category: 'military', requiresAnyEventId: ['rbih_washington_agreement_1994', 'hrhb_washington_agreement_1994'] },
+    { turn: 122, text: 'FEDERATION OF BOSNIA AND HERZEGOVINA FORMALLY CONSTITUTED', category: 'political', requiresAnyEventId: ['rbih_washington_agreement_1994', 'hrhb_washington_agreement_1994'] },
     { turn: 122, text: 'MICHAEL JORDAN ANNOUNCES BASEBALL CAREER — JOINS MINOR LEAGUES', category: 'world' },
     { turn: 123, text: 'GORAZDE COMES UNDER VRS ATTACK — SAFE AREA THREATENED', category: 'military' },
 
@@ -289,7 +292,7 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 127, text: 'CONTACT GROUP FORMED — US, UK, FRANCE, GERMANY, RUSSIA', category: 'international' },
 
     // May 1994 (Turns 128-131)
-    { turn: 128, text: 'CONTACT GROUP PRESENTS MAP DIVIDING BOSNIA 51-49', category: 'international' },
+    { turn: 128, text: 'CONTACT GROUP PRESENTS MAP DIVIDING BOSNIA 51-49', category: 'international', requiresEventId: 'contact_group_plan_1994' },
     { turn: 128, text: 'CHANNEL TUNNEL OPENS — BRITAIN AND FRANCE LINKED BY RAIL', category: 'world' },
     { turn: 129, text: 'NELSON MANDELA INAUGURATED AS PRESIDENT OF SOUTH AFRICA', category: 'world' },
     { turn: 130, text: 'FEDERATION FORCES BEGIN JOINT OPERATIONS IN CENTRAL BOSNIA', category: 'military' },
@@ -297,15 +300,15 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 131, text: 'UNPROFOR REINFORCEMENTS DEPLOY TO SAFE AREAS', category: 'bih_international' },
 
     // June 1994 (Turns 132-135)
-    { turn: 132, text: 'CONTACT GROUP PLAN PRESENTED TO WARRING PARTIES', category: 'international' },
+    { turn: 132, text: 'CONTACT GROUP PLAN PRESENTED TO WARRING PARTIES', category: 'international', requiresEventId: 'contact_group_plan_1994' },
     { turn: 132, text: 'HOUSTON ROCKETS WIN NBA CHAMPIONSHIP — OLAJUWON NAMED MVP', category: 'world' },
-    { turn: 133, text: 'FEDERATION ACCEPTS CONTACT GROUP MAP', category: 'political' },
+    { turn: 133, text: 'FEDERATION ACCEPTS CONTACT GROUP MAP', category: 'political', requiresEventId: 'contact_group_plan_1994' },
     { turn: 133, text: 'O.J. SIMPSON SLOW-SPEED CHASE WATCHED BY 95 MILLION', category: 'world' },
     { turn: 134, text: 'USA HOSTS WORLD CUP — OPENING CEREMONIES IN CHICAGO', category: 'world' },
-    { turn: 135, text: 'VRS DELAYS RESPONSE TO CONTACT GROUP PLAN', category: 'political' },
+    { turn: 135, text: 'VRS DELAYS RESPONSE TO CONTACT GROUP PLAN', category: 'political', requiresEventId: 'contact_group_plan_1994' },
 
     // July 1994 (Turns 136-139)
-    { turn: 136, text: 'BOSNIAN SERBS REJECT CONTACT GROUP PLAN', category: 'political' },
+    { turn: 136, text: 'BOSNIAN SERBS REJECT CONTACT GROUP PLAN', category: 'political', requiresEventId: 'contact_group_plan_1994' },
     { turn: 137, text: 'MILOSEVIC BREAKS WITH PALE — IMPOSES BLOCKADE ON REPUBLIKA SRPSKA', category: 'international' },
     { turn: 137, text: 'WOODSTOCK \'94 FESTIVAL DRAWS 350,000 — MARKS 25TH ANNIVERSARY', category: 'world' },
     { turn: 138, text: 'SERBIA CLOSES BORDER WITH RS — INTERNATIONAL MONITORS DEPLOYED', category: 'international' },
@@ -331,7 +334,7 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 148, text: 'CEASEFIRE LARGELY HOLDS — SOME VIOLATIONS REPORTED', category: 'military' },
     { turn: 148, text: 'PULP FICTION PREMIERES — TARANTINO FILM TAKES PALME D\'OR', category: 'world' },
     { turn: 149, text: 'ARBIH 5TH CORPS CONTINUES PROBING ATTACKS FROM BIHAC', category: 'military' },
-    { turn: 150, text: 'CONTACT GROUP CONSIDERS NEXT STEPS IF PEACE FAILS', category: 'international' },
+    { turn: 150, text: 'CONTACT GROUP CONSIDERS NEXT STEPS IF PEACE FAILS', category: 'international', requiresEventId: 'contact_group_plan_1994' },
     { turn: 151, text: 'US MID-TERM ELECTIONS — REPUBLICAN CONGRESS PRESSURES CLINTON ON BOSNIA', category: 'international' },
 
     // November 1994 (Turns 152-155)
@@ -353,7 +356,7 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 160, text: 'SAN FRANCISCO 49ERS WIN SUPER BOWL XXIX — STEVE YOUNG MVP', category: 'world' },
     { turn: 161, text: 'US DIPLOMAT RICHARD HOLBROOKE BEGINS SHUTTLE DIPLOMACY', category: 'international' },
     { turn: 162, text: 'EARTHQUAKE STRIKES KOBE JAPAN — OVER 6000 DEAD', category: 'world' },
-    { turn: 163, text: 'CONTACT GROUP SEEKS FRAMEWORK FOR COMPREHENSIVE SETTLEMENT', category: 'international' },
+    { turn: 163, text: 'CONTACT GROUP SEEKS FRAMEWORK FOR COMPREHENSIVE SETTLEMENT', category: 'international', requiresEventId: 'contact_group_plan_1994' },
     { turn: 163, text: 'MICHAEL JORDAN ANNOUNCES RETURN TO BASKETBALL — WEARS NUMBER 45', category: 'world' },
 
     // February 1995 (Turns 164-167)
@@ -413,29 +416,29 @@ export const PHASE0_TICKER_EVENTS: readonly TickerEvent[] = [
     { turn: 193, text: 'FEDERATION AND HV FORCES LAUNCH GROUND OFFENSIVE IN WESTERN BOSNIA', category: 'military' },
     { turn: 194, text: 'VRS AGREES TO CONDITIONS — NATO HALTS BOMBING', category: 'bih_international' },
     { turn: 194, text: 'CAL RIPKEN JR. BREAKS LOU GEHRIG\'S CONSECUTIVE GAMES RECORD', category: 'world' },
-    { turn: 195, text: 'FURTHER AGREED PRINCIPLES FOR PEACE SIGNED IN NEW YORK', category: 'international' },
+    { turn: 195, text: 'FURTHER AGREED PRINCIPLES FOR PEACE SIGNED IN NEW YORK', category: 'international', requiresEventId: 'dayton_talks_begin_1995' },
 
     // October 1995 (Turns 196-199)
-    { turn: 196, text: 'CEASEFIRE TAKES EFFECT ACROSS BOSNIA ON 12 OCTOBER', category: 'bih_international' },
+    { turn: 196, text: 'CEASEFIRE TAKES EFFECT ACROSS BOSNIA ON 12 OCTOBER', category: 'bih_international', requiresEventId: 'ceasefire_1995' },
     { turn: 196, text: 'O.J. SIMPSON FOUND NOT GUILTY — 150 MILLION WATCH VERDICT', category: 'world' },
-    { turn: 197, text: 'FEDERATION OFFENSIVE HALTED AT 51% TERRITORY LINE', category: 'military' },
+    { turn: 197, text: 'FEDERATION OFFENSIVE HALTED AT 51% TERRITORY LINE', category: 'military', requiresEventId: 'us_halts_federation_advance_1995' },
     { turn: 197, text: 'ATLANTA BRAVES WIN WORLD SERIES — FIRST TITLE SINCE 1957', category: 'world' },
-    { turn: 198, text: 'PROXIMITY TALKS ANNOUNCED — DAYTON, OHIO', category: 'international' },
-    { turn: 199, text: 'PARTIES PREPARE FOR PEACE NEGOTIATIONS', category: 'political' },
+    { turn: 198, text: 'PROXIMITY TALKS ANNOUNCED — DAYTON, OHIO', category: 'international', requiresEventId: 'dayton_talks_begin_1995' },
+    { turn: 199, text: 'PARTIES PREPARE FOR PEACE NEGOTIATIONS', category: 'political', requiresEventId: 'dayton_talks_begin_1995' },
 
     // November 1995 (Turns 200-203)
-    { turn: 200, text: 'DAYTON PEACE TALKS BEGIN — WRIGHT-PATTERSON AIR FORCE BASE', category: 'international' },
+    { turn: 200, text: 'DAYTON PEACE TALKS BEGIN — WRIGHT-PATTERSON AIR FORCE BASE', category: 'international', requiresEventId: 'dayton_talks_begin_1995' },
     { turn: 200, text: 'TOY STORY PREMIERES — FIRST FULLY COMPUTER-ANIMATED FEATURE FILM', category: 'world' },
-    { turn: 201, text: 'INTENSE NEGOTIATIONS — HOLBROOKE PUSHES FOR AGREEMENT', category: 'international' },
-    { turn: 202, text: 'TERRITORIAL DISPUTES AND SARAJEVO STATUS DOMINATE DAYTON TALKS', category: 'international' },
+    { turn: 201, text: 'INTENSE NEGOTIATIONS — HOLBROOKE PUSHES FOR AGREEMENT', category: 'international', requiresEventId: 'dayton_talks_begin_1995' },
+    { turn: 202, text: 'TERRITORIAL DISPUTES AND SARAJEVO STATUS DOMINATE DAYTON TALKS', category: 'international', requiresEventId: 'dayton_talks_begin_1995' },
     { turn: 202, text: 'BEATLES RELEASE FREE AS A BIRD — FIRST NEW SINGLE IN 25 YEARS', category: 'world' },
-    { turn: 203, text: 'DAYTON AGREEMENT REACHED ON 21 NOVEMBER — WAR ENDS', category: 'international' },
+    { turn: 203, text: 'DAYTON AGREEMENT REACHED ON 21 NOVEMBER — WAR ENDS', category: 'international', requiresEventId: 'dayton_signed_1995' },
 
     // December 1995 (Turns 204-207)
-    { turn: 204, text: 'DAYTON AGREEMENT FORMALLY SIGNED IN PARIS ON 14 DECEMBER', category: 'international' },
-    { turn: 205, text: 'NATO DEPLOYS IFOR — 60,000 TROOPS TO ENFORCE PEACE', category: 'bih_international' },
+    { turn: 204, text: 'DAYTON AGREEMENT FORMALLY SIGNED IN PARIS ON 14 DECEMBER', category: 'international', requiresEventId: 'dayton_signed_1995' },
+    { turn: 205, text: 'NATO DEPLOYS IFOR - 60,000 TROOPS TO ENFORCE PEACE', category: 'bih_international', requiresEventId: 'dayton_signed_1995' },
     { turn: 205, text: 'GOLDENEYE OPENS IN CINEMAS — BOND IS BACK', category: 'world' },
-    { turn: 206, text: 'UNPROFOR MANDATE ENDS — REPLACED BY NATO IFOR', category: 'bih_international' },
-    { turn: 207, text: 'DEMILITARIZED ZONES ESTABLISHED ALONG ENTITY BOUNDARIES', category: 'military' },
+    { turn: 206, text: 'UNPROFOR MANDATE ENDS - REPLACED BY NATO IFOR', category: 'bih_international', requiresEventId: 'dayton_signed_1995' },
+    { turn: 207, text: 'DEMILITARIZED ZONES ESTABLISHED ALONG ENTITY BOUNDARIES', category: 'military', requiresEventId: 'dayton_signed_1995' },
     { turn: 207, text: 'CHICAGO BULLS BEGIN RECORD-BREAKING 72-WIN SEASON', category: 'world' },
 ];
