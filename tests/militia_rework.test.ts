@@ -73,6 +73,35 @@ test('spawn at 800: pool with 800 available spawns one brigade with personnel 80
     assert.strictEqual(formation.faction, 'RBiH');
 });
 
+test('spawned historical brigades inherit corps from lookup', () => {
+    const state = baseState();
+    state.military.formation_spawn_directive = { kind: 'brigade' };
+    const key = militiaPoolKey('ilijas', 'RS');
+    state.military.militia_pools![key] = {
+        mun_id: 'ilijas',
+        faction: 'RS',
+        available: 2500,
+        committed: 0,
+        exhausted: 0,
+        updated_turn: 10
+    };
+    state.political.municipalities!['ilijas'] = { control: 'consolidated' };
+
+    const report = spawnFormationsFromPools(state, {
+        ...defaultSpawnOptions(),
+        maxPerMun: 1,
+        historicalNameLookup: (faction, mun, ordinal) =>
+            faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? '3rd Sarajevo Infantry Brigade (Ilijas)' : null,
+        historicalCorpsLookup: (faction, mun, ordinal) =>
+            faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? 'vrs_sarajevo_romanija' : null
+    });
+
+    assert.strictEqual(report.formations_created, 1);
+    const formation = Object.values(state.military.formations!)[0] as any;
+    assert.strictEqual(formation.name, '3rd Sarajevo Infantry Brigade (Ilijas)');
+    assert.strictEqual(formation.corps_id, 'vrs_sarajevo_romanija');
+});
+
 test('fragmented mun never spawns', () => {
     const state = baseState();
     state.military.formation_spawn_directive = { kind: 'brigade' };

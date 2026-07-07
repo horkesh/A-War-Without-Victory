@@ -109,8 +109,8 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
     });
 
     it('routes a ?shellHandoff=... deep-link to the game shell after applying it', () => {
-        expect(app).toContain('applyShellHandoffCommand(useGameStore.getState(), command);');
-        const handoffIdx = app.indexOf('applyShellHandoffCommand(useGameStore.getState(), command);');
+        expect(app).toContain('applyShellCommand(command);');
+        const handoffIdx = app.indexOf('applyShellCommand(command);');
         const deleteIdx = app.indexOf("params.delete('shellHandoff');");
         const routeIdx = app.indexOf("setAppScreen('game');", handoffIdx);
         expect(handoffIdx).toBeGreaterThan(-1);
