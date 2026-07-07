@@ -617,3 +617,9 @@ OSID, raw faction ids, and similar backend nouns are valid in engine code, canon
 - Heavy aftermath remains modal-first. The classifier defaults unknown aftermath content to heavy and treats actions, blockers, strategic signals, territory movement, battles, casualties, displacement, and own formation losses as heavy.
 - Warroom calendar advance now mirrors the toolbar gate: clear/review states advance directly through `advanceTurnAndSync`, while blocked states still open the pre-advance review modal and cannot bypass required decisions.
 - See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-2 quiet-turn advance digest`.
+
+## 2026-07-06 - WP-6 archive spine
+
+- The standalone Authored Choices / Decision History overlay is retired; authored event choices now live in Army HQ Records -> Decision Consequences with the same title, chosen option, historical/diverged, receipt-count, and downstream descendant fields.
+- D/E authored-choice shortcuts now route to the Records `decisions` subtab. Chronicle remains the campaign memory archive; Records remains the reference archive.
+- See `docs/PROJECT_LEDGER.md` / `2026-07-06 - WP-6 archive spine retired Decision History overlay`.

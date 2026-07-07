@@ -35,6 +35,7 @@ import { Z } from '../../../shared/zIndex';
 import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import type { CorpsFrontSectorView, FormationView, NamedOfficerView, OperationView } from '../../data/types';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
+import type { EventDefinition } from '../../../../sim/events/event_types';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -48,6 +49,7 @@ const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<strin
 
 export interface ArmyHQModalProps {
     onDecisionRoomNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
 }
 
 const FACTION_DISPLAY: Record<string, string> = {
@@ -166,7 +168,7 @@ function CommandAccessStrip({
     );
 }
 
-export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps = {}) {
+export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: ArmyHQModalProps = {}) {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
@@ -389,7 +391,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
                         id="army-hq-tabpanel-records"
                         aria-label={t('armyHq.tab.records')}
                     >
-                        <RecordsContent />
+                        <RecordsContent eventCatalog={eventCatalog} />
                     </div>
                 </div>
             </div>
@@ -676,7 +678,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget }: ArmyHQModalProps =
 
                     {/* ═══ RECORDS TAB ═══ */}
                     {activeTab === 'records' && (
-                        <RecordsContent />
+                        <RecordsContent eventCatalog={eventCatalog} />
                     )}
 
                     {/* ═══ PERSONNEL TAB ═══ */}

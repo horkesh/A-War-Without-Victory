@@ -16,6 +16,7 @@ import { buildTurnAftermathRecordViews } from '../../data/turnAftermath';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { openCodex } from '../../utils/shellNavigation';
 import { filterPlayerFacingOperationHistory } from '../../../shared/playerVisibility';
+import type { EventDefinition } from '../../../../sim/events/event_types';
 
 const SUB_TABS = [
     { id: 'aftermath' as const, labelKey: 'recordsContent.tab.aftermath' },
@@ -25,7 +26,11 @@ const SUB_TABS = [
     { id: 'opportunities' as const, labelKey: 'recordsContent.tab.opportunities' },
 ];
 
-export function RecordsContent() {
+export interface RecordsContentProps {
+    eventCatalog?: ReadonlyMap<string, EventDefinition>;
+}
+
+export function RecordsContent({ eventCatalog }: RecordsContentProps = {}) {
     const subTab = useGameStore((s) => s.armyHQRecordsSubTab);
     const setSubTab = useGameStore((s) => s.setArmyHQRecordsSubTab);
     const state = useGameStore((s) => s.loadedGameState);
@@ -153,7 +158,7 @@ export function RecordsContent() {
             {subTab === 'aftermath' && <TurnAftermathRecordsPanel />}
             {subTab === 'aar' && <AARPanel isOpen={true} onClose={() => {}} embedded />}
             {subTab === 'ops' && <OperationHistoryPanel isOpen={true} onClose={() => {}} embedded />}
-            {subTab === 'decisions' && <DecisionConsequenceRecordsPanel />}
+            {subTab === 'decisions' && <DecisionConsequenceRecordsPanel eventCatalog={eventCatalog} />}
             {subTab === 'opportunities' && <OpportunityLedgerPanel />}
         </div>
     );
