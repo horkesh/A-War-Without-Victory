@@ -23676,3 +23676,13 @@ Verification: red proof failed `npx.cmd vitest run tests/ui/audio_ambient_floor.
 Manual/package listen note: the implemented cue path now constructs `HTMLAudioElement` instances for resolved provided cue assets only after first gesture unlock. The ambient beds remain intentionally silent until owner `.ogg` files land and are wired through `audioAssets.ts`; no placeholder ambient file was invented.
 
 Determinism/scope: UI audio preferences, browser gesture gating, audio bus playback, ambient-bed routing, audio asset manifest docs, focused UI/audio regression tests, browser QA evidence, and docs only. No simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed.
+
+## 2026-07-06 - WP-9 D2 friction-diary discipline
+
+Implemented WP-9 from `docs/plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md`. Added `docs/40_reports/playtests/TEMPLATE.md` as the owner-session diary for packaged desktop D2-prep play: date/build/faction, turns and minutes per turn, three worst friction moments, one best moment, 1-5 presidential feel score, bug-vs-friction split, Desk -> Decision -> Advance loop check, and backlog triage outcome.
+
+The Master Roadmap and Command Board now name the owner-directed GUI decision-access runway as the pre-D2 process lane, require packaged owner sessions after WP-1 through WP-4 merge, and define the WP-9 stop gate: two consecutive diaries with no new top-three Desk -> Decision -> Advance friction schedule the D2 full-campaign playthrough. `GAME_STATE_RATING_MASTER.md` now records grade honesty coupling: UI / command-surface self-grades may not exceed the latest diary feel-grade band until later owner diary evidence raises it. `PROJECT_LEDGER_KNOWLEDGE.md` records the durable process boundary.
+
+Verification: docs-only proof passed `git diff --check` and `npm.cmd run typecheck`.
+
+Determinism/scope: documentation/process only. No runtime UI behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed.

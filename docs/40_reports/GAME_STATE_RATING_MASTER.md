@@ -72,6 +72,8 @@ Four-panel re-grade vs the 2026-05-24 pass below. **Observation-only.** Per §7.
 
 ## 0. Reading guide
 
+**2026-07-06 WP-9 grade honesty note:** UI / command-surface self-grades after the owner-directed GUI decision-access runway may not exceed the latest owner playtest diary's "Did I feel like the President?" band. Use `docs/40_reports/playtests/TEMPLATE.md` for the diary, and treat the score as a cap until a later diary records a higher feel-grade with no new top-three Desk -> Decision -> Advance loop friction.
+
 ### Prior art — read first, this file builds on them
 
 This file does **not replace** the existing audit chain. It **updates** it to current state (2026-05-16) and **extends coverage** to systems that prior audits did not formally grade (UI shell, content depth, audio/localization/accessibility, narrative, telemetry, build/CI, soundscape, store readiness).

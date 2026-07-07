@@ -3737,3 +3737,7 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-07-06 - Scenario baseline refresh boundary
 
 **Output-changing player-experience branches still owe scenario baseline reconciliation:** broad UI/agency work can alter deterministic scenario artifacts through startup normalization, operation authorization state, or report surfaces even when no scenario JSON is edited. Durable rule: after a branch changes player-facing simulation output or scenario state surfaces, run `npm.cmd run test:baselines`; if the failure is an intentional output change, refresh with `UPDATE_BASELINES=1`, rerun strict mode, and commit the manifest with a ledger note instead of leaving CI to catch stale hashes. Applied in `[2026-07-06] Scenario baseline manifest refresh for player-experience branch`.
+
+## 2026-07-06 - Owner friction diary boundary
+
+**Played sessions outrank speculative UI backlog ordering:** the D2-entry command surface is now owner-feel gated, not only contract-test gated. Durable rule: after the GUI decision-access runway, each packaged desktop owner session files a structured diary, the diary's top-three friction items move to the front of the UI backlog, and UI / command-surface self-grades may not exceed the latest diary feel-grade band. Two consecutive diaries with no new top-three Desk -> Decision -> Advance loop friction schedule the D2 full-campaign playthrough. Applied in `[2026-07-06] WP-9 D2 friction-diary discipline`.
