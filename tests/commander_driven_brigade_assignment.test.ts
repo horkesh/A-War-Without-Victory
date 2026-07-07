@@ -415,8 +415,8 @@ describe('n696: Phase 2c — PHASE_2C_MAX_HOPS = 4', () => {
         ]);
         // deep → rear (1) → f1 (2): within cap
         expect(allBrigs).toContain('brig_deep');
-        expect(state.military.formations.brig_deep.location_osid).toMatch(/^op:zon:f[1-5]$/);
-        expect(state.military.formations.brig_deep.assignment?.role).toBe('front');
+        expect(state.military.formations.brig_deep.location_osid).toBe('op:zon:deep');
+        expect(state.military.formations.brig_deep.assignment?.role).toBe('rear');
     });
 
     it('frontline brigade is assigned via Phase 1 (0 hops)', () => {

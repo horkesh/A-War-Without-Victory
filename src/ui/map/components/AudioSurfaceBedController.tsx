@@ -4,6 +4,10 @@ import {
   playAmbientBed,
   stopAmbientBed,
 } from '../audio/audio_engine.js';
+import {
+  applyAudioPreferences,
+  loadAudioPreferences,
+} from '../audio/audio_preferences.js';
 import { useGameStore } from '../store/gameStore.js';
 
 type AppAudioSurface = 'mainMenu' | 'game' | 'warroom';
@@ -22,6 +26,11 @@ function selectAmbientBed(
   return archiveOpen ? 'ambient_archive' : 'ambient_field';
 }
 
+function requestAmbientBedPlayback(bedId: AmbientBedId): void {
+  applyAudioPreferences(loadAudioPreferences());
+  void playAmbientBed(bedId);
+}
+
 export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControllerProps) {
   const chronicleOpen = useGameStore((state) => state.chronicleOpen);
   const armyHQOpen = useGameStore((state) => state.armyHQOpen);
@@ -30,18 +39,22 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
   const bedId = useMemo(() => selectAmbientBed(appScreen, archiveOpen), [appScreen, archiveOpen]);
 
   useEffect(() => {
+    applyAudioPreferences(loadAudioPreferences());
+  }, []);
+
+  useEffect(() => {
     if (!bedId) {
       stopAmbientBed();
       return;
     }
-    void playAmbientBed(bedId);
+    requestAmbientBedPlayback(bedId);
     return () => stopAmbientBed(bedId);
   }, [bedId]);
 
   useEffect(() => {
     if (!bedId) return;
     return installAudioGestureUnlockListeners(undefined, () => {
-      void playAmbientBed(bedId);
+      requestAmbientBedPlayback(bedId);
     });
   }, [bedId]);
 

@@ -190,6 +190,12 @@ export function ArmyHQCorpsCard({
     const stanceLabel = t(STANCE_LABEL_KEYS[data.stance] ?? 'armyHqCorps.stance.unreported');
     const effectivenessBand = effectivenessBandLabel(data.eff);
     const gradeColor = GRADE_COLORS[effectivenessBand.grade] ?? 'text-text-secondary';
+    const effectivenessTitle = effectivenessBand.grade === 'UNREPORTED'
+        ? t('armyHqCorps.effectivenessShort', {
+            grade: effectivenessBand.grade,
+            label: t(effectivenessBand.labelKey),
+        })
+        : t('effectiveness.exactTooltip', { value: data.eff.totalEffectiveness.toLocaleString() });
     const expandCardAria = t('armyHqCorps.expandCardAria', { corps: displayName });
     const collapseCardAria = t('armyHqCorps.collapseCardAria', { corps: displayName });
     const reportedCohesion = data.avgCohesion;
@@ -283,7 +289,7 @@ export function ArmyHQCorpsCard({
                     <span
                         data-testid="army-hq-corps-effectiveness"
                         className={`font-bold ${gradeColor}`}
-                        title={t('effectiveness.exactTooltip', { value: data.eff.totalEffectiveness.toLocaleString() })}
+                        title={effectivenessTitle}
                     >
                         {t('armyHqCorps.effectivenessShort', {
                             grade: effectivenessBand.grade,

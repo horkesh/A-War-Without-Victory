@@ -51,6 +51,7 @@ describe('WP-8 ambient audio floor', () => {
     vi.stubGlobal('fetch', vi.fn());
     vi.stubGlobal('AudioContext', vi.fn());
     vi.stubGlobal('Audio', FakeAudio);
+    window.localStorage.clear();
     useGameStore.setState(useGameStore.getInitialState());
   });
 
@@ -138,5 +139,27 @@ describe('WP-8 ambient audio floor', () => {
     useGameStore.setState({ chronicleOpen: false, armyHQOpen: true, armyHQTab: 'records' });
     view.rerender(React.createElement(AudioSurfaceBedController, { appScreen: 'game' }));
     expect(getAudioState().requestedAmbientId).toBe('ambient_archive');
+  });
+
+  it('applies startup preferences before gesture-unlocked ambient playback', async () => {
+    render(React.createElement(AudioSurfaceBedController, { appScreen: 'warroom' }));
+
+    expect(getAudioState()).toMatchObject({
+      enabled: true,
+      muted: false,
+      requestedAmbientId: 'ambient_warroom',
+      currentAmbientId: null,
+      userGestureUnlocked: false,
+    });
+
+    window.dispatchEvent(new Event('pointerdown'));
+    await Promise.resolve();
+
+    expect(getAudioState()).toMatchObject({
+      enabled: true,
+      muted: false,
+      userGestureUnlocked: true,
+      currentAmbientId: 'ambient_warroom',
+    });
   });
 });
