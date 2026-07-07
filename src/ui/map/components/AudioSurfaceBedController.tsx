@@ -26,6 +26,11 @@ function selectAmbientBed(
   return archiveOpen ? 'ambient_archive' : 'ambient_field';
 }
 
+function requestAmbientBedPlayback(bedId: AmbientBedId): void {
+  applyAudioPreferences(loadAudioPreferences());
+  void playAmbientBed(bedId);
+}
+
 export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControllerProps) {
   const chronicleOpen = useGameStore((state) => state.chronicleOpen);
   const armyHQOpen = useGameStore((state) => state.armyHQOpen);
@@ -42,14 +47,14 @@ export function AudioSurfaceBedController({ appScreen }: AudioSurfaceBedControll
       stopAmbientBed();
       return;
     }
-    void playAmbientBed(bedId);
+    requestAmbientBedPlayback(bedId);
     return () => stopAmbientBed(bedId);
   }, [bedId]);
 
   useEffect(() => {
     if (!bedId) return;
     return installAudioGestureUnlockListeners(undefined, () => {
-      void playAmbientBed(bedId);
+      requestAmbientBedPlayback(bedId);
     });
   }, [bedId]);
 
