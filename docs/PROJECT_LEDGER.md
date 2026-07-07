@@ -23594,3 +23594,11 @@ Refreshed `data/derived/scenario/baselines/manifest.json` after the first-hour/p
 Verification: reproduced the GitHub failure locally with `npm.cmd run test:baselines` redirected to `baseline-regression-local.log`; it failed on the same `apr1992_52w/activity_summary.json` expected/actual hash pair as Actions run `28754829125`. Green proof passed `$env:UPDATE_BASELINES='1'; npm.cmd run test:baselines`, then strict `npm.cmd run test:baselines` without the update flag.
 
 Determinism/scope: committed golden scenario baseline hashes only. No runtime UI behavior, simulation resolver behavior, operation injection mechanics, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed in this follow-up. Knowledge note: `docs/PROJECT_LEDGER_KNOWLEDGE.md` / `2026-07-06 - Scenario baseline refresh boundary`.
+
+## 2026-07-07 - Structural fingerprint refresh for player-experience base PR
+
+Refreshed `data/calibration/structural_fingerprint_40w.json` after PR #473 exposed that the first-hour/player-experience base branch had updated scenario baselines and deterministic startup outputs but still carried the old 40w structural-fingerprint expectation. The generated fingerprint moved from `b9f5a40aa0a1726e` to `6806ddd157044afa`; the active readiness hash in `docs/40_reports/GAME_STATE_RATING_MASTER.md` was updated to match.
+
+Verification: `npm.cmd run ci:structural-fingerprint:check` reproduced the stale expected fingerprint failure locally on `codex/player-experience-cleanup-20260705`; `npm.cmd run ci:structural-fingerprint:update` regenerated the expected artifact; strict `npm.cmd run ci:structural-fingerprint:check` then passed with `OK structural fingerprint 6806ddd157044afa matches expected`, preserving 30/30 anchors and 6/6 benchmarks.
+
+Determinism/scope: generated structural-fingerprint artifact, readiness hash documentation, and ledger only. No source behavior, event JSON, scenario source data, save schema migration, golden baseline manifest, packaged installer artifact, randomness, timestamps, locale persistence, or persisted output ordering changed in this follow-up.
