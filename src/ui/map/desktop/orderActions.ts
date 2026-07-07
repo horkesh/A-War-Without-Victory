@@ -1,11 +1,11 @@
 import type { IPC } from './useIPC';
 import type { LoadedGameState } from '../data/types';
-import { buildTurnAftermathView, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
+import { buildTurnAftermathDigest, buildTurnAftermathView, classifyTurnAftermathWeight, type TurnAftermathDigest, type TurnAftermathReportInput, type TurnAftermathView } from '../data/turnAftermath';
 import type { LastTurnReport, StagedOrder } from '../store/gameStore';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 
 interface AdvanceTurnDeps {
-    ipc: IPC;
+    ipc: Pick<IPC, 'advanceTurn'>;
     loadSave: (jsonOrText: unknown | string) => Promise<void>;
     clearStagedOrders: () => void;
     setLoadError: (msg: string | null) => void;
@@ -14,6 +14,7 @@ interface AdvanceTurnDeps {
     setLastTurnReport?: (report: LastTurnReport | null) => void;
     setTurnAftermath?: (view: TurnAftermathView | null) => void;
     setTurnAftermathOpen?: (open: boolean) => void;
+    setTurnAftermathDigest?: (digest: TurnAftermathDigest | null) => void;
 }
 
 function normalizeTurnReport(report: unknown): (LastTurnReport & TurnAftermathReportInput) | null {
@@ -48,8 +49,10 @@ export async function advanceTurnAndSync({
     setLastTurnReport,
     setTurnAftermath,
     setTurnAftermathOpen,
+    setTurnAftermathDigest,
 }: AdvanceTurnDeps): Promise<void> {
     const previousState = getCurrentState?.() ?? null;
+    setTurnAftermathDigest?.(null);
     const result = await ipc.advanceTurn();
     if (!result.ok || !result.stateJson) {
         setLoadError(playerFacingErrorCopy(result.error ?? 'Advance turn failed.'));
@@ -69,7 +72,12 @@ export async function advanceTurnAndSync({
         });
         if (aftermath) {
             setTurnAftermath?.(aftermath);
-            setTurnAftermathOpen?.(true);
+            if (classifyTurnAftermathWeight(aftermath) === 'heavy') {
+                setTurnAftermathDigest?.(null);
+                setTurnAftermathOpen?.(true);
+            } else {
+                setTurnAftermathDigest?.(buildTurnAftermathDigest(aftermath));
+            }
         }
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

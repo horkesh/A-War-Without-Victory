@@ -183,6 +183,106 @@ export interface TurnAftermathView {
   };
 }
 
+export interface TurnAftermathDigest {
+  headline: string;
+}
+
+export type TurnAftermathWeight = 'quiet' | 'heavy';
+
+const TURN_AFTERMATH_VIEW_KEYS = [
+  'turn',
+  'dateLabel',
+  'playerFaction',
+  'headline',
+  'narrativeLine',
+  'tone',
+  'territory',
+  'combat',
+  'humanitarian',
+  'formations',
+  'supply',
+  'cost',
+  'signals',
+  'judgment',
+  'nextActions',
+] as const;
+const TURN_AFTERMATH_TERRITORY_KEYS = ['friendlyNet', 'gains', 'losses', 'notable'] as const;
+const TURN_AFTERMATH_FLIP_KEYS = ['osid', 'label', 'direction', 'significance', 'from', 'to'] as const;
+const TURN_AFTERMATH_COMBAT_KEYS = ['battleCount', 'friendlyBattleCount', 'friendlyCasualties', 'opposingCasualties', 'territoryFlipsFromBattles'] as const;
+const TURN_AFTERMATH_HUMANITARIAN_KEYS = ['displacedThisTurn', 'hotspotLabel'] as const;
+const TURN_AFTERMATH_FORMATION_KEYS = ['spawned', 'destroyed', 'ownSpawned', 'ownDestroyed'] as const;
+const TURN_AFTERMATH_SUPPLY_KEYS = ['ownSupplyDelta', 'ownHeavyMunitionsDelta'] as const;
+const TURN_AFTERMATH_COST_KEYS = [
+  'friendlyMilitaryCasualties',
+  'theaterMilitaryCasualties',
+  'displacedThisTurn',
+  'ownFormationsDestroyed',
+  'ownSupplySpent',
+  'ownHeavyMunitionsSpent',
+  'severity',
+  'reasons',
+] as const;
+const TURN_AFTERMATH_SIGNAL_KEYS = ['id', 'kind', 'label', 'detail', 'severity'] as const;
+const TURN_AFTERMATH_JUDGMENT_KEYS = ['headline', 'detail', 'memoryTone', 'primarySurface', 'secondarySurface'] as const;
+const TURN_AFTERMATH_NEXT_ACTION_KEYS = [
+  'actionableCount',
+  'blockingCount',
+  'opportunityCount',
+  'reserveCount',
+  'officerCount',
+  'eventDecisionCount',
+  'peaceCount',
+  'topItems',
+] as const;
+const TURN_AFTERMATH_TOP_ACTION_KEYS = ['id', 'type', 'severity', 'title', 'action', 'actionLabel'] as const;
+
+function hasOnlyKeys(value: unknown, allowedKeys: readonly string[]): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const allowed = new Set<string>(allowedKeys);
+  return Object.keys(value as Record<string, unknown>).every((key) => allowed.has(key));
+}
+
+function arrayItemsHaveOnlyKeys(values: unknown, allowedKeys: readonly string[]): boolean {
+  return Array.isArray(values) && values.every((value) => hasOnlyKeys(value, allowedKeys));
+}
+
+function hasRecognizedTurnAftermathShape(view: TurnAftermathView): boolean {
+  return hasOnlyKeys(view, TURN_AFTERMATH_VIEW_KEYS)
+    && hasOnlyKeys(view.territory, TURN_AFTERMATH_TERRITORY_KEYS)
+    && arrayItemsHaveOnlyKeys(view.territory.notable, TURN_AFTERMATH_FLIP_KEYS)
+    && hasOnlyKeys(view.combat, TURN_AFTERMATH_COMBAT_KEYS)
+    && hasOnlyKeys(view.humanitarian, TURN_AFTERMATH_HUMANITARIAN_KEYS)
+    && hasOnlyKeys(view.formations, TURN_AFTERMATH_FORMATION_KEYS)
+    && hasOnlyKeys(view.supply, TURN_AFTERMATH_SUPPLY_KEYS)
+    && hasOnlyKeys(view.cost, TURN_AFTERMATH_COST_KEYS)
+    && Array.isArray(view.cost.reasons)
+    && arrayItemsHaveOnlyKeys(view.signals, TURN_AFTERMATH_SIGNAL_KEYS)
+    && hasOnlyKeys(view.judgment, TURN_AFTERMATH_JUDGMENT_KEYS)
+    && hasOnlyKeys(view.nextActions, TURN_AFTERMATH_NEXT_ACTION_KEYS)
+    && arrayItemsHaveOnlyKeys(view.nextActions.topItems, TURN_AFTERMATH_TOP_ACTION_KEYS);
+}
+
+export function classifyTurnAftermathWeight(view: TurnAftermathView): TurnAftermathWeight {
+  if (!hasRecognizedTurnAftermathShape(view)) return 'heavy';
+  if (view.nextActions.actionableCount > 0 || view.nextActions.blockingCount > 0 || view.nextActions.topItems.length > 0) return 'heavy';
+  if (view.nextActions.eventDecisionCount > 0 || view.nextActions.peaceCount > 0) return 'heavy';
+  if (view.signals.length > 0) return 'heavy';
+  if (view.territory.friendlyNet !== 0 || view.territory.gains > 0 || view.territory.losses > 0 || view.territory.notable.length > 0) return 'heavy';
+  if (view.combat.battleCount > 0 || view.combat.friendlyBattleCount > 0 || view.combat.territoryFlipsFromBattles > 0) return 'heavy';
+  if (view.combat.friendlyCasualties > 0 || view.combat.opposingCasualties > 0) return 'heavy';
+  if (view.humanitarian.displacedThisTurn > 0 || view.humanitarian.hotspotLabel) return 'heavy';
+  if (view.formations.ownDestroyed > 0 || view.cost.ownFormationsDestroyed > 0) return 'heavy';
+  if (view.cost.friendlyMilitaryCasualties > 0 || view.cost.theaterMilitaryCasualties > 0 || view.cost.displacedThisTurn > 0) return 'heavy';
+  if (view.cost.severity === 'critical' || view.cost.severity === 'severe') return 'heavy';
+  return 'quiet';
+}
+
+export function buildTurnAftermathDigest(_view: TurnAftermathView): TurnAftermathDigest {
+  return {
+    headline: t('aftermath.digest.quiet'),
+  };
+}
+
 function strictStringCompare(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }

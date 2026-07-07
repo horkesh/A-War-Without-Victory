@@ -85,6 +85,8 @@ import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
 import { useIPC } from './desktop/useIPC';
+import { advanceTurnAndSync } from './desktop/orderActions';
+import { getTurnAftermathAdvanceDeps } from './desktop/turnAftermathAdvanceDeps';
 import { resolvePlayerFacingFaction } from '../shared/playerVisibility';
 import type { RecruitmentCatalogBrigade, StartNewCampaignPayload } from './desktop/types';
 import type { LoadedGameState, SummaryFocusSection } from './data/types';
@@ -99,7 +101,7 @@ import { requestDecisionRoomLens } from './utils/decisionRoomLensRequest';
 import { isKeyboardEventFromInteractiveControl } from './utils/interactiveFocus';
 import { isWarroomLocalCommand, type WarroomOverlaySurface } from './utils/warroomNavigation';
 import { getPeacePlanDismissalKey, shouldShowPeacePlanModal } from './utils/peacePlanDismissal';
-import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab } from '../shared/shellHandoff';
+import { decodeShellHandoffCommand, isShellHandoffCommand, type ArmyHQRecordsSubTab, type ShellHandoffCommand } from '../shared/shellHandoff';
 import { shouldShowOpeningBrief } from './data/openingBriefGate';
 import {
   applyRecruitmentAndSync,
@@ -514,6 +516,7 @@ function App() {
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
   const loadSave = useGameStore((s) => s.loadSave);
+  const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const loadError = useGameStore((s) => s.loadError);
   const turnAftermath = useGameStore((s) => s.turnAftermath);
@@ -1560,6 +1563,17 @@ function App() {
     gs.setFocusedDecisionConsequenceId(null);
   };
 
+  const applyShellCommand = (command: ShellHandoffCommand): boolean => applyShellHandoffCommand({
+    ...useGameStore.getState(),
+    advanceTurnNow: () => advanceTurnAndSync({
+      ipc,
+      loadSave,
+      clearStagedOrders,
+      setLoadError,
+      ...getTurnAftermathAdvanceDeps(),
+    }),
+  }, command);
+
   useEffect(() => {
     const handleShellHandoff = (event: MessageEvent) => {
       // warroom.ts posts this when REACT_SHELL_ENABLED and the player clicks "back to HQ"
@@ -1584,7 +1598,7 @@ function App() {
       const command = event.data?.command;
       if (!isShellHandoffCommand(command)) return;
 
-      const handled = applyShellHandoffCommand(useGameStore.getState(), command);
+      const handled = applyShellCommand(command);
       if (!handled) return;
       // Transition from warroom view to game view when a shell handoff arrives.
       leaveWarroomForGame();
@@ -1599,7 +1613,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     const command = decodeShellHandoffCommand(params.get('shellHandoff'));
     if (!command) return;
-    applyShellHandoffCommand(useGameStore.getState(), command);
+    applyShellCommand(command);
     // Task #80 — a `?shellHandoff=...` deep-link (warroom.ts `showTacticalMapScene`)
     // opens the tactical map with no `view=game`. With the boot-to-menu default
     // the screen would stay on the Main Menu and hide the requested panel behind
@@ -2038,7 +2052,7 @@ function App() {
                 closeCommandStrip(false);
               }
               if (command) {
-                applyShellHandoffCommand(useGameStore.getState(), command);
+                applyShellCommand(command);
               }
               if (!warroomCommandStaysInRoom(command)) {
                 leaveWarroomForGame();

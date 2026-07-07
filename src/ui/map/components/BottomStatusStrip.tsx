@@ -57,6 +57,9 @@ export interface BottomStatusStripProps {
  */
 export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {}) {
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const turnAftermathDigest = useGameStore((s) => s.turnAftermathDigest);
+  const setTurnAftermathOpen = useGameStore((s) => s.setTurnAftermathOpen);
+  const setTurnAftermathDigest = useGameStore((s) => s.setTurnAftermathDigest);
   const playerFaction = getPlayerFacingFaction(loadedGameState);
   const playerOperations = useMemo(
     () => filterPlayerFacingOperations(loadedGameState),
@@ -355,6 +358,28 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       <div className="flex-1" />
 
       {/* 4. Layer toggles — gear dropdown */}
+      {turnAftermathDigest && (
+        <div className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-[10px] text-text-secondary shadow-sm lg:flex">
+          <span className="truncate">{turnAftermathDigest.headline}</span>
+          <button
+            type="button"
+            onClick={() => setTurnAftermathOpen(true)}
+            className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-accent-gold hover:text-amber-200"
+            aria-label={t('aftermath.digest.reviewAria')}
+          >
+            {t('aftermath.digest.review')}
+          </button>
+          <button
+            type="button"
+            onClick={() => setTurnAftermathDigest(null)}
+            className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-text-muted hover:text-text-primary"
+            aria-label={t('aftermath.digest.dismissAria')}
+          >
+            {t('aftermath.digest.dismiss')}
+          </button>
+        </div>
+      )}
+
       <div className="relative shrink-0">
         <button
           type="button"

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { LoadedGameState } from '../data/types';
 import { parseGameState } from '../data/GameStateAdapter';
 import { shouldMarkPeaceWarTransitionSeenOnLoad } from '../data/peaceWarTransitionGate';
-import type { TurnAftermathView } from '../data/turnAftermath';
+import type { TurnAftermathDigest, TurnAftermathView } from '../data/turnAftermath';
 import type { ArmyHQRecordsSubTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
 import type { ReplaySaveManifest } from '../../../sim/replay/replay_manifest';
@@ -298,9 +298,11 @@ export interface GameStore {
   /** Player-facing after-action bridge opened immediately after a successful turn advance. */
   turnAftermath: TurnAftermathView | null;
   turnAftermathOpen: boolean;
+  turnAftermathDigest: TurnAftermathDigest | null;
   focusedAftermathTurn: number | null;
   setTurnAftermath: (view: TurnAftermathView | null) => void;
   setTurnAftermathOpen: (open: boolean) => void;
+  setTurnAftermathDigest: (digest: TurnAftermathDigest | null) => void;
   setFocusedAftermathTurn: (turn: number | null) => void;
   /** Last load error message (cleared when a new load starts or succeeds). */
   loadError: string | null;
@@ -780,9 +782,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setLastTurnReport: (report) => set({ lastTurnReport: report }),
   turnAftermath: null,
   turnAftermathOpen: false,
+  turnAftermathDigest: null,
   focusedAftermathTurn: null,
   setTurnAftermath: (view) => set({ turnAftermath: view }),
   setTurnAftermathOpen: (open) => set({ turnAftermathOpen: open }),
+  setTurnAftermathDigest: (digest) => set({ turnAftermathDigest: digest }),
   setFocusedAftermathTurn: (turn) => set({ focusedAftermathTurn: turn }),
 
   loadError: null,
@@ -921,6 +925,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
               // Turn aftermath belongs to the previous save/turn payload.
               turnAftermath: null,
               turnAftermathOpen: false,
+              turnAftermathDigest: null,
               focusedAftermathTurn: null,
               focusedOperationHistoryId: null,
               // #244: a stale focused-decision id from the previous save makes
