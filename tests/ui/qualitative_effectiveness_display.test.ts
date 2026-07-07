@@ -188,6 +188,33 @@ describe('WP-7 qualitative effectiveness display', () => {
 
     expect(copy).toContain('Combat ready');
     expect(copy).not.toMatch(rawArmyCardEffectivenessPattern);
+    expect(card.container.querySelector('[data-testid="army-hq-corps-effectiveness"]')?.getAttribute('title'))
+      .toMatch(/exact/i);
+
+    cleanup();
+    const sparseCard = render(
+      React.createElement(ArmyHQCorpsCard, {
+        corps: state.formations[0],
+        brigades: [reportedBrigade({ fatigue: undefined })],
+        sectors: state.corpsFrontSectors ?? [],
+        operations: [],
+        factionBattles: [],
+        gameState: state,
+        isExpanded: false,
+        isCompressed: false,
+        onToggleExpand: () => undefined,
+        readinessGrade: 'UNREPORTED',
+        hasThreat: false,
+      }),
+    );
+    const sparseTitle = sparseCard.container
+      .querySelector('[data-testid="army-hq-corps-effectiveness"]')
+      ?.getAttribute('title') ?? '';
+
+    expect(sparseCard.container.textContent ?? '').toContain('Assessment incomplete');
+    expect(sparseTitle).toContain('Assessment incomplete');
+    expect(sparseTitle).not.toMatch(/exact/i);
+    expect(sparseTitle).not.toMatch(/\d/);
   });
 
   it('keeps Army HQ Command Access chips to corps name plus readiness only', () => {
