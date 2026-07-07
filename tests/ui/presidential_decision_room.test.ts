@@ -363,27 +363,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.some((card) => card.category === 'cost')).toBe(false);
     expect(view.cards.some((card) => card.category === 'memory')).toBe(false);
     expect(view.lenses.some((lens) => lens.id === 'turn' || lens.id === 'cost' || lens.id === 'memory')).toBe(false);
-    expect(view.sourceHandoffs.some((handoff) => handoff.id === 'chronicle' || handoff.id.startsWith('army-hq-records'))).toBe(false);
-    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
-    expect(loopsById.report).toMatchObject({
-      count: 0,
-      urgentCount: 0,
-      navigationTarget: { kind: 'none' },
-      unavailableReason: 'No current item is available for this action.',
-    });
-    expect(loopsById.cost).toMatchObject({
-      count: 0,
-      urgentCount: 0,
-      navigationTarget: { kind: 'none' },
-      unavailableReason: 'No current item is available for this action.',
-    });
-    expect(loopsById.judge).toMatchObject({
-      count: 0,
-      urgentCount: 0,
-      navigationTarget: { kind: 'none' },
-      unavailableReason: 'No current item is available for this action.',
-    });
-    expect(`${loopsById.report.summary} ${loopsById.cost.summary} ${loopsById.judge.summary}`).not.toContain('recorded turn');
+    const handoffs = buildPresidentialDecisionRoomSourceHandoffs(view.cards);
+    expect(handoffs.some((handoff) => handoff.id === 'chronicle' || handoff.id.startsWith('army-hq-records'))).toBe(false);
   });
 
   it('does not treat setup-control summaries after turn zero as filed war records', () => {
@@ -408,15 +389,10 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.some((card) => card.category === 'turn')).toBe(false);
     expect(view.cards.some((card) => card.category === 'cost')).toBe(false);
     expect(view.cards.some((card) => card.category === 'memory')).toBe(false);
-    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
-    expect(loopsById.report).toMatchObject({
-      count: 0,
-      urgentCount: 0,
-      navigationTarget: { kind: 'none' },
-    });
+    expect(view.lenses.some((lens) => lens.id === 'turn' || lens.id === 'cost' || lens.id === 'memory')).toBe(false);
   });
 
-  it('keeps quiet loop fallbacks on presidential surfaces instead of Army HQ primary routes', () => {
+  it('keeps quiet card archive fallbacks off Army HQ primary routes', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
         latestTurnSummary: null,
@@ -425,27 +401,10 @@ describe('buildPresidentialDecisionRoomView', () => {
         operationalSitrep: undefined,
       }),
     });
-    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
 
-    expect(loopsById.brief.navigationTarget).toEqual({ kind: 'decision-room', lens: 'briefing' });
-    expect(loopsById.decide.navigationTarget).toEqual({ kind: 'inbox' });
-    expect(loopsById.next.navigationTarget.kind).toBe('decision-room');
-    expect(view.loopSteps
-      .filter((step) => step.navigationTarget.kind === 'none')
-      .map((step) => step.unavailableReason))
-      .toEqual([
-        'No current item is available for this action.',
-        'No current item is available for this action.',
-        'No current item is available for this action.',
-        'No current item is available for this action.',
-      ]);
-    expect(view.nextOrders.find((order) => order.navigationTarget.kind === 'none')?.unavailableReason).toBe('No current item is available for this action.');
-    const disabledQuestions = view.commandQuestions.filter((question) => question.navigationTarget.kind === 'none');
-    expect(disabledQuestions.length).toBeGreaterThan(0);
-    expect(disabledQuestions.map((question) => question.unavailableReason))
-      .toEqual(disabledQuestions.map(() => 'No current item is available for this action.'));
-    expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-tab');
-    expect(view.loopSteps.map((step) => step.navigationTarget.kind)).not.toContain('army-hq-records');
+    expect(view.cards.map((card) => card.navigationTarget.kind)).not.toContain('army-hq-tab');
+    expect(view.cards.map((card) => card.navigationTarget.kind)).not.toContain('army-hq-records');
+    expect(view.activeDossier?.navigationTarget.kind).not.toBe('army-hq-tab');
   });
 
   it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
@@ -589,10 +548,12 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     const first = buildPresidentialDecisionRoomView({ state });
     const second = buildPresidentialDecisionRoomView({ state });
-    const byId = Object.fromEntries(first.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+    const firstHandoffs = buildPresidentialDecisionRoomSourceHandoffs(first.cards);
+    const secondHandoffs = buildPresidentialDecisionRoomSourceHandoffs(second.cards);
+    const byId = Object.fromEntries(firstHandoffs.map((handoff) => [handoff.id, handoff]));
 
-    expect(second.sourceHandoffs).toEqual(first.sourceHandoffs);
-    expect(first.sourceHandoffs.map((handoff) => handoff.id)).toEqual([
+    expect(secondHandoffs).toEqual(firstHandoffs);
+    expect(firstHandoffs.map((handoff) => handoff.id)).toEqual([
       'presidential-inbox',
       'army-hq-briefing',
       'army-hq-summary',
@@ -737,124 +698,6 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
   });
 
-  it('builds command-loop question lanes from the same priority card archive', () => {
-    const state = makeState({
-      presidentialReviewQueue: {
-        pendingCount: 2,
-        criticalCount: 1,
-        eventDecisionCount: 1,
-        commandInterpretationCount: 0,
-        personnelDirectiveCount: 0,
-        operationOpportunityCount: 1,
-      },
-      operationOpportunityProposals: [
-        makeOpportunity({ proposal_id: 'opp_beta', display_name: 'Beta Window', expires_turn: 30 }),
-        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
-      ],
-      operationalSitrep: makeSitrep(),
-      commandBriefing: {
-        headline: 'Critical command alert.',
-        criticalCount: 1,
-        pendingCount: 1,
-        items: [
-          {
-            id: 'briefing:zeta',
-            kind: 'command',
-            severity: 'critical',
-            title: 'Corps command strain rising',
-            detail: 'Staff reports command friction around the main effort.',
-            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
-          },
-        ],
-      },
-      latestTurnSummary: makeSummary({
-        turn: 24,
-        territory_net: { RBiH: -1 },
-        displacement_total: 1600,
-      }),
-    });
-
-    const first = buildPresidentialDecisionRoomView({ state });
-    const second = buildPresidentialDecisionRoomView({ state });
-    const byId = Object.fromEntries(first.commandQuestions.map((question) => [question.id, question]));
-
-    expect(first.commandQuestions.map((question) => question.id)).toEqual([
-      'urgent',
-      'pending',
-      'fronts',
-      'inspect',
-      'advance',
-    ]);
-    expect(second.commandQuestions).toEqual(first.commandQuestions);
-    expect(byId.urgent).toMatchObject({
-      label: 'Urgent',
-      count: 5,
-      urgentCount: 5,
-      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed'],
-      navigationTarget: { kind: 'inbox' },
-    });
-    expect(byId.pending).toMatchObject({
-      label: 'Decisions',
-      cardIds: ['review:pending', 'opportunity:opp_alpha', 'opportunity:opp_beta'],
-    });
-    expect(byId.fronts).toMatchObject({
-      label: 'Fronts',
-      cardIds: ['sitrep:front-exposed', 'briefing:briefing:zeta'],
-      navigationTarget: { kind: 'decision-room', lens: 'operational', cardId: 'sitrep:front-exposed' },
-    });
-    expect(byId.inspect.cardIds).toEqual(first.inspectNext.map((card) => card.id));
-    expect(byId.advance).toMatchObject({
-      label: 'Advance',
-      headline: 'Review before advance',
-      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
-    });
-  });
-
-  it('builds an ordered next-orders agenda that separates act, inspect, and monitor work', () => {
-    const state = makeState({
-      presidentialReviewQueue: {
-        pendingCount: 2,
-        criticalCount: 1,
-        eventDecisionCount: 1,
-        commandInterpretationCount: 0,
-        personnelDirectiveCount: 0,
-        operationOpportunityCount: 1,
-      },
-      operationOpportunityProposals: [
-        makeOpportunity({ proposal_id: 'opp_alpha', display_name: 'Alpha Window', expires_turn: 24 }),
-      ],
-      operationalSitrep: makeSitrep(),
-      latestTurnSummary: makeSummary({
-        turn: 24,
-        displacement_total: 1400,
-      }),
-    });
-
-    const first = buildPresidentialDecisionRoomView({ state });
-    const second = buildPresidentialDecisionRoomView({ state });
-
-    expect(first.nextOrders.map((order) => order.role)).toEqual(['act', 'inspect', 'monitor']);
-    expect(first.nextOrders[0]).toMatchObject({
-      id: 'act:review:pending',
-      label: 'Act',
-      headline: 'Presidential reviews pending',
-      instruction: 'Resolve this before advancing the turn.',
-      cardId: 'review:pending',
-      navigationTarget: { kind: 'inbox' },
-    });
-    expect(first.nextOrders[1]).toMatchObject({
-      label: 'Inspect',
-      instruction: 'Open the named surface to understand the staff evidence.',
-    });
-    expect(first.nextOrders[2]).toMatchObject({
-      role: 'monitor',
-      label: 'Monitor',
-      headline: 'Review before advance',
-      instruction: 'Watch this before ending the turn.',
-    });
-    expect(second.nextOrders).toEqual(first.nextOrders);
-  });
-
   it('localizes Decision Room lane, loop, lens, and source-handoff chrome in BCS mode', () => {
     setLocale('bcs');
     const state = makeState({
@@ -892,26 +735,18 @@ describe('buildPresidentialDecisionRoomView', () => {
     });
 
     const view = buildPresidentialDecisionRoomView({ state });
-    const questionsById = Object.fromEntries(view.commandQuestions.map((question) => [question.id, question]));
-    const loopsById = Object.fromEntries(view.loopSteps.map((step) => [step.id, step]));
-    const handoffsById = Object.fromEntries(view.sourceHandoffs.map((handoff) => [handoff.id, handoff]));
+    const handoffsById = Object.fromEntries(
+      buildPresidentialDecisionRoomSourceHandoffs(view.cards).map((handoff) => [handoff.id, handoff]),
+    );
 
     expect(view.lenses.map((lens) => lens.label)).toContain('Sve');
     expect(view.lenses.map((lens) => lens.label)).toContain('Prilika');
-    expect(questionsById.urgent.label).toBe('Hitno');
-    expect(questionsById.pending.label).toBe('Odluke');
-    expect(questionsById.advance.summary).toContain('stavke za napredovanje');
-    expect(loopsById.brief.label).toBe('Brifing');
-    expect(loopsById.execute.label).toBe('Izvrši');
-    expect(loopsById.cost.summary).toContain('stavke cijene');
-    expect(loopsById.report.summary).toContain('zapisana poteza');
     expect(handoffsById['army-hq-briefing'].label).toBe('Brifing Štaba armije');
     expect(handoffsById['presidential-inbox'].label).toBe('Predsjednički sto');
     expect(handoffsById['presidential-inbox'].label).not.toBe('Presidential Inbox');
     expect(handoffsById['turn-aftermath-records'].label).toBe('Zapisi posljedica poteza');
     expect(handoffsById.chronicle.actionLabel).toBe('Otvori Hroniku');
-    expect(view.commandQuestions.map((question) => question.label)).not.toContain('Urgent');
-    expect(view.loopSteps.map((step) => step.label)).not.toContain('Execute');
+    expect(view.lenses.map((lens) => lens.label)).not.toContain('Opportunity');
   });
 
   it('localizes Decision Room generated decision card prose in BCS mode', () => {
@@ -1063,109 +898,6 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.sourceLabel).not.toBe('Turn 24');
   });
 
-  it('dates report-loop fallback headlines with calendar copy instead of raw turns', () => {
-    const view = buildPresidentialDecisionRoomView({
-      state: makeState({
-        latestTurnSummary: makeSummary({ turn: 24 }),
-        turnSummaries: [makeSummary({ turn: 24 })],
-      }),
-    });
-
-    const report = view.loopSteps.find((step) => step.id === 'report');
-    expect(report?.headline).toBe(`Latest turn record: ${turnToDateString(24)}`);
-    expect(report?.headline).not.toContain('T24');
-  });
-
-  it('builds the full presidential product loop as handoffs to existing owners', () => {
-    const state = makeState({
-      presidentialReviewQueue: {
-        pendingCount: 2,
-        criticalCount: 1,
-        eventDecisionCount: 1,
-        commandInterpretationCount: 0,
-        personnelDirectiveCount: 0,
-        operationOpportunityCount: 1,
-      },
-      operationOpportunityProposals: [makeOpportunity({ expires_turn: 24 })],
-      operationalSitrep: makeSitrep(),
-      commandBriefing: {
-        headline: 'Critical command alert.',
-        criticalCount: 1,
-        pendingCount: 1,
-        items: [
-          {
-            id: 'briefing:zeta',
-            kind: 'command',
-            severity: 'critical',
-            title: 'Corps command strain rising',
-            detail: 'Staff reports command friction around the main effort.',
-            target: { type: 'corps', corpsId: 'arbih_3rd_corps' },
-          },
-        ],
-      },
-      latestTurnSummary: makeSummary({
-        turn: 24,
-        territory_net: { RBiH: -1 },
-        displacement_total: 1600,
-      }),
-      turnSummaries: [makeSummary({ turn: 23, territory_net: { RBiH: 1 } })],
-    });
-
-    const first = buildPresidentialDecisionRoomView({ state });
-    const second = buildPresidentialDecisionRoomView({ state });
-    const byId = Object.fromEntries(first.loopSteps.map((step) => [step.id, step]));
-
-    expect(second.loopSteps).toEqual(first.loopSteps);
-    expect(first.loopSteps.map((step) => step.id)).toEqual([
-      'brief',
-      'inspect',
-      'decide',
-      'execute',
-      'report',
-      'cost',
-      'judge',
-      'next',
-    ]);
-    expect(byId.brief).toMatchObject({
-      label: 'Brief',
-      count: 2,
-      navigationTarget: { kind: 'decision-room', lens: 'operational', cardId: 'sitrep:front-exposed' },
-    });
-    expect(byId.inspect).toMatchObject({
-      label: 'Inspect',
-      count: first.inspectNext.length,
-      navigationTarget: first.inspectNext[0]?.navigationTarget,
-    });
-    expect(byId.decide).toMatchObject({
-      label: 'Decide',
-      cardIds: ['review:pending', 'opportunity:opp_alpha'],
-      navigationTarget: { kind: 'inbox' },
-    });
-    expect(byId.execute).toMatchObject({
-      label: 'Execute',
-      headline: 'Review before advance',
-      cardIds: ['review:pending', 'opportunity:opp_alpha', 'sitrep:front-exposed', 'turn:24:hard-turn'],
-    });
-    expect(byId.report).toMatchObject({
-      label: 'Report',
-      navigationTarget: { kind: 'decision-room', lens: 'turn', cardId: 'turn:24:hard-turn' },
-      sourceHandoffTarget: { kind: 'army-hq-aftermath-record', turn: 24 },
-    });
-    expect(byId.cost).toMatchObject({
-      label: 'Cost',
-      navigationTarget: { kind: 'decision-room', lens: 'cost', cardId: 'campaign-cost' },
-      sourceHandoffTarget: { kind: 'army-hq-records', recordsSubTab: 'aftermath' },
-    });
-    expect(byId.judge).toMatchObject({
-      label: 'Judge',
-      navigationTarget: { kind: 'chronicle' },
-    });
-    expect(byId.next).toMatchObject({
-      label: 'Next',
-      navigationTarget: { kind: 'inbox' },
-    });
-  });
-
   it('marks what should be reviewed before advancing without blocking beyond existing systems', () => {
     const view = buildPresidentialDecisionRoomView({
       state: makeState({
@@ -1297,9 +1029,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(convoyCard?.countWeight).toBe(2);
     expect(view.metrics.pendingReviews).toBe(2);
     expect(view.lenses.find((lens) => lens.id === 'decision')?.count).toBe(2);
-    expect(view.sourceHandoffs.find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
-    expect(view.commandQuestions.find((question) => question.id === 'pending')?.count).toBe(2);
-    expect(view.loopSteps.find((step) => step.id === 'decide')?.count).toBe(2);
+    expect(buildPresidentialDecisionRoomSourceHandoffs(view.cards).find((handoff) => handoff.id === 'presidential-inbox')?.count).toBe(2);
   });
 
   it('falls back to pending modal blockers when player decision summary is absent', () => {
@@ -1950,8 +1680,6 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.hasPlayerFaction).toBe(false);
     expect(view.cards).toEqual([]);
     expect(view.lenses).toEqual([]);
-    expect(view.commandQuestions).toEqual([]);
-    expect(view.sourceHandoffs).toEqual([]);
     expect(view.activeDossier).toBeNull();
     expect(view.emptyState).toBe('No player faction loaded.');
   });

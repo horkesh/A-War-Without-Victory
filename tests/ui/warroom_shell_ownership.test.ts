@@ -37,11 +37,14 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(modal).toContain('shouldShowWarroomReturn');
     });
 
-    it('deduplicates repeated Decision Room lane headlines', () => {
+    it('keeps the Decision Room as one flat card archive instead of lane projections', () => {
         const source = read('src/ui/map/data/presidentialDecisionRoom.ts');
 
-        expect(source).toContain('dedupeCommandQuestionHeadlines');
-        expect(source).toContain('seenHeadlines');
+        expect(source).not.toContain('dedupeCommandQuestionHeadlines');
+        expect(source).not.toContain('commandQuestions');
+        expect(source).not.toContain('loopSteps');
+        expect(source).toContain('cards: PresidentialDecisionRoomCard[]');
+        expect(source).toContain('lenses: PresidentialDecisionRoomLens[]');
     });
 
     it('routes the Warroom diplomacy telephone through the Warroom overlay dispatcher', () => {

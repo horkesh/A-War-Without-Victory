@@ -58,12 +58,14 @@ describe('GUI audit Batch E stale-state resets', () => {
         expect(selectionPanel).toMatch(/useEffect\(\(\)\s*=>\s*\{[\s\S]*setSupportMessage\(null\)[\s\S]*\}, \[selectedOsid\]\)/);
     });
 
-    it('hiding advanced Decision Room controls also clears hidden lens filters', () => {
+    it('flattened Decision Room filters stay visible instead of becoming hidden stale state', () => {
         const panel = read('src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx');
 
-        expect(panel).toContain('setShowAdvanced(nextShowAdvanced)');
-        expect(panel).toMatch(/if \(!nextShowAdvanced\) \{[\s\S]*setActiveLens\('all'\)[\s\S]*\}/);
-        expect(panel).toMatch(/if \(!nextShowAdvanced\) \{[\s\S]*setActiveCardId\(null\)[\s\S]*\}/);
+        expect(panel).not.toContain('setShowAdvanced');
+        expect(panel).not.toContain('showAdvanced');
+        expect(panel).not.toContain('data-testid="decision-room-advanced"');
+        expect(panel).toContain('{view.lenses.length > 0 && (');
+        expect(panel).toContain('setActiveLens(id)');
     });
 
     it('the Inbox home badge closes store-owned overlays before clearing selections', () => {

@@ -8,14 +8,10 @@ import {
   buildPresidentialDecisionRoomView,
   type PresidentialDecisionRoomCard,
   type PresidentialDecisionRoomCategory,
-  type PresidentialDecisionRoomCommandQuestion,
   type PresidentialDecisionRoomDossier,
   type PresidentialDecisionRoomLens,
-  type PresidentialDecisionRoomLoopStep,
-  type PresidentialDecisionRoomNextOrder,
   type PresidentialDecisionRoomNavigationTarget,
   type PresidentialDecisionRoomSeverity,
-  type PresidentialDecisionRoomSourceHandoff,
 } from '../../data/presidentialDecisionRoom';
 import {
   cardBelongsToPresidentialCommandCategory,
@@ -53,30 +49,8 @@ function categoryLabel(category: PresidentialDecisionRoomCard['category']): stri
   return t('decisionRoom.category.memory');
 }
 
-function MetricCell({ label, value, tone = 'neutral' }: { label: string; value: number; tone?: 'neutral' | 'urgent' }) {
-  return (
-    <div className="min-w-0 rounded border border-panel-border/60 bg-panel-card/70 px-2 py-1.5">
-      <div className="truncate text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">{label}</div>
-      <div className={`text-[15px] font-bold tabular-nums ${tone === 'urgent' ? 'text-amber-300' : 'text-text-primary'}`}>
-        {value}
-      </div>
-    </div>
-  );
-}
-
 type ActiveDecisionRoomLens = 'all' | PresidentialDecisionRoomCategory;
 type DecisionRoomNavigateTarget = (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
-
-function unavailableButtonReason(
-  target: PresidentialDecisionRoomNavigationTarget,
-  reason: string | undefined,
-): string | undefined {
-  return target.kind === 'none' ? reason ?? t('decisionRoom.actionUnavailable') : undefined;
-}
-
-function unavailableAria(label: string, reason: string | undefined): string | undefined {
-  return reason ? `${label} - ${reason}` : undefined;
-}
 
 function LensButton({
   lens,
@@ -114,151 +88,16 @@ function LensButton({
   );
 }
 
-function CommandQuestionLane({
-  question,
-  navigateTarget,
-}: {
-  question: PresidentialDecisionRoomCommandQuestion;
-  navigateTarget: DecisionRoomNavigateTarget;
-}) {
-  const disabled = question.navigationTarget.kind === 'none';
-  const disabledReason = unavailableButtonReason(question.navigationTarget, question.unavailableReason);
-  return (
-    <article className="min-w-0 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2">
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className="truncate text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">
-            {question.label}
-          </div>
-          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">
-            {question.headline}
-          </div>
-        </div>
-        <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${question.urgentCount > 0
-          ? 'border-red-400/35 bg-red-500/10 text-red-300'
-          : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
-        >
-          {question.count}
-        </span>
-      </div>
-      <div className="mt-1 truncate text-[9px] uppercase tracking-[0.08em] text-text-secondary">
-        {question.summary}
-      </div>
-      <button
-        type="button"
-        disabled={disabled}
-        title={disabledReason}
-        aria-label={unavailableAria(question.actionLabel, disabledReason)}
-        onClick={() => navigateTarget(question.navigationTarget)}
-        className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-      >
-        {question.actionLabel}
-      </button>
-      {disabledReason && (
-        <div className="mt-1 text-[8px] uppercase tracking-[0.08em] text-text-muted">
-          {disabledReason}
-        </div>
-      )}
-    </article>
-  );
-}
-
-function NextOrderCard({
-  order,
-  navigateTarget,
-}: {
-  order: PresidentialDecisionRoomNextOrder;
-  navigateTarget: DecisionRoomNavigateTarget;
-}) {
-  const disabled = order.navigationTarget.kind === 'none';
-  const disabledReason = unavailableButtonReason(order.navigationTarget, order.unavailableReason);
-  return (
-    <article className={`min-w-0 rounded border px-3 py-2 ${order.role === 'act'
-      ? 'border-amber-400/40 bg-amber-400/10'
-      : 'border-panel-border/55 bg-panel-card/55'}`}
-    >
-      <div className="flex min-w-0 items-start justify-between gap-2">
-        <div className="min-w-0">
-          <div className={`text-[8px] font-bold uppercase tracking-[0.14em] ${order.urgent ? 'text-amber-300' : 'text-text-muted'}`}>
-            {order.label}
-          </div>
-          <div className="mt-1 truncate text-[12px] font-bold text-text-primary">
-            {order.headline}
-          </div>
-        </div>
-        {order.urgent && (
-          <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase text-amber-300">
-            {t('decisionRoom.nextOrders.urgent')}
-          </span>
-        )}
-      </div>
-      <div className="mt-1 text-[10px] leading-snug text-text-secondary">{order.instruction}</div>
-      <button
-        type="button"
-        disabled={disabled}
-        title={disabledReason}
-        aria-label={unavailableAria(order.actionLabel, disabledReason)}
-        onClick={() => navigateTarget(order.navigationTarget)}
-        className="mt-2 h-7 w-full truncate rounded border border-amber-400/25 bg-amber-400/10 px-2 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
-      >
-        {order.actionLabel}
-      </button>
-      {disabledReason && (
-        <div className="mt-1 text-[8px] uppercase tracking-[0.08em] text-text-muted">
-          {disabledReason}
-        </div>
-      )}
-    </article>
-  );
-}
-
-function ProductLoopStep({
-  step,
-  navigateTarget,
-}: {
-  step: PresidentialDecisionRoomLoopStep;
-  navigateTarget: DecisionRoomNavigateTarget;
-}) {
-  const disabled = step.navigationTarget.kind === 'none';
-  const disabledReason = unavailableButtonReason(step.navigationTarget, step.unavailableReason);
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      title={disabledReason}
-      aria-label={unavailableAria(`${step.label}: ${step.headline}`, disabledReason)}
-      onClick={() => navigateTarget(step.navigationTarget)}
-      className="flex min-h-[4.75rem] min-w-0 flex-col justify-between rounded border border-panel-border/55 bg-panel-card/50 px-2 py-2 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
-    >
-      <span className="min-w-0">
-        <span className="block truncate text-[8px] font-bold uppercase tracking-[0.14em] text-amber-300">
-          {step.label}
-        </span>
-        <span className="mt-1 block truncate text-[10px] font-semibold text-text-primary">
-          {step.headline}
-        </span>
-      </span>
-      <span className="mt-1 flex min-w-0 items-center justify-between gap-2">
-        <span className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">{disabledReason ?? step.summary}</span>
-        <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold tabular-nums ${step.urgentCount > 0
-          ? 'border-red-400/35 bg-red-500/10 text-red-300'
-          : 'border-panel-border/55 bg-panel-bg/70 text-text-muted'}`}
-        >
-          {step.count}
-        </span>
-      </span>
-    </button>
-  );
-}
-
 function PriorityCard({
   card,
   active,
+  advanceSensitive,
   onSelectCard,
   navigateTarget,
 }: {
   card: PresidentialDecisionRoomCard;
   active: boolean;
+  advanceSensitive: boolean;
   onSelectCard: (cardId: string) => void;
   navigateTarget: DecisionRoomNavigateTarget;
 }) {
@@ -280,6 +119,11 @@ function PriorityCard({
             <span className="rounded border border-panel-border/70 bg-panel-bg/70 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary">
               {categoryLabel(card.category)}
             </span>
+            {advanceSensitive && (
+              <span className="rounded border border-amber-400/40 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300">
+                {t('decisionRoom.advanceSensitiveBadge')}
+              </span>
+            )}
             <button
               type="button"
               onClick={() => onSelectCard(card.id)}
@@ -369,9 +213,6 @@ function PriorityDossier({
           <div className={`mt-0.5 truncate text-[10px] font-semibold ${dossier.advanceSensitive ? 'text-amber-300' : 'text-text-primary'}`}>
             {dossier.advanceLabel}
           </div>
-          <div className="truncate text-[8px] uppercase tracking-[0.08em] text-text-muted">
-            {dossier.sourceHandoff?.summary ?? t('decisionRoom.noHandoff')}
-          </div>
         </div>
       </div>
 
@@ -428,63 +269,6 @@ function PriorityDossier({
   );
 }
 
-function CompactLink({
-  card,
-  navigateTarget,
-}: {
-  card: PresidentialDecisionRoomCard;
-  navigateTarget: DecisionRoomNavigateTarget;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => navigateTarget(card.navigationTarget)}
-      className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04]"
-    >
-      <span className="min-w-0">
-        <span className="block truncate text-[10px] font-semibold text-text-primary">{card.title}</span>
-        <span className="block truncate text-[8px] uppercase tracking-[0.1em] text-text-muted">{card.actionLabel}</span>
-      </span>
-      <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase ${severityClass(card.severity)}`}>
-        {categoryLabel(card.category)}
-      </span>
-    </button>
-  );
-}
-
-function SourceHandoffLink({
-  handoff,
-  navigateTarget,
-}: {
-  handoff: PresidentialDecisionRoomSourceHandoff;
-  navigateTarget: DecisionRoomNavigateTarget;
-}) {
-  const disabled = handoff.navigationTarget.kind === 'none';
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={() => navigateTarget(handoff.navigationTarget)}
-      className="flex min-w-0 items-center justify-between gap-2 rounded border border-panel-border/55 bg-panel-card/55 px-2 py-1.5 text-left transition hover:border-amber-400/25 hover:bg-white/[0.04] disabled:cursor-default disabled:opacity-55"
-    >
-      <span className="min-w-0">
-        <span className="block truncate text-[10px] font-semibold text-text-primary">{handoff.label}</span>
-        <span className="block truncate text-[8px] uppercase tracking-[0.1em] text-text-muted">{handoff.summary}</span>
-      </span>
-      <span className="flex shrink-0 items-center gap-1">
-        {handoff.urgentCount > 0 && (
-          <span className="rounded border border-red-400/35 bg-red-500/10 px-1.5 py-0.5 text-[8px] font-bold tabular-nums text-red-300">
-            {handoff.urgentCount}
-          </span>
-        )}
-        <span className="rounded border border-amber-400/25 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.09em] text-amber-300">
-          {handoff.actionLabel}
-        </span>
-      </span>
-    </button>
-  );
-}
-
 export interface PresidentialDecisionRoomPanelProps {
   onNavigateTarget?: DecisionRoomNavigateTarget;
 }
@@ -495,11 +279,9 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
   const [activeLens, setActiveLens] = useState<ActiveDecisionRoomLens>('all');
   const [activeCommandCategoryId, setActiveCommandCategoryId] = useState<PresidentialCommandCategoryId | null>(null);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Command-surface deep-link: the card strip pushes a requested lens here; we
   // consume it (one-shot) and pre-filter the Decision Room to that category.
-  // The lens bar lives in the advanced desk, so we reveal it for non-`all` lenses.
   const lensRequest = useSyncExternalStore(
     subscribeDecisionRoomLensRequest,
     getDecisionRoomLensRequestSnapshot,
@@ -512,7 +294,6 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
     setActiveLens(requested.lens);
     setActiveCommandCategoryId(requested.commandCategoryId);
     setActiveCardId(requested.cardId ?? null);
-    if (requested.lens !== 'all' || requested.commandCategoryId !== null || requested.cardId) setShowAdvanced(true);
   }, [lensRequest]);
 
   const categorySeedCardId = useMemo(() => {
@@ -561,10 +342,7 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
     : effectiveLens === 'all'
     ? view.cards
     : view.cards.filter((card) => card.category === effectiveLens);
-  const mainCards = filteredCards.slice(0, showAdvanced ? 7 : 4);
-  const inspectNext = (effectiveLens === 'all' && !activeCommandCategoryId
-    ? view.inspectNext
-    : filteredCards.filter((card) => card.navigationTarget.kind !== 'none')).slice(0, 5);
+  const advanceSensitiveCardIds = new Set(view.advanceReadiness.items.map((card) => card.id));
   const selectedDossierCardId = view.activeDossier?.cardId ?? null;
   const navigateTarget = onNavigateTarget ?? openPresidentialDecisionRoomNavigationTarget;
   const handleSelectLens = (id: ActiveDecisionRoomLens) => {
@@ -587,74 +365,13 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
           <div className="text-[13px] font-bold tracking-[0.02em] text-text-primary">{t('decisionRoom.subtitle')}</div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            type="button"
-            onClick={() => {
-              const nextShowAdvanced = !showAdvanced;
-              setShowAdvanced(nextShowAdvanced);
-              if (!nextShowAdvanced) {
-                setActiveLens('all');
-                setActiveCommandCategoryId(null);
-                setActiveCardId(null);
-              }
-            }}
-            className="rounded border border-panel-border/65 bg-panel-card/65 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-amber-400/30 hover:bg-white/[0.04] hover:text-amber-300"
-            aria-pressed={showAdvanced}
-          >
-            {showAdvanced ? t('decisionRoom.hideAdvanced') : t('decisionRoom.viewAdvanced')}
-          </button>
           <div className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${view.advanceReadiness.blockedByExistingSystems ? 'border-red-400/35 bg-red-500/10 text-red-300' : 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'}`}>
             {view.advanceReadiness.headline}
           </div>
         </div>
       </div>
 
-      {showAdvanced && (
-        <div className="mb-2 rounded border border-panel-border/55 bg-panel-bg/35 p-2" data-testid="decision-room-advanced">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.advancedDesk')}</div>
-          <div className="mb-2 grid grid-cols-2 gap-2 sm:grid-cols-5">
-            <MetricCell label={t('decisionRoom.metric.urgent')} value={view.metrics.urgentCount} tone={view.metrics.urgentCount > 0 ? 'urgent' : 'neutral'} />
-            <MetricCell label={t('decisionRoom.metric.pending')} value={view.metrics.pendingReviews} tone={view.metrics.pendingReviews > 0 ? 'urgent' : 'neutral'} />
-            <MetricCell label={t('decisionRoom.metric.ops')} value={view.metrics.opportunities} />
-            <MetricCell label={t('decisionRoom.metric.hardTurns')} value={view.metrics.hardTurns} />
-            <MetricCell label={t('decisionRoom.metric.advanceReview')} value={view.metrics.advanceReviewCount} />
-          </div>
-          {view.loopSteps.length > 0 && (
-            <div>
-              <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.productLoop')}</div>
-              <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-8">
-                {view.loopSteps.map((step) => (
-                  <ProductLoopStep key={step.id} step={step} navigateTarget={navigateTarget} />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {view.nextOrders.length > 0 && (
-        <div className="mb-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.nextOrders.title')}</div>
-          <div className="grid gap-1.5 md:grid-cols-3">
-            {view.nextOrders.map((order) => (
-              <NextOrderCard key={order.id} order={order} navigateTarget={navigateTarget} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {view.commandQuestions.length > 0 && (
-        <div className="mb-2">
-          <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.commandLoop')}</div>
-          <div className="grid gap-1.5 sm:grid-cols-2 xl:grid-cols-5">
-            {view.commandQuestions.map((question) => (
-              <CommandQuestionLane key={question.id} question={question} navigateTarget={navigateTarget} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {showAdvanced && view.lenses.length > 0 && (
+      {view.lenses.length > 0 && (
         <div className="mb-2 flex gap-1.5 overflow-x-auto pb-1">
           {view.lenses.map((lens) => (
             <LensButton
@@ -667,17 +384,23 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
         </div>
       )}
 
+      {view.cards.length === 0 ? (
+        <div className="rounded border border-panel-border/55 bg-panel-card/55 px-3 py-3 text-[11px] text-text-secondary">
+          {view.emptyState}
+        </div>
+      ) : (
       <div className="grid gap-2 lg:grid-cols-[minmax(0,1.55fr)_minmax(20rem,0.8fr)]">
-        <div className="space-y-2">
-          {mainCards.length === 0 ? (
+        <div className="max-h-[min(70vh,52rem)] space-y-2 overflow-y-auto pr-1">
+          {filteredCards.length === 0 ? (
             <div className="rounded border border-panel-border/55 bg-panel-card/55 px-3 py-3 text-[11px] text-text-secondary">
               {view.emptyState}
             </div>
-          ) : mainCards.map((card) => (
+          ) : filteredCards.map((card) => (
             <PriorityCard
               key={card.id}
               card={card}
               active={selectedDossierCardId === card.id}
+              advanceSensitive={advanceSensitiveCardIds.has(card.id)}
               onSelectCard={setActiveCardId}
               navigateTarget={navigateTarget}
             />
@@ -694,51 +417,9 @@ export function PresidentialDecisionRoomPanel({ onNavigateTarget }: Presidential
               navigateTarget={navigateTarget}
             />
           </div>
-
-          {showAdvanced && (
-          <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.inspectNext')}</div>
-            <div className="space-y-1.5">
-              {inspectNext.length === 0 ? (
-                <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  {t('decisionRoom.noInspectionHandoffs')}
-                </div>
-              ) : inspectNext.map((card) => (
-                <CompactLink key={card.id} card={card} navigateTarget={navigateTarget} />
-              ))}
-            </div>
-          </div>
-          )}
-
-          {showAdvanced && (
-          <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.sourceHandoffs')}</div>
-            <div className="space-y-1.5">
-              {view.sourceHandoffs.length === 0 ? (
-                <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  {t('decisionRoom.noSourceHandoffs')}
-                </div>
-              ) : view.sourceHandoffs.map((handoff) => (
-                <SourceHandoffLink key={handoff.id} handoff={handoff} navigateTarget={navigateTarget} />
-              ))}
-            </div>
-          </div>
-          )}
-
-          <div>
-            <div className="mb-1 text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionRoom.reviewBeforeAdvance')}</div>
-            <div className="space-y-1.5">
-              {view.advanceReadiness.items.length === 0 ? (
-                <div className="rounded border border-panel-border/55 bg-panel-card/55 px-2 py-2 text-[10px] text-text-secondary">
-                  {t('decisionRoom.noBuriedItems')}
-                </div>
-              ) : view.advanceReadiness.items.map((card) => (
-                <CompactLink key={`advance:${card.id}`} card={card} navigateTarget={navigateTarget} />
-              ))}
-            </div>
-          </div>
         </aside>
       </div>
+      )}
     </section>
   );
 }
