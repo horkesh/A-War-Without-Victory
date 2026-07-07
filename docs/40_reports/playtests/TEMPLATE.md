@@ -2,6 +2,8 @@
 
 Use this template for each owner D2-prep play session after WP-1 through WP-4 of the GUI decision-access runway are merged. Play the packaged desktop build with `npm run desktop`, not a loose browser/dev session, unless the diary explicitly says it is a dev-only reproduction pass.
 
+File filled diaries as `docs/40_reports/playtests/YYYYMMDD_<faction>_diary.md`.
+
 ## Session Metadata
 
 | Field | Entry |
@@ -12,8 +14,8 @@ Use this template for each owner D2-prep play session after WP-1 through WP-4 of
 | Build / commit |  |
 | Package version |  |
 | Build command | `npm run desktop` |
-| Faction |  |
-| Scenario or save |  |
+| Faction | RBiH / RS / HRHB |
+| Scenario or save | Fresh campaign / continued save |
 | Start in-game date / turn |  |
 | End in-game date / turn |  |
 
@@ -26,6 +28,7 @@ Use this template for each owner D2-prep play session after WP-1 through WP-4 of
 | Minutes per turn |  |
 | End state saved? | Yes / No |
 | Evidence folder |  |
+| Command Authority this session | Spent: ; earned: ; turns at cap / income wasted: ; one sentence: did you ever want to act and could not afford it, or forget the levers existed? |
 
 ## Three Worst Friction Moments
 
@@ -83,6 +86,7 @@ Use this template for each owner D2-prep play session after WP-1 through WP-4 of
 | --- | --- |
 | Did I feel like the President? | 1 / 2 / 3 / 4 / 5 |
 | One-sentence reason |  |
+| Would I play the next 10 turns tomorrow unprompted? | Yes / No, with one sentence why |
 
 ## Bug vs. Friction Split
 

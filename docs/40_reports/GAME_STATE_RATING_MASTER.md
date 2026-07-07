@@ -8,6 +8,16 @@
 
 ---
 
+## 2026-07-06 Annotation (owner release review — grade caveats, observation-only)
+
+Per §7.2 this annotates rather than rewrites. The 2026-07-06 owner release review (GUI decision-access + Command Authority economy) qualifies three graded rows until played evidence exists:
+
+1. **Row 21 "Inbox + Decision Room loop: A" was contradicted by owner experience** — the shipped panel buried a single decision under ~10 meta-boxes, hard-capped the card list at 4 with no overflow affordance, and deep-links forced the meta-heavy view. WP-1 of `../plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md` (flatten to cards + dossier) is IMPLEMENTED and gate-green as of 2026-07-06; the row's grade should be re-earned through WP-9 friction diaries, not asserted from contract tests.
+2. **Row +N2 "Presidential Command Model + Surface: A" carries an unvalidated economy** — command authority's campaign integral (≤476 CA lifetime ⇒ ~19 max / ~4 hoard-case override acts per 188w, cap-waste, self-penalizing recovery spiral) was never computed or felt; the field is player-only and absent headless, so NO automated gate can see it and D2 was never played. Repair lane: `../plans/2026-07-06-command-authority-economy-plan.md` (CA-0..CA-3).
+3. **Grade-coupling rule (standing, from WP-9):** a self-graded UI/product row may not exceed the feel-grade band of the latest owner friction diary (`playtests/TEMPLATE.md`). Contract/browser gates prove routing and truth, not experience; the diary is the instrument for the experience grades.
+
+---
+
 ## 2026-06-18 Reconciliation (roadmap/process status)
 
 The June 9 panel grades remain useful as a system-quality snapshot, but the release road and first-hour polish status have moved:
