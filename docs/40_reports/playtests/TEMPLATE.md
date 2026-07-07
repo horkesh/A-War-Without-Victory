@@ -1,6 +1,6 @@
 # AWWV Owner Playtest Diary Template
 
-Use this template for each owner D2-prep play session after WP-1 through WP-4 of the GUI decision-access runway are merged. Play the packaged desktop build with `npm run desktop`, not a loose browser/dev session, unless the diary explicitly says it is a dev-only reproduction pass.
+Use this template for each owner D2-prep play session now that WP-1 through WP-9 of the GUI decision-access runway are merged. Play the packaged desktop build with `npm run desktop`, not a loose browser/dev session, unless the diary explicitly says it is a dev-only reproduction pass.
 
 File filled diaries as `docs/40_reports/playtests/YYYYMMDD_<faction>_diary.md`.
 

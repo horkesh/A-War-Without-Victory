@@ -49,7 +49,7 @@
 
 ## Planning (docs/plans/)
 
-**2026-06-16 supersession:** current planning truth lives in [docs/plans/README.md](../plans/README.md), [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md), [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md), [2026-06-08-v1.0-definition-of-done.md](../plans/2026-06-08-v1.0-definition-of-done.md), and [POST_D2_RESIDUALS.md](../plans/POST_D2_RESIDUALS.md). D2 remains the sole 1.0 go/no-go gate; active pre-D2 work is player-polish guarded by `qa:player-journeys` and live browser checks. The older `docs/30_planning/` links below are historical/design-reference only unless the command board points to them.
+**2026-07-07 supersession:** current planning truth lives in [docs/plans/README.md](../plans/README.md), [COMMAND_BOARD.md](../plans/COMMAND_BOARD.md), [MASTER_ROADMAP.md](../plans/MASTER_ROADMAP.md), [2026-06-08-v1.0-definition-of-done.md](../plans/2026-06-08-v1.0-definition-of-done.md), and [POST_D2_RESIDUALS.md](../plans/POST_D2_RESIDUALS.md). GUI runway WP-1..WP-9 is merged to `main`; current pre-D2 action is owner friction diaries using [40_reports/playtests/TEMPLATE.md](../40_reports/playtests/TEMPLATE.md). D2 remains the sole 1.0 go/no-go gate. The older `docs/30_planning/` links below are historical/design-reference only unless the command board points to them.
 
 - [ROADMAP_v1_0.md](../30_planning/ROADMAP_v1_0.md) — implementation roadmap to v1.0
 - [EXECUTIVE_ROADMAP.md](../30_planning/EXECUTIVE_ROADMAP.md) — executive phases (1–7)

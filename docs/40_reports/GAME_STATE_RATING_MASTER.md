@@ -2,9 +2,9 @@
 
 **Purpose:** Single living "where is the game today, honestly" master. Per-system rating against an AAA+++ / Paradox-tier reference bar, with the exact remaining gap and what work would close it. **Observation-only — no code changes.**
 
-**Updated:** 2026-06-18 roadmap/process reconciliation over the 2026-06-09 Pyrrhic panel re-grade and 2026-05-24 full pass.
+**Updated:** 2026-07-07 docs reconciliation after GUI runway merge and main CI green.
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** required 188w engine-health floor **609/712** after the 2026-06-26 CI-observed re-floor, schema **v36**, 40w structural fingerprint v2 **`6806ddd157044afa`**, and `engine-health-188w` REQUIRED/BLOCKING. The June 9 `649` / collapse-before-D2 and June 11 `658` floor framing below is historical lineage; the active road is **D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**.
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** required 188w engine-health floor **609/712** after the 2026-06-26 CI-observed re-floor, schema **v36**, 40w structural fingerprint v2 **`6806ddd157044afa`**, and `engine-health-188w` REQUIRED/BLOCKING. The GUI decision-access runway WP-1..WP-9 is merged; the active road is **WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**. The June 9 `649` / collapse-before-D2 and June 11 `658` floor framing below is historical lineage.
 
 ---
 
@@ -12,9 +12,10 @@
 
 Per §7.2 this annotates rather than rewrites. The 2026-07-06 owner release review (GUI decision-access + Command Authority economy) qualifies three graded rows until played evidence exists:
 
-1. **Row 21 "Inbox + Decision Room loop: A" was contradicted by owner experience** — the shipped panel buried a single decision under ~10 meta-boxes, hard-capped the card list at 4 with no overflow affordance, and deep-links forced the meta-heavy view. WP-1 of `../plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md` (flatten to cards + dossier) is IMPLEMENTED and gate-green as of 2026-07-06; the row's grade should be re-earned through WP-9 friction diaries, not asserted from contract tests.
+1. **Row 21 "Inbox + Decision Room loop: A" was contradicted by owner experience** — the shipped panel buried a single decision under ~10 meta-boxes, hard-capped the card list at 4 with no overflow affordance, and deep-links forced the meta-heavy view. WP-1..WP-9 of `../plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md` are merged as of 2026-07-07, covering the flattened Decision Room, quiet-turn digest, own-force unreported discipline, single tactical detail panel, lever convergence, archive spine, qualitative effectiveness display, ambient audio floor, and friction-diary protocol. The row's grade should be re-earned through WP-9 friction diaries, not asserted from contract tests.
 2. **Row +N2 "Presidential Command Model + Surface: A" carries an unvalidated economy** — command authority's campaign integral (≤476 CA lifetime ⇒ ~19 max / ~4 hoard-case override acts per 188w, cap-waste, self-penalizing recovery spiral) was never computed or felt; the field is player-only and absent headless, so NO automated gate can see it and D2 was never played. Repair lane: `../plans/2026-07-06-command-authority-economy-plan.md` (CA-0..CA-3).
 3. **Grade-coupling rule (standing, from WP-9):** a self-graded UI/product row may not exceed the feel-grade band of the latest owner friction diary (`playtests/TEMPLATE.md`). Contract/browser gates prove routing and truth, not experience; the diary is the instrument for the experience grades.
+4. **Row 33 "Music / soundscape / VO" is no longer silent-by-default, but remains asset-limited.** WP-8 unmuted fresh audio preferences, preserved mute/master-volume control, gates playback on first gesture, and added ambient-bed routing plus an asset manifest. It did not ship commissioned ambient beds, music, or VO; the row remains a low C substrate until owner assets and package listening evidence exist.
 
 ---
 
@@ -53,7 +54,7 @@ Four-panel re-grade vs the 2026-05-24 pass below. **Observation-only.** Per §7.
 | 29 | Essay / Codex corpus | B+ | **A-** | ↑ | Indexed corpus 96→146; camp/atrocity deposit essays now indexed w/ provenance. |
 | 30 | Dynamic Codex / reactive | B+ | **A** | ↑ | Tier system + dependency graph + per-response morph + comparison-atom grammar. |
 | 32 | Sensitive-history handling | A- | **A** | ↑ | Ring-3 informational records; source remediation; atrocity essays w/ Ring-2 provenance. |
-| 33 | Music / soundscape / VO | D+ | **C-** | ↑ | Real SFX `.ogg` binaries + clean bus shipped — but still silent-by-default, no music/ambient/VO. |
+| 33 | Music / soundscape / VO | D+ | **C-** | ↑ | Real SFX `.ogg` binaries + clean bus; WP-8 unmuted the default tactical audio path, applies preferences before playback, gates on first user gesture, and adds ambient-bed routing/manifest. Still no commissioned music/VO/full soundscape. |
 | 36 | CI/CD | B+ | **A-** | ↑ | `release.yml` (tag→Release) + dual-platform packaging matrix with smoke-verify. |
 | 37 | Build system | B+ | **A-** | ↑ | Reproducible packaging matrix; determinism static scan tightened. |
 | 41 | Localization | C | **C+** | ↑ | Rigorous Bosnian LQA audit + deterministic CI leakage guard (native sign-off still gates B). |

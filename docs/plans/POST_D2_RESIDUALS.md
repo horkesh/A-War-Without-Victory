@@ -4,7 +4,7 @@
 
 ## Gate Rule
 
-D2 is the sole remaining 1.0 go/no-go gate. Do not reopen system, calibration, or Section 6 work before D2 unless the owner explicitly changes the command-board state.
+D2 is the sole remaining 1.0 go/no-go gate. The current entry path to D2 is WP-9 owner friction-diary evidence. Do not reopen system, calibration, or Section 6 work before D2 unless the owner explicitly changes the command-board state.
 
 ## Residuals
 
@@ -20,7 +20,8 @@ D2 is the sole remaining 1.0 go/no-go gate. Do not reopen system, calibration, o
 
 ## Current 1.0 Path
 
-1. D2 owner full-campaign playthrough.
-2. D3 operator release evidence.
-3. D4 final docs/release sweep.
-4. 1.0 tag.
+1. WP-9 owner friction-diary sessions.
+2. D2 owner full-campaign playthrough.
+3. D3 operator release evidence.
+4. D4 final docs/release sweep.
+5. 1.0 tag.

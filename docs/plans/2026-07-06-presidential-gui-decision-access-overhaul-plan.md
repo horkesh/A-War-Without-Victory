@@ -1,10 +1,10 @@
 # Presidential GUI Decision-Access Overhaul — Execution Plan (v2, fully developed)
 
 **Date:** 2026-07-06 (v2 — developed to execution grade; supersedes the v1 draft of the same date)
-**Status:** READY FOR EXECUTION — owner directed the analysis (2026-07-05), the plan (2026-07-06), and full development for dispatch to builder agents.
+**Status:** IMPLEMENTED AND MERGED — WP-1..WP-9 landed through PRs #462-#470 and are merged to `main` as of 2026-07-07. This plan is retained as the execution record and acceptance contract; current action is WP-9 owner friction-diary sessions, not more runway packets.
 **Owner problem statement:** "Player does not easily have access to decisions and information. Instead of being president, he is buried in huge windows with bunch of data, much of it repeating."
 **Scope class:** UI-layer only (`src/ui/**`) + one audio-preferences default + process protocol. No sim, scenario, event JSON, save-schema, or canon changes anywhere in this plan.
-**Roadmap authority:** The active road is D2 owner playthrough → D3 → D4 → 1.0. This plan is the owner-directed runway TO a meaningful D2 (WP-9 re-couples it). It satisfies the "no lane ahead of D2 without a new owner directive" rule.
+**Roadmap authority:** The active road is WP-9 owner friction diaries → D2 owner playthrough → D3 → D4 → 1.0. This plan is the owner-directed runway TO a meaningful D2 and is now the execution record for that runway. It satisfies the "no lane ahead of D2 without a new owner directive" rule.
 
 ---
 

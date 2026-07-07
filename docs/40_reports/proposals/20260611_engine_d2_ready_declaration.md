@@ -1,6 +1,6 @@
 # Engine D2-READY declaration (engine-health pivot complete)
 
-**Status:** DECLARED 2026-06-11. Authority: Pyrrhic Panel B verdict (delegated owner signature). The engine-health pivot is complete for 1.0; the next 1.0 gate is the **D2 full-campaign playthrough** (owner-only, travel-blocked).
+**Status:** DECLARED 2026-06-11; SUPERSEDED FOR SCHEDULING 2026-07-07. Authority: Pyrrhic Panel B verdict (delegated owner signature). The engine-health pivot remains complete for 1.0; current scheduling now runs through WP-9 owner friction diaries before the **D2 full-campaign playthrough**.
 
 ## Verdict (Pyrrhic Panel B, 2026-06-11)
 > "Ship Fix B, then declare the engine D2-ready and schedule the playthrough — the dead_ops=32 ceiling is already guarded, EH-3 fix(b) is a post-D2 lane, and the highest-value move for 1.0 is getting a full campaign played start→Dayton, not more engine polish."
@@ -28,7 +28,7 @@ The pivot's goal was never to drive every metric to zero — it was to make the 
 
 ## What "D2-ready" means / next action
 - The engine is ready for the **D2 playthrough**: a full campaign played start→Dayton — the TRUE remaining 1.0 blocker (no full campaign has been played end-to-end yet; D2 = go/no-go).
-- **D2 is owner-only and currently travel-blocked.** No agent action remains on the engine-health track; the ball is with the owner to play D2 when back.
+- **D2 is owner-only and now diary-gated by the 2026-07-07 command-board supersession.** No agent action remains on the engine-health track; current pre-D2 action is owner friction diaries using `docs/40_reports/playtests/TEMPLATE.md`.
 - Post-D2: full doc-sync sweep (DoD/MASTER_ROADMAP/canon to reality), then any D2-surfaced fixes, then the remaining parked lanes (EH-3 fix(b), EH-4 Fix A, enclave OVERRUN/CONTAIN #6, Teočak #9) prioritized by what D2 reveals.
 
 ## Parked/deferred (post-D2, by panel)

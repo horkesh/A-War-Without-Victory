@@ -15,16 +15,17 @@
 
 ## Current State
 
-As of 2026-06-16, the technical road to 1.0 is closed. The remaining 1.0 path is:
+As of 2026-07-07, the technical road to 1.0 is closed and the GUI decision-access runway WP-1..WP-9 is merged to `main`. The remaining 1.0 path is:
 
-1. D2 owner full-campaign playthrough.
-2. D3 operator release gate.
-3. D4 final docs/release sweep.
-4. 1.0 tag.
+1. WP-9 owner friction-diary sessions using `../40_reports/playtests/TEMPLATE.md`.
+2. D2 owner full-campaign playthrough.
+3. D3 operator release gate.
+4. D4 final docs/release sweep.
+5. 1.0 tag.
 
 Historical execution packets in this folder are retained for traceability. Do not treat a dated plan as active unless the command board or this index points to it.
 
-The active pre-D2 quality lane is player-polish only: `qa:player-journeys`, first-hour choreography, warroom/Army HQ/map legibility, and live browser checks. These guard the owner playthrough but do not reopen calibration or system-roadmap work.
+The active pre-D2 quality lane is diary-driven owner play only. `qa:player-journeys`, first-hour choreography, warroom/Army HQ/map legibility, and live browser checks remain guardrails, but new polish starts from diary top-three friction or an explicit regression/owner directive. These guard the owner playthrough but do not reopen calibration or system-roadmap work.
 
 ## Archive Policy
 
