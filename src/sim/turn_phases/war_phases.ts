@@ -1820,6 +1820,9 @@ export const warPhases: NamedPhase[] = [
                     evt => !(evt.acknowledged && evt.turn < turn - 8)
                 );
             }
+            if (state.military.narrative_queue && state.military.narrative_queue.length > 128) {
+                state.military.narrative_queue = state.military.narrative_queue.slice(-128);
+            }
         }
     },
     {

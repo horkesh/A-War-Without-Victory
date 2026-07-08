@@ -423,6 +423,7 @@ describe('Phase 3 Suite D: decay — stale acknowledged event cleanup', () => {
         const data = makeOfficerData({ id: 'off_d3' });
         const officerState = makeOfficerState({ officer_id: 'off_d3', assigned_corps_id: 'corps_d3' });
         const state = makeMinimalState('corps_d3', data, officerState, 12);
+        state.meta.player_faction = 'RBiH';
 
         const unacknowledgedEvent: PendingOfficerEvent = {
             event_id: 'corps_d3:stance:1',
@@ -439,6 +440,75 @@ describe('Phase 3 Suite D: decay — stale acknowledged event cleanup', () => {
 
         expect(state.military.pending_officer_events).toHaveLength(1);
         expect(state.military.pending_officer_events![0]!.acknowledged).toBe(false);
+    });
+
+    it('D4. stale unacknowledged non-player event is retained as command dedupe state', () => {
+        const data = makeOfficerData({ id: 'off_d4' });
+        const officerState = makeOfficerState({ officer_id: 'off_d4', assigned_corps_id: 'corps_d4' });
+        const state = makeMinimalState('corps_d4', data, officerState, 12);
+        state.meta.player_faction = 'RBiH';
+        state.military.pending_officer_events = [{
+            event_id: 'corps_d4:rs:1',
+            type: 'army_directive_pushback',
+            faction: 'RS',
+            turn: 1,
+            officer_id: 'off_d4',
+            corps_id: 'corps_d4',
+            acknowledged: false,
+        } as PendingOfficerEvent];
+
+        runDecayStep(state);
+
+        expect(state.military.pending_officer_events).toHaveLength(1);
+        expect(state.military.pending_officer_events![0]!.event_id).toBe('corps_d4:rs:1');
+    });
+
+    it('D5. headless stale unacknowledged events are retained as command dedupe state', () => {
+        const data = makeOfficerData({ id: 'off_d5' });
+        const officerState = makeOfficerState({ officer_id: 'off_d5', assigned_corps_id: 'corps_d5' });
+        const state = makeMinimalState('corps_d5', data, officerState, 12);
+        state.military.pending_officer_events = [{
+            event_id: 'corps_d5:rbih:1',
+            type: 'army_directive_pushback',
+            faction: 'RBiH',
+            turn: 1,
+            officer_id: 'off_d5',
+            corps_id: 'corps_d5',
+            acknowledged: false,
+        } as PendingOfficerEvent];
+
+        runDecayStep(state);
+
+        expect(state.military.pending_officer_events).toHaveLength(1);
+        expect(state.military.pending_officer_events![0]!.event_id).toBe('corps_d5:rbih:1');
+    });
+
+    it('D6. narrative queue is capped to a stable recent window', () => {
+        const data = makeOfficerData({ id: 'off_d6' });
+        const officerState = makeOfficerState({ officer_id: 'off_d6', assigned_corps_id: 'corps_d6' });
+        const state = makeMinimalState('corps_d6', data, officerState, 12);
+        state.military.narrative_queue = Array.from({ length: 132 }, (_, i) => ({
+            faction: 'RS',
+            corpsId: 'vrs_drina',
+            input: {
+                officerName: 'Corps Commander',
+                faction: 'RS',
+                corpsId: 'vrs_drina',
+                targetOsid: `op:test:${String(i).padStart(3, '0')}`,
+                outcome: 'attrition',
+                attackerCasualties: i,
+                defenderCasualties: 0,
+                attackerBrigades: [`attacker_${i}`],
+                defenderBrigades: [],
+                territoryChanged: false,
+            },
+        })) as any;
+
+        runDecayStep(state);
+
+        expect(state.military.narrative_queue).toHaveLength(128);
+        expect(state.military.narrative_queue?.[0]?.input.targetOsid).toBe('op:test:004');
+        expect(state.military.narrative_queue?.[127]?.input.targetOsid).toBe('op:test:131');
     });
 });
 

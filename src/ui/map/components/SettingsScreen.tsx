@@ -438,7 +438,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
 function resolveSettingsPlatform(): 'desktop' | 'browser' | 'unknown' {
     if (typeof window === 'undefined') return 'unknown';
-    return window.awwv ? 'desktop' : 'browser';
+    return (window as Window & { awwv?: unknown }).awwv ? 'desktop' : 'browser';
 }
 
 function resolveSettingsOsFamily(): 'windows' | 'macos' | 'linux' | 'unknown' {

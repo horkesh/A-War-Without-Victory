@@ -1,132 +1,239 @@
-# Release Review Round 2 — Findings & Repair Packets
+# Release Review Round 2 - Actionable Repair Plan
 
 **Date:** 2026-07-08
-**Status:** READY FOR EXECUTION — RR2-1/RR2-3/RR2-4/RR2-5 dispatchable now; RR2-2 requires specialist consultation before build; RR2-6..RR2-9 are a measure-first structural register, NOT scheduled work.
-**Origin:** Owner directive 2026-07-08 ("examine all the recent commits, as well as whole of the repo; identify weaknesses, edge cases and just plain bad design decisions"). This review audited the merged GUI runway PRs #462–#470 line-by-line at the riskiest points, the working state of `main` after `f547c338b`, and repo structure. Companion prior reviews: `2026-07-06-presidential-gui-decision-access-overhaul-plan.md` (merged), `2026-07-06-command-authority-economy-plan.md` (CA-0 done, CA-1 pending), `2026-07-06-ghost-war-design.md` (seed shipped, surfaces gated).
-**What this review CLEARED (for the record):** WP-2's `classifyTurnAftermathWeight` is exemplary — `hasOnlyKeys` shape-guarding (`turnAftermath.ts:249-266`) flips classification to `heavy` even when a NEW field is added, exactly the default-to-heavy contract; WP-5's `tests/ui/lever_single_host_guard.test.ts` exists and is strict; `turn_summaries` is properly capped at 3 (`war_phase_briefing_steps.ts:26`). The packet discipline held across nine PRs in 24 hours.
+**Status:** FULLY EXECUTED for all dispatchable RR2 work authorized by this plan, including the post-closeout continuation that repaired the later 52w 65th loan lifecycle drift and refreshed the affected baseline hashes. RR2-1, RR2-2, RR2-3A, RR2-3B asset-history cleanup, RR2-4, RR2-5, and RR2-7A are implemented with tests/proofs; RR2-6, RR2-8, RR2-9, and RR2-10 remain trigger-gated structural work outside this execution pass.
+**Origin:** Owner directive 2026-07-08: examine recent commits and the broader repo for weaknesses, edge cases, and bad design decisions. This plan supersedes the first RR2 draft where it incorrectly treated `src/ui/warroom` as dormant/dead code.
 
----
+## Part A - Corrected Findings Register
 
-## Part A — Verified receipts (all read on current `main`, 2026-07-08)
+| ID | Finding | Current verdict | Primary receipts |
+|---|---|---|---|
+| RR2-1 | Pre-WP-8 audio preference profiles can remain muted forever | FIXED | v2 migration implemented in `src/ui/map/audio/audio_preferences.ts`; v1 exact old default un-mutes, custom v1 values migrate, corrupt v1 falls back safely. |
+| RR2-2 | 65th Protection Regiment loan limbo | FIXED | `docs/40_reports/working/20260708_65th_protection_regiment_loan_limbo_investigation.md`: recent sector-exempt active loans and column-deploying elites no longer emit transient unresolved warnings; late/final sector rescue accounts for loaned elites that reach receiving-corps territory. Dynamic active-loan redeploy was tested and rejected after 188w engine-health regression. |
+| RR2-3A | `_archived/ui_legacy` is dead code inside `src/` | FIXED | Sandbox slice/scenario utilities were extracted to `src/ui/map/sandbox/`, `tests/sandbox_slice_determinism.test.ts` was retargeted, deadness was re-proven, and `src/_archived/ui_legacy` was removed. |
+| RR2-3B | `src/ui/warroom` cleanup was misclassified | PARTIAL CLEANUP COMPLETE | `docs/40_reports/working/20260708_warroom_live_surface_decision_audit.md`: Warroom shell remains live; asset-history dirs `assets/_old` and `assets/raw_sora` were proven non-runtime and removed. |
+| RR2-4 | Napkin failed its own charter | FIXED | `.claude/napkin.md` compact index is <=400 lines with linked topic archives; repo-local and active global napkin skill updated to bounded-index behavior. |
+| RR2-5 | Pending queue growth | PARTIAL FIX + NO-GO RECORDED | `docs/40_reports/working/20260708_pending_queue_growth_audit.md`: `narrative_queue` is capped to the most recent 128 entries. `pending_officer_events` pruning was attempted, then reverted because unacknowledged non-player/headless rows are command lifecycle/dedupe state and pruning caused 188w engine-health regression. |
+| RR2-6 | Full-save IPC and adapter rebuild grows with war length | MEASURE FIRST | 188w saves are ~8.9 MB; no late-war advance latency breakdown exists. |
+| RR2-7 | Untyped main-process business logic and duplicated constants | RR2-7A FIXED | Static parity guard now fails on local force-launch literals, and `electron-main.cjs` uses the imported shared `FORCE_LAUNCH_COST`. |
+| RR2-8 | God files | REAL; post-1.0 refactor only | `war_phases.ts`, `validateGameState.ts`, `GameStateAdapter.ts`, `MapContainer.tsx`, `scenario_runner.ts`, and `corps_front_sectors.ts` are large shared surfaces. |
+| RR2-9 | i18n monoliths cause merge friction | REAL; post-1.0 or conflict-triggered | `messages.en.ts` and `messages.bcs.ts` exceed 5k lines and are touched by most UI lanes. |
+| RR2-10 | Turn Aftermath digest is generic | REAL but cosmetic | `buildTurnAftermathDigest(_view)` ignores the view. Fold into a diary-driven quiet-turn packet. |
 
-| # | Finding | Receipt |
-|---|---|---|
-| 1 | Pre-WP-8 profiles stay muted forever | `audio_preferences.ts:19-21` new default `{muted:false, masterVolume:0.5}`; `saveAudioPreferences` called ONLY from `SettingsScreen.tsx:159` and persists the WHOLE object — any pre-WP-8 Settings save wrote `muted:true` (old default) into `awwv.audio.preferences.v1` as a "choice"; `normalizeAudioPreferences:37` honors it forever |
-| 2 | 65th Protection Regiment permanent warning | `corps_front_sectors_constants.ts:28`: `vrs_main_staff` IS exempt; `brigade_assignment.ts:1535`: `if (isSectorAssignmentExemptCorpsId(fCorpsId) && !isLoaned) continue;` — the regiment starts ON LOAN, bypasses the exemption, no loan-target sector absorbs it → `:1537` warns EVERY campaign; 1,200 men in limbo from turn 1 |
-| 3 | ~20k LOC dead code in the hot path | `tsconfig.json` `include: ["src","tests"]`, excludes only storybook/mocks/saved — so `src/_archived/ui_legacy/` (13k+ LOC; `MapApp.ts` 5,471 = largest file in repo) and `src/ui/warroom/` (~7.5k LOC; own `index.html`; imported only by itself; zero matches in `electron-main.cjs`) are typechecked, grepped, and context-loaded by every agent |
-| 4 | Napkin failed its own charter | `.claude/napkin.md` = 436,171 bytes (425KB two days prior), vs its own "cap 10/category" rule; mandatory session-start read; in practice ~150 of ~6,000 lines get read |
-| 5 | Suspicious append-only queues in the save | 188w final save (`runs/apr1992_definitive_188w__acb538b04d79af3c__w188_n39/final_save.json`, 8.5MB): `military.pending_officer_events` = 232KB and `military.narrative_queue` = 192KB at WAR'S END — large for anything named "pending"; unverified whether consumed entries are pruned |
-| 6 | Full-state IPC per turn, growing | save 1.3MB (w0) → 8.5MB (w188); `military.formations` 1.9MB, `corps_command` 544KB; `advanceTurnAndSync` ships the full save JSON to the renderer each turn + full `GameStateAdapter` (3,760 lines) rebuild; advance latency grows with the war and has never been measured past the first hour |
-| 7 | Untyped main-process business logic | `electron-main.cjs` 3,626 lines of unchecked JS with real rules + duplicated literals (e.g. `FORCE_LAUNCH_COST = 15` at :2351); the four-file "MUST match" comment family is the confession; CA-0 guards the CA constants only |
-| 8 | God files | `war_phases.ts` 4,096 (151 steps) · `validateGameState.ts` 3,958 · `GameStateAdapter.ts` 3,760 · `MapContainer.tsx` 3,609 · `scenario_runner.ts` 3,349 · `corps_front_sectors.ts` 3,327 |
-| 9 | i18n monoliths = merge-conflict engine | `messages.en.ts` 5,221 + `messages.bcs.ts` 5,188 lines; all nine runway PRs touched both; several needed mid-flight merge commits |
-| 10 | WP-2 digest says nothing (cosmetic) | `buildTurnAftermathDigest(_view)` at `turnAftermath.ts:280-284` ignores the view, returns one fixed sentence |
+## Part B - Execution Rails
 
----
+Common rails for every packet:
 
-## Part B — Repair packets (dispatchable)
+1. Start with `git status --short --branch`.
+2. Confirm scope before editing. If a file outside the packet scope is required, stop and record why.
+3. Use red-first tests for behavior changes; for docs/process changes, use explicit diff/search verification.
+4. Preserve determinism: no timestamps in generated outputs, stable ordering for any new pruning/cap logic, no random iteration.
+5. Update `docs/PROJECT_LEDGER.md` with scope, verification, and determinism statement.
+6. If a packet changes UI/read-model behavior, update `docs/40_reports/GUI_MASTER.md` or the relevant master report when status changes.
+7. If a packet changes sim behavior or persisted output, run the packet-specific baseline/engine-health gates before closeout.
 
-Execution rails: every packet inherits the Common Rails of `2026-07-06-presidential-gui-decision-access-overhaul-plan.md` Part A (read-first, premise checks, TDD red-first, full grep-derived suites, honest evidence, ledger+GUI_MASTER-when-UI) **except the scope fence, which is defined per packet below** — RR2-2 and RR2-5(b) are deliberately sim-touching and carry the heavier proof obligations the GUI rails forbid.
+## Part C - Dispatchable Packets
 
-### RR2-1 — Audio preference migration (finding 1; UI-only; ~half day)
+### RR2-1 - Audio Preference v1 to v2 Migration
 
-**Objective:** Players who never chose silence get WP-8's un-mute; players who chose it keep it.
+**Objective:** Players who never chose silence get WP-8's unmuted default; players who made a real preference choice keep it.
 
-**Scope fence:** `src/ui/map/audio/**`, `tests/**`, docs. Nothing else.
+**Scope:** `src/ui/map/audio/**`, audio/settings tests, docs/ledger only.
 
 **Steps:**
-1. In `audio_preferences.ts`, bump storage to `awwv.audio.preferences.v2` with a load-time migration: read v2; if absent, read v1; if the v1 object is EXACTLY the old default (`muted === true && masterVolume === <old default value — recover it from git history of this file and pin it in a comment>`), treat as never-customized → adopt current defaults; any other v1 shape → carry over normalized as a real choice. Write v2, leave v1 in place (no destructive cleanup; it is one small key).
-2. Edge cases the test must pin: v1 `{muted:true, masterVolume:0.7}` (customized volume ⇒ user touched settings ⇒ KEEP muted:true), v1 `{muted:false, ...}` (keep), corrupt v1 JSON (defaults), v2 present (v1 ignored entirely).
-3. The known ambiguity — a pre-WP-8 user who deliberately confirmed mute without changing volume is indistinguishable from an untouched default — resolves in favor of UN-muting (they keep one-click mute; the reverse error, a player who never hears the game exists, is strictly worse). State this in a code comment.
+1. In `audio_preferences.ts`, introduce `awwv.audio.preferences.v2` while keeping the v1 key exported for migration/tests.
+2. Load order: v2 first; if absent, read v1; if v1 is exactly the old default `{ muted: true, masterVolume: 0.5 }`, treat it as untouched and return current defaults; otherwise normalize and carry the v1 value forward.
+3. Save normalized migrated values to v2 on load or first save. Do not delete v1.
+4. Add a short comment naming the ambiguity: a user who deliberately accepted old mute at exactly 0.5 is indistinguishable from untouched default; the product chooses unmute because silent-by-accident is worse and mute remains one click.
 
-**Tests:** extend the WP-8 preferences suite (grep `audio_preferences|audioPreferences` in tests/, run all hits) + new migration cases red-first.
-**Acceptance:** all four migration cases test-pinned; `qa:player-experience` green; no console errors on first gesture.
+**Tests:**
+- Extend `tests/ui/audio_preferences.test.ts` and any settings preference tests.
+- Required cases: v2 present ignores v1; exact old v1 default migrates to unmuted current default; v1 muted with custom volume stays muted; v1 unmuted stays unmuted; corrupt v1 returns defaults and does not throw.
+- Run all grep hits for `audio_preferences|audioPreferences|AUDIO_PREFERENCES_STORAGE_KEY`, then `npm.cmd run qa:player-experience`.
 
-### RR2-2 — The 65th Protection Regiment loan limbo (finding 2; SIM-TOUCHING; consultation-gated)
+**Acceptance:** Migration cases are pinned; no autoplay/gesture regression; ledger states UI-only/no persisted sim output impact.
 
-**Objective:** No formation is permanently unresolvable by the sector pipeline; the campaign does not open with a warning everyone must learn to ignore.
+### RR2-3A - Delete Archived Legacy UI From `src`
 
-**MANDATORY consultations before any edit (CLAUDE.md):** `corps-army-commander` (brigade_assignment.ts is on its must-consult list), `operations-expert` if the fix touches loan semantics, `formation-expert` for the OOB reading. Historian check on what the 65th actually did (main-staff protection at Han Pijesak/Crna Rijeka — historically NOT a line brigade).
+**Objective:** Remove archived legacy tactical UI from typecheck and agent context without touching live runtime paths.
 
-**Investigate first (report before building):** why does the 65th start `on_loan`, and to which corps? Enumerate every other formation that hits `brigade_assignment.ts:1537` at turn 1 across all three factions (run a 2w scenario, collect the warns) — fix the CLASS, not the instance.
-
-**Fix options (pick via the consultation, not by default):**
-- **(a) Data:** the 65th should not start loaned — remove/repair the opening loan in the OOB/startup state so the `vrs_main_staff` exemption applies. Smallest blast radius IF historically right.
-- **(b) Engine:** loaned exempt-corps formations are absorbed by the loan-target corps' rear-guard/reserve path instead of falling through. More general; more baseline risk.
-
-**Proof obligations (non-negotiable, either option):** one-change-per-run; 188w run with `matched_osids` diff vs the 609 floor + anchors + §6 invariants; `npm run test:baselines` (expect movement if behavior changes — that is a re-bless decision, not a rubber stamp); `engine:health:gate` comparison (ghost/stranded counts should IMPROVE, not just shift); the turn-1 warn count for the fixed class must go to zero and be test-pinned.
-
-**Acceptance:** zero `UNRESOLVED` warns at campaign start for the fixed class; 1,200 men accounted for (reserve, garrison, or sector — visible in ORBAT); calibration verdict explicitly recorded (flat or re-blessed with panel GO).
-
-### RR2-3 — Dead-code excision: `_archived/ui_legacy` + legacy warroom (finding 3; cleanup-discipline; ~1 day)
-
-**Objective:** ~20k LOC leave the typecheck, the greps, and every agent's context.
-
-**Scope fence:** deletions/moves under `src/_archived/**` and `src/ui/warroom/**`, `tsconfig.json`, build configs that reference them, docs. NO live-code edits.
-
-**Steps (cleanup-packet discipline, STOP-and-report on any live consumer):**
-1. Tri-scope importer verification (src/tests/tools) for every module in both trees. Known near-misses to resolve explicitly: `WarHasBegunSplash.tsx` and `ui/shared/factionPalette.ts` matched a `ui/warroom` grep — determine whether these are real imports (then STOP for that module) or comments/strings.
-2. Check build wiring: no Vite/electron-builder/package.json script may reference `src/ui/warroom/index.html`, `map_viewer_standalone.html`, or anything in `_archived`. If one does, that's a live consumer — STOP and report.
-3. Preferred disposition: `git rm` both trees (history preserves them; `_archived` inside `src/` is the worst of both worlds — deleted-but-still-compiled). Acceptable fallback if the owner wants the code visible: move `ui/warroom` into `_archived/` AND add both to tsconfig `exclude` — but say explicitly this keeps the grep/context tax.
-4. Proof of deadness: `npm run typecheck` green, `desktop:map:build` green, `desktop:release:check`/package probe green, full vitest green, AND `tools/scenario_runner/run_baseline_regression.ts` byte-identical (pure deletion must not move any artifact).
-5. Record the LOC delta in the ledger entry.
-
-**Acceptance:** typecheck wall-time delta reported; zero references to deleted paths anywhere in src/tests/tools/configs; baselines byte-identical.
-
-### RR2-4 — Napkin restructure (finding 4; process/docs; ~half day + standing rule)
-
-**Objective:** The mandatory session-start read becomes a document that a session can actually read.
-
-**Steps (mirror the life_lessons 2026-04-11 restructure):**
-1. Split `.claude/napkin.md` into: a ≤400-line INDEX (per-category top-10 rules, one line each, enforcing the existing cap for real) + dated topic archives under `.claude/napkin/` (e.g. `napkin/map_counters.md`, `napkin/qa_gates.md`, `napkin/unreported.md`). Newest-first ordering preserved in the index.
-2. Curation pass while splitting: merge the ~30 near-duplicate "unreported/absence" entries into one canonical rule + pointer; archive superseded counter-rendering entries (the 2026-07-05 terrain-compositing rule supersedes several clamp-era ones).
-3. Add a hard rule to the index header: an entry added to the index must evict one (cap enforced by count, checked by the napkin skill on read).
-4. Update the napkin skill instructions (`.claude/skills/napkin/`) to read INDEX always + topic files on demand, and to enforce the eviction rule.
-
-**Acceptance:** index ≤400 lines; every archived entry reachable from an index pointer; session-start read cost stated in the ledger entry (bytes before/after).
-
-### RR2-5 — "Pending" queue growth audit (finding 5; audit first, fix gated; ~2 hours audit)
-
-**Objective:** Know whether `military.pending_officer_events` (232KB at w188) and `military.narrative_queue` (192KB) prune consumed entries — and cap them if not.
+**Scope:** `src/_archived/ui_legacy/**`, `tsconfig.json` only if deletion is not accepted, references/docs/ledger. No live `src/ui/map`, `src/ui/warroom`, sim, state, or desktop edits.
 
 **Steps:**
-1. **(a) Read-only audit (dispatch now):** find every producer/consumer of both fields; determine lifecycle (consumed-and-removed vs consumed-and-flagged vs never-consumed); measure entry counts at w2 vs w188 (the run dirs exist: `...40w__c410759aa651b613__w2` and `...188w__acb538b04d79af3c__w188_n39`). Deliver a table: field → producers → consumers → prune path → w2/w188 counts → verdict (BOUNDED / UNBOUNDED / UNBOUNDED-BUT-INTENTIONAL). File as `docs/40_reports/working/20260708_pending_queue_growth_audit.md`. Remember the EH-3 lesson: a "zombie" field can be LOAD-BEARING — the audit recommends, it does not delete.
-2. **(b) Fix (only if UNBOUNDED, separate sim-touching packet):** add pruning/cap at the consumer boundary with the full 188w `matched_osids` + `test:baselines` proof obligations (same as RR2-2). Any cap must respect determinism (prune by stable order) and save-compat (older saves with big queues must load).
+1. Prove deadness with searches over `src`, `tests`, `tools`, `package.json`, `.github`, and desktop packaging config for `_archived/ui_legacy`, `MapApp.ts`, `tactical_sandbox`, and legacy viewer entrypoints.
+2. If any live import/build/runtime reference exists, stop and convert to a decision note.
+3. Preferred action: `git rm src/_archived/ui_legacy`. Fallback only if deletion is rejected: add `src/_archived/**` to `tsconfig.exclude`, and state that grep/context tax remains.
+4. Record file count, LOC count, and typecheck wall-time before/after.
 
-**Acceptance (a):** the table, with every claim carrying a file:line receipt.
+**Tests:**
+- `npm.cmd run typecheck`
+- `npm.cmd run desktop:map:build`
+- `npm.cmd run desktop:release:check`
+- `npm.cmd run test:baselines` byte-identical, because deletion must not move sim artifacts.
+- `git diff --check`
 
-### RR2-10 — Aftermath digest content (finding 10; cosmetic; fold into a diary packet)
+**Acceptance:** No references to deleted paths in live/build/test/tool config; baseline artifacts byte-identical; ledger records LOC and timing delta.
 
-Not worth its own dispatch. When the first friction diary touches the quiet-turn flow, upgrade `buildTurnAftermathDigest` to derive one sentence from the view's quiet facts (e.g. supply state, front stability) instead of the fixed string. Keep it one sentence.
+### RR2-4 - Napkin Index and Topic Archive Restructure
 
----
+**Objective:** Make the mandatory session-start runbook readable and enforce its cap.
 
-## Part C — Structural register (findings 6–9; measure-first, NOT scheduled)
+**Scope:** `.claude/napkin.md`, `.claude/napkin/**`, repo-local `.claude/skills/napkin/**` if present, active Codex skill at `C:/Users/User/.codex/skills/napkin/SKILL.md` if the user wants Codex behavior changed immediately, docs/ledger. No canon edits.
 
-These are real design debts, but building any of them now would repeat the mistake this review exists to catch — engineering ahead of played evidence. Each has an explicit TRIGGER; none is dispatched until its trigger fires.
+**Steps:**
+1. Snapshot current byte/line counts.
+2. Convert `.claude/napkin.md` into an index no longer than 400 lines: category headers plus top-10 rules per category, one compact rule each, each with "Do instead".
+3. Move historical/detail material into topic archives under `.claude/napkin/` such as `qa_gates.md`, `unreported.md`, `map_counters.md`, `release_process.md`, and `engine_runtime.md`.
+4. Merge duplicate absence/unreported rules into one canonical index rule with archive pointers.
+5. Add an index header rule: adding an index entry requires evicting or demoting another entry in that category.
+6. Update the napkin skill instructions to read the index always and topic files only on demand. If updating the active global Codex skill is not desired, state that repo-local restructuring alone will not change Codex session-start behavior.
 
-| ID | Debt | Trigger to act | First step when triggered |
+**Tests:**
+- Scripted count check: index line count <= 400 and every archive linked from the index exists.
+- Search for orphan topic archive files not linked from index.
+- `git diff --check`.
+
+**Acceptance:** Session-start read is bounded; every archive is reachable; ledger records before/after bytes and whether global skill behavior was updated.
+
+### RR2-5A - Pending Queue Growth Audit
+
+**Objective:** Determine whether `military.pending_officer_events` and `military.narrative_queue` are bounded, intentionally historical, or leaking.
+
+**Scope:** Read-only audit plus report at `docs/40_reports/working/20260708_pending_queue_growth_audit.md`. No code changes in this packet.
+
+**Steps:**
+1. Enumerate all producers, consumers, UI readers, validators, migrations, and IPC handlers for both fields.
+2. For each field, classify lifecycle as consumed-and-removed, consumed-and-flagged, never-consumed, or historical-log-by-design.
+3. Measure counts and JSON byte size at w2 and w188 using the existing run dirs.
+4. Sample representative entries to identify whether old entries remain actionable, acknowledged, historical, or never read.
+5. Deliver a table: field, producers, consumers, prune path, w2 count/bytes, w188 count/bytes, verdict, recommended next packet.
+
+**Tests/verification:**
+- Report must carry file:line receipts for every lifecycle claim.
+- `git diff --check`.
+
+**Acceptance:** Audit report exists with a verdict for each field. Any pruning/cap work becomes a new sim-touching packet with deterministic stable-order pruning, save compatibility proof, 188w comparison, and `npm run test:baselines`.
+
+### RR2-7A - Main-Process Constant Parity Guards
+
+**Objective:** Reduce `.cjs` business-logic divergence risk without starting a full typed-main-process migration.
+
+**Scope:** Static/parity tests and minimal handler cleanup for duplicated command-authority constants. No behavior change.
+
+**Steps:**
+1. Inventory duplicated "MUST match" constant families in `src/desktop/*.cjs`, `src/ui/map/desktop/useIPC.ts`, and shared contract helpers.
+2. Add or extend a static parity test that fails when a command-authority cost literal is reintroduced in an Electron handler instead of using `autonomy_ipc_contract.cjs`.
+3. Replace the local `const FORCE_LAUNCH_COST = 15` in `electron-main.cjs` with the already imported shared constant if the focused test proves parity.
+4. Record all remaining `.cjs` duplication families as follow-up rows, not drive-by refactors.
+
+**Tests:**
+- Focused parity/static test.
+- `npm.cmd run typecheck`
+- Relevant desktop IPC/runtime contract tests.
+- `git diff --check`.
+
+**Acceptance:** No runtime behavior changes; parity guard catches the current duplicated literal if reverted; ledger states no simulation/output drift.
+
+## Part D - Consultation-Gated Packet
+
+### RR2-2 - 65th Protection Regiment Loan Limbo
+
+**Objective:** No campaign-start formation should be permanently unresolvable by the sector pipeline, and no warning should become accepted background noise.
+
+**Required consultations before edit:** formation expert for OOB semantics, operations expert for loan semantics, corps/army command expert for sector assignment behavior, historian check for the 65th Protection Regiment's intended historical role.
+
+**Investigation before fix:**
+1. Run a short scenario and capture every `brigade_assignment] UNRESOLVED` warning at turn 1 and turn 2 across all factions.
+2. Identify why `rs_65th_protection_motorized_regiment` starts `on_loan`, who receives it, and whether its garrison/main-staff role should be sectorless, rear/security, or loan-target reserve.
+3. Enumerate every other loaned exempt-corps formation and whether it hits the same class.
+
+**Fix options to choose after consultation:**
+- Data fix: remove/repair the opening loan if the regiment is main-staff protection and should remain covered by the `vrs_main_staff` exemption.
+- Engine fix: loaned exempt-corps formations route into the receiving corps rear/security/reserve path when historically and mechanically valid.
+- UI/reporting fix only: acceptable only if the warning is proven harmless and the formation is accounted for elsewhere; must still remove routine noisy warning.
+
+**Proof obligations:**
+- One change per run.
+- Focused regression proving the fixed class has zero campaign-start warnings.
+- 188w comparison versus current floor: `matched_osids`, anchors, consistency failures, stranded/ghost counts.
+- `npm run test:baselines`; any artifact movement requires explicit re-bless decision.
+- `engine:health:gate` comparison if that script is available in current package scripts; otherwise document the exact substitute command.
+
+**Acceptance:** Fixed class has zero start warnings; 1,200 personnel are accounted for in ORBAT/reserve/garrison/sector truth; calibration verdict is recorded.
+
+## Part E - Live Warroom Decision Audit
+
+### RR2-3B - Warroom Live-Surface Retirement or Reaffirmation Decision
+
+**Objective:** Stop paying accidental maintenance tax for unclear Warroom ownership, without breaking desktop startup or packaged release.
+
+**Status:** Not a deletion packet. `src/ui/warroom` is live until this audit proves and replaces its product/runtime role.
+
+**Steps:**
+1. Inventory every live dependency: `package.json` scripts, electron-builder resources, `electron-main.cjs` protocol/startup/probe paths, GitHub workflows, tests, tools under `tools/ui/warroom_*`, and docs master reports.
+2. Classify current Warroom responsibilities: startup shell, main menu/new campaign, embedded tactical map host, priority docket, packaged runtime proof, old player-facing modal system, debug/map viewer.
+3. For each responsibility, choose one disposition: keep, migrate to `src/ui/map`, retire with replacement, or archive as developer-only.
+4. Produce a decision report with one recommended path:
+   - Reaffirm and rename as live desktop shell, then reduce dead submodules only.
+   - Migrate startup shell to tactical map app, then remove Warroom after package probe and desktop startup contracts are rewritten.
+   - Split developer-only map viewers from player Warroom and exclude only the developer-only branch from release builds.
+5. Only after that decision report may a deletion/migration implementation packet be created.
+
+**Verification for audit:** `git diff --check`; file:line receipts for every live path; no runtime code edits.
+
+**Stop gate:** Any proposed deletion of `src/ui/warroom` before replacing `desktop:release:check`, electron-builder `dist/warroom`, `awwv://warroom/index.html`, packaged probe `warroomIndex`, and related tests is a hard NO-GO.
+
+## Part F - Trigger-Gated Structural Register
+
+| ID | Debt | Trigger to act | First action |
 |---|---|---|---|
-| RR2-6 | Full-save-over-IPC per turn advance (8.5MB late war) + full adapter rebuild | WP-9 diary reports minutes-per-turn degrading with campaign length, OR a measured advance >3s at week 100+ | Instrument first: log advance wall-time (serialize / IPC / parse / adapter / render) per turn in dev builds; then the fix ladder compact-serialization → adapter memoization → delta sync, ONE rung at a time |
-| RR2-7 | Untyped business logic in `electron-main.cjs` + `.cjs` handlers; "MUST match" constant families | Next defect traced to a `.cjs` logic divergence, OR post-1.0 hardening window | Extend the CA-0 pattern (static parity guards) to every MUST-match family NOW is cheap and allowed; the full typed-main-process migration waits for post-1.0 |
-| RR2-8 | God files (war_phases 4,096 / validateGameState 3,958 / GameStateAdapter 3,760 / MapContainer 3,609 / corps_front_sectors 3,327) | Post-1.0, before any content/DLC lane | Split by ownership seams that already exist in comments (war_phases → phase-group modules; GameStateAdapter → per-surface projections); never as a side effect of a feature PR |
-| RR2-9 | i18n monoliths (5,221 + 5,188 lines, touched by every UI PR) | Post-1.0, or the next time two concurrent UI lanes conflict on messages files | Per-surface message modules + build-time merge + the existing CI parity gate pointed at the merged output |
+| RR2-6 | Full-save IPC per turn and full adapter rebuild | WP-9 diary reports late-campaign turn advance friction, or measured week 100+ advance exceeds 3 seconds | Instrument serialize, IPC, parse, adapter, and render timing in dev builds; do not optimize before measuring. |
+| RR2-8 | God files | Post-1.0 hardening window or a feature touches one of these files enough to justify ownership extraction | Split along existing ownership boundaries with no behavior changes and byte-identical proof where sim is touched. |
+| RR2-9 | i18n monoliths | Post-1.0 or the next concurrent UI conflict on `messages.en.ts` / `messages.bcs.ts` | Introduce per-surface message modules and a build-time merge/parity gate. |
+| RR2-10 | Generic aftermath digest | A diary identifies quiet-turn comprehension as top-three friction | Add one view-derived sentence; keep it cosmetic and one sentence. |
 
----
+## Part G - Sequencing
 
-## Part D — Sequencing
+1. RR2-5A queue audit - read-only, fastest risk clarification.
+2. RR2-1 audio migration - direct UI bug fix.
+3. RR2-3A archived legacy UI deletion - cleanup only after deadness proof.
+4. RR2-4 napkin restructure - process/readability fix.
+5. RR2-7A parity guard - small hardening slice, no behavior change.
+6. RR2-2 65th regiment - solo sim-touching lane after consultations.
+7. RR2-3B Warroom decision audit - can run in parallel with docs/read-only work, but implementation waits for decision.
 
-| Order | Packet | Mode | Blocking? |
-|---|---|---|---|
-| 1 | RR2-5(a) queue audit | direct, read-only | no |
-| 2 | RR2-1 audio migration | direct or builder | no |
-| 3 | RR2-3 dead-code excision | builder (cleanup discipline) | no |
-| 4 | RR2-4 napkin restructure | direct (napkin skill) | no |
-| 5 | RR2-2 65th regiment | consultation → builder | sim-touching: solo lane, one-change-per-run |
-| — | RR2-6..9 | register only | trigger-gated |
+Current release priority remains unchanged: WP-9 owner friction diaries and the CA-1 panel remain ahead of speculative polish. RR2 packets exist to remove known hazards without displacing the D2 path.
 
-RR2-1/3/4/5(a) are mutually parallel-safe. RR2-2 must not run concurrently with ANY other sim-touching lane. None of this displaces the actual front of the queue: **WP-9 owner friction diaries and the CA-1 panel remain the next real actions** — this plan exists so the findings are not lost, not to delay play.
+## Part H - Ledger and Board Discipline
 
-## Part E — Ledger/board discipline
+Each packet closeout updates:
 
-Each packet: PROJECT_LEDGER entry with verification evidence; RR2-3 and RR2-4 also update the docs their deletions touch; RR2-2 records its calibration verdict in CALIBRATION_MASTER lineage if a re-bless occurs. COMMAND_BOARD carries this plan's row; GAME_STATE_RATING_MASTER is NOT touched (no grades change until diaries).
+- `docs/PROJECT_LEDGER.md` with verification and determinism/scope.
+- `docs/plans/COMMAND_BOARD.md` if status, next action, stop gate, or sequencing changes.
+- `docs/plans/MASTER_ROADMAP.md` only for roadmap-level reclassification or release-gate implications.
+- Relevant master report (`GUI_MASTER`, `WARROOM_MASTER`, `CALIBRATION_MASTER`) only when that domain's live truth changes.
+
+`docs/10_canon/FORAWWV.md` is not in scope for this plan.
+
+## Part I - Execution Closeout 2026-07-08
+
+Completed packets:
+
+1. **RR2-1 audio migration:** implemented `awwv.audio.preferences.v2` with v1 migration and tests.
+2. **RR2-2 65th loan lifecycle diagnostics:** unresolved diagnostics now treat recent sector-exempt active loans and active column deployments as lifecycle-owned transition state; final seal runs loaned-elite rescue before unresolved warnings. A dynamic active-loan redeploy variant was tested and rejected after 188w engine-health regression. The 2w proof and strict post-rebless baseline proof no longer emit `UNRESOLVED rs_65th_protection_motorized_regiment`.
+3. **RR2-3A archived UI deletion:** extracted the deterministic sandbox slice/scenario utilities to `src/ui/map/sandbox/`, updated the live test import, re-proved no `_archived/ui_legacy` references outside the deleted tree, and removed the archived tree.
+4. **RR2-3B Warroom asset cleanup:** reaffirmed the Warroom shell as live packaged startup code, then removed only the non-runtime asset-history directories `src/ui/warroom/assets/_old` and `src/ui/warroom/assets/raw_sora`.
+5. **RR2-4 napkin restructure:** replaced the oversized mandatory runbook with a bounded index and linked topic archives; updated repo-local and active global napkin skill instructions.
+6. **RR2-5 queue lifecycle:** capped `narrative_queue` to the latest 128 entries. Attempted stale non-player/headless `pending_officer_events` pruning was reverted and documented as a no-go until a tombstone/archive design preserves command lifecycle/dedupe semantics.
+7. **RR2-7A CA parity guard:** changed the main-process force-launch path to use the imported shared `FORCE_LAUNCH_COST`; static guard catches a reintroduced local literal.
+
+Residual trigger-gated work:
+
+- RR2-6 full-save IPC instrumentation waits for diary/perf evidence.
+- RR2-8 god-file splits wait for post-1.0 or a touching feature branch.
+- RR2-9 i18n module split waits for post-1.0 or a real merge-conflict trigger.
+- RR2-10 aftermath digest copy waits for diary evidence that quiet-turn comprehension is top-three friction.
+
+Important closeout note: the continuation repaired the later 52w active-loan diagnostic issue and performed the explicit baseline-refresh decision. `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed the `apr1992_52w` artifacts after the intentional diagnostic/final-sector output change; strict `npm.cmd run test:baselines` then passed with no `UNRESOLVED rs_65th`, no `ENOENT`, and no baseline mismatch. Fresh 188w engine health passed (`dead_ops=12`, `matched_osids=646`, `pass=true`). Further persisted-output movement still requires a new explicit baseline-refresh decision.
+
+Closeout verification commands are recorded in `docs/PROJECT_LEDGER.md`.

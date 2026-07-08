@@ -425,6 +425,52 @@ describe('deployEliteLoan', () => {
         expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual([]);
     });
 
+    it('does not report a loaned elite with a column assembly order before operation attachment', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'arbih_1st_corps';
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RBiH',
+            side_b: 'RS',
+        }] as any;
+        state.military.brigade_movement_orders = {
+            arbih_guards_brigade: { destination_sids: ['op:mun:assembly'], stance: 'column' } as any,
+        };
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual([]);
+    });
+
+    it('does not report a newly loaned elite before the same-turn movement planner attaches orders', () => {
+        const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'arbih_1st_corps';
+        brigade.elite_loan_state!.loan_start_turn = 5;
+        const sector = makeSector('arbih_1st_corps', 'RBiH', 'op:mun:o1');
+        const state = makeState({
+            formations: { arbih_guards_brigade: brigade },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RBiH',
+            side_b: 'RS',
+        }] as any;
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual([]);
+    });
+
     it('still reports a loaned elite when the only movement order lacks column deployment ownership', () => {
         const brigade = makeElite('arbih_guards_brigade', 'RBiH', 'op:mun:o0', { corps_id: 'arbih_general_staff' });
         brigade.elite_loan_state!.on_loan = true;
@@ -447,6 +493,86 @@ describe('deployEliteLoan', () => {
         };
 
         expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(2))).toEqual(['arbih_guards_brigade']);
+    });
+
+    it('does not report an active loaned elite that is column-deploying to receiving corps operation staging', () => {
+        const brigade = makeElite('rs_65th_protection_motorized_regiment', 'RS', 'op:mun:o0', { corps_id: 'vrs_main_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_sarajevo_romanija';
+        const sector = makeSector('vrs_sarajevo_romanija', 'RS', 'op:mun:o1');
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: {
+                vrs_sarajevo_romanija: {
+                    active_operations: [{
+                        name: 'Operation Prsten',
+                        phase: 'execution',
+                        participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                        staging_osid: 'op:mun:corps_staging',
+                        axes: [{
+                            axis_id: 'axis:romanija',
+                            objectives: ['op:mun:o2'],
+                            staging_osid: 'op:mun:o3',
+                            assigned_brigades: ['rs_65th_protection_motorized_regiment'],
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }] as any;
+        state.military.brigade_movement_orders = {
+            rs_65th_protection_motorized_regiment: { destination_sids: ['op:mun:o3'], stance: 'column' } as any,
+        };
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(3))).toEqual([]);
+    });
+
+    it('does not report an active loaned elite operation participant with a column assembly move', () => {
+        const brigade = makeElite('rs_65th_protection_motorized_regiment', 'RS', 'op:mun:o0', { corps_id: 'vrs_main_staff' });
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_sarajevo_romanija';
+        const sector = makeSector('vrs_sarajevo_romanija', 'RS', 'op:mun:o1');
+        const state = makeState({
+            formations: { rs_65th_protection_motorized_regiment: brigade },
+            corps_command: {
+                vrs_sarajevo_romanija: {
+                    active_operations: [{
+                        name: 'Operation Prsten',
+                        phase: 'execution',
+                        participating_brigades: ['rs_65th_protection_motorized_regiment'],
+                        staging_osid: 'op:mun:corps_staging',
+                        axes: [{
+                            axis_id: 'axis:romanija',
+                            objectives: ['op:mun:o2'],
+                            staging_osid: 'op:mun:o3',
+                            assigned_brigades: ['rs_65th_protection_motorized_regiment'],
+                        }],
+                    }],
+                },
+            },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 5,
+        });
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:mun:o1__op:enemy:e0',
+            a: 'op:mun:o1',
+            b: 'op:enemy:e0',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }] as any;
+        state.military.brigade_movement_orders = {
+            rs_65th_protection_motorized_regiment: { destination_sids: ['op:mun:assembly'], stance: 'column' } as any,
+        };
+
+        expect(collectUnresolvedSectorBrigades(state, { [sector.sector_id]: sector }, state.military.formations!, chainAdj(3))).toEqual([]);
     });
 
     it('syncs a loaned army-HQ elite into receiving corps sector assignment after column arrival', () => {
@@ -720,6 +846,61 @@ describe('tickEliteLoans', () => {
         tickEliteLoans(state, 10, chainAdj(3));
 
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
+    });
+
+    it('does not reissue deployment orders for active loans from sector-exempt organic corps', () => {
+        const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
+        brigade.location_osid = 'op:mun:o0';
+        brigade.assignment = null;
+        const sector = makeSector('vrs_drina', 'RS', 'op:mun:o2');
+        const state = makeState({
+            formations: { rs_1st_guards: brigade },
+            corps_command: { vrs_drina: { active_operations: [] } },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+        delete state.military.brigade_movement_orders?.rs_1st_guards;
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(state.military.brigade_movement_orders?.rs_1st_guards).toBeUndefined();
+    });
+
+    it('does not reissue deployment orders for active loans from non-exempt organic corps', () => {
+        const brigade = makeOnLoanBrigade('rs_line_elite', { loanStartTurn: 0 });
+        brigade.corps_id = 'vrs_1st_krajina';
+        brigade.location_osid = 'op:mun:o0';
+        brigade.assignment = null;
+        const sector = makeSector('vrs_drina', 'RS', 'op:mun:o2');
+        const state = makeState({
+            formations: { rs_line_elite: brigade },
+            corps_command: { vrs_drina: { active_operations: [] } },
+            corps_front_sectors: { [sector.sector_id]: sector },
+            turn: 10,
+        });
+        state.political.political_controllers = {
+            'op:mun:o0': 'RS',
+            'op:mun:o1': 'RS',
+            'op:mun:o2': 'RS',
+        } as any;
+        brigade.elite_loan_state!.on_loan = true;
+        brigade.elite_loan_state!.loaned_to_corps = 'vrs_drina';
+        brigade.elite_loan_state!.loan_start_turn = 0;
+        delete state.military.brigade_movement_orders?.rs_line_elite;
+
+        tickEliteLoans(state, 10, chainAdj(3));
+
+        expect(brigade.elite_loan_state!.on_loan).toBe(true);
+        expect(state.military.brigade_movement_orders?.rs_line_elite).toBeUndefined();
     });
 
     it('auto-joins a newly launched execution operation through axis membership as well', () => {

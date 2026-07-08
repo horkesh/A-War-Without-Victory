@@ -23770,6 +23770,92 @@ Verification: stale-phrase search over the touched live/current surfaces found n
 
 Determinism/scope: documentation/process/status reconciliation only. No runtime UI behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or canon/FORAWWV content changed.
 
+## 2026-07-08 - RR2 executed through current stop gates
+
+Executed the dispatchable and audit portions of `docs/plans/2026-07-08-release-review-round2-findings-plan.md`.
+
+Shipped fixes/guards:
+- RR2-1: added `awwv.audio.preferences.v2` migration in `src/ui/map/audio/audio_preferences.ts`. v2 wins over v1; exact old v1 default `{ muted: true, masterVolume: 0.5 }` resolves to the current unmuted default; real custom v1 preferences migrate and persist to v2; corrupt v1 falls back safely.
+- RR2-4: restructured `.claude/napkin.md` into a bounded index with linked topic archives under `.claude/napkin/`; updated repo-local `.claude/skills/napkin/SKILL.md` and active global `C:/Users/User/.codex/skills/napkin/SKILL.md` to bounded-index behavior.
+- RR2-7A: replaced the duplicate `const FORCE_LAUNCH_COST = 15` in `src/desktop/electron-main.cjs` with the imported shared constant and updated the static parity guard so a reintroduced local literal fails.
+
+Filed required reports:
+- RR2-5A queue audit: `docs/40_reports/working/20260708_pending_queue_growth_audit.md`.
+- RR2-3A archived legacy probe: `docs/40_reports/working/20260708_archived_ui_legacy_deadness_probe.md`; deletion is NO-GO until the load-bearing sandbox test import is extracted/replaced.
+- RR2-2 65th loan-limbo investigation: `docs/40_reports/working/20260708_65th_protection_regiment_loan_limbo_investigation.md`; 2w run `runs/apr1992_definitive_40w__c410759aa651b613__w2_n47` captured two transient turn-1 warnings and showed the 65th assigned by turn 2. No behavior edit was made because operations/corps-command consultation is still missing.
+- RR2-3B Warroom audit: `docs/40_reports/working/20260708_warroom_live_surface_decision_audit.md`; `src/ui/warroom` is reaffirmed live packaged startup code. Cleanup should target asset history/dev-viewer ownership separately.
+
+Updated `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, `docs/plans/2026-07-08-release-review-round2-findings-plan.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md` with execution state, stop gates, and durable lessons.
+
+Verification:
+- Red proof for RR2-1: `npx.cmd vitest run tests/ui/audio_preferences.test.ts --pool=forks --reporter=dot` failed before implementation on the v1 migration cases.
+- Green audio proof: `npx.cmd vitest run tests/ui/audio_preferences.test.ts tests/ui/settings_audio_preferences.test.ts tests/ui/audio_ambient_floor.test.ts tests/playtest_evidence_packet.test.ts --pool=forks --reporter=dot` passed, 4 files / 18 tests.
+- Red proof for RR2-7A: `npx.cmd vitest run tests/command_authority_economy.test.ts --pool=forks --reporter=dot` failed before implementation on the local `FORCE_LAUNCH_COST` literal.
+- Green CA proof: `npx.cmd vitest run tests/command_authority_economy.test.ts --pool=forks --reporter=dot` passed, 1 file / 10 tests.
+- Probe-adjacent proof: `npx.cmd vitest run tests/sandbox_slice_determinism.test.ts tests/warroom_smoke.test.ts tests/ui/warroom_launch_screen_contract.test.ts --pool=forks --reporter=dot` passed, 3 files / 5 tests.
+- Scenario investigation proof: `npx.cmd tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --weeks 2 --unique --out runs` passed; captured console log at `docs/40_reports/working/20260708_rr2_65th_2w_console.log`.
+- `npm.cmd run typecheck` passed.
+- `git diff --check` passed.
+
+Not run: `npm.cmd run test:baselines`, `engine:health:gate`, and full `qa:player-experience`. RR2-2/RR2-5A/RR2-3A/RR2-3B stopped at audits/probes, and the shipped code changes were UI preference migration plus static/main-process constant parity with no simulation behavior or scenario output changes.
+
+Determinism/scope: RR2-1 changes browser-local UI preference migration only; RR2-7A changes constant ownership in Electron main without changing the value; RR2-4 changes process docs/runbook shape; RR2-2/RR2-3A/RR2-3B/RR2-5A are report/audit outputs. No simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, or canon/FORAWWV content changed.
+
 ## 2026-07-08 - Release Review Round 2: findings written up as execution plan
 
 Filed docs/plans/2026-07-08-release-review-round2-findings-plan.md from the owner-directed post-runway review (PRs #462-#470 line-audit at the riskiest points + repo structure sweep). Part A carries ten receipts verified on current main. Part B repair packets: RR2-1 audio-preference v1->v2 migration with four pinned edge cases (pre-WP-8 Settings saves persisted muted:true as a choice; ambiguous exact-old-default resolves toward un-mute); RR2-2 65th Protection Regiment loan limbo (exemption bypassed by on-loan state at brigade_assignment.ts:1535; consultation-gated, fix-the-class investigation first, options data-vs-engine, full 188w matched_osids + test:baselines + engine-health proof obligations); RR2-3 excision of ~20k LOC dead code (src/_archived/ui_legacy + dormant src/ui/warroom) under cleanup-packet discipline with baseline-byte-identical proof; RR2-4 napkin restructure to a <=400-line index + topic archives + eviction rule (436KB vs its own cap-10 charter); RR2-5 read-only growth audit of pending_officer_events (232KB at w188) and narrative_queue (192KB) with any fix gated as a separate sim-touching packet; RR2-10 aftermath digest content folded into a future diary packet. Part C structural register (RR2-6 full-save-per-turn IPC growth with instrument-first fix ladder; RR2-7 untyped electron-main.cjs logic with extend-CA-0-parity-guards as the cheap immediate move; RR2-8 god files; RR2-9 i18n monoliths) is trigger-gated, not scheduled. Review also CLEARED WP-2 classifier shape-guarding, WP-5 lever guard, and turn_summaries capping as sound. Sequencing keeps WP-9 friction diaries + CA-1 panel as the front of the queue. COMMAND_BOARD row added. Docs-only change; no runtime behavior, simulation, event JSON, scenario data, save schema, baseline/golden manifest, or persisted output ordering changed.
+
+## 2026-07-08 - RR2 corrected actionable plan and roadmap integration
+
+Rewrote `docs/plans/2026-07-08-release-review-round2-findings-plan.md` into a fully actionable corrected execution plan after plan review found one critical classification error: `src/ui/warroom` is not dead code, because `desktop:release:check` builds it, electron-builder packages `dist/warroom`, `electron-main.cjs` loads `awwv://warroom/index.html`, and the packaged runtime probe requires `warroomIndex`. The corrected plan splits RR2-3 into RR2-3A (`src/_archived/ui_legacy` deadness proof/deletion) and RR2-3B (Warroom live-surface retirement/reaffirmation decision audit with a hard no-delete stop gate). It also makes RR2-1 audio migration, RR2-4 napkin restructure, RR2-5A pending-queue audit, and RR2-7A command-authority parity guards dispatchable; keeps RR2-2 as the sole consultation-gated sim-touching lane; and keeps RR2-6/RR2-8/RR2-9/RR2-10 trigger-gated.
+
+Updated `docs/plans/COMMAND_BOARD.md` with the corrected RR2 dispatch state and `docs/plans/MASTER_ROADMAP.md` with a short 2026-07-08 amendment tying RR2 to the release path without displacing WP-9 diaries or the CA-1 panel. Added the reusable process rule to `docs/PROJECT_LEDGER_KNOWLEDGE.md`: package/startup/probe contracts outrank import-grep deadness claims when assessing UI shell deletion.
+
+Determinism/scope: documentation/process/roadmap only. No runtime UI behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or canon/FORAWWV content changed.
+
+## 2026-07-08 - RR2 full execution closeout
+
+Executed the remaining authorized work from `docs/plans/2026-07-08-release-review-round2-findings-plan.md` after the owner explicitly directed full execution.
+
+Implemented follow-through:
+- RR2-2 diagnostic/final-seal repair: `isMovementOwnedActiveLoanDeployment()` now treats same-turn new loans, recent sector-exempt active loans inside the minimum loan window, and active column deployments as movement-owned transition state, preventing false final-pass unresolved warnings for the 65th Protection Regiment while preserving stale/no-column warnings. Final sector truth sealing also rescues legitimate loaned elites into the receiving-corps sector before unresolved warning collection.
+- RR2-3A archived legacy deletion: extracted the deterministic sandbox slice/scenario utilities to `src/ui/map/sandbox/`, retargeted `tests/sandbox_slice_determinism.test.ts`, re-proved no live `_archived/ui_legacy` references, and removed `src/_archived/ui_legacy`.
+- RR2-3B Warroom cleanup: retained the live Warroom shell and removed only non-runtime asset-history directories `src/ui/warroom/assets/_old` and `src/ui/warroom/assets/raw_sora`.
+- RR2-5 lifecycle guard: capped `narrative_queue` to the latest 128 entries. The attempted stale unacknowledged non-player/headless `pending_officer_events` prune was rejected in continuation because it regressed 188w engine health; unacknowledged pending-officer rows remain command lifecycle/dedupe state until a tombstone/archive design preserves that behavior.
+- Updated the RR2 plan, command board, master roadmap, working reports, and knowledge ledger to reflect full execution and the remaining trigger-gated items.
+
+Verification:
+- Red/green RR2-2 proof: focused cases first proved the false-positive 65th warning path, then passed after the diagnostic predicate and final-seal rescue. Dynamic active-loan redeploy was attempted later and rejected after 188w engine-health regression.
+- Focused RR2 proof: `npx.cmd vitest run tests/sim/combat/phase3_reliability_decay.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/loaned_elite_rescue_reserve_cap.test.ts tests/army_reserve_system.test.ts tests/command_authority_economy.test.ts tests/ui/audio_preferences.test.ts tests/sandbox_slice_determinism.test.ts --pool=forks --reporter=dot` passed, 8 files / 100 tests.
+- Warroom/package proof: `npx.cmd vitest run tests/desktop_packaging_extraresources_filter.test.ts tests/desktop_packaged_runtime_probe.test.ts tests/warroom_smoke.test.ts tests/ui/warroom_launch_screen_contract.test.ts --pool=forks --reporter=dot` passed, 4 files / 17 tests.
+- Audio proof remained green: `npx.cmd vitest run tests/ui/audio_preferences.test.ts tests/ui/settings_audio_preferences.test.ts tests/ui/audio_ambient_floor.test.ts tests/playtest_evidence_packet.test.ts --pool=forks --reporter=dot` passed, 4 files / 18 tests.
+- `npm.cmd run desktop:release:check` passed.
+- `npm.cmd run typecheck` passed after fixing the existing `Window.awwv` type hole in `src/ui/map/components/SettingsScreen.tsx`.
+- `cmd.exe /c "npm.cmd run qa:player-experience > docs\40_reports\working\20260708_rr2_qa_player_experience_final_cmd.log 2>&1"` passed end-to-end after rerunning once past a transient live-surface port conflict; the final pass covered 44 files / 707 tests plus both browser gates.
+- Scenario proof passed: `npx.cmd tsx tools/scenario_runner/run_scenario_with_preflight.ts --scenario data/scenarios/apr1992_definitive_40w.json --weeks 2 --unique --out runs` produced `runs/apr1992_definitive_40w__c410759aa651b613__w2_n52`, final hash `337e1e0bd753bf26`, with no `UNRESOLVED rs_65th_protection_motorized_regiment` console lines.
+- `git diff --check` passed with only existing CRLF normalization warnings.
+- Superseded by the RR2 continuation below: the first strict `npm.cmd run test:baselines` run exposed later 52w active-loan diagnostic/output drift. The continuation rejected active redeploy and pending-prune variants after 188w regression, kept the diagnostic/final-seal and narrative-cap subset, refreshed the affected `apr1992_52w` baseline hashes by explicit decision, and strict baseline regression now passes.
+
+Determinism/scope: RR2-5 changes persisted queue output only through stable-order `narrative_queue` capping; unacknowledged `pending_officer_events` pruning is explicitly not shipped. RR2-2 changes diagnostic warning classification and final-sector reconciliation for loaned elites; it does not reissue active-loan deployment orders. All other code changes are UI preference migration, package/context cleanup, or constant ownership. No event JSON, scenario source data, startup artifact construction, save schema migration, calibration thresholds, packaged installer artifact, randomness, timestamps, locale persistence, or canon/FORAWWV content changed. Further persisted-output movement requires a new explicit baseline-refresh decision.
+
+## 2026-07-08 - RR2 continuation: diagnostic finalization, no-go reversions, and baseline refresh
+
+Completed the continuation requested after the RR2 full-execution closeout exposed a later 52w 65th unresolved diagnostic. Two broader runtime variants were tested and rejected, then the final subset was revalidated:
+
+- Active-loan redeploy retry was rejected: it made 188w engine health fail (`dead_ops=30`, `matched_osids=643`) and was reverted.
+- Stale unacknowledged non-player/headless `pending_officer_events` pruning was rejected: it also made 188w engine health fail by removing command lifecycle/dedupe rows, and was reverted.
+- Final sector truth sealing runs loaned-elite rescue before unresolved warning collection, then reapplies final owner truth and syncs formation assignments.
+- The final 65th diagnostic predicate suppresses same-turn loans, recent sector-exempt active loans inside the minimum loan window, and active column deployments; stale/no-column cases still warn.
+- Focused tests now cover diagnostic suppression, final-seal loaned-elite rescue, static final-seal ordering, retained unacknowledged pending-event lifecycle rows, acknowledged stale pruning, and `narrative_queue` capping.
+- The intentional persisted-output movement was re-blessed with `UPDATE_BASELINES=1 npm.cmd run test:baselines`, refreshing the affected `apr1992_52w` baseline artifacts in `data/derived/scenario/baselines/manifest.json`.
+
+Verification:
+- Red/green no-redeploy proof: `tests/army_reserve_system.test.ts` now asserts active loans from sector-exempt organic corps do not receive duplicate deployment orders while already lifecycle-owned.
+- Red/green final-seal proof: `tests/final_sector_truth_reconciliation.test.ts` failed before implementation because the loaned elite was not rescued into the receiving-corps sector before warning collection, then passed after the final-seal rescue.
+- Adjacent proof passed: `npx.cmd vitest run tests/sim/combat/phase3_reliability_decay.test.ts tests/final_sector_truth_reconciliation.test.ts tests/final_sector_truth_reconciliation_cache.test.ts tests/loaned_elite_rescue_reserve_cap.test.ts tests/army_reserve_system.test.ts tests/command_authority_economy.test.ts tests/ui/audio_preferences.test.ts tests/sandbox_slice_determinism.test.ts --pool=forks --reporter=dot` passed, 8 files / 100 tests.
+- Baseline refresh passed: `$env:UPDATE_BASELINES='1'; npm.cmd run test:baselines` exited 0.
+- Strict baseline proof passed: `npm.cmd run test:baselines` exited 0 and reported `Baseline regression: all scenarios match.` The strict post-rebless log `docs/40_reports/working/20260708_rr2_test_baselines_strict_post_rebless.log` has no `UNRESOLVED rs_65th`, no `ENOENT`, and no baseline mismatch.
+- Fresh 188w engine health passed on the final diagnostic-only subset: `node tools/engine_health_gate.cjs runs\eh_rr2\apr1992_definitive_188w__acb538b04d79af3c__w188_n4 --horizon 188w --json` reported `zero_eligible_ops=2`, `dead_ops=12`, `ghost_destroyed=2`, `stranded_brigades=4`, `matched_osids=646`, `consistency_failures=0`, and `pass=true`.
+- Release gates passed: `npm.cmd run ci:structural-fingerprint:check`, `npm.cmd run desktop:release:check`, and `cmd.exe /c "npm.cmd run qa:player-experience > docs\40_reports\working\20260708_rr2_qa_player_experience_final_cmd.log 2>&1"`.
+
+Determinism/scope: simulation behavior changed only for final-sector reconciliation and diagnostic classification of loaned elites; active-loan deployment retry is explicitly not shipped. Generated baseline hashes moved only for the intentional `apr1992_52w` output drift and were refreshed through the baseline gate. Queue capping remains stable-order; unacknowledged `pending_officer_events` pruning is explicitly not shipped. No event JSON, scenario source data, startup artifact construction, save schema migration, calibration thresholds, packaged installer artifact, randomness, timestamps, locale persistence, structural-fingerprint expectation, or canon/FORAWWV content changed.

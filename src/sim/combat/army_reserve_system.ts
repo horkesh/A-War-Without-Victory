@@ -1031,7 +1031,6 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
         const turnsSinceLoan = ls.loan_start_turn != null ? turn - ls.loan_start_turn : 0;
         const personnel = f.personnel ?? 0;
         const startPersonnel = ls.loan_start_personnel ?? personnel;
-
         // ── Force recall checks (in priority order) ──
 
         // Permanent degradation — > 50% personnel loss
@@ -1097,5 +1096,6 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
             continue;
         }
+
     }
 }

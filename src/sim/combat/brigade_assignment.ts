@@ -21,6 +21,7 @@ import {
     isSectorAssignmentExemptCorpsId,
     PHASE_2C_MAX_HOPS,
 } from './corps_front_sectors_constants.js';
+import { ELITE_LOAN_MIN_DURATION } from '../../state/elite_loan_types.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
 import {
@@ -359,6 +360,45 @@ export function isMovementOwnedReturnToCorps(
         && movementState?.stance === 'column'
         && activeDestination != null
         && ownCorpsTerritory.has(activeDestination);
+}
+
+function columnDeploymentDestination(
+    state: GameState,
+    formationId: FormationId,
+): string | null {
+    const moveOrder = state.military.brigade_movement_orders?.[formationId] as { destination_sids?: string[]; stance?: string } | undefined;
+    const orderedDestination = moveOrder?.destination_sids?.[0];
+    if (moveOrder?.stance === 'column' && orderedDestination) return orderedDestination;
+
+    const movementState = state.military.brigade_movement_state?.[formationId];
+    const activeDestination = movementState?.destination_sids?.[0];
+    if (movementState?.status === 'in_transit' && movementState?.stance === 'column' && activeDestination) {
+        return activeDestination;
+    }
+
+    return null;
+}
+
+export function isMovementOwnedActiveLoanDeployment(
+    state: GameState | undefined,
+    formationId: FormationId,
+    formation: FormationState,
+): boolean {
+    if (!state || formation.assignment?.kind != null) return false;
+    const loanedToCorps = formation.elite_loan_state?.on_loan
+        ? formation.elite_loan_state.loaned_to_corps
+        : null;
+    if (!loanedToCorps) return false;
+    if (formation.elite_loan_state?.loan_start_turn === state.meta?.turn) return true;
+    const loanStartTurn = formation.elite_loan_state?.loan_start_turn;
+    if (isSectorAssignmentExemptCorpsId(formation.corps_id) && loanStartTurn != null) {
+        const turnsSinceLoan = (state.meta?.turn ?? loanStartTurn) - loanStartTurn;
+        if (turnsSinceLoan >= 0 && turnsSinceLoan < ELITE_LOAN_MIN_DURATION) return true;
+    }
+
+    const destination = columnDeploymentDestination(state, formationId);
+    if (!destination) return false;
+    return true;
 }
 
 function dissolvePocketDestroyableBrigade(

@@ -2,7 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
-import { reconcileFinalSectorTruth } from '../src/sim/combat/final_sector_truth_reconciliation.js';
+import { isMovementOwnedActiveLoanDeployment } from '../src/sim/combat/brigade_assignment.js';
+import {
+    reconcileFinalSectorTruth,
+    sealFinalSectorTruthFromCurrentSectors,
+} from '../src/sim/combat/final_sector_truth_reconciliation.js';
 import {
     CURRENT_SCHEMA_VERSION,
     type FactionId,
@@ -94,6 +98,33 @@ function makeState(): { state: GameState; edges: EdgeRecord[] } {
 
     return { state, edges };
 }
+
+describe('isMovementOwnedActiveLoanDeployment', () => {
+    it('suppresses recent active-loan diagnostics for sector-exempt organic formations', () => {
+        const { state } = makeState();
+        state.meta.turn = 52;
+        const formation = makeFormation('rs_65th_protection_motorized_regiment', {
+            corps_id: 'vrs_main_staff',
+            location_osid: 'op:test:rear',
+            assignment: null,
+            elite_loan_state: {
+                current_episode_id: 3,
+                last_recall_turn: 45,
+                loan_start_personnel: 1416,
+                loan_start_turn: 49,
+                loaned_to_corps: 'vrs_sarajevo_romanija',
+                on_loan: true,
+                permanently_degraded: false,
+            },
+        });
+
+        expect(isMovementOwnedActiveLoanDeployment(
+            state,
+            'rs_65th_protection_motorized_regiment' as any,
+            formation,
+        )).toBe(true);
+    });
+});
 
 describe('final sector truth reconciliation', () => {
     afterEach(() => {
@@ -328,5 +359,81 @@ describe('final sector truth reconciliation', () => {
         expect(
             state.military.sector_combat_ratings?.[rebuiltSector!.sector_id]?.brigade_count ?? 0,
         ).toBeGreaterThan(0);
+    });
+
+    it('rescues loaned elites in receiving-corps territory before final seal warnings', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const { state, edges } = makeState();
+        state.meta.turn = 52;
+        state.military.formations!.loaned_elite = makeFormation('loaned_elite', {
+            corps_id: 'vrs_main_staff',
+            location_osid: 'op:test:rear',
+            home_osid: 'op:test:rear',
+            elite_loan_state: {
+                on_loan: true,
+                loaned_to_corps: 'corps_a',
+                loan_start_turn: 49,
+                last_recall_turn: null,
+                loan_start_personnel: 1200,
+                permanently_degraded: false,
+                current_episode_id: 0,
+            },
+        });
+        state.military.corps_front_sectors = {
+            'sector:corps_a:0': {
+                sector_id: 'sector:corps_a:0',
+                corps_id: 'corps_a',
+                faction: 'RS',
+                opposing_factions: ['RBiH' as FactionId],
+                edge_ids: ['op:test:front__op:test:enemy'],
+                sub_segments: [],
+                length_edges: 1,
+                territory_osids: ['op:test:rear', 'op:test:front'],
+                assigned_brigade_ids: ['brig_seed'],
+                reserve_brigade_ids: [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+                sector_stance: 'defend',
+                stance_source: 'bot',
+            },
+        };
+
+        sealFinalSectorTruthFromCurrentSectors(state, edges);
+
+        const sector = state.military.corps_front_sectors['sector:corps_a:0']!;
+        const sectorRoster = [
+            ...sector.assigned_brigade_ids,
+            ...sector.reserve_brigade_ids,
+            ...(sector.rear_brigade_ids ?? []),
+        ];
+        expect(sectorRoster).toContain('loaned_elite');
+        expect(state.military.formations!.loaned_elite!.assignment).toEqual(
+            expect.objectContaining({ kind: 'sector', sector_id: 'sector:corps_a:0' }),
+        );
+        expect(state.military.unresolved_sector_brigades ?? []).not.toContain('loaned_elite');
+        expect(
+            warnSpy.mock.calls.some(([msg]) => String(msg).includes('UNRESOLVED loaned_elite')),
+        ).toBe(false);
+    });
+
+    it('static contract: final seal rescues loaned elites after final owner truth pass', () => {
+        const builderSource = readFileSync('src/sim/combat/corps_front_sectors.ts', 'utf8');
+        const syncIdx = builderSource.indexOf('syncSectorAssignmentsToFormations');
+        const collectIdx = builderSource.indexOf('collectUnresolvedSectorBrigades');
+
+        expect(syncIdx).toBeGreaterThan(-1);
+        expect(syncIdx).toBeLessThan(collectIdx);
+
+        const sealSource = readFileSync('src/sim/combat/final_sector_truth_reconciliation.ts', 'utf8');
+        const firstOwnerPassIdx = sealSource.indexOf('applyFinalSectorOwnerTruthPass(');
+        const rescueIdx = sealSource.indexOf('rescueUnassignedLoanedElitesInTerritory', firstOwnerPassIdx);
+        const secondOwnerPassIdx = sealSource.indexOf('applyFinalSectorOwnerTruthPass(', firstOwnerPassIdx + 1);
+        const sealSyncIdx = sealSource.indexOf('syncSectorAssignmentsToFormations', secondOwnerPassIdx);
+
+        expect(firstOwnerPassIdx).toBeGreaterThan(-1);
+        expect(rescueIdx).toBeGreaterThan(firstOwnerPassIdx);
+        expect(secondOwnerPassIdx).toBeGreaterThan(rescueIdx);
+        expect(sealSyncIdx).toBeGreaterThan(secondOwnerPassIdx);
     });
 });

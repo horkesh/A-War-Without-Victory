@@ -73,6 +73,7 @@ import {
     enforcePhysicalSectorOwnership,
     rehomeUnassignedBrigadesToPhysicalSectorOwners,
     deduplicateBrigadesAcrossSectors,
+    isMovementOwnedActiveLoanDeployment,
     isMovementOwnedHomeReturn,
     isMovementOwnedReturnToCorps,
     recomputeSectorPowerAndThreat,
@@ -993,6 +994,9 @@ function collectUnresolvedSectorBrigades(
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
             if (isMovementOwnedHomeReturn(state, formationId, formation)) {
+                return false;
+            }
+            if (isMovementOwnedActiveLoanDeployment(state, formationId, formation)) {
                 return false;
             }
             if (isMovementOwnedReturnToCorps(state, formationId, formation, sectorList)) {

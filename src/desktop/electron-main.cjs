@@ -2347,8 +2347,7 @@ app.whenReady().then(() => {
       if (!op) {
         return { ok: false, error: 'Operation not found' };
       }
-      // Level 3 Direct Intervention: deduct command authority (cost 15)
-      const FORCE_LAUNCH_COST = 15;
+      // Level 3 Direct Intervention: deduct command authority.
       const auth = state.military.command_authority;
       if (auth) {
         if (auth.current < FORCE_LAUNCH_COST) {

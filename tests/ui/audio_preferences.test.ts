@@ -5,6 +5,7 @@ import {
 } from '../../src/ui/map/audio/audio_engine.js';
 import {
     AUDIO_PREFERENCES_STORAGE_KEY,
+    AUDIO_PREFERENCES_STORAGE_KEY_V1,
     applyAudioPreferences,
     loadAudioPreferences,
     saveAudioPreferences,
@@ -43,6 +44,49 @@ describe('audio preference persistence', () => {
         expect(saved).toEqual({ muted: false, masterVolume: 1 });
         expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(saved);
         expect(loadAudioPreferences(storage)).toEqual(saved);
+    });
+
+    it('migrates the exact v1 old silent default to the current enabled default', () => {
+        const storage = new MemoryStorage();
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: true, masterVolume: 0.5 }));
+
+        const prefs = loadAudioPreferences(storage);
+
+        expect(prefs).toEqual({ muted: false, masterVolume: 0.5 });
+        expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(prefs);
+    });
+
+    it('preserves v1 mute when the user changed volume', () => {
+        const storage = new MemoryStorage();
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: true, masterVolume: 0.7 }));
+
+        const prefs = loadAudioPreferences(storage);
+
+        expect(prefs).toEqual({ muted: true, masterVolume: 0.7 });
+        expect(JSON.parse(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY) ?? '{}')).toEqual(prefs);
+    });
+
+    it('preserves v1 unmuted preferences', () => {
+        const storage = new MemoryStorage();
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: false, masterVolume: 0.25 }));
+
+        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.25 });
+    });
+
+    it('uses v2 preferences when both v1 and v2 exist', () => {
+        const storage = new MemoryStorage();
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, JSON.stringify({ muted: true, masterVolume: 0.7 }));
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY, JSON.stringify({ muted: false, masterVolume: 0.35 }));
+
+        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.35 });
+    });
+
+    it('falls back to defaults for corrupt v1 JSON', () => {
+        const storage = new MemoryStorage();
+        storage.setItem(AUDIO_PREFERENCES_STORAGE_KEY_V1, '{not-json');
+
+        expect(loadAudioPreferences(storage)).toEqual({ muted: false, masterVolume: 0.5 });
+        expect(storage.getItem(AUDIO_PREFERENCES_STORAGE_KEY)).toBeNull();
     });
 
     it('applies preferences to the silent bus without browser audio or network IO', () => {

@@ -73,12 +73,10 @@ describe('CA cost parity (single-host constants stay in sync)', () => {
         expect(ipcContract.DECORATE_UNIT_COST).toBe(DECORATE_UNIT_COST);
     });
 
-    it('electron-main.cjs duplicated force-launch literal matches the contract', () => {
-        // electron-main.cjs re-declares FORCE_LAUNCH_COST locally (line ~2351).
+    it('electron-main.cjs uses the shared force-launch constant instead of a local literal', () => {
         const src = read('src/desktop/electron-main.cjs');
-        const m = /const FORCE_LAUNCH_COST = (\d+);/.exec(src);
-        expect(m, 'electron-main.cjs no longer declares FORCE_LAUNCH_COST — update this guard').not.toBeNull();
-        expect(Number(m![1])).toBe(FORCE_LAUNCH_COST);
+        expect(src).toContain('FORCE_LAUNCH_COST,');
+        expect(src).not.toMatch(/\bconst\s+FORCE_LAUNCH_COST\s*=\s*\d+\s*;/);
     });
 });
 

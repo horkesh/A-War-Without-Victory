@@ -11,6 +11,7 @@ import {
     buildCorpsFrontSectors,
     collectUnresolvedSectorBrigades,
     emitFinalUnresolvedSectorWarnings,
+    rescueUnassignedLoanedElitesInTerritory,
 } from './corps_front_sectors.js';
 import { computeSectorCombatRatings } from './sector_combat_rating.js';
 import { strictCompare } from '../../state/validateGameState.js';
@@ -218,6 +219,10 @@ export function sealFinalSectorTruthFromCurrentSectors(
 
     const formations = state.military.formations ?? {};
     const adjacency = (spatial?.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(edges);
+    applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency, {
+        allowCollapsedRearGuardAbsorption: true,
+    });
+    rescueUnassignedLoanedElitesInTerritory(sectors, formations);
     applyFinalSectorOwnerTruthPass(sectors, state, formations, adjacency, {
         allowCollapsedRearGuardAbsorption: true,
     });
