@@ -23859,3 +23859,11 @@ Verification:
 - Release gates passed: `npm.cmd run ci:structural-fingerprint:check`, `npm.cmd run desktop:release:check`, and `cmd.exe /c "npm.cmd run qa:player-experience > docs\40_reports\working\20260708_rr2_qa_player_experience_final_cmd.log 2>&1"`.
 
 Determinism/scope: simulation behavior changed only for final-sector reconciliation and diagnostic classification of loaned elites; active-loan deployment retry is explicitly not shipped. Generated baseline hashes moved only for the intentional `apr1992_52w` output drift and were refreshed through the baseline gate. Queue capping remains stable-order; unacknowledged `pending_officer_events` pruning is explicitly not shipped. No event JSON, scenario source data, startup artifact construction, save schema migration, calibration thresholds, packaged installer artifact, randomness, timestamps, locale persistence, structural-fingerprint expectation, or canon/FORAWWV content changed.
+
+## 2026-07-08 - RR2 CI strict-null follow-up
+
+Cleaned the moved sandbox slicer source after GitHub CI caught the strict-null inventory ratchet: `src/ui/map/sandbox/sandbox_slice.ts` no longer uses dot non-null assertions on the parallel fetch responses. This preserves the extracted sandbox utility while keeping the global optional-contract floor at `non_null_assertions_dot=7`.
+
+Verification: `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --pool=forks --reporter=dot` passed, 1 file / 91 tests.
+
+Determinism/scope: defensive UI sandbox loader cleanup only. No simulation behavior, event JSON, scenario source data, baseline/golden manifest, structural fingerprint expectation, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or canon/FORAWWV content changed.

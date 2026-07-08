@@ -212,11 +212,13 @@ export async function loadSliceData(
     const [stRes, edRes] = responses;
     const saveRes = responses[2] ?? null;
 
-    if (!stRes!.ok) throw new Error(`Settlements fetch failed: HTTP ${stRes!.status}`);
-    if (!edRes!.ok) throw new Error(`Edges fetch failed: HTTP ${edRes!.status}`);
+    if (!stRes) throw new Error('Settlements fetch failed: missing response');
+    if (!edRes) throw new Error('Edges fetch failed: missing response');
+    if (!stRes.ok) throw new Error(`Settlements fetch failed: HTTP ${stRes.status}`);
+    if (!edRes.ok) throw new Error(`Edges fetch failed: HTTP ${edRes.status}`);
 
-    const settlementsGeo = (await stRes!.json()) as SettlementsGeoJSON;
-    const edgesJson = (await edRes!.json()) as EdgesJSON;
+    const settlementsGeo = (await stRes.json()) as SettlementsGeoJSON;
+    const edgesJson = (await edRes.json()) as EdgesJSON;
     let gameSave: GameSave | null = null;
     if (saveRes && saveRes.ok) {
         gameSave = (await saveRes.json()) as GameSave;
