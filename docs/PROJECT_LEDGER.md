@@ -23920,3 +23920,15 @@ Updated `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs
 Verification: docs-only change; `git diff --check` passed.
 
 Determinism/scope: documentation/design decision only. No runtime behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.
+
+## 2026-07-09 - Warroom new-campaign overlay hide fix
+
+Fixed the desktop Warroom new-campaign handoff where selecting a starting faction appeared to return the player to the initial Command Post screen. Faction selection was already creating a valid campaign state, but the Command Post overlay stayed visible because the higher-specificity `#main-menu { display: grid }` rule overrode the shared `.mm-overlay.mm-hidden { display: none }` rule. `#main-menu.mm-hidden` now explicitly hides the Command Post overlay, and the Warroom flow truth tests guard that selector.
+
+Verification:
+- Live Electron proof with Playwright after `npm run desktop` equivalent launch: New Campaign -> `RBiH` produced `meta.player_faction="RBiH"`, `meta.turn=0`, `#main-menu` computed `display: none`, tactical scene computed `display: block`, and the embedded tactical frame showed `WAR BEGINS: 6 APR 1992`.
+- `npx.cmd vitest run tests/warroom_new_campaign_flow_truth.test.ts tests/ui/app_boot_main_menu.test.ts tests/browser_campaign_start_fallback.test.ts --pool=forks --reporter=dot` passed, 3 files / 25 tests.
+- `npm.cmd run warroom:build` passed.
+- `npm.cmd run desktop:release:check` passed.
+
+Determinism/scope: desktop Warroom UI visibility only. No simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.

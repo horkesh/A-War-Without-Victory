@@ -84,6 +84,13 @@ describe('warroom new campaign flow truth', () => {
     expect(html).toContain('Choose Your Side');
   });
 
+  it('hides the Command Post overlay after faction selection despite #main-menu display styling', () => {
+    const html = readRepoFile('src', 'ui', 'warroom', 'index.html');
+
+    expect(html).toContain('#main-menu.mm-hidden');
+    expect(html.indexOf('#main-menu.mm-hidden')).toBeGreaterThan(html.indexOf('.mm-overlay.mm-hidden'));
+  });
+
   it('keeps embedded tactical-map replay sidecar subscriptions local to avoid cloning callbacks', () => {
     const html = readRepoFile('src', 'ui', 'map', 'index.html');
 
