@@ -1,7 +1,7 @@
 # Command Authority Economy — Repair Plan
 
 **Date:** 2026-07-06
-**Status:** CA-2 / CA-3 IMPLEMENTED 2026-07-09 on `codex/ca2-political-income`; local branch verification is green and PR checks own merge readiness. WP-9 owner diaries remain the release-path blocker.
+**Status:** CA-2 / CA-3 IMPLEMENTED 2026-07-09 on `codex/ca2-political-income` / PR #474; local branch verification and PR checks are green, with merge remaining. WP-9 owner diaries remain the release-path blocker.
 **Origin:** 2026-07-06 release review finding: the flagship Presidential Command Model's resource economy was never computed, felt, or decided over campaign length. This plan fixes it. Companion findings from the same review are owned elsewhere: Decision Room 4-card cap + deep-link trap → GUI plan WP-1 commit 0; audio un-mute → GUI plan WP-8 commit 1; turn ceremony + play discipline → GUI plan WP-2/WP-9 (`docs/plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md`). This document owns ONLY the CA economy.
 
 ---
@@ -56,7 +56,7 @@ Hard constraints binding ALL options: **§6 — CA must never be granted by atro
 2. Persisted subfields are optional: `reserve`, `reserve_max`, `last_recovery`, and `last_recovery_source`. `validateGameState.ts` validates finite nonnegative reserve/recovery values, reserve cap ordering, and the approved source vocabulary. No schema bump is required because old-shape saves remain valid and are covered by tests.
 3. Retuned `tests/command_authority_economy.test.ts` from characterization pins to the chosen target table. The test now enforces lifetime income, max override acts, hoard-case bank behavior, post-crisis drought, gesture cadence, healthy quiet cadence, and source-code delegation to the shared helper.
 4. Determinism: formula reads only persisted state, uses sorted corps iteration already present in the phase, rounds recovery to quarter-CA increments, and uses no randomness, timestamps, locale sorting, or external inputs.
-5. **Calibration proof, not assumption:** local branch verification passed `npm.cmd run test:baselines` and `npm.cmd run ci:structural-fingerprint:check`; PR checks own final merge readiness.
+5. **Calibration proof, not assumption:** local branch verification passed `npm.cmd run test:baselines` and `npm.cmd run ci:structural-fingerprint:check`; PR #474 checks are green after rerunning a cancelled `engine-health-188w` job.
 6. i18n: Desk and toolbar recovery copy updated in EN+BCS.
 
 ### CA-3 — Budget legibility (implemented with CA-2)
