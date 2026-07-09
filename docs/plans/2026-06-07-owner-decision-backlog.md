@@ -180,7 +180,9 @@ risk = primary downside if mishandled.
 - **Flags:** §6 none · canon yes (FORAWWV — orchestrator-applied, panel-authorized only) ·
   calibration none · effort varies · risk low.
 - **Build-lane:** Canon decision-prep bank / orchestrator FORAWWV lane.
-- **Status:** **MOSTLY RULED — Dayton research open; Bucket-A promotions accepted.**
+- **Status:** **OWNER APPROVED 2026-07-09 (#194) for the D2/D3/D4 packet recommendations.**
+  `FORAWWV.md` remains manual/panel-authorized; do not edit it automatically from this register.
+  Dayton research and accepted Bucket-A promotions stay tracked through their dedicated canon lane.
 
 ---
 

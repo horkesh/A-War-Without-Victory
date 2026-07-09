@@ -20,8 +20,8 @@
 |---|---|---|
 | #237 `i18n(§6): native-speaker polish for camp/Foča/Višegrad essay BCS translations` | `owner-decision` | Native-speaker/signoff lane. Decide pre-1.0 required vs post-1.0 LQA. |
 | #195 `i18n: Bosnian diacritic LQA — fast-track war-crimes labels + safe subset` | `owner-decision` | Same BCS LQA lane as #237; can be combined only with owner approval. |
-| #194 `design: FORAWWV open rulings D2/D3/D4 (owner decisions)` | `owner-decision` | Owner ruling lane. Do not edit `FORAWWV.md` automatically. |
-| #192 `assets: soundscape sourcing approval (owner + §6 sensitivity gate)` | `owner-decision` | Source/approval lane; not agent-closeable without owner approval. |
+| #194 `design: FORAWWV open rulings D2/D3/D4 (owner decisions)` | `owner-approved` | Owner approved the D2/D3/D4 packet recommendations on 2026-07-09. Record approval and close; do not edit `FORAWWV.md` automatically. |
+| #192 `assets: soundscape sourcing approval (owner + §6 sensitivity gate)` | `owner-approved` | Owner approved the recommended sourcing order and Section 6 sensitivity lane on 2026-07-09. Record approval and close; implementation still needs supplied/wired assets plus proof. |
 | #170 `Codex review-thread backlog: engine/cache/event follow-ups` | `tracker-split` | Narrow to current residuals only, or replace with individual issues. Do not treat stale closed comments as active work. |
 | #41 `Calibration: op-axis 2-hop concentration support off-by-one` | `deferred-calibration` | One-change calibration branch only; requires focused proof plus 40w/188w gates. |
 | #31 `Calibration debt: WA timing + anchor failures + HV teleportation source` | `deferred-calibration` | Calibration session work; not D2 release-path work by default. |
@@ -44,7 +44,7 @@
 2. Comment and close #10 as superseded by event-owned receipt doctrine.
 3. Comment and close #17 as duplicate of canonical #18.
 4. Leave #18 open as the single `tier_boost` EventEffect design/calibration issue.
-5. Leave owner-decision issues open; do not close without explicit owner approval.
+5. Leave remaining owner-decision issues open; do not close without explicit owner approval. #194 and #192 received owner approval on 2026-07-09 and should be closed with approval comments.
 6. Leave calibration issues open and behind WP-9/D2 unless owner reclassifies them.
 7. For #170, schedule a separate tracker-split pass only if owner wants issue cleanup beyond obvious housekeeping.
 
