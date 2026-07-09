@@ -30,6 +30,7 @@ import { recordOperationWeeklyEntries } from '../combat/operation_aar.js';
 import { buildAdjacencyMap } from '../../map/adjacency_map.js';
 import { computeFrontEdges, computeFrontEdgesOsid } from '../../map/front_edges.js';
 import { computeFrontRegions } from '../../map/front_regions.js';
+import { applyCommandAuthorityRecovery, computeCommandAuthorityRecovery } from '../../shared/commandAuthorityEconomy.js';
 import { loadSettlementGraph } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
 import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
@@ -2505,13 +2506,14 @@ export const warPhases: NamedPhase[] = [
             if (context.state.meta.phase !== 'war') return;
             const auth = context.state.military.command_authority;
             if (!auth) return;
+            const playerFaction = context.state.meta?.player_faction;
+            if (typeof playerFaction !== 'string') return;
             // Reset per-turn spend counter
             auth.spent_this_turn = 0;
 
-            // Wave 10: CA recovery penalty for recent presidential interventions.
-            // Each recent force-launched op (within 3 turns) or unresolved friction
-            // event (within 2 turns) reduces recovery by 0.5, capped at full loss.
-            // No UI imports — inline approximation of strain sources.
+            // CA-2: political-income recovery is player-faction scoped.
+            // Headless/calibration states can carry legacy command_authority, but
+            // must stay byte-identical unless a player faction owns the meter.
             const currentTurn = context.state.meta?.turn ?? 0;
             let recentInterventions = 0;
             const corpsCommand = context.state.military.corps_command;
@@ -2528,9 +2530,17 @@ export const warPhases: NamedPhase[] = [
             const unresolvedFriction = (context.state.military.friction_events ?? [])
                 .filter((e: { resolved: boolean; turn: number }) => !e.resolved && (currentTurn - e.turn) < 2).length;
 
-            const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
-            const recovery = Math.max(0, 2 - penalty);
-            auth.current = Math.min(auth.max, auth.current + recovery);
+            const dimensions = context.state.military.negotiation?.strategic_dimensions?.[playerFaction];
+            const recovery = computeCommandAuthorityRecovery({
+                dimensions: {
+                    internationalStanding: dimensions?.international_standing?.effective_value,
+                    patronConfidence: dimensions?.patron_confidence?.effective_value,
+                    internalCohesion: dimensions?.internal_cohesion?.effective_value,
+                },
+                recentInterventions,
+                unresolvedFriction,
+            });
+            applyCommandAuthorityRecovery(auth, recovery);
         }
     },
     {

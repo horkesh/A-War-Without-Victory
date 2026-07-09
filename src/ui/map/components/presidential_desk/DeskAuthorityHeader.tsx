@@ -31,7 +31,6 @@ import {
   ELITE_DEPLOY_COST,
   REPLACE_CO_COST,
   FRONT_VISIT_COST,
-  COMMAND_AUTHORITY_RECOVERY_PER_TURN,
 } from '../../utils/commandAuthority';
 
 interface LeverCost {
@@ -59,6 +58,21 @@ const LEVER_COSTS: LeverCost[] = [
 /** Cheapest lever cost — the threshold below which the player can do nothing. */
 const MIN_LEVER_COST = Math.min(...LEVER_COSTS.map((l) => l.cost));
 
+function sourceLabelKey(source: string | undefined): Parameters<typeof t>[0] {
+  switch (source) {
+    case 'international_standing':
+      return 'deskAuthority.source.internationalStanding';
+    case 'patron_confidence':
+      return 'deskAuthority.source.patronConfidence';
+    case 'internal_cohesion':
+      return 'deskAuthority.source.internalCohesion';
+    case 'quiet_front_restraint':
+      return 'deskAuthority.source.quietFront';
+    default:
+      return 'deskAuthority.source.baseRecovery';
+  }
+}
+
 export interface DeskAuthorityHeaderProps {
   state: LoadedGameState | null;
 }
@@ -70,6 +84,10 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
   if (!ca) return null;
 
   const { current, max, spentThisTurn } = ca;
+  const reserve = ca.reserve ?? 0;
+  const reserveMax = ca.reserveMax ?? 0;
+  const lastRecovery = ca.lastRecovery ?? 0;
+  const directiveCadence = lastRecovery > 0 ? Math.max(1, Math.ceil(REQUEST_OP_COST / lastRecovery)) : null;
   const pct = max > 0 ? Math.max(0, Math.min(100, Math.round((current / max) * 100))) : 0;
   const lowAuthority = current < MIN_LEVER_COST;
 
@@ -109,7 +127,17 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
         </div>
         <div className="mt-1 flex items-center justify-between text-[9px] text-text-secondary">
           <span data-testid="desk-authority-spent">{t('deskAuthority.spentThisTurn', { spent: spentThisTurn })}</span>
-          <span>{t('deskAuthority.recovers', { rate: COMMAND_AUTHORITY_RECOVERY_PER_TURN })}</span>
+          <span data-testid="desk-authority-bank">{t('deskAuthority.bank', { reserve, max: reserveMax })}</span>
+        </div>
+        <div className="mt-1 grid grid-cols-1 gap-0.5 text-[9px] text-text-secondary">
+          <span data-testid="desk-authority-income-source">
+            {t('deskAuthority.incomeSource', { source: t(sourceLabelKey(ca.lastRecoverySource)) })}
+          </span>
+          {directiveCadence != null && (
+            <span data-testid="desk-authority-cadence">
+              {t('deskAuthority.cadence', { turns: directiveCadence })}
+            </span>
+          )}
         </div>
         {lowAuthority && (
           <div

@@ -93,20 +93,18 @@ describe('UI localization substrate', () => {
         }
     });
 
-    it('softens the authority-recovery copy so it never promises an unconditional gain (#127)', () => {
-        // The engine applies max(0, RECOVERY - friction), so the per-turn gain is a
-        // ceiling, not a guarantee. The copy must say "up to" and acknowledge friction.
-        const en = t('deskAuthority.recovers', { rate: 2 }, 'en');
-        expect(en).toBe('Recovers up to +2/turn (less under friction).');
-        expect(en).toMatch(/up to/i);
-        expect(en).toMatch(/friction/i);
-        // Must not read as an unconditional "+N each turn" promise.
-        expect(en).not.toMatch(/\+2 each turn/);
+    it('describes authority recovery as political capacity, never an unconditional flat gain (#127)', () => {
+        const en = t('toolbar.commandAuthority.description', undefined, 'en');
+        expect(en).toBe('Authority is the Presidency resource for exceptional intervention in the command chain. It recovers from political standing and command stability.');
+        expect(en).toMatch(/political standing/i);
+        expect(en).not.toMatch(/\+\d/);
+        expect(en).not.toMatch(/each turn|per turn/i);
 
-        const bcs = t('deskAuthority.recovers', { rate: 2 }, 'bcs');
-        expect(bcs).toBe('Obnavlja se do +2/potez (manje uz trenja).');
-        expect(bcs).toMatch(/do \+/);
-        expect(bcs).toMatch(/trenja/);
+        const bcs = t('toolbar.commandAuthority.description', undefined, 'bcs');
+        expect(bcs).toBe('Ovlast je predsjednicki resurs za izuzetnu intervenciju u komandni lanac. Obnavlja se iz politickog položaja i stabilnosti komande.');
+        expect(bcs).toMatch(/politickog položaja/i);
+        expect(bcs).not.toMatch(/\+\d/);
+        expect(bcs).not.toMatch(/po potezu/);
     });
 
     it('keeps BCS copy free of common Serbian ekavian and Croatian lexical forms', () => {

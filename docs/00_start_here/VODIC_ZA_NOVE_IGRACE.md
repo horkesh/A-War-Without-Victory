@@ -80,7 +80,7 @@ Gore u sredini: grb vaše frakcije. Datum i broj poteza gore lijevo. Gore desno,
 - **EVENTS** — dnevnik događaja. Rijedak u ranoj fazi rata.
 - **CODEX** — historijski eseji. 96+ unosa o stvarnim događajima (Bijeljina, Ahmići, operacija Oluja, Dejton itd.). Dinamični odjeljci se povezuju sa stvarnom putanjom vaše partije.
 - **INBOX** — broj na Predsjedničkoj poštanskoj kutiji. Prikazuje čekajuće odluke: mirovne planove, kadrovske događaje, konvojske odluke, paravojne preglede.
-- **AUTH** (mjerač) — vaš Command Authority (komandna ovlast). Maksimum 100/100, oporavlja se +2 po potezu. Troši se na nadređenja trećeg nivoa (Level 3): force-launch operacija protiv preporuke komandanta, ručna brigadna naređenja.
+- **AUTH** (mjerač) — vaš Command Authority (komandna ovlast). Trenutni maksimum je 100/100, uz vidljivu rezervu; oporavlja se kroz politički ugled, povjerenje patrona, unutrašnju koheziju i komandnu stabilnost. Desk prikazuje rezervu, izvor prihoda i ritam direktiva. Troši se na nadređenja trećeg nivoa (Level 3): force-launch operacija protiv preporuke komandanta, ručna brigadna naređenja.
 - **ADVANCE TURN** — glavna akcija. Kliknite za pomjeranje jednu sedmicu naprijed.
 
 Donja alatna traka: birač sloja na mapi na tipkama 1-9 (Political / Ethnic / Supply / Casualties / Morale / Operations / Defense / Authority / Legitimacy). Statusna traka pokazuje procenat Friendly, Hostile-held, stav patrona ili saveza.
@@ -151,7 +151,7 @@ I **trake komandne petlje** ispod:
 
 1. **Pokušavanje da pomjerite potez u potezu 0 bez čitanja brifinga.** Brifing vam govori šta strateški položaj vaše frakcije zahtijeva. Preskočite ga i letite na slijepo.
 2. **Postavljanje svih korpusa na Offensive odmah.** Vaši korpusi nemaju snabdijevanje ni moral da održe napade svaki potez. Miješajte Defensive (ukopavanje) + Reorganize (odmor) + Offensive (napad) prema situaciji.
-3. **Rano forsiranje pokretanja operacija.** Košta 15 Command Authority. Počinjete sa 100, oporavljate +2 po potezu. Trošite namjerno; požalit ćete ako ste na 20/100 kada se pojavi prava prilika.
+3. **Rano forsiranje pokretanja operacija.** Košta 15 Command Authority. Počinjete sa 100, a oporavak zavisi od političkog kapaciteta i komandnog trenja. Trošite namjerno; požalit ćete ako ste na 20/100 kada se pojavi prava prilika.
 4. **Ignorisanje mirovnih planova.** Svaki je stvarna strateška odluka. Odbijete sve i počinjete sa obavezom da se borite do Dejtona, do kojeg je vaša frakcija akumulirala maksimum ratnih zločina i gubitaka.
 5. **Nečitanje Codex-a.** Historijski eseji objašnjavaju *zašto* su važni događaji koje vidite. Dinamični odjeljci takođe prate kako vaša partija odstupa od historije — koristan povratni signal.
 6. **Briga zbog neprijateljskih jedinica unutar vaše teritorije.** To mogu biti JNA brigade koje se još nisu povukle, paravojne formacije koje nisu vezane ni za jedan front, ili jednostavno se kreću da napadnu. Broj „exposed front sectors" u Operacionom sitrep-u je pouzdaniji od brojanja ikona.

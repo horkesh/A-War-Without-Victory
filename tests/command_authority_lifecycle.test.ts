@@ -1,6 +1,10 @@
 ﻿import { describe, it, expect } from 'vitest';
 import type { CommandAuthority, CorpsOperation } from '../src/state/game_state.js';
 import type { OperationAAR } from '../src/sim/combat/operation_aar.js';
+import {
+    applyCommandAuthorityRecovery,
+    computeCommandAuthorityRecovery,
+} from '../src/shared/commandAuthorityEconomy.js';
 import { computeCorpsCommandStrain, getCommandStrainLabel, deriveOrderInterpretation, deriveStanceInterpretation, deriveOperationOutcomeCategory, buildOperationTrendSummary, projectStrainDecay, deriveRecoveryForecast, deriveCorpsSituationAssessment, deriveRecommendationExplanation, deriveReadinessTrend, isExhaustionContributingToStrain, EXHAUSTION_STRAIN_THRESHOLD, EXHAUSTION_STRAIN_SEVERE_THRESHOLD, deriveDelegationContext, deriveCorpsDelegationSummary } from '../src/ui/map/data/command_strain.js';
 import type { OperationOutcomeCategory, OperationTrendSummary, PrimaryConstraint, ReadinessTrendDirection, DelegationPath } from '../src/ui/map/data/command_strain.js';
 
@@ -11,7 +15,16 @@ function makeAuth(overrides?: Partial<CommandAuthority>): CommandAuthority {
 /** Simulate the recover-command-authority war phase step. */
 function recoverAuthority(auth: CommandAuthority): void {
     auth.spent_this_turn = 0;
-    auth.current = Math.min(auth.max, auth.current + 2);
+    const breakdown = computeCommandAuthorityRecovery({
+        dimensions: {
+            internationalStanding: 50,
+            patronConfidence: 50,
+            internalCohesion: 50,
+        },
+        recentInterventions: 1,
+        unresolvedFriction: 0,
+    });
+    applyCommandAuthorityRecovery(auth, breakdown);
 }
 
 /** Simulate the force-launch deduction (mirrors electron-main.cjs handler). */
@@ -73,10 +86,10 @@ describe('command authority', () => {
     });
 
     describe('recovery', () => {
-        it('recovers +2 per turn', () => {
+        it('recovers political-capacity income per turn', () => {
             const auth = makeAuth({ current: 85 });
             recoverAuthority(auth);
-            expect(auth.current).toBe(87);
+            expect(auth.current).toBe(88.25);
         });
 
         it('resets spent_this_turn on recovery', () => {
@@ -94,7 +107,7 @@ describe('command authority', () => {
         it('recovers from zero', () => {
             const auth = makeAuth({ current: 0 });
             recoverAuthority(auth);
-            expect(auth.current).toBe(2);
+            expect(auth.current).toBe(3.25);
         });
     });
 

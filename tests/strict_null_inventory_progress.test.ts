@@ -653,15 +653,20 @@ describe('strict null inventory progress', () => {
             // list of pre-planned operations already satisfied at scenario injection. sim domain;
             // no sim reader consumes it for behavior, so absent legacy saves and non-satisfied
             // injections remain byte-identical. 518->519 / sim 331->332. No new type-escape casts.
-            optional_fields_game_state: 519,
+            // Command Authority political-income lane (#474): +4 optional fields on
+            // CommandAuthority (`reserve`, `reserve_max`, `last_recovery`,
+            // `last_recovery_source`). state domain; player-faction gated in war_phases and
+            // absent on headless/historical saves, so calibration baselines remain
+            // byte-identical. 519->523 / state 177->181. No new type-escape casts.
+            optional_fields_game_state: 523,
         });
-        expect(current.optional_field_domains.total).toBe(519);
+        expect(current.optional_field_domains.total).toBe(523);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
             sim: 332,
-            state: 177,
+            state: 181,
             ui_adapter: 0,
             unknown: 0,
         });

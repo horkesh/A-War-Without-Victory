@@ -2516,8 +2516,14 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         commandAuthority: state.military.command_authority ? {
             current: finiteNumber(state.military.command_authority.current),
             max: finiteNumber(state.military.command_authority.max, 100),
+            reserve: finiteNumber(state.military.command_authority.reserve),
+            reserveMax: finiteNumber(state.military.command_authority.reserve_max, 15),
             spentThisTurn: finiteNumber(state.military.command_authority.spent_this_turn),
             lifetimeSpent: finiteNumber(state.military.command_authority.lifetime_spent),
+            lastRecovery: finiteNumber(state.military.command_authority.last_recovery),
+            lastRecoverySource: typeof state.military.command_authority.last_recovery_source === 'string'
+                ? state.military.command_authority.last_recovery_source
+                : undefined,
         } : undefined,
         commandBriefing,
         operationalSitrep,

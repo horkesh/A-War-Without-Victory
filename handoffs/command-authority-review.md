@@ -1,10 +1,12 @@
 # Handoff: Command Authority legibility in command review
 
+**Supersession note (2026-07-09):** This handoff predates the CA-2 political-income recovery model. Command Authority is still the player resource for Direct Intervention and force-launch still costs 15 CA, but recovery is no longer a flat fixed trickle. Current recovery truth lives in `src/shared/commandAuthorityEconomy.ts` and `docs/plans/2026-07-06-command-authority-economy-plan.md`.
+
 ## Context
 
 `992328de` landed the first Command Authority vertical slice:
 - `command_authority` field on `MilitaryState` (current/max/spent_this_turn/lifetime_spent)
-- +2/turn recovery in war pipeline
+- legacy fixed recovery in the war pipeline (superseded by CA-2 political-income recovery)
 - Force-launch costs 15 CA — deducted in `electron-main.cjs`
 - `CommandAuthorityGauge` on `PresidentialToolbar` (green/amber/red)
 - `[FORCE LAUNCH — 15 AUTH]` button in `OperationsSection.tsx` (Army HQ ops list)
@@ -56,7 +58,7 @@ When `assessment !== 'launch'` (commander recommends postpone or abort), add a s
 │ Forcing launch overrides the command chain.         │
 │                                                     │
 │ Command Authority: 85 → 70 after this action        │
-│                   Cost: 15 | Recovery: +2/turn      │
+│                   Cost: 15 | Recovery: political    │
 │                                                     │
 │ [ FORCE LAUNCH — OVERRIDE COMMAND CHAIN ]           │
 └─────────────────────────────────────────────────────┘

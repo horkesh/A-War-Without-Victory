@@ -1,5 +1,5 @@
 /**
- * CA-0 — Command Authority economy characterization + cost-parity guard.
+ * CA-2 — Command Authority economy target table + cost-parity guard.
  *
  * The instrument that was missing (docs/plans/2026-07-06-command-authority-economy-plan.md):
  * command_authority is player-only and ABSENT in headless/calibration runs, so no
@@ -7,12 +7,10 @@
  * This test COMPUTES the campaign integral from the real shipped constants so any
  * future drift fails a test instead of a reviewer's arithmetic.
  *
- * CHARACTERIZATION PINS: the integral assertions below pin the CURRENT shipped
- * economy (2026-07-06). They are provisional by design — CA-2 retunes them to the
- * CA-1 panel's chosen cadence spec. If you got here because a pin went red after
- * an intentional retune, update the pins to the new cadence table and record the
- * change in the CA plan §6 ledger. If the retune was NOT intentional, you just
- * caught silent economy drift — that is this file doing its job.
+ * TARGET PINS: the integral assertions below enforce the 2026-07-09 CA-1 panel
+ * verdict: political-income recovery, visible overflow banking, and bounded
+ * force-launch/friction spiral. If these pins move, the Command Authority
+ * cadence changed and must be recorded in the CA plan §6 ledger.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -32,6 +30,11 @@ import {
     DECORATE_UNIT_COST,
     COMMAND_AUTHORITY_RECOVERY_PER_TURN,
 } from '../src/ui/map/utils/commandAuthority';
+import {
+    COMMAND_AUTHORITY_RESERVE_MAX,
+    applyCommandAuthorityRecovery,
+    computeCommandAuthorityRecovery,
+} from '../src/shared/commandAuthorityEconomy';
 
 const require_ = createRequire(import.meta.url);
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -44,6 +47,7 @@ const read = (rel: string) => readFileSync(join(repoRoot, rel), 'utf8');
 /** Initial pool and cap, pinned against the literal in scenario_runner.ts below. */
 const INIT_CURRENT = 100;
 const INIT_MAX = 100;
+const INIT_RESERVE = 0;
 /** Campaign horizon of the definitive full-war scenario (188 weekly turns). */
 const CAMPAIGN_WEEKS = 188;
 
@@ -54,9 +58,28 @@ const CAMPAIGN_WEEKS = 188;
  * clamped to the pool cap. The source-pin test below breaks if the engine formula
  * moves away from this mirror.
  */
-function recoveryForTurn(recentInterventions: number, unresolvedFriction: number): number {
-    const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);
-    return Math.max(0, COMMAND_AUTHORITY_RECOVERY_PER_TURN - penalty);
+function neutralStrainedRecovery(): number {
+    return computeCommandAuthorityRecovery({
+        dimensions: {
+            internationalStanding: 50,
+            patronConfidence: 50,
+            internalCohesion: 50,
+        },
+        recentInterventions: 1,
+        unresolvedFriction: 0,
+    }).recovery;
+}
+
+function healthyQuietRecovery(): number {
+    return computeCommandAuthorityRecovery({
+        dimensions: {
+            internationalStanding: 90,
+            patronConfidence: 85,
+            internalCohesion: 80,
+        },
+        recentInterventions: 0,
+        unresolvedFriction: 0,
+    }).recovery;
 }
 
 describe('CA cost parity (single-host constants stay in sync)', () => {
@@ -88,60 +111,64 @@ describe('CA engine source pins (formula and init have not silently moved)', () 
         );
     });
 
-    it('war_phases recovery step still matches the mirrored formula', () => {
+    it('war_phases delegates recovery to the political-income helper after the headless early return', () => {
         const src = read('src/sim/turn_phases/war_phases.ts');
-        // The two load-bearing lines of the recover-command-authority step.
-        expect(src).toContain('const penalty = Math.min(2, (recentInterventions + unresolvedFriction) * 0.5);');
-        expect(src).toContain('auth.current = Math.min(auth.max, auth.current + recovery);');
-        // Recovery base comes from the shared constant's value.
-        expect(src).toContain(`const recovery = Math.max(0, ${COMMAND_AUTHORITY_RECOVERY_PER_TURN} - penalty);`);
+        expect(src).toContain('const auth = context.state.military.command_authority;');
+        expect(src).toContain('if (!auth) return;');
+        expect(src).toContain('const recovery = computeCommandAuthorityRecovery({');
+        expect(src).toContain('applyCommandAuthorityRecovery(auth, recovery);');
     });
 });
 
-describe('CA campaign integral (the numbers nobody computed)', () => {
-    const lifetimeIncomeMax = INIT_CURRENT + COMMAND_AUTHORITY_RECOVERY_PER_TURN * CAMPAIGN_WEEKS;
+describe('CA campaign integral target table', () => {
+    const neutralRecovery = neutralStrainedRecovery();
+    const healthyRecovery = healthyQuietRecovery();
+    const lifetimeNeutralIncome = INIT_CURRENT + COMMAND_AUTHORITY_RESERVE_MAX + neutralRecovery * CAMPAIGN_WEEKS;
 
-    it('lifetime income ceiling over the 188-week war', () => {
-        // 100 initial + 2/turn * 188 turns — assumes the player NEVER idles at cap
-        // (recovery at cap is destroyed, see cap-waste test below).
-        expect(lifetimeIncomeMax).toBe(476);
+    it('neutral strained lifetime income over the 188-week war', () => {
+        expect(lifetimeNeutralIncome).toBe(726);
     });
 
-    it('maximum override-class acts across the entire war', () => {
-        // Every override lever costs 25 (author/request/stop/elite/replace/proactive).
-        expect(Math.floor(lifetimeIncomeMax / REQUEST_OP_COST)).toBe(19);
+    it('maximum neutral override-class acts across the entire war', () => {
+        expect(Math.floor(lifetimeNeutralIncome / REQUEST_OP_COST)).toBe(29);
     });
 
-    it('hoard-case acts: a player who sits at cap banks nothing', () => {
-        // At 100/100 recovery is Math.min(max, current + r) - current = 0 — the
-        // dominant hoarding strategy reduces the WHOLE campaign budget to the
-        // initial pool.
-        expect(Math.floor(INIT_CURRENT / REQUEST_OP_COST)).toBe(4);
+    it('hoard-case acts: a player at cap banks one bounded extra action, not zero-income waste', () => {
+        expect(Math.floor((INIT_CURRENT + COMMAND_AUTHORITY_RESERVE_MAX) / REQUEST_OP_COST)).toBe(4);
     });
 
-    it('cap-waste: recovery at the cap is destroyed, not banked', () => {
-        const atCap = Math.min(INIT_MAX, INIT_MAX + recoveryForTurn(0, 0));
-        expect(atCap).toBe(INIT_MAX); // income while full: zero
+    it('cap overflow is banked visibly up to the bounded reserve', () => {
+        const account = { current: INIT_MAX, max: INIT_MAX, reserve: 0, reserve_max: COMMAND_AUTHORITY_RESERVE_MAX, spent_this_turn: 0, lifetime_spent: 0 };
+        applyCommandAuthorityRecovery(account, computeCommandAuthorityRecovery({
+            dimensions: { internationalStanding: 90, patronConfidence: 85, internalCohesion: 80 },
+            recentInterventions: 0,
+            unresolvedFriction: 0,
+        }));
+        expect(account.current).toBe(INIT_MAX);
+        expect(account.reserve).toBe(healthyRecovery);
     });
 
-    it('post-crisis drought: 13 turns locked out after a 4-act crisis window', () => {
-        // Crisis: turns 1-4 spend 100 (three 25-CA overrides + one 25-CA proactive
-        // force-launch on turn 4). The force-launched op counts as a recent
-        // intervention for 3 turns (started_turn delta < 3), throttling recovery
-        // to 1.5 on turns 5-6, then 2.0 — the spiral: using the system slows the
-        // system. Count turns from empty until the next 25-CA act is affordable.
+    it('post-crisis drought is bounded to 8 turns under strained non-collapsing conditions', () => {
         let current = 0;
         let turnsToAfford = 0;
-        for (let turn = 5; current < REQUEST_OP_COST; turn++) {
-            const recentInterventions = turn - 4 < 3 ? 1 : 0; // op started turn 4
-            current = Math.min(INIT_MAX, current + recoveryForTurn(recentInterventions, 0));
+        const recovery = computeCommandAuthorityRecovery({
+            dimensions: { internationalStanding: 35, patronConfidence: 40, internalCohesion: 35 },
+            recentInterventions: 4,
+            unresolvedFriction: 4,
+        }).recovery;
+        for (; current < REQUEST_OP_COST;) {
+            current = Math.min(INIT_MAX, current + recovery);
             turnsToAfford++;
             expect(turnsToAfford).toBeLessThan(100); // safety bound
         }
-        expect(turnsToAfford).toBe(13); // one quarter of a year of war, silent
+        expect(turnsToAfford).toBe(8);
     });
 
-    it('gesture cadence: a 10-CA gesture is affordable every 5 quiet turns from empty', () => {
-        expect(Math.ceil(FRONT_VISIT_COST / COMMAND_AUTHORITY_RECOVERY_PER_TURN)).toBe(5);
+    it('gesture cadence: a 10-CA gesture is affordable roughly monthly under neutral strained conditions', () => {
+        expect(Math.ceil(FRONT_VISIT_COST / neutralRecovery)).toBe(4);
+    });
+
+    it('healthy quiet cadence affords one override-class act every 3 turns', () => {
+        expect(Math.ceil(REQUEST_OP_COST / healthyRecovery)).toBe(3);
     });
 });

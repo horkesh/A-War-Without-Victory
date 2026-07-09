@@ -82,7 +82,7 @@ Top center: faction crest. Date and turn number top-left. Top-right toolbar from
 - **EVENTS** — Event log. Sparse early-war.
 - **CODEX** — historical essays. 96+ entries on real events (Bijeljina, Ahmici, Operation Storm, Dayton, etc.). Dynamic sections wire into your run's actual divergence from history.
 - **INBOX** — Presidential Inbox count. Shows pending decisions: peace plans, personnel events, convoy decisions, paramilitary reviews.
-- **AUTH** (gauge) — your Command Authority. 100/100 max, recovers +2 per turn. Spent on Level 3 overrides: force-launching operations against commander recommendation, manual brigade orders.
+- **AUTH** (gauge) — your Command Authority. It has a 100/100 current cap plus a visible reserve bank, and recovers through political standing, patron confidence, internal cohesion, and command stability. The Desk shows the current bank, income source, and directive cadence. Spent on Level 3 overrides: force-launching operations against commander recommendation, manual brigade orders.
 - **ADVANCE TURN** — primary action. Click to roll one week forward.
 
 Bottom toolbar: map overlay selector on keys 1-9 (Political / Ethnic / Supply / Casualties / Morale / Operations / Defense / Authority / Legitimacy). Status bar shows Friendly %, Hostile-held %, patron/alliance state.
@@ -153,7 +153,7 @@ And the **command loop lanes** below:
 
 1. **Trying to advance the turn at Turn 0 without reading the Brief.** The brief tells you what your faction's strategic position requires. Skip it and you're flying blind.
 2. **Setting all corps to Offensive immediately.** Your corps don't have the supply or morale to sustain attacks every turn. Mix Defensive (entrench) + Reorganize (rest) + Offensive (push) per the situation.
-3. **Force-launching operations early.** Costs 15 Command Authority. You start at 100, recover +2 per turn. Spend it deliberately; you'll regret it if you're at 20/100 when a real opportunity appears.
+3. **Force-launching operations early.** Costs 15 Command Authority. You start at 100, and recovery depends on political capacity and command friction. Spend it deliberately; you'll regret it if you're at 20/100 when a real opportunity appears.
 4. **Ignoring peace plans.** Each is a real strategic choice. Reject all of them and you commit to fighting until Dayton, by which time your faction has accumulated maximum war crimes and casualties.
 5. **Not reading the Codex.** The historical essays explain *why* the events you see happening matter. The dynamic sections also track how your run is diverging from history — useful feedback.
 6. **Worrying about hostile units inside your territory.** They might be JNA brigades that haven't withdrawn yet, paramilitary formations that aren't tied to any front, or simply moving in to attack. The Operational Sitrep "exposed front sectors" count is more reliable than counting icons.
