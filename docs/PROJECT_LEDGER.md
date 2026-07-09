@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-07-09] docs(process): classify open GitHub issue closeout paths
+
+**Type:** Documentation / issue-tracker process / release-path triage.
+
+**Fix:** Added `docs/plans/2026-07-09-open-issues-closeout-plan.md`, classifying every open GitHub issue as `close-now`, `owner-decision`, `deferred-calibration`, `deferred-infrastructure`, or `tracker-split`. Updated `docs/plans/COMMAND_BOARD.md` so old GitHub issues do not silently become pre-D2 blockers. The only immediate agent-actionable closures are superseded #10 and duplicate #17; #18 remains the canonical `tier_boost` issue, and calibration issues stay open behind WP-9/D2 unless owner reclassifies them.
+
+**Verification:** Docs-only diff; `git diff --check`; no runtime code, scenario data, canon text, baselines, generated artifacts, or `docs/10_canon/FORAWWV.md` changed. GitHub closeout evidence is #10 and #17 comments/closure after this plan lands.
+
+**Scope/determinism:** Process and tracker truth only. No gameplay, save schema, event JSON, calibration floor, output ordering, randomness, timestamps, locale sorting, or shipped assets changed.
+
+---
+
 ## [2026-07-09] feat(command-authority): implement political-income recovery and Desk budget legibility
 
 **Type:** Player command-resource economy / UI read-model / i18n / docs / tests.
