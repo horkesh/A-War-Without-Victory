@@ -12,10 +12,10 @@
    Do instead: keep current path as WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag.
 2. **[2026-07-07] WP-9 diaries outrank speculative UI backlog**
    Do instead: use docs/40_reports/playtests/TEMPLATE.md; top-three diary friction items move to the front before new polish.
-3. **[2026-07-06] CA-1 panel remains a live companion lane**
-   Do instead: do not retune Command Authority until the Pyrrhic panel decides cadence/income model from the CA plan.
+3. **[2026-07-09] CA-2 is the live Command Authority companion lane**
+   Do instead: implement only the CA-1 political-income verdict; keep Section 6 income exclusions binding and prove headless byte-identical output.
 4. **[2026-07-08] RR2 packets do not displace D2 path**
-   Do instead: execute RR2 cleanup/audit work only within its stop gates; keep WP-9 and CA-1 first.
+   Do instead: execute RR2 cleanup/audit work only within its stop gates; keep WP-9 first and CA-2 as the Command Authority companion lane.
 
 ## Execution & Validation
 1. **[2026-06-30] Vite warnings are release-surface failures**

@@ -202,7 +202,7 @@ Common rails for every packet:
 6. RR2-2 65th regiment - solo sim-touching lane after consultations.
 7. RR2-3B Warroom decision audit - can run in parallel with docs/read-only work, but implementation waits for decision.
 
-Current release priority remains unchanged: WP-9 owner friction diaries and the CA-1 panel remain ahead of speculative polish. RR2 packets exist to remove known hazards without displacing the D2 path.
+Current release priority remains unchanged: WP-9 owner friction diaries remain first, and CA-2 political-income implementation is the Command Authority companion lane ahead of speculative polish. RR2 packets exist to remove known hazards without displacing the D2 path.
 
 ## Part H - Ledger and Board Discipline
 

@@ -23867,3 +23867,20 @@ Cleaned the moved sandbox slicer source after GitHub CI caught the strict-null i
 Verification: `npx.cmd vitest run tests/strict_null_inventory_progress.test.ts --pool=forks --reporter=dot` passed, 1 file / 91 tests.
 
 Determinism/scope: defensive UI sandbox loader cleanup only. No simulation behavior, event JSON, scenario source data, baseline/golden manifest, structural fingerprint expectation, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, or canon/FORAWWV content changed.
+
+## 2026-07-09 - CA-1 command-authority panel verdict
+
+Recorded the Command Authority CA-1 Pyrrhic-panel verdict in `docs/plans/2026-07-06-command-authority-economy-plan.md`: GO with Option B, political income. The verdict keeps the player in the canon presidential-command role: authority recovery should come from deterministic political capacity signals, not direct battlefield control. CA-2 is now the next agent-actionable command-authority packet: implement political-income recovery, add visible banking/overflow preservation so patience is not punished, bound the force-launch/friction anti-spiral, retune `tests/command_authority_economy.test.ts` from characterization pins to the target cadence table, and prove headless byte-identical behavior with `test:baselines` plus structural fingerprint.
+
+Panel rationale:
+- Option B was selected because it ties authority to existing political dimensions (`international_standing`, `patron_confidence`, `internal_cohesion`) and the command-chain fantasy.
+- Option A was rejected as a floor-only arithmetic fix that keeps authority as an abstract timer.
+- Option C was rejected as the primary model because crisis-only acceleration risks making agency appear mostly when the house burns.
+- The CA-2 cadence target is roughly one 25-CA override every 2-3 quiet turns, 3-4 override acts inside a 4-turn full-pool crisis, post-crisis recovery to the next 25-CA act within 5 healthy quiet turns or 8 strained non-collapsing quiet turns, and about monthly 10-CA leadership gestures.
+- Section 6 exclusions are binding: no CA income from ethnic consolidation, coercive control, forced displacement, siege/starvation, safe-area fall outcomes, civilian casualties, camps, atrocities, or ambiguous atrocity-adjacent events.
+
+Updated `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs/PROJECT_LEDGER_KNOWLEDGE.md` so the active state is truthful: WP-9 owner diaries remain the release-path blocker, while CA-2 is the next agent-actionable Command Authority implementation packet.
+
+Verification: docs-only change; `git diff --check` passed.
+
+Determinism/scope: documentation/design decision only. No runtime behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.

@@ -1,7 +1,7 @@
 # Command Authority Economy — Repair Plan
 
 **Date:** 2026-07-06
-**Status:** READY FOR EXECUTION — CA-0 dispatchable now; CA-1 is a Pyrrhic panel convening; CA-2/CA-3 follow the panel verdict.
+**Status:** CA-1 VERDICT RECORDED 2026-07-09; CA-2 implementation is now the next agent-actionable packet, while WP-9 owner diaries remain the release-path blocker.
 **Origin:** 2026-07-06 release review finding: the flagship Presidential Command Model's resource economy was never computed, felt, or decided over campaign length. This plan fixes it. Companion findings from the same review are owned elsewhere: Decision Room 4-card cap + deep-link trap → GUI plan WP-1 commit 0; audio un-mute → GUI plan WP-8 commit 1; turn ceremony + play discipline → GUI plan WP-2/WP-9 (`docs/plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md`). This document owns ONLY the CA economy.
 
 ---
@@ -93,5 +93,10 @@ Changing what the levers DO; adding new levers; touching bot/headless behavior; 
   | Gesture cadence from empty | **5 turns** per 10-CA gesture | front visit / address / decorate |
   | Cost parity | **green** | TS constants == `autonomy_ipc_contract.cjs` exports == `electron-main.cjs` force-launch literal |
   Reading for the panel: steady-state presidential tempo is ~0.08 override acts/turn; the design doc's "at most a few weighty directives" pacing is achievable only in the opening crisis, never again. The spiral (force-launch throttles recovery for 3 turns) means the drought lengthens precisely when the player is most engaged.
-- Panel verdict + chosen option + cadence spec: _pending_
-- §6 income-source audit result: _pending_
+- **CA-1 panel verdict (2026-07-09): GO with Option B, political income.** The panel rejected Option A as a floor-only timer repair that would not make the Command Authority economy feel politically earned, and rejected Option C as the primary model because emergency acceleration risks rewarding catastrophe. Option C may return later only as a bounded modifier after the same event and Section 6 screens.
+- **Chosen income model:** deterministic political capacity recovery. CA should recover from a base weekly floor plus bounded contributions from legitimate political standing, internal cohesion / civil-military confidence, non-atrocity patron confidence, and quiet-front restraint. One-off grants are allowed only through authored political events that pass source classification and Section 6 review.
+- **CA-2 cadence target:** one 25-CA override every 2-3 quiet turns; a full pool supports 3-4 override acts inside a 4-turn crisis; after that crisis, the next 25-CA act should arrive within 5 healthy quiet turns or 8 strained but non-collapsing quiet turns. A 10-CA gesture should be roughly monthly under neutral conditions.
+- **Anti-spiral rule:** force-launch and friction penalties may reduce recovery, but may not zero CA income for more than 2 consecutive turns unless an explicit political-collapse or endgame constraint is active. Penalty decay must be deterministic and persisted.
+- **Cap-waste rule:** CA-2 must add a bounded reserve / bank or other visible overflow-preservation path. The Desk must show what is flowing, banking, or capped.
+- **Acceptance update:** retune `tests/command_authority_economy.test.ts` from characterization pins to the target table: income, max override acts, hoard-case acts, post-crisis drought, and gesture cadence.
+- **Section 6 income-source audit result: GO with exclusions.** Allowed CA sources are broad legitimacy / institutional confidence, lawful international standing, non-atrocity patron confidence, internal cohesion / civil-military trust, quiet-front restraint, and authored assembly / patron endorsement events after event and Section 6 screens. Banned CA sources are ethnic consolidation, coercive territorial control, forced displacement, camp / atrocity events, safe-area fall outcomes, civilian casualties, siege starvation, and any ambiguous atrocity-adjacent reward. Any authored event CA grant must carry source classification and a Section 6 note; ambiguous sources stop for panel / owner review.
