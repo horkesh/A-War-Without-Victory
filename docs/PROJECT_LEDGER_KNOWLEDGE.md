@@ -1,3 +1,7 @@
+## 2026-07-09 - Owner approvals close decision-only issues
+
+**Owner approval must be recorded before closing owner-decision issues:** owner-decision GitHub issues are not agent-closeable until the decision is explicit and durable in docs. Once recorded, close the decision-only issue with a comment and leave downstream implementation gates intact. #194 approval records D2/D3/D4 FORAWWV packet approval without automatic `FORAWWV.md` edits; #192 approval records the soundscape sourcing/sensitivity lane without implying assets are supplied or wired. Applied in `[2026-07-09] docs(process): record owner approvals for #192 and #194`; plan `docs/plans/2026-07-09-open-issues-closeout-plan.md`.
+
 ## 2026-07-09 - GitHub issue tracker closeout discipline
 
 **Open GitHub issues are not automatically release blockers:** the current release path is controlled by Command Board / Master Roadmap, not by the raw open-issue count. Durable rule: classify open issues before acting. `close-now` issues may be commented and closed; `owner-decision` issues wait for owner approval; `deferred-calibration` issues require one-change implementation branches plus 40w/188w proof; `deferred-infrastructure` issues remain open while compensating CI contracts exist; `tracker-split` issues must be narrowed before closure. Applied in `[2026-07-09] docs(process): classify open GitHub issue closeout paths`; plan `docs/plans/2026-07-09-open-issues-closeout-plan.md`.

@@ -1,4 +1,16 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-07-09] docs(process): record owner approvals for #192 and #194
+
+**Type:** Documentation / issue-tracker process / owner-decision closeout.
+
+**Fix:** Recorded owner approval for GitHub #194 and #192 across `docs/plans/COMMAND_BOARD.md`, `docs/plans/2026-07-09-open-issues-closeout-plan.md`, `docs/plans/2026-06-07-owner-decision-backlog.md`, and `docs/plans/MASTER_ROADMAP.md`. #194 now records approval of the D2/D3/D4 FORAWWV packet recommendations while preserving the rule that `docs/10_canon/FORAWWV.md` is not edited automatically. #192 now records approval of the recommended soundscape sourcing/sensitivity lane: Priority-1 UI CC0 set, CC0 ambient beds, and commissioned spend reserved for main theme/stingers under Section 6 guardrails.
+
+**Verification:** Docs-only diff; `git diff --check`; no runtime code, scenario data, canon text, baselines, generated artifacts, shipped audio assets, or `docs/10_canon/FORAWWV.md` changed. GitHub closeout evidence is #192 and #194 comments/closure after this approval record lands.
+
+**Scope/determinism:** Process, roadmap, and tracker truth only. No gameplay, save schema, event JSON, calibration floor, output ordering, randomness, timestamps, locale sorting, or shipped assets changed.
+
+---
+
 ## [2026-07-09] docs(process): classify open GitHub issue closeout paths
 
 **Type:** Documentation / issue-tracker process / release-path triage.
