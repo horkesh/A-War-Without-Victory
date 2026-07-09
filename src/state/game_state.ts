@@ -2785,7 +2785,7 @@ narrative_queue?: import('../sim/ai_commander/aar_narrative.js').NarrativeQueueE
 last_briefing?: import('../sim/briefing/collect_briefing.js').CommandBriefing;
 /** Per-enclave state tracking (fallen status, resilience, etc). Key: enclave name. */
 enclave_state?: Record<string, { fallen?: boolean; status?: string; [key: string]: unknown }>;
-/** Presidential command authority resource. Spent on Level 3 (Direct Intervention) actions; recovers +2/turn.
+/** Presidential command authority resource. Spent on Level 3 (Direct Intervention) actions; recovers through political capacity.
  *  See docs/20_engineering/PRESIDENTIAL_COMMAND_DOCTRINE.md §Level 3. */
 command_authority?: CommandAuthority;
 /** Audit-only annotations attached to the cost ledger by divergence events.
@@ -2844,10 +2844,18 @@ export interface CommandAuthority {
     current: number;
     /** Maximum authority (default 100). */
     max: number;
+    /** Overflow authority banked when current is already at max. */
+    reserve?: number;
+    /** Maximum banked overflow authority. */
+    reserve_max?: number;
     /** Authority spent this turn (reset each turn start). */
     spent_this_turn: number;
     /** Lifetime total authority spent. */
     lifetime_spent: number;
+    /** Last recovered authority amount. */
+    last_recovery?: number;
+    /** Last recovery source classification; must stay inside the Section 6-approved CA source set. */
+    last_recovery_source?: import('../shared/commandAuthorityEconomy.js').CommandAuthorityIncomeSource;
 }
 
 /**

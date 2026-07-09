@@ -1,7 +1,7 @@
 # Command Authority Economy — Repair Plan
 
 **Date:** 2026-07-06
-**Status:** CA-1 VERDICT RECORDED 2026-07-09; CA-2 implementation is now the next agent-actionable packet, while WP-9 owner diaries remain the release-path blocker.
+**Status:** CA-2 / CA-3 IMPLEMENTED 2026-07-09 on `codex/ca2-political-income`; local branch verification is green and PR checks own merge readiness. WP-9 owner diaries remain the release-path blocker.
 **Origin:** 2026-07-06 release review finding: the flagship Presidential Command Model's resource economy was never computed, felt, or decided over campaign length. This plan fixes it. Companion findings from the same review are owned elsewhere: Decision Room 4-card cap + deep-link trap → GUI plan WP-1 commit 0; audio un-mute → GUI plan WP-8 commit 1; turn ceremony + play discipline → GUI plan WP-2/WP-9 (`docs/plans/2026-07-06-presidential-gui-decision-access-overhaul-plan.md`). This document owns ONLY the CA economy.
 
 ---
@@ -50,20 +50,20 @@ Convene: game-designer + product-manager + gameplay-programmer + war-or-game (fe
 
 Hard constraints binding ALL options: **§6 — CA must never be granted by atrocity-adjacent events or outcomes** (the red-team's one question: audit the proposed income sources against the bright line; "authority dividend from ethnic consolidation" class = banned). The force-launch/friction penalty may stay but must be BOUNDED so the spiral cannot zero out income for more than N consecutive turns. Panel GO = signature (standing delegation); split/bright-line → owner.
 
-### CA-2 — Implementation (after CA-1 verdict; one PR)
+### CA-2 — Implementation (implemented 2026-07-09; one PR)
 
-1. Implement the chosen model in `war_phases.ts` `recover-command-authority` (keep the `!auth` early-return — headless stays untouched) + `scenario_runner.ts:288` init if the pool/cap changes + `commandAuthority.ts` mirrored constants + every MUST-match site (`autonomy_ipc_contract.cjs`, the four `.cjs` handlers, `electron-main.cjs`) — the CA-0 parity guard is the net.
-2. If a new persisted subfield is added (e.g. `reserve`): update `validateGameState.ts` constraints, save-migration default for older saves (schema bump), and the resumed-save cross-flag test discipline (pre-seed an old-shape save, load, advance).
-3. Retune the CA-0 characterization pins to the chosen targets — the campaign-integral test now ENFORCES the cadence spec (this is the permanent regression net: any future constant drift fails the integral, not a reviewer's arithmetic).
-4. Determinism: formula reads only persisted state, sorted iteration (the existing step already sorts corps keys — keep it); no floats where integers do (recovery may stay fractional-step ×0.5 as today — it is player-only, off the calibration path, but keep it deterministic).
-5. **Calibration proof, not assumption:** the field is absent headless and the step early-returns — expect byte-identical baselines, but PROVE it: `npm run test:baselines` + structural fingerprint check in the PR (sim-file-touching change ⇒ the CI sim gates run regardless; a red there means the early-return assumption broke — STOP).
-6. i18n: desk legend copy for any changed costs/recovery, EN+BCS.
+1. Implemented the chosen model in `war_phases.ts` `recover-command-authority`, backed by `src/shared/commandAuthorityEconomy.ts`. The `!auth` early-return is preserved; old-shape `command_authority` saves normalize when recovery runs; `scenario_runner.ts` keeps the legacy init shape so untouched headless saves do not gain reserve fields before recovery.
+2. Persisted subfields are optional: `reserve`, `reserve_max`, `last_recovery`, and `last_recovery_source`. `validateGameState.ts` validates finite nonnegative reserve/recovery values, reserve cap ordering, and the approved source vocabulary. No schema bump is required because old-shape saves remain valid and are covered by tests.
+3. Retuned `tests/command_authority_economy.test.ts` from characterization pins to the chosen target table. The test now enforces lifetime income, max override acts, hoard-case bank behavior, post-crisis drought, gesture cadence, healthy quiet cadence, and source-code delegation to the shared helper.
+4. Determinism: formula reads only persisted state, uses sorted corps iteration already present in the phase, rounds recovery to quarter-CA increments, and uses no randomness, timestamps, locale sorting, or external inputs.
+5. **Calibration proof, not assumption:** local branch verification passed `npm.cmd run test:baselines` and `npm.cmd run ci:structural-fingerprint:check`; PR checks own final merge readiness.
+6. i18n: Desk and toolbar recovery copy updated in EN+BCS.
 
-### CA-3 — Budget legibility (UI-only; can ship with CA-2 or after)
+### CA-3 — Budget legibility (implemented with CA-2)
 
-1. `DeskAuthorityHeader.tsx`: replace the raw "Recovers up to +2/turn" line with the cadence sentence derived from live values ("At current standing you can sustain about one directive every N weeks"), and — if Option B — one line naming the top income source ("Authority is flowing from: patron confidence").
-2. At-cap state (Option A) or reserve display (bank): the header must show when income is banking vs. flowing, never silently losing.
-3. Diary check: WP-9 sessions after CA-2 must answer "did you ever want to act and couldn't afford it / did you ever forget the levers existed" — the two failure modes this plan exists to balance.
+1. `DeskAuthorityHeader.tsx` no longer displays a raw fixed recovery promise. It derives cadence from the live `last_recovery` value and displays approximately one directive every N turns.
+2. The Desk shows the visible bank (`reserve` / `reserve_max`) and the latest top income source for Option B, using the approved source vocabulary.
+3. Diary check remains binding: WP-9 sessions after CA-2 must answer "did you ever want to act and couldn't afford it / did you ever forget the levers existed" — the two failure modes this plan exists to balance.
 
 ## 4. Sequencing & verification
 
@@ -71,8 +71,8 @@ Hard constraints binding ALL options: **§6 — CA must never be granted by atro
 |---|---|---|---|
 | 1 | CA-0 | direct or worktree builder | typecheck + new tests + full grep-derived suites (`commandAuthority`, `command_authority`) |
 | 2 | CA-1 | panel convening | GO recorded in this doc §6 + ledger |
-| 3 | CA-2 | worktree builder | full gate incl. `test:baselines` + structural fingerprint + resumed-save test |
-| 4 | CA-3 | direct | UI gate (`qa:player-experience`) |
+| 3 | CA-2 | worktree builder | full gate incl. `test:baselines` + structural fingerprint + old-shape save test |
+| 4 | CA-3 | shipped with CA-2 | UI gate (`qa:player-experience`) |
 
 CA-0 is parallel-safe with everything in the GUI plan. CA-2 touches `war_phases.ts` — do not run concurrently with any other sim-touching lane (one-change-per-run discipline applies to the PROOF even though the field is player-only).
 
@@ -100,3 +100,5 @@ Changing what the levers DO; adding new levers; touching bot/headless behavior; 
 - **Cap-waste rule:** CA-2 must add a bounded reserve / bank or other visible overflow-preservation path. The Desk must show what is flowing, banking, or capped.
 - **Acceptance update:** retune `tests/command_authority_economy.test.ts` from characterization pins to the target table: income, max override acts, hoard-case acts, post-crisis drought, and gesture cadence.
 - **Section 6 income-source audit result: GO with exclusions.** Allowed CA sources are broad legitimacy / institutional confidence, lawful international standing, non-atrocity patron confidence, internal cohesion / civil-military trust, quiet-front restraint, and authored assembly / patron endorsement events after event and Section 6 screens. Banned CA sources are ethnic consolidation, coercive territorial control, forced displacement, camp / atrocity events, safe-area fall outcomes, civilian casualties, siege starvation, and any ambiguous atrocity-adjacent reward. Any authored event CA grant must carry source classification and a Section 6 note; ambiguous sources stop for panel / owner review.
+- **CA-2 / CA-3 implementation record (2026-07-09, `codex/ca2-political-income`):** Option B is implemented as deterministic political-capacity recovery. Recovery sources are limited to `international_standing`, `patron_confidence`, `internal_cohesion`, `quiet_front_restraint`, and `base_recovery`; validation rejects any other source. Base/floor recovery is 3.25 CA per turn, quiet-front restraint can add 2 CA, force-launch/friction penalties are capped at 2 CA, and reserve is capped at 15 CA. `scenario_runner.ts` keeps the old initial object shape; optional reserve/source fields are written by recovery normalization, preserving old saves without a schema bump.
+- **CA-2 target table now enforced by tests:** neutral strained lifetime usable income is **726 CA** over 188 weeks; max override-class acts are **29**; hoarding preserves a visible **15 CA** reserve instead of silently destroying all overflow; post-crisis drought is **8 turns** under strained non-collapsing conditions; a 10-CA gesture is affordable in **4 turns** under neutral strained conditions; healthy quiet conditions sustain a 25-CA directive about every **3 turns**.

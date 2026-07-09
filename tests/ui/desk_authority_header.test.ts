@@ -46,10 +46,19 @@ afterEach(() => cleanup());
 
 describe('DeskAuthorityHeader', () => {
   it('renders the current CA balance from state.commandAuthority', () => {
-    renderHeader({ current: 60, max: 100, spentThisTurn: 12, lifetimeSpent: 48 });
+    renderHeader({ current: 60, max: 100, reserve: 8, reserveMax: 15, spentThisTurn: 12, lifetimeSpent: 48, lastRecovery: 7, lastRecoverySource: 'patron_confidence' });
     expect(screen.getByTestId('desk-authority-ca-value').textContent).toContain('60');
     expect(screen.getByTestId('desk-authority-ca-value').textContent).toContain('100');
     expect(screen.getByTestId('desk-authority-spent').textContent).toContain('12');
+  });
+
+  it('shows banked overflow and the political income source', () => {
+    renderHeader({ current: 100, max: 100, reserve: 9, reserveMax: 15, spentThisTurn: 0, lifetimeSpent: 48, lastRecovery: 9, lastRecoverySource: 'international_standing' });
+
+    expect(screen.getByTestId('desk-authority-bank').textContent).toContain('9');
+    expect(screen.getByTestId('desk-authority-bank').textContent).toContain('15');
+    expect(screen.getByTestId('desk-authority-income-source').textContent).toMatch(/international standing/i);
+    expect(screen.getByTestId('desk-authority-cadence').textContent).toMatch(/one directive every 3 turns/i);
   });
 
   it('renders each lever cost from the canonical constants', () => {

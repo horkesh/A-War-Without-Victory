@@ -1171,7 +1171,16 @@ export interface LoadedGameState {
         refugeesByTurn: Array<{ turn: number; refugeesCreated: number }>;
     };
     /** Presidential command authority (Level 3 override resource). */
-    commandAuthority?: { current: number; max: number; spentThisTurn: number; lifetimeSpent: number };
+    commandAuthority?: {
+        current: number;
+        max: number;
+        reserve?: number;
+        reserveMax?: number;
+        spentThisTurn: number;
+        lifetimeSpent: number;
+        lastRecovery?: number;
+        lastRecoverySource?: string;
+    };
     fogOfWar?: FogOfWarView;
     /** Sector intelligence records for the player faction — per friendly sector, what we know about enemy sectors. */
     sectorIntel?: SectorIntelRecordView[];

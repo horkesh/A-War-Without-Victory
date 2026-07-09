@@ -6,6 +6,7 @@
 
 
 import type { PhaseName } from './game_state.js';
+import { COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES } from '../shared/commandAuthorityEconomy.js';
 
 
 /** Known phase names (must match PhaseName in game_state.ts). */
@@ -2414,14 +2415,36 @@ function validateCommandAuthority(value: unknown, errors: string[]): void {
     if (!isFiniteNonNegativeNumber(max)) {
         errors.push('military.command_authority.max must be a finite non-negative number');
     }
+    if (value.reserve !== undefined && !isFiniteNonNegativeNumber(value.reserve)) {
+        errors.push('military.command_authority.reserve must be a finite non-negative number when present');
+    }
+    if (value.reserve_max !== undefined && !isFiniteNonNegativeNumber(value.reserve_max)) {
+        errors.push('military.command_authority.reserve_max must be a finite non-negative number when present');
+    }
     if (!isFiniteNonNegativeNumber(value.spent_this_turn)) {
         errors.push('military.command_authority.spent_this_turn must be a finite non-negative number');
     }
     if (!isFiniteNonNegativeNumber(value.lifetime_spent)) {
         errors.push('military.command_authority.lifetime_spent must be a finite non-negative number');
     }
+    if (value.last_recovery !== undefined && !isFiniteNonNegativeNumber(value.last_recovery)) {
+        errors.push('military.command_authority.last_recovery must be a finite non-negative number when present');
+    }
+    if (
+        value.last_recovery_source !== undefined
+        && !COMMAND_AUTHORITY_ALLOWED_INCOME_SOURCES.includes(value.last_recovery_source as never)
+    ) {
+        errors.push('military.command_authority.last_recovery_source must be a Section 6-approved command authority income source when present');
+    }
     if (isFiniteNonNegativeNumber(current) && isFiniteNonNegativeNumber(max) && current > max) {
         errors.push('military.command_authority.current must be less than or equal to military.command_authority.max');
+    }
+    if (
+        isFiniteNonNegativeNumber(value.reserve)
+        && isFiniteNonNegativeNumber(value.reserve_max)
+        && value.reserve > value.reserve_max
+    ) {
+        errors.push('military.command_authority.reserve must be less than or equal to military.command_authority.reserve_max');
     }
 }
 

@@ -88,4 +88,7 @@ export const ADDRESS_NATION_COST = 10;
  * initiate-decorate-unit IPC handler.
  */
 export const DECORATE_UNIT_COST = 10;
-export const COMMAND_AUTHORITY_RECOVERY_PER_TURN = 2;
+export {
+    COMMAND_AUTHORITY_BASE_RECOVERY_PER_TURN as COMMAND_AUTHORITY_RECOVERY_PER_TURN,
+    COMMAND_AUTHORITY_RESERVE_MAX,
+} from '../../../shared/commandAuthorityEconomy.js';
