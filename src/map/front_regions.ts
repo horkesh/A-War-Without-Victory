@@ -1,4 +1,5 @@
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { FrontEdge } from './front_edges.js';
 
 export interface FrontRegion {
@@ -54,7 +55,7 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
 
     for (const [side_pair, edges] of edgesBySidePair.entries()) {
         // Deterministic ordering inside the side-pair processing.
-        edges.sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+        edges.sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
         const edgeById = new Map<string, EdgeLite>();
         for (const e of edges) edgeById.set(e.edge_id, e);
@@ -69,7 +70,7 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
             idsB.push(e.edge_id);
             sidToEdgeIds.set(e.b, idsB);
         }
-        for (const ids of sidToEdgeIds.values()) ids.sort((a, b) => a.localeCompare(b));
+        for (const ids of sidToEdgeIds.values()) ids.sort(strictCompare);
 
         const visited = new Set<string>();
         const edgeIdsSorted = edges.map((e) => e.edge_id);
@@ -104,8 +105,8 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
                 }
             }
 
-            componentEdgeIds.sort((a, b) => a.localeCompare(b));
-            const settlements = Array.from(componentSettlements).sort((a, b) => a.localeCompare(b));
+            componentEdgeIds.sort(strictCompare);
+            const settlements = Array.from(componentSettlements).sort(strictCompare);
             const first_edge_id = componentEdgeIds[0] ?? '';
             const region_id = `${side_pair}::${first_edge_id}`;
 
@@ -120,10 +121,10 @@ export function computeFrontRegions(state: GameState, derivedFrontEdges: FrontEd
     }
 
     regions.sort((a, b) => {
-        const sp = a.side_pair.localeCompare(b.side_pair);
+        const sp = strictCompare(a.side_pair, b.side_pair);
         if (sp !== 0) return sp;
         if (a.active_edge_count !== b.active_edge_count) return b.active_edge_count - a.active_edge_count;
-        return a.region_id.localeCompare(b.region_id);
+        return strictCompare(a.region_id, b.region_id);
     });
 
     return { schema: 1, turn: state.meta.turn, regions };

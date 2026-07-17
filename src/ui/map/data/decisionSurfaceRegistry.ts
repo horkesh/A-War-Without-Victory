@@ -414,7 +414,8 @@ export function getDecisionSurface(familyId: DecisionSurfaceFamilyId): DecisionS
 }
 
 export function getDecisionSurfaceForInboxType(inboxType: InboxItemType): DecisionSurfaceDefinition | null {
-  return listDecisionSurfaces().find((surface) => surface.inboxType === inboxType) ?? null;
+  const matches = listDecisionSurfaces().filter((surface) => surface.inboxType === inboxType);
+  return matches.length === 1 ? matches[0] ?? null : null;
 }
 
 export function sanitizeDecisionCopy(

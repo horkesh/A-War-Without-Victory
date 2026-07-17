@@ -105,7 +105,8 @@ function readEnvCasualtyRealismV2(): boolean {
     // casualty-split behavior (territory-orthogonal: control_delta byte-identical,
     // KIA + all casualty TOTALS untouched — only the MIA→WIA partition moves).
     // Explicit OFF values still disable it (rollback / flag-OFF byte-identity test).
-    const raw = process.env.AWWV_CASUALTY_REALISM_V2;
+    const runtimeProcess = typeof process === 'undefined' ? undefined : process;
+    const raw = runtimeProcess?.env.AWWV_CASUALTY_REALISM_V2;
     if (raw === undefined) return true; // default ON — EH-2 MC-leak fix is standard behavior
     const normalized = raw.trim().toLowerCase();
     if (normalized === '0' || normalized === 'false' || normalized === 'off' || normalized === 'no') {

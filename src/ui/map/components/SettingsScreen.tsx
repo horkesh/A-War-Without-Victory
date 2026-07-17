@@ -254,7 +254,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     {allSections.map(sec => (
                         <button key={sec.id} type="button"
                             onClick={() => setActiveSectionAndRefresh(sec.id)}
-                            className={`text-[10px] uppercase tracking-wider px-3 py-1.5 rounded border transition-colors ${
+                            className={`text-xs uppercase tracking-wider px-3 py-1.5 rounded border transition-colors ${
                                 activeSection === sec.id
                                     ? 'text-[#c4a35a] border-[#c4a35a]/40 bg-[#c4a35a]/10'
                                     : 'text-[#8a7a60] border-[#8a7a60]/20 hover:bg-[#8a7a60]/10'
@@ -324,7 +324,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                             </SettingRow>
                             <SettingRow label={t('settings.colorblindMode.label')} description={t('settings.colorblindMode.description')}>
                                 <select
-                                    className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
+                                    className="bg-[#2a2720] text-[#d5c9bc] text-xs border border-[#8a7a60]/20 rounded px-2 py-1"
                                     aria-label={t('settings.colorblindMode.ariaLabel')}
                                     value={colorblindPreset}
                                     onChange={(e) => setColorblindPreset(e.target.value as ColorblindPreset)}>
@@ -339,7 +339,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                     {activeSection === 'language' && (
                         <SettingRow label={t('settings.language.label')} description={t('settings.language.description')}>
                             <select
-                                className="bg-[#2a2720] text-[#d5c9bc] text-[11px] border border-[#8a7a60]/20 rounded px-2 py-1"
+                                className="bg-[#2a2720] text-[#d5c9bc] text-xs border border-[#8a7a60]/20 rounded px-2 py-1"
                                 aria-label={t('settings.language.ariaLabel')}
                                 value={locale}
                                 onChange={(e) => setLocale(e.target.value as Locale)}>
@@ -366,17 +366,17 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                 />
                             </SettingRow>
                             <div className="rounded border border-[#8a7a60]/10 bg-[#2a2720]/50 p-2">
-                                <p className="m-0 text-[10px] leading-relaxed text-[#8a7a60]">
+                                <p className="m-0 text-xs leading-relaxed text-[#8a7a60]">
                                     {t('settings.crashDiagnostics.privacy')}
                                 </p>
-                                <p className="mb-0 mt-2 text-[10px] text-[#d5c9bc]">
+                                <p className="mb-0 mt-2 text-xs text-[#d5c9bc]">
                                     {t('settings.crashDiagnostics.status', { count: String(crashReportCount) })}
                                 </p>
                                 <div className="mt-2 flex flex-wrap gap-2">
                                     <button
                                         type="button"
                                         onClick={exportCrashReports}
-                                        className="text-[10px] uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
+                                        className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
                                         style={{ fontFamily: 'Courier New, monospace' }}
                                     >
                                         {t('settings.crashDiagnostics.export')}
@@ -384,7 +384,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     <button
                                         type="button"
                                         onClick={exportPlaytestEvidence}
-                                        className="text-[10px] uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
+                                        className="text-xs uppercase tracking-wider text-[#c4a35a] border border-[#c4a35a]/30 px-2 py-1 rounded hover:bg-[#c4a35a]/10"
                                         style={{ fontFamily: 'Courier New, monospace' }}
                                     >
                                         {t('settings.playtestEvidence.export')}
@@ -392,7 +392,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                     <button
                                         type="button"
                                         onClick={clearCrashReports}
-                                        className="text-[10px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
+                                        className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-2 py-1 rounded hover:bg-[#8a7a60]/10"
                                         style={{ fontFamily: 'Courier New, monospace' }}
                                     >
                                         {t('settings.crashDiagnostics.clear')}
@@ -403,7 +403,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         readOnly
                                         aria-label={t('settings.crashDiagnostics.exportedAriaLabel')}
                                         value={crashExportJson}
-                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-[10px] text-[#d5c9bc]"
+                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-xs text-[#d5c9bc]"
                                     />
                                 )}
                                 {playtestEvidenceJson && (
@@ -411,7 +411,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
                                         readOnly
                                         aria-label={t('settings.playtestEvidence.exportedAriaLabel')}
                                         value={playtestEvidenceJson}
-                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-[10px] text-[#d5c9bc]"
+                                        className="mt-2 h-24 w-full resize-none rounded border border-[#8a7a60]/20 bg-[#1c1a16] p-2 text-xs text-[#d5c9bc]"
                                     />
                                 )}
                             </div>
@@ -426,7 +426,7 @@ export function SettingsScreen({ onClose }: SettingsScreenProps) {
 
                 <div className="flex justify-center gap-3">
                     <button type="button" onClick={onClose}
-                        className="text-[11px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
+                        className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10"
                         style={{ fontFamily: 'Courier New, monospace' }}>
                         {t('settings.close')}
                     </button>
@@ -455,7 +455,7 @@ function SettingRow({ label, description, children }: { label: string; descripti
         <div className="flex items-center justify-between p-2 rounded border border-[#8a7a60]/10 bg-[#2a2720]/50">
             <div>
                 <div className="text-[12px] text-[#d5c9bc]">{label}</div>
-                <div className="text-[10px] text-[#8a7a60]">{description}</div>
+                <div className="text-xs text-[#8a7a60]">{description}</div>
             </div>
             {children}
         </div>

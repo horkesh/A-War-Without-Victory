@@ -53,3 +53,23 @@ test('Warroom Vite build declares browser-safe warning boundaries', () => {
         'Warroom build should set an explicit chunk warning limit for its shared player-safe text chunk',
     );
 });
+
+test('tactical map build keeps geometry builders out of the interactive map chunk', () => {
+    const config = readFileSync(join(process.cwd(), 'src', 'ui', 'map', 'vite.config.ts'), 'utf8');
+
+    assert.match(
+        config,
+        /normalized\.includes\('\/src\/ui\/map\/map\/builders\/'\).*return 'map-geometry'/,
+        'GeoJSON builders must have a stable chunk separate from the interactive map shell',
+    );
+    assert.match(
+        config,
+        /normalized\.endsWith\('\/src\/ui\/map\/map\/generateFactionBorders\.ts'\).*return 'map-geometry'/,
+        'the front-line geometry helper must stay with its builder chunk to prevent a circular chunk edge',
+    );
+    assert.match(
+        config,
+        /chunkSizeWarningLimit:\s*1200/,
+        'the tactical map warning boundary must not be raised to hide oversized chunks',
+    );
+});

@@ -1,17 +1,23 @@
 /**
- * War phase: Validate that every brigade/OG with location_osid is in territory its faction controls.
- * Invariant: formation.location_osid implies political_controllers[location_osid] === formation.faction.
+ * War phase: validate physical combat formations have exact-control placement.
  */
 
 import type { GameState } from '../state/game_state.js';
 import { getPoliticalControllerOSID } from '../state/settlement_control.js';
 import type { ValidationIssue } from './validate.js';
 
-const LOCATION_KINDS = new Set(['brigade', 'og', 'operational_group']);
+const PHYSICAL_COMBAT_KINDS = new Set([
+    'brigade',
+    'militia',
+    'og',
+    'operational_group',
+    'jna_phantom',
+    'hv_phantom',
+    'paramilitary',
+]);
 
 /**
- * Validates that each active formation with location_osid (brigade/OG) is in an OSID
- * controlled by that formation's faction. Runs only in war phase.
+ * Runs only in war phase. Corps, corps assets, and army HQs are non-spatial command records.
  */
 export function validateBrigadeLocationControl(state: GameState): ValidationIssue[] {
     const issues: ValidationIssue[] = [];
@@ -20,14 +26,21 @@ export function validateBrigadeLocationControl(state: GameState): ValidationIssu
     const formations = state.military.formations ?? {};
     for (const [formationId, f] of Object.entries(formations)) {
         if (!f || f.status !== 'active') continue;
-        const kind = (f as { kind?: string }).kind;
-        if (!kind || !LOCATION_KINDS.has(kind)) continue;
+        const kind = (f as { kind?: string }).kind ?? 'brigade';
+        if (!PHYSICAL_COMBAT_KINDS.has(kind)) continue;
 
         const locOsid = (f as { location_osid?: string }).location_osid;
-        if (!locOsid) continue;
+        if (!locOsid) {
+            issues.push({
+                severity: 'error',
+                code: 'formation.location_missing',
+                message: `Active physical formation ${formationId} (${f.faction ?? 'unknown'}) has no location_osid`,
+                path: `formations.${formationId}.location_osid`
+            });
+            continue;
+        }
 
         const factionId = (f as { faction?: string }).faction;
-        if (!factionId) continue;
 
         const controller = getPoliticalControllerOSID(state, locOsid);
         if (controller !== factionId) {

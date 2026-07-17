@@ -17,7 +17,7 @@ export function TempoSelector({ value, onChange }: TempoSelectorProps) {
     const current = value;
     return (
         <div className="space-y-2">
-            <label className="text-[10px] font-bold text-accent-gold uppercase tracking-[0.2em]">{t('planUi.operationalTempo')}</label>
+            <label className="text-xs font-bold text-accent-gold uppercase tracking-[0.2em]">{t('planUi.operationalTempo')}</label>
             <div className="flex bg-black/40 border border-white/10 rounded p-1">
                 {OPTIONS.map((opt) => (
                     <button
@@ -28,12 +28,12 @@ export function TempoSelector({ value, onChange }: TempoSelectorProps) {
                             : 'text-slate-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
-                        <span className="text-[10px] font-black uppercase tracking-tight">{t(opt.labelKey)}</span>
+                        <span className="text-xs font-black uppercase tracking-tight">{t(opt.labelKey)}</span>
                     </button>
                 ))}
             </div>
             <div className="px-1">
-                <p className="text-[9px] text-slate-500 italic uppercase tracking-tighter text-center">
+                <p className="text-xs text-slate-500 italic uppercase tracking-tighter text-center">
                     {t(OPTIONS.find(o => o.id === current)?.descKey ?? 'planUi.standardDesc')}
                 </p>
             </div>

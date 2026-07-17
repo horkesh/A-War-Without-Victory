@@ -5,9 +5,29 @@ import {
   buildPlayerSafeFormationTooltipModel,
   buildPlayerSafeFrontTooltipModel,
   getPlayerSafeSettlementTooltipFormations,
+  resolveHoveredFormationSectorId,
 } from '../src/ui/map/components/tooltipPlayerSafe.js';
 
 describe('player-safe tooltip models', () => {
+  it('resolves synthetic enemy-contact hover to its visible front sector', () => {
+    const osidToSector = new Map([
+      ['op:doboj', 'sector:tuzla-doboj'],
+    ]);
+
+    expect(resolveHoveredFormationSectorId({
+      formationId: 'enemy_contact:op:doboj:0',
+      contactLocationOsid: undefined,
+      formationSectorId: null,
+      osidToSector,
+    })).toBe('sector:tuzla-doboj');
+    expect(resolveHoveredFormationSectorId({
+      formationId: 'own_bde',
+      contactLocationOsid: 'op:doboj',
+      formationSectorId: 'sector:own-line',
+      osidToSector,
+    })).toBe('sector:own-line');
+  });
+
   it('keeps exact detail for own formations but abstracts enemy contacts', () => {
     const formations = [
       {

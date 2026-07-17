@@ -260,6 +260,66 @@ describe('buildTurnAftermathView', () => {
       'reserve:reserve_1',
       'officer:replacement_suggested:officer_a',
     ]);
+    expect(view?.nextActions.topItems.find((item) => item.id === 'reserve:reserve_1')?.detail)
+      .toContain('Reserve Review');
+  });
+
+  it('records whose directives survived and what named corps commanders actually did', () => {
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        formations: [
+          { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps' },
+          { id: 'arbih_2nd_corps', name: '2nd Corps', faction: 'RBiH', kind: 'corps' },
+          { id: 'vrs_drina_corps', name: 'Drina Corps', faction: 'RS', kind: 'corps' },
+        ] as LoadedGameState['formations'],
+        namedOfficerData: [
+          { id: 'officer_one', name: 'General One', faction: 'RBiH', rank: 'corps_commander', status: 'active', assigned_corps_id: 'arbih_1st_corps' },
+          { id: 'officer_two', name: 'General Two', faction: 'RBiH', rank: 'corps_commander', status: 'active', assigned_corps_id: 'arbih_2nd_corps' },
+          { id: 'foreign_officer', name: 'Foreign General', faction: 'RS', rank: 'corps_commander', status: 'active', assigned_corps_id: 'vrs_drina_corps' },
+        ] as LoadedGameState['namedOfficerData'],
+        armyCoDecisionTraces: {
+          RBiH: [{ turn: 12, campaign_role: 'PRESS_OFFENSIVE', rationale: 'The Main Staff accepted the offensive intent.' }],
+        },
+        armyCorpsDirectives: [
+          { corpsId: 'arbih_2nd_corps', role: 'economy', deviated: false },
+          { corpsId: 'arbih_1st_corps', role: 'secondary', deviated: true, deviationReason: 'cautious_preference' },
+          { corpsId: 'vrs_drina_corps', role: 'primary', deviated: false },
+        ],
+        corpsCommanderActions: [
+          { corpsId: 'arbih_1st_corps', turn: 12, action: 'launched', reason: 'Plan ready; operation launched.' },
+          { corpsId: 'arbih_2nd_corps', turn: 12, action: 'none', reason: 'Corps exhaustion prevented a new plan.' },
+          { corpsId: 'vrs_drina_corps', turn: 12, action: 'advanced', reason: 'Foreign action.' },
+        ],
+      }),
+    });
+
+    expect(view?.commandRecord.directives).toEqual([{
+      label: 'Press offensive',
+      rationale: 'The Main Staff accepted the offensive intent.',
+    }]);
+    expect(view?.commandRecord.rows).toEqual([
+      {
+        id: 'arbih_1st_corps',
+        corpsName: '1st Corps',
+        officerName: 'General One',
+        assignedRole: 'Supporting effort',
+        interpretation: 'reinterpreted',
+        interpretationDetail: 'The commander adopted a more cautious role.',
+        action: 'Launched an operation',
+        actionDetail: 'Plan ready; operation launched.',
+      },
+      {
+        id: 'arbih_2nd_corps',
+        corpsName: '2nd Corps',
+        officerName: 'General Two',
+        assignedRole: 'Economy of force',
+        interpretation: 'as_issued',
+        interpretationDetail: 'The assignment survived command review.',
+        action: 'No new plan',
+        actionDetail: 'Corps exhaustion prevented a new plan.',
+      },
+    ]);
+    expect(JSON.stringify(view?.commandRecord)).not.toMatch(/vrs_drina_corps|Foreign General|Foreign action/);
   });
 
   it('uses effective inbox severity for next-action blockers and top rows', () => {
@@ -676,6 +736,20 @@ describe('buildTurnAftermathView', () => {
     });
   });
 
+  it('does not classify a costly campaign as quiet', () => {
+    const costlyRecords = [20, 19].map((turn) => buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn,
+          territory_net: { RBiH: turn === 20 ? 2 : 0 },
+          displacement_total: 1200,
+        }),
+      }),
+    })!);
+
+    expect(buildTurnAftermathCampaignPulse(costlyRecords).momentum).toBe('contested');
+  });
+
   it('builds an active campaign cost view from the full turn archive', () => {
     const turn18 = makeSummary({
       turn: 18,
@@ -738,6 +812,8 @@ describe('buildTurnAftermathView', () => {
       hardTurnCount: 2,
       averageFriendlyMilitaryCasualties: 160 / 3,
       casualtyExchangeRatio: 50 / 160,
+      displayFriendlyMilitaryCasualties: 160,
+      friendlyMilitaryCasualtyScope: 'turn_archive',
     });
     expect(cost.briefing).toBe('3 recorded turns: 160 friendly casualties, 5200 displaced, +2 net territorial change, 0.31 opposing casualties per friendly casualty.');
     expect(cost.briefing).not.toContain('OSID');
@@ -755,6 +831,37 @@ describe('buildTurnAftermathView', () => {
       displacedThisTurn: 4000,
       ownFormationsDestroyed: 1,
     });
+  });
+
+  it('prefers the cumulative casualty ledger for display while preserving archive analytics', () => {
+    const summary = makeSummary({
+      battles: [{
+        osid: 'op:test:ledger',
+        attacker_faction: 'RBiH',
+        defender_faction: 'RS',
+        primary_attacker_id: 'a',
+        primary_defender_id: 'b',
+        all_attacker_ids: ['a'],
+        outcome: 'stalemate' as never,
+        attacker_casualties: 80,
+        defender_casualties: 55,
+        territory_flipped: false,
+        was_concentrated: false,
+      }],
+    });
+    const cost = buildTurnAftermathCampaignCost({
+      state: makeState({
+        latestTurnSummary: summary,
+        turnSummaries: [summary],
+        casualtyLedger: {
+          RBiH: { killed: 12_000, wounded: 17_000, missing_captured: 500 },
+        },
+      }),
+    });
+
+    expect(cost.totalFriendlyMilitaryCasualties).toBe(80);
+    expect(cost.displayFriendlyMilitaryCasualties).toBe(29_500);
+    expect(cost.friendlyMilitaryCasualtyScope).toBe('campaign_ledger');
   });
 
   it('localizes campaign pulse and campaign cost archive prose when BCS is selected', () => {
@@ -809,7 +916,8 @@ describe('buildTurnAftermathView', () => {
     const pulse = buildTurnAftermathCampaignPulse(records);
     const cost = buildTurnAftermathCampaignCost({ state });
 
-    expect(pulse.briefing).toBe('Arhivski prozor je miran: nema većih pomjeranja ili troškova u vidljivim zapisima.');
+    expect(pulse.momentum).toBe('contested');
+    expect(pulse.briefing).toBe('Arhivski prozor je sporan: malo neto pomjeranja, ali 160 prijateljskih gubitaka i 0 strateških signala.');
     expect(cost.headline).toBe('Cijena kampanje je kritična.');
     expect(cost.briefing).toBe('3 zabilježena poteza: 160 prijateljskih gubitaka, 5200 raseljenih, +2 teritorijalni saldo, 0.31 protivničkih gubitaka po prijateljskom gubitku.');
     expect(cost.briefing).not.toContain('OSID');
@@ -1079,5 +1187,25 @@ describe('buildTurnAftermathView', () => {
     expect(filterTurnAftermathRecords(records, 'signals').map((record) => record.turn)).toEqual([42]);
     expect(filterTurnAftermathRecords(records, 'actions').map((record) => record.turn)).toEqual([43]);
     expect(filterTurnAftermathRecords(records, 'territory').map((record) => record.turn)).toEqual([44, 41]);
+  });
+
+  it('assigns unique deterministic ids to repeated decoration signals', () => {
+    const decoration = { tier: 'tier_1', awarded_turn: 12, reason: 'steadfast defense' } as const;
+    const view = buildTurnAftermathView({
+      nextState: makeState({
+        latestTurnSummary: makeSummary({
+          turn: 12,
+          decoration_awards: [
+            { formation_id: 'arbih_185th_light', formation_name: '185th Light', faction: 'RBiH', decoration },
+            { formation_id: 'arbih_185th_light', formation_name: '185th Light', faction: 'RBiH', decoration },
+          ],
+        }),
+      }),
+    })!;
+    const ids = view.signals.filter((signal) => signal.kind === 'decoration').map((signal) => signal.id);
+
+    expect(ids).toHaveLength(2);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids.join('|')).not.toContain('[object Object]');
   });
 });

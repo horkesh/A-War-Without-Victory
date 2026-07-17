@@ -5,6 +5,7 @@ import { computeFrontBreaches } from './front_breaches.js';
 import type { FactionId, GameState } from './game_state.js';
 import type { MilitiaFatigueStepReport } from './militia_fatigue.js';
 import type { SustainabilityStepReport } from './sustainability.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Per-faction negotiation pressure component breakdown.
@@ -56,7 +57,7 @@ export function updateNegotiationPressure(
     sustainabilityReport: SustainabilityStepReport | undefined
 ): NegotiationPressureStepReport {
     const currentTurn = state.meta.turn;
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
 
     // Compute breach candidates (deterministic)
     const breaches = computeFrontBreaches(state, derivedFrontEdges);
@@ -176,7 +177,7 @@ export function updateNegotiationPressure(
     }
 
     // Sort deterministically
-    per_faction.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    per_faction.sort((a, b) => strictCompare(a.faction_id, b.faction_id));
 
     return { per_faction };
 }

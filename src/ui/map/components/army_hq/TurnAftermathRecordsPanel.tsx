@@ -128,9 +128,9 @@ function actionTypeLabel(type: TurnAftermathView['nextActions']['topItems'][numb
 function RecordMetric({ label, value, detail }: { label: string; value: string; detail: string }) {
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
-            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{label}</div>
+            <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{label}</div>
             <div className="text-[13px] font-bold tabular-nums text-text-primary">{value}</div>
-            <div className="truncate text-[9px] text-text-secondary">{detail}</div>
+            <div className="truncate text-xs text-text-secondary">{detail}</div>
         </div>
     );
 }
@@ -154,18 +154,18 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                 <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="text-[12px] font-bold text-text-primary">{view.dateLabel}</div>
-                        <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${toneClass(view.tone)}`}>
+                        <span className={`rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] ${toneClass(view.tone)}`}>
                             {toneLabel(view.tone)}
                         </span>
-                        <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
+                        <span className={`rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] ${costClass(view.cost.severity)}`}>
                             {t('records.costSeverity', { severity: costSeverityLabel(view.cost.severity) })}
                         </span>
                     </div>
-                    <div className="mt-0.5 truncate text-[11px] text-text-secondary">{view.headline}</div>
-                    <div className="mt-1 text-[11px] leading-5 text-text-primary/80">{view.narrativeLine}</div>
+                    <div className="mt-0.5 truncate text-xs text-text-secondary">{view.headline}</div>
+                    <div className="mt-1 text-xs leading-5 text-text-primary/80">{view.narrativeLine}</div>
                 </div>
                 <div className="shrink-0 text-right">
-                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.filing')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.metric.filing')}</div>
                     <div className="text-[13px] font-bold tabular-nums text-text-primary">{view.dateLabel}</div>
                 </div>
             </div>
@@ -195,12 +195,12 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
 
             {signalPreview.length > 0 && (
                 <div className="mt-2 rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                    <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.strategicSignals')}</div>
+                    <div className="mb-1 text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.strategicSignals')}</div>
                     <div className="grid gap-1.5 md:grid-cols-3">
                         {signalPreview.map((signal) => (
                             <div key={signal.id} className={`min-w-0 rounded border px-2 py-1 ${signalClass(signal.severity)}`}>
-                                <div className="truncate text-[10px] font-semibold">{signal.label}</div>
-                                <div className="truncate text-[8px] uppercase tracking-[0.1em] opacity-75">{signalKindLabel(signal.kind)} / {signal.detail}</div>
+                                <div className="break-words text-xs font-semibold">{signal.label}</div>
+                                <div className="break-words text-xs uppercase tracking-[0.1em]">{signalKindLabel(signal.kind)} / {signal.detail}</div>
                             </div>
                         ))}
                     </div>
@@ -211,16 +211,16 @@ function TurnAftermathRecordCard({ view, isLatest, isFocused }: { view: TurnAfte
                 <div className="mt-2 grid gap-2 md:grid-cols-2">
                     {firstFlip && (
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadTerritorialNote')}</div>
-                            <div className="truncate text-[11px] font-semibold text-text-primary">{firstFlip.label}</div>
-                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{directionLabel(firstFlip.direction)}</div>
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.leadTerritorialNote')}</div>
+                            <div className="truncate text-xs font-semibold text-text-primary">{firstFlip.label}</div>
+                            <div className="text-xs uppercase tracking-[0.1em] text-text-secondary">{directionLabel(firstFlip.direction)}</div>
                         </div>
                     )}
                     {firstAction && (
                         <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.leadDeskItem')}</div>
-                            <div className="truncate text-[11px] font-semibold text-text-primary">{firstAction.title}</div>
-                            <div className="text-[9px] uppercase tracking-[0.1em] text-text-secondary">{actionTypeLabel(firstAction.type)}</div>
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.leadDeskItem')}</div>
+                            <div className="truncate text-xs font-semibold text-text-primary">{firstAction.title}</div>
+                            <div className="text-xs uppercase tracking-[0.1em] text-text-secondary">{actionTypeLabel(firstAction.type)}</div>
                         </div>
                     )}
                 </div>
@@ -269,7 +269,7 @@ export function TurnAftermathRecordsPanel() {
 
     if (records.length === 0) {
         return (
-            <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
+            <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-xs text-text-secondary">
                 {t('records.emptyCampaign')}
             </div>
         );
@@ -288,7 +288,7 @@ export function TurnAftermathRecordsPanel() {
                             key={option.id}
                             type="button"
                             onClick={() => setFilter(option.id)}
-                            className={`rounded border px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.12em] transition ${
+                            className={`rounded border px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.12em] transition ${
                                 active
                                     ? 'border-amber-400/35 bg-amber-400/15 text-amber-300'
                                     : 'border-panel-border/60 bg-panel-card/60 text-text-secondary hover:border-white/20 hover:text-text-primary'
@@ -303,11 +303,11 @@ export function TurnAftermathRecordsPanel() {
             <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.campaignPulse')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.campaignPulse')}</div>
                         <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{pulse.windowLabel}</div>
-                        <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{pulse.briefing}</div>
+                        <div className="mt-1 max-w-3xl text-xs text-text-secondary">{pulse.briefing}</div>
                     </div>
-                    <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${momentumClass(pulse.momentum)}`}>
+                    <span className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] ${momentumClass(pulse.momentum)}`}>
                         {momentumLabel(pulse.momentum)}
                     </span>
                 </div>
@@ -322,11 +322,11 @@ export function TurnAftermathRecordsPanel() {
             <section className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2" data-testid="campaign-cost-spine">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.campaignCostSoFar')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.campaignCostSoFar')}</div>
                         <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{campaignCost.headline}</div>
-                        <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">{campaignCost.briefing}</div>
+                        <div className="mt-1 max-w-3xl text-xs text-text-secondary">{campaignCost.briefing}</div>
                     </div>
-                    <span className={`rounded border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.severity)}`}>
+                    <span className={`rounded border px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.severity)}`}>
                         {costSeverityLabel(campaignCost.severity)}
                     </span>
                 </div>
@@ -342,10 +342,10 @@ export function TurnAftermathRecordsPanel() {
                     <div className="mt-2 grid gap-2 lg:grid-cols-[1.2fr_0.8fr]">
                         {campaignCost.topDrivers.length > 0 && (
                             <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                                <div className="mb-1 text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.costDrivers')}</div>
+                                <div className="mb-1 text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.costDrivers')}</div>
                                 <div className="flex flex-wrap gap-1.5">
                                     {campaignCost.topDrivers.map((driver) => (
-                                        <span key={driver} className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[9px] text-text-secondary">
+                                        <span key={driver} className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-xs text-text-secondary">
                                             {driver}
                                         </span>
                                     ))}
@@ -354,14 +354,14 @@ export function TurnAftermathRecordsPanel() {
                         )}
                         {campaignCost.mostCostlyTurn && (
                             <div className="rounded border border-panel-border/40 bg-black/10 px-2 py-1.5">
-                                <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{t('records.costliestTurn')}</div>
+                                <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.costliestTurn')}</div>
                                 <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                                    <span className="text-[11px] font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
-                                    <span className={`rounded border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
+                                    <span className="text-xs font-semibold text-text-primary">{campaignCost.mostCostlyTurn.dateLabel}</span>
+                                    <span className={`rounded border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] ${costClass(campaignCost.mostCostlyTurn.severity)}`}>
                                         {costSeverityLabel(campaignCost.mostCostlyTurn.severity)}
                                     </span>
                                 </div>
-                                <div className="mt-1 text-[9px] text-text-secondary">
+                                <div className="mt-1 text-xs text-text-secondary">
                                     {t('records.detail.casualtiesDisplacedFormations', {
                                         casualties: campaignCost.mostCostlyTurn.friendlyMilitaryCasualties,
                                         displaced: campaignCost.mostCostlyTurn.displacedThisTurn,
@@ -376,34 +376,34 @@ export function TurnAftermathRecordsPanel() {
 
             <div className="grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.archive')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.metric.archive')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.recordCount}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.netTerritory')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.metric.netTerritory')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{formatSigned(summary.netFriendlyTerritory)}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('situation.casualties')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('situation.casualties')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalFriendlyMilitaryCasualties}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('warSummary.label.displaced')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('warSummary.label.displaced')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-text-primary">{summary.totalDisplaced}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.metric.lostFormations')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.metric.lostFormations')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-red-300">{summary.totalOwnFormationsDestroyed}</div>
                 </div>
                 <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-2">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('records.filter.hard')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('records.filter.hard')}</div>
                     <div className="text-[16px] font-bold tabular-nums text-amber-300">{summary.criticalTurns + summary.severeTurns}</div>
                 </div>
             </div>
 
             <div className="space-y-2">
                 {visibleRecords.length === 0 ? (
-                    <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
+                    <div className="rounded border border-panel-border/50 bg-panel-card/50 px-3 py-4 text-xs text-text-secondary">
                         {t('records.noFilterMatches')}
                     </div>
                 ) : visibleRecords.map((record) => (

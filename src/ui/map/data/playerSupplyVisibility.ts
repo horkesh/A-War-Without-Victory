@@ -20,6 +20,7 @@
  */
 import type { LoadedGameState } from './types.js';
 import { t } from '../i18n/index.js';
+import { humanizeOsid } from '../utils/osidDisplayName.js';
 
 export type PlayerSupplySeverity = 'critical' | 'warning' | 'info' | 'unknown';
 
@@ -40,6 +41,11 @@ export interface PlayerSupplyVisibilityView {
     corridorCutReported: boolean;
     corridorAtRisk: boolean;
     isolatedFormationCount: number;
+    isolatedFormations: Array<{
+        id: string;
+        label: string;
+        location: string;
+    }>;
     severity: PlayerSupplySeverity;
     headline: string;
     evidence: string[];
@@ -49,9 +55,12 @@ function strictCompare(a: string, b: string): number {
     return a < b ? -1 : a > b ? 1 : 0;
 }
 
-function countIsolatedPlayerFormations(state: LoadedGameState, playerFaction: string): number {
+function collectIsolatedPlayerFormations(
+    state: LoadedGameState,
+    playerFaction: string,
+): PlayerSupplyVisibilityView['isolatedFormations'] {
     const supply = state.supplyStateByOsid ?? {};
-    let count = 0;
+    const isolated: PlayerSupplyVisibilityView['isolatedFormations'] = [];
     const formations = [...(state.formations ?? [])].sort((a, b) => strictCompare(a.id, b.id));
     for (const formation of formations) {
         if (formation.faction !== playerFaction) continue;
@@ -59,9 +68,15 @@ function countIsolatedPlayerFormations(state: LoadedGameState, playerFaction: st
         if (formation.status !== 'active') continue;
         const osid = formation.location_osid;
         if (!osid) continue;
-        if (supply[osid] === 'critical') count++;
+        if (supply[osid] === 'critical') {
+            isolated.push({
+                id: formation.id,
+                label: formation.name?.trim() || t('corpsFront.unreported'),
+                location: humanizeOsid(osid),
+            });
+        }
     }
-    return count;
+    return isolated;
 }
 
 function deriveSeverity(args: {
@@ -140,6 +155,14 @@ function buildEvidence(view: Omit<PlayerSupplyVisibilityView, 'headline' | 'evid
                 ? 'decisionRoom.card.supply.unit.brigadeSingular'
                 : 'decisionRoom.card.supply.unit.brigadePlural'),
         }));
+        const visible = view.isolatedFormations.slice(0, 3);
+        const remaining = view.isolatedFormations.length - visible.length;
+        const items = visible.map((formation) => `${formation.label} at ${formation.location}`).join('; ');
+        evidence.push(t('decisionRoom.card.supply.evidence.isolatedExamples', {
+            items,
+            more: remaining > 0 ? t('decisionRoom.card.supply.evidence.more', { count: remaining }) : '',
+        }));
+        evidence.push(t('decisionRoom.card.supply.evidence.staffHandoff'));
     }
     return evidence;
 }
@@ -194,9 +217,10 @@ export function buildPlayerSupplyVisibility(
     const corridorCutCount = corridorCut ?? 0;
     const corridorAtRisk = corridorBrittleCount > 0 || corridorCutCount > 0;
 
-    const isolatedFormationCount = hasOsidData
-        ? countIsolatedPlayerFormations(state, playerFaction)
-        : 0;
+    const isolatedFormations = hasOsidData
+        ? collectIsolatedPlayerFormations(state, playerFaction)
+        : [];
+    const isolatedFormationCount = isolatedFormations.length;
 
     const severity: PlayerSupplySeverity = hasSupplyData
         ? deriveSeverity({ corridorAtRisk, criticalCount, isolatedFormationCount })
@@ -219,6 +243,7 @@ export function buildPlayerSupplyVisibility(
         corridorCutReported: corridorCut != null,
         corridorAtRisk,
         isolatedFormationCount,
+        isolatedFormations,
         severity,
     };
 

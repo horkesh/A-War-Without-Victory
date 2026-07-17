@@ -20,6 +20,7 @@ import type {
     CorpsStance,
 } from '../../../src/state/game_state.js';
 import { generateLevel1StanceProposals } from '../../../src/sim/ai_commander/proposal_generation.js';
+import { warPhases } from '../../../src/sim/turn_phases/war_phases.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -102,6 +103,16 @@ function makeState(opts: {
             corps_command: corpsCommand,
         },
     } as unknown as GameState;
+}
+
+function getWarPhaseStep(name: string) {
+    const step = warPhases.find((candidate) => candidate.name === name);
+    if (!step) throw new Error(`Step '${name}' not found in warPhases`);
+    return step;
+}
+
+function makePhaseContext(state: GameState) {
+    return { state } as unknown as Parameters<typeof warPhases[0]['run']>[0];
 }
 
 // ---------------------------------------------------------------------------
@@ -448,53 +459,39 @@ describe('schema contract: CorpsCommandState.ai_recommended_stance', () => {
 // ---------------------------------------------------------------------------
 
 describe('level 2+ gate removal: StateMeta.autonomy_level_pending', () => {
-    /**
-     * Phase B had a guard blocking level 2+ in the IPC handler.
-     * Phase C removes it. We verify at the state layer: autonomy_level_pending can
-     * be set to 2 or 3 and the apply-autonomy-transition logic promotes it to
-     * autonomy_level without any guard.
-     *
-     * We simulate the transition inline (no pipeline needed).
-     */
-    function simulateAutonomyTransition(state: GameState): void {
-        const meta = state.meta;
-        if (meta.autonomy_level_pending !== undefined) {
-            meta.autonomy_level = meta.autonomy_level_pending;
-            meta.autonomy_level_pending = undefined;
-        }
-    }
+    const step = getWarPhaseStep('apply-autonomy-transition');
 
-    it('autonomy_level_pending=2 transitions to autonomy_level=2', () => {
+    it('autonomy_level_pending=2 transitions to autonomy_level=2', async () => {
         const state = {
             meta: { turn: 1, seed: 'test', phase: 'war', autonomy_level_pending: 2 as const },
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        simulateAutonomyTransition(state);
+        await step.run(makePhaseContext(state));
 
         expect(state.meta.autonomy_level).toBe(2);
         expect(state.meta.autonomy_level_pending).toBeUndefined();
     });
 
-    it('autonomy_level_pending=3 transitions to autonomy_level=3', () => {
+    it('autonomy_level_pending=3 transitions to autonomy_level=3', async () => {
         const state = {
             meta: { turn: 1, seed: 'test', phase: 'war', autonomy_level_pending: 3 as const },
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        simulateAutonomyTransition(state);
+        await step.run(makePhaseContext(state));
 
         expect(state.meta.autonomy_level).toBe(3);
         expect(state.meta.autonomy_level_pending).toBeUndefined();
     });
 
-    it('autonomy_level_pending=1 transitions to autonomy_level=1', () => {
+    it('autonomy_level_pending=1 transitions to autonomy_level=1', async () => {
         const state = {
             meta: { turn: 1, seed: 'test', phase: 'war', autonomy_level: 0 as const, autonomy_level_pending: 1 as const },
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        simulateAutonomyTransition(state);
+        await step.run(makePhaseContext(state));
 
         expect(state.meta.autonomy_level).toBe(1);
     });
@@ -505,23 +502,14 @@ describe('level 2+ gate removal: StateMeta.autonomy_level_pending', () => {
 // ---------------------------------------------------------------------------
 
 describe('apply-autonomy-transition: proposal expiry', () => {
-    /**
-     * Simulate only the proposal-expiry logic from apply-autonomy-transition.
-     */
-    function applyExpiry(state: GameState): void {
-        const meta = state.meta;
-        if (meta.pending_proposal_reviews) {
-            meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter(
-                p => !(p.turn < meta.turn && p.accepted === undefined)
-            );
-        }
-    }
+    const step = getWarPhaseStep('apply-autonomy-transition');
 
-    it('discards unresolved proposals from a prior turn', () => {
+    it('records an explicit negative disposition when an ordinary prior-turn proposal expires', async () => {
         const state = {
             meta: {
                 turn: 6,
                 seed: 'test',
+                phase: 'war',
                 pending_proposal_reviews: [
                     {
                         id: 'PROP_5_military_0',
@@ -537,16 +525,23 @@ describe('apply-autonomy-transition: proposal expiry', () => {
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        applyExpiry(state);
+        await step.run(makePhaseContext(state));
 
-        expect(state.meta.pending_proposal_reviews).toHaveLength(0);
+        expect(state.meta.pending_proposal_reviews).toEqual([
+            expect.objectContaining({
+                id: 'PROP_5_military_0',
+                accepted: false,
+                resolved_turn: 6,
+            }),
+        ]);
     });
 
-    it('keeps resolved proposals (accepted=true) from a prior turn', () => {
+    it('garbage-collects a previously resolved ordinary proposal from a prior turn', async () => {
         const state = {
             meta: {
                 turn: 6,
                 seed: 'test',
+                phase: 'war',
                 pending_proposal_reviews: [
                     {
                         id: 'PROP_5_military_0',
@@ -563,16 +558,48 @@ describe('apply-autonomy-transition: proposal expiry', () => {
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        applyExpiry(state);
+        await step.run(makePhaseContext(state));
 
-        expect(state.meta.pending_proposal_reviews).toHaveLength(1);
+        expect(state.meta.pending_proposal_reviews).toHaveLength(0);
     });
 
-    it('keeps current-turn proposals (not yet expired)', () => {
+    it('keeps a resolved operation-plan decision as a durable no-reprompt record', async () => {
+        const state = {
+            meta: {
+                turn: 6,
+                seed: 'test',
+                phase: 'war',
+                pending_proposal_reviews: [{
+                    id: 'PROP_5_ops_0',
+                    turn: 5,
+                    faction: 'RBiH' as FactionId,
+                    domain: 'ops' as const,
+                    description: 'accepted plan',
+                    proposed_action: 'APPROVE_OP:arbih_1st:plan_arbih_1st_t5',
+                    accepted: true,
+                    resolved_turn: 5,
+                }] as PendingProposalReview[],
+            },
+            military: { formations: {}, corps_command: {} },
+        } as unknown as GameState;
+
+        await step.run(makePhaseContext(state));
+
+        expect(state.meta.pending_proposal_reviews).toEqual([
+            expect.objectContaining({
+                proposed_action: 'APPROVE_OP:arbih_1st:plan_arbih_1st_t5',
+                accepted: true,
+                resolved_turn: 5,
+            }),
+        ]);
+    });
+
+    it('keeps current-turn proposals unresolved', async () => {
         const state = {
             meta: {
                 turn: 5,
                 seed: 'test',
+                phase: 'war',
                 pending_proposal_reviews: [
                     {
                         id: 'PROP_5_military_0',
@@ -588,9 +615,41 @@ describe('apply-autonomy-transition: proposal expiry', () => {
             military: { formations: {}, corps_command: {} },
         } as unknown as GameState;
 
-        applyExpiry(state);
+        await step.run(makePhaseContext(state));
 
         expect(state.meta.pending_proposal_reviews).toHaveLength(1);
+        expect(state.meta.pending_proposal_reviews?.[0].id).toBe('PROP_5_military_0');
+        expect(state.meta.pending_proposal_reviews?.[0].accepted).toBeUndefined();
+        expect(state.meta.pending_proposal_reviews?.[0].resolved_turn).toBeUndefined();
+    });
+
+    it('keeps a standing historical-operation authorization unresolved across turns', async () => {
+        const state = {
+            meta: {
+                turn: 6,
+                seed: 'test',
+                phase: 'war',
+                pending_proposal_reviews: [
+                    {
+                        id: 'PROP_5_historical_op_preplanned_arbih_1st_operation_example',
+                        turn: 5,
+                        faction: 'RBiH' as FactionId,
+                        domain: 'ops' as const,
+                        description: 'Operation Example - staff requests authorization to proceed.',
+                        proposed_action: 'HISTORICAL_OP:preplanned:arbih_1st:Operation Example',
+                    },
+                ] as PendingProposalReview[],
+            },
+            military: { formations: {}, corps_command: {} },
+        } as unknown as GameState;
+
+        await step.run(makePhaseContext(state));
+
+        expect(state.meta.pending_proposal_reviews).toHaveLength(1);
+        expect(state.meta.pending_proposal_reviews?.[0].id)
+            .toBe('PROP_5_historical_op_preplanned_arbih_1st_operation_example');
+        expect(state.meta.pending_proposal_reviews?.[0].accepted).toBeUndefined();
+        expect(state.meta.pending_proposal_reviews?.[0].resolved_turn).toBeUndefined();
     });
 });
 

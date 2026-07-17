@@ -1,48 +1,52 @@
-/**
- * Invariant assertion: active brigades must be in friendly territory.
- *
- * Every active brigade with a location_osid must be at an OSID controlled
- * by its own faction or a friendly faction (RBiH↔HRHB when allied).
- *
- * Exceptions:
- *   - Formations with no location_osid (HQ, undeployed)
- *   - Non-brigade/og formations (corps HQ, etc.)
- *   - Formations in column transit (being redeployed)
- *
- * Assertion-only — never throws, never modifies state. Logs violations via console.error.
- */
-
 import type { GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { ValidationIssue } from '../../validate/validate.js';
 import { isFriendlyFaction } from '../early_war/alliance_update.js';
 
-/**
- * Assert all active brigades are in friendly-controlled territory.
- */
-export function assertFormationsInFriendlyTerritory(state: GameState): void {
-    const pc = state.political.political_controllers ?? {};
+const PHYSICAL_COMBAT_KINDS = new Set([
+    'brigade',
+    'militia',
+    'og',
+    'operational_group',
+    'jna_phantom',
+    'hv_phantom',
+    'paramilitary',
+]);
+
+/** Return deterministic issues for active physical formations outside friendly control. */
+export function assertFormationsInFriendlyTerritory(state: GameState): ValidationIssue[] {
+    const controllers = state.political?.political_controllers ?? {};
     const formations = state.military.formations ?? {};
-    const violations: string[] = [];
+    const issues: ValidationIssue[] = [];
 
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid]!;
-        if (f.status !== 'active') continue;
-        if (!f.location_osid) continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[formationId]!;
+        if (formation.status !== 'active') continue;
+        const kind = formation.kind ?? 'brigade';
+        if (!PHYSICAL_COMBAT_KINDS.has(kind)) continue;
 
-        const controller = pc[f.location_osid];
-        // null controller = unclaimed territory, acceptable during early war
-        if (controller === null || controller === undefined) continue;
-        if (!isFriendlyFaction(controller, f.faction, state)) {
-            violations.push(
-                `${fid} (${f.faction}) at ${f.location_osid} controlled by ${controller}`
-            );
+        const locationOsid = formation.location_osid;
+        const path = `military.formations.${formationId}.location_osid`;
+        if (!locationOsid) {
+            issues.push({
+                severity: 'error',
+                code: 'formation.location_missing',
+                message: `Active physical formation ${formationId} (${formation.faction}) has no location_osid`,
+                path,
+            });
+            continue;
         }
+
+        const controller = controllers[locationOsid] ?? null;
+        if (controller !== null && isFriendlyFaction(controller, formation.faction, state)) continue;
+
+        issues.push({
+            severity: 'error',
+            code: 'formation.location_not_friendly',
+            message: `Active physical formation ${formationId} (${formation.faction}) is at ${locationOsid} controlled by ${controller ?? 'null'}`,
+            path,
+        });
     }
 
-    if (violations.length > 0) {
-        console.error(
-            `FORMATION IN ENEMY TERRITORY (${violations.length} violations):\n  ${violations.join('\n  ')}`
-        );
-    }
+    return issues;
 }

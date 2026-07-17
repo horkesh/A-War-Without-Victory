@@ -8,6 +8,7 @@ import { getFactionEquipmentPressureMultiplier } from './heavy_equipment.js';
 import { getFactionLegitimacyAverages } from './legitimacy.js';
 import { getSettlementControlStatus } from './settlement_control.js';
 import { computeSupplyReachability } from './supply_reachability.js';
+import { strictCompare } from './validateGameState.js';
 
 function postureMultiplier(posture: PostureLevel): number {
     switch (posture) {
@@ -86,7 +87,7 @@ export function accumulateFrontPressure(
     const turn = state.meta.turn;
     const edgesSorted = [...derivedFrontEdges]
         .filter((e) => e && typeof e.edge_id === 'string')
-        .sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+        .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
     // Compute supply reachability once per turn and build reachable sets by faction.
     const supply = computeSupplyReachability(state, adjacencyMap);

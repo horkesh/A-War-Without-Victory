@@ -1329,7 +1329,7 @@ export function autoResolveOpportunityProposalReviews(
     let marked = 0;
     for (const review of reviews) {
         if (!review.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)) continue;
-        if (review.accepted !== undefined || normalizeOpportunityDecision(review.opportunity_decision) !== null) continue;
+        if (review.accepted != null || review.resolved_turn != null || normalizeOpportunityDecision(review.opportunity_decision) !== null) continue;
         if (playerFaction !== null && review.faction !== playerFaction) continue;
 
         const decision = normalizeOpportunityDecision(review.proposed_value);
@@ -1365,7 +1365,7 @@ export function applyResolvedOpportunityDecisions(
     const targets = reviews
         .filter(r =>
             r.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)
-            && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted !== undefined))
+            && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted != null))
         .sort((a, b) => strictCompare(a.id, b.id));
     for (const r of targets) {
         const proposalId = r.proposed_action.slice(OPPORTUNITY_PROPOSAL_ACTION_PREFIX.length);

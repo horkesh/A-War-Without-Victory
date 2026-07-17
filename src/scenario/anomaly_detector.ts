@@ -306,6 +306,7 @@ function detectZeroPersonnelActive(state: GameState): AnomalyReport[] {
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
         const f = formations[fid];
         if (f.status !== 'active') continue;
+        if (f.readiness === 'forming') continue;
         if (!isBrigadeKind(f.kind)) continue;
         const personnel = f.personnel ?? 0;
         if (personnel === 0) {
@@ -337,6 +338,7 @@ function detectBrigadeNeverFights(state: GameState): AnomalyReport[] {
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
         const f = formations[fid];
         if (f.status !== 'active') continue;
+        if (f.readiness === 'forming') continue;
         if (!isBrigadeKind(f.kind)) continue;
         const assignedSector = getAssignedSector(state, f as Record<string, any>);
         const onLoan = !!f.elite_loan_state?.on_loan
@@ -494,7 +496,7 @@ function detectOperationStagnation(state: GameState): AnomalyReport[] {
  *   - misallocated   → corps-army-commander (rebalance)
  *
  * Heuristic: count active brigade-kind formations belonging to the corps,
- * subtract those already attached to any sector (assigned or reserve). If
+ * subtract those already attached to any sector (assigned, reserve, or rear). If
  * surplus >= 1, the corps has unassigned brigades that could fill the gap.
  *
  * Read-only over GameState; deterministic via sortedKeys + strictCompare.
@@ -519,13 +521,14 @@ function classifyCorpsBrigadeAvailability(
         if (!sec || sec.corps_id !== corpsId) continue;
         for (const bid of sec.assigned_brigade_ids ?? []) sectorAssigned.add(bid);
         for (const bid of sec.reserve_brigade_ids ?? []) sectorAssigned.add(bid);
+        for (const bid of sec.rear_brigade_ids ?? []) sectorAssigned.add(bid);
     }
     return activeBrigades > sectorAssigned.size ? 'misallocated' : 'pool_exhausted';
 }
 
 /**
  * 8. empty_contested_sector (warning)
- * Sector with >0 front edges and 0 assigned+reserve brigades.
+ * Sector with >0 front edges and 0 assigned, reserve, or rear brigades.
  *
  * LANE-2026-05-02-B3: emits one report per `subtype` to distinguish
  * pool_exhausted (no surplus brigades anywhere in corps) from
@@ -540,7 +543,9 @@ function detectEmptyContestedSector(state: GameState): AnomalyReport[] {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
         if (sector.unstaffed_front === true) continue;
-        const totalBrigades = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+        const totalBrigades = sector.assigned_brigade_ids.length
+            + sector.reserve_brigade_ids.length
+            + (sector.rear_brigade_ids?.length ?? 0);
         if (totalBrigades === 0) {
             const corpsId = sector.corps_id;
             if (!emptyByCorps[corpsId]) emptyByCorps[corpsId] = [];
@@ -568,7 +573,7 @@ function detectEmptyContestedSector(state: GameState): AnomalyReport[] {
             severity: 'warning',
             type: 'empty_contested_sector',
             subtype,
-            description: `${ids.length} sector(s) [${subtype}] have front edges but 0 assigned or reserve brigades.`,
+            description: `${ids.length} sector(s) [${subtype}] have front edges but 0 assigned, reserve, or rear brigades.`,
             entities: ids,
         });
     }
@@ -670,7 +675,7 @@ function detectCasualtyRatio(state: GameState): AnomalyReport[] {
 
 /**
  * 11. phantom_sector_advantage (critical)
- * Sector has front edges and 0 brigades but positive combat power —
+ * Sector has front edges and 0 assigned, reserve, or rear brigades but positive combat power —
  * any displayed force superiority is phantom / stale derived state.
  *
  * Checks both sector.defensive_power (on CorpsFrontSector directly) and
@@ -688,7 +693,9 @@ function detectPhantomSectorAdvantage(state: GameState): AnomalyReport[] {
         const sector = sectors[sectorId];
         if (sector.edge_ids.length === 0) continue;
 
-        const totalBrigades = sector.assigned_brigade_ids.length + sector.reserve_brigade_ids.length;
+        const totalBrigades = sector.assigned_brigade_ids.length
+            + sector.reserve_brigade_ids.length
+            + (sector.rear_brigade_ids?.length ?? 0);
         if (totalBrigades > 0) continue;
 
         // Check power on the sector itself
@@ -953,6 +960,7 @@ function detectBrigadeStacking(state: GameState): AnomalyReport[] {
     for (const fid of sortedKeys(formations as Record<string, unknown>)) {
         const f = formations[fid];
         if (f.status !== 'active') continue;
+        if (f.readiness === 'forming') continue;
         if (!isBrigadeKind(f.kind)) continue;
         if (!f.location_osid) continue;
         const list = osidBrigades.get(f.location_osid) ?? [];
@@ -1272,6 +1280,7 @@ function detectUndefendedFrontSubsegments(state: GameState): AnomalyReport[] {
 
     for (const sectorId of sortedKeys(sectors as Record<string, unknown>)) {
         const sector = sectors[sectorId];
+        if (sector.unstaffed_front === true) continue;
         for (let i = 0; i < sector.sub_segments.length; i++) {
             const sub = sector.sub_segments[i];
             if (sub.gap === true && sub.edge_ids.length > 2) {

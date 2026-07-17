@@ -1,4 +1,5 @@
 import type { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
+import { strictCompare } from '../state/validateGameState.js';
 
 export type OperationalGeometryIssueReason =
   | 'missing_geometry'
@@ -177,11 +178,11 @@ export function validateOperationalSettlementsGeometry(
   }
 
   invalidRings.sort((a, b) =>
-    a.osid.localeCompare(b.osid)
+    strictCompare(a.osid, b.osid)
     || a.featureIndex - b.featureIndex
     || a.polygonIndex - b.polygonIndex
     || a.ringIndex - b.ringIndex
-    || a.reason.localeCompare(b.reason),
+    || strictCompare(a.reason, b.reason),
   );
 
   return {

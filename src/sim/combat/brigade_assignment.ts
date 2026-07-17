@@ -24,17 +24,9 @@ import {
 import { ELITE_LOAN_MIN_DURATION } from '../../state/elite_loan_types.js';
 import { getSectorComponent, getSectorFrontOsids } from './sector_utils.js';
 import type { CorpsCommanderProfile } from './commander_override.js';
-import {
-    removeFromActiveOperation,
-    DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
-    DISSOLUTION_EQUIPMENT_TRANSFER_RATE,
-} from './brigade_dissolution.js';
 import { isSectorRosterEligibleFormation } from './sector_roster_eligibility.js';
+import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 
-const POCKET_BRIGADE_FORCE_DISSOLUTION_IDS = new Set<string>([
-    'hrhb_105th_modrica_brigade',
-    'hvo_hrvoje_vukcic_brigade',
-]);
 const REAR_GUARD_CORPS = new Set<string>(['vrs_1st_krajina', 'vrs_2nd_krajina']);
 const COLLAPSED_REAR_GUARD_ABSORPTION_CORPS = new Set<string>(['vrs_2nd_krajina']);
 const VRS_1K_LINE_DISTANCE_MAX_HOPS = 6;
@@ -255,7 +247,7 @@ export function buildOneHopReserveBand(
     return oneHopBehind;
 }
 
-function buildOperationParticipantSet(state: GameState | undefined): Set<FormationId> {
+export function buildOperationParticipantSet(state: GameState | undefined): Set<FormationId> {
     const participants = new Set<FormationId>();
     if (!state) return participants;
     const corpsCommand = state.military.corps_command ?? {};
@@ -401,50 +393,6 @@ export function isMovementOwnedActiveLoanDeployment(
     return true;
 }
 
-function dissolvePocketDestroyableBrigade(
-    state: GameState,
-    formations: Record<FormationId, FormationState>,
-    brigadeId: FormationId
-): void {
-    const f = formations[brigadeId];
-    if (!f || f.status !== 'active') return;
-    const personnel = f.personnel ?? 0;
-    const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
-    if (state.military.strategic_reserves && f.faction) {
-        const factionReserve = state.military.strategic_reserves[f.faction];
-        if (typeof factionReserve === 'number') {
-            (state.military.strategic_reserves as Record<string, number>)[f.faction] = factionReserve + personnelToReserve;
-        }
-    }
-    if (f.composition && f.corps_id) {
-        const salvageRate = DISSOLUTION_EQUIPMENT_TRANSFER_RATE;
-        const tanksToTransfer = Math.floor((f.composition.tanks ?? 0) * salvageRate);
-        const artilleryToTransfer = Math.floor((f.composition.artillery ?? 0) * salvageRate);
-        const sortedIds = Object.keys(formations).sort((a, b) => strictCompare(a, b));
-        let targetBrigade: FormationState | null = null;
-        for (const tid of sortedIds) {
-            const t = formations[tid];
-            if (!t || t.status !== 'active' || tid === brigadeId) continue;
-            if (t.faction !== f.faction || t.corps_id !== f.corps_id) continue;
-            if (t.kind !== 'brigade' && t.kind !== 'og') continue;
-            targetBrigade = t;
-            break;
-        }
-        if (targetBrigade && targetBrigade.composition) {
-            targetBrigade.composition.tanks = (targetBrigade.composition.tanks ?? 0) + tanksToTransfer;
-            targetBrigade.composition.artillery = (targetBrigade.composition.artillery ?? 0) + artilleryToTransfer;
-        }
-        f.composition.tanks = 0;
-        f.composition.artillery = 0;
-        f.composition.aa_systems = 0;
-    }
-    removeFromActiveOperation(state, brigadeId, f.corps_id);
-    f.status = 'inactive';
-    f.lifecycle_status = 'destroyed';
-    f.personnel = 0;
-    f.destruction_turn = state.meta?.turn ?? 0;
-}
-
 /**
  * Classify brigades into sectors based on territory membership.
  *
@@ -556,12 +504,6 @@ export function classifyBrigadesByTerritory(
         const f = formations[fid];
         if (!f || f.faction !== faction || !isSectorRosterEligibleFormation(f)) continue;
         if (!f.location_osid) continue;
-        if (state && POCKET_BRIGADE_FORCE_DISSOLUTION_IDS.has(fid)) {
-            dissolvePocketDestroyableBrigade(state, formations, fid);
-            emitRoutineConsoleWarn(`[brigade_assignment] Destroyed designated pocket brigade ${fid}`);
-            continue;
-        }
-
         const fCorpsId = getFormationCorpsId(f);
         if (isSectorAssignmentExemptCorpsId(fCorpsId) && !loanedCorpsMap.has(fid)) continue;
 
@@ -733,12 +675,6 @@ export function classifyBrigadesByTerritory(
         if (!corpsSectors || corpsSectors.length === 0) {
             // Corps has brigades but no sectors with edges. Do not mint fake
             // sector ownership across disconnected fronts; leave them unresolved.
-            for (const bid of pool) {
-                const f = formations[bid];
-                if (!f) continue;
-                if (isMovementOwnedHomeReturn(state, bid, f) || isMovementOwnedReturnToCorps(state, bid, f, sectors)) continue;
-                emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNASSIGNED ${bid}: corps ${corpsId} has no sectors with edges`);
-            }
             continue;
         }
 
@@ -945,7 +881,6 @@ export function classifyBrigadesByTerritory(
                     }
                 }
                 if (REAR_GUARD_CORPS.has(corpsId)) {
-                    emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNASSIGNED ${bid}: rear-guard corps brigade cannot reach any same-component sector`);
                     continue;
                 }
                 const hasFactionSectorInComponent = sectors.some((s) =>
@@ -958,14 +893,6 @@ export function classifyBrigadesByTerritory(
                 // Brigade is in a disconnected component with no matching sector.
                 // Leave it unresolved rather than inventing false canonical sector truth.
 
-                // Pocket-destroyable brigades: dissolve instead of teleporting 200km.
-                // Historical: when the Posavina pocket fell, its brigades ceased to exist.
-                if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable') && state) {
-                    dissolvePocketDestroyableBrigade(state, formations, bid);
-                    emitRoutineConsoleWarn(`[brigade_assignment] Pocket brigade ${f.name ?? bid} destroyed: home pocket overrun`);
-                    continue; // Skip force-assignment
-                }
-                emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNASSIGNED ${bid}: no reachable same-component sector from ${f.location_osid}`);
             }
         }
 
@@ -1074,16 +1001,8 @@ export function classifyBrigadesByTerritory(
                     emitRoutineConsoleDebug(`[brigade_assignment] Reassigned unreachable ${bid} from ${sector.sector_id} to ${sameCorps[0]!.sector.sector_id}`);
                     continue;
                 }
-                if (Array.isArray(f.tags) && f.tags.includes('pocket_destroyable')) {
-                    const idx = sector.assigned_brigade_ids.indexOf(bid);
-                    if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
-                    dissolvePocketDestroyableBrigade(state, formations, bid);
-                    emitRoutineConsoleWarn(`[brigade_assignment] Destroyed unreachable pocket brigade ${bid} (no reachable same-corps sector)`);
-                    continue;
-                }
                 const idx = sector.assigned_brigade_ids.indexOf(bid);
                 if (idx >= 0) sector.assigned_brigade_ids.splice(idx, 1);
-                emitRoutineConsoleWarn(`[brigade_assignment] [PROVISIONAL] UNRESOLVED ${bid}: assigned sector ${sector.sector_id} became unreachable and no same-corps sector could absorb it`);
             }
         }
 
@@ -1676,6 +1595,7 @@ export function ensureMinimumSectorCoverage(
         const vacantTargets = new Set<string>();
         for (const target of sectorFrontOsids) {
             if ((activeCounts.get(target) ?? 0) !== 0) continue;
+            if (!isEnclaveMovementDestinationAllowed(formation, formation.location_osid, target)) continue;
             vacantTargets.add(target);
         }
         if (vacantTargets.size === 0) return null;
@@ -1733,6 +1653,7 @@ export function ensureMinimumSectorCoverage(
         const formation = formations[bid];
         if (!formation?.location_osid) return;
         const previous = formation.location_osid;
+        if (!isEnclaveMovementDestinationAllowed(formation, previous, target)) return;
         formation.location_osid = target;
         formation.entrenchment_turns = 0;
         activeCounts.set(previous, Math.max(0, (activeCounts.get(previous) ?? 0) - 1));

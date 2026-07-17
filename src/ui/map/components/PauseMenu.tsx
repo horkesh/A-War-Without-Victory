@@ -33,10 +33,10 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
                      backdropFilter: 'blur(8px)',
                  }}>
                 <div className="flex items-center justify-between border-b border-[#8a7a60]/20 pb-2 mb-1">
-                    <div className="text-[11px] uppercase tracking-[0.2em] text-[#c4a35a] font-bold">
+                    <div className="text-xs uppercase tracking-[0.2em] text-[#c4a35a] font-bold">
                         {t('pause.paused')}
                     </div>
-                    <div className="text-[9px] uppercase tracking-[0.16em] text-[#d5c9bc]/65">
+                    <div className="text-xs uppercase tracking-[0.16em] text-[#d5c9bc]/65">
                         {t('pause.escResume')}
                     </div>
                 </div>
@@ -46,7 +46,7 @@ export function PauseMenu({ onResume, onSave, onSettings, onMainMenu, onQuit }: 
                 <PauseButton onClick={onMainMenu}>{t('pause.mainMenu')}</PauseButton>
                 <div className="h-px bg-[#8a7a60]/20 my-1" />
                 <PauseButton onClick={onQuit} danger>{t('pause.quit')}</PauseButton>
-                <div className="pt-1 text-[9px] text-[#d5c9bc]/55 text-center">
+                <div className="pt-1 text-xs text-[#d5c9bc]/55 text-center">
                     {t('pause.statePreserved')}
                 </div>
             </div>
@@ -59,7 +59,7 @@ function PauseButton({ children, onClick, danger }: { children: ReactNode; onCli
         <button
             type="button"
             onClick={onClick}
-            className={`w-full py-2.5 rounded border text-[11px] uppercase tracking-wider font-bold transition-colors ${
+            className={`w-full py-2.5 rounded border text-xs uppercase tracking-wider font-bold transition-colors ${
                 danger
                     ? 'text-red-400 border-red-400/20 hover:bg-red-400/10'
                     : 'text-[#d5c9bc] border-[#8a7a60]/20 hover:bg-[#8a7a60]/15'

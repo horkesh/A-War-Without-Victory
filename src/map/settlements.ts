@@ -1,6 +1,8 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
+import { strictCompare } from '../state/validateGameState.js';
+
 export interface SettlementRecord {
     sid: string;
     source_id: string;
@@ -178,9 +180,9 @@ function resolveSid(
                 const nonFallbacks = candidates.filter(s => !fallbackSids.has(s));
                 let chosen: string;
                 if (nonFallbacks.length > 0) {
-                    chosen = nonFallbacks.sort((x, y) => x.localeCompare(y))[0];
+                    chosen = nonFallbacks.sort(strictCompare)[0];
                 } else {
-                    chosen = candidates.sort((x, y) => x.localeCompare(y))[0];
+                    chosen = candidates.sort(strictCompare)[0];
                 }
                 // Resolved but not unique (multiple candidates, chose deterministically)
                 return { resolved: true, sid: chosen, unique: false };
@@ -347,7 +349,7 @@ export function validateSettlementGraph(
         const resolvedEntries = Array.from(resolvedSids.entries())
             .sort((a, b) => {
                 if (b[1].count !== a[1].count) return b[1].count - a[1].count;
-                return a[0].localeCompare(b[0]);
+                return strictCompare(a[0], b[0]);
             });
 
         const totalResolved = resolvedEntries.reduce((sum, [_, info]) => sum + info.count, 0);
@@ -468,4 +470,3 @@ function parseEdges(json: unknown): EdgeRecord[] {
 function isRecord(value: unknown): value is Record<string, any> {
     return !!value && typeof value === 'object' && !Array.isArray(value);
 }
-

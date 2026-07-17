@@ -10,6 +10,7 @@ import { lookupLogisticsPriority } from '../sim/combat/combat_math.js';
 
 import type { EdgeRecord } from '../map/settlements.js';
 import { getEdgeCapacityMultiplier } from '../sim/collapse/capacity_modifiers.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Per-formation fatigue update record.
@@ -131,7 +132,7 @@ export function computeLocalSupplyForEdges(
 
     const edgesSorted = [...derivedFrontEdges]
         .filter((e) => e && typeof e.edge_id === 'string')
-        .sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+        .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;
@@ -431,7 +432,7 @@ export function updateFormationFatigue(
 
     // Build sorted faction totals array
     const byFaction: FormationFatigueFactionTotals[] = Array.from(factionTotals.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => strictCompare(a[0], b[0]))
         .map(([faction_id, totals]) => ({
             faction_id,
             formations_active: totals.active,
@@ -443,9 +444,9 @@ export function updateFormationFatigue(
 
     // Sort records deterministically
     records.sort((a, b) => {
-        const fc = a.formation_id.localeCompare(b.formation_id);
+        const fc = strictCompare(a.formation_id, b.formation_id);
         if (fc !== 0) return fc;
-        return a.faction_id.localeCompare(b.faction_id);
+        return strictCompare(a.faction_id, b.faction_id);
     });
 
     return { by_formation: records, by_faction: byFaction };

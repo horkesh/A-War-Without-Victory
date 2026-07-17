@@ -119,12 +119,12 @@ export function FrontVisitSection() {
             defaultOpen={true}
         >
             <div className="flex flex-col gap-2">
-                <p className="text-[10px] text-text-secondary leading-snug">
+                <p className="text-xs text-text-secondary leading-snug">
                     {t('frontVisit.stake')}
                 </p>
 
                 {/* Availability readout */}
-                <div className="flex flex-col gap-0.5 text-[9px] text-text-secondary/70 font-mono">
+                <div className="flex flex-col gap-0.5 text-xs text-text-secondary font-mono">
                     {avail.firesLeft > 0 ? (
                         <span>{t('frontVisit.firesLeft', { count: avail.firesLeft })}</span>
                     ) : (
@@ -155,7 +155,7 @@ export function FrontVisitSection() {
                     type="button"
                     disabled={!canVisit}
                     onClick={(e) => { e.stopPropagation(); void handleVisit(); }}
-                    className={`w-full text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
+                    className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                         canVisit
                             ? 'border-emerald-600/50 text-emerald-400 bg-emerald-900/20 hover:bg-emerald-900/40 hover:border-emerald-500/70 cursor-pointer'
                             : 'border-panel-border text-text-secondary/40 bg-panel-bg/40 cursor-not-allowed'

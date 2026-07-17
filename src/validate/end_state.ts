@@ -5,6 +5,7 @@
 
 import { BRCKO_CONTROLLER_ID } from '../state/brcko.js';
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { ValidationIssue } from './validate.js';
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -290,11 +291,11 @@ export function validateEndState(state: GameState): ValidationIssue[] {
                     controllerCounts.set(controller, count + 1);
                 }
                 const expected: Array<[string, number]> = Array.from(controllerCounts.entries())
-                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .sort((a, b) => strictCompare(a[0], b[0]))
                     .map(([controller, count]) => [controller, count]);
                 const actual = settlementsByController
                     .filter(isControllerCountTuple)
-                    .sort((a, b) => a[0].localeCompare(b[0]));
+                    .sort((a, b) => strictCompare(a[0], b[0]));
 
                 if (expected.length !== actual.length || !expected.every((e, i) => actual[i] && e[0] === actual[i][0] && e[1] === actual[i][1])) {
                     issues.push({

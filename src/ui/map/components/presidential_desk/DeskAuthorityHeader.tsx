@@ -98,21 +98,21 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
     <section
       data-testid="desk-authority-header"
       aria-label={t('deskAuthority.title')}
-      className="pointer-events-auto border border-panel-border/80 bg-panel-bg/92 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)] backdrop-blur-md"
+      className="pointer-events-auto border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]"
     >
       <div className="flex items-baseline justify-between gap-3 border-b border-panel-border/70 pb-2">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">
             {t('deskAuthority.title')}
           </div>
-          <div className="mt-0.5 text-[10px] text-text-secondary">{t('deskAuthority.subtitle')}</div>
+          <div className="mt-0.5 text-xs text-text-secondary">{t('deskAuthority.subtitle')}</div>
         </div>
       </div>
 
       {/* Current Command Authority — compact gauge + value. */}
       <div className="mt-3">
         <div className="flex items-center justify-between">
-          <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
+          <span className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
             {t('deskAuthority.caLabel')}
           </span>
           <span
@@ -125,11 +125,11 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
         <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-white/10">
           <div className={`h-full ${gaugeColor} transition-all duration-500`} style={{ width: `${pct}%` }} />
         </div>
-        <div className="mt-1 flex items-center justify-between text-[9px] text-text-secondary">
+        <div className="mt-1 flex items-center justify-between text-xs text-text-secondary">
           <span data-testid="desk-authority-spent">{t('deskAuthority.spentThisTurn', { spent: spentThisTurn })}</span>
           <span data-testid="desk-authority-bank">{t('deskAuthority.bank', { reserve, max: reserveMax })}</span>
         </div>
-        <div className="mt-1 grid grid-cols-1 gap-0.5 text-[9px] text-text-secondary">
+        <div className="mt-1 grid grid-cols-1 gap-0.5 text-xs text-text-secondary">
           <span data-testid="desk-authority-income-source">
             {t('deskAuthority.incomeSource', { source: t(sourceLabelKey(ca.lastRecoverySource)) })}
           </span>
@@ -142,7 +142,7 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
         {lowAuthority && (
           <div
             data-testid="desk-authority-low-cue"
-            className="mt-2 border border-red-400/40 bg-red-500/10 px-2 py-1 text-[9px] font-semibold text-red-200"
+            className="mt-2 border border-red-400/40 bg-red-500/10 px-2 py-1 text-xs font-semibold text-red-200"
           >
             {t('deskAuthority.lowHint')}
           </div>
@@ -151,7 +151,7 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
 
       {/* Lever cost legend — names + CA costs from the canonical constants. */}
       <div className="mt-3">
-        <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
+        <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
           {t('deskAuthority.legendHeading')}
         </div>
         <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
@@ -161,7 +161,7 @@ export function DeskAuthorityHeader({ state }: DeskAuthorityHeaderProps) {
               <li
                 key={labelKey}
                 data-testid="desk-authority-lever"
-                className="flex items-center justify-between gap-2 text-[10px]"
+                className="flex items-center justify-between gap-2 text-xs"
               >
                 <span className={affordable ? 'text-text-secondary' : 'text-text-muted/60'}>
                   {t(labelKey)}

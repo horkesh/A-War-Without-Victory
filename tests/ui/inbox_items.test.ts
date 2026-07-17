@@ -73,6 +73,36 @@ function makeOpportunityDossier(
     };
 }
 
+describe('deriveInboxItems — paramilitary requests', () => {
+    it('projects exact marginal standing impact from prior deployments and civilian casualties', () => {
+        const state = makeStub({
+            player_faction: 'RS',
+            paramilitaryPolicy: 'ask',
+            pendingParamilitaryRequests: [{
+                faction: 'RS',
+                strength: 150,
+                target_osid: 'op:zvornik:zvornik_2',
+                estimated_civilian_risk: 250,
+            }],
+            rawGameState: {
+                paramilitary_deployment_count: { RS: 3 },
+            } as unknown as LoadedGameState['rawGameState'],
+        });
+
+        const item = deriveInboxItems(state, { 'op:zvornik:zvornik_2': 'Zvornik' })
+            .find((entry) => entry.type === 'paramilitary_request');
+
+        expect(item?.subtitle).toContain('250 projected civilian casualties');
+        expect(item?.subtitle).toContain('+1 war crimes event');
+        expect(item?.subtitle).toContain('-10.05 international standing');
+        expect(item?.subtitle).toContain('Population source: 1991 census map data');
+        expect(item?.subtitle).toContain('Balkan Battlegrounds, Vol. I');
+        expect(item?.subtitle).toContain('fixed 5,000-person target baseline');
+        expect(item?.subtitle).toContain('not a claim that this exact outcome occurred here');
+        expect(item?.subtitle).not.toMatch(/utility|risk[- ]reward/i);
+    });
+});
+
 // ---------------------------------------------------------------------------
 // 1. Event decisions
 // ---------------------------------------------------------------------------
@@ -100,10 +130,11 @@ describe('deriveInboxItems — event decisions', () => {
         expect(eventItems[0].action).toBe('event_modal');
         expect(eventItems[0].id).toBe('event:evt_1');
         expect(eventItems[0].title).toBe('Srebrenica Crisis');
+        expect(eventItems[0].subtitle).toContain('requires your response');
         expect(hasBlockingItems(items)).toBe(true);
     });
 
-    it('routes advisory event decisions through Decision Room without blocking or auto-opening the modal', () => {
+    it('routes advisory event decisions to their response modal without making them blocking', () => {
         const state = makeStub({
             pendingEventDecisions: [
                 {
@@ -123,9 +154,11 @@ describe('deriveInboxItems — event decisions', () => {
         expect(eventItems[0]).toMatchObject({
             id: 'event:evt_advisory',
             severity: 'normal',
-            action: 'decision_room',
+            action: 'event_modal',
             title: 'Staff Advisory',
         });
+        expect(eventItems[0].subtitle).toContain('available for review');
+        expect(eventItems[0].subtitle).not.toContain('requires your response');
         expect(hasBlockingItems(items)).toBe(false);
     });
 
@@ -519,6 +552,44 @@ describe('deriveInboxItems — reserve requests', () => {
         expect(reserveItems[0].subtitle).not.toContain('first_corps');
         expect(reserveItems[0].subtitle).toContain('Defensive');
     });
+
+    it('summarizes the concrete reserve commitment instead of echoing the thin request description', () => {
+        const state = makeStub({
+            formations: [
+                { id: 'first_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps' },
+                { id: 'third_corps', name: '3rd Corps', faction: 'RBiH', kind: 'corps' },
+                {
+                    id: 'guards', name: 'Guards Brigade', faction: 'RBiH', kind: 'brigade',
+                    readiness: 'ready', corps_id: 'first_corps', location_osid: 'op:visoko:visoko_2',
+                },
+            ] as LoadedGameState['formations'],
+            pendingReserveRequests: [{
+                request_id: 'req_reserve_truth',
+                corps_id: 'third_corps',
+                faction: 'RBiH',
+                reason: 'defensive_gap',
+                purpose: 'defensive',
+                priority: 80,
+                severityBand: 'critical',
+                travel_hops: 3,
+                description: 'thin raw description',
+                suggested_brigade_id: 'guards',
+                turn_requested: 5,
+            }],
+        });
+
+        const item = deriveInboxItems(state, { 'op:visoko:visoko_2': 'Visoko' })
+            .find((entry) => entry.id === 'reserve:req_reserve_truth');
+
+        expect(item?.subtitle).toContain('Immediate Army Need');
+        expect(item?.subtitle).toContain('Guards Brigade');
+        expect(item?.subtitle).toContain('1st Corps');
+        expect(item?.subtitle).toContain('3rd Corps');
+        expect(item?.subtitle).toContain('about 2 weeks travel');
+        expect(item?.subtitle).toContain('Visoko');
+        expect(item?.subtitle).not.toContain('thin raw description');
+        expect(item?.subtitle).not.toMatch(/first_corps|third_corps|op:visoko/);
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -699,6 +770,69 @@ describe('deriveInboxItems — autonomy proposals', () => {
         expect(proposalItems[1].id).toBe('command:review-proposal:PROP_5_ops_1');
     });
 
+    it('uses the ready-plan read-model summary for an ordinary operation approval', () => {
+        const state = makeStub({
+            pendingProposalReviews: [{
+                id: 'PROP_30_ops_0',
+                turn: 30,
+                faction: 'RBiH',
+                domain: 'ops',
+                description: 'Zone: zone:donji_vakuf. Plan: plan_internal_30',
+                proposed_action: 'APPROVE_OP:arbih_1st_corps:plan_internal_30',
+            }],
+            opProposalCards: [{
+                proposal_id: 'PROP_30_ops_0',
+                corps_id: 'arbih_1st_corps',
+                corps_name: '1st Corps',
+                plan_id: 'plan_internal_30',
+                op_id: null,
+                op_name: 'Relieve Jajce',
+                commander: null,
+                objective: 'Relieve Jajce',
+                targets: ['Jajce'],
+                forces: ['Alpha Brigade', 'Beta Brigade'],
+                concentration_readiness: '100% concentrated; ready',
+                intel_assessment: 'Unreported',
+                supply_assessment: 'Unreported',
+                risk_assessment: 'Moderate pressure; 70% plan viability',
+                recommendation: 'Authorize launch',
+                decision_deadline: 'Before the next turn advances',
+                force_ratio: 'Unreported',
+                opportunity_cost: 'Unreported',
+                summary: '1st Corps requests authorization to relieve Jajce with Alpha Brigade and Beta Brigade; decision due before the next turn advances.',
+                force_ratio_estimate: null,
+                commander_assessment: null,
+                donors: [],
+                total_personnel_lent: 0,
+                override_available: false,
+                override_ca_cost: 15,
+                framing: 'The field commander requests authorization.',
+            }],
+        });
+
+        const item = deriveInboxItems(state, null)
+            .find((entry) => entry.id === 'command:review-proposal:PROP_30_ops_0');
+
+        expect(item?.subtitle).toBe('1st Corps requests authorization to relieve Jajce with Alpha Brigade and Beta Brigade; decision due before the next turn advances.');
+        expect(item?.subtitle).not.toMatch(/arbih_1st_corps|plan_internal_30|zone:donji/);
+    });
+
+    it('uses neutral copy when a sparse proposal description contains raw engine tokens', () => {
+        const state = makeStub({
+            pendingProposalReviews: [{
+                id: 'PROP_31_ops_0', turn: 31, faction: 'RBiH', domain: 'ops',
+                description: 'Zone: zone:donji_vakuf. Plan: plan_internal_31 for arbih_1st_corps.',
+                proposed_action: 'APPROVE_OP:arbih_1st_corps:plan_internal_31',
+            }],
+        });
+
+        const item = deriveInboxItems(state, null)
+            .find((entry) => entry.id === 'command:review-proposal:PROP_31_ops_0');
+
+        expect(item?.subtitle).toBe('operations proposal requires your review.');
+        expect(item?.subtitle).not.toMatch(/zone:|plan_internal|arbih_1st_corps/);
+    });
+
     it('routes OPPORTUNITY proposals to the presidential Decision Room', () => {
         const state = makeStub({
             pendingProposalReviews: [
@@ -771,8 +905,76 @@ describe('deriveInboxItems — autonomy proposals', () => {
 
         expect(proposal.type).toBe('autonomy_proposal');
         expect(proposal.title).toBe('Operation Kotor Varos');
-        expect(proposal.subtitle).toBe('Operation launch requires your authorization.');
+        expect(proposal.subtitle).toBe('Authorization recommended; does not block advance.');
         expect(proposal.action).toBe('decision_room');
+    });
+
+    it('groups multiple historical operation authorizations into one inbox packet', () => {
+        const state = makeStub({
+            player_faction: 'RS',
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_0_op_prijedor',
+                    turn: 0,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Authorize Operation Prijedor.',
+                    proposed_action: 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Prijedor',
+                },
+                {
+                    id: 'PROP_0_op_drina',
+                    turn: 0,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Authorize Operation Drina.',
+                    proposed_action: 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina',
+                },
+                {
+                    id: 'PROP_0_op_resolved',
+                    turn: 0,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Already accepted.',
+                    proposed_action: 'HISTORICAL_OP:preplanned:vrs_herzegovina:Operation Visegrad',
+                    accepted: true,
+                    resolved_turn: 0,
+                } as NonNullable<LoadedGameState['pendingProposalReviews']>[number],
+            ],
+        });
+
+        const proposalItems = deriveInboxItems(state, null).filter(i => i.type === 'autonomy_proposal');
+
+        expect(proposalItems).toHaveLength(1);
+        expect(proposalItems[0]).toMatchObject({
+            id: 'command:review-proposal:historical-ops',
+            title: 'Operation authorizations',
+            subtitle: '2 operation plans are awaiting optional authorization review.',
+            updateCount: 2,
+            sourceIds: ['PROP_0_op_drina', 'PROP_0_op_prijedor'],
+            action: 'decision_room',
+        });
+    });
+
+    it('does not surface resolved proposal-history rows as active inbox items', () => {
+        const state = makeStub({
+            player_faction: 'RS',
+            pendingProposalReviews: [
+                {
+                    id: 'PROP_resolved',
+                    turn: 0,
+                    faction: 'RS',
+                    domain: 'ops',
+                    description: 'Already accepted.',
+                    proposed_action: 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina',
+                    accepted: true,
+                    resolved_turn: 0,
+                } as NonNullable<LoadedGameState['pendingProposalReviews']>[number],
+            ],
+        });
+
+        const proposalItems = deriveInboxItems(state, null).filter(i => i.type === 'autonomy_proposal');
+
+        expect(proposalItems).toHaveLength(0);
     });
 
     it('suppresses operation-opportunity inbox rows when no Decision Room dossier exists', () => {
@@ -1051,6 +1253,15 @@ describe('countActionableItems / hasBlockingItems', () => {
         expect(effectiveInboxSeverity(convoy)).toBe('blocking');
         expect(hasBlockingItems(items)).toBe(true);
     });
+
+    it('derives blocking from the decision manifest while preserving dynamic event advisories', () => {
+        expect(effectiveInboxSeverity({ type: 'paramilitary_request', severity: 'normal' })).toBe('blocking');
+        expect(effectiveInboxSeverity({ type: 'peace_plan', severity: 'normal' })).toBe('blocking');
+        expect(effectiveInboxSeverity({ type: 'reserve_request', severity: 'urgent' })).toBe('urgent');
+        expect(effectiveInboxSeverity({ type: 'event_decision', severity: 'normal' })).toBe('normal');
+        expect(effectiveInboxSeverity({ type: 'event_decision', severity: 'blocking' })).toBe('blocking');
+        expect(effectiveInboxSeverity({ type: 'situation', severity: 'info' })).toBe('info');
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -1075,18 +1286,18 @@ describe('resolveEventQueueIndex — inbox click → queue index resolution', ()
         expect(resolveEventQueueIndex('event:evt_alpha', queue)).toBe(0);
     });
 
-    it('malformed itemId (no event: prefix) falls back to 0', () => {
-        expect(resolveEventQueueIndex('garbage', queue)).toBe(0);
-        expect(resolveEventQueueIndex('peace:vance_owen', queue)).toBe(0);
-        expect(resolveEventQueueIndex('reserve:req_1', queue)).toBe(0);
+    it('returns null for malformed or non-event item ids', () => {
+        expect(resolveEventQueueIndex('garbage', queue)).toBeNull();
+        expect(resolveEventQueueIndex('peace:vance_owen', queue)).toBeNull();
+        expect(resolveEventQueueIndex('reserve:req_1', queue)).toBeNull();
     });
 
-    it('event: prefix with non-existent event_id falls back to 0', () => {
-        expect(resolveEventQueueIndex('event:nonexistent', queue)).toBe(0);
+    it('returns null when the target event is not in the queue', () => {
+        expect(resolveEventQueueIndex('event:nonexistent', queue)).toBeNull();
     });
 
-    it('empty queue falls back to 0', () => {
-        expect(resolveEventQueueIndex('event:evt_alpha', [])).toBe(0);
+    it('returns null for an empty queue', () => {
+        expect(resolveEventQueueIndex('event:evt_alpha', [])).toBeNull();
     });
 });
 

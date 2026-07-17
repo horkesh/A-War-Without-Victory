@@ -5,11 +5,10 @@
  * or launch unauthorized operations. Models the ARBiH warlord problem
  * (Caco, Čelo (Ramiz Dedić), etc.) and VRS corps-level autonomy.
  *
- * Deterministic: uses deterministicRandom, no Math.random().
+ * Deterministic: explicit reliability cadence, state ranking, and stable ordering.
  */
 
 import type { FactionId, GameState } from '../../state/game_state.js';
-import { deterministicRandom } from '../../state/deterministic_random.js';
 import { strictCompare } from '../../state/validateGameState.js';
 
 const VALID_FACTION_IDS = new Set<string>(['HRHB', 'RBiH', 'RS']);
@@ -39,32 +38,29 @@ export interface WarlordFrictionReport {
 // Constants
 // ═══════════════════════════════════════════════════════════════════════════
 
-/**
- * Base friction chance per point below reliability 3.
- * At reliability 1: (3-1) * 0.05 = 10% chance.
- * At reliability 2: (3-2) * 0.05 = 5% chance.
- */
-const FRICTION_CHANCE_PER_POINT = 0.05;
-
 /** Reliability threshold: officers at or above this never cause friction. */
 const RELIABILITY_THRESHOLD = 3;
+const FRICTION_BASE_COOLDOWN_TURNS = 20;
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Core
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Compute friction probability for an officer based on political reliability.
- * Returns 0 for officers with reliability >= 3.
+ * Compute the explicit friction cadence from political reliability.
+ * Returns null for officers with reliability >= 3.
  */
-export function getFrictionChance(politicalReliability: number): number {
-    if (politicalReliability >= RELIABILITY_THRESHOLD) return 0;
-    return (RELIABILITY_THRESHOLD - politicalReliability) * FRICTION_CHANCE_PER_POINT;
+export function getFrictionCooldownTurns(politicalReliability: number): number | null {
+    if (politicalReliability >= RELIABILITY_THRESHOLD) return null;
+    const reliabilityDeficit = RELIABILITY_THRESHOLD - Math.max(1, politicalReliability);
+    return Math.floor(FRICTION_BASE_COOLDOWN_TURNS / reliabilityDeficit);
 }
 
 /**
  * Check all active corps commanders for warlord friction this turn.
- * Deterministic: uses officer ID + turn as RNG seed.
+ * Eligibility is an explicit reliability cadence. When multiple commanders from
+ * one faction qualify, reliability deficit, aggressiveness, command tenure, and
+ * finally officer ID rank the single event emitted for that faction.
  *
  * Friction effects:
  * - 'ignored_stance': commander ignores army-level stance for this turn
@@ -88,6 +84,14 @@ export function checkWarlordFriction(state: GameState): WarlordFrictionReport {
     }
 
     const officerIds = Object.keys(officers).sort(strictCompare);
+    const candidates: Array<{
+        id: string;
+        factionId: FactionId;
+        politicalReliability: number;
+        aggressiveness: number;
+        turnsInCommand: number;
+        enclaveLockActive: boolean;
+    }> = [];
     for (const id of officerIds) {
         const os = officers[id];
         if (!os) continue;
@@ -98,6 +102,7 @@ export function checkWarlordFriction(state: GameState): WarlordFrictionReport {
 
         // Check faction friction end week
         const factionId = readFactionId(data.faction);
+        if (!factionId) continue;
         const factionConfig = factionId
             ? state.military.war_timeline?.officer_config?.[factionId]
             : undefined;
@@ -106,36 +111,45 @@ export function checkWarlordFriction(state: GameState): WarlordFrictionReport {
             continue;
         }
 
-        const chance = getFrictionChance(data.political_reliability);
-        if (chance <= 0) continue;
-
-        // Deterministic check
-        const roll = deterministicRandom(id, `friction:${turn}`);
-        if (roll >= chance) continue;
-
-        // Determine friction type based on a second deterministic roll
-        const typeRoll = deterministicRandom(id, `friction_type:${turn}`);
-        let frictionType: FrictionType;
-        if (typeRoll < 0.5) {
-            frictionType = 'ignored_stance';
-        } else if (typeRoll < 0.85) {
-            frictionType = 'unauthorized_op';
-        } else {
-            frictionType = 'refused_release';
-        }
-
-        // Enclave-lock guard: physically isolated commanders cannot refuse to
-        // release brigades — they have no connection to army reserve.
-        // Their non-compliance is structural isolation, not insubordination.
-        // (Orić/Srebrenica, Palić/Žepa, Imamović/Goražde — Historian-flagged 2026-04-06)
-        if (frictionType === 'refused_release' && data.enclave_lock) {
+        const cooldownTurns = getFrictionCooldownTurns(data.political_reliability);
+        if (cooldownTurns == null || turn % cooldownTurns !== 0) continue;
+        let enclaveLockActive = false;
+        if (data.enclave_lock) {
             const lock = data.enclave_lock;
-            const lockActive = lock.locked_until_turn === undefined || turn < lock.locked_until_turn;
-            if (lockActive) continue;
+            enclaveLockActive = lock.locked_until_turn === undefined || turn < lock.locked_until_turn;
         }
+
+        candidates.push({
+            id,
+            factionId,
+            politicalReliability: data.political_reliability,
+            aggressiveness: data.aggressiveness,
+            turnsInCommand: os.turns_in_command,
+            enclaveLockActive,
+        });
+    }
+
+    candidates.sort((a, b) => {
+        if (a.factionId !== b.factionId) return strictCompare(a.factionId, b.factionId);
+        if (a.politicalReliability !== b.politicalReliability) return a.politicalReliability - b.politicalReliability;
+        if (a.aggressiveness !== b.aggressiveness) return b.aggressiveness - a.aggressiveness;
+        if (a.turnsInCommand !== b.turnsInCommand) return b.turnsInCommand - a.turnsInCommand;
+        return strictCompare(a.id, b.id);
+    });
+
+    const emittedFactions = new Set<FactionId>();
+    for (const candidate of candidates) {
+        if (emittedFactions.has(candidate.factionId)) continue;
+        emittedFactions.add(candidate.factionId);
+
+        const frictionType: FrictionType = candidate.aggressiveness >= 4
+            ? 'unauthorized_op'
+            : candidate.politicalReliability <= 1 && !candidate.enclaveLockActive
+                ? 'refused_release'
+                : 'ignored_stance';
 
         const event: FrictionEvent = {
-            officer_id: id,
+            officer_id: candidate.id,
             turn,
             type: frictionType,
             resolved: false,

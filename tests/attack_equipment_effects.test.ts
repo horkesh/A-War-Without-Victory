@@ -276,6 +276,33 @@ describe('processEquipmentTransfers', () => {
         };
     }
 
+    it('keeps every equipment-condition triplet normalized after transfers', () => {
+        const params = makeTransferParams({
+            outcome: 'decisive_victory' as const,
+            totalATanksLost: 12,
+            totalAArtLost: 12,
+            totalDTanksLost: 20,
+            totalDArtLost: 20,
+        });
+
+        processEquipmentTransfers(params);
+
+        for (const formation of [params.firstAttacker, params.defenderFormation!]) {
+            for (const condition of [
+                formation.composition!.tank_condition,
+                formation.composition!.artillery_condition,
+            ]) {
+                expect(condition.operational).toBeGreaterThanOrEqual(0);
+                expect(condition.degraded).toBeGreaterThanOrEqual(0);
+                expect(condition.non_operational).toBeGreaterThanOrEqual(0);
+                expect(condition.operational).toBeLessThanOrEqual(1);
+                expect(condition.degraded).toBeLessThanOrEqual(1);
+                expect(condition.non_operational).toBeLessThanOrEqual(1);
+                expect(condition.operational + condition.degraded + condition.non_operational).toBeCloseTo(1, 10);
+            }
+        }
+    });
+
     describe('attacker wins — scavenging rates', () => {
         it('decisive_victory: attacker scavenges at 0.20, defender at 0.15', () => {
             // With large losses to ensure accumulator crosses 1.0

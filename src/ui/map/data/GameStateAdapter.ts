@@ -51,6 +51,7 @@ import { classifyArmyReserveSeverity } from '../utils/armyReserveSeverity.js';
 import { deriveWarFrontVisibleEnemyOsids } from '../utils/deriveWarFrontVisibleEnemyOsids.js';
 import { buildSectorFormationAssignment } from '../utils/sectorUtils.js';
 import { buildControlLookup, buildStatusLookup } from './ControlLookup.js';
+import { hideWithdrawnEmptySyntheticJnaCommands } from './syntheticJnaCommandVisibility.js';
 import { getMunicipalitySupportLabel } from '../../../sim/combat/municipality_support.js';
 import { splitKiaWiaMia } from '../../../sim/combat/attack_casualty_distribution.js';
 import { strictCompare } from '../../../state/validateGameState.js';
@@ -86,6 +87,257 @@ import war1993Events from '../../../../data/scenarios/events/war_1993.json';
 import war1994Events from '../../../../data/scenarios/events/war_1994.json';
 import war1995Events from '../../../../data/scenarios/events/war_1995.json';
 import war1992HrhbSummerEvents from '../../../../data/scenarios/events/war_1992_hrhb_summer.json';
+
+export type StrategicObjectiveStatus = 'secure' | 'contested' | 'critical' | 'unreported';
+export type StrategicObjectiveTrend = 'improving' | 'steady' | 'worsening' | 'unreported';
+
+export interface FactionStrategicObjectiveView {
+    id: string;
+    title: string;
+    status: StrategicObjectiveStatus;
+    trend: StrategicObjectiveTrend;
+    responsibleCommand: string | null;
+    currentCommitment: string | null;
+    nextLever: {
+        owner: 'army_hq' | 'decision_room';
+        label: string;
+        navigationTarget:
+            | { kind: 'army-hq-tab'; tab: 'briefing' | 'summary' | 'records' | 'personnel' }
+            | { kind: 'army-hq-corps-briefing'; corpsId: string | null }
+            | { kind: 'decision-room'; lens: 'decision' | 'command'; cardId?: string | null };
+    };
+    lastConsequence: string | null;
+}
+
+type StrategicObjectiveConfig = {
+    id: string;
+    dimension: string;
+    titleKey:
+        | 'warSummary.objective.rbih.stateSurvival'
+        | 'warSummary.objective.rbih.militaryCredibility'
+        | 'warSummary.objective.rbih.internationalStanding'
+        | 'warSummary.objective.rbih.internalCohesion'
+        | 'warSummary.objective.rs.territorialPosition'
+        | 'warSummary.objective.rs.militaryCredibility'
+        | 'warSummary.objective.rs.patronConfidence'
+        | 'warSummary.objective.rs.internalCohesion'
+        | 'warSummary.objective.hrhb.heartland'
+        | 'warSummary.objective.hrhb.patronConfidence'
+        | 'warSummary.objective.hrhb.militaryCredibility'
+        | 'warSummary.objective.hrhb.internalCohesion';
+    militaryOwner: boolean;
+};
+
+const STRATEGIC_OBJECTIVE_CONFIG: Record<string, StrategicObjectiveConfig[]> = {
+    RBiH: [
+        { id: 'state_survival', dimension: 'territorial_legitimacy', titleKey: 'warSummary.objective.rbih.stateSurvival', militaryOwner: true },
+        { id: 'military_credibility', dimension: 'military_credibility', titleKey: 'warSummary.objective.rbih.militaryCredibility', militaryOwner: true },
+        { id: 'international_standing', dimension: 'international_standing', titleKey: 'warSummary.objective.rbih.internationalStanding', militaryOwner: false },
+        { id: 'internal_cohesion', dimension: 'internal_cohesion', titleKey: 'warSummary.objective.rbih.internalCohesion', militaryOwner: false },
+    ],
+    RS: [
+        { id: 'territorial_position', dimension: 'territorial_legitimacy', titleKey: 'warSummary.objective.rs.territorialPosition', militaryOwner: true },
+        { id: 'military_credibility', dimension: 'military_credibility', titleKey: 'warSummary.objective.rs.militaryCredibility', militaryOwner: true },
+        { id: 'patron_confidence', dimension: 'patron_confidence', titleKey: 'warSummary.objective.rs.patronConfidence', militaryOwner: false },
+        { id: 'internal_cohesion', dimension: 'internal_cohesion', titleKey: 'warSummary.objective.rs.internalCohesion', militaryOwner: false },
+    ],
+    HRHB: [
+        { id: 'heartland', dimension: 'territorial_legitimacy', titleKey: 'warSummary.objective.hrhb.heartland', militaryOwner: true },
+        { id: 'patron_confidence', dimension: 'patron_confidence', titleKey: 'warSummary.objective.hrhb.patronConfidence', militaryOwner: false },
+        { id: 'military_credibility', dimension: 'military_credibility', titleKey: 'warSummary.objective.hrhb.militaryCredibility', militaryOwner: true },
+        { id: 'internal_cohesion', dimension: 'internal_cohesion', titleKey: 'warSummary.objective.hrhb.internalCohesion', militaryOwner: false },
+    ],
+};
+
+function objectiveStatus(value: unknown): StrategicObjectiveStatus {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return 'unreported';
+    if (value >= 70) return 'secure';
+    if (value >= 40) return 'contested';
+    return 'critical';
+}
+
+function objectiveTrend(value: unknown): StrategicObjectiveTrend {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return 'unreported';
+    if (value > 0) return 'improving';
+    if (value < 0) return 'worsening';
+    return 'steady';
+}
+
+function objectiveCommand(state: LoadedGameState, faction: string): string | null {
+    const request = (state.pendingReserveRequests ?? [])
+        .filter((candidate) => candidate.faction === faction)
+        .sort((a, b) => b.priority - a.priority || strictCompare(a.request_id, b.request_id))[0];
+    const operation = (state.operations ?? [])
+        .filter((candidate) => candidate.faction === faction)
+        .sort((a, b) => strictCompare(a.corps_id, b.corps_id) || strictCompare(a.name, b.name))[0];
+    const corpsId = request?.corps_id ?? operation?.corps_id;
+    if (!corpsId) return null;
+    const formationName = state.formations.find((formation) => formation.id === corpsId)?.name;
+    return formationName
+        ? getPlayerSafeCorpsName(formationName, corpsId)
+        : operation?.corps_name ?? null;
+}
+
+function objectiveCommitment(
+    state: LoadedGameState,
+    config: StrategicObjectiveConfig,
+    faction: string,
+    effectiveValue: unknown,
+    eventModifier: unknown,
+): string | null {
+    if (config.id === 'state_survival' || config.id === 'territorial_position' || config.id === 'heartland') {
+        const front = state.operationalSitrep?.front;
+        return front
+            ? t('warSummary.objective.commitment.fronts', { engaged: front.engagedCount, exposed: front.exposedCount })
+            : null;
+    }
+    if (config.dimension === 'military_credibility') {
+        if (!state.operations) return null;
+        const active = state.operations.filter((operation) => operation.faction === faction);
+        const brigades = active.reduce((sum, operation) => sum + operation.participating_brigade_count, 0);
+        const operationCountKey = active.length === 1 ? 'operationOne' : 'operationMany';
+        const brigadeCountKey = brigades === 1 ? 'BrigadeOne' : 'BrigadeMany';
+        return t(`warSummary.objective.commitment.${operationCountKey}${brigadeCountKey}`, {
+            operations: active.length,
+            brigades,
+        });
+    }
+    if (
+        config.dimension === 'internal_cohesion'
+        && (faction === 'RBiH' || faction === 'HRHB')
+        && typeof state.war_alliance_rbih_hrhb === 'number'
+        && Number.isFinite(state.war_alliance_rbih_hrhb)
+    ) {
+        return t('warSummary.objective.commitment.alliance', {
+            value: Math.round(state.war_alliance_rbih_hrhb * 100),
+        });
+    }
+    if (typeof effectiveValue !== 'number' || !Number.isFinite(effectiveValue)) return null;
+    return t('warSummary.objective.commitment.dimension', {
+        value: Math.round(effectiveValue),
+        modifier: typeof eventModifier === 'number' && Number.isFinite(eventModifier)
+            ? `${eventModifier >= 0 ? '+' : ''}${Math.round(eventModifier)}`
+            : t('corpsFront.unreported'),
+    });
+}
+
+function objectiveLever(
+    state: LoadedGameState,
+    config: StrategicObjectiveConfig,
+    faction: string,
+): FactionStrategicObjectiveView['nextLever'] {
+    if (!config.militaryOwner) {
+        return {
+            owner: 'decision_room',
+            label: t('warSummary.objective.lever.politicalDecisions'),
+            navigationTarget: { kind: 'decision-room', lens: 'decision' },
+        };
+    }
+
+    const operation = (state.operations ?? [])
+        .filter((candidate) => candidate.faction === faction)
+        .sort((a, b) => strictCompare(a.corps_id, b.corps_id) || strictCompare(a.name, b.name))[0];
+    if (config.dimension === 'military_credibility' && operation) {
+        return {
+            owner: 'army_hq',
+            label: t('warSummary.objective.lever.commandBriefing'),
+            navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: operation.corps_id },
+        };
+    }
+
+    const request = (state.pendingReserveRequests ?? [])
+        .filter((candidate) => candidate.faction === faction)
+        .sort((a, b) => b.priority - a.priority || strictCompare(a.request_id, b.request_id))[0];
+    if (request?.suggested_brigade_id) {
+        return {
+            owner: 'decision_room',
+            label: t('warSummary.objective.lever.reserveCommitment'),
+            navigationTarget: {
+                kind: 'decision-room',
+                lens: 'command',
+                cardId: `command:elite-deploy:${request.request_id}`,
+            },
+        };
+    }
+    if (request) {
+        return {
+            owner: 'army_hq',
+            label: t('warSummary.objective.lever.reserveSelection'),
+            navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
+        };
+    }
+
+    return {
+        owner: 'army_hq',
+        label: t('warSummary.objective.lever.commandBriefing'),
+        navigationTarget: operation
+            ? { kind: 'army-hq-corps-briefing', corpsId: operation.corps_id }
+            : { kind: 'army-hq-tab', tab: 'briefing' },
+    };
+}
+
+function objectiveLastConsequence(
+    state: LoadedGameState,
+    config: StrategicObjectiveConfig,
+    faction: string,
+): string | null {
+    if (config.dimension === 'territorial_legitimacy') {
+        const event = [...(state.allControlEvents ?? [])]
+            .filter((candidate) => candidate.from === faction || candidate.to === faction)
+            .sort((a, b) => b.turn - a.turn || strictCompare(a.settlementId, b.settlementId))[0];
+        if (!event) return null;
+        return event.to === faction
+            ? t('warSummary.objective.consequence.territoryGained', { turn: event.turn })
+            : t('warSummary.objective.consequence.territoryLost', { turn: event.turn });
+    }
+    if (config.dimension === 'military_credibility') {
+        const operation = [...(state.operationHistory ?? [])]
+            .filter((candidate) => candidate.faction === faction)
+            .sort((a, b) => b.ended_turn - a.ended_turn || strictCompare(a.operation_id, b.operation_id))[0];
+        if (!operation) return null;
+        return t('warSummary.objective.consequence.operation', {
+            turn: operation.ended_turn,
+            operation: getPlayerSafeOperationName(operation.operation_name, operation.operation_display_name),
+        });
+    }
+    const event = [...(state.firedEvents ?? [])]
+        .filter((candidate) => candidate.effects.some((effect) => {
+            if (effect.kind !== 'dimension_shift') return false;
+            const normalized = effect.description.toLowerCase();
+            return normalized.includes(config.dimension) || normalized.includes(config.dimension.replace(/_/g, ' '));
+        }))
+        .sort((a, b) => b.turn - a.turn || strictCompare(a.id, b.id))[0];
+    return event ? t('warSummary.objective.consequence.decision', { turn: event.turn, event: event.title }) : null;
+}
+
+export function buildFactionStrategicObjectiveViews(state: LoadedGameState): FactionStrategicObjectiveView[] {
+    const faction = state.player_faction;
+    if (!faction) return [];
+    const configs = STRATEGIC_OBJECTIVE_CONFIG[faction];
+    if (!configs) return [];
+    const dimensions = state.strategicDimensions?.[faction];
+    const command = objectiveCommand(state, faction);
+
+    return configs.map((config) => {
+        const dimension = dimensions?.[config.dimension];
+        return {
+            id: config.id,
+            title: t(config.titleKey),
+            status: objectiveStatus(dimension?.effective_value),
+            trend: objectiveTrend(dimension?.event_modifier),
+            responsibleCommand: config.militaryOwner ? command : null,
+            currentCommitment: objectiveCommitment(
+                state,
+                config,
+                faction,
+                dimension?.effective_value,
+                dimension?.event_modifier,
+            ),
+            nextLever: objectiveLever(state, config, faction),
+            lastConsequence: objectiveLastConsequence(state, config, faction),
+        };
+    });
+}
 
 function pointsByFaction(rec: Record<string, { points?: number }>): Record<string, number> {
     const out: Record<string, number> = {};
@@ -2396,6 +2648,9 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         operationOpportunityProposals,
     });
     const pendingReserveRequests = derivePendingReserveRequests(state, playerFaction);
+    const armyCoDecisionTraces = derivePlayerArmyCoDecisionTraces(state, playerFaction);
+    const armyCorpsDirectives = derivePlayerArmyCorpsDirectives(state, playerFaction);
+    const corpsCommanderActions = derivePlayerCorpsCommanderActions(state, playerFaction);
     const reserveRequestHistory = deriveReserveRequestHistory(state, playerFaction);
     const peacePlanHistory = derivePeacePlanHistory(state, playerFaction);
     const convoyDecisionHistory = deriveConvoyDecisionHistory(state, playerFaction);
@@ -2458,6 +2713,11 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
     // (chosen response vs each event's historical_default_response_id). Pure /
     // display-only / zero-hash; reads only the raw event_decision_log substrate.
     const distanceFromHistory = buildDistanceFromHistory({ rawGameState: gameState });
+    const presentedFormations = hideWithdrawnEmptySyntheticJnaCommands(
+        formations,
+        state.military.event_flags,
+    );
+    const rawOperationHistory = deriveOperationHistory(state);
 
     return {
         label, turn, phase,
@@ -2465,11 +2725,12 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
             turn,
             date: metadataDate,
         },
-        formations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
+        formations: presentedFormations, militiaPools, controlBySettlement, initialControlBySettlement, statusBySettlement,
         brigadeAorByFormationId,
         attackOrders, aorOrders, recentControlEvents, allControlEvents: recentControlEvents, displacementEventLog: displacementEventLogRaw, recruitment,
         runtimeFeatureFlags: options?.runtimeFeatureFlags,
-        armyStance, casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
+        armyStance, armyCoDecisionTraces, armyCorpsDirectives, corpsCommanderActions,
+        casualtyLedger: scopeToPlayerFaction(casualtyLedger, playerFaction), civilianCasualties, internationalVisibilityPressure, ivpConsequencesActive, pendingConvoyDecisions, municipalitySupportOrders,
         sarajevoTunnelOperational: Boolean(state.military.sarajevo_tunnel_operational), warPhaseSupplyPressure: scopeToPlayerFaction(warPhaseSupplyPressure, playerFaction), warPhaseSupplyCondition: scopeToPlayerFaction(warPhaseSupplyCondition, playerFaction), warPhaseExhaustion: scopeToPlayerFaction(warPhaseExhaustion, playerFaction),
         player_faction: playerFaction ?? undefined,
         rbih_hrhb_war_earliest_turn: rbih_hrhb_war_earliest_turn ?? null,
@@ -2539,7 +2800,8 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         historicalEventsByTurn: deriveHistoricalEvents(state),
         latestTurnSummary: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined)?.[0] ?? null,
         turnSummaries: (state.turn_summaries as import('../../../state/turn_summary.js').TurnSummary[] | undefined) ?? [],
-        operationHistory: filterPlayerFacingEntriesByFaction(deriveOperationHistory(state), playerFaction),
+        operationHistory: filterPlayerFacingEntriesByFaction(rawOperationHistory, playerFaction),
+        rawOperationHistory,
         activeOperations: filterPlayerFacingEntriesByFaction(deriveActiveOperations(state), playerFaction),
         brigadeSectorOverride: brigadeSectorOverride && Object.keys(brigadeSectorOverride).length > 0 ? brigadeSectorOverride : undefined,
         pendingReserveRequests,
@@ -2607,6 +2869,90 @@ export function parseGameState(json: unknown, options?: ParseGameStateOptions): 
         // pass. Runtime-only handle; not persisted, no save-schema impact.
         rawGameState: gameState,
     };
+}
+
+function derivePlayerArmyCoDecisionTraces(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['armyCoDecisionTraces'] {
+    if (!playerFaction) return undefined;
+    const raw = state.military?.army_co_decision_traces?.[playerFaction];
+    if (!Array.isArray(raw)) return undefined;
+    const traces = raw
+        .filter((entry: any) => entry && Number.isInteger(entry.turn) && typeof entry.campaign_role === 'string')
+        .map((entry: any) => ({
+            turn: Number(entry.turn),
+            campaign_role: String(entry.campaign_role),
+            rationale: typeof entry.rationale === 'string' ? entry.rationale : '',
+            ...(typeof entry.raw_directive_id === 'string'
+                ? { raw_directive_id: entry.raw_directive_id }
+                : {}),
+        }))
+        .sort((a, b) => a.turn - b.turn
+            || strictCompare(a.campaign_role, b.campaign_role)
+            || strictCompare(a.rationale, b.rationale));
+    return traces.length > 0 ? { [playerFaction]: traces } : undefined;
+}
+
+function derivePlayerArmyCorpsDirectives(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['armyCorpsDirectives'] {
+    if (!playerFaction) return undefined;
+    const raw = state.military?.army_corps_directives_by_faction?.[playerFaction];
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+    const validRoles = new Set(['primary', 'secondary', 'economy', 'contain']);
+    const validReasons = new Set(['aggressive_preference', 'cautious_preference', 'compliance_score_low']);
+    const directives: NonNullable<LoadedGameState['armyCorpsDirectives']> = [];
+    for (const key of Object.keys(raw).sort(strictCompare)) {
+        const entry = raw[key];
+        if (!entry || typeof entry !== 'object') continue;
+        const corpsId = typeof entry.corps_id === 'string' ? entry.corps_id : key;
+        const formation = state.military?.formations?.[corpsId];
+        if (formation?.faction !== playerFaction || !validRoles.has(entry.role)) continue;
+        directives.push({
+            corpsId,
+            role: entry.role,
+            deviated: entry.deviated === true,
+            ...(entry.deviated === true && validReasons.has(entry.deviation_reason)
+                ? { deviationReason: entry.deviation_reason }
+                : {}),
+        });
+    }
+    return directives.length > 0 ? directives : undefined;
+}
+
+function derivePlayerCorpsCommanderActions(
+    state: any,
+    playerFaction: string | null | undefined,
+): LoadedGameState['corpsCommanderActions'] {
+    if (!playerFaction) return undefined;
+    const raw = state.military?.corps_command;
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return undefined;
+    const validActions = new Set(['created', 'advanced', 'suspended', 'abandoned', 'launched', 'none']);
+    const actions: NonNullable<LoadedGameState['corpsCommanderActions']> = [];
+    for (const corpsId of Object.keys(raw).sort(strictCompare)) {
+        if (state.military?.formations?.[corpsId]?.faction !== playerFaction) continue;
+        const commanderState = raw[corpsId]?.commander_state;
+        if (!commanderState || typeof commanderState !== 'object') continue;
+        const action = commanderState.last_plan_action;
+        const traceTurn = commanderState.decision_trace?.turn;
+        const turn = Number.isInteger(traceTurn)
+            ? Number(traceTurn)
+            : Number.isInteger(commanderState.last_assessment_turn)
+                ? Number(commanderState.last_assessment_turn)
+                : null;
+        if (turn === null || !validActions.has(action)) continue;
+        actions.push({
+            corpsId,
+            turn,
+            action,
+            reason: typeof commanderState.last_plan_reason === 'string'
+                ? commanderState.last_plan_reason
+                : '',
+        });
+    }
+    return actions.length > 0 ? actions : undefined;
 }
 
 function deriveEliteBrigadeTracker(state: any): LoadedGameState['eliteBrigadeTracker'] {
@@ -3074,6 +3420,7 @@ function derivePendingParamilitaryRequests(
 
     const parsed = requests
         .filter((request) => playerFactionMatch(request?.faction, playerFaction))
+        .filter((request) => !isFinalParamilitaryDecision(request?.decision))
         .filter((request) =>
             typeof request?.faction === 'string'
             && typeof request?.target_osid === 'string'
@@ -3088,12 +3435,15 @@ function derivePendingParamilitaryRequests(
                 strength: Number(request.strength),
                 target_osid: request.target_osid,
                 estimated_civilian_risk: Math.trunc(Number(request.estimated_civilian_risk)),
-                ...(request.decision === 'allow' || request.decision === 'deny' ? { decision: request.decision } : {}),
                 ...(request.mode === 'rear_pocket' || request.mode === 'offensive' ? { mode: request.mode } : {}),
             };
         });
 
     return parsed.length > 0 ? parsed : undefined;
+}
+
+function isFinalParamilitaryDecision(decision: unknown): boolean {
+    return decision === 'allow' || decision === 'deny' || decision === 'regular';
 }
 
 function derivePeacePhaseData(state: any, phase: string): Partial<LoadedGameState> {
@@ -3405,7 +3755,9 @@ function derivePresidentialReviewQueue({
     const personnelDirectiveCount = (pendingOfficerEvents ?? []).filter((event) =>
         event.type === 'officer_available' || event.type === 'replacement_suggested' || event.type === 'officer_relieved',
     ).length;
-    const operationOpportunityCount = operationOpportunityProposals?.length ?? 0;
+    const operationOpportunityCount = (operationOpportunityProposals ?? [])
+        .filter((proposal) => Boolean(proposal.review_id))
+        .length;
     const pendingCount = eventDecisionCount + commandInterpretationCount + personnelDirectiveCount + operationOpportunityCount;
 
     if (pendingCount === 0) return undefined;
@@ -3517,7 +3869,10 @@ function derivePendingReserveRequests(
                 how_to_use: typeof request.how_to_use === 'string' ? request.how_to_use : undefined,
                 priority: Number(request.priority ?? 0),
                 severityBand: classifyArmyReserveSeverity(Number(request.priority ?? 0)),
-                travel_hops: Number(request.travel_hops ?? 0),
+                travel_hops:
+                    typeof request.travel_hops === 'number' && Number.isFinite(request.travel_hops)
+                        ? request.travel_hops
+                        : -1,
                 description: String(request.description ?? ''),
                 suggested_brigade_id: request.suggested_brigade_id ? String(request.suggested_brigade_id) : null,
                 turn_requested: Number(request.turn_requested ?? 0),
@@ -3934,7 +4289,13 @@ function derivePendingProposalReviews(
     const reviews = state.meta?.pending_proposal_reviews;
     if (!reviews || reviews.length === 0) return undefined;
     const pending = reviews
-        .filter((r: any) => r && r.accepted == null && playerFactionMatch(r.faction, playerFaction))
+        .filter((r: any) =>
+            r
+            && r.accepted == null
+            && r.opportunity_decision == null
+            && r.resolved_turn == null
+            && playerFactionMatch(r.faction, playerFaction)
+        )
         .map((r: any) => ({
             id: String(r.id ?? ''),
             turn: typeof r.turn === 'number' ? r.turn : 0,

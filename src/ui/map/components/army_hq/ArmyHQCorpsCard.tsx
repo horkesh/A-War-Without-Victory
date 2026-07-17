@@ -27,6 +27,7 @@ import { OrbatSection } from './OrbatSection';
 import { CombatRecordSection } from './CombatRecordSection';
 import { FlipCard } from './FlipCard';
 import { deriveCorpsDelegationSummary, normalizeCommandStrainLabel } from '../../data/command_strain';
+import { isWithdrawnEmptySyntheticJnaCommand } from '../../data/syntheticJnaCommandVisibility';
 import { t, type MessageKey } from '../../i18n';
 
 import { readinessGradeLabel, type ReadinessGrade } from './ForceReadiness';
@@ -51,7 +52,7 @@ const COHESION_CRITICAL = 40;
 const COHESION_HEALTHY = 70;
 
 const GRADE_COLORS: Record<string, string> = {
-    A: 'text-emerald-400', B: 'text-accent-gold', C: 'text-amber-500', D: 'text-red-500', F: 'text-red-600',
+    A: 'text-emerald-400', B: 'text-accent-gold', C: 'text-amber-500', D: 'text-red-400', F: 'text-red-300',
     UNREPORTED: 'text-text-secondary',
 };
 
@@ -63,7 +64,7 @@ const STANCE_LABEL_KEYS: Record<string, MessageKey> = {
     unreported: 'armyHqCorps.stance.unreported',
 };
 const STANCE_COLORS: Record<string, string> = {
-    offensive: 'text-red-500 border-red-500/30 bg-red-500/5',
+    offensive: 'text-red-400 border-red-500/30 bg-red-500/5',
     defensive: 'text-blue-400 border-blue-400/30 bg-blue-400/5',
     balanced: 'text-accent-gold border-accent-gold/30 bg-accent-gold/5',
     reorganize: 'text-neutral-400 border-neutral-400/30 bg-neutral-400/5',
@@ -92,7 +93,7 @@ function getPersonnelTone(summary: ReportedMetricSummary): { textClass: string; 
     if (summary.reportedTotal >= 4000) {
         return { textClass: 'text-accent-gold', iconColor: '#fbbf24', state: 'complete-moderate' };
     }
-    return { textClass: 'text-red-500', iconColor: '#f87171', state: 'complete-thin' };
+    return { textClass: 'text-red-400', iconColor: '#f87171', state: 'complete-thin' };
 }
 
 function averageReported(values: ReadonlyArray<number | undefined | null>): number | null {
@@ -181,6 +182,10 @@ export function ArmyHQCorpsCard({
         return { totalPersonnel, totalPersonnelLabel, personnelTone, avgCohesion, avgFatigue, eff, commander, commanderDisplay, syntheticCommand, stance, activeOp, planningOp, displayedOp, displayedOpLabel, corpsBattles, equipment, strain, commandStrainReported, displayedStrain, strainLabel, frictionTypes, frictionEvents, stabilizationAvailable, stabilizationCooldownUntil, stabilizationCostCA, currentTurn, recoveryForecast, recoveryForecastToken, delegationSummary };
     }, [corps, brigades, sectors, operations, factionBattles, gameState]);
 
+    if (isWithdrawnEmptySyntheticJnaCommand(corps, gameState.formations, gameState.eventFlags)) {
+        return null;
+    }
+
     const displayName = formatCorpsDisplayName(corps.name, corps.id);
     const isCritical = data.avgCohesion != null && data.avgCohesion < COHESION_CRITICAL;
     const noCommander = !data.commanderDisplay;
@@ -217,11 +222,11 @@ export function ArmyHQCorpsCard({
                 className="bg-panel-card border border-panel-border overflow-hidden hover:border-amber-400/40 transition-colors cursor-pointer group"
             >
                 <div className="flex items-center justify-between px-3 py-2 bg-panel-card">
-                    <span className="text-[11px] font-bold text-text-secondary uppercase tracking-widest font-mono">
+                    <span className="text-xs font-bold text-text-secondary uppercase tracking-widest font-mono">
                         {displayName}
                     </span>
                     <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold tabular-nums font-mono ${gradeColor}`}>
+                        <span className={`text-xs font-bold tabular-nums font-mono ${gradeColor}`}>
                             {data.eff.grade}
                         </span>
                     </div>
@@ -254,13 +259,13 @@ export function ArmyHQCorpsCard({
         >
             {/* Threat badge */}
             {hasThreat && (
-                <div className="absolute top-2 left-2 text-[8px] text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5 z-10">
+                <div className="absolute top-2 left-2 text-xs text-red-400 font-bold animate-pulse tracking-[0.15em] bg-red-500/10 border border-red-500/30 px-1.5 py-0.5 z-10">
                     {t('armyHqCorps.incoming')}
                 </div>
             )}
 
             {/* Status Stamp */}
-            <div className={`absolute top-4 right-4 text-[10px] font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} z-10 font-mono`}>
+            <div className={`absolute top-4 right-4 text-xs font-bold uppercase tracking-[0.2em] px-2 py-1 border ${stanceClass} z-10 font-mono`}>
                 {stanceLabel}
             </div>
 
@@ -271,9 +276,9 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {/* Line 2: Commander + grade */}
-                <div className="text-[12px] text-text-secondary mt-1.5 flex items-center gap-2.5 font-mono">
+                <div className="mt-1.5 flex flex-wrap items-start gap-x-2.5 gap-y-1 text-[12px] text-text-secondary font-mono">
                     {displayCommanderName ? (
-                        <span>
+                        <span className="min-w-0 basis-full break-words sm:basis-auto sm:flex-1">
                             {data.syntheticCommand ? `${t('armyHqCorps.operationCommander')}: ` : ''}
                             {displayCommanderName}
                             {!data.syntheticCommand && data.commanderDisplay?.acting && (
@@ -281,14 +286,14 @@ export function ArmyHQCorpsCard({
                             )}
                         </span>
                     ) : (
-                        <span className={`italic ${commanderSourceUnreported ? 'text-text-secondary' : 'text-red-500/60'}`}>
+                        <span className={`min-w-0 basis-full break-words italic sm:basis-auto sm:flex-1 ${commanderSourceUnreported ? 'text-text-secondary' : 'text-red-400'}`}>
                             {commanderSourceUnreported ? t('armyHqCorps.commanderUnreported') : t('armyHqCorps.unassigned')}
                         </span>
                     )}
-                    <div className="w-1 h-3 border-l border-panel-border" />
+                    <div className="hidden h-3 w-1 border-l border-panel-border sm:block" />
                     <span
                         data-testid="army-hq-corps-effectiveness"
-                        className={`font-bold ${gradeColor}`}
+                        className={`shrink-0 font-bold ${gradeColor}`}
                         title={effectivenessTitle}
                     >
                         {t('armyHqCorps.effectivenessShort', {
@@ -298,8 +303,8 @@ export function ArmyHQCorpsCard({
                     </span>
                     {readinessGrade && (
                         <>
-                            <div className="w-1 h-3 border-l border-panel-border" />
-                            <span className={`font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : readinessGrade === 'UNREPORTED' ? 'text-text-secondary' : 'text-red-400'}`}>
+                            <div className="hidden h-3 w-1 border-l border-panel-border sm:block" />
+                            <span className={`shrink-0 font-bold uppercase ${readinessGrade === 'COMBAT READY' ? 'text-emerald-400' : readinessGrade === 'ADEQUATE' ? 'text-text-primary' : readinessGrade === 'STRAINED' ? 'text-amber-400' : readinessGrade === 'UNREPORTED' ? 'text-text-secondary' : 'text-red-400'}`}>
                                 {readinessGradeLabel(readinessGrade)}
                             </span>
                         </>
@@ -307,20 +312,20 @@ export function ArmyHQCorpsCard({
                 </div>
 
                 {data.commanderDisplay?.source === 'opening_read_model' && (
-                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-[10px] leading-4 text-amber-300/85 font-mono">
+                    <div data-testid="army-hq-opening-command-provenance" className="mt-1 text-xs leading-4 text-amber-300/85 font-mono">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.openingCommand')}</span>
-                        <span className="text-text-secondary/80"> - {t('commanderDisplay.openingCommandHelp')}</span>
+                        <span className="text-text-secondary"> - {t('commanderDisplay.openingCommandHelp')}</span>
                     </div>
                 )}
                 {data.commanderDisplay?.source === 'synthetic' && (
-                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-[10px] leading-4 text-amber-300/85 font-mono">
+                    <div data-testid="army-hq-command-staff-provenance" className="mt-1 text-xs leading-4 text-amber-300/85 font-mono">
                         <span className="font-bold uppercase tracking-[0.12em]">{t('commanderDisplay.commandStaff')}</span>
-                        <span className="text-text-secondary/80"> - {t('commanderDisplay.commandStaffHelp')}</span>
+                        <span className="text-text-secondary"> - {t('commanderDisplay.commandStaffHelp')}</span>
                     </div>
                 )}
 
                 {readinessGrade && (
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.12em] text-text-secondary/80 font-mono">
+                    <div className="mt-1 text-xs uppercase tracking-[0.12em] text-text-secondary font-mono">
                         {t('armyHqCorps.readinessVitals', {
                             fatigue: roundConditionLabel(data.avgFatigue),
                             cohesion: roundConditionLabel(data.avgCohesion),
@@ -343,7 +348,7 @@ export function ArmyHQCorpsCard({
                 {/* Line 3: Stats */}
                 <div className="flex items-center gap-4 mt-3 text-[12px] tabular-nums font-mono">
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
+                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.personnel')}</span>
                         <span
                             data-testid="army-hq-corps-card-personnel"
                             data-report-state={data.personnelTone.state}
@@ -353,11 +358,11 @@ export function ArmyHQCorpsCard({
                         </span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.orbat')}</span>
+                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.orbat')}</span>
                         <span className="text-text-secondary font-bold">{t('armyHqCorps.brigadeShortCount', { count: brigades.length })}</span>
                     </div>
                     <div className="flex flex-col">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
+                        <span className="text-xs text-text-secondary uppercase tracking-tighter">{t('armyHqCorps.front')}</span>
                         <span className="text-text-secondary font-bold">{t('armyHqCorps.sectorShortCount', { count: sectors.length })}</span>
                     </div>
                 </div>
@@ -365,10 +370,10 @@ export function ArmyHQCorpsCard({
                 {/* Active op indicator */}
                 {data.displayedOp && data.displayedOpLabel && (
                     <div className="mt-3 pt-2.5 border-t border-panel-border flex flex-col gap-1">
-                        <span className="text-[9px] text-red-500 font-bold tracking-[0.2em] uppercase">{data.displayedOpLabel}</span>
+                        <span className="text-xs text-red-400 font-bold tracking-[0.2em] uppercase">{data.displayedOpLabel}</span>
                         <div className="flex items-center gap-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                            <span className="text-[11px] text-red-400 font-bold truncate uppercase font-mono">
+                            <span className="text-xs text-red-400 font-bold truncate uppercase font-mono">
                                 {data.displayedOp.display_name}
                             </span>
                         </div>
@@ -378,7 +383,7 @@ export function ArmyHQCorpsCard({
                 {/* This-week battles */}
                 {data.corpsBattles.length > 0 && (
                     <div className="mt-2.5 flex gap-2">
-                        <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-[9px] font-bold tracking-widest animate-pulse">
+                        <div className="px-2 py-0.5 bg-red-900/40 border border-red-500/40 text-red-400 text-xs font-bold tracking-widest animate-pulse">
                             {t('armyHqCorps.contactEngagements', { count: data.corpsBattles.length })}
                         </div>
                     </div>
@@ -387,7 +392,7 @@ export function ArmyHQCorpsCard({
                 {!data.commandStrainReported && (
                     <div className="mt-2.5">
                         <div
-                            className="inline-flex px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-panel-bg/60 border-panel-border/60 text-text-secondary"
+                            className="inline-flex px-2 py-0.5 text-xs font-bold tracking-widest border bg-panel-bg/60 border-panel-border/60 text-text-secondary"
                             title={t('armyHqCorps.commandStrainUnreported')}
                         >
                             {t('armyHqCorps.commandStrainUnreported')}
@@ -399,7 +404,7 @@ export function ArmyHQCorpsCard({
                 {data.displayedStrain > 0 && (
                     <div className="mt-2.5 flex flex-wrap gap-1.5">
                         <div
-                            className={`px-2 py-0.5 text-[9px] font-bold tracking-widest border ${
+                            className={`px-2 py-0.5 text-xs font-bold tracking-widest border ${
                                 data.strainLabel === 'compromised'
                                     ? 'bg-red-900/30 border-red-500/40 text-red-400'
                                     : 'bg-amber-900/30 border-amber-500/40 text-amber-400'
@@ -415,7 +420,7 @@ export function ArmyHQCorpsCard({
                         {/* Friction dot — demoted from badge to dot indicator (back face owns the detail list) */}
                         {data.frictionTypes.length > 0 && (
                             <div
-                                className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
+                                className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500"
                                 title={t('armyHqCorps.frictionTitle')}
                             >
                                 <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />
@@ -428,7 +433,7 @@ export function ArmyHQCorpsCard({
                 {data.displayedStrain === 0 && data.frictionTypes.length > 0 && (
                     <div className="mt-2.5">
                         <div
-                            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
+                            className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold tracking-widest border bg-amber-900/20 border-amber-600/40 text-amber-500 inline-flex"
                             title={t('armyHqCorps.frictionTitle')}
                         >
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block" />

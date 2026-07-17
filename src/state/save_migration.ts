@@ -522,11 +522,23 @@ registerMigration({
         if (!Array.isArray(s.turn_summaries)) s.turn_summaries = [];
         if (!Array.isArray(s.operation_history)) s.operation_history = [];
         if (!Array.isArray(s.pending_paramilitary_requests)) s.pending_paramilitary_requests = [];
-        if (!s.paramilitary_policy || typeof s.paramilitary_policy !== 'object' || Array.isArray(s.paramilitary_policy)) {
-            s.paramilitary_policy = {};
+        if (
+            s.paramilitary_policy !== 'ask' &&
+            s.paramilitary_policy !== 'always_allow' &&
+            s.paramilitary_policy !== 'always_deny'
+        ) {
+            s.paramilitary_policy = 'ask';
         }
-        if (!Number.isInteger(s.paramilitary_deployment_count) || s.paramilitary_deployment_count < 0) {
-            s.paramilitary_deployment_count = 0;
+        const deploymentCounts = asRecord(s.paramilitary_deployment_count);
+        if (deploymentCounts) {
+            const sanitized: Partial<Record<FactionId, number>> = {};
+            for (const faction of ['HRHB', 'RBiH', 'RS'] as const) {
+                const count = deploymentCounts[faction];
+                if (Number.isInteger(count) && count >= 0) sanitized[faction] = count;
+            }
+            s.paramilitary_deployment_count = sanitized;
+        } else if (!Number.isInteger(s.paramilitary_deployment_count) || s.paramilitary_deployment_count < 0) {
+            s.paramilitary_deployment_count = {};
         }
     },
 });

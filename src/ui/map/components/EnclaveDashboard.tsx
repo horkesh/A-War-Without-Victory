@@ -136,10 +136,10 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
       </div>
       <div className="max-h-[32rem] overflow-auto p-3 space-y-3">
         <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-          <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+          <div className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
             {t('enclave.summaryTitle')}
           </div>
-          <div className="grid grid-cols-3 gap-2 text-[11px]">
+          <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
               <div className="text-text-secondary">{t('enclave.summaryCritical')}</div>
               <div className="font-mono text-red-400">{criticalCount}</div>
@@ -156,24 +156,24 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
         </div>
         {eligibleEnclaveIds.length > 0 && (
           <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-xs">
               <span className="text-text-secondary">{t('enclave.airdropBudget')}</span>
               <span className="text-text-primary font-mono">{allocated.toFixed(1)} / {airdropBudget.toFixed(1)}</span>
             </div>
             <div className="h-2 rounded bg-black/30 overflow-hidden">
               <div className="h-full bg-sky-400/80" style={{ width: `${allocatedPct}%` }} />
             </div>
-            <div className="text-[10px] text-text-secondary">{t('enclave.remaining', { value: remaining.toFixed(1) })}</div>
+            <div className="text-xs text-text-secondary">{t('enclave.remaining', { value: remaining.toFixed(1) })}</div>
             <button
               type="button"
               onClick={() => void stageAllocations()}
               disabled={!canStageAirdrop}
               title={airdropStageDisabledReason}
-              className="w-full rounded border border-panel-border px-2 py-1 text-[11px] text-text-primary hover:bg-panel-hover disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded border border-panel-border px-2 py-1 text-xs text-text-primary hover:bg-panel-hover disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t('enclave.stageAirdropAllocation')}
             </button>
-            {actionMessage && <div className="text-[10px] text-accent-gold">{actionMessage}</div>}
+            {actionMessage && <div className="text-xs text-accent-gold">{actionMessage}</div>}
           </div>
         )}
         {enclaves.length === 0 ? (
@@ -194,24 +194,24 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                     <div className="font-sans text-sm text-text-primary font-semibold">
                       {getPlayerSafeEnclaveName(enclave.display_name ?? enclaveId)}
                     </div>
-                    <div className="text-[10px] uppercase tracking-wide text-text-secondary">
+                    <div className="text-xs uppercase tracking-wide text-text-secondary">
                       {getPlayerSafePoliticalFactionName(enclave.faction, t('common.unknown'))}
                     </div>
                   </div>
-                  <div className={`text-[11px] font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
+                  <div className={`text-xs font-mono ${enclave.hardening_active ? 'text-accent-gold' : 'text-text-secondary'}`}>
                     {enclave.hardening_active ? t('enclave.hardeningActive') : t('enclave.hardeningInactive')}
                   </div>
                 </div>
 
-                <div className={`text-[11px] font-semibold uppercase tracking-wide ${risk.className}`}>
+                <div className={`text-xs font-semibold uppercase tracking-wide ${risk.className}`}>
                   {risk.label}
                 </div>
-                <div className="text-[11px] text-text-secondary">
+                <div className="text-xs text-text-secondary">
                   {risk.detail}
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center justify-between text-xs">
                     <span className="text-text-secondary">{t('enclave.resilience')}</span>
                     <span className="text-text-primary font-mono">{enclave.resilience.toFixed(1)} / 30</span>
                   </div>
@@ -221,7 +221,7 @@ export function EnclaveDashboard({ state, open, onClose }: EnclaveDashboardProps
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <div className="text-text-secondary">{t('enclave.isolationTurns')}</div>
                     <div className="text-text-primary font-mono">{enclave.isolation_turns}</div>

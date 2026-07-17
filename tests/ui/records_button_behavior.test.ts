@@ -65,6 +65,7 @@ function makeAftermathView(): TurnAftermathView {
             reasons: ['cost signal'],
         },
         signals: [],
+        commandRecord: { directives: [], rows: [] },
         judgment: {
             headline: 'Review the cost.',
             detail: 'Chronicle memory is available for this turn.',
@@ -135,7 +136,7 @@ describe('PresidentialToolbar RECORDS button', () => {
 
         expect(screen.getByText('The front traded ground without mercy, leaving staff to sort signal from noise.')).toBeTruthy();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Turn Records' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Weekly Aftermath' }));
         fireEvent.click(screen.getByRole('button', { name: 'Chronicle' }));
 
         expect(calls).toEqual(['records', 'chronicle']);

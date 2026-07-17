@@ -152,7 +152,11 @@ export function TurnAftermathModal({
   if (!view) return null;
 
   const hasTopActions = view.nextActions.topItems.length > 0;
+  const commandRecord = view.commandRecord ?? { directives: [], rows: [] };
   const primaryAction = view.nextActions.topItems[0] ?? null;
+  const primaryActionLabelKey = primaryAction?.severity === 'blocking'
+    ? 'turnAftermath.primaryAction.requiredLabel'
+    : 'turnAftermath.primaryAction.label';
   const signalPreview = view.signals.slice(0, 4);
   const realizedConsequences = consequences ?? [];
   const realizedForcedOps = forcedOps ?? [];
@@ -171,6 +175,7 @@ export function TurnAftermathModal({
       onClose={onClose}
       zIndex={Z.TURN_AFTERMATH}
       closeOnBackdropClick={false}
+      initialFocusTestId={primaryAction?.severity === 'blocking' ? 'turn-aftermath-primary-action' : undefined}
       ariaLabelledBy="turn-aftermath-title"
       backdropClassName="bg-black/70 px-4"
       panelClassName="w-full max-w-6xl max-h-[86vh] overflow-hidden border border-white/15 bg-[#101018] shadow-2xl"
@@ -178,12 +183,12 @@ export function TurnAftermathModal({
       <>
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-black/30 px-5 py-4">
           <div className="min-w-0">
-            <div id="turn-aftermath-title" className="text-[10px] font-mono uppercase tracking-[0.28em] text-amber-400/70">
+            <div id="turn-aftermath-title" className="text-xs font-mono uppercase tracking-[0.28em] text-amber-400/70">
               {t('turnAftermath.title')}
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <h2 className="text-xl font-bold text-text-primary">{view.dateLabel}</h2>
-              <span className={`rounded border px-2 py-1 text-[10px] font-mono uppercase tracking-[0.18em] ${toneClasses(view.tone)}`}>
+              <span className={`rounded border px-2 py-1 text-xs font-mono uppercase tracking-[0.18em] ${toneClasses(view.tone)}`}>
                 {enumLabel('turnAftermath.tone', view.tone)}
               </span>
             </div>
@@ -192,8 +197,9 @@ export function TurnAftermathModal({
           </div>
           <button
             type="button"
+            data-testid="turn-aftermath-close"
             onClick={onClose}
-            className="shrink-0 rounded border border-white/10 px-3 py-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary"
+            className="shrink-0 rounded border border-white/10 px-3 py-1.5 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary hover:border-white/25 hover:text-text-primary"
           >
             {t('turnAftermath.continue')}
           </button>
@@ -209,7 +215,7 @@ export function TurnAftermathModal({
             </div>
 
             <div className="border border-white/10 bg-black/20">
-              <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
+              <div className="border-b border-white/10 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary">
                 {t('turnAftermath.notableTerritory')}
               </div>
               <div className="divide-y divide-white/10">
@@ -219,9 +225,9 @@ export function TurnAftermathModal({
                   <div key={`${flip.osid}:${flip.from ?? 'none'}:${flip.to ?? 'none'}`} className="flex items-center justify-between gap-3 px-3 py-2">
                     <div className="min-w-0">
                       <div className="truncate text-sm font-semibold text-text-primary">{flip.label}</div>
-                      <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-text-secondary">{territorySignificanceLabel(flip.significance)}</div>
+                      <div className="text-xs font-mono uppercase tracking-[0.14em] text-text-secondary">{territorySignificanceLabel(flip.significance)}</div>
                     </div>
-                    <span className={`rounded border px-2 py-1 text-[10px] font-mono uppercase ${flip.direction === 'gain' ? 'border-emerald-400/30 text-emerald-300' : flip.direction === 'loss' ? 'border-red-400/30 text-red-300' : 'border-white/10 text-text-secondary'}`}>
+                    <span className={`rounded border px-2 py-1 text-xs font-mono uppercase ${flip.direction === 'gain' ? 'border-emerald-400/30 text-emerald-300' : flip.direction === 'loss' ? 'border-red-400/30 text-red-300' : 'border-white/10 text-text-secondary'}`}>
                       {enumLabel('turnAftermath.direction', flip.direction)}
                     </span>
                   </div>
@@ -231,12 +237,107 @@ export function TurnAftermathModal({
           </section>
 
           <section className="min-w-0 space-y-4">
+            <div className="border border-white/10 bg-black/20">
+              <div className="border-b border-white/10 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary">
+                {t('turnAftermath.commandDesk')}
+              </div>
+              <div className="grid grid-cols-2 gap-2 p-3 text-sm">
+                <Metric label={t('turnAftermath.metric.actionable')} value={String(view.nextActions.actionableCount)} detail={t('turnAftermath.detail.blocking', { count: view.nextActions.blockingCount })} compact />
+                <Metric label={t('turnAftermath.metric.opportunities')} value={String(view.nextActions.opportunityCount)} detail={t('turnAftermath.detail.armyHq')} compact />
+                <Metric label={t('turnAftermath.metric.reserves')} value={String(view.nextActions.reserveCount)} detail={t('turnAftermath.detail.requests')} compact />
+                <Metric label={t('turnAftermath.metric.officers')} value={String(view.nextActions.officerCount)} detail={t('turnAftermath.detail.personnel')} compact />
+              </div>
+              <div className="divide-y divide-white/10 border-t border-white/10">
+                {!hasTopActions ? (
+                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noDecisions')}</div>
+                ) : view.nextActions.topItems.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    data-testid={`turn-aftermath-action-${item.id}`}
+                    data-action-id={item.id}
+                    aria-label={t('turnAftermath.action.aria', {
+                      action: item.actionLabel,
+                      title: item.title,
+                      detail: item.detail ?? '',
+                    })}
+                    onClick={() => triggerActionReview(item)}
+                    className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${actionTone(item)}`}
+                  >
+                    <div className="flex min-w-0 items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{item.title}</div>
+                        {item.detail && <div className="mt-0.5 break-words text-xs leading-4 opacity-80">{item.detail}</div>}
+                        <div className="text-xs font-mono uppercase tracking-[0.14em] opacity-75">{actionTypeLabel(item.type)}</div>
+                      </div>
+                      <span className="shrink-0 rounded border border-current/30 px-2 py-1 text-xs font-mono uppercase tracking-[0.12em] opacity-90">
+                        {item.actionLabel}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(commandRecord.directives.length > 0 || commandRecord.rows.length > 0) && (
+              <div data-testid="turn-aftermath-command-record" className="border border-sky-400/25 bg-sky-950/10">
+                <div className="border-b border-sky-400/20 px-3 py-2">
+                  <div className="text-xs font-mono uppercase tracking-[0.18em] text-sky-300">
+                    {t('turnAftermath.commandRecord.title')}
+                  </div>
+                  <div className="mt-0.5 text-xs leading-4 text-text-secondary">
+                    {t('turnAftermath.commandRecord.subtitle')}
+                  </div>
+                </div>
+                {commandRecord.directives.length > 0 && (
+                  <div className="divide-y divide-white/10 border-b border-white/10">
+                    {commandRecord.directives.map((directive, index) => (
+                      <div key={`${directive.label}:${index}`} className="px-3 py-2.5">
+                        <div className="text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">
+                          {t('turnAftermath.commandRecord.directive')}
+                        </div>
+                        <div className="mt-0.5 text-sm font-semibold text-text-primary">{directive.label}</div>
+                        <div className="mt-1 text-xs leading-4 text-text-secondary">{directive.rationale}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="divide-y divide-white/10">
+                  {commandRecord.rows.map((row) => (
+                    <div key={row.id} data-testid="turn-aftermath-command-record-row" className="px-3 py-2.5">
+                      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                        <div>
+                          <span className="text-sm font-semibold text-text-primary">{row.corpsName}</span>
+                          <span className="ml-2 text-xs text-text-secondary">{row.officerName}</span>
+                        </div>
+                        <span className={`border px-2 py-0.5 text-xs font-mono uppercase tracking-[0.1em] ${row.interpretation === 'reinterpreted' ? 'border-amber-400/35 text-amber-300' : 'border-white/15 text-text-secondary'}`}>
+                          {t(`turnAftermath.commandRecord.status.${row.interpretation === 'as_issued' ? 'asIssued' : row.interpretation}` as MessageKey)}
+                        </span>
+                      </div>
+                      <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
+                        <div>
+                          <div className="font-mono uppercase tracking-[0.1em] text-text-secondary">{t('turnAftermath.commandRecord.assignment')}</div>
+                          <div className="mt-0.5 font-semibold text-text-primary">{row.assignedRole}</div>
+                          <div className="mt-0.5 leading-4 text-text-secondary">{row.interpretationDetail}</div>
+                        </div>
+                        <div>
+                          <div className="font-mono uppercase tracking-[0.1em] text-text-secondary">{t('turnAftermath.commandRecord.action')}</div>
+                          <div className="mt-0.5 font-semibold text-text-primary">{row.action}</div>
+                          <div className="mt-0.5 leading-4 text-text-secondary">{row.actionDetail}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {realizedConsequences.length > 0 && (
               <div
                 data-testid="turn-aftermath-consequences"
                 className="border border-amber-400/30 bg-amber-950/15"
               >
-                <div className="border-b border-amber-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-amber-300/80">
+                <div className="border-b border-amber-400/20 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-amber-300/80">
                   {t('turnAftermath.consequencesRealized')}
                 </div>
                 <div className="divide-y divide-white/10">
@@ -252,7 +353,7 @@ export function TurnAftermathModal({
                         consequence: receipt.predictedLabel,
                       })}
                       {receipt.predictedExplanation && (
-                        <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                        <div className="mt-1 text-xs leading-4 text-text-secondary/80 italic">
                           {receipt.predictedExplanation}
                         </div>
                       )}
@@ -267,7 +368,7 @@ export function TurnAftermathModal({
                 data-testid="turn-aftermath-forced-op-consequences"
                 className="border border-red-400/30 bg-red-950/15"
               >
-                <div className="border-b border-red-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-red-300/80">
+                <div className="border-b border-red-400/20 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-red-300/80">
                   {t('turnAftermath.forcedOpRealized')}
                 </div>
                 <div className="divide-y divide-white/10">
@@ -282,7 +383,7 @@ export function TurnAftermathModal({
                         commander: receipt.commanderName,
                         recommendation: forcedOpRecommendationLabel(receipt.assessmentAtLaunch),
                       })}
-                      <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                      <div className="mt-1 text-xs leading-4 text-text-secondary/80 italic">
                         {t('turnAftermath.forcedOpOutcome', {
                           grade: t(`turnAftermath.opOutcome.${receipt.outcome}` as MessageKey),
                           casualties: receipt.casualtiesSuffered,
@@ -302,7 +403,7 @@ export function TurnAftermathModal({
                 data-testid="turn-aftermath-officer-resentment"
                 className="border border-red-400/30 bg-red-950/15"
               >
-                <div className="border-b border-red-400/20 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-red-300/80">
+                <div className="border-b border-red-400/20 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-red-300/80">
                   {t('officerResentment.realized')}
                 </div>
                 <div className="divide-y divide-white/10">
@@ -315,7 +416,7 @@ export function TurnAftermathModal({
                       {t('officerResentment.overrode', {
                         officer: receipt.officerName,
                       })}
-                      <div className="mt-1 text-[10px] leading-4 text-text-secondary/80 italic">
+                      <div className="mt-1 text-xs leading-4 text-text-secondary/80 italic">
                         {receipt.newlyCowed && receipt.cowedUntilTurn !== null
                           ? t('officerResentment.cowed', {
                               officer: receipt.officerName,
@@ -333,33 +434,44 @@ export function TurnAftermathModal({
             )}
 
             <div className="border border-white/10 bg-black/20">
-              <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
+              <div className="border-b border-white/10 px-3 py-2 text-xs font-mono uppercase tracking-[0.18em] text-text-secondary">
                 {t('turnAftermath.strategicSignals')}
               </div>
               <div className="divide-y divide-white/10">
                 {signalPreview.length === 0 ? (
                   <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noSignals')}</div>
                 ) : signalPreview.map((signal) => (
-                  <button
-                    key={signal.id}
-                    type="button"
-                    onClick={() => onOpenCodex(signalEventId(signal.id))}
-                    data-testid="turn-aftermath-signal-row"
-                    className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${signalTone(signal.severity)}`}
-                  >
-                    <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
-                    <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signalDetailCopy(signal.detail)}</div>
-                  </button>
+                  signalEventId(signal.id) ? (
+                    <button
+                      key={signal.id}
+                      type="button"
+                      onClick={() => onOpenCodex(signalEventId(signal.id))}
+                      data-testid="turn-aftermath-signal-row"
+                      className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${signalTone(signal.severity)}`}
+                    >
+                      <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
+                      <div className="text-xs font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signalDetailCopy(signal.detail)}</div>
+                    </button>
+                  ) : (
+                    <div
+                      key={signal.id}
+                      data-testid="turn-aftermath-signal-row"
+                      className={`block w-full px-3 py-2 text-left ${signalTone(signal.severity)}`}
+                    >
+                      <div className="min-w-0 truncate text-sm font-semibold">{signal.label}</div>
+                      <div className="text-xs font-mono uppercase tracking-[0.14em] opacity-75">{enumLabel('turnAftermath.signal.kind', signal.kind)} / {signalDetailCopy(signal.detail)}</div>
+                    </div>
+                  )
                 ))}
               </div>
             </div>
 
             <div className="border border-white/10 bg-black/20">
               <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 py-2">
-                <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
+                <div className="text-xs font-mono uppercase tracking-[0.18em] text-text-secondary">
                   {t('turnAftermath.turnCost')}
                 </div>
-                <span className={`rounded border px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.16em] ${costSeverityClasses(view.cost.severity)}`}>
+                <span className={`rounded border px-2 py-0.5 text-xs font-mono uppercase tracking-[0.16em] ${costSeverityClasses(view.cost.severity)}`}>
                   {enumLabel('turnAftermath.severity', view.cost.severity)}
                 </span>
               </div>
@@ -369,7 +481,7 @@ export function TurnAftermathModal({
                 <Metric label={t('turnAftermath.metric.destroyed')} value={String(view.cost.ownFormationsDestroyed)} detail={t('turnAftermath.detail.ownFormations')} compact />
                 <Metric label={t('turnAftermath.metric.supplySpent')} value={String(view.cost.ownSupplySpent + view.cost.ownHeavyMunitionsSpent)} detail={t('turnAftermath.detail.heavy', { count: view.cost.ownHeavyMunitionsSpent })} compact />
               </div>
-              <div className="border-t border-white/10 px-3 py-2 text-[10px] text-text-secondary">
+              <div className="border-t border-white/10 px-3 py-2 text-xs text-text-secondary">
                 {view.cost.reasons.slice(0, 3).join(' / ')}
               </div>
             </div>
@@ -377,55 +489,21 @@ export function TurnAftermathModal({
             <div className={`border px-3 py-3 ${memoryToneClasses(view.judgment.memoryTone)}`}>
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <div className="text-[10px] font-mono uppercase tracking-[0.18em] opacity-70">{t('turnAftermath.judgmentMemory')}</div>
+                  <div className="text-xs font-mono uppercase tracking-[0.18em] opacity-70">{t('turnAftermath.judgmentMemory')}</div>
                   <div className="mt-1 text-sm font-semibold">{view.judgment.headline}</div>
-                  <div className="mt-1 text-[11px] leading-5 opacity-80">{view.judgment.detail}</div>
+                  <div className="mt-1 text-xs leading-5 opacity-80">{view.judgment.detail}</div>
                 </div>
-                <span className="shrink-0 rounded border border-current/30 px-2 py-0.5 text-[9px] font-mono uppercase tracking-[0.14em] opacity-80">
+                <span className="shrink-0 rounded border border-current/30 px-2 py-0.5 text-xs font-mono uppercase tracking-[0.14em] opacity-80">
                   {enumLabel('turnAftermath.memoryTone', view.judgment.memoryTone)}
                 </span>
               </div>
               <div className="mt-3 grid grid-cols-2 gap-2">
-                <button type="button" onClick={onOpenChronicle} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
+                <button type="button" onClick={onOpenChronicle} className="rounded border border-current/25 px-2 py-1.5 text-xs font-mono uppercase tracking-[0.12em] hover:bg-white/10">
                   {t('turnAftermath.chronicle')}
                 </button>
-                <button type="button" onClick={() => onOpenCodex()} className="rounded border border-current/25 px-2 py-1.5 text-[9px] font-mono uppercase tracking-[0.12em] hover:bg-white/10">
+                <button type="button" onClick={() => onOpenCodex()} className="rounded border border-current/25 px-2 py-1.5 text-xs font-mono uppercase tracking-[0.12em] hover:bg-white/10">
                   {t('turnAftermath.codex')}
                 </button>
-              </div>
-            </div>
-
-            <div className="border border-white/10 bg-black/20">
-              <div className="border-b border-white/10 px-3 py-2 text-[10px] font-mono uppercase tracking-[0.18em] text-text-secondary">
-                {t('turnAftermath.commandDesk')}
-              </div>
-              <div className="grid grid-cols-2 gap-2 p-3 text-sm">
-                <Metric label={t('turnAftermath.metric.actionable')} value={String(view.nextActions.actionableCount)} detail={t('turnAftermath.detail.blocking', { count: view.nextActions.blockingCount })} compact />
-                <Metric label={t('turnAftermath.metric.opportunities')} value={String(view.nextActions.opportunityCount)} detail={t('turnAftermath.detail.armyHq')} compact />
-                <Metric label={t('turnAftermath.metric.reserves')} value={String(view.nextActions.reserveCount)} detail={t('turnAftermath.detail.requests')} compact />
-                <Metric label={t('turnAftermath.metric.officers')} value={String(view.nextActions.officerCount)} detail={t('turnAftermath.detail.personnel')} compact />
-              </div>
-              <div className="divide-y divide-white/10 border-t border-white/10">
-                {!hasTopActions ? (
-                  <div className="px-3 py-3 text-sm text-text-secondary">{t('turnAftermath.noDecisions')}</div>
-                ) : view.nextActions.topItems.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => triggerActionReview(item)}
-                    className={`block w-full px-3 py-2 text-left transition-colors hover:border-amber-400/45 hover:bg-amber-400/10 focus:outline-none focus:ring-1 focus:ring-amber-400/70 ${actionTone(item)}`}
-                  >
-                    <div className="flex min-w-0 items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold">{item.title}</div>
-                        <div className="text-[10px] font-mono uppercase tracking-[0.14em] opacity-75">{actionTypeLabel(item.type)}</div>
-                      </div>
-                      <span className="shrink-0 rounded border border-current/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.12em] opacity-90">
-                        {item.actionLabel}
-                      </span>
-                    </div>
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -437,10 +515,10 @@ export function TurnAftermathModal({
         </div>
 
         <div className="grid grid-cols-3 gap-2 border-t border-white/10 bg-black/30 px-5 py-4">
-          <button type="button" onClick={onOpenSummary} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
+          <button type="button" onClick={onOpenSummary} className="min-w-0 rounded border border-white/10 px-2 py-2 text-xs font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-xs sm:tracking-[0.18em]">
             {t('turnAftermath.warSummary')}
           </button>
-          <button type="button" onClick={onOpenRecords} className="min-w-0 rounded border border-white/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-[10px] sm:tracking-[0.18em]">
+          <button type="button" onClick={onOpenRecords} className="min-w-0 rounded border border-white/10 px-2 py-2 text-xs font-mono uppercase tracking-[0.12em] text-text-secondary hover:border-white/25 hover:text-text-primary sm:px-3 sm:text-xs sm:tracking-[0.18em]">
             {t('turnAftermath.turnRecords')}
           </button>
           {primaryAction ? (
@@ -451,22 +529,24 @@ export function TurnAftermathModal({
               aria-label={t('turnAftermath.primaryAction.aria', {
                 action: primaryAction.actionLabel,
                 title: primaryAction.title,
+                detail: primaryAction.detail ?? '',
               })}
               title={t('turnAftermath.primaryAction.aria', {
                 action: primaryAction.actionLabel,
                 title: primaryAction.title,
+                detail: primaryAction.detail ?? '',
               })}
               className="min-w-0 rounded border border-amber-400/50 bg-amber-400/15 px-2 py-2 text-left text-amber-200 hover:bg-amber-400/25 focus:outline-none focus:ring-1 focus:ring-amber-300 sm:px-4"
             >
-              <span className="block truncate text-[8px] font-mono uppercase tracking-[0.14em] text-amber-300/70 sm:text-[9px]">
-                {t('turnAftermath.primaryAction.label')}
+              <span className="block truncate text-xs font-mono uppercase tracking-[0.14em] text-amber-300/70 sm:text-xs">
+                {t(primaryActionLabelKey)}
               </span>
-              <span className="mt-0.5 block truncate text-[10px] font-mono uppercase tracking-[0.12em] sm:text-[11px]">
+              <span className="mt-0.5 block truncate text-xs font-mono uppercase tracking-[0.12em] sm:text-xs">
                 {primaryAction.actionLabel}
               </span>
             </button>
           ) : (
-            <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-[10px] sm:tracking-[0.18em]">
+            <button type="button" onClick={onOpenInbox} className="min-w-0 rounded border border-amber-400/35 bg-amber-400/10 px-2 py-2 text-xs font-mono uppercase tracking-[0.12em] text-amber-300 hover:bg-amber-400/20 sm:px-4 sm:text-xs sm:tracking-[0.18em]">
               {t('turnAftermath.reviewInbox')}
             </button>
           )}
@@ -489,9 +569,9 @@ function Metric({
 }) {
   return (
     <div className={`min-w-0 overflow-hidden border border-white/10 bg-white/[0.03] ${compact ? 'px-3 py-2' : 'px-3 py-3'}`}>
-      <div className="break-words text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary">{label}</div>
+      <div className="break-words text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">{label}</div>
       <div className="mt-1 text-lg font-bold tabular-nums text-text-primary">{value}</div>
-      <div className="break-words text-[10px] text-text-secondary">{detail}</div>
+      <div className="break-words text-xs text-text-secondary">{detail}</div>
     </div>
   );
 }

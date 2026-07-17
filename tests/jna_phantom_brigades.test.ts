@@ -264,6 +264,33 @@ describe('withdrawal processing', () => {
         const withdrawnIds = events.map((event) => event.phantom_id).sort();
         assert.deepEqual(withdrawnIds, expectedDue);
     });
+
+    it('retires the empty synthetic JNA command after its final phantom withdraws', () => {
+        const state = makeState(6);
+        spawnJnaPhantomBrigades(state);
+        keepOnlyPhantoms(state, ['jna_nevesinje_garrison', 'jna_foca_paramilitaries']);
+        state.military.formations!['jna_herzegovina_command'] = {
+            id: 'jna_herzegovina_command' as FormationId,
+            faction: 'RS',
+            name: 'JNA Herzegovina Command',
+            created_turn: 0,
+            status: 'active',
+            assignment: null,
+            kind: 'corps_asset',
+            personnel: 0,
+            readiness: 'active',
+        };
+
+        processJnaWithdrawals(state);
+        assert.equal(state.military.formations!['jna_herzegovina_command']!.status, 'active');
+
+        state.meta.turn = 8;
+        processJnaWithdrawals(state);
+        const command = state.military.formations!['jna_herzegovina_command']!;
+        assert.equal(command.status, 'inactive');
+        assert.equal(command.lifecycle_status, 'withdrawn');
+        assert.equal(command.readiness, 'degraded');
+    });
 });
 
 describe('equipment handoff', () => {

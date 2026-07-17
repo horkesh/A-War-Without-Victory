@@ -249,6 +249,65 @@ describe('catastrophic outcome stall (#39)', () => {
         expect(axis.failure_count).toBe(1);
     });
 
+    it('credits a resolved objective battle after post-battle effects force the attacker to defend', () => {
+        const b1 = makeBrigade('b1', 'op:front:approach', {
+            posture: 'defend',
+            lastOutcome: 'catastrophic',
+            lastOsid: 'op:target:obj',
+        });
+        const state = makeState({
+            brigades: { b1 },
+            axes: [{
+                axis_id: 'a1', name: 'Main', assigned_brigades: ['b1'],
+                objectives: ['op:target:obj'], current_objective_index: 0,
+                status: 'executing', failure_count: 0,
+                consecutive_failures_on_current: 0, momentum: 0,
+                battles_this_turn: 1,
+                objective_battles_this_turn: 1,
+                attack_attempt_count: 0, objective_capture_count: 0,
+                movement_only_execution_turns: 0, idle_execution_turn_streak: 0,
+            }],
+        });
+
+        updateSectorOffensiveResults(state);
+
+        const op = (state.military.corps_command as any).arbih_corps.active_operations[0];
+        const axis = op.axes[0];
+        expect(axis.attack_attempt_count).toBe(1);
+        expect(op.attack_attempt_count).toBe(1);
+        expect(axis.failure_count).toBe(1);
+        expect(axis.consecutive_catastrophic_on_current).toBe(1);
+    });
+
+    it('credits the same post-battle posture reset for legacy flat operations', () => {
+        const b1 = makeBrigade('b1', 'op:front:approach', {
+            posture: 'defend',
+            lastOutcome: 'catastrophic',
+            lastOsid: 'op:target:obj',
+        });
+        const state = makeState({
+            brigades: { b1 },
+            axes: [],
+        });
+        const op = (state.military.corps_command as any).arbih_corps.active_operations[0];
+        op.objectives = ['op:target:obj'];
+        op.current_objective_index = 0;
+        op.failure_count = 0;
+        op.consecutive_failures_on_current = 0;
+        op.momentum = 0;
+        op.battles_this_turn = 1;
+        op.objective_battles_this_turn = 1;
+        op.attack_attempt_count = 0;
+        op.objective_capture_count = 0;
+        op.movement_only_execution_turns = 0;
+        op.idle_execution_turn_streak = 0;
+
+        updateSectorOffensiveResults(state);
+
+        expect(op.attack_attempt_count).toBe(1);
+        expect(op.failure_count).toBe(1);
+    });
+
     it('second consecutive catastrophic on same objective STALLS the axis', () => {
         const b1 = makeBrigade('b1', 'op:front:approach', {
             posture: 'attack',

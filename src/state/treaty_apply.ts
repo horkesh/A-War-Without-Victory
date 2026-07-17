@@ -17,6 +17,7 @@ import type { GameState, NegotiationLedgerEntry, PoliticalSideId, SupplyCorridor
 import type { TreatyDraft } from './treaty.js';
 import type { TreatyAcceptanceReport } from './treaty_acceptance.js';
 import { isClauseDeprecated } from './treaty_clause_library.js';
+import { strictCompare } from './validateGameState.js';
 
 export interface TreatyApplyReport {
     schema: 1 | 2 | 3;
@@ -841,8 +842,8 @@ export function applyTreatyTerritorialAnnex(
     }
 
     // Sort results deterministically
-    appliedTransfers.sort((a, b) => a.sid.localeCompare(b.sid));
-    appliedRecognitions.sort((a, b) => a.sid.localeCompare(b.sid));
+    appliedTransfers.sort((a, b) => strictCompare(a.sid, b.sid));
+    appliedRecognitions.sort((a, b) => strictCompare(a.sid, b.sid));
     failures.sort();
     const uniqueFailures = Array.from(new Set(failures));
 
@@ -1185,10 +1186,10 @@ export function applyTreatyCorridorRights(
     }
 
     // Ensure corridors are sorted by id (deterministic ordering)
-    state.political.supply_rights.corridors.sort((a, b) => a.id.localeCompare(b.id));
+    state.political.supply_rights.corridors.sort((a, b) => strictCompare(a.id, b.id));
 
     // Sort results deterministically
-    appliedCorridors.sort((a, b) => a.id.localeCompare(b.id));
+    appliedCorridors.sort((a, b) => strictCompare(a.id, b.id));
 
     return {
         state,
@@ -1420,7 +1421,7 @@ function collectCompetenceAllocations(
     }
 
     // Sort allocations by competence ID for deterministic ordering
-    allocations.sort((a, b) => a.competence.localeCompare(b.competence));
+    allocations.sort((a, b) => strictCompare(a.competence, b.competence));
     failures.sort();
 
     return {

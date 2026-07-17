@@ -398,7 +398,7 @@ export function OpsPlanningModal() {
                                     ? 'bg-accent-gold/40 group-hover:bg-accent-gold/70'
                                     : 'bg-[rgba(180,160,130,0.15)]'
                         }`} />
-                        <span className={`text-[9px] font-bold uppercase tracking-[0.15em] transition-colors ${
+                        <span className={`text-xs font-bold uppercase tracking-[0.15em] transition-colors ${
                             i === currentIdx ? 'text-accent-gold' : i <= highestPhase ? 'text-text-secondary' : 'text-text-secondary/30'
                         }`}>
                             {phaseLabel}
@@ -416,7 +416,7 @@ export function OpsPlanningModal() {
                 <div
                     role="status"
                     className="absolute top-16 left-1/2 -translate-x-1/2 z-30 rounded-md border border-accent-gold/25
-                               bg-[rgba(20,18,15,0.92)] px-3 py-2 text-[11px] font-semibold text-accent-gold shadow-lg"
+                               bg-[rgba(20,18,15,0.92)] px-3 py-2 text-xs font-semibold text-accent-gold shadow-lg"
                 >
                     {phaseGateMessage}
                 </div>
@@ -432,11 +432,11 @@ export function OpsPlanningModal() {
                 >
                     <div
                         id="ops-planning-discard-title"
-                        className="text-[11px] font-bold uppercase tracking-[0.18em] text-red-300"
+                        className="text-xs font-bold uppercase tracking-[0.18em] text-red-300"
                     >
                         {t('opsPlanning.discard.title')}
                     </div>
-                    <p className="mt-2 text-[11px] leading-relaxed text-text-secondary">
+                    <p className="mt-2 text-xs leading-relaxed text-text-secondary">
                         {t('opsPlanning.discard.body')}
                     </p>
                     <div className="mt-4 flex justify-end gap-2">
@@ -444,7 +444,7 @@ export function OpsPlanningModal() {
                             type="button"
                             onClick={() => setDiscardConfirmOpen(false)}
                             className="rounded border border-[rgba(180,160,130,0.2)] px-3 py-1.5
-                                       text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary
+                                       text-xs font-bold uppercase tracking-[0.14em] text-text-secondary
                                        hover:border-accent-gold/35 hover:text-white"
                         >
                             {t('opsPlanning.discard.keepPlanning')}
@@ -453,7 +453,7 @@ export function OpsPlanningModal() {
                             type="button"
                             onClick={confirmDiscardOpsPlanning}
                             className="rounded border border-red-400/35 bg-red-500/15 px-3 py-1.5
-                                       text-[10px] font-bold uppercase tracking-[0.14em] text-red-200
+                                       text-xs font-bold uppercase tracking-[0.14em] text-red-200
                                        hover:bg-red-500/25"
                         >
                             {t('opsPlanning.discard.discardDraft')}

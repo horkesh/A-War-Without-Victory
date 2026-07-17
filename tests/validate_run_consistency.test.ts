@@ -574,6 +574,113 @@ describe('validate_run_consistency assignment completeness', () => {
         });
     });
 
+    it.each([
+        {
+            label: 'in transit',
+            movement: {
+                brigade_movement_state: {
+                    reserve_en_route: {
+                        status: 'in_transit',
+                        path: ['op:test:reserve', 'op:test:front_b'],
+                        turns_remaining: 1,
+                    },
+                },
+            },
+        },
+        {
+            label: 'under a pending movement order',
+            movement: {
+                brigade_movement_orders: {
+                    reserve_en_route: {
+                        destination_osid: 'op:test:front_b',
+                        stance: 'column',
+                    },
+                },
+            },
+        },
+    ])('does not count an own-sector reserve $label as an available floor-completion donor', ({ movement }) => {
+        const state = {
+            meta: { turn: 52 },
+            __contact_graph_edges: [
+                { a: 'op:test:reserve', b: 'op:test:front_a' },
+                { a: 'op:test:front_a', b: 'op:test:front_b' },
+                { a: 'op:test:front_a', b: 'op:test:enemy_a' },
+                { a: 'op:test:front_b', b: 'op:test:enemy_b' },
+            ],
+            political: {
+                political_controllers: {
+                    'op:test:reserve': 'RS',
+                    'op:test:front_a': 'RS',
+                    'op:test:front_b': 'RS',
+                    'op:test:enemy_a': 'RBiH',
+                    'op:test:enemy_b': 'RBiH',
+                },
+            },
+            military: {
+                ...movement,
+                formations: {
+                    recipient_front: makeBrigade('recipient_front', {
+                        location_osid: 'op:test:front_a',
+                        assignment: { kind: 'sector', sector_id: 'sector:vrs_drina:1', role: 'front' },
+                    }),
+                    reserve_en_route: makeBrigade('reserve_en_route', {
+                        location_osid: 'op:test:reserve',
+                        assignment: { kind: 'sector', sector_id: 'sector:vrs_drina:1', role: 'reserve' },
+                    }),
+                },
+                corps_command: {},
+                unresolved_sector_brigades: [],
+                war_front_edges_osid: [
+                    { edge_id: 'op:test:front_a__op:test:enemy_a', a: 'op:test:front_a', b: 'op:test:enemy_a', side_a: 'RS', side_b: 'RBiH' },
+                    { edge_id: 'op:test:front_b__op:test:enemy_b', a: 'op:test:front_b', b: 'op:test:enemy_b', side_a: 'RS', side_b: 'RBiH' },
+                ],
+                corps_front_sectors: {
+                    'sector:vrs_drina:1': {
+                        sector_id: 'sector:vrs_drina:1',
+                        corps_id: 'vrs_drina',
+                        faction: 'RS',
+                        length_edges: 16,
+                        threat_ratio: 20,
+                        edge_ids: [
+                            'op:test:front_a__op:test:enemy_a',
+                            'op:test:front_b__op:test:enemy_b',
+                        ],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:vrs_drina:1:0',
+                            edge_ids: [
+                                'op:test:front_a__op:test:enemy_a',
+                                'op:test:front_b__op:test:enemy_b',
+                            ],
+                            friendly_osids: ['op:test:front_a', 'op:test:front_b'],
+                            enemy_osids: ['op:test:enemy_a', 'op:test:enemy_b'],
+                            length_edges: 16,
+                            primary_brigade_ids: ['recipient_front'],
+                        }],
+                        territory_osids: ['op:test:reserve', 'op:test:front_a', 'op:test:front_b'],
+                        assigned_brigade_ids: ['recipient_front'],
+                        reserve_brigade_ids: ['reserve_en_route'],
+                        rear_brigade_ids: [],
+                    },
+                },
+                sector_intel: {
+                    'sector:vrs_drina:1': [{ offensive_signs: true }],
+                },
+            },
+        };
+
+        expect(collectSectorFloorShortfallIssues(state)).toEqual({
+            missed_reinforcement: [],
+            unavoidable_shortfall: [
+                expect.objectContaining({
+                    sector: 'sector:vrs_drina:1',
+                    assigned: 1,
+                    needed: 2,
+                    donor_candidates: [],
+                }),
+            ],
+        });
+    });
+
     it('classifies below-floor sectors with no legal donor as unavoidable shortfall instead of missed reinforcement', () => {
         const state = {
             meta: { turn: 40 },
@@ -1031,7 +1138,7 @@ describe('validate_run_consistency assignment completeness', () => {
         expect(result.lines.some((line) => line.includes('partially covered sector'))).toBe(true);
     });
 
-    it('does not accuse canonical unstaffed-front packets as empty contested sectors', () => {
+    it('does not duplicate canonical unstaffed-front packets as empty sectors or wide gaps', () => {
         const state = {
             meta: { turn: 40 },
             military: {
@@ -1041,8 +1148,8 @@ describe('validate_run_consistency assignment completeness', () => {
                         sector_id: 'sector:hvo_central_bosnia:2',
                         corps_id: 'hvo_central_bosnia',
                         faction: 'HRHB',
-                        length_edges: 1,
-                        edge_ids: ['e1'],
+                        length_edges: 3,
+                        edge_ids: ['e1', 'e2', 'e3'],
                         unstaffed_front: true,
                         assigned_brigade_ids: [],
                         reserve_brigade_ids: [],
@@ -1050,11 +1157,11 @@ describe('validate_run_consistency assignment completeness', () => {
                         territory_osids: ['op:test:front'],
                         sub_segments: [{
                             sub_segment_id: 'subseg:sector:hvo_central_bosnia:2:0',
-                            edge_ids: ['e1'],
+                            edge_ids: ['e1', 'e2', 'e3'],
                             friendly_osids: ['op:test:front'],
                             enemy_osids: ['op:test:enemy'],
                             primary_brigade_ids: [],
-                            length_edges: 1,
+                            length_edges: 3,
                             gap: true,
                         }],
                     },
@@ -1066,6 +1173,78 @@ describe('validate_run_consistency assignment completeness', () => {
         expect(collectEmptyContestedSectorIssues(state)).toEqual({
             missed_reinforcement: [],
             unavoidable_empty: [],
+        });
+        expect(collectUndefendedFrontSubsegmentIssues(state)).toEqual({
+            missed_reinforcement: [],
+            unavoidable_gap: [],
+            stale_gap: [],
+        });
+    });
+
+    it('counts a rear brigade as sector ownership and faction-side coverage', () => {
+        const state = {
+            meta: { turn: 40 },
+            political: {
+                political_controllers: {
+                    'op:test:friendly': 'RBiH',
+                    'op:test:rear': 'RBiH',
+                    'op:test:enemy': 'RS',
+                },
+            },
+            military: {
+                formations: {
+                    rbih_rear: makeBrigade('rbih_rear', {
+                        faction: 'RBiH',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:test:rear',
+                        assignment: { kind: 'sector', sector_id: 'sector:arbih_1st_corps:0', role: 'rear' },
+                    }),
+                    rs_attacker: makeBrigade('rs_attacker', {
+                        faction: 'RS',
+                        corps_id: 'vrs_drina',
+                        location_osid: 'op:test:enemy',
+                    }),
+                },
+                war_front_edges_osid: [{
+                    edge_id: 'op:test:enemy__op:test:friendly',
+                    a: 'op:test:enemy',
+                    b: 'op:test:friendly',
+                    side_a: 'RS',
+                    side_b: 'RBiH',
+                }],
+                corps_front_sectors: {
+                    'sector:arbih_1st_corps:0': {
+                        sector_id: 'sector:arbih_1st_corps:0',
+                        corps_id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        length_edges: 1,
+                        edge_ids: ['op:test:enemy__op:test:friendly'],
+                        assigned_brigade_ids: [],
+                        reserve_brigade_ids: [],
+                        rear_brigade_ids: ['rbih_rear'],
+                        territory_osids: ['op:test:friendly', 'op:test:rear'],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:arbih_1st_corps:0:0',
+                            edge_ids: ['op:test:enemy__op:test:friendly'],
+                            friendly_osids: ['op:test:friendly'],
+                            enemy_osids: ['op:test:enemy'],
+                            primary_brigade_ids: [],
+                            length_edges: 1,
+                        }],
+                    },
+                },
+                unresolved_sector_brigades: [],
+            },
+        };
+
+        expect(collectEmptyContestedSectorIssues(state)).toEqual({
+            missed_reinforcement: [],
+            unavoidable_empty: [],
+        });
+        expect(collectAdjacentUncontestedTerritoryIssues(state)).toEqual({
+            missed_defender: [],
+            unavoidable_exposure: [],
+            unowned_front: [],
         });
     });
 

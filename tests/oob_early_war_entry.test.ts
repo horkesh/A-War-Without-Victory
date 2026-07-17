@@ -187,7 +187,10 @@ test('createOobFormations tags brigades with explicit home_osid as fixed placeme
     militia_pools: {}
   } as any,
   political: {
-    political_controllers: { s_rs: 'RS' },
+    political_controllers: {
+      s_rs: 'RS',
+      'op:prijedor:prijedor_2': 'RS'
+    },
     municipalities: { prijedor: { control: 'consolidated' } }
   } as any,
         displacement: {} as any
@@ -208,4 +211,46 @@ test('createOobFormations tags brigades with explicit home_osid as fixed placeme
     createOobFormations(state, [], brigades, hq, sidToMun);
     expect(state.military.formations?.vrs_fixed?.tags?.includes('placement:fixed_home_osid')).toEqual(true);
     expect(state.military.formations?.vrs_fixed?.location_osid).toBe('op:prijedor:prijedor_2');
+});
+
+test('createOobFormations honors a controlled deployment_osid outside the home municipality', () => {
+    const state: GameState = {
+        schema_version: CURRENT_SCHEMA_VERSION,
+        meta: { turn: 1, seed: 's' },
+        factions: [],
+        military: {
+            formations: {},
+            front_segments: {},
+            front_posture: {},
+            front_posture_regions: {},
+            front_pressure: {},
+            militia_pools: {},
+        } as any,
+        political: {
+            political_controllers: {
+                'op:kakanj:home': 'RBiH',
+                'op:kalesija:deployment': 'RBiH',
+            },
+            municipalities: { kakanj: { control: 'consolidated' } },
+        } as any,
+        displacement: {} as any,
+    };
+    const sidToMun = new Map([['op:kakanj:home', 'kakanj']]);
+    const brigades: OobBrigade[] = [
+        makeBrigade({
+            id: 'arbih_deployed',
+            faction: 'RBiH',
+            name: 'Deployed Brigade',
+            home_mun: 'kakanj',
+            kind: 'brigade',
+            home_osid: 'op:kakanj:home',
+            deployment_osid: 'op:kalesija:deployment',
+        }),
+    ];
+
+    createOobFormations(state, [], brigades, { kakanj: 'op:kakanj:home' }, sidToMun);
+
+    expect(state.military.formations?.arbih_deployed?.location_osid).toBe('op:kalesija:deployment');
+    expect(state.military.formations?.arbih_deployed?.home_osid).toBe('op:kakanj:home');
+    expect(state.military.formations?.arbih_deployed?.tags?.includes('placement:fixed_home_osid')).toBe(false);
 });

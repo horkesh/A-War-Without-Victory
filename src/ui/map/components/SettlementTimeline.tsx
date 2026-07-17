@@ -38,7 +38,7 @@ interface Props {
 export function SettlementTimeline({ events }: Props) {
     if (events.length === 0) {
         return (
-            <div className="py-4 text-center text-text-secondary text-[11px] italic">
+            <div className="py-4 text-center text-text-secondary text-xs italic">
                 {t('settlementTimeline.empty')}
             </div>
         );
@@ -65,7 +65,7 @@ export function SettlementTimeline({ events }: Props) {
                     {/* Turn marker */}
                     <div className="flex items-center gap-2 mb-1">
                         <div className="w-[9px] h-[9px] rounded-full bg-panel-border/60 border border-panel-border relative z-10 -ml-[0.5px]" />
-                        <span className="text-[9px] font-mono text-text-secondary tracking-wider">
+                        <span className="text-xs font-mono text-text-secondary tracking-wider">
                             {formatSettlementTimelineTurnDate(group.turn)}
                         </span>
                     </div>
@@ -80,20 +80,20 @@ export function SettlementTimeline({ events }: Props) {
                                     className={`border-l-2 ${style.bg} pl-2 py-0.5`}
                                 >
                                     <div className="flex items-start gap-1.5">
-                                        <span className={`${style.color} text-[11px] leading-none mt-0.5 flex-shrink-0`}>
+                                        <span className={`${style.color} text-xs leading-none mt-0.5 flex-shrink-0`}>
                                             {style.icon}
                                         </span>
                                         <div className="min-w-0">
-                                            <div className={`text-[10px] font-medium ${style.color}`}>
+                                            <div className={`text-xs font-medium ${style.color}`}>
                                                 {event.title}
                                             </div>
                                             {event.detail && (
-                                                <div className="text-[9px] text-text-secondary">
+                                                <div className="text-xs text-text-secondary">
                                                     {event.detail}
                                                 </div>
                                             )}
                                             {event.casualties && (
-                                                <div className="text-[9px] text-text-secondary font-mono">
+                                                <div className="text-xs text-text-secondary font-mono">
                                                     {t('settlementTimeline.casualties', {
                                                         attacker: formatCasualtyCount(event.casualties.attacker),
                                                         defender: formatCasualtyCount(event.casualties.defender),

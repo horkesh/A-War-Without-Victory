@@ -64,37 +64,37 @@ export function ObjectiveList({
                         bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg
                         border border-[rgba(180,160,130,0.15)] p-3 flex flex-col">
             <div className="flex items-center justify-between mb-2">
-                <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
                     {t('opsPlanning.phase.objectives')}
                 </div>
-                <div className="text-[8px] uppercase tracking-[0.16em] text-text-secondary/70">
+                <div className="text-xs uppercase tracking-[0.16em] text-text-secondary/70">
                     {t('opsPlanning.phase.planning')}
                 </div>
             </div>
 
             <div className="grid grid-cols-4 gap-2 mb-3">
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
-                    <div className="text-[10px] font-bold text-white truncate">{activeAxis.name}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
+                    <div className="text-xs font-bold text-white truncate">{activeAxis.name}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
-                    <div className="text-[10px] font-bold text-white">{selectedAxisObjectiveCount}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
+                    <div className="text-xs font-bold text-white">{selectedAxisObjectiveCount}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
-                    <div className="text-[10px] font-bold text-white">{selectedAxisBrigadeCount}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
+                    <div className="text-xs font-bold text-white">{selectedAxisBrigadeCount}</div>
                 </div>
                 <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.available')}</div>
-                    <div className={`text-[10px] font-bold ${availableObjectiveCount > 0 ? 'text-accent-gold' : 'text-red-300'}`}>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.available')}</div>
+                    <div className={`text-xs font-bold ${availableObjectiveCount > 0 ? 'text-accent-gold' : 'text-red-300'}`}>
                         {availableObjectiveCount}
                     </div>
                 </div>
             </div>
 
             {objectives.length === 0 ? (
-                <div className="text-[10px] text-text-secondary/50 italic py-4 text-center">
+                <div className="text-xs text-text-secondary/50 italic py-4 text-center">
                     {t('opsPlanning.phase.emptyObjectives')}
                 </div>
             ) : (
@@ -104,11 +104,11 @@ export function ObjectiveList({
                         const displayName = getOsidDisplayName(osid, osidDisplayNames);
                         return (
                             <div key={osid} className="flex items-center gap-1.5 group">
-                                <span className="text-[10px] font-bold text-text-secondary w-4 text-right">
+                                <span className="text-xs font-bold text-text-secondary w-4 text-right">
                                     {idx + 1}.
                                 </span>
 
-                                <span className="text-[10px] text-white flex-1 truncate" title={displayName}>
+                                <span className="text-xs text-white flex-1 truncate" title={displayName}>
                                     {displayName}
                                 </span>
 
@@ -127,7 +127,7 @@ export function ObjectiveList({
                                     type="button"
                                     onClick={() => moveObjective(idx, -1)}
                                     disabled={idx === 0}
-                                    className="text-[9px] text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
+                                    className="text-xs text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
                                 >
                                     ↑
                                 </button>
@@ -135,7 +135,7 @@ export function ObjectiveList({
                                     type="button"
                                     onClick={() => moveObjective(idx, 1)}
                                     disabled={idx === objectives.length - 1}
-                                    className="text-[9px] text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
+                                    className="text-xs text-text-secondary/40 hover:text-white disabled:opacity-20 transition-colors"
                                 >
                                     ↓
                                 </button>
@@ -143,7 +143,7 @@ export function ObjectiveList({
                                 <button
                                     type="button"
                                     onClick={() => removeObjective(osid)}
-                                    className="text-[9px] text-text-secondary/40 hover:text-red-400 transition-colors"
+                                    className="text-xs text-text-secondary/40 hover:text-red-400 transition-colors"
                                 >
                                     ×
                                 </button>
@@ -154,8 +154,8 @@ export function ObjectiveList({
             )}
 
             <div className="mt-2 rounded border border-[rgba(180,160,130,0.12)] bg-[rgba(180,160,130,0.05)] px-2 py-1.5">
-                <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.stagingArea')}</div>
-                <div className="text-[10px] text-white truncate">
+                <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.stagingArea')}</div>
+                <div className="text-xs text-white truncate">
                     {selectedStaging ? getOsidDisplayName(selectedStaging, osidDisplayNames) : t('opsPlanning.phase.notSet')}
                 </div>
             </div>
@@ -167,7 +167,7 @@ export function ObjectiveList({
                             key={axis.id}
                             type="button"
                             onClick={() => onUpdate({ activeAxisId: axis.id })}
-                            className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider transition-colors
+                            className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-colors
                                 ${axis.id === plan.activeAxisId
                                     ? 'bg-accent-gold/20 text-accent-gold'
                                     : 'text-text-secondary/50 hover:text-text-secondary'
@@ -184,7 +184,7 @@ export function ObjectiveList({
                     type="button"
                     onClick={onAdvance}
                     disabled={!canAdvanceToG2}
-                    className="mt-3 w-full py-2 rounded-md text-[10px] font-bold uppercase tracking-wider
+                    className="mt-3 w-full py-2 rounded-md text-xs font-bold uppercase tracking-wider
                                bg-accent-gold/15 text-accent-gold border border-accent-gold/25
                                hover:bg-accent-gold/25 transition-all disabled:cursor-not-allowed disabled:opacity-30"
                 >

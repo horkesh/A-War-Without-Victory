@@ -124,7 +124,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 - **Not pool-sourced:** Spawned directly by graph analysis when rear enemy pockets detected, not from militia pools
 - **Not reinforceable:** `isEligibleForReinforcement()` returns false
 - **Not bot-AI-controlled:** No `corps_id`; bot corps/brigade AI skips them
-- **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded`)
+- **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded` + `degraded`, personnel zero); formations found after the final active week dissolve before acting
 - **Low combat value:** Cohesion 20 (vs brigade 45-72); cannot hold positions or provide garrison defense
 - **Faction-differentiated:** RS 0.85, HRHB 0.55, RBiH 0.30 spawn probability (organizational penetration)
 
@@ -143,6 +143,8 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_TARGET_AVG_POPULATION | 5000 | Avg civilian pop at target OSID |
 
 **Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments.
+
+**Truth writes:** Captures emit `control_events` with `mechanism: 'paramilitary'`. Civilian killings update the faction casualty ledger, displacement event log/aggregates, and target municipality `displacement_state.lost_population` in the same resolution.
 
 **Code:** `src/sim/combat/paramilitary_sweep.ts`. Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`.
 

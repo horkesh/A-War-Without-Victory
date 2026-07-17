@@ -4,7 +4,7 @@
  * Tier 1 of the two-tier officer system. Named officers (corps and above)
  * provide per-corps combat modifiers and are managed through succession rules.
  *
- * Deterministic: officerHash for casualty checks, sorted iteration, no randomness.
+ * Deterministic: state-derived casualty exposure, ranked candidates, and stable ordering.
  */
 
 import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
@@ -15,6 +15,11 @@ import type {
     FactionOfficerConfig,
 } from '../../state/officer_types.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import {
+    processArmyCommanderLifecycle,
+    type ArmyCommanderLifecycleChange,
+} from './army_co_lifecycle.js';
+import { CANONICAL_ARMY_CO_ROSTER } from './army_co_roster_data.js';
 import { getBrigadeOfficerMod } from './combat_math.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -38,6 +43,7 @@ const COMPATIBLE_PENALTY_TURNS = 8;
 const HVO_POLITICAL_REPLACEMENT_DELAY = 4;
 /** C.3: HVO combat death replacement delay (turns). */
 const HVO_COMBAT_DEATH_REPLACEMENT_DELAY = 1;
+const OFFICER_CASUALTY_EXPOSURE_RATE = 0.1;
 
 /** Pool tier succession priority ordering. */
 const TIER_PRIORITY: Record<OfficerPoolTier, number> = {
@@ -77,30 +83,50 @@ function findHistoricalSuccessor(
         .sort((a, b) => {
             const tierDiff = (TIER_PRIORITY[a.pool_tier] ?? 99) - (TIER_PRIORITY[b.pool_tier] ?? 99);
             if (tierDiff !== 0) return tierDiff;
-            return a.id.localeCompare(b.id);
+            return strictCompare(a.id, b.id);
         });
 
     return candidates[0] ?? null;
 }
 
+export function officerReplacementMatterKey(
+    outgoingOfficerId: string,
+    corpsId: string,
+    proposedSuccessorId: string,
+): string {
+    return `replacement:${outgoingOfficerId}:${corpsId}:${proposedSuccessorId}`;
+}
+
+function replacementMatterMatches(
+    value: {
+        type?: string;
+        event_type?: string;
+        officer_id?: string;
+        current_commander_id?: string;
+        outgoing_officer_id?: string;
+        new_officer_id?: string;
+        corps_id?: string;
+        matter_key?: string;
+    },
+    matterKey: string,
+    outgoingOfficerId: string,
+    corpsId: string,
+    proposedSuccessorId: string,
+): boolean {
+    if (value.matter_key === matterKey) return true;
+    if ((value.type ?? value.event_type) !== 'replacement_suggested') return false;
+    return (value.outgoing_officer_id ?? value.current_commander_id) === outgoingOfficerId
+        && value.corps_id === corpsId
+        && (value.new_officer_id ?? value.officer_id) === proposedSuccessorId;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
-// Deterministic hash for casualty checks
+// Deterministic casualty exposure eligibility
 // ═══════════════════════════════════════════════════════════════════════════
 
 /**
- * Deterministic hash for officer casualty vulnerability checks.
- * Produces a stable [0,1) value from (turn, officerId).
- * NOT random — same inputs always produce same output.
+ * Casualty eligibility is resolved below from explicit officer state.
  */
-export function officerHash(turn: number, officerId: string): number {
-    let hash = 5381;
-    const combined = `${turn}:${officerId}`;
-    for (let i = 0; i < combined.length; i++) {
-        hash = ((hash << 5) + hash + combined.charCodeAt(i)) | 0;
-    }
-    return Math.abs(hash % 10000) / 10000;
-}
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Officer lookups
 // ═══════════════════════════════════════════════════════════════════════════
@@ -531,6 +557,7 @@ export interface OfficerSuccessionReport {
     departures: string[];
     casualties: string[];
     replacements: Array<{ corps_id: string; old_officer: string; new_officer: string }>;
+    army_replacements: ArmyCommanderLifecycleChange[];
     new_arrivals: string[];
     generic_replacements: number;
 }
@@ -553,6 +580,7 @@ export function processOfficerSuccession(
         departures: [],
         casualties: [],
         replacements: [],
+        army_replacements: [],
         new_arrivals: [],
         generic_replacements: 0,
     };
@@ -572,6 +600,10 @@ export function processOfficerSuccession(
 
     // 1. Historical departures
     for (const data of officerData) {
+        // Army-command transitions are roster-owned. This prevents an officer
+        // with no authored tenure end (notably Mladic) from receiving an
+        // invented calendar succession and preserves the player-choice path.
+        if (data.rank === 'army_commander') continue;
         const os = officers[data.id];
         if (!os || os.status !== 'active' && os.status !== 'reserve') continue;
         if (data.available_until_turn !== undefined && turn >= data.available_until_turn) {
@@ -580,17 +612,31 @@ export function processOfficerSuccession(
                 // Find the suggested replacement (next officer for this corps by tier)
                 const suggestedReplacement = findHistoricalSuccessor(data, officerData, officers, turn);
                 if (suggestedReplacement) {
-                    const eventId = `replacement_${data.id}_t${turn}`;
-                    const alreadyPending = pendingEvents.some(e => e.event_id === eventId);
-                    if (!alreadyPending) {
+                    const corpsId = os.assigned_corps_id;
+                    const matterKey = officerReplacementMatterKey(data.id, corpsId, suggestedReplacement.id);
+                    const alreadyPending = pendingEvents.some(event => replacementMatterMatches(
+                        event,
+                        matterKey,
+                        data.id,
+                        corpsId,
+                        suggestedReplacement.id,
+                    ));
+                    const alreadyResolved = (state.military.officer_decision_history ?? []).some(record => replacementMatterMatches(
+                        record as typeof record & { matter_key?: string },
+                        matterKey,
+                        data.id,
+                        corpsId,
+                        suggestedReplacement.id,
+                    ));
+                    if (!alreadyPending && !alreadyResolved) {
                         pendingEvents.push({
-                            event_id: eventId,
+                            event_id: matterKey,
                             type: 'replacement_suggested',
                             faction: data.faction,
                             turn,
                             officer_id: suggestedReplacement.id,
                             current_commander_id: data.id,
-                            corps_id: os.assigned_corps_id,
+                            corps_id: corpsId,
                             acknowledged: false,
                         });
                     }
@@ -645,8 +691,10 @@ export function processOfficerSuccession(
         }
     }
 
-    // 3. Casualty checks for corps that fought
+    // 3. Rank casualty-eligible officers in corps that fought. Exposure is
+    // cumulative command tenure weighted by authored vulnerability.
     const officerIds = Object.keys(officers).sort(strictCompare);
+    const casualtyCandidates: Array<{ id: string; corpsId: string; exposure: number }> = [];
     for (const id of officerIds) {
         const os = officers[id]!;
         if (os.status !== 'active') continue;
@@ -655,14 +703,39 @@ export function processOfficerSuccession(
         const data = officerData.find(o => o.id === id);
         if (!data) continue;
 
-        const hash = officerHash(turn, id);
-        if (hash < data.casualty_vulnerability * 0.1) {
-            // Officer killed/captured
-            os.status = 'killed';
-            os.assigned_corps_id = null;
-            report.casualties.push(id);
-        }
+        const exposure = data.casualty_vulnerability
+            * OFFICER_CASUALTY_EXPOSURE_RATE
+            * Math.max(1, os.turns_in_command);
+        if (exposure < 1) continue;
+        casualtyCandidates.push({ id, corpsId: os.assigned_corps_id, exposure });
     }
+    casualtyCandidates.sort((a, b) => {
+        if (a.corpsId !== b.corpsId) return strictCompare(a.corpsId, b.corpsId);
+        if (b.exposure !== a.exposure) return b.exposure - a.exposure;
+        return strictCompare(a.id, b.id);
+    });
+    const affectedCorpsIds = new Set<string>();
+    for (const candidate of casualtyCandidates) {
+        if (affectedCorpsIds.has(candidate.corpsId)) continue;
+        affectedCorpsIds.add(candidate.corpsId);
+        const officerState = officers[candidate.id]!;
+        officerState.status = 'killed';
+        officerState.assigned_corps_id = null;
+        report.casualties.push(candidate.id);
+    }
+
+    // Army commanders are not corps-assigned, so their combat exposure and
+    // succession require a faction-level lifecycle owner. Run it before corps
+    // vacancies are filled so a promoted corps officer vacates their old post
+    // in time for the same deterministic replacement pass below.
+    const armyLifecycle = processArmyCommanderLifecycle(
+        state,
+        engagedCorpsIds,
+        CANONICAL_ARMY_CO_ROSTER,
+    );
+    report.army_replacements.push(...armyLifecycle.replacements);
+    report.casualties.push(...armyLifecycle.casualties);
+    report.departures.push(...armyLifecycle.departures);
 
     // 4. Advance turns_in_command and reduce penalties
     for (const id of officerIds) {

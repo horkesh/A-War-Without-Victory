@@ -107,7 +107,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 
     return (
         <div data-tutorial-step="cost-ledger" className="p-6 space-y-4 border-t border-panel-border">
-            <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
+            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold">
                 {t('warCost.title')}
             </div>
 
@@ -138,7 +138,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {/* Operation opportunity reckoning */}
             {opportunityLedger && opportunityLedger.total_decisions > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
                         {t('warCost.opportunityDecisions')}
                     </div>
                     <div className="grid grid-cols-3 gap-2 mb-3">
@@ -159,13 +159,13 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
                         {opportunityLedger.entries.map((entry) => (
                             <div
                                 key={entry.proposal_id}
-                                className="flex items-center justify-between gap-3 text-[10px] text-text-secondary"
+                                className="flex items-center justify-between gap-3 text-xs text-text-secondary"
                             >
                                 <div className="min-w-0">
                                     <span className="text-text-primary font-medium">
                                         {entry.display_name}
                                     </span>
-                                    <span className="ml-2 uppercase text-[8px] tracking-wider text-text-secondary/80">
+                                    <span className="ml-2 uppercase text-xs tracking-wider text-text-secondary/80">
                                         {getPlayerSafeMilitaryFactionName(entry.faction)} / {formatOpportunityResponse(entry.response)}
                                     </span>
                                 </div>
@@ -188,26 +188,26 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {/* Prosecutorial findings */}
             {costLedger.findings && costLedger.findings.length > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
                         {t('warCost.prosecutorialFindings')}
                     </div>
                     <div className="space-y-2">
                         {costLedger.findings.map((finding) => (
                             <div
                                 key={finding.id}
-                                className="border-l border-panel-border pl-3 text-[10px] text-text-secondary leading-relaxed"
+                                className="border-l border-panel-border pl-3 text-xs text-text-secondary leading-relaxed"
                             >
                                 <div className="flex items-baseline justify-between gap-3">
                                     <span className="text-text-primary font-semibold">
                                         {finding.title}
                                     </span>
-                                    <span className="shrink-0 uppercase text-[8px] tracking-wider text-text-secondary/80">
+                                    <span className="shrink-0 uppercase text-xs tracking-wider text-text-secondary/80">
                                         {formatFindingBadge(finding)}
                                     </span>
                                 </div>
                                 <div>{finding.text}</div>
                                 {finding.sources.length > 0 && (
-                                    <div className="mt-1 text-[9px] text-text-secondary/75">
+                                    <div className="mt-1 text-xs text-text-secondary/75">
                                         {t('warCost.sources')}: {finding.sources.join('; ')}
                                     </div>
                                 )}
@@ -220,12 +220,12 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {/* Territory divergence */}
             {Object.keys(comparison.territory_divergence).length > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
                         {t('warCost.territoryVsDayton')}
                     </div>
                     <div className="space-y-1">
                         {Object.entries(comparison.territory_divergence).map(([key, delta]) => (
-                            <div key={key} className="text-[10px] text-text-secondary">
+                            <div key={key} className="text-xs text-text-secondary">
                                 {formatTerritoryDivergence(key, delta)}
                             </div>
                         ))}
@@ -236,12 +236,12 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
             {/* Divergence notes */}
             {comparison.divergence_notes.length > 0 && (
                 <div>
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">
                         {t('warCost.historicalDivergence')}
                     </div>
                     <div className="space-y-1">
                         {comparison.divergence_notes.map((note, i) => (
-                            <div key={i} className="text-[10px] text-text-secondary leading-relaxed">
+                            <div key={i} className="text-xs text-text-secondary leading-relaxed">
                                 {formatHistoricalDivergenceNote(note)}
                             </div>
                         ))}
@@ -258,7 +258,7 @@ export function WarCostSummary({ costLedger, comparison }: WarCostSummaryProps) 
 
 function CostRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-xs">
             <span className="text-text-secondary">{label}</span>
             <span className="text-text-primary tabular-nums font-medium">{value}</span>
         </div>
@@ -268,7 +268,7 @@ function CostRow({ label, value }: { label: string; value: string }) {
 function OpportunityMetric({ label, value }: { label: string; value: string }) {
     return (
         <div className="rounded border border-panel-border bg-panel-card/35 px-3 py-2">
-            <div className="text-[8px] uppercase tracking-wider text-text-secondary/80">
+            <div className="text-xs uppercase tracking-wider text-text-secondary/80">
                 {label}
             </div>
             <div className="text-[15px] font-bold tabular-nums text-text-primary">

@@ -1134,10 +1134,12 @@ export function advanceSectorOffensives(
 
         // Reset per-turn combat feedback counters
         op.battles_this_turn = 0;
+        op.objective_battles_this_turn = 0;
         op.territory_gained_this_turn = 0;
         if (Array.isArray(op.axes)) {
             for (const axis of op.axes) {
                 axis.battles_this_turn = 0;
+                axis.objective_battles_this_turn = 0;
             }
         }
 
@@ -1715,7 +1717,7 @@ function updateMultiAxisResults(
         } else {
             // Check if any of THIS AXIS's brigades attacked (objective or intermediate)
             const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
-            const anyAttackedObjective = axis.assigned_brigades.some(bid => {
+            const hasObjectiveAttackPosture = axis.assigned_brigades.some(bid => {
                 const b = state.military.formations?.[bid];
                 if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
                 return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
@@ -1725,8 +1727,11 @@ function updateMultiAxisResults(
                 const b = state.military.formations?.[bid];
                 return b != null && (b.posture === 'attack' || b.posture === 'assault');
             });
-            const anyAttacked = anyAttackedObjective || anyAttackedAnything;
             const anyResolvedAxisBattle = (axis.battles_this_turn ?? 0) > 0;
+            const anyResolvedObjectiveBattle = axis.objective_battles_this_turn !== undefined
+                ? axis.objective_battles_this_turn > 0
+                : hasObjectiveAttackPosture && anyResolvedAxisBattle;
+            const anyAttacked = hasObjectiveAttackPosture || anyAttackedAnything || anyResolvedAxisBattle;
             // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
             // (which is cleared by apply-brigade-movement BEFORE this step runs).
             const anyMoved = axis.assigned_brigades.some(bid => {
@@ -1734,7 +1739,7 @@ function updateMultiAxisResults(
                 return movState?.status === 'in_transit' || movState?.status === 'packing';
             });
 
-            if (anyAttackedObjective && anyResolvedAxisBattle) {
+            if (anyResolvedObjectiveBattle) {
                 // Direct attack on current objective — standard failure tracking
                 axis.attack_attempt_count += 1;
                 axis.idle_execution_turn_streak = 0;
@@ -1773,7 +1778,7 @@ function updateMultiAxisResults(
                     axis.consecutive_failures_on_current = 0;
                     axis.consecutive_catastrophic_on_current = 0; // reset on objective change
                 }
-            } else if (anyAttackedAnything && anyResolvedAxisBattle) {
+            } else if (anyResolvedAxisBattle) {
                 // Intermediate attack (fighting through toward objective)
                 // Counts as approach progress, not a failure on the current objective
                 axis.attack_attempt_count += 1;
@@ -1970,7 +1975,7 @@ function updateLegacyFlatResults(
         fullyRevealProbeSectorIntel(state, op);
     } else {
         const adjacentFriendlyOsids = collectAdjacentFriendlyOsids(state, corpsId, currentObjective);
-        const anyAttackedObjective = op.participating_brigades.some(bid => {
+        const hasObjectiveAttackPosture = op.participating_brigades.some(bid => {
             const b = state.military.formations?.[bid];
             if (!b || (b.posture !== 'attack' && b.posture !== 'assault')) return false;
             return b.location_osid ? adjacentFriendlyOsids.has(b.location_osid) : false;
@@ -1980,6 +1985,9 @@ function updateLegacyFlatResults(
             return b != null && (b.posture === 'attack' || b.posture === 'assault');
         });
         const anyResolvedBattle = (op.battles_this_turn ?? 0) > 0;
+        const anyResolvedObjectiveBattle = op.objective_battles_this_turn !== undefined
+            ? op.objective_battles_this_turn > 0
+            : hasObjectiveAttackPosture && anyResolvedBattle;
         // Check brigade_movement_state (persists across turns) NOT brigade_movement_orders
         // (which is cleared by apply-brigade-movement BEFORE this step runs).
         const anyMoved = op.participating_brigades.some(bid => {
@@ -1987,7 +1995,7 @@ function updateLegacyFlatResults(
             return movState?.status === 'in_transit' || movState?.status === 'packing';
         });
 
-        if (anyAttackedObjective && anyResolvedBattle) {
+        if (anyResolvedObjectiveBattle) {
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
             // Only reset movement_only counter when no brigades are also marching.
@@ -2004,14 +2012,14 @@ function updateLegacyFlatResults(
                 op.current_objective_index = currentIdx + 1;
                 op.consecutive_failures_on_current = 0;
             }
-        } else if (anyAttackedAnything && anyResolvedBattle) {
+        } else if (anyResolvedBattle) {
             // Intermediate attack: fighting through toward objective
             op.attack_attempt_count = (op.attack_attempt_count ?? 0) + 1;
             op.idle_execution_turn_streak = 0;
             op.last_result = 'approach';
             op.momentum = 0;
             op.movement_only_execution_turns = (op.movement_only_execution_turns ?? 0) + 1;
-        } else if (anyAttackedObjective || anyAttackedAnything) {
+        } else if (hasObjectiveAttackPosture || anyAttackedAnything) {
             op.idle_execution_turn_streak = 0;
             op.last_result = 'approach';
             op.momentum = 0;

@@ -128,6 +128,7 @@ describe('command drilldown routing', () => {
     const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
     const copy = container.textContent ?? '';
 
+    expect(screen.getByTestId('corps-detail-panel')).toBeTruthy();
     expect(copy).toContain('Iscrpljenost:');
     expect(copy).not.toContain('Exhaustion:');
   });
@@ -370,7 +371,7 @@ describe('command drilldown routing', () => {
     expect(container.textContent).not.toContain('Obj 0/0');
   });
 
-  it('names the sector used when opening CorpsDetail operation planning', () => {
+  it('keeps CorpsDetail operation planning delegated to the corps commander', () => {
     const state = makeState();
     state.corpsFrontSectors = [
       {
@@ -406,14 +407,14 @@ describe('command drilldown routing', () => {
       selectedCorpsId: 'rbih_1_corps',
     });
 
-    render(createElement(CorpsDetail, { railSlot: 'primary' }));
+    const { container } = render(createElement(CorpsDetail, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Orders/i }));
-    const planButton = screen.getByRole('button', { name: /Prepare Operation in HQ for Contact line/i });
-    expect(planButton.getAttribute('title')).toBe('Prepare Operation in HQ for Contact line');
-    fireEvent.click(planButton);
 
-    expect(useGameStore.getState().opsPlanningCorpsId).toBe('rbih_1_corps');
-    expect(useGameStore.getState().opsPlanningOriginSectorId).toBe('sector:rbih_1_corps:contact');
+    expect(screen.queryByRole('button', { name: /Prepare Operation/i })).toBeNull();
+    expect(container.textContent).toContain('Operation planning, brigade assignments, and attack axes are managed by the corps commander.');
+    expect(container.textContent).toContain('Presidential intervention is issued through Army HQ directives.');
+    expect(useGameStore.getState().opsPlanningCorpsId).toBeNull();
+    expect(useGameStore.getState().opsPlanningOriginSectorId).toBeNull();
   });
 });

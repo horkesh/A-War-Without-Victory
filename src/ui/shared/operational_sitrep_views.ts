@@ -16,6 +16,7 @@ export interface OperationalSitrepAlertView {
     severity: OperationalSitrepSeverity;
     text: string;
     textToken?: OperationalSitrepCopyToken;
+    evidence?: string[];
 }
 
 export interface OperationalSitrepFrontEdgeView {
@@ -64,12 +65,19 @@ export interface OperationalSitrepView {
     readiness: {
         weakestBrigades: OperationalSitrepWeakestBrigadeView[];
         encircledCount: number;
+        encircledBrigades?: Array<{
+            id: string;
+            label: string;
+            location: string;
+        }>;
     };
     sustainment: {
         adequateCount: number;
         strainedCount: number;
         criticalCount: number;
         collapsedMunicipalities: string[];
+        hostileTakeoverMunicipalityCount?: number;
+        hostileTakeoverMunicipalities?: string[];
         activeHostileTakeoverTimers: number;
         activeCamps: number;
     };
@@ -177,6 +185,12 @@ function exposedFrontSummaryToken(count: number): OperationalSitrepCopyToken {
     if (count >= 6) return { key: 'operationalSitrep.headline.frontExposed.several' };
     if (count > 0) return { key: 'operationalSitrep.headline.frontExposed.one' };
     return { key: 'operationalSitrep.headline.frontExposed.none' };
+}
+
+function formatEvidenceExamples(items: string[], maximum = 3): string {
+    const visible = items.slice(0, maximum);
+    const remaining = items.length - visible.length;
+    return remaining > 0 ? `${visible.join('; ')}; +${remaining} more` : visible.join('; ');
 }
 
 function toHeadline(view: Omit<OperationalSitrepView, 'headline'>): string {
@@ -288,6 +302,20 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
         })
         .slice(0, 5);
 
+    const formationById = new Map(
+        snapshot.ownForces.formationDetails.map((formation) => [formation.id, formation] as const),
+    );
+    const encircledBrigades = [...snapshot.brigadeMovement.encircled]
+        .sort(compareText)
+        .map((id) => {
+            const formation = formationById.get(id);
+            return {
+                id,
+                label: formation?.name?.trim() || 'Unreported formation',
+                location: formatLocationLabel(formation?.locationId),
+            };
+        });
+
     const corpsOperations = snapshot.ownCorpsOps
         .map((entry) => ({
             corpsId: entry.corpsId,
@@ -308,19 +336,29 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
     const collapsedMunicipalities = [...snapshot.ownSupply.collapsedMunicipalities]
         .map((municipalityId) => formatLocationLabel(municipalityId))
         .sort(compareText);
+    const hostileTakeoverMunicipalities = [...(snapshot.ownDisplacement.hostileTakeoverMunicipalities ?? [])]
+        .map((municipalityId) => formatLocationLabel(municipalityId))
+        .sort(compareText);
 
     const alerts: OperationalSitrepAlertView[] = [];
-    if (frontEdges.some((edge) => edge.tier === 'exposed')) {
-        const exposedCount = frontEdges.filter((edge) => edge.tier === 'exposed').length;
+    const pressuredExposedEdges = frontEdges
+        .filter((edge) => edge.tier === 'exposed' && Math.abs(edge.pressure) > 0)
+        .sort((a, b) => Math.abs(b.pressure) - Math.abs(a.pressure) || compareText(a.label, b.label) || compareText(a.id, b.id));
+    if (pressuredExposedEdges.length > 0) {
+        const exposedCount = pressuredExposedEdges.length;
         alerts.push({
             id: 'front-exposed',
             severity: 'critical',
             text: exposedFrontSummary(exposedCount),
             textToken: exposedFrontSummaryToken(exposedCount),
+            evidence: [
+                `${exposedCount === 1 ? 'Affected front' : 'Affected fronts'}: ${formatEvidenceExamples(pressuredExposedEdges.map((edge) => edge.label))}.`,
+                'Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.',
+            ],
         });
     }
-    if (snapshot.brigadeMovement.encircled.length > 0) {
-        const encircledCount = snapshot.brigadeMovement.encircled.length;
+    if (encircledBrigades.length > 0) {
+        const encircledCount = encircledBrigades.length;
         alerts.push({
             id: 'brigades-encircled',
             severity: 'critical',
@@ -331,6 +369,10 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
                     : 'operationalSitrep.alert.brigadesEncircled.many',
                 params: { count: encircledCount },
             },
+            evidence: [
+                `Cut off: ${formatEvidenceExamples(encircledBrigades.map((formation) => `${formation.label} at ${formation.location}`))}.`,
+                'Staff handoff: inspect the formation and relief routes in War Summary; no direct presidential move order is available while cut off.',
+            ],
         });
     }
     if (snapshot.ownExhaustion.collapseEligible) {
@@ -393,18 +435,12 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
             textToken: { key: 'operationalSitrep.alert.allianceStrained' },
         });
     }
-    if (snapshot.ownDisplacement.activeHostileTakeoverTimers > 0) {
-        const timerCount = snapshot.ownDisplacement.activeHostileTakeoverTimers;
+    if (hostileTakeoverMunicipalities.length > 0) {
+        const municipalityCount = hostileTakeoverMunicipalities.length;
         alerts.push({
             id: 'hostile-takeovers',
             severity: 'warning',
-            text: `${timerCount} hostile takeover timer${timerCount === 1 ? '' : 's'} remain active.`,
-            textToken: {
-                key: timerCount === 1
-                    ? 'operationalSitrep.alert.hostileTakeovers.one'
-                    : 'operationalSitrep.alert.hostileTakeovers.many',
-                params: { count: timerCount },
-            },
+            text: `${municipalityCount} ${pluralize(municipalityCount, 'municipality', 'municipalities')} face active hostile takeover pressure.`,
         });
     }
     if (snapshot.brigadeMovement.packing.length > 0) {
@@ -459,13 +495,16 @@ export function toOperationalSitrepView(snapshot: WarDataSnapshot): OperationalS
         },
         readiness: {
             weakestBrigades,
-            encircledCount: snapshot.brigadeMovement.encircled.length,
+            encircledCount: encircledBrigades.length,
+            encircledBrigades,
         },
         sustainment: {
             adequateCount: snapshot.ownSupply.adequateCount,
             strainedCount: snapshot.ownSupply.strainedCount,
             criticalCount: snapshot.ownSupply.criticalCount,
             collapsedMunicipalities,
+            hostileTakeoverMunicipalityCount: hostileTakeoverMunicipalities.length,
+            hostileTakeoverMunicipalities,
             activeHostileTakeoverTimers: snapshot.ownDisplacement.activeHostileTakeoverTimers,
             activeCamps: snapshot.ownDisplacement.activeCamps,
         },

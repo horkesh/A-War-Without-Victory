@@ -34,6 +34,19 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         expect(screen.getByRole('button', { name: 'Acknowledge' })).toBeTruthy();
     });
 
+    it('is readable on the first rendered frame instead of exposing the map-loading backdrop', () => {
+        render(createElement(WarHasBegunSplash, { onDismiss: vi.fn() }));
+
+        const dialog = screen.getByRole('dialog');
+        const title = screen.getByText('WAR HAS STARTED');
+        const acknowledge = screen.getByRole('button', { name: 'Acknowledge' });
+
+        expect(dialog.style.opacity).toBe('1');
+        expect(dialog.style.backgroundColor).toBe('rgba(24, 4, 4, 0.94)');
+        expect(getComputedStyle(title).color).toBe('rgb(255, 244, 222)');
+        expect(getComputedStyle(acknowledge).backgroundColor).toBe('rgb(255, 244, 222)');
+    });
+
     it('auto-advances exactly once after the hold elapses', () => {
         const onDismiss = vi.fn();
         render(createElement(WarHasBegunSplash, { onDismiss, holdMs: 2000 }));
@@ -48,6 +61,16 @@ describe('WarHasBegunSplash (game-start intro — step 1)', () => {
         const onDismiss = vi.fn();
         render(createElement(WarHasBegunSplash, { onDismiss }));
         fireEvent.click(screen.getByRole('dialog'));
+        act(() => {
+            vi.advanceTimersByTime(2000);
+        });
+        expect(onDismiss).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips when the visible central splash copy is clicked', () => {
+        const onDismiss = vi.fn();
+        render(createElement(WarHasBegunSplash, { onDismiss }));
+        fireEvent.click(screen.getByText('WAR HAS STARTED'));
         act(() => {
             vi.advanceTimersByTime(2000);
         });

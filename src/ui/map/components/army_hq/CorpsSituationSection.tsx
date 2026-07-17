@@ -50,7 +50,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
     if (!assessment) {
         return (
             <CollapsibleSection sectionKey="situation-assessment" title={t('corpsSituation.title')} defaultOpen>
-                <div className="px-3 py-2 text-xs italic text-text-secondary/80">
+                <div className="px-3 py-2 text-xs italic text-text-secondary">
                     {t('corpsFront.unreported')}
                 </div>
             </CollapsibleSection>
@@ -95,7 +95,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                 {dominantReason && (
                     <div className="flex items-start gap-2">
                         {badge && (
-                            <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.color}`}>
+                            <span className={`shrink-0 text-xs font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.color}`}>
                                 {t(badge.labelKey)}
                             </span>
                         )}
@@ -108,7 +108,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                 {/* Wave 3: Relief path — what would need to change */}
                 {reliefPath && (
                     <div className="flex items-start gap-1.5 pl-0.5">
-                        <span className="text-neutral-500 shrink-0 mt-px">&rarr;</span>
+                        <span className="text-text-secondary shrink-0 mt-px">&rarr;</span>
                         <span className="text-neutral-400 leading-snug">
                             {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
                         </span>
@@ -132,7 +132,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                         {militaryFactors.length > 0 && militaryFactors.map((factor, i) => (
                             <div key={i} className="flex items-start gap-1.5">
                                 <span className="text-amber-500/60 shrink-0 mt-px">&bull;</span>
-                                <span className="text-neutral-500">{factor}</span>
+                                <span className="text-text-secondary">{factor}</span>
                             </div>
                         ))}
 
@@ -140,7 +140,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                         {institutionalFactors.length > 0 && institutionalFactors.map((factor, i) => (
                             <div key={i} className="flex items-start gap-1.5">
                                 <span className="text-blue-400/60 shrink-0 mt-px">&bull;</span>
-                                <span className="text-neutral-500">{factor}</span>
+                                <span className="text-text-secondary">{factor}</span>
                             </div>
                         ))}
 
@@ -148,7 +148,7 @@ export function CorpsSituationSection({ assessment }: CorpsSituationSectionProps
                         {planExplanation && (
                             <div className="flex items-start gap-1.5">
                                 <span className="text-neutral-600 shrink-0 mt-px">&#9654;</span>
-                                <span className="text-neutral-500">{planExplanation}</span>
+                                <span className="text-text-secondary">{planExplanation}</span>
                             </div>
                         )}
                     </div>

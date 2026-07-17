@@ -4,7 +4,8 @@
 **Source tree:** `src/ui/map/`
 **Dev server:** `npm run dev:map` (Vite, port 3002)
 **Build:** `npm run build` → `dist/tactical-map/`
-**Last updated:** 2026-05-16
+**Last updated:** 2026-07-15
+**Front staffing truth (2026-07-15):** Formation counters continue to represent physical `location_osid`, never sector-assignment metadata. A sector marked `unstaffed_front` has no legal roster-eligible donor under current corps, connectivity, enclave, and commitment rules; the map and Army HQ must present that as an empty/front-gap advisory and must not imply that an assigned brigade exists. Reachable relief arrives through delayed column movement before a counter appears at the destination.
 **Dev/live mode (2026-03-10; demarcation removal 2026-05-16):** Single codebase with `devMode` boolean in `gameStore.ts`. `isDevMode()`: auto-ON in Vite dev, `?dev=1` in production, `?live=1` forces live. Dev mode shows full load/run toolbar + DEV badge; separate Fronts/Sectors toggles; offset sector glow. Live mode auto-loads `latest_run_final_save.json` as RBiH; merged "Front" toggle (controls `sectorsVisible`); sector glow centered on front line (no offset, wider, `line-blur`). Lateral same-faction sector demarcation lines are removed from the tactical map entirely; sector readability is carried by front edges, selected-sector fill/glow, and brigade rings. Front line features carry `sector_id`; merge key by sector creates natural visual breaks at sector boundaries.
 
 > **See also:** [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) — original engineering reference.
@@ -224,9 +225,9 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 - **Shows:** `selectedFormationId` set
 - **Data:** name, kind, faction, cohesion, fatigue, personnel, status, readiness, location OSID,
   officer quality + corps commander (Phase E), narrative arc + war story, combat summary,
-  sector link (brigade: own sector; corps: all its sectors), attack order, order buttons
-- **Interactions:** Close → clears formationId; order mode buttons (Attack/Move) → setOrderModeForFormation;
-  sector link → setSelectedCorpsFrontSectorId
+  sector link (brigade: own sector; corps: all its sectors), current field status, army-reserve loan state,
+  and home-distance effectiveness context
+- **Interactions:** Close → clears formationId; parent/sector links open read-only drilldowns; a loaned elite brigade may expose the presidential recall lever. Direct brigade attack, posture, movement, and sector-assignment controls are retired. The Orders tab explicitly attributes field orders and sector responsibility to the corps commander and routes presidential intervention to Army HQ directives.
 
 #### CorpsFrontPanel
 - **Shows:** `selectedCorpsFrontSectorId` set, no formation selected
@@ -241,7 +242,9 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 - **Data:** corps name, faction, corps color swatch, stance, exhaustion, personnel, brigade count,
   sector count, OG slots, combat summary, sector list (clickable), active operations, subordinate brigades
 - **Interactions:** Formation click → setSelectedFormationId; sector click → setSelectedCorpsFrontSectorId;
-  hover brigade → setHoveredOsids; close → setSelectedCorpsId(null)
+  hover brigade → setHoveredOsids; close → setSelectedCorpsId(null). Direct operation planning,
+  brigade assignment, and attack-axis controls are retired; the Orders tab attributes those duties to
+  the corps commander and routes presidential intervention to Army HQ directives.
 
 #### ArmyDetail
 - **Shows:** `selectedArmyId` set, no formation/sector/corps selected (faction header clicked in OOBSidebar)
@@ -262,11 +265,19 @@ Usage: `style={getPanelRailStyle(railSlot, '24rem')}`.
 - **IPC:** APPROVE → `approve-reserve-request`; Recall → `recall-elite-brigade`
 - **Data:** `loadedGameState.pendingReserveRequests`, `loadedGameState.eliteBrigadeTracker`, formation `eliteLoanState`
 
+#### EventModal
+- **Layout:** bounded flex-column modal. Header and acknowledgement action bar remain fixed; only the narrative/evidence body scrolls.
+- **Completion contract:** the sole `ACKNOWLEDGED` action is never inside the narrative scroll region, so long dispatches cannot hide the action below the fold.
+- **Gate:** `tests/ui/event_modal_dismissal.test.ts` plus real Electron viewport evidence in `docs/40_reports/playtests/20260714_rs_52w_canon_player_experience.md`.
+
 #### Army HQ Modal (`army_hq/`)
 - **Opens:** `armyHQOpen` store flag, keyboard shortcut `H`
 - **Full-screen** command center modal with dark warroom aesthetic
 - **Top row:** Commander card, Chief of Staff briefing, faction crest, Exhaustion Clock, Strategic Position
 - **Situation Briefing** (`SituationBriefing.tsx`) — presentation-only renderer over `loadedGameState.commandBriefing.items`. Canonical command briefing owner is sim-side `state.military.last_briefing` (`collect_briefing.ts` -> `war_phases.ts` -> `GameStateAdapter`).
+- **Operation/archive ownership:** `data/operationLifecycleProjection.ts` is the shared pure operation projection. `RecordsContent.tsx` owns the authoritative operational ledger over active and raw history rows, including explicit exclusion reasons. Chronicle owns narrative memory only and `generateChronicleEntries.ts` adds exactly one entry per visible completed operation. Briefing reads the projection's executing count; none of these consumers may independently infer a false quiet/archive-empty state.
+- **AAR causality:** `AARPanel.tsx` renders capture credit from attack-backed weekly receipts. Current control at operation close is not capture provenance.
+- **Vance-Owen ownership:** the peace-plan resolution is the single decision/history coordinator: one durable event-decision receipt plus one peace-plan-history row, with the duplicate pending event consumed.
 - **Operational SITREP / Summary truth:** `extractWarData(...)` is the canonical raw operational snapshot owner; `getOperationalSitrepView(...)` in `src/ui/shared/operational_sitrep_views.ts` is the canonical mapped packet read path; `GameStateAdapter` maps that packet into `LoadedGameState`, and Army HQ SUMMARY / `SituationTab` render it rather than rebuilding separate front-supply-ops summaries locally. Warroom `ReportsModal` consumes that same packet for staff reporting and only reads extra contact lines from the raw snapshot. Warroom `FactionOverviewPanel` now renders its warning band from `operationalSitrep.alerts`, while its `COMMAND SHELL` block remains a shell-only handoff back to Army HQ rather than a second command analysis surface.
 - **Legacy Army HQ reporting helpers still present in repo:** `ThreatAssessment.tsx`, `ForceReadiness.tsx`, and `SupplyIntelligence.tsx` remain implementation files but are not the live top-row Army HQ owners as of the v0.8-to-v0.9 hardening pass.
 - **Corps cards** (`ArmyHQCorpsCard.tsx`) — FlipCard animation. Front: summary with equipment icons, readiness-driven left border color, incoming threat badge from sectorIntel, health stripe (cohesion + fatigue dual bar). Back: 5 collapsible sections (Commander, Sectors, Operations, ORBAT, Combat Record).
@@ -380,6 +391,8 @@ All setters enforce mutual exclusion — setting one clears the others.
 Operation key format: `` `${corps_id}|${operation_name}` ``
 
 `setSelectedOperationKey(key)` auto-sets `isOperationsPanelOpen = true` when `key != null`.
+
+Top-level transitions to Warroom Desk, Decision Room, or Inbox call the shared tactical-inspection cleanup before opening the destination. Cleanup closes Army HQ, Codex, Chronicle, operation/planning surfaces, detail panels and transient summaries; clears OSID/formation/corps/sector/army/HQ/operation/ORBAT selections, stack expansion, hover/tooltip state, and map aftermath overlays; and suppresses the already-seen command briefing for the current turn. Blocking event decisions also close or suspend conflicting Warroom surfaces and hide the status dock.
 
 ### 4.2 Operations Panel State
 
@@ -654,6 +667,8 @@ Style: black-white alternating stripe. **No chevrons** (standing directive — d
 
 **Default:** Deck.gl formation counters via `buildTacticalDeckLayers.ts`. **`deckFormationCounters`** in `deckLayerCapabilities.ts` is **`true`** by default — MapLibre `formation-markers` and `formation-labels` are hidden to prevent double-draw. Deck.gl enrichment layers include: health bar, supply dot, status icons, stack badges, and op/disrupted glow rings. On the pitched 2.5D main map, formation counters are screen-space symbols over terrain, not terrain decals: `MapContainer.tsx` must keep the tactical `MapboxOverlay` non-interleaved (`interleaved: false`), sprites must have opaque faction bodies plus an opaque paper/ink halo, and counter/label Deck layers must set `depthTest: false`, `depthMask: false`, and `depthWriteEnabled: false` so hillshade, borders, and labels cannot physically or visually cut into units.
 
+Deck and the accessible DOM interaction owner use the same truthful `location_osid` screen projection. A counter whose true projected point is off-screen or hidden by shell chrome is omitted; no path may clamp it to a viewport edge and imply a false location. Co-located members use deterministic offsets with at most 12 visible member badges, while the stack badge/picker retains access to the complete stable member list. The DOM owner supplies exact named-formation selection and enemy-contact hover parity; Deck retains visual ownership after fallback readiness.
+
 When **`deckFormationCounters`** is **true** (the default), MapLibre formation symbol layers are hidden and Deck supplies:
 
 | Layer ID | Source | Purpose |
@@ -831,6 +846,8 @@ Desktop advance-turn → awwv bridge callback → loadSave(stateJson)
   → officer succession → setLastTurnReport → FormationDetail shows recent command changes
 ```
 
+Formation map position always derives from physical `location_osid`. `hq_osid`, corps membership, and parent/command relationships may drive navigation and hierarchy but must not create counters, stacks, movement origins, or stationed-unit claims.
+
 ---
 
 ## 10. Theme & Styling
@@ -983,6 +1000,22 @@ Map overlay sources are created in `runUpdate` inside nested `requestAnimationFr
 ### 14.4 Sector zoom vs map click
 
 Selecting a sector from the map (clicking a front edge) should NOT zoom — the user is already looking at it. Selecting from Command/sidebar should zoom to fit. `sectorSelectedFromMapRef` flag distinguishes the two cases. The pan/zoom effect uses `prevSectorIdRef` to detect sector changes.
+
+### 14.5 Context cleanup and bounded telemetry
+
+`MapContainer` unmount cleanup releases MapLibre and standalone Deck WebGL contexts, unregisters map/store callbacks and timers, and removes the DOM formation-counter overlay. The overlay's `data-awwv-formation-counter-*` fields are bounded aggregate diagnostics (source gate, update stage, built count, rendered count, and related status). Do not expose raw formations, serialized state, or an accumulating event history through DOM telemetry.
+
+### 14.6 Hard player-experience QA gates
+
+Electron remediation/replay evidence must reach the exact requested turn without overrun, exercise the full required surface tour, and finish with Records/Chronicle screenshots. Fail on unresolved required blockers, failed IPC, active combat formations without physical placement, console warnings/errors, page errors, request failures, or HTTP >=400 except narrowly named teardown noise. Essential text must compute to at least 12px with no clipping or horizontal overflow. Comparator evidence must bind the actual Electron log and autosave and validate scenario/faction/turn plus the full control timeline before reporting Electron-versus-controlled/headless deltas; recruitment, Command Authority, and proposal actions absent from the policy comparator are attributed input differences, not nondeterminism.
+
+### 14.7 Current-state map readiness
+
+`MapContainer` readiness is a rendered-state contract, not a one-time MapLibre lifecycle flag. `isTacticalMapStateReady(...)` requires a ready map instance, a rendered turn equal to the loaded turn, and a rendered save fingerprint equal to the loaded save fingerprint. The required `osid-control` source must report loaded, early formation-counter telemetry must be installed, and a subsequent render must have occurred before `data-map-ready="true"` is exposed. The loading surface remains `aria-busy`; the map is not keyboard-focusable until current-state readiness passes.
+
+Required-source failure times out after 15 seconds into a localized retryable error state. Optional MapLibre errors are logged as diagnostics but do not become fatal map-load errors. Direct Playwright/Electron QA must start and HTTP-verify `npm.cmd run dev:map -- --port 3002 --strictPort` before launching Electron, then wait for current-turn readiness and require nonzero visible player counters whenever the loaded player owns physically located formations. Probe exceptions are failures, not swallowed skips. Gates: `tests/ui/map_loading_state.test.ts`, `tests/ui/map_context_lifecycle.test.ts`, and `tests/paradox_local_qa_harness.test.ts`.
+
+While the loaded turn/save fingerprint is changing, the previous rendered canvas remains covered and inert. The fallback and Deck datasets are published only from the current viewport-selected projection; stale counters cannot remain clickable beneath the loading surface.
 
 ---
 

@@ -77,6 +77,8 @@ import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
+import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
+import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -613,7 +615,9 @@ function buildSectorReassignmentOrders(
     briefing: CommanderBriefing,
     zones: ZoneAssessment[],
 ): Array<{ brigade_id: string; to_sector_id: string }> {
-    if (decisions.reserve_shifts.length === 0) return [];
+    const directRelief = [...(decisions.empty_sector_relief_reassignments ?? [])]
+        .sort((left, right) => strictCompare(left.brigade_id, right.brigade_id));
+    if (decisions.reserve_shifts.length === 0 && directRelief.length === 0) return [];
 
     // Build zone-to-sector mapping: zone OSIDs → overlapping sector
     const corpsSectors = briefing.sectors
@@ -631,11 +635,16 @@ function buildSectorReassignmentOrders(
         }
     }
 
-    const orders: Array<{ brigade_id: string; to_sector_id: string }> = [];
+    const orders: Array<{ brigade_id: string; to_sector_id: string }> = directRelief.map((relief) => ({
+        brigade_id: relief.brigade_id,
+        to_sector_id: relief.to_sector_id,
+    }));
+    const orderedBrigades = new Set(orders.map((order) => order.brigade_id));
 
     for (const shift of [...decisions.reserve_shifts].sort((a, b) =>
         strictCompare(a.brigade_id, b.brigade_id),
     )) {
+        if (orderedBrigades.has(shift.brigade_id)) continue;
         // Find a sector in the destination zone
         // We need to find any OSID in the destination zone and look up its sector
         // Since we don't have zone->osid mapping here, use briefing.sectors territory
@@ -685,6 +694,7 @@ function buildSectorReassignmentOrders(
                 brigade_id: shift.brigade_id,
                 to_sector_id: targetSectorId,
             });
+            orderedBrigades.add(shift.brigade_id);
         }
     }
 
@@ -935,6 +945,34 @@ function buildOperations(
         // creating this operation rather than injecting an empty-objectives op that
         // would immediately stall. The plan will be abandoned on the next assess cycle.
         if (objectives.length === 0) {
+            return ops;
+        }
+
+        const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
+        const sectorIntelConfidence = briefing.state_ref && sectorId
+            ? getStalestSectorIntelConfidence(briefing.state_ref, sectorId)
+            : 0;
+        const launchProbe = shouldLaunchProbeInstead(
+            briefing.faction,
+            sectorIntelConfidence,
+            commandState?.consecutive_probes ?? 0,
+            briefing.turn,
+            briefing.state_ref?.military.war_timeline,
+        );
+        if (launchProbe) {
+            const probeOp = buildProbeOperation(
+                briefing.corps_id,
+                briefing.turn,
+                participatingBrigades[0]!,
+                sectorId ?? undefined,
+                objectives,
+            );
+            const conflictingProbe = briefing.active_operations.find(
+                (existing) => operationsOverlap(existing, probeOp),
+            );
+            if (!conflictingProbe) {
+                ops.push(probeOp);
+            }
             return ops;
         }
 

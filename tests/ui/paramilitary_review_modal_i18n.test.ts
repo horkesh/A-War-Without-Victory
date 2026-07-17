@@ -22,7 +22,7 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
     const src = read('../../src/ui/map/components/ParamilitaryReviewModal.tsx');
 
     it('imports and uses the i18n t() helper', () => {
-        expect(src).toContain("import { t } from '../i18n';");
+        expect(src).toMatch(/import \{[^}]*\bt\b[^}]*\} from '\.\.\/i18n';/);
         expect(src).toContain("t('paramilitaryReview.");
     });
 
@@ -54,19 +54,23 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
             'paramilitaryReview.requestMeta',
             'paramilitaryReview.deny',
             'paramilitaryReview.allow',
-            'paramilitaryReview.denyAll',
-            'paramilitaryReview.allowAll',
+            'paramilitaryReview.denyPacket',
+            'paramilitaryReview.allowPacket',
+            'paramilitaryReview.alwaysDeny',
+            'paramilitaryReview.alwaysAllow',
+            'paramilitaryReview.policyHint',
             'paramilitaryReview.close',
             'paramilitaryReview.submit',
             'paramilitaryReview.submitting',
             'paramilitaryReview.error.ipcUnavailable',
             'paramilitaryReview.error.resolveFailed',
+            'paramilitaryReview.error.stateUnavailable',
         ]) {
             expect(src).toContain(`t('${key}'`);
         }
     });
 
-    it('pins the EN catalog values byte-identical to the pre-migration wording', () => {
+    it('pins the EN catalog disclosure and action wording', () => {
         const en = enMessages as Record<string, string>;
         expect(en['paramilitaryReview.mode.offensive']).toBe('Offensive sweep');
         expect(en['paramilitaryReview.mode.rearArea']).toBe('Rear-area consolidation');
@@ -74,7 +78,7 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.eyebrow']).toBe('Presidential Decision Required');
         expect(en['paramilitaryReview.title']).toBe('Paramilitary Authorization');
         expect(en['paramilitaryReview.description']).toBe(
-            'Approving these deployments can capture territory quickly, but paramilitary operations carry a serious risk of war crimes, civilian casualties, and international consequences.',
+            'Authorization deploys irregular forces into the named undefended rear pocket. The projected civilian deaths, war crimes record, and international consequences are shown for each request.',
         );
         expect(en['paramilitaryReview.requestCount']).toBe('{count} request');
         expect(en['paramilitaryReview.requestCountPlural']).toBe('{count} requests');
@@ -83,12 +87,16 @@ describe('Paramilitary review modal — i18n Car 3 (EN keys)', () => {
         expect(en['paramilitaryReview.requestMeta']).toBe('{faction} - {mode} - strength {strength}');
         expect(en['paramilitaryReview.deny']).toBe('Deny');
         expect(en['paramilitaryReview.allow']).toBe('Allow');
-        expect(en['paramilitaryReview.denyAll']).toBe('Deny All');
-        expect(en['paramilitaryReview.allowAll']).toBe('Allow All');
+        expect(en['paramilitaryReview.denyPacket']).toBe('Deny packet');
+        expect(en['paramilitaryReview.allowPacket']).toBe('Allow packet');
+        expect(en['paramilitaryReview.alwaysDeny']).toBe('Always deny');
+        expect(en['paramilitaryReview.alwaysAllow']).toBe('Always allow');
+        expect(en['paramilitaryReview.policyHint']).toBe('Use a standing order if you want future paramilitary packets resolved the same way.');
         expect(en['paramilitaryReview.close']).toBe('Close');
         expect(en['paramilitaryReview.submit']).toBe('Submit Decisions');
         expect(en['paramilitaryReview.submitting']).toBe('Submitting...');
         expect(en['paramilitaryReview.error.ipcUnavailable']).toBe('This action requires the desktop command shell.');
         expect(en['paramilitaryReview.error.resolveFailed']).toBe('Failed to resolve paramilitary requests.');
+        expect(en['paramilitaryReview.error.stateUnavailable']).toBe('Paramilitary decisions were recorded, but the updated player-visible state was unavailable.');
     });
 });

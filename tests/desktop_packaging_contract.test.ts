@@ -64,6 +64,7 @@ test('electron-builder config matches the packaged runtime resource contract', a
             'src/desktop/command_strain.cjs',
             'src/desktop/convoy_ipc_contract.cjs',
             'src/desktop/officer_decision_history.cjs',
+            'src/desktop/player_visible_state.cjs',
             'src/desktop/settings_store.cjs',
             'src/desktop/author_op_staging.cjs',
             'src/desktop/op_halt.cjs',

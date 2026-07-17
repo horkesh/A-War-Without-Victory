@@ -1,6 +1,6 @@
 /**
- * Event evaluator tests — trigger matching, registry order, determinism.
- * Same state + turn + seed → same events_fired; RNG only for random events; stable registry order.
+ * Event evaluator tests: trigger matching, registry order, and determinism.
+ * Same state and turn produce the same fired events in stable registry order.
  * Tests use inline event definitions passed via the registry parameter.
  */
 
@@ -14,26 +14,10 @@ import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { strictCompare } from '../src/state/validateGameState.js';
 
-/** Deterministic RNG: same seed → same sequence (Mulberry32 + string hash). */
-function createRng(seed: string | number): Rng {
-    const numericSeed = typeof seed === 'number' ? seed : hashSeed(seed);
-    let a = numericSeed >>> 0;
-    return function rng(): number {
-        a = (a + 0x6d2b79f5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
-function hashSeed(seed: string): number {
-    let h = 1779033703 ^ seed.length;
-    for (let i = 0; i < seed.length; i += 1) {
-        h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
-        h = (h << 13) | (h >>> 19);
-    }
-    return (h ^ (h >>> 16)) >>> 0;
-}
+/** Legacy callback supplied only to prove event evaluation never consumes it. */
+const rejectRandomness: Rng = () => {
+    throw new Error('Engine Invariants 11.1: event evaluator consumed RNG');
+};
 
 function minimalState(phase: 'peace' | 'war', turn: number): GameState {
     return {
@@ -235,7 +219,7 @@ test('evaluateEvents: five eligible same-priority same-turn events fire four and
         makeDecisionEvent('overflow_e', { priority: 1, turnMin: 12 }),
     ];
 
-    const result = evaluateEvents(state, createRng('overflow'), 12, registry);
+    const result = evaluateEvents(state, rejectRandomness, 12, registry);
 
     assert.deepStrictEqual(result.fired.map((event) => event.id), [
         'overflow_a',
@@ -269,7 +253,7 @@ test('evaluateEvents: auto/flag-setter events bypass the cap; only player-decisi
         makeDecisionEvent('dec_e', { priority: 1, turnMin: 12 }),
     ];
 
-    const result = evaluateEvents(state, createRng('auto-bypass'), 12, registry);
+    const result = evaluateEvents(state, rejectRandomness, 12, registry);
 
     const firedIds = result.fired.map((event) => event.id);
     // All five autos fire (never capped).
@@ -296,7 +280,7 @@ test('evaluateEvents: stores overflowed ids in the persisted overflow queue', ()
         makeDecisionEvent('queue_f', { priority: 1, turnMin: 13 }),
     ];
 
-    const result = evaluateEvents(state, createRng('overflow-queue-store'), 13, registry);
+    const result = evaluateEvents(state, rejectRandomness, 13, registry);
 
     assert.deepStrictEqual(result.overflowed_ids, ['queue_e', 'queue_f']);
     assert.deepStrictEqual(state.military.event_overflow_queue, ['queue_e', 'queue_f']);
@@ -306,7 +290,7 @@ test('evaluateEvents: clears queued ids outside war phase', () => {
     const state = minimalState('peace', 13);
     state.military.event_overflow_queue = ['queued_war_only'];
 
-    const result = evaluateEvents(state, createRng('overflow-queue-peace'), 13, [
+    const result = evaluateEvents(state, rejectRandomness, 13, [
         makeEligibleEvent('queued_war_only', { priority: 1, turnMin: 13 }),
     ]);
 
@@ -326,7 +310,7 @@ test('evaluateEvents: re-enters queued ids but canonical order controls firing a
         makeDecisionEvent('queued_z', { priority: 100, turnMin: 14 }),
     ];
 
-    const result = evaluateEvents(state, createRng('overflow-queue-priority'), 14, registry);
+    const result = evaluateEvents(state, rejectRandomness, 14, registry);
 
     assert.deepStrictEqual(result.fired.map((event) => event.id), [
         'new_a',
@@ -347,7 +331,7 @@ test('evaluateEvents: drops queued ids that no longer pass normal gates', () => 
         makeEligibleEvent('blocked_by_cooldown', { priority: 1, turnMin: 15, cooldownTurns: 3 }),
     ];
 
-    const result = evaluateEvents(state, createRng('overflow-queue-stale'), 15, registry);
+    const result = evaluateEvents(state, rejectRandomness, 15, registry);
 
     assert.deepStrictEqual(result.fired, []);
     assert.deepStrictEqual(result.overflowed_ids, []);
@@ -365,7 +349,7 @@ test('evaluateEvents: does not queue mutex-suppressed ids', () => {
         makeDecisionEvent('plain_queue_d', { priority: 1, turnMin: 16 }),
     ];
 
-    const result = evaluateEvents(state, createRng('overflow-queue-mutex'), 16, registry);
+    const result = evaluateEvents(state, rejectRandomness, 16, registry);
 
     assert.deepStrictEqual(result.mutex_suppressed_ids, ['mutex_queue_b']);
     assert.deepStrictEqual(result.overflowed_ids, ['plain_queue_d']);
@@ -383,7 +367,7 @@ test('evaluateEvents: shuffled five-event registry fires canonical first four de
         makeDecisionEvent('canonical_b', { priority: 1, turnMin: 20 }),
     ];
 
-    const result = evaluateEvents(state, createRng('canonical-shuffle'), 20, registry);
+    const result = evaluateEvents(state, rejectRandomness, 20, registry);
 
     assert.deepStrictEqual(result.fired.map((event) => event.id), [
         'canonical_a',
@@ -423,7 +407,7 @@ test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receip
     seedEventReadiness(state, srebrenica);
     const srebrenicaResult = evaluateEvents(
         state,
-        createRng('safe-area-falls'),
+        rejectRandomness,
         160,
         [srebrenica, zepa],
     );
@@ -439,7 +423,7 @@ test('evaluateEvents: Srebrenica and Zepa falls write event-owned control receip
     seedEventReadiness(state, zepa);
     const zepaResult = evaluateEvents(
         state,
-        createRng('safe-area-falls'),
+        rejectRandomness,
         161,
         [srebrenica, zepa],
     );
@@ -463,7 +447,7 @@ test('evaluateEvents: recurrence cooldown-blocked event is excluded before overf
         makeDecisionEvent('blocked_by_cooldown', { priority: 1, turnMin: 30, cooldownTurns: 3 }),
     ];
 
-    const result = evaluateEvents(state, createRng('cooldown-overflow'), 30, registry);
+    const result = evaluateEvents(state, rejectRandomness, 30, registry);
 
     assert.strictEqual(result.candidates_considered, 5);
     assert.deepStrictEqual(result.fired.map((event) => event.id), [
@@ -487,7 +471,7 @@ test('evaluateEvents: mutex suppression happens after canonical sort and before 
         makeDecisionEvent('cap_f', { priority: 1, turnMin: 40 }),
     ];
 
-    const result = evaluateEvents(state, createRng('mutex-before-cap'), 40, registry);
+    const result = evaluateEvents(state, rejectRandomness, 40, registry);
 
     assert.strictEqual(result.candidates_considered, 6);
     assert.deepStrictEqual(result.mutex_suppressed_ids, ['mutex_b']);
@@ -513,8 +497,8 @@ test('evaluateEvents: shuffled mutex registry yields deterministic suppression a
     const stateA = minimalState('war', 41);
     const stateB = minimalState('war', 41);
 
-    const resultA = evaluateEvents(stateA, createRng('mutex-shuffle'), 41, makeRegistry());
-    const resultB = evaluateEvents(stateB, createRng('mutex-shuffle'), 41, makeRegistry().reverse());
+    const resultA = evaluateEvents(stateA, rejectRandomness, 41, makeRegistry());
+    const resultB = evaluateEvents(stateB, rejectRandomness, 41, makeRegistry().reverse());
 
     assert.deepStrictEqual(resultA.fired.map((event) => event.id), resultB.fired.map((event) => event.id));
     assert.deepStrictEqual(resultA.mutex_suppressed_ids, resultB.mutex_suppressed_ids);
@@ -561,9 +545,8 @@ test('triggerMatches: turn_max — event with turn_max 80 matches turn 80', () =
 
 test('evaluateEvents: war turn 10 fires matching historical events (via registry param)', () => {
     const state = minimalState('war', 10);
-    const rng = createRng('seed-a');
-    const result = evaluateEvents(state, rng, 10, TEST_REGISTRY);
-    const ids = result.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const result = evaluateEvents(state, rejectRandomness, 10, TEST_REGISTRY);
+    const ids = result.fired.map((f) => f.id).sort(strictCompare);
     assert.ok(ids.includes('test_early_war'));
     assert.ok(ids.includes('test_full_war'));
     assert.ok(!ids.includes('test_mid_war')); // turn_min 40
@@ -573,21 +556,18 @@ test('evaluateEvents: war turn 10 fires matching historical events (via registry
 
 test('evaluateEvents: war turn 100 fires late and mid war events', () => {
     const state = minimalState('war', 100);
-    const rng = createRng('seed-b');
-    const result = evaluateEvents(state, rng, 100, TEST_REGISTRY);
+    const result = evaluateEvents(state, rejectRandomness, 100, TEST_REGISTRY);
     const ids = result.fired.map((f) => f.id);
     assert.ok(ids.includes('test_late_war'));
     assert.ok(ids.includes('test_mid_war'));
     assert.ok(ids.includes('test_full_war'));
 });
 
-test('evaluateEvents: same state + turn + seed → same events_fired (determinism)', () => {
+test('evaluateEvents: same state + turn produces the same events_fired', () => {
     const state1 = minimalState('war', 50);
     const state2 = minimalState('war', 50);
-    const rng1 = createRng('determinism-seed');
-    const rng2 = createRng('determinism-seed');
-    const result1 = evaluateEvents(state1, rng1, 50, TEST_REGISTRY);
-    const result2 = evaluateEvents(state2, rng2, 50, TEST_REGISTRY);
+    const result1 = evaluateEvents(state1, rejectRandomness, 50, TEST_REGISTRY);
+    const result2 = evaluateEvents(state2, rejectRandomness, 50, TEST_REGISTRY);
     assert.deepStrictEqual(
         result1.fired.map((f) => ({ id: f.id, text: f.text })),
         result2.fired.map((f) => ({ id: f.id, text: f.text }))
@@ -597,10 +577,8 @@ test('evaluateEvents: same state + turn + seed → same events_fired (determinis
 test('evaluateEvents: registry order stable — two calls produce identical fired order', () => {
     const state1 = minimalState('war', 100);
     const state2 = minimalState('war', 100);
-    const rng1 = createRng('order-seed');
-    const rng2 = createRng('order-seed');
-    const a = evaluateEvents(state1, rng1, 100, TEST_REGISTRY).fired;
-    const b = evaluateEvents(state2, rng2, 100, TEST_REGISTRY).fired;
+    const a = evaluateEvents(state1, rejectRandomness, 100, TEST_REGISTRY).fired;
+    const b = evaluateEvents(state2, rejectRandomness, 100, TEST_REGISTRY).fired;
     assert.strictEqual(a.length, b.length);
     for (let i = 0; i < a.length; i += 1) {
         assert.strictEqual(a[i]!.id, b[i]!.id);
@@ -610,44 +588,32 @@ test('evaluateEvents: registry order stable — two calls produce identical fire
 
 test('evaluateEvents: peace phase returns empty fired', () => {
     const state = minimalState('peace', 10);
-    const rng = createRng('x');
-    const result = evaluateEvents(state, rng, 10, TEST_REGISTRY);
+    const result = evaluateEvents(state, rejectRandomness, 10, TEST_REGISTRY);
     assert.strictEqual(result.fired.length, 0);
 });
 
 test('evaluateEvents: once-only events tracked and not re-fired', () => {
     const state = minimalState('war', 10);
-    const rng1 = createRng('once-a');
-    const rng2 = createRng('once-b');
-    const r1 = evaluateEvents(state, rng1, 10, TEST_REGISTRY);
+    const r1 = evaluateEvents(state, rejectRandomness, 10, TEST_REGISTRY);
     assert.ok(r1.fired.some(f => f.id === 'test_early_war'));
     // Second call with same state (fired_event_ids now populated)
-    const r2 = evaluateEvents(state, rng2, 10, TEST_REGISTRY);
+    const r2 = evaluateEvents(state, rejectRandomness, 10, TEST_REGISTRY);
     assert.ok(!r2.fired.some(f => f.id === 'test_early_war'), 'once-only event should not re-fire');
 });
 
-test('evaluateEvents: random events use RNG — same seed same fired set', () => {
-    const state1 = minimalState('war', 95);
-    const state2 = minimalState('war', 95);
-    const seed = 'random-same';
-    const r1 = evaluateEvents(state1, createRng(seed), 95, TEST_RANDOM);
-    const r2 = evaluateEvents(state2, createRng(seed), 95, TEST_RANDOM);
-    const ids1 = r1.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const ids2 = r2.fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    assert.deepStrictEqual(ids1, ids2);
-});
+test('evaluateEvents: probability metadata cannot suppress a state-eligible event', () => {
+    const state = minimalState('war', 95);
+    let rngCalls = 0;
+    const result = evaluateEvents(state, () => {
+        rngCalls += 1;
+        throw new Error('Engine Invariants 11.1: event evaluator consumed RNG');
+    }, 95, TEST_RANDOM);
 
-test('evaluateEvents: each RNG seed yields deterministic fired set', () => {
-    const stateA1 = minimalState('war', 95);
-    const stateA2 = minimalState('war', 95);
-    const stateB1 = minimalState('war', 95);
-    const stateB2 = minimalState('war', 95);
-    const seedA1 = evaluateEvents(stateA1, createRng('seed-alpha'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedA2 = evaluateEvents(stateA2, createRng('seed-alpha'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedB1 = evaluateEvents(stateB1, createRng('seed-beta'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    const seedB2 = evaluateEvents(stateB2, createRng('seed-beta'), 95, TEST_RANDOM).fired.map((f) => f.id).sort((a, b) => a.localeCompare(b));
-    assert.deepStrictEqual(seedA1, seedA2);
-    assert.deepStrictEqual(seedB1, seedB2);
+    assert.strictEqual(rngCalls, 0);
+    assert.deepStrictEqual(
+        result.fired.map((event) => event.id),
+        TEST_RANDOM.map((event) => event.id).sort(strictCompare),
+    );
 });
 
 test('triggerMatches: skips event when requires_events prerequisite not met', () => {
@@ -665,8 +631,7 @@ test('triggerMatches: skips event when requires_events prerequisite not met', ()
         once: true,
     };
     // Prerequisite has NOT fired — fired_event_ids is empty
-    const rng = createRng('prereq-not-met');
-    const result = evaluateEvents(state, rng, 6, [prerequisite, dependent]);
+    const result = evaluateEvents(state, rejectRandomness, 6, [prerequisite, dependent]);
     assert.ok(!result.fired.some(f => f.id === 'dependent_event'), 'dependent should not fire without prerequisite');
 });
 
@@ -680,8 +645,7 @@ test('triggerMatches: fires event when requires_events prerequisite is met', () 
         effect: { kind: 'narrative', text: 'Dependent event.' },
         once: true,
     };
-    const rng = createRng('prereq-met');
-    const result = evaluateEvents(state, rng, 6, [dependent]);
+    const result = evaluateEvents(state, rejectRandomness, 6, [dependent]);
     assert.ok(result.fired.some(f => f.id === 'dependent_event'), 'dependent should fire when prerequisite is met');
 });
 
@@ -695,7 +659,6 @@ test('triggerMatches: requires ALL listed events in requires_events (not just on
         effect: { kind: 'narrative', text: 'Multi-dependency event.' },
         once: true,
     };
-    const rng = createRng('partial-prereq');
-    const result = evaluateEvents(state, rng, 6, [dependent]);
+    const result = evaluateEvents(state, rejectRandomness, 6, [dependent]);
     assert.ok(!result.fired.some(f => f.id === 'multi_dep_event'), 'should not fire with only one of two prerequisites');
 });

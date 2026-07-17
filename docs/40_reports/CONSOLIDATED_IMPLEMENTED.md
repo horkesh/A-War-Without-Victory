@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest full-campaign player/canon acceptance:** [playtests/20260714_rs_52w_canon_player_experience.md](playtests/20260714_rs_52w_canon_player_experience.md) - fresh RS exact-52 Electron run, 468 screenshots/59 manually inspected sheets, bound controlled-player/headless comparator, durable exact-plan approvals, reserve deployment continuity, truthful paramilitary scope metadata, and sticky long-event completion action. Local agent-actionable PASS; D2/release/publication remain open.
+
 **Latest command-surface truth:** [implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md](implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md) - Decision Room disabled actions now explain unavailable routes, generic inbox navigation stays owned by the Desk shell, sector coverage uses live line-holder density, Corps Front missing reserve/security truth stays unreported, opening commander projection is turn-zero only, and Formation Detail war narratives are player-safe.
 
 **Latest player-start hardening:** [implemented/20260627_P17_PLAYER_START_HARDENING.md](implemented/20260627_P17_PLAYER_START_HARDENING.md) - RBiH, RS, and HRHB foundational decisions remain first-hour required decisions, but `EventDecisionModal` no longer renders pre-choice future-consequence/downstream-impact preview cards or detail toggles; the all-faction browser gate now fails on future-branch knowledge leaks before the player chooses.
@@ -966,5 +968,13 @@ Command briefing views now carry typed category/subject/copy-token metadata, Chi
 Report: `docs/40_reports/implemented/20260622_COMMAND_BRIEFING_FALLBACK_LOCALIZATION.md`
 
 Known generated command briefing rows now resolve at display time through EN/BCS keys across the tactical banner, Army HQ Situation Briefing, Presidential Decision Room cards, and legacy Warroom briefing modal while retaining saved English fallback text for compatibility.
+
+---
+
+# 2026-07-13 Paramilitary Truth Fixes
+
+Report: `docs/40_reports/implemented/20260713_PARAMILITARY_TRUTH_FIXES.md`
+
+Paramilitary sweeps now stop after week 20, clear readiness on dissolution, write civilian deaths into population availability, and attribute their control flips separately from combat. Focused verification passed 4 files / 79 tests plus typecheck; the shared baseline drift was recorded without refreshing artifacts.
 
 ---

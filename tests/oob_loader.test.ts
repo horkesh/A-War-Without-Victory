@@ -1,6 +1,7 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 import { loadMunicipalityHqSettlement, loadOobBrigades, loadOobCorps } from '../src/scenario/oob_loader.js';
+import { strictCompare } from '../src/state/validateGameState.js';
 
 test('loadOobBrigades returns stable order (faction then name) and valid home_mun', async () => {
     const baseDir = process.cwd();
@@ -10,10 +11,10 @@ test('loadOobBrigades returns stable order (faction then name) and valid home_mu
     for (let i = 1; i < brigades.length; i++) {
         const a = brigades[i - 1];
         const b = brigades[i];
-        const fc = a.faction.localeCompare(b.faction);
+        const fc = strictCompare(a.faction, b.faction);
         assert.ok(fc <= 0, `order: ${a.faction} vs ${b.faction}`);
         if (fc === 0) {
-            assert.ok(a.name.localeCompare(b.name) <= 0, `order: ${a.name} vs ${b.name}`);
+            assert.ok(strictCompare(a.name, b.name) <= 0, `order: ${a.name} vs ${b.name}`);
         }
     }
     const ids = new Set<string>();
@@ -58,9 +59,9 @@ test('loadOobCorps returns stable order (faction then name) and valid hq_mun', a
     for (let i = 1; i < corps.length; i++) {
         const a = corps[i - 1];
         const b = corps[i];
-        const fc = a.faction.localeCompare(b.faction);
+        const fc = strictCompare(a.faction, b.faction);
         assert.ok(fc <= 0);
-        if (fc === 0) assert.ok(a.name.localeCompare(b.name) <= 0);
+        if (fc === 0) assert.ok(strictCompare(a.name, b.name) <= 0);
     }
     const ids = new Set<string>();
     for (const c of corps) {

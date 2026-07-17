@@ -1,7 +1,8 @@
 /**
- * CodexPanel - Historical essay viewer unlocked by in-game events.
+ * CodexPanel - Historical record and campaign-entry viewer.
  * Sidebar list grouped by year, content viewer on right with paper aesthetic.
- * Locked essays show title only (grayed out). Unlocked essays expand with full content.
+ * Tier 0-2 records are visible from scenario start. Tier 3 campaign entries
+ * stay hidden or title-redacted until their predicates fire.
  *
  * Phase H Packet 5 (Component C — Codex unlock-state display): the panel
  * accepts OPTIONAL `eventCatalog` + `state` props that, when both provided,
@@ -42,7 +43,7 @@ const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
 function CategoryBadge({ category }: { category: string }) {
     const colors = CATEGORY_COLORS[category] ?? { bg: 'bg-neutral-400/15', text: 'text-neutral-400' };
     return (
-        <span className={`px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] rounded ${colors.bg} ${colors.text}`}>
+        <span className={`px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] rounded ${colors.bg} ${colors.text}`}>
             {category}
         </span>
     );
@@ -73,9 +74,8 @@ function tierLabel(tier: CodexTier): string {
     }
 }
 
-/** A1b: soft "unlocks after X" hint for a graph-gated locked essay. Returns
- *  null for the plain not-yet-experienced case (lockReason kind 'event_fire')
- *  so the panel only surfaces actual dependency-graph gates. */
+/** Soft campaign-entry hint for a graph-gated Tier 3 entry. Plain unfired Tier
+ *  3 entries remain hidden. */
 function lockHint(lockReason: CodexLockReason | null): string | null {
     if (!lockReason) return null;
     switch (lockReason.kind) {
@@ -87,7 +87,7 @@ function lockHint(lockReason: CodexLockReason | null): string | null {
     }
 }
 
-/** A sidebar row: an unlocked essay, or a graph-gated locked essay with a hint. */
+/** A sidebar row: visible history or a title-redacted Tier 3 campaign hint. */
 interface CodexRow {
     essay: EssayEntry;
     unlocked: boolean;
@@ -103,7 +103,7 @@ function TierBadge({ tier }: { tier: CodexTier }) {
         <span
             data-testid="codex-tier-badge"
             data-tier={tier}
-            className="px-1 py-0.5 text-[7px] font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
+            className="px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] rounded bg-neutral-500/15 text-neutral-400"
         >
             {tierLabel(tier)}
         </span>
@@ -201,10 +201,8 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
     const distanceFromHistory = loadedGameState?.distanceFromHistory ?? null;
 
     const essays = (Array.isArray(essayIndex) ? essayIndex : (essayIndex as { essays: EssayEntry[] }).essays ?? []) as EssayEntry[];
-    // A1a/A1b: index-level resolution. `resolveCodexEssayIndex` runs the
-    // deterministic transitive fixpoint for `requires_essays` and supplies
-    // `currentTurn` for `unlock_turn_min`. Existing event-fire/ghost unlock is
-    // unchanged — tiers + the dependency graph layer on top.
+    // Index-level resolution keeps Tier 0-2 history visible while applying the
+    // deterministic dependency fixpoint to Tier 3 campaign entries.
     const resolvedEssays = useMemo(() => {
         const context = {
             firedEventIds,
@@ -218,11 +216,9 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
         return resolveCodexEssayIndex(essays, context, locale);
     }, [essays, firedEventIds, locale, loadedGameState?.eventFlags, loadedGameState?.decisionResponses, loadedGameState?.historicalComparison, loadedGameState?.costLedger, loadedGameState?.gameOver, loadedGameState?.turn]);
 
-    // A1a/A1b: per-year rows sorted by tier (FIXED → AHISTORICAL), then by the
-    // essay's original index for stability. Each row carries the unlocked flag
-    // and a soft dependency-graph hint. Unlocked essays always show; locked
-    // essays show ONLY when graph-gated (lockHint non-null) — plain
-    // not-yet-experienced essays stay hidden, preserving prior behavior.
+    // Per-year rows sort Tier 0-2 start-visible history before Tier 3 campaign
+    // entries. A graph-gated Tier 3 row may show a redacted hint; a plain
+    // unfired Tier 3 entry stays hidden.
     const rowsByYear = useMemo(() => {
         const tierRank = new Map<CodexTier, number>(TIER_ORDER.map((tier, i) => [tier, i]));
         const grouped = new Map<number, CodexRow[]>();
@@ -301,7 +297,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         <div className="text-amber-400 text-[15px] font-bold tracking-[0.13em] uppercase">
                             {t('codex.title')}
                         </div>
-                        <div className="text-[9px] text-neutral-500">
+                        <div className="text-xs text-neutral-400">
                             {t(availableCount === 1 ? 'codex.essayAvailableSingular' : 'codex.essayAvailablePlural', { count: availableCount })}
                         </div>
                     </div>
@@ -309,7 +305,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         type="button"
                         onClick={onClose}
                         data-testid="codex-close"
-                        className="text-neutral-500 hover:text-neutral-300 transition-colors text-[11px] px-2 py-0.5"
+                        className="text-neutral-400 hover:text-neutral-200 transition-colors text-xs px-2 py-0.5"
                     >
                         ESC
                     </button>
@@ -327,7 +323,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         data-testid="codex-dilemma-spine-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
                     >
-                        <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1.5">
+                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1.5">
                             {t('codex.dilemmaSpine.title')}
                         </div>
                         <ul className="space-y-1">
@@ -341,14 +337,14 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         data-testid="codex-dilemma-row"
                                         data-dilemma-id={dilemma.dilemmaId}
                                         data-faced={dilemma.faced ? 'true' : 'false'}
-                                        className="flex items-start gap-2 text-[9px] leading-snug"
+                                        className="flex items-start gap-2 text-xs leading-snug"
                                     >
                                         <span
                                             data-testid="codex-dilemma-faced-badge"
-                                            className={`mt-[1px] shrink-0 px-1 py-0.5 rounded text-[7px] font-bold uppercase tracking-[0.1em] ${
+                                            className={`mt-[1px] shrink-0 px-1 py-0.5 rounded text-xs leading-none font-bold uppercase tracking-[0.1em] ${
                                                 dilemma.faced
                                                     ? 'bg-amber-400/15 text-amber-400'
-                                                    : 'bg-neutral-500/15 text-neutral-500'
+                                                    : 'bg-neutral-500/15 text-neutral-400'
                                             }`}
                                         >
                                             {dilemma.faced ? t('codex.dilemma.faced') : t('codex.dilemma.notYet')}
@@ -358,11 +354,11 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                             {dilemma.faced && dilemma.chosenBranchLabel && (
                                                 <div
                                                     data-testid="codex-dilemma-branch"
-                                                    className="text-neutral-400 text-[8px] mt-0.5"
+                                                    className="text-neutral-400 text-xs mt-0.5"
                                                 >
                                                     {t('codex.dilemma.chose', { choice: dilemma.chosenBranchLabel })}
                                                     {dilemma.decisionTurn !== null && (
-                                                        <span className="text-neutral-600"> ({turnToDateString(dilemma.decisionTurn)})</span>
+                                                        <span className="text-neutral-400"> ({turnToDateString(dilemma.decisionTurn)})</span>
                                                     )}
                                                 </div>
                                             )}
@@ -377,10 +373,10 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                     if (essay) setExpandedYear(essay.year);
                                                     setSelectedEssayId(dilemma.essayId);
                                                 }}
-                                                className={`shrink-0 text-[8px] uppercase tracking-[0.1em] px-1.5 py-0.5 rounded transition-colors ${
+                                                className={`shrink-0 text-xs uppercase tracking-[0.1em] px-1.5 py-0.5 rounded transition-colors ${
                                                     essayUnlocked
                                                         ? 'text-amber-400 hover:bg-amber-400/10'
-                                                        : 'text-neutral-600 cursor-default'
+                                                        : 'text-neutral-400 cursor-default'
                                                 }`}
                                             >
                                                 {essayUnlocked ? t('codex.dilemma.readEssay') : t('codex.dilemma.locked')}
@@ -388,7 +384,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         ) : (
                                             <span
                                                 data-testid="codex-dilemma-no-essay"
-                                                className="shrink-0 text-[8px] uppercase tracking-[0.1em] text-neutral-700 px-1.5 py-0.5"
+                                                className="shrink-0 text-xs uppercase tracking-[0.1em] text-neutral-400 px-1.5 py-0.5"
                                             >
                                                 {t('codex.dilemma.noEssay')}
                                             </span>
@@ -411,12 +407,12 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         data-testid="codex-distance-from-history-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
                     >
-                        <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1">
+                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1">
                             {t('codex.distance.title')}
                         </div>
                         <div
                             data-testid="codex-distance-from-history-summary"
-                            className="text-[9px] text-neutral-300 mb-1.5"
+                            className="text-xs text-neutral-300 mb-1.5"
                         >
                             <span className="text-amber-400 font-bold">
                                 {t(
@@ -448,7 +444,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         data-testid="codex-distance-from-history-row"
                                         data-event-id={d.eventId}
                                         data-source={d.source}
-                                        className="flex items-start gap-2 text-[9px] leading-snug"
+                                        className="flex items-start gap-2 text-xs leading-snug"
                                     >
                                         <span className="text-neutral-600 shrink-0">{turnToDateString(d.turn)}</span>
                                         <div className="flex-1 min-w-0">
@@ -462,7 +458,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         {d.source === 'player' && (
                                             <span
                                                 data-testid="codex-distance-from-history-player-badge"
-                                                className="shrink-0 text-[7px] font-bold uppercase tracking-[0.1em] px-1 py-0.5 rounded bg-amber-400/15 text-amber-400"
+                                                className="shrink-0 text-xs font-bold uppercase tracking-[0.1em] px-1 py-0.5 rounded bg-amber-400/15 text-amber-400"
                                             >
                                                 {t('codex.distance.yours')}
                                             </span>
@@ -492,12 +488,12 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         data-testid="codex-unlock-state-section"
                         className="border-b border-neutral-700/40 bg-[#0d0f16] px-3 py-2"
                     >
-                        <div className="text-amber-400 text-[10px] font-bold tracking-[0.12em] uppercase mb-1">
+                        <div className="text-amber-400 text-xs font-bold tracking-[0.12em] uppercase mb-1">
                             Unlock State
                         </div>
                         <div
                             data-testid="codex-unlock-state-summary"
-                            className="text-[9px] text-neutral-400 mb-2"
+                            className="text-xs text-neutral-400 mb-2"
                         >
                             Foundational: {unlockState.summary.foundational_count}
                             {' | '}Fired downstream: {unlockState.summary.downstream_fired_count}
@@ -509,7 +505,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 data-testid="codex-unlock-fired-list"
                                 className="flex-1"
                             >
-                                <div className="text-[8px] uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
+                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
                                     Fired ({unlockState.fired.length})
                                 </div>
                                 <ul className="space-y-0.5">
@@ -520,7 +516,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                 key={id}
                                                 data-testid="codex-unlock-fired-row"
                                                 data-event-id={id}
-                                                className="text-[9px] text-neutral-300 leading-snug"
+                                                className="text-xs text-neutral-300 leading-snug"
                                             >
                                                 <span>{id}</span>
                                                 {' '}
@@ -536,7 +532,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 data-testid="codex-unlock-enabled-list"
                                 className="flex-1"
                             >
-                                <div className="text-[8px] uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
+                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
                                     Enabled (pending) ({unlockState.enabled.length})
                                 </div>
                                 <ul className="space-y-0.5">
@@ -547,7 +543,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                 key={id}
                                                 data-testid="codex-unlock-enabled-row"
                                                 data-event-id={id}
-                                                className="text-[9px] text-neutral-300 leading-snug"
+                                                className="text-xs text-neutral-300 leading-snug"
                                             >
                                                 <span>{id}</span>
                                                 {' '}
@@ -563,7 +559,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 data-testid="codex-unlock-closed-list"
                                 className="flex-1"
                             >
-                                <div className="text-[8px] uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
+                                <div className="text-xs uppercase tracking-[0.1em] text-neutral-500 mb-0.5">
                                     Closed ({unlockState.closed.length})
                                 </div>
                                 <ul className="space-y-0.5">
@@ -574,7 +570,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                 key={id}
                                                 data-testid="codex-unlock-closed-row"
                                                 data-event-id={id}
-                                                className="text-[9px] text-neutral-300 leading-snug"
+                                                className="text-xs text-neutral-300 leading-snug"
                                             >
                                                 <span>{id}</span>
                                                 {' '}
@@ -605,10 +601,10 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                         onClick={() => setExpandedYear(isExpanded ? null : year)}
                                         className="w-full flex items-center justify-between px-2.5 py-1 text-left hover:bg-white/5 transition-colors border-b border-neutral-800/50"
                                     >
-                                        <span className="text-[10px] font-bold text-neutral-300 tracking-[0.08em]">
+                                        <span className="text-xs font-bold text-neutral-300 tracking-[0.08em]">
                                             {year}
                                         </span>
-                                        <span className="text-[9px] text-neutral-500">
+                                        <span className="text-xs text-neutral-500">
                                             {unlockedCount}
                                         </span>
                                     </button>
@@ -626,7 +622,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                     <div
                                                         data-testid="codex-tier-header"
                                                         data-tier={row.tier}
-                                                        className="px-2.5 pt-1.5 pb-0.5 text-[7px] font-bold uppercase tracking-[0.14em] text-neutral-500 bg-[#0b0d13]"
+                                                        className="px-2.5 pt-1.5 pb-0.5 text-xs font-bold uppercase tracking-[0.14em] text-neutral-400 bg-[#0b0d13]"
                                                     >
                                                         {tierLabel(row.tier)}
                                                     </div>
@@ -653,18 +649,18 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                         <CategoryBadge category={resolved?.category ?? essay.category} />
                                                         <TierBadge tier={row.tier} />
                                                         {ghost && (
-                                                            <span className="text-[7px] text-amber-500 uppercase tracking-wider">
+                                                            <span className="text-xs text-amber-500 uppercase tracking-wider">
                                                                 {t('codex.ghost')}
                                                             </span>
                                                         )}
                                                     </div>
-                                                    <div className={`text-[10px] leading-snug ${row.unlocked ? 'text-neutral-200' : 'text-neutral-400'}`}>
+                                                    <div className={`text-xs leading-snug ${row.unlocked ? 'text-neutral-200' : 'text-neutral-400'}`}>
                                                         {row.unlocked ? (resolved?.title ?? essay.title) : t('codex.lockedHistoricalEntry')}
                                                     </div>
                                                     {!row.unlocked && row.hint && (
                                                         <div
                                                             data-testid="codex-unlock-hint"
-                                                            className="text-[8px] text-neutral-500 italic mt-0.5"
+                                                            className="text-xs text-neutral-500 italic mt-0.5"
                                                         >
                                                             {row.hint}
                                                         </div>
@@ -682,8 +678,8 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         {!selectedEssay ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-600 text-[13px] mb-2">{t('codex.selectEssay')}</div>
-                                    <div className="text-neutral-700 text-[9px] max-w-[260px]">
+                                    <div className="text-neutral-400 text-[13px] mb-2">{t('codex.selectEssay')}</div>
+                                    <div className="text-neutral-400 text-xs max-w-[260px]">
                                         {t('codex.selectEssayHelp')}
                                     </div>
                                 </div>
@@ -691,8 +687,8 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                         ) : !selectedResolvedEssay?.isUnlocked ? (
                             <div className="flex items-center justify-center h-full">
                                 <div className="text-center">
-                                    <div className="text-neutral-500 text-[13px] mb-2">{selectedResolvedEssay?.title ?? selectedEssay.title}</div>
-                                    <div className="text-[9px] text-neutral-600 border border-neutral-700/30 rounded-md px-2.5 py-2 bg-neutral-800/20 max-w-[300px]">
+                                    <div className="text-neutral-400 text-[13px] mb-2">{selectedResolvedEssay?.title ?? selectedEssay.title}</div>
+                                    <div className="text-xs text-neutral-400 border border-neutral-700/30 rounded-md px-2.5 py-2 bg-neutral-800/20 max-w-[300px]">
                                         {t('codex.lockedHelp')}
                                     </div>
                                 </div>
@@ -712,11 +708,11 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                 <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8] rounded-t-lg">
                                     <div className="flex items-center gap-2 mb-1">
                                         <CategoryBadge category={selectedResolvedEssay.category} />
-                                        <span className="text-[8px] uppercase text-neutral-500 tracking-[0.15em]">
+                                        <span className="text-xs uppercase text-neutral-500 tracking-[0.15em]">
                                             {selectedEssay.year}
                                         </span>
                                         {selectedResolvedEssay.isGhost && (
-                                            <span className="text-[8px] uppercase text-amber-700 tracking-[0.15em] font-bold">
+                                            <span className="text-xs uppercase text-amber-700 tracking-[0.15em] font-bold">
                                                 {t('codex.ghostEntry')}
                                             </span>
                                         )}
@@ -724,7 +720,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                     <div className="text-[12px] font-bold text-neutral-800 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
                                         {selectedResolvedEssay.title}
                                     </div>
-                                    <div className="text-[8px] text-neutral-500 mt-1 italic">
+                                    <div className="text-xs text-neutral-500 mt-1 italic">
                                         {selectedResolvedEssay.isGhost ? t('codex.historicalGhostEntry') : t('codex.historicalContext')}
                                     </div>
                                 </div>
@@ -735,7 +731,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                     data-awwv-codex-selected-state={selectedResolvedEssay.isGhost ? 'ghost' : 'unlocked'}
                                 >
                                     {selectedResolvedEssay.paragraphs.length > 0 ? (
-                                        <div className="text-[9px] text-neutral-700 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
+                                        <div className="text-xs text-neutral-700 leading-relaxed" style={{ fontFamily: 'Georgia, serif' }}>
                                             {selectedResolvedEssay.paragraphs.map((paragraph, index) => (
                                                 paragraph.kind === 'canonical' ? (
                                                     <p key={index} className="mb-2 last:mb-0">{paragraph.text}</p>
@@ -748,7 +744,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                                                 : 'border-l-slate-500 bg-slate-100/60 text-neutral-700'
                                                         }`}
                                                     >
-                                                        <div className="text-[7px] uppercase tracking-[0.15em] font-bold mb-1 text-neutral-500">
+                                                        <div className="text-xs uppercase tracking-[0.15em] font-bold mb-1 text-neutral-600">
                                                             {paragraph.kind === 'ghost'
                                                                 ? t('codex.historicalGhost')
                                                                 : paragraph.variant === 'divergence'
@@ -761,7 +757,7 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
                                             ))}
                                         </div>
                                     ) : (
-                                        <div className="text-[9px] text-neutral-400 italic text-center py-3" style={{ fontFamily: 'Georgia, serif' }}>
+                                        <div className="text-xs text-neutral-400 italic text-center py-3" style={{ fontFamily: 'Georgia, serif' }}>
                                             {t('codex.contentPending')}
                                         </div>
                                     )}
@@ -769,10 +765,10 @@ export function CodexPanel({ isOpen, onClose, requestedEventId, eventCatalog, st
 
                                 {selectedResolvedEssay.sources && selectedResolvedEssay.sources.length > 0 && (
                                     <div className="px-3 py-1.5 border-t border-neutral-300/60 bg-[#ebe5d8] rounded-b-lg">
-                                        <div className="text-[7px] uppercase text-neutral-500 font-bold tracking-[0.15em] mb-1">
+                                        <div className="text-xs uppercase text-neutral-600 font-bold tracking-[0.15em] mb-1">
                                             {t('codex.sources')}
                                         </div>
-                                        <ul className="text-[8px] text-neutral-500 space-y-0.5">
+                                        <ul className="text-xs text-neutral-500 space-y-0.5">
                                             {selectedResolvedEssay.sources.map((src, index) => (
                                                 <li key={index} className="leading-snug">{src}</li>
                                             ))}

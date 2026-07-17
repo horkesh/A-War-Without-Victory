@@ -371,6 +371,8 @@ function collectSectorFloorShortfallIssues(state) {
     const formations = state.military?.formations ?? {};
     const adjacency = loadOperationalAdjacency(state);
     const opParticipants = buildOperationParticipantSet(state);
+    const brigadeMovementState = state.military?.brigade_movement_state ?? {};
+    const brigadeMovementOrders = state.military?.brigade_movement_orders ?? {};
     const activeCounts = countActiveFieldBrigadesByOsid(state);
     const byFaction = new Map();
     for (const sector of sectors) {
@@ -434,6 +436,8 @@ function collectSectorFloorShortfallIssues(state) {
             if (!isFieldBrigadeKind(formation.kind)) continue;
             if ((formation.disrupted_turns ?? 0) > 0) continue;
             if (opParticipants.has(entry.bid)) continue;
+            if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
+            if (brigadeMovementOrders[entry.bid]) continue;
             const legalTarget = findLegalReliefTarget(
                 formation,
                 vacantFrontOsids,
@@ -482,6 +486,8 @@ function collectSectorFloorShortfallIssues(state) {
                 if (!isFieldBrigadeKind(formation.kind)) continue;
                 if ((formation.disrupted_turns ?? 0) > 0) continue;
                 if (opParticipants.has(entry.bid)) continue;
+                if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
+                if (brigadeMovementOrders[entry.bid]) continue;
                 if (entry.donorRole === 'front') {
                     const claim = classifySectorPosition(
                         formation.location_osid,
@@ -785,6 +791,7 @@ function buildSectorCoverageFactions(state) {
         const brigadeIds = [
             ...(sector.assigned_brigade_ids ?? []),
             ...(sector.reserve_brigade_ids ?? []),
+            ...(sector.rear_brigade_ids ?? []),
         ].sort((a, b) => String(a).localeCompare(String(b)));
         const hasActiveCoverage = brigadeIds.some((brigadeId) => {
             const brigade = formations[brigadeId];
@@ -823,7 +830,8 @@ function collectEmptyContestedSectorIssues(state) {
         if (sector.unstaffed_front === true) continue;
         const assigned = sector.assigned_brigade_ids?.length ?? 0;
         const reserve = sector.reserve_brigade_ids?.length ?? 0;
-        if (assigned + reserve === 0) {
+        const rear = sector.rear_brigade_ids?.length ?? 0;
+        if (assigned + reserve + rear === 0) {
             const donorCandidates = collectLegalSectorDonorCandidates(state, sector, getSectorFrontOsids(sector));
             const issue = {
                 sector: sectorId,
@@ -849,6 +857,7 @@ function collectUndefendedFrontSubsegmentIssues(state) {
     const unavoidableGap = [];
     const staleGap = [];
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
+        if (sector.unstaffed_front === true) continue;
         for (const subSegment of sector.sub_segments ?? []) {
             const lengthEdges = subSegment.length_edges ?? subSegment.edge_ids?.length ?? 0;
             if (subSegment.gap === true && lengthEdges > 2) {
@@ -859,7 +868,8 @@ function collectUndefendedFrontSubsegmentIssues(state) {
                 };
                 const assigned = sector.assigned_brigade_ids?.length ?? 0;
                 const reserve = sector.reserve_brigade_ids?.length ?? 0;
-                if (assigned + reserve > 0) {
+                const rear = sector.rear_brigade_ids?.length ?? 0;
+                if (assigned + reserve + rear > 0) {
                     staleGap.push(issue);
                     continue;
                 }

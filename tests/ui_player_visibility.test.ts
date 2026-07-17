@@ -378,7 +378,7 @@ describe('player visibility helpers', () => {
     expect(isPlayerEnemyContactFormation(state, state.formations.find((formation) => formation.id === 'enemy_rear'))).toBe(false);
   });
 
-  it('formation stack expansion only includes player-visible fielded units', () => {
+  it('formation stack expansion includes own forming markers without exposing hidden enemies', () => {
     const state = {
       player_faction: 'RBiH',
       fogOfWar: {
@@ -400,7 +400,7 @@ describe('player visibility helpers', () => {
       ['op:rear', [20, 44]],
     ]);
 
-    expect(getPlayerVisibleFormationStack(state, 'op:shared_hidden', centroids).map((formation) => formation.id)).toEqual(['own_1']);
+    expect(getPlayerVisibleFormationStack(state, 'op:shared_hidden', centroids).map((formation) => formation.id)).toEqual(['forming_own', 'own_1']);
     expect(getPlayerVisibleFormationStack(state, 'op:shared_seen', centroids).map((formation) => formation.id)).toEqual(['seen_enemy']);
   });
 

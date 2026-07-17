@@ -4285,10 +4285,14 @@
         "type": "and",
         "conditions": [
           {
-            "type": "faction_controls_municipality",
+            "type": "territory_control",
             "faction": "RS",
-            "municipality": "brcko",
-            "threshold": 0.5
+            "osid": "op:brcko:krepsic"
+          },
+          {
+            "type": "territory_control",
+            "faction": "RS",
+            "osid": "op:brcko:skakava_donja"
           },
           {
             "type": "flag_equals",

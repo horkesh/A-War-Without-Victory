@@ -70,7 +70,8 @@ const STRATEGY_PROFILES: Record<string, BotStrategyProfile> = {
         consolidation_priority_weight: 0.8,
         benchmarks: [
             { turn: 20, objective: 'early_territorial_expansion', expected_control_share: 0.55, tolerance: 0.08 },
-            { turn: 40, objective: 'consolidate_gains', expected_control_share: 0.553, tolerance: 0.05 }
+            // Painted January 1993 reference: 385 of 712 operational settlements.
+            { turn: 40, objective: 'consolidate_gains', expected_control_share: 0.541, tolerance: 0.05 }
         ]
     },
     HRHB: {

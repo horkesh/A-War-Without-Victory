@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+    CodexTier,
     evaluateEssayCondition,
     resolveCodexEssay,
     type CodexRenderContext,
@@ -31,20 +32,43 @@ function essay(overrides: Partial<EssayEntry> = {}): EssayEntry {
 }
 
 describe('codexEssayResolver', () => {
-    it('keeps regular essays locked until their event fires', () => {
-        const resolved = resolveCodexEssay(essay(), context());
-        expect(resolved.isUnlocked).toBe(false);
-        expect(resolved.isGhost).toBe(false);
-        expect(resolved.paragraphs).toEqual([]);
-    });
+    it.each([CodexTier.FIXED, CodexTier.CONDITIONAL, CodexTier.SHAPEABLE])(
+        'shows Tier %s canonical title, sources, and base prose from scenario start',
+        (tier) => {
+            const resolved = resolveCodexEssay(
+                essay({ tier, sources: ['Historical source'] }),
+                context(),
+            );
 
-    it('unlocks canonical essay content when the source event fired', () => {
+            expect(resolved.isUnlocked).toBe(true);
+            expect(resolved.isGhost).toBe(false);
+            expect(resolved.title).toBe('Test Essay');
+            expect(resolved.sources).toEqual(['Historical source']);
+            expect(resolved.paragraphs).toEqual([
+                { kind: 'canonical', text: 'Paragraph one.' },
+                { kind: 'canonical', text: 'Paragraph two.' },
+            ]);
+        },
+    );
+
+    it('keeps Tier 3 title, sources, and prose redacted until its campaign predicate fires', () => {
+        const hidden = resolveCodexEssay(
+            essay({ tier: CodexTier.AHISTORICAL, sources: ['Campaign source'] }),
+            context(),
+        );
+        expect(hidden.isUnlocked).toBe(false);
+        expect(hidden.title).toBe('');
+        expect(hidden.sources).toBeUndefined();
+        expect(hidden.paragraphs).toEqual([]);
+
         const resolved = resolveCodexEssay(
-            essay(),
+            essay({ tier: CodexTier.AHISTORICAL, sources: ['Campaign source'] }),
             context({ firedEventIds: new Set(['test_event']) }),
         );
         expect(resolved.isUnlocked).toBe(true);
         expect(resolved.isGhost).toBe(false);
+        expect(resolved.title).toBe('Test Essay');
+        expect(resolved.sources).toEqual(['Campaign source']);
         expect(resolved.paragraphs.map((paragraph) => paragraph.text)).toEqual([
             'Paragraph one.',
             'Paragraph two.',
@@ -94,8 +118,9 @@ describe('codexEssayResolver', () => {
                 },
             }),
         );
-        expect(resolved.isUnlocked).toBe(false);
+        expect(resolved.isUnlocked).toBe(true);
         expect(resolved.isGhost).toBe(false);
+        expect(resolved.paragraphs.every((paragraph) => paragraph.kind === 'canonical')).toBe(true);
     });
 
     it('appends comparison notes through a dynamic divergence section', () => {
@@ -112,7 +137,6 @@ describe('codexEssayResolver', () => {
                 ],
             }),
             context({
-                firedEventIds: new Set(['test_event']),
                 gameOver: true,
                 historicalComparison: {
                     duration_delta_weeks: 4,
@@ -139,6 +163,25 @@ describe('codexEssayResolver', () => {
                 variant: 'divergence',
                 text: 'Srebrenica enclave survived',
             },
+        ]);
+    });
+
+    it('uses the source event as the fallback gate for a dynamic section without a condition', () => {
+        const entry = essay({
+            tier: CodexTier.SHAPEABLE,
+            dynamic_sections: [{ content: 'Campaign-only annotation.' }],
+        });
+
+        const atStart = resolveCodexEssay(entry, context());
+        expect(atStart.isUnlocked).toBe(true);
+        expect(atStart.paragraphs.some((paragraph) => paragraph.kind === 'dynamic')).toBe(false);
+
+        const afterEvent = resolveCodexEssay(
+            entry,
+            context({ firedEventIds: new Set(['test_event']) }),
+        );
+        expect(afterEvent.paragraphs.filter((paragraph) => paragraph.kind === 'dynamic')).toEqual([
+            { kind: 'dynamic', text: 'Campaign-only annotation.', variant: 'note' },
         ]);
     });
 
@@ -778,30 +821,20 @@ describe('codexEssayResolver - cost-ledger annotation atoms and tokens', () => {
     });
 });
 
-describe('T2-C — FIXED tier-0 essay with no backing event unlocks as canonical (orphaned-wiring audit)', () => {
-    // independence_referendum_1992: tier-0 FIXED, no backing event in the
-    // catalog, now `ghost_when`-anchored on an always-firing campaign-opening
-    // event. It must unlock as full canonical prose — NOT a "path not taken"
-    // ghost — because tier-0 is canonical history that always happened.
-    function fixedReferendumEssay(overrides: Partial<EssayEntry> = {}): EssayEntry {
+describe('hard canon start visibility for the independence referendum', () => {
+    function referendumEssay(overrides: Partial<EssayEntry> = {}): EssayEntry {
         return essay({
             id: 'essay_independence_referendum_1992',
             event_id: 'independence_referendum_1992',
             tier: 0,
-            ghost_when: 'EVENT:rs_strategic_goals OR EVENT:rbih_state_identity',
             content: 'The referendum.\n\nTwo legitimacies.',
             ...overrides,
         });
     }
 
-    it('unlocks as canonical (non-ghost) when its always-fired anchor event has fired', () => {
-        const resolved = resolveCodexEssay(
-            fixedReferendumEssay(),
-            context({ firedEventIds: new Set(['rs_strategic_goals']) }),
-        );
+    it('shows canonical referendum prose at scenario start without an unlock-only ghost predicate', () => {
+        const resolved = resolveCodexEssay(referendumEssay(), context());
         expect(resolved.isUnlocked).toBe(true);
-        // The key assertion: a FIXED essay is NEVER a ghost, even when it
-        // unlocked via ghost_when rather than a direct event_id fire.
         expect(resolved.isGhost).toBe(false);
         expect(resolved.paragraphs.every((p) => p.kind !== 'ghost')).toBe(true);
         expect(resolved.paragraphs.map((p) => p.text)).toEqual([
@@ -810,39 +843,21 @@ describe('T2-C — FIXED tier-0 essay with no backing event unlocks as canonical
         ]);
     });
 
-    it('also unlocks via the RBiH-side anchor event (cross-faction reachability)', () => {
+    it('adds ghost prose only when a real ghost predicate fires', () => {
         const resolved = resolveCodexEssay(
-            fixedReferendumEssay(),
-            context({ firedEventIds: new Set(['rbih_state_identity']) }),
-        );
-        expect(resolved.isUnlocked).toBe(true);
-        expect(resolved.isGhost).toBe(false);
-    });
-
-    it('stays locked when no anchor event has fired', () => {
-        const resolved = resolveCodexEssay(fixedReferendumEssay(), context());
-        expect(resolved.isUnlocked).toBe(false);
-    });
-
-    it('a CONDITIONAL essay with the same ghost_when still surfaces AS a ghost (FIXED-only rule)', () => {
-        const resolved = resolveCodexEssay(
-            fixedReferendumEssay({ tier: 1, ghost_summary: 'A path not taken.' }),
+            referendumEssay({
+                tier: 1,
+                ghost_when: 'EVENT:rs_strategic_goals',
+                ghost_summary: 'A campaign path not taken.',
+            }),
             context({ firedEventIds: new Set(['rs_strategic_goals']) }),
         );
         expect(resolved.isUnlocked).toBe(true);
         expect(resolved.isGhost).toBe(true);
-    });
-
-    it('a FIXED essay whose event_id has no backing event AND no ghost_when stays permanently locked (§6 invariant)', () => {
-        // Synthetic invariant: a tier-0 essay with no backing event and no
-        // ghost_when is never reachable. (The former orphaned
-        // bijeljina_massacre_1992 index/essay that exhibited this was removed in
-        // PR #377 and replaced by the wired bijeljina_killings_1992; this
-        // resolver-level invariant is retained as a general guard.)
-        const resolved = resolveCodexEssay(
-            essay({ id: 'essay_bijeljina', event_id: 'unbacked_orphan_example', tier: 0 }),
-            context({ firedEventIds: new Set(['rs_strategic_goals', 'rbih_state_identity']) }),
-        );
-        expect(resolved.isUnlocked).toBe(false);
+        expect(resolved.paragraphs[0]).toEqual({
+            kind: 'ghost',
+            text: 'A campaign path not taken.',
+            variant: 'ghost',
+        });
     });
 });

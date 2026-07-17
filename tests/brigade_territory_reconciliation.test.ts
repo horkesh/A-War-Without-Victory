@@ -478,6 +478,71 @@ describe('Phase 1.5: territory-based brigade assignment', () => {
         expect(sector1.reserve_brigade_ids).not.toContain('brig_unresolved');
     });
 
+    it('does not destroy named pocket brigades during sector assignment', () => {
+        const sector = makeSector(
+            'sector:hvo_northwest_bosnia:0',
+            'hvo_northwest_bosnia',
+            [makeSubSeg('northwest', ['op:orasje:front'], ['op:enemy:front'], 3)],
+            ['op:orasje:front'],
+        );
+        sector.faction = 'HRHB';
+
+        const formations: Record<FormationId, FormationState> = {
+            hrhb_103rd_derventa_brigade: makeFormation({
+                id: 'hrhb_103rd_derventa_brigade',
+                faction: 'HRHB',
+                corps_id: 'hvo_northwest_bosnia',
+                location_osid: 'op:derventa:derventa_2',
+                personnel: 600,
+                readiness: 'active',
+                lifecycle_status: 'active',
+                tags: ['pocket_destroyable'],
+            }),
+            hvo_hrvoje_vukcic_brigade: makeFormation({
+                id: 'hvo_hrvoje_vukcic_brigade',
+                faction: 'HRHB',
+                corps_id: 'hvo_northwest_bosnia',
+                location_osid: 'op:odzak:donja_dubica',
+                personnel: 1100,
+                readiness: 'active',
+                lifecycle_status: 'active',
+            }),
+        };
+        const state = {
+            meta: { turn: 8, phase: 'war' },
+            military: {
+                formations,
+                strategic_reserves: { RBiH: 0, RS: 0, HRHB: 0 },
+                corps_command: {},
+            },
+            political: { political_controllers: {} },
+        } as unknown as GameState;
+
+        classifyBrigadesByTerritory(
+            [sector],
+            'HRHB',
+            formations,
+            makeAdjacency([]),
+            new Set(['op:orasje:front', 'op:derventa:derventa_2', 'op:odzak:donja_dubica']),
+            makeComponentOf({
+                'op:orasje:front': 0,
+                'op:derventa:derventa_2': 1,
+                'op:odzak:donja_dubica': 1,
+            }),
+            new Map<string, CorpsCommanderProfile>(),
+            undefined,
+            state,
+        );
+
+        for (const formation of Object.values(formations)) {
+            expect(formation.status).toBe('active');
+            expect(formation.lifecycle_status).toBe('active');
+            expect(formation.readiness).toBe('active');
+        }
+        expect(formations.hrhb_103rd_derventa_brigade.personnel).toBe(600);
+        expect(formations.hvo_hrvoje_vukcic_brigade.personnel).toBe(1100);
+    });
+
     it('keeps loaned brigades unresolved when the loan target corps has only other-component sectors', () => {
         const ssLoan = makeSubSeg('ss_loan', ['op:m:front_x'], ['op:m:enemy_x'], 3);
         const sectorLoan = makeSector(

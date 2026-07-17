@@ -1,16 +1,11 @@
 import type { LoadedGameState } from './types';
-import { deriveInboxItems, type InboxItem } from './inboxItems';
+import { deriveInboxItems, isAdvanceBlockingInboxItem, type InboxItem } from './inboxItems';
 import { getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
 import { t } from '../i18n';
 
-type PresidentialBlockerType = Extract<
-  InboxItem['type'],
-  'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request'
->;
-
 export interface PresidentialBlocker {
   id: string;
-  type: PresidentialBlockerType;
+  type: InboxItem['type'];
   typeLabel: string;
   severity: InboxItem['severity'];
   title: string;
@@ -20,14 +15,6 @@ export interface PresidentialBlocker {
   priority: number;
 }
 
-const BLOCKING_TYPES = new Set<InboxItem['type']>([
-  'event_decision',
-  'peace_plan',
-  'dayton_negotiation',
-  'convoy_decision',
-  'paramilitary_request',
-]);
-
 function blockerSummary(item: InboxItem): string {
   if (item.type === 'convoy_decision') {
     return t('presidentialBlockers.convoy.summary');
@@ -36,19 +23,12 @@ function blockerSummary(item: InboxItem): string {
   return surface?.copySanitizer({ title: item.title, subtitle: item.subtitle }).summary ?? item.subtitle;
 }
 
-function isPresidentialBlocker(item: InboxItem): item is InboxItem & { type: PresidentialBlockerType } {
-  if (item.type === 'event_decision') {
-    return item.severity === 'blocking';
-  }
-  return BLOCKING_TYPES.has(item.type);
-}
-
 export function derivePresidentialBlockers(
   state: LoadedGameState | null,
   osidNameMap: Record<string, string> | null,
 ): PresidentialBlocker[] {
   return deriveInboxItems(state, osidNameMap)
-    .filter(isPresidentialBlocker)
+    .filter(isAdvanceBlockingInboxItem)
     .map((item) => {
       const surface = getDecisionSurfaceForInboxType(item.type);
       return {

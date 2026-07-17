@@ -24,18 +24,18 @@ describe('warroom new campaign flow truth', () => {
     expect(warroomSource).toContain('freshCampaignIntroPending');
     expect(warroomSource).toContain('this.freshCampaignIntroPending = true;');
     expect(warroomSource).toContain("intro=war_start");
-    const start = warroomSource.indexOf('if (result.stateJson) {');
+    const start = warroomSource.indexOf('const result = await this.desktopBridge.startNewCampaign({');
     const end = warroomSource.indexOf('} catch (error)', start);
     expect(start).toBeGreaterThanOrEqual(0);
     expect(end).toBeGreaterThan(start);
     const desktopStartBlock = warroomSource.slice(start, end);
-    expect(desktopStartBlock.indexOf('this.freshCampaignIntroPending = true;')).toBeLessThan(
-      desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson, { showShell: false });"),
-    );
-    expect(desktopStartBlock.indexOf("this.applyGameStateFromJson(result.stateJson, { showShell: false });")).toBeLessThan(
-      desktopStartBlock.indexOf("void this.showTacticalMapScene('warroom');"),
-    );
-    expect(desktopStartBlock).toContain("void this.showTacticalMapScene('warroom');");
+    const introArm = warroomSource.lastIndexOf('this.freshCampaignIntroPending = true;', start);
+    expect(introArm).toBeGreaterThanOrEqual(0);
+    expect(introArm).toBeLessThan(start);
+    expect(desktopStartBlock).not.toContain('result.stateJson');
+    expect(desktopStartBlock).not.toContain('applyGameStateFromJson');
+    expect(desktopStartBlock).toContain("this.showScreen('none');");
+    expect(desktopStartBlock).not.toContain("void this.showTacticalMapScene('warroom');");
   });
 
   it('posts a fresh-campaign reset message into the embedded tactical map after iframe load or reuse', () => {
@@ -82,6 +82,21 @@ describe('warroom new campaign flow truth', () => {
     expect(html).not.toContain('id="scn-apr1992"');
     expect(html).toContain('id="side-picker"');
     expect(html).toContain('Choose Your Side');
+  });
+
+  it('separates the presidential player role from the armed force in the side picker', () => {
+    const html = readRepoFile('src', 'ui', 'warroom', 'index.html');
+
+    expect(html).not.toContain('RBiH (ARBiH)');
+    expect(html).not.toContain('RS (VRS)');
+    expect(html).not.toContain('HRHB (HVO)');
+    expect(html).toContain('Republic of Bosnia and Herzegovina');
+    expect(html).toContain('Republika Srpska');
+    expect(html).toContain('Croatian Republic of Herzeg-Bosnia');
+    expect(html.match(/class="sp-player-role">Presidency</g)).toHaveLength(3);
+    expect(html).toContain('Armed forces: ARBiH');
+    expect(html).toContain('Armed forces: VRS');
+    expect(html).toContain('Armed forces: HVO');
   });
 
   it('hides the Command Post overlay after faction selection despite #main-menu display styling', () => {

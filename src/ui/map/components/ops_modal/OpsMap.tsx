@@ -24,6 +24,7 @@ import { ModalMapSource } from '../../utils/ModalMapSource';
 import type { AxisState } from './types';
 import { getPlayerSafePoliticalFactionName, getPlayerSafeSettlementName } from '../../utils/playerSafeText';
 import { t } from '../../i18n';
+import { releaseMapWebGlContext, safeScalarMapPadding } from '../../map/mapContextLifecycle';
 
 // Faction-colored axis palettes
 const AXIS_PALETTES: Record<string, string[]> = {
@@ -32,6 +33,36 @@ const AXIS_PALETTES: Record<string, string[]> = {
     HRHB: ['rgba(80,140,220,0.95)', 'rgba(120,180,255,0.90)', 'rgba(100,160,200,0.85)', 'rgba(80,120,180,0.80)'],
 };
 const DEFAULT_AXIS_COLORS = ['rgba(255,255,255,0.95)', 'rgba(100,200,255,0.90)', 'rgba(255,180,60,0.85)', 'rgba(200,120,255,0.80)'];
+const OPS_MIN_CAMERA_BOUNDS_DELTA = 0.0005;
+type OpsCameraBounds = [[number, number], [number, number]];
+
+function fitOpsBoundsOrEaseTo(
+    map: maplibregl.Map,
+    bounds: OpsCameraBounds,
+    options: { padding: number; maxZoom: number; animate?: boolean; bearing?: number; pitch?: number },
+): void {
+    const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+    const values = [minLng, minLat, maxLng, maxLat];
+    if (!values.every(Number.isFinite)) return;
+
+    const lngCollapsed = Math.abs(maxLng - minLng) < OPS_MIN_CAMERA_BOUNDS_DELTA;
+    const latCollapsed = Math.abs(maxLat - minLat) < OPS_MIN_CAMERA_BOUNDS_DELTA;
+    const padding = safeScalarMapPadding(map.getCanvas(), options.padding);
+    if (padding == null) return;
+    if (lngCollapsed || latCollapsed) {
+        map.easeTo({
+            center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2],
+            zoom: Math.min(map.getZoom(), options.maxZoom),
+            duration: options.animate === false ? 0 : 300,
+            essential: true,
+            ...(options.bearing != null ? { bearing: options.bearing } : {}),
+            ...(options.pitch != null ? { pitch: options.pitch } : {}),
+        });
+        return;
+    }
+
+    map.fitBounds(bounds, { ...options, padding });
+}
 
 interface OpsMapProps {
     corpsId: string;
@@ -146,7 +177,7 @@ export function OpsMap({
                         }
                     }
                     if (minLng !== Infinity) {
-                        map.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+                        fitOpsBoundsOrEaseTo(map, [[minLng, minLat], [maxLng, maxLat]], {
                             padding: 80, maxZoom: 10, animate: false,
                             bearing: 0,
                             pitch: 30,
@@ -404,10 +435,11 @@ export function OpsMap({
             stagingSourceRef.current = null;
             availableTargetsSourceRef.current = null;
             dimmedSourceRef.current = null;
+            deckOverlayRef.current?.finalize();
             deckOverlayRef.current = null;
             mapRef.current = null;
             setMapReady(false);
-            map.remove();
+            releaseMapWebGlContext(map);
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [corpsId, !!loadedGameState]); // Reinit on corps change or when game state first loads
@@ -484,7 +516,7 @@ export function OpsMap({
             {enabled && (
                 <div className="absolute bottom-4 left-4 z-20 pointer-events-auto
                                 bg-[rgba(20,18,15,0.85)] backdrop-blur-sm rounded-md
-                                border border-[rgba(180,160,130,0.15)] px-3 py-2 text-[8px]">
+                                border border-[rgba(180,160,130,0.15)] px-3 py-2 text-xs">
                     <div className="text-accent-gold font-bold uppercase tracking-wider mb-1">{t('opsModal.legend')}</div>
                     <div className="space-y-0.5 text-text-secondary">
                         <div><span className="inline-block w-2 h-2 rounded-full bg-red-800 mr-1" /> {t('opsPlanning.legend.objective')} &middot; <span className="text-accent-gold">&#9733;</span> {t('opsPlanning.compactLegend.schwerpunkt')} &middot; <span className="inline-block w-2 h-2 rounded-full bg-[#2d6a4f] mr-1" /> {t('opsPlanning.phase.staging')}</div>

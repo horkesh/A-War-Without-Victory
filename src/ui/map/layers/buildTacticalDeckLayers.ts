@@ -8,6 +8,9 @@
 import { IconLayer, TextLayer } from '@deck.gl/layers';
 import type { FeatureCollection, Feature } from 'geojson';
 import { getIconDataUrl } from '../map/formationIcons';
+import { getFormationStackPixelOffset } from '../map/clickSelectionPriority';
+
+export { getFormationStackPixelOffset } from '../map/clickSelectionPriority';
 
 export type DeckViewportClip = {
     width: number;
@@ -23,7 +26,8 @@ export type DeckPointHalfSize = {
 };
 
 const COUNTER_EDGE_CLEARANCE_PX = 28;
-const COUNTER_EDGE_CLAMP_REACH_PX = 180;
+const COUNTER_EDGE_CLAMP_REACH_PX = 96;
+const MAX_VISIBLE_STACK_FAN_MEMBERS = 12;
 
 /** Highlighted formations render as a dedicated overlay so non-top-stack selections stay visible. */
 function getHighlightedFeatures(features: Feature[], highlightedFormationIdSet: Set<string>): Feature[] {
@@ -96,6 +100,20 @@ export function filterViewportClampablePointFeatures(
     });
 }
 
+export function selectViewportFormationCounterFeatures(
+    features: Feature[],
+    clip: DeckViewportClip | null | undefined,
+    size: DeckPointHalfSize,
+    getPixelOffset: (feature: Feature) => [number, number] = () => [0, 0],
+): Feature[] {
+    const boundedFanFeatures = features.filter((feature) => {
+        const stackIndex = feature.properties?.stack_index;
+        return typeof stackIndex !== 'number'
+            || Math.max(0, Math.floor(stackIndex)) < MAX_VISIBLE_STACK_FAN_MEMBERS;
+    });
+    return filterViewportSafePointFeatures(boundedFanFeatures, clip, size, getPixelOffset);
+}
+
 export function getViewportSafePixelOffset(
     feature: Feature,
     clip: DeckViewportClip | null | undefined,
@@ -121,28 +139,117 @@ export function getViewportSafePixelOffset(
     return [baseOffset[0] + offsetX, baseOffset[1] + offsetY];
 }
 
-export function getFormationStackPixelOffset(feature: Feature, iconHeight: number): [number, number] {
-    const stackIndex = typeof feature.properties?.stack_index === 'number'
-        ? Math.max(0, Math.floor(feature.properties.stack_index))
-        : 0;
-    const stackCount = typeof feature.properties?.stack_count === 'number'
-        ? Math.max(1, Math.floor(feature.properties.stack_count))
-        : 1;
-    if (stackIndex === 0 || stackCount <= 1) return [0, 0];
-
-    const slot = Math.min(stackIndex - 1, 5);
-    const column = slot % 3;
-    const row = Math.floor(slot / 3);
-    const horizontalStep = Math.max(8, Math.round(iconHeight * 0.35));
-    const verticalStep = Math.max(6, Math.round(iconHeight * 0.2));
-    return [(column - 1) * horizontalStep, -(row + 1) * verticalStep];
-}
-
 export function getCounterFootprintHalfSize(iconHeight: number): DeckPointHalfSize {
     return {
         halfWidth: Math.ceil(iconHeight + COUNTER_EDGE_CLEARANCE_PX),
         halfHeight: Math.ceil(iconHeight / 2 + COUNTER_EDGE_CLEARANCE_PX),
     };
+}
+
+export function buildFormationCounterPixelOffsets(
+    features: Feature[],
+    iconHeight: number,
+    clip: DeckViewportClip | null | undefined,
+): Map<string, [number, number]> {
+    const result = new Map<string, [number, number]>();
+    const groups = new Map<string, Feature[]>();
+    for (const feature of features) {
+        const id = String(feature.properties?.id ?? '');
+        if (!id) continue;
+        const groupId = typeof feature.properties?.location_osid === 'string'
+            ? feature.properties.location_osid
+            : `formation:${id}`;
+        const group = groups.get(groupId) ?? [];
+        group.push(feature);
+        groups.set(groupId, group);
+    }
+
+    const placed: Array<{ left: number; right: number; top: number; bottom: number }> = [];
+    const candidates = [
+        [0, 0], [0, -1.5], [0, 1.5], [-2.25, 0], [2.25, 0],
+        [-2.25, -1.5], [2.25, -1.5], [-2.25, 1.5], [2.25, 1.5],
+        [0, -3], [0, 3], [-4.5, 0], [4.5, 0],
+    ] as const;
+    const overlaps = (
+        left: { left: number; right: number; top: number; bottom: number },
+        right: { left: number; right: number; top: number; bottom: number },
+    ) => left.right + 4 > right.left
+        && left.left - 4 < right.right
+        && left.bottom + 4 > right.top
+        && left.top - 4 < right.bottom;
+
+    for (const groupId of [...groups.keys()].sort((left, right) => left < right ? -1 : left > right ? 1 : 0)) {
+        const group = groups.get(groupId)!
+            .sort((left, right) => {
+                const leftIndex = Number(left.properties?.stack_index ?? 0);
+                const rightIndex = Number(right.properties?.stack_index ?? 0);
+                if (leftIndex !== rightIndex) return leftIndex - rightIndex;
+                const leftId = String(left.properties?.id ?? '');
+                const rightId = String(right.properties?.id ?? '');
+                return leftId < rightId ? -1 : leftId > rightId ? 1 : 0;
+            });
+        const top = group[0];
+        const coordinates = top?.geometry?.type === 'Point' ? top.geometry.coordinates : null;
+        const point = Array.isArray(coordinates)
+            && typeof coordinates[0] === 'number'
+            && typeof coordinates[1] === 'number'
+            ? clip?.project([coordinates[0], coordinates[1]])
+            : null;
+        if (!point) {
+            for (const feature of group) {
+                const id = String(feature.properties?.id ?? '');
+                if (id) result.set(id, getFormationStackPixelOffset(feature, iconHeight));
+            }
+            continue;
+        }
+
+        const baseOffsets = group.map((feature) => getFormationStackPixelOffset(feature, iconHeight));
+        const localLeft = Math.min(...baseOffsets.map(([x]) => x - iconHeight));
+        const localRight = Math.max(
+            ...baseOffsets.map(([x]) => x + iconHeight),
+            Math.round(iconHeight * 0.72) + 12,
+        );
+        const localTop = Math.min(
+            ...baseOffsets.map(([, y]) => y - iconHeight / 2),
+            -Math.round(iconHeight * 0.42) - 12,
+        );
+        const localBottom = Math.max(...baseOffsets.map(([, y]) => y + iconHeight / 2));
+        let selected: [number, number] = [0, 0];
+        let selectedRect = {
+            left: point.x + localLeft,
+            right: point.x + localRight,
+            top: point.y + localTop,
+            bottom: point.y + localBottom,
+        };
+        for (const [xUnits, yUnits] of candidates) {
+            const extra: [number, number] = [Math.round(xUnits * iconHeight), Math.round(yUnits * iconHeight)];
+            const rect = {
+                left: point.x + localLeft + extra[0],
+                right: point.x + localRight + extra[0],
+                top: point.y + localTop + extra[1],
+                bottom: point.y + localBottom + extra[1],
+            };
+            const insideViewport = !clip || (
+                rect.left >= clip.padding.left
+                && rect.right <= clip.width - clip.padding.right
+                && rect.top >= clip.padding.top
+                && rect.bottom <= clip.height - clip.padding.bottom
+            );
+            if (insideViewport && !placed.some((other) => overlaps(rect, other))) {
+                selected = extra;
+                selectedRect = rect;
+                break;
+            }
+        }
+        placed.push(selectedRect);
+        for (let index = 0; index < group.length; index += 1) {
+            const feature = group[index]!;
+            const id = String(feature.properties?.id ?? '');
+            const base = baseOffsets[index]!;
+            if (id) result.set(id, [base[0] + selected[0], base[1] + selected[1]]);
+        }
+    }
+    return result;
 }
 
 export function getBaseFormationIconId(feature: any): string {
@@ -216,16 +323,33 @@ export function buildTacticalDeckLayers(
     }
 
     const iconHalfSize = getCounterFootprintHalfSize(iconHeight);
-    const getFormationPixelOffset = (feature: Feature) => getFormationStackPixelOffset(feature, iconHeight);
-    const visibleFormationFeatures = filterViewportSafePointFeatures(
+    const getBaseFormationPixelOffset = (feature: Feature) => getFormationStackPixelOffset(feature, iconHeight);
+    const visibleFormationFeatures = selectViewportFormationCounterFeatures(
         formationsGeoJson.features,
         viewportClip,
         iconHalfSize,
-        getFormationPixelOffset,
+        getBaseFormationPixelOffset,
+    );
+    const formationPixelOffsets = buildFormationCounterPixelOffsets(visibleFormationFeatures, iconHeight, viewportClip);
+    const getFormationPixelOffset = (feature: Feature): [number, number] => (
+        formationPixelOffsets.get(String(feature.properties?.id ?? ''))
+        ?? getBaseFormationPixelOffset(feature)
     );
     const highlightedFeatures = highlightedFormationIds.length > 0
         ? getHighlightedFeatures(visibleFormationFeatures, highlightedFormationIdSet)
         : [];
+    const stackBadgeFeatures = visibleFormationFeatures.filter((feature) => (
+        feature.properties?.is_stack_top === true
+        && typeof feature.properties?.stack_count === 'number'
+        && feature.properties.stack_count > 1
+    ));
+    const getStackBadgePixelOffset = (feature: Feature): [number, number] => {
+        const counterOffset = getFormationPixelOffset(feature);
+        return [
+            counterOffset[0] + Math.round(iconHeight * 0.72),
+            counterOffset[1] - Math.round(iconHeight * 0.42),
+        ];
+    };
 
     layers.push(
         new IconLayer({
@@ -237,12 +361,7 @@ export function buildTacticalDeckLayers(
                 height: 80,
             }),
             getPosition: (d: any) => d.geometry.coordinates,
-            getPixelOffset: (d: Feature) => getViewportSafePixelOffset(
-                d,
-                viewportClip,
-                iconHalfSize,
-                getFormationPixelOffset(d),
-            ),
+            getPixelOffset: getFormationPixelOffset,
             getSize: iconHeight,
             sizeUnits: 'pixels',
             sizeScale: 1,
@@ -268,12 +387,7 @@ export function buildTacticalDeckLayers(
                     height: 80,
                 }),
                 getPosition: (d: any) => d.geometry.coordinates,
-                getPixelOffset: (d: Feature) => getViewportSafePixelOffset(
-                    d,
-                    viewportClip,
-                    getCounterFootprintHalfSize(iconHeight + 2),
-                    getFormationStackPixelOffset(d, iconHeight + 2),
-                ),
+                getPixelOffset: getFormationPixelOffset,
                 getSize: iconHeight + 2,
                 sizeUnits: 'pixels',
                 sizeScale: 1,
@@ -284,6 +398,49 @@ export function buildTacticalDeckLayers(
                     getIcon: highlightedFormationKey,
                     getPixelOffset: viewportClip,
                 }
+            }),
+        );
+    }
+
+    if (stackBadgeFeatures.length > 0) {
+        layers.push(
+            new TextLayer({
+                id: 'deck-formations-stack-circle',
+                data: stackBadgeFeatures,
+                getPosition: (d: any) => d.geometry.coordinates,
+                getPixelOffset: getStackBadgePixelOffset,
+                getText: () => '\u25cf',
+                getSize: Math.max(18, Math.round(iconHeight * 0.58)),
+                getColor: [15, 19, 26, 255],
+                outlineColor: [235, 225, 205, 255],
+                outlineWidth: 1,
+                fontSettings: { sdf: true },
+                characterSet: ['\u25cf'],
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontWeight: 'bold',
+                getTextAnchor: 'middle',
+                getAlignmentBaseline: 'center',
+                sizeUnits: 'pixels',
+                pickable: false,
+                parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
+                updateTriggers: { getSize: zoom, getPixelOffset: viewportClip },
+            }),
+            new TextLayer({
+                id: 'deck-formations-stack-text',
+                data: stackBadgeFeatures,
+                getPosition: (d: any) => d.geometry.coordinates,
+                getPixelOffset: getStackBadgePixelOffset,
+                getText: (d: Feature) => String(d.properties?.stack_count ?? ''),
+                getSize: Math.max(10, Math.round(iconHeight * 0.28)),
+                getColor: [255, 255, 255, 255],
+                fontFamily: 'Arial, Helvetica, sans-serif',
+                fontWeight: 'bold',
+                getTextAnchor: 'middle',
+                getAlignmentBaseline: 'center',
+                sizeUnits: 'pixels',
+                pickable: false,
+                parameters: { depthTest: false, depthMask: false, depthWriteEnabled: false, depthCompare: 'always' },
+                updateTriggers: { getSize: zoom, getPixelOffset: viewportClip },
             }),
         );
     }

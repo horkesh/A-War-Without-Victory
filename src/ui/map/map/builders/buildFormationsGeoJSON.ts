@@ -4,7 +4,7 @@ import { buildOsidCentroidLookup } from './geojsonLookup';
 import { resolveFormationPhysicalLocationOsid } from './resolveFormationLocationOsid';
 import { formationIconId } from './formationIconId';
 import { resolveCurrentSectorForFormation } from '../../utils/sectorUtils';
-import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation, isPlayerEnemyContactFormation } from '../../../shared/playerVisibility';
+import { filterPlayerVisibleMapFormations, isPlayerEnemyContactFormation, isPlayerVisibleTacticalMarker } from '../../../shared/playerVisibility';
 import type { Locale } from '../../i18n';
 import { t } from '../../i18n';
 import { getFormationUnitType, getLocalizedFormationName } from '../../data/formationNameLocalizations';
@@ -47,6 +47,8 @@ export interface FormationMarkerProperties {
   stack_count: number;
   /** Enemy contact is visible only as a reduced observation, not a formation dossier. */
   is_enemy_contact: boolean;
+  /** Formation exists at this location but is not yet field-ready. */
+  is_forming: boolean;
 }
 
 export const getBrigadeType = (name: string): string => {
@@ -75,7 +77,7 @@ export function buildFormationsGeoJSON(
   // Pre-filter physical units to simplify counting and main loop
   const visibleFormations = filterPlayerVisibleMapFormations(state);
   const physicalUnits = visibleFormations.filter(f =>
-    isFieldedTacticalFormation(f)
+    isPlayerVisibleTacticalMarker(f, state)
   );
   const activeOperationFormationIds = new Set<string>();
   for (const operation of state.activeOperations ?? []) {
@@ -114,11 +116,13 @@ export function buildFormationsGeoJSON(
 
     const type = getFormationMarkerType(formation);
     const isEnemyContact = isPlayerEnemyContactFormation(state, formation);
+    const isForming = !isEnemyContact && String(formation.readiness).toLowerCase() === 'forming';
     const displayName = isEnemyContact
       ? t('tooltip.enemyContactTitle', undefined, locale)
       : getLocalizedFormationName(formation, locale);
     const contactId = `enemy_contact:${osid}:${stackIndex}`;
     const postureSuffix = !isEnemyContact && formation.posture ? `__${formation.posture}` : '';
+    const formingSuffix = isForming ? '__forming' : '';
 
     // Status Banners: quantize reported morale to 10% steps. Counter health remains
     // unreported because the read model has raw personnel, not authorized strength.
@@ -132,7 +136,7 @@ export function buildFormationsGeoJSON(
 
     const markerFaction = formation.faction;
     const markerType = isEnemyContact ? 'enemy_contact' : type;
-    const icon_id = `${markerType}__${markerFaction}${postureSuffix}${statusSuffix}`;
+    const icon_id = `${markerType}__${markerFaction}${postureSuffix}${formingSuffix}${statusSuffix}`;
 
     features.push({
       type: 'Feature',
@@ -164,6 +168,7 @@ export function buildFormationsGeoJSON(
         stack_index: stackIndex,
         stack_count: totalInStack,
         is_enemy_contact: isEnemyContact,
+        is_forming: isForming,
       },
     });
   }

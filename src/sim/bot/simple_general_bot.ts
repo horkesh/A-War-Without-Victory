@@ -1,5 +1,6 @@
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { scoreConsolidationTarget } from '../consolidation_scoring.js';
 import { areRbihHrhbAllied, isRbihHrhbAtWar } from '../early_war/alliance_update.js';
 import type { Bot, BotDecisionContext, BotDecisions } from './bot_interface.js';
@@ -44,7 +45,7 @@ export class SimpleGeneralBot implements Bot {
                 }
                 return true;
             })
-            .sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+            .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
         const aggression = resolveAggression(context.strategy, state.meta.phase, context.timeContext, state);
         const tuning = getBotDifficultyTuning(context.difficulty);
@@ -116,7 +117,7 @@ export class SimpleGeneralBot implements Bot {
             .sort((x, y) => {
                 if (x.isObjective !== y.isObjective) return x.isObjective ? -1 : 1;
                 if (y.score !== x.score) return y.score - x.score;
-                return x.edge.edge_id.localeCompare(y.edge.edge_id);
+                return strictCompare(x.edge.edge_id, y.edge.edge_id);
             });
 
         const pushCount = Math.min(
@@ -142,19 +143,37 @@ export class SimpleGeneralBot implements Bot {
         if (state.military.formations) {
             const myFormations = Object.values(state.military.formations)
                 .filter((f) => f.faction === this.factionId && f.status === 'active')
-                .sort((a, b) => a.id.localeCompare(b.id));
+                .sort((a, b) => strictCompare(a.id, b.id));
 
-            for (let i = 0; i < myFormations.length; i += 1) {
-                const formation = myFormations[i]!;
-                const currentAssignment = formation.assignment?.edge_id;
-                const isAssignedValid = typeof currentAssignment === 'string' && rankedEdgeIds.includes(currentAssignment);
-                const shouldReassign =
-                    !isAssignedValid || context.rng() < tuning.reassign_bias * Math.max(0.45, broadAggression);
-
-                if (shouldReassign && rankedEdgeIds.length > 0) {
-                    const targetEdgeId = rankedEdgeIds[i % rankedEdgeIds.length];
-                    formationAssignments[formation.id] = targetEdgeId;
-                }
+            const reassignmentCandidates = myFormations
+                .map((formation, index) => {
+                    const targetEdgeId = rankedEdgeIds[index % Math.max(1, rankedEdgeIds.length)];
+                    const currentEdgeId = formation.assignment?.edge_id;
+                    const currentRank = typeof currentEdgeId === 'string' ? rankedEdgeIds.indexOf(currentEdgeId) : -1;
+                    const targetRank = targetEdgeId == null ? -1 : rankedEdgeIds.indexOf(targetEdgeId);
+                    return {
+                        formation,
+                        targetEdgeId,
+                        invalid: currentRank < 0,
+                        rankDistance: currentRank < 0 || targetRank < 0 ? Number.MAX_SAFE_INTEGER : Math.abs(currentRank - targetRank),
+                    };
+                })
+                .filter((candidate) => candidate.targetEdgeId != null && candidate.formation.assignment?.edge_id !== candidate.targetEdgeId)
+                .sort((a, b) => {
+                    if (a.invalid !== b.invalid) return a.invalid ? -1 : 1;
+                    if (b.rankDistance !== a.rankDistance) return b.rankDistance - a.rankDistance;
+                    return strictCompare(a.formation.id, b.formation.id);
+                });
+            const invalidCount = reassignmentCandidates.filter((candidate) => candidate.invalid).length;
+            const scoredBudget = Math.ceil(
+                myFormations.length * tuning.reassign_bias * Math.max(0.45, broadAggression)
+            );
+            const reassignmentCount = Math.min(
+                reassignmentCandidates.length,
+                Math.max(invalidCount, scoredBudget)
+            );
+            for (const candidate of reassignmentCandidates.slice(0, reassignmentCount)) {
+                formationAssignments[candidate.formation.id] = candidate.targetEdgeId!;
             }
         }
 
@@ -164,7 +183,7 @@ export class SimpleGeneralBot implements Bot {
 
 function computeActivePersonnel(state: GameState, factionId: FactionId): number {
     const formations = state.military.formations ?? {};
-    const formationIds = Object.keys(formations).sort((a, b) => a.localeCompare(b));
+    const formationIds = Object.keys(formations).sort(strictCompare);
     let total = 0;
     for (const id of formationIds) {
         const f = formations[id];
@@ -176,7 +195,7 @@ function computeActivePersonnel(state: GameState, factionId: FactionId): number 
 
 function computeAvailablePool(state: GameState, factionId: FactionId): number {
     const pools = state.military.militia_pools ?? {};
-    const keys = Object.keys(pools).sort((a, b) => a.localeCompare(b));
+    const keys = Object.keys(pools).sort(strictCompare);
     let total = 0;
     for (const key of keys) {
         const p = pools[key];

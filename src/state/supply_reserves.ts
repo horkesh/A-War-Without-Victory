@@ -57,7 +57,7 @@ import { getActiveSarajevoLifeline, isSarajevoCoreSiegeCounterKey } from './sara
 
 /** Ensure reserve fields exist on GameState with default values. Idempotent. */
 export function ensureSupplyReserves(state: GameState): void {
-    const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     if (!state.military.general_supply_reserve) {
         state.military.general_supply_reserve = {};
         for (const fid of factionIds) {
@@ -175,13 +175,13 @@ export function updateSiegeTurnCounters(
     // Pre-compute small-pocket OSIDs when adjacency available
     const smallPocketOsids = new Set<string>();
     if (adjacency) {
-        const sortedFactions = [...supplyByOsid.factions].sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+        const sortedFactions = [...supplyByOsid.factions].sort((a, b) => strictCompare(a.faction_id, b.faction_id));
         for (const facEntry of sortedFactions) {
             if (!facEntry.by_osid) continue;
             const criticalOsids = facEntry.by_osid
                 .filter(e => e.state === 'critical')
                 .map(e => e.osid)
-                .sort((a, b) => a.localeCompare(b));
+                .sort(strictCompare);
             if (criticalOsids.length === 0) continue;
 
             const pockets = computeCriticalPockets(criticalOsids, adjacency);
@@ -202,14 +202,14 @@ export function updateSiegeTurnCounters(
     // Skip HRHB siege counters entirely under Graz — resume when truce breaks.
     const grazActive = isGrazAccordsActive(state);
 
-    const sortedFactions = [...supplyByOsid.factions].sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    const sortedFactions = [...supplyByOsid.factions].sort((a, b) => strictCompare(a.faction_id, b.faction_id));
     for (const facEntry of sortedFactions) {
         if (!facEntry.by_osid) continue;
 
         // Graz Accords: HRHB is not besieged while RS truce + RBiH alliance hold
         if (grazActive && facEntry.faction_id === 'HRHB') continue;
 
-        const sortedOsids = [...facEntry.by_osid].sort((a, b) => a.osid.localeCompare(b.osid));
+        const sortedOsids = [...facEntry.by_osid].sort((a, b) => strictCompare(a.osid, b.osid));
         for (const entry of sortedOsids) {
             const key = `${facEntry.faction_id}:${entry.osid}`;
             if (entry.state === 'critical') {
@@ -227,7 +227,7 @@ export function updateSiegeTurnCounters(
     }
 
     // Reset counters for keys no longer critical
-    const allKeys = Object.keys(counters).sort((a, b) => a.localeCompare(b));
+    const allKeys = Object.keys(counters).sort(strictCompare);
     for (const key of allKeys) {
         if (!activeKeys.has(key)) {
             delete counters[key];
@@ -275,9 +275,9 @@ export function updateSupplyReserves(
     ensureSupplyReserves(state);
     assertSupplyInvariant(state, 'updateSupplyReserves:entry');
 
-    const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     const formations = state.military.formations ?? {};
-    const formationIds = Object.keys(formations).sort((a, b) => a.localeCompare(b));
+    const formationIds = Object.keys(formations).sort(strictCompare);
 
     // Count formations and heavy weapons per faction (deterministic)
     const formationCountByFaction: Record<string, number> = {};
@@ -304,7 +304,7 @@ export function updateSupplyReserves(
     if (state.military.siege_turn_counters) {
         // B7: shared lifeline scalar (undefined ⇒ flag OFF ⇒ identical pre-change path).
         const lifeline = getActiveSarajevoLifeline(state);
-        const counterKeys = Object.keys(state.military.siege_turn_counters).sort((a, b) => a.localeCompare(b));
+        const counterKeys = Object.keys(state.military.siege_turn_counters).sort(strictCompare);
         for (const key of counterKeys) {
             const colonIdx = key.indexOf(':');
             if (colonIdx < 0) continue;
@@ -509,7 +509,7 @@ export function applyUnAirdrops(state: GameState): void {
     const eligibleEnclaves: string[] = [];
 
     // Sorted iteration for determinism
-    for (const key of Object.keys(enclaveResilience).sort((a, b) => a.localeCompare(b))) {
+    for (const key of Object.keys(enclaveResilience).sort(strictCompare)) {
         const entry = enclaveResilience[key];
         if (typeof entry !== 'object' || entry === null) continue;
         const typedEntry = entry as EnclaveResilienceEntry;
@@ -564,7 +564,7 @@ function determineConvoyRouteFaction(enclave: EnclaveState, state: GameState, ed
         hostileCounts.set(controller, (hostileCounts.get(controller) ?? 0) + 1);
     }
     return [...hostileCounts.entries()]
-        .sort((a, b) => (b[1] - a[1]) || String(a[0]).localeCompare(String(b[0]), 'en'))
+        .sort((a, b) => (b[1] - a[1]) || strictCompare(String(a[0]), String(b[0])))
         .map(([faction]) => faction)[0] ?? null;
 }
 
@@ -575,7 +575,7 @@ export function evaluateHumanitarianConvoys(state: GameState, edges: EdgeRecord[
     const pendingIds = new Set(pending.map((convoy) => convoy.id));
     const created: PendingConvoyDecision[] = [];
 
-    for (const enclave of [...(state.political.enclaves ?? [])].sort((a, b) => a.id.localeCompare(b.id))) {
+    for (const enclave of [...(state.political.enclaves ?? [])].sort((a, b) => strictCompare(a.id, b.id))) {
         if (enclave.siege_duration < 4 || enclave.collapsed) continue;
         const routeFaction = determineConvoyRouteFaction(enclave, state, edges);
         if (!routeFaction) continue;
@@ -593,7 +593,7 @@ export function evaluateHumanitarianConvoys(state: GameState, edges: EdgeRecord[
         pendingIds.add(convoy.id);
     }
 
-    state.military.pending_convoy_decisions = pending.sort((a, b) => a.id.localeCompare(b.id));
+    state.military.pending_convoy_decisions = pending.sort((a, b) => strictCompare(a.id, b.id));
     return created;
 }
 
@@ -609,7 +609,7 @@ export function applyHumanitarianConvoyDecisions(state: GameState): void {
         ? [...state.military.convoy_decision_history]
         : [];
 
-    for (const convoy of pending.sort((a, b) => a.id.localeCompare(b.id))) {
+    for (const convoy of pending.sort((a, b) => strictCompare(a.id, b.id))) {
         let decision = convoy.decision;
         const wasPlayerFiled = Boolean(playerFaction && convoy.route_faction === playerFaction && decision);
         if (!decision) {
@@ -662,7 +662,7 @@ export function applySmugglingAllocation(state: GameState): void {
     if (budget <= 0) return;
     const entries = Object.entries(state.military.smuggling_allocation ?? {})
         .filter(([, allocation]) => allocation && typeof allocation.amount === 'number' && allocation.amount > 0)
-        .sort(([a], [b]) => a.localeCompare(b));
+        .sort(([a], [b]) => strictCompare(a, b));
     if (entries.length === 0) return;
 
     const totalRequested = entries.reduce((sum, [, allocation]) => sum + allocation.amount, 0);

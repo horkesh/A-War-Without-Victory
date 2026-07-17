@@ -183,7 +183,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
   return (
     <div
       data-awwv-counter-occluder="true"
-      className="absolute bottom-0 left-0 right-0 flex items-center justify-center gap-2 px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
+      className="absolute bottom-0 left-0 right-0 flex items-center justify-start gap-2 overflow-hidden px-3 py-1.5 bg-glass border-t border-white/10 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
       style={{ zIndex: Z.SHELL_FLOATING }}
     >
 
@@ -196,7 +196,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
               key={id}
               type="button"
               onClick={() => setMapMode(id)}
-              className={`px-2.5 py-1 rounded text-[9px] font-mono tracking-widest transition-all duration-200 uppercase ${active
+              className={`px-2.5 py-1 rounded text-xs font-mono tracking-widest transition-all duration-200 uppercase ${active
                 ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
               }`}
@@ -210,7 +210,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
         <button
           type="button"
           onClick={() => setMoreExpanded(prev => !prev)}
-          className={`px-2 py-1 rounded text-[9px] font-mono tracking-widest uppercase transition-all ${
+          className={`px-2 py-1 rounded text-xs font-mono tracking-widest uppercase transition-all ${
             moreExpanded || secondaryModes.some(m => m.id === mapMode)
               ? 'bg-accent-gold/20 text-accent-gold font-bold'
               : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
@@ -225,7 +225,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             key={id}
             type="button"
             onClick={() => { setMapMode(id); }}
-            className={`px-2.5 py-1 rounded text-[9px] font-mono tracking-widest transition-all duration-200 uppercase ${
+            className={`px-2.5 py-1 rounded text-xs font-mono tracking-widest transition-all duration-200 uppercase ${
               mapMode === id
                 ? 'bg-accent-gold/20 text-accent-gold shadow-glow-sm font-bold'
                 : 'text-text-secondary hover:bg-white/5 hover:text-text-primary'
@@ -256,7 +256,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             style={{ width: `${playerTerritoryPct}%`, backgroundColor: playerFaction ? (FACTION_HEX_COLORS[playerFaction] ?? '#888') : '#888' }}
           >
             {playerTerritoryPct > 15 && (
-              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-mono font-bold text-white/90 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                 {playerTerritoryPct.toFixed(0)}%
               </span>
             )}
@@ -266,7 +266,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
             style={{ width: `${hostileHeldPct}%` }}
           >
             {hostileHeldPct > 15 && (
-              <span className="absolute inset-0 flex items-center justify-center text-[8px] font-mono font-bold text-white/70 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
+              <span className="absolute inset-0 flex items-center justify-center text-xs font-mono font-bold text-white/70 tabular-nums drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
                 {hostileHeldPct.toFixed(0)}%
               </span>
             )}
@@ -276,7 +276,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
         {/* Player-safe labels */}
         <div className="flex items-center gap-1.5">
           <span className={`flex items-center gap-0.5 font-mono tabular-nums ${playerFaction ? (FACTION_COLORS_SUBTLE[playerFaction] ?? 'text-text-primary') : 'text-text-primary'}`}>
-            <span className="text-[11px] font-bold">
+            <span className="text-xs font-bold">
               {t('statusStrip.friendlyPct', { pct: playerTerritoryPct.toFixed(1) })}
               {playerTerritoryTrend && (
                 <span className={`ml-0.5 ${playerTerritoryTrend.includes('\u2191') ? 'text-emerald-400' : playerTerritoryTrend.includes('\u2193') ? 'text-red-400' : 'text-text-secondary/50'}`}>
@@ -287,7 +287,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           </span>
           <span className="text-white/10">|</span>
           <span className="flex items-center gap-0.5 font-mono tabular-nums text-text-secondary">
-            <span className="text-[9px]">{t('statusStrip.hostileHeldPct', { pct: hostileHeldPct.toFixed(1) })}</span>
+            <span className="text-xs">{t('statusStrip.hostileHeldPct', { pct: hostileHeldPct.toFixed(1) })}</span>
           </span>
         </div>
       </button>
@@ -295,7 +295,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       <div className="w-[1px] h-4 bg-white/10 shrink-0" />
 
       {/* 3. Faction-contextual indicator — R6: more prominent */}
-      <div className="hidden lg:flex items-center gap-2 px-2 shrink-0 text-[10px] font-mono">
+      <div className="hidden lg:flex min-w-0 flex-1 items-center gap-2 overflow-x-auto overflow-y-hidden px-2 text-xs font-mono">
         {showAlliance && alliance != null && (() => {
           const a = alliance;
           const status = a <= 0.10 ? 'WAR' : a <= 0.20 ? 'MOBILIZING' : a <= 0.45 ? 'STRAINED' : 'ALLIED';
@@ -303,7 +303,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           return (
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
               <Icon name="balanced" size={10} color={color} />
-              <span style={{ color }} className="font-bold uppercase text-[9px] tracking-wider">{t(ALLIANCE_STATUS_LABEL_KEYS[status])}</span>
+              <span style={{ color }} className="font-bold uppercase text-xs tracking-wider">{t(ALLIANCE_STATUS_LABEL_KEYS[status])}</span>
             </span>
           );
         })()}
@@ -311,8 +311,8 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           <>
             {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
-              <span className="text-[9px] text-white/50 uppercase font-semibold">{patronStatus.label}</span>
-              <span style={{ color: patronStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{patronStatus.statusLabel}</span>
+              <span className="text-xs text-white/50 uppercase font-semibold">{patronStatus.label}</span>
+              <span style={{ color: patronStatus.color }} className="font-bold uppercase text-xs tracking-wider">{patronStatus.statusLabel}</span>
             </span>
           </>
         )}
@@ -320,8 +320,8 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           <>
             {showAlliance && <span className="text-white/10">|</span>}
             <span className="flex items-center gap-1.5 px-2 py-0.5 rounded border border-white/10 bg-panel-bg/50">
-              <span className="text-[9px] text-white/50 uppercase font-semibold">{t('statusStrip.international')}:</span>
-              <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-[10px] tracking-wider">{internationalStatus.statusLabel}</span>
+              <span className="text-xs text-white/50 uppercase font-semibold">{t('statusStrip.international')}:</span>
+              <span style={{ color: internationalStatus.color }} className="font-bold uppercase text-xs tracking-wider">{internationalStatus.statusLabel}</span>
             </span>
           </>
         )}
@@ -330,9 +330,9 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
         {playerOperations.length > 0 && (
           <>
             <span className="text-white/10">|</span>
-            <span className="flex items-center gap-1 text-accent-gold">
+            <span className="flex shrink-0 whitespace-nowrap items-center gap-1 text-xs text-accent-gold">
               <Icon name="operation" size={10} color="#c4a35a" />
-              <span className="text-[9px]">{t('statusStrip.opsCount', { count: playerOperations.length })}</span>
+              <span>{t('statusStrip.opsCount', { count: playerOperations.length })}</span>
             </span>
           </>
         )}
@@ -355,16 +355,16 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
       </div>
 
       {/* Spacer */}
-      <div className="flex-1" />
+      <div className="hidden flex-1 md:block" />
 
       {/* 4. Layer toggles — gear dropdown */}
       {turnAftermathDigest && (
-        <div className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-[10px] text-text-secondary shadow-sm lg:flex">
+        <div className="hidden min-w-0 max-w-[38vw] items-center gap-2 border border-white/10 bg-panel-card/70 px-2 py-0.5 text-xs text-text-secondary shadow-sm lg:flex">
           <span className="truncate">{turnAftermathDigest.headline}</span>
           <button
             type="button"
             onClick={() => setTurnAftermathOpen(true)}
-            className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-accent-gold hover:text-amber-200"
+            className="shrink-0 text-xs font-bold uppercase tracking-wider text-accent-gold hover:text-amber-200"
             aria-label={t('aftermath.digest.reviewAria')}
           >
             {t('aftermath.digest.review')}
@@ -372,7 +372,7 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
           <button
             type="button"
             onClick={() => setTurnAftermathDigest(null)}
-            className="shrink-0 text-[9px] font-bold uppercase tracking-wider text-text-muted hover:text-text-primary"
+            className="shrink-0 text-xs font-bold uppercase tracking-wider text-text-muted hover:text-text-primary"
             aria-label={t('aftermath.digest.dismissAria')}
           >
             {t('aftermath.digest.dismiss')}
@@ -384,8 +384,8 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
         <button
           type="button"
           onClick={() => setLayersOpen(!layersOpen)}
-          className={`px-2 py-1 rounded text-[9px] font-mono uppercase tracking-wider transition-all ${
-            layersOpen ? 'bg-white/10 text-text-primary' : 'text-text-secondary/50 hover:text-text-secondary'
+          className={`px-2 py-1 rounded text-xs font-mono uppercase tracking-wider transition-all ${
+            layersOpen ? 'bg-white/10 text-text-primary' : 'text-text-secondary hover:text-text-primary'
           }`}
         >
           {t('statusStrip.layers')}
@@ -402,8 +402,8 @@ export function BottomStatusStrip({ eventCatalog }: BottomStatusStripProps = {})
                   key={key}
                   type="button"
                   onClick={() => toggle.set(!toggle.value)}
-                  className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                    toggle.value ? 'text-text-primary' : 'text-text-secondary/50'
+                  className={`flex items-center gap-2 w-full px-3 py-1.5 text-left text-xs font-mono uppercase tracking-wider transition-colors ${
+                    toggle.value ? 'text-text-primary' : 'text-text-secondary'
                   } hover:bg-white/5`}
                 >
                   <span className={`w-2 h-2 rounded-sm ${toggle.value ? 'bg-interactive' : 'bg-white/10 border border-white/20'}`} />

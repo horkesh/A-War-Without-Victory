@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import type { FormationView } from '../data/types';
 import { FACTION_HEX_COLORS } from '../utils/theme';
 import { drawFormationIcon, ICON_WIDTH, ICON_HEIGHT } from '../map/formationIcons';
@@ -15,14 +15,6 @@ interface StackExpansionOverlayProps {
     playerFaction?: string | null;
     onClose: () => void;
     onSelect: (id: string) => void;
-}
-
-const STACK_VIEWPORT_MARGIN = 180;
-
-function clampToViewport(value: number, viewportExtent: number): number {
-    const min = Math.min(STACK_VIEWPORT_MARGIN, Math.max(0, viewportExtent / 2));
-    const max = Math.max(min, viewportExtent - min);
-    return Math.min(Math.max(value, min), max);
 }
 
 /** Component to render a formation icon onto a canvas. */
@@ -64,7 +56,7 @@ const EnemyContactGlyph: React.FC<{ faction: string; className?: string }> = ({ 
             data-contact-redacted="true"
             data-contact-faction-color={faction}
             aria-hidden="true"
-            className={`flex items-center justify-center rounded border font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-white/85 shadow-lg ${className ?? ''}`}
+            className={`flex items-center justify-center rounded border font-mono text-xs font-bold uppercase tracking-[0.08em] text-white shadow-lg ${className ?? ''}`}
             style={{
                 width: '80px',
                 height: '40px',
@@ -77,10 +69,7 @@ const EnemyContactGlyph: React.FC<{ faction: string; className?: string }> = ({ 
     );
 };
 
-/**
- * Premium animated overlay for fanning out a stack of formations.
- * Features backdrop-blur, radial fan-out animation, and high-quality selection.
- */
+/** Bounded modal picker for every player-visible formation at an OSID. */
 export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
     osid,
     anchorX,
@@ -91,15 +80,8 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
     onSelect,
 }) => {
     const [locale] = useLocale();
-    const [isMounted, setIsMounted] = useState(false);
     const dialogRef = useRef<HTMLDivElement>(null);
     const previouslyFocusedRef = useRef<HTMLElement | null>(null);
-
-    /* Animation states */
-    useEffect(() => {
-        const t = setTimeout(() => setIsMounted(true), 20);
-        return () => clearTimeout(t);
-    }, []);
 
     useEffect(() => {
         previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -153,15 +135,15 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
 
     // If no formations (race condition?), close overlay.
     useEffect(() => {
-        if (total === 0 && isMounted) {
+        if (total === 0) {
             onClose();
         }
-    }, [total, isMounted, onClose]);
+    }, [total, onClose]);
 
-    const viewportWidth = typeof window === 'undefined' ? anchorX : window.innerWidth;
-    const viewportHeight = typeof window === 'undefined' ? anchorY : window.innerHeight;
-    const clampedAnchorX = clampToViewport(anchorX, viewportWidth);
-    const clampedAnchorY = clampToViewport(anchorY, viewportHeight);
+    const viewportWidth = typeof window === 'undefined' ? Math.max(1, anchorX * 2) : window.innerWidth;
+    const viewportHeight = typeof window === 'undefined' ? Math.max(1, anchorY * 2) : window.innerHeight;
+    const clampedAnchorX = viewportWidth / 2;
+    const clampedAnchorY = viewportHeight / 2;
 
     return (
         <div
@@ -177,13 +159,14 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
             {/* Backdrop with blur & darken */}
             <button
                 type="button"
-                className={`absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md transition-opacity duration-500 ease-out ${isMounted ? 'opacity-100' : 'opacity-0'}`}
+                className="absolute inset-0 border-0 bg-black/40 p-0 backdrop-blur-md opacity-100"
                 onClick={onClose}
                 aria-label={t('stackExpansion.closeAria')}
                 tabIndex={-1}
             />
 
-            {/* Orbital content */}
+            {/* Keep the picker anchored near the clicked stack while clamping the
+                whole interaction region away from viewport edges. */}
             <div
                 className="absolute pointer-events-none"
                 style={{
@@ -191,94 +174,72 @@ export const StackExpansionOverlay: React.FC<StackExpansionOverlayProps> = ({
                     top: clampedAnchorY,
                 }}
             >
-                {/* Central "Origin" indicator */}
                 <div
-                    className="absolute -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full border-2 border-accent-gold/50 animate-ping opacity-30"
-                    style={{ transform: `scale(${isMounted ? 1 : 0})` }}
-                />
-
-                {formations.map((f, i) => {
-                    // Angle calculation (start from top)
-                    const angle = total === 1 ? 0 : (i / total) * Math.PI * 2 - Math.PI / 2;
-                    const baseRadius = total === 1 ? 0 : 140;
-                    const radius = Math.min(300, baseRadius + total * 12);
-                    const tx = Math.cos(angle) * radius;
-                    const ty = Math.sin(angle) * radius;
-                    const isEnemyContact = Boolean(playerFaction && f.faction !== playerFaction);
-                    const name = isEnemyContact ? t('tooltip.enemyContactTitle') : getLocalizedFormationName(f, locale);
-                    const selectionId = isEnemyContact ? `enemy_contact:${f.location_osid ?? osid}:${i}` : f.id;
-                    const glowColor = isEnemyContact
-                        ? 'rgba(180, 190, 200, 0.18)'
-                        : FACTION_HEX_COLORS[f.faction] ? `${FACTION_HEX_COLORS[f.faction]}22` : 'rgba(255,255,255,0.1)';
-
-                    // Staggered delay for each unit
-                    const delay = i * 60;
-
-                    return (
-                        <div
-                            key={selectionId}
-                            className="absolute pointer-events-auto transition-all duration-500"
-                            style={{
-                                transform: `translate(calc(${tx}px - 50%), calc(${ty}px - 50%)) scale(${isMounted ? 1 : 0.2})`,
-                                transitionTimingFunction: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
-                                transitionDelay: `${delay}ms`,
-                                opacity: isMounted ? 1 : 0,
-                            }}
-                        >
-                            <button
-                                type="button"
-                                className="group relative flex flex-col items-center gap-2 cursor-pointer border-0 bg-transparent p-0"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    onSelect(selectionId);
-                                }}
-                                aria-label={isEnemyContact
-                                    ? t('stackExpansion.inspectEnemyContactAria')
-                                    : t('stackExpansion.selectAria', { name })}
-                                data-stack-focusable="true"
-                            >
-                                {/* Shield Glow */}
-                                <div
-                                    className="absolute -inset-4 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"
-                                    style={{ backgroundColor: glowColor }}
-                                />
-
-                                {isEnemyContact ? (
-                                    <EnemyContactGlyph faction={f.faction} className="group-hover:scale-110 transition-transform" />
-                                ) : (
-                                    <FormationIconCanvas
-                                        formation={f}
-                                        className="drop-shadow-lg group-hover:scale-110 transition-transform"
-                                    />
-                                )}
-
-                                <div className="bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] font-mono text-white whitespace-nowrap shadow-xl group-hover:bg-accent-gold group-hover:text-black transition-colors">
-                                    {name}
-                                </div>
-                            </button>
+                    data-stack-picker-panel="true"
+                    className="pointer-events-auto flex max-h-[calc(100vh-2rem)] w-[min(32rem,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 scale-100 flex-col overflow-hidden rounded border border-accent-gold/45 bg-panel-bg p-3 opacity-100 shadow-2xl"
+                >
+                    <div className="mb-2 flex items-center justify-between gap-3 border-b border-panel-border pb-2">
+                        <div className="text-[12px] font-bold uppercase tracking-[0.08em] text-text-primary">
+                            {t('stackExpansion.dialogAria')}
                         </div>
-                    );
-                })}
+                        <span className="rounded border border-accent-gold/45 bg-panel-card px-2 py-0.5 text-[12px] font-bold tabular-nums text-accent-gold">
+                            {total}
+                        </span>
+                    </div>
 
-                {/* Close Button UI */}
-                {total > 0 && (
+                    <div
+                        data-stack-member-list="true"
+                        className="grid min-h-0 max-h-[min(70vh,36rem)] flex-1 gap-2 overflow-y-auto overscroll-contain pr-1 sm:grid-cols-2"
+                    >
+                        {formations.map((formation, index) => {
+                            const isEnemyContact = Boolean(playerFaction && formation.faction !== playerFaction);
+                            const name = isEnemyContact
+                                ? t('tooltip.enemyContactTitle')
+                                : getLocalizedFormationName(formation, locale);
+                            const selectionId = isEnemyContact
+                                ? `enemy_contact:${formation.location_osid ?? osid}:${index}`
+                                : formation.id;
+
+                            return (
+                                <button
+                                    key={selectionId}
+                                    type="button"
+                                    className="group flex min-h-14 min-w-0 items-center gap-3 rounded border border-panel-border bg-panel-card px-2 py-2 text-left transition-colors hover:border-accent-gold/55 hover:bg-panel-hover focus-visible:border-accent-gold"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onSelect(selectionId);
+                                    }}
+                                    aria-label={isEnemyContact
+                                        ? t('stackExpansion.inspectEnemyContactAria')
+                                        : t('stackExpansion.selectAria', { name })}
+                                    data-stack-focusable="true"
+                                    data-stack-selection-id={selectionId}
+                                >
+                                    <span className="shrink-0" aria-hidden="true">
+                                        {isEnemyContact ? (
+                                            <EnemyContactGlyph faction={formation.faction} />
+                                        ) : (
+                                            <FormationIconCanvas formation={formation} className="drop-shadow-lg" />
+                                        )}
+                                    </span>
+                                    <span className="min-w-0 break-words text-[12px] font-mono font-semibold leading-snug text-text-primary">
+                                        {name}
+                                    </span>
+                                </button>
+                            );
+                        })}
+                    </div>
+
                     <button
                         type="button"
-                        className="absolute -translate-x-1/2 -translate-y-1/2 cursor-pointer pointer-events-auto group mt-4 flex border-0 bg-transparent p-0"
-                        style={{
-                            top: total === 1 ? 60 : 24, // Position relative to origin
-                            opacity: isMounted ? 1 : 0,
-                            transition: 'opacity 0.3s 0.5s'
-                        }}
+                        className="mt-3 w-full rounded border border-panel-border bg-black/50 px-3 py-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition-colors hover:border-accent-gold/50 hover:text-accent-gold"
                         onClick={onClose}
                         aria-label={t('stackExpansion.dismissAria')}
                         data-stack-focusable="true"
                     >
-                        <div className="bg-black/80 border border-white/20 hover:border-accent-gold/50 px-3 py-1 rounded-full text-[9px] text-white/60 tracking-widest font-bold uppercase transition-all hover:scale-105 active:scale-95 whitespace-nowrap shadow-2xl">
-                            {t('stackExpansion.dismiss')}
-                        </div>
+                        {t('stackExpansion.dismiss')}
                     </button>
-                )}
+                </div>
             </div>
         </div>
     );

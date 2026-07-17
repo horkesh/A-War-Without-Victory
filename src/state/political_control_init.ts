@@ -22,6 +22,7 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import { shouldEmitRoutineConsoleDiagnostics } from '../utils/routine_console_diagnostics.js';
 import type { FactionId, GameState, SettlementId } from './game_state.js';
 import { isMunicipalityAlignedToRbih } from './rbih_aligned_municipalities.js';
+import { strictCompare } from './validateGameState.js';
 
 const CANONICAL_FACTION_IDS = ['RBiH', 'RS', 'HRHB'] as const;
 
@@ -37,7 +38,7 @@ export function promotePoliticalControllersToOsid(
     const contestedSid = state.political.contested_control ?? {};
     const controllersOsid: Record<string, FactionId | null> = {};
     const contestedOsid: Record<string, boolean> = {};
-    const osids = Array.from(operationalToCanonical.keys()).sort((a, b) => a.localeCompare(b));
+    const osids = Array.from(operationalToCanonical.keys()).sort(strictCompare);
     for (const osid of osids) {
         const sids = operationalToCanonical.get(osid) ?? [];
         const factionCounts: Record<string, number> = { RBiH: 0, RS: 0, HRHB: 0 };
@@ -77,7 +78,7 @@ export function applyOsidControlOverrides(
     overrides: Record<string, string>
 ): void {
     const pc = state.political.political_controllers ?? {};
-    const keys = Object.keys(overrides).sort((a, b) => a.localeCompare(b));
+    const keys = Object.keys(overrides).sort(strictCompare);
     for (const osid of keys) {
         const faction = overrides[osid];
         if (faction && CANONICAL_FACTION_IDS.includes(faction as (typeof CANONICAL_FACTION_IDS)[number])) {
@@ -165,7 +166,7 @@ function applyRbihAlignedMunicipalityOverrides(
     controllersRecord: Record<SettlementId, PoliticalControllerId>,
     settlementGraph: LoadedSettlementGraph
 ): void {
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     for (const sid of settlementIds) {
         const settlement = settlementGraph.settlements.get(sid);
         if (!settlement) continue;
@@ -326,7 +327,7 @@ export function computeInitialPoliticalControllers(
     const settlementOverrides = overrides?.overrides ?? {};
 
     const sortedSettlements = Array.from(settlementGraph.settlements.entries())
-        .sort(([a], [b]) => a.localeCompare(b));
+        .sort(([a], [b]) => strictCompare(a, b));
 
     for (const [sid, settlement] of sortedSettlements) {
         const munKey = settlement.mun1990_id ?? settlement.mun_code;
@@ -408,7 +409,7 @@ function enforceNonNullStartControllers(
     settlementGraph: LoadedSettlementGraph,
     controllersRecord: Record<SettlementId, PoliticalControllerId>
 ): { coerced_from_null: number; defaulted_to_fallback: number } {
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const byMun = new Map<string, SettlementId[]>();
     for (const sid of settlementIds) {
         const settlement = settlementGraph.settlements.get(sid)!;
@@ -418,7 +419,7 @@ function enforceNonNullStartControllers(
         byMun.set(munKey, list);
     }
     for (const list of byMun.values()) {
-        list.sort((a, b) => a.localeCompare(b));
+        list.sort(strictCompare);
     }
 
     // Pass 1: municipality-majority fallback.
@@ -447,7 +448,7 @@ function enforceNonNullStartControllers(
         }
     }
     for (const sid of settlementIds) {
-        adjacency.get(sid)!.sort((a, b) => a.localeCompare(b));
+        adjacency.get(sid)!.sort(strictCompare);
     }
 
     // Pass 2: neighbor-majority propagation until fixed point.
@@ -617,7 +618,7 @@ async function initializePoliticalControllersFromEthnic1991(
 ): Promise<PoliticalControlInitResult> {
     const ethnicityData = await loadSettlementEthnicityData(ethnicityDataPath);
     const bySid = ethnicityData.by_settlement_id ?? {};
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const controllersRecord: Record<SettlementId, PoliticalControllerId> = {};
     const contestedRecord: Record<SettlementId, boolean> = {};
     const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
@@ -638,7 +639,7 @@ async function initializePoliticalControllersFromEthnic1991(
     state.political.political_controllers = controllersRecord;
     state.political.contested_control = contestedRecord;
     if (!state.political.municipalities) state.political.municipalities = {};
-    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => strictCompare(a, b));
     for (const [munId, control_status] of sortedMunicipalities) {
         if (!state.political.municipalities[munId]) state.political.municipalities[munId] = {};
         state.political.municipalities[munId].control_status = control_status;
@@ -680,7 +681,7 @@ async function initializePoliticalControllersFromHybrid1992(
         loadSettlementEthnicityData(ethnicityDataPath)
     ]);
     const bySid = ethnicityData.by_settlement_id ?? {};
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const controllersRecord: Record<SettlementId, PoliticalControllerId> = {};
     const contestedRecord: Record<SettlementId, boolean> = {};
     const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
@@ -719,7 +720,7 @@ async function initializePoliticalControllersFromHybrid1992(
     state.political.political_controllers = controllersRecord;
     state.political.contested_control = contestedRecord;
     if (!state.political.municipalities) state.political.municipalities = {};
-    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => strictCompare(a, b));
     for (const [munId, control_status] of sortedMunicipalities) {
         if (!state.political.municipalities[munId]) state.political.municipalities[munId] = {};
         state.political.municipalities[munId].control_status = control_status;
@@ -756,7 +757,7 @@ export async function applyMunicipalityControllersFromMun1990Only(
     mappingPath: string
 ): Promise<PoliticalControlInitResult> {
     const mapping = await loadInitialMunicipalityControllers1990(mappingPath);
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const controllersRecord: Record<SettlementId, PoliticalControllerId> = {};
     const contestedRecord: Record<SettlementId, boolean> = {};
     const municipalityStatus = new Map<string, 'SECURE' | 'CONTESTED' | 'HIGHLY_CONTESTED'>();
@@ -787,7 +788,7 @@ export async function applyMunicipalityControllersFromMun1990Only(
     state.political.political_controllers = controllersRecord;
     state.political.contested_control = contestedRecord;
     if (!state.political.municipalities) state.political.municipalities = {};
-    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => a.localeCompare(b));
+    const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) => strictCompare(a, b));
     for (const [munId, control_status] of sortedMunicipalities) {
         if (!state.political.municipalities[munId]) {
             state.political.municipalities[munId] = {};
@@ -829,7 +830,7 @@ export async function initializePoliticalControllers(
     mappingPath?: string,
     initOptions?: PoliticalControlInitOptions
 ): Promise<PoliticalControlInitResult> {
-    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const settlementIds = Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const existing = state.political.political_controllers ?? {};
     let definedCount = 0;
     let undefinedCount = 0;
@@ -982,7 +983,7 @@ export async function initializePoliticalControllers(
 
     if (!state.political.municipalities) state.political.municipalities = {};
     const sortedMunicipalities = Array.from(municipalityStatus.entries()).sort(([a], [b]) =>
-        a.localeCompare(b)
+        strictCompare(a, b)
     );
     for (const [munId, status] of sortedMunicipalities) {
         if (!state.political.municipalities[munId]) {
@@ -1033,7 +1034,7 @@ function computeInitialPoliticalControllersFromMun1990(
     const controllers = new Map<SettlementId, PoliticalControllerId>();
     const settlementOverrides = overrides?.overrides ?? {};
     const sortedSettlements = Array.from(settlementGraph.settlements.entries()).sort(([a], [b]) =>
-        a.localeCompare(b)
+        strictCompare(a, b)
     );
 
     for (const [sid, settlement] of sortedSettlements) {

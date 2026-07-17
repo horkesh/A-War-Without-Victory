@@ -294,7 +294,15 @@ describe('LANE-REPLAY-SAVE-SEQUENCE replay save emit', () => {
                     military: {
                         formations: {
                             z: { status: 'destroyed' },
-                            a: { status: 'active' },
+                            a: {
+                                id: 'a',
+                                faction: 'RBiH',
+                                name: 'Replay Test Brigade',
+                                kind: 'brigade',
+                                status: 'active',
+                                created_turn: 0,
+                                location_osid: 'op:a',
+                            },
                         },
                         front_segments: {},
                         front_posture: {},

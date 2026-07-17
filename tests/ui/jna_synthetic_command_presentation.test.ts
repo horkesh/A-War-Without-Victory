@@ -1,16 +1,19 @@
 // @vitest-environment jsdom
 import React, { createElement } from 'react';
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { ArmyHQCorpsCard } from '../../src/ui/map/components/army_hq/ArmyHQCorpsCard.js';
 import { CorpsCard } from '../../src/ui/map/components/CorpsCard.js';
 import { OOBSidebar } from '../../src/ui/map/components/OOBSidebar.js';
+import { OperationsPanel } from '../../src/ui/map/components/OperationsPanel.js';
+import { parseGameState } from '../../src/ui/map/data/GameStateAdapter.js';
 import type { FormationView, LoadedGameState, NamedOfficerView, OperationView } from '../../src/ui/map/data/types.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 const CORPS_ID = 'jna_herzegovina_command';
 const OPERATION_NAME = 'Operation Herzegovina';
+const OPERATION_DISPLAY_NAME = 'JNA Operations in Herzegovina';
 const COMMANDER_NAME = 'Slavko Lisica';
 
 function jnaCommand(): FormationView {
@@ -34,13 +37,13 @@ function jnaTaskGroup(): FormationView {
         id: 'jna_nevesinje_garrison',
         faction: 'RS',
         name: 'JNA Nevesinje Garrison',
-        kind: 'brigade',
+        kind: 'jna_phantom',
         readiness: 'ready',
         cohesion: 72,
         fatigue: 0,
         status: 'active',
         createdTurn: 0,
-        tags: ['jna'],
+        tags: ['jna', 'jna_phantom'],
         personnel: 2400,
         corps_id: CORPS_ID,
         location_osid: 'op:nevesinje:sopilja',
@@ -52,6 +55,16 @@ function jnaTaskGroup(): FormationView {
             tank_condition: { operational: 1, degraded: 0, non_operational: 0 },
             artillery_condition: { operational: 1, degraded: 0, non_operational: 0 },
         },
+    };
+}
+
+function jnaBilecaTaskGroup(): FormationView {
+    return {
+        ...jnaTaskGroup(),
+        id: 'jna_bileca_garrison',
+        name: 'JNA Bileca Garrison',
+        personnel: 1700,
+        location_osid: 'op:bileca:bileca_1',
     };
 }
 
@@ -85,8 +98,9 @@ function operation(): OperationView {
         display_name: OPERATION_NAME,
         type: 'pre_planned',
         phase: 'planning',
-        participating_brigade_count: 1,
-        participating_brigade_ids: ['jna_nevesinje_garrison'],
+        participating_brigade_count: 2,
+        participating_brigade_ids: ['jna_nevesinje_garrison', 'jna_bileca_garrison'],
+        objectives: ['op:nevesinje:nevesinje_1', 'op:bileca:bileca_1'],
         started_turn: 0,
         commander_officer_id: 'vrs_lisica',
     };
@@ -99,7 +113,7 @@ function loadedState(): LoadedGameState {
         turn: 0,
         phase: 'war',
         metadata: { turn: 0, date: '1992-04-01' },
-        formations: [jnaCommand(), jnaTaskGroup()],
+        formations: [jnaCommand(), jnaTaskGroup(), jnaBilecaTaskGroup()],
         militiaPools: [],
         controlBySettlement: {},
         statusBySettlement: {},
@@ -140,6 +154,104 @@ afterEach(() => {
 });
 
 describe('synthetic JNA command presentation', () => {
+    it('routes command inspection to an operation task-force dossier without treating phantoms as fielded brigades', () => {
+        useGameStore.setState({
+            loadedGameState: loadedState(),
+            osidDisplayNames: {
+                'op:nevesinje:nevesinje_1': 'Nevesinje',
+                'op:bileca:bileca_1': 'Bileca',
+            },
+        });
+
+        render(createElement(React.Fragment, null,
+            createElement(OOBSidebar),
+            createElement(OperationsPanel),
+        ));
+
+        const inspectCommand = screen.getByRole('button', {
+            name: /Inspect JNA Herzegovina Command command card/i,
+        });
+        expect(inspectCommand.getAttribute('aria-label')).toContain('0 fielded brigades');
+
+        fireEvent.click(inspectCommand);
+
+        expect(useGameStore.getState()).toMatchObject({
+            selectedCorpsId: null,
+            selectedOperationKey: `${CORPS_ID}|${OPERATION_NAME}`,
+            isOperationsPanelOpen: true,
+        });
+        const dossier = screen.getByTestId('operation-task-force-dossier');
+        expect(screen.getAllByText(OPERATION_DISPLAY_NAME).length).toBeGreaterThan(0);
+        expect(dossier.textContent).toContain('Temporary operation task force');
+        expect(dossier.textContent).toContain('2 operation participants');
+        expect(dossier.textContent).toContain('4,100 reported personnel');
+        expect(dossier.textContent).toContain('2 operation goals');
+        expect(dossier.textContent).toContain(COMMANDER_NAME);
+        expect(dossier.textContent).toContain('Temporary JNA/TO operation command');
+        expect(dossier.textContent).toContain('No organic corps staff');
+        expect(dossier.textContent).toContain('No permanent front sectors');
+        expect(dossier.textContent).toContain('Scenario-authored grouping of JNA/TO actions; not a documented operation title.');
+        expect(dossier.textContent).toContain('JNA Nevesinje Garrison');
+        expect(dossier.textContent).toContain('JNA Bileca Garrison');
+        expect(screen.queryByRole('button', { name: /Open Corps Orders/i })).toBeNull();
+    });
+
+    it('omits a withdrawn empty synthetic command while preserving its completed AAR', () => {
+        const parsed = parseGameState({
+            meta: { turn: 52, phase: 'war', player_faction: 'RS' },
+            military: {
+                formations: {
+                    [CORPS_ID]: {
+                        ...jnaCommand(),
+                        created_turn: 0,
+                    },
+                },
+                militia_pools: {},
+                event_flags: { jna_withdrawn: true },
+            },
+            political: { political_controllers: {} },
+            operation_history: [{
+                operation_id: 'preplanned:jna-herzegovina',
+                operation_name: OPERATION_NAME,
+                corps_id: CORPS_ID,
+                faction: 'RS',
+                started_turn: 0,
+                ended_turn: 8,
+                outcome: 'abandoned',
+                objectives_targeted: [],
+                objectives_captured: [],
+                total_attacks: 0,
+                duration_turns: 8,
+                weekly_log: [],
+            }],
+        });
+
+        expect(parsed.formations.some((formation) => formation.id === CORPS_ID)).toBe(false);
+        expect(parsed.operationHistory?.map((aar) => aar.operation_name)).toContain(OPERATION_NAME);
+    });
+
+    it('does not render a withdrawn empty synthetic command card', () => {
+        const state = loadedState();
+        state.turn = 52;
+        state.formations = [jnaCommand()];
+        state.operations = [];
+        state.eventFlags = { jna_withdrawn: true };
+
+        const { container } = render(createElement(ArmyHQCorpsCard, {
+            corps: state.formations[0],
+            brigades: [],
+            sectors: [],
+            operations: [],
+            factionBattles: [],
+            gameState: state,
+            isExpanded: true,
+            isCompressed: false,
+            onToggleExpand: vi.fn(),
+        }));
+
+        expect(container.textContent).not.toContain('JNA Herzegovina Command');
+    });
+
     it('shows unreported Army HQ command source instead of vacancy copy when officer roster is missing', () => {
         const state = loadedState();
         delete (state as Partial<LoadedGameState>).namedOfficerData;

@@ -25,6 +25,10 @@
 
 const { REPLACE_CO_COST } = require('./autonomy_ipc_contract.cjs');
 
+function strictCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /**
  * Validate the co-replacement payload shape. Returns an error string or null.
  * Requires corpsId; replacementOfficerId is OPTIONAL (auto-pick when omitted).
@@ -104,7 +108,7 @@ function resolveReplacement(military, corpsId, faction, requestedId) {
       const bTier = TIER_PRIORITY[b.pool_tier] ?? 99;
       if (aTier !== bTier) return aTier - bTier;
       if (a.competence !== b.competence) return b.competence - a.competence;
-      return a.id.localeCompare(b.id);
+      return strictCompare(a.id, b.id);
     });
 
   if (candidates.length === 0) return { error: 'no_reserve_officer_available' };

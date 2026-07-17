@@ -27,6 +27,10 @@ export interface OsidCentroid { lat: number; lon: number; }
 /** OSID → Centroid. Used for topological Case B adjacency checks. */
 export type OsidCentroidMap = Map<string, OsidCentroid>;
 
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
+
 
 // ── Browser-safe pure functions (no Node APIs) ─────────────────────────────
 
@@ -45,7 +49,7 @@ export function resolveLocationOsid(
 
 /**
  * Build OSID → sorted SIDs from SID → OSID map.
- * Determinism: each OSID's SID list is sorted with localeCompare.
+ * Determinism: each OSID's SID list is sorted by strict code-unit order.
  */
 export function buildReverseMap(
     canonicalToOperational: CanonicalToOperationalMap
@@ -57,7 +61,7 @@ export function buildReverseMap(
         reverse.set(osid, list);
     }
     for (const [, list] of reverse) {
-        list.sort((a, b) => a.localeCompare(b));
+        list.sort(strictCompare);
     }
     return reverse;
 }

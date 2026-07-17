@@ -46,6 +46,7 @@ import {
     MIN_SECTOR_BRIGADES,
 } from './corps_front_sectors_constants.js';
 import { getCorpsArmyPriorities } from './bot_strategy.js';
+import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 
 // ── Imported from extracted modules ──────────────────────────────────────
 import { buildFriendlyComponents, getSectorComponent, getSectorFrontOsids, getSectorUniqueFrontOsids, canAnyBrigadeReachAny, getCorpsForFaction, getFactions, isSectorColdFront } from './sector_utils.js';
@@ -66,6 +67,7 @@ import { areSectorsEdgeAdjacent, mergeSectors, splitNonContiguousSectors } from 
 import {
     classifyBrigadesByTerritory,
     assignCrossCorpsEnclaveDefenders,
+    buildOperationParticipantSet,
     buildOneHopReserveBand,
     ensureMinimumSectorCoverage,
     reclassifyRearBrigades,
@@ -984,12 +986,15 @@ function collectUnresolvedSectorBrigades(
 ): FormationId[] {
     const sectorList = Object.values(sectors);
     const frontEdges = state.military.war_front_edges_osid ?? [];
+    const operationParticipants = buildOperationParticipantSet(state);
 
     return Object.keys(formations)
         .sort(strictCompare)
         .filter((formationId): formationId is FormationId => {
             const formation = formations[formationId];
             if (!isSectorRosterEligibleFormation(formation)) return false;
+            if (formation.stranded_status === 'holding') return false;
+            if (operationParticipants.has(formationId)) return false;
             const corpsId = getFormationCorpsId(formation);
             const loaned = !!formation.elite_loan_state?.on_loan;
             if (isSectorAssignmentExemptCorpsId(corpsId) && !loaned) return false;
@@ -1137,21 +1142,33 @@ function canCorpsStaffSectorFront(
 function isSectorUnstaffableByFaction(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
-    factionBrigadeLocations: string[],
+    factionBrigades: FormationState[],
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
     factionBrigadeComponents: Set<number>,
 ): boolean {
     const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, siblingSectors);
-    if (uniqueFrontOsids.size > 0) {
-        return !canAnyBrigadeReachAny(
-            factionBrigadeLocations,
-            uniqueFrontOsids,
-            adjacency,
-            friendlyOsids,
-            TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
-        );
+    const targetOsids = uniqueFrontOsids.size > 0
+        ? uniqueFrontOsids
+        : getSectorFrontOsids(sector);
+    if (targetOsids.size > 0) {
+        const factionCanLegallyReach = factionBrigades.some((formation) => {
+            const originOsid = formation.location_osid;
+            if (!originOsid) return false;
+            const legalTargets = new Set(
+                [...targetOsids].filter((targetOsid) =>
+                    isEnclaveMovementDestinationAllowed(formation, originOsid, targetOsid)),
+            );
+            return canAnyBrigadeReachAny(
+                [originOsid],
+                legalTargets,
+                adjacency,
+                friendlyOsids,
+                TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+            );
+        });
+        return !factionCanLegallyReach;
     }
 
     const sectorComp = getSectorComponent(sector, componentOf);
@@ -1178,12 +1195,14 @@ export function annotateUnstaffedFrontSectors(
         if (factionSectors.length === 0) continue;
         const friendlyOsids = buildFriendlyOsidsFromState(state, adjacency, faction);
         const componentOf = buildFriendlyComponents(adjacency, friendlyOsids);
-        const factionBrigadeLocations = Object.values(formations)
+        const factionBrigades = Object.keys(formations)
+            .sort(strictCompare)
+            .map((formationId) => formations[formationId]!)
             .filter((formation) =>
                 formation.faction === faction
-                && formation.status === 'active'
-                && formation.location_osid)
-            .map((formation) => formation.location_osid!);
+                && isSectorRosterEligibleFormation(formation)
+                && formation.location_osid);
+        const factionBrigadeLocations = factionBrigades.map((formation) => formation.location_osid!);
         const factionBrigadeComponents = new Set<number>();
         for (const location of factionBrigadeLocations) {
             const component = componentOf.get(location);
@@ -1196,7 +1215,7 @@ export function annotateUnstaffedFrontSectors(
             if (!isSectorUnstaffableByFaction(
                 sector,
                 factionSectors,
-                factionBrigadeLocations,
+                factionBrigades,
                 adjacency,
                 friendlyOsids,
                 componentOf,
@@ -1235,13 +1254,14 @@ function absorbEmptyStaffableSiblingSectors(
         const componentOf = spatial?.componentsByFaction.get(faction)
             ? new Map(spatial.componentsByFaction.get(faction)!)
             : buildFriendlyComponents(adjacency, friendlyOsids);
+        const factionBrigades: FormationState[] = [];
         const factionBrigadeLocations: string[] = [];
         const factionBrigadeComponents = new Set<number>();
         for (const fid of Object.keys(formations).sort(strictCompare)) {
             const formation = formations[fid];
-            if (!formation || formation.faction !== faction || formation.status !== 'active') continue;
-            if (formation.kind !== 'brigade' && formation.kind !== 'og' && formation.kind !== 'operational_group') continue;
+            if (!formation || formation.faction !== faction || !isSectorRosterEligibleFormation(formation)) continue;
             if (!formation.location_osid) continue;
+            factionBrigades.push(formation);
             factionBrigadeLocations.push(formation.location_osid);
             const componentId = componentOf.get(formation.location_osid);
             if (componentId !== undefined) factionBrigadeComponents.add(componentId);
@@ -1262,7 +1282,7 @@ function absorbEmptyStaffableSiblingSectors(
                 if (isSectorUnstaffableByFaction(
                     sector,
                     corpsSectors,
-                    factionBrigadeLocations,
+                    factionBrigades,
                     adjacency,
                     friendlyOsids,
                     componentOf,

@@ -179,6 +179,49 @@ function makeBriefing(activeOperations: any[] = [], brigades: FormationState[] =
     } as CommanderBriefing;
 }
 
+function makeIntelBriefing(
+    confidences: readonly number[],
+    options: {
+        turn?: number;
+        consecutiveProbes?: number;
+        probeExempt?: boolean;
+    } = {},
+): CommanderBriefing {
+    const turn = options.turn ?? 20;
+    const briefing = makeBriefing();
+    const sectorId = makeSector().sector_id;
+    const records = confidences.map((confidence, index) => ({
+        enemy_sector_id: `sector:enemy:${index}`,
+        confidence,
+        last_updated_turn: turn,
+        sources: ['passive_contact'] as const,
+    }));
+    const state = briefing.state_ref!;
+    state.meta.turn = turn;
+    state.military.sector_intel = { [sectorId]: records as any };
+    state.military.corps_command![CORPS_ID]!.consecutive_probes = options.consecutiveProbes ?? 0;
+    if (options.probeExempt != null) {
+        state.military.war_timeline = {
+            doctrine_phases: {
+                RS: [{
+                    start_week: 0,
+                    end_week: 9999,
+                    default_corps_stance: 'offensive',
+                    probe_exempt: options.probeExempt,
+                }],
+            },
+        } as any;
+    }
+    return {
+        ...briefing,
+        turn,
+        intel_data: {
+            sector_intel: { [sectorId]: records as any },
+            opsec_active_sectors: [],
+        },
+    };
+}
+
 function makeForces(): ForceAssessment {
     const evals = [makeEval('b1'), makeEval('b2')];
     return {
@@ -278,6 +321,131 @@ describe('commander emission overlap guards', () => {
         expect(output.operations).toHaveLength(0);
     });
 
+    it('downgrades a ready full operation to a sector-scoped probe when the stalest intel is below threshold', () => {
+        const briefing = makeIntelBriefing([0.8, 0.24]);
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]).toMatchObject({
+            type: 'probe',
+            sector_id: `sector:${CORPS_ID}:0`,
+            objectives: ['op:test:objective'],
+            planning_duration: 1,
+            min_attack_outcome: 'repulsed',
+        });
+        expect(output.operations[0]!.participating_brigades.length).toBeGreaterThan(0);
+        expect(output.operations[0]!.participating_brigades.length).toBeLessThanOrEqual(2);
+    });
+
+    it('launches the full operation at the exact canonical RS threshold', () => {
+        const briefing = makeIntelBriefing([0.25]);
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
+    it('honors the active doctrine probe exemption supplied by the scenario timeline', () => {
+        const briefing = makeIntelBriefing([0], { probeExempt: true });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
+    it('forces a full commitment after two accepted probes', () => {
+        const briefing = makeIntelBriefing([0], { consecutiveProbes: 2 });
+
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        expect(output.operations).toHaveLength(1);
+        expect(output.operations[0]!.type).toBe('sector_attack');
+    });
+
+    it('emits byte-identical intel-gated operations for identical inputs', () => {
+        const briefing = makeIntelBriefing([0.24]);
+        const emit = () => emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        ).operations;
+
+        expect(JSON.stringify(emit())).toBe(JSON.stringify(emit()));
+    });
+
+    it('increments the probe counter only when a probe is accepted', () => {
+        const briefing = makeIntelBriefing([0.24]);
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        applyCommanderOutput(briefing.state_ref!, CORPS_ID, output);
+
+        expect(briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes).toBe(1);
+    });
+
+    it('resets the probe counter when a full operation is accepted', () => {
+        const briefing = makeIntelBriefing([0], { consecutiveProbes: 2 });
+        const output = emitCommanderOutput(
+            briefing,
+            [],
+            makeForces(),
+            makeAllocation(),
+            makePlanDecision(),
+            makeDecisions(),
+            makeThreats(),
+        );
+
+        applyCommanderOutput(briefing.state_ref!, CORPS_ID, output);
+
+        expect(briefing.state_ref!.military.corps_command![CORPS_ID]!.consecutive_probes).toBe(0);
+    });
+
     it('applyCommanderOutput rejects overlapping operations even when the generated name differs', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
@@ -339,6 +507,72 @@ describe('commander emission overlap guards', () => {
 
         expect(state.military.corps_command?.[CORPS_ID]?.active_operations).toHaveLength(1);
         expect(state.military.corps_command?.[CORPS_ID]?.active_operations?.[0]?.name).toBe('cmd_old');
+    });
+
+    it('keeps a Level-1 approval pending when an unrelated live operation blocks emission', () => {
+        const state = {
+            schema_version: CURRENT_SCHEMA_VERSION,
+            meta: { turn: 10, phase: 'war', seed: 'approved-overlap', autonomy_level: 1 } as any,
+            factions: [{ id: FACTION }] as any,
+            military: {
+                corps_command: {
+                    [CORPS_ID]: {
+                        command_span: 5,
+                        subordinate_count: 2,
+                        og_slots: 0,
+                        active_ogs: [],
+                        corps_exhaustion: 0,
+                        faction_war_exhaustion: 0,
+                        stance: 'offensive',
+                        active_operations: [{
+                            name: 'blocking_probe',
+                            type: 'probe',
+                            phase: 'execution',
+                            sector_id: `sector:${CORPS_ID}:0`,
+                            objectives: ['op:test:objective'],
+                            participating_brigades: ['b1'],
+                        }],
+                        player_op_response: { plan_id: 'p1', approved: true, turn: 9 },
+                    },
+                },
+                brigade_movement_orders: {},
+            },
+        } as unknown as GameState;
+
+        applyCommanderOutput(state, CORPS_ID, {
+            directive: { type: 'hold', target_zone: null } as any,
+            operations: [{
+                name: 'approved_main_effort',
+                type: 'sector_attack',
+                phase: 'planning',
+                sector_id: `sector:${CORPS_ID}:0`,
+                objectives: ['op:test:objective'],
+                participating_brigades: ['b1', 'b2'],
+            } as any],
+            sector_stances: [],
+            updated_state: {
+                current_plan: { plan_id: 'p1', status: 'executing' } as any,
+                zone_assessments: [],
+                threat_assessment: { threatened_zones: [], enemy_concentration_zones: [], recent_losses: [], overall_pressure: 'low' },
+                force_assessment: makeForces(),
+                sector_activity_log: [],
+                operation_history: [],
+                intel_picture: undefined,
+                garrison_budget: {},
+                last_assessment_turn: 10,
+                last_plan_action: 'none',
+                last_plan_reason: 'test',
+            } as any,
+            reinforcement_requests: [],
+            prepositioning_orders: [],
+            plan_updates: [],
+            garrison_locks: [],
+        });
+
+        const command = state.military.corps_command?.[CORPS_ID];
+        expect(command?.active_operations.map((operation) => operation.name)).toEqual(['blocking_probe']);
+        expect(command?.player_op_response).toEqual({ plan_id: 'p1', approved: true, turn: 9 });
+        expect(command?.commander_state?.current_plan?.status).toBe('ready');
     });
 
     // Codex P1 regression (#86): at autonomy level 1 the emitted op is tagged

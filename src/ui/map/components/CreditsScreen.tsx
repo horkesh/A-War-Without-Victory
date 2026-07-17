@@ -38,20 +38,20 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 
                 <CreditSection title={t('credits.designDevelopment')}>
                     <p className="text-[#d5c9bc]">A War Without Victory</p>
-                    <p className="text-[#8a7a60] text-[11px]">{t('credits.subtitle')}</p>
+                    <p className="text-[#8a7a60] text-xs">{t('credits.subtitle')}</p>
                 </CreditSection>
 
                 <CreditSection title={t('credits.historicalSources')}>
                     <p className="text-[#d5c9bc] text-[12px]">
                         {t('credits.basedOn')} <em>{t('credits.balkanBattlegroundsTitle')}</em> (CIA, 2002)
                     </p>
-                    <p className="text-[#8a7a60] text-[11px] mt-1">
+                    <p className="text-[#8a7a60] text-xs mt-1">
                         {t('credits.additionalSources')}
                     </p>
                 </CreditSection>
 
                 <CreditSection title={t('credits.technology')}>
-                    <p className="text-[#8a7a60] text-[11px] leading-relaxed">
+                    <p className="text-[#8a7a60] text-xs leading-relaxed">
                         Electron · React · TypeScript · MapLibre GL JS · Deck.gl · Vite · Vitest · Node.js
                     </p>
                 </CreditSection>
@@ -64,7 +64,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 
                 <div className="text-center mt-6">
                     <button type="button" onClick={onClose}
-                        className="text-[11px] uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10 transition-colors"
+                        className="text-xs uppercase tracking-wider text-[#8a7a60] border border-[#8a7a60]/20 px-4 py-2 rounded hover:bg-[#8a7a60]/10 transition-colors"
                         style={{ fontFamily: 'Courier New, monospace' }}>
                         {t('common.close')}
                     </button>
@@ -77,7 +77,7 @@ export function CreditsScreen({ onClose }: CreditsScreenProps) {
 function CreditSection({ title, children }: { title: string; children: ReactNode }) {
     return (
         <div className="mb-4">
-            <div className="text-[9px] uppercase tracking-[0.2em] text-[#c4a35a]/60 font-bold mb-1">{title}</div>
+            <div className="text-xs uppercase tracking-[0.2em] text-[#c4a35a]/60 font-bold mb-1">{title}</div>
             {children}
         </div>
     );

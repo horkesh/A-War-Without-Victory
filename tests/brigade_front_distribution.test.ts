@@ -50,6 +50,52 @@ function makeFormation(overrides: Partial<any> = {}): any {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('distributeBrigadesToFront', () => {
+    it('keeps a fixed-home Zepa defender out of a Srebrenica-only front assignment', () => {
+        const zepa = 'op:rogatica:zepa_2';
+        const srebrenica = 'op:srebrenica:srebrenica_2';
+        const srebrenicaApproach = 'op:srebrenica:suceska';
+        const state = makeState({
+            arbih_285th_light_brigade: makeFormation({
+                faction: 'RBiH',
+                corps_id: 'arbih_2nd_corps',
+                location_osid: zepa,
+                home_osid: zepa,
+                tags: ['enclave', 'placement:fixed_home_osid'],
+            }),
+        });
+        state.political.political_controllers = {
+            [zepa]: 'RBiH',
+            [srebrenica]: 'RBiH',
+            [srebrenicaApproach]: 'RBiH',
+        };
+        state.military.corps_front_sectors = {
+            'sector:arbih_2nd_corps:0': makeSector({
+                sector_id: 'sector:arbih_2nd_corps:0',
+                corps_id: 'arbih_2nd_corps',
+                faction: 'RBiH',
+                assigned_brigade_ids: ['arbih_285th_light_brigade'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:arbih_2nd_corps:0',
+                    friendly_osids: [srebrenica, srebrenicaApproach],
+                    enemy_osids: ['op:bratunac:enemy'],
+                    primary_brigade_ids: ['arbih_285th_light_brigade'],
+                    edge_ids: [],
+                    length_edges: 1,
+                }],
+            }),
+        };
+        const sectors = Object.values(state.military.corps_front_sectors) as any[];
+        const adjacency = makeAdjacency([
+            [zepa, srebrenica],
+            [srebrenica, srebrenicaApproach],
+        ]);
+
+        distributeBrigadesToFront(state, sectors, adjacency);
+
+        expect(state.military.formations.arbih_285th_light_brigade.location_osid).toBe(zepa);
+        expect(state.military.brigade_movement_orders.arbih_285th_light_brigade).toBeUndefined();
+    });
+
     it('spreads stacked brigades to adjacent empty front OSIDs', () => {
         // 3 brigades all at osid-A, sub-segment front = [A, B, C], A↔B, A↔C
         const state = makeState({

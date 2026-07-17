@@ -79,7 +79,7 @@ export function LoadErrorToast({ message, onDismiss, positioning = 'fixed' }: Lo
     >
       <div className="flex items-start gap-3 p-3">
         <div
-          className="font-mono uppercase tracking-[0.22em] text-[10px] text-red-400 mt-0.5"
+          className="font-mono uppercase tracking-[0.22em] text-xs text-red-400 mt-0.5"
           data-testid="load-error-toast-tag"
         >
           {t('loadError.error')}

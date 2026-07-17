@@ -1,7 +1,7 @@
 /**
  * Officer System Tests — Phase B (Tier 1: Named Officers + Corps Sensitivity)
  *
- * Tests for officer_system.ts functions: hash, lookups, modifiers,
+ * Tests for officer_system.ts functions: casualty eligibility, lookups, modifiers,
  * initialization, succession, validation, and three-tier combat math.
  */
 import { describe, it } from 'vitest';
@@ -9,7 +9,6 @@ import * as assert from 'node:assert/strict';
 import type { FactionId, FormationState, GameState } from '../src/state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
 import {
-    officerHash,
     getCorpsCommander,
     getArmyCommander,
     getEffectiveCompetence,
@@ -115,35 +114,8 @@ function makeCorpsCommand(overrides: Record<string, unknown> = {}): any {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-// officerHash
+// Officer casualty eligibility
 // ═══════════════════════════════════════════════════════════════════════════
-
-describe('officerHash', () => {
-    it('returns deterministic value for same inputs', () => {
-        const h1 = officerHash(5, 'vrs_mladic');
-        const h2 = officerHash(5, 'vrs_mladic');
-        assert.equal(h1, h2);
-    });
-
-    it('returns different values for different turns', () => {
-        const h1 = officerHash(0, 'vrs_mladic');
-        const h2 = officerHash(1, 'vrs_mladic');
-        assert.notEqual(h1, h2);
-    });
-
-    it('returns different values for different officers', () => {
-        const h1 = officerHash(5, 'vrs_mladic');
-        const h2 = officerHash(5, 'arbih_halilovic');
-        assert.notEqual(h1, h2);
-    });
-
-    it('returns value in [0, 1) range', () => {
-        for (let t = 0; t < 100; t++) {
-            const h = officerHash(t, 'test_officer');
-            assert.ok(h >= 0 && h < 1, `Hash ${h} out of range at turn ${t}`);
-        }
-    });
-});
 
 // ═══════════════════════════════════════════════════════════════════════════
 // getEffectiveCompetence
@@ -495,6 +467,67 @@ describe('processOfficerSuccession', () => {
         assert.equal(state.military.named_officers!['o1']!.status, 'retired');
     });
 
+    it('does not regenerate a player replacement matter after durable resolution', () => {
+        const outgoing = makeOfficer({
+            id: 'vrs_sipcic',
+            faction: 'RS',
+            available_until_turn: 18,
+            is_historical_start: true,
+            historical_corps_id: 'vrs_sarajevo_romanija',
+            home_corps_id: 'vrs_sarajevo_romanija',
+        });
+        const successor = makeOfficer({
+            id: 'vrs_galic',
+            faction: 'RS',
+            pool_tier: 'tier_a',
+            available_from_turn: 18,
+            home_corps_id: 'vrs_sarajevo_romanija',
+        });
+        const state = makeMinimalState({
+            meta: {
+                turn: 18,
+                phase: 'war',
+                scenario_id: 'test',
+                player_faction: 'RS',
+            },
+        } as unknown as Partial<GameState>);
+        state.military.named_officer_data = [outgoing, successor];
+        state.military.named_officers = {
+            vrs_sipcic: makeOfficerState({
+                officer_id: 'vrs_sipcic',
+                assigned_corps_id: 'vrs_sarajevo_romanija',
+            }),
+            vrs_galic: makeOfficerState({
+                officer_id: 'vrs_galic',
+                status: 'reserve',
+            }),
+        };
+
+        processOfficerSuccession(state, new Set());
+        const firstMatter = state.military.pending_officer_events?.[0];
+        assert.ok(firstMatter);
+        assert.equal(firstMatter.event_id, 'replacement:vrs_sipcic:vrs_sarajevo_romanija:vrs_galic');
+
+        state.military.officer_decision_history = [{
+            id: `officer:18:${firstMatter.event_id}:acknowledged`,
+            turn: 18,
+            faction: 'RS',
+            event_id: firstMatter.event_id,
+            event_type: 'replacement_suggested',
+            officer_id: 'vrs_galic',
+            current_commander_id: 'vrs_sipcic',
+            corps_id: 'vrs_sarajevo_romanija',
+            decision: 'acknowledged',
+        }];
+        state.military.pending_officer_events = [];
+        state.meta!.turn = 35;
+
+        processOfficerSuccession(state, new Set());
+
+        assert.deepEqual(state.military.pending_officer_events, []);
+        assert.equal(state.military.named_officers.vrs_sipcic?.status, 'active');
+    });
+
     it('adds newly available officers to pool', () => {
         const data = [
             makeOfficer({ id: 'o1', faction: 'RS', available_from_turn: 5 }),
@@ -508,29 +541,52 @@ describe('processOfficerSuccession', () => {
         assert.equal(state.military.named_officers!['o1']!.status, 'reserve');
     });
 
-    it('casualty check can kill officers in engaged corps', () => {
-        // Use an officer with very high vulnerability to make the hash very likely to trigger
+    it('kills an engaged officer once cumulative exposure reaches the eligibility floor', () => {
         const data = makeOfficer({ id: 'high_vuln', faction: 'RS', casualty_vulnerability: 1.0 });
         const state = makeMinimalState({ meta: { turn: 0, phase: 'war', scenario_id: 'test' } } as unknown as Partial<GameState>);
         state.military.named_officer_data = [data];
         state.military.named_officers = {
-            high_vuln: makeOfficerState({ officer_id: 'high_vuln', assigned_corps_id: 'vrs_1kk' }),
+            high_vuln: makeOfficerState({ officer_id: 'high_vuln', assigned_corps_id: 'vrs_1kk', turns_in_command: 10 }),
         };
 
-        // Search for a turn where the hash triggers (vulnerability × 0.1 = 0.1 threshold)
-        let killed = false;
-        for (let t = 0; t < 200; t++) {
-            state.meta!.turn = t;
-            // Reset status each iteration
-            state.military.named_officers!['high_vuln']!.status = 'active';
-            state.military.named_officers!['high_vuln']!.assigned_corps_id = 'vrs_1kk';
-            const report = processOfficerSuccession(state, new Set(['vrs_1kk']));
-            if (report.casualties.length > 0) {
-                killed = true;
-                break;
-            }
-        }
-        assert.ok(killed, 'High vulnerability officer should be killed within 200 turns');
+        const report = processOfficerSuccession(state, new Set(['vrs_1kk']));
+
+        assert.deepEqual(report.casualties, ['high_vuln']);
+    });
+
+    it('defers casualty eligibility while cumulative exposure remains below one', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'not_yet_exposed', faction: 'RS', casualty_vulnerability: 1.0 }),
+        ];
+        state.military.named_officers = {
+            not_yet_exposed: makeOfficerState({
+                officer_id: 'not_yet_exposed',
+                assigned_corps_id: 'vrs_1kk',
+                turns_in_command: 9,
+            }),
+        };
+
+        const report = processOfficerSuccession(state, new Set(['vrs_1kk']));
+
+        assert.deepEqual(report.casualties, []);
+    });
+
+    it('selects the highest exposure officer per engaged corps', () => {
+        const state = makeMinimalState();
+        state.military.named_officer_data = [
+            makeOfficer({ id: 'lower', faction: 'RS', casualty_vulnerability: 0.5 }),
+            makeOfficer({ id: 'higher', faction: 'RS', casualty_vulnerability: 1.0 }),
+        ];
+        state.military.named_officers = {
+            lower: makeOfficerState({ officer_id: 'lower', assigned_corps_id: 'vrs_1kk', turns_in_command: 20 }),
+            higher: makeOfficerState({ officer_id: 'higher', assigned_corps_id: 'vrs_1kk', turns_in_command: 20 }),
+        };
+
+        const report = processOfficerSuccession(state, new Set(['vrs_1kk']));
+
+        assert.deepEqual(report.casualties, ['higher']);
+        assert.equal(state.military.named_officers.lower!.status, 'active');
     });
 
     it('does not kill officers in corps that did not fight', () => {

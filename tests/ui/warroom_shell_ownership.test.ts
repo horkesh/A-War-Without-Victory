@@ -79,7 +79,8 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
     it('keeps event decisions as the exclusive presidential modal owner', () => {
         const app = read('src/ui/map/App.tsx');
 
-        expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*if \(activeEventDecisionId !== null\) return;/);
+        expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*if \(activeEventDecisionId !== null\) return false;/);
+        expect(app).toMatch(/const openWarroomDecisionRoomFromField =[\s\S]*setWarroomDecisionRoomOpen\(true\);[\s\S]*return true;/);
         expect(app).toMatch(/const openWarroomDeskFromField = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
         expect(app).toMatch(/const openCommandCategory = \(\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
         expect(app).toMatch(/const openWarroomOverlay = \(surface: WarroomOverlaySurface\) => \{[\s\S]*if \(activeEventDecisionId !== null\) return;/);
@@ -149,6 +150,52 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).not.toContain("onOpenDesk={() => setAppScreen('warroom')}");
     });
 
+    it('clears tactical inspection overlays before opening Desk or Decision Room from the field', () => {
+        const app = read('src/ui/map/App.tsx');
+        const briefing = read('src/ui/map/components/CommandBriefingLayer.tsx');
+        const helperStart = app.indexOf('const clearTacticalInspectionOverlays = () => {');
+        const helperEnd = app.indexOf('\n  const openWarroomDecisionRoomFromField =', helperStart);
+        const decisionStart = app.indexOf('const openWarroomDecisionRoomFromField =');
+        const decisionEnd = app.indexOf('\n\n  const reviewPreAdvancePriorities', decisionStart);
+        const deskStart = app.indexOf('const openWarroomDeskFromField = () => {');
+        const deskEnd = app.indexOf('\n  const openCommandCategory =', deskStart);
+
+        expect(helperStart).toBeGreaterThanOrEqual(0);
+        expect(helperEnd).toBeGreaterThan(helperStart);
+        expect(decisionStart).toBeGreaterThanOrEqual(0);
+        expect(decisionEnd).toBeGreaterThan(decisionStart);
+        expect(deskStart).toBeGreaterThanOrEqual(0);
+        expect(deskEnd).toBeGreaterThan(deskStart);
+
+        const helper = app.slice(helperStart, helperEnd);
+        expect(helper).toContain('gs.setSelectedFormationId(null);');
+        expect(helper).toContain('gs.setExpandedStackOsid(null);');
+        expect(helper).toContain('gs.clearTooltipTarget();');
+        expect(helper).toContain('setTurnAftermathOpen(false);');
+        expect(helper).toContain('suppressCommandBriefingForCurrentTurn();');
+
+        expect(app.slice(decisionStart, decisionEnd)).toContain('clearTacticalInspectionOverlays();');
+        expect(app.slice(deskStart, deskEnd)).toContain('clearTacticalInspectionOverlays();');
+        expect(app).toContain('const [commandBriefingSuppressedTurn, setCommandBriefingSuppressedTurn]');
+        expect(app).toContain('suppressedTurn={commandBriefingSuppressedTurn}');
+        expect(briefing).toContain('suppressedTurn?: number | null;');
+        expect(briefing).toContain('if (turn != null && suppressedTurn === turn) return null;');
+    });
+
+    it('clears stack expansion, tooltips, and aftermath when field toolbar routes away', () => {
+        const toolbar = read('src/ui/map/components/PresidentialToolbar.tsx');
+        const clearStart = toolbar.indexOf('const clearFieldPanels = useCallback(() => {');
+        const clearEnd = toolbar.indexOf('\n\n    const handleOpenDesk', clearStart);
+
+        expect(clearStart).toBeGreaterThanOrEqual(0);
+        expect(clearEnd).toBeGreaterThan(clearStart);
+
+        const clearFieldPanels = toolbar.slice(clearStart, clearEnd);
+        expect(clearFieldPanels).toContain('gs.setExpandedStackOsid(null);');
+        expect(clearFieldPanels).toContain('gs.clearTooltipTarget();');
+        expect(clearFieldPanels).toContain('setTurnAftermathOpen(false);');
+    });
+
     it('routes Warroom-hosted Decision Room non-local targets through the visible shell handoff path', () => {
         const app = read('src/ui/map/App.tsx');
         const hostStart = app.indexOf('{warroomDecisionRoomOpen && (');
@@ -213,6 +260,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
 
         const inboxRoute = app.slice(inboxStart, inboxEnd);
         expect(inboxRoute).toContain('openWarroomDeskFromField();');
+        expect(inboxRoute).toContain('setWarroomDecisionRoomOpen(false);');
         expect(inboxRoute).not.toContain("setAppScreen('game');");
         expect(inboxRoute).toContain('gs.setFocusedAftermathTurn(null);');
         expect(inboxRoute).toContain('gs.setFocusedOperationHistoryId(null);');

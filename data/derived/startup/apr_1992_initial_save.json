@@ -1345,6 +1345,29 @@
                   "rs_1st_armored",
                   "rs_5th_kozara_light_infantry"
                 ]
+              },
+              {
+                "assigned_brigades": [
+                  "rs_6th_sanske_infantry"
+                ],
+                "attack_attempt_count": 0,
+                "axis_id": "sanski_most",
+                "consecutive_failures_on_current": 0,
+                "current_objective_index": 0,
+                "failure_count": 0,
+                "idle_execution_turn_streak": 0,
+                "main_brigade": "rs_6th_sanske_infantry",
+                "momentum": 0,
+                "movement_only_execution_turns": 0,
+                "name": "Sanski Most",
+                "objective_capture_count": 0,
+                "objectives": [
+                  "op:sanski_most:stari_majdan",
+                  "op:sanski_most:sanski_most_2",
+                  "op:sanski_most:ilidza_2"
+                ],
+                "staging_osid": "op:sanski_most:stari_majdan",
+                "status": "executing"
               }
             ],
             "commander_officer_id": "vrs_zeljaja",
@@ -1358,13 +1381,17 @@
               "op:prijedor:ljubija_2",
               "op:prijedor:kozarac_2",
               "op:prijedor:kamicani",
-              "op:prijedor:raljas"
+              "op:prijedor:raljas",
+              "op:sanski_most:stari_majdan",
+              "op:sanski_most:sanski_most_2",
+              "op:sanski_most:ilidza_2"
             ],
             "participating_brigades": [
               "jna_2nd_md_tg",
               "rs_1st_armored",
               "rs_43rd_prijedor_motorized",
-              "rs_5th_kozara_light_infantry"
+              "rs_5th_kozara_light_infantry",
+              "rs_6th_sanske_infantry"
             ],
             "phase": "planning",
             "phase_started_turn": 0,
@@ -5933,7 +5960,7 @@
           "op:bosanski_novi:novi_grad_3",
           "op:bosanski_novi:suhaca_4"
         ],
-        "threat_ratio": 0,
+        "threat_ratio": 9999,
         "unstaffed_front": true
       },
       "sector:arbih_5th_corps:4": {
@@ -6155,7 +6182,7 @@
           "op:velika_kladusa:poljana_2",
           "op:velika_kladusa:zboriste_2"
         ],
-        "threat_ratio": 10.783298826777088
+        "threat_ratio": 0
       },
       "sector:hvo_central_bosnia:0": {
         "assigned_brigade_ids": [],
@@ -6309,184 +6336,6 @@
         "defensive_power": 0,
         "density": 0,
         "edge_ids": [
-          "op:vares:toljenak__op:vares:vares_2"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:10",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:vares:toljenak__op:vares:vares_2"
-            ],
-            "enemy_osids": [
-              "op:vares:toljenak"
-            ],
-            "friendly_osids": [
-              "op:vares:vares_2"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:10:0"
-          }
-        ],
-        "territory_osids": [
-          "op:vares:vares_2"
-        ],
-        "threat_ratio": 0,
-        "unstaffed_front": true
-      },
-      "sector:hvo_central_bosnia:11": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:zavidovici:cardak_2__op:zepce:viniste_2"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:11",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:zavidovici:cardak_2__op:zepce:viniste_2"
-            ],
-            "enemy_osids": [
-              "op:zavidovici:cardak_2"
-            ],
-            "friendly_osids": [
-              "op:zepce:viniste_2"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:11:0"
-          }
-        ],
-        "territory_osids": [
-          "op:zepce:ozimica_2",
-          "op:zepce:viniste_2"
-        ],
-        "threat_ratio": 0
-      },
-      "sector:hvo_central_bosnia:12": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:bosanska_gradiska:kozinci__op:bosanska_gradiska:mackovac",
-          "op:bosanska_gradiska:mackovac__op:bosanska_gradiska:nova_topola_2",
-          "op:bosanska_gradiska:mackovac__op:srbac:srbac_2"
-        ],
-        "faction": "HRHB",
-        "length_edges": 3,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:12",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:bosanska_gradiska:kozinci__op:bosanska_gradiska:mackovac",
-              "op:bosanska_gradiska:mackovac__op:bosanska_gradiska:nova_topola_2",
-              "op:bosanska_gradiska:mackovac__op:srbac:srbac_2"
-            ],
-            "enemy_osids": [
-              "op:bosanska_gradiska:kozinci",
-              "op:bosanska_gradiska:nova_topola_2",
-              "op:srbac:srbac_2"
-            ],
-            "friendly_osids": [
-              "op:bosanska_gradiska:mackovac"
-            ],
-            "length_edges": 3,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:12:0"
-          }
-        ],
-        "territory_osids": [
-          "op:bosanska_gradiska:mackovac"
-        ],
-        "threat_ratio": 9999,
-        "unstaffed_front": true
-      },
-      "sector:hvo_central_bosnia:2": {
-        "assigned_brigade_ids": [
-          "hrhb_stjepan_tomaevi_brigade"
-        ],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 231.00000000000003,
-        "density": 1,
-        "edge_ids": [
-          "op:bugojno:medini__op:donji_vakuf:komar_2"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [
-          "hrhb_jure_franceti_brigade",
-          "hrhb_vitezovi_brigade_vitez"
-        ],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:2",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:bugojno:medini__op:donji_vakuf:komar_2"
-            ],
-            "enemy_osids": [
-              "op:donji_vakuf:komar_2"
-            ],
-            "friendly_osids": [
-              "op:bugojno:medini"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:2:0"
-          }
-        ],
-        "territory_osids": [
-          "op:bugojno:medini",
-          "op:busovaca:bare_2",
-          "op:busovaca:buselji_2",
-          "op:busovaca:busovaca_2",
-          "op:busovaca:polje_2",
-          "op:novi_travnik:rankovici_2",
-          "op:novi_travnik:ruda_2",
-          "op:travnik:puticevo_2",
-          "op:vitez:vitez_2"
-        ],
-        "threat_ratio": 4.329004329004328
-      },
-      "sector:hvo_central_bosnia:3": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
           "op:celinac:celinac_2__op:kotor_varos:kotor_varos_2",
           "op:celinac:josavka_donja_2__op:kotor_varos:kotor_varos_2",
           "op:celinac:snjegotina_srednja__op:kotor_varos:kotor_varos_2",
@@ -6503,7 +6352,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:3",
+        "sector_id": "sector:hvo_central_bosnia:10",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -6533,7 +6382,7 @@
             ],
             "length_edges": 8,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:3:0"
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:10:0"
           }
         ],
         "territory_osids": [
@@ -6542,7 +6391,7 @@
         "threat_ratio": 9999,
         "unstaffed_front": true
       },
-      "sector:hvo_central_bosnia:4": {
+      "sector:hvo_central_bosnia:11": {
         "assigned_brigade_ids": [
           "hrhb_ban_jelai_brigade"
         ],
@@ -6566,7 +6415,7 @@
         "reserve_brigade_ids": [
           "hrhb_kiseljak_brigade"
         ],
-        "sector_id": "sector:hvo_central_bosnia:4",
+        "sector_id": "sector:hvo_central_bosnia:11",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -6584,7 +6433,7 @@
             ],
             "length_edges": 2,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:4:0"
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:11:0"
           }
         ],
         "territory_osids": [
@@ -6598,127 +6447,7 @@
         ],
         "threat_ratio": 0
       },
-      "sector:hvo_central_bosnia:5": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:jajce:barevo_2__op:jajce:bravnice"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:5",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:jajce:barevo_2__op:jajce:bravnice"
-            ],
-            "enemy_osids": [
-              "op:jajce:bravnice"
-            ],
-            "friendly_osids": [
-              "op:jajce:barevo_2"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:5:0"
-          }
-        ],
-        "territory_osids": [
-          "op:jajce:barevo_2"
-        ],
-        "threat_ratio": 0,
-        "unstaffed_front": true
-      },
-      "sector:hvo_central_bosnia:6": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:jajce:grdovo__op:skender_vakuf:donji_koricani"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:6",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:jajce:grdovo__op:skender_vakuf:donji_koricani"
-            ],
-            "enemy_osids": [
-              "op:jajce:grdovo"
-            ],
-            "friendly_osids": [
-              "op:skender_vakuf:donji_koricani"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:6:0"
-          }
-        ],
-        "territory_osids": [
-          "op:skender_vakuf:donji_koricani"
-        ],
-        "threat_ratio": 0,
-        "unstaffed_front": true
-      },
-      "sector:hvo_central_bosnia:7": {
-        "assigned_brigade_ids": [],
-        "corps_id": "hvo_central_bosnia",
-        "defensive_power": 0,
-        "density": 0,
-        "edge_ids": [
-          "op:konjic:bijela_2__op:konjic:turija"
-        ],
-        "faction": "HRHB",
-        "length_edges": 1,
-        "opposing_factions": [
-          "RS"
-        ],
-        "rear_brigade_ids": [],
-        "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:7",
-        "sector_stance": "defend",
-        "stance_source": "bot",
-        "sub_segments": [
-          {
-            "edge_ids": [
-              "op:konjic:bijela_2__op:konjic:turija"
-            ],
-            "enemy_osids": [
-              "op:konjic:bijela_2"
-            ],
-            "friendly_osids": [
-              "op:konjic:turija"
-            ],
-            "length_edges": 1,
-            "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:7:0"
-          }
-        ],
-        "territory_osids": [
-          "op:konjic:turija"
-        ],
-        "threat_ratio": 0,
-        "unstaffed_front": true
-      },
-      "sector:hvo_central_bosnia:8": {
+      "sector:hvo_central_bosnia:2": {
         "assigned_brigade_ids": [
           "hrhb_111th_brigade"
         ],
@@ -6735,7 +6464,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:8",
+        "sector_id": "sector:hvo_central_bosnia:2",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -6751,7 +6480,7 @@
             ],
             "length_edges": 1,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:8:0"
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:2:0"
           }
         ],
         "territory_osids": [
@@ -6759,7 +6488,7 @@
         ],
         "threat_ratio": 4.329004329004328
       },
-      "sector:hvo_central_bosnia:9": {
+      "sector:hvo_central_bosnia:3": {
         "assigned_brigade_ids": [],
         "corps_id": "hvo_central_bosnia",
         "defensive_power": 0,
@@ -6774,7 +6503,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_central_bosnia:9",
+        "sector_id": "sector:hvo_central_bosnia:3",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -6790,7 +6519,7 @@
             ],
             "length_edges": 1,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_central_bosnia:9:0"
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:3:0"
           }
         ],
         "territory_osids": [
@@ -6799,6 +6528,264 @@
           "op:kakanj:seoce_2",
           "op:kakanj:slapnica_2",
           "op:vares:gornja_borovica_2"
+        ],
+        "threat_ratio": 9999,
+        "unstaffed_front": true
+      },
+      "sector:hvo_central_bosnia:4": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:jajce:barevo_2__op:jajce:bravnice"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:4",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:jajce:barevo_2__op:jajce:bravnice"
+            ],
+            "enemy_osids": [
+              "op:jajce:bravnice"
+            ],
+            "friendly_osids": [
+              "op:jajce:barevo_2"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:4:0"
+          }
+        ],
+        "territory_osids": [
+          "op:jajce:barevo_2"
+        ],
+        "threat_ratio": 0,
+        "unstaffed_front": true
+      },
+      "sector:hvo_central_bosnia:5": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:jajce:grdovo__op:skender_vakuf:donji_koricani"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:5",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:jajce:grdovo__op:skender_vakuf:donji_koricani"
+            ],
+            "enemy_osids": [
+              "op:jajce:grdovo"
+            ],
+            "friendly_osids": [
+              "op:skender_vakuf:donji_koricani"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:5:0"
+          }
+        ],
+        "territory_osids": [
+          "op:skender_vakuf:donji_koricani"
+        ],
+        "threat_ratio": 0,
+        "unstaffed_front": true
+      },
+      "sector:hvo_central_bosnia:6": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:vares:toljenak__op:vares:vares_2"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:6",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:vares:toljenak__op:vares:vares_2"
+            ],
+            "enemy_osids": [
+              "op:vares:toljenak"
+            ],
+            "friendly_osids": [
+              "op:vares:vares_2"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:6:0"
+          }
+        ],
+        "territory_osids": [
+          "op:vares:vares_2"
+        ],
+        "threat_ratio": 0,
+        "unstaffed_front": true
+      },
+      "sector:hvo_central_bosnia:7": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:zavidovici:cardak_2__op:zepce:viniste_2"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:7",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:zavidovici:cardak_2__op:zepce:viniste_2"
+            ],
+            "enemy_osids": [
+              "op:zavidovici:cardak_2"
+            ],
+            "friendly_osids": [
+              "op:zepce:viniste_2"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:7:0"
+          }
+        ],
+        "territory_osids": [
+          "op:zepce:ozimica_2",
+          "op:zepce:viniste_2"
+        ],
+        "threat_ratio": 0
+      },
+      "sector:hvo_central_bosnia:8": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:bosanska_gradiska:kozinci__op:bosanska_gradiska:mackovac",
+          "op:bosanska_gradiska:mackovac__op:bosanska_gradiska:nova_topola_2",
+          "op:bosanska_gradiska:mackovac__op:srbac:srbac_2"
+        ],
+        "faction": "HRHB",
+        "length_edges": 3,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:8",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:bosanska_gradiska:kozinci__op:bosanska_gradiska:mackovac",
+              "op:bosanska_gradiska:mackovac__op:bosanska_gradiska:nova_topola_2",
+              "op:bosanska_gradiska:mackovac__op:srbac:srbac_2"
+            ],
+            "enemy_osids": [
+              "op:bosanska_gradiska:kozinci",
+              "op:bosanska_gradiska:nova_topola_2",
+              "op:srbac:srbac_2"
+            ],
+            "friendly_osids": [
+              "op:bosanska_gradiska:mackovac"
+            ],
+            "length_edges": 3,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:8:0"
+          }
+        ],
+        "territory_osids": [
+          "op:bosanska_gradiska:mackovac"
+        ],
+        "threat_ratio": 9999,
+        "unstaffed_front": true
+      },
+      "sector:hvo_central_bosnia:9": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_central_bosnia",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:bugojno:medini__op:donji_vakuf:komar_2"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [
+          "hrhb_jure_franceti_brigade",
+          "hrhb_stjepan_tomaevi_brigade",
+          "hrhb_vitezovi_brigade_vitez"
+        ],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_central_bosnia:9",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:bugojno:medini__op:donji_vakuf:komar_2"
+            ],
+            "enemy_osids": [
+              "op:donji_vakuf:komar_2"
+            ],
+            "friendly_osids": [
+              "op:bugojno:medini"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_central_bosnia:9:0"
+          }
+        ],
+        "territory_osids": [
+          "op:bugojno:medini",
+          "op:busovaca:bare_2",
+          "op:busovaca:buselji_2",
+          "op:busovaca:busovaca_2",
+          "op:busovaca:polje_2",
+          "op:novi_travnik:rankovici_2",
+          "op:novi_travnik:ruda_2",
+          "op:travnik:puticevo_2",
+          "op:vitez:vitez_2"
         ],
         "threat_ratio": 9999,
         "unstaffed_front": true
@@ -6938,7 +6925,8 @@
           "op:modrica:garevac_2",
           "op:odzak:donja_dubica"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
       "sector:hvo_northwest_bosnia:2": {
         "assigned_brigade_ids": [],
@@ -6984,7 +6972,8 @@
           "op:bosanski_samac:novo_selo_2",
           "op:modrica:garevac_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
       "sector:hvo_northwest_bosnia:3": {
         "assigned_brigade_ids": [],
@@ -7023,7 +7012,8 @@
         "territory_osids": [
           "op:modrica:garevac_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
       "sector:hvo_northwest_bosnia:4": {
         "assigned_brigade_ids": [],
@@ -7069,7 +7059,8 @@
           "op:odzak:donja_dubica",
           "op:odzak:potocani_2"
         ],
-        "threat_ratio": 9999
+        "threat_ratio": 9999,
+        "unstaffed_front": true
       },
       "sector:hvo_northwest_bosnia:5": {
         "assigned_brigade_ids": [
@@ -7156,7 +7147,6 @@
         "rear_brigade_ids": [
           "hrhb_6th_brigade_ranko_boban",
           "hrhb_grude_brigade",
-          "hrhb_herceg_stjepan_brigade",
           "hrhb_iroki_brijeg_brigade",
           "hrhb_itluk_brigade",
           "hrhb_ljubuki_brigade",
@@ -7211,11 +7201,11 @@
           "op:citluk:krehin_gradac_2",
           "op:citluk:veliki_ogradjenik_2",
           "op:duvno:dobrici",
-          "op:duvno:kongora",
           "op:duvno:rosko_polje_2",
           "op:duvno:vinica_2",
           "op:grude:grude_2",
           "op:grude:sovici_3",
+          "op:jablanica:doljani_2",
           "op:listica:kocerin_2",
           "op:listica:lise",
           "op:listica:ljuti_dolac",
@@ -7233,15 +7223,51 @@
           "op:posusje:posusje_2",
           "op:posusje:sutina_2",
           "op:posusje:vir_2",
-          "op:prozor:jaklici",
-          "op:prozor:ljubunci_2",
-          "op:prozor:prozor_2",
-          "op:prozor:rumboci_2",
           "op:stolac:prenj"
         ],
         "threat_ratio": 0
       },
       "sector:hvo_southeast_herzegovina:1": {
+        "assigned_brigade_ids": [],
+        "corps_id": "hvo_southeast_herzegovina",
+        "defensive_power": 0,
+        "density": 0,
+        "edge_ids": [
+          "op:konjic:bijela_2__op:konjic:turija"
+        ],
+        "faction": "HRHB",
+        "length_edges": 1,
+        "opposing_factions": [
+          "RS"
+        ],
+        "rear_brigade_ids": [],
+        "reserve_brigade_ids": [],
+        "sector_id": "sector:hvo_southeast_herzegovina:1",
+        "sector_stance": "defend",
+        "stance_source": "bot",
+        "sub_segments": [
+          {
+            "edge_ids": [
+              "op:konjic:bijela_2__op:konjic:turija"
+            ],
+            "enemy_osids": [
+              "op:konjic:bijela_2"
+            ],
+            "friendly_osids": [
+              "op:konjic:turija"
+            ],
+            "length_edges": 1,
+            "primary_brigade_ids": [],
+            "sub_segment_id": "subseg:sector:hvo_southeast_herzegovina:1:0"
+          }
+        ],
+        "territory_osids": [
+          "op:konjic:turija"
+        ],
+        "threat_ratio": 0,
+        "unstaffed_front": true
+      },
+      "sector:hvo_southeast_herzegovina:2": {
         "assigned_brigade_ids": [
           "hrhb_1st_herzegovina_brigade_knez_domagoj"
         ],
@@ -7260,7 +7286,7 @@
         ],
         "rear_brigade_ids": [],
         "reserve_brigade_ids": [],
-        "sector_id": "sector:hvo_southeast_herzegovina:1",
+        "sector_id": "sector:hvo_southeast_herzegovina:2",
         "sector_stance": "defend",
         "stance_source": "bot",
         "sub_segments": [
@@ -7280,7 +7306,7 @@
             ],
             "length_edges": 3,
             "primary_brigade_ids": [],
-            "sub_segment_id": "subseg:sector:hvo_southeast_herzegovina:1:0"
+            "sub_segment_id": "subseg:sector:hvo_southeast_herzegovina:2:0"
           }
         ],
         "territory_osids": [
@@ -7328,7 +7354,7 @@
         "territory_osids": [
           "op:prijedor:raljas"
         ],
-        "threat_ratio": 9999,
+        "threat_ratio": 0,
         "unstaffed_front": true
       },
       "sector:hvo_tomislavgrad:1": {
@@ -7412,7 +7438,7 @@
         "territory_osids": [
           "op:sanski_most:stari_majdan"
         ],
-        "threat_ratio": 0,
+        "threat_ratio": 9999,
         "unstaffed_front": true
       },
       "sector:hvo_tomislavgrad:3": {
@@ -7488,7 +7514,7 @@
           "op:duvno:stipanjici_2",
           "op:duvno:suica_2",
           "op:duvno:tomislavgrad_2",
-          "op:jablanica:doljani_2",
+          "op:gornji_vakuf:vaganjac",
           "op:livno:livno_2",
           "op:livno:misi_2",
           "op:livno:priluka_2",
@@ -7786,7 +7812,7 @@
           "op:donji_vakuf:komar_2",
           "op:travnik:varosluk"
         ],
-        "threat_ratio": 32.15739484396201
+        "threat_ratio": 17.910447761194032
       },
       "sector:vrs_1st_krajina:13": {
         "assigned_brigade_ids": [
@@ -7842,12 +7868,10 @@
         "threat_ratio": 0
       },
       "sector:vrs_1st_krajina:14": {
-        "assigned_brigade_ids": [
-          "rs_1st_novigrad_infantry"
-        ],
+        "assigned_brigade_ids": [],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 61.104,
-        "density": 0.2,
+        "defensive_power": 0,
+        "density": 0,
         "edge_ids": [
           "op:bosanska_krupa:gornja_suvaja__op:bosanska_krupa:jezerski_2",
           "op:bosanska_krupa:gornja_suvaja__op:bosanska_krupa:veliki_badic",
@@ -7894,7 +7918,7 @@
           "op:bosanska_krupa:ivanjska_2",
           "op:bosanska_krupa:vranjska_2"
         ],
-        "threat_ratio": 22.911757004451427
+        "threat_ratio": 9999
       },
       "sector:vrs_1st_krajina:15": {
         "assigned_brigade_ids": [
@@ -8017,7 +8041,7 @@
       },
       "sector:vrs_1st_krajina:17": {
         "assigned_brigade_ids": [
-          "rs_6th_sanske_infantry"
+          "rs_1st_novigrad_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
         "defensive_power": 17.509333333333334,
@@ -8522,8 +8546,8 @@
       },
       "sector:vrs_1st_krajina:23": {
         "assigned_brigade_ids": [
-          "rs_2nd_krajina_infantry",
-          "rs_43rd_prijedor_motorized"
+          "rs_43rd_prijedor_motorized",
+          "rs_6th_sanske_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
         "defensive_power": 56.24666666666666,
@@ -9058,11 +9082,12 @@
       "sector:vrs_1st_krajina:8": {
         "assigned_brigade_ids": [
           "rs_11th_mrkonji_light_infantry",
-          "rs_1st_sipovo_light_infantry"
+          "rs_1st_sipovo_light_infantry",
+          "rs_2nd_krajina_infantry"
         ],
         "corps_id": "vrs_1st_krajina",
-        "defensive_power": 23.405671077504724,
-        "density": 0.08695652173913043,
+        "defensive_power": 36.932325141776936,
+        "density": 0.13043478260869565,
         "edge_ids": [
           "op:donji_vakuf:babin_potok_2__op:donji_vakuf:torlakovac_2",
           "op:donji_vakuf:kutanja__op:donji_vakuf:torlakovac_2",
@@ -9167,7 +9192,7 @@
           "op:sipovo:pribeljci_2",
           "op:sipovo:sipovo_2"
         ],
-        "threat_ratio": 18.798862828713577
+        "threat_ratio": 11.913682615727945
       },
       "sector:vrs_1st_krajina:9": {
         "assigned_brigade_ids": [
@@ -18380,7 +18405,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:hvo_central_bosnia:8"
+          "sector_id": "sector:hvo_central_bosnia:2"
         },
         "cohesion": 55,
         "composition": {
@@ -18530,7 +18555,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:hvo_southeast_herzegovina:1"
+          "sector_id": "sector:hvo_southeast_herzegovina:2"
         },
         "cohesion": 62,
         "composition": {
@@ -18753,7 +18778,7 @@
         "assignment": {
           "kind": "sector",
           "role": "rear",
-          "sector_id": "sector:hvo_central_bosnia:4"
+          "sector_id": "sector:hvo_central_bosnia:11"
         },
         "cohesion": 55,
         "composition": {
@@ -18827,7 +18852,7 @@
         "assignment": {
           "kind": "sector",
           "role": "rear",
-          "sector_id": "sector:hvo_central_bosnia:4"
+          "sector_id": "sector:hvo_central_bosnia:11"
         },
         "cohesion": 55,
         "composition": {
@@ -18975,7 +19000,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:hvo_central_bosnia:4"
+          "sector_id": "sector:hvo_central_bosnia:11"
         },
         "cohesion": 55,
         "composition": {
@@ -19120,11 +19145,7 @@
       "hrhb_herceg_stjepan_brigade": {
         "activation_gated": false,
         "activation_turn": null,
-        "assignment": {
-          "kind": "sector",
-          "role": "rear",
-          "sector_id": "sector:hvo_southeast_herzegovina:0"
-        },
+        "assignment": null,
         "cohesion": 62,
         "composition": {
           "aa_systems": 0,
@@ -19144,7 +19165,6 @@
         },
         "corps_id": "hvo_southeast_herzegovina",
         "created_turn": 0,
-        "defense_streak": 0,
         "doctrine_state": {
           "active": null,
           "active_turns": 0,
@@ -19157,7 +19177,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -19169,11 +19188,11 @@
         },
         "faction": "HRHB",
         "force_label": "HVO",
-        "home_osid": "op:konjic:gorani_2",
+        "home_osid": "op:konjic:buturovic_polje_2",
         "hq_sid": "op:konjic:buturovic_polje_2",
         "id": "hrhb_herceg_stjepan_brigade",
         "kind": "brigade",
-        "location_osid": "op:prozor:ljubunci_2",
+        "location_osid": "op:konjic:buturovic_polje_2",
         "max_personnel": 1800,
         "morale": 60,
         "name": "Herceg Stjepan Brigade",
@@ -19189,8 +19208,7 @@
         "tags": [
           "corps:hvo_southeast_herzegovina",
           "equip:mountain",
-          "mun:konjic",
-          "placement:fixed_home_osid"
+          "mun:konjic"
         ]
       },
       "hrhb_iroki_brijeg_brigade": {
@@ -19347,7 +19365,7 @@
         "assignment": {
           "kind": "sector",
           "role": "rear",
-          "sector_id": "sector:hvo_central_bosnia:2"
+          "sector_id": "sector:hvo_central_bosnia:9"
         },
         "cohesion": 55,
         "composition": {
@@ -19421,7 +19439,7 @@
         "assignment": {
           "kind": "sector",
           "role": "reserve",
-          "sector_id": "sector:hvo_central_bosnia:4"
+          "sector_id": "sector:hvo_central_bosnia:11"
         },
         "cohesion": 55,
         "composition": {
@@ -19569,7 +19587,7 @@
         "assignment": {
           "kind": "sector",
           "role": "rear",
-          "sector_id": "sector:hvo_central_bosnia:4"
+          "sector_id": "sector:hvo_central_bosnia:11"
         },
         "cohesion": 55,
         "composition": {
@@ -19864,8 +19882,8 @@
         "activation_turn": null,
         "assignment": {
           "kind": "sector",
-          "role": "front",
-          "sector_id": "sector:hvo_central_bosnia:2"
+          "role": "rear",
+          "sector_id": "sector:hvo_central_bosnia:9"
         },
         "cohesion": 55,
         "composition": {
@@ -19898,7 +19916,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -19914,7 +19931,7 @@
         "hq_sid": "op:novi_travnik:rankovici_2",
         "id": "hrhb_stjepan_tomaevi_brigade",
         "kind": "brigade",
-        "location_osid": "op:bugojno:medini",
+        "location_osid": "op:novi_travnik:rankovici_2",
         "max_personnel": 1500,
         "morale": 60,
         "name": "\"Stjepan Tomašević\" Brigade",
@@ -20084,7 +20101,7 @@
         "assignment": {
           "kind": "sector",
           "role": "rear",
-          "sector_id": "sector:hvo_central_bosnia:2"
+          "sector_id": "sector:hvo_central_bosnia:9"
         },
         "cohesion": 55,
         "composition": {
@@ -20585,7 +20602,6 @@
         },
         "corps_id": "hvo_tomislavgrad",
         "created_turn": 0,
-        "defense_streak": 0,
         "doctrine_state": {
           "active": null,
           "active_turns": 0,
@@ -20598,7 +20614,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "light_infantry",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -20610,11 +20625,11 @@
         },
         "faction": "HRHB",
         "force_label": "HVO",
-        "home_osid": "op:prozor:ustirama_3",
+        "home_osid": "op:prozor:prozor_2",
         "hq_sid": "op:prozor:jaklici",
         "id": "hvo_rama_brigade",
         "kind": "brigade",
-        "location_osid": "op:jablanica:doljani_2",
+        "location_osid": "op:prozor:prozor_2",
         "max_personnel": 1500,
         "morale": 60,
         "name": "Rama Brigade",
@@ -20630,8 +20645,7 @@
         "tags": [
           "corps:hvo_tomislavgrad",
           "equip:light_infantry",
-          "mun:prozor",
-          "placement:fixed_home_osid"
+          "mun:prozor"
         ]
       },
       "hvo_southeast_herzegovina": {
@@ -23194,7 +23208,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:14"
+          "sector_id": "sector:vrs_1st_krajina:17"
         },
         "cohesion": 67,
         "composition": {
@@ -23227,7 +23241,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -23243,7 +23256,7 @@
         "hq_sid": "op:bosanski_novi:dobrljin_2",
         "id": "rs_1st_novigrad_infantry",
         "kind": "brigade",
-        "location_osid": "op:bosanska_krupa:ivanjska_2",
+        "location_osid": "op:bosanski_novi:matavazi_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "1st Novigrad Infantry",
@@ -23390,7 +23403,7 @@
         },
         "faction": "RS",
         "force_label": "VRS",
-        "home_osid": "op:rogatica:rogatica_2",
+        "home_osid": "op:rogatica:pljesevica",
         "hq_sid": "op:rogatica:pljesevica",
         "id": "rs_1st_podrinje",
         "kind": "brigade",
@@ -23410,8 +23423,7 @@
         "tags": [
           "corps:vrs_drina",
           "equip:mountain",
-          "mun:rogatica",
-          "placement:fixed_home_osid"
+          "mun:rogatica"
         ]
       },
       "rs_1st_posavina_infantry": {
@@ -24610,7 +24622,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:23"
+          "sector_id": "sector:vrs_1st_krajina:8"
         },
         "cohesion": 67,
         "composition": {
@@ -24659,7 +24671,7 @@
         "hq_sid": "op:banja_luka:banja_luka_2",
         "id": "rs_2nd_krajina_infantry",
         "kind": "brigade",
-        "location_osid": "op:kljuc:donje_ratkovo_2",
+        "location_osid": "op:mrkonjic_grad:majdan_2",
         "max_personnel": 2000,
         "morale": 60,
         "name": "2nd Krajina Infantry",
@@ -26321,7 +26333,7 @@
         "assignment": {
           "kind": "sector",
           "role": "front",
-          "sector_id": "sector:vrs_1st_krajina:17"
+          "sector_id": "sector:vrs_1st_krajina:23"
         },
         "cohesion": 67,
         "composition": {
@@ -26354,7 +26366,6 @@
             "STATIC_DEFENSE": false
           }
         },
-        "entrenchment_turns": 0,
         "equipment_class": "mountain",
         "equipment_state": {
           "degraded_heavy": 0,
@@ -26370,7 +26381,7 @@
         "hq_sid": "op:sanski_most:budimlic_japra_2",
         "id": "rs_6th_sanske_infantry",
         "kind": "brigade",
-        "location_osid": "op:prijedor:brezicani",
+        "location_osid": "op:sanski_most:ostra_luka",
         "max_personnel": 2000,
         "morale": 60,
         "name": "6th Sanske Infantry",
@@ -27185,7 +27196,7 @@
         },
         "faction": "RS",
         "force_label": "VRS",
-        "home_osid": "op:visegrad:visegrad_2",
+        "home_osid": "op:visegrad:donji_dobrun_2",
         "hq_sid": "op:visegrad:donji_dobrun_2",
         "id": "rs_visegrad_brigade",
         "kind": "brigade",
@@ -27205,8 +27216,7 @@
         "tags": [
           "corps:vrs_drina",
           "equip:mountain",
-          "mun:visegrad",
-          "placement:fixed_home_osid"
+          "mun:visegrad"
         ]
       },
       "vrs_1st_krajina": {
@@ -39280,7 +39290,11 @@
       }
     }
   },
+  "operation_history": [],
   "paramilitary_decision_history": [],
+  "paramilitary_deployment_count": {},
+  "paramilitary_policy": "ask",
+  "pending_paramilitary_requests": [],
   "political": {
     "ceasefire": {},
     "coercion_pressure_by_municipality": {
@@ -43037,5 +43051,6 @@
     "war_supply_condition": {},
     "war_supply_pressure": {}
   },
-  "schema_version": 36
+  "schema_version": 36,
+  "turn_summaries": []
 }

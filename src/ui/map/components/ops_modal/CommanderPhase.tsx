@@ -176,17 +176,17 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                 <div className="flex items-center gap-3">
                     <div className="w-3 h-10 rounded-sm" style={{ backgroundColor: factionColor }} />
                     <div>
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-text-secondary">{getPlayerSafeMilitaryFactionName(faction)}</div>
+                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary">{getPlayerSafeMilitaryFactionName(faction)}</div>
                         <div className="text-sm font-bold text-white">{corpsName}</div>
                     </div>
                 </div>
                 {corpsCommander && (
-                    <div className="text-[10px] text-text-secondary">
+                    <div className="text-xs text-text-secondary">
                         <span className="uppercase tracking-wider">{t('opsPlanning.commander.commanding')}</span>{' '}
                         <span className="text-white">{formatRank(corpsCommander.rank)} {corpsCommander.name}</span>
                     </div>
                 )}
-                <div className="flex gap-4 text-[10px] text-text-secondary">
+                <div className="flex gap-4 text-xs text-text-secondary">
                     <div>
                         <span className="text-white font-bold">{totalPersonnel.toLocaleString()}</span> {t('opsPlanning.commander.personnel')}
                     </div>
@@ -200,13 +200,13 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
             <div className="pointer-events-auto max-w-[720px] w-full mx-auto">
                 <div className="bg-[rgba(20,18,15,0.92)] backdrop-blur-xl rounded-lg
                                 border border-[rgba(180,160,130,0.15)] p-4">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold mb-3">
+                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold mb-3">
                         {t('opsPlanning.commander.select')}
                     </div>
 
                     {/* Available officers */}
                     {availableOfficers.length === 0 && (
-                        <div className="text-[11px] text-text-secondary/60 italic py-6 text-center">
+                        <div className="text-xs text-text-secondary/60 italic py-6 text-center">
                             {t('opsPlanning.commander.noneAvailable')}
                         </div>
                     )}
@@ -237,38 +237,38 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div className="min-w-0">
-                                            <div className="text-[10px] text-text-secondary uppercase tracking-wider">
+                                            <div className="text-xs text-text-secondary uppercase tracking-wider">
                                                 {rankLabel}
                                             </div>
                                             <div className="text-sm font-bold text-white truncate group-hover:text-accent-gold transition-colors">
                                                 {officer.name}
                                             </div>
                                         </div>
-                                        <div className={`text-[8px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${fit.colorClass} bg-white/5`}>
+                                        <div className={`text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${fit.colorClass} bg-white/5`}>
                                             {fitLabel}
                                         </div>
                                     </div>
 
-                                    <div className="text-[9px] text-text-secondary mt-1 italic">
+                                    <div className="text-xs text-text-secondary mt-1 italic">
                                         {getArchetype(officer)} — {getPersonalitySummary(officer.competence, officer.aggressiveness)}
                                     </div>
 
                                     <div className="flex gap-3 mt-2">
                                         <div className="space-y-0.5">
-                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.competence')}</div>
-                                            <div className="text-[10px]" style={{ color: getRatingColor(officer.competence) }}>
+                                            <div className="text-xs uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.competence')}</div>
+                                            <div className="text-xs" style={{ color: getRatingColor(officer.competence) }}>
                                                 {formatPips(officer.competence)} <span className="text-text-secondary">{getCompetenceLabel(officer.competence)}</span>
                                             </div>
                                         </div>
                                         <div className="space-y-0.5">
-                                            <div className="text-[8px] uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.aggressiveness')}</div>
-                                            <div className="text-[10px]" style={{ color: getRatingColor(officer.aggressiveness) }}>
+                                            <div className="text-xs uppercase tracking-wider text-text-secondary">{t('opsPlanning.commander.aggressiveness')}</div>
+                                            <div className="text-xs" style={{ color: getRatingColor(officer.aggressiveness) }}>
                                                 {formatPips(officer.aggressiveness)} <span className="text-text-secondary">{getAggressionLabel(officer.aggressiveness)}</span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 mt-2 text-[9px]">
+                                    <div className="flex items-center gap-2 mt-2 text-xs">
                                         <span className="text-text-secondary">{t('opsPlanning.commander.prepTime')}</span>
                                         <span className={`font-bold ${prepTurns <= 3 ? 'text-green-400' : prepTurns <= 5 ? 'text-amber-400' : 'text-red-400'}`}>
                                             {prepTurns} {t('opsPlanning.commander.turns')}
@@ -285,18 +285,18 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     {/* WP4b: Confirmation bar */}
                     {pendingOfficer && (
                         <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.15)] flex items-center gap-3">
-                            <span className="text-[10px] text-text-secondary flex-1 truncate">
+                            <span className="text-xs text-text-secondary flex-1 truncate">
                                 {t('opsPlanning.commander.selected')} <span className="text-white font-bold">
                                     {formatRank(pendingOfficer.officer.rank)} {pendingOfficer.officer.name}
                                 </span>
-                                <span className={`ml-1.5 text-[8px] uppercase ${pendingOfficer.fit.colorClass}`}>
+                                <span className={`ml-1.5 text-xs uppercase ${pendingOfficer.fit.colorClass}`}>
                                     ({localizeRegionalFit(pendingOfficer.fit.label)})
                                 </span>
                             </span>
                             <button
                                 type="button"
                                 onClick={handleConfirm}
-                                className="px-4 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider
+                                className="px-4 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider
                                            bg-accent-gold/20 text-accent-gold border border-accent-gold/30
                                            hover:bg-accent-gold/30 transition-colors"
                             >
@@ -305,7 +305,7 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                             <button
                                 type="button"
                                 onClick={handleCancelSelection}
-                                className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
+                                className="text-xs text-text-secondary/50 hover:text-text-secondary transition-colors"
                             >
                                 {t('opsPlanning.commander.cancel')}
                             </button>
@@ -315,13 +315,13 @@ export function CommanderPhase({ onAdvance }: CommanderPhaseProps) {
                     {/* Unavailable officers (collapsed) */}
                     {unavailableOfficers.length > 0 && (
                         <div className="mt-3 pt-3 border-t border-[rgba(180,160,130,0.08)]">
-                            <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary/50 mb-2">
+                            <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary/50 mb-2">
                                 {t('opsPlanning.commander.unavailable', { count: unavailableOfficers.length })}
                             </div>
                             <div className="flex flex-wrap gap-1.5">
                                 {unavailableOfficers.map(({ officer, reason }) => (
                                     <div key={officer.id}
-                                         className="text-[9px] text-text-secondary/40 px-2 py-0.5 rounded
+                                         className="text-xs text-text-secondary/40 px-2 py-0.5 rounded
                                                     bg-[rgba(40,36,30,0.3)] border border-[rgba(180,160,130,0.05)]"
                                          title={reason}>
                                         <span className="line-through">{officer.name}</span>

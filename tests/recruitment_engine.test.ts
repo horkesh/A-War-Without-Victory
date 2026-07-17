@@ -1,8 +1,10 @@
 import assert from 'node:assert';
-import { describe, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import type { OobBrigade, OobCorps } from '../src/scenario/oob_loader.js';
+import { createOobFormations } from '../src/scenario/oob_early_war_entry.js';
 import {
     applyRecruitment,
+    evaluateRecruitmentEligibility,
     initializeRecruitmentResources,
     isEmergentFormationSuppressed,
     recruitBrigade,
@@ -90,6 +92,32 @@ describe('initializeRecruitmentResources', () => {
 });
 
 describe('recruitBrigade', () => {
+    test('returns stable player-authority and availability reason codes before resource checks', () => {
+        const state = makeState({
+            meta: { turn: 3, seed: 'test', player_faction: 'RBiH' },
+            military: {
+                militia_pools: {
+                    [militiaPoolKey('zenica', 'RS')]: { mun_id: 'zenica', faction: 'RS', available: 5000, committed: 0, exhausted: 0, updated_turn: 3 },
+                },
+            } as never,
+            political: { political_controllers: { 'op:zenica:core': 'RS' } } as never,
+        });
+        const resources = initializeRecruitmentResources(['RBiH', 'RS']);
+        const sidToMun = new Map([['op:zenica:core', 'zenica']]);
+
+        const wrongFaction = evaluateRecruitmentEligibility(
+            state,
+            makeBrigade({ id: 'rs_late', faction: 'RS', name: 'RS Late', home_mun: 'zenica', available_from: 8 }),
+            'light_infantry',
+            resources,
+            sidToMun,
+            { zenica: 'op:zenica:core' },
+            undefined,
+            'RBiH',
+        );
+        expect(wrongFaction).toEqual({ eligible: false, reason_codes: ['wrong_faction', 'not_yet_available'] });
+    });
+
     test('succeeds when all resources available', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
@@ -269,6 +297,63 @@ describe('applyRecruitment', () => {
 });
 
 describe('runBotRecruitment', () => {
+    test('adopts a generated formation that already represents the OOB brigade instead of duplicating it', () => {
+        const poolKey = militiaPoolKey('ilijas', 'RS');
+        const state = makeState({
+            meta: { turn: 3, seed: 'test' },
+            military: {
+                formations: {
+                    F_RS_0001: {
+                        id: 'F_RS_0001',
+                        faction: 'RS',
+                        name: '3rd Sarajevo Infantry Brigade (Ilijas)',
+                        created_turn: 1,
+                        status: 'active',
+                        assignment: null,
+                        kind: 'brigade',
+                        corps_id: 'vrs_sarajevo_romanija',
+                        tags: ['generated_phase_i0', 'kind:brigade', 'mun:ilijas', 'oob:rs_ilijas_brigade'],
+                        personnel: 800,
+                        location_osid: 'op:ilijas:podlugovi',
+                    },
+                },
+                militia_pools: {
+                    [poolKey]: { mun_id: 'ilijas', faction: 'RS', available: 2000, committed: 800, exhausted: 0, updated_turn: 3 },
+                },
+            } as never,
+            political: { political_controllers: { 'op:ilijas:podlugovi': 'RS' } } as never,
+        });
+        const resources = initializeRecruitmentResources(['RS'], { RS: 0 }, { RS: 0 });
+        state.military.recruitment_state = resources;
+        const brigade = makeBrigade({
+            id: 'rs_ilijas_brigade',
+            faction: 'RS',
+            name: '3rd Sarajevo Infantry Brigade (Ilijas)',
+            home_mun: 'ilijas',
+            home_osid: 'op:ilijas:podlugovi',
+            corps: 'vrs_sarajevo_romanija',
+            available_from: 3,
+            mandatory: true,
+        });
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            [brigade],
+            resources,
+            new Map([['op:ilijas:podlugovi', 'ilijas']]),
+            { ilijas: 'op:ilijas:podlugovi' },
+            { includeCorps: false, includeMandatory: true },
+        );
+
+        expect(report.mandatory_recruited).toBe(0);
+        expect(report.actions).toEqual([]);
+        expect(state.military.formations.rs_ilijas_brigade).toBeUndefined();
+        expect(Object.keys(state.military.formations)).toEqual(['F_RS_0001']);
+        expect(resources.recruited_brigade_ids).toContain('rs_ilijas_brigade');
+        expect(isEmergentFormationSuppressed(state, 'ilijas', 'RS')).toBe(true);
+    });
+
     test('recruits brigades for faction with available resources', () => {
         const poolKey = militiaPoolKey('zenica', 'RBiH');
         const state = makeState({
@@ -373,6 +458,292 @@ describe('runBotRecruitment', () => {
 
         assert.strictEqual(report.mandatory_recruited, 1);
         assert.strictEqual(state.military.formations!['arbih_770th_slavna_mountain']?.location_osid, 'op:donji_vakuf:korenici');
+    });
+
+    test('mandatory recruitment preserves a controlled enclave home position over the municipal HQ', () => {
+        const poolKey = militiaPoolKey('rogatica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'rogatica', faction: 'RBiH', available: 1500, committed: 0, exhausted: 0, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'op:rogatica:rogatica_2': 'RBiH',
+                    'op:rogatica:zepa_2': 'RBiH',
+                },
+            } as never,
+        });
+        const sidToMun = new Map([
+            ['op:rogatica:rogatica_2', 'rogatica'],
+            ['op:rogatica:zepa_2', 'rogatica'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const brigades: OobBrigade[] = [
+            makeBrigade({
+                id: 'arbih_285th_light',
+                faction: 'RBiH',
+                name: '285th Light Brigade',
+                home_mun: 'rogatica',
+                home_osid: 'op:rogatica:zepa_2',
+                tags: ['enclave'],
+                mandatory: true,
+            }),
+        ];
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            brigades,
+            resources,
+            sidToMun,
+            { rogatica: 'op:rogatica:rogatica_2' },
+            { includeCorps: false, includeMandatory: true },
+        );
+
+        expect(report.mandatory_recruited).toBe(1);
+        expect(state.military.formations.arbih_285th_light?.location_osid).toBe('op:rogatica:zepa_2');
+        expect(state.military.formations.arbih_285th_light?.tags).toContain('placement:fixed_home_osid');
+    });
+
+    test('player recruitment rejects allied placement and uses the strict-sorted exact-control fallback', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'op:zenica:allied': 'HRHB',
+                    'op:zenica:zulu': 'RBiH',
+                    'op:zenica:Alpha': 'RBiH',
+                },
+                war_alliance_rbih_hrhb: 1,
+            } as never,
+        });
+        const sidToMun = new Map([
+            ['op:zenica:zulu', 'zenica'],
+            ['op:zenica:Alpha', 'zenica'],
+            ['op:zenica:allied', 'zenica'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH']);
+        const brigade = makeBrigade({
+            id: 'arbih_exact_control',
+            faction: 'RBiH',
+            name: 'Exact Control',
+            home_mun: 'zenica',
+            home_osid: 'op:zenica:allied',
+        });
+
+        const result = recruitBrigade(state, brigade, 'light_infantry', resources, sidToMun, {});
+
+        expect(result.success).toBe(true);
+        expect(result.formation?.location_osid).toBe('op:zenica:Alpha');
+        expect(state.political.political_controllers![result.formation!.location_osid!]).toBe('RBiH');
+    });
+
+    test('player recruitment prefers the exact-controlled municipal HQ over an OOB home anchor', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'op:zenica:home': 'RBiH',
+                    'op:zenica:hq': 'RBiH',
+                },
+            } as never,
+        });
+        const sidToMun = new Map([
+            ['op:zenica:home', 'zenica'],
+            ['op:zenica:hq', 'zenica'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH']);
+        const brigade = makeBrigade({
+            id: 'arbih_hq_preference',
+            faction: 'RBiH',
+            name: 'HQ Preference',
+            home_mun: 'zenica',
+            home_osid: 'op:zenica:home',
+        });
+
+        const result = recruitBrigade(
+            state,
+            brigade,
+            'light_infantry',
+            resources,
+            sidToMun,
+            { zenica: 'op:zenica:hq' },
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.formation?.location_osid).toBe('op:zenica:hq');
+    });
+
+    test('player recruitment rejects an exact-controlled HQ anchor outside the home municipality', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'op:mostar:hq': 'RBiH',
+                    'op:zenica:home': 'RBiH',
+                },
+            } as never,
+        });
+        const sidToMun = new Map([
+            ['op:mostar:hq', 'mostar'],
+            ['op:zenica:home', 'zenica'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH']);
+        const brigade = makeBrigade({
+            id: 'arbih_home_boundary',
+            faction: 'RBiH',
+            name: 'Home Boundary',
+            home_mun: 'zenica',
+            home_osid: 'op:zenica:home',
+        });
+
+        const result = recruitBrigade(
+            state,
+            brigade,
+            'light_infantry',
+            resources,
+            sidToMun,
+            { zenica: 'op:mostar:hq' },
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.formation?.location_osid).toBe('op:zenica:home');
+    });
+
+    test('player recruitment resolves a controlled canonical HQ to its operational OSID', () => {
+        const poolKey = militiaPoolKey('zenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'zenica', faction: 'RBiH', available: 2000, committed: 0, exhausted: 0, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: {
+                    'sid-zenica-hq': 'RBiH',
+                    'op:zenica:hq': 'RBiH',
+                },
+            } as never,
+        });
+        const sidToMun = new Map([
+            ['sid-zenica-hq', 'zenica'],
+            ['op:zenica:hq', 'zenica'],
+        ]);
+        const resources = initializeRecruitmentResources(['RBiH']);
+        const brigade = makeBrigade({
+            id: 'arbih_operational_hq',
+            faction: 'RBiH',
+            name: 'Operational HQ',
+            home_mun: 'zenica',
+            home_osid: undefined,
+        });
+
+        const result = recruitBrigade(
+            state,
+            brigade,
+            'light_infantry',
+            resources,
+            sidToMun,
+            { zenica: 'sid-zenica-hq' },
+            { 'sid-zenica-hq': 'op:zenica:hq' },
+        );
+
+        expect(result.success).toBe(true);
+        expect(result.formation?.location_osid).toBe('op:zenica:hq');
+    });
+
+    test('mandatory recruitment does not seed or mutate a pool when exact-control placement is unavailable', () => {
+        const poolKey = militiaPoolKey('srebrenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'srebrenica', faction: 'RBiH', available: 0, committed: 7, exhausted: 3, updated_turn: 4 },
+                },
+            } as never,
+            political: {
+                political_controllers: { 'op:srebrenica:srebrenica_2': 'HRHB' },
+                war_alliance_rbih_hrhb: 1,
+            } as never,
+        });
+        const beforePool = structuredClone(state.military.militia_pools![poolKey]);
+        const resources = initializeRecruitmentResources(['RBiH'], { RBiH: 0 }, { RBiH: 0 });
+        const brigade = makeBrigade({
+            id: 'arbih_srebrenica_unplaced',
+            faction: 'RBiH',
+            name: 'Srebrenica Unplaced',
+            home_mun: 'srebrenica',
+            home_osid: 'op:srebrenica:srebrenica_2',
+            tags: ['enclave'],
+            mandatory: true,
+        });
+
+        const report = runBotRecruitment(
+            state,
+            [],
+            [brigade],
+            resources,
+            new Map([['op:srebrenica:srebrenica_2', 'srebrenica']]),
+            { srebrenica: 'op:srebrenica:srebrenica_2' },
+            { includeCorps: false },
+        );
+
+        expect(report.mandatory_recruited).toBe(0);
+        expect(report.brigades_skipped_no_control).toBe(1);
+        expect(state.military.formations?.[brigade.id]).toBeUndefined();
+        expect(state.military.militia_pools![poolKey]).toEqual(beforePool);
+        expect(resources.recruited_brigade_ids).not.toContain(brigade.id);
+    });
+
+    test('legacy OOB recruitment leaves formation and pool untouched without exact-control placement', () => {
+        const poolKey = militiaPoolKey('srebrenica', 'RBiH');
+        const state = makeState({
+            military: {
+                militia_pools: {
+                    [poolKey]: { mun_id: 'srebrenica', faction: 'RBiH', available: 100, committed: 11, exhausted: 2, updated_turn: 0 },
+                },
+            } as never,
+            political: {
+                political_controllers: { 'op:srebrenica:srebrenica_2': null },
+            } as never,
+        });
+        const beforePool = structuredClone(state.military.militia_pools![poolKey]);
+        const brigade = makeBrigade({
+            id: 'arbih_legacy_unplaced',
+            faction: 'RBiH',
+            name: 'Legacy Unplaced',
+            home_mun: 'srebrenica',
+            home_osid: 'op:srebrenica:srebrenica_2',
+            tags: ['enclave'],
+        });
+
+        const report = createOobFormations(
+            state,
+            [],
+            [brigade],
+            { srebrenica: 'op:srebrenica:srebrenica_2' },
+            new Map([['op:srebrenica:srebrenica_2', 'srebrenica']]),
+        );
+
+        expect(report.brigades_created).toBe(0);
+        expect(state.military.formations?.[brigade.id]).toBeUndefined();
+        expect(state.military.militia_pools![poolKey]).toEqual(beforePool);
     });
 
     test('bot downgrades equipment when points scarce', () => {
@@ -623,5 +994,26 @@ describe('isEmergentFormationSuppressed', () => {
         assert.strictEqual(isEmergentFormationSuppressed(state, 'zenica', 'RBiH'), true);
         assert.strictEqual(isEmergentFormationSuppressed(state, 'zenica', 'RS'), false);
         assert.strictEqual(isEmergentFormationSuppressed(state, 'tuzla', 'RBiH'), false);
+    });
+
+    test('returns true when a generated formation represents a recruited OOB brigade', () => {
+        const state = makeState({
+            military: {
+                formations: {
+                    F_RS_0001: {
+                        id: 'F_RS_0001', faction: 'RS', name: 'Ilijas', created_turn: 1,
+                        status: 'active', assignment: null, kind: 'brigade',
+                        tags: ['generated_phase_i0', 'mun:ilijas', 'oob:rs_ilijas_brigade'],
+                    },
+                },
+                recruitment_state: {
+                    recruitment_capital: {},
+                    equipment_pools: {},
+                    recruited_brigade_ids: ['rs_ilijas_brigade'],
+                },
+            } as never,
+        });
+
+        expect(isEmergentFormationSuppressed(state, 'ilijas', 'RS')).toBe(true);
     });
 });

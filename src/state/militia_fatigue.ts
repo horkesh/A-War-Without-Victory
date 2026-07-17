@@ -4,6 +4,7 @@ import { computeSupplyReachability } from './supply_reachability.js';
 
 import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import type { EdgeRecord } from '../map/settlements.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Per-municipality militia pool fatigue update record.
@@ -167,7 +168,7 @@ export function updateMilitiaFatigue(
         .sort((a, b) => {
             if (a[0] === 'null' && b[0] !== 'null') return 1;
             if (a[0] !== 'null' && b[0] === 'null') return -1;
-            return a[0].localeCompare(b[0]);
+            return strictCompare(a[0], b[0]);
         })
         .map(([faction_id, totals]) => ({
             faction_id: faction_id === 'null' ? 'null' : faction_id,
@@ -179,11 +180,11 @@ export function updateMilitiaFatigue(
 
     // Sort records deterministically
     records.sort((a, b) => {
-        const mc = a.mun_id.localeCompare(b.mun_id);
+        const mc = strictCompare(a.mun_id, b.mun_id);
         if (mc !== 0) return mc;
         const fa = a.faction_id ?? '';
         const fb = b.faction_id ?? '';
-        return fa.localeCompare(fb);
+        return strictCompare(fa, fb);
     });
 
     return { by_municipality: records, by_faction: byFaction };

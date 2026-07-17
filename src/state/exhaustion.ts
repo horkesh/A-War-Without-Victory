@@ -2,6 +2,7 @@ import { FrontEdge } from '../map/front_edges.js';
 import type { FactionId, GameState } from './game_state.js';
 import { getFactionLegitimacyAverages } from './legitimacy.js';
 import { getExhaustionExternalModifier } from './patron_pressure.js';
+import { strictCompare } from './validateGameState.js';
 // Band thresholds + derivation live in a BROWSER-SAFE leaf module (zero Node
 // imports, zero runtime game_state import) so the UI read-model can share them
 // without dragging Node-only code into the vite/rollup bundle. (Codex #402.)
@@ -45,7 +46,7 @@ export function recordWarWearinessBandCrossings(state: GameState): void {
     const exhaustion = state.political?.war_exhaustion;
     if (!exhaustion || typeof exhaustion !== 'object') return;
 
-    const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     for (const fid of factionIds) {
         const raw = Number((exhaustion as Partial<Record<FactionId, number>>)[fid] ?? 0);
         const band = warWearinessBandForExhaustion(raw);
@@ -89,7 +90,7 @@ export function accumulateExhaustion(
     pressureDeltasByEdge: Map<string, number>,
     localSupplyByEdgeSide: Map<string, { side_a_supplied: boolean; side_b_supplied: boolean }>
 ): ExhaustionStats {
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
     const workSuppliedByFaction = new Map<string, number>();
     const workUnsuppliedByFaction = new Map<string, number>();
     const legitimacyByFaction = getFactionLegitimacyAverages(state);
@@ -101,7 +102,7 @@ export function accumulateExhaustion(
 
     const edgesSorted = [...derivedFrontEdges]
         .filter((e) => e && typeof e.edge_id === 'string')
-        .sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+        .sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
     for (const edge of edgesSorted) {
         const edge_id = edge.edge_id;

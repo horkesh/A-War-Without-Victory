@@ -141,6 +141,28 @@ export function shouldRenderTacticalDetailRails(state: TacticalDetailRailOwnerSt
     && !state.chronicleOpen;
 }
 
+export interface CommandBriefingOwnerState {
+  panel: PanelRailPanel | null;
+  operationsPanelOpen: boolean;
+  armyHQOpen: boolean;
+  recruitmentOpen: boolean;
+  autonomyOpen: boolean;
+  chronicleOpen: boolean;
+  codexOpen: boolean;
+  fullOverlayOpen: boolean;
+}
+
+export function shouldRenderCommandBriefing(state: CommandBriefingOwnerState): boolean {
+  return state.panel === 'inbox'
+    && !state.operationsPanelOpen
+    && !state.armyHQOpen
+    && !state.recruitmentOpen
+    && !state.autonomyOpen
+    && !state.chronicleOpen
+    && !state.codexOpen
+    && !state.fullOverlayOpen;
+}
+
 export function getPanelRailStyle(
   _slot: 'primary' | 'secondary',
   width: string,

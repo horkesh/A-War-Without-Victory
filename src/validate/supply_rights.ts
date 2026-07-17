@@ -1,5 +1,6 @@
 import { GameState } from '../state/game_state.js';
 import { POLITICAL_SIDES } from '../state/identity.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { ValidationIssue } from './validate.js';
 
 /**
@@ -187,7 +188,7 @@ export function validateSupplyRights(state: GameState): ValidationIssue[] {
         const prev = corridors[i - 1];
         const curr = corridors[i];
         if (prev && curr && typeof prev.id === 'string' && typeof curr.id === 'string') {
-            if (prev.id.localeCompare(curr.id) > 0) {
+            if (strictCompare(prev.id, curr.id) > 0) {
                 issues.push({
                     severity: 'warn',
                     code: 'supply_rights.corridors.not_sorted',

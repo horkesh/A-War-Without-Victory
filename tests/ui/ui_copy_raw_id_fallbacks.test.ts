@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createElement } from 'react';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { AutonomyPanel } from '../../src/ui/map/components/AutonomyPanel.js';
 import { ChiefOfStaffBriefing, generateCoSBriefing } from '../../src/ui/map/components/army_hq/ChiefOfStaffBriefing.js';
@@ -174,6 +174,7 @@ describe('UI copy raw-id fallbacks', () => {
       devMode: false,
       loadedGameState: {
         turn: 1,
+        pendingPeacePlan: { planId: 'vance_owen' },
         commandBriefing: {
           headline: '1 critical item requires attention.',
           criticalCount: 1,
@@ -199,6 +200,7 @@ describe('UI copy raw-id fallbacks', () => {
       onOpenEnclaves: vi.fn(),
       onOpenPeacePlan: vi.fn(),
     }));
+    fireEvent.click(screen.getByTestId('command-briefing-toggle'));
 
     const copy = container.textContent ?? '';
     expect(copy).toContain('1 kritična stavka zahtijeva pažnju.');

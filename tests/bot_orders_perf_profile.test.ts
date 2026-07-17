@@ -147,7 +147,6 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalFront).toContain('.pocketEvacuation.assignedSectorLookup');
         expect(brigadeEvalAttack).toContain('HOME_DEFENSE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.homeDefense.deepRearNearFront');
-        expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');
         expect(brigadeEvalAttack).toContain('DEFENSIVE_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.defensive.deepRearNearFront');
         expect(brigadeEvalAttack).toContain('.defensive.selfRetreatPredictTargets');
@@ -157,7 +156,6 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(brigadeEvalAttack).toContain('.defensive.sectorCounterAttackPredictTargets');
         expect(brigadeEvalAttack).toContain('.defensive.frontGapCountHere');
         expect(brigadeEvalAttack).toContain('.defensive.frontGapSearch');
-        expect(brigadeEvalAttack).toContain('.defensive.uncontestedOccupation');
         expect(brigadeEvalAttack).toContain('SECTOR_ATTACK_PROFILE_PREFIX');
         expect(brigadeEvalAttack).toContain('.sectorAttack.offAssignedFront');
         expect(brigadeEvalAttack).toContain('.sectorAttack.planningApproaches');
@@ -177,22 +175,7 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(sectorAttackEvaluator.indexOf('.sectorAttack.executionApproachPath')).toBeLessThan(
             sectorAttackEvaluator.indexOf('.sectorAttack.executionPredictTargets'),
         );
-        expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
-        expect(brigadeEvalAttack).toContain('profileLabelPrefix = \'.uncontestedOccupation\'');
-        expect(brigadeEvalAttack).toContain("evaluateUncontestedOccupation(ctx, '.homeDefense.uncontestedOccupation')");
-        expect(brigadeEvalAttack).toContain("evaluateUncontestedOccupation(ctx, '.defensive.uncontestedOccupation')");
-        expect(brigadeEvalAttack).toContain('uncontestedOccupationCallerProfileTime');
-        expect(brigadeEvalAttack).toContain('${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${profileLabelPrefix}${labelSuffix}');
-        expect(brigadeEvalAttack).toContain("profileTime('.earlyGates'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateLoop'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.opPrefix'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.controller'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.alliance'");
-        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates.enclave'");
-        expect(brigadeEvalAttack).toContain("profileTime('.salient'");
-        expect(brigadeEvalAttack).toContain("profileTime('.defenderScan'");
-        expect(brigadeEvalAttack).toContain("profileTime('.sectorDefense'");
+        expect(brigadeEvalAttack).not.toContain('evaluateUncontestedOccupation');
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

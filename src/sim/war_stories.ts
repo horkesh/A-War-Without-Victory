@@ -116,6 +116,11 @@ export function generateNarrative(
     const peak = history.peak_personnel;
     const nadir = history.nadir_personnel;
 
+    if (formation.readiness === 'forming') {
+        return `The ${name} is reforming around a cadre of ${currentPers} personnel. ` +
+            `Its record stands at ${battles} engagements while the formation prepares to return to the line.`;
+    }
+
     switch (arc) {
         case 'veteran':
             return `The ${name} has fought ${battles} battles, winning ${wins}. ` +

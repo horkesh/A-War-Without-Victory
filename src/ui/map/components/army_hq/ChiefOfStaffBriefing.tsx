@@ -15,6 +15,7 @@ import type { CommandStrainLabel } from '../../data/command_strain.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard';
 import { getActiveLocale, t, type MessageKey } from '../../i18n';
 import { getPlayerSafeCorpsName } from '../../utils/playerSafeText';
+import { projectOperationLifecycle } from '../../data/operationLifecycleProjection';
 
 // ── CoS identity ────────────────────────────────────────────────────
 
@@ -191,6 +192,23 @@ function subjectCorpsId(item: BriefingItem): string | undefined {
     return item.corpsId ?? item.target.corpsId;
 }
 
+function operationalSituationText(
+    tone: CoSProfile['tone'],
+    executingCount: number,
+    hasOperationOrArchiveActivity: boolean,
+): string {
+    if (executingCount > 0) {
+        const key = executingCount === 1
+            ? 'chiefOfStaff.operations.executing.one'
+            : 'chiefOfStaff.operations.executing.many';
+        return t(key, { count: executingCount });
+    }
+    if (hasOperationOrArchiveActivity) return t('chiefOfStaff.operations.activity');
+    if (tone === 'cautious') return t('chiefOfStaff.stable.cautious');
+    if (tone === 'precise') return t('chiefOfStaff.stable.precise');
+    return t('chiefOfStaff.stable.aggressive');
+}
+
 export function generateCoSBriefing(
     briefingItems: BriefingItem[],
     state: LoadedGameState,
@@ -203,6 +221,8 @@ export function generateCoSBriefing(
 
     const criticals = briefingItems.filter(i => i.severity === 'critical');
     const warnings = briefingItems.filter(i => i.severity === 'warning');
+    const operationLifecycle = projectOperationLifecycle(state);
+    const executingCount = operationLifecycle.counts.executing;
 
     const paragraphs: Paragraph[] = [];
 
@@ -243,11 +263,7 @@ export function generateCoSBriefing(
     if (criticals.length === 0 && warnings.length === 0) {
         paragraphs.push([
             text(pickPhrase(GREETINGS[tone], turn) + ' '),
-            text(tone === 'cautious'
-                ? t('chiefOfStaff.stable.cautious')
-                : tone === 'precise'
-                    ? t('chiefOfStaff.stable.precise')
-                    : t('chiefOfStaff.stable.aggressive')),
+            text(operationalSituationText(tone, executingCount, operationLifecycle.hasAnyActivity)),
         ]);
     } else {
         const segments: Segment[] = [text(pickPhrase(GREETINGS[tone], turn) + ' ')];
@@ -323,6 +339,12 @@ export function generateCoSBriefing(
         }
 
         paragraphs.push(segments);
+    }
+
+    if (executingCount > 0 && (criticals.length > 0 || warnings.length > 0)) {
+        paragraphs.push([
+            text(t(executingCount === 1 ? 'chiefOfStaff.operations.executing.one' : 'chiefOfStaff.operations.executing.many', { count: executingCount })),
+        ]);
     }
 
     // § 3 — Command strain institutional signal (silence = healthy)
@@ -410,17 +432,17 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
 
             {/* Header */}
             <div className="px-3 py-1.5 border-b border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-[8px] uppercase font-bold text-neutral-500 tracking-[0.2em]">{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
-                <div className="text-[11px] font-bold text-neutral-800 mt-0.5">
+                <div className="text-xs uppercase font-bold text-neutral-600 tracking-[0.2em]">{t('chiefOfStaff.header.dailyBriefing')} — {turnToDateString(turn)}</div>
+                <div className="text-xs font-bold text-neutral-800 mt-0.5">
                     {profile.rank} {profile.name}
                 </div>
-                <div className="text-[8px] text-neutral-500 italic">{profileTitle}</div>
+                <div className="text-xs text-neutral-600 italic">{profileTitle}</div>
             </div>
 
             {/* Body — missive text with inline links */}
             <div className="px-3 py-1.5 flex-1 overflow-y-auto">
                 {paragraphs.map((segments, i) => (
-                    <p key={i} className="text-[10px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'Georgia, serif' }}>
+                    <p key={i} className="text-[12px] text-neutral-700 leading-relaxed mb-2 last:mb-0" style={{ fontFamily: 'Georgia, serif' }}>
                         {i === 0 && <>&ldquo;</>}
                         {segments.map((seg, j) =>
                             seg.type === 'link' && onCorpsClick ? (
@@ -445,7 +467,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
                 {letterHomeText && (
                     <div className="mt-2 pt-2 border-t border-neutral-300/40">
                         <p
-                            className="text-[9.5px] text-neutral-600 leading-relaxed italic"
+                            className="text-xs text-neutral-700 leading-relaxed italic"
                             style={{ fontFamily: 'Georgia, serif', borderLeft: '2px solid #b8860b44', paddingLeft: '8px' }}
                         >
                             {letterHomeText}
@@ -456,7 +478,7 @@ export function ChiefOfStaffBriefing({ briefingItems, gameState, faction, onCorp
 
             {/* Footer — signature line */}
             <div className="px-3 py-1 border-t border-neutral-300/60 bg-[#ebe5d8]">
-                <div className="text-[8px] text-neutral-400 italic text-right">
+                <div className="text-xs text-neutral-600 italic text-right">
                     — {profile.rank} {profile.name.split(' ').pop()}, {profileTitle}
                 </div>
             </div>

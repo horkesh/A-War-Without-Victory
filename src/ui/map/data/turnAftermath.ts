@@ -28,6 +28,7 @@ export interface TurnAftermathBuildInput {
   lastTurnReport?: TurnAftermathReportInput | null;
   osidNameMap?: Record<string, string> | null;
   includeNextActions?: boolean;
+  includeCurrentCommandState?: boolean;
 }
 
 export interface TurnAftermathRecordsInput {
@@ -50,6 +51,7 @@ export interface TurnAftermathTopAction {
   type: InboxItem['type'];
   severity: InboxItem['severity'];
   title: string;
+  detail?: string;
   action: InboxItem['action'];
   actionLabel: string;
 }
@@ -79,6 +81,23 @@ export interface TurnAftermathJudgmentView {
   memoryTone: TurnAftermathMemoryTone;
   primarySurface: TurnAftermathMemorySurface;
   secondarySurface: TurnAftermathMemorySurface;
+}
+
+export interface TurnAftermathCommandRecordView {
+  directives: Array<{
+    label: string;
+    rationale: string;
+  }>;
+  rows: Array<{
+    id: string;
+    corpsName: string;
+    officerName: string;
+    assignedRole: string;
+    interpretation: 'as_issued' | 'reinterpreted' | 'unreported';
+    interpretationDetail: string;
+    action: string;
+    actionDetail: string;
+  }>;
 }
 
 export interface TurnAftermathLedgerSummary {
@@ -122,6 +141,8 @@ export interface TurnAftermathCampaignCostView {
   hardTurnCount: number;
   averageFriendlyMilitaryCasualties: number;
   casualtyExchangeRatio: number | null;
+  displayFriendlyMilitaryCasualties: number;
+  friendlyMilitaryCasualtyScope: 'campaign_ledger' | 'turn_archive';
   topDrivers: string[];
   mostCostlyTurn: {
     turn: number;
@@ -170,6 +191,7 @@ export interface TurnAftermathView {
   };
   cost: TurnAftermathCostView;
   signals: TurnAftermathSignalView[];
+  commandRecord: TurnAftermathCommandRecordView;
   judgment: TurnAftermathJudgmentView;
   nextActions: {
     actionableCount: number;
@@ -203,6 +225,7 @@ const TURN_AFTERMATH_VIEW_KEYS = [
   'supply',
   'cost',
   'signals',
+  'commandRecord',
   'judgment',
   'nextActions',
 ] as const;
@@ -223,6 +246,18 @@ const TURN_AFTERMATH_COST_KEYS = [
   'reasons',
 ] as const;
 const TURN_AFTERMATH_SIGNAL_KEYS = ['id', 'kind', 'label', 'detail', 'severity'] as const;
+const TURN_AFTERMATH_COMMAND_RECORD_KEYS = ['directives', 'rows'] as const;
+const TURN_AFTERMATH_COMMAND_DIRECTIVE_KEYS = ['label', 'rationale'] as const;
+const TURN_AFTERMATH_COMMAND_ROW_KEYS = [
+  'id',
+  'corpsName',
+  'officerName',
+  'assignedRole',
+  'interpretation',
+  'interpretationDetail',
+  'action',
+  'actionDetail',
+] as const;
 const TURN_AFTERMATH_JUDGMENT_KEYS = ['headline', 'detail', 'memoryTone', 'primarySurface', 'secondarySurface'] as const;
 const TURN_AFTERMATH_NEXT_ACTION_KEYS = [
   'actionableCount',
@@ -234,7 +269,7 @@ const TURN_AFTERMATH_NEXT_ACTION_KEYS = [
   'peaceCount',
   'topItems',
 ] as const;
-const TURN_AFTERMATH_TOP_ACTION_KEYS = ['id', 'type', 'severity', 'title', 'action', 'actionLabel'] as const;
+const TURN_AFTERMATH_TOP_ACTION_KEYS = ['id', 'type', 'severity', 'title', 'detail', 'action', 'actionLabel'] as const;
 
 function hasOnlyKeys(value: unknown, allowedKeys: readonly string[]): boolean {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
@@ -257,6 +292,9 @@ function hasRecognizedTurnAftermathShape(view: TurnAftermathView): boolean {
     && hasOnlyKeys(view.cost, TURN_AFTERMATH_COST_KEYS)
     && Array.isArray(view.cost.reasons)
     && arrayItemsHaveOnlyKeys(view.signals, TURN_AFTERMATH_SIGNAL_KEYS)
+    && hasOnlyKeys(view.commandRecord, TURN_AFTERMATH_COMMAND_RECORD_KEYS)
+    && arrayItemsHaveOnlyKeys(view.commandRecord.directives, TURN_AFTERMATH_COMMAND_DIRECTIVE_KEYS)
+    && arrayItemsHaveOnlyKeys(view.commandRecord.rows, TURN_AFTERMATH_COMMAND_ROW_KEYS)
     && hasOnlyKeys(view.judgment, TURN_AFTERMATH_JUDGMENT_KEYS)
     && hasOnlyKeys(view.nextActions, TURN_AFTERMATH_NEXT_ACTION_KEYS)
     && arrayItemsHaveOnlyKeys(view.nextActions.topItems, TURN_AFTERMATH_TOP_ACTION_KEYS);
@@ -267,6 +305,7 @@ export function classifyTurnAftermathWeight(view: TurnAftermathView): TurnAfterm
   if (view.nextActions.actionableCount > 0 || view.nextActions.blockingCount > 0 || view.nextActions.topItems.length > 0) return 'heavy';
   if (view.nextActions.eventDecisionCount > 0 || view.nextActions.peaceCount > 0) return 'heavy';
   if (view.signals.length > 0) return 'heavy';
+  if (view.commandRecord.directives.length > 0 || view.commandRecord.rows.length > 0) return 'heavy';
   if (view.territory.friendlyNet !== 0 || view.territory.gains > 0 || view.territory.losses > 0 || view.territory.notable.length > 0) return 'heavy';
   if (view.combat.battleCount > 0 || view.combat.friendlyBattleCount > 0 || view.combat.territoryFlipsFromBattles > 0) return 'heavy';
   if (view.combat.friendlyCasualties > 0 || view.combat.opposingCasualties > 0) return 'heavy';
@@ -295,6 +334,98 @@ function humanizeToken(value: string | undefined): string | undefined {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
     .join(' ');
+}
+
+function sentenceCaseToken(value: string): string {
+  const humanized = humanizeToken(value) ?? value;
+  return humanized.charAt(0) + humanized.slice(1).toLowerCase();
+}
+
+const COMMAND_ROLE_KEYS: Record<string, MessageKey> = {
+  primary: 'turnAftermath.commandRecord.role.primary',
+  secondary: 'turnAftermath.commandRecord.role.secondary',
+  economy: 'turnAftermath.commandRecord.role.economy',
+  contain: 'turnAftermath.commandRecord.role.contain',
+};
+
+const COMMAND_DEVIATION_KEYS: Record<string, MessageKey> = {
+  aggressive_preference: 'turnAftermath.commandRecord.deviation.aggressive',
+  cautious_preference: 'turnAftermath.commandRecord.deviation.cautious',
+  compliance_score_low: 'turnAftermath.commandRecord.deviation.lowCompliance',
+};
+
+const COMMAND_ACTION_KEYS: Record<string, MessageKey> = {
+  created: 'turnAftermath.commandRecord.action.created',
+  advanced: 'turnAftermath.commandRecord.action.advanced',
+  suspended: 'turnAftermath.commandRecord.action.suspended',
+  abandoned: 'turnAftermath.commandRecord.action.abandoned',
+  launched: 'turnAftermath.commandRecord.action.launched',
+  none: 'turnAftermath.commandRecord.action.none',
+};
+
+function buildCommandRecord(
+  state: LoadedGameState,
+  turn: number,
+  includeCurrentCommandState: boolean,
+): TurnAftermathCommandRecordView {
+  const playerFaction = state.player_faction ?? null;
+  const directives = (playerFaction ? state.armyCoDecisionTraces?.[playerFaction] ?? [] : [])
+    .filter((trace) => trace.turn === turn)
+    .map((trace) => ({
+      label: sentenceCaseToken(trace.campaign_role),
+      rationale: trace.rationale || t('turnAftermath.commandRecord.unreported'),
+    }));
+
+  if (!includeCurrentCommandState || !playerFaction) return { directives, rows: [] };
+
+  const formationById = new Map(state.formations.map((formation) => [formation.id, formation]));
+  const directiveByCorps = new Map(
+    (state.armyCorpsDirectives ?? [])
+      .filter((directive) => formationById.get(directive.corpsId)?.faction === playerFaction)
+      .map((directive) => [directive.corpsId, directive]),
+  );
+  const actionByCorps = new Map(
+    (state.corpsCommanderActions ?? [])
+      .filter((action) => action.turn === turn)
+      .filter((action) => formationById.get(action.corpsId)?.faction === playerFaction)
+      .map((action) => [action.corpsId, action]),
+  );
+  const corpsIds = [...new Set([...directiveByCorps.keys(), ...actionByCorps.keys()])].sort(strictStringCompare);
+  const officers = [...(state.namedOfficerData ?? [])]
+    .filter((officer) => officer.faction === playerFaction && officer.status === 'active')
+    .sort((a, b) => strictStringCompare(a.id, b.id));
+
+  const rows: TurnAftermathCommandRecordView['rows'] = corpsIds.map((corpsId) => {
+    const formation = formationById.get(corpsId);
+    const directive = directiveByCorps.get(corpsId);
+    const action = actionByCorps.get(corpsId);
+    const officer = officers.find((candidate) => candidate.assigned_corps_id === corpsId);
+    const interpretation = directive
+      ? directive.deviated ? 'reinterpreted' : 'as_issued'
+      : 'unreported';
+    const interpretationDetail = directive
+      ? directive.deviated
+        ? t(COMMAND_DEVIATION_KEYS[directive.deviationReason ?? '']
+          ?? 'turnAftermath.commandRecord.deviation.unreported')
+        : t('turnAftermath.commandRecord.asIssuedDetail')
+      : t('turnAftermath.commandRecord.unreported');
+    return {
+      id: corpsId,
+      corpsName: formation?.name || t('turnAftermath.commandRecord.corpsFallback'),
+      officerName: officer?.name || t('turnAftermath.commandRecord.staffFallback'),
+      assignedRole: directive
+        ? t(COMMAND_ROLE_KEYS[directive.role] ?? 'turnAftermath.commandRecord.unreported')
+        : t('turnAftermath.commandRecord.unreported'),
+      interpretation,
+      interpretationDetail,
+      action: action
+        ? t(COMMAND_ACTION_KEYS[action.action] ?? 'turnAftermath.commandRecord.unreported')
+        : t('turnAftermath.commandRecord.unreported'),
+      actionDetail: action?.reason || t('turnAftermath.commandRecord.unreported'),
+    };
+  });
+
+  return { directives, rows };
 }
 
 function notableEventKindLabel(kind: string | undefined): string {
@@ -441,6 +572,7 @@ function buildNextActions(state: LoadedGameState, osidNameMap: Record<string, st
       type: item.type,
       severity,
       title: item.title,
+      detail: item.subtitle,
       action: item.action,
       actionLabel: getDecisionSurfaceForInboxType(item.type)?.actionLabel ?? t('records.actionType.reviewItem'),
     })),
@@ -564,15 +696,16 @@ function buildStrategicSignals(
     });
   });
 
-  for (const award of summary.decoration_awards) {
+  summary.decoration_awards.forEach((award, index) => {
+    const decoration = award.decoration;
     signals.push({
-      id: `decoration:${award.formation_id}:${award.decoration}`,
+      id: `decoration:${award.formation_id}:${decoration.tier}:${decoration.awarded_turn}:${index}`,
       kind: 'decoration',
       label: t('turnAftermath.signal.label.decorated', { formation: award.formation_name }),
-      detail: decorationLabel(String(award.decoration)),
+      detail: decorationLabel(decoration.tier),
       severity: 'notable',
     });
-  }
+  });
 
   for (const arc of summary.arc_transitions) {
     const from = arcLabel(String(arc.from_arc));
@@ -804,6 +937,11 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     friendlyMilitaryCasualties: friendlyCasualties,
     ownFormationsDestroyed,
   });
+  const commandRecord = buildCommandRecord(
+    nextState,
+    turn,
+    input.includeCurrentCommandState !== false,
+  );
   const signals = buildStrategicSignals(narratedSummary, input.osidNameMap ?? null, nextState, playerFaction);
   const nextActions = input.includeNextActions === false
     ? emptyNextActions()
@@ -845,6 +983,7 @@ export function buildTurnAftermathView(input: TurnAftermathBuildInput): TurnAfte
     },
     cost,
     signals,
+    commandRecord,
     judgment: buildTurnJudgment({
       tone,
       friendlyNet,
@@ -881,6 +1020,7 @@ export function buildTurnAftermathRecordViews(input: TurnAftermathRecordsInput):
       },
       osidNameMap: input.osidNameMap ?? null,
       includeNextActions: summary.turn === state.latestTurnSummary?.turn,
+      includeCurrentCommandState: summary.turn === state.latestTurnSummary?.turn,
     }))
     .filter((view): view is TurnAftermathView => view != null);
 }
@@ -929,6 +1069,14 @@ function classifyCampaignMomentum(
   if (
     Math.abs(summary.netFriendlyTerritory) <= 1
     && (summary.totalFriendlyMilitaryCasualties > 0 || summary.totalDisplaced > 0 || signalCount > 0)
+  ) {
+    return 'contested';
+  }
+  if (
+    hardTurnCount > 0
+    || summary.totalFriendlyMilitaryCasualties > 0
+    || summary.totalDisplaced > 0
+    || signalCount > 0
   ) {
     return 'contested';
   }
@@ -1169,6 +1317,15 @@ export function buildTurnAftermathCampaignCost(input: TurnAftermathRecordsInput)
   const casualtyExchangeRatio = summary.totalFriendlyMilitaryCasualties > 0
     ? totalOpposingMilitaryCasualties / summary.totalFriendlyMilitaryCasualties
     : null;
+  const playerFaction = input.state?.player_faction ?? null;
+  const casualtyLedgerEntry = playerFaction ? input.state?.casualtyLedger?.[playerFaction] : undefined;
+  const ledgerKilled = reportedNumber(casualtyLedgerEntry?.killed);
+  const ledgerWounded = reportedNumber(casualtyLedgerEntry?.wounded);
+  const ledgerMissingCaptured = reportedNumber(casualtyLedgerEntry?.missing_captured);
+  const hasCampaignCasualtyLedger = ledgerKilled != null || ledgerWounded != null || ledgerMissingCaptured != null;
+  const displayFriendlyMilitaryCasualties = hasCampaignCasualtyLedger
+    ? (ledgerKilled ?? 0) + (ledgerWounded ?? 0) + (ledgerMissingCaptured ?? 0)
+    : summary.totalFriendlyMilitaryCasualties;
   const severity = classifyCampaignCost(summary, averageFriendlyMilitaryCasualties);
   const latest = records[0]?.dateLabel ?? null;
   const oldest = records[records.length - 1]?.dateLabel ?? null;
@@ -1203,6 +1360,8 @@ export function buildTurnAftermathCampaignCost(input: TurnAftermathRecordsInput)
     hardTurnCount,
     averageFriendlyMilitaryCasualties,
     casualtyExchangeRatio,
+    displayFriendlyMilitaryCasualties,
+    friendlyMilitaryCasualtyScope: hasCampaignCasualtyLedger ? 'campaign_ledger' : 'turn_archive',
     topDrivers: buildCampaignCostDrivers({
       summary,
       totalOpposingMilitaryCasualties,

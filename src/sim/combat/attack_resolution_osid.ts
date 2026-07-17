@@ -1356,6 +1356,15 @@ export function resolveAttackOrdersOsid(
             if (activeAxis) {
                 activeAxis.battles_this_turn = (activeAxis.battles_this_turn ?? 0) + 1;
                 activeAxis.total_battles = (activeAxis.total_battles ?? 0) + 1;
+                const currentAxisObjective = activeAxis.objectives[activeAxis.current_objective_index ?? 0];
+                if (currentAxisObjective === targetOsid) {
+                    activeAxis.objective_battles_this_turn = (activeAxis.objective_battles_this_turn ?? 0) + 1;
+                }
+            } else {
+                const currentObjective = activeOp.objectives?.[activeOp.current_objective_index ?? 0];
+                if (currentObjective === targetOsid) {
+                    activeOp.objective_battles_this_turn = (activeOp.objective_battles_this_turn ?? 0) + 1;
+                }
             }
             if (flip) {
                 activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;

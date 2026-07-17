@@ -123,7 +123,7 @@ describe('LANE-NIGHTSHIFT-N4 dissolution override gate (shadow-flag)', () => {
         const f = makeBrigade({
             personnel: 2000,
             morale: 0,
-            cohesion: 20,
+            cohesion: 21,
             morale_low_streak: MORALE_OVERRIDE_TURNS, // 8
         });
         const state = makeState(f);
@@ -138,7 +138,7 @@ describe('LANE-NIGHTSHIFT-N4 dissolution override gate (shadow-flag)', () => {
         const f = makeBrigade({
             personnel: 2000,
             morale: 0,
-            cohesion: 20,
+            cohesion: 21,
             morale_low_streak: MORALE_OVERRIDE_TURNS, // 8
         });
         const state = makeState(f);
@@ -153,7 +153,7 @@ describe('LANE-NIGHTSHIFT-N4 dissolution override gate (shadow-flag)', () => {
         const f = makeBrigade({
             personnel: 2000,
             morale: 0,
-            cohesion: 20,
+            cohesion: 21,
             morale_low_streak: 5, // below threshold
         });
         const state = makeState(f);

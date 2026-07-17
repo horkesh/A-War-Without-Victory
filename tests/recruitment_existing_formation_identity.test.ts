@@ -146,7 +146,7 @@ describe('recruitment existing formation identity', () => {
         expect(state.military.recruitment_state.recruited_brigade_ids).toContain('rs_5th_podrinje');
     });
 
-    it('preserves historical home_osid but spawns a mandatory brigade at the friendly resolved HQ when home_osid has flipped enemy', () => {
+    it('reanchors home and physical location to the friendly resolved HQ when authored home_osid has flipped enemy', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
             meta: { turn: 22, seed: 'test', phase: 'war' },
@@ -214,7 +214,7 @@ describe('recruitment existing formation identity', () => {
         );
 
         const formation = state.military.formations['arbih_284th_east_bosnian_light']!;
-        expect(formation.home_osid).toBe('op:srebrenica:osmace_2');
+        expect(formation.home_osid).toBe('op:srebrenica:potocari_2');
         expect(formation.location_osid).toBe('op:srebrenica:potocari_2');
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -223,7 +223,7 @@ describe('recruitment existing formation identity', () => {
         spy.mockRestore();
     });
 
-    it('places ongoing enclave recruitment at a friendly enclave capital when no canonical placement map is available', () => {
+    it('places ongoing enclave recruitment at a deterministic friendly enclave OSID when no canonical placement map is available', () => {
         const state = {
             schema_version: CURRENT_SCHEMA_VERSION,
             meta: { turn: 22, seed: 'test', phase: 'war' },
@@ -289,8 +289,8 @@ describe('recruitment existing formation identity', () => {
         );
 
         const formation = state.military.formations['arbih_284th_east_bosnian_light']!;
-        expect(formation.home_osid).toBe('op:srebrenica:osmace_2');
-        expect(formation.location_osid).toBe('op:srebrenica:srebrenica_2');
+        expect(formation.home_osid).toBe('op:srebrenica:potocari_2');
+        expect(formation.location_osid).toBe('op:srebrenica:potocari_2');
 
         const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
         assertFormationsInFriendlyTerritory(state);

@@ -3,6 +3,7 @@ import { FrontEdge } from '../map/front_edges.js';
 import { FRONT_BREACH_THRESHOLD, FrontBreach } from './front_breaches.js';
 import { GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
+import { strictCompare } from './validateGameState.js';
 
 
 export { buildAdjacencyMap };
@@ -70,7 +71,7 @@ export function computeControlFlipProposals(
         const absA = Math.abs(a.pressure_value);
         const absB = Math.abs(b.pressure_value);
         if (absA !== absB) return absB - absA;
-        return a.edge_id.localeCompare(b.edge_id);
+        return strictCompare(a.edge_id, b.edge_id);
     });
 
     const proposals: ControlFlipProposal[] = [];
@@ -115,7 +116,7 @@ export function computeControlFlipProposals(
                 bestScore = score;
                 bestSid = sid;
             } else if (score === bestScore && bestSid !== null) {
-                if (sid.localeCompare(bestSid) < 0) bestSid = sid;
+                if (strictCompare(sid, bestSid) < 0) bestSid = sid;
             }
         }
 
@@ -139,14 +140,14 @@ export function computeControlFlipProposals(
         const absA = Math.abs(a.pressure_value);
         const absB = Math.abs(b.pressure_value);
         if (absA !== absB) return absB - absA;
-        return a.edge_id.localeCompare(b.edge_id);
+        return strictCompare(a.edge_id, b.edge_id);
     });
 
     return { schema: 1, turn, threshold: FRONT_BREACH_THRESHOLD, proposals };
 }
 
 export function applyControlFlipProposals(state: GameState, file: ControlFlipProposalFile): { applied: number } {
-    const factionsSorted = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factionsSorted = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
 
     // Build id -> faction reference for the final add step.
     const factionById = new Map<string, (typeof factionsSorted)[number]>();
@@ -155,7 +156,7 @@ export function applyControlFlipProposals(state: GameState, file: ControlFlipPro
     let applied = 0;
 
     for (const proposal of file.proposals) {
-        const targetsSorted = [...proposal.targets].sort((a, b) => a.sid.localeCompare(b.sid));
+        const targetsSorted = [...proposal.targets].sort((a, b) => strictCompare(a.sid, b.sid));
         for (const t of targetsSorted) {
             // Remove sid from ALL factions first (deterministic by faction id sort).
             for (const f of factionsSorted) {

@@ -1,6 +1,6 @@
 import type { FormationView, LoadedGameState } from '../data/types';
 import { resolveFormationPhysicalLocationOsid } from '../map/builders/resolveFormationLocationOsid';
-import { filterPlayerVisibleMapFormations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
+import { filterPlayerVisibleMapFormations, isPlayerVisibleTacticalMarker } from '../../shared/playerVisibility';
 
 export function getPlayerVisibleFormationStack(
   state: LoadedGameState | null | undefined,
@@ -9,7 +9,7 @@ export function getPlayerVisibleFormationStack(
 ): FormationView[] {
   if (!state || !osid) return [];
   return filterPlayerVisibleMapFormations(state).filter((formation) => (
-    isFieldedTacticalFormation(formation)
+    isPlayerVisibleTacticalMarker(formation, state)
     && resolveFormationPhysicalLocationOsid(formation, centroidLookup) === osid
   )).sort((a, b) => a.id.localeCompare(b.id));
 }

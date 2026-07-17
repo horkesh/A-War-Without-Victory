@@ -3,7 +3,7 @@
  * - Production facilities produce supply
  * - Damaged facilities produce less
  * - Smuggling routes generate income
- * - Route disruption via deterministicRandom
+ * - Route disruption from explicit route state
  */
 import { describe, it, expect } from 'vitest';
 import { calculateFactionProductionBonus, ensureProductionFacilities } from '../src/state/production_facilities.js';
@@ -152,6 +152,15 @@ describe('Smuggling routes', () => {
 
         // Both should produce identical results
         expect(state1.military.smuggling_routes).toEqual(state2.military.smuggling_routes);
+    });
+
+    it('does not invent route disruption when every available route is politically open', () => {
+        for (let turn = 0; turn <= 100; turn++) {
+            const state = makeMinimalState({ meta: { turn, phase: 'war', supply_reserves_enabled: true } as any });
+            state.political.rbih_hrhb_state = { alliance_value: 1 } as any;
+            const report = updateSmugglingRoutes(state, turn);
+            expect(report.routes_disrupted, `turn ${turn}`).toBe(0);
+        }
     });
 
     it('SMUGGLING_ROUTE_DEFS has 3 routes per faction', () => {

@@ -10,7 +10,8 @@ import {
 import {
     applyArmyCoRosterStep,
     A4_PIPELINE_STEP_NAME,
-} from '../combat/army_co_roster_loader.js';
+} from '../combat/army_co_lifecycle.js';
+import { CANONICAL_ARMY_CO_ROSTER } from '../combat/army_co_roster_data.js';
 import {
     applyPoliticalDirectiveProducer,
     B1_PIPELINE_STEP_NAME,
@@ -21,8 +22,11 @@ import {
     generateOpportunityProposalReviews,
     runOpportunityEvaluationStep,
 } from '../combat/operation_opportunities.js';
+import {
+    isHistoricalOperationAuthorizationReview,
+    isUnresolvedHistoricalOperationAuthorizationReview,
+} from '../combat/historical_operation_authorization.js';
 import { snapshotPoliticalControllers } from '../combat/assert_control_events.js';
-import { assertOperationLifecycle } from '../combat/assert_operation_lifecycle.js';
 import { applyGuerrillaAttrition } from '../combat/guerrilla_attrition.js';
 import { cleanupExpiredEventModifiers } from '../events/active_modifiers.js';
 import { attributeOperationCasualties } from '../combat/operation_casualty_attribution.js';
@@ -35,7 +39,7 @@ import { loadSettlementGraph } from '../../map/settlements.js';
 import { loadTerrainScalars } from '../../map/terrain_scalars_node.js';
 import { backfillFormationLocationOsid, computeOsidPopulation, loadOperationalCentroids, loadOperationalData, loadOperationalEdges } from '../../data/operational_data.js';
 import { loadSettlementEthnicityData } from '../../data/settlement_ethnicity.js';
-import { buildSidToMunFromSettlements, buildOsidToMunFromReverseMap } from '../../scenario/oob_early_war_entry.js';
+import { buildSidToMunFromSettlements } from '../../scenario/oob_early_war_entry.js';
 import { updateCapabilityProfiles } from '../../state/capability_progression.js';
 import { computeDimensionBaseValues, applyDimensionShift } from '../events/strategic_dimensions.js';
 import { relieveOfficer, recordPresidentialOverride } from '../combat/order_interpretation.js';
@@ -59,6 +63,7 @@ import { updateHeavyEquipmentState } from '../../state/heavy_equipment.js';
 import { updateLegitimacyState } from '../../state/legitimacy.js';
 import { ensureMaintenanceCapacity } from '../../state/maintenance.js';
 import { updateMilitiaFatigue } from '../../state/militia_fatigue.js';
+import { buildRecruitmentContext } from '../recruitment_context.js';
 import { updateNegotiationCapital } from '../../state/negotiation_capital.js';
 import {
     applyEnforcementPackage,
@@ -158,7 +163,8 @@ import { buildStaticOsidAdjacency } from '../combat/sector_offensive_launch_help
 // LANE-2026-05-02: estimateForceRatio defender-modifier integration — terrain cache for advance-sector-offensives
 import { buildTerrainCache } from '../combat/combat_predictor.js';
 import { processJnaWithdrawals, spawnJnaPhantomBrigades } from '../combat/jna_phantom_brigades.js';
-import { injectQueuedOperation } from '../combat/pre_planned_operations.js';
+import { runJNATransition } from '../early_war/jna_transition.js';
+import { injectPrePlannedOperations, injectQueuedOperation } from '../combat/pre_planned_operations.js';
 import { isSlot0AvailableForQueue, hasAvailableSlot, getAvailableBrigades, buildCorpsOperation, findBrigadeOperationAnywhere, removeOperation } from '../combat/corps_operation_helpers.js';
 import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat/operation_validation.js';
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
@@ -166,7 +172,11 @@ import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
 import { assignOperationCommander, releaseOperationCommander, releaseTacticalCommander } from '../combat/officer_system.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { checkTriggeredOperations, injectArmyHqOperations } from '../combat/triggered_operations.js';
+import {
+    checkTriggeredOperations,
+    injectArmyHqOperations,
+    isTriggeredHistoricalOperationForFaction,
+} from '../combat/triggered_operations.js';
 import { computeMilitiaGarrisons } from '../combat/militia_garrison.js';
 import { activateOGs, updateOGLifecycle } from '../combat/operational_groups.js';
 import { deriveSectorIntel } from '../combat/sector_intel.js';
@@ -188,11 +198,11 @@ import type { Osid } from '../combat/osid_adjacency.js';
 import { generateArmyReserveRequests, evaluateArmyReserveAssignments, tickEliteLoans } from '../combat/army_reserve_system.js';
 import { buildHomeDistanceCache } from '../combat/home_distance.js';
 import { computeSectorCombatRatings } from '../combat/sector_combat_rating.js';
-import { detectParamilitaryTargets, advanceParamilitaries, detectOffensiveParamilitaryTargets } from '../combat/paramilitary_sweep.js';
+import { detectParamilitaryTargets, advanceParamilitaries } from '../combat/paramilitary_sweep.js';
+import { consolidateRearPockets } from '../combat/rear_pocket_consolidation.js';
 import { updateStrandedBrigadeLifecycle } from '../combat/stranded_brigade_lifecycle.js';
 import {
     PARAMILITARY_FADE_WEEK,
-    OFFENSIVE_PARA_FADE_WEEK,
     VRS_EQUIPMENT_DECAY_FLOOR,
     VRS_EQUIPMENT_DECAY_START_WEEK
 } from '../../state/formation_constants.js';
@@ -909,10 +919,50 @@ export function selectBotBrigadeOrderFactions(state: GameState): FactionId[] {
     const playerFaction = state.meta.headless_scenario_auto_control
         ? null
         : state.meta.player_faction ?? null;
+    const assistedExecutionActive = (state.meta.autonomy_level ?? 0) >= 1;
     return (state.factions ?? [])
         .map(f => f.id)
-        .filter((fid): fid is FactionId => playerFaction == null || fid !== playerFaction)
+        .filter((fid): fid is FactionId =>
+            playerFaction == null || assistedExecutionActive || fid !== playerFaction
+        )
         .sort(strictCompare);
+}
+
+function isPlayerHistoricalOperationAssistOperation(
+    state: GameState,
+    playerFaction: FactionId,
+    op: CorpsOperation | null | undefined,
+): boolean {
+    if (!op) return false;
+    if (op.phase !== 'planning' && op.phase !== 'execution') return false;
+    if (op.authored_by_player === true || op.requested_by_president === true) return false;
+    if (op.is_pre_planned === true) return true;
+    return state.military.triggered_operations_accepted?.[op.name] != null
+        && isTriggeredHistoricalOperationForFaction(op.name, playerFaction);
+}
+
+function isPlayerHistoricalOperationAssistFormation(state: GameState, formation: FormationState): boolean {
+    const playerFaction = state.meta.headless_scenario_auto_control
+        ? null
+        : state.meta.player_faction ?? null;
+    if (!playerFaction || formation.faction !== playerFaction) return false;
+    const found = findBrigadeOperationAnywhere(state, formation.id);
+    return isPlayerHistoricalOperationAssistOperation(state, playerFaction, found?.op);
+}
+
+function hasPlayerHistoricalOperationAssistWork(state: GameState): boolean {
+    const playerFaction = state.meta.headless_scenario_auto_control
+        ? null
+        : state.meta.player_faction ?? null;
+    if (!playerFaction) return false;
+    const formations = state.military.formations ?? {};
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[formationId];
+        if (formation && isPlayerHistoricalOperationAssistFormation(state, formation)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -1000,6 +1050,14 @@ export const warPhases: NamedPhase[] = [
             if (grazText) {
                 result.fired.push({ id: 'graz_accords', text: grazText });
             }
+        }
+    },
+    {
+        name: 'jna-transition',
+        run: (context) => {
+            const jna = context.state.military.war_jna;
+            if (jna?.transition_begun && jna.withdrawal_progress >= 1 && jna.asset_transfer_rs >= 1) return;
+            context.report.war_jna_transition = runJNATransition(context.state);
         }
     },
     {
@@ -1631,28 +1689,6 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
-        name: 'offensive-paramilitary-detect',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            if ((context.state.meta?.turn ?? 0) > OFFENSIVE_PARA_FADE_WEEK) return;
-            const od = getOperationalData(context);
-            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
-
-            const report = detectOffensiveParamilitaryTargets(
-                context.state, od.edges, od.opData.operationalToCanonical
-            );
-            if (report.spawned.length > 0 || report.pending_player_requests > 0) {
-                const existing = context.report.paramilitary_sweep as import('../combat/paramilitary_sweep.js').ParamilitarySweepReport | undefined;
-                if (existing) {
-                    existing.spawned.push(...report.spawned);
-                    existing.pending_player_requests += report.pending_player_requests;
-                } else {
-                    context.report.paramilitary_sweep = report;
-                }
-            }
-        }
-    },
-    {
         name: 'paramilitary-advance',
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
@@ -1669,6 +1705,24 @@ export const warPhases: NamedPhase[] = [
                 } else {
                     context.report.paramilitary_sweep = report;
                 }
+            }
+        }
+    },
+    {
+        name: 'rear-pocket-consolidation',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if ((context.state.meta?.turn ?? 0) <= PARAMILITARY_FADE_WEEK) return;
+            const od = getOperationalData(context);
+            if (!od?.opData?.operationalToCanonical || !od?.edges?.length) return;
+
+            const report = consolidateRearPockets(
+                context.state,
+                od.edges,
+                od.opData.operationalToCanonical,
+            );
+            if (report.total_flipped > 0) {
+                context.report.rear_pocket_consolidation = report;
             }
         }
     },
@@ -1732,6 +1786,32 @@ export const warPhases: NamedPhase[] = [
         }
     },
     {
+        // Live campaigns remove selected-faction opening operations from the
+        // baked snapshot until the President authorizes them. Re-inject accepted
+        // plans before operation lifecycle advancement so an authorization made
+        // during the preceding turn keeps the same elapsed-week clock as the
+        // preserved startup operation.
+        //
+        // DETERMINISM GATE: headless calibration sets headless_scenario_auto_control,
+        // so this step is inert for scenario-runner baselines.
+        name: 'inject-player-pre-planned-operations',
+        run: (context) => {
+            if (context.state.meta.phase !== 'war') return;
+            if (context.state.meta.headless_scenario_auto_control === true) return;
+            const playerFaction = context.state.meta.player_faction;
+            if (!playerFaction) return;
+            const hasAcceptedHistoricalOperation = (context.state.meta.pending_proposal_reviews ?? []).some(
+                review => review.faction === playerFaction
+                    && review.accepted === true
+                    && isHistoricalOperationAuthorizationReview(review)
+            );
+            if (!hasAcceptedHistoricalOperation) return;
+            const spatial = getSpatialContextCache(context);
+            const adjacency = spatial?.preCombat.adjacency as Map<Osid, Osid[]> | undefined;
+            injectPrePlannedOperations(context.state, adjacency, { faction: playerFaction });
+        }
+    },
+    {
         name: 'advance-sector-offensives',
         // LANE-2026-05-02: build terrain cache once per turn so estimateForceRatio
         // can honor terrain/urban/forest defender modifiers via combat_math helpers.
@@ -1783,13 +1863,6 @@ export const warPhases: NamedPhase[] = [
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
             reevaluateWeakenedOperations(context.state);
-        }
-    },
-    {
-        name: 'assert-operation-lifecycle',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            assertOperationLifecycle(context.state);
         }
     },
     {
@@ -1999,22 +2072,40 @@ export const warPhases: NamedPhase[] = [
                 meta.autonomy_level_pending = undefined;
             }
             meta.autonomy_overrides = undefined;
-            // GC all proposals from previous turns — unresolved ones were missed by the player,
-            // resolved ones have already been consumed. Current-turn proposals are not yet generated
-            // at this pipeline point.
+            // Expire ordinary unanswered proposals with an explicit negative
+            // disposition before GC. Keeping the disposition for the current turn
+            // lets canonical UI/read models observe a resolved review instead of
+            // having the proposal silently disappear. Historical operation
+            // operation authorization rows are standing presidential records in
+            // every disposition, so accepted/declined plans cannot be re-prompted.
             if (meta.pending_proposal_reviews) {
-                meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter(
-                    p => p.turn >= meta.turn
+                for (const proposal of meta.pending_proposal_reviews) {
+                    const isUnresolved = proposal.accepted === undefined
+                        && proposal.resolved_turn === undefined
+                        && proposal.opportunity_decision === undefined;
+                    if (
+                        proposal.turn < meta.turn
+                        && isUnresolved
+                        && !isUnresolvedHistoricalOperationAuthorizationReview(proposal)
+                    ) {
+                        proposal.accepted = false;
+                        proposal.resolved_turn = meta.turn;
+                    }
+                }
+                meta.pending_proposal_reviews = meta.pending_proposal_reviews.filter((proposal) =>
+                    proposal.turn >= meta.turn
+                        || proposal.resolved_turn === meta.turn
+                        || isUnresolvedHistoricalOperationAuthorizationReview(proposal)
+                        || isHistoricalOperationAuthorizationReview(proposal)
+                        || (
+                            proposal.proposed_action.startsWith('APPROVE_OP:')
+                            && proposal.resolved_turn !== undefined
+                        )
                 );
             }
-            // v0.8.4 Phase D: Clear per-corps player_op_response each turn so stale responses
-            // from prior turns do not block or spuriously approve next-turn plans.
             const corpsCmd = context.state.military.corps_command;
             if (corpsCmd) {
                 for (const corpsId of Object.keys(corpsCmd)) {
-                    if (corpsCmd[corpsId].player_op_response !== undefined) {
-                        corpsCmd[corpsId].player_op_response = undefined;
-                    }
                     // Free War Phase 4 (#67): belt-and-suspenders GC of any stale
                     // pending_authored_op (normally consumed by inject-authored-operations
                     // earlier the same turn; clear here if it survived for any reason).
@@ -2206,15 +2297,15 @@ export const warPhases: NamedPhase[] = [
         // `apply-army-directive-interpretation` (A3 reads the populated
         // stubbornness values).
         //
-        // SUBSTRATE-DRIVEN: short-circuits when the roster JSON is unavailable
-        // or A4_ARMY_CO_ROSTER_DISABLED env var is set (188w A/B control run).
+        // The canonical roster is bundled for this browser-reachable pipeline.
+        // Node-only A/B tooling retains an explicit disabled wrapper.
         //
         // DDR: docs/40_reports/audits/20260506_AI_OFFICERS_ARMY_COS_DESIGN_DECISIONS.md
         // (eee308e0). A1: 18136710. A2: ba6955bf. A3: c8ff93d8.
         name: A4_PIPELINE_STEP_NAME,
         run: (context) => {
             if (context.state.meta.phase !== 'war') return;
-            applyArmyCoRosterStep(context.state);
+            applyArmyCoRosterStep(context.state, CANONICAL_ARMY_CO_ROSTER);
         },
     },
     {
@@ -2480,8 +2571,39 @@ export const warPhases: NamedPhase[] = [
                     ethnicCompositionByOsid,
                     osidPopulationMap
                 };
-                const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, factions, osidCtx);
+                const playerFaction = context.state.meta.headless_scenario_auto_control
+                    ? null
+                    : context.state.meta.player_faction ?? null;
+                const playerAssistedExecutionActive =
+                    playerFaction != null && factions.includes(playerFaction);
+                const ordinaryBotFactions = playerAssistedExecutionActive
+                    ? factions.filter((faction) => faction !== playerFaction)
+                    : factions;
+
+                const botOrderDiagnostics = generateAllBotOrdersOsid(context.state, ordinaryBotFactions, osidCtx);
                 context.report.bot_order_diagnostics = createBotOrderDiagnosticsSnapshot(context.state, botOrderDiagnostics);
+
+                if (playerFaction && playerAssistedExecutionActive) {
+                    const assistDiagnostics = generateAllBotOrdersOsid(
+                        context.state,
+                        [playerFaction],
+                        osidCtx,
+                        { mergeWithExistingOrders: true },
+                    );
+                    context.report.player_assisted_execution = assistDiagnostics;
+                } else if (playerFaction && hasPlayerHistoricalOperationAssistWork(context.state)) {
+                    const assistDiagnostics = generateAllBotOrdersOsid(
+                        context.state,
+                        [playerFaction],
+                        osidCtx,
+                        {
+                            brigadeFilter: (formation) =>
+                                isPlayerHistoricalOperationAssistFormation(context.state, formation),
+                            mergeWithExistingOrders: true,
+                        },
+                    );
+                    context.report.player_historical_operation_assist = assistDiagnostics;
+                }
             }
             // When operational data unavailable: no bot brigade orders (AoR path removed).
         }
@@ -3164,27 +3286,20 @@ export const warPhases: NamedPhase[] = [
 
             const catalog = await loadRecruitmentCatalog();
             if (catalog) {
-                let sidToMun = buildSidToMunFromSettlements(graph.settlements);
-                // OSID-vs-SID fix: when political_controllers are OSID-keyed, rebuild sidToMun
-                // so factionHasPresenceInMun can match OSID keys to municipalities.
                 const opDataCache = getOperationalData(context);
-                if (opDataCache?.opData?.operationalToCanonical) {
-                    const pc = context.state.political.political_controllers ?? {};
-                    const firstKey = Object.keys(pc)[0];
-                    if (firstKey?.startsWith('op:')) {
-                        sidToMun = buildOsidToMunFromReverseMap(
-                            opDataCache.opData.operationalToCanonical,
-                            sidToMun
-                        );
-                    }
-                }
+                const recruitmentContext = buildRecruitmentContext(
+                    context.state,
+                    graph.settlements,
+                    catalog.municipality_hq_settlement,
+                    opDataCache?.opData,
+                );
                 const ongoingReport = runOngoingRecruitment(
                     context.state,
                     catalog.corps,
                     catalog.brigades,
-                    sidToMun,
-                    catalog.municipality_hq_settlement,
-                    opDataCache?.opData?.canonicalToOperational,
+                    recruitmentContext.sidToMun,
+                    recruitmentContext.municipalityHqSettlement,
+                    recruitmentContext.canonicalToOperational,
                 );
                 recruited_actions = ongoingReport?.actions.length ?? 0;
                 for (const action of ongoingReport?.actions ?? []) {
@@ -3276,6 +3391,7 @@ export const warPhases: NamedPhase[] = [
                 municipalityHqSettlement: context.input.municipalityHqSettlement ?? undefined,
                 historicalNameLookup: context.input.historicalNameLookup ?? undefined,
                 historicalCorpsLookup: context.input.historicalCorpsLookup ?? undefined,
+                historicalOobIdLookup: context.input.historicalOobIdLookup ?? undefined,
                 population1991ByMun: context.input.municipalityPopulation1991 ?? undefined,
                 canonicalToOperational
             }, getSiegeStateCache(context)?.siegeRatios);
@@ -4064,17 +4180,15 @@ export const warPhases: NamedPhase[] = [
         //
         // Streaming: if context.input.displacementEventStreamSink is provided
         // (scenario_runner wires this to displacement_event_log.jsonl), the
-        // sink is invoked with this turn's events BEFORE clearing, mirroring
-        // the brigade_temporal_log.jsonl pattern. Without a sink, the events
+        // batch is copied before clearing and published by the turn pipeline
+        // only after the final post-turn invariant barrier succeeds. The events
         // are dropped — equivalent to streaming-without-retention semantics.
         name: 'clear-displacement-event-log',
         run: (context) => {
             const log = context.state.displacement?.displacement_event_log;
             if (!log) return;
-            // Stream out before clearing (only if a sink is registered).
-            const sink = context.input.displacementEventStreamSink;
-            if (sink && log.length > 0) {
-                sink(log.slice());
+            if (context.input.displacementEventStreamSink && log.length > 0) {
+                context.pendingDisplacementEventStream = log.slice();
             }
             // Truncate buffer (in-place; preserves array identity for any
             // intra-turn references already captured).

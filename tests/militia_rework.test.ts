@@ -50,6 +50,15 @@ function defaultSpawnOptions() {
     };
 }
 
+function placementOptions(munId: string, hqOsid: string) {
+    const hqSid = `hq:${munId}`;
+    return {
+        ...defaultSpawnOptions(),
+        municipalityHqSettlement: { [munId]: hqSid },
+        canonicalToOperational: { [hqSid]: hqOsid },
+    };
+}
+
 test('spawn at 800: pool with 800 available spawns one brigade with personnel 800', () => {
     const state = baseState();
     state.military.formation_spawn_directive = { kind: 'brigade' };
@@ -63,8 +72,9 @@ test('spawn at 800: pool with 800 available spawns one brigade with personnel 80
         updated_turn: 10
     };
     state.political.municipalities!['MUN_X'] = { control: 'consolidated' };
+    state.political.political_controllers!['op:MUN_X:hq'] = 'RBiH';
 
-    const report = spawnFormationsFromPools(state, defaultSpawnOptions());
+    const report = spawnFormationsFromPools(state, placementOptions('MUN_X', 'op:MUN_X:hq'));
 
     assert.strictEqual(report.formations_created, 1);
     const formation = Object.values(state.military.formations!)[0] as any;
@@ -86,20 +96,24 @@ test('spawned historical brigades inherit corps from lookup', () => {
         updated_turn: 10
     };
     state.political.municipalities!['ilijas'] = { control: 'consolidated' };
+    state.political.political_controllers!['op:ilijas:ilijas_2'] = 'RS';
 
     const report = spawnFormationsFromPools(state, {
-        ...defaultSpawnOptions(),
+        ...placementOptions('ilijas', 'op:ilijas:ilijas_2'),
         maxPerMun: 1,
         historicalNameLookup: (faction, mun, ordinal) =>
             faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? '3rd Sarajevo Infantry Brigade (Ilijas)' : null,
         historicalCorpsLookup: (faction, mun, ordinal) =>
-            faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? 'vrs_sarajevo_romanija' : null
+            faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? 'vrs_sarajevo_romanija' : null,
+        historicalOobIdLookup: (faction, mun, ordinal) =>
+            faction === 'RS' && mun === 'ilijas' && ordinal === 1 ? 'rs_ilijas_brigade' : null
     });
 
     assert.strictEqual(report.formations_created, 1);
     const formation = Object.values(state.military.formations!)[0] as any;
     assert.strictEqual(formation.name, '3rd Sarajevo Infantry Brigade (Ilijas)');
     assert.strictEqual(formation.corps_id, 'vrs_sarajevo_romanija');
+    assert.ok(formation.tags.includes('oob:rs_ilijas_brigade'));
 });
 
 test('fragmented mun never spawns', () => {
@@ -221,6 +235,7 @@ test('spawn priority: reinforcement reserves one spawn batch when directive is a
         tags: ['mun:zenica']
     } as any;
     state.political.municipalities!['zenica'] = { control: 'consolidated' };
+    state.political.political_controllers!['op:zenica:zenica_2'] = 'RBiH';
     state.military.militia_pools![militiaPoolKey('zenica', 'RBiH')] = {
         mun_id: 'zenica',
         faction: 'RBiH',
@@ -233,7 +248,72 @@ test('spawn priority: reinforcement reserves one spawn batch when directive is a
     const reinforce = reinforceBrigadesFromPools(state);
     assert.strictEqual(reinforce.manpower_added, 50, 'reinforcement should keep 800 reserved for spawn');
 
-    const spawn = spawnFormationsFromPools(state, defaultSpawnOptions());
+    const spawn = spawnFormationsFromPools(state, placementOptions('zenica', 'op:zenica:zenica_2'));
     assert.strictEqual(spawn.formations_created, 1, 'reserved manpower should allow one new brigade spawn');
     assert.strictEqual(Object.keys(state.military.formations ?? {}).length, 2, 'existing + newly spawned brigade expected');
+});
+
+test('spawn placement prefers a faction-controlled municipality HQ OSID', () => {
+    const state = baseState();
+    const key = militiaPoolKey('zenica', 'RBiH');
+    state.military.militia_pools![key] = {
+        mun_id: 'zenica', faction: 'RBiH', available: 800, committed: 0, exhausted: 0, updated_turn: 10,
+    };
+    state.political.municipalities!['zenica'] = { control: 'consolidated' };
+    state.political.political_controllers = {
+        'op:zenica:a_controlled': 'RBiH',
+        'op:zenica:zenica_2': 'RBiH',
+    };
+
+    const report = spawnFormationsFromPools(state, placementOptions('zenica', 'op:zenica:zenica_2'));
+
+    assert.strictEqual(report.formations_created, 1);
+    const formation = Object.values(state.military.formations!)[0]!;
+    assert.strictEqual(formation.location_osid, 'op:zenica:zenica_2');
+});
+
+test('spawn placement falls back to the first sorted faction-controlled OSID in the municipality', () => {
+    const state = baseState();
+    const key = militiaPoolKey('zenica', 'RBiH');
+    state.military.militia_pools![key] = {
+        mun_id: 'zenica', faction: 'RBiH', available: 800, committed: 0, exhausted: 0, updated_turn: 10,
+    };
+    state.political.municipalities!['zenica'] = { control: 'consolidated' };
+    state.political.political_controllers = {
+        'op:zenica:z_controlled': 'RBiH',
+        'op:zenica:enemy_hq': 'RS',
+        'op:zenica:a_controlled': 'RBiH',
+    };
+
+    const report = spawnFormationsFromPools(state, placementOptions('zenica', 'op:zenica:enemy_hq'));
+
+    assert.strictEqual(report.formations_created, 1);
+    const formation = Object.values(state.military.formations!)[0]!;
+    assert.strictEqual(formation.location_osid, 'op:zenica:a_controlled');
+});
+
+test('spawn rejects an unplaceable combat formation before pool, force, or report mutation', () => {
+    const state = baseState();
+    const key = militiaPoolKey('zenica', 'RBiH');
+    state.military.militia_pools![key] = {
+        mun_id: 'zenica', faction: 'RBiH', available: 800, committed: 25, exhausted: 0, updated_turn: 7,
+    };
+    state.political.municipalities!['zenica'] = { control: 'consolidated' };
+    state.political.political_controllers = {
+        'op:zenica:enemy_hq': 'RS',
+        'op:zenica:enemy_other': 'RS',
+    };
+
+    const report = spawnFormationsFromPools(state, placementOptions('zenica', 'op:zenica:enemy_hq'));
+
+    assert.deepStrictEqual(report, {
+        formations_created: 0,
+        manpower_committed: 0,
+        pools_touched: 0,
+        created: [],
+    });
+    assert.deepStrictEqual(state.military.formations, {});
+    assert.deepStrictEqual(state.military.militia_pools![key], {
+        mun_id: 'zenica', faction: 'RBiH', available: 800, committed: 25, exhausted: 0, updated_turn: 7,
+    });
 });

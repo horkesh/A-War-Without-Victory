@@ -1,3 +1,31 @@
+## 2026-07-12 - RBiH exact-turn remediation durable boundaries
+
+**Desktop mutation success is durable, shared state:** canonical mutating IPC completes as one transaction: serialize the new state, autosave it, then broadcast that exact serialization to every renderer, including the caller. Autosave failure restores the previous in-memory serialization and fails the invoke. A successful renderer response without persistence and broadcast is not a successful mutation.
+
+**Recruitment has one context, one evaluator, and explicit autonomy:** catalog rows and activation use the same faction, turn, scenario OOB, existing-formation, control, manpower, capital, equipment, and availability context. Ineligibility remains labeled rather than reconstructed by UI fallback. Automatic recruitment excludes the selected player faction at autonomy 0/1, includes it at autonomy 2+, and has no selected-player exclusion in headless auto-control. Activation requires a deterministic faction-controlled `location_osid` in the home municipality; command/HQ anchors cannot substitute for physical placement.
+
+**Operations have one lifecycle projection and causal receipts:** active state plus raw history projects labeled proposed/planning/executing/recovery/completed/archived counts with stable IDs; every raw history row is visible or explicitly excluded, and player-generated operations are included. Records owns the complete operational ledger. Chronicle owns narrative memory and emits exactly one entry per visible completed operation. Briefing consumes the same executing count. AAR objective capture requires an attack-backed weekly receipt; control held at close is not causal capture evidence. Grading consumes the canonical attack-attempt count: zero attempts are a one-star `No Assault Attempted` result with no duration reward, advance verdicts require causal capture, and ending-force-versus-start scoring is capped at 100 so reinforcements cannot inflate preservation.
+
+**Vance-Owen has one player-decision owner:** resolving the peace plan synchronizes one durable event-decision receipt, consumes the duplicate pending event, and appends one peace-plan-history chronology row. Do not present or record the same response as a second event decision.
+
+**Map transitions and diagnostics are bounded:** top-level Warroom transitions clear tactical inspection overlays and stale selections before opening their destination; blocking decisions suspend conflicting surfaces. Map unmount releases MapLibre/Deck WebGL contexts, listeners, timers, callbacks, and DOM overlays. Formation status telemetry is bounded aggregate DOM data only, never raw state or accumulating history.
+
+**Tactical readiness belongs to the loaded state revision:** a MapLibre `load` event or a prior same-turn render does not prove that the player is seeing the current campaign state. Durable rule: keep the localized loading surface active until the required control source and formation-counter projection have rendered for the current turn and loaded-save fingerprint; bound required-source failure with a retryable timeout, keep optional MapLibre errors diagnostic, and make direct Electron QA start/verify the port-3002 tactical host before requiring current-turn readiness and nonzero player counters when located player formations exist.
+
+**Electron QA evidence is a hard gate:** remediation/replay must finish on the exact requested turn with no overrun, tour the full required player surface, retain final Records/Chronicle screenshots/contact sheets, keep essential text at least 12px without clipping/overflow, and pass clean console/page/network/runtime checks. The desktop comparator binds the actual Electron log and autosave and validates scenario, faction, requested/final turn, initial controls, every per-turn snapshot, and final controls before reporting Electron-versus-controlled/headless deltas. Electron-only recruitment, Command Authority, and proposal actions are explicit input divergence, not evidence of nondeterminism.
+
+**Named formation counters own exact identity:** the accessible DOM counter projection is the player/QA interaction owner for a visible named formation. It must synchronize with viewport movement, exclude buttons covered by live counter occluders, and open the exact formation id even when multiple formations share the OSID. Generic Deck/map hits may remain stack-aware; a named button silently opening a location stack is a selection defect.
+
+**Attached is not player-reachable:** React and Warroom may retain hidden mounted copies of routes, tabs, and actions. Electron QA must require a visible owning surface and visible control before activation, then require the intended destination to become visible and record screenshot/state evidence. Locator existence, attachment, or a click against a hidden copy is not route proof.
+
+## 2026-07-10 - Paramilitary standing policy persistence
+
+**Standing paramilitary policy is a string, not a legacy object:** `state.paramilitary_policy` is player-facing standing-order state with allowed values `ask`, `always_deny`, and `always_allow`. Durable rule: save migrations must preserve those strings, default malformed legacy values to `ask`, and never normalize the field to `{}`. Sweep code must consume stale player pending requests under standing policy before rear/offensive sweep work and before fade-week early returns, or old blockers can survive after the player chose a standing order. Applied in `[2026-07-10] Owner-promoted first-20 friction resolution`; plan `docs/plans/2026-07-10-first-20-turn-friction-resolution-plan.md`.
+
+## 2026-07-10 - Historical operation authorization dossier truth
+
+**Historical operation authorizations need operation facts, not generic mail:** opening `HISTORICAL_OP:*` reviews can look duplicated if every card says only "authorize operation." Durable rule: Decision Room historical-operation reviews should derive goals/objective chains, responsible command, currently assigned commander, assigned force/reporting strength, staging, timing, launch floor, and provenance from existing scenario operation definitions plus the current save. Keep provenance specific: pre-planned, triggered, and Army-HQ-marked definitions are not interchangeable. Do not invent commanders or historical claims: when the current save has no assigned commander, say so; when personnel is partial, label it reported personnel. Applied in `[2026-07-10] fix(ui): close local RS first-20-turn QA findings`; diary `docs/40_reports/playtests/20260710_rs_first20_local_qa.md`.
+
 ## 2026-07-09 - Owner approvals close decision-only issues
 
 **Owner approval must be recorded before closing owner-decision issues:** owner-decision GitHub issues are not agent-closeable until the decision is explicit and durable in docs. Once recorded, close the decision-only issue with a comment and leave downstream implementation gates intact. #194 approval records D2/D3/D4 FORAWWV packet approval without automatic `FORAWWV.md` edits; #192 approval records the soundscape sourcing/sensitivity lane without implying assets are supplied or wired. Applied in `[2026-07-09] docs(process): record owner approvals for #192 and #194`; plan `docs/plans/2026-07-09-open-issues-closeout-plan.md`.
@@ -3634,7 +3662,9 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 
 **Player-faction historical operations require a launch authorization gate:** preplanned, queued, triggered, and Army HQ operations are not just staff mail after the fact when they belong to the loaded player faction. Durable rule: create a deterministic pending proposal review before injection, launch only after acceptance, leave non-player automation unchanged, and ensure a pending operation blocks later same-corps chain prompts so future operation names are not exposed before the current plan is resolved. Applied in `[2026-06-29] Map selection, contact visibility, and operation authorization repair`.
 
-**Point map markers should be preserved at viewport edges, not filtered away:** hiding counters or labels near the screen boundary makes units look absent and breaks trust in the map. Durable rule: keep the feature in the render set and apply a viewport-safe pixel offset or camera padding; use filtering only for truly invalid geometry or impossible viewport bounds. Applied in `[2026-06-29] Map selection, contact visibility, and operation authorization repair`.
+**SUPERSEDED 2026-07-12 for formation counters:** this historical rule conflated camera padding with moving a counter away from its physical OSID. Camera padding remains valid; formation counters now stay at their truthful projected point and are omitted when off-screen or occluded. See `2026-07-12 - Tactical counter truth and revision safety` below.
+
+**Point map markers should be preserved at viewport edges, not filtered away (historical):** hiding counters or labels near the screen boundary makes units look absent and breaks trust in the map. The original rule kept the feature in the render set with a viewport-safe pixel offset or camera padding. Applied in `[2026-06-29] Map selection, contact visibility, and operation authorization repair`; superseded for formation counters on 2026-07-12.
 
 ## 2026-06-29 - Operation authorization handoff boundary
 
@@ -3730,17 +3760,19 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 
 ## 2026-07-04 - Tactical counter stack boundary
 
-**Stacked counters should not move in map coordinates:** geographic fanning makes icons drift differently by zoom/projection and can look like brigades are floating away from the front. Durable rule: keep every stacked formation feature anchored to its physical OSID coordinate, carry `stack_index` / `stack_count`, and apply only bounded Deck pixel offsets with viewport clamping at render time. Applied in `[2026-07-04] Tactical counter stack anchoring`.
+**Stacked counters should not move in map coordinates:** geographic fanning makes icons drift differently by zoom/projection and can look like brigades are floating away from the front. Durable rule: keep every stacked formation feature anchored to its physical OSID coordinate, carry stable stack identity/count, and apply only deterministic co-location offsets. The former viewport-clamping clause is superseded by the 2026-07-12 truthful-location contract. Applied in `[2026-07-04] Tactical counter stack anchoring`, refined 2026-07-12.
 
 **Visible counter bounds must use live chrome and rendered footprint, not the raw canvas:** a counter can be inside the map canvas and still be clipped by the terrain edge, OOB rail, Corps/sector panels, command briefing, top toolbar, bottom status strip, President's Desk, or minimap. Durable rule: when Deck owns counters, keep MapLibre's native `formations` source empty, mark visible chrome with `data-awwv-counter-occluder`, recalculate after React layout, choose the actual clear horizontal band, and filter Deck counter layers using the expanded rendered-counter footprint, not merely the geographic anchor. Applied in `[2026-07-04] Tactical counter stack anchoring`.
 
 ## 2026-07-05 - Tactical counter viewport clamp boundary
 
-**Deck counter pixel offsets use screen-coordinate Y:** a top-edge counter must receive a positive Y pixel offset to move down into the visible map band; a bottom-edge counter must receive a negative Y offset to move up. Durable rule: verify Deck `getPixelOffset` sign conventions with rendered screenshots, not only helper tests, whenever changing counter clamping. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+**SUPERSEDED 2026-07-12 for formation placement:** the two counter-clamping rules in this section are historical. Do not move a formation to a false screen-edge position. Camera padding remains current because it moves the viewport, not the formation.
 
-**Near-edge counters should clamp before they disappear:** filtering every counter whose footprint intersects chrome makes units look missing, while leaving them unclamped creates chopped symbols. Durable rule: keep counters whose projected anchor is close enough to the visible tactical band, clamp their final rendered position inward, and filter only anchors too far outside the viewport to move honestly. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+**Deck counter pixel offsets use screen-coordinate Y (historical):** this sign convention described the removed viewport-clamping behavior. Do not use it to relocate formation counters. Applied in `[2026-07-05] Tactical counter viewport clamp correction`; superseded 2026-07-12.
 
-**Camera padding and counter padding must be one contract:** setting initial map padding is not enough if later `easeTo`, `fitBounds`, or keyboard reset calls use raw centers or ad hoc padding. Durable rule: all tactical map camera moves must call the same chrome-aware padding helper used by Deck counter clipping. Applied in `[2026-07-05] Tactical counter viewport clamp correction`.
+**Near-edge counters should clamp before they disappear (historical):** this rule is no longer valid for formation placement. Current behavior omits a counter when its truthful footprint is off-screen or occluded and relies on camera/pan plus the full stack picker for discovery. Applied in `[2026-07-05] Tactical counter viewport clamp correction`; superseded 2026-07-12.
+
+**Camera padding remains a truthful visibility tool:** setting initial map padding is not enough if later `easeTo`, `fitBounds`, or keyboard reset calls use raw centers or ad hoc padding. Durable rule: all tactical map camera moves use the same chrome-aware padding helper, but camera padding must not be converted into formation-counter relocation. Applied in `[2026-07-05] Tactical counter viewport clamp correction`, refined 2026-07-12.
 
 ## 2026-07-05 - Tactical counter occluder intersection boundary
 
@@ -3789,3 +3821,98 @@ In AWWV, a shell can look player-safe overall while one modal still reaches into
 ## 2026-07-09 - Warroom overlay specificity boundary
 
 **Valid campaign state does not prove the visible surface changed:** the desktop Warroom new-campaign flow successfully wrote `meta.player_faction` and loaded the tactical iframe, but the player still saw the Command Post because `#main-menu { display: grid }` outranked `.mm-overlay.mm-hidden { display: none }`. Durable rule: for overlay handoffs, verify computed visibility on the concrete element selectors, not only state mutation or class names; ID-scoped display rules need matching ID-scoped hidden rules or a stronger shared visibility contract. Applied in `[2026-07-09] Warroom new-campaign overlay hide fix`.
+
+## 2026-07-09 - Tactical counter startup rendering boundary
+
+**Critical unit counters must not wait for idle or optional overlays:** Electron iframes can delay `requestIdleCallback` long enough for the live War Map to look empty even when persisted formations and player-visible formation GeoJSON are present. Durable rule: build the player-visible formation counter set as soon as control GeoJSON is ready, render a DOM fallback through the same truthful OSID screen projection as Deck, and keep optional sources such as `ghost-paths` out of the readiness gate. Applied in `[2026-07-09] Local game review first-hour UI repair` and refined in `[2026-07-12] RBiH v47 exact-52 local closeout`.
+
+## 2026-07-09 - Modal stack ownership boundary
+
+**Turn Aftermath owns focus before required decision modals:** a required `EventDecisionModal` can be present in the DOM but unplayable if it auto-launches behind Turn Aftermath. Durable rule: event-decision auto-launch and render conditions must wait while `turnAftermathOpen` is true; do not mount response-required controls behind another blocking shell modal. Applied in `[2026-07-09] Local RS 10-turn playtest stack closure`.
+
+## 2026-07-10 - First-hour advisory review boundary
+
+**Historical operation authorizations are advisory review in the current desktop flow, not hard advance blockers:** player-faction `HISTORICAL_OP:*` proposals still deserve visible review and corps-context handoff, but the live first-hour RS flow advances through them without a hard gate. Durable rule: do not label these cards `blocking`, `required`, or `Review before advance`; use `Recommended before advance` / advisory evidence, group multiple opening authorizations in the inbox, and defensively filter resolved rows from live review surfaces. This supersedes the 2026-07-01 knowledge note that classified all player-faction historical operation authorization as advance-blocking. Applied in `[2026-07-10] Local first-hour game review action-plan execution`.
+
+**Electron QA formation metrics must read raw formations from `military.formations`:** local desktop bridge state stores raw persisted formations under `raw.military.formations`, not `raw.formations`. Durable rule: QA harnesses that validate "empty map" complaints must separately report raw owned formations from `military.formations`, player-visible rendered counter counts, and Krajina/near-Krajina counter matches before declaring a faction empty. Applied in `[2026-07-10] Local first-hour game review action-plan execution`.
+
+## 2026-07-10 - First-20-turn QA truth boundaries
+
+**Advisory decision copy must follow the same predicate as blocker routing:** a blue/normal Decision Room route is not allowed to say "requires your response" unless the same row is a required pending decision. Durable rule: derive required/advisory wording from the blocker predicate (`requires_player_response` / required-decision helper), not from the generic decision family label. Applied in `[2026-07-10] Local RS first-20-turn QA repair`.
+
+**Resolved paramilitary requests are history, not blockers:** paramilitary request rows can remain in persisted state after an allow/deny/regular decision for audit/history. Durable rule: manifest/blocker derivation filters rows with final decisions and preserves request mode metadata (`rear_pocket` vs `offensive`) so the review packet stays truthful without re-blocking the player. Applied in `[2026-07-10] Local RS first-20-turn QA repair`.
+
+**Exact-turn QA runs must not let surface tours advance the game:** checkpoint tours can dismiss aftermath/review overlays, but they must hold at `ADVANCE TURN` confirmations when the target turn is reached. Durable rule: a "20-turn" Electron run reports turn 20 evidence, not a later state caused by the harness itself; read pending event decisions from every live bridge shape before diagnosing blocker state. Applied in `[2026-07-10] Local RS first-20-turn QA repair`.
+
+## 2026-07-11 - Opening-operation and comparison input boundary
+
+**Accepted opening operations must enter the pipeline before lifecycle advancement:** `runTurn` advances the turn clock before war phases, so injecting an accepted operation after `advance-sector-offensives` postpones its lifecycle and suppresses first-advance orders. Durable rule: inject accepted player pre-planned operations immediately before lifecycle advancement and initialize their operation clock from the authorization review's integer `resolved_turn`; use review turn only as a migration fallback. Applied in `[2026-07-11] Opening-turn authorization clock and calibration provenance correction`.
+
+**Determinism comparisons require equal scenario state and explicit decisions:** matching seeds do not make runs equivalent when they use different scenario files, startup snapshots, player/bot control, or unresolved-decision policies. Durable rule: every desktop/headless comparator must load one fingerprinted startup snapshot, record scenario source/id and ordered decision transcript, derive both result sets by execution, and label unmatched player choices as `player_choice_vs_headless` divergence rather than nondeterminism. Applied in `[2026-07-11] Opening-turn authorization clock and calibration provenance correction`.
+
+## 2026-07-11 - Player/headless phase-input boundary
+
+**Matching choice labels do not establish input equivalence:** player event/operation decisions are applied between turns, headless choices resolve inside their generating phase, player offensive-paramilitary targeting omits the bot's historical municipality list while retaining organized-defense exclusions, and Army HQ gathering excludes the player faction. Durable rule: comparisons must record candidate scope, decision timing, non-player decision mode, Army HQ ownership, and unresolved proposals. Exact equality requires identical state and phase inputs or an explicit replay/delegation mode, not merely `allow`/`accept` labels. Applied in `[2026-07-11] Player/headless input-equivalence deep investigation`; scope wording clarified by the 2026-07-15 RS acceptance.
+
+**Decision metadata must drive spawned mechanics, not only history copy:** an offensive paramilitary request that records `mode: offensive` but spawns through a defaulted rear-pocket call silently changes personnel, ETA, formation id, and downstream control. Durable rule: every resolved typed request must pass its type/mode through the execution call and assert the resulting entity shape, not only the audit row. Applied in `[2026-07-11] Player/headless input-equivalence deep investigation`.
+
+## 2026-07-11 - Paramilitary defended-target boundary
+
+**Dispatch eligibility must encode the safety invariant before a decision exists:** a resolver fallback that retreats from defense does not justify knowingly creating a bot deployment or player authorization request against a defended target. Durable rule: exact organized defense and organized defense adjacent to the target for its current controller are hard exclusions during deterministic candidate generation, for every paramilitary mode.
+
+**Defense arriving after dispatch cannot become a light-defense combat exception:** autonomous paramilitary cleanup is not brigade combat, so defender personnel strength does not create a capture threshold. Durable rule: if any organized defender occupies the target at resolution, record paramilitary retreat casualties, dissolve the paramilitary formation, preserve control, and leave defender personnel unchanged. Applied in `[2026-07-11] Canonical defended-target guard for paramilitary dispatch`.
+
+## 2026-07-12 - Tactical counter truth and revision safety
+
+**Screen-edge visibility cannot falsify physical location:** clamping an off-screen formation to the viewport edge makes a visible counter assert the wrong OSID. Durable rule: project from canonical `location_osid`; omit counters whose true point is outside the viewport or covered by live chrome. Co-located formations use deterministic offsets capped at 12 visible member badges, while the complete stable member list remains reachable through the stack picker. Applied in `[2026-07-12] RBiH v47 exact-52 local closeout`.
+
+**A previous map is not an interactive fallback for a new state:** during turn/save-fingerprint revisions, an old canvas can look plausible while exposing stale click targets. Durable rule: cover and inert the prior map until current-state readiness passes, and publish Deck/DOM counter datasets only from the current viewport-selected projection. Applied in `[2026-07-12] RBiH v47 exact-52 local closeout`.
+
+## 2026-07-12 - Decision Room selection truth
+
+**Grouped cards do not own a selected dossier's source route:** same-corps grouping can make a generic lookup route Review to another item. Durable rule: the selected card carries its exact source handoff into the dossier action; tests must include grouped same-corps cards. Active category filters must be named, clearable, and preserve exact empty results instead of silently falling back to All. Applied in `[2026-07-12] RBiH v47 exact-52 local closeout`.
+
+## 2026-07-12 - Electron replay startup capture
+
+**Intro dismissal must not race embedded-frame startup:** dismissing the opening surface before local chunks settle creates harness-induced navigation aborts that are indistinguishable from product failures. Durable rule: wait for the embedded tactical frame to reach network idle before dismissing the intro, then treat local chunk/document cancellations as failures. Applied in `[2026-07-12] RBiH v47 exact-52 local closeout`.
+
+## 2026-07-13 - Brigade dissolution ownership
+
+**Assignment topology and stranded duration are not brigade-removal authority:** an unreachable sector, a named formation id, a data tag, low cohesion alone, or elapsed isolation alone cannot bypass the canonical no-destruction invariant. Durable rule: assignment and stranded-state systems may leave formations unresolved and apply their authored degradation, but only the canonical dissolution evaluator may make an ordinary brigade inactive/destroyed after the required two-of-three personnel/cohesion/morale criteria (three-of-three for enclaves) or an enabled canonical override. Any destroyed formation must also lose operational readiness. Applied in `[2026-07-13] Canonical stranded brigade dissolution ownership`.
+
+## 2026-07-13 - JNA lifecycle and synthetic-command presentation
+
+**Event flags, lifecycle state, and live command presentation must agree:** a historical event flag alone is not sufficient when a parallel persisted lifecycle object remains at its default, and deleting temporary subordinates alone is not sufficient when their synthetic command remains active. Durable rule: project terminal event truth through the canonical War pipeline, retire a synthetic command only after its spawned subordinate set is empty, and suppress that command only from live presentation. Keep the inactive/withdrawn formation state and completed operation AAR archive intact. Applied in `[2026-07-13] JNA withdrawal state and presentation coherence`.
+
+## 2026-07-13 - Paramilitary truth ownership
+
+**A lifecycle cutoff must gate both creation and already-active entities:** blocking new spawns after a fade week is insufficient when formations already in transit can still act. Durable rule: enforce the cutoff at every spawn boundary and before active resolution side effects, then leave a complete inactive lifecycle/readiness/personnel state.
+
+**Civilian mortality and territorial attribution need their canonical downstream truth:** an event log and headline casualty total do not reduce population availability, and a control flip is not automatically combat. Durable rule: mortality producers update casualty, event, and municipal population-loss ledgers together; control producers emit their actual typed mechanism through validators and reports. Applied in `[2026-07-13] Paramilitary truth fixes` / `docs/40_reports/implemented/20260713_PARAMILITARY_TRUTH_FIXES.md`.
+## 2026-07-15 - RS exact-52 decision, movement, and modal boundaries
+
+**A decision identity must outlive presentation cleanup:** a Level-1 commander trace is deliberation, not an issuable plan. Durable rule: generate an operation authorization only from a concrete ready plan with targets, key it by exact corps and plan identity, retain approval until that operation is admitted, and retain the resolved row as a no-reprompt record. A temporarily blocked launch holds ready; rejection abandons the exact plan.
+
+**Active assignments retain transit intent:** recording an elite brigade as loaned does not place it with the receiving corps. Durable rule: globally match simultaneous request-to-brigade edges in deterministic priority/corps/brigade order, then keep or reacquire a legal column-movement order while the active loan remains outside receiving territory.
+
+**Long narrative cannot own the only completion action:** a scrollbar proves content access but does not make a below-fold action discoverable. Durable rule: informational event narrative/evidence scrolls independently beneath a fixed header and above a persistent acknowledgement footer; pin the DOM relation in tests and verify the real Electron viewport.
+
+**Comparison metadata separates scope from legality:** player paramilitary target selection may omit the bot's historical municipality list without ignoring organized defense. Durable rule: record this as unrestricted municipality scope with undefended-only generation, and never use the ambiguous label `player_unrestricted_offensive`.
+
+Applied in the RS exact-52 acceptance packet: `docs/40_reports/playtests/20260714_rs_52w_canon_player_experience.md`.
+
+## 2026-07-15 - Empty-front intent and dead-helper detection
+
+**A canonical helper without a production caller is dead behavior:** tests for a pure helper do not prove that a campaign executes it. Durable rule: for every phase mechanic, trace the production call chain and pin relative pipeline order. Post-paramilitary rear-pocket consolidation now runs immediately after `paramilitary-advance` and is contract-tested there.
+
+**Sector assignment is not movement authority:** a reachable empty front needs explicit strategic intent, route translation, and delayed physical execution. Durable rule: T1 emits a same-corps reassignment, T2 converts it to a legal column order, and T3 changes `location_osid`; no coverage or reconciliation pass may teleport or paper-assign a brigade. If enclave rules, connectivity, or donor commitments prevent relief, mark the sector `unstaffed_front` and preserve the advisory truth.
+
+Applied in `[2026-07-15] Post-acceptance rear-pocket and empty-front remediation` and `docs/20_engineering/MOVEMENT_AUTHORITY.md`.
+
+## 2026-07-17 - Decision receipts and browser fixture ownership
+
+**Resolved decisions can be durable receipts without remaining actionable:** terminal historical-operation authorization rows prevent exact-plan re-prompts and preserve audit truth, while live blocker and Decision Room projections independently filter them. Durable rule: garbage collection must distinguish actionability from identity/history; do not delete a terminal decision if it is the dedupe receipt for a future producer.
+
+**Browser automation must not directly await churn-prone renderer promises:** a large save load can outlive the execution context Chromium associates with `Runtime.callFunctionOn`, producing `Promise was collected` even when the application operation is valid. Durable rule: start the renderer operation behind a unique token, store terminal status in browser-owned state, and poll that state synchronously from Node while preserving all product assertions and timeout failures.
+
+Applied in `[2026-07-17] RS post-acceptance local closeout` and `tools/ui/live_surface_browser_sweep.cjs`.

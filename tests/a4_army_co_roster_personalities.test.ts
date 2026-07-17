@@ -26,19 +26,21 @@ import type {
     NamedOfficerState,
 } from '../src/state/officer_types.js';
 import {
-    loadArmyCoRoster,
     applyRosterToOfficers,
     evaluateScheduledTransitions,
     applyEmergentVariationRules,
-    applyArmyCoRosterStep,
     A4_PIPELINE_STEP_NAME,
     A4_DEFAULT_COMPETENCE_DECAY_PER_12W,
     A4_DEFAULT_STUBBORNNESS_ESCALATION,
     A4_DEFAULT_STUBBORNNESS_CAP,
     A4_DEFAULT_COOLDOWN_HALVED_TO_TURNS,
     A4_DEFAULT_EARLY_RELIEF_PC_COST,
-    _resetArmyCoRosterCache,
     type ArmyCoRoster,
+} from '../src/sim/combat/army_co_lifecycle.js';
+import {
+    _resetArmyCoRosterCache,
+    applyArmyCoRosterStep,
+    loadArmyCoRoster,
 } from '../src/sim/combat/army_co_roster_loader.js';
 
 // ---------------------------------------------------------------------------
@@ -361,7 +363,7 @@ describe('A4 — early-relief surface', () => {
 // ===========================================================================
 describe('A4 — faction-symmetric mechanism', () => {
     it('T8 — no per-faction branches in source (static-grep, code-only)', () => {
-        const path = resolve('src/sim/combat/army_co_roster_loader.ts');
+        const path = resolve('src/sim/combat/army_co_lifecycle.ts');
         const src = readFileSync(path, 'utf8');
         const code = stripComments(src);
         // Allowed: type unions / canonical-faction LIST literals (sorted iteration).
@@ -412,7 +414,7 @@ describe('A4 — determinism', () => {
     });
 
     it('T9b — no Math.random / Date.now / new Date in source (static-grep, code-only)', () => {
-        const path = resolve('src/sim/combat/army_co_roster_loader.ts');
+        const path = resolve('src/sim/combat/army_co_lifecycle.ts');
         const src = readFileSync(path, 'utf8');
         const code = stripComments(src);
         expect(/Math\s*\.\s*random/.test(code)).toBe(false);
@@ -491,10 +493,10 @@ describe('A4 — DDR provenance', () => {
     it('T12 — DDR commit cited in roster JSON + loader source', () => {
         const rosterRaw = readFileSync(resolve('data/scenarios/army_co_roster.json'), 'utf8');
         expect(rosterRaw).toContain('eee308e0');
-        const loaderRaw = readFileSync(resolve('src/sim/combat/army_co_roster_loader.ts'), 'utf8');
-        expect(loaderRaw).toContain('eee308e0');
-        expect(loaderRaw).toContain('18136710'); // A1
-        expect(loaderRaw).toContain('ba6955bf'); // A2
-        expect(loaderRaw).toContain('c8ff93d8'); // A3
+        const lifecycleRaw = readFileSync(resolve('src/sim/combat/army_co_lifecycle.ts'), 'utf8');
+        expect(lifecycleRaw).toContain('eee308e0');
+        expect(lifecycleRaw).toContain('18136710'); // A1
+        expect(lifecycleRaw).toContain('ba6955bf'); // A2
+        expect(lifecycleRaw).toContain('c8ff93d8'); // A3
     });
 });

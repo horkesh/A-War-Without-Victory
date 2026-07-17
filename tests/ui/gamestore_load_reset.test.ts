@@ -115,6 +115,7 @@ function dirtyStoreState(): void {
                 reasons: ['No major costs recorded'],
             },
             signals: [],
+            commandRecord: { directives: [], rows: [] },
             judgment: {
                 headline: 'No judgment recorded yet.',
                 detail: 'No major cost, signal, action, or territorial change was recorded for this turn.',

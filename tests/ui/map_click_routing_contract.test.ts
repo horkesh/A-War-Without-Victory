@@ -293,18 +293,20 @@ describe('direct tactical map click routing', () => {
     }
   });
 
-  it('opens the stack chooser before inspecting a formation from stacked counters', () => {
+  it('keeps generic map selection stack-aware while named counters remain exact', () => {
     const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
-    const deckStackBranchStart = source.indexOf('const stackCount = typeof props.stack_count');
-    const deckStackBranchEnd = source.indexOf('map.addControl(deckOverlay)', deckStackBranchStart);
-    const deckStackBranch = source.slice(deckStackBranchStart, deckStackBranchEnd);
+    const helperStart = source.indexOf('function handleFormationCounterSelection(');
+    const helperEnd = source.indexOf('/** Layer IDs for front lines', helperStart);
+    const helper = source.slice(helperStart, helperEnd);
 
-    expect(deckStackBranchStart).toBeGreaterThan(-1);
-    expect(deckStackBranch).toContain('if (osid && stackCount > 1) {');
-    expect(deckStackBranch).toContain('store.setExpandedStackOsid(osid)');
-    expect(deckStackBranch.indexOf('store.setExpandedStackOsid(osid)')).toBeLessThan(
-      deckStackBranch.indexOf('inspectFormationFromMap(clickTarget.formationId, props)'),
+    expect(helperStart).toBeGreaterThan(-1);
+    expect(helper).toContain("selectionIntent: 'stack-aware' | 'exact' = 'stack-aware'");
+    expect(helper).toContain("if (selectionIntent === 'stack-aware' && osid && stackCount > 1) {");
+    expect(helper).toContain('store.setExpandedStackOsid(osid)');
+    expect(helper.indexOf('store.setExpandedStackOsid(osid)')).toBeLessThan(
+      helper.indexOf('inspectMarkerContactOrFormation(formationId, properties)'),
     );
+    expect(source).toContain("onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent)");
 
     const mapLibreHandlerStart = source.indexOf('onFormationClick: (id, props, point) => {');
     const mapLibreHandlerEnd = source.indexOf('onFrontEdgeClick:', mapLibreHandlerStart);
@@ -318,13 +320,33 @@ describe('direct tactical map click routing', () => {
     );
   });
 
-  it('rejects empty attack-mode clicks before creating an attack confirmation', () => {
+  it('limits both nearest-formation fallbacks to current visible viewport counters', () => {
+    const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
+    const fallbackHelperStart = source.indexOf('const getVisibleFormationClickFallback =');
+    const fallbackHelperEnd = source.indexOf('const applyDeckLayerSelection =', fallbackHelperStart);
+    const fallbackHelper = source.slice(fallbackHelperStart, fallbackHelperEnd);
+    const deckFallbackStart = source.indexOf('const formationFallback =');
+    const deckFallbackEnd = source.indexOf('const frontFeature =', deckFallbackStart);
+    const deckFallback = source.slice(deckFallbackStart, deckFallbackEnd);
+    const mapLibreFallbackStart = source.indexOf('getFormationClickFallback: (point) => {');
+    const mapLibreFallbackEnd = source.indexOf('onOsidClick:', mapLibreFallbackStart);
+    const mapLibreFallback = source.slice(mapLibreFallbackStart, mapLibreFallbackEnd);
+
+    expect(source).toContain('buildFormationCounterDomOverlayItems');
+    expect(source).toContain('visibleFormationCounterItemsRef.current = buildFormationCounterDomOverlayItems(args)');
+    expect(fallbackHelperStart).toBeGreaterThan(-1);
+    expect(fallbackHelper).toContain('if (!currentMapStateReadyRef.current || !useGameStore.getState().formationsVisible) return null;');
+    expect(fallbackHelper).toContain('items: visibleFormationCounterItemsRef.current');
+    expect(deckFallback).toContain('getVisibleFormationClickFallback({ x: info.x, y: info.y })');
+    expect(deckFallback).not.toContain('lastFormationsGeoJsonRef.current.features');
+    expect(mapLibreFallback).toContain('return getVisibleFormationClickFallback(point);');
+    expect(mapLibreFallback).not.toContain('lastFormationsGeoJsonRef.current.features');
+  });
+
+  it('does not retain direct attack-mode confirmation routing in the presidential command model', () => {
     const source = readFileSync(new URL('../../src/ui/map/map/MapContainer.tsx', import.meta.url), 'utf8');
 
-    expect(source).toContain("if (!osid) {");
-    expect(source).toContain("setLoadError(t('map.attack.selectTarget'))");
-    expect(source.indexOf("setLoadError(t('map.attack.selectTarget'))")).toBeLessThan(
-      source.indexOf('setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid })'),
-    );
+    expect(source).not.toContain("setLoadError(t('map.attack.selectTarget'))");
+    expect(source).not.toContain('setPendingAttackConfirmation(');
   });
 });

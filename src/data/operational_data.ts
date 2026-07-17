@@ -2,7 +2,7 @@
  * Single source for canonical↔operational settlement mapping and OSID-level data.
  * Used for: location_osid on formations, OSID control derivation, stable iteration.
  *
- * Determinism: All iteration over OSIDs or map keys uses sorted order (localeCompare).
+ * Determinism: All iteration over OSIDs or map keys uses strict code-unit order.
  * Canon: OSID + Attack Resolution roadmap (data/state phase).
  */
 
@@ -29,6 +29,10 @@ import type {
     OsidCentroid,
     OsidCentroidMap,
 } from './operational_data_types.js';
+
+function strictCompare(a: string, b: string): number {
+    return a < b ? -1 : a > b ? 1 : 0;
+}
 
 
 export interface LoadedOperationalData {
@@ -127,7 +131,7 @@ export function getOsidKeysSorted(data: LoadedOperationalData): OperationalSettl
     for (const osid of data.operationalToCanonical.keys()) {
         osids.add(osid);
     }
-    return Array.from(osids).sort((a, b) => a.localeCompare(b));
+    return Array.from(osids).sort(strictCompare);
 }
 
 // resolveLocationOsid is re-exported from operational_data_types.ts (browser-safe)
@@ -204,7 +208,7 @@ export function backfillFormationLocationOsid(
 ): void {
     const formations = state.military.formations;
     if (!formations || typeof formations !== 'object') return;
-    const ids = Object.keys(formations).sort((a, b) => a.localeCompare(b));
+    const ids = Object.keys(formations).sort(strictCompare);
     for (const id of ids) {
         const f = formations[id];
         if (!f || f.location_osid != null) continue;

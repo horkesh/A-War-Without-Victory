@@ -171,6 +171,38 @@ describe('Army HQ timing copy', () => {
     expect(copy).not.toContain('W3 - W7');
   });
 
+  it('labels the current AAR grade factors by what they measure', () => {
+    render(React.createElement(OperationsSection, {
+      corpsId: 'arbih_3rd_corps',
+      operations: [makeOperation()],
+      gameState: makeGameState({
+        operationHistory: [{
+          ...makeGameState().operationHistory![0],
+          grade: {
+            stars: 2,
+            verdict: 'Costly Stalemate',
+            factors: {
+              objective_completion: 0,
+              exchange_ratio: 25,
+              tempo: 40,
+              preservation: 100,
+            },
+          },
+        }],
+      }),
+      defaultOpen: true,
+    }));
+
+    fireEvent.click(screen.getByRole('button', { name: /Operation Ridge/i }));
+
+    const copy = document.body.textContent ?? '';
+    expect(copy).toContain('Objective progress:');
+    expect(copy).toContain('Exchange ratio:');
+    expect(copy).toContain('Duration efficiency:');
+    expect(copy).toContain('Ending force vs start:');
+    expect(copy).not.toContain('Other factor:');
+  });
+
   it('renders corps operation weekly rows without raw operation shorthand', () => {
     storeState.osidDisplayNames = { 'op:ridge:ridge_1': 'Ridge One' };
 

@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { applyEnforcementPackage } from '../state/negotiation_offers.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
 
@@ -93,7 +93,9 @@ async function main(): Promise<void> {
 
     if (opts.command === 'propose') {
         // Run one turn compute-only to generate offers + acceptance report
-        const { report } = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        const result = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        assertTurnSuccess(result);
+        const { report } = result;
 
         const offerReport = report.negotiation_offer;
         const acceptanceReport = report.negotiation_acceptance;
@@ -150,7 +152,9 @@ async function main(): Promise<void> {
         }
     } else if (opts.command === 'apply') {
         // Apply enforcement package if offer exists and is accepted
-        const { report } = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        const result = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        assertTurnSuccess(result);
+        const { report } = result;
 
         const offerReport = report.negotiation_offer;
         const acceptanceReport = report.negotiation_acceptance;

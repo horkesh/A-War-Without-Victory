@@ -36,6 +36,7 @@ import { isFieldedTacticalFormation } from '../../../shared/playerVisibility';
 import type { CorpsFrontSectorView, FormationView, NamedOfficerView, OperationView } from '../../data/types';
 import type { PresidentialDecisionRoomNavigationTarget } from '../../data/presidentialDecisionRoom';
 import type { EventDefinition } from '../../../../sim/events/event_types';
+import { projectOperationLifecycle } from '../../data/operationLifecycleProjection';
 import osidAreasData from '../../../../../data/derived/operational/osid_areas.json';
 
 const HQ_TABS = [
@@ -50,6 +51,8 @@ const osidAreas = osidAreasData as { total_area_km2: number; areas: Record<strin
 export interface ArmyHQModalProps {
     onDecisionRoomNavigateTarget?: (target: PresidentialDecisionRoomNavigationTarget) => boolean | void;
     eventCatalog?: ReadonlyMap<string, EventDefinition>;
+    onOpenRecruitment?: () => void;
+    onOpenAutonomy?: () => void;
 }
 
 const FACTION_DISPLAY: Record<string, string> = {
@@ -69,17 +72,18 @@ function DecisionRoomHandoff({
             data-testid="army-hq-decision-room-handoff"
             className="rounded-lg border border-amber-400/25 bg-amber-400/[0.05] p-3"
         >
-            <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-amber-300/80">
+                <div className="text-xs font-bold uppercase tracking-[0.22em] text-amber-300">
                 {t('armyHq.decisionRoomHandoff.title')}
             </div>
-            <div className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+            <div className="mt-1 text-xs leading-relaxed text-text-secondary">
                 {t('armyHq.decisionRoomHandoff.detail')}
             </div>
             <button
                 type="button"
+                data-testid="army-hq-decision-room-open"
                 disabled={disabled}
                 onClick={() => onNavigateTarget?.({ kind: 'decision-room', lens: 'all' })}
-                className="mt-2 h-8 rounded border border-amber-400/35 bg-amber-400/12 px-3 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+                className="mt-2 h-8 rounded border border-amber-400/35 bg-amber-400/12 px-3 text-xs font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
             >
                 {t('armyHq.openDecisionRoom')}
             </button>
@@ -89,7 +93,7 @@ function DecisionRoomHandoff({
 
 function OfficerMiniBio({ officer }: { officer: NamedOfficerView }) {
     return (
-        <div className="mt-1.5 space-y-1 border-t border-panel-border/30 pt-1.5 text-[9px] leading-snug">
+        <div className="mt-1.5 space-y-1 border-t border-panel-border/30 pt-1.5 text-xs leading-snug">
             <div className="text-text-primary">{officer.bio_short ?? t('armyHq.officer.servicePending')}</div>
             {(officer.command_style || officer.known_for || officer.political_alignment_note || officer.sensitive_history_note) && (
                 <div className="grid grid-cols-1 gap-0.5">
@@ -128,29 +132,31 @@ function CommandAccessStrip({
     return (
         <div data-testid="army-hq-corps-index" className="mb-3 border-y border-panel-border bg-panel-card/70 px-2 py-2">
             <div className="mb-1.5 flex items-center justify-between gap-2">
-                <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-text-secondary">
+                <div className="text-xs font-bold uppercase tracking-[0.22em] text-text-secondary">
                     {t('armyHq.commandAccess')}
                 </div>
-                <div className="text-[8px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary">
                     {t('armyHq.commandAccessHint')}
                 </div>
             </div>
-            <div className="grid grid-cols-[repeat(auto-fit,minmax(11rem,1fr))] gap-1.5">
+            <div className="grid grid-cols-[repeat(auto-fit,minmax(21rem,1fr))] gap-1.5">
                 {corpsFormations.map((corps) => {
                     const readiness = readinessByCorps.get(corps.id);
                     return (
                         <button
                             key={corps.id}
                             type="button"
+                            data-testid={`army-hq-corps-${corps.id}`}
+                            data-corps-id={corps.id}
                             onClick={() => onSelect(corps.id)}
                             className="min-w-0 rounded-md border border-panel-border/70 bg-panel-bg px-2 py-1.5 text-left transition-colors hover:border-amber-400/40 hover:bg-amber-400/5"
                         >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-start gap-2">
                                 <span className={`h-2 w-2 rounded-full ${readiness?.hasThreat ? 'bg-red-500' : 'bg-emerald-400'}`} />
-                                <span className="min-w-0 flex-1 truncate text-[11px] font-bold uppercase text-text-primary">
+                                <span className="min-w-0 flex-1 break-words text-xs font-bold uppercase leading-tight text-text-primary">
                                     {getPlayerSafeCorpsName(corps.name, corps.id)}
                                 </span>
-                                <span className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold text-accent-gold">
+                                <span className="shrink-0 rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-xs font-bold text-accent-gold">
                                     {t('armyHq.commandAccessReadiness', { grade: readiness?.grade ? readinessGradeLabel(readiness.grade) : '--' })}
                                 </span>
                             </div>
@@ -162,7 +168,12 @@ function CommandAccessStrip({
     );
 }
 
-export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: ArmyHQModalProps = {}) {
+export function ArmyHQModal({
+    onDecisionRoomNavigateTarget,
+    eventCatalog,
+    onOpenRecruitment,
+    onOpenAutonomy,
+}: ArmyHQModalProps = {}) {
     const open = useGameStore((s) => s.armyHQOpen);
     const setOpen = useGameStore((s) => s.setArmyHQOpen);
     const faction = useGameStore((s) => s.selectedArmyId);
@@ -209,7 +220,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
         const operations = (state.operations ?? []).filter((op) =>
             corpsFormations.some(c => c.id === op.corps_id)
         );
-        const executingOperations = operations.filter((op) => op.phase === 'execution');
+        const executingOperationCount = projectOperationLifecycle(state).counts.executing;
 
         const cbs = state.controlBySettlement ?? {};
         let factionArea = 0;
@@ -252,7 +263,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
         );
 
         return {
-            formations, brigades, corpsFormations, totalPersonnelLabel, sectors, operations, executingOperations,
+            formations, brigades, corpsFormations, totalPersonnelLabel, sectors, operations, executingOperationCount,
             sectorsByCorps, opsByCorps, readinessByCorps,
             territoryPct, reserves,
             eff, commander, factionBattles, briefingItems
@@ -320,6 +331,16 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
         setOpen(false);
     }, [data, faction, setOpen, setSelectedArmyHqId]);
 
+    const handleOpenRecruitment = useCallback(() => {
+        setOpen(false);
+        onOpenRecruitment?.();
+    }, [onOpenRecruitment, setOpen]);
+
+    const handleOpenAutonomy = useCallback(() => {
+        setOpen(false);
+        onOpenAutonomy?.();
+    }, [onOpenAutonomy, setOpen]);
+
     /**
      * A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C — tablist arrow-key navigation.
      * ArrowLeft / ArrowRight cycle (with wrap-around). Home / End jump to first / last tab.
@@ -356,13 +377,13 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                             <button
                                 type="button"
                                 onClick={() => setOpen(false)}
-                                className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                                className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
                                 title={t('armyHq.returnFieldTitle')}
                             >
                                 ← FIELD
                             </button>
                             <div>
-                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                                <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
                                     {t('armyHq.observerLabel')}
                                 </div>
                                 <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
@@ -371,7 +392,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 {t('armyHq.strategicSituation')}
                             </div>
                             <div className="text-[12px] font-bold text-text-primary tabular-nums">
@@ -397,7 +418,15 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
     const crestSrc = getArmyCrest(faction);
 
     return (
-        <div className="fixed inset-0 flex overflow-hidden font-mono" style={{ zIndex: Z.MODAL }} role="dialog" aria-modal="true" aria-label={t('armyHq.dialogTitle')}>
+        <div
+            data-testid="army-hq-modal"
+            data-expanded-corps-id={expandedCorpsId ?? ''}
+            className="fixed inset-0 flex overflow-hidden font-mono"
+            style={{ zIndex: Z.MODAL }}
+            role="dialog"
+            aria-modal="true"
+            aria-label={t('armyHq.dialogTitle')}
+        >
             {/* A11y LANE-NIGHTSHIFT-V093-A11Y-LANE-C: backdrop is now a real <button> for keyboard activation. */}
             <button
                 type="button"
@@ -413,6 +442,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                     <div className="flex items-center gap-2">
                         <button
                             type="button"
+                            data-testid={expandedCorpsId ? 'army-hq-corps-back' : 'army-hq-field-return'}
                             onClick={() => {
                                 if (expandedCorpsId) {
                                     setExpandedCorpsId(null);
@@ -420,7 +450,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                     setOpen(false);
                                 }
                             }}
-                            className="flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
+                            className="flex items-center gap-1 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary border border-panel-border rounded-md hover:bg-panel-hover hover:text-text-primary transition-colors"
                             title={expandedCorpsId ? t('armyHq.backOverviewTitle') : t('armyHq.returnFieldTitle')}
                         >
                             {expandedCorpsId ? '← BACK' : '← FIELD'}
@@ -439,7 +469,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                         void ipc.focusWarroom();
                                     }
                                 }}
-                                className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/70 border border-amber-400/20 rounded-md hover:bg-amber-400/10 hover:text-amber-400 transition-colors"
+                                className="px-2 py-0.5 text-xs font-bold uppercase tracking-[0.14em] text-amber-300 border border-amber-400/20 rounded-md hover:bg-amber-400/10 hover:text-amber-200 transition-colors"
                                 title={t('armyHq.returnWarroomTitle')}
                             >
                                 WARROOM
@@ -449,7 +479,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                             <img src={crestSrc} alt="" className="w-8 h-8 object-contain opacity-80" draggable={false} />
                         )}
                         <div>
-                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 {expandedCorpsId ? `${getArmyName(faction) ?? faction} HQ` : (FACTION_DISPLAY[faction] ?? faction)}
                             </div>
                             <div className="text-[14px] font-bold uppercase tracking-[0.04em] text-text-primary leading-tight">
@@ -467,7 +497,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                     {/* Right: situation + close */}
                     <div className="flex items-center gap-2">
                         <div className="text-right">
-                            <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold">
+                            <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold">
                                 {t('armyHq.strategicSituation')}
                             </div>
                             <div className="text-[12px] font-bold text-text-primary tabular-nums">
@@ -475,7 +505,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                             </div>
                             <div
                                 data-testid="army-hq-personnel-reporting"
-                                className="mt-0.5 text-[9px] uppercase tracking-[0.12em] text-text-secondary"
+                                className="mt-0.5 text-xs uppercase tracking-[0.12em] text-text-secondary"
                             >
                                 <span>{t('personnel.totalPersonnel')}</span>
                                 <span className="ml-1 font-bold text-text-primary tabular-nums">{data.totalPersonnelLabel}</span>
@@ -505,6 +535,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                             <button
                                 key={id}
                                 id={`army-hq-tab-${id}`}
+                                data-testid={`army-hq-tab-${id}`}
                                 ref={(el) => { tabRefs.current[id] = el; }}
                                 type="button"
                                 role="tab"
@@ -514,7 +545,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                 data-tutorial-step={`army-hq-tab-${id}`}
                                 onClick={() => setActiveTab(id)}
                                 onKeyDown={(e) => handleTabKeyDown(e, idx)}
-                                className={`px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
+                                className={`px-2.5 py-0.5 text-xs font-bold uppercase tracking-[0.15em] rounded-md transition-all ${
                                     isActive
                                         ? 'bg-amber-400/15 text-amber-400 border border-amber-400/30'
                                         : 'text-text-secondary hover:text-text-primary hover:bg-white/5 border border-transparent'
@@ -581,8 +612,14 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                     <div className="min-w-0 flex flex-col gap-2">
                                         {/* Commander dossier — friendly identity + mini-bio */}
                                         <div className="bg-panel-card border border-emerald-500/20 rounded-lg p-2.5">
-                                            <div className="text-[8px] uppercase tracking-[0.22em] text-emerald-300/80 font-bold mb-1 pb-1 border-b border-emerald-500/15">
-                                                {t('armyHq.commander')}
+                                            <div className="text-xs uppercase tracking-[0.22em] text-emerald-300 font-bold mb-1 pb-1 border-b border-emerald-500/15">
+                                                {t('armyHq.armyCommander')}
+                                            </div>
+                                            <div
+                                                data-testid="army-hq-command-role"
+                                                className="mb-2 text-xs leading-snug text-text-secondary"
+                                            >
+                                                {t('armyHq.armyCommander.role')}
                                             </div>
                                             {data.commander ? (
                                                 <>
@@ -590,7 +627,7 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                                     <OfficerMiniBio officer={data.commander} />
                                                 </>
                                             ) : (
-                                                <div className="text-text-secondary/70 text-[11px] py-3 text-center italic">
+                                                <div className="text-text-secondary text-xs py-3 text-center italic">
                                                     {t('armyHq.noCommander')}
                                                 </div>
                                             )}
@@ -599,21 +636,21 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
                                         {/* Counts row — red threat / amber warning / blue-green active ops */}
                                         <div className="grid grid-cols-3 gap-2">
                                             <div className="rounded-lg border border-red-500/25 bg-red-500/[0.04] px-2 py-1.5">
-                                                <div className="text-[8px] uppercase tracking-[0.18em] text-red-300/70 font-bold">{t('armyHq.critical')}</div>
+                                                <div className="text-xs uppercase tracking-[0.18em] text-red-300 font-bold">{t('armyHq.critical')}</div>
                                                 <div className="text-[16px] font-bold text-red-400 tabular-nums leading-tight">
                                                     {data.briefingItems.filter((item) => item.severity === 'critical').length}
                                                 </div>
                                             </div>
                                             <div className="rounded-lg border border-amber-400/25 bg-amber-400/[0.04] px-2 py-1.5">
-                                                <div className="text-[8px] uppercase tracking-[0.18em] text-amber-300/70 font-bold">{t('armyHq.warnings')}</div>
+                                                <div className="text-xs uppercase tracking-[0.18em] text-amber-300 font-bold">{t('armyHq.warnings')}</div>
                                                 <div className="text-[16px] font-bold text-amber-300 tabular-nums leading-tight">
                                                     {data.briefingItems.filter((item) => item.severity === 'warning').length}
                                                 </div>
                                             </div>
                                             <div className="rounded-lg border border-emerald-500/25 bg-emerald-500/[0.04] px-2 py-1.5">
-                                                <div className="text-[8px] uppercase tracking-[0.18em] text-emerald-300/70 font-bold">{t('armyHq.executingOps')}</div>
+                                                <div className="text-xs uppercase tracking-[0.18em] text-emerald-300 font-bold">{t('armyHq.executingOps')}</div>
                                                 <div className="text-[16px] font-bold text-emerald-300 tabular-nums leading-tight">
-                                                    {data.executingOperations.length}
+                                                    {data.executingOperationCount}
                                                 </div>
                                             </div>
                                         </div>
@@ -636,13 +673,13 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
 
                             {/* Corps Cards */}
                             <div>
-                                <div className="text-[8px] uppercase tracking-[0.22em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
+                                <div className="text-xs uppercase tracking-[0.22em] text-text-secondary font-bold mb-2 pb-1 border-b border-panel-border">
                                     {t('armyHq.allCorps', { count: data.corpsFormations.length })}
                                 </div>
 
                                 <div className={`grid gap-2 ${expandedCorpsId
-                                    ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6'
-                                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'
+                                    ? 'grid-cols-[repeat(auto-fit,minmax(16rem,1fr))]'
+                                    : 'grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]'
                                 }`}>
                                     {data.corpsFormations.map((corps) => (
                                         <ArmyHQCorpsCard
@@ -677,7 +714,10 @@ export function ArmyHQModal({ onDecisionRoomNavigateTarget, eventCatalog }: Army
 
                     {/* ═══ PERSONNEL TAB ═══ */}
                     {activeTab === 'personnel' && (
-                        <PersonnelContent />
+                        <PersonnelContent
+                            onOpenRecruitment={handleOpenRecruitment}
+                            onOpenAutonomy={handleOpenAutonomy}
+                        />
                     )}
                 </div>
             </div>

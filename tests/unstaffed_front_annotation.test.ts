@@ -99,4 +99,56 @@ describe('annotateUnstaffedFrontSectors', () => {
         expect(sectors['sector:rs:reachable']!.unstaffed_front).toBeUndefined();
         expect(sectors['sector:rs:isolated']!.unstaffed_front).toBe(true);
     });
+
+    it('marks a connected front unstaffed when the only formation is enclave-locked outside it', () => {
+        const sectors = {
+            'sector:hrhb:outside-zepce': makeSector({
+                sector_id: 'sector:hrhb:outside-zepce',
+                corps_id: 'hvo_central_bosnia',
+                faction: 'HRHB',
+                territory_osids: ['op:teslic:kamenica_2'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:hrhb:outside-zepce:0',
+                    friendly_osids: ['op:teslic:kamenica_2'],
+                    enemy_osids: ['op:teslic:enemy'],
+                    edge_ids: ['edge:hrhb:outside-zepce'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['edge:hrhb:outside-zepce'],
+            }),
+        } as Record<string, any>;
+
+        const state = {
+            factions: [{ id: 'HRHB' }],
+            political: {
+                political_controllers: {
+                    'op:zepce:viniste_2': 'HRHB',
+                    'op:teslic:kamenica_2': 'HRHB',
+                    'op:teslic:enemy': 'RS',
+                },
+            },
+        } as any;
+
+        const formations = {
+            hrhb_111th_brigade: {
+                id: 'hrhb_111th_brigade',
+                kind: 'brigade',
+                faction: 'HRHB',
+                corps_id: 'hvo_central_bosnia',
+                status: 'active',
+                location_osid: 'op:zepce:viniste_2',
+                home_osid: 'op:zepce:viniste_2',
+                tags: ['enclave'],
+            },
+        } as any;
+
+        const adjacency = makeAdjacency([
+            ['op:zepce:viniste_2', 'op:teslic:kamenica_2'],
+        ]);
+
+        annotateUnstaffedFrontSectors(sectors, state, formations, adjacency);
+
+        expect(sectors['sector:hrhb:outside-zepce']!.unstaffed_front).toBe(true);
+    });
 });

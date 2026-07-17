@@ -95,7 +95,7 @@ export function TabBar<T extends string>({
             tabIndex={isActive ? 0 : -1}
             onClick={() => onTabChange(tab.id)}
             onKeyDown={(e) => handleKeyDown(e, idx)}
-            className={`flex-1 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition-colors ${
+            className={`flex-1 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors ${
               isActive
                 ? 'text-accent-gold border-b-2 border-accent-gold bg-panel-card/40'
                 : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -103,7 +103,7 @@ export function TabBar<T extends string>({
           >
             {tab.label}
             {tab.count != null && tab.count > 0 && (
-              <span aria-hidden="true" className="ml-1 text-[9px] opacity-60">{` ${tab.count}`}</span>
+              <span aria-hidden="true" className="ml-1 text-xs opacity-60">{` ${tab.count}`}</span>
             )}
           </button>
         );

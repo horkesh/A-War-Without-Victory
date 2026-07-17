@@ -51,6 +51,7 @@ export interface FormationDetail {
     woundedPending: number;
     movementStatus: string;
     corpsId: FormationId | null;
+    locationId: SettlementId | null;
 }
 
 export interface OwnForcesSnapshot {
@@ -87,7 +88,10 @@ export interface DisplacementSnapshot {
     civilianKilled: number;
     civilianFledAbroad: number;
     activeCamps: number;
+    /** Raw player-faction OSID/faction timer pairs for drilldown. */
     activeHostileTakeoverTimers: number;
+    /** Sorted municipality ids threatened by those player-faction timer pairs. */
+    hostileTakeoverMunicipalities: string[];
 }
 
 export interface ExhaustionSnapshot {
@@ -473,6 +477,7 @@ function extractOwnForces(state: GameState, pf: FactionId): OwnForcesSnapshot {
             woundedPending: f.wounded_pending ?? 0,
             movementStatus: ms?.status ?? 'deployed',
             corpsId: f.corps_id ?? null,
+            locationId: f.location_osid ?? null,
         });
     }
 
@@ -577,6 +582,15 @@ function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnaps
 
     // Civilian casualties for player's associated ethnicity
     const civEntry = civCas?.[pf];
+    const playerTakeoverTimers = Object.keys(timers)
+        .sort(sc)
+        .map((timerId) => timers[timerId])
+        .filter((timer) => timer?.from_faction === pf);
+    const hostileTakeoverMunicipalities = Array.from(new Set(
+        playerTakeoverTimers
+            .map((timer) => timer?.mun_id)
+            .filter((munId): munId is string => typeof munId === 'string' && munId.length > 0),
+    )).sort(sc);
 
     return {
         totalDisplacedOut: totalOut,
@@ -584,7 +598,8 @@ function extractDisplacement(state: GameState, pf: FactionId): DisplacementSnaps
         civilianKilled: civEntry?.killed ?? 0,
         civilianFledAbroad: civEntry?.fled_abroad ?? 0,
         activeCamps: Object.keys(camps).length,
-        activeHostileTakeoverTimers: Object.keys(timers).length,
+        activeHostileTakeoverTimers: playerTakeoverTimers.length,
+        hostileTakeoverMunicipalities,
     };
 }
 

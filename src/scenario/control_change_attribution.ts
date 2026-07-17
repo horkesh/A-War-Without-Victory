@@ -3,6 +3,7 @@ import { strictCompare } from '../state/validateGameState.js';
 export interface ControlChangeAttributionSummary {
     total_changes: number;
     combat: number;
+    paramilitary: number;
     consolidation: number;
     abandoned: number;
     init_overrides: number;
@@ -20,6 +21,7 @@ export function summarizeControlChangeAttribution(
     const summary: ControlChangeAttributionSummary = {
         total_changes: Math.max(0, initOverrideCount),
         combat: 0,
+        paramilitary: 0,
         consolidation: 0,
         abandoned: 0,
         init_overrides: Math.max(0, initOverrideCount),
@@ -30,6 +32,9 @@ export function summarizeControlChangeAttribution(
         switch (event.mechanism) {
             case 'combat':
                 summary.combat += 1;
+                break;
+            case 'paramilitary':
+                summary.paramilitary += 1;
                 break;
             case 'consolidation':
                 summary.consolidation += 1;
@@ -73,6 +78,7 @@ export function mergeControlChangeAttributionSummaries(
     return {
         total_changes: left.total_changes + right.total_changes,
         combat: left.combat + right.combat,
+        paramilitary: left.paramilitary + right.paramilitary,
         consolidation: left.consolidation + right.consolidation,
         abandoned: left.abandoned + right.abandoned,
         init_overrides: left.init_overrides + right.init_overrides,

@@ -44,7 +44,9 @@ test('determinism: same fatigue scenario run twice produces identical scenario_s
                     faction: 'RBiH',
                     name: 'Test Formation 1',
                     created_turn: 0,
+                    kind: 'brigade',
                     status: 'active',
+                    location_osid: 's1',
                     assignment: { kind: 'edge', edge_id: 's1__s2' },
                     ops: { fatigue: 0, last_supplied_turn: null },
                 },
@@ -66,7 +68,7 @@ test('determinism: same fatigue scenario run twice produces identical scenario_s
             },
             war_militia_strength: {},
         } as any,
-        political: { political_controllers: {}, municipalities: {}, war_consolidation_until: {} } as any,
+        political: { political_controllers: { s1: 'RBiH', s2: 'RS', s3: 'RS' }, municipalities: {}, war_consolidation_until: {} } as any,
         displacement: {} as any,
     } as unknown as GameState;
 

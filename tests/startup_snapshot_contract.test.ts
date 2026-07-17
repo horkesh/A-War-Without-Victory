@@ -434,6 +434,7 @@ test('baked April 1992 startup sector roster and sectorless brigades are structu
         'rs_65th_protection_motorized_regiment',
     ]);
     assert.deepStrictEqual(interiorOrAlliedIds.sort(), [
+        'hrhb_herceg_stjepan_brigade',
         'hrhb_travnik_brigade',
     ]);
     assert.deepStrictEqual(unresolvedIds.sort(), []);

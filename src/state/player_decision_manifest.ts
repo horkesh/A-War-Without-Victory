@@ -163,9 +163,10 @@ function matchesPlayerFaction(item: RawRecord, playerFaction: string | null): bo
 }
 
 function isResolved(item: RawRecord): boolean {
-    return item.accepted !== undefined
-        || item.resolved_turn !== undefined
-        || item.decision !== undefined
+    return item.accepted != null
+        || item.resolved_turn != null
+        || item.opportunity_decision != null
+        || item.decision != null
         || item.acknowledged === true;
 }
 
@@ -245,6 +246,7 @@ function paramilitaryRequestInstances(state: GameStateLike, playerFaction: strin
     const family = requiredFamily('paramilitary_request');
     return arrayFrom(state.pending_paramilitary_requests)
         .filter((item) => matchesPlayerFaction(item, playerFaction))
+        .filter((item) => item.decision !== 'allow' && item.decision !== 'deny' && item.decision !== 'regular')
         .map((item, index) => {
             const target = stringFrom(item.target_osid) ?? `request:${index}`;
             return instance(family, target, true, stringFrom(item.faction));

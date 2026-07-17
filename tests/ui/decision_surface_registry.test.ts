@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { PLAYER_DECISION_FAMILIES } from '../../src/state/player_decision_manifest.js';
 import {
   DECISION_SURFACE_REGISTRY,
@@ -31,6 +32,14 @@ describe('decision surface registry', () => {
     }
   });
 
+  it('keeps advance-blocking ownership in the decision registry instead of a second inbox allowlist', () => {
+    const inboxSource = readFileSync('src/ui/map/data/inboxItems.ts', 'utf8');
+    const blockerSource = readFileSync('src/ui/map/data/presidentialBlockers.ts', 'utf8');
+
+    expect(inboxSource).not.toContain('ADVANCE_BLOCKING_TYPES');
+    expect(blockerSource).not.toContain('BLOCKING_TYPES');
+  });
+
   it('assigns direct resolver surfaces and player action labels to hard decision families', () => {
     expect(getDecisionSurface('event_decision')).toMatchObject({
       ownerShell: 'desk',
@@ -43,7 +52,7 @@ describe('decision surface registry', () => {
       ownerShell: 'desk',
       resolverSurface: 'paramilitary_review_modal',
       inboxAction: 'paramilitary_review',
-      actionLabel: 'Review deployment',
+      actionLabel: 'Review paramilitary',
       severity: 'hard_block',
     });
     expect(getDecisionSurface('convoy_decision')).toMatchObject({
@@ -67,6 +76,11 @@ describe('decision surface registry', () => {
       ownerShell: 'desk',
       gatePolicy: 'info',
     });
+  });
+
+  it('refuses ambiguous reverse lookup instead of routing a situation update as a counter offer', () => {
+    expect(listDecisionSurfaces().filter((surface) => surface.inboxType === 'situation')).toHaveLength(2);
+    expect(getDecisionSurfaceForInboxType('situation')).toBeNull();
   });
 
   it('routes operation opportunity action to the presidential Decision Room while keeping Army HQ as the source handoff', () => {

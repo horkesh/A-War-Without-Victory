@@ -1322,12 +1322,13 @@ describe('CorpsFrontPanel field routing', () => {
     expect(container.textContent).not.toMatch(/Wait For Orders|wait_for_orders/i);
   });
 
-  it('disables draft directive without the desktop command bridge', () => {
-    render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
+  it('keeps sector operation planning delegated to corps command', () => {
+    const { container } = render(React.createElement(CorpsFrontPanel, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: /Ops Snapshot/i }));
-    const directiveButton = screen.getByTestId('corps-front-draft-directive') as HTMLButtonElement;
-    expect(directiveButton.disabled).toBe(true);
-    expect(directiveButton.getAttribute('title')).toContain('Desktop command bridge unavailable');
+    expect(screen.queryByTestId('corps-front-draft-directive')).toBeNull();
+    expect(screen.getByTestId('corps-front-delegated-command-note')).toBeTruthy();
+    expect(container.textContent).toContain('Operation planning, brigade assignments, and attack axes are managed by corps command.');
+    expect(container.textContent).toContain('Presidential intervention is issued through Army HQ directives.');
   });
 });

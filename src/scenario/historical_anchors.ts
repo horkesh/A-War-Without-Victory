@@ -8,11 +8,54 @@ export interface HistoricalOsidAnchor {
     expected_controller: string;
 }
 
+export interface HistoricalControlBandClause {
+    clause_id: string;
+    osids: readonly string[];
+    accepted_controllers: readonly CanonicalFactionId[];
+    min_count: number;
+}
+
+export interface HistoricalControlBandAnchor {
+    anchor_id: string;
+    clauses: readonly HistoricalControlBandClause[];
+    citation: string;
+}
+
+export interface HistoricalControlBandEvaluation {
+    passed: boolean;
+    clauses: Array<{
+        clause_id: string;
+        actual_count: number;
+        min_count: number;
+        total_count: number;
+    }>;
+}
+
 // ===== Tier 1 painted-target anchors (2026-05-21) =====
 // Source plan: docs/plans/2026-05-21-tier1-painted-target-anchors-plan.md
 // Source memos: docs/40_reports/audits/20260521_{HISTORIAN,SCRT,CANON_COMPLIANCE,WAR_OR_GAME,OPERATIONS_EXPERT,BB_KRAJINA_COLLAPSE,PLAN_OPEN_QUESTIONS_RESEARCH}_*.md
 
 export type CanonicalFactionId = 'RBiH' | 'RS' | 'HRHB';
+
+export function evaluateHistoricalControlBand(
+    anchor: HistoricalControlBandAnchor,
+    controllers: Readonly<Record<string, string | null | undefined>>,
+): HistoricalControlBandEvaluation {
+    const clauses = anchor.clauses.map((clause) => {
+        const accepted = new Set<string>(clause.accepted_controllers);
+        const actualCount = clause.osids.filter((osid) => accepted.has(controllers[osid] ?? '')).length;
+        return {
+            clause_id: clause.clause_id,
+            actual_count: actualCount,
+            min_count: clause.min_count,
+            total_count: clause.osids.length,
+        };
+    });
+    return {
+        passed: clauses.every((clause) => clause.actual_count >= clause.min_count),
+        clauses,
+    };
+}
 
 /**
  * Type 2 — Strategic-event-by-week anchor.
@@ -71,13 +114,13 @@ export const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: HistoricalOsidAnchor[] 
     { osid: 'op:ugljevik:teocak_krstac_2', expected_controller: 'RBiH' },
     { osid: 'op:orasje:orasje', expected_controller: 'HRHB' },
     { osid: 'op:brcko:brcko', expected_controller: 'RS' },
-    { osid: 'op:brcko:brka_2', expected_controller: 'RBiH' },
     { osid: 'op:gorazde:gorazde_2', expected_controller: 'RBiH' },
     { osid: 'op:srebrenica:srebrenica_2', expected_controller: 'RBiH' },
     { osid: 'op:zavidovici:vozuca_2', expected_controller: 'RS' },
     { osid: 'op:gradacac:gradacac_2', expected_controller: 'RBiH' },
     { osid: 'op:rogatica:zepa_2', expected_controller: 'RBiH' },
     { osid: 'op:derventa:derventa_2', expected_controller: 'RS' },
+    { osid: 'op:bosanski_brod:brod', expected_controller: 'RS' },
     { osid: 'op:prijedor:prijedor_2', expected_controller: 'RS' },
     { osid: 'op:foca:foca_3', expected_controller: 'RS' },
     { osid: 'op:visegrad:visegrad_2', expected_controller: 'RS' },
@@ -88,6 +131,48 @@ export const HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992: HistoricalOsidAnchor[] 
     { osid: 'op:bugojno:kopcic_2', expected_controller: 'RBiH' },
     { osid: 'op:gracanica:petrovo_2', expected_controller: 'RS' },
     { osid: 'op:lukavac:brijesnica_donja_2', expected_controller: 'RS' },
+];
+
+/**
+ * Volatile fronts are graded as spatial bands rather than single painted points.
+ * The Brcko contract requires a viable RS corridor while preserving a substantial
+ * Federation-held southern shoulder; Brka itself may change hands without turning
+ * an otherwise credible January 1993 front into a false calibration failure.
+ */
+export const HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992: readonly HistoricalControlBandAnchor[] = [
+    {
+        anchor_id: 'brcko_corridor_jan1993',
+        clauses: [
+            {
+                clause_id: 'rs_corridor',
+                osids: [
+                    'op:brcko:brcko',
+                    'op:brcko:brezovo_polje_selo_2',
+                    'op:brcko:donji_rahic',
+                    'op:brcko:krepsic',
+                    'op:brcko:potocari_2',
+                    'op:brcko:skakava_donja',
+                ],
+                accepted_controllers: ['RS'],
+                min_count: 4,
+            },
+            {
+                clause_id: 'federation_southern_shoulder',
+                osids: [
+                    'op:brcko:bijela_2',
+                    'op:brcko:boce_2',
+                    'op:brcko:brka_2',
+                    'op:brcko:bukvik_gornji_2',
+                    'op:brcko:gornji_rahic_2',
+                    'op:brcko:maoca_2',
+                    'op:brcko:palanka',
+                ],
+                accepted_controllers: ['HRHB', 'RBiH'],
+                min_count: 4,
+            },
+        ],
+        citation: 'BB1 p.182; 20260521 WAR_OR_GAME anchor review Trap 10; historian painted-target proposal section 1.1',
+    },
 ];
 
 // ===== Jan 1993 (w40) — engine adequate, full Tier 1 =====

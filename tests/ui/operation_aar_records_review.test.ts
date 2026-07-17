@@ -265,6 +265,31 @@ describe('Army HQ Records operation AAR review', () => {
         expect(copy).not.toMatch(/supply_crisis/i);
     });
 
+    it('labels duration and ending-force factors without claiming tempo or original-force preservation', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                operationHistory: [{
+                    ...makeLoadedState().operationHistory![0],
+                    grade: {
+                        stars: 2,
+                        verdict: 'Costly Stalemate',
+                        factors: { tempo: 40, preservation: 100 },
+                    },
+                }],
+            },
+        });
+        const view = render(createElement(RecordsContent));
+
+        fireEvent.click(screen.getByRole('button', { name: /^History/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Operation Iron Corridor/i }));
+
+        const copy = view.container.textContent ?? '';
+        expect(copy).toContain('Duration efficiency:');
+        expect(copy).toContain('Ending force vs start:');
+        expect(copy).not.toContain('Force preservation:');
+    });
+
     it('renders Operation History weekly rows without planning shorthand or raw combat labels', () => {
         useGameStore.setState({
             loadedGameState: {
@@ -468,7 +493,27 @@ describe('Army HQ Records operation AAR review', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /^History/i }));
 
-        expect(screen.getByText('No completed operations yet.')).toBeTruthy();
+        expect(screen.getByText('No completed RS operations are available for detailed review.')).toBeTruthy();
+    });
+
+    it('names weekly record routes by scope and uses truthful weekly-report empty copy', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                ...makeLoadedState(),
+                latestTurnSummary: null,
+                turnSummaries: [],
+            },
+            armyHQRecordsSubTab: 'aftermath',
+        });
+
+        render(createElement(RecordsContent));
+
+        expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'LATEST WEEKLY REPORT' })).toBeTruthy();
+        expect(screen.getByText('No weekly aftermath reports have been filed for this campaign yet.')).toBeTruthy();
+        expect(screen.getByTestId('records-archive-summary').textContent).toContain('Weekly Aftermath');
+        expect(screen.queryByText(/Turn Records/i)).toBeNull();
+        expect(screen.queryByText(/Latest After-Action Report/i)).toBeNull();
     });
 
     it('summarizes archive routes and sub-tab counts before drilling into a tab', () => {
@@ -518,6 +563,16 @@ describe('Army HQ Records operation AAR review', () => {
         const archiveSummaryCopy = screen.getByTestId('records-archive-summary').textContent ?? '';
         expect(archiveSummaryCopy).toMatch(/Decisions\s*0/);
         expect(archiveSummaryCopy).toMatch(/Chronicle Filed\s*1/);
+    });
+
+    it('puts the authoritative operation lifecycle ledger before the territory chart', () => {
+        useGameStore.setState({ loadedGameState: makeLoadedState() });
+
+        render(createElement(RecordsContent));
+
+        const ledger = screen.getByTestId('records-operation-ledger');
+        const chart = screen.getByTestId('territory-over-time-chart');
+        expect(ledger.compareDocumentPosition(chart) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     });
 
     it('does not narrate turn-0 territory provenance in the AAR tab', () => {
@@ -593,7 +648,7 @@ describe('Army HQ Records operation AAR review', () => {
         render(createElement(RecordsContent));
 
         expect(screen.getByRole('button', { name: 'TURN AFTERMATH' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'LATEST AFTER-ACTION REPORT' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'LATEST WEEKLY REPORT' })).toBeTruthy();
         expect(screen.queryByRole('button', { name: /Turn Aftermath 0/i })).toBeNull();
         expect(screen.getAllByTitle('0 records').length).toBeGreaterThan(0);
         expect(document.body.textContent ?? '').toContain('No report yet');
@@ -647,7 +702,7 @@ describe('Army HQ Records operation AAR review', () => {
 
         render(createElement(RecordsContent));
 
-        expect(screen.getByRole('button', { name: 'LATEST AFTER-ACTION REPORT' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'LATEST WEEKLY REPORT' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'OPERATION HISTORY' })).toBeTruthy();
         expect(screen.getAllByTitle('1 records').length).toBeGreaterThan(0);
     });

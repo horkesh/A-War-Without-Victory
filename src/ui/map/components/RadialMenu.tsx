@@ -83,7 +83,7 @@ export function RadialMenu({ items, position, targetLabel, onClose }: RadialMenu
             title={item.label}
           >
             <span className="text-sm">{item.icon}</span>
-            <span className="text-[8px] text-text-secondary whitespace-nowrap">{item.label}</span>
+            <span className="text-xs text-text-secondary whitespace-nowrap">{item.label}</span>
           </button>
         );
       })}

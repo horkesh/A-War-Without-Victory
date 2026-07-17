@@ -22,7 +22,7 @@ export interface PresidentDeskShellProps {
   onOpenDecisionRecords?: (recordId?: string) => void;
   onOpenChronicle?: (recordId?: string) => void;
   onClose?: () => void;
-  /** Open the advance-turn review modal; blocked state explains blockers there. */
+  /** Open the advance-turn review modal for blockers or recommended staff review. */
   onReviewAdvance?: () => void;
 }
 
@@ -53,6 +53,7 @@ export function PresidentDeskShell({
   const presidentialBlockers = derivePresidentialBlockers(state, osidNameMap);
   const requiredItemIds = new Set(presidentialBlockers.map((blocker) => blocker.id));
   const blocked = advanceReview.status === 'blocked' || presidentialBlockers.length > 0;
+  const reviewRecommended = !blocked && advanceReview.status === 'review';
 
   useEffect(() => {
     if (onClose) shellRef.current?.focus();
@@ -82,7 +83,7 @@ export function PresidentDeskShell({
           onClick={onClose}
           aria-label={t('desk.closeOverlayAria')}
           data-testid="desk-close-overlay"
-          className="pointer-events-auto self-end border border-panel-border/80 bg-panel-bg/92 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          className="pointer-events-auto self-end border border-panel-border/80 bg-[#11141b] px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary shadow-[0_16px_48px_rgba(0,0,0,0.42)] transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           {t('common.close')}
         </button>
@@ -91,28 +92,34 @@ export function PresidentDeskShell({
         <DeskAuthorityHeader state={state} />
       </div>
 
-      <div className="pointer-events-auto self-start border border-panel-border/80 bg-panel-bg/92 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)] backdrop-blur-md">
+      <div className="pointer-events-auto self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.52)]">
         <DeskPacket items={items} onAction={onAction} requiredItemIds={requiredItemIds} />
       </div>
 
-      <aside className="pointer-events-auto self-start border border-panel-border/80 bg-panel-bg/90 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)] backdrop-blur-md">
+      <aside className="pointer-events-auto self-start border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.46)]">
         <div className="border-b border-panel-border/70 pb-3">
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t('desk.strategicSituation')}</div>
           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{factionTitle(state)}</h2>
-          <div className="mt-1 text-[11px] text-text-secondary">
+          <div className="mt-1 text-xs text-text-secondary">
             {state ? t('desk.situation.dateTurn', { date: turnToDateString(state.turn) }) : t('desk.situation.noCampaign')}
           </div>
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
-            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.items.label')}</div>
+            <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.items.label')}</div>
             <div className="mt-1 text-[18px] font-bold text-text-primary">{actionableCount}</div>
           </div>
           <div className="border border-panel-border/70 bg-black/20 px-2.5 py-2">
-            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.advance.label')}</div>
-            <div className={`mt-1 text-[13px] font-bold ${blocked ? 'text-red-200' : 'text-green-200'}`}>
-              {blocked ? t('desk.advance.blocked') : t('desk.advance.ready')}
+            <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.advance.label')}</div>
+            <div className={`mt-1 text-[13px] font-bold ${
+              blocked ? 'text-red-200' : reviewRecommended ? 'text-amber-200' : 'text-green-200'
+            }`}>
+              {blocked
+                ? t('desk.advance.blocked')
+                : reviewRecommended
+                  ? t('desk.advance.reviewRecommended')
+                  : t('desk.advance.ready')}
             </div>
           </div>
         </div>
@@ -122,22 +129,34 @@ export function PresidentDeskShell({
             type="button"
             onClick={onOpenArmyHQ}
             data-testid="desk-action-army-hq"
-            className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+            className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
           >
             {t('desk.action.callArmyHQ')}
           </button>
           <button
             type="button"
-            onClick={blocked && onReviewAdvance ? onReviewAdvance : onAdvance}
-            data-testid={blocked ? 'desk-action-review-blockers' : 'desk-action-advance-clearance'}
+            onClick={(blocked || reviewRecommended) && onReviewAdvance ? onReviewAdvance : onAdvance}
+            data-testid={
+              blocked
+                ? 'desk-action-review-blockers'
+                : reviewRecommended
+                  ? 'desk-action-review-priorities'
+                  : 'desk-action-advance-clearance'
+            }
             className={[
-              'border px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] transition-colors',
+              'border px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] transition-colors',
               blocked
                 ? 'border-red-300/45 bg-red-500/12 text-red-100 hover:bg-red-500/20'
+                : reviewRecommended
+                  ? 'border-amber-300/45 bg-amber-500/12 text-amber-100 hover:bg-amber-500/20'
                 : 'border-accent-gold/50 bg-accent-gold/14 text-accent-gold hover:bg-accent-gold/22',
             ].join(' ')}
           >
-            {blocked ? t('desk.action.reviewBlockers') : t('desk.action.advanceClearance')}
+            {blocked
+              ? t('desk.action.reviewBlockers')
+              : reviewRecommended
+                ? t('desk.action.reviewPriorities')
+                : t('desk.action.advanceClearance')}
           </button>
         </div>
 

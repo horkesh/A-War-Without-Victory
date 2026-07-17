@@ -9,6 +9,7 @@
 
 import type { FrontEdge } from '../../map/front_edges.js';
 import type { FactionId, GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type { EffectivePressureEdge } from './phase3a_pressure_eligibility.js';
 import { getEnablePhase3A } from './phase3a_pressure_eligibility.js';
 
@@ -147,7 +148,7 @@ export function applyPhase3BPressureExhaustion(
             const v = (fp as Record<string, { value?: unknown }>)[k];
             return v && typeof v === 'object' && typeof (v as { value: number }).value === 'number';
         })
-        .sort((a, b) => a.localeCompare(b));
+        .sort(strictCompare);
 
     if (edgeIds.length === 0) {
         return {
@@ -215,7 +216,7 @@ export function applyPhase3BPressureExhaustion(
 
     // Apply exhaustion increments to state (monotonic, irreversible)
     const exhaustionDeltaByFaction: Record<string, number> = {};
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
 
     for (const f of factions) {
         const delta = exhaustionDeltas.get(f.id) ?? 0;

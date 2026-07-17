@@ -52,7 +52,7 @@ Scenario runner (`src/scenario/scenario_runner.ts`) routes to whichever pipeline
 ### Tactical Map System (standalone map GUI)
 - **Engineering reference:** `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`
 - **Code:** `src/ui/map/` (Vite app; entry: `tactical_map.html` → `main.ts` → `MapApp.ts`)
-- **Dev server:** `npm run dev:map` — Vite on port 3001; open `http://localhost:3001/tactical_map.html`
+- **Dev server:** `npm run dev:map` — Vite on port 3002; open `http://localhost:3002/tactical_map.html`. Direct Playwright/Electron QA starts it explicitly with `npm.cmd run dev:map -- --port 3002 --strictPort` and verifies HTTP readiness before launching Electron.
 - **Canonical map data:** The set of files the Tactical Map loads defines the canonical map data. Full list: TACTICAL_MAP_SYSTEM.md §5 (required: `settlements_a1_viewer.geojson`, `political_control_data.json`; optional: A1_BASE_MAP, settlement_edges, settlement_names, mun1990_names, settlement_ethnicity_data; on-demand: political_control_data_sep1992.json). Served via custom Vite plugin from project root (`/data/derived/`). For repo cleanup 2026, other map assets may be moved to `data/_deprecated/` (move only, no delete); this list is never moved.
 
 ### Knowledge Base Ingest (Historical Canon)
@@ -135,6 +135,7 @@ Save, load, and migration have one canonical owner per seam. Nothing else in the
 - **Migration registry:** `src/state/save_migration.ts` — `registerMigration()` / `applyMigrations()`. Migrations are applied in ascending version order and only to states older than the migration's target version. Current registered migrations are v1-v35; new `GameState` fields require the next registry entry, a `CURRENT_SCHEMA_VERSION` bump, and a per-version fixture.
 - **Save schema evolution:** [SAVE_SCHEMA_EVOLUTION.md](SAVE_SCHEMA_EVOLUTION.md) is the copy-paste procedure for adding saved fields, registering deterministic defaults, updating strict required-field validation, and extending the fixture contract.
 - **Desktop load-path (native/Electron):** `src/desktop/electron-main.cjs` — IPC handlers `load-scenario-dialog` (line 1427), `start-new-campaign` (line 1441), `load-state-dialog` (line 1461); error classification via `classifyLoadError()` at line 68 covers 10 categories, proven by `tests/ui/desktop_load_error_classification.test.ts`.
+- **Desktop mutation owner:** `src/desktop/electron-main.cjs` — `writeCanonicalCurrentState(...)` serializes the mutation, autosaves it, and broadcasts the same state to every renderer. Autosave failure restores the prior in-memory serialization and fails the invoke. Mutating handlers must converge on this transaction rather than returning renderer-local success.
 - **Browser load-path + post-load UI reset owner:** `src/ui/map/store/gameStore.ts` — `loadSave()` is the canonical post-load UI reset point; it resets 30+ selection/modal/order fields so a fresh save cannot inherit stale UI context. Proven by `tests/ui/gamestore_load_reset.test.ts` (11 assertions).
 - **Adapter after deserialize:** `src/ui/map/data/GameStateAdapter.ts` — parity is proven for 6 owned fields; 6 other fields are intentionally recomputed and that recomputation is documented in the project ledger. See `tests/adapter_field_completeness.test.ts` (18 field assertions) and `tests/ui_adapter_boundary.test.ts` (adapter discipline under the canonical Vitest lane; current discovery reports zero `node:test` entrypoints).
 
@@ -155,6 +156,8 @@ Harness-side replay artifacts feed that surface:
 
 Replay scale hardening remains separate from replay inspection: large desktop loads prefer `replay_save_manifest.json` so the renderer can inspect post-run summaries without parsing multi-GB replay arrays. Full `replay_save_sequence.json` sidecars can also be inspected as read-only tactical-map frames from the Verdict replay scrubber; sparse manifests stay summary-only because they do not contain raw `GameState` frames.
 
+Desktop calibration comparison is a separate replay-evidence entrypoint: `tools/ai_play/desktop_calibration_compare.ts --electron-log <path> --electron-autosave <path> ...`. It must bind scenario, player faction, requested/final turn, initial control totals, every per-turn control snapshot, and final control totals before comparing Electron against controlled-player and headless branches. It reports per-turn/final control deltas and categorizes Electron-only recruitment, Command Authority, and proposal actions as input divergence rather than nondeterminism. Contract tests: `tests/desktop_calibration_compare.test.ts`.
+
 When changing any of the owners above, update the allow-list or register a migration before landing the change; see the pre-commit doc checklist at the end of this file.
 
 ## Demoted / Legacy Harnesses (do not route live behavior through these)
@@ -173,11 +176,22 @@ These are **not** simulation entrypoints. They are opt-in tooling and must remai
 - Warroom build staging (ADR-0003):
   - `tools/ui/warroom_stage_assets.ts` (`npm run warroom:build`)
 - Tactical Map dev server (non-sim, opt-in):
-  - `src/ui/map/vite.config.ts` (`npm run dev:map`, port 3001)
+  - `src/ui/map/vite.config.ts` (`npm run dev:map`, port 3002)
+- Desktop calibration comparator (read-only evidence tooling):
+  - `tools/ai_play/desktop_calibration_compare.ts` (requires explicit Electron log + autosave binding for desktop claims)
+
+## Current War-Phase Corrections (2026-07-15)
+
+This section supersedes older details in the broad War-phase OSID paragraph where they conflict:
+
+- `paramilitary-detect` and `paramilitary-advance` run after sector partitioning. `rear-pocket-consolidation` follows `paramilitary-advance` and is active only after `PARAMILITARY_FADE_WEEK`; it consolidates only deterministic undefended fully surrounded clusters of one to six OSIDs that pass enclave guards.
+- Sector partitioning promotes only roster-eligible, legally reachable formations. It does not guarantee paper staffing when enclave rules, connectivity, or donor commitments make relief impossible; those sectors carry `unstaffed_front: true`.
+- During `generate-bot-corps-orders`, commander decision/emit may write a same-corps `sector_reassignment_order` for an empty staffable front. `generate-bot-brigade-orders` translates that T1 intent into a T2 column order, and a later T3 movement pass changes physical location. No assignment or final reconciliation step teleports a formation.
 
 ## Run Contracts (Must Hold)
 - Determinism contract in `docs/20_engineering/CODE_CANON.md` applies to all entrypoints.
 - Any new entrypoint requires an ADR + ledger entry.
+- Electron player-experience runs are hard-gated on exact requested turn/no overrun, full required surface coverage, essential text at least 12px without clipping/overflow, clean console/page/network runtime, no unresolved required blockers or unlocated active combat formations, and bound screenshot/contact-sheet evidence.
 
 ## Pre-commit doc checklist (when changing code/data)
 When adding or changing the following, update docs as below so REPO_MAP and PIPELINE_ENTRYPOINTS stay authoritative:

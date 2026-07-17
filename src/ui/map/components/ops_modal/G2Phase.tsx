@@ -68,35 +68,35 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                             rounded-lg border border-[rgba(180,160,130,0.16)]
                             bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
                 <div className="flex items-center justify-between mb-2">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
                         {t('opsPlanning.g2.snapshot')}
                     </div>
-                    <div className="text-[8px] uppercase tracking-[0.14em] text-text-secondary/70">
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">
                         {t('opsPlanning.g2.preAuthorization')}
                     </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.corps')}</div>
-                        <div className="text-[10px] font-bold text-white truncate">{corpsName || corpsId}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.corps')}</div>
+                        <div className="text-xs font-bold text-white truncate">{corpsName || corpsId}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.date')}</div>
-                        <div className="text-[10px] font-bold text-white">{date || t('opsPlanning.g2.notAvailable')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.date')}</div>
+                        <div className="text-xs font-bold text-white">{date || t('opsPlanning.g2.notAvailable')}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
-                        <div className="text-[10px] font-bold text-white">{totalObjectives}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
+                        <div className="text-xs font-bold text-white">{totalObjectives}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
-                        <div className="text-[10px] font-bold text-white">{totalAssignedBrigades}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
+                        <div className="text-xs font-bold text-white">{totalAssignedBrigades}</div>
                     </div>
                 </div>
                 {prediction && (
                     <div className="mt-2 rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.predictedOutcome')}</div>
-                        <div className="text-[10px] font-bold text-white">
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.g2.predictedOutcome')}</div>
+                        <div className="text-xs font-bold text-white">
                             {prediction.overall.predictedOutcome == null
                                 ? t('corpsFront.unreported')
                                 : formatPlanningPredictedOutcome(prediction.overall.predictedOutcome)}
@@ -122,7 +122,7 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                         <button
                             type="button"
                             onClick={() => setActiveTab('assessment')}
-                            className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
+                            className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider transition-colors
                                 ${activeTab === 'assessment'
                                     ? 'bg-[#3a3228] text-[#faf6ef]'
                                     : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
@@ -133,7 +133,7 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                         <button
                             type="button"
                             onClick={() => setActiveTab('map_legend')}
-                            className={`px-3 py-1 rounded text-[9px] font-bold uppercase tracking-wider transition-colors
+                            className={`px-3 py-1 rounded text-xs font-bold uppercase tracking-wider transition-colors
                                 ${activeTab === 'map_legend'
                                     ? 'bg-[#3a3228] text-[#faf6ef]'
                                     : 'bg-[#d6ccb7] text-[#4a4238] hover:bg-[#c0b090]'
@@ -154,20 +154,20 @@ export function G2Phase({ plan, prediction, loading, error, corpsId, onAdvance }
                     )}
 
                     {error && (
-                        <div className="text-[10px] text-red-700 bg-red-100 rounded p-2 space-y-1">
+                        <div className="text-xs text-red-700 bg-red-100 rounded p-2 space-y-1">
                             <div className="font-bold">{t('opsPlanning.g2.errorTitle')}</div>
                             <div>{t('opsPlanning.g2.errorBody')}</div>
                         </div>
                     )}
 
                     {!loading && !error && !prediction && !hasObjectives && (
-                        <div className="text-[10px] text-[#4a4238] italic text-center py-8">
+                        <div className="text-xs text-[#4a4238] italic text-center py-8">
                             {t('opsPlanning.g2.completePlan')}
                         </div>
                     )}
 
                     {!loading && !error && !prediction && hasObjectives && (
-                        <div className="text-[10px] text-[#4a4238] italic text-center py-8">
+                        <div className="text-xs text-[#4a4238] italic text-center py-8">
                             {t('opsPlanning.g2.awaitingPrediction')}
                         </div>
                     )}

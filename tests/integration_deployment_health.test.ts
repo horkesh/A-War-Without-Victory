@@ -205,16 +205,18 @@ describe('deployment health (40w)', () => {
     // ─── Frontline coverage ──────────────────────────────────────────
 
     describe('frontline coverage', () => {
-        it('fewer than 8 sectors with >3 edges have zero assigned brigades', () => {
+        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
             if (skipped) return;
             const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
             const gaps: string[] = [];
+            const unclassifiedGaps: string[] = [];
 
             for (const [sectorId, sector] of Object.entries(sectors)) {
                 const edgeCount = (sector.edge_ids ?? []).length;
                 const brigadeCount = (sector.assigned_brigade_ids ?? []).length;
                 if (edgeCount > 3 && brigadeCount === 0) {
                     gaps.push(`${sectorId}: ${edgeCount} edges, 0 brigades (faction=${sector.faction}, corps=${sector.corps_id})`);
+                    if (sector.unstaffed_front !== true) unclassifiedGaps.push(sectorId);
                 }
             }
 
@@ -223,9 +225,12 @@ describe('deployment health (40w)', () => {
                 for (const line of gaps) console.log(`  ${line}`);
             }
 
+            expect(unclassifiedGaps,
+                `Large empty sectors without explicit unstaffed-front truth: ${unclassifiedGaps.join(', ')}`
+            ).toEqual([]);
             expect(gaps.length,
-                `${gaps.length} sectors with >3 edges have zero brigades — should be fewer than 8`
-            ).toBeLessThan(8);
+                `${gaps.length} sectors with >3 edges have zero brigades — expected no more than the two legally isolated fronts`
+            ).toBeLessThanOrEqual(2);
         });
 
         it('reserve brigades are <30% of total sector-assigned forces', () => {
@@ -393,12 +398,9 @@ describe('deployment health (40w)', () => {
                 emptyDefenseSectors.forEach(s => console.log(`  ${s}`));
             }
 
-            // Current baseline: 13 (home-return fix keeps brigades at front instead of recalling
-            // through intermediate sectors — correct behavior, reduces transient coverage).
-            // Aspirational target: <=2. Reduce as bot AI improves.
             expect(emptyDefenseSectors.length,
                 `${emptyDefenseSectors.length} sectors undefended but not taken: ${emptyDefenseSectors.slice(0, 3).join('; ')}`
-            ).toBeLessThanOrEqual(14);
+            ).toBe(0);
         });
     });
 

@@ -28,6 +28,10 @@ const FRICTION_EVENT_STRAIN = 2;
 const DECAY_PER_TURN = 1;
 const COMPROMISED_THRESHOLD = 6;
 
+function strictCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /**
  * Compute command strain for a corps from raw CJS-deserialized state.
  *
@@ -45,7 +49,7 @@ function computeCorpsCommandStrain(state, corpsId, currentTurn) {
   // ── Source 1: force-launched active operations on this corps ──────────
   const corpsCmd = state && state.corps_command ? state.corps_command[corpsId] : undefined;
   if (corpsCmd) {
-    const activeOps = [...(corpsCmd.active_operations || [])].sort((a, b) => a.name.localeCompare(b.name));
+    const activeOps = [...(corpsCmd.active_operations || [])].sort((a, b) => strictCompare(a.name, b.name));
     for (const op of activeOps) {
       if (op.was_force_launched !== true) continue;
       const launchTurn = op.started_turn != null ? op.started_turn : currentTurn;

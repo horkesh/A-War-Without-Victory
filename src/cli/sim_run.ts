@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../state/game_state.js';
 import { prepareNewGameState } from '../state/initialize_new_game_state.js';
 import { serializeState } from '../state/serialize.js';
@@ -78,7 +78,9 @@ async function main(): Promise<void> {
 
     await prepareNewGameState(initial, graph);
 
-    const { nextState, report } = await runTurn(initial, { seed: initial.meta.seed, settlementEdges: graph.edges });
+    const result = await runTurn(initial, { seed: initial.meta.seed, settlementEdges: graph.edges });
+    assertTurnSuccess(result);
+    const { nextState, report } = result;
 
     await mkdir(dirname(savePath), { recursive: true });
     await writeFile(savePath, serializeState(nextState), 'utf8');

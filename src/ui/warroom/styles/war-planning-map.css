@@ -106,7 +106,7 @@
     top: 8px;
     right: 48px;
     padding: 4px 10px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     font-family: Arial, sans-serif;
     color: #fff;
@@ -184,7 +184,7 @@
 
 .war-planning-map-phase-badge {
     color: #6a6258;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 /* Zoom buttons (P1.3) */
@@ -314,7 +314,7 @@
 }
 
 .settlement-info-section-header {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     color: #c4b8a8;
     text-transform: uppercase;
@@ -357,7 +357,7 @@
 }
 
 .settlement-info-provenance {
-    font-size: 11px;
+    font-size: 12px;
     color: #8a8278;
 }
 
@@ -385,7 +385,7 @@
 
 .war-planning-map-legend-toggle {
     padding: 4px 8px;
-    font-size: 11px;
+    font-size: 12px;
     color: #ddd;
     background: rgba(0, 0, 0, 0.6);
     border: 1px solid #555;
@@ -399,7 +399,7 @@
     background: rgba(30, 28, 26, 0.95);
     border: 1px solid #4a4238;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     color: #e0d8cc;
 }
 
@@ -488,7 +488,7 @@
 .settlement-info-tab {
     flex: 1;
     padding: 4px 6px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: bold;
     text-transform: uppercase;
     color: #8a8278;
@@ -558,7 +558,7 @@
 }
 
 .investment-panel-capital-label {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: bold;
     color: #c4b8a8;
     text-transform: uppercase;
@@ -671,7 +671,7 @@
 }
 
 .investment-panel-ethnicity-note {
-    font-size: 11px;
+    font-size: 12px;
     color: #8a8278;
     margin-top: 4px;
     font-style: italic;
@@ -679,7 +679,7 @@
 
 /* Section headers */
 .investment-panel-section-header {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: bold;
     color: #c4b8a8;
     text-transform: uppercase;
@@ -705,7 +705,7 @@
 }
 
 .investment-panel-org-label {
-    font-size: 11px;
+    font-size: 12px;
     color: #c4b8a8;
 }
 
@@ -725,7 +725,7 @@
 }
 
 .investment-panel-org-value {
-    font-size: 11px;
+    font-size: 12px;
     color: #e0d8cc;
     text-align: right;
 }
@@ -777,7 +777,7 @@
 }
 
 .investment-panel-option-desc {
-    font-size: 11px;
+    font-size: 12px;
     color: #8a8278;
     margin-top: 2px;
 }
@@ -810,7 +810,7 @@
 }
 
 .investment-panel-option-reason {
-    font-size: 11px;
+    font-size: 12px;
     color: #8a6258;
     font-style: italic;
     padding: 2px 0;
@@ -834,7 +834,7 @@
 
 .investment-panel-coordination-note {
     color: #9cb79d;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 /* Staged investments summary */
@@ -942,7 +942,7 @@
     position: absolute;
     top: 42px;
     left: 16px;
-    font-size: 11px;
+    font-size: 12px;
     color: #4f4233;
     background: rgba(231, 219, 194, 0.9);
     border: 1px solid rgba(79, 66, 52, 0.45);
@@ -979,7 +979,7 @@
     border-radius: 2px;
     background: rgba(231, 219, 194, 0.9);
     color: #3f3429;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.02em;
     padding: 0 10px;
@@ -1002,7 +1002,7 @@
 }
 
 .phase0-prep-map-layer-title {
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: #d6c7ae;
@@ -1028,7 +1028,7 @@
     border: 1px solid #6e5b48;
     padding: 8px 10px;
     color: #e4d7c1;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .phase0-prep-map-legend-row {
@@ -1082,7 +1082,7 @@
 }
 
 .phase0-prep-map-tooltip-body {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.25;
     color: #d8c7b0;
 }

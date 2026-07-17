@@ -18,8 +18,8 @@ function LegendItem({ swatch, label, detail }: LegendItemProps) {
             <div className="w-5 h-3 flex-shrink-0 flex items-center justify-center">
                 {swatch}
             </div>
-            <span className="text-[10px] text-[#2a2218]">{label}</span>
-            {detail && <span className="text-[9px] text-[#4a4238] ml-auto">{detail}</span>}
+            <span className="text-xs text-[#2a2218]">{label}</span>
+            {detail && <span className="text-xs text-[#4a4238] ml-auto">{detail}</span>}
         </div>
     );
 }
@@ -56,7 +56,7 @@ export function MapLegendTab() {
         <div className="space-y-4" style={{ fontFamily: "'Courier New', monospace" }}>
             {/* Territory Colors */}
             <div>
-                <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
                     {t('opsPlanning.legend.territory')}
                 </div>
                 <div className="space-y-0.5">
@@ -77,7 +77,7 @@ export function MapLegendTab() {
 
             {/* Front Lines */}
             <div>
-                <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
                     {t('opsPlanning.legend.frontLines')}
                 </div>
                 <div className="space-y-0.5">
@@ -96,7 +96,7 @@ export function MapLegendTab() {
 
             {/* Operation Markers */}
             <div>
-                <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
                     {t('opsPlanning.legend.operationMarkers')}
                 </div>
                 <div className="space-y-0.5">
@@ -120,7 +120,7 @@ export function MapLegendTab() {
 
             {/* Selection States */}
             <div>
-                <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
                     {t('opsPlanning.legend.selection')}
                 </div>
                 <div className="space-y-0.5">
@@ -139,7 +139,7 @@ export function MapLegendTab() {
 
             {/* Terrain Modifiers */}
             <div>
-                <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-2">
+                <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-2">
                     {t('opsPlanning.legend.terrainDefense')}
                 </div>
                 <div className="space-y-0.5">

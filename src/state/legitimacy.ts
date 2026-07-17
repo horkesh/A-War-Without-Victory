@@ -3,6 +3,7 @@ import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { FactionId, GameState, LegitimacyState, MunicipalityId, SettlementId } from './game_state.js';
 import { loadInitialMunicipalityControllers1990 } from './political_control_init.js';
 import { clamp01 } from '../utils/math.js';
+import { strictCompare } from './validateGameState.js';
 
 // Re-export browser-safe utilities from legitimacy_utils so existing consumers
 // that import from this module continue to work without changes.
@@ -59,7 +60,7 @@ export async function updateLegitimacyState(
     const populationData = await loadMunicipalityPopulation1991();
     const prewarControllers = await loadInitialMunicipalityControllers1990();
 
-    const sids = Object.keys(state.political.political_controllers).sort((a, b) => a.localeCompare(b));
+    const sids = Object.keys(state.political.political_controllers).sort(strictCompare);
     for (const sid of sids) {
         const controller = state.political.political_controllers[sid] ?? null;
         const munId = getMunicipalityIdForSettlement(graph, sid);

@@ -1,3 +1,5 @@
+import { strictCompare } from '../state/validateGameState.js';
+
 // Note: importing types from tools is messy in src. 
 // Better to define a minimal interface here.
 
@@ -51,7 +53,7 @@ export function createOOBLookup(
 
     // Sort each list deterministically by ID
     for (const list of brigadesByKey.values()) {
-        list.sort((a, b) => a.id.localeCompare(b.id));
+        list.sort((a, b) => strictCompare(a.id, b.id));
     }
 
     // 2. Build map: mun_id -> Set<mun_code> (for settlement validation)

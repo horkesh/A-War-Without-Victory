@@ -11,14 +11,16 @@ describe('control change attribution', () => {
     const summary = summarizeControlChangeAttribution([
       { mechanism: 'combat' },
       { mechanism: 'combat' },
+      { mechanism: 'paramilitary' },
       { mechanism: 'consolidation' },
       { mechanism: 'abandoned' },
       { mechanism: 'unknown_legacy' },
     ], 2);
 
     expect(summary).toEqual({
-      total_changes: 7,
+      total_changes: 8,
       combat: 2,
+      paramilitary: 1,
       consolidation: 1,
       abandoned: 1,
       init_overrides: 2,
@@ -55,14 +57,16 @@ describe('control change attribution', () => {
       {
         total_changes: 3,
         combat: 1,
+        paramilitary: 0,
         consolidation: 1,
         abandoned: 0,
         init_overrides: 1,
         other: 0,
       },
       {
-        total_changes: 4,
+        total_changes: 5,
         combat: 2,
+        paramilitary: 1,
         consolidation: 0,
         abandoned: 1,
         init_overrides: 0,
@@ -71,8 +75,9 @@ describe('control change attribution', () => {
     );
 
     expect(merged).toEqual({
-      total_changes: 7,
+      total_changes: 8,
       combat: 3,
+      paramilitary: 1,
       consolidation: 1,
       abandoned: 1,
       init_overrides: 1,

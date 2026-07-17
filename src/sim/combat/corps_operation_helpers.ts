@@ -368,7 +368,7 @@ export function buildProbeOperation(
         phase_started_turn: turn,
         participating_brigades: [brigadeId],
         ...(sectorId ? { sector_id: sectorId } : {}),
-        planning_duration: 0,
+        planning_duration: 1,
         supply_readiness: 1.0,
         momentum: 0,
         failure_count: 0,
@@ -380,7 +380,7 @@ export function buildProbeOperation(
         // Probes are recon-by-force, not full offensive commitments.
         // Give them an explicit threshold so execution does not silently fall
         // back to the harsher costly_victory default intended for generic ops.
-        min_attack_outcome: 'stalemate',
+        min_attack_outcome: 'repulsed',
         // If objectives provided, create axis so multi-axis execution path fires (ZEA fix).
         ...(objectives && objectives.length > 0 ? {
             objectives,

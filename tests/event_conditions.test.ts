@@ -1,4 +1,6 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { evaluateCondition } from '../src/sim/events/event_types.js';
 import type { EventCondition } from '../src/sim/events/event_types.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -120,5 +122,44 @@ describe('event condition evaluation', () => {
         const state = makeState();
         const cond: EventCondition = { type: 'territory_control', faction: 'RS' };
         expect(evaluateCondition(cond, state)).toBe(false);
+    });
+
+    it('anchors Operation Corridor to the captured Brcko breakthrough rather than municipality majority', () => {
+        const catalog = JSON.parse(readFileSync(
+            join(process.cwd(), 'data', 'scenarios', 'events', 'war_1992.json'),
+            'utf8',
+        )) as Array<{ id: string; trigger?: { condition?: EventCondition } }>;
+        const event = catalog.find((entry) => entry.id === 'operation_corridor_1992');
+
+        expect(event?.trigger?.condition).toEqual({
+            type: 'and',
+            conditions: [
+                { type: 'territory_control', faction: 'RS', osid: 'op:brcko:krepsic' },
+                { type: 'territory_control', faction: 'RS', osid: 'op:brcko:skakava_donja' },
+                { type: 'flag_equals', flag: 'jna_withdrawn', value: true },
+            ],
+        });
+
+        const corridorState = makeState({
+            political: {
+                political_controllers: {
+                    'op:brcko:bijela_2': 'RBiH',
+                    'op:brcko:boce_2': 'RBiH',
+                    'op:brcko:brcko': 'RS',
+                    'op:brcko:brezovo_polje_selo_2': 'RS',
+                    'op:brcko:brka_2': 'RBiH',
+                    'op:brcko:bukvik_gornji_2': 'RBiH',
+                    'op:brcko:donji_rahic': 'RS',
+                    'op:brcko:gornji_rahic_2': 'RBiH',
+                    'op:brcko:krepsic': 'RS',
+                    'op:brcko:maoca_2': 'RBiH',
+                    'op:brcko:palanka': 'RBiH',
+                    'op:brcko:potocari_2': 'RS',
+                    'op:brcko:skakava_donja': 'RS',
+                },
+            },
+            military: { event_flags: { jna_withdrawn: true } },
+        });
+        expect(evaluateCondition(event!.trigger!.condition!, corridorState)).toBe(true);
     });
 });

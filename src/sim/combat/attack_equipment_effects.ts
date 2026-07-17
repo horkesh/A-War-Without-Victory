@@ -11,7 +11,7 @@
  * ═══════════════════════════════════════════════════════════════
  */
 
-import type { FormationState } from '../../state/game_state.js';
+import type { EquipmentCondition, FormationState } from '../../state/game_state.js';
 import type { CasualtyLedger } from '../../state/casualty_ledger.js';
 import type { CombatOutcome } from './combat_math.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
@@ -25,6 +25,41 @@ import type { OsidPopulationMap } from '../../data/operational_data_types.js';
 // Equipment loss rates per battle (same as legacy path in battle_resolution.ts)
 export const TANK_LOSS_RATE = 0.08;
 export const ARTILLERY_LOSS_RATE = 0.04;
+
+function normalizedCondition(condition: EquipmentCondition): EquipmentCondition {
+    const operational = Math.max(0, condition.operational);
+    const degraded = Math.max(0, condition.degraded);
+    const nonOperational = Math.max(0, condition.non_operational);
+    const total = operational + degraded + nonOperational;
+    if (total <= 0) {
+        return { operational: 1, degraded: 0, non_operational: 0 };
+    }
+    return {
+        operational: operational / total,
+        degraded: degraded / total,
+        non_operational: nonOperational / total,
+    };
+}
+
+function mixAddedEquipmentCondition(
+    condition: EquipmentCondition,
+    totalAfterTransfer: number,
+    addedCount: number,
+    addedCondition: EquipmentCondition,
+): void {
+    const total = Math.max(0, totalAfterTransfer);
+    const added = Math.min(Math.max(0, addedCount), total);
+    const oldCount = total - added;
+    const oldMix = normalizedCondition(condition);
+    const newMix = normalizedCondition(addedCondition);
+    if (total <= 0) {
+        Object.assign(condition, oldMix);
+        return;
+    }
+    condition.operational = (oldMix.operational * oldCount + newMix.operational * added) / total;
+    condition.degraded = (oldMix.degraded * oldCount + newMix.degraded * added) / total;
+    condition.non_operational = (oldMix.non_operational * oldCount + newMix.non_operational * added) / total;
+}
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Per-formation equipment loss
@@ -173,15 +208,21 @@ export function processEquipmentTransfers(params: {
         const { tanks: scavTanks, art: scavArt } = accumulateScavenge(recipient, fracTanks, fracArt);
         if (scavTanks > 0) {
             comp.tanks += scavTanks;
-            const frac = scavTanks / Math.max(1, comp.tanks);
-            comp.tank_condition.degraded += frac * 0.7;
-            comp.tank_condition.operational = Math.max(0, comp.tank_condition.operational - frac * 0.5);
+            mixAddedEquipmentCondition(
+                comp.tank_condition,
+                comp.tanks,
+                scavTanks,
+                { operational: 0.3, degraded: 0.7, non_operational: 0 },
+            );
         }
         if (scavArt > 0) {
             comp.artillery += scavArt;
-            const frac = scavArt / Math.max(1, comp.artillery);
-            comp.artillery_condition.degraded += frac * 0.7;
-            comp.artillery_condition.operational = Math.max(0, comp.artillery_condition.operational - frac * 0.5);
+            mixAddedEquipmentCondition(
+                comp.artillery_condition,
+                comp.artillery,
+                scavArt,
+                { operational: 0.3, degraded: 0.7, non_operational: 0 },
+            );
         }
         scavengedTanks += scavTanks;
         scavengedArt += scavArt;
@@ -235,16 +276,22 @@ export function processEquipmentTransfers(params: {
         if (capTanks > 0) {
             dComp3.tanks -= capTanks;
             aComp3.tanks += capTanks;
-            const frac = capTanks / Math.max(1, aComp3.tanks);
-            aComp3.tank_condition.degraded += frac * 0.5;
-            aComp3.tank_condition.operational = Math.max(0, aComp3.tank_condition.operational - frac * 0.3);
+            mixAddedEquipmentCondition(
+                aComp3.tank_condition,
+                aComp3.tanks,
+                capTanks,
+                { operational: 0.5, degraded: 0.5, non_operational: 0 },
+            );
         }
         if (capArt > 0) {
             dComp3.artillery -= capArt;
             aComp3.artillery += capArt;
-            const frac = capArt / Math.max(1, aComp3.artillery);
-            aComp3.artillery_condition.degraded += frac * 0.5;
-            aComp3.artillery_condition.operational = Math.max(0, aComp3.artillery_condition.operational - frac * 0.3);
+            mixAddedEquipmentCondition(
+                aComp3.artillery_condition,
+                aComp3.artillery,
+                capArt,
+                { operational: 0.5, degraded: 0.5, non_operational: 0 },
+            );
         }
         capturedTanks = capTanks;
         capturedArt = capArt;
@@ -269,24 +316,30 @@ export function processEquipmentTransfers(params: {
         if (capTanks > 0) {
             aComp3.tanks -= capTanks;
             dComp3.tanks += capTanks;
-            const frac = capTanks / Math.max(1, dComp3.tanks);
-            dComp3.tank_condition.degraded += frac * 0.5;
-            dComp3.tank_condition.operational = Math.max(0, dComp3.tank_condition.operational - frac * 0.3);
+            mixAddedEquipmentCondition(
+                dComp3.tank_condition,
+                dComp3.tanks,
+                capTanks,
+                { operational: 0.5, degraded: 0.5, non_operational: 0 },
+            );
         }
         if (capArt > 0) {
             aComp3.artillery -= capArt;
             dComp3.artillery += capArt;
-            const frac = capArt / Math.max(1, dComp3.artillery);
-            dComp3.artillery_condition.degraded += frac * 0.5;
-            dComp3.artillery_condition.operational = Math.max(0, dComp3.artillery_condition.operational - frac * 0.3);
+            mixAddedEquipmentCondition(
+                dComp3.artillery_condition,
+                dComp3.artillery,
+                capArt,
+                { operational: 0.5, degraded: 0.5, non_operational: 0 },
+            );
         }
         capturedTanks = capTanks;
         capturedArt = capArt;
         capturedBy = defenderFormation.faction as string;
     }
 
-    // ── Abandoned equipment on uncontested occupation ──────────────────
-    // When a force walks into a vacated enemy OSID, it recovers some equipment
+    // ── Abandoned equipment after an undefended operation capture ─────
+    // When an authorized operation captures a vacated enemy OSID, it recovers equipment
     // left behind by the retreating garrison. Historically critical for ARBiH:
     // much of their early heavy equipment came from overrunning JNA barracks
     // and abandoned VRS positions. Amount based on OSID population (proxy for
@@ -304,15 +357,21 @@ export function processEquipmentTransfers(params: {
                 const aComp4 = firstAttacker.composition;
                 if (abandonedTanks > 0) {
                     aComp4.tanks += abandonedTanks;
-                    const frac = abandonedTanks / Math.max(1, aComp4.tanks);
-                    aComp4.tank_condition.degraded += frac * 0.6;
-                    aComp4.tank_condition.operational = Math.max(0, aComp4.tank_condition.operational - frac * 0.4);
+                    mixAddedEquipmentCondition(
+                        aComp4.tank_condition,
+                        aComp4.tanks,
+                        abandonedTanks,
+                        { operational: 0.4, degraded: 0.6, non_operational: 0 },
+                    );
                 }
                 if (abandonedArt > 0) {
                     aComp4.artillery += abandonedArt;
-                    const frac = abandonedArt / Math.max(1, aComp4.artillery);
-                    aComp4.artillery_condition.degraded += frac * 0.6;
-                    aComp4.artillery_condition.operational = Math.max(0, aComp4.artillery_condition.operational - frac * 0.4);
+                    mixAddedEquipmentCondition(
+                        aComp4.artillery_condition,
+                        aComp4.artillery,
+                        abandonedArt,
+                        { operational: 0.4, degraded: 0.6, non_operational: 0 },
+                    );
                 }
                 capturedTanks = abandonedTanks;
                 capturedArt = abandonedArt;

@@ -137,4 +137,35 @@ describe('Negotiation Capital', () => {
         const rs = state.military.negotiation!.capital.RS;
         expect(rbih.military_casualties_inflicted).toBeGreaterThan(rs.military_casualties_inflicted);
     });
+
+    it('counts operation AARs instead of brigade attacker participations', () => {
+        const state = makeState({
+            military: {
+                formations: {
+                    brig_1: {
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        brigade_history: { battles_as_attacker: 12, victories: 8 },
+                    },
+                    brig_2: {
+                        faction: 'RBiH',
+                        kind: 'brigade',
+                        brigade_history: { battles_as_attacker: 9, victories: 4 },
+                    },
+                },
+            } as any,
+            operation_history: [
+                { operation_id: 'rbih-success', faction: 'RBiH', outcome: 'success' },
+                { operation_id: 'rbih-partial', faction: 'RBiH', outcome: 'partial' },
+                { operation_id: 'rs-success', faction: 'RS', outcome: 'success' },
+            ] as any,
+        });
+
+        computeNegotiationBreakdown(state);
+
+        expect(state.military.negotiation!.capital.RBiH.operations_launched).toBe(2);
+        expect(state.military.negotiation!.capital.RBiH.operations_successful).toBe(1);
+        expect(state.military.negotiation!.capital.RS.operations_launched).toBe(1);
+        expect(state.military.negotiation!.capital.RS.operations_successful).toBe(1);
+    });
 });

@@ -285,6 +285,17 @@ describe('WarroomShellLayer accessibility proof', () => {
         expect(appSource).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
     });
 
+    it('keeps Warroom-hosted Decision Room review text readable over the staff-room background', () => {
+        const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
+        const panelSource = readFileSync('src/ui/map/components/army_hq/PresidentialDecisionRoomPanel.tsx', 'utf8');
+
+        expect(appSource).toContain('bg-[#0f131a]/98');
+        expect(appSource).not.toContain('bg-panel-bg/96');
+        expect(panelSource).toContain('bg-[#121820]/95');
+        expect(panelSource).not.toContain('bg-panel-card/55');
+        expect(panelSource).not.toContain('max-h-8 overflow-hidden text-[10px]');
+    });
+
     it('routes Warroom Diplomacy and Chronicle directly to their mature player-facing panels', () => {
         const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
         const openWarroomOverlayStart = appSource.indexOf('const openWarroomOverlay =');

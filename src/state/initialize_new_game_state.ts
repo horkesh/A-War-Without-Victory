@@ -7,6 +7,7 @@
 
 import type { LoadedSettlementGraph } from '../map/settlements.js';
 import type { GameState } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 import {
     initializePoliticalControllers,
     type PoliticalControlInitOptions,
@@ -36,8 +37,8 @@ export async function prepareNewGameState(
     }
     const reverseMap = initOptions?.operationalToCanonical;
     const keysToCheck = reverseMap
-        ? Array.from(reverseMap.keys()).sort((a, b) => a.localeCompare(b))
-        : Array.from(settlementGraph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+        ? Array.from(reverseMap.keys()).sort(strictCompare)
+        : Array.from(settlementGraph.settlements.keys()).sort(strictCompare);
     const undefinedKeys: string[] = [];
     const nullKeys: string[] = [];
     for (const key of keysToCheck) {

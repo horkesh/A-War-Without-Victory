@@ -31,7 +31,7 @@ export function OwnForceReportGapNotice({ fields, className = '' }: OwnForceRepo
   return (
     <div
       data-awwv-report-gap={uniqueFields.join('|')}
-      className={`rounded border border-panel-border/70 bg-panel-bg/60 px-2 py-1 text-[10px] text-text-secondary ${className}`}
+      className={`rounded border border-panel-border/70 bg-panel-bg/60 px-2 py-1 text-xs text-text-secondary ${className}`}
     >
       {t('reportGap.notice', { fields: visibleList })}
     </div>

@@ -19,7 +19,7 @@ import type {
     GameState,
     OperationAxis,
 } from '../../state/game_state.js';
-import type { Osid } from './osid_adjacency.js';
+import { munFromOsid, type Osid } from './osid_adjacency.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { assignOperationCommander } from './officer_system.js';
@@ -39,7 +39,10 @@ import {
     hasActiveOperation,
     isSlot0AvailableForQueue,
 } from './corps_operation_helpers.js';
-import { ensureHistoricalOperationAuthorizationReview } from './historical_operation_authorization.js';
+import {
+    ensureHistoricalOperationAuthorizationReview,
+    getAcceptedHistoricalOperationAuthorizationTurn,
+} from './historical_operation_authorization.js';
 // Graz truce imports removed: east Herzegovina truce is handled by sector_offensive
 // on operation completion (graz_east_herzegovina_active_turn), not by injection.
 
@@ -47,7 +50,7 @@ import { ensureHistoricalOperationAuthorizationReview } from './historical_opera
 // Pre-planned operation definitions
 // ═══════════════════════════════════════════════════════════════════════════
 
-interface AxisDef {
+export interface AxisDef {
     axis_id: string;
     name: string;
     brigades: FormationId[];
@@ -55,7 +58,7 @@ interface AxisDef {
     staging_osid?: string;
 }
 
-interface PrePlannedOp {
+export interface PrePlannedOp {
     corps: string;
     faction: FactionId;
     name: string;
@@ -68,6 +71,11 @@ interface PrePlannedOp {
     min_attack_outcome?: CorpsOperation['min_attack_outcome'];
     /** Planning duration override — gives brigades time to march to staging. */
     planning_duration?: number;
+}
+
+export interface PrePlannedOperationInjectionOptions {
+    /** Limit injection to one faction, used by live desktop player campaigns. */
+    faction?: FactionId;
 }
 
 const MIN_OPERATION_PARTICIPANTS = 2;
@@ -640,7 +648,7 @@ const VRS_PRE_PLANNED: PrePlannedOp[] = [
         name: 'Operation Corridor',
         staging_osid: 'op:modrica:skugric_gornji_2',
         min_attack_outcome: 'repulsed',
-        planning_duration: 3, // ~2-week preliminary phase: Doboj-Derventa clearing before main push
+        planning_duration: 8, // Seven-hop staging budget for the dispersed east-axis brigades
         axes: [
             {
                 axis_id: 'corridor_east',
@@ -884,6 +892,13 @@ function canReachAxisStaging(
     return false;
 }
 
+function isForwardDeployedOnAxis(formation: FormationState, axis: AxisDef): boolean {
+    const location = formation.location_osid;
+    if (!location) return false;
+    const locationMun = munFromOsid(location);
+    return axis.objectives.some((objective) => munFromOsid(objective) === locationMun);
+}
+
 function activeOperationObjectiveOsids(cmd: CorpsCommandState | undefined): Set<Osid> {
     const objectives = new Set<Osid>();
     for (const op of cmd?.active_operations ?? []) {
@@ -891,6 +906,15 @@ function activeOperationObjectiveOsids(cmd: CorpsCommandState | undefined): Set<
         for (const osid of opObjectives) objectives.add(osid as Osid);
     }
     return objectives;
+}
+
+function hasNonCapturingObjectiveOverlap(def: PrePlannedOp, cmd: CorpsCommandState | undefined): boolean {
+    const queuedObjectives = new Set(def.axes.flatMap((axis) => axis.objectives));
+    return (cmd?.active_operations ?? []).some((op) => {
+        if (op.type !== 'probe' && op.type !== 'feint') return false;
+        const activeObjectives = op.axes?.flatMap((axis) => axis.objectives ?? []) ?? op.objectives ?? [];
+        return activeObjectives.some((osid) => queuedObjectives.has(osid));
+    });
 }
 
 function omitObjectivesClaimedByActiveOperations(def: PrePlannedOp, cmd: CorpsCommandState | undefined): PrePlannedOp {
@@ -936,6 +960,19 @@ function recordPrePlannedSatisfiedByStart(state: GameState, def: PrePlannedOp): 
     );
 }
 
+function prePlannedOperationAlreadyResolved(state: GameState, def: PrePlannedOp): boolean {
+    if ((state.operation_history ?? []).some((entry) =>
+        entry.corps_id === def.corps
+        && entry.operation_name === def.name
+    )) {
+        return true;
+    }
+    return (state.military.preplanned_operations_satisfied_by_start ?? []).some((entry) =>
+        entry.corps_id === def.corps
+        && entry.operation_name === def.name
+    );
+}
+
 /**
  * Build axes and operation from a PrePlannedOp definition.
  * Shared by both initial injection and queued operation injection.
@@ -964,14 +1001,17 @@ function buildAxesFromDef(
             // Exclude brigades currently in column-march transit — they are already
             // marching somewhere else and contribute zero eligible attackers until they arrive.
             if (movementState[fid]?.status === 'in_transit') return false;
-            if (!canReachAxisStaging(
-                state,
-                formation,
-                def.faction,
-                (axisDef.staging_osid ?? def.staging_osid) as Osid | undefined,
-                adjacency,
-                def.planning_duration != null ? Math.max(0, def.planning_duration - 1) : undefined,
-            )) return false;
+            if (
+                !isForwardDeployedOnAxis(formation, axisDef)
+                && !canReachAxisStaging(
+                    state,
+                    formation,
+                    def.faction,
+                    (axisDef.staging_osid ?? def.staging_osid) as Osid | undefined,
+                    adjacency,
+                    def.planning_duration != null ? Math.max(0, def.planning_duration - 1) : undefined,
+                )
+            ) return false;
             // Exempt-corps brigades (e.g. General Staff elites) are allowed
             // if explicitly named in a pre-planned op — they get an elite loan
             // to the operation's corps at injection time.
@@ -1055,7 +1095,11 @@ function deployPrePlannedEliteLoans(
  * For now, we inject the first matching op per corps (Visegrad first since it's
  * listed first) and queue the second.
  */
-export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osid, Osid[]>): void {
+export function injectPrePlannedOperations(
+    state: GameState,
+    adjacency?: Map<Osid, Osid[]>,
+    options?: PrePlannedOperationInjectionOptions,
+): void {
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
     if (!hasInjectableBrigadeRoster(state)) return;
@@ -1067,12 +1111,15 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
     // Deferred operations are validated when their queue slot becomes live.
     const allWarnings: OpInjectionWarning[] = [];
     for (const def of ALL_PRE_PLANNED) {
+        if (options?.faction && def.faction !== options.faction) continue;
         if (def.available_from != null && turn < def.available_from) continue;
+        if (prePlannedOperationAlreadyResolved(state, def)) continue;
         if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
             recordPrePlannedSatisfiedByStart(state, def);
             continue;
         }
         const cmd = corpsCommand[def.corps];
+        if (cmd && (hasActiveOperation(cmd) || (cmd.queued_operations?.length ?? 0) > 0)) continue;
         const warnings = validateOpAtInjection(def, state, undefined, cmd ?? undefined);
         allWarnings.push(...warnings);
     }
@@ -1087,18 +1134,22 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
     const deferredCorps = new Set<string>();
 
     for (const def of ALL_PRE_PLANNED) {
+        if (options?.faction && def.faction !== options.faction) continue;
         const cmd = corpsCommand[def.corps];
         if (!cmd) continue;
 
         // Skip if not yet available
         if (def.available_from != null && turn < def.available_from) continue;
+        if (prePlannedOperationAlreadyResolved(state, def)) continue;
         if (allPrePlannedObjectivesOwnedByFaction(state, def)) {
             recordPrePlannedSatisfiedByStart(state, def);
             continue;
         }
 
-        // Skip if corps already has an active operation (including from this pass)
+        // Skip if corps already has active or queued work. Follow-on chain entries
+        // are injected only by injectQueuedOperation, which consumes queue order.
         if (hasActiveOperation(cmd)) continue;
+        if ((cmd.queued_operations?.length ?? 0) > 0) continue;
         if (injectedCorps.has(def.corps)) continue;
         if (deferredCorps.has(def.corps)) continue;
 
@@ -1106,12 +1157,13 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
         collectOpInjectionWarnings(state, warnings);
         if (hasBlockingOpInjectionWarnings(warnings)) continue;
 
-        const authorization = ensureHistoricalOperationAuthorizationReview(state, {
+        const authorizationInput = {
             kind: 'preplanned',
             faction: def.faction,
             corpsId: def.corps,
             operationName: def.name,
-        });
+        } as const;
+        const authorization = ensureHistoricalOperationAuthorizationReview(state, authorizationInput);
         if (authorization === 'pending' || authorization === 'declined') {
             deferredCorps.add(def.corps);
             continue;
@@ -1130,7 +1182,17 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
             result.participating,
             state.military.formations ?? {},
         );
-        const op = buildCorpsOperation(def, result.axes, result.participating, turn, true, primarySectorId);
+        const authorizedTurn = options?.faction
+            ? getAcceptedHistoricalOperationAuthorizationTurn(state, authorizationInput)
+            : null;
+        const op = buildCorpsOperation(
+            def,
+            result.axes,
+            result.participating,
+            authorizedTurn ?? turn,
+            true,
+            primarySectorId,
+        );
         cmd.active_operations.push(op);
         assignOperationCommander(state, op, def.corps, def.faction);
         cmd.stance = 'offensive';
@@ -1178,8 +1240,11 @@ export function injectPrePlannedOperations(state: GameState, adjacency?: Map<Osi
 
     // Queue deferred ops (those with available_from that weren't injected this pass)
     for (const def of ALL_PRE_PLANNED) {
+        if (options?.faction && def.faction !== options.faction) continue;
         if (def.available_from == null) continue;
+        if (prePlannedOperationAlreadyResolved(state, def)) continue;
         if (injectedCorps.has(def.corps)) continue; // already injected directly
+        if (deferredCorps.has(def.corps)) continue; // first live op is awaiting player authorization
         const cmd = corpsCommand[def.corps];
         if (!cmd) continue;
         if (!cmd.queued_operations) cmd.queued_operations = [];
@@ -1213,8 +1278,19 @@ export function injectQueuedOperation(state: GameState, corpsId: string, adjacen
         return false;
     }
 
+    if (prePlannedOperationAlreadyResolved(state, def)) {
+        cmd.queued_operations.shift();
+        if (cmd.queued_operations.length === 0) delete cmd.queued_operations;
+        return false;
+    }
+
     // Check available_from gating
     if (def.available_from != null && turn < def.available_from) return false;
+
+    // A probe/feint cannot capture its target. Defer the canonical queued
+    // operation until that transient work closes instead of permanently
+    // deleting the shared objective from the historical plan.
+    if (hasNonCapturingObjectiveOverlap(def, cmd)) return false;
 
     const effectiveDef = omitObjectivesClaimedByActiveOperations(def, cmd);
     if (effectiveDef.axes.length === 0) return false;

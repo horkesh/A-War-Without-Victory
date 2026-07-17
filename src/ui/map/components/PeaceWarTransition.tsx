@@ -76,13 +76,13 @@ function IdentityBlock({ faction }: { faction: IdentityFaction }) {
             className="mb-4 rounded border border-[#c4a04a]/40 bg-[#c4a04a]/5 p-3.5"
             style={{ borderLeft: `3px solid ${color}` }}
         >
-            <div className="text-[10px] font-black uppercase tracking-[0.28em] text-[#c4a04a] mb-2.5">
+            <div className="text-xs font-black uppercase tracking-[0.28em] text-[#c4a04a] mb-2.5">
                 {t('intro.identity.heading')}
             </div>
             <div className="space-y-2.5">
                 {rows.map((row) => (
                     <div key={row.label}>
-                        <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-[#8a8578] mb-1">
+                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#8a8578] mb-1">
                             {row.label}
                         </div>
                         <p className="text-[10.5px] leading-relaxed text-[#cfc7b6]">{row.body}</p>
@@ -124,9 +124,9 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
         <GlassPanel position="overlay" title={t('peace.warBegins', { date })} width="560px" onClose={onDismiss} zIndex={Z.MODAL_HARD}>
             {/* Date */}
             <div className="text-center mb-4">
-                <div className="text-[10px] uppercase tracking-[0.3em] text-[#8a8578] mb-1">{t('peace.date')}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-[#8a8578] mb-1">{t('peace.date')}</div>
                 <div className="text-lg font-bold text-[#e8e0d4] tracking-wide">{date}</div>
-                <div className="text-[11px] text-[#8a8578] mt-1">
+                <div className="text-xs text-[#8a8578] mt-1">
                     {t('peace.referendumHeld')}
                 </div>
             </div>
@@ -148,20 +148,20 @@ export function PeaceWarTransition({ onDismiss, state }: PeaceWarTransitionProps
                         >
                             <div className="flex items-center gap-2 mb-1.5">
                                 <div className="w-2.5 h-2.5 rounded-sm" style={{ backgroundColor: info.color }} />
-                                <span className="text-[11px] font-bold text-[#e8e0d4] uppercase tracking-wide">
+                                <span className="text-xs font-bold text-[#e8e0d4] uppercase tracking-wide">
                                     {t(info.nameKey)}
                                 </span>
                                 {isPlayer && (
-                                    <span className="text-[8px] bg-[#c4a04a]/20 text-[#c4a04a] px-1.5 py-0.5 rounded border border-[#c4a04a]/30 font-bold uppercase tracking-wider">
+                                    <span className="text-xs bg-[#c4a04a]/20 text-[#c4a04a] px-1.5 py-0.5 rounded border border-[#c4a04a]/30 font-bold uppercase tracking-wider">
                                         {t('peace.you')}
                                     </span>
                                 )}
                             </div>
-                            <p className="text-[10px] text-[#b0a898] leading-relaxed mb-2">
+                            <p className="text-xs text-[#b0a898] leading-relaxed mb-2">
                                 {t(info.briefingKey)}
                             </p>
                             {summary && (
-                                <div className="flex gap-4 text-[9px] font-mono text-[#8a8578]">
+                                <div className="flex gap-4 text-xs font-mono text-[#8a8578]">
                                     <span>{t('peace.brigadeCount', { count: summary.brigades })}</span>
                                     <span>{t('peace.personnelShort', { count: formatNumber(summary.personnel) })}</span>
                                     <span>{t('peace.tankCount', { count: summary.tanks })}</span>

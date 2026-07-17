@@ -744,6 +744,7 @@ describe('combat causality diagnostics', () => {
         const attribution = {
             total_changes: 3,
             combat: 1,
+            paramilitary: 0,
             consolidation: 1,
             abandoned: 0,
             init_overrides: 1,

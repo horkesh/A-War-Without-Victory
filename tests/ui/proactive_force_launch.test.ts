@@ -95,6 +95,31 @@ describe('buildForceableReadyPlans — proactive force-launch read-model', () =>
         expect(views[0].op_name).not.toContain('plan_alpha');
     });
 
+    it('humanizes a generated opportunity origin instead of exposing zone and corps ids', () => {
+        const state = makeState('ready');
+        state.military.corps_command['1st_corps'].commander_state.current_plan.objective_description =
+            'offensive opportunity from zone:vrs_1st_krajina:op:banja_luka:banja_luka_2';
+
+        const views = buildForceableReadyPlans(state, ROSTER, []);
+
+        expect(views).toHaveLength(1);
+        expect(views[0].op_name).toBe('Advance from Banja Luka');
+        expect(views[0].op_name).not.toMatch(/zone:|op:|vrs_1st_krajina|banja_luka_2/);
+    });
+
+    it('uses the staging settlement when a pre-planned objective is opaque', () => {
+        const state = makeState('ready');
+        const plan = state.military.corps_command['1st_corps'].commander_state.current_plan;
+        plan.objective_description = 'pre_planned_op';
+        (plan as typeof plan & { staging_zone: string }).staging_zone =
+            'zone:vrs_1st_krajina:op:banja_luka:banja_luka_2';
+
+        const views = buildForceableReadyPlans(state, ROSTER, []);
+
+        expect(views[0].op_name).toBe('Advance from Banja Luka');
+        expect(views[0].op_name).not.toBe('Unspecified operation');
+    });
+
     it('EXCLUDES a non-ready plan (concentrating)', () => {
         const views = buildForceableReadyPlans(makeState('concentrating'), ROSTER, []);
         expect(views).toEqual([]);

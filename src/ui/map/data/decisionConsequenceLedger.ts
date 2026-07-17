@@ -288,11 +288,11 @@ function peaceDetail(record: PeacePlanDecisionRecordView): string {
       ? 'rejected'
       : 'left pending';
   const responses = ['RBiH', 'RS', 'HRHB']
-    .filter((faction) => record.responses[faction])
+    .filter((faction) => faction !== record.playerFaction && record.responses[faction])
     .map((faction) => `${getPlayerSafeMilitaryFactionName(faction, faction)} ${peaceResponseLabel(record.responses[faction]!)}`)
     .join(', ');
   return responses
-    ? `Your government ${playerVerb} the proposal; ${responses}.`
+    ? `Your government ${playerVerb} the proposal. Other delegations: ${responses}.`
     : `Your government ${playerVerb} the proposal.`;
 }
 
@@ -303,7 +303,7 @@ function peaceDetailToken(record: PeacePlanDecisionRecordView): DecisionConseque
       ? t('decisionConsequences.response.rejected')
       : t('decisionConsequences.response.leftPending');
   const responses = ['RBiH', 'RS', 'HRHB']
-    .filter((faction) => record.responses[faction])
+    .filter((faction) => faction !== record.playerFaction && record.responses[faction])
     .map((faction) => `${getPlayerSafeMilitaryFactionName(faction, faction)} ${localizedPeaceResponseLabel(record.responses[faction]!)}`)
     .join(', ');
   return responses

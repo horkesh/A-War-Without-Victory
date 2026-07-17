@@ -14,6 +14,7 @@ import type { EdgeRecord } from '../map/settlements.js';
 import { getEffectiveSettlementSide } from './control_effective.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { computeSupplyReachability } from './supply_reachability.js';
+import { strictCompare } from './validateGameState.js';
 
 // Sustainability degradation constants
 const BASE_DEGRADATION = 5; // per turn when surrounded
@@ -366,7 +367,7 @@ export function updateSustainability(
     }
 
     // Sort records deterministically
-    records.sort((a, b) => a.mun_id.localeCompare(b.mun_id));
+    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
 
     return {
         by_municipality: records,

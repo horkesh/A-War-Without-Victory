@@ -91,7 +91,7 @@ export function BranchTagBadgeRow({
     const tooltip = `Active strategic branches (${labels.length}): ${labels.map((entry) => entry.label).join(', ')}`;
     return (
         <div
-            className="branch-tag-badge-row flex flex-wrap items-center gap-1.5"
+            className="branch-tag-badge-row flex shrink-0 flex-nowrap items-center gap-1.5"
             data-testid="branch-tag-badge-row"
             data-faction={faction}
             title={tooltip}
@@ -99,7 +99,7 @@ export function BranchTagBadgeRow({
             {labels.map(({ tag, label }) => (
                 <span
                     key={tag}
-                    className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary"
+                    className="rounded-sm border border-panel-border bg-panel-card px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-secondary"
                     data-testid="branch-tag-chip"
                     data-tag={tag}
                 >

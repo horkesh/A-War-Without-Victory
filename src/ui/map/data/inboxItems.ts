@@ -11,15 +11,18 @@
 import type { LoadedGameState } from './types';
 import type { EventDefinition } from '../../../sim/events/event_types';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
-import { parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
+import { isResolvedProposalReview, parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
 import { playerFactionMatch } from './playerFactionMatch';
 import { strictCompare } from '../../../state/validateGameState';
 import { turnToDateString } from '../utils/formatters';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
-import { getDecisionSurface } from './decisionSurfaceRegistry';
+import { getDecisionSurface, getDecisionSurfaceForInboxType } from './decisionSurfaceRegistry';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { getPlayerFacingCorpsName } from '../../shared/playerFacingLabels';
 import { getActiveLocale, t, type MessageKey } from '../i18n';
+import { buildReserveRequestPresentation, buildReserveRequestSummary } from './reserveRequestPresentation';
+import { looksLikeRawPlayerFacingToken } from '../utils/playerSafeText';
+import { PARAMILITARY_TARGET_AVG_POPULATION } from '../../../state/formation_constants';
 
 export type InboxItemType = 'event_decision' | 'peace_plan' | 'dayton_negotiation' | 'convoy_decision' | 'paramilitary_request' | 'reserve_request' | 'officer_event' | 'operation_opportunity' | 'autonomy_proposal' | 'intelligence_notification' | 'situation';
 export type InboxSeverity = 'blocking' | 'urgent' | 'normal' | 'info';
@@ -40,14 +43,6 @@ export interface InboxItem {
     priority: number;
 }
 
-const ADVANCE_BLOCKING_TYPES = new Set<InboxItemType>([
-    'event_decision',
-    'peace_plan',
-    'dayton_negotiation',
-    'convoy_decision',
-    'paramilitary_request',
-]);
-
 function opportunityProposalIdFromAction(action: string | null | undefined, fallbackId: string): string {
     const prefix = 'OPPORTUNITY:';
     return typeof action === 'string' && action.startsWith(prefix) && action.slice(prefix.length).trim()
@@ -57,7 +52,8 @@ function opportunityProposalIdFromAction(action: string | null | undefined, fall
 
 export function isAdvanceBlockingInboxItem(item: Pick<InboxItem, 'type' | 'severity'>): boolean {
     if (item.type === 'event_decision') return item.severity === 'blocking';
-    return ADVANCE_BLOCKING_TYPES.has(item.type);
+    const gatePolicy = getDecisionSurfaceForInboxType(item.type)?.gatePolicy;
+    return gatePolicy === 'hard_block' || gatePolicy === 'modal_required';
 }
 
 export function effectiveInboxSeverity(item: Pick<InboxItem, 'type' | 'severity'>): InboxSeverity {
@@ -105,7 +101,7 @@ function proposalDomainLabel(domain: string | null | undefined): string {
 
 function formatAutonomyProposalSubtitle(description: string | null | undefined, domain: string | null | undefined): string {
     const trimmed = description?.trim();
-    if (getActiveLocale() === 'en' && trimmed) return trimmed;
+    if (getActiveLocale() === 'en' && trimmed && !looksLikeRawPlayerFacingToken(trimmed)) return trimmed;
     return t('inbox.item.autonomyProposal.subtitleFallback', { domain: proposalDomainLabel(domain) });
 }
 
@@ -115,17 +111,30 @@ function normalizeDedupeSubject(value: string | null | undefined): string | null
     return trimmed.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || null;
 }
 
-function classifyPendingParamilitaryBand(count: number): 'minor' | 'mid' | 'severe' {
-    if (count >= 10) return 'severe';
-    if (count >= 4) return 'mid';
-    return 'minor';
+function paramilitaryStandingPenalty(deploymentCount: number): number {
+    if (deploymentCount >= 10) return (deploymentCount * 5) + 10;
+    if (deploymentCount >= 4) return deploymentCount * 4;
+    return deploymentCount * 2;
 }
 
-function estimateInternationalStandingImpact(count: number): number {
-    const band = classifyPendingParamilitaryBand(count);
-    if (band === 'severe') return -((count * 5) + 10);
-    if (band === 'mid') return -(count * 4);
-    return -(count * 2);
+function currentParamilitaryDeploymentCount(state: LoadedGameState, faction: string | null | undefined): number {
+    if (!faction) return 0;
+    const counts = state.rawGameState?.paramilitary_deployment_count as Record<string, unknown> | undefined;
+    const value = counts?.[faction];
+    return typeof value === 'number' && Number.isFinite(value) && value > 0
+        ? Math.trunc(value)
+        : 0;
+}
+
+function formatParamilitaryStandingImpact(value: number): string {
+    const exact = value.toFixed(4).replace(/\.?0+$/, '');
+    return getActiveLocale() === 'bcs' ? exact.replace('.', ',') : exact;
+}
+
+function formatParamilitaryModelPopulation(): string {
+    return new Intl.NumberFormat(getActiveLocale() === 'bcs' ? 'bs-BA' : 'en-US').format(
+        PARAMILITARY_TARGET_AVG_POPULATION,
+    );
 }
 
 type OfficerEvent = NonNullable<LoadedGameState['pendingOfficerEvents']>[number];
@@ -197,7 +206,8 @@ export function deriveInboxItems(
     const intelligenceSurface = getDecisionSurface('intelligence_notification');
     const situationSurface = getDecisionSurface('situation');
 
-    // 1. Pending event decisions. Only required rows block and auto-open.
+    // 1. Pending event decisions. Only required rows block and auto-open, but
+    // advisory choices still need their real response surface when reviewed.
     const eventDecisions = state.pendingEventDecisions;
     if (eventDecisions) {
         for (const evt of eventDecisions) {
@@ -208,8 +218,8 @@ export function deriveInboxItems(
                 type: 'event_decision',
                 severity: required ? 'blocking' : 'normal',
                 title: localizedEventTitle(evt.event_id, evt.event_title, eventCatalog),
-                subtitle: t('inbox.item.eventDecision.subtitle', { date: turnToDateString(evt.turn_fired) }),
-                action: required ? eventSurface.inboxAction : 'decision_room',
+                subtitle: t(required ? 'inbox.item.eventDecision.subtitle' : 'inbox.item.eventDecision.advisorySubtitle', { date: turnToDateString(evt.turn_fired) }),
+                action: eventSurface.inboxAction,
                 priority: 10,
             });
         }
@@ -245,7 +255,15 @@ export function deriveInboxItems(
 
     const proposals = state.pendingProposalReviews;
     if (proposals && proposals.length > 0) {
-        for (const prop of proposals) {
+        const historicalOperationReviews: Array<{
+            prop: NonNullable<LoadedGameState['pendingProposalReviews']>[number];
+            operationName: string;
+        }> = [];
+        const pendingProposals = [...proposals]
+            .filter((prop) => playerFactionMatch(prop.faction, playerFaction))
+            .filter((prop) => !isResolvedProposalReview(prop))
+            .sort((a, b) => strictCompare(a.id, b.id));
+        for (const prop of pendingProposals) {
             if (!playerFactionMatch(prop.faction, playerFaction)) continue;
             if (isOperationOpportunityReview(prop)) {
                 const { title, detail } = splitOpportunityDescription(prop.description || '');
@@ -265,14 +283,48 @@ export function deriveInboxItems(
                 continue;
             }
             const historicalOp = parseHistoricalOperationAuthorizationAction(prop.proposed_action);
+            if (historicalOp) {
+                historicalOperationReviews.push({
+                    prop,
+                    operationName: historicalOp.operationName,
+                });
+                continue;
+            }
+            const ordinaryOperation = prop.domain === 'ops'
+                ? state.opProposalCards?.find((proposal) => proposal.proposal_id === prop.id)
+                : undefined;
             items.push({
                 id: `command:review-proposal:${prop.id}`,
                 type: 'autonomy_proposal',
                 severity: 'normal',
-                title: historicalOp?.operationName ?? t('inbox.item.autonomyProposal.title'),
-                subtitle: historicalOp
-                    ? t('inbox.item.historicalOperation.subtitle')
-                    : formatAutonomyProposalSubtitle(prop.description, prop.domain),
+                title: t('inbox.item.autonomyProposal.title'),
+                subtitle: formatAutonomyProposalSubtitle(ordinaryOperation?.summary ?? prop.description, prop.domain),
+                action: autonomySurface.inboxAction,
+                priority: 35,
+            });
+        }
+        if (historicalOperationReviews.length === 1) {
+            const review = historicalOperationReviews[0];
+            if (review) {
+                items.push({
+                    id: `command:review-proposal:${review.prop.id}`,
+                    type: 'autonomy_proposal',
+                    severity: 'normal',
+                    title: review.operationName,
+                    subtitle: t('inbox.item.historicalOperation.subtitle'),
+                    action: autonomySurface.inboxAction,
+                    priority: 35,
+                });
+            }
+        } else if (historicalOperationReviews.length > 1) {
+            items.push({
+                id: 'command:review-proposal:historical-ops',
+                type: 'autonomy_proposal',
+                severity: 'normal',
+                title: t('inbox.item.historicalOperation.groupTitle'),
+                subtitle: t('inbox.item.historicalOperation.groupSubtitle', { count: historicalOperationReviews.length }),
+                updateCount: historicalOperationReviews.length,
+                sourceIds: historicalOperationReviews.map((review) => review.prop.id),
                 action: autonomySurface.inboxAction,
                 priority: 35,
             });
@@ -285,34 +337,46 @@ export function deriveInboxItems(
     const paramilitaryRequests = state.paramilitaryPolicy && state.paramilitaryPolicy !== 'ask'
         ? []
         : (state.pendingParamilitaryRequests ?? [])
-            .filter((request) => playerFactionMatch(request.faction, playerFaction));
+            .filter((request) =>
+                playerFactionMatch(request.faction, playerFaction)
+                && !isFinalParamilitaryDecision(request.decision),
+            );
     if (paramilitaryRequests.length > 0) {
         const totalStrength = paramilitaryRequests.reduce((sum, request) => sum + request.strength, 0);
         const projectedCivilianRisk = paramilitaryRequests.reduce((sum, request) => sum + request.estimated_civilian_risk, 0);
-        const standingImpact = estimateInternationalStandingImpact(paramilitaryRequests.length);
+        const previousDeployments = currentParamilitaryDeploymentCount(state, playerFaction);
+        const deploymentImpact = paramilitaryStandingPenalty(previousDeployments + paramilitaryRequests.length)
+            - paramilitaryStandingPenalty(previousDeployments);
+        const standingImpact = formatParamilitaryStandingImpact(
+            -(deploymentImpact + (projectedCivilianRisk / PARAMILITARY_TARGET_AVG_POPULATION)),
+        );
         const samplePlace = getOsidDisplayName(paramilitaryRequests[0]?.target_osid ?? '', osidNameMap);
+        const consequenceSummary = t('inbox.item.paramilitary.subtitle', {
+            requestCount: paramilitaryRequests.length,
+            requestLabel: t(paramilitaryRequests.length === 1
+                ? 'inbox.item.paramilitary.request.one'
+                : 'inbox.item.paramilitary.request.many'),
+            place: samplePlace,
+            civilianRisk: projectedCivilianRisk,
+            civilianLabel: t(projectedCivilianRisk === 1
+                ? 'inbox.item.paramilitary.civilian.one'
+                : 'inbox.item.paramilitary.civilian.many'),
+            warCrimeCount: paramilitaryRequests.length,
+            warCrimeLabel: t(paramilitaryRequests.length === 1
+                ? 'inbox.item.paramilitary.warCrime.one'
+                : 'inbox.item.paramilitary.warCrime.many'),
+            standingImpact,
+            strength: totalStrength,
+        });
+        const sourceContext = t('paramilitaryReview.sourceContext', {
+            modelPopulation: formatParamilitaryModelPopulation(),
+        });
         items.push({
             id: `paramilitary:${state.turn ?? 0}`,
             type: 'paramilitary_request',
             severity: 'blocking',
             title: t('inbox.item.paramilitary.title'),
-            subtitle: t('inbox.item.paramilitary.subtitle', {
-                requestCount: paramilitaryRequests.length,
-                requestLabel: t(paramilitaryRequests.length === 1
-                    ? 'inbox.item.paramilitary.request.one'
-                    : 'inbox.item.paramilitary.request.many'),
-                place: samplePlace,
-                civilianRisk: projectedCivilianRisk,
-                civilianLabel: t(projectedCivilianRisk === 1
-                    ? 'inbox.item.paramilitary.civilian.one'
-                    : 'inbox.item.paramilitary.civilian.many'),
-                warCrimeCount: paramilitaryRequests.length,
-                warCrimeLabel: t(paramilitaryRequests.length === 1
-                    ? 'inbox.item.paramilitary.warCrime.one'
-                    : 'inbox.item.paramilitary.warCrime.many'),
-                standingImpact,
-                strength: totalStrength,
-            }),
+            subtitle: `${consequenceSummary} ${sourceContext}`,
             action: paramilitarySurface.inboxAction,
             priority: 25,
         });
@@ -340,14 +404,17 @@ export function deriveInboxItems(
             if (!playerFactionMatch(req.faction, playerFaction)) continue;
             const corpsName = getPlayerFacingCorpsName(req.corps_id, state.formations, 'An assigned command');
             const purposeLabel = reservePurposeLabel(req.purpose);
+            const presentation = buildReserveRequestPresentation(state, req, osidNameMap);
             items.push({
                 id: `reserve:${req.request_id}`,
                 type: 'reserve_request',
                 severity: 'normal',
                 title: t('inbox.item.reserve.title'),
-                subtitle: purposeLabel
-                    ? t('inbox.item.reserve.subtitleWithPurpose', { corps: corpsName, purpose: purposeLabel })
-                    : t('inbox.item.reserve.subtitle', { corps: corpsName }),
+                subtitle: getActiveLocale() === 'en'
+                    ? `${buildReserveRequestSummary(presentation)} Purpose: ${purposeLabel ?? t('armyReserve.purpose.unknown')}.`
+                    : purposeLabel
+                        ? t('inbox.item.reserve.subtitleWithPurpose', { corps: corpsName, purpose: purposeLabel })
+                        : t('inbox.item.reserve.subtitle', { corps: corpsName }),
                 action: reserveSurface.inboxAction,
                 priority: 40,
             });
@@ -462,6 +529,10 @@ export function deriveInboxItems(
     return items.sort((a, b) => a.priority - b.priority);
 }
 
+function isFinalParamilitaryDecision(decision: unknown): boolean {
+    return decision === 'allow' || decision === 'deny' || decision === 'regular';
+}
+
 /**
  * Count actionable items (everything except situation highlights).
  */
@@ -482,14 +553,14 @@ export function hasBlockingItems(items: InboxItem[]): boolean {
  * @param itemId  The InboxItem.id passed from the inbox click (e.g. "event:evt_beta").
  * @param queue   The EventDisplayData[] queue built from pendingEventDecisions,
  *                where each entry's `.id` is the raw event_id.
- * @returns       The index into `queue` for the clicked event, or 0 as fallback.
+ * @returns       The index into `queue` for the clicked event, or null when identity cannot be resolved.
  */
 export function resolveEventQueueIndex(
     itemId: string,
     queue: ReadonlyArray<{ id: string }>,
-): number {
-    if (!itemId.startsWith('event:')) return 0;
+): number | null {
+    if (!itemId.startsWith('event:')) return null;
     const targetEventId = itemId.slice(6);
     const idx = queue.findIndex(d => d.id === targetEventId);
-    return idx >= 0 ? idx : 0;
+    return idx >= 0 ? idx : null;
 }

@@ -47,6 +47,12 @@ export function countChronicleEntriesByFilter(entries: ChronicleEntry[]): Record
     return counts;
 }
 
+export function getVisibleChronicleFilters(
+    counts: Readonly<Record<ChronicleFilterId, number>>,
+): typeof CHRONICLE_FILTERS {
+    return CHRONICLE_FILTERS.filter(filter => filter.id === 'all' || counts[filter.id] > 0);
+}
+
 export function filterChronicleEntries(
     entries: ChronicleEntry[],
     activeFilter: ChronicleFilterId,

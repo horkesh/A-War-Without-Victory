@@ -75,7 +75,7 @@ export class IvpBreakdownModal {
             rowEl.style.margin = '4px 0';
             rowEl.innerHTML = `
                 <span class="fo-stat-label" style="flex:1;">${ivpComponentLabel(row.key)}</span>
-                <span class="fo-stat-value" style="font-size:11px;">${pct(row.raw)} × weight ${pct(row.weight)} → +${pct(row.contribution)}</span>
+                <span class="fo-stat-value" style="font-size: 12px;">${pct(row.raw)} × weight ${pct(row.weight)} → +${pct(row.contribution)}</span>
             `;
             section.appendChild(rowEl);
         }
@@ -85,15 +85,15 @@ export class IvpBreakdownModal {
         thresh.className = 'faction-overview-section';
         thresh.innerHTML = `
             <h3 class="text-accent-gold">CONSEQUENCE THRESHOLDS</h3>
-            <div class="fo-stat-row" style="font-size:11px;">
+            <div class="fo-stat-row" style="font-size: 12px;">
                 <span class="fo-stat-label">${pct(DRINA_BLOCKADE_THRESHOLD)}+</span>
                 <span class="fo-stat-value">Drina blockade pressure</span>
             </div>
-            <div class="fo-stat-row" style="font-size:11px;">
+            <div class="fo-stat-row" style="font-size: 12px;">
                 <span class="fo-stat-label">${pct(INTERNATIONAL_SANCTIONS_THRESHOLD)}+</span>
                 <span class="fo-stat-value">International sanctions</span>
             </div>
-            <div class="fo-stat-row" style="font-size:11px;">
+            <div class="fo-stat-row" style="font-size: 12px;">
                 <span class="fo-stat-label">${pct(NATO_INTERVENTION_THRESHOLD)}+</span>
                 <span class="fo-stat-value">NATO intervention threat</span>
             </div>
@@ -117,14 +117,14 @@ export class IvpBreakdownModal {
 
         if (ivpSnap.sarajevoTunnelOperational) {
             const note = document.createElement('div');
-            note.style.cssText = 'margin-top:12px;font-size:11px;color:#555570;';
+            note.style.cssText = 'margin-top:12px;font-size: 12px;color:#555570;';
             note.textContent = 'Sarajevo tunnel operational — siege visibility modifier applied in engine.';
             modal.appendChild(note);
         }
 
         if (ivpSnap.lastMajorShift != null) {
             const shift = document.createElement('div');
-            shift.style.cssText = 'margin-top:8px;font-size:11px;color:#555570;';
+            shift.style.cssText = 'margin-top:8px;font-size: 12px;color:#555570;';
             shift.textContent = `Last major diplomatic shift: ${turnToWeekString(ivpSnap.lastMajorShift)}.`;
             modal.appendChild(shift);
         }

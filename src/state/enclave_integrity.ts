@@ -4,6 +4,7 @@ import type { EdgeRecord, LoadedSettlementGraph } from '../map/settlements.js';
 import { clamp01 } from '../utils/math.js';
 import type { EnclaveState, FactionId, GameState, MunicipalityId, SettlementId } from './game_state.js';
 import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
+import { strictCompare } from './validateGameState.js';
 
 export const SUPPLY_INTEGRITY_WEIGHT = 0.4;
 export const AUTHORITY_INTEGRITY_WEIGHT = 0.3;
@@ -137,10 +138,10 @@ function findComponents(
                 component.push(n);
             }
         }
-        component.sort((a, b) => a.localeCompare(b));
+        component.sort(strictCompare);
         components.push(component);
     }
-    components.sort((a, b) => a[0].localeCompare(b[0]));
+    components.sort((a, b) => strictCompare(a[0], b[0]));
     return components;
 }
 
@@ -157,7 +158,7 @@ export function updateEnclaveIntegrity(
 ): EnclaveIntegrityReport {
     const adjacency = buildAdjacencyMap(edges);
     const controllers = state.political.political_controllers ?? {};
-    const factions = state.factions.map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factions = state.factions.map((f) => f.id).sort(strictCompare);
     const enclaves: EnclaveState[] = [];
 
     for (const factionId of factions) {
@@ -170,7 +171,7 @@ export function updateEnclaveIntegrity(
             }
         }
         if (controlledCritical.length === 0) continue;
-        controlledCritical.sort((a, b) => a.localeCompare(b));
+        controlledCritical.sort(strictCompare);
         const components = findComponents(controlledCritical, adjacency);
         for (const component of components) {
             const munIds = component
@@ -228,7 +229,7 @@ export function updateEnclaveIntegrity(
         }
     }
 
-    enclaves.sort((a, b) => a.id.localeCompare(b.id));
+    enclaves.sort((a, b) => strictCompare(a.id, b.id));
     state.political.enclaves = enclaves;
     const humanitarian_pressure_total = enclaves.reduce((sum, e) => sum + e.humanitarian_pressure, 0);
     return { enclaves, humanitarian_pressure_total };
@@ -259,7 +260,7 @@ export function updateEnclaveIntegrity(
 export function computeEnclaveResilienceFallbackPressure(state: GameState): number {
     const map = state.political?.enclave_resilience;
     if (!map) return 0;
-    const ids = Object.keys(map).sort((a, b) => a.localeCompare(b));
+    const ids = Object.keys(map).sort(strictCompare);
     let total = 0;
     let activeCount = 0;
     for (const id of ids) {

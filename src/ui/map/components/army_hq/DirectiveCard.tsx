@@ -28,7 +28,10 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LoadedGameState } from '../../data/types';
-import type { PresidentialDecisionRoomDirective } from '../../data/presidentialDecisionRoom';
+import {
+  buildReserveRequestPresentation,
+  type PresidentialDecisionRoomDirective,
+} from '../../data/presidentialDecisionRoom';
 import { useIPC } from '../../desktop/useIPC';
 import { useGameStore } from '../../store/gameStore';
 import {
@@ -40,16 +43,22 @@ import { resolveDirectiveActArt } from '../../data/directiveActArt';
 import { getPlayerSafeCorpsName, getPlayerSafeOfficerName } from '../../utils/playerSafeText';
 import { getOsidDisplayName } from '../../utils/osidDisplayName';
 import { buildObjectiveTargetOptions } from '../../utils/objectiveTargetOptions';
-import { t } from '../../i18n';
+import { t, type MessageKey } from '../../i18n';
 import { strictCompare } from '../../../../state/validateGameState.js';
 import {
   buildCommandFrictionStakes,
   type CommandFrictionStakes,
 } from '../../../../sim/combat/command_lever_consequences.js';
 
+export interface DirectiveReceipt {
+  kind: 'success' | 'error' | 'cancelled';
+  message: string;
+}
+
 interface DirectiveCardProps {
   directive: PresidentialDecisionRoomDirective;
   gameState: LoadedGameState;
+  onReceipt?: (receipt: DirectiveReceipt) => void;
 }
 
 interface TargetInputResolution {
@@ -132,7 +141,7 @@ function resolveTargetOsidInput(
   return { targetOsid: trimmed, ambiguousMatches: [] };
 }
 
-export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
+export function DirectiveCard({ directive, gameState, onReceipt }: DirectiveCardProps) {
   const ipc = useIPC();
   const setLoadError = useGameStore((s) => s.setLoadError);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
@@ -146,7 +155,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const [impossibleReason, setImpossibleReason] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
-  const [receipt, setReceipt] = useState<{ kind: 'success' | 'error' | 'cancelled'; message: string } | null>(null);
+  const [receipt, setReceipt] = useState<DirectiveReceipt | null>(null);
 
   // REQUEST-OP in-card target OSID (Decision-Room request-op cards carry an EMPTY
   // payload — the president names the objective settlement here). Mirrors the proven
@@ -194,6 +203,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   const targetPickerValue = showTargetInput && targetPickerOptions.some((option) => option.osid === effectiveTargetOsid)
     ? effectiveTargetOsid
     : '';
+  const reserveRequestId = typeof directive.payload.requestId === 'string' ? directive.payload.requestId : '';
+  const reserveRequest = directive.lever === 'elite_deploy'
+    ? (gameState.pendingReserveRequests ?? []).find((request) => request.request_id === reserveRequestId)
+    : undefined;
+  const reservePresentation = reserveRequest
+    ? buildReserveRequestPresentation(gameState, reserveRequest, osidDisplayNames)
+    : null;
 
   // Commander disposition for the request/force objection (same lookup as
   // OperationsSection): the active CO of the target corps.
@@ -317,21 +333,21 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         <div className="px-3 py-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
-              <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
+              <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
                 {t('directive.issueDirective')}
               </div>
-              <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
+              <div className="mt-0.5 truncate text-xs font-bold text-text-primary">
                 {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
               </div>
             </div>
-            <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-300">
+            <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-amber-300">
               {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
             </span>
           </div>
           <div
             role="status"
             aria-label={t('directive.bridgeUnavailable.aria')}
-            className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[10px] text-text-secondary"
+            className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-xs text-text-secondary"
           >
             {t('attention.bridgeUnavailableReadOnly')}
           </div>
@@ -345,15 +361,20 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
     setImpossibleReason(null);
   };
 
+  const publishReceipt = (nextReceipt: DirectiveReceipt) => {
+    setReceipt(nextReceipt);
+    onReceipt?.(nextReceipt);
+  };
+
   const handleCancel = () => {
     resetTransient();
     setTargetOsidInput('');
-    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
+    publishReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
   const handleStandDown = () => {
     setPendingObjection(null);
-    setReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
+    publishReceipt({ kind: 'cancelled', message: t('directive.receipt.cancelled') });
   };
 
   // REVIEW-PROPOSAL withhold — deny a general's autonomy Level-1 proposal. Routes
@@ -374,7 +395,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
   };
 
   const markIssued = () => {
-    setReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
+    publishReceipt({ kind: 'success', message: t('directive.receipt.stagedNextTurn') });
   };
 
   const markFailed = (reason: string) => {
@@ -383,7 +404,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       return;
     }
     setLoadError(reason);
-    setReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
+    publishReceipt({ kind: 'error', message: t('directive.receipt.failed', { reason }) });
   };
 
   /** Stage a request-op directive (optionally forced past a shown objection). */
@@ -577,67 +598,53 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
       className="mt-2 overflow-hidden rounded border border-amber-400/30 bg-amber-400/[0.06]"
       aria-label={t('directive.sectionAria')}
     >
-      {/* 16:9 dossier-header band — period still + bottom-gradient title-safe area
-          (mirrors the DecisionCard/CommandCard object-cover + gradient idiom so the
-          lever/target caption stays legible over any photo). Omitted entirely when
-          no art resolves; the text header below carries the same information. */}
-      {headerArt && (
-        <div
-          data-testid="directive-card-header-art"
-          className="relative aspect-video w-full overflow-hidden border-b border-amber-400/25 bg-black/40"
-        >
-          <img
-            src={headerArt}
-            alt=""
-            aria-hidden="true"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-          <div
-            aria-hidden="true"
-            className="absolute inset-x-0 bottom-0 h-2/3"
-            style={{
-              background:
-                'linear-gradient(to top, rgba(8,7,5,0.92), rgba(8,7,5,0.5) 45%, rgba(8,7,5,0))',
-            }}
-          />
-          <div className="absolute inset-x-0 bottom-0 p-2">
-            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-              {t('directive.issueDirective')}
-            </div>
-            <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
-              {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
-            </div>
+      <div className="px-3 py-2">
+      {/* Keep the command and its cost ahead of supporting artwork so the player
+          sees the actionable control without discovering a hidden scroll. */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-amber-300">
+            {t('directive.issueDirective')}
+          </div>
+          <div className="mt-0.5 truncate text-xs font-bold text-text-primary">
+            {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
           </div>
         </div>
-      )}
-
-      <div className="px-3 py-2">
-      {/* Header row. When the dossier image renders above, its overlay already
-          carries the "Issue directive" / lever title, so here we keep only the
-          cost badge (right-aligned). With no art the original text header carries
-          the full title — graceful fallback, identical information. */}
-      <div className={`flex items-start gap-2 ${headerArt ? 'justify-end' : 'justify-between'}`}>
-        {!headerArt && (
-          <div className="min-w-0">
-            <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-amber-300">
-              {t('directive.issueDirective')}
-            </div>
-            <div className="mt-0.5 truncate text-[11px] font-bold text-text-primary">
-              {leverLabel(directive.lever)}{tgt ? ` · ${tgt}` : ''}
-            </div>
-          </div>
-        )}
-        <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.08em] text-amber-300">
+        <span className="shrink-0 rounded border border-amber-400/35 bg-amber-400/10 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.08em] text-amber-300">
           {cost === 0 ? t('directive.costFree') : t('directive.costAuthority', { cost })}
         </span>
       </div>
+
+      {reservePresentation && (
+        <div
+          role="group"
+          aria-label={t('directive.reserveCommitment.aria')}
+          className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2 text-[12px] leading-snug"
+        >
+          <p className="mb-1 font-semibold text-text-primary">{t('directive.reserveCommitment.title')}</p>
+          {[
+            ['armyReserve.presentation.requestingCommand', reservePresentation.requestingCommand],
+            ['armyReserve.presentation.recipientSector', reservePresentation.recipientSector],
+            ['armyReserve.presentation.candidateForce', reservePresentation.candidateForce],
+            ['armyReserve.presentation.readiness', reservePresentation.readiness],
+            ['armyReserve.presentation.travelTime', reservePresentation.travelTime],
+            ['armyReserve.presentation.expectedEffect', reservePresentation.expectedEffect],
+            ['armyReserve.presentation.opportunityCost', reservePresentation.opportunityCost],
+          ].map(([labelKey, value]) => (
+            <div key={labelKey} className="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2 py-0.5">
+              <span className="text-text-secondary">{t(labelKey as MessageKey)}</span>
+              <span className="min-w-0 text-text-primary">{value}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* CANNOT ISSUE banner — the directive is IMPOSSIBLE (unbuildable / no slot).
           Nothing committed; no CA spent. */}
       {impossibleReason && (
         <div role="alert" aria-label={t('directive.cannotIssue.aria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.cannotIssue.heading')}</p>
-          <p className="mt-0.5 text-[10px] text-text-primary">
+          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('directive.cannotIssue.heading')}</p>
+          <p className="mt-0.5 text-xs text-text-primary">
             {t('directive.cannotIssue.body', { reason: plainReason(impossibleReason) })}
           </p>
         </div>
@@ -655,10 +662,10 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               : 'border-amber-500/50 bg-amber-500/5'
           }`}
         >
-          <p className="text-[8px] font-bold uppercase tracking-wider text-amber-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
             {pendingObjection.severity === 'abort' ? t('directive.objection.recommendsAgainst') : t('directive.objection.urgesDelay')}
           </p>
-          <p className="mt-1 text-[10px] italic text-text-primary">{pendingObjection.prose}</p>
+          <p className="mt-1 text-xs italic text-text-primary">{pendingObjection.prose}</p>
           <div className="mt-2 flex items-center gap-2">
             <button
               type="button"
@@ -667,7 +674,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               title={pendingObjection.rejection_reason !== undefined
                 ? t('directive.objection.forceAnywayDisabledTitle')
                 : t('directive.objection.forceAnywayTitle')}
-              className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10"
+              className="text-xs font-mono uppercase tracking-wider px-2 py-1 rounded border border-red-500/50 text-red-400 disabled:opacity-40 hover:bg-red-500/10"
             >
               {t('directive.objection.forceAnyway')}
             </button>
@@ -675,7 +682,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               type="button"
               onClick={handleStandDown}
               disabled={busy}
-              className="text-[9px] font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
+              className="text-xs font-mono uppercase tracking-wider px-2 py-1 rounded border border-panel-border/50 text-text-primary disabled:opacity-40 hover:bg-panel-bg"
             >
               {t('directive.objection.standDown')}
             </button>
@@ -688,8 +695,8 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
           reason; the ISSUE button is disabled. */}
       {isLeadershipGesture && gestureReady && gestureUnavailableReason && (
         <div role="status" aria-label={t('directive.gesture.unavailableAria')} className="mt-2 rounded border border-panel-border/60 bg-panel-bg/60 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">{t('directive.gesture.cannotAct')}</p>
-          <p className="mt-0.5 text-[10px] text-text-primary">{gestureUnavailableReason}</p>
+          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">{t('directive.gesture.cannotAct')}</p>
+          <p className="mt-0.5 text-xs text-text-primary">{gestureUnavailableReason}</p>
         </div>
       )}
 
@@ -706,7 +713,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               value={targetPickerValue}
               onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
               aria-label={t('directive.targetPicker.aria')}
-              className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] text-text-primary"
+              className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-xs text-text-primary"
             >
               <option value="">{t('directive.targetPicker.placeholder')}</option>
               {targetPickerOptions.map((option) => (
@@ -720,16 +727,16 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
             onChange={(e) => { setTargetOsidInput(e.target.value); if (impossibleReason) setImpossibleReason(null); }}
             placeholder={t('directive.targetInput.placeholder')}
             aria-label={t('directive.targetInput.aria')}
-            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-[11px] font-mono text-text-primary"
+            className="w-full rounded border border-panel-border/50 bg-panel-bg px-2 py-1 text-xs font-mono text-text-primary"
           />
         </div>
       )}
       {!pendingObjection && !impossibleReason && ambiguousTargetMatches.length > 0 && (
         <div role="alert" aria-label={t('directive.targetInput.ambiguousAria')} className="mt-2 rounded border border-amber-500/50 bg-amber-500/5 p-2">
-          <p className="text-[8px] font-bold uppercase tracking-wider text-amber-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-amber-400">
             {t('directive.targetInput.ambiguousHeading')}
           </p>
-          <p className="mt-0.5 text-[10px] text-text-primary">
+          <p className="mt-0.5 text-xs text-text-primary">
             {t('directive.targetInput.ambiguousBody', { matches: ambiguousTargetMatches.join(', ') })}
           </p>
         </div>
@@ -752,14 +759,14 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
                 : 'border-panel-border/60 bg-panel-bg/60'
           }`}
         >
-          <p className="text-[8px] font-bold uppercase tracking-wider text-text-secondary">
+          <p className="text-xs font-bold uppercase tracking-wider text-text-secondary">
             {t('directive.stakes.heading')}
           </p>
           {/* FORCE-LAUNCH OVER A SHOWN NO-GO (#327): name the objection the president is about
               to override, so the patron cost reads as a consequence of overruling the commander,
               not an arbitrary charge. Only on the proposal-override path (overridesShownObjection). */}
           {forceLaunchOverridesObjection && (
-            <p className="mt-0.5 text-[10px] text-text-primary">
+            <p className="mt-0.5 text-xs text-text-primary">
               {corpsCommander
                 ? t('directive.stakes.forceLaunchObjection', {
                     commander: getPlayerSafeOfficerName(corpsCommander.name),
@@ -767,12 +774,12 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
                 : t('directive.stakes.forceLaunchObjectionGeneric')}
             </p>
           )}
-          <p className="mt-0.5 text-[10px] text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
+          <p className="mt-0.5 text-xs text-text-primary">{stakesSeverityLabel(frictionStakes.severity)}</p>
           {frictionStakes.revoltLikely && (
-            <p className="mt-0.5 text-[10px] text-red-300">{t('directive.stakes.revoltLikely')}</p>
+            <p className="mt-0.5 text-xs text-red-300">{t('directive.stakes.revoltLikely')}</p>
           )}
           {frictionStakes.patronConfidenceAtRisk < 0 && (
-            <p className="mt-0.5 text-[9px] font-mono text-text-secondary">
+            <p className="mt-0.5 text-xs font-mono text-text-secondary">
               {t('directive.stakes.patronAtRisk', { delta: frictionStakes.patronConfidenceAtRisk })}
             </p>
           )}
@@ -801,13 +808,13 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               : t('directive.issue.costTitle', { cost, current: authCurrent }))
             : t('directive.issue.insufficientTitle', { cost, current: authCurrent });
         return (
-          <div className={`mt-2 grid gap-2 ${isReviewProposal ? 'grid-cols-[1fr_1fr_auto]' : 'grid-cols-[1fr_auto]'}`}>
+          <div className={`mt-2 grid gap-2 ${isReviewProposal ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-[1fr_auto]'}`}>
             <button
               type="button"
               onClick={handleConfirm}
               disabled={issueDisabled}
               title={issueTitle}
-              className="h-7 min-w-0 truncate rounded border border-amber-400/35 bg-amber-400/12 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+              className="h-7 min-w-0 whitespace-nowrap rounded border border-amber-400/35 bg-amber-400/12 px-2 text-xs font-bold uppercase tracking-[0.08em] text-amber-300 transition hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
             >
               {busy
                 ? (needsObjection ? t('directive.button.consulting') : t('directive.button.issuing'))
@@ -823,7 +830,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
                 onClick={() => { void handleWithhold(); }}
                 disabled={busy}
                 title={t('directive.issue.freeTitle')}
-                className="h-7 min-w-0 truncate rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+                className="h-7 min-w-0 whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
               >
                 {busy ? t('directive.button.withholding') : t('directive.button.withhold')}
               </button>
@@ -832,9 +839,9 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
               type="button"
               onClick={handleCancel}
               disabled={busy}
-              className="h-7 rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
+              className="h-7 min-w-0 whitespace-nowrap rounded border border-panel-border/60 bg-panel-bg/50 px-2 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition hover:border-text-secondary/70 hover:text-text-primary disabled:opacity-40"
             >
-              {t('directive.button.cancel')}
+              {isReviewProposal ? t('directive.button.cancelShort') : t('directive.button.cancel')}
             </button>
           </div>
         );
@@ -843,7 +850,7 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         <div
           role="status"
           aria-label={t('directive.receipt.aria')}
-          className={`mt-2 rounded border p-2 text-[10px] ${
+          className={`mt-2 rounded border p-2 text-xs ${
             receipt.kind === 'error'
               ? 'border-red-500/45 bg-red-500/5 text-red-200'
               : receipt.kind === 'cancelled'
@@ -855,6 +862,19 @@ export function DirectiveCard({ directive, gameState }: DirectiveCardProps) {
         </div>
       )}
       </div>
+      {headerArt && (
+        <div
+          data-testid="directive-card-header-art"
+          className="relative h-24 w-full overflow-hidden border-t border-amber-400/25 bg-black/40"
+        >
+          <img
+            src={headerArt}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </div>
+      )}
     </section>
   );
 }

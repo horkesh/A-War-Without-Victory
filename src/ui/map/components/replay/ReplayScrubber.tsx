@@ -130,7 +130,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
     if (turnCount === 0) {
         return (
             <div
-                className="px-6 py-4 text-[10px] text-text-secondary italic"
+                className="px-6 py-4 text-xs text-text-secondary italic"
                 data-awwv-replay-empty="true"
             >
                 Replay is unavailable for this war &mdash; no saved snapshots.
@@ -162,25 +162,25 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
             data-awwv-replay-playback-status={isPlaying ? 'playing' : 'paused'}
             data-testid="replay-scrubber"
         >
-            <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
+            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
                 Replay &mdash; Scrub Your War
             </div>
 
             <div className="flex items-center gap-3 mb-2">
-                <span className="text-[10px] text-text-secondary tabular-nums">
+                <span className="text-xs text-text-secondary tabular-nums">
                     {currentDateLabel}
                 </span>
                 {current && onInspectFrame && (
                     <button
                         type="button"
                         onClick={() => onInspectFrame(current, cursor)}
-                        className="rounded border border-accent-gold/40 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+                        className="rounded border border-accent-gold/40 bg-accent-gold/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.18em] text-accent-gold transition-colors hover:bg-accent-gold/20"
                         data-awwv-replay-inspect="true"
                     >
                         Inspect Map
                     </button>
                 )}
-                <span className="text-[10px] text-text-secondary/60 ml-auto tabular-nums">
+                <span className="text-xs text-text-secondary/60 ml-auto tabular-nums">
                     {cursor + 1} / {turnCount}
                 </span>
             </div>
@@ -197,7 +197,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 data-awwv-replay-input="slider"
             />
 
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[9px] uppercase tracking-[0.16em] text-text-secondary/70">
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.16em] text-text-secondary/70">
                 <button
                     type="button"
                     onClick={() => onStep(-1)}
@@ -234,7 +234,7 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
                 </span>
             </div>
 
-            <div className="flex items-center justify-between mt-2 text-[9px] text-text-secondary/70">
+            <div className="flex items-center justify-between mt-2 text-xs text-text-secondary/70">
                 <button
                     type="button"
                     onClick={() => onJump(0)}
@@ -254,23 +254,23 @@ export function ReplayScrubber({ saveSequence, saveManifest, onInspectFrame }: R
             </div>
 
             <div
-                className="mt-4 grid grid-cols-2 gap-2 text-[10px] text-text-secondary sm:grid-cols-4"
+                className="mt-4 grid grid-cols-2 gap-2 text-xs text-text-secondary sm:grid-cols-4"
                 data-awwv-replay-summary="true"
             >
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.activeFormations')}</div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.activeFormations')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{summary.activeFormations}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.casualties')}</div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.casualties')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalCasualties)}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.displaced')}</div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.displaced')}</div>
                     <div className="mt-1 font-mono text-text-primary tabular-nums">{String(summary.totalDisplaced)}</div>
                 </div>
                 <div className="min-w-0 rounded border border-panel-border/70 bg-black/10 px-2 py-2">
-                    <div className="text-[8px] uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.control')}</div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-text-secondary/60">{t('replay.control')}</div>
                     <div className="mt-1 break-words font-mono leading-relaxed text-text-primary tabular-nums">
                         {summary.controlByFaction.length === 0
                             ? 'n/a'

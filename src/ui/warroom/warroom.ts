@@ -13,16 +13,17 @@ import flagRsUrl from './assets/flag_RS.webp?url';
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
+import { parsePlayerVisibleWarroomState } from './data/player_visible_state_adapter.js';
 
 type CampaignScenarioKey = 'apr_1992';
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
 
 interface DesktopBridge {
-    startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+    startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string }>;
     subscribeGameStateUpdated?: (cb: (stateJson: string) => void) => (() => void);
     subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
-    loadStateDialog?: () => Promise<{ ok: boolean; error?: string; stateJson?: string }>;
+    loadStateDialog?: () => Promise<{ ok: boolean; error?: string }>;
     openTacticalMapWindow?: (payload?: { mode?: 'operational' | 'sandbox' }) => Promise<unknown>;
     [key: string]: unknown;
 }
@@ -114,7 +115,7 @@ class WarroomApp {
         }
         if (this.desktopBridge?.subscribeGameStateUpdated) {
             this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((stateJson: string) => {
-                this.applyGameStateFromJson(stateJson);
+                this.applyGameStateFromJson(stateJson, { showShell: false });
                 this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
             });
         }
@@ -293,7 +294,7 @@ class WarroomApp {
 
     private applyGameStateFromJson(stateJson: string, options?: { showShell?: boolean }): void {
         try {
-            this.gameState = deserializeState(stateJson);
+            this.gameState = parsePlayerVisibleWarroomState(stateJson);
             // Sync scenario epoch so date helpers produce correct calendar dates
             setScenarioStartDate(this.gameState.meta.scenario_start_date);
             // Defer DOM work to the next task so the triggering click is consumed and UI stays responsive.
@@ -314,6 +315,17 @@ class WarroomApp {
             }, 0);
         } catch (error) {
             console.error('Failed to apply game state JSON in warroom', error);
+        }
+    }
+
+    private applyCanonicalGameStateFromJson(stateJson: string): void {
+        try {
+            this.gameState = deserializeState(stateJson);
+            setScenarioStartDate(this.gameState.meta.scenario_start_date);
+            this.updateUIOverlay();
+            this.showLoadedGameShellScene();
+        } catch (error) {
+            console.error('Failed to apply canonical browser game state JSON in warroom', error);
         }
     }
 
@@ -399,8 +411,7 @@ class WarroomApp {
                 if (this.desktopBridge?.loadStateDialog) {
                     try {
                         const result = await this.desktopBridge.loadStateDialog();
-                        if (result?.ok && result.stateJson) {
-                            this.applyGameStateFromJson(result.stateJson);
+                        if (result?.ok) {
                             this.showScreen('none');
                         }
                     } catch (error) {
@@ -418,7 +429,7 @@ class WarroomApp {
                 reader.onload = (re) => {
                     const text = re.target?.result as string;
                     if (text) {
-                        this.applyGameStateFromJson(text);
+                        this.applyCanonicalGameStateFromJson(text);
                         this.showScreen('none');
                     }
                 };
@@ -458,21 +469,19 @@ class WarroomApp {
                 for (const b of factionButtons) b.disabled = true;
 
                 try {
+                    this.freshCampaignIntroPending = true;
                     const result = await this.desktopBridge.startNewCampaign({
                         playerFaction: faction,
                         scenarioKey: 'apr_1992',
                     });
                     if (!result?.ok) {
+                        this.freshCampaignIntroPending = false;
                         showError(result?.error ?? 'Failed to start campaign.');
                         return;
                     }
-                    if (result.stateJson) {
-                        this.freshCampaignIntroPending = true;
-                        this.showScreen('none');
-                        this.applyGameStateFromJson(result.stateJson, { showShell: false });
-                        void this.showTacticalMapScene('warroom');
-                    }
+                    this.showScreen('none');
                 } catch (error) {
+                    this.freshCampaignIntroPending = false;
                     showError(error instanceof Error ? error.message : String(error));
                 } finally {
                     for (const b of factionButtons) b.disabled = false;
@@ -703,6 +712,12 @@ class WarroomApp {
         try {
             const iframeWindow = iframe.contentWindow as (Window & { awwv?: Record<string, unknown> }) | null;
             if (!iframeWindow) return;
+            const iframeOrigin = new URL(iframe.src, window.location.href).origin;
+            if (iframeOrigin !== window.location.origin) {
+                // The HTTP tactical map server is intentionally cross-origin from awwv://warroom.
+                // Runtime handoff uses postMessage; direct DOM setup is only valid for same-origin fallback.
+                return;
+            }
 
             // Ensure the "Back to HQ" button is visible (inline script handles this too)
             let hqBtn = iframeWindow.document.getElementById('btn-back-to-hq');
@@ -716,7 +731,7 @@ class WarroomApp {
                     hqBtn.id = 'btn-back-to-hq';
                     hqBtn.textContent = '\u25C0 HQ';
                     hqBtn.title = 'Return to warroom HQ';
-                    hqBtn.style.cssText = 'padding:4px 10px;background:rgba(0,232,120,0.12);color:#00e878;border:1px solid rgba(0,232,120,0.3);border-radius:3px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-right:6px;';
+                    hqBtn.style.cssText = 'padding:4px 10px;background:rgba(0,232,120,0.12);color:#00e878;border:1px solid rgba(0,232,120,0.3);border-radius:3px;cursor:pointer;font-family:inherit;font-size: 12px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-right:6px;';
                     hqBtn.addEventListener('click', () => {
                         window.postMessage({ type: 'awwv-back-to-hq' }, '*');
                     });

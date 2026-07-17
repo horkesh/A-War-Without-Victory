@@ -59,7 +59,7 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
         >
             <div className="px-2.5 py-2">
                 {/* Category badge */}
-                <span className={`inline-block px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-[0.12em] ${accent.badge} ${accent.badgeText} mb-1`}>
+                <span className={`inline-block px-1.5 py-0.5 rounded text-xs leading-none font-bold uppercase tracking-[0.12em] ${accent.badge} ${accent.badgeText} mb-1`}>
                     {label}
                 </span>
 
@@ -67,8 +67,8 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
                 <div
                     className={
                         entry.headline
-                            ? 'text-[11px] font-semibold text-amber-200/90 leading-tight'
-                            : 'text-[10px] text-stone-200/80 leading-tight'
+                            ? 'text-xs font-semibold text-amber-200/90 leading-tight'
+                            : 'text-xs text-stone-200/80 leading-tight'
                     }
                     style={entry.headline ? { fontFamily: 'Georgia, "Times New Roman", serif' } : {}}
                 >
@@ -77,7 +77,7 @@ export const ChronicleCard = React.memo(function ChronicleCard({ entry }: Chroni
 
                 {/* Detail */}
                 {detail && (
-                    <div className={`text-[9px] font-mono mt-1 leading-tight ${entry.ghost ? 'text-amber-200/55 italic' : 'text-stone-400/70'}`}>
+                    <div className={`text-xs font-mono mt-1 leading-tight ${entry.ghost ? 'text-amber-200/80 italic' : 'text-stone-300/90'}`}>
                         {detail}
                     </div>
                 )}

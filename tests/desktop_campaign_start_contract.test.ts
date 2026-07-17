@@ -4,6 +4,14 @@ import { readFile, rm } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { test } from 'vitest';
 
+test('desktop dev-map detection survives Vite React-refresh injection', async () => {
+    const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
+
+    assert.match(source, /body\.length < 4096/);
+    assert.match(source, /body\.includes\('\/@vite\/client'\)/);
+    assert.match(source, /body\.includes\('main\.tsx'\)/);
+});
+
 import { queryBattleEvents, startNewCampaign } from '../src/desktop/desktop_sim.js';
 import { createStateFromScenario, runScenario } from '../src/scenario/scenario_runner.js';
 import { selectBotBrigadeOrderFactions } from '../src/sim/turn_phases/war_phases.js';

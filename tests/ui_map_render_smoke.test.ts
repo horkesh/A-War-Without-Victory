@@ -533,7 +533,7 @@ describe('Tactical map render smoke', () => {
     expect(byId.get('attacking_nonparticipant')).toBe(false);
   });
 
-  it('buildFormationsGeoJSON hides non-fielded brigades from tactical counters', () => {
+  it('buildFormationsGeoJSON shows own forming brigades as non-combat forming counters', () => {
     const state = {
       label: 'Turn 1',
       turn: 1,
@@ -610,9 +610,13 @@ describe('Tactical map render smoke', () => {
     } as unknown as LoadedGameState;
 
     const controlledGeo = buildControlGeoJSON(minimalBaseGeo, state.controlBySettlement);
-    const ids = buildFormationsGeoJSON(state, controlledGeo).features.map((feature) => feature.properties.id);
+    const features = buildFormationsGeoJSON(state, controlledGeo).features;
+    const ids = features.map((feature) => feature.properties.id);
 
-    expect(ids).toEqual(['active_brigade', 'active_operational_group']);
+    expect(ids).toEqual(['active_brigade', 'active_operational_group', 'forming_brigade']);
+    const forming = features.find((feature) => feature.properties.id === 'forming_brigade');
+    expect(forming?.properties.is_forming).toBe(true);
+    expect(forming?.properties.icon_id).toContain('__forming');
   });
 
   it('buildFormationsGeoJSON does not place physical counters from AoR or HQ anchors', () => {

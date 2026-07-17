@@ -187,10 +187,15 @@ export interface IpcDaytonPreviewResult {
     error?: string;
 }
 
+type ParamilitaryReviewPolicy = 'ask' | 'always_deny' | 'always_allow';
+interface ParamilitaryReviewOptions {
+    policy?: ParamilitaryReviewPolicy;
+}
+
 /** Shape of window.awwv as exposed by preload.cjs. */
 interface WindowAwwv {
-    startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
+    startNewCampaign: (payload: StartNewCampaignPayload) => Promise<{ ok: boolean; error?: string }>;
+    advanceTurn: (payload?: { phase0Directives?: unknown[] }) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     getCurrentGameState: () => Promise<string | null>;
     getRuntimeFeatureFlags: () => Promise<{ srkStranglePostureActive: boolean } | null>;
     subscribeGameStateUpdated: (cb: (stateJson: string) => void) => () => void;
@@ -204,7 +209,7 @@ interface WindowAwwv {
     subscribeReplaySequenceUpdated: (cb: (sequenceJson: string) => void) => () => void;
     subscribeReplayManifestUpdated: (cb: (manifestJson: string) => void) => () => void;
     getRecruitmentCatalog: () => Promise<{ brigades?: unknown[]; error?: string }>;
-    applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+    applyRecruitment: (brigadeId: string, equipmentClass: string) => Promise<{ ok: boolean; newFormationId?: string; error?: string }>;
     getSettings: () => Promise<{ ok: boolean; settings?: unknown; error?: string }>;
     saveSettings: (settings: unknown) => Promise<{ ok: boolean; error?: string }>;
     getAiCommanderConfig: () => Promise<{ mode: string; session_cost_estimate: number }>;
@@ -255,8 +260,8 @@ interface WindowAwwv {
     queryBattleEvents: () => Promise<IpcBattleEventsResult>;
     getMapServerUrl: () => Promise<string | null>;
     focusWarroom: () => Promise<void>;
-    loadScenarioDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
-    loadStateDialog: () => Promise<{ ok: boolean; stateJson?: string; error?: string }>;
+    loadScenarioDialog: () => Promise<{ ok: boolean; error?: string }>;
+    loadStateDialog: () => Promise<{ ok: boolean; error?: string }>;
     saveGame: (payload?: { filename?: string }) => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     quickSave: () => Promise<{ ok: boolean; filePath?: string; error?: string }>;
     openTacticalMapWindow: (payload?: { mode?: string }) => Promise<void>;
@@ -274,7 +279,7 @@ interface WindowAwwv {
         proposedSplit: { RBiH: number; RS: number; HRHB: number };
         rider?: string;
     }) => Promise<{ ok: boolean; counter_offer_id?: string; error?: string }>;
-    resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>) => Promise<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>;
+    resolveParamilitaryRequests: (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>, options?: ParamilitaryReviewOptions) => Promise<{ ok: boolean; report?: unknown; error?: string }>;
     resolveDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<{ ok: boolean; result?: Record<string, unknown>; error?: string }>;
     /** Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no state mutation. */
     previewDayton: (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => Promise<IpcDaytonPreviewResult>;
@@ -425,11 +430,11 @@ export function useIPC() {
 
             startNewCampaign: awwv
                 ? (payload: StartNewCampaignPayload) => awwv.startNewCampaign(payload)
-                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+                : makeNoop<{ ok: boolean; error?: string }>(),
 
             advanceTurn: awwv
                 ? (payload?: { phase0Directives?: unknown[] }) => awwv.advanceTurn(payload)
-                : makeNoop<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>(),
+                : makeNoop<{ ok: boolean; report?: unknown; error?: string }>(),
 
             getCurrentGameState: awwv
                 ? () => awwv.getCurrentGameState()
@@ -461,7 +466,7 @@ export function useIPC() {
 
             applyRecruitment: awwv
                 ? (brigadeId: string, equipmentClass: string) => awwv.applyRecruitment(brigadeId, equipmentClass)
-                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+                : makeNoop<{ ok: boolean; newFormationId?: string; error?: string }>(),
 
             getSettings: awwv
                 ? () => awwv.getSettings()
@@ -605,11 +610,11 @@ export function useIPC() {
 
             loadScenarioDialog: awwv
                 ? () => awwv.loadScenarioDialog()
-                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+                : makeNoop<{ ok: boolean; error?: string }>(),
 
             loadStateDialog: awwv
                 ? () => awwv.loadStateDialog()
-                : makeNoop<{ ok: boolean; stateJson?: string; error?: string }>(),
+                : makeNoop<{ ok: boolean; error?: string }>(),
 
             saveGame: awwv
                 ? (payload?: { filename?: string }) => awwv.saveGame(payload)
@@ -675,8 +680,9 @@ export function useIPC() {
                 : makeNoop<{ ok: boolean; counter_offer_id?: string; error?: string }>(),
 
             resolveParamilitaryRequests: awwv
-                ? (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>) => awwv.resolveParamilitaryRequests(decisions)
-                : makeNoop<{ ok: boolean; stateJson?: string; report?: unknown; error?: string }>(),
+                ? (decisions: Array<{ target_osid: string; decision: 'allow' | 'deny' }>, options?: ParamilitaryReviewOptions) =>
+                    options ? awwv.resolveParamilitaryRequests(decisions, options) : awwv.resolveParamilitaryRequests(decisions)
+                : makeNoop<{ ok: boolean; report?: unknown; error?: string }>(),
 
             resolveDayton: awwv
                 ? (proposal: { territorial_demands: string[]; territorial_concessions: string[]; institutional_choices: Record<string, 'centralized' | 'decentralized'> }) => awwv.resolveDayton(proposal)

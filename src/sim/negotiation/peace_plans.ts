@@ -16,8 +16,10 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalPersonality, computePoliticalAssessment } from '../political/political_personality.js';
 import { computePoliticalPeacePlanResponse } from '../political/political_peace_plan.js';
 import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
+import { resolveEventDecision } from '../events/resolve_decision.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+const VANCE_OWEN_EVENT_ID = 'vance_owen_plan_1993';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // War week helper
@@ -147,13 +149,13 @@ export function evaluatePeacePlans(state: GameState): void {
         const alreadyOffered = neg.peace_plan_history.some(h => h.plan_id === plan.id);
         if (alreadyOffered) continue;
 
-        // Determine player faction (defaults to RBiH if not set)
-        const playerFaction = state.meta.player_faction ?? 'RBiH';
+        const playerFaction = state.meta.player_faction;
 
-        // Compute bot responses for non-player factions
+        // A no-player headless state computes every faction. Player sessions leave
+        // the selected faction pending for the existing desktop resolution path.
         const botResponses: Record<string, 'accepted' | 'rejected'> = {};
         for (const faction of CANONICAL_FACTIONS) {
-            if (faction === playerFaction) continue;
+            if (playerFaction != null && faction === playerFaction) continue;
             botResponses[faction] = computeBotResponse(state, plan, faction);
         }
 
@@ -164,6 +166,10 @@ export function evaluatePeacePlans(state: GameState): void {
             bot_responses: botResponses,
         };
 
+        if (playerFaction == null) {
+            resolvePeacePlan(state, plan.id, botResponses.RBiH ?? 'rejected');
+        }
+
         // Only one plan per turn
         break;
     }
@@ -172,6 +178,35 @@ export function evaluatePeacePlans(state: GameState): void {
 // ═══════════════════════════════════════════════════════════════════════════
 // Resolution (called when player responds)
 // ═══════════════════════════════════════════════════════════════════════════
+
+export function synchronizeVanceOwenEventDecision(
+    state: GameState,
+    playerResponse: 'accepted' | 'rejected',
+    playerFaction: FactionId,
+): void {
+    const pending = state.military.pending_event_decisions;
+    if (!pending?.some(decision => (
+        decision.event_id === VANCE_OWEN_EVENT_ID
+        && decision.faction === playerFaction
+    ))) return;
+
+    const existingReceipt = state.military.event_decision_log?.some(
+        decision => decision.event_id === VANCE_OWEN_EVENT_ID && decision.faction === playerFaction,
+    ) === true;
+    if (!existingReceipt) {
+        resolveEventDecision(
+            state,
+            VANCE_OWEN_EVENT_ID,
+            playerResponse === 'accepted' ? 'accept' : 'reject',
+        );
+    }
+
+    state.military.pending_event_decisions = (state.military.pending_event_decisions ?? [])
+        .filter(decision => !(
+            decision.event_id === VANCE_OWEN_EVENT_ID
+            && decision.faction === playerFaction
+        ));
+}
 
 /**
  * Resolve a pending peace plan after the player responds.
@@ -198,6 +233,10 @@ export function resolvePeacePlan(
     }
 
     const playerFaction = state.meta.player_faction ?? 'RBiH';
+
+    if (planId === 'vance_owen') {
+        synchronizeVanceOwenEventDecision(state, playerResponse, playerFaction);
+    }
 
     // Build complete response map: bot responses + player response
     const allResponses: Record<string, 'accepted' | 'rejected' | 'pending'> = {};
@@ -234,7 +273,7 @@ export function resolvePeacePlan(
     if (allAccepted) {
         // All factions accepted — game ends with peace plan outcome.
         state.meta.game_over = true;
-        state.meta.outcome = `peace_plan:${planId}`;
+        state.meta.outcome = `negotiated_peace:${planId}`;
         // LANE-2026-05-02-D1-WAR-ENDED-EARLY-PRODUCER:
         // Also set the `war_ended_early` event flag that
         // `src/sim/war_termination.ts:62` reads. The direct

@@ -10,6 +10,7 @@
 import { FrontEdge } from '../map/front_edges.js';
 import { getSidCapacityModifiers } from '../sim/collapse/capacity_modifiers.js';
 import type { FactionId, GameState, TrendDirection } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 
 /**
@@ -53,7 +54,7 @@ export function updateLossOfControlTrends(
     const previousSnapshot = trends.previous_turn_snapshot;
 
     // Initialize faction trends
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
     for (const faction of factions) {
         if (!trends.by_faction[faction.id]) {
             trends.by_faction[faction.id] = {

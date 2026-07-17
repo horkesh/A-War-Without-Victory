@@ -240,7 +240,18 @@ export function runOngoingRecruitment(
         maxMandatoryPerFaction: maxRecruitsPerFaction,
         maxElectivePerFaction: maxRecruitsPerFaction,
         canonicalToOperational,
+        factionIds: selectAutomaticRecruitmentFactions(state),
     });
+}
+
+export function selectAutomaticRecruitmentFactions(state: GameState): FactionId[] {
+    const playerFaction = state.meta.headless_scenario_auto_control === true
+        ? null
+        : state.meta.player_faction ?? null;
+    const delegatesRecruitment = (state.meta.autonomy_level ?? 0) >= 2;
+    return sortedFactionIds(state).filter(
+        (factionId) => playerFaction == null || delegatesRecruitment || factionId !== playerFaction,
+    );
 }
 
 function applyRsMandatoryMobilizationAccrual(state: GameState, oobBrigades: OobBrigade[]): void {

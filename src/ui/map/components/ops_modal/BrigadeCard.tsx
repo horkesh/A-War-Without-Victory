@@ -137,20 +137,20 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             {/* Unavailable overlay */}
             {isUnavailable && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-red-400/60 rotate-[-15deg]">
+                    <span className="text-xs font-bold uppercase tracking-wider text-red-400/60 rotate-[-15deg]">
                         {isCombatIneffective ? t('opsModal.combatIneffective') : t('formationDetail.disrupted')}
                     </span>
                 </div>
             )}
 
             {/* Brigade name */}
-            <div className="text-[10px] font-bold text-white truncate" style={{ fontFamily: "'Courier New', monospace" }}>
+            <div className="text-xs font-bold text-white truncate" style={{ fontFamily: "'Courier New', monospace" }}>
                 {brigadeName}
             </div>
 
             {/* WP2e: Unit type indicator */}
             {unitType && (
-                <div className="text-[8px] font-bold uppercase tracking-wider text-accent-gold/70 mt-0.5">
+                <div className="text-xs font-bold uppercase tracking-wider text-accent-gold/70 mt-0.5">
                     {unitType}
                 </div>
             )}
@@ -161,7 +161,7 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
             </div>
 
             {/* WP2a: Equipment labels - always show both, spelled out */}
-            <div className="flex gap-2 mt-1.5 text-[9px] text-text-secondary">
+            <div className="flex gap-2 mt-1.5 text-xs text-text-secondary">
                 <span>{t('formationDetail.tanks').toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedTanks, locale)}</span></span>
                 <span className="text-text-secondary/30">&middot;</span>
                 <span>{t('peace.artyCount', { count: '' }).trim().toUpperCase()} <span className="text-white font-bold">{formatOptionalInteger(reportedArty, locale)}</span></span>
@@ -182,14 +182,14 @@ export const BrigadeCard = memo(function BrigadeCard({ brigade, isAssigned, isAu
                 </div>
                 {/* WP2b: Cohesion/Fatigue readability - 9px, full opacity */}
                 {/* WP2c/2d: Verbal descriptors with colors */}
-                <div className="flex justify-between text-[9px] text-text-secondary mt-0.5">
+                <div className="flex justify-between text-xs text-text-secondary mt-0.5">
                     <span>{t('tacticalCard.cohShort').toUpperCase()} {formatOptionalMetric(reportedCohesion, locale)} <span className={cohLabel.color}>{cohLabel.text}</span></span>
                     <span>{t('tacticalCard.fatShort').toUpperCase()} {formatOptionalMetric(reportedFatigue, locale)} <span className={fatLabel.color}>{fatLabel.text}</span></span>
                 </div>
             </div>
 
             {/* March time */}
-            <div className={`text-[10px] font-bold mt-1 ${getMarchColor(marchTurns)}`}>
+            <div className={`text-xs font-bold mt-1 ${getMarchColor(marchTurns)}`}>
                 {marchTurns === null || marchTurns === 99
                     ? '\u2014'
                     : marchTurns === 0

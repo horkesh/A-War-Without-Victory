@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import { loadSettlementGraph, type EdgeRecord } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import {
     applyControlFlipProposals,
     buildAdjacencyMap,
@@ -325,11 +325,13 @@ export async function runScenarioDeterministic(
         const scripted = options.script.turns[String(i)] ?? [];
         if (scripted.length > 0) applyScriptedPostureUpdates(state, scripted);
 
-        const { nextState, report: turnReport } = await runTurn(state, {
+        const result = await runTurn(state, {
             seed: state.meta.seed,
             settlementEdges: options.settlementEdges,
             applyNegotiation: options.applyNegotiation
         });
+        assertTurnSuccess(result);
+        const { nextState, report: turnReport } = result;
         state = nextState;
 
         const derivedFrontEdges = computeFrontEdges(state, options.settlementEdges);

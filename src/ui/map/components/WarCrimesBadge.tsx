@@ -18,7 +18,7 @@ export interface WarCrimesRecord {
 export function WarCrimesBadge({ record, className }: { record: WarCrimesRecord; className?: string }) {
     const style = VERDICT_STYLE[record.verdict] ?? VERDICT_STYLE.indicted;
     return (
-        <div className={`text-[9px] px-1.5 py-1.5 rounded border ${style.border} ${style.bg} space-y-0.5${className ? ` ${className}` : ''}`}>
+        <div className={`text-xs px-1.5 py-1.5 rounded border ${style.border} ${style.bg} space-y-0.5${className ? ` ${className}` : ''}`}>
             <div className="flex items-center justify-between gap-2">
                 <span className={`font-bold uppercase tracking-wider ${style.text}`}>{t(style.iconKey)}</span>
             </div>

@@ -52,9 +52,9 @@ describe('ui map order actions', () => {
     const ipc = {
       advanceTurn: vi.fn().mockResolvedValue({
         ok: true,
-        stateJson: '{"meta":{"turn":12}}',
         report: { phase: 'war', turn: 12, player_faction: 'RBiH' },
       }),
+      getCurrentGameState: vi.fn().mockResolvedValue('{"meta":{"turn":12}}'),
     };
     const loadSave = vi.fn().mockImplementation(async () => {
       current = next;

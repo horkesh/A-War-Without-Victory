@@ -63,7 +63,7 @@ export function SidePickerOverlay({
               <div className="flex flex-col">
                 <span className="text-sm font-semibold tracking-wide">{sidePickerFactionLabel(faction)}</span>
                 {getArmyName(faction) && (
-                  <span className="text-[10px] text-text-secondary uppercase">{t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}</span>
+                  <span className="text-xs text-text-secondary uppercase">{t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}</span>
                 )}
               </div>
             </button>
@@ -113,7 +113,7 @@ export function SidePickerOverlay({
           </div>
         </div>
         <div className="px-4 py-3 border-t border-panel-border bg-panel-bg flex justify-between items-center">
-          <div className="text-[10px] text-text-secondary italic">
+          <div className="text-xs text-text-secondary italic">
             {AWWV_APP_VERSION}
           </div>
           <button

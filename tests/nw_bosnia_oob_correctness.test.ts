@@ -39,11 +39,11 @@
  * Out of scope (kept as-is):
  *   - `hvo_hrvoje_vukcic_brigade`: already `available_from=0`
  *   - `hrhb_103rd_derventa_brigade`: kept `available_from=8`
- *     (`pocket_destroyable` — separate mechanism handles 4-5 July 1992 fall)
+ *     (`pocket_destroyable` is legacy authored metadata, not removal authority)
  *   - `hrhb_104th_bosanski_brod_brigade`: kept `available_from=8`
- *     (`pocket_destroyable` — separate mechanism handles 6 October 1992 fall)
+ *     (`pocket_destroyable` is legacy authored metadata, not removal authority)
  *   - `hrhb_105th_modrica_brigade`: kept `available_from=8`
- *     (`pocket_destroyable` — separate mechanism handles 28 June 1992 fall)
+ *     (ordinary canonical dissolution rules apply)
  */
 
 import assert from 'node:assert';
@@ -191,14 +191,13 @@ test('T6: hvo_hrvoje_vukcic_brigade unchanged at available_from=0 (pre-existing 
     assert.strictEqual(hrvoje.corps, 'hvo_northwest_bosnia');
 });
 
-test('T7: sibling NW-Bosnia brigades 103rd/104th/105th kept at available_from=8 (out of this lane scope; canonical pocket-loss mechanism handles their fall)', async () => {
+test('T7: sibling NW-Bosnia brigades keep authored availability and pocket metadata without bypassing canonical dissolution', async () => {
     // Per BB1 timing, these brigades historically existed in April 1992 too,
     // but they fell to VRS during 1992 (Modrica 28 Jun, Derventa 4-5 Jul,
     // Bosanski Brod 6 Oct). They are out of this lane's scope; their
-    // `available_from=8` value is unchanged by this fix. The `pocket_destroyable`
-    // engine mechanism dissolves the 103rd Derventa + 104th Bosanski Brod when
-    // their home pockets are overrun; the 105th Modriča lacks the tag — that
-    // is a separate pre-existing OOB inconsistency tracked apart from this lane.
+    // `available_from=8` value is unchanged by this fix. `pocket_destroyable`
+    // remains legacy authored metadata and does not authorize removal outside
+    // the canonical dissolution evaluator.
     const brigades = await loadOobBrigades(REPO_ROOT);
     const siblings = ['hrhb_103rd_derventa_brigade', 'hrhb_104th_bosanski_brod_brigade', 'hrhb_105th_modrica_brigade'];
     for (const bid of siblings) {
@@ -207,13 +206,11 @@ test('T7: sibling NW-Bosnia brigades 103rd/104th/105th kept at available_from=8 
         assert.strictEqual(b.available_from, 8,
             `${bid}.available_from must remain 8 (out of this lane's scope); got ${b.available_from}`);
     }
-    // Spot-check the canonical pocket_destroyable mechanism is wired on the
-    // brigades that have it (103rd + 104th). Don't assert on 105th — that
-    // gap is pre-existing and out of scope.
+    // Spot-check the legacy authored metadata remains on the 103rd + 104th.
     const has103rd = brigades.find(b => b.id === 'hrhb_103rd_derventa_brigade');
     const has104th = brigades.find(b => b.id === 'hrhb_104th_bosanski_brod_brigade');
     assert.ok(has103rd && Array.isArray(has103rd.tags) && has103rd.tags.includes('pocket_destroyable'),
-        'hrhb_103rd_derventa_brigade carries the pocket_destroyable tag (canonical engine mechanism)');
+        'hrhb_103rd_derventa_brigade retains its authored pocket_destroyable metadata');
     assert.ok(has104th && Array.isArray(has104th.tags) && has104th.tags.includes('pocket_destroyable'),
-        'hrhb_104th_bosanski_brod_brigade carries the pocket_destroyable tag (canonical engine mechanism)');
+        'hrhb_104th_bosanski_brod_brigade retains its authored pocket_destroyable metadata');
 });

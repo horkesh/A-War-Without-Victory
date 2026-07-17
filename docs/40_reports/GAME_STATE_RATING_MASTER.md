@@ -4,7 +4,7 @@
 
 **Updated:** 2026-07-07 docs reconciliation after GUI runway merge and main CI green.
 
-**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** required 188w engine-health floor **609/712** after the 2026-06-26 CI-observed re-floor, schema **v36**, 40w structural fingerprint v2 **`6806ddd157044afa`**, and `engine-health-188w` REQUIRED/BLOCKING. The GUI decision-access runway WP-1..WP-9 is merged; the active road is **WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**. The June 9 `649` / collapse-before-D2 and June 11 `658` floor framing below is historical lineage.
+**Studio:** Pyrrhic Games · **Project:** A War Without Victory (AWWV) · **Version:** v0.9.9-beta.1 · **Current release-readiness contract:** required 188w engine-health floor **609/712** after the 2026-06-26 CI-observed re-floor, schema **v36**, 40w structural fingerprint v2 **`66ac3f76cb351904`**, and `engine-health-188w` REQUIRED/BLOCKING. The GUI decision-access runway WP-1..WP-9 is merged; the active road is **WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag**. The June 9 `649` / collapse-before-D2 and June 11 `658` floor framing below is historical lineage.
 
 ---
 

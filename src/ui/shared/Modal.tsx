@@ -125,6 +125,8 @@ export interface ModalProps {
      * `true`.
      */
     trapFocus?: boolean;
+    /** Optional stable child test id to receive initial focus before the default first control. */
+    initialFocusTestId?: string;
     /**
      * Optional `aria-labelledby` referencing an `id` on a heading inside
      * the panel.
@@ -196,6 +198,7 @@ export function Modal({
     closeOnEscape = true,
     closeOnBackdropClick = true,
     trapFocus = true,
+    initialFocusTestId,
     ariaLabelledBy,
     ariaLabel,
     ariaDescribedBy,
@@ -237,8 +240,11 @@ export function Modal({
             : null);
         // Focus the first focusable child of the panel, or the panel
         // itself if no children are focusable.
+        const requestedTarget = initialFocusTestId
+            ? panelRef.current?.querySelector<HTMLElement>(`[data-testid="${initialFocusTestId}"]`) ?? null
+            : null;
         const focusables = getFocusableElements(panelRef.current);
-        const target = focusables[0] ?? panelRef.current;
+        const target = requestedTarget ?? focusables[0] ?? panelRef.current;
         if (target && typeof target.focus === 'function') {
             target.focus();
         }
@@ -254,7 +260,7 @@ export function Modal({
             }
             previousActiveRef.current = null;
         };
-    }, [isOpen, trapFocus]);
+    }, [initialFocusTestId, isOpen, trapFocus]);
 
     // Tab-trap inside the panel: cycle Tab / Shift+Tab through focusable
     // descendants without escaping into background DOM.

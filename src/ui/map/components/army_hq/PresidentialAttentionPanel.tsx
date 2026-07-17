@@ -25,7 +25,7 @@ function CountCard({ label, value, tone = 'neutral' }: { label: string; value: n
 
     return (
         <div className="rounded border border-panel-border bg-panel-bg px-2 py-1.5">
-            <div className="text-[8px] uppercase tracking-wide text-text-secondary">{label}</div>
+            <div className="text-xs uppercase tracking-wide text-text-secondary">{label}</div>
             <div className={`text-[12px] font-bold ${valueClass}`}>{value}</div>
         </div>
     );
@@ -105,10 +105,10 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
     if (liveReviewCount === 0 && !armyReserveQueue) {
         return (
             <div className="bg-panel-card border border-panel-border rounded-lg p-4 mb-4">
-                <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
+                <div className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary mb-2 pb-1.5 border-b border-panel-border">
                     {t('attention.title')}
                 </div>
-                <div className="text-[11px] text-text-secondary italic">
+                <div className="text-xs text-text-secondary italic">
                     {t('attention.emptyDetail')}
                 </div>
             </div>
@@ -120,7 +120,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
             <div className="space-y-4">
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <div className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-1">
+                        <div className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary mb-1">
                             {t('attention.title')}
                         </div>
                         <div className="text-[12px] font-bold text-text-primary">
@@ -128,7 +128,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                 ? t(liveReviewCount === 1 ? 'attention.awaitReview.one' : 'attention.awaitReview.many', { count: liveReviewCount })
                                 : t('attention.noReviews')}
                         </div>
-                        <div className="text-[10px] text-text-secondary mt-1">
+                        <div className="text-xs text-text-secondary mt-1">
                             {t('attention.queueDetail')}
                         </div>
                     </div>
@@ -144,7 +144,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                 </div>
 
                 {!ipc.isAvailable && (pendingDecisions.length > 0 || personnelDirectives.length > 0) && (
-                    <div className="rounded border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-[10px] leading-relaxed text-amber-200">
+                    <div className="rounded border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-xs leading-relaxed text-amber-200">
                         {t('attention.bridgeUnavailableReadOnly')}
                     </div>
                 )}
@@ -153,13 +153,13 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                     <section className="rounded border border-panel-border bg-panel-bg p-3 space-y-2">
                         <div className="flex items-start justify-between gap-3">
                             <div>
-                                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70">
                                     {t('attention.reserveRequests')}
                                 </div>
-                                <div className={`text-[11px] mt-1 font-semibold ${reserveSummary?.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
+                                <div className={`text-xs mt-1 font-semibold ${reserveSummary?.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
                                     {reserveSummary?.heading}
                                 </div>
-                                <div className="text-[10px] text-text-secondary mt-1">
+                                <div className="text-xs text-text-secondary mt-1">
                                     {reserveSummary?.detail}
                                 </div>
                             </div>
@@ -175,7 +175,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                 <button
                                     type="button"
                                     onClick={onOpenArmyReserve}
-                                    className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5"
+                                    className="px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-primary transition-colors hover:bg-white/5"
                                 >
                                     {t('attention.openReserveDesk')}
                                 </button>
@@ -187,21 +187,21 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {pendingDecisions.length > 0 && (
                 <section className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
                         {t('attention.presidentialDecisions')}
                     </div>
                     {pendingDecisions.map((decision) => (
                         <div key={decision.event_id} className="rounded border border-red-500/25 bg-red-950/10 p-3 space-y-2">
                             <div className="flex items-center justify-between gap-2">
                                 <div>
-                                    <div className="text-[11px] font-bold text-text-primary">{decision.event_title}</div>
-                                    <div className="text-[10px] text-text-secondary">{t('attention.pendingSinceWeek', { date: turnToDateString(decision.turn_fired) })}</div>
+                                    <div className="text-xs font-bold text-text-primary">{decision.event_title}</div>
+                                    <div className="text-xs text-text-secondary">{t('attention.pendingSinceWeek', { date: turnToDateString(decision.turn_fired) })}</div>
                                 </div>
-                                <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border border-red-500/35 bg-red-500/10 text-red-400">
+                                <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-widest rounded border border-red-500/35 bg-red-500/10 text-red-400">
                                     {t('attention.decisionRequired')}
                                 </span>
                             </div>
-                            <div className="rounded border border-panel-border/70 bg-panel-bg/70 px-3 py-2 text-[10px] leading-relaxed text-text-secondary">
+                            <div className="rounded border border-panel-border/70 bg-panel-bg/70 px-3 py-2 text-xs leading-relaxed text-text-secondary">
                                 {t(
                                     decision.response_options.length === 1
                                         ? 'attention.responseOptionsAwaiting.one'
@@ -216,7 +216,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {reviewQueue && reviewQueue.commandInterpretationCount > 0 && (
                 <section className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
                         {t('attention.commandReactions')}
                     </div>
                     <OrderInterpretationPanel gameState={gameState} playerFaction={playerFaction} />
@@ -225,7 +225,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
 
             {personnelDirectives.length > 0 && (
                 <section className="space-y-2">
-                    <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
+                    <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70 border-b border-panel-border pb-1">
                         {t('attention.personnelDirectives')}
                     </div>
                     {personnelDirectives.map((event) => {
@@ -242,8 +242,8 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                             <div key={event.event_id} className="rounded border border-panel-border bg-panel-bg p-3 space-y-2">
                                 <div className="flex items-center justify-between gap-2">
                                     <div>
-                                        <div className="text-[11px] font-bold text-text-primary">{event.officer_name}</div>
-                                        <div className="text-[10px] text-text-secondary">
+                                        <div className="text-xs font-bold text-text-primary">{event.officer_name}</div>
+                                        <div className="text-xs text-text-secondary">
                                             {isReplacement
                                                 ? t('attention.replacementAvailable', { corps: corpsLabel })
                                                 : event.type === 'officer_relieved'
@@ -251,13 +251,13 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                                     : t('attention.newOfficerDetail')}
                                         </div>
                                     </div>
-                                    <span className="px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest rounded border border-amber-500/35 bg-amber-500/10 text-amber-400">
+                                    <span className="px-2 py-0.5 text-xs font-bold uppercase tracking-widest rounded border border-amber-500/35 bg-amber-500/10 text-amber-400">
                                         {badgeLabel}
                                     </span>
                                 </div>
 
                                 {isReplacement && event.current_commander_name && (
-                                    <div className="text-[10px] text-text-secondary">
+                                    <div className="text-xs text-text-secondary">
                                         {t('attention.currentCommander')} <span className="text-text-primary font-semibold">{event.current_commander_name}</span>
                                     </div>
                                 )}
@@ -269,7 +269,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                                 type="button"
                                                 onClick={() => { void handleAcknowledgeOfficerEvent(event.event_id); }}
                                                 disabled={!ipc.isAvailable}
-                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] rounded border border-panel-border bg-panel-bg text-text-secondary transition-colors hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {t('attention.keepCurrent')}
                                             </button>
@@ -277,7 +277,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                                 type="button"
                                                 onClick={() => { void handleAcceptReplacement(event); }}
                                                 disabled={!ipc.isAvailable}
-                                                className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                                className="px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 {t('attention.acceptReplacement')}
                                             </button>
@@ -287,7 +287,7 @@ export function PresidentialAttentionPanel({ gameState, playerFaction, onOpenArm
                                             type="button"
                                             onClick={() => { void handleAcknowledgeOfficerEvent(event.event_id); }}
                                             disabled={!ipc.isAvailable}
-                                            className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                                            className="px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] rounded border border-amber-500/35 bg-amber-500/10 text-amber-400 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {t('attention.acknowledge')}
                                         </button>

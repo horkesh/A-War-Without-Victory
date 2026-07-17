@@ -9,9 +9,7 @@ import {
   type PresidentialDecisionRoomSourceHandoff,
 } from './presidentialDecisionRoom';
 import type { LoadedGameState } from './types';
-import { playerFactionMatch } from './playerFactionMatch';
 import { derivePresidentialBlockers } from './presidentialBlockers';
-import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { t } from '../i18n';
 
 export type PreAdvanceCommandReviewStatus = 'blocked' | 'review' | 'clear' | 'unavailable';
@@ -82,17 +80,7 @@ function countBlockingDecisions(state: LoadedGameState | null): number {
   const counterOfferCount = (state.pendingCounterOffers ?? [])
     .filter((offer) => !playerFaction || !offer.targetFaction || offer.targetFaction === playerFaction)
     .length;
-  const liveRequiredEventDecisionCount = (state.pendingEventDecisions ?? []).filter((decision) =>
-      playerFactionMatch(decision.faction, state.player_faction ?? null)
-      && isRequiredPendingEventDecision(decision)
-    ).length;
-  const eventDecisionCount = Array.isArray(state.pendingEventDecisions)
-    ? liveRequiredEventDecisionCount
-    : Math.max(state.presidentialReviewQueue?.eventDecisionCount ?? 0, liveRequiredEventDecisionCount);
-  const paramilitaryRequestCount = playerFaction
-    ? (state.pendingParamilitaryRequests ?? []).filter((request) => request.faction === playerFaction).length
-    : 0;
-  return Math.max(eventDecisionCount + paramilitaryRequestCount, presidentialBlockerCount) + counterOfferCount;
+  return presidentialBlockerCount + counterOfferCount;
 }
 
 export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: number }): string {
@@ -105,19 +93,26 @@ export function formatPreAdvanceGateBlockTitle(view: { blockingDecisionCount: nu
 
 export function buildPreAdvanceCommandReviewView(input: PreAdvanceCommandReviewInput): PreAdvanceCommandReviewView {
   const decisionRoom = buildPresidentialDecisionRoomView(input);
-  const items = decisionRoom.advanceReadiness.items.map(mapReadinessItem);
-  const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(decisionRoom.advanceReadiness.items);
+  const liveBlockers = derivePresidentialBlockers(input.state, input.osidNameMap ?? null);
+  const hasLiveParamilitaryBlocker = liveBlockers.some((blocker) => blocker.type === 'paramilitary_request');
+  const readinessCards = decisionRoom.advanceReadiness.items
+    .filter((card) => card.id !== 'paramilitary:pending' || hasLiveParamilitaryBlocker);
+  const items = readinessCards.map(mapReadinessItem);
+  const sourceHandoffs = buildPresidentialDecisionRoomSourceHandoffs(readinessCards);
   const blockingDecisionCount = countBlockingDecisions(input.state);
+  const status = statusFor(
+    input.state != null && decisionRoom.hasPlayerFaction,
+    blockingDecisionCount > 0,
+    items.length,
+  );
 
   return {
-    status: statusFor(
-      input.state != null && decisionRoom.hasPlayerFaction,
-      decisionRoom.advanceReadiness.blockedByExistingSystems || blockingDecisionCount > 0,
-      items.length,
-    ),
-    headline: blockingDecisionCount > 0
+    status,
+    headline: status === 'blocked'
       ? t('decisionRoom.advance.reviewBeforeAdvance')
-      : decisionRoom.advanceReadiness.headline,
+      : status === 'review'
+        ? t('decisionRoom.advance.recommendedBeforeAdvance')
+        : decisionRoom.advanceReadiness.headline,
     canReviewPriorities: decisionRoom.hasPlayerFaction,
     blockingDecisionCount,
     items,

@@ -50,7 +50,7 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
             }}
         >
             {/* Slide counter */}
-            <div className="absolute top-6 right-8 text-[10px] font-mono text-white/25 tracking-wider">
+            <div className="absolute top-6 right-8 text-xs font-mono text-white/25 tracking-wider">
                 {index + 1} / {total}
             </div>
 
@@ -74,14 +74,14 @@ export const WrappedSlideComponent = React.memo(function WrappedSlideComponent({
 
                 {/* Detail */}
                 {slide.detail && (
-                    <p className="text-[10px] font-mono text-white/30 tracking-wider uppercase">
+                    <p className="text-xs font-mono text-white/30 tracking-wider uppercase">
                         {slide.detail}
                     </p>
                 )}
             </div>
 
             {/* Navigation hint */}
-            <div className="absolute bottom-8 text-[9px] font-mono text-white/15 tracking-wider uppercase">
+            <div className="absolute bottom-8 text-xs font-mono text-white/15 tracking-wider uppercase">
                 {index < total - 1 ? t('wrapped.navHint.next') : t('wrapped.navHint.close')}
             </div>
         </div>
@@ -109,12 +109,12 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         </div>
                     )}
                     {slide.heroLabel && (
-                        <div className="text-[10px] font-mono text-white/40 uppercase tracking-wider">
+                        <div className="text-xs font-mono text-white/40 uppercase tracking-wider">
                             {slide.heroLabel}
                         </div>
                     )}
                     {slide.bullets && slide.bullets.length > 0 && (
-                        <ul className="max-w-sm text-left text-[11px] text-white/60 leading-relaxed mt-2 space-y-2">
+                        <ul className="max-w-sm text-left text-xs text-white/60 leading-relaxed mt-2 space-y-2">
                             {slide.bullets.map((bullet, idx) => (
                                 <li key={`${slide.id}-bullet-${idx}`}>{formatHistoricalDivergenceNote(bullet)}</li>
                             ))}
@@ -134,11 +134,11 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                     >
                         {slide.heroValue ?? '0'}
                     </div>
-                    <div className="text-[11px] font-mono text-red-400/60 uppercase tracking-wider">
+                    <div className="text-xs font-mono text-red-400/60 uppercase tracking-wider">
                         {slide.heroLabel ?? t('wrapped.hero.casualtiesFallback')}
                     </div>
                     {(casualties ?? 0) > 500 && (
-                        <div className="text-[9px] text-red-400/30 italic mt-1">
+                        <div className="text-xs text-red-400/30 italic mt-1">
                             {t('wrapped.hero.survivorMemory')}
                         </div>
                     )}
@@ -157,7 +157,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                     >
                         {(totalCasualties ?? 0).toLocaleString()}
                     </div>
-                    <div className="text-[10px] font-mono text-red-400/50 uppercase tracking-wider">
+                    <div className="text-xs font-mono text-red-400/50 uppercase tracking-wider">
                         {t('wrapped.hero.totalCasualties')}
                     </div>
                     {(totalDisplaced ?? 0) > 0 && (
@@ -166,7 +166,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         </div>
                     )}
                     {(totalDisplaced ?? 0) > 0 && (
-                        <div className="text-[10px] font-mono text-amber-500/30 uppercase tracking-wider">
+                        <div className="text-xs font-mono text-amber-500/30 uppercase tracking-wider">
                             {t('wrapped.hero.peopleDisplaced')}
                         </div>
                     )}
@@ -188,7 +188,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                     <div className="text-[48px] font-bold tabular-nums text-amber-400/80 leading-none">
                         {slide.heroValue}
                     </div>
-                    <div className="text-[11px] font-mono text-amber-400/40 uppercase tracking-wider">
+                    <div className="text-xs font-mono text-amber-400/40 uppercase tracking-wider">
                         {slide.heroLabel}
                     </div>
                 </div>
@@ -205,7 +205,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         {slide.heroValue ?? '-'}
                     </div>
                     {slide.heroLabel && (
-                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider text-center">
+                        <div className="text-xs font-mono text-white/40 uppercase tracking-wider text-center">
                             {slide.heroLabel}
                         </div>
                     )}
@@ -225,7 +225,7 @@ function renderHeroContent(slide: WrappedSlideType, accent: string, faction?: st
                         </div>
                     )}
                     {slide.heroLabel && (
-                        <div className="text-[11px] font-mono text-white/40 uppercase tracking-wider">
+                        <div className="text-xs font-mono text-white/40 uppercase tracking-wider">
                             {slide.heroLabel}
                         </div>
                     )}

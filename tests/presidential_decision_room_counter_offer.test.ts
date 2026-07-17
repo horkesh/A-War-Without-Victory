@@ -98,4 +98,29 @@ describe('Presidential Decision Room counter-offer surface', () => {
         expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('counter-offer:HRHB_FOREIGN');
         expect(view.metrics.urgentCount).toBe(0);
     });
+
+    it('keeps every hard blocker in advance review when more than four are pending', () => {
+        const state = makeState();
+        const template = state.pendingCounterOffers![0];
+        state.pendingCounterOffers = Array.from({ length: 5 }, (_, index) => ({
+            ...template,
+            id: `HRHB_00${index + 1}`,
+            createdTurn: 70 + index,
+        }));
+        const selectedCardId = 'counter-offer:HRHB_005';
+
+        const view = buildPresidentialDecisionRoomView({ state, selectedCardId });
+        const readinessIds = view.advanceReadiness.items.map((item) => item.id);
+
+        expect(readinessIds).toHaveLength(5);
+        expect(readinessIds).toEqual(expect.arrayContaining(
+            state.pendingCounterOffers.map((offer) => `counter-offer:${offer.id}`),
+        ));
+        expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+        expect(view.activeDossier).toMatchObject({
+            cardId: selectedCardId,
+            advanceSensitive: true,
+            advanceLabel: 'Review before advance',
+        });
+    });
 });

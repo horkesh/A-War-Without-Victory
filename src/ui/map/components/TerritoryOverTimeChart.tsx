@@ -90,10 +90,16 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
       result[faction] = `M${topPoints.join('L')}L${bottomPoints.join('L')}Z`;
     }
 
-    // X-axis labels (every ~10 turns)
-    const step = Math.max(1, Math.ceil(turnRange / 8));
+    // Six labels keep full month/year copy separated at the 560-unit viewBox.
+    const labelCount = Math.min(6, turnRange + 1);
     const labels: Array<{ x: number; label: string }> = [];
-    for (let turn = minTurn; turn <= maxTurn; turn += step) {
+    const seenTurns = new Set<number>();
+    for (let index = 0; index < labelCount; index += 1) {
+      const turn = labelCount === 1
+        ? minTurn
+        : Math.round(minTurn + (index * turnRange) / (labelCount - 1));
+      if (seenTurns.has(turn)) continue;
+      seenTurns.add(turn);
       labels.push({ x: xScale(turn), label: formatTerritoryChartTickLabel(turn) });
     }
 
@@ -101,14 +107,14 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
   }, [hasHistory, territoryHistory, plotWidth, plotHeight, padding.left, padding.top]);
 
   return (
-    <div>
-      <h3 className="text-[10px] font-bold uppercase tracking-wider text-text-secondary mb-2">
+    <div data-testid="territory-over-time-chart">
+      <h3 className="text-xs font-bold uppercase tracking-wider text-text-secondary mb-2">
         Territory Over Time
       </h3>
       {hasHistory ? (
         <svg
           viewBox={`0 0 ${chartWidth} ${chartHeight}`}
-          className="w-full h-auto bg-black/20 rounded border border-white/5"
+          className="h-auto max-h-[14rem] w-full rounded border border-white/5 bg-black/20"
           preserveAspectRatio="xMidYMid meet"
         >
           {/* Grid lines */}
@@ -123,8 +129,8 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
                 />
                 <text
                   x={padding.left - 4} y={y + 3}
-                  textAnchor="end" fill="rgba(255,255,255,0.3)"
-                  fontSize={9} fontFamily="monospace"
+                  textAnchor="end" fill="rgba(255,255,255,0.65)"
+                  fontSize={12} fontFamily="monospace"
                 >
                   {pct}%
                 </text>
@@ -168,9 +174,11 @@ export const TerritoryOverTimeChart = React.memo(function TerritoryOverTimeChart
           {xLabels.map((l, i) => (
             <text
               key={i}
+              data-testid="territory-chart-x-label"
               x={l.x} y={chartHeight - 4}
-              textAnchor="middle" fill="rgba(255,255,255,0.3)"
-              fontSize={9} fontFamily="monospace"
+              textAnchor={i === 0 ? 'start' : i === xLabels.length - 1 ? 'end' : 'middle'}
+              fill="rgba(255,255,255,0.65)"
+              fontSize={12} fontFamily="monospace"
             >
               {l.label}
             </text>

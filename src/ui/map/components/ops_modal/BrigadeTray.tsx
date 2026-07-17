@@ -81,15 +81,15 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                 {/* Assembly time badge */}
                 {activeAxis && activeAxis.brigadeIds.length > 0 && (
                     <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-secondary">
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary">
                             {t('opsModal.fullAssembly', undefined, locale)}
                         </span>
-                        <span className={`text-[10px] font-bold ${
+                        <span className={`text-xs font-bold ${
                             maxMarch <= 1 ? 'text-green-400' : maxMarch <= 3 ? 'text-amber-400' : 'text-red-400'
                         }`}>
                             {t(maxMarch === 1 ? 'opsModal.march.turn.one' : 'opsModal.march.turn.many', { count: maxMarch }, locale)}
                         </span>
-                        <span className="text-[8px] text-text-secondary">
+                        <span className="text-xs text-text-secondary">
                             {t(assignedCount === 1 ? 'opsModal.assignedSummary.one' : 'opsModal.assignedSummary.many', { count: assignedCount }, locale)}
                         </span>
                     </div>
@@ -112,7 +112,7 @@ export function BrigadeTray({ plan, onUpdate, corpsBrigades, autoProposed, facti
                         );
                     })}
                     {sortedBrigades.length === 0 && (
-                        <div className="text-[10px] text-text-secondary/50 italic py-8 text-center w-full">
+                        <div className="text-xs text-text-secondary/50 italic py-8 text-center w-full">
                             {t('opsModal.noBrigadesForCorps', undefined, locale)}
                         </div>
                     )}

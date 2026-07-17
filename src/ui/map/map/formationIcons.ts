@@ -14,6 +14,8 @@ const COUNTER_BODY_WIDTH = ICON_WIDTH - COUNTER_BODY_INSET * 2;
 const COUNTER_BODY_HEIGHT = ICON_HEIGHT - COUNTER_BODY_INSET * 2;
 const COUNTER_HALO_FILL = 'rgba(235, 225, 205, 0.98)';
 const COUNTER_HALO_BORDER = 'rgba(18, 14, 10, 0.72)';
+const FORMING_FILL = 'rgba(104, 108, 112, 1)';
+const FORMING_BORDER = 'rgba(54, 58, 62, 1)';
 
 const FACTION_FILL: Record<string, string> = {
   RS: 'rgba(178, 60, 60, 1)',
@@ -96,13 +98,14 @@ function parseReportedBar(token: string | undefined, prefix: 'h' | 'm'): number 
   return Number.isFinite(value) ? Math.max(0, Math.min(100, value)) : undefined;
 }
 
-function parseIconId(iconId: string): { kind: string; faction: string; posture?: string; health?: number; morale?: number } {
+function parseIconId(iconId: string): { kind: string; faction: string; posture?: string; health?: number; morale?: number; forming: boolean } {
   const [kind = 'unit', faction = 'UNKNOWN', ...rest] = iconId.split('__');
   const isStatusToken = (token: string) => /^(?:h|m)(?:\d+|unreported)/.test(token);
-  const posture = rest.find((token) => !isStatusToken(token));
+  const forming = rest.includes('forming');
+  const posture = rest.find((token) => token !== 'forming' && !isStatusToken(token));
   const health = parseReportedBar(rest.find((token) => /^h(?:\d+|unreported)/.test(token)), 'h');
   const morale = parseReportedBar(rest.find((token) => /^m(?:\d+|unreported)/.test(token)), 'm');
-  return { kind, faction, posture, health, morale };
+  return { kind, faction, posture, health, morale, forming };
 }
 
 function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number): void {
@@ -122,10 +125,10 @@ function roundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: num
 export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string): void {
   const isWhiteVariant = iconId.startsWith('white__');
   const actualIconId = isWhiteVariant ? iconId.slice(7) : iconId;
-  const { kind, faction, posture } = parseIconId(actualIconId);
+  const { kind, faction, posture, forming } = parseIconId(actualIconId);
   const canonicalFaction = normalizeFactionId(faction);
-  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)');
-  const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)');
+  const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? FORMING_FILL : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)');
+  const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? FORMING_BORDER : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)');
   const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : 'rgba(255, 255, 255, 1)';
 
   ctx.clearRect(0, 0, ICON_WIDTH, ICON_HEIGHT);
@@ -155,14 +158,17 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
   }
 
   // Border
+  ctx.save();
+  if (forming) ctx.setLineDash([10, 8]);
   roundedRect(ctx, COUNTER_BODY_X, COUNTER_BODY_Y, COUNTER_BODY_WIDTH, COUNTER_BODY_HEIGHT, CORNER_RADIUS);
   ctx.strokeStyle = border;
   ctx.lineWidth = 4;
   ctx.stroke();
+  ctx.restore();
 
   // Status Bars: bottom 16px (15-20% of counter)
   const { health, morale } = parseIconId(actualIconId);
-  if (health !== undefined || morale !== undefined) {
+  if (!forming && (health !== undefined || morale !== undefined)) {
     const barY = COUNTER_BODY_Y + COUNTER_BODY_HEIGHT - 10;
     const barH = 6;
     const barX = COUNTER_BODY_X + 16;
@@ -196,6 +202,14 @@ export function drawFormationIcon(ctx: CanvasRenderingContext2D, iconId: string)
   ctx.fillStyle = symbolColor;
   drawTacticalSymbol(ctx, kind, ICON_WIDTH, ICON_HEIGHT - 8); // Offset up to make room for bars
   ctx.restore();
+
+  if (forming) {
+    ctx.fillStyle = symbolColor;
+    ctx.font = 'bold 13px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('FORMING', ICON_WIDTH / 2, COUNTER_BODY_Y + COUNTER_BODY_HEIGHT - 8);
+  }
 }
 
 function createFormationIcon(iconId: string): ImageData {

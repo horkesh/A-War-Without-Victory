@@ -1,6 +1,7 @@
 import type { GameState, MunicipalityId } from '../state/game_state.js';
 import { POLITICAL_SIDES } from '../state/identity.js';
 import { parseMilitiaPoolKey } from '../state/militia_pool_key.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { ValidationIssue } from './validate.js';
 
 function asRecord(value: unknown): Record<string, unknown> | undefined {
@@ -227,6 +228,6 @@ export function validateMilitiaPools(
     return issues.sort((a, b) => {
         const pathA = a.path ?? '';
         const pathB = b.path ?? '';
-        return pathA.localeCompare(pathB);
+        return strictCompare(pathA, pathB);
     });
 }

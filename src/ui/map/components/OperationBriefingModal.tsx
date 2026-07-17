@@ -32,7 +32,7 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         return (
             <div className="mb-2">
-                <div className="flex justify-between text-[9px] mb-0.5">
+                <div className="flex justify-between text-xs mb-0.5">
                     <span className="uppercase font-bold text-neutral-600">{label}</span>
                     <span className="text-neutral-500 italic">{t('operationsSection.metricUnreported')}</span>
                 </div>
@@ -44,7 +44,7 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
     const color = pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500';
     return (
         <div className="mb-2">
-            <div className="flex justify-between text-[9px] mb-0.5">
+            <div className="flex justify-between text-xs mb-0.5">
                 <span className="uppercase font-bold text-neutral-600">{label}</span>
                 <span className="text-neutral-500">{pct}%{thresholdLabel ? ` (${t('operationBriefing.need', { threshold: thresholdLabel })})` : ''}</span>
             </div>
@@ -58,13 +58,13 @@ function ReadinessBar({ label, value, thresholdLabel }: { label: string; value: 
 function AssessmentBadge({ assessment }: { assessment?: string }) {
     switch (assessment) {
         case 'launch':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">{t('operationBriefing.recommendsLaunch')}</span>;
+            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">{t('operationBriefing.recommendsLaunch')}</span>;
         case 'postpone':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">{t('operationBriefing.recommendsPostpone')}</span>;
+            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-500/50">{t('operationBriefing.recommendsPostpone')}</span>;
         case 'abort':
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">{t('operationBriefing.recommendsAbort')}</span>;
+            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-red-950/40 text-red-200 border border-red-500/50">{t('operationBriefing.recommendsAbort')}</span>;
         default:
-            return <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-panel-card text-text-muted border border-panel-border">{t('operationBriefing.pendingAssessment')}</span>;
+            return <span className="px-2 py-0.5 text-xs uppercase font-bold bg-panel-card text-text-muted border border-panel-border">{t('operationBriefing.pendingAssessment')}</span>;
     }
 }
 
@@ -89,8 +89,8 @@ function resolveBriefingCommander(
 function ForceLaunchBadge({ caCost }: { caCost: number }) {
     return (
         <div className="mx-4 mt-3 mb-1 px-3 py-1.5 border border-amber-400/40 bg-amber-950/30 flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.presidentialOverride')}</span>
-            <span className="text-[9px] text-amber-300" style={{ opacity: 0.7 }}>{t('operationBriefing.costCa', { cost: caCost })}</span>
+            <span className="text-xs uppercase font-bold tracking-wider text-amber-200">{t('operationBriefing.presidentialOverride')}</span>
+            <span className="text-xs text-amber-300" style={{ opacity: 0.7 }}>{t('operationBriefing.costCa', { cost: caCost })}</span>
         </div>
     );
 }
@@ -110,25 +110,25 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
     return (
         <div className="mx-4 mt-3 mb-1 border border-panel-border bg-panel-card/70">
             <div className="px-3 py-1.5 border-b border-panel-border bg-panel-card">
-                <span className="text-[9px] uppercase font-bold tracking-wider text-neutral-600">{t('operationBriefing.commandRecord')}</span>
+                <span className="text-xs uppercase font-bold tracking-wider text-neutral-600">{t('operationBriefing.commandRecord')}</span>
             </div>
             <div className="px-3 py-2 space-y-1">
                 <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commanderRecommended')}</span>
+                    <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commanderRecommended')}</span>
                     <AssessmentBadge assessment={assessmentAtLaunch} />
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.presidentialDecision')}</span>
+                    <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.presidentialDecision')}</span>
                     {outcomeCategory === 'direct_intervention' ? (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
+                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/40 text-amber-200 border border-amber-400">
                             {t('operationBriefing.directIntervention')}
                         </span>
                     ) : outcomeCategory === 'reluctant_compliance' ? (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
+                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-amber-950/30 text-amber-200 border border-amber-500/50">
                             {t('operationBriefing.approvedAgainstRecommendation')}
                         </span>
                     ) : (
-                        <span className="px-2 py-0.5 text-[10px] uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">
+                        <span className="px-2 py-0.5 text-xs uppercase font-bold bg-green-950/40 text-green-200 border border-green-500/50">
                             {t('operationBriefing.ordinaryCompliance')}
                         </span>
                     )}
@@ -136,8 +136,8 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                 {/* Reluctant compliance explanation — command chain complied under presidential direction, no CA spent */}
                 {outcomeCategory === 'reluctant_compliance' && (
                     <div className="flex items-start gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">{t('operationBriefing.interpretation')}</span>
-                        <p className="text-[10px] text-amber-700 leading-snug">
+                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0 mt-0.5">{t('operationBriefing.interpretation')}</span>
+                        <p className="text-xs text-amber-700 leading-snug">
                             {t('operationBriefing.reluctantComplianceDetail', { assessment: assessmentAtLaunch })}
                         </p>
                     </div>
@@ -145,15 +145,15 @@ function CommandRecord({ assessmentAtLaunch, wasForce, caCost, corpsStrain, corp
                 {/* CA cost row — only when force-launched (Direct Intervention). Reluctant compliance does NOT show CA cost: no CA was spent. */}
                 {wasForce && (
                     <div className="flex items-center gap-2">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandAuthoritySpent')}</span>
-                        <span className="text-[10px] font-mono text-amber-700">{caCost} CA</span>
+                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandAuthoritySpent')}</span>
+                        <span className="text-xs font-mono text-amber-700">{caCost} CA</span>
                     </div>
                 )}
                 {/* Institutional strain follow-through — only when force-launched AND strain > 0 */}
                 {wasForce && typeof corpsStrain === 'number' && corpsStrain > 0 && (
                     <div className="flex items-center gap-2 pt-1 border-t border-panel-border mt-1">
-                        <span className="text-[9px] uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandStrain')}</span>
-                        <span className={`text-[10px] font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
+                        <span className="text-xs uppercase font-bold text-neutral-500 w-36 shrink-0">{t('operationBriefing.commandStrain')}</span>
+                        <span className={`text-xs font-mono ${corpsStrainLabel === 'compromised' ? 'text-red-700' : 'text-amber-700'}`}>
                             {t(corpsStrainLabel === 'compromised' ? 'operationBriefing.compromised' : 'operationBriefing.strained')} - {t('operationBriefing.strainDamageDetail')}
                         </span>
                     </div>
@@ -188,8 +188,8 @@ function DelegationPathIndicator({ delegation }: { delegation: DelegationContext
     return (
         <div className={`mx-4 my-1 px-3 py-1.5 border ${config.borderClass} bg-panel-card/60`}>
             <div className="flex items-start gap-2">
-                <span className={`shrink-0 text-[10px] mt-px ${config.textClass}`}>{config.icon}</span>
-                <span className={`text-[10px] leading-snug ${config.textClass}`}>
+                <span className={`shrink-0 text-xs mt-px ${config.textClass}`}>{config.icon}</span>
+                <span className={`text-xs leading-snug ${config.textClass}`}>
                     {delegation.labelToken ? t(delegation.labelToken.key, delegation.labelToken.params) : delegation.label}
                 </span>
             </div>
@@ -223,13 +223,13 @@ function ReadinessTrendIndicator({ trend }: { trend: ReadinessTrend | undefined 
     return (
         <div className="mx-4 my-1 px-3 py-1.5 border border-panel-border bg-panel-card/60">
             <div className="flex items-start gap-2">
-                <span className={`shrink-0 font-bold text-[11px] mt-px ${config.color}`}>{config.arrow}</span>
-                <span className="text-[10px] text-neutral-600 leading-snug">{trend.label}</span>
+                <span className={`shrink-0 font-bold text-xs mt-px ${config.color}`}>{config.arrow}</span>
+                <span className="text-xs text-neutral-600 leading-snug">{trend.label}</span>
             </div>
             {trend.timelineLabel && (
                 <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[9px] text-neutral-400 shrink-0">⏱</span>
-                    <span className="text-[9px] text-neutral-500">{trend.timelineLabel}</span>
+                    <span className="text-xs text-neutral-400 shrink-0">⏱</span>
+                    <span className="text-xs text-neutral-500">{trend.timelineLabel}</span>
                     {trend.timelineFraction != null && (
                         <div className="flex-1 h-1 bg-panel-border rounded-sm overflow-hidden max-w-[80px]">
                             <div
@@ -266,19 +266,19 @@ function RecommendationDriverSection({ explanation }: {
 
     return (
         <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.recommendationDriver')}</div>
+            <div className="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.recommendationDriver')}</div>
             <div className="flex items-start gap-2">
                 {explanation.mainBlocker && (
-                    <span className="shrink-0 text-[11px] mt-px" aria-hidden="true">
+                    <span className="shrink-0 text-xs mt-px" aria-hidden="true">
                         {BLOCKER_ICON[explanation.mainBlocker] ?? '•'}
                     </span>
                 )}
-                <span className="text-[10px] text-neutral-700 leading-snug">{explanation.recommendationReason}</span>
+                <span className="text-xs text-neutral-700 leading-snug">{explanation.recommendationReason}</span>
             </div>
             {explanation.wouldImproveIf && (
                 <div className="flex items-start gap-1.5 mt-1 pl-0.5">
-                    <span className="text-neutral-400 shrink-0 mt-px text-[10px]">&rarr;</span>
-                    <span className="text-[9px] text-neutral-500 leading-snug">{explanation.wouldImproveIf}</span>
+                    <span className="text-neutral-400 shrink-0 mt-px text-xs">&rarr;</span>
+                    <span className="text-xs text-neutral-500 leading-snug">{explanation.wouldImproveIf}</span>
                 </div>
             )}
         </div>
@@ -325,21 +325,21 @@ export function OperationConstraintContext({ assessment }: {
 
     return (
         <div className="mx-4 my-2 px-3 py-2 border border-panel-border bg-panel-card/70">
-            <div className="text-[9px] uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.corpsConstraint')}</div>
+            <div className="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-1">{t('operationBriefing.corpsConstraint')}</div>
             <div className="flex items-start gap-2">
                 {badge && (
-                    <span className={`shrink-0 text-[9px] font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
+                    <span className={`shrink-0 text-xs font-bold tracking-wider uppercase px-1.5 py-0.5 border ${badge.className}`}>
                         {t(badge.labelKey)}
                     </span>
                 )}
-                <span className="text-[10px] text-neutral-700 leading-snug">
+                <span className="text-xs text-neutral-700 leading-snug">
                     {dominantReasonToken ? t(dominantReasonToken.key, dominantReasonToken.params) : dominantReason}
                 </span>
             </div>
             {reliefPath && (
                 <div className="flex items-start gap-1.5 mt-1 pl-0.5">
-                    <span className="text-neutral-400 shrink-0 mt-px text-[10px]">&rarr;</span>
-                    <span className="text-[9px] text-neutral-500 leading-snug">
+                    <span className="text-neutral-400 shrink-0 mt-px text-xs">&rarr;</span>
+                    <span className="text-xs text-neutral-500 leading-snug">
                         {reliefPathToken ? t(reliefPathToken.key, reliefPathToken.params) : reliefPath}
                     </span>
                 </div>
@@ -430,9 +430,9 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <div className={`absolute top-1 right-3 opacity-15 font-black text-2xl -rotate-12 select-none uppercase ${assessment === 'launch' ? 'text-green-700' : assessment === 'abort' ? 'text-red-700' : 'text-amber-700'}`}>
                         {t('operationBriefing.stamp')}
                     </div>
-                    <div id="operation-briefing-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">{t('operationBriefing.title')}</div>
+                    <div id="operation-briefing-title" className="text-xs uppercase font-bold text-neutral-500 tracking-wider">{t('operationBriefing.title')}</div>
                     <div className="text-sm font-bold mt-0.5">{operation.display_name}</div>
-                    <div className="text-[10px] text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
+                    <div className="text-xs text-neutral-500">{corpsLabel} / {getPlayerSafeMilitaryFactionName(operation.faction)}</div>
                 </div>
 
                 {/* Command Record — canonical decision surface for executing/recovery ops */}
@@ -454,20 +454,20 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 {/* Commander info */}
                 {commanderDisplay && (
                     <div className="px-4 py-2 border-b border-panel-border bg-panel-card/60">
-                        <div className="text-[9px] uppercase font-bold text-neutral-500 mb-1">{t('operationBriefing.opsCommander')}</div>
+                        <div className="text-xs uppercase font-bold text-neutral-500 mb-1">{t('operationBriefing.opsCommander')}</div>
                         {commanderDisplay.kind === 'assigned' ? (
                             <div className="flex items-center gap-3">
                                 <div>
-                                    <div className="text-[11px] font-bold">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</div>
-                                    <div className="text-[9px] text-text-muted italic">{getArchetype(commanderDisplay.officer)}</div>
+                                    <div className="text-xs font-bold">{formatRank(commanderDisplay.officer.rank)} {commanderDisplay.officer.name}</div>
+                                    <div className="text-xs text-text-muted italic">{getArchetype(commanderDisplay.officer)}</div>
                                 </div>
-                                <div className="flex gap-2 text-[8px]">
+                                <div className="flex gap-2 text-xs">
                                     <span className={`font-mono ${getRatingColor(commanderDisplay.officer.competence)}`}>{formatPips(commanderDisplay.officer.competence)}</span>
                                     <span className={`font-mono ${getRatingColor(commanderDisplay.officer.aggressiveness)}`}>{formatPips(commanderDisplay.officer.aggressiveness)}</span>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-[11px] italic text-text-secondary">{commanderDisplay.label}</div>
+                            <div className="text-xs italic text-text-secondary">{commanderDisplay.label}</div>
                         )}
                     </div>
                 )}
@@ -480,11 +480,11 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                     {forceBalance && (
                         <div className="flex items-center gap-2 mt-2 pt-2 border-t border-panel-border">
-                            <span className="text-[9px] uppercase font-bold text-neutral-600">{t('operationBriefing.forceBalanceEstimate')}</span>
-                            <span className={`text-[11px] font-bold ${forceBalance.toneClass}`}>
+                            <span className="text-xs uppercase font-bold text-neutral-600">{t('operationBriefing.forceBalanceEstimate')}</span>
+                            <span className={`text-xs font-bold ${forceBalance.toneClass}`}>
                                 {forceBalance.label}
                             </span>
-                            <span className="text-[8px] text-neutral-400 uppercase">
+                            <span className="text-xs text-neutral-400 uppercase">
                                 ({forceBalance.summary})
                             </span>
                         </div>
@@ -493,10 +493,10 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
 
                 {/* Assessment badge */}
                 <div className="px-4 py-2 border-t border-panel-border flex items-center gap-3">
-                    <span className="text-[9px] uppercase font-bold text-neutral-500">{t('operationBriefing.commanderAssessment')}</span>
+                    <span className="text-xs uppercase font-bold text-neutral-500">{t('operationBriefing.commanderAssessment')}</span>
                     <AssessmentBadge assessment={assessment} />
                     {postponements > 0 && (
-                        <span className="text-[8px] text-neutral-400">({t(postponements === 1 ? 'operationBriefing.priorPostponements.one' : 'operationBriefing.priorPostponements.many', { count: postponements })})</span>
+                        <span className="text-xs text-neutral-400">({t(postponements === 1 ? 'operationBriefing.priorPostponements.one' : 'operationBriefing.priorPostponements.many', { count: postponements })})</span>
                     )}
                 </div>
 
@@ -540,12 +540,12 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                 {/* Action buttons */}
                 <div className="px-4 py-3 border-t-2 border-panel-border bg-panel-card/70 flex gap-2 flex-wrap">
                     {!isDecisionReady && (
-                        <div className="basis-full text-[10px] text-neutral-500 italic">
+                        <div className="basis-full text-xs text-neutral-500 italic">
                             {t('operationBriefing.reviewReadOnly')}
                         </div>
                     )}
                     {isDecisionReady && !commandBridgeAvailable && (
-                        <div className="basis-full text-[10px] text-neutral-500 italic">
+                        <div className="basis-full text-xs text-neutral-500 italic">
                             {t('attention.bridgeUnavailableReadOnly')}
                         </div>
                     )}
@@ -555,7 +555,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onLaunch}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-green-600 hover:bg-green-700 text-white border border-green-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {t('operationBriefing.launchOperation')}
                             </button>
@@ -563,7 +563,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onOrderProbe}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-blue-600 hover:bg-blue-700 text-white border border-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {t('operationBriefing.orderProbe')}
                             </button>
@@ -571,7 +571,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onPostpone}
                                 disabled={!commandBridgeAvailable || postponements >= 2}
-                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-amber-950/50 hover:bg-amber-900/60 text-amber-100 border border-amber-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {t('operationBriefing.postpone')}{postponements >= 2 ? ` (${t('operationBriefing.maxReached')})` : ''}
                             </button>
@@ -579,7 +579,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                                 type="button"
                                 onClick={onAbort}
                                 disabled={!commandBridgeAvailable}
-                                className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-red-950/50 hover:bg-red-900/60 text-red-100 border border-red-500/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                                 {t('operationBriefing.abortOperation')}
                             </button>
@@ -589,7 +589,7 @@ export function OperationBriefingModal({ isOpen, onClose, onLaunch, onPostpone, 
                     <button
                         type="button"
                         onClick={onClose}
-                        className="kbd-focus px-3 py-1.5 text-[10px] uppercase font-bold bg-panel-card hover:bg-panel-border text-text-primary border border-panel-border transition-colors"
+                        className="kbd-focus px-3 py-1.5 text-xs uppercase font-bold bg-panel-card hover:bg-panel-border text-text-primary border border-panel-border transition-colors"
                     >
                         {t('common.close')}
                     </button>

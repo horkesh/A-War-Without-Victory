@@ -25,14 +25,14 @@ function ReserveBar({ label, value, color }: { label: string; value: number | nu
 
   return (
     <div className="flex items-center gap-1.5 min-w-0">
-      <span className={`w-[42px] shrink-0 text-[10px] ${color}`}>{label}</span>
+      <span className={`w-[42px] shrink-0 text-xs ${color}`}>{label}</span>
       <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
         <div
           className={`absolute left-0 top-0 h-full rounded-full transition-all ${barColor}`}
           style={{ width: reported ? `${pct}%` : '0%' }}
         />
       </div>
-      <span className={`shrink-0 text-right text-[10px] tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
+      <span className={`shrink-0 text-right text-xs tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
         {reported ? Math.round(pct) : t('corpsFront.unreported')}
       </span>
     </div>
@@ -91,7 +91,7 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
       className="absolute z-20 rounded border border-panel-border bg-panel-card/95 backdrop-blur-sm p-2.5 space-y-2 text-xs font-mono"
       style={{ bottom: '36px', left: 'calc(15.5rem + 12px)', minWidth: '200px', direction: 'ltr' }}
     >
-      <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+      <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">
         {t('supply.logistics')}
       </div>
 
@@ -103,7 +103,7 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
             return (
               <div key={faction} className="space-y-0.5">
-                <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction, faction)}</span>
+                <span className={`text-xs font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction, faction)}</span>
                 <ReserveBar label={t('economy.supply')} value={r?.generalSupply} color="text-text-secondary" />
                 <ReserveBar label={t('economy.ammo')} value={r?.heavyMunitions} color="text-text-secondary" />
               </div>
@@ -111,11 +111,11 @@ export function SupplyPanel({ state }: SupplyPanelProps) {
           })}
         </div>
       ) : (
-        <div className="text-text-secondary text-[10px] italic">{t('supply.reservesDisabled')}</div>
+        <div className="text-text-secondary text-xs italic">{t('supply.reservesDisabled')}</div>
       )}
 
       {/* Corridor summary */}
-      <div className="border-t border-panel-border/50 pt-1.5 text-[10px] text-text-secondary space-y-1">
+      <div className="border-t border-panel-border/50 pt-1.5 text-xs text-text-secondary space-y-1">
         {visibleSummaries.length > 0 && (
           <div className="flex gap-2">
             <span className="text-green-400">{t('supply.stateAdequateCount', { count: visibleStateTotals.adequate })}</span>

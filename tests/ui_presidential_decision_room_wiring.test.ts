@@ -121,6 +121,7 @@ describe('Presidential Decision Room wiring', () => {
     );
     expect(armyHq).not.toContain('PresidentialDecisionRoomPanel');
     expect(armyHq).toContain('data-testid="army-hq-decision-room-handoff"');
+    expect(armyHq).toContain('data-testid="army-hq-decision-room-open"');
     expect(armyHq).toContain("kind: 'decision-room'");
     expect(armyHq).toContain("lens: 'all'");
     expect(armyHq).toContain("t('armyHq.openDecisionRoom')");
@@ -181,8 +182,12 @@ describe('Presidential Decision Room wiring', () => {
     const app = read('../src/ui/map/App.tsx');
 
     expect(panel).toContain('onNavigateTarget?:');
-    expect(panel).toContain('navigateTarget(dossier.navigationTarget)');
+    expect(panel).toContain('navigateTarget(reviewTarget)');
     expect(panel).toContain('navigateTarget(card.navigationTarget)');
+    expect(panel).toContain('data-command-category-id={activeCommandCategoryId ?? \'\'}');
+    expect(panel).toContain('data-testid="decision-room-dossier-review"');
+    expect(panel).toContain('data-navigation-kind={reviewTarget.kind}');
+    expect(panel).toContain('data-testid={`decision-room-card-action-${card.id}`}');
     expect(app).toContain('const openDecisionRoomTarget =');
     expect(app).toContain("if (target.kind === 'counter-offer')");
     expect(app).toContain('setSelectedCounterOfferId(target.counterOfferId)');
@@ -194,7 +199,9 @@ describe('Presidential Decision Room wiring', () => {
     const enclaveBranch = app.slice(enclaveBranchStart, inboxBranchStart);
     expect(enclaveBranch).toContain('gs.setArmyHQOpen(false)');
     expect(app).toContain('<PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />');
-    expect(app).toContain('<ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} eventCatalog={eventCatalogFull} />');
+    expect(app).toContain('<ArmyHQModal');
+    expect(app).toContain('onDecisionRoomNavigateTarget={openDecisionRoomTarget}');
+    expect(app).toContain('eventCatalog={eventCatalogFull}');
     expect(app).toContain("openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null)");
   });
 
@@ -228,7 +235,7 @@ describe('Presidential Decision Room wiring', () => {
     expect(panel).not.toContain("t('decisionRoom.hideAdvanced')");
     expect(panel).not.toContain('data-testid="decision-room-advanced"');
     expect(panel).toContain('{view.lenses.length > 0 && (');
-    expect(panel).toContain('filteredCards.map((card) => (');
+    expect(panel).toContain('filteredCards.map((card, index) => {');
     expect(panel).not.toContain('filteredCards.slice');
   });
 

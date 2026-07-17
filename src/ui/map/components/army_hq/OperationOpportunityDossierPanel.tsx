@@ -131,8 +131,8 @@ function AxisPill({ axis }: { axis: OperationOpportunityProposalView['prerequisi
             className={`rounded border px-2 py-1 ${AXIS_STYLES[axis.state]}`}
             title={axis.reason}
         >
-            <div className="text-[8px] font-bold uppercase tracking-[0.12em]">{axis.label}</div>
-            <div className="text-[9px] leading-snug opacity-90 line-clamp-2">{axis.reason || t(AXIS_STATE_KEYS[axis.state])}</div>
+            <div className="text-xs font-bold uppercase tracking-[0.12em]">{axis.label}</div>
+            <div className="text-xs leading-snug opacity-90 line-clamp-2">{axis.reason || t(AXIS_STATE_KEYS[axis.state])}</div>
         </div>
     );
 }
@@ -144,12 +144,12 @@ function TraitPill({ trait }: { trait: OperationOpportunityProposalView['force_q
             title={trait.reason}
         >
             <div className="flex items-center justify-between gap-2">
-                <span className="text-[8px] font-bold uppercase tracking-[0.12em]">{trait.label}</span>
-                <span className="text-[8px] font-bold uppercase tracking-[0.12em] opacity-80">
+                <span className="text-xs font-bold uppercase tracking-[0.12em]">{trait.label}</span>
+                <span className="text-xs font-bold uppercase tracking-[0.12em] opacity-80">
                     {t(TRAIT_BAND_KEYS[trait.band])}
                 </span>
             </div>
-            <div className="mt-0.5 text-[9px] leading-snug opacity-90 line-clamp-2">{trait.reason}</div>
+            <div className="mt-0.5 text-xs leading-snug opacity-90 line-clamp-2">{trait.reason}</div>
         </div>
     );
 }
@@ -157,7 +157,7 @@ function TraitPill({ trait }: { trait: OperationOpportunityProposalView['force_q
 function FootprintPill({ label, muted = false }: { label: string; muted?: boolean }) {
     return (
         <span
-            className={`rounded border px-2 py-0.5 text-[9px] leading-snug ${
+            className={`rounded border px-2 py-0.5 text-xs leading-snug ${
                 muted
                     ? 'border-panel-border bg-panel-card text-text-secondary'
                     : 'border-sky-500/25 bg-sky-500/10 text-sky-200'
@@ -215,8 +215,8 @@ function DossierCard({
         <div className="rounded border border-panel-border bg-panel-bg p-3 space-y-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="text-[11px] font-bold text-text-primary truncate">{proposal.display_name}</div>
-                    <div className="mt-1 flex flex-wrap gap-1.5 text-[9px] font-bold uppercase tracking-[0.12em]">
+                    <div className="text-xs font-bold text-text-primary truncate">{proposal.display_name}</div>
+                    <div className="mt-1 flex flex-wrap gap-1.5 text-xs font-bold uppercase tracking-[0.12em]">
                         <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-amber-300">
                             {proposal.recommendation
                                 ? t('opportunity.recommend', { recommendation: recommendationLabel(proposal.recommendation) })
@@ -230,22 +230,22 @@ function DossierCard({
                     </div>
                 </div>
                 <div className="shrink-0 text-right">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary">{requiredSummary}</div>
-                    {optionalSummary && <div className="mt-0.5 text-[9px] text-text-tertiary">{optionalSummary}</div>}
+                    <div className="text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{requiredSummary}</div>
+                    {optionalSummary && <div className="mt-0.5 text-xs text-text-tertiary">{optionalSummary}</div>}
                 </div>
             </div>
 
             {proposal.description && (
-                <div className="text-[10px] leading-relaxed text-text-secondary">{proposal.description}</div>
+                <div className="text-xs leading-relaxed text-text-secondary">{proposal.description}</div>
             )}
 
             {backTheOfficer && (backTheOfficer.commander || backTheOfficer.donors.length > 0) && (
                 <div className="rounded border border-sky-500/25 bg-sky-500/10 p-2 space-y-1">
-                    <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-sky-300/80">
+                    <div className="text-xs font-bold uppercase tracking-[0.16em] text-sky-300/80">
                         {t('opportunity.backTheOfficer')}
                     </div>
                     {backTheOfficer.commander && (
-                        <div className="text-[10px] font-bold text-text-primary">
+                        <div className="text-xs font-bold text-text-primary">
                             {(() => {
                                 const rank = formatOfficerRank(backTheOfficer.commander?.rank);
                                 return rank ? `${rank} ` : '';
@@ -254,7 +254,7 @@ function DossierCard({
                             {backTheOfficer.tg_name ? ` - ${backTheOfficer.tg_name}` : ''}
                         </div>
                     )}
-                    <div className="text-[10px] leading-relaxed text-text-secondary">
+                    <div className="text-xs leading-relaxed text-text-secondary">
                         {formatBackTheOfficerFraming(backTheOfficer)}
                     </div>
                     {backTheOfficer.donors.length > 0 && (
@@ -262,7 +262,7 @@ function DossierCard({
                             {backTheOfficer.donors.map((donor) => (
                                 <span
                                     key={`${proposal.proposal_id}:donor:${donor.corps_id}`}
-                                    className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.1em] text-text-tertiary"
+                                    className="rounded border border-panel-border bg-panel-card px-1.5 py-0.5 text-xs font-semibold uppercase tracking-[0.1em] text-text-tertiary"
                                     title={donor.personnel_lent > 0
                                         ? t('opportunity.backTheOfficer.donorPersonnelLent', { count: donor.personnel_lent })
                                         : undefined}
@@ -279,7 +279,7 @@ function DossierCard({
             {(proposal.objectives.length > 0 || proposal.staging.length > 0) && (
                 <div className="space-y-1.5">
                     <div className="flex items-center justify-between gap-2">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                        <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-secondary/70">
                             {t('opportunity.mapFootprint')}
                         </div>
                         <div className="flex items-center gap-1.5">
@@ -291,14 +291,14 @@ function DossierCard({
                                 aria-label={highlightUnavailableReason
                                     ? t('opportunity.highlightUnavailableAria', { reason: highlightUnavailableReason })
                                     : t('opportunity.highlight')}
-                                className="rounded border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
+                                className="rounded border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
                             >
                                 {t('opportunity.highlight')}
                             </button>
                             <button
                                 type="button"
                                 onClick={onClearFootprint}
-                                className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:bg-panel-hover"
+                                className="rounded border border-panel-border bg-panel-card px-2 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:bg-panel-hover"
                             >
                                 {t('opportunity.clear')}
                             </button>
@@ -306,7 +306,7 @@ function DossierCard({
                     </div>
                     {proposal.objectives.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
+                            <span className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary">
                                 {t('opportunity.objectives')}
                             </span>
                             {proposal.objectives.map((objective) => (
@@ -316,7 +316,7 @@ function DossierCard({
                     )}
                     {proposal.staging.length > 0 && (
                         <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-tertiary">
+                            <span className="text-xs font-bold uppercase tracking-[0.14em] text-text-tertiary">
                                 {t('opportunity.staging')}
                             </span>
                             {proposal.staging.map((staging) => (
@@ -337,7 +337,7 @@ function DossierCard({
 
             {proposal.force_quality_traits.length > 0 && (
                 <div className="space-y-1.5">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                    <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-secondary/70">
                         {t('opportunity.forceQuality')}
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-1.5">
@@ -350,7 +350,7 @@ function DossierCard({
 
             {canAct && proposal.redirect_variants.length > 0 && (
                 <div className="space-y-1.5">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary/70">
+                    <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-secondary/70">
                         {t('opportunity.redirectOptions')}
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -368,7 +368,7 @@ function DossierCard({
                                     disabled={busy}
                                     title={disabledReason ?? (detail || variant.label)}
                                     aria-label={disabledReason ?? variant.label}
-                                    className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
+                                    className="rounded border border-sky-500/30 bg-sky-500/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-sky-300 transition-colors hover:bg-sky-500/20 disabled:opacity-50"
                                 >
                                     {variant.label}
                                 </button>
@@ -390,7 +390,7 @@ function DossierCard({
                                 disabled={Boolean(disabledReason)}
                                 title={disabledReason ?? action.label}
                                 aria-label={disabledReason ?? action.label}
-                                className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] rounded border transition-colors disabled:opacity-50 ${actionButtonClass(action.id)}`}
+                                className={`px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] rounded border transition-colors disabled:opacity-50 ${actionButtonClass(action.id)}`}
                             >
                                 {action.label}
                             </button>
@@ -399,7 +399,7 @@ function DossierCard({
                 </div>
             )}
             {hasEnabledActions && !commandBridgeAvailable && (
-                <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-[10px] italic text-text-secondary">
+                <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-xs italic text-text-secondary">
                     {t('attention.bridgeUnavailableReadOnly')}
                 </div>
             )}
@@ -475,10 +475,10 @@ export function OperationOpportunityDossierPanel({ gameState, playerFaction }: O
     return (
         <section className="space-y-2" data-coachmark-id="operation-opportunity">
             <div className="flex items-center justify-between gap-3 border-b border-panel-border pb-1">
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-text-secondary/70">
+                <div className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/70">
                     {t('opportunity.operationalOpportunities')}
                 </div>
-                <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-amber-300">
+                <span className="rounded border border-amber-500/25 bg-amber-500/10 px-2 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-300">
                     {proposals.length}
                 </span>
             </div>

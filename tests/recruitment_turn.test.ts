@@ -1,8 +1,8 @@
 import assert from 'node:assert';
-import { describe, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import type { OobBrigade } from '../src/scenario/oob_loader.js';
 import { initializeRecruitmentResources } from '../src/sim/recruitment_engine.js';
-import { accrueRecruitmentResources, runOngoingRecruitment } from '../src/sim/recruitment_turn.js';
+import { accrueRecruitmentResources, runOngoingRecruitment, selectAutomaticRecruitmentFactions } from '../src/sim/recruitment_turn.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { militiaPoolKey } from '../src/state/militia_pool_key.js';
@@ -109,6 +109,54 @@ describe('accrueRecruitmentResources', () => {
 });
 
 describe('runOngoingRecruitment', () => {
+    test('keeps player recruitment manual at autonomy 0-1 and delegates it at 2-3 or headless', () => {
+        const state = makeState();
+        state.meta.player_faction = 'RBiH';
+        state.factions = [
+            ...state.factions,
+            { id: 'RS', profile: { authority: 50, legitimacy: 50, control: 50, logistics: 50, exhaustion: 0 }, areasOfResponsibility: [], supply_sources: [] },
+        ];
+
+        state.meta.autonomy_level = 0;
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        state.meta.autonomy_level = 1;
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RS']);
+        state.meta.autonomy_level = 2;
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
+        state.meta.autonomy_level = 3;
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
+        state.meta.autonomy_level = 0;
+        state.meta.headless_scenario_auto_control = true;
+        expect(selectAutomaticRecruitmentFactions(state)).toEqual(['RBiH', 'RS']);
+    });
+
+    test('does not consume an assisted player formation through ongoing bot recruitment', () => {
+        const state = makeState();
+        state.meta.player_faction = 'RBiH';
+        state.meta.autonomy_level = 1;
+        const brigade: OobBrigade = {
+            id: 'rbih_player_choice',
+            faction: 'RBiH',
+            name: 'Player Choice Brigade',
+            home_mun: 'zenica',
+            kind: 'brigade',
+            manpower_cost: 800,
+            capital_cost: 10,
+            default_equipment_class: 'light_infantry',
+            home_osid: 'op:zenica:core',
+            priority: 1,
+            mandatory: false,
+            available_from: 0,
+            max_personnel: 3000,
+        };
+
+        const report = runOngoingRecruitment(state, [], [brigade], new Map([['s1', 'zenica']]), { zenica: 's1' });
+
+        expect(report?.actions).toEqual([]);
+        expect(state.military.formations[brigade.id]).toBeUndefined();
+        expect(state.military.recruitment_state?.recruited_brigade_ids).not.toContain(brigade.id);
+    });
+
     test('applies per-faction recruit cap deterministically', () => {
         const state = makeState();
         const brigades: OobBrigade[] = [

@@ -3,6 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createElement } from 'react';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { setLocale } from '../../src/ui/map/i18n';
+import essayIndex from '../../data/scenarios/essays/essay_index.json';
+
+const startVisibleEssayCount = (essayIndex as { essays: Array<{ tier?: number }> }).essays
+    .filter((essay) => essay.tier !== 3).length;
 
 let storeState: Record<string, any> = { loadedGameState: null };
 
@@ -82,10 +86,10 @@ describe('CodexPanel dynamic essay proof', () => {
         renderPanel();
 
         expect(screen.getByText('Kodeks')).toBeTruthy();
-        expect(screen.getByText('0 eseja dostupno')).toBeTruthy();
+        expect(screen.getByText(`${startVisibleEssayCount} eseja dostupno`)).toBeTruthy();
         expect(screen.getByText('Izaberite esej')).toBeTruthy();
         expect(screen.queryByText('Select an essay')).toBeNull();
-        expect(screen.getByText(/Historijski eseji se otvaraju/)).toBeTruthy();
+        expect(screen.getByText(/Historijski zapisi dostupni su od početka scenarija/)).toBeTruthy();
     });
 
     it('hides not-yet-faced future dilemma titles during an active campaign', () => {
@@ -357,11 +361,7 @@ describe('CodexPanel dynamic essay proof', () => {
         expect(screen.getAllByText(/Sources: RDC Sarajevo/).length).toBeGreaterThanOrEqual(1);
     });
 
-    it('hides unfired non-ghost essays from the sidebar entirely', () => {
-        // Per the 2026-05-17 visibility spec: the Codex must not list essays that
-        // were never surfaced to the player. Locked entries used to render greyed-out
-        // and clickable; they no longer do. With no fired events and no ghost
-        // conditions met, every year section is empty and collapses.
+    it('mounts Tier 0-2 historical records at scenario start without campaign annotations', () => {
         storeState = {
             loadedGameState: {
                 firedEvents: [],
@@ -371,8 +371,13 @@ describe('CodexPanel dynamic essay proof', () => {
 
         renderPanel();
 
-        expect(screen.queryByText('The Dayton Agreement: Ending the War, Freezing the Questions')).toBeNull();
-        expect(screen.queryByText('1995')).toBeNull();
-        expect(screen.queryByText('1992')).toBeNull();
+        expect(screen.getByText('1995')).toBeTruthy();
+        fireEvent.click(screen.getByText('1995'));
+        const daytonTitle = 'The Dayton Agreement: Ending the War, Freezing the Questions';
+        expect(screen.getByText(daytonTitle)).toBeTruthy();
+        fireEvent.click(screen.getByText(daytonTitle));
+        expect(screen.getByTestId('codex-selected-essay-body')).toBeTruthy();
+        expect(screen.queryByText('Player War Divergence')).toBeNull();
+        expect(screen.queryByText('Historical Ghost Entry')).toBeNull();
     });
 });

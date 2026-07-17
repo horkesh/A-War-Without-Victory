@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+    HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992,
     HISTORICAL_EVENT_ANCHORS_JAN1993,
     HISTORICAL_AREA_BANDS_JAN1993,
     HISTORICAL_OSID_ANCHORS_JAN1993_SUPPLEMENT,
@@ -37,6 +38,7 @@ import {
  */
 
 const PAINTED_JAN1993 = join(process.cwd(), 'data', 'source', 'calibration', 'painted_control_jan1993.json');
+const INITIAL_CONTROL_JAN1993 = join(process.cwd(), 'data', 'scenarios', 'initial_control', 'jan1993.json');
 const PAINTED_APR1994 = join(process.cwd(), 'data', 'source', 'calibration', 'painted_control_apr1994.json');
 const PAINTED_APR1995 = join(process.cwd(), 'data', 'source', 'calibration', 'painted_control_apr1995.json');
 const PAINTED_OCT1995 = join(process.cwd(), 'data', 'source', 'calibration', 'painted_control_oct1995.json');
@@ -175,6 +177,22 @@ describe('Tier 1 painted-target anchors — Jan 1993 (w40)', () => {
         for (const a of HISTORICAL_OSID_ANCHORS_JAN1993_SUPPLEMENT) {
             expect(a.at_week, `${a.osid} at_week`).toBe(40);
         }
+    });
+
+    it('jan1993: Bosanski Brod city core is a historical RS anchor', () => {
+        expect(
+            HISTORICAL_OSID_ANCHORS_APR1992_TO_DEC1992.find((anchor) =>
+                anchor.osid === 'op:bosanski_brod:brod'
+            ),
+        ).toEqual({ osid: 'op:bosanski_brod:brod', expected_controller: 'RS' });
+    });
+
+    it('jan1993: municipality control reflects the 6 October fall of Bosanski Brod', () => {
+        const initialControl = JSON.parse(readFileSync(INITIAL_CONTROL_JAN1993, 'utf8')) as {
+            controllers_by_mun1990_id: Record<string, string>;
+        };
+
+        expect(initialControl.controllers_by_mun1990_id.bosanski_brod).toBe('RS');
     });
 });
 

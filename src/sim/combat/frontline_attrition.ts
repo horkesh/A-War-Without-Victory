@@ -35,7 +35,6 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { militiaPoolKey } from '../../state/militia_pool_key.js';
 import { ensureBrigadeComposition } from './equipment_effects.js';
 import { getMainCasualtySplit } from './casualty_realism_v2_gate.js';
-import { deterministicRandom } from '../../state/deterministic_random.js';
 import { recordBrigadeEngagement, ensureBrigadeHistory } from './brigade_history_recorder.js';
 import {
     isGrazAccordsActive,
@@ -98,8 +97,8 @@ const ENTRENCHMENT_ATTRITION_FLOOR = 0.40;
 // Attrition casualty split (KIA 0.30 / WIA 0.55 / MIA 0.15 remainder) — canonical
 // export from attack_casualty_distribution.ts (matches P9 value).
 
-/** Probability that a frontline friction event is recorded as a skirmish engagement. */
-const FRICTION_RECORD_CHANCE = 0.35;
+/** Share of the highest-casualty eligible incidents recorded as full skirmish engagements. */
+const FRICTION_RECORD_SHARE = 0.35;
 /** Minimum casualties for a friction event to be eligible for recording. */
 const FRICTION_CASUALTY_THRESHOLD = 15;
 
@@ -268,7 +267,13 @@ export function applyFrontlineAttrition(
     }
 
     const turn = state.meta?.turn ?? 0;
-    const seed = state.meta?.seed ?? 'awwv';
+    const frictionCandidates: Array<{
+        fid: string;
+        formation: FormationState;
+        sector: CorpsFrontSector;
+        factionId: string;
+        casualties: number;
+    }> = [];
 
     // B1 casualty-realism V2 gate (default OFF ⇒ KIA_FRACTION/WIA_FRACTION exactly).
     const split = getMainCasualtySplit();
@@ -367,41 +372,10 @@ export function applyFrontlineAttrition(
             }
         }
 
-        // ── Probabilistic friction skirmish recording ──
-        // Not every week: deterministic random keyed on turn + brigade ID.
-        // ~35% chance when casualties exceed threshold — some weeks quiet, some notable.
-        let frictionEngagementRecorded = false;
+        // Rank materially notable incidents after all attrition has been resolved.
         if (casualties >= FRICTION_CASUALTY_THRESHOLD) {
-            const frictionRoll = deterministicRandom(seed, `friction_${turn}_${fid}`);
-            if (frictionRoll < FRICTION_RECORD_CHANCE) {
-                const enemyFaction = inferEnemyFaction(sector, factionId);
-                const frontSet = new Set<string>();
-                for (const ss of sector.sub_segments ?? []) {
-                    for (const o of ss.friendly_osids ?? []) frontSet.add(o);
-                }
-                const location = frontSet.has(formation.location_osid ?? '')
-                    ? (formation.location_osid as string)
-                    : (sector.sub_segments?.[0]?.friendly_osids?.[0] ?? 'unknown');
-                recordBrigadeEngagement(formation, {
-                    battle_id: `${turn}:${location}:friction:${fid}`,
-                    turn,
-                    osid: location,
-                    role: 'defender',
-                    outcome: 'stalemate',
-                    casualties_taken: casualties,
-                    casualties_inflicted: Math.floor(casualties * 0.3), // approximate reciprocal friction
-                    enemy_faction: enemyFaction,
-                    territory_flipped: false,
-                    was_concentrated: false,
-                });
-                report.friction_engagements++;
-                frictionEngagementRecorded = true;
-            }
-        }
-        // Always update brigade history casualty tally for friction —
-        // recordBrigadeEngagement already updates total_casualties_taken for the 35%,
-        // so only add here for brigades that didn't get a full engagement recorded.
-        if (!frictionEngagementRecorded) {
+            frictionCandidates.push({ fid, formation, sector, factionId, casualties });
+        } else {
             const frictionHistory = ensureBrigadeHistory(formation);
             frictionHistory.total_casualties_taken += casualties;
         }
@@ -409,6 +383,41 @@ export function applyFrontlineAttrition(
         report.brigades_affected += 1;
         report.total_casualties += casualties;
         report.by_faction[factionId] = (report.by_faction[factionId] ?? 0) + casualties;
+    }
+
+    frictionCandidates.sort((a, b) => {
+        if (b.casualties !== a.casualties) return b.casualties - a.casualties;
+        return strictCompare(a.fid, b.fid);
+    });
+    const engagementCount = Math.ceil(frictionCandidates.length * FRICTION_RECORD_SHARE);
+    for (let index = 0; index < frictionCandidates.length; index++) {
+        const candidate = frictionCandidates[index]!;
+        if (index >= engagementCount) {
+            const history = ensureBrigadeHistory(candidate.formation);
+            history.total_casualties_taken += candidate.casualties;
+            continue;
+        }
+        const enemyFaction = inferEnemyFaction(candidate.sector, candidate.factionId);
+        const frontSet = new Set<string>();
+        for (const subSegment of candidate.sector.sub_segments ?? []) {
+            for (const osid of subSegment.friendly_osids ?? []) frontSet.add(osid);
+        }
+        const location = frontSet.has(candidate.formation.location_osid ?? '')
+            ? (candidate.formation.location_osid as string)
+            : (candidate.sector.sub_segments?.[0]?.friendly_osids?.[0] ?? 'unknown');
+        recordBrigadeEngagement(candidate.formation, {
+            battle_id: `${turn}:${location}:friction:${candidate.fid}`,
+            turn,
+            osid: location,
+            role: 'defender',
+            outcome: 'stalemate',
+            casualties_taken: candidate.casualties,
+            casualties_inflicted: Math.floor(candidate.casualties * 0.3),
+            enemy_faction: enemyFaction,
+            territory_flipped: false,
+            was_concentrated: false,
+        });
+        report.friction_engagements++;
     }
 
     return report;

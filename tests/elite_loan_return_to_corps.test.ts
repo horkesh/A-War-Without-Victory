@@ -90,6 +90,15 @@ function makeContext(overrides: Partial<BrigadeEvaluationContext> = {}): Brigade
 }
 
 describe('evaluateReturnToCorps', () => {
+    it('does not recall an active operation participant away from its staging area', () => {
+        const ctx = makeContext({ isActiveSectorOperationParticipant: true });
+
+        const handled = evaluateReturnToCorps(ctx);
+
+        expect(handled).toBe(false);
+        expect(ctx.result.movement_orders[ctx.brigade.id]).toBeUndefined();
+    });
+
     it('routes on-loan elite brigades toward the receiving corps territory', () => {
         const ctx = makeContext();
         const handled = evaluateReturnToCorps(ctx);

@@ -337,11 +337,15 @@ function makeStateWithMilitiaFormations(
             personnel: 100,
             readiness: 'forming',
             cohesion: 30,
+            location_osid: `op:${munId}:center`,
             tags: [`generated_phase_i0`, `kind:militia`, `mun:${munId}`]
         } as FormationState;
     }
     return baseState({
-        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        political: {
+            municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
+            political_controllers: { [`op:${munId}:center`]: faction }
+        } as any,
         military: { formations,
         militia_pools: {
             [`${munId}:${faction}`]: {
@@ -418,7 +422,10 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
 
     // No existing formations (below normal cap), pool has just enough
     const state = baseState({
-        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        political: {
+            municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
+            political_controllers: { [`op:${munId}:center`]: faction }
+        } as any,
         military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {
@@ -465,6 +472,12 @@ test('Displacement spawn: dispIn >= DISPLACED_FORMATION_THRESHOLD + siege_ratio 
         report.formations_created >= 2,
         `Expected at least 2 formations (normal + displaced-origin), got ${report.formations_created}`
     );
+    assert.ok(
+        Object.values(state.military.formations ?? {}).every(
+            formation => formation.location_osid === `op:${munId}:center`
+        ),
+        'Every spawned detachment should receive the controlled deterministic location'
+    );
 
     // Check that at least one formation has the displaced_origin tag
     const displacedOriginFormations = report.created.filter(f => {
@@ -484,7 +497,10 @@ test('Displacement spawn: dispIn below threshold â†’ no extra detachment', 
     const faction = 'RBiH';
 
     const state = baseState({
-        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        political: {
+            municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
+            political_controllers: { [`op:${munId}:center`]: faction }
+        } as any,
         military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {
@@ -539,7 +555,10 @@ test('Displacement spawn: siege_ratio below SIEGE_RATIO_PARTIAL â†’ no extr
     const faction = 'RBiH';
 
     const state = baseState({
-        political: { municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } } } as any,
+        political: {
+            municipalities: { [munId]: { stability_score: 50, control: 'consolidated' } },
+            political_controllers: { [`op:${munId}:center`]: faction }
+        } as any,
         military: { formations: {},
         militia_pools: {
             [`${munId}:${faction}`]: {

@@ -83,14 +83,14 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
 
     return (
         <div className="bg-panel-card border border-panel-border rounded-lg p-4">
-            <div className="text-[10px] uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
+            <div className="text-xs uppercase tracking-[0.25em] text-text-secondary font-bold mb-3 pb-2 border-b border-panel-border">
                 {t('strategicPosition.title')}
             </div>
 
             {/* Composite Negotiating Capital bar — friendly-state weighted composite. */}
             <div className="mb-3 pb-2 border-b border-panel-border/50">
                 <div className="flex items-center justify-between mb-1">
-                    <span className="text-[10px] font-bold uppercase tracking-wide text-emerald-300/90">
+                    <span className="text-xs font-bold uppercase tracking-wide text-emerald-300/90">
                         {t('strategicPosition.negotiatingCapital')}
                     </span>
                     <span className={`text-[13px] font-mono font-bold ${score == null ? 'text-text-secondary italic' : `tabular-nums ${compositeGradeColor(score)}`}`}>
@@ -103,7 +103,7 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                         style={{ width: `${score == null ? 0 : Math.max(0, Math.min(100, score))}%` }}
                     />
                 </div>
-                <div className="text-[8px] text-text-secondary/50 mt-0.5 font-mono text-right">
+                <div className="text-xs text-text-secondary mt-0.5 font-mono text-right">
                     {score == null ? t('strategicPosition.compositeUnreported') : t('strategicPosition.weightedComposite')}
                 </div>
             </div>
@@ -127,21 +127,21 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                             onMouseLeave={() => setHoveredDim(null)}
                         >
                             <div className="flex items-center justify-between mb-0.5">
-                                <span className="text-[10px] font-bold uppercase tracking-wide text-text-secondary">
+                                <span className="text-xs font-bold uppercase tracking-wide text-text-secondary">
                                     {t(labelKey)}
                                     {weight != null && (
-                                        <span className="text-[8px] text-text-secondary/40 ml-1 font-mono">
+                                        <span className="text-xs text-text-secondary ml-1 font-mono">
                                             {formatWeight(weight)}
                                         </span>
                                     )}
                                 </span>
                                 <div className="flex items-center gap-1.5">
                                     {mod && (
-                                        <span className={`text-[9px] font-mono font-bold ${mod.color}`}>
+                                        <span className={`text-xs font-mono font-bold ${mod.color}`}>
                                             {mod.text}
                                         </span>
                                     )}
-                                    <span className={`text-[11px] font-mono font-bold ${effective == null ? 'text-text-secondary italic' : `tabular-nums ${gradeColor(effective)}`}`}>
+                                    <span className={`text-xs font-mono font-bold ${effective == null ? 'text-text-secondary italic' : `tabular-nums ${gradeColor(effective)}`}`}>
                                         {effective == null ? t('strategicPosition.unreported') : Math.round(effective)}
                                     </span>
                                 </div>
@@ -156,7 +156,7 @@ export function StrategicPosition({ dimensions, faction, compositeScore }: Strat
                             {/* Tooltip on hover */}
                             {isHovered && (
                                 <div className="absolute z-50 left-0 top-full mt-1 bg-panel-bg border border-panel-border rounded px-2 py-1.5 shadow-lg whitespace-nowrap pointer-events-none">
-                                    <div className="text-[9px] font-mono text-text-secondary space-y-0.5">
+                                    <div className="text-xs font-mono text-text-secondary space-y-0.5">
                                         <div>{t('strategicPosition.base')} <span className="text-text-primary font-bold">{base == null ? t('strategicPosition.unreported') : Math.round(base)}</span></div>
                                         <div>{t('strategicPosition.events')} <span className={eventMod == null ? 'text-text-secondary italic' : eventMod >= 0 ? 'text-emerald-400' : 'text-red-400'}>{eventMod == null ? t('strategicPosition.unreported') : `${eventMod >= 0 ? '+' : ''}${Math.round(eventMod)}`}</span></div>
                                         <div>{t('strategicPosition.effective')} <span className={`font-bold ${effective == null ? 'text-text-secondary italic' : gradeColor(effective)}`}>{effective == null ? t('strategicPosition.unreported') : Math.round(effective)}</span></div>

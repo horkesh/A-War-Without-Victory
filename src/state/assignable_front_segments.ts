@@ -1,5 +1,6 @@
 import type { FrontEdge } from '../map/front_edges.js';
 import type { AssignableFrontSegmentState, FactionId } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 interface Bucket {
     sideA: FactionId | null;
@@ -48,7 +49,7 @@ function edgeAdjacencyMap(frontEdges: FrontEdge[]): Map<string, Set<string>> {
 export function deriveAssignableFrontSegments(frontEdges: FrontEdge[]): AssignableFrontSegmentState[] {
     if (!Array.isArray(frontEdges) || frontEdges.length === 0) return [];
 
-    const sortedEdges = [...frontEdges].sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+    const sortedEdges = [...frontEdges].sort((a, b) => strictCompare(a.edge_id, b.edge_id));
     const edgeMeta = new Map<string, { sideA: FactionId | null; sideB: FactionId | null }>();
     const bucketsByPair = new Map<string, Bucket>();
     for (const edge of sortedEdges) {
@@ -108,7 +109,7 @@ export function deriveAssignableFrontSegments(frontEdges: FrontEdge[]): Assignab
         }
     }
 
-    out.sort((a, b) => a.front_id.localeCompare(b.front_id));
+    out.sort((a, b) => strictCompare(a.front_id, b.front_id));
     return out;
 }
 

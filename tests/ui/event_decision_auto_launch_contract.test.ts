@@ -19,7 +19,7 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const autoLaunchEffect = app.slice(
       app.indexOf('auto-launch the EventDecisionModal'),
-      app.indexOf('// Auto-dismiss non-decision events'),
+      app.indexOf('const handleEventAcknowledge'),
     );
 
     expect(autoLaunchEffect).toContain('selectNextPendingEventDecision');
@@ -32,7 +32,7 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const autoLaunchEffect = app.slice(
       app.indexOf('auto-launch the EventDecisionModal'),
-      app.indexOf('// Auto-dismiss non-decision events'),
+      app.indexOf('const handleEventAcknowledge'),
     );
 
     expect(autoLaunchEffect).toContain('if (peaceWarTransitionActive) return;');
@@ -46,13 +46,28 @@ describe('event decision modal auto-launch contract', () => {
     const app = readApp();
     const autoLaunchEffect = app.slice(
       app.indexOf('auto-launch the EventDecisionModal'),
-      app.indexOf('// Auto-dismiss non-decision events'),
+      app.indexOf('const handleEventAcknowledge'),
     );
 
     expect(autoLaunchEffect).toContain('if (openingBriefPending) return;');
     expect(autoLaunchEffect).toContain('openingBriefPending,');
     expect(autoLaunchEffect.indexOf('if (openingBriefPending) return;')).toBeLessThan(
       autoLaunchEffect.indexOf('selectNextPendingEventDecision'),
+    );
+  });
+
+  it('keeps the opening brief visible ahead of a required foundational decision', () => {
+    const app = readApp();
+    const blockingSurfaceBlock = app.slice(
+      app.indexOf('const openingBriefPending = shouldShowOpeningBrief'),
+      app.indexOf('const onboardingBlockingOverlayActive'),
+    );
+
+    expect(blockingSurfaceBlock).toContain(
+      '(requiredPlayerEventDecisionPending && !openingBriefPending) ||',
+    );
+    expect(blockingSurfaceBlock.indexOf('const openingBriefPending')).toBeLessThan(
+      blockingSurfaceBlock.indexOf('const presidentialBlockingSurfaceActive'),
     );
   });
 
@@ -108,8 +123,22 @@ describe('event decision modal auto-launch contract', () => {
     );
 
     expect(modalRenderBlock).toContain('const result = await ipc.respondToEventDecision(eventId, responseId)');
+    expect(modalRenderBlock).toContain('setActionReceiptMessage');
+    expect(modalRenderBlock).toContain("t('firedEvent.wrapper.responseRecorded'");
     expect(modalRenderBlock).toContain('if (result.ok === true)');
     expect(modalRenderBlock).toContain('setActiveEventDecisionId(null)');
+  });
+
+  it('renders the durable action receipt on an opaque non-intercepting surface', () => {
+    const app = readApp();
+    const receiptBlock = app.slice(
+      app.indexOf('data-testid="action-receipt-toast"'),
+      app.indexOf('{actionReceiptMessage}', app.indexOf('data-testid="action-receipt-toast"')),
+    );
+
+    expect(receiptBlock).toContain('pointer-events-none');
+    expect(receiptBlock).toContain('border-emerald-400/45 bg-[#10151d] px-4');
+    expect(receiptBlock).not.toContain('bg-[#10151d]/');
   });
 
   it('logs raw browser fallback event-decision errors while showing generic player copy', () => {
@@ -154,6 +183,30 @@ describe('event decision modal auto-launch contract', () => {
     expect(eventQueueEffect).toContain('e.turn === loadedGameState.turn');
     expect(eventQueueEffect).toContain('setShownEventModalIds');
     expect(eventQueueEffect).not.toContain('!acknowledgedEventIds.has(e.id) && !e.isDecision');
+  });
+
+  it('retains acknowledged event ids across ordinary state projection updates', () => {
+    const app = readApp();
+
+    expect(app).not.toContain('const stateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint)');
+    expect(app).toContain('const resetCampaignScopedUiState = useCallback(() => {');
+    expect(app).toContain('setShownEventModalIds(new Set());');
+    expect(app).toContain('setEventQueue([]);');
+    expect(app).toContain('setEventQueueIndex(0);');
+    expect(app).toMatch(/handleSelectFaction[\s\S]*resetCampaignScopedUiState\(\)/);
+    expect(app).toMatch(/handleMainMenuLoadGame[\s\S]*resetCampaignScopedUiState\(\)/);
+    expect(app).toMatch(/awwv-shell:fresh-campaign-started[\s\S]*resetCampaignScopedUiState\(\)/);
+  });
+
+  it('keeps non-decision event essays visible until the player acknowledges them', () => {
+    const app = readApp();
+    const queueDismissalBlock = app.slice(
+      app.indexOf('const pendingPeacePlan = loadedGameState?.pendingPeacePlan'),
+      app.indexOf('const handleEventAcknowledge'),
+    );
+
+    expect(queueDismissalBlock).not.toContain('setTimeout');
+    expect(queueDismissalBlock).not.toContain('setEventQueue([])');
   });
 
   it('keeps PresidentialAttentionPanel as a summary surface, not an event response executor', () => {

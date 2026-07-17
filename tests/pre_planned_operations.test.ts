@@ -3,6 +3,7 @@ import { describe, it } from 'vitest';
 
 import { deferUnauthorizedHistoricalOperationsForPlayer } from '../src/sim/combat/historical_operation_authorization.js';
 import { injectPrePlannedOperations, injectQueuedOperation, _ALL_PRE_PLANNED } from '../src/sim/combat/pre_planned_operations.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { getSectorOffensiveApproachOsids } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import { collectOpInjectionWarnings } from '../src/sim/combat/operation_validation.js';
 import type { OpInjectionWarning } from '../src/sim/combat/operation_validation.js';
@@ -13,6 +14,12 @@ import type {
     FormationState,
     GameState,
 } from '../src/state/game_state.js';
+
+async function applyAutonomyTransition(state: GameState): Promise<void> {
+    const step = warPhases.find((phase) => phase.name === 'apply-autonomy-transition');
+    assert.ok(step);
+    await step.run({ state, input: {}, report: {} } as any);
+}
 
 function makeMinimalState(): GameState {
     const formations: Record<string, FormationState> = {};
@@ -119,6 +126,18 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('retains both Bosanski Brod targets in the canonical Corridor east-axis order', () => {
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor');
+        assert.ok(corridor);
+        const eastAxis = corridor.axes.find((axis) => axis.axis_id === 'corridor_east');
+        assert.ok(eastAxis);
+
+        assert.deepEqual(
+            eastAxis.objectives.filter((objective) => objective.startsWith('op:bosanski_brod:')),
+            ['op:bosanski_brod:novo_selo_2', 'op:bosanski_brod:brod'],
+        );
+    });
+
     it('injects one active operation per corps and preserves current queue chains', () => {
         const state = makeMinimalState();
         injectPrePlannedOperations(state);
@@ -171,6 +190,75 @@ describe('pre-planned operations', () => {
         injectPrePlannedOperations(state);
 
         assert.equal(state.military.corps_command?.vrs_drina?.active_operations[0]?.name, 'Operation Drina');
+    });
+
+    it('retains accepted authorization through temporary corps work and retries without reauthorization', async () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.queued_operations = ['Operation Drina'];
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
+        );
+        assert.ok(review);
+        review.accepted = true;
+        review.resolved_turn = state.meta.turn;
+
+        command.active_operations = [{
+            name: 'Temporary Corps Task',
+            type: 'sector_attack',
+            phase: 'planning',
+            is_pre_planned: true,
+        } as any];
+        state.meta.turn += 1;
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        await applyAutonomyTransition(state);
+        assert.equal(
+            state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
+            true,
+        );
+
+        command.active_operations = [];
+        state.meta.turn += 1;
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), true);
+        assert.equal(command.active_operations[0]?.name, 'Operation Drina');
+
+        state.meta.turn += 1;
+        await applyAutonomyTransition(state);
+        assert.equal(
+            state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
+            true,
+            'resolved historical authorization remains a durable no-reprompt record',
+        );
+    });
+
+    it('retains accepted authorization when a queued operation is permanently moot', async () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+        const command = state.military.corps_command!.vrs_drina!;
+        command.queued_operations = ['Operation Drina'];
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina'
+        );
+        assert.ok(review);
+        review.accepted = true;
+        review.resolved_turn = state.meta.turn;
+
+        const drina = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Drina')!;
+        for (const objective of drina.axes.flatMap((axis) => axis.objectives)) {
+            state.political.political_controllers![objective] = 'RS';
+        }
+        state.meta.turn += 1;
+        assert.equal(injectQueuedOperation(state, 'vrs_drina'), false);
+        assert.equal(command.queued_operations, undefined);
+
+        await applyAutonomyTransition(state);
+        assert.equal(
+            state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
+            true,
+        );
     });
 
     it('normalizes baked startup snapshots so selected player operations become authorization reviews', () => {
@@ -356,6 +444,42 @@ describe('pre-planned operations', () => {
         );
     });
 
+    it('does not let a concurrent probe erase an objective from a queued historical operation', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 16;
+        state.political.political_controllers!['op:derventa:derventa_2'] = 'HRHB';
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [{
+            name: 'probe_vrs_1st_krajina_t14',
+            type: 'probe',
+            phase: 'execution',
+            started_turn: 14,
+            phase_started_turn: 15,
+            participating_brigades: ['rs_5th_kozara_light_infantry'],
+            objectives: ['op:derventa:derventa_2'],
+            current_objective_index: 0,
+            momentum: 0,
+            failure_count: 0,
+            consecutive_failures_on_current: 0,
+        } as any];
+        command.queued_operations = ['Operation Corridor'];
+
+        const firstAttempt = injectQueuedOperation(state, 'vrs_1st_krajina');
+
+        assert.equal(firstAttempt, false);
+        assert.deepEqual(command.queued_operations, ['Operation Corridor']);
+        command.active_operations = [];
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+        assert.equal(injected, true);
+        const corridor = command.active_operations.find((op) => op.name === 'Operation Corridor');
+        assert.ok(corridor);
+        assert.ok(
+            corridor!.axes?.some((axis) => axis.objectives.includes('op:derventa:derventa_2')),
+            'a non-capturing probe must not permanently strip Derventa from Operation Corridor',
+        );
+    });
+
     it('keeps player-faction queued operations queued until the player authorizes them', () => {
         const state = makeMinimalState();
         state.meta.turn = 8;
@@ -380,6 +504,55 @@ describe('pre-planned operations', () => {
         assert.equal(second, true);
         assert.equal(command.active_operations[0]?.name, 'Operation Foca');
         assert.deepEqual(command.queued_operations, undefined);
+    });
+
+    it('does not bypass queued follow-ons or re-offer completed player pre-planned operations', () => {
+        const state = makeMinimalState();
+        state.meta.player_faction = 'RS' as FactionId;
+
+        injectPrePlannedOperations(state, undefined, { faction: 'RS' });
+        const prijedorReview = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Prijedor'
+        );
+        assert.ok(prijedorReview);
+        prijedorReview!.accepted = true;
+        prijedorReview!.resolved_turn = state.meta.turn;
+        injectPrePlannedOperations(state, undefined, { faction: 'RS' });
+
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        assert.equal(command.active_operations[0]?.name, 'Operation Prijedor');
+        assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+
+        command.active_operations = [];
+        state.operation_history = [{
+            corps_id: 'vrs_1st_krajina',
+            operation_name: 'Operation Prijedor',
+            ended_turn: 7,
+            outcome: 'success',
+        } as any];
+        state.meta.pending_proposal_reviews = [];
+
+        injectPrePlannedOperations(state, undefined, { faction: 'RS' });
+
+        assert.equal(
+            command.active_operations.some((op) => op.name === 'Operation Corridor'),
+            false,
+            'scenario-start injector must not bypass the queued-operation owner',
+        );
+        assert.ok(
+            !state.meta.pending_proposal_reviews?.some((proposal) =>
+                proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Prijedor'
+            ),
+            'completed Prijedor must not be re-offered',
+        );
+
+        const queuedAttempt = injectQueuedOperation(state, 'vrs_1st_krajina');
+        assert.equal(queuedAttempt, false);
+        const corridorReview = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Corridor'
+        );
+        assert.ok(corridorReview);
+        assert.deepEqual(command.queued_operations, ['Operation Corridor', 'Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
     });
 
     it('keeps a queued operation queued when live operations already claim every objective', () => {
@@ -450,6 +623,77 @@ describe('pre-planned operations', () => {
         assert.equal(injected, true);
         assert.equal(command.active_operations[0]?.name, 'Operation Corridor');
         assert.deepEqual(command.queued_operations, ['Operation Jajce', 'Operation Donji Vakuf', 'Operation Bosanski Novi']);
+    });
+
+    it('keeps Corridor participants viable when already forward-deployed in an objective municipality', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 10;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Corridor'];
+        const forwardIds = new Set(['rs_27th_derventa_motorized', 'rs_16th_krajina_motorized']);
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor')!;
+        for (const brigadeId of corridor.axes.flatMap((axis) => axis.brigades)) {
+            const formation = state.military.formations[brigadeId]!;
+            formation.personnel = forwardIds.has(brigadeId) ? 1000 : 300;
+        }
+        state.military.formations['rs_27th_derventa_motorized']!.location_osid = 'op:derventa:cerani_2';
+        state.military.formations['rs_16th_krajina_motorized']!.location_osid = 'op:derventa:lug';
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina', new Map());
+
+        assert.equal(injected, true);
+        const operation = command.active_operations.find((op) => op.name === 'Operation Corridor');
+        assert.ok(operation);
+        assert.deepEqual(
+            [...operation!.participating_brigades].sort(),
+            [...forwardIds].sort(),
+        );
+    });
+
+    it('gives Operation Corridor eight turns to stage its east-axis brigades', () => {
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor');
+
+        assert.ok(corridor);
+        assert.equal(corridor!.planning_duration, 8);
+    });
+
+    it('stages all six Corridor east-axis brigades across the duration-minus-one movement budget', () => {
+        const state = makeMinimalState();
+        state.meta.turn = 10;
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [];
+        command.queued_operations = ['Operation Corridor'];
+
+        const corridor = _ALL_PRE_PLANNED.find((def) => def.name === 'Operation Corridor')!;
+        const eastAxis = corridor.axes.find((axis) => axis.axis_id === 'corridor_east')!;
+        const staging = eastAxis.staging_osid ?? corridor.staging_osid;
+        const route = [
+            'op:test:corridor_east_start',
+            'op:test:corridor_route_1',
+            'op:test:corridor_route_2',
+            'op:test:corridor_route_3',
+            'op:test:corridor_route_4',
+            'op:test:corridor_route_5',
+            'op:test:corridor_route_6',
+            staging,
+        ];
+        const adjacency = new Map<string, string[]>();
+        for (let i = 0; i < route.length; i++) {
+            adjacency.set(route[i]!, [route[i - 1], route[i + 1]].filter((osid): osid is string => osid !== undefined));
+            state.political.political_controllers![route[i]!] = 'RS';
+        }
+        for (const brigadeId of eastAxis.brigades) {
+            state.military.formations[brigadeId]!.location_osid = route[0];
+        }
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina', adjacency as any);
+
+        assert.equal(injected, true);
+        const operation = command.active_operations.find((op) => op.name === 'Operation Corridor');
+        assert.ok(operation);
+        const injectedEastAxis = operation!.axes?.find((axis) => axis.axis_id === 'corridor_east');
+        assert.deepEqual(injectedEastAxis?.assigned_brigades, eastAxis.brigades);
     });
 
     it('keeps Trnovo kijevo_2 as a friendly approach waypoint after stripping it as a capture objective', () => {
@@ -616,7 +860,7 @@ describe('pre-planned operations', () => {
         assert.equal(state.military.op_injection_warnings?.length, 2);
     });
 
-    it('trims queued objectives already claimed by a live probe before overlap validation', () => {
+    it('defers queued historical work until a live probe releases the objective', () => {
         const state = makeMinimalState();
         state.meta.turn = 19;
 
@@ -642,13 +886,18 @@ describe('pre-planned operations', () => {
         } as any];
         command.queued_operations = ['Operation Donji Vakuf'];
 
-        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
+        const firstAttempt = injectQueuedOperation(state, 'vrs_1st_krajina');
 
+        assert.equal(firstAttempt, false);
+        assert.deepEqual(command.queued_operations, ['Operation Donji Vakuf']);
+        command.active_operations = [];
+
+        const injected = injectQueuedOperation(state, 'vrs_1st_krajina');
         assert.equal(injected, true);
         const donjiVakuf = command.active_operations.find((op) => op.name === 'Operation Donji Vakuf');
         assert.ok(donjiVakuf);
         const objectives = donjiVakuf!.axes!.flatMap((axis) => axis.objectives);
-        assert.ok(!objectives.includes('op:donji_vakuf:oborci_2'));
+        assert.ok(objectives.includes('op:donji_vakuf:oborci_2'));
         assert.ok(objectives.includes('op:donji_vakuf:torlakovac_2'));
         assert.ok(
             !(state.military.op_injection_warnings ?? []).some((warning) => warning.check === 'objective_overlap'),

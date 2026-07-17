@@ -281,6 +281,8 @@ export interface OperationAxis {
     launch_blocker?: 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'recent_catastrophic_losses_at_objective' | 'insufficient_donation';
     /** Battles conducted by this axis this turn (reset each turn). */
     battles_this_turn?: number;
+    /** Battles resolved against this axis's current objective this turn. */
+    objective_battles_this_turn?: number;
     /** Total battles conducted by this axis since operation start. */
     total_battles?: number;
 }
@@ -446,6 +448,8 @@ export interface CorpsOperation {
     // --- Combat feedback counters (for API commanders / GUI) ---
     /** Battles conducted this turn (reset each turn). */
     battles_this_turn?: number;
+    /** Battles resolved against the current flat-operation objective this turn. */
+    objective_battles_this_turn?: number;
     /** OSIDs captured this turn (reset each turn). */
     territory_gained_this_turn?: number;
     /** Total battles since operation started. */
@@ -1200,7 +1204,7 @@ export interface ConvoyDecisionRecord {
     decided_by: 'player' | 'bot';
 }
 
-/** Paramilitary deployment request for a rear enemy pocket. */
+/** Paramilitary deployment request awaiting player authorization. */
 export interface ParamilitaryRequest {
     /** Target OSID to capture. */
     target_osid: string;
@@ -1208,6 +1212,8 @@ export interface ParamilitaryRequest {
     faction: FactionId;
     /** Estimated paramilitary strength (personnel). */
     strength: number;
+    /** Operational mode: rear-pocket cleanup or offensive sweep. */
+    mode?: 'rear_pocket' | 'offensive';
     /** Projected civilian casualties as an integer count. Required for player-facing ask-mode review. */
     estimated_civilian_risk?: number;
     /** Player decision: 'allow' deploys paramilitary, 'deny' skips, 'regular' flags for corps priority. */
@@ -1221,6 +1227,7 @@ export interface ParamilitaryDecisionRecord {
     faction: FactionId;
     strength: number;
     decision: 'allow' | 'deny' | 'regular';
+    mode?: 'rear_pocket' | 'offensive';
     estimated_civilian_risk?: number;
 }
 
@@ -1445,7 +1452,7 @@ export interface DisplacementState {
 export interface ControlEvent {
     turn: number;
     settlement_id: string;
-    mechanism: 'combat' | 'consolidation' | 'abandoned' | 'event' | 'setup_control';
+    mechanism: 'combat' | 'paramilitary' | 'consolidation' | 'abandoned' | 'event' | 'setup_control';
     from: string | null;
     to: string | null;
     mun_id?: string;
@@ -2959,7 +2966,7 @@ phase0_relationships?: {
 // --- Control change events (Phase 5 GUI: battle markers) ---
 /**
      * Per-turn log of OSID control changes. Cleared at the start of each attack-resolution step,
-     * then populated by combat flips (mechanism='combat').
+     * then populated by control-flip producers with an explicit mechanism.
      * Kept for last 3 turns. Sorted by (turn, settlement_id) for determinism.
      * Used by the GUI battle-markers layer — does not affect simulation logic.
      */

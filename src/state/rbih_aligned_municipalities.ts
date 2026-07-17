@@ -1,3 +1,5 @@
+import { strictCompare } from './validateGameState.js';
+
 /**
  * Municipalities where Croat-majority (HRHB) control is treated as RBiH (HVO subordinate to ARBiH).
  * Only HRHB → RBiH in init; Serb-majority (RS) settlements in these muns stay RS (e.g. Brčko, Bihać).
@@ -20,7 +22,7 @@ export const MUN1990_IDS_ALIGNED_TO_RBIH: readonly string[] = [
     'tesanj',
     'velika_kladusa',
     'vogosca',
-].sort((a, b) => a.localeCompare(b));
+].sort(strictCompare);
 
 const SET = new Set<string>(MUN1990_IDS_ALIGNED_TO_RBIH);
 

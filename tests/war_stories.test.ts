@@ -134,6 +134,16 @@ describe('narrative generation', () => {
         const text = generateNarrative(f, h, 'garrison');
         assert.ok(text.includes('patience'));
     });
+
+    it('describes forming brigade personnel as a reforming cadre, not a fielded force', () => {
+        const f = makeFormation({ personnel: 205, readiness: 'forming' });
+        const h = makeHistory({ battles_fought: 1 });
+
+        const text = generateNarrative(f, h, 'garrison');
+
+        assert.ok(text.includes('reforming around a cadre of 205 personnel'));
+        assert.ok(!text.includes('currently fields'));
+    });
 });
 
 describe('notable moments', () => {

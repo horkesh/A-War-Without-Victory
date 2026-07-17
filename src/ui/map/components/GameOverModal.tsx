@@ -85,20 +85,20 @@ export function GameOverModal() {
             <>
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
+                    <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
                         {t('gameOver.header', { date })}
                     </div>
                     <div id="game-over-title" className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
                         {title}
                     </div>
-                    <div className="text-[11px] text-text-secondary italic leading-relaxed max-w-sm mx-auto">
+                    <div className="text-xs text-text-secondary italic leading-relaxed max-w-sm mx-auto">
                         {subtitle}
                     </div>
                 </div>
 
                 {/* Faction Standings */}
                 <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
                     {factionIds.map((fid) => {
                         const color = FACTION_COLORS[fid as keyof typeof FACTION_COLORS] ?? '#888';
                         const osids = factionOsids[fid] ?? 0;
@@ -111,9 +111,9 @@ export function GameOverModal() {
                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
                                         <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{fid}</span>
                                     </div>
-                                    <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
+                                    <span className="text-xs text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
-                                <div className="flex gap-4 text-[10px] text-text-secondary">
+                                <div className="flex gap-4 text-xs text-text-secondary">
                                     <span>{formatSettlementsControlled(osids, locale)}</span>
                                     <span>{t('gameOver.activeBrigades', { count: brigades })}</span>
                                 </div>
@@ -124,7 +124,7 @@ export function GameOverModal() {
                         );
                     })}
 
-                    <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
+                    <div className="text-xs text-text-secondary text-center pt-2 border-t border-panel-border">
                         {t('gameOver.campaignDuration', { weeks: turn, years: Math.floor(turn / 52), remainder: turn % 52 })}
                     </div>
                 </div>
@@ -133,14 +133,14 @@ export function GameOverModal() {
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
+                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
                         {t('mainMenu.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button
                             onClick={() => ipc.loadStateDialog?.()}
-                            className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
+                            className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
                         >
                             {t('gameOver.loadSave')}
                         </button>

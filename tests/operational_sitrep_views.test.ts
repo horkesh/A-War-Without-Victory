@@ -14,14 +14,22 @@ describe('operational SITREP views', () => {
         corpsCount: 1,
         avgCohesion: 0,
         formationDetails: [
-          { id: 'b3', name: '3rd Brigade', kind: 'brigade', personnel: 700, cohesion: 55, readiness: 'ready', posture: 'defend', disrupted: false, woundedPending: 0, movementStatus: 'deployed', corpsId: 'c1' },
-          { id: 'b1', name: '1st Brigade', kind: 'brigade', personnel: 300, cohesion: 40, readiness: 'ready', posture: 'hold', disrupted: false, woundedPending: 0, movementStatus: 'packing', corpsId: 'c1' },
-          { id: 'b2', name: '2nd Brigade', kind: 'brigade', personnel: 300, cohesion: 35, readiness: 'ready', posture: 'hold', disrupted: false, woundedPending: 0, movementStatus: 'deployed', corpsId: 'c1' },
+          { id: 'b3', name: '3rd Brigade', kind: 'brigade', personnel: 700, cohesion: 55, readiness: 'ready', posture: 'defend', disrupted: false, woundedPending: 0, movementStatus: 'deployed', corpsId: 'c1', locationId: 'op:c' },
+          { id: 'b1', name: '1st Brigade', kind: 'brigade', personnel: 300, cohesion: 40, readiness: 'ready', posture: 'hold', disrupted: false, woundedPending: 0, movementStatus: 'packing', corpsId: 'c1', locationId: 'op:a' },
+          { id: 'b2', name: '2nd Brigade', kind: 'brigade', personnel: 300, cohesion: 35, readiness: 'ready', posture: 'hold', disrupted: false, woundedPending: 0, movementStatus: 'deployed', corpsId: 'c1', locationId: 'op:b' },
         ],
       },
       ownCasualties: { killed: 0, wounded: 0, missingCaptured: 0, equipmentLost: { tanks: 0, artillery: 0, aa: 0 }, woundedPendingReturn: 0 },
       ownTerritory: { settlementsControlled: 1, settlementsTotal: 2, territoryPercent: 50 },
-      ownDisplacement: { totalDisplacedOut: 0, totalDisplacedIn: 0, civilianKilled: 0, civilianFledAbroad: 0, activeCamps: 2, activeHostileTakeoverTimers: 1 },
+      ownDisplacement: {
+        totalDisplacedOut: 0,
+        totalDisplacedIn: 0,
+        civilianKilled: 0,
+        civilianFledAbroad: 0,
+        activeCamps: 2,
+        activeHostileTakeoverTimers: 1,
+        hostileTakeoverMunicipalities: ['visoko'],
+      },
       ownExhaustion: { level: 0, trend: 'flat', increasing: true, collapseEligible: true },
       ownSupply: { adequateCount: 1, strainedCount: 2, criticalCount: 1, collapsedMunicipalities: ['bijeljina:center'], },
       ownAuthority: { authority: 0.2, legitimacy: 0 },
@@ -48,6 +56,21 @@ describe('operational SITREP views', () => {
     expect(view.operations.corps[1]?.summary).not.toContain('probe');
     expect(view.operations.corps[1]?.summary).not.toContain('planning');
     expect(view.operations.corps[1]?.summary).not.toContain('T11');
+    expect(view.readiness.encircledBrigades).toEqual([
+      {
+        id: 'b2',
+        label: '2nd Brigade',
+        location: 'B',
+      },
+    ]);
+    expect(view.alerts.find((alert) => alert.id === 'front-exposed')?.evidence).toEqual([
+      'Affected front: A - B.',
+      'Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.',
+    ]);
+    expect(view.alerts.find((alert) => alert.id === 'brigades-encircled')?.evidence).toEqual([
+      'Cut off: 2nd Brigade at B.',
+      'Staff handoff: inspect the formation and relief routes in War Summary; no direct presidential move order is available while cut off.',
+    ]);
     expect(view.alerts.map((alert) => alert.id)).toEqual([
       'brigades-encircled',
       'front-exposed',
@@ -60,6 +83,39 @@ describe('operational SITREP views', () => {
       'exhaustion-worsening',
       'active-operations',
     ]);
+  });
+
+  it('does not elevate thin fronts without reported pressure into presidential alerts', () => {
+    const view = toOperationalSitrepView({
+      playerFaction: 'RS',
+      turn: 20,
+      phase: 'war',
+      ownForces: {
+        totalPersonnel: 0,
+        activeBrigades: 0,
+        totalBrigades: 0,
+        corpsCount: 0,
+        avgCohesion: 0,
+        formationDetails: [],
+      },
+      ownCasualties: { killed: 0, wounded: 0, missingCaptured: 0, equipmentLost: { tanks: 0, artillery: 0, aa: 0 }, woundedPendingReturn: 0 },
+      ownTerritory: { settlementsControlled: 1, settlementsTotal: 2, territoryPercent: 50 },
+      ownDisplacement: { totalDisplacedOut: 0, totalDisplacedIn: 0, civilianKilled: 0, civilianFledAbroad: 0, activeCamps: 0, activeHostileTakeoverTimers: 0, hostileTakeoverMunicipalities: [] },
+      ownExhaustion: { level: 0, trend: 'flat', increasing: false, collapseEligible: false },
+      ownSupply: { adequateCount: 1, strainedCount: 0, criticalCount: 0, collapsedMunicipalities: [] },
+      ownAuthority: { authority: 1, legitimacy: 1 },
+      ownCorpsOps: [],
+      ownDiplomacy: { patronState: null, rbihHrhbState: null, embargoProfile: null, constraintSeverity: null, negotiationMomentum: 0 },
+      contactedEnemyFormations: [],
+      engagedFrontEdges: [
+        { edgeId: 'quiet_gap', settlementA: 'op:prijedor:west', settlementB: 'op:sanski_most:east', sideA: 'RS', sideB: 'RBiH', pressure: 0, friction: 0, tier: 'exposed' },
+      ],
+      brigadeMovement: { packing: [], inTransit: [], unpacking: [], encircled: [] },
+      exposedFrontSettlements: [],
+    } as any);
+
+    expect(view.front.exposedCount).toBe(1);
+    expect(view.alerts.map((alert) => alert.id)).not.toContain('front-exposed');
   });
 
   it('builds the canonical operational packet from raw game state via the shared read path', () => {
@@ -166,5 +222,53 @@ describe('operational SITREP views', () => {
     expect(view.front.edges[0]?.label).toBe('West (Livno) - East (Glamoc)');
     expect(view.front.edges[0]?.label).not.toContain('op:');
     expect(view.front.edges[0]?.label).not.toContain('_');
+  });
+
+  it('aggregates player takeover pressure by municipality while preserving raw timer drilldown', () => {
+    const rawState = {
+      meta: { turn: 9, phase: 'war' },
+      factions: [
+        { id: 'RBiH', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+        { id: 'RS', profile: { authority: 1, legitimacy: 1, control: 1, logistics: 1, exhaustion: 0 } },
+      ],
+      military: {
+        formations: {},
+        casualty_ledger: {},
+        front_edges: [],
+        front_pressure: {},
+        front_segments: {},
+        militia_garrison: {},
+        brigade_movement_state: {},
+        brigade_encircled: {},
+        corps_command: {},
+      },
+      political: {
+        political_controllers: {},
+        war_exhaustion: { RBiH: 0 },
+        loss_of_control_trends: { by_faction: { RBiH: { exhaustion_trend: 'flat' } } },
+      },
+      displacement: {
+        displacement_state: {},
+        displacement_camp_state: {},
+        hostile_takeover_timers: {
+          'op:visoko:north|RBiH': { mun_id: 'visoko', from_faction: 'RBiH', to_faction: 'RS', started_turn: 8 },
+          'op:visoko:south|RBiH': { mun_id: 'visoko', from_faction: 'RBiH', to_faction: 'RS', started_turn: 8 },
+          'op:travnik:center|RBiH': { mun_id: 'travnik', from_faction: 'RBiH', to_faction: 'HRHB', started_turn: 9 },
+          'op:visoko:north|HRHB': { mun_id: 'visoko', from_faction: 'HRHB', to_faction: 'RS', started_turn: 8 },
+          'op:tuzla:center|RS': { mun_id: 'tuzla', from_faction: 'RS', to_faction: 'RBiH', started_turn: 8 },
+        },
+        civilian_casualties: {},
+        sustainability_state: {},
+      },
+    } as any;
+
+    const view = getOperationalSitrepView(rawState, 'RBiH');
+    const alert = view.alerts.find((entry) => entry.id === 'hostile-takeovers');
+
+    expect(view.sustainment.hostileTakeoverMunicipalityCount).toBe(2);
+    expect(view.sustainment.hostileTakeoverMunicipalities).toEqual(['Travnik', 'Visoko']);
+    expect(view.sustainment.activeHostileTakeoverTimers).toBe(3);
+    expect(alert?.text).toBe('2 municipalities face active hostile takeover pressure.');
+    expect(alert?.text).not.toContain('3');
   });
 });

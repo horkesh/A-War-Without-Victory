@@ -93,6 +93,26 @@ describe('deck click selection priority', () => {
     expect(result?.id).toBe('alpha_brigade');
   });
 
+  it('matches fallback hit testing to rendered stack pixel offsets', () => {
+    const result = pickNearestFormationAtPoint({
+      zoom: 9,
+      point: { x: 104, y: 94 },
+      formations: [
+        {
+          geometry: { type: 'Point', coordinates: [17, 43] },
+          properties: { id: 'alpha_brigade', stack_index: 0, stack_count: 3 },
+        },
+        {
+          geometry: { type: 'Point', coordinates: [17, 43] },
+          properties: { id: 'zeta_brigade', stack_index: 2, stack_count: 3 },
+        },
+      ],
+      project: () => ({ x: 100, y: 100 }),
+    });
+
+    expect(result?.id).toBe('zeta_brigade');
+  });
+
   it('MapContainer does not discard a resolved formation fallback when Deck has no object payload', () => {
     const source = readFileSync(resolve('src/ui/map/map/MapContainer.tsx'), 'utf8');
 

@@ -257,12 +257,17 @@ export async function startCampaignFromSidePicker(
 ): Promise<boolean> {
     if (ipc.isAvailable) {
         const result = await ipc.startNewCampaign({ playerFaction: faction, scenarioKey });
-        if (!result.ok || !result.stateJson) {
+        if (!result.ok) {
             setLoadError(result.error ?? 'Failed to start campaign.');
             return false;
         }
         try {
-            await loadSave(result.stateJson);
+            const stateJson = await ipc.getCurrentGameState();
+            if (!stateJson) {
+                setLoadError('Campaign started, but the player-visible state was unavailable.');
+                return false;
+            }
+            await loadSave(stateJson);
             return true;
         } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
@@ -362,12 +367,17 @@ export async function applyRecruitmentAndSync({
     equipmentClass,
 }: ApplyRecruitmentDeps): Promise<boolean> {
     const result = await ipc.applyRecruitment(brigadeId, equipmentClass);
-    if (!result.ok || !result.stateJson) {
+    if (!result.ok) {
         setLoadError(result.error ?? 'Recruitment failed.');
         return false;
     }
     try {
-        await loadSave(result.stateJson);
+        const stateJson = await ipc.getCurrentGameState();
+        if (!stateJson) {
+            setLoadError('Recruitment succeeded, but the updated player-visible state was unavailable.');
+            return false;
+        }
+        await loadSave(stateJson);
         return true;
     } catch (err) {
         const message = err instanceof Error ? err.message : String(err);

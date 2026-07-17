@@ -1,7 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-import { buildCorpsFrontSectors } from '../src/sim/combat/corps_front_sectors.js';
+import {
+    buildCorpsFrontSectors,
+    collectUnresolvedSectorBrigades,
+} from '../src/sim/combat/corps_front_sectors.js';
 import { isMovementOwnedActiveLoanDeployment } from '../src/sim/combat/brigade_assignment.js';
 import {
     reconcileFinalSectorTruth,
@@ -131,6 +134,180 @@ describe('final sector truth reconciliation', () => {
         vi.restoreAllMocks();
     });
 
+    it('does not classify an intentionally isolated holding brigade as a sector-pipeline failure', () => {
+        const { state } = makeState();
+        state.military.formations.brig_isolated = makeFormation('brig_isolated', {
+            corps_id: 'corps_a',
+            location_osid: 'op:test:island',
+            home_osid: 'op:test:island',
+            stranded_status: 'holding',
+            stranded_since_turn: 9,
+        });
+        state.military.war_front_edges_osid = [
+            {
+                edge_id: 'op:test:island__op:test:enemy',
+                a: 'op:test:island',
+                b: 'op:test:enemy',
+                side_a: 'RS',
+                side_b: 'RBiH',
+            },
+        ];
+        const sectors = {
+            'sector:corps_a:0': {
+                sector_id: 'sector:corps_a:0',
+                corps_id: 'corps_a',
+                faction: 'RS' as FactionId,
+                opposing_factions: ['RBiH' as FactionId],
+                edge_ids: ['op:test:front__op:test:enemy'],
+                sub_segments: [],
+                length_edges: 1,
+                territory_osids: ['op:test:rear', 'op:test:front'],
+                assigned_brigade_ids: ['brig_seed'],
+                reserve_brigade_ids: [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+                sector_stance: 'defend' as const,
+                stance_source: 'bot' as const,
+            },
+        };
+        const adjacency = new Map([
+            ['op:test:island', ['op:test:enemy']],
+            ['op:test:enemy', ['op:test:island']],
+        ]);
+
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            sectors,
+            state.military.formations,
+            adjacency,
+        )).not.toContain('brig_isolated');
+    });
+
+    it('requires sector assignment again as soon as an isolated brigade is reconnected', () => {
+        const { state } = makeState();
+        state.military.formations.brig_reconnected = makeFormation('brig_reconnected', {
+            corps_id: 'corps_a',
+            location_osid: 'op:test:island',
+            home_osid: 'op:test:island',
+            stranded_status: 'reconnected',
+            stranded_since_turn: 9,
+        });
+        state.military.war_front_edges_osid = [
+            {
+                edge_id: 'op:test:island__op:test:enemy',
+                a: 'op:test:island',
+                b: 'op:test:enemy',
+                side_a: 'RS',
+                side_b: 'RBiH',
+            },
+        ];
+        const sectors = {
+            'sector:corps_a:0': {
+                sector_id: 'sector:corps_a:0',
+                corps_id: 'corps_a',
+                faction: 'RS' as FactionId,
+                opposing_factions: ['RBiH' as FactionId],
+                edge_ids: ['op:test:front__op:test:enemy'],
+                sub_segments: [],
+                length_edges: 1,
+                territory_osids: ['op:test:rear', 'op:test:front'],
+                assigned_brigade_ids: ['brig_seed'],
+                reserve_brigade_ids: [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+                sector_stance: 'defend' as const,
+                stance_source: 'bot' as const,
+            },
+        };
+        const adjacency = new Map([
+            ['op:test:island', ['op:test:enemy']],
+            ['op:test:enemy', ['op:test:island']],
+        ]);
+
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            sectors,
+            state.military.formations,
+            adjacency,
+        )).toContain('brig_reconnected');
+    });
+
+    it('does not report an active-operation participant as a sector-pipeline failure', () => {
+        const { state } = makeState();
+        state.military.formations.brig_operation = makeFormation('brig_operation', {
+            corps_id: 'corps_a',
+            location_osid: 'op:test:front',
+            home_osid: 'op:test:rear',
+            assignment: null,
+        });
+        state.military.corps_command = {
+            corps_a: {
+                command_span: 4,
+                subordinate_count: 2,
+                og_slots: 0,
+                active_ogs: [],
+                corps_exhaustion: 0,
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'test_operation',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 10,
+                    phase_started_turn: 10,
+                    participating_brigades: ['brig_operation'],
+                }],
+            },
+        };
+        state.military.war_front_edges_osid = [{
+            edge_id: 'op:test:front__op:test:enemy',
+            a: 'op:test:front',
+            b: 'op:test:enemy',
+            side_a: 'RS',
+            side_b: 'RBiH',
+        }];
+        const sectors = {
+            'sector:corps_a:0': {
+                sector_id: 'sector:corps_a:0',
+                corps_id: 'corps_a',
+                faction: 'RS' as FactionId,
+                opposing_factions: ['RBiH' as FactionId],
+                edge_ids: ['op:test:front__op:test:enemy'],
+                sub_segments: [],
+                length_edges: 1,
+                territory_osids: ['op:test:rear', 'op:test:front'],
+                assigned_brigade_ids: ['brig_seed'],
+                reserve_brigade_ids: [],
+                density: 0,
+                threat_ratio: 0,
+                defensive_power: 0,
+                sector_stance: 'defend' as const,
+                stance_source: 'bot' as const,
+            },
+        };
+        const adjacency = new Map([
+            ['op:test:front', ['op:test:enemy', 'op:test:rear']],
+            ['op:test:rear', ['op:test:front']],
+            ['op:test:enemy', ['op:test:front']],
+        ]);
+
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            sectors,
+            state.military.formations,
+            adjacency,
+        )).not.toContain('brig_operation');
+
+        state.military.corps_command.corps_a!.active_operations = [];
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            sectors,
+            state.military.formations,
+            adjacency,
+        )).toContain('brig_operation');
+    });
+
     it('emitFinalUnresolvedSectorWarnings fires only when isFinalPass is true', () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
@@ -237,6 +414,32 @@ describe('final sector truth reconciliation', () => {
         expect(warnCallsAfterFinal).toHaveLength(0);
     });
 
+    it('does not warn for a deep-rear brigade that final reconciliation assigns truthfully', () => {
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+        const { state, edges } = makeState();
+        let previous = 'op:test:rear';
+        for (let hop = 1; hop <= 10; hop += 1) {
+            const current = `op:test:rear_${hop}`;
+            state.political.political_controllers![current] = 'RS';
+            edges.push({ a: previous, b: current } as EdgeRecord);
+            previous = current;
+        }
+        state.military.formations.brig_deep_rear = makeFormation('brig_deep_rear', {
+            corps_id: 'corps_a',
+            location_osid: previous,
+            home_osid: previous,
+        });
+
+        buildCorpsFrontSectors(state, edges, null, undefined, undefined, true);
+
+        expect(state.military.formations.brig_deep_rear.assignment).toMatchObject({
+            kind: 'sector',
+            role: 'rear',
+        });
+        expect(state.military.unresolved_sector_brigades ?? []).not.toContain('brig_deep_rear');
+        expect(warnSpy.mock.calls.some(([message]) => String(message).includes('[PROVISIONAL]'))).toBe(false);
+    });
+
     it('reconcileFinalSectorTruth passes isFinalPass through to buildCorpsFrontSectors', () => {
         const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
         const { state, edges } = makeState();
@@ -263,6 +466,11 @@ describe('final sector truth reconciliation', () => {
         expect(raw).toContain('active_operations');
         expect(raw).toContain('participating_brigades');
         expect(raw).toContain('|ops');
+    });
+
+    it('static contract: assignment emits warnings only from the final unresolved pass', () => {
+        const raw = readFileSync('src/sim/combat/brigade_assignment.ts', 'utf8');
+        expect(raw).not.toContain('[PROVISIONAL]');
     });
 
     it('rebuilds after active operation participating brigades mutate', () => {

@@ -1,7 +1,7 @@
 /**
  * Rear pocket consolidation: auto-flip enemy OSID clusters completely surrounded by faction territory.
  *
- * A cluster of 1-3 connected same-controller OSIDs where ALL external neighbors are controlled
+ * A cluster of 1-6 connected same-controller OSIDs where ALL external neighbors are controlled
  * by a single faction has no military access — the surrounding force controls all roads, supply
  * lines, and communication. Without a defending brigade, this territory is under de facto control
  * and should flip automatically.
@@ -21,7 +21,7 @@ import { strictCompare } from '../../state/validateGameState.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import { osidBelongsToEnclave, ENCLAVE_DEFINITIONS } from './enclave_resilience.js';
 
-/** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
+/** Max cluster size for auto-flip. Clusters > 6 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 6;
 
 /**
@@ -65,7 +65,7 @@ export interface RearPocketConsolidationReport {
 }
 
 /**
- * Scan all OSIDs and auto-flip clusters of 1-3 connected enemy OSIDs completely surrounded
+ * Scan all OSIDs and auto-flip clusters of 1-6 connected enemy OSIDs completely surrounded
  * by a single faction. Only flips OSIDs with NO defending brigade present.
  */
 export function consolidateRearPockets(

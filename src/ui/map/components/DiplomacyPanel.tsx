@@ -34,24 +34,24 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
             {confidence ? (
                 <>
                     <div className="flex items-center justify-between gap-3">
-                        <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
+                        <span className="text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">
                             {t('patronRelations.confidenceLabel')}
                         </span>
-                        <span className="text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-text-primary">
+                        <span className="text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-primary">
                             {t('patronRelations.confidenceReadout', { value: Math.round(confidence.value), band: bandLabel })}
                         </span>
                     </div>
                     <div className="mt-2 h-1.5 w-full overflow-hidden rounded bg-white/10" role="presentation">
                         <div className={`h-full ${tone}`} style={{ width: `${fillPct}%` }} />
                     </div>
-                    <p className="mt-2 text-[10px] leading-4 text-text-secondary">
+                    <p className="mt-2 text-xs leading-4 text-text-secondary">
                         {t('patronRelations.confidenceHelp')}
                     </p>
                 </>
             ) : null}
             {cuts ? (
                 <div className={confidence ? 'mt-2 border-t border-white/8 pt-2' : ''}>
-                    <p className="text-[11px] leading-5 text-red-300">
+                    <p className="text-xs leading-5 text-red-300">
                         {cuts.count > 1
                             ? t('patronRelations.defianceCutMulti', {
                                 count: cuts.count,
@@ -67,12 +67,12 @@ function PatronConfidenceGauge({ confidence, cuts }: { confidence?: PatronConfid
                     </p>
                     {cuts.entries && cuts.entries.length > 0 ? (
                         <div className="mt-2 rounded border border-red-400/20 bg-red-500/5 px-2 py-1.5">
-                            <div className="text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-red-200">
+                            <div className="text-xs font-mono font-bold uppercase tracking-[0.12em] text-red-200">
                                 {t('patronRelations.defianceReceipts')}
                             </div>
                             <ul className="mt-1 space-y-1">
                                 {cuts.entries.map((entry, index) => (
-                                    <li key={`${entry.turn}:${entry.cutFraction}:${entry.supportAfter}:${index}`} className="flex items-center justify-between gap-2 text-[10px] font-mono uppercase tracking-[0.08em] text-red-100/90">
+                                    <li key={`${entry.turn}:${entry.cutFraction}:${entry.supportAfter}:${index}`} className="flex items-center justify-between gap-2 text-xs font-mono uppercase tracking-[0.08em] text-red-100/90">
                                         <span>{t('patronRelations.defianceReceiptTurn', { date: turnToDateString(entry.turn) })}</span>
                                         <span>{t('patronRelations.defianceReceiptImpact', {
                                             pct: Math.round(entry.cutFraction * 100),
@@ -150,26 +150,26 @@ function ActorRow({ actor, primary = false }: { actor: DiplomacyActorView; prima
         <div className={`rounded border ${primary ? 'border-amber-400/35 bg-amber-400/8' : 'border-white/10 bg-black/20'} p-3`}>
             <div className="flex items-start justify-between gap-3">
                 <div>
-                    <div className="text-[11px] font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
+                    <div className="text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
                         {patronLabel}
                     </div>
-                    <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
+                    <div className="mt-1 text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">
                         {t('diplomacy.factionChannel', { faction: getPlayerSafeMilitaryFactionName(actor.faction) })}
                     </div>
                 </div>
                 {actor.sanctionsActive ? (
-                    <span className="rounded border border-red-400/30 bg-red-500/10 px-2 py-0.5 text-[9px] font-mono font-bold uppercase tracking-[0.12em] text-red-300">
+                    <span className="rounded border border-red-400/30 bg-red-500/10 px-2 py-0.5 text-xs font-mono font-bold uppercase tracking-[0.12em] text-red-300">
                         {t('diplomacy.sanctions')}
                     </span>
                 ) : null}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] font-mono uppercase tracking-[0.1em] text-text-secondary">
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-mono uppercase tracking-[0.1em] text-text-secondary">
                 <span>{t('diplomacy.support')} <b className="text-text-primary">{supportLabel}</b></span>
                 <span>{t('diplomacy.constraint')} <b className="text-text-primary">{constraintLabel}</b></span>
                 <span>{t('diplomacy.commitment')} <b className="text-text-primary">{commitmentLabel}</b></span>
                 <span>{t('diplomacy.isolation')} <b className="text-text-primary">{isolationLabel}</b></span>
             </div>
-            <p className="mt-3 text-[11px] leading-5 text-text-secondary">
+            <p className="mt-3 text-xs leading-5 text-text-secondary">
                 {localizedCopy(actor.stanceSummaryToken, actor.stanceSummary, {
                     patron: patronLabel,
                     force: getPlayerSafeMilitaryFactionName(actor.faction),
@@ -189,18 +189,18 @@ function ProposalRow({ proposal }: { proposal: DiplomacyProposalView }) {
         <li className="rounded border border-white/10 bg-black/20 p-3">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="text-[11px] font-mono font-bold uppercase tracking-[0.12em] text-text-primary">
+                    <div className="text-xs font-mono font-bold uppercase tracking-[0.12em] text-text-primary">
                         {name}
                     </div>
-                    <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.1em] text-amber-300">
+                    <div className="mt-1 text-xs font-mono uppercase tracking-[0.1em] text-amber-300">
                         {statusLabel}
                     </div>
                 </div>
-                <span className="shrink-0 text-[9px] font-mono uppercase tracking-[0.12em] text-text-secondary">
+                <span className="shrink-0 text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">
                     {confidenceLabel(proposal.confidence)}
                 </span>
             </div>
-            <p className="mt-2 line-clamp-3 text-[11px] leading-5 text-text-secondary">
+            <p className="mt-2 line-clamp-3 text-xs leading-5 text-text-secondary">
                 {detail}
             </p>
         </li>
@@ -211,8 +211,8 @@ function PressureRow({ reason }: { reason: DiplomacyPressureReasonView }) {
     const tone = reason.band === 'high' ? 'text-red-300' : reason.band === 'medium' ? 'text-amber-300' : 'text-text-primary';
     return (
         <li className="flex items-center justify-between gap-3 border-b border-white/8 py-2 last:border-b-0">
-            <span className="text-[11px] text-text-primary">{localizedCopy(reason.labelToken, reason.label)}</span>
-            <span className={`text-[10px] font-mono font-bold uppercase tracking-[0.12em] ${tone}`}>
+            <span className="text-xs text-text-primary">{localizedCopy(reason.labelToken, reason.label)}</span>
+            <span className={`text-xs font-mono font-bold uppercase tracking-[0.12em] ${tone}`}>
                 {t(PRESSURE_BAND_KEY[reason.band])} - {confidenceLabel(reason.confidence)}
             </span>
         </li>
@@ -222,14 +222,14 @@ function PressureRow({ reason }: { reason: DiplomacyPressureReasonView }) {
 function TimelineRow({ entry }: { entry: DiplomacyTimelineEntryView }) {
     return (
         <li className="flex gap-3 border-b border-white/8 py-2 last:border-b-0">
-            <div className="w-24 shrink-0 text-[10px] font-mono font-bold uppercase tracking-[0.12em] text-amber-300">
+            <div className="w-24 shrink-0 text-xs font-mono font-bold uppercase tracking-[0.12em] text-amber-300">
                 {entry.turn != null ? turnToDateString(entry.turn) : confidenceLabel(entry.confidence)}
             </div>
             <div className="min-w-0">
-                <div className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
+                <div className="text-xs font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
                     {localizedCopy(entry.labelToken, entry.label)}
                 </div>
-                <div className="mt-1 text-[10px] leading-4 text-text-secondary">
+                <div className="mt-1 text-xs leading-4 text-text-secondary">
                     {localizedCopy(entry.detailToken, entry.detail)}
                 </div>
             </div>
@@ -241,14 +241,14 @@ function NeedleHintRow({ hint }: { hint: DiplomacyNeedleHintView }) {
     return (
         <li className="rounded border border-amber-400/20 bg-amber-400/8 p-3">
             <div className="flex items-start justify-between gap-3">
-                <div className="text-[11px] font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
+                <div className="text-xs font-mono font-bold uppercase tracking-[0.1em] text-text-primary">
                     {localizedCopy(hint.labelToken, hint.label)}
                 </div>
-                <span className="shrink-0 text-[9px] font-mono uppercase tracking-[0.12em] text-amber-300">
+                <span className="shrink-0 text-xs font-mono uppercase tracking-[0.12em] text-amber-300">
                     {confidenceLabel(hint.confidence)}
                 </span>
             </div>
-            <p className="mt-2 text-[11px] leading-5 text-text-secondary">
+            <p className="mt-2 text-xs leading-5 text-text-secondary">
                 {localizedCopy(hint.detailToken, hint.detail)}
             </p>
         </li>
@@ -266,6 +266,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
         view.activeConsequences.length > 0 ||
         view.negotiationTimeline.length > 0 ||
         view.needleHints.length > 0;
+    const patronlessRBiH = view.playerFaction === 'RBiH';
     return (
         <div className="fixed inset-0 z-[70] bg-black/35 backdrop-blur-[1px]" role="presentation">
             <section
@@ -278,16 +279,16 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                 <header className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
                     <div>
                         <h2 id="diplomacy-panel-title" className="text-[13px] font-mono font-bold uppercase tracking-[0.16em] text-amber-300">
-                            {t('patronRelations.title')}
+                            {t(patronlessRBiH ? 'diplomacy.rbih.title' : 'patronRelations.title')}
                         </h2>
-                        <div className="mt-1 text-[10px] font-mono uppercase tracking-[0.12em] text-text-secondary">
-                            {t('patronRelations.subtitle')}
+                        <div className="mt-1 text-xs font-mono uppercase tracking-[0.12em] text-text-secondary">
+                            {t(patronlessRBiH ? 'diplomacy.rbih.subtitle' : 'patronRelations.subtitle')}
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded border border-white/10 px-2 py-1 text-[11px] font-mono font-bold text-text-secondary hover:border-amber-400/40 hover:text-amber-300"
+                        className="rounded border border-white/10 px-2 py-1 text-xs font-mono font-bold text-text-secondary hover:border-amber-400/40 hover:text-amber-300"
                         aria-label={t('patronRelations.closePanel')}
                     >
                         X
@@ -297,7 +298,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                 <div className="space-y-4 overflow-y-auto px-4 py-4">
                     {view.patronStance ? (
                         <section aria-label={t('patronRelations.headline')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-amber-300">
+                            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-amber-300">
                                 {t('patronRelations.headline')}
                             </div>
                             <ActorRow actor={view.patronStance} primary />
@@ -306,17 +307,17 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                     ) : (
                         <div className="rounded border border-white/10 bg-black/20 p-4">
                             <div className="text-[12px] font-mono font-bold uppercase tracking-[0.14em] text-text-primary">
-                                {t('patronRelations.noPatron')}
+                                {t(patronlessRBiH ? 'diplomacy.rbih.noPatron' : 'patronRelations.noPatron')}
                             </div>
-                            <p className="mt-2 text-[11px] leading-5 text-text-secondary">
-                                {t('patronRelations.noPatronHelp')}
+                            <p className="mt-2 text-xs leading-5 text-text-secondary">
+                                {t(patronlessRBiH ? 'diplomacy.rbih.noPatronHelp' : 'patronRelations.noPatronHelp')}
                             </p>
                         </div>
                     )}
 
                     {view.externalActors.length > 0 ? (
                         <section aria-label={t('patronRelations.otherPatrons')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
                                 {t('patronRelations.otherPatrons')}
                             </div>
                             <div className="space-y-2">
@@ -327,7 +328,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
 
                     {view.activeProposals.length > 0 ? (
                         <section aria-label={t('diplomacy.activeProposals')}>
-                            <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                            <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
                                 {t('diplomacy.activeProposals')}
                             </div>
                             <ul className="space-y-2">
@@ -338,13 +339,13 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
 
                     {hasRelatedTracks ? (
                         <details className="rounded border border-white/8 bg-black/10 px-3 py-2 [&_summary]:list-none">
-                            <summary className="cursor-pointer text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary/80">
+                            <summary className="cursor-pointer text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary/80">
                                 {t('patronRelations.relatedTracks')}
                             </summary>
                             <div className="mt-3 space-y-4">
                                 {view.pressureReasons.length > 0 || view.activeConsequences.length > 0 ? (
                                     <section aria-label={t('diplomacy.internationalPressure')}>
-                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                        <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
                                             {t('diplomacy.internationalPressure')}
                                         </div>
                                         <div className="rounded border border-white/10 bg-black/20 px-3">
@@ -354,7 +355,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
                                             {view.activeConsequences.length > 0 ? (
                                                 <div className="flex flex-wrap gap-2 border-t border-white/8 py-3">
                                                     {view.activeConsequences.map((item) => (
-                                                        <span key={item.id} className="rounded border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-[10px] font-mono uppercase tracking-[0.1em] text-amber-200">
+                                                        <span key={item.id} className="rounded border border-amber-400/25 bg-amber-400/10 px-2 py-1 text-xs font-mono uppercase tracking-[0.1em] text-amber-200">
                                                             {localizedCopy(item.labelToken, item.label)}
                                                         </span>
                                                     ))}
@@ -366,7 +367,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
 
                                 {view.negotiationTimeline.length > 0 ? (
                                     <section aria-label={t('diplomacy.negotiationTimeline')}>
-                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                        <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
                                             {t('diplomacy.negotiationTimeline')}
                                         </div>
                                         <div className="rounded border border-white/10 bg-black/20 px-3">
@@ -379,7 +380,7 @@ export function DiplomacyPanel({ view, onClose }: DiplomacyPanelProps) {
 
                                 {view.needleHints.length > 0 ? (
                                     <section aria-label={t('diplomacy.needleMovesAria')}>
-                                        <div className="mb-2 text-[10px] font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
+                                        <div className="mb-2 text-xs font-mono font-bold uppercase tracking-[0.14em] text-text-secondary">
                                             {t('diplomacy.needleMoves')}
                                         </div>
                                         <ul className="space-y-2">

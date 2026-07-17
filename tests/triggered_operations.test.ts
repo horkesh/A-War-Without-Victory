@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it, vi } from 'vitest';
 
 import { checkTriggeredOperations, injectArmyHqOperations, _TRIGGERED_OPS } from '../src/sim/combat/triggered_operations.js';
+import { warPhases } from '../src/sim/turn_phases/war_phases.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import type {
     CorpsCommandState,
@@ -107,6 +108,12 @@ function makeState(turn: number): GameState {
     } as unknown as GameState;
 }
 
+async function applyAutonomyTransition(state: GameState): Promise<void> {
+    const step = warPhases.find((phase) => phase.name === 'apply-autonomy-transition');
+    assert.ok(step);
+    await step.run({ state, input: {}, report: {} } as any);
+}
+
 describe('triggered operations definitions', () => {
     it('defines the current triggered operation catalog', () => {
         // Operation Sana migrated to the opportunity catalog (LANE B Phase 3,
@@ -139,6 +146,16 @@ describe('triggered operations definitions', () => {
         assert.deepEqual(new Set(posavina.axes.map((axis) => axis.corps)), new Set(['vrs_1st_krajina']));
         assert.equal(herzegovina.axes.length, 2);
         assert.deepEqual(new Set(herzegovina.axes.map((axis) => axis.corps)), new Set(['vrs_herzegovina']));
+    });
+
+    it('targets the canonical Cerska OSID instead of unrelated Srebrenica settlements', () => {
+        const operation = _TRIGGERED_OPS.find((def) => def.name === 'Operation Cerska-Kamenica')!;
+        const cerskaAxis = operation.axes.find((axis) => axis.axis_id === 'cerska_pocket')!;
+
+        assert.deepEqual(cerskaAxis.objectives, ['op:vlasenica:cerska_2']);
+        assert.equal(cerskaAxis.staging_osid, 'op:vlasenica:grabovica');
+        assert.ok(!cerskaAxis.objectives.includes('op:srebrenica:brezovice_2'));
+        assert.ok(!cerskaAxis.objectives.includes('op:srebrenica:mala_daljegosta_2'));
     });
 });
 
@@ -260,6 +277,74 @@ describe('checkTriggeredOperations', () => {
 
         assert.ok(second.includes('Operation Kotor Varos'));
         assert.equal(state.military.corps_command!['vrs_1st_krajina']!.active_operations[0]?.name, 'Operation Kotor Varos');
+    });
+
+    it('retains accepted authorization through a temporary launch blocker and retries without reauthorization', async () => {
+        const state = makeState(10);
+        state.meta.player_faction = 'RS' as FactionId;
+        checkTriggeredOperations(state);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
+        );
+        assert.ok(review);
+        review.accepted = true;
+        review.resolved_turn = state.meta.turn;
+        const authorizedTurn = state.meta.turn;
+
+        const command = state.military.corps_command!.vrs_1st_krajina!;
+        command.active_operations = [{
+            name: 'Temporary Corps Task',
+            type: 'sector_attack',
+            phase: 'planning',
+        } as any];
+        state.meta.turn = 11;
+        assert.ok(!checkTriggeredOperations(state).includes('Operation Kotor Varos'));
+
+        await applyAutonomyTransition(state);
+        assert.equal(
+            state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
+            true,
+        );
+
+        command.active_operations = [];
+        state.meta.turn = 12;
+        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
+
+        state.meta.turn = 13;
+        await applyAutonomyTransition(state);
+        const resolvedReview = state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id);
+        assert.equal(resolvedReview?.accepted, true);
+        assert.equal(resolvedReview?.resolved_turn, authorizedTurn);
+    });
+
+    it('retains accepted authorization when objectives are temporarily owned and launches if they become relevant again', async () => {
+        const state = makeState(10);
+        state.meta.player_faction = 'RS' as FactionId;
+        checkTriggeredOperations(state);
+        const review = state.meta.pending_proposal_reviews?.find((proposal) =>
+            proposal.proposed_action === 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos'
+        );
+        assert.ok(review);
+        review.accepted = true;
+        review.resolved_turn = state.meta.turn;
+
+        const objectives = _TRIGGERED_OPS
+            .find((def) => def.name === 'Operation Kotor Varos')!
+            .axes.flatMap((axis) => axis.objectives);
+        for (const objective of objectives) {
+            state.political.political_controllers![objective] = 'RS';
+        }
+        state.meta.turn = 11;
+        assert.ok(!checkTriggeredOperations(state).includes('Operation Kotor Varos'));
+        await applyAutonomyTransition(state);
+        assert.equal(
+            state.meta.pending_proposal_reviews?.find((proposal) => proposal.id === review.id)?.accepted,
+            true,
+        );
+
+        state.political.political_controllers![objectives[0]!] = 'RBiH';
+        state.meta.turn = 12;
+        assert.ok(checkTriggeredOperations(state).includes('Operation Kotor Varos'));
     });
 
     it('does not inject Kotor Varos once every objective is already RS-controlled', () => {
@@ -480,24 +565,22 @@ describe('checkTriggeredOperations', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
         state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
-        state.political.political_controllers!['op:srebrenica:brezovice_2'] = 'RS';
+        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
 
         const injected = checkTriggeredOperations(state);
         assert.ok(injected.includes('Operation Cerska-Kamenica'));
 
         const cerskaOp = state.military.corps_command!['vrs_drina']!.active_operations[0];
         const cerskaAxis = cerskaOp!.axes!.find((axis) => axis.axis_id === 'cerska_pocket');
-        assert.ok(cerskaAxis);
-        assert.ok(!cerskaAxis!.objectives.includes('op:srebrenica:brezovice_2'));
-        assert.ok(cerskaAxis!.objectives.length > 0);
+        assert.ok(!cerskaAxis);
+        assert.ok(cerskaOp!.axes!.some((axis) => axis.axis_id === 'kamenica'));
     });
 
     it('does not warn for a triggered axis whose objectives are already controlled when another axis remains viable', () => {
         const state = makeState(40);
         state.military.corps_command!['vrs_herzegovina']!.active_operations = [{ name: 'x' } as any];
         state.military.corps_command!['vrs_1st_krajina']!.active_operations = [{ name: 'y' } as any];
-        state.political.political_controllers!['op:srebrenica:brezovice_2'] = 'RS';
-        state.political.political_controllers!['op:srebrenica:mala_daljegosta_2'] = 'RS';
+        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
 
         const injected = checkTriggeredOperations(state);
 

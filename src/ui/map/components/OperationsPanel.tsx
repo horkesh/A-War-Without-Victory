@@ -21,7 +21,11 @@ import {
 } from '../utils/playerSafeText';
 import { inspectOnField, openArmyHQBriefingForCorps } from '../utils/shellNavigation';
 import { resolveCurrentSectorForFormation } from '../utils/sectorUtils';
-import { t } from '../i18n';
+import { t, useLocale } from '../i18n';
+import {
+  buildOperationTaskForceInspection,
+  type OperationTaskForceInspectionView,
+} from '../data/operationTaskForceInspection';
 
 function compareOperations(a: OperationView, b: OperationView): number {
   return (
@@ -104,7 +108,23 @@ function operationPhaseLabel(operation: OperationView): string {
     : getPlayerSafeOperationPhaseLabel(operation.phase);
 }
 
+function taskForceStrengthLabel(taskForce: OperationTaskForceInspectionView, numberLocale: string): string {
+  const { reportedTotal, unreportedCount } = taskForce.personnel;
+  if (unreportedCount === 0) {
+    return t('operationsPanel.taskForce.strengthReported', { personnel: reportedTotal.toLocaleString(numberLocale) });
+  }
+  if (reportedTotal > 0) {
+    return t('operationsPanel.taskForce.strengthPartial', {
+      personnel: reportedTotal.toLocaleString(numberLocale),
+      count: unreportedCount,
+    });
+  }
+  return t('operationsPanel.taskForce.strengthUnreported');
+}
+
 export function OperationsPanel() {
+  const [locale] = useLocale();
+  const numberLocale = locale === 'bcs' ? 'bs-BA' : 'en-US';
   const isOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const setIsOpen = useGameStore((s) => s.setIsOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
@@ -140,6 +160,9 @@ export function OperationsPanel() {
   }, [operations, selectedOperationKey]);
   const selectedOperationCorpsLabel = selectedOperation
     ? getPlayerSafeCorpsName(selectedOperation.corps_name ?? null, selectedOperation.corps_id, 'This corps')
+    : null;
+  const selectedTaskForce = selectedOperation && loadedGameState
+    ? buildOperationTaskForceInspection(selectedOperation, loadedGameState)
     : null;
 
   // Auto-select first operation ONLY when the panel first opens with no selection
@@ -302,18 +325,20 @@ export function OperationsPanel() {
       <div className="flex items-center justify-between px-3 py-2 bg-panel-card rounded-t-lg border-b border-panel-border shrink-0 relative z-10 glow-text text-accent-gold uppercase text-xs font-semibold">
         <div className="flex flex-col">
           <span>{t('operationsPanel.title')}</span>
-          <span className="text-[9px] font-mono text-text-secondary normal-case tracking-[0.12em]">
+          <span className="text-xs font-mono text-text-secondary normal-case tracking-[0.12em]">
             {t('operationsPanel.subtitle')}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={openHQReview}
-            disabled={!selectedOperation}
-            className="kbd-focus rounded border border-accent-gold/30 px-2 py-1 text-[9px] font-mono uppercase tracking-[0.16em] text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
-          >
-            {t('operationsPanel.hqReview')}
-          </button>
+          {!selectedTaskForce && (
+            <button
+              onClick={openHQReview}
+              disabled={!selectedOperation}
+              className="kbd-focus rounded border border-accent-gold/30 px-2 py-1 text-xs font-mono uppercase tracking-[0.16em] text-accent-gold hover:bg-accent-gold/10 disabled:opacity-30"
+            >
+              {t('operationsPanel.hqReview')}
+            </button>
+          )}
           <button
           onClick={close}
           aria-label={t('operationsPanel.closePanel')}
@@ -339,6 +364,8 @@ export function OperationsPanel() {
             >
               {operations.map((op, index) => {
                 const id = getOperationId(op);
+                const taskForce = buildOperationTaskForceInspection(op, loadedGameState);
+                const operationDisplayName = taskForce?.operationName ?? op.display_name;
                 const selected =
                   selectedOperation != null &&
                   id === getOperationId(selectedOperation);
@@ -352,11 +379,17 @@ export function OperationsPanel() {
                     type="button"
                     role="option"
                     aria-selected={selected}
-                    aria-label={t('operationsPanel.operationCardAria', {
-                      name: op.display_name,
-                      phase: operationPhaseLabel(op),
-                      brigades: op.participating_brigade_count,
-                    })}
+                    aria-label={t(
+                      taskForce
+                        ? 'operationsPanel.taskForce.operationCardAria'
+                        : 'operationsPanel.operationCardAria',
+                      {
+                        name: operationDisplayName,
+                        phase: operationPhaseLabel(op),
+                        brigades: op.participating_brigade_count,
+                        count: taskForce?.participants.length ?? op.participating_brigade_count,
+                      },
+                    )}
                     ref={(el) => {
                       operationCardRefs.current[index] = el;
                     }}
@@ -367,28 +400,30 @@ export function OperationsPanel() {
                       : 'border-panel-border bg-panel-card hover:bg-panel-hover'
                       }`}
                   >
-                    <div className={`text-[11px] font-semibold truncate ${FACTION_COLORS[op.faction] ?? 'text-text-primary'} transition-colors`}>
-                      {op.display_name}
+                    <div className={`text-xs font-semibold truncate ${FACTION_COLORS[op.faction] ?? 'text-text-primary'} transition-colors`}>
+                      {operationDisplayName}
                     </div>
-                    <div className="text-[10px] text-text-secondary truncate">
+                    <div className="text-xs text-text-secondary truncate">
                       {getPlayerSafeCorpsName(op.corps_name ?? null, op.corps_id, 'This corps')}
                     </div>
                     <div className="mt-0.5 flex items-center justify-between gap-2">
-                      <span className={`px-1 py-0.5 rounded text-white text-[10px] uppercase font-semibold ${phaseBadgeClass}`}>
+                      <span className={`px-1 py-0.5 rounded text-white text-xs uppercase font-semibold ${phaseBadgeClass}`}>
                         {operationPhaseLabel(op)}
                       </span>
-                      <span className={`text-[10px] uppercase tracking-wide ${health.className}`}>
+                      <span className={`text-xs uppercase tracking-wide ${health.className}`}>
                         {health.label}
                       </span>
                     </div>
-                    <div className="mt-1 flex flex-wrap items-center gap-1 text-[9px]">
+                    <div className="mt-1 flex flex-wrap items-center gap-1 text-xs">
                       {opPhaseTurn != null && (
                         <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
                           {t('operationsPanel.phaseAge', { count: opPhaseTurn })}
                         </span>
                       )}
                       <span className="px-1 py-0.5 rounded border border-panel-border bg-panel-bg/70 text-text-secondary tabular-nums">
-                        {t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
+                        {taskForce
+                          ? t('operationsPanel.taskForce.participantCount', { count: taskForce.participants.length })
+                          : t('operationsPanel.bdeCount', { count: op.participating_brigade_count })}
                       </span>
                       {(op.stale_participating_brigade_count ?? 0) > 0 && (
                         <span className="px-1 py-0.5 rounded border border-amber-500/35 bg-amber-500/10 text-amber-200 tabular-nums">
@@ -417,11 +452,63 @@ export function OperationsPanel() {
             {selectedOperation ? (
               <>
                 <div className={`text-sm font-semibold ${FACTION_COLORS[selectedOperation.faction] ?? 'text-text-primary'}`}>
-                  {selectedOperation.display_name}
+                  {selectedTaskForce?.operationName ?? selectedOperation.display_name}
                 </div>
                 <div className="text-xs text-text-secondary">
                   {selectedOperationCorpsLabel} / {getPlayerSafeMilitaryFactionName(selectedOperation.faction)}
                 </div>
+
+                {selectedTaskForce && (
+                  <section
+                    className="space-y-2 border-y border-amber-400/30 bg-amber-400/5 px-2 py-2"
+                    data-testid="operation-task-force-dossier"
+                    aria-label={t('operationsPanel.taskForce.title')}
+                  >
+                    <div className="text-xs font-bold uppercase tracking-[0.12em] text-amber-300">
+                      {t('operationsPanel.taskForce.title')}
+                    </div>
+                    <div className="grid grid-cols-1 gap-1 text-xs">
+                      <div className="text-text-primary">
+                        {t('operationsPanel.taskForce.participants', { count: selectedTaskForce.participants.length })}
+                      </div>
+                      <div className="text-text-primary">{taskForceStrengthLabel(selectedTaskForce, numberLocale)}</div>
+                      <div className="text-text-primary">
+                        {t('operationsPanel.taskForce.goals', { count: selectedTaskForce.goalCount })}
+                      </div>
+                    </div>
+                    <div className="border-l-2 border-amber-400/40 pl-2 text-xs text-text-secondary">
+                      <div className="font-semibold text-text-primary">{t('operationsPanel.taskForce.commandEvidence')}</div>
+                      <div>
+                        {selectedTaskForce.commanderName
+                          ? `${selectedTaskForce.commanderName} - ${t('operationsPanel.taskForce.temporaryCommand')}`
+                          : t('operationsPanel.taskForce.temporaryCommand')}
+                      </div>
+                    </div>
+                    <div className="space-y-0.5 text-xs text-text-secondary">
+                      {selectedTaskForce.organicStaffAbsent && <div>{t('operationsPanel.taskForce.organicStaffAbsent')}</div>}
+                      {selectedTaskForce.permanentSectorsAbsent && <div>{t('operationsPanel.taskForce.permanentSectorsAbsent')}</div>}
+                      {selectedTaskForce.provenance === 'scenario_authored' && (
+                        <div>{t('operationsPanel.taskForce.scenarioAuthored')}</div>
+                      )}
+                      <div>{t('operationsPanel.taskForce.scope', { operation: selectedTaskForce.operationName })}</div>
+                    </div>
+                    <div className="space-y-1">
+                      {selectedTaskForce.participants.map((participant) => (
+                        <div
+                          key={participant.id}
+                          className="flex items-center justify-between gap-2 border-l-2 border-panel-border px-2 py-1 text-xs"
+                        >
+                          <span className="text-text-primary">{getPlayerSafeBrigadeName(participant.name)}</span>
+                          <span className="shrink-0 tabular-nums text-text-secondary">
+                            {typeof participant.personnel === 'number' && Number.isFinite(participant.personnel)
+                              ? t('operationsPanel.taskForce.participantPersonnel', { personnel: participant.personnel.toLocaleString(numberLocale) })
+                              : t('operationsPanel.taskForce.participantPersonnelUnreported')}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
 
                 {/* Phase timeline */}
@@ -433,7 +520,7 @@ export function OperationsPanel() {
                     return (
                       <span
                         key={phase}
-                        className={`px-1.5 py-0.5 rounded border text-[10px] uppercase tracking-wide font-semibold ${tone} ${active ? 'ring-1 ring-accent-gold/60' : 'opacity-80'}`}
+                        className={`px-1.5 py-0.5 rounded border text-xs uppercase tracking-wide font-semibold ${tone} ${active ? 'ring-1 ring-accent-gold/60' : 'opacity-80'}`}
                       >
                         {getPlayerSafeOperationPhaseLabel(phase)}
                       </span>
@@ -441,7 +528,7 @@ export function OperationsPanel() {
                   })}
                 </div>
                 ) : (
-                  <div className="pt-1 border-t border-panel-border text-[10px] uppercase tracking-wide text-text-secondary italic">
+                  <div className="pt-1 border-t border-panel-border text-xs uppercase tracking-wide text-text-secondary italic">
                     {operationPhaseLabel(selectedOperation)}
                   </div>
                 )}
@@ -459,12 +546,16 @@ export function OperationsPanel() {
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary">{t('operationsPanel.brigades')} </span>
-                    <span className="text-text-primary tabular-nums">{selectedOperation.participating_brigade_count}</span>
+                      <span className="text-text-secondary">
+                        {t(selectedTaskForce ? 'operationsPanel.taskForce.participantsLabel' : 'operationsPanel.brigades')}{' '}
+                      </span>
+                      <span className="text-text-primary tabular-nums">
+                        {selectedTaskForce?.participants.length ?? selectedOperation.participating_brigade_count}
+                      </span>
                   </div>
                   <div>
                     <span className="text-text-secondary">{t('operationsPanel.started')} </span>
-                    <span className="text-text-primary text-[11px] whitespace-nowrap">{turnToDateString(selectedOperation.started_turn)}</span>
+                    <span className="text-text-primary text-xs whitespace-nowrap">{turnToDateString(selectedOperation.started_turn)}</span>
                   </div>
                   {selectedOperation.momentum != null && (
                     <div>
@@ -503,7 +594,7 @@ export function OperationsPanel() {
                   {selectedOperation.tempo && (
                     <div>
                       <span className="text-text-secondary">{t('operationsPanel.tempo')} </span>
-                      <span className={`inline-block px-1 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                      <span className={`inline-block px-1 py-0.5 rounded text-xs font-semibold uppercase ${
                         selectedOperation.tempo === 'all_out' ? 'bg-red-700/60 text-red-200' :
                         selectedOperation.tempo === 'methodical' ? 'bg-blue-700/60 text-blue-200' :
                         'bg-neutral-600/60 text-neutral-300'
@@ -532,10 +623,10 @@ export function OperationsPanel() {
                   if (commander.kind !== 'assigned') {
                     return (
                       <div className="pt-2 border-t border-panel-border">
-                        <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">
+                        <div className="text-xs text-text-secondary mb-1 uppercase tracking-wide">
                           {t('operationsPanel.operationCommander')}
                         </div>
-                        <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-[11px] italic text-text-secondary">
+                        <div className="rounded border border-panel-border bg-panel-card/70 px-2 py-1.5 text-xs italic text-text-secondary">
                           {commander.label}
                         </div>
                       </div>
@@ -549,9 +640,9 @@ export function OperationsPanel() {
                 })()}
 
                 {/* Participating Brigades */}
-                {((selectedOperation.participating_brigade_ids?.length ?? 0) > 0 || (selectedOperation.stale_participating_brigade_count ?? 0) > 0) && (
+                {!selectedTaskForce && ((selectedOperation.participating_brigade_ids?.length ?? 0) > 0 || (selectedOperation.stale_participating_brigade_count ?? 0) > 0) && (
                   <div className="pt-2 border-t border-panel-border">
-                    <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.allocatedAssets')}</div>
+                    <div className="text-xs text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.allocatedAssets')}</div>
                     {(selectedOperation.participating_brigade_ids?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {selectedOperation.participating_brigade_ids?.map(bId => {
@@ -577,7 +668,7 @@ export function OperationsPanel() {
                                       osid: formation?.location_osid ?? undefined,
                                     });
                               }}
-                              className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-[10px] text-text-primary transition-colors"
+                              className="px-1.5 py-0.5 bg-panel-card hover:bg-panel-hover border border-panel-border rounded text-xs text-text-primary transition-colors"
                             >
                               {bName}
                             </button>
@@ -586,7 +677,7 @@ export function OperationsPanel() {
                       </div>
                     )}
                     {(selectedOperation.stale_participating_brigade_count ?? 0) > 0 && (
-                      <div className="mt-1 text-[10px] text-amber-300/85 italic">
+                      <div className="mt-1 text-xs text-amber-300/85 italic">
                         {t(
                           selectedOperation.stale_participating_brigade_count === 1
                             ? 'operationsPanel.staleParticipant.one'
@@ -600,9 +691,9 @@ export function OperationsPanel() {
 
                 {/* AAR Strip */}
                 <div className="pt-1 border-t border-panel-border">
-                  <div className="text-[11px] text-accent-gold mb-1 uppercase tracking-wide font-semibold">{t('operationsPanel.aarStrip')}</div>
+                  <div className="text-xs text-accent-gold mb-1 uppercase tracking-wide font-semibold">{t('operationsPanel.aarStrip')}</div>
                   <div className="rounded border border-panel-border bg-panel-card/70 p-2 space-y-1.5">
-                    <div className="flex items-center justify-between text-[10px]">
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-text-secondary">{t('operationsPanel.objectiveProgress')}</span>
                       <span className="text-text-primary tabular-nums">
                         {selectedObjectiveCount > 0 && selectedObjectiveIndex != null ? `${Math.min(selectedObjectiveIndex + 1, selectedObjectiveCount)}/${selectedObjectiveCount}` : '—'}
@@ -614,7 +705,7 @@ export function OperationsPanel() {
                         style={{ width: `${Math.round(objectiveProgress * 100)}%` }}
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-[10px]">
+                    <div className="grid grid-cols-2 gap-2 text-xs">
                       <div className="rounded border border-panel-border bg-panel-bg/70 px-1.5 py-1">
                         <span className="text-text-secondary">{t('operationsPanel.momentum')} </span>
                         <span className={`tabular-nums ${momentumTone}`}>
@@ -638,7 +729,7 @@ export function OperationsPanel() {
                           [t('operationsPanel.intel'), readiness.intel],
                         ] as Array<[string, number | undefined]>).map(([label, value]) => (
                           <div key={label} className="space-y-0.5">
-                            <div className="flex items-center justify-between text-[10px]">
+                            <div className="flex items-center justify-between text-xs">
                               <span className="text-text-secondary">{label}</span>
                               <span className={`tabular-nums ${isReportedReadinessValue(value) ? 'text-text-primary' : 'text-text-secondary italic'}`}>{formatReadinessValue(value)}</span>
                             </div>
@@ -656,7 +747,7 @@ export function OperationsPanel() {
 
                 {/* Objectives */}
                 <div className="pt-1 border-t border-panel-border">
-                  <div className="text-[11px] text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.objectives')}</div>
+                  <div className="text-xs text-text-secondary mb-1 uppercase tracking-wide">{t('operationsPanel.objectives')}</div>
                   {selectedOperation.objectives && selectedOperation.objectives.length > 0 ? (
                     <div
                       className="space-y-1"
@@ -691,19 +782,19 @@ export function OperationsPanel() {
                               }`}
                           >
                             <div className="flex items-start gap-1.5">
-                              <span className="shrink-0 text-[10px] mt-0.5 w-3 text-center text-text-secondary">
+                              <span className="shrink-0 text-xs mt-0.5 w-3 text-center text-text-secondary">
                                 {isDone ? '✓' : isCurrent ? '▶' : '○'}
                               </span>
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center justify-between">
-                                  <div className="text-[11px] text-text-primary truncate">{objectiveName}</div>
+                                  <div className="text-xs text-text-primary truncate">{objectiveName}</div>
                                   {isCurrent && (
-                                    <span className="text-[9px] text-accent-gold font-bold uppercase tracking-tighter animate-pulse shadow-sm px-1 bg-accent-gold/10 rounded border border-accent-gold/30">
+                                    <span className="text-xs text-accent-gold font-bold uppercase tracking-tighter animate-pulse shadow-sm px-1 bg-accent-gold/10 rounded border border-accent-gold/30">
                                       {t('operationsPanel.schwerpunkt')}
                                     </span>
                                   )}
                                 </div>
-                                <div className="text-[10px] text-text-secondary truncate">
+                                <div className="text-xs text-text-secondary truncate">
                                   {t('operationsPanel.objectiveIndex', { index: index + 1, total: selectedOperation.objectives?.length ?? 0 })}{selectedOperation.schwerpunkt_osid === obj ? ` - ${t('operationsPanel.mainAxis')}` : ''}
                                 </div>
                               </div>
@@ -718,7 +809,7 @@ export function OperationsPanel() {
                 </div>
 
                 {/* Open Corps Orders */}
-                <div className="pt-1 border-t border-panel-border">
+                {!selectedTaskForce && <div className="pt-1 border-t border-panel-border">
                   <button
                     type="button"
                     onClick={() => {
@@ -730,7 +821,7 @@ export function OperationsPanel() {
                   >
                     {t('operationsPanel.openCorpsOrders')}
                   </button>
-                </div>
+                </div>}
               </>
             ) : (
               <div className="text-xs text-text-secondary italic">{t('operationsPanel.selectOperation')}</div>

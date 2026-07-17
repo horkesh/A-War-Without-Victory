@@ -18,10 +18,10 @@ export function ReplayInspectionBanner(): JSX.Element | null {
             data-awwv-replay-inspection-banner="true"
         >
             <div className="min-w-0">
-                <div className="text-[8px] font-bold uppercase tracking-[0.24em] text-accent-gold/80">
+                <div className="text-xs font-bold uppercase tracking-[0.24em] text-accent-gold/80">
                     Replay Inspection
                 </div>
-                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-[10px] text-text-secondary">
+                <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-text-secondary">
                     <span className="font-mono text-text-primary">{label}</span>
                     <span className="text-text-secondary/50">{finalLabel}</span>
                 </div>
@@ -29,7 +29,7 @@ export function ReplayInspectionBanner(): JSX.Element | null {
             <button
                 type="button"
                 onClick={exitReplayInspection}
-                className="shrink-0 rounded border border-panel-border px-3 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-text-primary transition-colors hover:bg-white/5"
+                className="shrink-0 rounded border border-panel-border px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-text-primary transition-colors hover:bg-white/5"
                 data-awwv-replay-exit-inspection="true"
             >
                 Return to Final

@@ -5,6 +5,7 @@ import { createElement } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { DiplomacyView } from '../../src/ui/map/data/types.js';
 import { DiplomacyPanel } from '../../src/ui/map/components/DiplomacyPanel.js';
+import { DiplomacyOverview } from '../../src/ui/map/components/DiplomacyOverview.js';
 import { buildDiplomacyView } from '../../src/ui/map/data/diplomacyView.js';
 import { setLocale } from '../../src/ui/map/i18n/index.js';
 import { turnToDateString } from '../../src/ui/map/utils/formatters.js';
@@ -78,6 +79,41 @@ function makeView(overrides: Partial<DiplomacyView> = {}): DiplomacyView {
 }
 
 describe('DiplomacyPanel', () => {
+    it('keeps patronless RBiH truth in the compact Situation diplomacy overview', () => {
+        render(createElement(DiplomacyOverview, {
+            strategicDimensions: {
+                RBiH: {
+                    patron_confidence: { effective_value: 57 },
+                    international_standing: { effective_value: 42 },
+                },
+            } as never,
+            negotiatingCapital: { RBiH: 51 },
+            patronOverride: { RBiH: 25, RS: 80 },
+            playerFaction: 'RBiH',
+        }));
+
+        expect(screen.getByText('International Backing')).toBeTruthy();
+        expect(screen.queryByText('Patron Override Authority')).toBeNull();
+        expect(screen.queryByText('International Community')).toBeNull();
+        expect(screen.queryByText('Patron Confidence')).toBeNull();
+    });
+
+    it('frames the patronless RBiH route as international relations', () => {
+        render(createElement(DiplomacyPanel, {
+            view: makeView({
+                playerFaction: 'RBiH',
+                patronStance: undefined,
+                patronConfidence: undefined,
+                patronDefianceCuts: undefined,
+            }),
+            onClose: vi.fn(),
+        }));
+
+        expect(screen.getByRole('heading', { name: 'International Relations' })).toBeTruthy();
+        expect(screen.getByText('RBiH has no controlling patron. International pressure, mediation, and active proposals are tracked below.')).toBeTruthy();
+        expect(screen.queryByText('What your patron will tolerate, current material support')).toBeNull();
+    });
+
     afterEach(() => {
         cleanup();
         setLocale('en');

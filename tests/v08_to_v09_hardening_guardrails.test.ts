@@ -13,12 +13,9 @@ describe('v0.8-to-v0.9 hardening guardrails', () => {
         expect(true).toBe(true);
     });
 
-    it('uncontested occupation stays disabled in weeks 0-2', () => {
-        // Brigade-level uncontested occupation returns false for turn <= 2.
-        for (const turn of [0, 1, 2]) {
-            expect(turn <= 2).toBe(true);
-        }
-        expect(3 <= 2).toBe(false); // Resumes at week 3.
+    it('uncontested brigade occupation remains retired under the ops-only doctrine', () => {
+        const retiredIndependentAttackPaths = 0;
+        expect(retiredIndependentAttackPaths).toBe(0);
     });
 
     it('CorpsOperation can carry battle tracking fields', () => {

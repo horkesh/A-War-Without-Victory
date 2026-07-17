@@ -59,7 +59,10 @@ function makeBottomUpState(munAvailable = 150): GameState {
             }
         }
   } as any,
-  political: {} as any,
+  political: {
+    political_controllers: { 'op:test_mun:center': 'RBiH' },
+    municipalities: { test_mun: { control: 'consolidated' } }
+  } as any,
   displacement: {} as any,
 } as unknown as GameState;
 }
@@ -92,6 +95,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
         expect(f.kind).toBe('militia');
         expect(f.personnel).toBe(MIN_DETACHMENT_SPAWN);
         expect(f.name).toBe('TO test_mun');
+        expect(f.location_osid).toBe('op:test_mun:center');
     });
 
     it('sets cohesion to MILITIA_COHESION (30) on the new detachment', () => {
@@ -144,6 +148,7 @@ describe('Phase B: spawnFormationsFromPools — bottom_up mode', () => {
                 personnel: MIN_DETACHMENT_SPAWN,
                 readiness: 'forming',
                 cohesion: MILITIA_COHESION,
+                location_osid: 'op:test_mun:center',
                 tags: ['mun:test_mun', 'kind:militia', 'generated_phase_i0'],
                 activation_gated: true,
                 activation_turn: null
@@ -198,6 +203,7 @@ describe('Phase B: reinforceBrigadesFromPools — bottom_up tier growth', () => 
             personnel: MIN_DETACHMENT_SPAWN,
             readiness: 'active',
             cohesion: MILITIA_COHESION,
+            location_osid: 'op:test_mun:center',
             tags: ['mun:test_mun', 'kind:militia', 'generated_phase_i0'],
             activation_gated: false,
             activation_turn: 0

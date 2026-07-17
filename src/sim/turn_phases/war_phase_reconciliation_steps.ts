@@ -6,7 +6,7 @@ import { reconcileFinalOperationTruth } from '../combat/final_operation_truth_re
 import { reconcileFinalSectorTruth, sealFinalSectorTruthFromCurrentSectors } from '../combat/final_sector_truth_reconciliation.js';
 import { computeCombatEffectiveBrigades } from '../negotiation/compute_combat_effective.js';
 import { computeSpatialContext } from '../spatial_context.js';
-import type { NamedPhase } from '../turn_pipeline_types.js';
+import type { NamedPhase, TurnContext } from '../turn_pipeline_types.js';
 import {
     getOperationalData,
     getPoliticalControlSnapshot,
@@ -16,6 +16,36 @@ import {
 } from '../turn_pipeline_types.js';
 import { CANONICAL_FACTIONS } from '../../state/game_state.js';
 import { computeFrontEdgesOsid } from '../../map/front_edges.js';
+import { strictCompare } from '../../state/validateGameState.js';
+import type { ValidationIssue } from '../../validate/validate.js';
+
+function compareIssues(a: ValidationIssue, b: ValidationIssue): number {
+    return strictCompare(a.path ?? '', b.path ?? '')
+        || strictCompare(a.code, b.code)
+        || strictCompare(a.message, b.message);
+}
+
+/** Engine Invariants section 1: the single final, deterministic post-turn barrier. */
+export function runPostTurnInvariantBarrier(context: TurnContext): ValidationIssue[] {
+    if (context.state.meta.phase !== 'war') return [];
+
+    const issues = [
+        ...assertOperationLifecycle(context.state),
+        ...assertFormationsInFriendlyTerritory(context.state),
+    ];
+    const controlSnapshot = getPoliticalControlSnapshot(context);
+    if (controlSnapshot) {
+        issues.push(...assertControlEventConsistency(context.state, controlSnapshot));
+    } else {
+        issues.push({
+            severity: 'error',
+            code: 'control_event.snapshot_missing',
+            message: 'Post-turn control-event validation requires the turn-start political control snapshot',
+            path: 'political.political_controllers',
+        });
+    }
+    return issues.sort(compareIssues);
+}
 
 export const warPhaseReconciliationSteps: NamedPhase[] = [
     {
@@ -128,28 +158,6 @@ export const warPhaseReconciliationSteps: NamedPhase[] = [
                 context.report?.supply_resolution?.supply_state_by_osid ?? null,
                 spatial?.postCombat,
             );
-        }
-    },
-    {
-        name: 'assert-final-operation-lifecycle',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            assertOperationLifecycle(context.state);
-        }
-    },
-    {
-        name: 'assert-formations-in-friendly-territory',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            assertFormationsInFriendlyTerritory(context.state);
-        }
-    },
-    {
-        name: 'assert-control-event-consistency',
-        run: (context) => {
-            if (context.state.meta.phase !== 'war') return;
-            const snapshot = getPoliticalControlSnapshot(context);
-            if (snapshot) assertControlEventConsistency(context.state, snapshot);
         }
     },
     {

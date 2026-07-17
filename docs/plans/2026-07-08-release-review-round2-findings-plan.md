@@ -1,7 +1,7 @@
 # Release Review Round 2 - Actionable Repair Plan
 
 **Date:** 2026-07-08
-**Status:** FULLY EXECUTED for all dispatchable RR2 work authorized by this plan, including the post-closeout continuation that repaired the later 52w 65th loan lifecycle drift and refreshed the affected baseline hashes. RR2-1, RR2-2, RR2-3A, RR2-3B asset-history cleanup, RR2-4, RR2-5, and RR2-7A are implemented with tests/proofs; RR2-6, RR2-8, RR2-9, and RR2-10 remain trigger-gated structural work outside this execution pass.
+**Status:** FULLY EXECUTED for all dispatchable RR2 work authorized by this plan, including the post-closeout continuation that repaired the later 52w 65th loan lifecycle drift and refreshed the affected baseline hashes. RR2-1, RR2-2, RR2-3A, RR2-3B asset-history cleanup, RR2-4, RR2-5, and RR2-7A are implemented with tests/proofs; RR2-6, RR2-8, RR2-9, and RR2-10 remain trigger-gated structural work outside this execution pass. Owner-directed extended RBiH/RS campaign QA subsequently closed its agent-actionable findings, including post-week-20 consolidation and delayed legal empty-sector relief; those later changes are tracked in the command board, master roadmap, and RS acceptance report rather than retroactively folded into RR2 scope. D2 owner play is next.
 **Origin:** Owner directive 2026-07-08: examine recent commits and the broader repo for weaknesses, edge cases, and bad design decisions. This plan supersedes the first RR2 draft where it incorrectly treated `src/ui/warroom` as dormant/dead code.
 
 ## Part A - Corrected Findings Register

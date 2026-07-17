@@ -10,7 +10,6 @@ import { loadSettlementGraph } from '../map/settlements.js';
 import { loadTerrainScalars } from '../map/terrain_scalars_node.js';
 import type { LoadedSettlementGraph } from '../map/settlements_parse.js';
 import { loadMunicipalityHqSettlement, loadOobBrigades } from '../scenario/oob_loader.js';
-import { buildSidToMunFromSettlements } from '../scenario/oob_early_war_entry.js';
 import { canonicalizeStartupState, createStateFromScenario } from '../scenario/scenario_runner.js';
 import { loadStartupSnapshotState } from '../scenario/startup_snapshot.js';
 import { shortestPathThroughFriendly } from '../sim/combat/brigade_movement.js';
@@ -18,8 +17,9 @@ import { isSrkStranglePostureEnabled } from '../sim/combat/contain_posture_gate.
 import { buildAdjacencyFromEdges, isSettlementSetContiguous } from '../sim/combat/war_adjacency.js';
 import { estimateAttackCost, type AttackEstimate } from '../sim/combat/combat_estimate.js';
 import { computeFrontWidthMetrics } from '../sim/combat/front_width_metrics.js';
-import { applyRecruitment, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { applyRecruitment, evaluateRecruitmentEligibility, initializeRecruitmentResources, recruitBrigade } from '../sim/recruitment_engine.js';
+import { buildRecruitmentContext } from '../sim/recruitment_context.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitionsFromDir } from '../sim/events/event_loader.js';
 import { applyEventEffects } from '../sim/events/apply_effects.js';
 import { resolveEventDecision } from '../sim/events/resolve_decision.js';
@@ -53,6 +53,17 @@ import type { Osid } from '../sim/combat/osid_adjacency.js';
 import { canEliteLoanReachCorpsTerritory, deployEliteLoan, recallEliteLoan } from '../sim/combat/army_reserve_system.js';
 import { ELITE_DEPLOY_COST } from '../ui/map/utils/commandAuthority.js';
 import { resolvePlayerParamilitaryDecisions } from '../sim/combat/paramilitary_sweep.js';
+
+// Electron main consumes simulation code through this built bundle. Direct
+// source-relative imports from electron-main.cjs do not exist in packaged output.
+export { interpretOperationLaunch, overrideInterpretation } from '../sim/combat/order_interpretation.js';
+export { dismissEventNotification } from '../sim/events/dismiss_notifications.js';
+export { resolvePeacePlan } from '../sim/negotiation/peace_plans.js';
+export { submitPlayerCounterOffer } from '../sim/negotiation/counter_offer_generator.js';
+export { resolveDaytonNegotiation } from '../sim/negotiation/dayton_negotiation.js';
+export { evaluateBotResponse } from '../sim/negotiation/bot_negotiation.js';
+export { createAiClient } from '../sim/ai_commander/ai_client.js';
+export { getAdvisorRecommendation } from '../sim/ai_commander/player_advisor.js';
 
 // Event definitions are static per build. Load + validate once per events dir and
 // reuse across turns — the scenario runner likewise loads them once before its loop.
@@ -293,12 +304,14 @@ export async function advanceTurn(state: GameState, baseDir: string): Promise<De
 
     try {
         if (phase === 'war') {
-            const { nextState, report } = await runTurn(state, {
+            const result = await runTurn(state, {
                 seed,
                 settlementGraph: graphForBrowser,
                 settlementEdges: graph.edges,
                 eventDefinitions: loadDesktopEventDefinitions(baseDir),
             });
+            assertTurnSuccess(result);
+            const { nextState, report } = result;
             return {
                 state: nextState,
                 game_over: nextState.meta.game_over === true ? true : undefined,
@@ -420,14 +433,14 @@ export function queryCorpsSectors(
     }
 
     const sectors: CorpsSectorQueryEntry[] = [];
-    for (const corpsId of [...corpsMap.keys()].sort((a, b) => a.localeCompare(b))) {
+    for (const corpsId of [...corpsMap.keys()].sort(strictCompare)) {
         const entry = corpsMap.get(corpsId)!;
         const metrics = computeFrontWidthMetrics(entry.settlements.size, entry.brigades.size);
         sectors.push({
             corps_id: corpsId,
             faction: entry.faction,
-            brigade_ids: [...entry.brigades].sort((a, b) => a.localeCompare(b)),
-            settlement_ids: [...entry.settlements].sort((a, b) => a.localeCompare(b)),
+            brigade_ids: [...entry.brigades].sort(strictCompare),
+            settlement_ids: [...entry.settlements].sort(strictCompare),
             front_width_score: metrics.front_width_score,
             overextended: metrics.overextended,
         });
@@ -470,9 +483,9 @@ export function queryBattleEvents(
     }
     events.sort((a, b) => {
         if (a.turn !== b.turn) return a.turn - b.turn;
-        const mech = a.mechanism.localeCompare(b.mechanism);
+        const mech = strictCompare(a.mechanism, b.mechanism);
         if (mech !== 0) return mech;
-        return a.settlement_id.localeCompare(b.settlement_id);
+        return strictCompare(a.settlement_id, b.settlement_id);
     });
     return { turn, events };
 }
@@ -495,10 +508,11 @@ export async function applyPlayerRecruitment(
         return { ok: false, error: `Invalid equipment class: ${equipmentClass}` };
     }
 
-    const [brigades, municipalityHqSettlement, graph] = await Promise.all([
+    const [brigades, municipalityHqSettlement, graph, operationalData] = await Promise.all([
         loadOobBrigades(baseDir),
         loadMunicipalityHqSettlement(baseDir),
         loadSettlementGraph(settlementGraphOptions(baseDir)),
+        loadOperationalData(baseDir),
     ]);
 
     const brigade = brigades.find((b) => b.id === brigadeId);
@@ -506,15 +520,18 @@ export async function applyPlayerRecruitment(
         return { ok: false, error: `Brigade not found: ${brigadeId}` };
     }
 
-    const sidToMun = buildSidToMunFromSettlements(graph.settlements);
+    const context = buildRecruitmentContext(state, graph.settlements, municipalityHqSettlement, operationalData);
+    const playerFaction = state.meta.player_faction;
 
     const result = recruitBrigade(
         state,
         brigade,
         cls,
         state.military.recruitment_state,
-        sidToMun,
-        municipalityHqSettlement
+        context.sidToMun,
+        context.municipalityHqSettlement,
+        context.canonicalToOperational,
+        playerFaction,
     );
 
     if (!result.success) {
@@ -554,6 +571,61 @@ export async function getRecruitmentCatalog(baseDir: string): Promise<{
             available_from: b.available_from,
             mandatory: b.mandatory,
         })),
+    };
+}
+
+/** State-aware catalog used by the desktop player surface. */
+export async function getPlayerRecruitmentCatalog(state: GameState, baseDir: string): Promise<{
+    brigades: Array<{
+        id: string;
+        faction: string;
+        name: string;
+        home_mun: string;
+        manpower_cost: number;
+        capital_cost: number;
+        default_equipment_class: string;
+        available_from: number;
+        mandatory: boolean;
+        eligible: boolean;
+        reason_codes: string[];
+    }>;
+}> {
+    const [brigades, municipalityHqSettlement, graph, operationalData] = await Promise.all([
+        loadOobBrigades(baseDir),
+        loadMunicipalityHqSettlement(baseDir),
+        loadSettlementGraph(settlementGraphOptions(baseDir)),
+        loadOperationalData(baseDir),
+    ]);
+    const resources = state.military.recruitment_state;
+    if (!resources) return { brigades: [] };
+    const context = buildRecruitmentContext(state, graph.settlements, municipalityHqSettlement, operationalData);
+    const playerFaction = state.meta.player_faction;
+
+    return {
+        brigades: brigades.map((brigade) => {
+            const eligibility = evaluateRecruitmentEligibility(
+                state,
+                brigade,
+                brigade.default_equipment_class,
+                resources,
+                context.sidToMun,
+                context.municipalityHqSettlement,
+                context.canonicalToOperational,
+                playerFaction,
+            );
+            return {
+                id: brigade.id,
+                faction: brigade.faction,
+                name: brigade.name,
+                home_mun: brigade.home_mun,
+                manpower_cost: brigade.manpower_cost,
+                capital_cost: brigade.capital_cost,
+                default_equipment_class: brigade.default_equipment_class,
+                available_from: brigade.available_from,
+                mandatory: brigade.mandatory,
+                ...eligibility,
+            };
+        }),
     };
 }
 
@@ -930,7 +1002,11 @@ export async function approveReserveRequest(
         how_to_use: howToUse,
     });
     // Remove the fulfilled request from pending list
-    state.military.pending_reserve_requests = pending.filter((request) => getReserveRequestId(request) !== requestId);
+    state.military.pending_reserve_requests = pending
+        .filter((request) => getReserveRequestId(request) !== requestId)
+        .map((request) => request.suggested_brigade_id === brigadeId
+            ? { ...request, suggested_brigade_id: null }
+            : request);
     return { ok: true };
 }
 

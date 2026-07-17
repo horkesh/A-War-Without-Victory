@@ -46,7 +46,7 @@ const EXIT_CLASS: Record<NonNullable<OperationOpportunityRecordView['exit_class'
 
 function RecordBadge({ record }: { record: OperationOpportunityRecordView }) {
     return (
-        <span className={`px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-[0.12em] ${STATUS_CLASS[record.status]}`}>
+        <span className={`px-2 py-0.5 rounded border text-xs font-bold uppercase tracking-[0.12em] ${STATUS_CLASS[record.status]}`}>
             {t(STATUS_LABEL_KEY[record.status])}
         </span>
     );
@@ -65,7 +65,7 @@ function AxisLine({ record }: { record: OperationOpportunityRecordView }) {
         : null;
     if (!required && !optional) return null;
     return (
-        <div className="text-[10px] text-text-muted tabular-nums">
+        <div className="text-xs text-text-muted tabular-nums">
             {[required, optional].filter(Boolean).join(' | ')}
         </div>
     );
@@ -92,7 +92,7 @@ function OpportunityRecordCard({ record }: { record: OperationOpportunityRecordV
                     <div className="text-[12px] font-bold text-text-primary truncate">
                         {record.display_name}
                     </div>
-                    <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-1 text-[10px] text-text-secondary">
+                    <div className="mt-0.5 flex flex-wrap gap-x-2 gap-y-1 text-xs text-text-secondary">
                         {record.faction && <span>{getPlayerSafeMilitaryFactionName(record.faction)}</span>}
                         {record.response_turn != null && <span>{turnToDateString(record.response_turn)}</span>}
                         {record.executed_op_aar_id && <span>{t('opportunityLedger.aarLinked')}</span>}
@@ -101,7 +101,7 @@ function OpportunityRecordCard({ record }: { record: OperationOpportunityRecordV
                 <RecordBadge record={record} />
             </div>
 
-            <div className="mt-2 grid grid-cols-2 gap-2 text-[10px]">
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
                 {outcome && (
                     <div>
                         <div className="uppercase tracking-[0.12em] text-text-muted">{t('opportunityLedger.outcome')}</div>
@@ -138,9 +138,9 @@ function OpportunityRecordCard({ record }: { record: OperationOpportunityRecordV
 function PulseMetric({ label, value, detail }: { label: string; value: string | number; detail: string }) {
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/50 px-2 py-1.5">
-            <div className="text-[8px] uppercase tracking-[0.14em] text-text-muted">{label}</div>
+            <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{label}</div>
             <div className="text-[13px] font-bold tabular-nums text-text-primary">{value}</div>
-            <div className="truncate text-[9px] text-text-secondary">{detail}</div>
+            <div className="truncate text-xs text-text-secondary">{detail}</div>
         </div>
     );
 }
@@ -162,9 +162,9 @@ function OpportunityLedgerPulseBand({ pulse }: { pulse: OpportunityLedgerPulse }
         >
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.pulse')}</div>
+                    <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.pulse')}</div>
                     <div className="mt-0.5 text-[12px] font-semibold text-text-primary">{pulse.headline}</div>
-                    <div className="mt-1 max-w-3xl text-[11px] text-text-secondary">
+                    <div className="mt-1 max-w-3xl text-xs text-text-secondary">
                         {pulse.total_decisions === 0
                             ? t('opportunityLedger.noRecordsPulse')
                             : t('opportunityLedger.resolvedTracked', {
@@ -224,7 +224,7 @@ export function OpportunityLedgerPanel() {
         return (
             <div className="space-y-3">
                 <OpportunityLedgerPulseBand pulse={pulse} />
-                <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-4 text-[11px] text-text-secondary">
+                <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-4 text-xs text-text-secondary">
                     {t('opportunityLedger.noRecordsForHq')}
                 </div>
             </div>
@@ -238,15 +238,15 @@ export function OpportunityLedgerPanel() {
             {summary && (
                 <div className="grid grid-cols-3 gap-2">
                     <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.pending')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.pending')}</div>
                         <div className="text-[16px] font-bold text-amber-300 tabular-nums">{summary.pendingCount}</div>
                     </div>
                     <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.completed')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.completed')}</div>
                         <div className="text-[16px] font-bold text-text-primary tabular-nums">{summary.completedCount}</div>
                     </div>
                     <div className="border border-panel-border/50 rounded bg-panel-card/50 px-3 py-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.successes')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-muted">{t('opportunityLedger.successes')}</div>
                         <div className="text-[16px] font-bold text-emerald-300 tabular-nums">{summary.successCount}</div>
                     </div>
                 </div>

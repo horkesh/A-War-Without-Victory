@@ -225,6 +225,28 @@ function makeUndefendedProbeScenario() {
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
 describe('probe territory flip gate', () => {
+    it('canon determinism: decisive probes do not capture while normal attacks can', () => {
+        const run = (type: 'probe' | 'sector_attack') => {
+            const { state, edges } = makeScenario(type);
+            const report = resolveAttackOrdersOsid(state, edges, new Map<string, string[]>());
+            return {
+                control: state.political.political_controllers!['op:rbih:target'],
+                flips: report.flips_applied,
+                outcome: report.battles[0]?.outcome,
+            };
+        };
+
+        const probe = run('probe');
+        const attack = run('sector_attack');
+
+        expect(run('probe')).toEqual(probe);
+        expect(run('sector_attack')).toEqual(attack);
+        expect(probe.control).toBe('RBiH');
+        expect(probe.flips).toBe(0);
+        expect(attack.control).toBe('RS');
+        expect(attack.flips).toBe(1);
+    });
+
     it('a probe that wins tactically does NOT flip political_controllers', () => {
         const { state, edges } = makeScenario('probe');
         const reverseMap = new Map<string, string[]>();
@@ -317,6 +339,7 @@ describe('probe territory flip gate', () => {
 
         // But battles_this_turn SHOULD increment (the battle happened)
         expect(operation.battles_this_turn ?? 0).toBeGreaterThan(0);
+        expect(operation.axes?.[0]?.objective_battles_this_turn ?? 0).toBeGreaterThan(0);
     });
 
     it('a probe that wins against an undefended enemy tile does NOT flip political_controllers', () => {

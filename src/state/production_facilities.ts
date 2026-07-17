@@ -1,5 +1,6 @@
 import type { SettlementRecord } from '../map/settlements.js';
 import type { GameState, MunicipalityId, ProductionFacilityState } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 interface ProductionFacilitySeed {
     facility_id: string;
@@ -73,7 +74,7 @@ const FACILITY_SEEDS: ProductionFacilitySeed[] = [
         type: 'heavy_equipment' as const,
         base_capacity: 4
     }
-].sort((a, b) => a.facility_id.localeCompare(b.facility_id));
+].sort((a, b) => strictCompare(a.facility_id, b.facility_id));
 
 export function ensureProductionFacilities(state: GameState): void {
     if (state.military.production_facilities && Object.keys(state.military.production_facilities).length > 0) return;
@@ -102,7 +103,7 @@ function getMunicipalityControllerByMajority(
 ): Map<MunicipalityId, string | null> {
     const counts = new Map<MunicipalityId, Map<string, number>>();
     const controllers = state.political.political_controllers ?? {};
-    const sids = Array.from(settlements.keys()).sort((a, b) => a.localeCompare(b));
+    const sids = Array.from(settlements.keys()).sort(strictCompare);
     for (const sid of sids) {
         const rec = settlements.get(sid);
         if (!rec) continue;
@@ -117,7 +118,7 @@ function getMunicipalityControllerByMajority(
     for (const [mun, byFaction] of counts.entries()) {
         const ranked = Array.from(byFaction.entries()).sort((a, b) => {
             if (b[1] !== a[1]) return b[1] - a[1];
-            return a[0].localeCompare(b[0]);
+            return strictCompare(a[0], b[0]);
         });
         out.set(mun, ranked.length > 0 ? ranked[0]![0] : null);
     }
@@ -130,11 +131,11 @@ export function calculateFactionProductionBonus(
 ): Record<string, number> {
     ensureProductionFacilities(state);
     const facilities = state.military.production_facilities ?? {};
-    const factionIds = (state.factions ?? []).map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factionIds = (state.factions ?? []).map((f) => f.id).sort(strictCompare);
     const bonuses: Record<string, number> = {};
     for (const fid of factionIds) bonuses[fid] = 0;
     const munController = getMunicipalityControllerByMajority(state, settlements);
-    const facilityIds = Object.keys(facilities).sort((a, b) => a.localeCompare(b));
+    const facilityIds = Object.keys(facilities).sort(strictCompare);
     for (const facilityId of facilityIds) {
         const f = facilities[facilityId];
         if (!f) continue;
@@ -147,5 +148,5 @@ export function calculateFactionProductionBonus(
         const bonus = f.base_capacity * f.current_condition;
         bonuses[controller] = (bonuses[controller] ?? 0) + bonus;
     }
-    return Object.fromEntries(Object.entries(bonuses).sort((a, b) => a[0].localeCompare(b[0])));
+    return Object.fromEntries(Object.entries(bonuses).sort((a, b) => strictCompare(a[0], b[0])));
 }

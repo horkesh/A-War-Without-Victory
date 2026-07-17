@@ -6,6 +6,7 @@ import type { FactionId, GameState, NegotiationLedgerEntry } from './game_state.
 import type { AcceptanceReport } from './negotiation_offers.js';
 import type { NegotiationPressureStepReport } from './negotiation_pressure.js';
 import { computeSettlementValues } from './territorial_valuation.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Per-faction negotiation capital component breakdown.
@@ -61,7 +62,7 @@ export async function updateNegotiationCapital(
     settlementsGraph?: LoadedSettlementGraph
 ): Promise<NegotiationCapitalStepReport> {
     const currentTurn = state.meta.turn;
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
 
     // Ensure ledger exists
     if (!state.political.negotiation_ledger || !Array.isArray(state.political.negotiation_ledger)) {
@@ -126,7 +127,7 @@ export async function updateNegotiationCapital(
                 { reason: 'patron_bonus', amount: Math.floor(patronBonus) },
                 { reason: 'enclave_liability_penalty', amount: Math.floor(enclavePenalty) }
             ];
-            reasons.sort((a, b) => a.reason.localeCompare(b.reason));
+            reasons.sort((a, b) => strictCompare(a.reason, b.reason));
             for (let seq = 1; seq <= reasons.length; seq += 1) {
                 const { reason, amount } = reasons[seq - 1];
                 if (amount === 0) continue;
@@ -160,7 +161,7 @@ export async function updateNegotiationCapital(
     }
 
     // Sort deterministically
-    per_faction.sort((a, b) => a.faction_id.localeCompare(b.faction_id));
+    per_faction.sort((a, b) => strictCompare(a.faction_id, b.faction_id));
 
     return { per_faction, ledger_entries_added: ledgerEntriesAdded };
 }

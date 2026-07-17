@@ -22,6 +22,7 @@ import type { EdgeRecord } from '../map/settlements.js';
 import type { CanonicalToOperationalMap, OperationalToCanonicalReverseMap } from '../data/operational_data.js';
 import { runSupplyBfs } from './supply_reachability.js';
 import { buildOsidAdjacency } from '../sim/combat/osid_adjacency.js';
+import { strictCompare } from './validateGameState.js';
 
 export interface FactionSupplyReachabilityOsid {
     faction_id: string;
@@ -50,7 +51,7 @@ const factionSupplyCache: WeakMap<
 function edgeTopologyFingerprint(edges: readonly EdgeRecord[]): string {
     return edges
         .map((edge) => edge.a < edge.b ? `${edge.a}__${edge.b}` : `${edge.b}__${edge.a}`)
-        .sort((a, b) => a.localeCompare(b))
+        .sort(strictCompare)
         .join(',');
 }
 
@@ -74,7 +75,7 @@ export function computeSupplyReachabilityOsid(
     operationalToCanonical: OperationalToCanonicalReverseMap
 ): SupplyReachabilityOsidReport {
     const turn = state.meta.turn;
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
     const adjacency = buildOsidAdjacency(edges); // C1-memoized
     const edgeTopology = edgeTopologyFingerprint(edges);
 
@@ -84,7 +85,7 @@ export function computeSupplyReachabilityOsid(
         allOsids.add(e.a);
         allOsids.add(e.b);
     }
-    const sortedOsids = [...allOsids].sort((a, b) => a.localeCompare(b));
+    const sortedOsids = [...allOsids].sort(strictCompare);
 
     // Single-pass controlled-set bucketing: one political-controller lookup
     // per OSID, dispatched to the owning faction's list. Preserves per-faction
@@ -117,7 +118,7 @@ export function computeSupplyReachabilityOsid(
             const osid = canonicalToOperational[sid];
             if (osid) sourceOsids.add(osid);
         }
-        const sources = [...sourceOsids].sort((a, b) => a.localeCompare(b));
+        const sources = [...sourceOsids].sort(strictCompare);
 
         // Cache check: if (sources, controlled) matches last turn, skip BFS.
         const cacheKey = factionCacheKey(sources, controlled, edgeTopology);

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { createElement } from 'react';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { TurnAftermathModal } from '../../src/ui/map/components/TurnAftermathModal.js';
@@ -53,6 +54,7 @@ function makeView(): TurnAftermathView {
             reasons: ['12 prijateljskih gubitaka', '80 raseljenih'],
         },
         signals: [],
+        commandRecord: { directives: [], rows: [] },
         judgment: {
             headline: 'Teritorija je promijenila pamćenje kampanje.',
             detail: 'Linija fronta je zabiljezila +1 neto OSID za igracevu frakciju.',
@@ -82,11 +84,12 @@ describe('TurnAftermathModal localization', () => {
 
     it('renders BCS chrome for the turn aftermath modal', () => {
         setLocale('bcs');
+        const onClose = vi.fn();
 
         render(createElement(TurnAftermathModal, {
             isOpen: true,
             view: makeView(),
-            onClose: vi.fn(),
+            onClose,
             onOpenInbox: vi.fn(),
             onOpenSummary: vi.fn(),
             onOpenRecords: vi.fn(),
@@ -95,14 +98,17 @@ describe('TurnAftermathModal localization', () => {
         }));
 
         expect(screen.getByText('Posljedice poteza')).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Nastavi' })).toBeTruthy();
+        const closeReport = screen.getByTestId('turn-aftermath-close');
+        expect(closeReport.textContent).toBe('Zatvori izvjestaj');
+        fireEvent.click(closeReport);
+        expect(onClose).toHaveBeenCalledOnce();
         expect(screen.getByText('Teritorija')).toBeTruthy();
         expect(screen.getByText('1 osvojeno / 0 izgubljeno')).toBeTruthy();
         expect(screen.getByText('Cijena poteza')).toBeTruthy();
         expect(screen.getByText('Sud / sjećanje')).toBeTruthy();
         expect(screen.getByText('Komandni sto')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregled rata' })).toBeTruthy();
-        expect(screen.getByRole('button', { name: 'Zapisi poteza' })).toBeTruthy();
+        expect(screen.getByRole('button', { name: 'Sedmične posljedice' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregledaj inbox' })).toBeTruthy();
         expect(screen.queryByText('Turn Aftermath')).toBeNull();
     });
@@ -117,6 +123,7 @@ describe('TurnAftermathModal localization', () => {
                 type: 'convoy_decision',
                 severity: 'urgent',
                 title: 'Convoy to Srebrenica',
+                detail: 'Srebrenica route; 20 supply points.',
                 action: 'convoy_decision_modal',
                 actionLabel: 'Review convoy',
             }],
@@ -134,6 +141,9 @@ describe('TurnAftermathModal localization', () => {
         }));
 
         expect(screen.getByText('Humanitarian convoy')).toBeTruthy();
+        expect(screen.getByText('Srebrenica route; 20 supply points.')).toBeTruthy();
+        expect(screen.getByTestId('turn-aftermath-action-convoy:one').getAttribute('aria-label'))
+            .toContain('Srebrenica route; 20 supply points.');
         expect(container.textContent).not.toMatch(/\bconvoy decision\b|convoy_decision/i);
     });
 
@@ -213,6 +223,17 @@ describe('TurnAftermathModal localization', () => {
         const footerAction = screen.getByTestId('turn-aftermath-primary-action');
         expect(footerAction.getAttribute('aria-label')).toContain('Next presidential action');
         expect(footerAction.textContent).toContain('Review convoy');
+        expect(document.activeElement).toBe(footerAction);
+
+        const reserveAction = screen.getByTestId('turn-aftermath-action-command:review-proposal:rev_1');
+        expect(reserveAction.textContent).toContain('Operation Test Plan');
+
+        fireEvent.click(reserveAction);
+
+        expect(onReviewAction).toHaveBeenCalledWith(expect.objectContaining({
+            id: 'command:review-proposal:rev_1',
+            action: 'decision_room',
+        }));
 
         fireEvent.click(footerAction);
 
@@ -221,6 +242,71 @@ describe('TurnAftermathModal localization', () => {
             action: 'convoy_decision_modal',
         }));
         expect(onOpenInbox).not.toHaveBeenCalled();
+    });
+
+    it('places the command desk before supporting signals and does not disguise movement records as Codex links', () => {
+        const view = makeView();
+        view.signals = [{
+            id: 'movement:brigade:one',
+            kind: 'movement',
+            label: '1st Brigade moved',
+            detail: 'Visoko -> Sarajevo',
+            severity: 'routine',
+        }];
+        const onOpenCodex = vi.fn();
+
+        render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex,
+        }));
+
+        const commandDesk = screen.getByText('Command Desk');
+        const signals = screen.getByText('Strategic Signals');
+        expect(commandDesk.compareDocumentPosition(signals) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+        expect(screen.getByText('1st Brigade moved').closest('button')).toBeNull();
+        expect(onOpenCodex).not.toHaveBeenCalled();
+    });
+
+    it('shows the command record in player language without exposing engine ids', () => {
+        const view = makeView();
+        view.commandRecord = {
+            directives: [{ label: 'Press offensive', rationale: 'The Main Staff accepted the offensive intent.' }],
+            rows: [{
+                id: 'arbih_1st_corps',
+                corpsName: '1st Corps',
+                officerName: 'General One',
+                assignedRole: 'Supporting effort',
+                interpretation: 'reinterpreted',
+                interpretationDetail: 'The commander adopted a more cautious role.',
+                action: 'Launched an operation',
+                actionDetail: 'Plan ready; operation launched.',
+            }],
+        };
+
+        const { container } = render(createElement(TurnAftermathModal, {
+            isOpen: true,
+            view,
+            onClose: vi.fn(),
+            onOpenInbox: vi.fn(),
+            onOpenSummary: vi.fn(),
+            onOpenRecords: vi.fn(),
+            onOpenChronicle: vi.fn(),
+            onOpenCodex: vi.fn(),
+        }));
+
+        expect(screen.getByText('Command Record')).toBeTruthy();
+        expect(screen.getByText('Whose orders survived and what commanders did')).toBeTruthy();
+        expect(screen.getByText('Press offensive')).toBeTruthy();
+        expect(screen.getByText('General One')).toBeTruthy();
+        expect(screen.getByText('Reinterpreted')).toBeTruthy();
+        expect(screen.getByText('Launched an operation')).toBeTruthy();
+        expect(container.textContent).not.toContain('arbih_1st_corps');
     });
 
     it('uses the stored commander recommendation in forced-operation receipts', () => {
@@ -376,5 +462,12 @@ describe('TurnAftermathModal localization', () => {
         fireEvent.click(screen.getByTestId('turn-aftermath-signal-row'));
 
         expect(onOpenCodex).toHaveBeenCalledWith('sarajevo_siege');
+    });
+
+    it('keeps command-desk action summaries fully readable', () => {
+        const source = readFileSync('src/ui/map/components/TurnAftermathModal.tsx', 'utf8');
+
+        expect(source).not.toContain('line-clamp-2 text-xs leading-4 opacity-80');
+        expect(source).toContain('break-words text-xs leading-4 opacity-80');
     });
 });

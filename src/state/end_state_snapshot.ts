@@ -8,6 +8,7 @@
 import { createHash } from 'node:crypto';
 import { getEffectiveSettlementSide } from './control_effective.js';
 import type { EndStateSnapshot, GameState } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Build end-state snapshot from current game state.
@@ -62,13 +63,13 @@ export function buildEndStateSnapshot(
 
     // Build settlements_by_controller (sorted by controller_id ascending)
     const settlementsByController: Array<[string, number]> = Array.from(controllerCounts.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => strictCompare(a[0], b[0]))
         .map(([controller, count]) => [controller, count]);
 
     // Optional: exhaustion totals (if available in state)
     const exhaustionTotals: Array<[string, number]> | undefined = state.factions
         .map((f) => [f.id, f.profile.exhaustion] as [string, number])
-        .sort((a, b) => a[0].localeCompare(b[0]));
+        .sort((a, b) => strictCompare(a[0], b[0]));
 
     // Optional: negotiation spend (if available)
     const negotiationSpend: Array<{ side_id: string; category: string; amount: number }> | undefined =
@@ -81,9 +82,9 @@ export function buildEndStateSnapshot(
                     amount: entry.amount
                 }))
                 .sort((a, b) => {
-                    const sideCmp = a.side_id.localeCompare(b.side_id);
+                    const sideCmp = strictCompare(a.side_id, b.side_id);
                     if (sideCmp !== 0) return sideCmp;
-                    const catCmp = a.category.localeCompare(b.category);
+                    const catCmp = strictCompare(a.category, b.category);
                     if (catCmp !== 0) return catCmp;
                     return a.amount - b.amount;
                 })
@@ -93,7 +94,7 @@ export function buildEndStateSnapshot(
     let competences: Array<{ competence: string; holder: string }> | undefined = undefined;
     if (competenceAllocations && competenceAllocations.length > 0) {
         // Sort by competence ID (already sorted, but ensure)
-        competences = [...competenceAllocations].sort((a, b) => a.competence.localeCompare(b.competence));
+        competences = [...competenceAllocations].sort((a, b) => strictCompare(a.competence, b.competence));
     }
 
     // Build canonical snapshot object for hashing

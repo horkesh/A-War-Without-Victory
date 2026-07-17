@@ -22,6 +22,131 @@ const { AUTHOR_OP_COST } = require('./autonomy_ipc_contract.cjs');
 
 const VALID_OP_TYPES = ['general_offensive', 'sector_attack', 'strategic_defense', 'reorganization', 'feint', 'probe'];
 
+function strictCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
+function currentOperationObjectiveForBrigade(operation, brigadeId) {
+  const axes = Array.isArray(operation.axes) ? operation.axes : [];
+  if (axes.length > 0) {
+    const axis = axes.find((candidate) => (
+      Array.isArray(candidate && candidate.assigned_brigades)
+      && candidate.assigned_brigades.includes(brigadeId)
+    ));
+    if (!axis || axis.status !== 'executing') return null;
+    const index = Number.isInteger(axis.current_objective_index)
+      ? axis.current_objective_index
+      : 0;
+    const objective = Array.isArray(axis.objectives) ? axis.objectives[index] : null;
+    return typeof objective === 'string' && objective.length > 0 ? objective : null;
+  }
+
+  const index = Number.isInteger(operation.current_objective_index)
+    ? operation.current_objective_index
+    : 0;
+  const objectives = Array.isArray(operation.objectives)
+    ? operation.objectives
+    : operation.target_settlements;
+  const objective = Array.isArray(objectives) ? objectives[index] : null;
+  return typeof objective === 'string' && objective.length > 0 ? objective : null;
+}
+
+function isExecutingOperationAttack(state, brigadeId, targetSettlementId) {
+  const corpsCommand = state.military && state.military.corps_command;
+  if (!corpsCommand || typeof corpsCommand !== 'object') return false;
+
+  for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+    const operations = corpsCommand[corpsId] && corpsCommand[corpsId].active_operations;
+    if (!Array.isArray(operations)) continue;
+    for (const operation of operations) {
+      if (!operation || operation.phase !== 'execution') continue;
+      if (!Array.isArray(operation.participating_brigades)
+        || !operation.participating_brigades.includes(brigadeId)) continue;
+      if (currentOperationObjectiveForBrigade(operation, brigadeId) === targetSettlementId) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isValidCounterattack(state, formation, targetSettlementId) {
+  const currentTurn = state.meta && state.meta.turn;
+  const retreat = formation.last_retreat_from;
+  return Number.isInteger(currentTurn)
+    && currentTurn >= 1
+    && retreat
+    && retreat.osid === targetSettlementId
+    && retreat.turn === currentTurn - 1
+    && (formation.disrupted_turns ?? 0) === 0
+    && formation.disrupted !== true;
+}
+
+/**
+ * Stage a desktop attack only when it is backed by canon-authorized state.
+ * Rejections are mutation-free; successful orders live in the canonical
+ * military ledger consumed by attack resolution.
+ *
+ * @param {any} state Deserialized canonical GameState.
+ * @param {any} payload Desktop IPC payload.
+ * @returns {{ok:true,authorization:'operation'|'counterattack'}|{ok:false,error:string}}
+ */
+function stageCanonAttackOrder(state, payload) {
+  const brigadeId = payload && payload.brigadeId;
+  const targetSettlementId = payload && payload.targetSettlementId;
+  if (typeof brigadeId !== 'string' || brigadeId.length === 0
+    || typeof targetSettlementId !== 'string' || targetSettlementId.length === 0) {
+    return { ok: false, error: 'invalid_payload' };
+  }
+
+  const military = state && state.military;
+  const formations = military && military.formations;
+  const formation = formations && formations[brigadeId];
+  if (!formation) return { ok: false, error: 'brigade_not_found' };
+  if ((formation.kind ?? 'brigade') !== 'brigade') {
+    return { ok: false, error: 'invalid_brigade' };
+  }
+  if (formation.status !== 'active') {
+    return { ok: false, error: 'brigade_not_active' };
+  }
+  if (typeof formation.location_osid !== 'string' || formation.location_osid.length === 0) {
+    return { ok: false, error: 'brigade_not_located' };
+  }
+
+  const playerFaction = state && state.meta && state.meta.player_faction;
+  if (typeof playerFaction !== 'string' || playerFaction.length === 0) {
+    return { ok: false, error: 'player_faction_not_set' };
+  }
+  if (formation.faction !== playerFaction) {
+    return { ok: false, error: 'brigade_not_owned_by_player' };
+  }
+
+  const controllers = state && state.political && state.political.political_controllers;
+  if (!controllers || typeof controllers !== 'object'
+    || !Object.prototype.hasOwnProperty.call(controllers, targetSettlementId)) {
+    return { ok: false, error: 'target_not_found' };
+  }
+  if (controllers[targetSettlementId] === formation.faction) {
+    return { ok: false, error: 'target_not_hostile' };
+  }
+
+  let authorization = null;
+  if (isExecutingOperationAttack(state, brigadeId, targetSettlementId)) {
+    authorization = 'operation';
+  } else if (isValidCounterattack(state, formation, targetSettlementId)) {
+    authorization = 'counterattack';
+  }
+  if (!authorization) {
+    return { ok: false, error: 'attack_not_canon_authorized' };
+  }
+
+  if (!military.brigade_attack_orders || typeof military.brigade_attack_orders !== 'object') {
+    military.brigade_attack_orders = {};
+  }
+  military.brigade_attack_orders[brigadeId] = targetSettlementId;
+  return { ok: true, authorization };
+}
+
 /**
  * Validate the author-op payload shape. Returns an error string or null.
  * @param {any} payload
@@ -121,4 +246,5 @@ module.exports = {
   validateAuthorOpPayload,
   buildAuthoredOpDef,
   stageAuthoredOperation,
+  stageCanonAttackOrder,
 };

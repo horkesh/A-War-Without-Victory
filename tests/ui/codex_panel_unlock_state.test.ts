@@ -51,7 +51,7 @@ vi.mock('../../data/scenarios/essays/essay_index.json', () => ({
             year: 1992,
             category: 'political',
             content: 'Hidden until the turn gate opens.',
-            tier: 0,
+            tier: 3,
             unlock_turn_min: 12,
         },
         {
@@ -61,7 +61,7 @@ vi.mock('../../data/scenarios/essays/essay_index.json', () => ({
             year: 1992,
             category: 'diplomatic',
             content: 'Hidden until the future dependency opens.',
-            tier: 0,
+            tier: 3,
             requires_events: ['future_peace_plan_event'],
         },
     ],
@@ -356,6 +356,7 @@ describe('CodexPanel Unlock State (Phase H Packet 5)', () => {
 
         const hint = screen.getByTestId('codex-unlock-hint');
         expect(hint.textContent).toContain(turnToDateString(12));
+        expect(hint.textContent).toContain('Campaign entry can appear from');
         expect(hint.textContent).not.toMatch(/week\s+12/i);
         expect(hint.textContent).not.toContain('W12');
     });
@@ -384,8 +385,8 @@ describe('CodexPanel Unlock State (Phase H Packet 5)', () => {
 
         const panel = screen.getByTestId('codex-panel');
         expect(panel.textContent).not.toContain('The Vance-Owen Peace Plan');
-        expect(screen.getByText('Locked historical entry')).toBeTruthy();
-        expect(screen.getByTestId('codex-unlock-hint').textContent).toBe('Unlocks after another campaign event');
+        expect(screen.getByText('Locked campaign entry')).toBeTruthy();
+        expect(screen.getByTestId('codex-unlock-hint').textContent).toBe('Campaign entry appears after another campaign event');
     });
 
     it('renders dilemma decision timing as a player-facing date instead of a raw W label', () => {
