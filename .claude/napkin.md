@@ -34,6 +34,8 @@
    Do instead: reproduce with engine_health_gate.cjs, update through the gate command, rerun strict JSON, and record evidence.
 7. **[2026-07-12] Electron replay proof is an exact-turn hard gate**
    Do instead: bind the actual Electron log and autosave; validate scenario/faction/full control timeline, tour all required surfaces, enforce 12px unclipped essential text and clean runtime/network output, and retain Records/Chronicle screenshot evidence.
+8. **[2026-07-17] CI tests cannot depend on local evidence roots**
+   Do instead: keep executable QA harnesses under tracked `tools/`; write generated screenshots, saves, and logs under excluded `tmp-*` roots, and prove harness contracts from a clean-checkout path.
 
 ## Domain Behavior Guardrails
 1. **[2026-07-06] Player-only state is gate-invisible**

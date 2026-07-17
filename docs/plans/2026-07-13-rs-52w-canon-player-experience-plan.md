@@ -42,7 +42,7 @@
 ## Task 2: Harness Integrity Before Product Judgment
 
 **Files:**
-- Inspect/modify: `tmp-paradox-qa-20260710/paradox-local-qa.cjs`
+- Inspect/modify: `tools/ui/paradox_local_qa.cjs` (generated evidence remains under `tmp-paradox-qa-20260710/`)
 - Test: `tests/paradox_local_qa_harness.test.ts`
 
 **Steps:**

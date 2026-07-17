@@ -24352,3 +24352,21 @@ Final local verification:
 Documentation synchronized: Systems Manual, Engine Invariants, context, Movement Authority, pipeline entrypoints, map/product/calibration/report indexes, command board, master roadmap, release-review plan, acceptance report, reusable knowledge ledger, napkin, and this append-only ledger.
 
 Scope: all work remains local in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, publication, or remote-green claim was performed. The next product gate is D2 owner play; D3/D4 and release operation remain separately authorized owner/operator work.
+
+## 2026-07-17 - PR #477 clean-checkout Electron harness repair
+
+GitHub Baseline Regression exposed a clean-checkout dependency that the local full suite could not reveal: `tests/paradox_local_qa_harness.test.ts` read `tmp-paradox-qa-20260710/paradox-local-qa.cjs`, which existed inside the local 50 GB evidence tree but was correctly excluded from commit `edc0c3ea2`. The CI `test` job failed with repeated `ENOENT`; downstream `engine-health-188w` failed because its required test dependency failed, and `scenarios` was skipped.
+
+Correction:
+- Promoted the executable Electron QA harness to tracked `tools/ui/paradox_local_qa.cjs`.
+- Kept generated screenshots, user data, saves, logs, and evidence under the untracked `tmp-paradox-qa-20260710/` output root.
+- Updated the harness repository-root calculation for its tracked location.
+- Pointed the 38-test harness contract and current engineering/planning references at the tracked path.
+- Left historical report command lines unchanged where they record the exact path used by prior local evidence runs.
+
+Verification:
+- `node --check tools/ui/paradox_local_qa.cjs`: PASS.
+- `npx.cmd vitest run tests/paradox_local_qa_harness.test.ts --reporter=dot`: PASS, 1 file / 38 tests.
+- The generated evidence roots remain untracked and FORAWWV remains unchanged.
+
+Scope: CI reproducibility and documentation only; no simulation behavior, scenario source, baseline artifact, structural fingerprint, startup snapshot, package, installer, tag, or release changed.

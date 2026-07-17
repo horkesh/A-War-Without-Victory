@@ -51,7 +51,7 @@
 ### Task A3: Exact campaign harness and runtime telemetry
 
 **Files:**
-- Modify: `tmp-paradox-qa-20260710/paradox-local-qa.cjs`
+- Modify: `tools/ui/paradox_local_qa.cjs` (generated evidence remains under `tmp-paradox-qa-20260710/`)
 - Test: syntax/self-checks in the harness
 
 **Steps:**

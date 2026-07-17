@@ -3916,3 +3916,9 @@ Applied in `[2026-07-15] Post-acceptance rear-pocket and empty-front remediation
 **Browser automation must not directly await churn-prone renderer promises:** a large save load can outlive the execution context Chromium associates with `Runtime.callFunctionOn`, producing `Promise was collected` even when the application operation is valid. Durable rule: start the renderer operation behind a unique token, store terminal status in browser-owned state, and poll that state synchronously from Node while preserving all product assertions and timeout failures.
 
 Applied in `[2026-07-17] RS post-acceptance local closeout` and `tools/ui/live_surface_browser_sweep.cjs`.
+
+## 2026-07-17 - Tracked harness and generated evidence boundary
+
+**A passing local test can still hide an unpublishable dependency:** the Electron QA harness contract read its source from a 50 GB untracked evidence root, so local tests passed while GitHub clean-checkout tests failed with `ENOENT`. Durable rule: executable harness source belongs under tracked `tools/`; only generated screenshots, saves, logs, user-data, and manifests belong under excluded `tmp-*` evidence roots. Contract tests must resolve the tracked source path.
+
+Applied in `[2026-07-17] PR #477 clean-checkout harness repair`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.

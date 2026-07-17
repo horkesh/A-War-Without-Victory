@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { runInNewContext } from 'node:vm';
 import { test } from 'vitest';
 
-const harnessPath = join(process.cwd(), 'tmp-paradox-qa-20260710', 'paradox-local-qa.cjs');
+const harnessPath = join(process.cwd(), 'tools', 'ui', 'paradox_local_qa.cjs');
 
 function readHarness(): string {
     return readFileSync(harnessPath, 'utf8');

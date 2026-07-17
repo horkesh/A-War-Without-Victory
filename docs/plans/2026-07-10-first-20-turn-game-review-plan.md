@@ -127,7 +127,7 @@ Actions completed:
 Files:
 - `src/ui/map/App.tsx`
 - `src/ui/map/components/PresidentialToolbar.tsx`
-- `tmp-paradox-qa-20260710/paradox-local-qa.cjs`
+- `tools/ui/paradox_local_qa.cjs` (generated evidence remains under `tmp-paradox-qa-20260710/`)
 - `tests/ui/warroom_shell_ownership.test.ts`
 - `tests/ui/warroom_shell_accessibility.test.ts`
 
@@ -145,7 +145,7 @@ Actions completed:
 - The completed v12 run ended at exact turn 20 with empty stderr.
 
 Files:
-- `tmp-paradox-qa-20260710/paradox-local-qa.cjs`
+- `tools/ui/paradox_local_qa.cjs` (generated evidence remains under `tmp-paradox-qa-20260710/`)
 
 Status: completed locally.
 
