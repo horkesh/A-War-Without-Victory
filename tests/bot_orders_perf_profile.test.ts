@@ -175,7 +175,16 @@ describe('bot-orders perf profile instrumentation', () => {
         expect(sectorAttackEvaluator.indexOf('.sectorAttack.executionApproachPath')).toBeLessThan(
             sectorAttackEvaluator.indexOf('.sectorAttack.executionPredictTargets'),
         );
-        expect(brigadeEvalAttack).not.toContain('evaluateUncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('UNCONTESTED_OCCUPATION_PROFILE_PREFIX');
+        expect(brigadeEvalAttack).toContain('evaluateUncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('.homeDefense.uncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('.defensive.uncontestedOccupation');
+        expect(brigadeEvalAttack).toContain('.offensive.uncontestedOccupation');
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateLoop'");
+        expect(brigadeEvalAttack).toContain("profileTime('.candidateGates'");
+        expect(brigadeEvalAttack).toContain("profileTime('.defenderScan'");
+        expect(brigadeEvalAttack).toContain("profileTime('.sectorDefense'");
+        expect(brigadeEvalAttack).toContain("profileTime('.proximityScan'");
         expect(commanderLoop).toContain('botOrdersPerfTime');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.buildBriefing');
         expect(commanderLoop).toContain('commander.runCommanderForCorps.commanderDecide');

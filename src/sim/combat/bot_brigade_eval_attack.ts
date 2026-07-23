@@ -17,14 +17,15 @@ import {
 } from './bot_brigade_targeting.js';
 import { getAttackerSupplyPenalty, getRsVsHrhbPenalty } from './bot_brigade_supply_ethnic.js';
 import { findAdjacentFrontGap } from './bot_brigade_movement_ai.js';
-import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid } from './bot_brigade_context.js';
+import { countFactionBrigadesAtOsid, getCorpsBrigadeCountAtOsid, hasActiveFormationAtOsid } from './bot_brigade_context.js';
 import type { Osid } from './osid_adjacency.js';
 import { getTacticalAdjacentOsids } from './tactical_adjacency.js';
 import { effectivePersonnel } from './tactical_group_personnel.js';
 import type { BrigadePosture, FactionId, FormationState, GameState } from '../../state/game_state.js';
-import { findSubSegmentForOsid } from './corps_front_sectors.js';
+import { findSectorForEnemyOsid, findSubSegmentForOsid } from './corps_front_sectors.js';
 import type { CorpsFrontSector, CorpsFrontSubSegment } from '../../state/game_state.js';
 import { isFriendlyFaction, isRbihHrhbCombatEnabled } from '../early_war/alliance_update.js';
+import { isEnclaveBrigade, isOsidInSameEnclave } from './enclave_resilience.js';
 import { assignedBrigadeNotOnSectorFrontOsids } from './bot_brigade_eval_front.js';
 import {
     MAX_SECTOR_COUNTER_ATTACKS_PER_TURN,
@@ -34,11 +35,14 @@ import {
     COUNTER_ATTACK_RETREAT_WINDOW,
 } from './bot_constants.js';
 
+export const UNCONTESTED_OCCUPATION_SCORE = 600;
 const HOME_DEFENSE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const DEFENSIVE_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const SECTOR_ATTACK_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
 const SECTOR_ATTACK_DIRECT_OBJECTIVE_PREDICT_PROFILE_PREFIX =
     'bot_orders.executeFactionDirectives.eval.sectorAttack.executionDirectObjective.predictCombatOutcome';
+const UNCONTESTED_OCCUPATION_PROFILE_PREFIX = 'bot_orders.executeFactionDirectives.eval';
+const UNCONTESTED_REPULSE_COOLDOWN_TURNS = 4;
 
 function homeDefenseProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${HOME_DEFENSE_PROFILE_PREFIX}${labelSuffix}`, fn);
@@ -50,6 +54,10 @@ function defensiveProfileTime<T>(labelSuffix: string, fn: () => T): T {
 
 function sectorAttackProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${SECTOR_ATTACK_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+function uncontestedOccupationCallerProfileTime<T>(profileLabelPrefix: string, labelSuffix: string, fn: () => T): T {
+    return botOrdersPerfTime(`${UNCONTESTED_OCCUPATION_PROFILE_PREFIX}${profileLabelPrefix}${labelSuffix}`, fn);
 }
 
 // The following functions are assumed to be exported/accessible from bot_brigade_ai_osid or another common file.
@@ -90,6 +98,12 @@ export function evaluateHomeDefense(ctx: BrigadeEvaluationContext): boolean {
         if ((brigade.counterattack_window_turns ?? 0) > 0) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'counterattack' });
         } else {
+            if (homeDefenseProfileTime(
+                '.homeDefense.uncontestedOccupation',
+                () => evaluateUncontestedOccupation(ctx, '.homeDefense.uncontestedOccupation'),
+            )) {
+                return true;
+            }
             // Home defense: defend in place. Attacks only through operations.
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
         }
@@ -681,6 +695,12 @@ export function evaluateDefensive(ctx: BrigadeEvaluationContext): boolean {
             }
         }
         // Defensive stance, no attack — dig_in if cohesion sufficient
+        if (defensiveProfileTime(
+            '.defensive.uncontestedOccupation',
+            () => evaluateUncontestedOccupation(ctx, '.defensive.uncontestedOccupation'),
+        )) {
+            return true;
+        }
         if ((brigade.cohesion ?? 0) >= 20) {
             result.posture_orders.push({ brigade_id: brigade.id, posture: 'dig_in' });
         } else {
@@ -708,6 +728,10 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
     if (corpsStance !== 'offensive' && corpsStance !== 'balanced') return false;
     if (adjEnemy.length === 0) return false;
 
+    if (evaluateUncontestedOccupation(ctx, '.offensive.uncontestedOccupation')) {
+        return true;
+    }
+
     // Offensive/balanced brigade on the front with no active op: defend in place.
     // High cohesion → dig in for better entrenchment.
     if ((brigade.cohesion ?? 0) >= 40) {
@@ -723,6 +747,169 @@ export function evaluateOffensive(ctx: BrigadeEvaluationContext): boolean {
 // ═══════════════════════════════════════════════════════════════════════════
 
 /** Bonus applied to attack target scores when the target OSID is in the weakest sub-segment. */
+function isUncontestedTargetInCommandScope(
+    ctx: BrigadeEvaluationContext,
+    targetOsid: string,
+): boolean {
+    if (ctx.directive?.offensive_targets?.includes(targetOsid)) return true;
+
+    const sector = ctx.sectorAssignment?.sector;
+    if (!sector) return false;
+    const assignedSubSegmentId = ctx.brigade.assigned_sub_segment_id;
+    if (assignedSubSegmentId) {
+        const assignedSubSegment = sector.sub_segments.find(
+            (subSegment) => subSegment.sub_segment_id === assignedSubSegmentId,
+        );
+        return assignedSubSegment?.enemy_osids.includes(targetOsid) ?? false;
+    }
+    return sector.sub_segments.some((subSegment) => subSegment.enemy_osids.includes(targetOsid));
+}
+
+/**
+ * Occupy genuinely empty adjacent enemy ground without creating a free-ranging
+ * brigade attack. The target must belong to the brigade's assigned
+ * sector/sub-segment or be an explicit corps directive objective.
+ */
+export function evaluateUncontestedOccupation(
+    ctx: BrigadeEvaluationContext,
+    profileLabelPrefix = '.uncontestedOccupation',
+): boolean {
+    const {
+        brigade,
+        loc,
+        faction,
+        adjacency,
+        state,
+        isActiveSectorOperationParticipant,
+        result,
+        activeFormationLocationsByFaction,
+        sectorDefenseByFactionAndOsid,
+    } = ctx;
+    const profileTime = <T>(labelSuffix: string, fn: () => T): T =>
+        uncontestedOccupationCallerProfileTime(profileLabelPrefix, labelSuffix, fn);
+
+    const earlyBlocked = profileTime('.earlyGates', () => {
+        const turn = state.meta?.turn ?? 0;
+        if (turn <= 2) return true;
+        if (isActiveSectorOperationParticipant) return true;
+        if (ctx.directive?.hold_osids?.includes(loc)) return true;
+        return ((brigade as { disrupted_turns?: number }).disrupted_turns ?? 0) > 0;
+    });
+    if (earlyBlocked) return false;
+
+    const neighbors = [...(adjacency.get(loc) ?? [])].sort(strictCompare);
+    const formations = state.military.formations ?? {};
+    const pc = state.political.political_controllers ?? {};
+
+    return profileTime('.candidateLoop', () => {
+        for (const n of neighbors) {
+            const controller = profileTime('.candidateGates', () => {
+                if (!n.startsWith('op:')) return undefined;
+                const targetController = pc[n];
+                if (!targetController || targetController === faction) return undefined;
+                if (
+                    ((faction === 'HRHB' && targetController === 'RBiH')
+                        || (faction === 'RBiH' && targetController === 'HRHB'))
+                    && !isRbihHrhbCombatEnabled(state)
+                ) {
+                    return undefined;
+                }
+                if (isEnclaveBrigade(brigade) && !isOsidInSameEnclave(loc, n)) {
+                    return undefined;
+                }
+                if (!isUncontestedTargetInCommandScope(ctx, n)) return undefined;
+                return targetController;
+            });
+            if (!controller) continue;
+            if (wasRecentlyRepulsedFromTarget(
+                brigade,
+                n,
+                state.meta?.turn ?? 0,
+                UNCONTESTED_REPULSE_COOLDOWN_TURNS,
+            )) {
+                continue;
+            }
+
+            const salientBlocked = profileTime('.salient', () => {
+                const targetNeighbors = adjacency.get(n as Osid) ?? [];
+                let friendlyNeighbors = 0;
+                let enemyNeighbors = 0;
+                for (const neighbor of targetNeighbors) {
+                    const neighborController = pc[neighbor];
+                    if (neighborController === faction || neighbor === loc) {
+                        friendlyNeighbors += 1;
+                    } else if (neighborController && neighborController !== faction) {
+                        enemyNeighbors += 1;
+                    }
+                }
+                const totalNeighbors = friendlyNeighbors + enemyNeighbors;
+                return totalNeighbors > 0 && enemyNeighbors / totalNeighbors >= 0.75;
+            });
+            if (salientBlocked) continue;
+
+            if (state.meta?.avoided_osids_by_faction?.[faction]?.includes(n)) continue;
+
+            const hasDefender = profileTime('.defenderScan', () => {
+                if (activeFormationLocationsByFaction) {
+                    return hasActiveFormationAtOsid(
+                        activeFormationLocationsByFaction,
+                        controller,
+                        n as Osid,
+                    );
+                }
+                for (const formationId of Object.keys(formations).sort(strictCompare)) {
+                    const formation = formations[formationId];
+                    if (
+                        formation
+                        && formation.status === 'active'
+                        && formation.location_osid === n
+                        && formation.faction === controller
+                    ) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+            if (hasDefender) continue;
+
+            const sectorHasBrigades = profileTime('.sectorDefense', () => {
+                const sector = sectorDefenseByFactionAndOsid?.get(controller)?.get(n)
+                    ?? findSectorForEnemyOsid(state, n as Osid, controller);
+                if (!sector) return false;
+                const sectorBrigades = [
+                    ...sector.assigned_brigade_ids,
+                    ...(sector.reserve_brigade_ids ?? []),
+                ];
+                return sectorBrigades.some((brigadeId) => {
+                    const formation = formations[brigadeId];
+                    return formation != null && formation.status === 'active';
+                });
+            });
+            if (sectorHasBrigades) continue;
+
+            const proximityBlocked = profileTime('.proximityScan', () => {
+                if (!activeFormationLocationsByFaction) return false;
+                const targetNeighbors = adjacency.get(n as Osid) ?? [];
+                return targetNeighbors.some((neighbor) =>
+                    neighbor !== loc
+                    && hasActiveFormationAtOsid(
+                        activeFormationLocationsByFaction,
+                        controller,
+                        neighbor as Osid,
+                    )
+                );
+            });
+            if (proximityBlocked) continue;
+
+            result.posture_orders.push({ brigade_id: brigade.id, posture: 'attack' });
+            result.attack_orders[brigade.id] = n as Osid;
+            result.attack_scores[brigade.id] = UNCONTESTED_OCCUPATION_SCORE;
+            return true;
+        }
+        return false;
+    });
+}
+
 export const WEAK_SUBSEGMENT_SCORE_BONUS = 50;
 
 /**

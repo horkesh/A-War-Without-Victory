@@ -72,7 +72,7 @@ const DONJI_VAKUF_BRIGADES = [
 
 const KUPRES_STAGING_ANCHORS = [
     'op:livno:livno_2',
-    'op:tomislavgrad:tomislavgrad_2',
+    'op:duvno:tomislavgrad_2',
     'op:kupres:kupres_2',
     'op:kupres:goravci',
 ];
@@ -131,8 +131,11 @@ function buildVlasicState(opts: {
         formations[id] = {
             id,
             name: id,
+            kind: 'brigade',
+            status: 'active',
             faction: 'RBiH',
-            own_corps_cmd: 'arbih_3rd_corps',
+            corps_id: 'arbih_3rd_corps',
+            personnel: 1400,
             strength: 1400,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.75,
             cohesion: opts.axisCoordinationLow ? 35 : 70,
@@ -213,9 +216,12 @@ function buildDonjiVakufState(opts: {
         formations[id] = {
             id,
             name: id,
+            kind: 'brigade',
+            status: 'active',
             faction: 'RBiH',
             corps_id: 'arbih_3rd_corps',
             own_corps_cmd: 'arbih_3rd_corps',
+            personnel: 1350,
             strength: 1350,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
             cohesion: opts.axisCoordinationLow ? 34 : 68,
@@ -312,8 +318,11 @@ function buildKupresCincarState(opts: {
         formations[id] = {
             id,
             name: id,
+            kind: 'brigade',
+            status: 'active',
             faction: 'HRHB',
-            own_corps_cmd: 'hvo_tomislavgrad',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1450,
             strength: 1450,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
             cohesion: opts.axisCoordinationLow ? 34 : 68,
@@ -416,12 +425,27 @@ describe('Central Bosnia / Vlasic operation opportunity catalog', () => {
         )).toBe(true);
     });
 
+    it('uses the canonical Duvno OSID for the Tomislavgrad staging anchor', () => {
+        const state = buildKupresCincarState({ turn: 138 });
+        const controllers = state.political.political_controllers!;
+        controllers['op:tomislavgrad:tomislavgrad_2'] = 'RS';
+        controllers['op:duvno:tomislavgrad_2'] = 'HRHB';
+
+        runOpportunityEvaluationStep(state, 138);
+
+        expect(state.military.operation_opportunities
+            ?.find(p => p.opportunity_id === 'kupres_cincar_94')).toBeDefined();
+    });
+
     it('blocks Kupres/Cincar outside window, broken alliance, lost staging, or no enemy-held objectives', () => {
+        const missingStagingController = buildKupresCincarState({ turn: 138 });
+        delete missingStagingController.political.political_controllers!['op:duvno:tomislavgrad_2'];
         const cases = [
             buildKupresCincarState({ turn: 131 }),
             buildKupresCincarState({ turn: 143 }),
             buildKupresCincarState({ turn: 138, alliance: 0.35 }),
             buildKupresCincarState({ turn: 138, stagingHeld: false }),
+            missingStagingController,
             buildKupresCincarState({ turn: 138, objectivesHeldByRs: false }),
         ];
 

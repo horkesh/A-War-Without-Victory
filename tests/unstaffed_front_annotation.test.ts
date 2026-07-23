@@ -64,16 +64,33 @@ describe('annotateUnstaffedFrontSectors', () => {
                 }],
                 edge_ids: ['edge:rs:isolated'],
             }),
+            'sector:rs:donor': makeSector({
+                sector_id: 'sector:rs:donor',
+                territory_osids: ['op:rs:rear', 'op:rs:donor_front'],
+                reserve_brigade_ids: ['rs_relief'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:rs:donor:0',
+                    friendly_osids: ['op:rs:donor_front'],
+                    enemy_osids: ['op:enemy:donor_front'],
+                    edge_ids: ['edge:rs:donor'],
+                    length_edges: 1,
+                    primary_brigade_ids: [],
+                }],
+                edge_ids: ['edge:rs:donor'],
+            }),
         } as Record<string, any>;
 
         const state = {
             factions: [{ id: 'RS' }],
+            military: {},
             political: {
                 political_controllers: {
                     'op:rs:front': 'RS',
                     'op:rs:rear': 'RS',
+                    'op:rs:donor_front': 'RS',
                     'op:rs:isolated_front': 'RS',
                     'op:enemy:front': 'RBiH',
+                    'op:enemy:donor_front': 'RBiH',
                     'op:enemy:isolated_front': 'RBiH',
                 },
             },
@@ -100,6 +117,79 @@ describe('annotateUnstaffedFrontSectors', () => {
         expect(sectors['sector:rs:isolated']!.unstaffed_front).toBe(true);
     });
 
+    it('marks a reachable front unstaffed when every same-corps donor must retain its line floor', () => {
+        const target = makeSector({
+            sector_id: 'sector:rs:target',
+            territory_osids: ['op:rs:target'],
+            sub_segments: [{
+                sub_segment_id: 'subseg:rs:target:0',
+                friendly_osids: ['op:rs:target'],
+                enemy_osids: ['op:enemy:target'],
+                edge_ids: ['edge:rs:target'],
+                length_edges: 1,
+                primary_brigade_ids: [],
+            }],
+            edge_ids: ['edge:rs:target'],
+        }) as any;
+        const donor = makeSector({
+            sector_id: 'sector:rs:donor',
+            territory_osids: ['op:rs:donor'],
+            assigned_brigade_ids: ['rs_donor_1', 'rs_donor_2'],
+            length_edges: 16,
+            threat_ratio: 1,
+            sub_segments: [{
+                sub_segment_id: 'subseg:rs:donor:0',
+                friendly_osids: ['op:rs:donor'],
+                enemy_osids: ['op:enemy:donor'],
+                edge_ids: ['edge:rs:donor'],
+                length_edges: 16,
+                primary_brigade_ids: ['rs_donor_1', 'rs_donor_2'],
+            }],
+            edge_ids: ['edge:rs:donor'],
+        });
+        const sectors = {
+            'sector:rs:target': target,
+            'sector:rs:donor': donor,
+        } as Record<string, any>;
+        const state = {
+            factions: [{ id: 'RS' }],
+            military: {},
+            political: {
+                political_controllers: {
+                    'op:rs:target': 'RS',
+                    'op:rs:donor': 'RS',
+                    'op:enemy:target': 'RBiH',
+                    'op:enemy:donor': 'RBiH',
+                },
+            },
+        } as any;
+        const formations = {
+            rs_donor_1: {
+                id: 'rs_donor_1',
+                kind: 'brigade',
+                faction: 'RS',
+                corps_id: 'corps:test',
+                status: 'active',
+                location_osid: 'op:rs:donor',
+            },
+            rs_donor_2: {
+                id: 'rs_donor_2',
+                kind: 'brigade',
+                faction: 'RS',
+                corps_id: 'corps:test',
+                status: 'active',
+                location_osid: 'op:rs:donor',
+            },
+        } as any;
+        const adjacency = makeAdjacency([
+            ['op:rs:donor', 'op:rs:target'],
+        ]);
+
+        annotateUnstaffedFrontSectors(sectors, state, formations, adjacency);
+
+        expect(target.unstaffed_front).toBe(true);
+    });
+
     it('marks a connected front unstaffed when the only formation is enclave-locked outside it', () => {
         const sectors = {
             'sector:hrhb:outside-zepce': makeSector({
@@ -121,6 +211,7 @@ describe('annotateUnstaffedFrontSectors', () => {
 
         const state = {
             factions: [{ id: 'HRHB' }],
+            military: {},
             political: {
                 political_controllers: {
                     'op:zepce:viniste_2': 'HRHB',

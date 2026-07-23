@@ -83,7 +83,7 @@ The Bosniak-Croat conflict (October 1992 – March 1994) was a war-within-a-war 
 - Ceasefire: +0.015 when active
 - Refugee pressure: up to -0.028 (7 municipalities x 0.004 each)
 
-**Floor:** Alliance cannot drop below 0.40 until `rbih_hrhb_war_earliest_turn` (default 26 = October 1992).
+**Floor:** Alliance cannot drop below 0.40 until `rbih_hrhb_war_earliest_turn` (default 40 in active definitive April 1992 scenarios). Runtime fallbacks and every control-changing path use the same value; rear-pocket consolidation cannot bypass it.
 
 ---
 

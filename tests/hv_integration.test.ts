@@ -13,6 +13,8 @@
  */
 
 import assert from 'node:assert';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, test } from 'vitest';
 import {
     HV_BRIGADE_DEFS,
@@ -72,6 +74,12 @@ function makeWashingtonSignedState(washingtonTurn: number, currentTurn: number):
         meta: { turn: currentTurn, seed: 'hv-test', phase: 'war', referendum_held: true, war_start_turn: 1 },
     });
     ensureRbihHrhbState(state);
+    state.political.political_controllers = {
+        'op:duvno:tomislavgrad_2': 'HRHB',
+        'op:glamoc:glamoc_2': 'RS',
+        'op:kupres:bucovaca': 'RS',
+        'op:livno:livno_2': 'HRHB',
+    };
     state.political.rbih_hrhb_state!.washington_signed = true;
     state.political.rbih_hrhb_state!.washington_turn = washingtonTurn;
     state.political.war_alliance_rbih_hrhb = WASH_ALLIANCE_LOCK_VALUE;
@@ -83,6 +91,20 @@ function makeWashingtonSignedState(washingtonTurn: number, currentTurn: number):
 // ═══════════════════════════════════════════════════════════════════════════
 
 describe('HV integration', () => {
+    test('every authored HV deployment OSID exists in the operational map', () => {
+        const operationalOsids = JSON.parse(readFileSync(
+            resolve(process.cwd(), 'data/derived/operational/osid_areas.json'),
+            'utf8',
+        )) as { areas: Record<string, number> };
+
+        for (const def of HV_BRIGADE_DEFS) {
+            assert.ok(
+                Object.prototype.hasOwnProperty.call(operationalOsids.areas, def.location_osid),
+                `${def.id} deployment OSID ${def.location_osid} must exist`,
+            );
+        }
+    });
+
     test('HV brigades do NOT spawn before Washington is signed', () => {
         const state = makeState();
         ensureRbihHrhbState(state);
@@ -178,13 +200,58 @@ describe('HV integration', () => {
         const state = makeWashingtonSignedState(washTurn, spawnTurn);
         tickHvIntegration(state);
 
-        const westernFrontPrefixes = ['op:livno', 'op:tomislavgrad', 'op:glamoc', 'op:kupres'];
+        const westernFrontPrefixes = ['op:livno', 'op:duvno', 'op:glamoc', 'op:kupres'];
 
         for (const def of HV_BRIGADE_DEFS) {
             const f = state.military.formations[def.id]!;
             const onWesternFront = westernFrontPrefixes.some(p => (f.location_osid ?? '').startsWith(p));
             assert.ok(onWesternFront, `${def.id} should be on western front, got ${f.location_osid}`);
         }
+    });
+
+    test('HV brigades enter only through HRHB-controlled western territory', () => {
+        const washTurn = 100;
+        const spawnTurn = washTurn + HV_PREPARATION_DELAY;
+        const state = makeWashingtonSignedState(washTurn, spawnTurn);
+        tickHvIntegration(state);
+
+        for (const def of HV_BRIGADE_DEFS) {
+            const formation = state.military.formations[def.id]!;
+            assert.strictEqual(
+                state.political.political_controllers?.[formation.location_osid!],
+                'HRHB',
+                `${def.id} must enter on HRHB-controlled territory`,
+            );
+        }
+    });
+
+    test('HV integration defers atomically until a western entry anchor is controlled', () => {
+        const washTurn = 100;
+        const spawnTurn = washTurn + HV_PREPARATION_DELAY;
+        const state = makeWashingtonSignedState(washTurn, spawnTurn);
+        state.political.political_controllers = {
+            'op:duvno:tomislavgrad_2': 'RS',
+            'op:glamoc:glamoc_2': 'RS',
+            'op:kupres:bucovaca': 'RS',
+            'op:livno:livno_2': 'RS',
+        };
+
+        const blocked = tickHvIntegration(state);
+
+        assert.strictEqual(blocked.spawned_this_turn, false);
+        assert.strictEqual(state.meta.hv_brigades_spawned, undefined);
+        assert.strictEqual(
+            HV_BRIGADE_DEFS.some(def => state.military.formations[def.id] != null),
+            false,
+            'a blocked integration must not partially spawn the permanent HV pool',
+        );
+
+        state.political.political_controllers['op:duvno:tomislavgrad_2'] = 'HRHB';
+        const admitted = tickHvIntegration(state);
+
+        assert.strictEqual(admitted.spawned_this_turn, true);
+        assert.strictEqual(admitted.spawned_brigade_ids.length, HV_BRIGADE_DEFS.length);
+        assert.strictEqual(state.meta.hv_brigades_spawned, true);
     });
 
     test('HV brigades only spawn once — not every turn', () => {

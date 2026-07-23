@@ -10,8 +10,8 @@
 ## Current Release State
 1. **[2026-07-07] Technical road to 1.0 is closed**
    Do instead: keep current path as WP-9 owner friction diaries -> D2 owner full-campaign playthrough -> D3 operator release gate -> D4 final docs/release sweep -> 1.0 tag.
-2. **[2026-07-15] Campaign QA stays local until the owner reopens release work**
-   Do instead: retain RBiH v47 and RS v17 as accepted local comparison evidence; keep D2 owner play as the separate release gate and do not stage, commit, push, package, release, or infer remote status.
+2. **[2026-07-17] Campaign QA publication is authorized; packaging remains paused**
+   Do instead: commit and push the reviewed campaign QA packet through PR #477, retain RBiH v47 and RS v17 as local evidence, keep `tmp-*` evidence roots untracked, and do not package, tag, or release without separate authorization. Current required 188w floor is the explicit current-canon `622/712` re-floor; RR2 `646` remains lineage. The canon-corrected deterministic endpoint passes 31/31 anchors after the centralized bilateral gate closed the pre-war consolidation leak and Brcko debt.
 3. **[2026-07-07] WP-9 diaries outrank speculative UI backlog**
    Do instead: use docs/40_reports/playtests/TEMPLATE.md; top-three diary friction items move to the front before new polish.
 4. **[2026-07-09] CA-2/CA-3 Command Authority is merged**

@@ -17,6 +17,7 @@ import {
     getAlliancePhase,
     HOSTILE_THRESHOLD,
     isRbihHrhbAtWar,
+    isRbihHrhbCombatBlocked,
     REFUGEE_PRESSURE_RATE,
     REFUGEE_PRESSURE_RATIO_CAP,
     updateAllianceValue
@@ -86,6 +87,25 @@ function makeState(overrides?: Partial<GameState>): GameState {
 // ── Alliance Update Tests ──
 
 describe('alliance update', () => {
+    test('combat gate defaults to the canonical turn-40 war floor', () => {
+        const state = makeState({
+            meta: {
+                turn: 30,
+                seed: 'alliance-default-floor',
+                phase: 'war',
+                referendum_held: true,
+                war_start_turn: 1,
+            },
+            political: {
+                war_alliance_rbih_hrhb: -0.3,
+            } as any,
+        });
+
+        expect(isRbihHrhbCombatBlocked(state, 'RBiH', 'HRHB')).toBe(true);
+        state.meta.turn = 40;
+        expect(isRbihHrhbCombatBlocked(state, 'RBiH', 'HRHB')).toBe(false);
+    });
+
     test('ensureRbihHrhbState initializes with defaults', () => {
         const state = makeState();
         ensureRbihHrhbState(state);

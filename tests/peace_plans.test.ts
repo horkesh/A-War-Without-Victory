@@ -245,7 +245,7 @@ describe('evaluatePeacePlans', () => {
         expect(pending!.bot_responses.HRHB).toBeDefined();
     });
 
-    it('headless no-player evaluation computes every faction and persists a resolved history entry', () => {
+    it('historical headless evaluation records the documented Cutileiro outcome', () => {
         const neg = makeNegotiationState({ override_authority: { RBiH: 10, RS: 10, HRHB: 10 } });
         const state = makeState({
             turn: 0,
@@ -264,13 +264,15 @@ describe('evaluatePeacePlans', () => {
             turn_offered: 0,
             resolved: true,
         });
-        expect(Object.keys(neg.peace_plan_history[0].responses).sort()).toEqual([...CANONICAL_FACTIONS].sort());
-        for (const faction of CANONICAL_FACTIONS) {
-            expect(['accepted', 'rejected']).toContain(neg.peace_plan_history[0].responses[faction]);
-        }
+        expect(neg.peace_plan_history[0].responses).toEqual({
+            RBiH: 'rejected',
+            RS: 'accepted',
+            HRHB: 'accepted',
+        });
+        expect(state.meta.game_over).not.toBe(true);
     });
 
-    it('headless no-player evaluation preserves resolved peace-plan chronology through turn 52', () => {
+    it('historical headless evaluation resolves every pre-Dayton plan without ending the war early', () => {
         const neg = makeNegotiationState({ override_authority: { RBiH: 10, RS: 10, HRHB: 10 } });
         const state = makeState({
             turn: 0,
@@ -283,17 +285,61 @@ describe('evaluatePeacePlans', () => {
         evaluatePeacePlans(state);
         state.meta.turn = 40;
         evaluatePeacePlans(state);
-        state.meta.turn = 52;
+        state.meta.turn = 70;
+        evaluatePeacePlans(state);
+        state.meta.turn = 118;
+        evaluatePeacePlans(state);
 
         expect(neg.pending_peace_plan).toBeUndefined();
         expect(neg.peace_plan_history.map(entry => ({
             plan_id: entry.plan_id,
             turn_offered: entry.turn_offered,
+            responses: entry.responses,
             resolved: entry.resolved,
         }))).toEqual([
-            { plan_id: 'cutileiro', turn_offered: 0, resolved: true },
-            { plan_id: 'vance_owen', turn_offered: 40, resolved: true },
+            {
+                plan_id: 'cutileiro',
+                turn_offered: 0,
+                responses: { RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'vance_owen',
+                turn_offered: 40,
+                responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'owen_stoltenberg',
+                turn_offered: 70,
+                responses: { RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'contact_group',
+                turn_offered: 118,
+                responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+                resolved: true,
+            },
         ]);
+        expect(state.meta.game_over).not.toBe(true);
+        expect(state.military.event_flags?.war_ended_early).toBeUndefined();
+    });
+
+    it('leaves the Dayton trigger to the dedicated negotiation system', () => {
+        const neg = makeNegotiationState();
+        const state = makeState({
+            turn: 185,
+            war_start_turn: 0,
+            no_player: true,
+            negotiation: neg,
+        });
+
+        evaluatePeacePlans(state);
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toEqual([]);
+        expect(state.meta.game_over).not.toBe(true);
     });
 });
 

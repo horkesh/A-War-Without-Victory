@@ -24370,3 +24370,52 @@ Verification:
 - The generated evidence roots remain untracked and FORAWWV remains unchanged.
 
 Scope: CI reproducibility and documentation only; no simulation behavior, scenario source, baseline artifact, structural fingerprint, startup snapshot, package, installer, tag, or release changed.
+
+## 2026-07-17 - Long-horizon campaign QA canon integration
+
+Completed the owner-directed RBiH and RS long-horizon campaign review packet and reconciled simulation behavior, player-visible truth, calibration artifacts, CI thresholds, canon, planning documents, and regression coverage.
+
+Implemented corrections:
+- COHA now suppresses operation attack/posture orders with explicit receipts, preserves legal movement, and pauses the affected operation lifecycle clock.
+- Battle receipts carry exact attacker-brigade and contributing-operation ids; scenario diagnostics no longer infer causality from a shared target.
+- Bot uncontested occupation is bounded by assigned sector/subsegment or explicit directive targets and applies defense, operation, disruption, cooldown, enclave, and connectivity guards.
+- Commander objective/fallback selection uses the deterministic primary sector. Historical operation opportunities filter authored participants through live eligibility while preserving authored order.
+- Forming formations cannot enter elite-loan rescue or operation-participant paths.
+- Cincar staging requires HRHB control. HV integration uses deterministic all-or-nothing legal placement and records truthful BiH station/home locations.
+- Paramilitary spawning uses local organizational penetration and dominance after organized-defense exclusions, with deterministic mode, faction, and municipality caps.
+- Historical-default peace plans use explicit faction dispositions; Cutileiro catches up once at the first War turn, while Dayton remains owned by its dedicated resolver.
+- The standalone consistency validator now mirrors all nine canonical enclave geometries.
+
+Pre-publication bilateral-war correction:
+- Fresh analysis found three turn-21 RBiH seizures of HRHB territory through rear-pocket consolidation.
+- Rear-pocket consolidation now calls the centralized RBiH-HRHB combat-permission gate.
+- The shared runtime default and every active definitive April 1992 scenario use the canonical turn-40 earliest-war floor.
+- Red proof failed two consolidation assertions before the fix. The green timing/consolidation pack passed 9 files / 91 tests with 4 intentional skips.
+- The first final whole-tree run then exposed one stale test fixture that expected an RBiH-HRHB edge at turn 30. Moving that fixture to turn 40 made the focused four-file / 50-test pack pass without changing production behavior.
+
+Deterministic calibration evidence:
+- Exact accepted 188-week A/B runs finished byte-identically at final-state hash `aa4302e694a6482e`.
+- Initial save SHA-256: `3E0D781E6E5A232BE9646690F862837EC1D0905AF2AFA70A0AC429EA6623763D`.
+- Final save SHA-256: `AA4302E694A6482E22AE2EE3548F862BAAC10D54D858CBBB503F3A869293B51F`.
+- Run-summary SHA-256: `AA77351C4B70882A4C5EA73A7012890621F5869AA6887E45C0414EBCA9FD825F`.
+- Control-delta SHA-256: `8C5B29F55B3694C0B31D897AD2F3FE2CA46DAB928BFAA401E4FEE5F6EFCE01A1`.
+- Formation-delta SHA-256: `0F0A10A5B17BEDFC9DE521997E49D6D624C0B076E426F94D5B02993895240C61`.
+- Engine health: 622/712 matched OSIDs, zero zero-eligible operations, three dead operations, zero ghost-destroyed formations, three stranded brigades, zero consistency failures, K:W 3.813, and 31/31 endpoint anchors.
+- The accepted run contains zero pre-turn-40 RBiH-HRHB control events.
+- Current 40-week structural proof is HRHB/RBiH/RS `85/251/376`, 110 flips, final hash `b4411ca087401148`, fingerprint `4fcdb21ab4bcff14`, 31/31 anchors, and 6/6 benchmarks.
+- Startup snapshot SHA-256 is `FCB9AFD6CA6C5E8AC4B5DDB635B5F103624EFDE053F323DEB5B1C1BCF1EA93F0`.
+
+Final local verification:
+- Full Vitest suite passed: 1,204 files passed, 4 skipped; 11,683 tests passed, 29 skipped; 0 failed.
+- `npm run qa:player-experience` passed, including desktop release builds, 8 files / 81 Electron-runtime tests, 44 files / 756 player-journey tests, first-hour browser proof, live-surface proof with all 42 screenshots, and output scan.
+- `npm run desktop:startup-snapshot:check`, `npm run ci:structural-fingerprint:check`, and `npm run test:baselines` passed.
+- `npm run canon:check` passed, including the determinism static scan and baseline regression.
+- `npm run typecheck` and `npm run build` passed.
+- A transient Windows localhost `ERR_NO_BUFFER_SPACE` occurred only after one live-surface capture set; the standalone rerun and final aggregate player-experience run both passed cleanly.
+- `git diff --check` passed before final documentation reconciliation.
+
+Residual non-gating balance/deployment advisories are recorded in `docs/40_reports/implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md`: high decisive-battle share, unused assigned formations, out-of-area corps, casualty asymmetry, one four-brigade stack, three low-density RBiH sectors, and 17 distant brigades.
+
+Documentation synchronized: Engine Invariants, Systems Manual, War Termination Spec, Determinism Test Matrix, C3 freeze manifest, calibration and game-state masters, report indexes, Command Board, Master Roadmap, release-review plans, reusable knowledge ledger, napkin, implementation report, and this append-only ledger. `docs/10_canon/FORAWWV.md` was not edited.
+
+Scope: this packet changes deterministic simulation outputs, scenario defaults, generated startup/baseline/calibration artifacts, and the required 188-week CI health floor. It does not create a package, installer, tag, or release publication.

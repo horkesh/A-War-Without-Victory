@@ -66,6 +66,10 @@ The canonical roster is the existing data in `src/sim/negotiation/peace_plan_dat
 
 Recurring-initiative rule: historical plans fire from code-backed trigger checks. Success remains low until precondition levers in Section 5 are sufficiently satisfied. Early acceptance is mechanically possible but historically rare; late Dayton acceptance is the design target. Thresholds are TBD and belong to a follow-on calibration pass.
 
+Historical-default resolution rule (2026-07-17): when no player owns the decision, each plan resolves from an explicit faction disposition rather than a generic accept/reject fallback. Cutileiro: RBiH rejects, RS and HRHB accept. Vance-Owen: RBiH and HRHB accept, RS rejects. Owen-Stoltenberg: RBiH rejects, RS and HRHB accept. Contact Group: RBiH and HRHB accept, RS rejects. Dayton: all three accept through the dedicated Dayton resolver. These are normalized terminal/calibration dispositions, not a complete chronology of conditional signatures, later withdrawals, or intra-faction bargaining. In particular, Owen-Stoltenberg's RBiH conditional acceptance/later rejection and HRHB concession withdrawal are represented by the terminal disposition used by the simulation.
+
+The War pipeline increments the turn before evaluating negotiation. A one-time Cutileiro catch-up therefore evaluates on the first War turn while preserving offer turn `0`; it must not be silently skipped by the clock transition or offered more than once.
+
 Dayton escape valve: `dayton_negotiation.ts:32-72` sets `DAYTON_TRIGGER_WEEK = 188` and can force Dayton before that only when all canonical factions have patron override authority at or above `FORCED_DAYTON_OVERRIDE_THRESHOLD = 95`.
 
 **Known code-data nuance:** `peace_plan_data.ts` lists Dayton `trigger_week: 185`, while `dayton_negotiation.ts` uses `DAYTON_TRIGGER_WEEK = 188`. This spec treats the Dayton resolver constant as authoritative for forced final negotiation timing and logs the data constant mismatch as follow-on cleanup.

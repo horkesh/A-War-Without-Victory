@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "fingerprint": "66ac3f76cb351904",
+  "fingerprint": "4fcdb21ab4bcff14",
   "fields": {
     "schema_version": 2,
     "scenario_id": "apr1992_definitive_40w",
     "weeks": 40,
     "final_turn": 40,
     "control_counts": {
-      "HRHB": 86,
-      "RBiH": 262,
-      "RS": 364
+      "HRHB": 85,
+      "RBiH": 251,
+      "RS": 376
     },
     "control_flips": [
       {
@@ -157,16 +157,40 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:bugojno:medini",
+        "municipality_id": "bugojno",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bugojno:prijaci",
+        "municipality_id": "bugojno",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:bugojno:udurlije",
         "municipality_id": "bugojno",
         "from": "HRHB",
-        "to": "RBiH"
+        "to": "RS"
       },
       {
-        "settlement_id": "op:bugojno:vucipolje_3",
+        "settlement_id": "op:bugojno:vesela_2",
         "municipality_id": "bugojno",
-        "from": "HRHB",
-        "to": "RBiH"
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:bugojno:vrpec",
+        "municipality_id": "bugojno",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:cajnice:todorovici",
+        "municipality_id": "cajnice",
+        "from": "RBiH",
+        "to": "RS"
       },
       {
         "settlement_id": "op:capljina:tasovcici_2",
@@ -205,7 +229,25 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:donji_vakuf:jemanlici",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:korenici",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:donji_vakuf:oborci_2",
+        "municipality_id": "donji_vakuf",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:donji_vakuf:prusac_2",
         "municipality_id": "donji_vakuf",
         "from": "RBiH",
         "to": "RS"
@@ -253,6 +295,12 @@
         "to": "RBiH"
       },
       {
+        "settlement_id": "op:gorazde:kolovarice",
+        "municipality_id": "gorazde",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:gorazde:podkozara_donja_2",
         "municipality_id": "gorazde",
         "from": "RS",
@@ -262,12 +310,6 @@
         "settlement_id": "op:gorazde:sopotnica",
         "municipality_id": "gorazde",
         "from": "RS",
-        "to": "RBiH"
-      },
-      {
-        "settlement_id": "op:gornji_vakuf:pajic_polje_2",
-        "municipality_id": "gornji_vakuf",
-        "from": "HRHB",
         "to": "RBiH"
       },
       {
@@ -415,6 +457,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:maglaj:jablanica",
+        "municipality_id": "maglaj",
+        "from": "RS",
+        "to": "RBiH"
+      },
+      {
         "settlement_id": "op:modrica:garevac_2",
         "municipality_id": "modrica",
         "from": "HRHB",
@@ -541,6 +589,12 @@
         "to": "RS"
       },
       {
+        "settlement_id": "op:skender_vakuf:donji_koricani",
+        "municipality_id": "skender_vakuf",
+        "from": "HRHB",
+        "to": "RS"
+      },
+      {
         "settlement_id": "op:srebrenica:brezovice_2",
         "municipality_id": "srebrenica",
         "from": "RBiH",
@@ -563,6 +617,18 @@
         "municipality_id": "stolac",
         "from": "RS",
         "to": "HRHB"
+      },
+      {
+        "settlement_id": "op:teslic:donji_ruzevic",
+        "municipality_id": "teslic",
+        "from": "RBiH",
+        "to": "RS"
+      },
+      {
+        "settlement_id": "op:teslic:kamenica_2",
+        "municipality_id": "teslic",
+        "from": "HRHB",
+        "to": "RS"
       },
       {
         "settlement_id": "op:tuzla:simin_han_2",

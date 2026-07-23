@@ -1,6 +1,8 @@
 import { createRequire } from 'node:module';
 import { describe, expect, it } from 'vitest';
 
+import { ENCLAVE_DEFINITIONS } from '../src/sim/combat/enclave_resilience.js';
+
 const require = createRequire(import.meta.url);
 
 type DonorCandidate = {
@@ -42,6 +44,7 @@ const {
     collectUndefendedFrontSubsegmentIssues,
     collectPhysicalSectorOwnershipIssues,
     collectSectorRoleBucketSyncIssues,
+    VALIDATOR_ENCLAVE_DEFINITIONS,
     validateState,
 } = require('../tools/validate_run_consistency.cjs') as {
     collectAssignmentCompletenessIssues: (state: any) => Array<{ id: string; corps: string; faction: string }>;
@@ -53,6 +56,12 @@ const {
     collectUndefendedFrontSubsegmentIssues: (state: any) => UndefendedSubsegmentIssues;
     collectPhysicalSectorOwnershipIssues: (state: any) => Array<{ id: string; sector: string; role: string; location: string | null }>;
     collectSectorRoleBucketSyncIssues: (state: any) => Array<{ id: string; sector: string; bucket: string; expected_role: string; assignment_role: string | null; physical_role: string | null; location: string | null }>;
+    VALIDATOR_ENCLAVE_DEFINITIONS: Array<{
+        id: string;
+        faction: string;
+        osid_list?: string[];
+        osid_prefixes?: string[];
+    }>;
     validateState: (state: any, runLabel: string) => { failures: number; lines: string[] };
 };
 
@@ -894,6 +903,173 @@ describe('validate_run_consistency assignment completeness', () => {
                 }),
             ],
         });
+    });
+
+    it('does not count an enclave brigade as a donor for a target outside its enclave', () => {
+        const state = {
+            meta: { turn: 188 },
+            __contact_graph_edges: [
+                { a: 'op:gorazde:faocici_2', b: 'op:foca:mazlina' },
+                { a: 'op:gorazde:faocici_2', b: 'op:test:enemy_donor' },
+                { a: 'op:gorazde:osjecani_2', b: 'op:test:enemy_recipient_a' },
+                { a: 'op:foca:mazlina', b: 'op:test:enemy_recipient_b' },
+            ],
+            political: {
+                political_controllers: {
+                    'op:gorazde:faocici_2': 'RBiH',
+                    'op:gorazde:osjecani_2': 'RBiH',
+                    'op:foca:mazlina': 'RBiH',
+                    'op:test:enemy_donor': 'RS',
+                    'op:test:enemy_recipient_a': 'RS',
+                    'op:test:enemy_recipient_b': 'RS',
+                },
+            },
+            military: {
+                formations: {
+                    enclave_donor: makeBrigade('enclave_donor', {
+                        faction: 'RBiH',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:gorazde:faocici_2',
+                        home_osid: 'op:gorazde:faocici_2',
+                        tags: ['enclave', 'placement:fixed_home_osid'],
+                        assignment: {
+                            kind: 'sector',
+                            sector_id: 'sector:arbih_1st_corps:0',
+                            role: 'front',
+                        },
+                    }),
+                    disrupted_donor: makeBrigade('disrupted_donor', {
+                        faction: 'RBiH',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:gorazde:faocici_2',
+                        home_osid: 'op:gorazde:faocici_2',
+                        disrupted_turns: 1,
+                        assignment: {
+                            kind: 'sector',
+                            sector_id: 'sector:arbih_1st_corps:0',
+                            role: 'front',
+                        },
+                    }),
+                    recipient_front: makeBrigade('recipient_front', {
+                        faction: 'RBiH',
+                        corps_id: 'arbih_1st_corps',
+                        location_osid: 'op:gorazde:osjecani_2',
+                        home_osid: 'op:gorazde:osjecani_2',
+                        assignment: {
+                            kind: 'sector',
+                            sector_id: 'sector:arbih_1st_corps:1',
+                            role: 'front',
+                        },
+                    }),
+                },
+                corps_command: {},
+                unresolved_sector_brigades: [],
+                brigade_movement_state: {},
+                brigade_movement_orders: {},
+                war_front_edges_osid: [
+                    {
+                        edge_id: 'op:gorazde:faocici_2__op:test:enemy_donor',
+                        a: 'op:gorazde:faocici_2',
+                        b: 'op:test:enemy_donor',
+                        side_a: 'RBiH',
+                        side_b: 'RS',
+                    },
+                    {
+                        edge_id: 'op:gorazde:osjecani_2__op:test:enemy_recipient_a',
+                        a: 'op:gorazde:osjecani_2',
+                        b: 'op:test:enemy_recipient_a',
+                        side_a: 'RBiH',
+                        side_b: 'RS',
+                    },
+                    {
+                        edge_id: 'op:foca:mazlina__op:test:enemy_recipient_b',
+                        a: 'op:foca:mazlina',
+                        b: 'op:test:enemy_recipient_b',
+                        side_a: 'RBiH',
+                        side_b: 'RS',
+                    },
+                ],
+                corps_front_sectors: {
+                    'sector:arbih_1st_corps:0': {
+                        sector_id: 'sector:arbih_1st_corps:0',
+                        corps_id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        length_edges: 8,
+                        threat_ratio: 20,
+                        edge_ids: ['op:gorazde:faocici_2__op:test:enemy_donor'],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:arbih_1st_corps:0:0',
+                            edge_ids: ['op:gorazde:faocici_2__op:test:enemy_donor'],
+                            friendly_osids: ['op:gorazde:faocici_2'],
+                            enemy_osids: ['op:test:enemy_donor'],
+                            length_edges: 8,
+                            primary_brigade_ids: ['enclave_donor', 'disrupted_donor'],
+                        }],
+                        territory_osids: ['op:gorazde:faocici_2'],
+                        assigned_brigade_ids: ['enclave_donor', 'disrupted_donor'],
+                        reserve_brigade_ids: [],
+                        rear_brigade_ids: [],
+                    },
+                    'sector:arbih_1st_corps:1': {
+                        sector_id: 'sector:arbih_1st_corps:1',
+                        corps_id: 'arbih_1st_corps',
+                        faction: 'RBiH',
+                        length_edges: 16,
+                        threat_ratio: 300,
+                        edge_ids: [
+                            'op:gorazde:osjecani_2__op:test:enemy_recipient_a',
+                            'op:foca:mazlina__op:test:enemy_recipient_b',
+                        ],
+                        sub_segments: [{
+                            sub_segment_id: 'subseg:sector:arbih_1st_corps:1:0',
+                            edge_ids: [
+                                'op:gorazde:osjecani_2__op:test:enemy_recipient_a',
+                                'op:foca:mazlina__op:test:enemy_recipient_b',
+                            ],
+                            friendly_osids: ['op:gorazde:osjecani_2', 'op:foca:mazlina'],
+                            enemy_osids: ['op:test:enemy_recipient_a', 'op:test:enemy_recipient_b'],
+                            length_edges: 16,
+                            primary_brigade_ids: ['recipient_front'],
+                        }],
+                        territory_osids: ['op:gorazde:osjecani_2', 'op:foca:mazlina'],
+                        assigned_brigade_ids: ['recipient_front'],
+                        reserve_brigade_ids: [],
+                        rear_brigade_ids: [],
+                    },
+                },
+                sector_intel: {},
+            },
+        };
+
+        expect(collectSectorFloorShortfallIssues(state)).toEqual({
+            missed_reinforcement: [],
+            unavoidable_shortfall: [
+                expect.objectContaining({
+                    sector: 'sector:arbih_1st_corps:1',
+                    assigned: 1,
+                    needed: 2,
+                    donor_candidates: [],
+                }),
+            ],
+        });
+    });
+
+    it('keeps validator enclave geometry synchronized with the simulation', () => {
+        const projectGeometry = (
+            definitions: ReadonlyArray<(typeof VALIDATOR_ENCLAVE_DEFINITIONS)[number]>,
+        ) =>
+            definitions.map((definition) => ({
+                id: definition.id,
+                faction: definition.faction,
+                osid_list: definition.osid_list ? [...definition.osid_list] : undefined,
+                osid_prefixes: definition.osid_prefixes
+                    ? [...definition.osid_prefixes]
+                    : undefined,
+            }));
+
+        expect(projectGeometry(VALIDATOR_ENCLAVE_DEFINITIONS)).toEqual(
+            projectGeometry(ENCLAVE_DEFINITIONS),
+        );
     });
 
     it('classifies empty contested sectors and wide gaps with no legal donor as unavoidable', () => {

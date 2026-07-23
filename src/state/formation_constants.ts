@@ -391,14 +391,10 @@ export const OFFENSIVE_PARA_UNIT_SIZE = 600;
 export const OFFENSIVE_PARA_FADE_WEEK = 12;
 /** Turns to reach target. 1 = arrive next turn (advancing alongside regulars). */
 export const OFFENSIVE_PARA_MARCH_TURNS = 1;
-/** Offensive paramilitary spawn probability by faction. RS dominant; HRHB limited HOS; RBiH none. */
-export const OFFENSIVE_PARA_SPAWN_RATE: Record<string, number> = {
-    RS: 0.50,
-    HRHB: 0.15,
-    RBiH: 0.0,
-};
 /** Per-faction per-turn cap for offensive paramilitary deployments. */
 export const OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN = 2;
+/** Offensive sweeps require the maximum formula-backed local paramilitary organization. */
+export const OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION = 60;
 /** Civilian casualty rate for offensive sweeps — higher than rear pocket (systematic ethnic cleansing). */
 export const OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE = 0.05;
 /** Municipality scope restriction for bot factions — prevents ahistorical sweep outside known AOs. */
@@ -415,17 +411,12 @@ export const PARAMILITARY_UNIT_SIZE = 150;
 export const PARAMILITARY_MARCH_TURNS = 0;
 /** Final active week for rear-pocket paramilitaries; regular forces own cleanup afterward. */
 export const PARAMILITARY_FADE_WEEK = 20;
-/** Paramilitary spawn probability by faction (keyed on OrganizationalPenetration field).
- *  RS had Arkan's Tigers, White Eagles, etc. — highest paramilitary activity.
- *  HRHB had HOS and some Croatian paramilitaries.
- *  RBiH had Patriotska Liga but lower paramilitary capability. */
-export const PARAMILITARY_SPAWN_RATE: Record<string, number> = {
-    RS: 0.65,    // High — SDS/JNA paramilitary networks (reduced from 0.85 for initial territory pacing)
-    HRHB: 0.55,  // Moderate — HOS, Croatian volunteers
-    RBiH: 0.30   // Low — Patriotska Liga, Green Berets (mostly integrated early)
-};
 /** Per-faction per-turn cap for rear-pocket paramilitary cleanup deployments. */
 export const PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN = 2;
+/** Rear-pocket cleanup requires population- or brigade-backed local paramilitary organization. */
+export const PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION = 25;
+/** A faction may issue only one autonomous paramilitary deployment per municipality each turn. */
+export const PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN = 1;
 /** Paramilitary casualty rate: fraction of unit killed in action during sweep. */
 export const PARAMILITARY_CASUALTY_RATE = 0.08;
 /** Civilian casualties inflicted by paramilitary sweep (as fraction of OSID population). War crimes implicit. */

@@ -85,6 +85,10 @@ MORALE_OVERRIDE_RESET     = 20   // streak resets when morale exceeds this (hyst
 
 Pioneer attacks seed with threshold `repulsed`; subsequent brigades join via `estimateConcentratedOutcome()`.
 
+**COHA ceasefire ownership:** An active cessation-of-hostilities agreement suppresses operation attack/posture orders without erasing legal movement intent. While suppression is active, the affected operation's execution/recovery clock is paused and the operation records `operation_lifecycle_paused_reason: 'coha_ceasefire'`; it cannot age into failure or completion for attacks that the political layer prohibited. Attack resolution emits explicit suppression receipts rather than inferring a missing attempt.
+
+**Operation capture causality:** A battle receipt records the exact attacker brigade ids and contributing operation ids. Scenario diagnostics and AAR attribution may credit an operation only from those exact contributor receipts or an explicit operation pause/suppression receipt. Sharing a target OSID is not evidence that an operation caused a battle or capture.
+
 ### 6.4 Cold Front Invariant
 
 RS-HRHB fronts under the Graz Accords are exempt from:
@@ -96,6 +100,8 @@ RS-HRHB fronts under the Graz Accords are exempt from:
 ### 6.5 Unified Sector Defense
 
 Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-at-OSID vs sector-coverage distinction -- the front is a continuous locked line. Casualty distribution: distance-weighted proportional (decay `0.60^hops`, max 5 hops) with home-municipality motivation bonus (1.3x).
+
+**Roster eligibility:** A formation with `lifecycle_status: 'forming'` is not a line holder, reserve, security formation, loan rescue, operation participant, or historical-opportunity commitment. Every sector-roster and operation-admission path must apply the shared live-formation eligibility contract before assigning it.
 
 ### 6.10 Siege Defender Morale Drain
 
@@ -375,7 +381,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are autonomous short-lived unit
 1. Excluded from reinforcement, bot AI targeting, and formation spawn
 2. Do not contribute to defended OSID checks
 3. Spawning and activity are gated by `PARAMILITARY_FADE_WEEK` (final active week 20); an active paramilitary formation encountered after week 20 dissolves before ETA, casualties, or control effects resolve
-4. All iteration deterministic (sorted by formation ID via `strictCompare`; spawn probability via deterministic hash)
+4. All iteration deterministic: the attacking faction must meet the local organizational-penetration floor and exceed the controller's local paramilitary penetration; eligible targets rank by attacker paramilitary penetration, party penetration, adjacent friendly support, dominance margin, municipality, and OSID; explicit per-faction and per-municipality turn caps truncate the result without a pseudo-random gate
 5. Casualties use standard KIA/WIA/MIA fractions (0.30/0.55/0.15)
 6. Control changes emit `control_events` with `mechanism: 'paramilitary'` and are reported separately from battle combat
 7. `paramilitary_deployment_count` per faction tracks cumulative deployments
@@ -386,7 +392,7 @@ Paramilitary formations (`kind: 'paramilitary'`) are autonomous short-lived unit
 
 ### 14.8b Post-paramilitary rear-pocket consolidation
 
-After the paramilitary lifecycle ends, the War pipeline runs deterministic rear-pocket consolidation immediately after `paramilitary-advance`. A candidate is a connected cluster of one to six same-controller operational OSIDs whose external neighbors are all controlled by one surrounding faction or its permitted co-belligerent. The cluster must have no active brigade and must pass enclave-protection guards. Larger clusters, defended positions, mixed-surrounding control, and protected enclaves require military action and do not auto-flip. Each legal flip emits a control event with `mechanism: 'consolidation'` and seeds the normal hostile-takeover displacement timer. Candidate discovery, cluster ordering, and flip ordering are deterministic.
+After the paramilitary lifecycle ends, the War pipeline runs deterministic rear-pocket consolidation immediately after `paramilitary-advance`. A candidate is a connected cluster of one to six same-controller operational OSIDs whose external neighbors are all controlled by one surrounding faction or its permitted co-belligerent. The cluster must have no active brigade, must pass enclave-protection guards, and must pass the same centralized RBiH-HRHB combat-permission gate used by regular combat and paramilitary capture. Consolidation can never transfer territory between RBiH and HRHB before the scenario's bilateral-war floor, during mobilization or ceasefire, or after Washington. Active definitive April 1992 scenarios and metadata-free runtime fallbacks use turn 40 as that earliest floor. Larger clusters, defended positions, mixed-surrounding control, protected enclaves, and politically blocked territory require military action and do not auto-flip. Each legal flip emits a control event with `mechanism: 'consolidation'` and seeds the normal hostile-takeover displacement timer. Candidate discovery, cluster ordering, and flip ordering are deterministic.
 
 ### 14.9 War movement pipeline order
 

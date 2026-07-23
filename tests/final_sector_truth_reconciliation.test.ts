@@ -134,6 +134,44 @@ describe('final sector truth reconciliation', () => {
         vi.restoreAllMocks();
     });
 
+    it('preserves an unstaffed faction-side front fragment during final-save projection', () => {
+        const { state, edges } = makeState();
+        state.political.political_controllers!['op:test:island'] = 'RS';
+        state.military.war_front_edges_osid = [
+            ...(state.military.war_front_edges_osid ?? []),
+            {
+                edge_id: 'op:test:island__op:test:island_enemy',
+                a: 'op:test:island',
+                b: 'op:test:island_enemy',
+                side_a: 'RS',
+                side_b: 'RBiH',
+            },
+        ];
+        state.political.political_controllers!['op:test:island_enemy'] = 'RBiH';
+        edges.push({
+            a: 'op:test:island',
+            b: 'op:test:island_enemy',
+        } as EdgeRecord);
+
+        const sectors = buildCorpsFrontSectors(
+            state,
+            edges,
+            null,
+            undefined,
+            undefined,
+            false,
+            true,
+        );
+        const islandSector = Object.values(sectors).find((sector) =>
+            sector.edge_ids.includes('op:test:island__op:test:island_enemy'),
+        );
+
+        expect(islandSector).toBeDefined();
+        expect(islandSector?.assigned_brigade_ids).toEqual([]);
+        expect(islandSector?.reserve_brigade_ids).toEqual([]);
+        expect(islandSector?.unstaffed_front).toBe(true);
+    });
+
     it('does not classify an intentionally isolated holding brigade as a sector-pipeline failure', () => {
         const { state } = makeState();
         state.military.formations.brig_isolated = makeFormation('brig_isolated', {
@@ -644,4 +682,5 @@ describe('final sector truth reconciliation', () => {
         expect(secondOwnerPassIdx).toBeGreaterThan(rescueIdx);
         expect(sealSyncIdx).toBeGreaterThan(secondOwnerPassIdx);
     });
+
 });

@@ -2,6 +2,8 @@
 
 **Purpose:** Single view of work that has been implemented and absorbed into code/canon.
 
+**Latest campaign-QA canon integration:** [implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md](implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md) - operation ceasefire/causality truth, bounded uncontested occupation, live opportunity/roster eligibility, primary-sector commander targeting, Cincar/HV placement, organizational-penetration paramilitary policy, historical peace defaults, and centralized bilateral gating for rear-pocket consolidation. Two 188-week runs are byte-identical at `aa4302e694a6482e`; required engine health passes at `622/712`, with zero pre-war bilateral control events and 31/31 endpoint anchors.
+
 **Latest full-campaign player/canon acceptance:** [playtests/20260714_rs_52w_canon_player_experience.md](playtests/20260714_rs_52w_canon_player_experience.md) - fresh RS exact-52 Electron run, 468 screenshots/59 manually inspected sheets, bound controlled-player/headless comparator, durable exact-plan approvals, reserve deployment continuity, truthful paramilitary scope metadata, and sticky long-event completion action. Local agent-actionable PASS; D2/release/publication remain open.
 
 **Latest command-surface truth:** [implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md](implemented/20260627_P18_COMMAND_SURFACE_TRUTH.md) - Decision Room disabled actions now explain unavailable routes, generic inbox navigation stays owned by the Desk shell, sector coverage uses live line-holder density, Corps Front missing reserve/security truth stays unreported, opening commander projection is turn-zero only, and Formation Detail war narratives are player-safe.

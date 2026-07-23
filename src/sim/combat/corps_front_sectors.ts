@@ -952,8 +952,7 @@ function rescueUnassignedLoanedElitesInTerritory(
     const sectorList = Object.values(sectors);
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
-        if (!f || f.status !== 'active') continue;
-        if (f.kind !== 'brigade' && f.kind !== 'og' && f.kind !== 'operational_group') continue;
+        if (!isSectorRosterEligibleFormation(f)) continue;
         if (!f.elite_loan_state?.on_loan || !f.elite_loan_state.loaned_to_corps) continue;
         if (assigned.has(fid as FormationId)) continue;
         if (!f.location_osid) continue;
@@ -1143,17 +1142,65 @@ function isSectorUnstaffableByFaction(
     sector: CorpsFrontSector,
     siblingSectors: CorpsFrontSector[],
     factionBrigades: FormationState[],
+    state: GameState,
     adjacency: Map<Osid, Osid[]>,
     friendlyOsids: Set<string>,
     componentOf: Map<string, number>,
-    factionBrigadeComponents: Set<number>,
 ): boolean {
+    const operationParticipants = buildOperationParticipantSet(state);
+    const pendingDigIn = new Set(
+        (state.military.brigade_posture_orders ?? [])
+            .filter((order) => order.posture === 'dig_in')
+            .map((order) => order.brigade_id),
+    );
+    const donorPlacement = new Map<FormationId, { tier: number; sector: CorpsFrontSector }>();
+    const considerPlacement = (
+        brigadeId: FormationId,
+        tier: number,
+        donorSector: CorpsFrontSector,
+    ): void => {
+        const previous = donorPlacement.get(brigadeId);
+        if (!previous || tier < previous.tier) {
+            donorPlacement.set(brigadeId, { tier, sector: donorSector });
+        }
+    };
+    for (const donorSector of [...siblingSectors].sort((a, b) =>
+        strictCompare(a.sector_id, b.sector_id))) {
+        for (const brigadeId of [...(donorSector.rear_brigade_ids ?? [])].sort(strictCompare)) {
+            considerPlacement(brigadeId, 0, donorSector);
+        }
+        for (const brigadeId of [...donorSector.reserve_brigade_ids].sort(strictCompare)) {
+            considerPlacement(brigadeId, 1, donorSector);
+        }
+        for (const brigadeId of [...donorSector.assigned_brigade_ids].sort(strictCompare)) {
+            considerPlacement(brigadeId, 2, donorSector);
+        }
+    }
+    const legalDonors = factionBrigades.filter((formation) => {
+        if (getFormationCorpsId(formation) !== sector.corps_id) return false;
+        if (!formation.location_osid) return false;
+        if (operationParticipants.has(formation.id)) return false;
+        if ((formation.disrupted_turns ?? 0) > 0 || formation.disrupted === true) return false;
+        if (formation.posture === 'dig_in' || pendingDigIn.has(formation.id)) return false;
+        if (formation.elite_loan_state?.on_loan) return false;
+        if (state.military.brigade_movement_orders?.[formation.id]) return false;
+        const movementState = state.military.brigade_movement_state?.[formation.id];
+        if (movementState && movementState.status !== 'deployed') return false;
+
+        const placement = donorPlacement.get(formation.id);
+        if (!placement) return false;
+        if (placement.tier < 2) return true;
+        const minimumLine = Math.max(1, Math.ceil(placement.sector.length_edges / 8));
+        return placement.sector.assigned_brigade_ids.length > minimumLine
+            && placement.sector.threat_ratio <= 250;
+    });
+
     const uniqueFrontOsids = getSectorUniqueFrontOsids(sector, siblingSectors);
     const targetOsids = uniqueFrontOsids.size > 0
         ? uniqueFrontOsids
         : getSectorFrontOsids(sector);
     if (targetOsids.size > 0) {
-        const factionCanLegallyReach = factionBrigades.some((formation) => {
+        const corpsCanLegallyRelieve = legalDonors.some((formation) => {
             const originOsid = formation.location_osid;
             if (!originOsid) return false;
             const legalTargets = new Set(
@@ -1168,11 +1215,16 @@ function isSectorUnstaffableByFaction(
                 TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
             );
         });
-        return !factionCanLegallyReach;
+        return !corpsCanLegallyRelieve;
     }
 
     const sectorComp = getSectorComponent(sector, componentOf);
-    return sectorComp === -1 || !factionBrigadeComponents.has(sectorComp);
+    const legalDonorComponents = new Set(
+        legalDonors
+            .map((formation) => componentOf.get(formation.location_osid!))
+            .filter((component): component is number => component != null),
+    );
+    return sectorComp === -1 || !legalDonorComponents.has(sectorComp);
 }
 
 export function annotateUnstaffedFrontSectors(
@@ -1202,13 +1254,6 @@ export function annotateUnstaffedFrontSectors(
                 formation.faction === faction
                 && isSectorRosterEligibleFormation(formation)
                 && formation.location_osid);
-        const factionBrigadeLocations = factionBrigades.map((formation) => formation.location_osid!);
-        const factionBrigadeComponents = new Set<number>();
-        for (const location of factionBrigadeLocations) {
-            const component = componentOf.get(location);
-            if (component != null) factionBrigadeComponents.add(component);
-        }
-
         for (const sector of factionSectors) {
             if (sector.edge_ids.length === 0) continue;
             if ((sector.assigned_brigade_ids?.length ?? 0) + (sector.reserve_brigade_ids?.length ?? 0) > 0) continue;
@@ -1216,10 +1261,10 @@ export function annotateUnstaffedFrontSectors(
                 sector,
                 factionSectors,
                 factionBrigades,
+                state,
                 adjacency,
                 friendlyOsids,
                 componentOf,
-                factionBrigadeComponents,
             )) {
                 continue;
             }
@@ -1255,16 +1300,11 @@ function absorbEmptyStaffableSiblingSectors(
             ? new Map(spatial.componentsByFaction.get(faction)!)
             : buildFriendlyComponents(adjacency, friendlyOsids);
         const factionBrigades: FormationState[] = [];
-        const factionBrigadeLocations: string[] = [];
-        const factionBrigadeComponents = new Set<number>();
         for (const fid of Object.keys(formations).sort(strictCompare)) {
             const formation = formations[fid];
             if (!formation || formation.faction !== faction || !isSectorRosterEligibleFormation(formation)) continue;
             if (!formation.location_osid) continue;
             factionBrigades.push(formation);
-            factionBrigadeLocations.push(formation.location_osid);
-            const componentId = componentOf.get(formation.location_osid);
-            if (componentId !== undefined) factionBrigadeComponents.add(componentId);
         }
 
         const corpsGroups = new Map<FormationId, CorpsFrontSector[]>();
@@ -1283,10 +1323,10 @@ function absorbEmptyStaffableSiblingSectors(
                     sector,
                     corpsSectors,
                     factionBrigades,
+                    state,
                     adjacency,
                     friendlyOsids,
                     componentOf,
-                    factionBrigadeComponents,
                 )) {
                     continue;
                 }

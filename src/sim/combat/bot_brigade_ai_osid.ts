@@ -852,6 +852,22 @@ export function generateAllBotOrdersOsid(
         }
     }
 
+    // COHA suspends combat. Keep movement/redeployment output, but do not
+    // stage attacks or charge attack/assault posture costs during the pause.
+    if (state.military.event_flags?.coha_active === true) {
+        for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
+            delete allAttackOrders[brigadeId as FormationId];
+        }
+        for (const corpsId of Object.keys(allEligibleAttackersByCorps).sort(strictCompare)) {
+            delete allEligibleAttackersByCorps[corpsId as FormationId];
+        }
+        for (const order of allPostureOrders) {
+            if (order.posture === 'attack' || order.posture === 'assault') {
+                order.posture = 'hold';
+            }
+        }
+    }
+
     // Write to state. In merge mode, existing orders are player-authored or
     // already-staged orders and must remain authoritative for the same brigade.
     // In replacement mode, preserve orders for factions this call did not
@@ -872,7 +888,7 @@ export function generateAllBotOrdersOsid(
         : allPostureOrders;
     state.military.brigade_posture_orders.push(...postureOrdersToWrite);
 
-    if (Object.keys(allAttackOrders).length > 0) {
+    if (Object.keys(allAttackOrders).length > 0 || !options.mergeWithExistingOrders) {
         const preservedAttackOrders: Record<FormationId, Osid> = {};
         if (!options.mergeWithExistingOrders) {
             for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {

@@ -55,8 +55,15 @@ export interface AttackResolutionOsidReport {
     flips_applied: number;
     casualty_attacker: number;
     casualty_defender: number;
+    combat_suppressed_reason?: 'coha_ceasefire';
+    operation_lifecycle_paused_reason?: 'coha_ceasefire';
     orders_by_faction: Record<string, number>;
     orders_seen_by_brigade?: Record<FormationId, Osid>;
+    suppressed_attack_orders?: Array<{
+        brigade_id: FormationId;
+        target_osid: Osid;
+        reason: 'coha_ceasefire';
+    }>;
     engaged_formation_ids: FormationId[];
     snap_events: AttackResolutionOsidSnapEvent[];
     snap_event_counts: Partial<Record<AttackResolutionOsidSnapEventType, number>>;
@@ -71,6 +78,10 @@ export interface AttackResolutionOsidReport {
         /** Deterministic join key: {turn}:{osid}:{attacker_brigade}:{defender_brigade|null} */
         battle_id: string;
         attacker_brigade: FormationId;
+        /** Every validated attacker that contributed to this battle, sorted by id. */
+        attacker_brigades?: FormationId[];
+        /** Every executing operation represented by validated attackers, sorted by id. */
+        contributing_operation_ids?: string[];
         attacker_faction: FactionId;
         defender_faction: FactionId;
         target_osid: Osid;

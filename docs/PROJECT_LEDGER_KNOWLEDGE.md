@@ -2178,8 +2178,8 @@ Three critical bugs discovered and fixed, each with systemic lessons:
 ## 2026-03-07 - Paramilitary rear pocket cleanup subsystem
 
 - **Design choice:** New `'paramilitary'` FormationKind rather than tag or equipment class. Clean lifecycle separation from brigades â€” no reinforcement, no bot AI, no formation spawn interaction.
-- **Pocket detection:** Graph analysis via `analyzeFactionGraph()` finds enemy OSIDs where ALL neighbors are faction-controlled. Deterministic hash (char code sum + turn mixing) for spawn probability â€” no randomness.
-- **Faction differentiation reflects historical organizational penetration:** RS=0.85 (Arkan's Tigers, White Eagles, SDS/JNA networks), HRHB=0.55 (HOS, Croatian volunteers), RBiH=0.30 (Patriotska Liga, Green Berets â€” largely integrated early).
+- **Pocket detection:** Graph analysis via `analyzeFactionGraph()` finds enemy OSIDs where ALL neighbors are faction-controlled. The former deterministic-hash spawn probability is superseded by the 2026-07-17 local organizational-penetration policy.
+- **Faction differentiation reflects historical organizational penetration:** current selection reads municipality-level paramilitary and party penetration, requires attacker penetration to exceed the controller, and applies floors of 25 for rear cleanup and 60 for offensive deployment. Ranking and turn caps are deterministic; no pseudo-random gate remains.
 - **Casualty model consistent with combat system:** Standard KIA=0.30, WIA=0.55, MIA=0.15 split via `recordBattleCasualties()`. Civilian casualties (2% of avg OSID population) recorded as war crimes against losing faction.
 - **Player agency via standing policy:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') avoids per-turn micro-management. `paramilitary_deployment_count` per faction enables future consequence scaling (IVP, legitimacy, patron disapproval).
 - **Fade mechanic:** PARAMILITARY_FADE_WEEK=20 hard cutoff. Defense-in-depth: checked in both pipeline step and function body. War professionalizes â€” paramilitaries absorbed or disbanded historically.
@@ -3922,3 +3922,25 @@ Applied in `[2026-07-17] RS post-acceptance local closeout` and `tools/ui/live_s
 **A passing local test can still hide an unpublishable dependency:** the Electron QA harness contract read its source from a 50 GB untracked evidence root, so local tests passed while GitHub clean-checkout tests failed with `ENOENT`. Durable rule: executable harness source belongs under tracked `tools/`; only generated screenshots, saves, logs, user-data, and manifests belong under excluded `tmp-*` evidence roots. Contract tests must resolve the tracked source path.
 
 Applied in `[2026-07-17] PR #477 clean-checkout harness repair`, `tools/ui/paradox_local_qa.cjs`, and `tests/paradox_local_qa_harness.test.ts`.
+
+## 2026-07-17 - Operation causality and political suppression
+
+**Political suppression pauses military time:** clearing an attack order under COHA is not an attempted operation turn. Durable rule: preserve legal movement, emit an explicit suppression receipt, and pause the affected operation lifecycle clock so a political prohibition cannot manufacture dead-operation or recovery diagnostics.
+
+**Shared targets are not shared causality:** two operations can name the same OSID while only one contributes attackers. Durable rule: battle receipts carry exact attacker brigade and contributing operation ids; AAR and scenario diagnostics credit only those receipts, never a same-target fallback.
+
+## 2026-07-17 - Formation admission and historical-default truth
+
+**One live-formation predicate must own every admission path:** fixing the normal sector builder is insufficient when loan rescue or historical opportunity catalogs can still admit a forming unit. Durable rule: front, reserve, security, rescue, and operation participant paths all apply the same lifecycle/personnel/disruption/transit/corps eligibility contract.
+
+**Historical defaults are explicit simulation inputs:** a generic accept/reject fallback silently rewrites peace-plan history, and turn increment can skip a turn-zero initiative. Durable rule: store plan-by-faction terminal dispositions, keep Dayton in its dedicated resolver, and give Cutileiro one deterministic first-War-turn catch-up while recording offer turn zero.
+
+## 2026-07-17 - Canon-aware calibration re-floor
+
+**A higher stale floor is not automatically the truer contract:** the RR2 `646` endpoint depended on brigade-survival behavior superseded by the accepted canonical two-of-three dissolution rule. Durable rule: do not restore non-canon guards to recover a metric; run exact long-horizon repeats, document the lost/gained contract honestly, and deliberately re-bless the current-canon floor with the prior value retained as lineage.
+
+Applied in `[2026-07-17] Campaign QA canon integration` and `docs/40_reports/implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md`.
+
+**Standalone validators must share movement legality, not approximate reachability:** the 188-week consistency checker reported four Gorazde enclave brigades as legal donors to non-enclave Foca/Pale targets because it enforced graph and home distance but omitted the enclave boundary. Durable rule: donor diagnostics must apply the same enclave-destination predicate as the simulation, and duplicated standalone geometry must be parity-tested against all canonical engine definitions. Do not move enclave brigades to satisfy a validator false positive.
+
+**A deterministic accepted gate may still expose a canon bypass after metrics pass:** the first organizational-policy pair was byte-identical at `622/712` and passed engine health/consistency, but only 29/31 endpoint anchors. Tracing the misses found three turn-21 RBiH seizures of HRHB territory through rear-pocket consolidation, which had bypassed the centralized bilateral-war gate. Applying that gate and synchronizing definitive scenarios/fallbacks to turn 40 preserved `622/712`, removed pre-war bilateral events, and restored 31/31 anchors. Durable rule: report anchor totals independently from engine health, inspect control-event mechanisms behind misses, and do not freeze a deterministic run until every control-changing path has passed political-permission review.

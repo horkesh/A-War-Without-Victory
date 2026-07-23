@@ -1124,6 +1124,32 @@ export function advanceSectorOffensives(
         cmd.corps_exhaustion = Math.max(0, Math.round((cmd.corps_exhaustion - decayRate) * 10) / 10);
     }
 
+    // The Carter/COHA period suspends combat rather than consuming operation
+    // preparation or execution time. Shift automatic phase clocks one week on
+    // each paused tick so elapsed-duration gates resume where they stopped.
+    if (state.military.event_flags?.coha_active === true) {
+        const turn = state.meta?.turn ?? 0;
+        for (const corpsId of allCorpsIds) {
+            const cmd = corpsCommand[corpsId];
+            if (!cmd) continue;
+            for (const operation of cmd.active_operations) {
+                if (
+                    (operation.phase === 'planning' || operation.phase === 'execution') &&
+                    operation.phase_started_turn < turn
+                ) {
+                    operation.phase_started_turn += 1;
+                }
+                if (
+                    operation.active_probe &&
+                    operation.active_probe.started_turn < turn
+                ) {
+                    operation.active_probe.started_turn += 1;
+                }
+            }
+        }
+        return prepEvents;
+    }
+
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
     for (const corpsId of corpsIds) {
         const cmd = corpsCommand[corpsId];
@@ -1623,6 +1649,8 @@ export function updateSectorOffensiveResults(
     state: GameState,
     reverseMap?: OperationalToCanonicalReverseMap | null
 ): void {
+    if (state.military.event_flags?.coha_active === true) return;
+
     const corpsCommand = state.military.corps_command;
     if (!corpsCommand) return;
 

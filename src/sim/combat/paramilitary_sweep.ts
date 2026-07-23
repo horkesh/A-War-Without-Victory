@@ -38,16 +38,20 @@ import {
     PARAMILITARY_TARGET_AVG_POPULATION,
     PARAMILITARY_FADE_WEEK,
     PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN,
+    PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION,
+    PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN,
     OFFENSIVE_PARA_UNIT_SIZE,
     OFFENSIVE_PARA_FADE_WEEK,
     OFFENSIVE_PARA_MARCH_TURNS,
     OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN,
+    OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION,
     OFFENSIVE_PARA_CIVILIAN_CASUALTY_RATE,
     OFFENSIVE_PARA_MUNICIPALITY_SCOPE,
 } from '../../state/formation_constants.js';
 import { analyzeFactionGraph } from './osid_graph_analysis.js';
 import { buildOsidAdjacency } from './osid_adjacency.js';
 import { ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
+import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { lookupParamilitaryNamedUnit } from '../../../data/source/oob/paramilitary_named_units.js';
 import type { OperationalToCanonicalReverseMap } from '../../data/operational_data.js';
 import type { EdgeRecord } from '../../map/settlements.js';
@@ -167,6 +171,153 @@ function makeParamilitaryId(faction: FactionId, turn: number, index: number): Fo
     return `para_${faction.toLowerCase()}_t${turn}_${index}`;
 }
 
+type ParamilitaryMode = 'rear_pocket' | 'offensive';
+
+interface ParamilitaryOrganizationScore {
+    paramilitary: number;
+    party: number;
+}
+
+interface RankedParamilitaryTarget {
+    osid: string;
+    municipalityId: string;
+    organization: ParamilitaryOrganizationScore;
+    dominance: number;
+    support: number;
+}
+
+function municipalityIdFromOsid(osid: string): string {
+    return osid.split(':')[1] ?? osid;
+}
+
+function getFactionOrganizationScore(
+    state: GameState,
+    faction: FactionId,
+    osid: string,
+): ParamilitaryOrganizationScore {
+    const penetration = state.political.municipalities?.[municipalityIdFromOsid(osid)]
+        ?.organizational_penetration;
+    if (!penetration) return { paramilitary: 0, party: 0 };
+
+    switch (faction) {
+        case 'RBiH':
+            return {
+                paramilitary: penetration.patriotska_liga ?? 0,
+                party: penetration.sda_penetration ?? 0,
+            };
+        case 'RS':
+            return {
+                paramilitary: penetration.paramilitary_rs ?? 0,
+                party: penetration.sds_penetration ?? 0,
+            };
+        case 'HRHB':
+            return {
+                paramilitary: penetration.paramilitary_hrhb ?? 0,
+                party: penetration.hdz_penetration ?? 0,
+            };
+        default:
+            return { paramilitary: 0, party: 0 };
+    }
+}
+
+function buildRankedParamilitaryTarget(
+    state: GameState,
+    faction: FactionId,
+    controller: FactionId,
+    osid: string,
+    minimumOrganization: number,
+    adjacency: Map<string, string[]>,
+    reverseMap: OperationalToCanonicalReverseMap,
+): RankedParamilitaryTarget | null {
+    const organization = getFactionOrganizationScore(state, faction, osid);
+    const controllerOrganization = getFactionOrganizationScore(state, controller, osid);
+    if (
+        organization.paramilitary < minimumOrganization
+        || organization.paramilitary <= controllerOrganization.paramilitary
+    ) {
+        return null;
+    }
+    return {
+        osid,
+        municipalityId: municipalityIdFromOsid(osid),
+        organization,
+        dominance: organization.paramilitary - controllerOrganization.paramilitary,
+        support: countFriendlyAdjacentOsids(osid, faction, adjacency, state, reverseMap),
+    };
+}
+
+function compareRankedParamilitaryTargets(
+    a: RankedParamilitaryTarget,
+    b: RankedParamilitaryTarget,
+): number {
+    if (a.organization.paramilitary !== b.organization.paramilitary) {
+        return b.organization.paramilitary - a.organization.paramilitary;
+    }
+    if (a.organization.party !== b.organization.party) {
+        return b.organization.party - a.organization.party;
+    }
+    if (a.support !== b.support) return b.support - a.support;
+    if (a.dominance !== b.dominance) return b.dominance - a.dominance;
+    const municipalityOrder = strictCompare(a.municipalityId, b.municipalityId);
+    return municipalityOrder !== 0 ? municipalityOrder : strictCompare(a.osid, b.osid);
+}
+
+function getFormationParamilitaryMode(formation: FormationState): ParamilitaryMode {
+    return formation.paramilitary_mode === 'offensive' ? 'offensive' : 'rear_pocket';
+}
+
+function getRequestParamilitaryMode(
+    request: NonNullable<GameState['pending_paramilitary_requests']>[number],
+): ParamilitaryMode {
+    return request.mode === 'offensive' ? 'offensive' : 'rear_pocket';
+}
+
+function collectParamilitaryIssuedTargets(
+    state: GameState,
+    faction: FactionId,
+    turn: number,
+    mode?: ParamilitaryMode,
+): Set<string> {
+    const targets = new Set<string>();
+    const formations = state.military.formations ?? {};
+    for (const fid of Object.keys(formations).sort(strictCompare)) {
+        const formation = formations[fid];
+        if (
+            !formation
+            || formation.kind !== 'paramilitary'
+            || formation.faction !== faction
+            || formation.created_turn !== turn
+            || !formation.paramilitary_target
+        ) {
+            continue;
+        }
+        if (mode && getFormationParamilitaryMode(formation) !== mode) continue;
+        targets.add(formation.paramilitary_target);
+    }
+    for (const request of state.pending_paramilitary_requests ?? []) {
+        if (request.faction !== faction) continue;
+        if (mode && getRequestParamilitaryMode(request) !== mode) continue;
+        targets.add(request.target_osid);
+    }
+    for (const decision of state.paramilitary_decision_history ?? []) {
+        if (decision.faction !== faction || decision.turn !== turn) continue;
+        const decisionMode = decision.mode === 'offensive' ? 'offensive' : 'rear_pocket';
+        if (mode && decisionMode !== mode) continue;
+        targets.add(decision.target_osid);
+    }
+    return targets;
+}
+
+function buildRegularForceClaimedTargets(state: GameState): Set<string> {
+    const targets = new Set<string>();
+    const attackOrders = state.military.brigade_attack_orders ?? {};
+    for (const formationId of Object.keys(attackOrders).sort(strictCompare)) {
+        const target = attackOrders[formationId];
+        if (target) targets.add(target);
+    }
+    return targets;
+}
+
 /** Split total casualties into KIA/WIA/MIA using the main-path split.
  * Routed through the B1 casualty-realism V2 gate (default OFF ⇒ KIA/WIA_FRACTION exactly). */
 function splitCasualties(total: number): { killed: number; wounded: number; missing_captured: number } {
@@ -206,6 +357,7 @@ export function detectParamilitaryTargets(
     const factions = (state.factions ?? []).map(f => f.id).sort(strictCompare);
     const defendedOsids = buildDefendedOsids(state);
     const defenderFactionMap = buildDefenderFactionMap(state);
+    const regularForceClaimedTargets = buildRegularForceClaimedTargets(state);
 
     // Existing paramilitary targets — avoid duplicates
     const existingTargets = new Set<string>();
@@ -231,39 +383,68 @@ export function detectParamilitaryTargets(
         // mutation graph state) — keep this site fresh-recompute. The G3-safe dedup ships at
         // bot_corps_ai.ts + bot_brigade_ai_osid.ts (the audit's primary 198 ms/turn target).
         const graphAnalysis = analyzeFactionGraph(state, faction, adjacency, reverseMap);
-        const pockets = [...graphAnalysis.enemy_pockets].sort((a, b) => {
-            const supportDifference = countFriendlyAdjacentOsids(b, faction, adjacency, state, reverseMap)
-                - countFriendlyAdjacentOsids(a, faction, adjacency, state, reverseMap);
-            return supportDifference !== 0 ? supportDifference : strictCompare(a, b);
-        });
+        const pockets = [...graphAnalysis.enemy_pockets].sort(strictCompare);
         if (pockets.length === 0) continue;
 
         let spawnIndex = 0;
-        let deploymentsThisTurn = countParamilitaryDeploymentsCreatedThisTurn(state, faction, turn, 'rear_pocket');
+        const issuedTargets = collectParamilitaryIssuedTargets(state, faction, turn, 'rear_pocket');
+        const allModeIssuedTargets = collectParamilitaryIssuedTargets(state, faction, turn);
+        for (const target of allModeIssuedTargets) existingTargets.add(`${faction}:${target}`);
+        let deploymentsThisTurn = issuedTargets.size;
+        const municipalityDeploymentCounts = new Map<string, number>();
+        for (const target of allModeIssuedTargets) {
+            const municipalityId = municipalityIdFromOsid(target);
+            municipalityDeploymentCounts.set(
+                municipalityId,
+                (municipalityDeploymentCounts.get(municipalityId) ?? 0) + 1,
+            );
+        }
 
+        const candidates: RankedParamilitaryTarget[] = [];
         for (const pocketOsid of pockets) {
-            if (deploymentsThisTurn >= PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN) break;
             if (existingTargets.has(`${faction}:${pocketOsid}`)) continue;
             // Skip enclave OSIDs — surrounded topology is correct siege geometry, not abandoned pocket
             if (ENCLAVE_DEFINITIONS.some(enc => enc.faction !== faction && osidBelongsToEnclave(pocketOsid, enc))) continue;
             const currentController = getPoliticalControllerOSID(state, pocketOsid, reverseMap);
-            if (currentController && hasAdjacentDefender(pocketOsid, currentController, adjacency, defenderFactionMap)) continue;
+            if (!currentController || currentController === faction) continue;
+            if (isRbihHrhbCombatBlocked(state, faction, currentController)) continue;
+            if (regularForceClaimedTargets.has(pocketOsid)) continue;
+            if (hasAdjacentDefender(pocketOsid, currentController, adjacency, defenderFactionMap)) continue;
             if (isDefendedAgainst(defendedOsids, state, pocketOsid, faction)) continue;
+            const candidate = buildRankedParamilitaryTarget(
+                state,
+                faction,
+                currentController,
+                pocketOsid,
+                PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION,
+                adjacency,
+                reverseMap,
+            );
+            if (candidate) candidates.push(candidate);
+        }
+
+        candidates.sort(compareRankedParamilitaryTargets);
+        for (const candidate of candidates) {
+            if (deploymentsThisTurn >= PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN) break;
+            const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
+            if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
 
             // Player faction: create request instead of auto-spawning
             if (faction === playerFaction) {
                 const policy = state.paramilitary_policy ?? 'ask';
                 if (policy === 'always_deny') continue;
                 if (policy === 'always_allow') {
-                    spawnParamilitary(state, faction, pocketOsid, turn, spawnIndex, report);
+                    spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
                     spawnIndex++;
                     deploymentsThisTurn++;
+                    existingTargets.add(`${faction}:${candidate.osid}`);
+                    municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
                     continue;
                 }
                 // 'ask' — add to pending
                 const requests = state.pending_paramilitary_requests ??= [];
                 requests.push({
-                    target_osid: pocketOsid,
+                    target_osid: candidate.osid,
                     faction,
                     strength: PARAMILITARY_UNIT_SIZE,
                     estimated_civilian_risk: estimateParamilitaryCivilianRisk('rear_pocket'),
@@ -271,13 +452,17 @@ export function detectParamilitaryTargets(
                 });
                 report.pending_player_requests++;
                 deploymentsThisTurn++;
+                existingTargets.add(`${faction}:${candidate.osid}`);
+                municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
                 continue;
             }
 
             // Bot faction: auto-approve
-            spawnParamilitary(state, faction, pocketOsid, turn, spawnIndex, report);
+            spawnParamilitary(state, faction, candidate.osid, turn, spawnIndex, report);
             spawnIndex++;
             deploymentsThisTurn++;
+            existingTargets.add(`${faction}:${candidate.osid}`);
+            municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
         }
     }
 
@@ -315,23 +500,6 @@ function countFriendlyAdjacentOsids(
     return count;
 }
 
-function countParamilitaryDeploymentsCreatedThisTurn(
-    state: GameState,
-    faction: FactionId,
-    turn: number,
-    mode: 'rear_pocket' | 'offensive'
-): number {
-    const formations = state.military.formations ?? {};
-    let count = 0;
-    for (const fid of Object.keys(formations).sort(strictCompare)) {
-        const f = formations[fid];
-        if (!f || f.kind !== 'paramilitary' || f.faction !== faction || f.created_turn !== turn) continue;
-        const isOffensive = f.paramilitary_mode === 'offensive';
-        if ((mode === 'offensive') === isOffensive) count++;
-    }
-    return count;
-}
-
 /** Spawn a paramilitary formation targeting an OSID. Shared by rear pocket and offensive modes. */
 function spawnParamilitary(
     state: GameState,
@@ -343,11 +511,18 @@ function spawnParamilitary(
     mode: 'rear_pocket' | 'offensive' = 'rear_pocket'
 ): void {
     const isOffensive = mode === 'offensive';
-    const fid = isOffensive
-        ? `opara_${faction.toLowerCase()}_t${turn}_${index}`
-        : makeParamilitaryId(faction, turn, index);
     const formations = state.military.formations ??= {};
-    const namedUnit = lookupParamilitaryNamedUnit(faction, mode, index, turn);
+    let resolvedIndex = index;
+    let fid = isOffensive
+        ? `opara_${faction.toLowerCase()}_t${turn}_${resolvedIndex}`
+        : makeParamilitaryId(faction, turn, resolvedIndex);
+    while (formations[fid]) {
+        resolvedIndex++;
+        fid = isOffensive
+            ? `opara_${faction.toLowerCase()}_t${turn}_${resolvedIndex}`
+            : makeParamilitaryId(faction, turn, resolvedIndex);
+    }
+    const namedUnit = lookupParamilitaryNamedUnit(faction, mode, resolvedIndex, turn);
 
     formations[fid] = {
         id: fid,
@@ -470,6 +645,7 @@ export function detectOffensiveParamilitaryTargets(
 
     const sortedOsids = [...allOsids].sort(strictCompare);
     const defenderFactionMap = buildDefenderFactionMap(state);
+    const regularForceClaimedTargets = buildRegularForceClaimedTargets(state);
 
     for (const faction of factions) {
         if (!OFFENSIVE_PARAMILITARY_FACTIONS.has(faction)) continue;
@@ -478,18 +654,26 @@ export function detectOffensiveParamilitaryTargets(
         const isPlayer = faction === playerFaction;
         const scopeMuns = isPlayer ? null : (OFFENSIVE_PARA_MUNICIPALITY_SCOPE[faction] ?? null);
         let spawnIndex = 0;
-        let deploymentsThisTurn = countParamilitaryDeploymentsCreatedThisTurn(state, faction, turn, 'offensive');
+        const issuedTargets = collectParamilitaryIssuedTargets(state, faction, turn, 'offensive');
+        const allModeIssuedTargets = collectParamilitaryIssuedTargets(state, faction, turn);
+        for (const target of allModeIssuedTargets) existingTargets.add(`${faction}:${target}`);
+        let deploymentsThisTurn = issuedTargets.size;
+        const municipalityDeploymentCounts = new Map<string, number>();
+        for (const target of allModeIssuedTargets) {
+            const municipalityId = municipalityIdFromOsid(target);
+            municipalityDeploymentCounts.set(
+                municipalityId,
+                (municipalityDeploymentCounts.get(municipalityId) ?? 0) + 1,
+            );
+        }
 
-        const rankedOsids = [...sortedOsids].sort((a, b) => {
-            const supportDifference = countFriendlyAdjacentOsids(b, faction, adjacency, state, reverseMap)
-                - countFriendlyAdjacentOsids(a, faction, adjacency, state, reverseMap);
-            return supportDifference !== 0 ? supportDifference : strictCompare(a, b);
-        });
-        for (const osid of rankedOsids) {
-            if (deploymentsThisTurn >= OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN) break;
+        const candidates: RankedParamilitaryTarget[] = [];
+        for (const osid of sortedOsids) {
             const controller = getPoliticalControllerOSID(state, osid, reverseMap);
             // Must be hostile-controlled (not our faction)
             if (controller === faction || controller === null) continue;
+            if (isRbihHrhbCombatBlocked(state, faction, controller)) continue;
+            if (regularForceClaimedTargets.has(osid)) continue;
 
             if (enclaveOsids.has(osid)) continue;
 
@@ -515,6 +699,24 @@ export function detectOffensiveParamilitaryTargets(
 
             // Dedup
             if (existingTargets.has(`${faction}:${osid}`)) continue;
+            const candidate = buildRankedParamilitaryTarget(
+                state,
+                faction,
+                controller,
+                osid,
+                OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION,
+                adjacency,
+                reverseMap,
+            );
+            if (candidate) candidates.push(candidate);
+        }
+
+        candidates.sort(compareRankedParamilitaryTargets);
+        for (const candidate of candidates) {
+            if (deploymentsThisTurn >= OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN) break;
+            const deploymentsInMunicipality = municipalityDeploymentCounts.get(candidate.municipalityId) ?? 0;
+            if (deploymentsInMunicipality >= PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN) continue;
+            const osid = candidate.osid;
 
             // Player faction: respect paramilitary policy
             if (isPlayer) {
@@ -525,6 +727,7 @@ export function detectOffensiveParamilitaryTargets(
                     spawnIndex++;
                     deploymentsThisTurn++;
                     existingTargets.add(`${faction}:${osid}`);
+                    municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
                     continue;
                 }
                 // 'ask' — add to pending
@@ -539,6 +742,7 @@ export function detectOffensiveParamilitaryTargets(
                 report.pending_player_requests++;
                 deploymentsThisTurn++;
                 existingTargets.add(`${faction}:${osid}`);
+                municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
                 continue;
             }
 
@@ -547,6 +751,7 @@ export function detectOffensiveParamilitaryTargets(
             spawnIndex++;
             deploymentsThisTurn++;
             existingTargets.add(`${faction}:${osid}`);
+            municipalityDeploymentCounts.set(candidate.municipalityId, deploymentsInMunicipality + 1);
         }
     }
 
@@ -617,16 +822,8 @@ export function advanceParamilitaries(
             continue;
         }
 
-        // Post-ceasefire / post-Washington RBiH↔HRHB gate.
-        // Narrower than the full bilateral-combat gate used at deliberate combat sites:
-        // pre-w26 / alliance-period paramilitary cleanup is historically loose (and the
-        // engine relies on it for sector contiguity), so only block the post-political-
-        // settlement window — the actual Orasje regression vector.
-        const rhsParamilitary = state.political.rbih_hrhb_state;
-        const isRbihHrhbPair =
-            (f.faction === 'RBiH' && currentController === 'HRHB') ||
-            (f.faction === 'HRHB' && currentController === 'RBiH');
-        if (isRbihHrhbPair && (rhsParamilitary?.ceasefire_active || rhsParamilitary?.washington_signed)) {
+        // Apply the same bilateral-combat truth used by regular battle resolution.
+        if (isRbihHrhbCombatBlocked(state, f.faction, currentController)) {
             dissolveParamilitary(state, fid, report);
             continue;
         }
@@ -637,7 +834,7 @@ export function advanceParamilitaries(
             ? hasAdjacentDefender(targetOsid, currentController, adjacency, defenderFactionMap)
             : false;
 
-        if (defended || (!isOffensive && hasAdjacentOrganizedDefense)) {
+        if (defended || hasAdjacentOrganizedDefense) {
             if (isOffensive) {
                 const casualties = Math.ceil((f.personnel ?? OFFENSIVE_PARA_UNIT_SIZE) * PARAMILITARY_CASUALTY_RATE * DEFENDED_RETREAT_CASUALTY_MULT);
                 if (state.military.casualty_ledger) {

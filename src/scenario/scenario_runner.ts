@@ -18,7 +18,10 @@ import { getBotStrategyProfile } from '../sim/bot/bot_strategy.js';
 import { getFrontActiveSettlements } from '../sim/emergence/aor_instantiation.js';
 import { getEligiblePressureEdges } from '../sim/emergence/pressure_eligibility.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../sim/displacement_pipeline/displacement_municipality_aggregation.js';
-import { ensureRbihHrhbState } from '../sim/early_war/alliance_update.js';
+import {
+    DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN,
+    ensureRbihHrhbState,
+} from '../sim/early_war/alliance_update.js';
 import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
@@ -1779,7 +1782,8 @@ export async function buildScenarioStartupState(
         state.meta.peace_scheduled_referendum_turn = null;
         state.meta.peace_scheduled_war_start_turn = null;
         state.meta.peace_war_start_control_path = null;
-        state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
+        state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week
+            ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
         if (scenario.enable_rbih_hrhb_dynamics === false) {
             state.meta.enable_rbih_hrhb_dynamics = false;
         }

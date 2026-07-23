@@ -137,6 +137,81 @@ test('execution-phase operation attacks current objective even without a corps d
     assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
 });
 
+test('COHA suppresses bot attack orders and attack posture costs while preserving non-combat orders', () => {
+    const state = {
+  meta: { turn: 150, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    event_flags: { coha_active: true },
+    formations: {
+            rs_1st_bratunac: {
+                id: 'rs_1st_bratunac',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_drina',
+                home_defense_active: true,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:bratunac:slapasnica',
+            },
+        },
+    corps_command: {
+            vrs_drina: {
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'Operation Drina',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 145,
+                    phase_started_turn: 148,
+                    participating_brigades: ['rs_1st_bratunac'],
+                    objectives: ['op:bratunac:bratunac_2'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                }],
+            },
+        },
+    brigade_posture_orders: [],
+    brigade_attack_orders: {
+            rs_1st_bratunac: 'op:bratunac:stale_target',
+        },
+  } as any,
+  political: {
+    political_controllers: {
+            'op:bratunac:slapasnica': 'RS',
+            'op:bratunac:bratunac_2': 'RBiH',
+            'op:bratunac:stale_target': 'RBiH',
+            'op:bratunac:polom': 'RS',
+        }
+  } as any,
+} as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:bratunac_2' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:polom' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.deepEqual(state.military.brigade_attack_orders, {});
+    assert.equal(
+        state.military.brigade_posture_orders?.some((order) =>
+            order.brigade_id === 'rs_1st_bratunac'
+            && (order.posture === 'attack' || order.posture === 'assault')
+        ),
+        false,
+    );
+});
+
 test('merge mode preserves existing manual player orders for the same brigade', () => {
     const state = {
   meta: { turn: 2, phase: 'war', seed: 'test-seed' },

@@ -281,7 +281,8 @@ describe('combat causality diagnostics', () => {
                 defender_brigade: null,
                 snap_events: [],
                 attacker_casualties: 0,
-                defender_casualties: 0
+                defender_casualties: 0,
+                operation_id: 'corps_1:Operacija Test:t1',
             }])
         );
 
@@ -348,6 +349,124 @@ describe('combat causality diagnostics', () => {
         assert.equal(diagnostics[0]!.current_objective_battle_count, 1);
         assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
         assert.ok(!diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
+    it('does not credit a same-target order that is absent from the validated battle contributors', () => {
+        const state = makeState();
+        const report = makeOsidReport([{
+            attacker_brigade: 'stray' as any,
+            attacker_faction: 'RS',
+            defender_faction: 'RBiH',
+            target_osid: 'op:enemy:obj1' as any,
+            outcome: 'victory' as any,
+            power_ratio: 1.2,
+            attacker_won: true,
+            defender_brigade: null,
+            snap_events: [],
+            attacker_casualties: 0,
+            defender_casualties: 0,
+        }]);
+        report.orders_seen_by_brigade = {
+            b1: 'op:enemy:obj1' as any,
+            stray: 'op:enemy:obj1' as any,
+        };
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1', stray: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            report,
+        );
+
+        assert.equal(diagnostics[0]!.attack_attempt_count, 1);
+        assert.equal(diagnostics[0]!.battle_count, 0);
+        assert.equal(diagnostics[0]!.current_objective_battle_count, 0);
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
+    it('credits every operation and brigade named by the validated battle contributor receipt', () => {
+        const state = makeState();
+        const report = makeOsidReport([{
+            attacker_brigade: 'stray' as any,
+            attacker_brigades: ['b1', 'stray'] as any,
+            contributing_operation_ids: ['corps_1:Operacija Test:t1'],
+            attacker_faction: 'RS',
+            defender_faction: 'RBiH',
+            target_osid: 'op:enemy:obj1' as any,
+            outcome: 'victory' as any,
+            power_ratio: 1.2,
+            attacker_won: true,
+            defender_brigade: null,
+            snap_events: [],
+            attacker_casualties: 0,
+            defender_casualties: 0,
+        }]);
+
+        const diagnostics = buildOperationCombatDiagnostics(
+            state,
+            makeOrderSnapshot({ b1: 'op:enemy:obj1', stray: 'op:enemy:obj1' }, {}, { corps_1: 1 }),
+            report,
+        );
+
+        assert.equal(diagnostics[0]!.battle_count, 1);
+        assert.equal(diagnostics[0]!.current_objective_battle_count, 1);
+        assert.equal(diagnostics[0]!.participant_attack_orders[0]!.battle_count, 1);
+        assert.ok(!diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+    });
+
+    it('does not classify ceasefire-suppressed orders as dead operation attempts', () => {
+        const state = makeState();
+        state.military.event_flags = { coha_active: true } as any;
+        const report = makeOsidReport([]);
+        report.combat_suppressed_reason = 'coha_ceasefire';
+        report.operation_lifecycle_paused_reason = 'coha_ceasefire';
+        report.suppressed_attack_orders = [{
+            brigade_id: 'b1' as any,
+            target_osid: 'op:enemy:obj1' as any,
+            reason: 'coha_ceasefire',
+        }];
+
+        const orderSnapshot = makeOrderSnapshot(
+            { b1: 'op:enemy:obj1' },
+            {},
+            { corps_1: 1 },
+        );
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        assert.deepEqual(diagnostics[0]!.invalidation_reasons, []);
+        assert.equal(diagnostics[0]!.invalid_for_combat_calibration, false);
+        assert.equal(summary.invalid_operation_count, 0);
+        assert.equal(summary.valid_for_combat_calibration, true);
+        assert.deepEqual(summary.invalidation_reasons, []);
+    });
+
+    it('still invalidates an unsuppressed operation order during a lifecycle pause', () => {
+        const state = makeState();
+        state.military.event_flags = { coha_active: true } as any;
+        const report = makeOsidReport([]);
+        report.combat_suppressed_reason = 'coha_ceasefire';
+        report.operation_lifecycle_paused_reason = 'coha_ceasefire';
+        report.suppressed_attack_orders = [{
+            brigade_id: 'b1' as any,
+            target_osid: 'op:enemy:obj1' as any,
+            reason: 'coha_ceasefire',
+        }];
+
+        const orderSnapshot = makeOrderSnapshot(
+            {
+                b1: 'op:enemy:obj1',
+                b2: 'op:enemy:obj1',
+            },
+            {},
+            { corps_1: 2 },
+        );
+        const diagnostics = buildOperationCombatDiagnostics(state, orderSnapshot, report);
+        const summary = buildCombatCausalitySummary(diagnostics, orderSnapshot, report);
+
+        assert.ok(diagnostics[0]!.invalidation_reasons.includes('attack_orders_without_battles'));
+        assert.equal(summary.valid_for_combat_calibration, false);
+        assert.ok(summary.invalidation_reasons.includes('zero_battles'));
+        assert.ok(summary.invalidation_reasons.includes('operation_attack_orders_without_battles'));
     });
 
     it('uses the live axis objective for multi-axis operation diagnostics', () => {

@@ -19,6 +19,8 @@ import { freezeEndgameSnapshot } from '../endgame/endgame_snapshot.js';
 import { resolveEventDecision } from '../events/resolve_decision.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
+const CUTILEIRO_PLAN_ID = 'cutileiro';
+const DAYTON_PLAN_ID = 'dayton';
 const VANCE_OWEN_EVENT_ID = 'vance_owen_plan_1993';
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -143,26 +145,48 @@ export function evaluatePeacePlans(state: GameState): void {
 
     // Check each plan in chronological order
     for (const plan of PEACE_PLANS) {
-        if (plan.trigger_week !== warWeek) continue;
+        // runTurn advances the turn before war phases execute, so the opening
+        // week-zero plan is first observed at war week one. Keep its recorded
+        // offer date canonical without relaxing exact-week scheduling later.
+        const openingPlanCatchUp =
+            plan.id === CUTILEIRO_PLAN_ID
+            && plan.trigger_week === 0
+            && warWeek === 1;
+        if (plan.trigger_week !== warWeek && !openingPlanCatchUp) continue;
+        // Dayton has its own package negotiation, trigger, and resolution flow.
+        // Offering the legacy binary plan at week 185 would bypass that system.
+        if (plan.id === DAYTON_PLAN_ID) continue;
 
         // Skip if this plan was already offered
         const alreadyOffered = neg.peace_plan_history.some(h => h.plan_id === plan.id);
         if (alreadyOffered) continue;
 
         const playerFaction = state.meta.player_faction;
+        const historicalHeadless =
+            playerFaction == null
+            && state.meta.decision_mode !== 'emergent';
 
         // A no-player headless state computes every faction. Player sessions leave
         // the selected faction pending for the existing desktop resolution path.
+        // Historical calibration uses documented outcomes, not the emergent scorer.
         const botResponses: Record<string, 'accepted' | 'rejected'> = {};
         for (const faction of CANONICAL_FACTIONS) {
             if (playerFaction != null && faction === playerFaction) continue;
-            botResponses[faction] = computeBotResponse(state, plan, faction);
+            const historicalResponse = plan.historical_responses[faction];
+            if (historicalHeadless && historicalResponse == null) {
+                throw new Error(`Peace plan ${plan.id} has no historical response for ${faction}`);
+            }
+            botResponses[faction] = historicalHeadless
+                ? historicalResponse!
+                : computeBotResponse(state, plan, faction);
         }
 
         // Create pending peace plan
         neg.pending_peace_plan = {
             plan_id: plan.id,
-            turn_offered: state.meta.turn,
+            turn_offered: openingPlanCatchUp
+                ? (state.meta.war_start_turn ?? 0)
+                : state.meta.turn,
             bot_responses: botResponses,
         };
 

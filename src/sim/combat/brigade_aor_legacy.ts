@@ -18,7 +18,10 @@ import type {
 } from '../../state/game_state.js';
 import { getLegacyAoR } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { areRbihHrhbAllied } from '../early_war/alliance_update.js';
+import {
+    areRbihHrhbAllied,
+    DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN,
+} from '../early_war/alliance_update.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Front-active detection
@@ -43,7 +46,8 @@ export function identifyFrontActiveSettlements(
             (controlA === 'RBiH' && controlB === 'HRHB') || (controlA === 'HRHB' && controlB === 'RBiH');
         if (isRbihHrhbPair) {
             const turn = state.meta?.turn ?? 0;
-            const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+            const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn
+                ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
             if (turn < earliestWar || areRbihHrhbAllied(state)) continue;
         }
         frontActive.add(edge.a);

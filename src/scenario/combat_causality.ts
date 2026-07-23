@@ -173,22 +173,34 @@ export function buildOperationCombatDiagnostics(
     orderSnapshot: BotOrderDiagnosticsSnapshot | undefined,
     osidResolution: AttackResolutionOsidReport | undefined
 ): OperationCombatDiagnostic[] {
+    const lifecyclePaused = osidResolution?.operation_lifecycle_paused_reason !== undefined;
+    const suppressedAttackOrders = new Set(
+        (osidResolution?.suppressed_attack_orders ?? [])
+            .map((order) => `${order.brigade_id}|${order.target_osid}`)
+    );
     const corpsCommand = state.military.corps_command ?? {};
     const battleCountsByBrigade = new Map<FormationId, number>();
     const battleCountsByOperation = new Map<string, number>();
     const battleCountsByOperationObjective = new Map<string, number>();
     const battleCountsByTarget = new Map<string, number>();
     for (const battle of osidResolution?.battles ?? []) {
-        battleCountsByBrigade.set(
-            battle.attacker_brigade,
-            (battleCountsByBrigade.get(battle.attacker_brigade) ?? 0) + 1
-        );
-        if (typeof battle.operation_id === 'string' && battle.operation_id.length > 0) {
-            battleCountsByOperation.set(
-                battle.operation_id,
-                (battleCountsByOperation.get(battle.operation_id) ?? 0) + 1
+        const attackerBrigades = battle.attacker_brigades ?? [battle.attacker_brigade];
+        for (const brigadeId of new Set(attackerBrigades)) {
+            battleCountsByBrigade.set(
+                brigadeId,
+                (battleCountsByBrigade.get(brigadeId) ?? 0) + 1
             );
-            const objectiveKey = `${battle.operation_id}|${battle.target_osid}`;
+        }
+        const operationIds = battle.contributing_operation_ids
+            ?? (typeof battle.operation_id === 'string' && battle.operation_id.length > 0
+                ? [battle.operation_id]
+                : []);
+        for (const operationId of new Set(operationIds)) {
+            battleCountsByOperation.set(
+                operationId,
+                (battleCountsByOperation.get(operationId) ?? 0) + 1
+            );
+            const objectiveKey = `${operationId}|${battle.target_osid}`;
             battleCountsByOperationObjective.set(
                 objectiveKey,
                 (battleCountsByOperationObjective.get(objectiveKey) ?? 0) + 1
@@ -217,6 +229,7 @@ export function buildOperationCombatDiagnostics(
             const hadResolvedAttackThisTurn =
                 operation.last_result === 'captured' || operation.last_result === 'failed';
             let attackAttemptCount = 0;
+            let unsuppressedAttackAttemptCount = 0;
             let movementOrderCount = 0;
             let currentObjectiveAttackCount = 0;
             let participantBattleCount = 0;
@@ -243,6 +256,9 @@ export function buildOperationCombatDiagnostics(
                 const target = orderSnapshot?.attack_orders_by_brigade?.[brigadeId];
                 if (typeof target === 'string' && target.length > 0) {
                     attackAttemptCount += 1;
+                    if (!suppressedAttackOrders.has(`${brigadeId}|${target}`)) {
+                        unsuppressedAttackAttemptCount += 1;
+                    }
                     attackTargetCounts.set(target, (attackTargetCounts.get(target) ?? 0) + 1);
                     if (currentObjectives.includes(target)) {
                         currentObjectiveAttackCount += 1;
@@ -264,16 +280,14 @@ export function buildOperationCombatDiagnostics(
                 participantBattleCount += battleCountsByBrigade.get(brigadeId) ?? 0;
             }
             const operationBattleCount = battleCountsByOperation.get(operationId) ?? 0;
-            const battleCount = operationBattleCount > 0 ? operationBattleCount : participantBattleCount;
+            const battleCount = operationBattleCount > 0
+                ? operationBattleCount
+                : participantBattleCount;
             // Keep the legacy field name stable for downstream consumers, but bind it
             // to the post-trim operation-local order truth the invalidation logic uses.
             const finalOrderedAttackerCount = attackAttemptCount;
             const currentObjectiveBattleCount = currentObjective !== null
-                ? (
-                    battleCountsByOperationObjective.get(`${operationId}|${currentObjective}`)
-                    ?? battleCountsByTarget.get(currentObjective)
-                    ?? 0
-                )
+                ? (battleCountsByOperationObjective.get(`${operationId}|${currentObjective}`) ?? 0)
                 : 0;
             const attackOrderTargets = Array.from(attackTargetCounts.entries())
                 .sort((a, b) => strictCompare(a[0], b[0]))
@@ -285,6 +299,7 @@ export function buildOperationCombatDiagnostics(
                 }));
             const invalidationReasons: OperationCombatInvalidationReason[] = [];
             if (
+                !lifecyclePaused &&
                 operation.phase === 'execution' &&
                 !hadResolvedAttackThisTurn &&
                 attackAttemptCount === 0 &&
@@ -295,6 +310,7 @@ export function buildOperationCombatDiagnostics(
                 invalidationReasons.push('execution_without_attack_orders');
             }
             if (
+                !lifecyclePaused &&
                 operation.phase === 'execution' &&
                 !hadResolvedAttackThisTurn &&
                 brigades.length > 0 &&
@@ -305,7 +321,11 @@ export function buildOperationCombatDiagnostics(
             ) {
                 invalidationReasons.push('execution_without_eligible_attackers');
             }
-            if (operation.phase === 'execution' && attackAttemptCount > 0 && battleCount === 0) {
+            if (
+                operation.phase === 'execution' &&
+                unsuppressedAttackAttemptCount > 0 &&
+                battleCount === 0
+            ) {
                 invalidationReasons.push('attack_orders_without_battles');
             }
             const currentTurn = state.meta?.turn ?? 0;
@@ -314,6 +334,7 @@ export function buildOperationCombatDiagnostics(
                 typeof operation.phase_started_turn === 'number' &&
                 operation.phase_started_turn === currentTurn;
             if (
+                !lifecyclePaused &&
                 enteredRecoveryThisTurn &&
                 recoveryReason === 'no_logged_attempt' &&
                 objectiveAttemptCount === 0 &&
@@ -363,7 +384,17 @@ export function buildCombatCausalitySummary(
     const invalidationReasons = new Set<CombatCausalityInvalidationReason>();
     const totalBattles = osidResolution?.battles?.length ?? 0;
     const totalAttackOrders = Object.keys(orderSnapshot?.attack_orders_by_brigade ?? {}).length;
-    if (totalBattles === 0 && totalAttackOrders > 0) {
+    const suppressedAttackOrders = new Set(
+        (osidResolution?.suppressed_attack_orders ?? [])
+            .map((order) => `${order.brigade_id}|${order.target_osid}`)
+    );
+    const unsuppressedAttackOrderCount = Object.entries(orderSnapshot?.attack_orders_by_brigade ?? {})
+        .filter(([brigadeId, targetOsid]) => !suppressedAttackOrders.has(`${brigadeId}|${targetOsid}`))
+        .length;
+    if (
+        totalBattles === 0 &&
+        unsuppressedAttackOrderCount > 0
+    ) {
         invalidationReasons.add('zero_battles');
     }
     let invalidOperationCount = 0;

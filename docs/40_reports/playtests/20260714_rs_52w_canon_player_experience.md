@@ -20,10 +20,12 @@ The v17 Electron evidence above remains an immutable record of that player path.
 - Empty reachable same-corps sectors now create an explicit T1 reassignment intent. T2 converts it to a column order and T3 moves the formation later; no assignment bucket or `location_osid` is mutated at decision time. The exact retained probe places `arbih_131st_light` physically at `op:cajnice:todorovici`.
 - Resolved historical-operation authorization rows now remain durable audit/no-reprompt receipts across autonomy-transition cleanup. Live Decision Room and blocker projections still filter terminal rows, so retention does not recreate the stale blocking decision that started this review.
 - The live-surface browser sweep now starts large manual-save fixture loads behind a tokenized renderer handshake and polls synchronous status from Node. This closes Chromium's intermittent `Promise was collected` failure without weakening route, network, or rendered-surface assertions.
-- The current exact 40-week result is HRHB/RBiH/RS `86/262/364`, final hash `702a2be4a3c3e7c3`, structural fingerprint v2 `66ac3f76cb351904`, 31/31 anchors, and 6/6 benchmark checks. Baseline hashes were deliberately refreshed for the output-changing behavior and then passed strict no-update comparison.
-- The current regenerated desktop startup snapshot SHA-256 is `1341987cccde0cc0dca4bec4547f4a0247fd02e92e4d6899e1bafb609ca0d57b`. It is post-acceptance derived state and does not replace the v17 evidence hash recorded below.
+- The current exact 40-week result is HRHB/RBiH/RS `85/251/376`, final hash `b4411ca087401148`, structural fingerprint v2 `4fcdb21ab4bcff14`, 31/31 anchors, and 6/6 benchmark checks. Baseline hashes were deliberately refreshed for the output-changing behavior and then passed strict no-update comparison.
+- The current regenerated desktop startup snapshot SHA-256 is `fcb9afd6ca6c5e8ac4b5ddb635b5f103624efde053f323deb5b1c1bcf1ea93f0`. It is post-acceptance derived state and does not replace the v17 evidence hash recorded below.
 
 This remediation changes deterministic headless outputs; it does not retroactively change the v17 Electron screenshots, comparator, or final `87/266/359` player result. Final whole-tree gates are recorded below only after rerun on the documentation-complete tree.
+
+The subsequent 2026-07-17 long-horizon integration is documented separately in `docs/40_reports/implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md`. It closes COHA lifecycle/causality, bounded uncontested occupation, historical opportunity and forming-roster eligibility, primary-sector commander targeting, Cincar/HV placement, organizational-penetration paramilitary policy, historical-default peace dispositions, and the rear-pocket bilateral-control bypass found during pre-publication review. Two exact 188-week runs are byte-identical at `aa4302e694a6482e`, and the current-canon required engine-health floor remains `622/712`. The endpoint passes 31/31 anchors with zero pre-turn-40 RBiH-HRHB control events. These later results also do not rewrite the accepted v17 Electron evidence.
 
 ## Evidence Of Record
 
@@ -259,7 +261,7 @@ The post-acceptance implementation and documentation were verified locally on th
 | `npm.cmd run qa:player-experience` | PASS - typecheck, desktop release builds, 44 files / 756 journey assertions, first-hour browser proof, live-surface browser proof, and output scan |
 | Focused authorization/browser closeout | PASS - durable authorization receipt suites and tokenized browser-harness contract |
 | `npm.cmd run test:baselines` | PASS - all scenarios match, strict no-update mode |
-| `npm.cmd run ci:structural-fingerprint:check` | PASS - `66ac3f76cb351904`; final state hash `702a2be4a3c3e7c3` |
+| `npm.cmd run ci:structural-fingerprint:check` | PASS - `4fcdb21ab4bcff14`; final state hash `b4411ca087401148` |
 | `npm.cmd run desktop:startup-snapshot:check` | PASS - baked snapshot exact |
 | `npm.cmd run canon:check` | PASS - final documentation-complete local tree |
 | Repository integrity | PASS - `git diff --check`; FORAWWV unchanged; staging empty |

@@ -904,7 +904,11 @@ export function classifyBrigadesByTerritory(
         // The pass runs per-faction; cross-faction entries would find zero
         // matching sectors and silently fall through.
         const loanedFormation = formations[fid];
-        if (!loanedFormation || loanedFormation.faction !== faction) continue;
+        if (
+            !loanedFormation
+            || loanedFormation.faction !== faction
+            || !isSectorRosterEligibleFormation(loanedFormation)
+        ) continue;
 
         let alreadyAssigned = false;
         for (const sec of sectors) {

@@ -77,7 +77,7 @@ export function findBrigadeOperation(cmd: CorpsCommandState, brigadeId: string):
 export function findBrigadeOperationAnywhere(
     state: GameState,
     brigadeId: string,
-): { cmd: CorpsCommandState; op: CorpsOperation } | null {
+): { corps_id: FormationId; cmd: CorpsCommandState; op: CorpsOperation } | null {
     const corpsCommand = state.military?.corps_command;
     if (!corpsCommand) return null;
     const corpsIds = Object.keys(corpsCommand).sort(strictCompare);
@@ -86,7 +86,7 @@ export function findBrigadeOperationAnywhere(
         if (!cmd) continue;
         for (const op of cmd.active_operations) {
             if (op.participating_brigades.includes(brigadeId)) {
-                return { cmd, op };
+                return { corps_id: cid as FormationId, cmd, op };
             }
         }
     }
