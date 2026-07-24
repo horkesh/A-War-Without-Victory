@@ -45,17 +45,18 @@ describe('shouldLaunchProbeInstead', () => {
         expect(shouldLaunchProbeInstead('RS', 0.40, 0)).toBe(false);
     });
 
-    it('returns true when intel is below faction threshold (RS)', () => {
+    it('uses the canonical RS threshold of 0.25 after the blitz phase', () => {
         // Pass turn=20 (post-blitz) so probe_exempt does not suppress the probe requirement
-        expect(shouldLaunchProbeInstead('RS', 0.30, 0, 20)).toBe(true);
+        expect(shouldLaunchProbeInstead('RS', 0.249, 0, 20)).toBe(true);
+        expect(shouldLaunchProbeInstead('RS', 0.25, 0, 20)).toBe(false);
+        expect(shouldLaunchProbeInstead('RS', 0.30, 0, 20)).toBe(false);
     });
 
-    it('returns true even when consecutive probes are high (no forced commitment)', () => {
-        // n1194: MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT removed — if intel says
-        // enemy is stronger, correct response is "defend," not "attack because
-        // you probed twice." consecutiveProbes no longer forces commitment.
-        // Pass turn=20 (post-blitz) so probe_exempt does not suppress the probe requirement
-        expect(shouldLaunchProbeInstead('RS', 0.10, 2, 20)).toBe(true);
+    it('enforces the canon two-probe cap deterministically', () => {
+        expect(shouldLaunchProbeInstead('RS', 0.10, 1, 20)).toBe(true);
+        expect(Array.from({ length: 3 }, () =>
+            shouldLaunchProbeInstead('RS', 0.10, 2, 20)
+        )).toEqual([false, false, false]);
     });
 
     it('returns true for RBiH at 0.35 (below 0.40 threshold)', () => {

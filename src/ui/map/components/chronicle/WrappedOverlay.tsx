@@ -125,7 +125,7 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
                             e.stopPropagation();
                             handleViewChronicle();
                         }}
-                        className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors cursor-pointer"
+                        className="px-6 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors cursor-pointer"
                     >
                         {t('wrapped.viewChronicle')}
                     </button>
@@ -134,7 +134,7 @@ export function WrappedOverlay({ eventCatalog }: WrappedOverlayProps = {}) {
                             e.stopPropagation();
                             handleClose();
                         }}
-                        className="px-6 py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] rounded border border-white/20 bg-white/5 text-white/50 hover:bg-white/10 transition-colors cursor-pointer"
+                        className="px-6 py-2.5 text-xs font-bold uppercase tracking-[0.2em] rounded border border-white/20 bg-white/5 text-white/50 hover:bg-white/10 transition-colors cursor-pointer"
                     >
                         {t('wrapped.close')}
                     </button>

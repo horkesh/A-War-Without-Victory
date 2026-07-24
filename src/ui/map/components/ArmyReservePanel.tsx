@@ -27,7 +27,10 @@ import { ELITE_DEPLOY_COST } from '../utils/commandAuthority';
 import { turnToDateString } from '../utils/formatters';
 import { inspectOnField } from '../utils/shellNavigation';
 import { EliteCommanderSummary } from './EliteCommanderSummary';
-import type { PresidentialDecisionRoomNavigationTarget } from '../data/presidentialDecisionRoom';
+import {
+    buildReserveRequestPresentation,
+    type PresidentialDecisionRoomNavigationTarget,
+} from '../data/presidentialDecisionRoom';
 
 const REASON_LABEL_KEYS: Record<string, MessageKey> = {
     offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -185,8 +188,8 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-2 border-b border-panel-border/60 bg-black/30 shrink-0">
                 <div className="min-w-0">
-                    <div className="text-[11px] font-bold text-text-primary tracking-wide uppercase">{t('armyReserve.title')}</div>
-                    <div className="text-[10px] text-text-secondary">{armyHq.name}</div>
+                    <div className="text-xs font-bold text-text-primary tracking-wide uppercase">{t('armyReserve.title')}</div>
+                    <div className="text-xs text-text-secondary">{armyHq.name}</div>
                     {breadcrumb}
                 </div>
                 <button
@@ -197,16 +200,16 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                 >×</button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-2.5 space-y-3 text-[11px]">
+            <div className="flex-1 overflow-y-auto p-2.5 space-y-3 text-xs">
                 {!ipc.isAvailable && hasLiveReserveActions && (
-                    <div className="text-[10px] text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
+                    <div className="text-xs text-text-secondary italic px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded">
                         {t('formationDetail.commandBridgeUnavailable')}
                     </div>
                 )}
 
                 {/* ── Reserve Pool ─────────────────────────────────────── */}
                 <section>
-                    <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                    <div className="text-xs text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
                         {t('armyReserve.reservePool', { count: elites.length })}
                     </div>
                     {elites.length === 0 ? (
@@ -244,13 +247,13 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                                 {brigadeName}
                                             </button>
                                             {ls.permanently_degraded ? (
-                                                <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-[9px] font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
+                                                <span className="px-1.5 py-0.5 bg-[#d45555]/20 text-[#d45555] text-xs font-bold rounded border border-[#d45555]/30 uppercase shrink-0">{t('armyReserve.status.degraded')}</span>
                                             ) : ls.on_loan ? (
-                                                <span className="px-1.5 py-0.5 bg-[#d4a855]/20 text-[#d4a855] text-[9px] font-bold rounded border border-[#d4a855]/30 uppercase shrink-0">{t('armyReserve.status.onLoan')}</span>
+                                                <span className="px-1.5 py-0.5 bg-[#d4a855]/20 text-[#d4a855] text-xs font-bold rounded border border-[#d4a855]/30 uppercase shrink-0">{t('armyReserve.status.onLoan')}</span>
                                             ) : ls.in_cooldown ? (
-                                                <span className="px-1.5 py-0.5 bg-white/10 text-text-secondary text-[9px] font-bold rounded border border-white/20 uppercase shrink-0">{t('armyReserve.status.cooldown')}</span>
+                                                <span className="px-1.5 py-0.5 bg-white/10 text-text-secondary text-xs font-bold rounded border border-white/20 uppercase shrink-0">{t('armyReserve.status.cooldown')}</span>
                                             ) : (
-                                                <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-[9px] font-bold rounded border border-[#55d48a]/30 uppercase shrink-0">{t('armyReserve.status.ready')}</span>
+                                                <span className="px-1.5 py-0.5 bg-[#55d48a]/20 text-[#55d48a] text-xs font-bold rounded border border-[#55d48a]/30 uppercase shrink-0">{t('armyReserve.status.ready')}</span>
                                             )}
                                         </div>
 
@@ -260,7 +263,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
 
                                         {/* Personnel bar */}
                                         <div className="space-y-0.5">
-                                            <div className="flex justify-between text-[10px] text-text-secondary">
+                                            <div className="flex justify-between text-xs text-text-secondary">
                                                 <span>{t('armyReserve.personnel')}</span>
                                                 {brigade.personnel == null ? (
                                                     <span className="italic text-text-secondary/80">{t('armyReserve.personnelUnreported')}</span>
@@ -289,7 +292,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                                     onClick={() => { void handleRecall(brigade.id); }}
                                                     aria-label={t('armyReserve.recallBrigadeAria', { name: brigadeName, corps: loanedToCorps })}
                                                     title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
-                                                    className={`px-2 py-0.5 border rounded text-[10px] font-bold transition-colors ${
+                                                    className={`px-2 py-0.5 border rounded text-xs font-bold transition-colors ${
                                                         ipc.isAvailable
                                                             ? 'bg-[#d45555]/20 border-[#d45555]/40 text-[#d45555] hover:bg-[#d45555]/30'
                                                             : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'
@@ -300,13 +303,13 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                             </div>
                                         )}
                                         {!ls.on_loan && ls.base_osid && (
-                                            <div className="text-[10px] text-text-secondary">
+                                            <div className="text-xs text-text-secondary">
                                                 {t('armyReserve.base', { base: getOsidDisplayName(ls.base_osid, osidDisplayNames) })}
                                             </div>
                                         )}
                                         {canAssignToPendingRequest && reviewablePendingRequests.length > 0 && (
                                             <div className="space-y-1 rounded border border-panel-border/35 bg-black/15 px-2 py-1.5">
-                                                <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-text-secondary">
+                                                <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-secondary">
                                                     {t('armyReserve.assignToRequest')}
                                                 </div>
                                                 <div className="flex flex-col gap-1">
@@ -323,7 +326,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                                                 title={commandAuthorityStatus === 'insufficient'
                                                                         ? t('armyReserve.insufficientAuthority')
                                                                         : undefined}
-                                                                className={`rounded border px-2 py-1 text-left text-[10px] font-semibold transition-colors ${
+                                                                className={`rounded border px-2 py-1 text-left text-xs font-semibold transition-colors ${
                                                                     disabled
                                                                         ? 'cursor-not-allowed border-white/10 bg-white/5 text-text-secondary'
                                                                         : 'border-emerald-400/35 bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18'
@@ -345,7 +348,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
 
                 {/* ── Active Loans Snapshot ─────────────────────────────── */}
                 <section>
-                    <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                    <div className="text-xs text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
                         {t('armyReserve.activeLoans', { count: activeLoans.length })}
                     </div>
                     {activeLoans.length === 0 ? (
@@ -379,11 +382,11 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                             >
                                                 {brigadeName}
                                             </button>
-                                            <span className="text-[10px] text-text-secondary shrink-0">
+                                            <span className="text-xs text-text-secondary shrink-0">
                                                 {deployedDurationLabel(ls.turns_deployed)}
                                             </span>
                                         </div>
-                                        <div className="text-[10px] text-text-secondary truncate">
+                                        <div className="text-xs text-text-secondary truncate">
                                             {loanedCorpsLabel(ls.loaned_to_corps)}
                                         </div>
                                         {brigade.eliteCommander && (
@@ -401,15 +404,15 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                 {/* ── Pending Requests ──────────────────────────────────── */}
                 {pendingRequests.length > 0 && (
                     <section>
-                        <div className="text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
+                        <div className="text-xs text-accent-gold uppercase tracking-widest font-bold opacity-70 mb-2">
                             {t('armyReserve.pendingRequests', { count: pendingRequests.length })}
                         </div>
                         {reserveAttentionSummary && (
                             <div className="mb-2 rounded border border-panel-border/40 bg-black/20 px-2 py-1.5">
-                                <div className={`text-[10px] font-semibold ${reserveAttentionSummary.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
+                                <div className={`text-xs font-semibold ${reserveAttentionSummary.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
                                     {reserveAttentionSummary.heading}
                                 </div>
-                                <div className="text-[10px] text-text-secondary mt-0.5">
+                                <div className="text-xs text-text-secondary mt-0.5">
                                     {reserveAttentionSummary.detail}
                                 </div>
                             </div>
@@ -421,18 +424,23 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                 const evidenceCopy = getArmyReserveRequestEvidenceCopy(req);
                                 const provenanceCopy = getArmyReserveRequestProvenanceCopy(req);
                                 const requestCorpsName = getCorpsName(req.corps_id);
+                                const requestPresentation = buildReserveRequestPresentation(
+                                    loadedGameState,
+                                    req,
+                                    osidDisplayNames,
+                                );
                                 return (
                                     <div key={req.request_id ?? idx} className="bg-black/20 border border-panel-border/40 rounded p-2 space-y-2">
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
                                             <div className="text-text-primary font-semibold">{requestCorpsName}</div>
-                                            <div className="text-[10px] text-text-secondary mt-1">
+                                            <div className="text-xs text-text-secondary mt-1">
                                                 {severityCopy.detail}
                                             </div>
                                         </div>
                                         <div className="flex flex-col items-end gap-1 shrink-0">
                                             <span
-                                                className="px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase"
+                                                className="px-1.5 py-0.5 text-xs font-bold rounded border uppercase"
                                                 style={{
                                                     color: priorityColor(req.priority),
                                                     backgroundColor: `${priorityColor(req.priority)}20`,
@@ -441,68 +449,81 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                             >
                                                 {reserveReasonLabel(req.reason)}
                                             </span>
-                                            <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase ${
+                                            <span className={`px-1.5 py-0.5 text-xs font-bold rounded border uppercase ${
                                                 req.severityBand === 'critical'
                                                     ? 'text-amber-400 border-amber-500/40 bg-amber-500/10'
                                                     : 'text-sky-300 border-sky-400/40 bg-sky-400/10'
                                             }`}>
                                                 {severityCopy.label}
                                             </span>
-                                            <span className="text-[10px] text-text-secondary">
+                                            <span className="text-xs text-text-secondary">
                                                 {travelDurationLabel(req.travel_hops)}
                                             </span>
                                         </div>
                                     </div>
 
+                                    <div
+                                        role="group"
+                                        aria-label={t('armyReserve.presentation.aria', { corps: requestCorpsName })}
+                                        data-testid={`army-reserve-request-presentation-${req.request_id}`}
+                                        className="rounded border border-panel-border/40 bg-panel-bg/45 px-2 py-2 text-[12px] leading-snug"
+                                    >
+                                        {[
+                                            ['armyReserve.presentation.requestingCommand', requestPresentation.requestingCommand],
+                                            ['armyReserve.presentation.recipientSector', requestPresentation.recipientSector],
+                                            ['armyReserve.presentation.candidateForce', requestPresentation.candidateForce],
+                                            ['armyReserve.presentation.readiness', requestPresentation.readiness],
+                                            ['armyReserve.presentation.travelTime', requestPresentation.travelTime],
+                                            ['armyReserve.presentation.expectedEffect', requestPresentation.expectedEffect],
+                                            ['armyReserve.presentation.opportunityCost', requestPresentation.opportunityCost],
+                                        ].map(([labelKey, value]) => (
+                                            <div key={labelKey} className="grid grid-cols-[8.5rem_minmax(0,1fr)] gap-2 py-0.5">
+                                                <span className="text-text-secondary">{t(labelKey as MessageKey)}</span>
+                                                <span className="min-w-0 text-text-primary">{value}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
                                     <div className="rounded border border-panel-border/30 bg-black/15 px-2 py-1.5">
-                                        <div className={`text-[10px] font-semibold ${causeCopy.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
+                                        <div className={`text-xs font-semibold ${causeCopy.tone === 'critical' ? 'text-amber-400' : 'text-text-primary'}`}>
                                             {causeCopy.label}
                                         </div>
-                                        <div className="text-[10px] text-text-primary mt-0.5">
+                                        <div className="text-xs text-text-primary mt-0.5">
                                             {causeCopy.summary}
                                         </div>
-                                        <div className="text-[10px] text-text-secondary mt-0.5">
+                                        <div className="text-xs text-text-secondary mt-0.5">
                                             {causeCopy.detail}
                                         </div>
                                     </div>
 
                                     <div className="rounded border border-panel-border/30 bg-black/10 px-2 py-1.5">
-                                        <div className="text-[10px] font-semibold text-text-primary">
+                                        <div className="text-xs font-semibold text-text-primary">
                                             {provenanceCopy.label}
                                         </div>
-                                        <div className="text-[10px] text-text-primary mt-0.5">
+                                        <div className="text-xs text-text-primary mt-0.5">
                                             {provenanceCopy.summary}
                                         </div>
-                                        <div className="text-[10px] text-text-secondary mt-0.5">
+                                        <div className="text-xs text-text-secondary mt-0.5">
                                             {provenanceCopy.detail}
                                         </div>
                                     </div>
 
                                     {evidenceCopy && (
                                         <div className="rounded border border-panel-border/30 bg-black/10 px-2 py-1.5">
-                                            <div className="text-[10px] font-semibold text-text-primary">
+                                            <div className="text-xs font-semibold text-text-primary">
                                                 {evidenceCopy.label}
                                             </div>
-                                            <div className="text-[10px] text-text-primary mt-0.5">
+                                            <div className="text-xs text-text-primary mt-0.5">
                                                 {evidenceCopy.summary}
                                             </div>
-                                            <div className="text-[10px] text-text-secondary mt-0.5">
+                                            <div className="text-xs text-text-secondary mt-0.5">
                                                 {evidenceCopy.detail}
                                             </div>
                                         </div>
                                     )}
 
-                                    {req.suggested_brigade_id && (
-                                        <div className="text-[10px] text-text-secondary">
-                                            {t('armyReserve.suggested')}: <span className="text-text-primary">{
-                                                getPlayerSafeBrigadeName(
-                                                    loadedGameState.formations.find(f => f.id === req.suggested_brigade_id)?.name,
-                                                )
-                                            }</span>
-                                        </div>
-                                    )}
                                     {!req.suggested_brigade_id && (
-                                        <div className="text-[10px] text-text-secondary italic">
+                                        <div className="text-xs text-text-secondary italic">
                                             {t('armyReserve.staffSelectionPending')}
                                         </div>
                                     )}
@@ -518,7 +539,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                         (scan context). The APPROVE action — elite-deploy — is issued from the
                                         Presidential Decision Room. Decline remains here: it dismisses the
                                         request (no Decision-Room decline path). */}
-                                    <div className={`text-[10px] ${commandAuthorityStatus === 'insufficient' ? 'text-[#d45555]' : 'text-text-secondary'}`}>
+                                    <div className={`text-xs ${commandAuthorityStatus === 'insufficient' ? 'text-[#d45555]' : 'text-text-secondary'}`}>
                                         {commandAuthorityStatus === 'unknown'
                                             ? t('armyReserve.commandAuthorityUnreported', { cost: ELITE_DEPLOY_COST })
                                             : t('armyReserve.commandAuthorityCost', { cost: ELITE_DEPLOY_COST })}
@@ -534,7 +555,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                             }}
                                             aria-label={t('armyReserve.declineRequestAria', { corps: requestCorpsName })}
                                             title={!ipc.isAvailable ? t('formationDetail.commandBridgeUnavailable') : undefined}
-                                            className={`px-2 py-1 border rounded text-[10px] transition-colors ${
+                                            className={`px-2 py-1 border rounded text-xs transition-colors ${
                                                 ipc.isAvailable
                                                     ? 'bg-black/30 border-panel-border/40 text-text-secondary hover:text-text-primary hover:bg-white/5'
                                                     : 'bg-white/5 border-white/10 text-text-secondary cursor-not-allowed'
@@ -559,7 +580,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                             aria-expanded={historyOpen}
                             aria-controls={`army-reserve-campaign-history-${armyHq.id}`}
                             aria-label={t(historyOpen ? 'armyReserve.collapseCampaignHistoryAria' : 'armyReserve.expandCampaignHistoryAria')}
-                            className="flex items-center gap-1.5 text-[10px] text-accent-gold uppercase tracking-widest font-bold opacity-70 hover:opacity-100 transition-opacity mb-2"
+                            className="flex items-center gap-1.5 text-xs text-accent-gold uppercase tracking-widest font-bold opacity-70 hover:opacity-100 transition-opacity mb-2"
                         >
                             <span>{historyOpen ? '▾' : '▸'}</span>
                             {t('armyReserve.campaignHistory')}
@@ -575,7 +596,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                     return (
                                         <div key={brigade.id} className="bg-black/10 border border-panel-border/30 rounded p-2 space-y-1.5">
                                             <div className="text-text-primary font-semibold">{getLocalizedFormationName(brigade, locale)}</div>
-                                            <div className="grid grid-cols-3 gap-1 text-[10px]">
+                                            <div className="grid grid-cols-3 gap-1 text-xs">
                                                 <div className="text-center">
                                                     <div className="text-text-secondary">{t('armyReserve.loans')}</div>
                                                     <div className="text-text-primary font-bold">{brigadeTracker.total_loans}</div>
@@ -592,7 +613,7 @@ export function ArmyReservePanel({ railSlot = 'primary', breadcrumb, onOpenDecis
                                             {brigadeTracker.episodes.length > 0 && (
                                                 <div className="space-y-1 pt-1 border-t border-panel-border/20">
                                                     {brigadeTracker.episodes.map(ep => (
-                                                        <div key={ep.episode_id} className="text-[10px] text-text-secondary flex items-center justify-between gap-2">
+                                                        <div key={ep.episode_id} className="text-xs text-text-secondary flex items-center justify-between gap-2">
                                                             <span>
                                                                 <span className="text-text-primary">{getCorpsName(ep.corps_id)}</span>
                                                                 {' '} - {reserveReasonLabel(ep.reason)}

@@ -37,7 +37,7 @@ import type { GameState } from '../src/state/game_state.js';
 
 function makeState(input: {
     corpsBrigades: Record<string, number>; // corpsId -> active brigade count
-    sectorOwners: Array<{ sectorId: string; corpsId: string; edgeCount: number; assigned: number; reserve: number; subSegments?: Array<{ subSegId: string; edgeCount: number; gap: boolean }> }>;
+    sectorOwners: Array<{ sectorId: string; corpsId: string; edgeCount: number; assigned: number; reserve: number; rear?: number; unstaffedFront?: boolean; subSegments?: Array<{ subSegId: string; edgeCount: number; gap: boolean }> }>;
 }): GameState {
     const formations: Record<string, any> = {};
     let bid = 0;
@@ -75,6 +75,7 @@ function makeState(input: {
         const corpsBrigadeIds = formationIdsByCorps[sec.corpsId] ?? [];
         const assignedIds: string[] = [];
         const reserveIds: string[] = [];
+        const rearIds: string[] = [];
         for (let i = 0; i < sec.assigned && assignedCounter + i < corpsBrigadeIds.length; i++) {
             const id = corpsBrigadeIds[assignedCounter + i];
             assignedIds.push(id);
@@ -87,6 +88,12 @@ function makeState(input: {
             assignedAcrossSectors.add(id);
         }
         assignedCounter += sec.reserve;
+        for (let i = 0; i < (sec.rear ?? 0) && assignedCounter + i < corpsBrigadeIds.length; i++) {
+            const id = corpsBrigadeIds[assignedCounter + i];
+            rearIds.push(id);
+            assignedAcrossSectors.add(id);
+        }
+        assignedCounter += sec.rear ?? 0;
         const subSegments = sec.subSegments?.map((s) => ({
             sub_segment_id: s.subSegId,
             edge_ids: Array.from({ length: s.edgeCount }, (_, k) => `${sec.sectorId}:e${k}`),
@@ -102,6 +109,8 @@ function makeState(input: {
             edge_ids: Array.from({ length: sec.edgeCount }, (_, k) => `${sec.sectorId}:e${k}`),
             assigned_brigade_ids: assignedIds,
             reserve_brigade_ids: reserveIds,
+            rear_brigade_ids: rearIds,
+            unstaffed_front: sec.unstaffedFront,
             sub_segments: subSegments,
             territory_osids: [],
         };
@@ -210,5 +219,50 @@ describe('LANE-B3 anomaly sector subtype classification', () => {
         expect(empties.length).toBe(2);
         const subtypes = empties.map((r) => r.subtype).sort();
         expect(subtypes).toEqual(['misallocated', 'pool_exhausted']);
+    });
+
+    it('suppresses the duplicate wide-gap warning for canonical unstaffed fronts deterministically', () => {
+        const state = makeState({
+            corpsBrigades: { vrs_1st_krajina: 0 },
+            sectorOwners: [{
+                sectorId: 'sector:vrs_1st_krajina:2',
+                corpsId: 'vrs_1st_krajina',
+                edgeCount: 5,
+                assigned: 0,
+                reserve: 0,
+                unstaffedFront: true,
+                subSegments: [{
+                    subSegId: 'subseg:sector:vrs_1st_krajina:2:0',
+                    edgeCount: 5,
+                    gap: true,
+                }],
+            }],
+        });
+
+        const first = runAnomalyDetection(state);
+        const second = runAnomalyDetection(state);
+
+        expect(first).toEqual(second);
+        expect(findReports(first, 'empty_contested_sector')).toEqual([]);
+        expect(findReports(first, 'undefended_front_subsegments')).toEqual([]);
+    });
+
+    it('counts rear brigades as sector ownership instead of surplus or an empty front', () => {
+        const state = makeState({
+            corpsBrigades: { vrs_1st_krajina: 1 },
+            sectorOwners: [{
+                sectorId: 'sector:vrs_1st_krajina:0',
+                corpsId: 'vrs_1st_krajina',
+                edgeCount: 5,
+                assigned: 0,
+                reserve: 0,
+                rear: 1,
+            }],
+        });
+        state.military.corps_front_sectors!['sector:vrs_1st_krajina:0']!.defensive_power = 10;
+
+        const reports = runAnomalyDetection(state);
+        expect(findReports(reports, 'empty_contested_sector')).toEqual([]);
+        expect(findReports(reports, 'phantom_sector_advantage')).toEqual([]);
     });
 });

@@ -21,8 +21,10 @@ import type {
 } from '../../../src/state/game_state.js';
 import type { CommanderDecisionTrace } from '../../../src/sim/combat/commander/commander_state.js';
 import { generateLevel1OpProposals } from '../../../src/sim/ai_commander/proposal_generation.js';
+import { applyCommanderOutput } from '../../../src/sim/combat/commander/commander_loop.js';
 import { evaluateEvents } from '../../../src/sim/events/evaluate_events.js';
 import type { EventDefinition } from '../../../src/sim/events/event_types.js';
+import { warPhases } from '../../../src/sim/turn_phases/war_phases.js';
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -290,6 +292,23 @@ describe('generateLevel1OpProposals: proposal shape from ready plan', () => {
         expect(p.proposed_value).toBe('approved');
     });
 
+    it('does not surface a ready plan with no operation targets', () => {
+        const state = makeState({
+            autonomyLevel: 1,
+            corpsEntries: [{ id: 'arbih_1st', planStatus: 'ready', planId: 'empty-plan' }],
+        });
+        const command = state.military.corps_command!.arbih_1st!;
+        command.commander_state = {
+            ...command.commander_state!,
+            current_plan: {
+                ...command.commander_state!.current_plan!,
+                target_osids: [],
+            },
+        };
+
+        expect(generateLevel1OpProposals(state, 'RBiH')).toEqual([]);
+    });
+
     it('proposal turn and faction match state', () => {
         const state = makeState({
             autonomyLevel: 1,
@@ -317,25 +336,25 @@ describe('generateLevel1OpProposals: proposal shape from ready plan', () => {
 // Group 3: Proposal from decision_trace (opportunity signal)
 // ---------------------------------------------------------------------------
 
-describe('generateLevel1OpProposals: from decision_trace winning_intent_id', () => {
-    it('generates proposal when winning_intent_id contains stage_operation', () => {
+describe('generateLevel1OpProposals: decision traces are not actionable plans', () => {
+    it('does not generate a proposal from stage_operation when current_plan is null', () => {
         const state = makeState({
             autonomyLevel: 1,
             turn: 5,
             corpsEntries: [{ id: 'arbih_1st', traceWinningIntentId: 'stage_operation_jajce' }],
         });
         const proposals = generateLevel1OpProposals(state, 'RBiH');
-        expect(proposals).toHaveLength(1);
+        expect(proposals).toEqual([]);
     });
 
-    it('generates proposal when winning_intent_id contains launch_opportunity', () => {
+    it('does not generate a proposal from launch_opportunity when current_plan is null', () => {
         const state = makeState({
             autonomyLevel: 1,
             turn: 5,
             corpsEntries: [{ id: 'arbih_1st', traceWinningIntentId: 'launch_opportunity' }],
         });
         const proposals = generateLevel1OpProposals(state, 'RBiH');
-        expect(proposals).toHaveLength(1);
+        expect(proposals).toEqual([]);
     });
 
     it('does not generate proposal when winning_intent_id is hold_line', () => {
@@ -410,7 +429,7 @@ describe('generateLevel1OpProposals: determinism', () => {
 // Group 6: player_op_response skip guard
 // ---------------------------------------------------------------------------
 
-describe('generateLevel1OpProposals: player_op_response same-turn skip guard', () => {
+describe('generateLevel1OpProposals: player_op_response skip guard', () => {
     it('skips corps that already has a player_op_response for same plan on same turn', () => {
         const state = makeState({
             autonomyLevel: 1,
@@ -444,7 +463,7 @@ describe('generateLevel1OpProposals: player_op_response same-turn skip guard', (
         expect(proposals).toHaveLength(1);
     });
 
-    it('does NOT skip when player_op_response is from a prior turn', () => {
+    it('skips when the matching player_op_response is from a prior turn', () => {
         const state = makeState({
             autonomyLevel: 1,
             turn: 5,
@@ -457,8 +476,126 @@ describe('generateLevel1OpProposals: player_op_response same-turn skip guard', (
                 },
             ],
         });
-        const proposals = generateLevel1OpProposals(state, 'RBiH');
-        expect(proposals).toHaveLength(1);
+        expect(generateLevel1OpProposals(state, 'RBiH')).toEqual([]);
+    });
+
+    it('never re-prompts a resolved exact plan identity', () => {
+        const state = makeState({
+            autonomyLevel: 1,
+            turn: 6,
+            corpsEntries: [{
+                id: 'arbih_1st',
+                planStatus: 'ready',
+                planId: 'plan_arbih_1st_t5',
+            }],
+        });
+        state.meta.pending_proposal_reviews = [{
+            id: 'PROP_5_ops_0',
+            turn: 5,
+            faction: 'RBiH',
+            domain: 'ops',
+            description: 'resolved plan',
+            proposed_action: 'APPROVE_OP:arbih_1st:plan_arbih_1st_t5',
+            accepted: true,
+            resolved_turn: 5,
+        }];
+
+        expect(generateLevel1OpProposals(state, 'RBiH')).toEqual([]);
+    });
+});
+
+describe('player_op_response lifecycle', () => {
+    it('survives apply-autonomy-transition until the matching commander can consume it', async () => {
+        const state = makeState({
+            autonomyLevel: 1,
+            turn: 6,
+            corpsEntries: [{
+                id: 'arbih_1st',
+                planStatus: 'ready',
+                planId: 'plan_arbih_1st_t5',
+                playerOpResponse: { plan_id: 'plan_arbih_1st_t5', approved: true, turn: 5 },
+            }],
+        });
+        const step = warPhases.find((phase) => phase.name === 'apply-autonomy-transition');
+        expect(step).toBeDefined();
+
+        await step!.run({ state, input: {}, report: {} } as any);
+
+        expect(state.military.corps_command?.arbih_1st?.player_op_response).toEqual({
+            plan_id: 'plan_arbih_1st_t5',
+            approved: true,
+            turn: 5,
+        });
+    });
+
+    it('keeps an approval authoritative when the commander emits no operation', () => {
+        const state = makeState({
+            autonomyLevel: 1,
+            turn: 6,
+            corpsEntries: [{
+                id: 'arbih_1st',
+                planStatus: 'ready',
+                planId: 'plan_arbih_1st_t5',
+                playerOpResponse: { plan_id: 'plan_arbih_1st_t5', approved: true, turn: 5 },
+            }],
+        });
+
+        applyCommanderOutput(state, 'arbih_1st', {
+            directive: { type: 'hold', target_zone: null },
+            operations: [],
+            sector_stances: [],
+            updated_state: {
+                ...state.military.corps_command!.arbih_1st!.commander_state!,
+                current_plan: {
+                    ...state.military.corps_command!.arbih_1st!.commander_state!.current_plan!,
+                    status: 'executing',
+                },
+            },
+            reinforcement_requests: [],
+            prepositioning_orders: [],
+            plan_updates: [],
+            garrison_locks: [],
+        } as any);
+
+        expect(state.military.corps_command?.arbih_1st?.player_op_response).toEqual({
+            plan_id: 'plan_arbih_1st_t5',
+            approved: true,
+            turn: 5,
+        });
+        expect(state.military.corps_command?.arbih_1st?.commander_state?.current_plan?.status).toBe('ready');
+    });
+
+    it('clears a rejected response when the commander consumes it', () => {
+        const state = makeState({
+            autonomyLevel: 1,
+            turn: 6,
+            corpsEntries: [{
+                id: 'arbih_1st',
+                planStatus: 'ready',
+                planId: 'plan_arbih_1st_t5',
+                playerOpResponse: { plan_id: 'plan_arbih_1st_t5', approved: false, turn: 5 },
+            }],
+        });
+
+        applyCommanderOutput(state, 'arbih_1st', {
+            directive: { type: 'hold', target_zone: null },
+            operations: [],
+            sector_stances: [],
+            updated_state: {
+                ...state.military.corps_command!.arbih_1st!.commander_state!,
+                current_plan: {
+                    ...state.military.corps_command!.arbih_1st!.commander_state!.current_plan!,
+                    status: 'executing',
+                },
+            },
+            reinforcement_requests: [],
+            prepositioning_orders: [],
+            plan_updates: [],
+            garrison_locks: [],
+        } as any);
+
+        expect(state.military.corps_command?.arbih_1st?.player_op_response).toBeUndefined();
+        expect(state.military.corps_command?.arbih_1st?.commander_state?.current_plan ?? null).toBeNull();
     });
 });
 

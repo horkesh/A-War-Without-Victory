@@ -212,33 +212,32 @@ function corpsHasLoanedElite(state: GameState, corpsId: string): boolean {
 
 function describeCorpsNeed(
     reason: ReserveRequestReason,
-    corpsId: string,
     description: string
 ): { purpose: ReserveRequestPurpose; whyNeeded: string; howToUse: string } {
     switch (reason) {
         case 'offensive_support':
             return {
                 purpose: 'offensive',
-                whyNeeded: `Corps ${corpsId} requests elite reinforcement to sustain offensive momentum. ${description}`,
+                whyNeeded: `This command requests elite reinforcement to sustain offensive momentum. ${description}`,
                 howToUse: 'Attach as assault reserve on the main axis, then consolidate captured front OSIDs.',
             };
         case 'exploitation':
             return {
                 purpose: 'offensive',
-                whyNeeded: `Corps ${corpsId} requests elite reinforcement to exploit a local breakthrough. ${description}`,
+                whyNeeded: `This command requests elite reinforcement to exploit a local breakthrough. ${description}`,
                 howToUse: 'Push the exploitation axis, secure flanks, and prevent enemy re-closure of the breach.',
             };
         case 'enclave_relief':
             return {
                 purpose: 'defensive',
-                whyNeeded: `Corps ${corpsId} requests elite reinforcement for enclave relief. ${description}`,
+                whyNeeded: `This command requests elite reinforcement for enclave relief. ${description}`,
                 howToUse: 'Open/hold a supply corridor and rotate exhausted defenders off the most threatened edge.',
             };
         case 'defensive_gap':
         default:
             return {
                 purpose: 'defensive',
-                whyNeeded: `Corps ${corpsId} requests elite reinforcement due to critical defensive weakness. ${description}`,
+                whyNeeded: `This command requests elite reinforcement due to critical defensive weakness. ${description}`,
                 howToUse: 'Anchor the thinnest sector-front sub-segment and stabilize local defensive depth.',
             };
     }
@@ -469,6 +468,33 @@ function issueEliteDeploymentOrder(
     };
 }
 
+function ensureActiveEliteDeploymentOrder(
+    state: GameState,
+    formation: FormationState,
+    brigadeId: FormationId,
+    corpsId: string,
+    adjacency?: Map<Osid, Osid[]>,
+): void {
+    if (!adjacency || !formation.location_osid) return;
+
+    const insideReceivingTerritory = sortedCorpsSectors(state, corpsId).some((sector) =>
+        (sector.territory_osids ?? []).includes(formation.location_osid!),
+    );
+    if (insideReceivingTerritory) return;
+
+    const movementOrder = state.military.brigade_movement_orders?.[brigadeId];
+    if (movementOrder?.stance === 'column' && movementOrder.destination_sids?.[0]) return;
+
+    const movementState = state.military.brigade_movement_state?.[brigadeId];
+    if (
+        movementState?.status === 'in_transit'
+        && movementState.stance === 'column'
+        && movementState.destination_sids?.[0]
+    ) return;
+
+    issueEliteDeploymentOrder(state, formation, brigadeId, corpsId, adjacency);
+}
+
 const COMMANDER_REQUEST_PRIORITY_SCORE: Record<'critical' | 'high' | 'medium' | 'low', number> = {
     critical: 90,
     high: 75,
@@ -513,7 +539,17 @@ export function generateArmyReserveRequests(
     const corpsSectors = state.military.corps_front_sectors ?? {};
     const turn = state.meta.turn;
 
-    const requests: ArmyReserveRequest[] = [];
+    type CandidateEdge = {
+        brigadeId: FormationId;
+        hops: number;
+    };
+    type MatchableRequest = {
+        request: ArmyReserveRequest;
+        candidates: CandidateEdge[];
+        matchedCandidate?: CandidateEdge;
+    };
+
+    const matchableRequests: MatchableRequest[] = [];
 
     const allCorpsIds = Object.keys(corpsCommand).sort(strictCompare);
 
@@ -639,9 +675,7 @@ export function generateArmyReserveRequests(
                 bestReason = inferredReason;
                 bestProvenanceDriver = 'commander_request';
                 bestRawPriority = rawPriority;
-                bestDescription =
-                    `Commander requested ${commanderNeed.brigadesNeeded} brigade(s) for ${commanderNeed.focusZoneId} ` +
-                    `(${commanderNeed.priority} priority)`;
+                bestDescription = `Commander reports ${commanderNeed.priority} reinforcement pressure across the active front`;
                 bestCommanderPriority = commanderNeed.priority;
                 bestCommanderBrigadesNeeded = commanderNeed.brigadesNeeded;
                 bestCommanderFocusZoneId = commanderNeed.focusZoneId;
@@ -657,61 +691,116 @@ export function generateArmyReserveRequests(
 
         if (!bestReason || !bestProvenanceDriver) continue;
 
-        // Find best available elite brigade (same faction, nearest)
+        // Collect every feasible elite edge. Assignment happens after all corps
+        // demands are known so one brigade cannot be promised more than once.
         const availableElites = getAvailableElites(state, corpsFaction, turn);
         if (availableElites.length === 0) continue;
 
-        const corpsRefOsid = getCorpsReferenceOsid(state, corpsId);
-        if (!corpsRefOsid) continue;
-
-        let bestBrigadeId: string | null = null;
-        let bestHops = Infinity;
-
+        const candidates: CandidateEdge[] = [];
         for (const bid of availableElites) {
             const f = formations[bid];
             const brigadeOsid = f.location_osid ?? f.home_osid;
             if (!brigadeOsid) continue;
-            const hops = computeOsidGraphDistance(brigadeOsid as Osid, corpsRefOsid as Osid, adjacency);
-            if (hops < bestHops) {
-                bestHops = hops;
-                bestBrigadeId = bid;
-            }
+            const hops = computeFriendlyDistanceToCorpsSectors(
+                state,
+                f.faction,
+                brigadeOsid as Osid,
+                corpsId,
+                adjacency,
+            );
+            if (!Number.isFinite(hops) || computeDeployPriority(bestRawPriority, hops) < 0) continue;
+            candidates.push({ brigadeId: bid, hops });
         }
 
-        if (bestBrigadeId === null || bestHops === Infinity) continue;
+        candidates.sort((a, b) => {
+            if (a.hops !== b.hops) return a.hops - b.hops;
+            return strictCompare(a.brigadeId, b.brigadeId);
+        });
+        const nearestCandidate = candidates[0];
+        if (!nearestCandidate) continue;
 
-        const priority = computeDeployPriority(bestRawPriority, bestHops);
-        if (priority < 0) continue; // too far for bot AI
+        const priority = computeDeployPriority(bestRawPriority, nearestCandidate.hops);
 
-        requests.push({
-            request_id: `req:${turn}:${corpsId}:${bestReason}`,
-            corps_id: corpsId,
-            faction: corpsFaction,
-            reason: bestReason,
-            provenance_driver: bestProvenanceDriver,
-            commander_request_priority: bestCommanderPriority,
-            commander_request_brigades_needed: bestCommanderBrigadesNeeded,
-            commander_focus_zone_id: bestCommanderFocusZoneId,
-            sector_threat_ratio: bestSectorThreatRatio,
-            sector_assigned_brigade_count: bestSectorAssignedBrigadeCount,
-            operation_name: bestOperationName,
-            operation_phase: bestOperationPhase,
-            operation_preparation_sub_phase: bestOperationPreparationSubPhase,
-            operation_momentum: bestOperationMomentum,
-            operation_objective_capture_count: bestOperationObjectiveCaptureCount,
-            purpose: describeCorpsNeed(bestReason, corpsId, bestDescription).purpose,
-            why_needed: describeCorpsNeed(bestReason, corpsId, bestDescription).whyNeeded,
-            how_to_use: describeCorpsNeed(bestReason, corpsId, bestDescription).howToUse,
-            priority,
-            raw_priority: bestRawPriority,
-            travel_hops: bestHops,
-            turn_requested: turn,
-            description: bestDescription,
-            suggested_brigade_id: bestBrigadeId,
+        matchableRequests.push({
+            candidates,
+            request: {
+                request_id: `req:${turn}:${corpsId}:${bestReason}`,
+                corps_id: corpsId,
+                faction: corpsFaction,
+                reason: bestReason,
+                provenance_driver: bestProvenanceDriver,
+                commander_request_priority: bestCommanderPriority,
+                commander_request_brigades_needed: bestCommanderBrigadesNeeded,
+                commander_focus_zone_id: bestCommanderFocusZoneId,
+                sector_threat_ratio: bestSectorThreatRatio,
+                sector_assigned_brigade_count: bestSectorAssignedBrigadeCount,
+                operation_name: bestOperationName,
+                operation_phase: bestOperationPhase,
+                operation_preparation_sub_phase: bestOperationPreparationSubPhase,
+                operation_momentum: bestOperationMomentum,
+                operation_objective_capture_count: bestOperationObjectiveCaptureCount,
+                purpose: describeCorpsNeed(bestReason, bestDescription).purpose,
+                why_needed: describeCorpsNeed(bestReason, bestDescription).whyNeeded,
+                how_to_use: describeCorpsNeed(bestReason, bestDescription).howToUse,
+                priority,
+                raw_priority: bestRawPriority,
+                travel_hops: nearestCandidate.hops,
+                turn_requested: turn,
+                description: bestDescription,
+                suggested_brigade_id: nearestCandidate.brigadeId,
+            },
         });
     }
 
-    // Sort descending by priority, tiebreak by corps_id ascending (determinism)
+    // Match higher-priority demands first. An augmenting path may move an
+    // incumbent to its next feasible brigade, but never drops that incumbent,
+    // so later demands cannot displace earlier ones when capacity is scarce.
+    matchableRequests.sort((a, b) => {
+        if (b.request.priority !== a.request.priority) return b.request.priority - a.request.priority;
+        return strictCompare(a.request.corps_id, b.request.corps_id);
+    });
+    const matchedRequestByBrigade = new Map<FormationId, MatchableRequest>();
+    const tryMatch = (entry: MatchableRequest, visitedBrigades: Set<FormationId>): boolean => {
+        // Prefer an unclaimed edge before relocating an earlier demand. This
+        // preserves priority/corps and candidate ordering whenever capacity
+        // permits a direct assignment.
+        for (const candidate of entry.candidates) {
+            if (visitedBrigades.has(candidate.brigadeId)) continue;
+            if (matchedRequestByBrigade.has(candidate.brigadeId)) continue;
+            matchedRequestByBrigade.set(candidate.brigadeId, entry);
+            entry.matchedCandidate = candidate;
+            return true;
+        }
+
+        // No free edge remains. Follow occupied edges in canonical order and
+        // relocate the incumbent only when the full augmenting path succeeds.
+        for (const candidate of entry.candidates) {
+            if (visitedBrigades.has(candidate.brigadeId)) continue;
+            visitedBrigades.add(candidate.brigadeId);
+
+            const incumbent = matchedRequestByBrigade.get(candidate.brigadeId);
+            if (!incumbent || !tryMatch(incumbent, visitedBrigades)) continue;
+
+            matchedRequestByBrigade.set(candidate.brigadeId, entry);
+            entry.matchedCandidate = candidate;
+            return true;
+        }
+        return false;
+    };
+    for (const entry of matchableRequests) {
+        tryMatch(entry, new Set<FormationId>());
+    }
+
+    const requests = matchableRequests
+        .filter((entry): entry is MatchableRequest & { matchedCandidate: CandidateEdge } => entry.matchedCandidate !== undefined)
+        .map(entry => ({
+            ...entry.request,
+            priority: computeDeployPriority(entry.request.raw_priority, entry.matchedCandidate.hops),
+            travel_hops: entry.matchedCandidate.hops,
+            suggested_brigade_id: entry.matchedCandidate.brigadeId,
+        }));
+
+    // Present the resulting actionable requests in canonical decision order.
     requests.sort((a, b) => {
         if (b.priority !== a.priority) return b.priority - a.priority;
         return strictCompare(a.corps_id, b.corps_id);
@@ -1076,7 +1165,10 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             }
         }
 
-        if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) continue;
+        if (turnsSinceLoan < ELITE_LOAN_MIN_DURATION) {
+            ensureActiveEliteDeploymentOrder(state, f, bid, ls.loaned_to_corps, adjacency);
+            continue;
+        }
 
         const corpsId = ls.loaned_to_corps;
         const cmd = corpsCommand[corpsId];
@@ -1096,6 +1188,8 @@ export function tickEliteLoans(state: GameState, turn: number, adjacency?: Map<O
             recallEliteLoan(state, bid, hadOp ? 'op_complete' : 'need_expired', turn);
             continue;
         }
+
+        ensureActiveEliteDeploymentOrder(state, f, bid, corpsId, adjacency);
 
     }
 }

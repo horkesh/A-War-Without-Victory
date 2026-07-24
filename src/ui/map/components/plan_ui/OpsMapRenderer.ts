@@ -9,6 +9,7 @@ import { buildFrontLinesGeoJSON } from '../../map/builders/buildFrontLinesGeoJSO
 import { ModalMapSource } from '../../utils/ModalMapSource';
 import styleJson from '../../map/awwv_map_style.json';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
+import { releaseMapWebGlContext, safeScalarMapPadding } from '../../map/mapContextLifecycle';
 
 export type OpType = 'offensive' | 'feint' | 'recon';
 
@@ -29,9 +30,38 @@ const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
 const DEFAULT_ZOOM = 8;
 const EMPTY_GEOJSON: FeatureCollection = { type: 'FeatureCollection', features: [] };
 const OPS_MAP_DEBUG = false;
+const OPS_MIN_CAMERA_BOUNDS_DELTA = 0.0005;
 
 function debugOpsMap(...args: unknown[]): void {
     if (OPS_MAP_DEBUG) console.debug('[OpsMap]', ...args);
+}
+
+function fitOpsBoundsOrEaseTo(
+    map: maplibregl.Map,
+    bounds: maplibregl.LngLatBounds,
+    options: { padding: number; maxZoom: number },
+): void {
+    const west = bounds.getWest();
+    const east = bounds.getEast();
+    const south = bounds.getSouth();
+    const north = bounds.getNorth();
+    const values = [west, east, south, north];
+    if (!values.every(Number.isFinite)) return;
+
+    const lngCollapsed = Math.abs(east - west) < OPS_MIN_CAMERA_BOUNDS_DELTA;
+    const latCollapsed = Math.abs(north - south) < OPS_MIN_CAMERA_BOUNDS_DELTA;
+    const padding = safeScalarMapPadding(map.getCanvas(), options.padding);
+    if (padding == null) return;
+    if (lngCollapsed || latCollapsed) {
+        map.easeTo({
+            center: bounds.getCenter(),
+            zoom: Math.min(map.getZoom(), options.maxZoom),
+            essential: true,
+        });
+        return;
+    }
+
+    map.fitBounds(bounds, { ...options, padding });
 }
 
 export class OpsMapRenderer {
@@ -107,7 +137,7 @@ export class OpsMapRenderer {
         this.mapReady.then(() => {
             const bounds = new maplibregl.LngLatBounds(coords[0], coords[0]);
             for (const c of coords) bounds.extend(c);
-            this.map.fitBounds(bounds, { padding: 60, maxZoom: 12 });
+            fitOpsBoundsOrEaseTo(this.map, bounds, { padding: 60, maxZoom: 12 });
         });
     }
 
@@ -125,7 +155,7 @@ export class OpsMapRenderer {
         this.osidDataSource = null;
         this.arrowsSource = null;
         this.markersSource = null;
-        if (this.map) this.map.remove();
+        if (this.map) releaseMapWebGlContext(this.map);
     }
 
     public updateOpType(type: OpType) {

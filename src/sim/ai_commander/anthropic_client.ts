@@ -21,7 +21,6 @@ export class AnthropicClient implements AiClient {
     }
 
     async generateDecision(prompt: AiPrompt): Promise<AiResponse> {
-        const startMs = Date.now();
         try {
             const response = await this.client.messages.create({
                 model: prompt.model,
@@ -41,7 +40,6 @@ export class AnthropicClient implements AiClient {
                 model: response.model,
                 prompt_tokens: response.usage.input_tokens,
                 completion_tokens: response.usage.output_tokens,
-                latency_ms: Date.now() - startMs,
             };
         } catch (error) {
             if (error instanceof Anthropic.APIError) {

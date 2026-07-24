@@ -574,6 +574,64 @@ describe('Event Decisions', () => {
         expect(state.military.event_flags!['test_flag']).toBeUndefined();
     });
 
+    it.each([
+        ['RS', 'rs_paramilitary_policy', 'always_allow'],
+        ['RBiH', 'rbih_paramilitary_policy', 'always_deny'],
+    ] as const)(
+        'resolveEventDecision synchronizes the %s player paramilitary policy carrier',
+        (faction, flag, policy) => {
+            const state = makeMinimalState(faction);
+            state.paramilitary_policy = 'ask';
+            state.military.pending_event_decisions = [
+                {
+                    event_id: `${faction}_paramilitary_policy_test`,
+                    event_title: 'Paramilitary Authorization Policy',
+                    turn_fired: 5,
+                    faction,
+                    response_options: [
+                        {
+                            id: policy,
+                            label: policy,
+                            effects: [],
+                            sets_flags: { [flag]: policy },
+                        },
+                    ],
+                },
+            ];
+
+            resolveEventDecision(state, `${faction}_paramilitary_policy_test`, policy);
+
+            expect(state.military.event_flags?.[flag]).toBe(policy);
+            expect(state.paramilitary_policy).toBe(policy);
+        },
+    );
+
+    it('does not let another faction paramilitary policy overwrite the loaded player policy', () => {
+        const state = makeMinimalState('RBiH');
+        state.paramilitary_policy = 'ask';
+        state.military.pending_event_decisions = [
+            {
+                event_id: 'rs_paramilitary_policy_test',
+                event_title: 'Paramilitary Authorization Policy',
+                turn_fired: 5,
+                faction: 'RS',
+                response_options: [
+                    {
+                        id: 'always_allow',
+                        label: 'Always allow',
+                        effects: [],
+                        sets_flags: { rs_paramilitary_policy: 'always_allow' },
+                    },
+                ],
+            },
+        ];
+
+        resolveEventDecision(state, 'rs_paramilitary_policy_test', 'always_allow');
+
+        expect(state.military.event_flags?.rs_paramilitary_policy).toBe('always_allow');
+        expect(state.paramilitary_policy).toBe('ask');
+    });
+
     it('resolveEventDecision applies dimension_shifts from chosen response', () => {
         const state = makeMinimalState('RBiH');
         // Set up minimal negotiation/dimension state

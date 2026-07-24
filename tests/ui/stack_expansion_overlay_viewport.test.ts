@@ -38,6 +38,14 @@ function formations(): FormationView[] {
   ] as FormationView[];
 }
 
+function largeStack(): FormationView[] {
+  return Array.from({ length: 9 }, (_, index) => ({
+    ...formations()[0]!,
+    id: `brigade_${index + 1}`,
+    name: `Brigade ${index + 1}`,
+  }));
+}
+
 describe('StackExpansionOverlay viewport behavior', () => {
   beforeEach(() => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
@@ -47,6 +55,28 @@ describe('StackExpansionOverlay viewport behavior', () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     cleanup();
+  });
+
+  it('is visible immediately without depending on a delayed mount timer', () => {
+    vi.useFakeTimers();
+
+    render(createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 300,
+      anchorY: 300,
+      formations: formations(),
+      onClose: vi.fn(),
+      onSelect: vi.fn(),
+    }));
+
+    const panel = document.querySelector('[data-stack-picker-panel="true"]');
+    const dialog = screen.getByRole('dialog', { name: /formation stack/i });
+    const backdrop = screen.getByRole('button', { name: /close formation stack/i });
+    expect(panel?.className).toContain('opacity-100');
+    expect(panel?.className).toContain('scale-100');
+    expect(panel?.className).not.toContain('opacity-0');
+    expect(backdrop.className).toContain('opacity-100');
+    expect(dialog).toBeTruthy();
   });
 
   it('clamps the orbital origin away from viewport edges so fanned units remain selectable', () => {
@@ -194,5 +224,38 @@ describe('StackExpansionOverlay viewport behavior', () => {
     expect(contact.querySelector('[data-raw-faction="RS"]')).toBeNull();
     expect(contact.querySelector('[data-raw-posture="attack"]')).toBeNull();
     expect(contact.querySelector('canvas')).toBeNull();
+  });
+
+  it('keeps stacks larger than seven bounded while exposing every exact member', () => {
+    vi.useFakeTimers();
+    const onSelect = vi.fn();
+
+    render(createElement(StackExpansionOverlay, {
+      osid: 'op:stacked',
+      anchorX: 300,
+      anchorY: 300,
+      formations: largeStack(),
+      playerFaction: 'RBiH',
+      onClose: vi.fn(),
+      onSelect,
+    }));
+
+    act(() => {
+      vi.advanceTimersByTime(25);
+    });
+
+    const memberList = document.querySelector('[data-stack-member-list="true"]');
+    const pickerPanel = document.querySelector('[data-stack-picker-panel="true"]');
+    expect(memberList?.className).toContain('max-h-[min(70vh,36rem)]');
+    expect(memberList?.className).toContain('overflow-y-auto');
+    expect(memberList?.className).toContain('min-h-0');
+    expect(memberList?.className).toContain('flex-1');
+    expect(pickerPanel?.className).toContain('max-h-[calc(100vh-2rem)]');
+    expect(pickerPanel?.className).toContain('overflow-hidden');
+    expect(screen.getAllByRole('button', { name: /Select Brigade/i })).toHaveLength(9);
+    expect(document.querySelector('[data-stack-selection-id="brigade_9"]')).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Select Brigade 9' }));
+    expect(onSelect).toHaveBeenCalledWith('brigade_9');
   });
 });

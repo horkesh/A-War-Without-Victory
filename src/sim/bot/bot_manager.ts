@@ -1,5 +1,6 @@
 import { FrontEdge } from '../../map/front_edges.js';
 import type { GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type { BotDecisions, ConsolidationContext } from './bot_interface.js';
 import {
     type BotDifficulty,
@@ -9,6 +10,7 @@ import {
 import { SimpleGeneralBot } from './simple_general_bot.js';
 
 interface BotManagerOptions {
+    /** Retained for caller compatibility; Engine Invariants 11.1 forbids using it for decisions. */
     seed?: string;
     difficulty?: BotDifficulty | string;
     scenarioStartWeek?: number;
@@ -34,12 +36,10 @@ export interface BotRunDiagnostics {
 export class BotManager {
     bots: BotEntry[] = [];
     difficulty: BotDifficulty;
-    private readonly rng: () => number;
     private readonly scenarioStartWeek: number;
 
     constructor(options: BotManagerOptions = {}) {
         this.difficulty = resolveBotDifficulty(options.difficulty);
-        this.rng = createRng(options.seed ?? 'bot-manager-seed');
         this.scenarioStartWeek = Number.isInteger(options.scenarioStartWeek) ? (options.scenarioStartWeek as number) : 0;
         const rbihStrategy = getBotStrategyProfile('RBiH');
         const rsStrategy = getBotStrategyProfile('RS');
@@ -72,12 +72,12 @@ export class BotManager {
 
     public runBots(state: GameState, frontEdges: FrontEdge[], consolidationContext?: ConsolidationContext): BotRunDiagnostics {
         const allDecisions: { bot: SimpleGeneralBot; decision: BotDecisions }[] = [];
-        const ordered = [...this.bots].sort((a, b) => a.bot.id.localeCompare(b.bot.id));
+        const ordered = [...this.bots].sort((a, b) => strictCompare(a.bot.id, b.bot.id));
         for (const entry of ordered) {
             allDecisions.push({
                 bot: entry.bot,
                 decision: entry.bot.makeDecisions(state, frontEdges, {
-                    rng: this.rng,
+                    rng: rejectRandomness,
                     difficulty: this.difficulty,
                     strategy: entry.strategy,
                     timeContext: {
@@ -106,7 +106,7 @@ export class BotManager {
                     formation_reassignments
                 };
             })
-            .sort((a, b) => a.bot_id.localeCompare(b.bot_id));
+            .sort((a, b) => strictCompare(a.bot_id, b.bot_id));
         this.applyDecisions(state, allDecisions);
         const total_reassignments = by_bot.reduce((sum, item) => sum + item.formation_reassignments, 0);
         return { by_bot, total_reassignments };
@@ -122,7 +122,7 @@ export class BotManager {
                     state.military.front_posture[bot.factionId] = { assignments: {} };
                 }
                 const assignments = state.military.front_posture[bot.factionId].assignments;
-                for (const [edgeId, posture] of Object.entries(decision.posture_assignments).sort(([a], [b]) => a.localeCompare(b))) {
+                for (const [edgeId, posture] of Object.entries(decision.posture_assignments).sort(([a], [b]) => strictCompare(a, b))) {
                     assignments[edgeId] = {
                         edge_id: edgeId,
                         posture: posture,
@@ -133,7 +133,7 @@ export class BotManager {
 
             // Apply Formation Moves
             if (decision.formation_assignments && state.military.formations) {
-                for (const [formationId, edgeId] of Object.entries(decision.formation_assignments).sort(([a], [b]) => a.localeCompare(b))) {
+                for (const [formationId, edgeId] of Object.entries(decision.formation_assignments).sort(([a], [b]) => strictCompare(a, b))) {
                     const formation = state.military.formations[formationId];
                     // Security check: only move own formations
                     if (formation && formation.faction === bot.factionId) {
@@ -148,21 +148,6 @@ export class BotManager {
     }
 }
 
-function createRng(seed: string): () => number {
-    let a = hashSeed(seed);
-    return () => {
-        a = (a + 0x6d2b79f5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
-function hashSeed(seed: string): number {
-    let h = 1779033703 ^ seed.length;
-    for (let i = 0; i < seed.length; i += 1) {
-        h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
-        h = (h << 13) | (h >>> 19);
-    }
-    return (h ^ (h >>> 16)) >>> 0;
+function rejectRandomness(): never {
+    throw new Error('Engine Invariants 11.1 prohibits bot randomness');
 }

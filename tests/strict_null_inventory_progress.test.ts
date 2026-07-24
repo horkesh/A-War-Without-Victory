@@ -10,6 +10,8 @@ const PHASE_1_FILES = [
 ];
 
 const PHASE_2_COMBAT_BATCH_4_FILES = [
+    'src/sim/combat/army_co_lifecycle.ts',
+    'src/sim/combat/army_co_roster_data.ts',
     'src/sim/combat/army_co_roster_loader.ts',
     'src/sim/combat/attack_casualty_distribution.ts',
     'src/sim/combat/combat_estimate.ts',
@@ -658,14 +660,19 @@ describe('strict null inventory progress', () => {
             // `last_recovery_source`). state domain; player-faction gated in war_phases and
             // absent on headless/historical saves, so calibration baselines remain
             // byte-identical. 519->523 / state 177->181. No new type-escape casts.
-            optional_fields_game_state: 523,
+            // Paramilitary request/decision receipts preserve their authored mode.
+            // +2 optional sim fields; no new type escapes.
+            // RS 52-week operation telemetry adds deterministic per-objective battle
+            // counters to OperationAxis and CorpsOperation. +2 optional sim fields;
+            // legacy saves remain absent-safe and no type escapes are required.
+            optional_fields_game_state: 527,
         });
-        expect(current.optional_field_domains.total).toBe(523);
+        expect(current.optional_field_domains.total).toBe(527);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 332,
+            sim: 336,
             state: 181,
             ui_adapter: 0,
             unknown: 0,

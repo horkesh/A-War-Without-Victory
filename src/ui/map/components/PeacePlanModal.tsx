@@ -3,19 +3,19 @@
  *
  * Renders when a pending peace plan exists in LoadedGameState.
  * Player can accept/reject through IPC, or review later while the plan stays pending.
- * Bot responses displayed alongside.
+ * Other delegations' precomputed responses remain hidden until resolution.
  * Paper document aesthetic matching EventModal.
  *
  * Migrated to the shared `<Modal>` wrapper in
  * LANE-V094-MODAL-DISMISSIBLE-EXTENSION. Must-respond modal:
  * `dismissible={false}` (no ESC, no click-outside) — the only valid close
- * path is an explicit panel action. Accept/Reject call `onDismiss`
- * (parent flips render guard) and resolve the plan via IPC; Review Later
- * only calls `onDismiss`. The
+ * path is an explicit panel action. Accept/Reject resolve the plan via IPC
+ * and call `onDismiss` only after success; Review Later only calls
+ * `onDismiss`. The
  * `onDismiss` prop is preserved on the panel content (NOT passed to Modal
  * as `onClose`) since Modal's master switch is `dismissible={false}`.
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { LoadedGameState } from '../data/types';
 import { useIPC } from '../desktop/useIPC';
 import { useGameStore } from '../store/gameStore';
@@ -23,7 +23,7 @@ import { getPlayerSafePoliticalFactionName } from '../utils/playerSafeText';
 import { Z } from '../../shared/zIndex';
 import { Modal } from '../../shared/Modal';
 import { playCue } from '../audio/audio_engine';
-import { t, type MessageKey } from '../i18n';
+import { t } from '../i18n';
 import { getDecisionHeaderForFamily } from '../data/presidentialDeskAssets';
 import { resolvePeacePlanStill } from '../data/peacePlanArt';
 import { turnToDateString } from '../utils/formatters';
@@ -35,11 +35,6 @@ const INSTITUTIONAL_LABELS: Record<string, string> = {
     loose_confederation: 'Loose Confederation',
     unitary: 'Unitary State',
     '10_provinces': '10 Decentralized Provinces',
-};
-
-const PEACE_RESPONSE_LABEL_KEYS: Record<string, MessageKey> = {
-    accepted: 'peacePlan.response.accepted',
-    rejected: 'peacePlan.response.rejected',
 };
 
 const FACTION_ORDER = ['RBiH', 'RS', 'HRHB'] as const;
@@ -65,10 +60,6 @@ function formatInstitutionalModel(model: string): string {
     return INSTITUTIONAL_LABELS[model] ?? t('peacePlan.institutionalModel.unknown');
 }
 
-function formatPeaceResponse(response: string): string {
-    return t(PEACE_RESPONSE_LABEL_KEYS[response] ?? 'peacePlan.response.unknown');
-}
-
 interface PeacePlanModalProps {
     plan: NonNullable<LoadedGameState['pendingPeacePlan']>;
     onDismiss: () => void;
@@ -77,7 +68,8 @@ interface PeacePlanModalProps {
 export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
     const ipc = useIPC();
     const setLoadError = useGameStore((s) => s.setLoadError);
-    const playerFaction = useGameStore((s) => s.loadedGameState?.player_faction ?? null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [responseError, setResponseError] = useState<string | null>(null);
     const headerImage = getDecisionHeaderForFamily('peace_plan');
     const planStill = resolvePeacePlanStill(plan.planId);
     const proposedFactionLabels = {
@@ -90,17 +82,28 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
         void playCue('peace_plan_offered');
     }, [plan.planId]);
 
-    const handleRespond = (response: 'accepted' | 'rejected') => {
-        // Dismiss immediately — don't wait for IPC
-        onDismiss();
-        if (ipc.isAvailable) {
-            ipc.resolvePeacePlan(plan.planId, response).then((result) => {
-                if (!result.ok) {
-                    setLoadError(result.error ?? 'Failed to resolve peace plan.');
-                }
-            }).catch((err) => {
-                console.error('[PeacePlanModal] Failed to resolve:', err);
-            });
+    const handleRespond = async (response: 'accepted' | 'rejected') => {
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
+        setResponseError(null);
+        try {
+            const result = await ipc.resolvePeacePlan(plan.planId, response);
+            if (!result.ok) {
+                const message = result.error ?? 'Failed to resolve peace plan.';
+                setResponseError(message);
+                setLoadError(message);
+                return;
+            }
+            onDismiss();
+        } catch (error) {
+            const message = error instanceof Error && error.message
+                ? error.message
+                : 'Failed to resolve peace plan.';
+            setResponseError(message);
+            setLoadError(message);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -120,9 +123,6 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
             widthPercent,
         };
     });
-    const otherFactionResponses = Object.entries(plan.botResponses)
-        .filter(([faction]) => faction !== playerFaction);
-
     return (
         <Modal
             isOpen={true}
@@ -147,16 +147,16 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         />
                     )}
                     <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-[#1b130c]/35 to-transparent" />
-                    <div className="absolute top-4 right-4 text-[9px] uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
+                    <div className="absolute top-4 right-4 text-xs uppercase tracking-widest text-[#8a7a60]/60 font-bold rotate-[-8deg] border-2 border-[#8a7a60]/30 px-2 py-1 rounded">
                         DIPLOMATIC
                     </div>
-                    <div className="text-[10px] uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
+                    <div className="text-xs uppercase tracking-[0.2em] text-[#8a7a60] font-bold mb-1">
                         International Peace Proposal
                     </div>
                     <h2 id="peace-plan-title" className="text-[20px] font-bold text-[#2a2016] leading-tight">
                         {plan.planName}
                     </h2>
-                    <div className="text-[11px] text-[#6a5a40] mt-1"
+                    <div className="text-xs text-[#6a5a40] mt-1"
                          style={{ fontFamily: 'Courier New, monospace' }}>
                         {t('peacePlan.proposedDate', { date: turnToDateString(plan.turnOffered) })}
                     </div>
@@ -193,7 +193,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
 
                 {/* Territorial Split */}
                 <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
+                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3">
                         Proposed Territorial Division
                     </div>
                     <div className="flex gap-1 h-5 rounded overflow-hidden border border-[#8a7a60]/30 mb-2">
@@ -211,48 +211,49 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                             />
                         ))}
                     </div>
-                    <div className="flex justify-between text-[11px] text-[#6a5a40]"
+                    <div className="flex justify-between text-xs text-[#6a5a40]"
                          style={{ fontFamily: 'Courier New, monospace' }}>
                         {splitRows.map((row) => (
                             <span key={row.faction}>{row.label} {formatPercent(row.displayPercent)}%</span>
                         ))}
                     </div>
-                    <div className="text-[11px] text-[#6a5a40] mt-2">
+                    <div className="text-xs text-[#6a5a40] mt-2">
                         <span className="font-bold text-[#2a2016]">{t('peace.institutionalModel')}</span>{' '}
                         {formatInstitutionalModel(plan.institutionalModel)}
                     </div>
                 </div>
 
-                {/* Bot Responses */}
+                {/* Other delegations' positions are simulation-private until the
+                    player commits. Resolution records the complete response map. */}
                 <div className="px-8 py-4 border-b border-[#c8b898]/40">
-                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
+                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-2">
                         {t('peacePlan.otherFactionResponses')}
                     </div>
                     <div className="space-y-1.5" data-testid="peace-plan-other-responses">
-                        {otherFactionResponses.map(([faction, response]) => (
-                            <div key={faction} className="flex items-center justify-between text-[12px]">
-                                <span className="text-[#2a2016]">{getPlayerSafePoliticalFactionName(faction)}</span>
-                                <span className={`font-bold text-[11px] px-2 py-0.5 rounded border ${
-                                    response === 'accepted'
-                                        ? 'text-[#2a6a2a] bg-[#d0e8d0] border-[#2a6a2a]/30'
-                                        : 'text-[#8a2a2a] bg-[#e8d0d0] border-[#8a2a2a]/30'
-                                }`}>
-                                    {formatPeaceResponse(response)}
-                                </span>
-                            </div>
-                        ))}
+                        <div className="text-[12px] italic text-[#5a4a34]">
+                            {t('peacePlan.otherFactionPositionsPending')}
+                        </div>
                     </div>
                 </div>
 
                 {/* Commander's Decision */}
                 <div className="px-8 py-5">
-                    <div className="text-[10px] uppercase tracking-widest text-[#8a7a60] font-bold mb-3 text-center">
+                    <div className="text-xs uppercase tracking-widest text-[#8a7a60] font-bold mb-3 text-center">
                         {t('peacePlan.decisionRequired')}
                     </div>
+                    {responseError && (
+                        <div
+                            role="alert"
+                            className="mb-3 border border-[#8a2a2a]/40 bg-[#e8d0d0] px-3 py-2 text-center text-[12px] font-bold text-[#6a1a1a]"
+                        >
+                            {responseError}
+                        </div>
+                    )}
                     <div className="flex gap-4 justify-center">
                         <button
                             type="button"
                             onClick={() => void handleRespond('accepted')}
+                            disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#2a6a2a]/50 bg-[#d0e8d0] text-[#1a4a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#b8d8b8] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
@@ -261,6 +262,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         <button
                             type="button"
                             onClick={onDismiss}
+                            disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#6a5a40]/35 bg-[#d8ceb8] text-[#4a3a24] font-bold text-[13px] uppercase tracking-wider hover:bg-[#c8b898] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >
@@ -269,6 +271,7 @@ export function PeacePlanModal({ plan, onDismiss }: PeacePlanModalProps) {
                         <button
                             type="button"
                             onClick={() => void handleRespond('rejected')}
+                            disabled={isSubmitting}
                             className="px-6 py-2.5 rounded border-2 border-[#8a2a2a]/50 bg-[#e8d0d0] text-[#6a1a1a] font-bold text-[13px] uppercase tracking-wider hover:bg-[#d8b8b8] transition-colors"
                             style={{ fontFamily: 'Courier New, monospace' }}
                         >

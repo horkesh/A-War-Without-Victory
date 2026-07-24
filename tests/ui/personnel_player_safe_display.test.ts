@@ -338,9 +338,9 @@ describe('PersonnelContent player-facing display', () => {
 
     const { container } = render(React.createElement(PersonnelContent));
 
-    expect(container.textContent ?? '').toMatch(/1[,.]800Total Personnel/);
+    expect(container.textContent ?? '').toMatch(/1[,.]800Fielded personnel now/);
     expect(container.textContent).toContain('2Active Brigades');
-    expect(container.textContent ?? '').not.toMatch(/2[,.]500Total Personnel/);
+    expect(container.textContent ?? '').not.toMatch(/2[,.]500Fielded personnel now/);
     expect(container.textContent).not.toContain('3Active Brigades');
   });
 

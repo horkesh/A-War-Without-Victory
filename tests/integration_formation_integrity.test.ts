@@ -1,16 +1,15 @@
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { existsSync } from 'node:fs';
 import { readFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { runScenario } from '../src/scenario/scenario_runner.js';
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
-import type { GameState, FormationState, FactionId } from '../src/state/game_state.js';
+import { runScenario } from '../src/scenario/scenario_runner.js';
 import {
-    DISSOLUTION_PERSONNEL_THRESHOLD,
     DISSOLUTION_COHESION_THRESHOLD,
     DISSOLUTION_MORALE_THRESHOLD,
-    DISSOLUTION_PERSONNEL_CAP,
+    DISSOLUTION_PERSONNEL_THRESHOLD,
 } from '../src/sim/combat/brigade_dissolution.js';
+import type { FormationState, GameState } from '../src/state/game_state.js';
 
 const SCENARIO_40W = join(process.cwd(), 'data', 'scenarios', 'apr1992_definitive_40w.json');
 const OUT_DIR = join(process.cwd(), '.tmp_integration_formation_integrity');
@@ -32,133 +31,61 @@ describe('formation integrity (40w)', () => {
         state = JSON.parse(json);
     }, 600_000);
 
-    it('no active brigade has location_osid in enemy territory (>5%)', () => {
+    it('every active physical combat formation has exact-faction-controlled location_osid', () => {
         if (skipped) return;
-        const controllers = (state as any).political.political_controllers;
-        const formations = (state as any).military.formations;
+        const controllers = state.political.political_controllers ?? {};
+        const formations = state.military.formations ?? {};
         const violations: string[] = [];
+        const nonSpatialKinds = new Set(['corps', 'corps_asset', 'army_hq']);
 
-        for (const [id, f] of Object.entries(formations)) {
-            const fm = f as FormationState;
+        for (const [id, fm] of Object.entries(formations)) {
             if (fm.status !== 'active') continue;
-            if (fm.kind !== 'brigade') continue;
-            if (!fm.location_osid) continue;
+            if (nonSpatialKinds.has(fm.kind ?? 'brigade')) continue;
+            if (!fm.location_osid) {
+                violations.push(`${id} (${fm.faction}) has no location_osid`);
+                continue;
+            }
 
             const controller = controllers[fm.location_osid];
-            if (!controller) continue; // uncontrolled is OK
-
-            const faction = fm.faction as FactionId;
-            // Same faction = friendly. Also check alliance (RBiH+HRHB allied when alliance > 0)
-            const alliance = (state as any).political.war_alliance_rbih_hrhb ?? 1;
-            const isFriendly =
-                controller === faction ||
-                (alliance > 0 && (
-                    (faction === 'RBiH' && controller === 'HRHB') ||
-                    (faction === 'HRHB' && controller === 'RBiH')
-                ));
-
-            if (!isFriendly) {
-                violations.push(`${id} (${faction}) at ${fm.location_osid} controlled by ${controller}`);
+            if (controller !== fm.faction) {
+                violations.push(`${id} (${fm.faction}) at ${fm.location_osid} controlled by ${controller ?? 'null'}`);
             }
         }
 
-        // Allow small number of transient violations (operations in progress)
-        // but flag if more than 5% of brigades are in enemy territory
-        const totalActive = Object.values(formations)
-            .filter((f: any) => f.status === 'active' && f.kind === 'brigade')
-            .length;
-        const violationRate = violations.length / Math.max(totalActive, 1);
-        expect(violationRate,
-            `${violations.length}/${totalActive} brigades in enemy territory: ${violations.slice(0, 5).join(', ')}`
-        ).toBeLessThan(0.05);
+        expect(violations).toEqual([]);
     });
 
     it('no formation has negative personnel', () => {
         if (skipped) return;
-        const formations = (state as any).military.formations;
+        const formations = state.military.formations ?? {};
 
-        for (const [id, f] of Object.entries(formations)) {
-            const fm = f as FormationState;
-            if (fm.personnel === undefined) continue; // corps may not track personnel directly
+        for (const [id, fm] of Object.entries(formations)) {
+            if (fm.personnel === undefined) continue;
             expect(fm.personnel, `${id} personnel`).toBeGreaterThanOrEqual(0);
         }
     });
 
-    it('no active non-enclave brigade meets 2-of-3 dissolution criteria', () => {
+    it('no active brigade meets its canonical dissolution criteria', () => {
         if (skipped) return;
-        const formations = (state as any).military.formations;
+        const formations = state.military.formations ?? {};
         const violations: string[] = [];
 
-        for (const [id, f] of Object.entries(formations)) {
-            const fm = f as FormationState;
-            if (fm.status !== 'active') continue;
-            if (fm.kind !== 'brigade') continue;
-            if ((fm as any).is_enclave) continue; // enclave brigades have higher bar
-            // HRHB pocket brigades in central Bosnia enclaves degrade below thresholds
-            // before the dissolution step catches them — structurally expected.
-            // Also: pocket_destroyable tagged brigades are awaiting pocket overrun.
-            const tags: string[] = Array.isArray((fm as any).tags) ? (fm as any).tags : [];
-            if (tags.includes('pocket_destroyable')) continue;
-            // hvo_central_bosnia brigades in isolated pockets (Busovaca, Kiseljak) degrade
-            // naturally but their pocket hasn't been overrun — not a dissolution bug
-            if ((fm as any).corps_id === 'hvo_central_bosnia') continue;
+        for (const [id, fm] of Object.entries(formations) as Array<[string, FormationState]>) {
+            if (fm.status !== 'active' || fm.kind !== 'brigade') continue;
 
             const personnel = fm.personnel ?? 1000;
             const cohesion = fm.cohesion ?? 60;
             const morale = fm.morale ?? 60;
-
-            // Mirror dissolution logic: brigades above the personnel cap are demoralized,
-            // not destroyed — combat penalties apply but dissolution does not fire.
-            if (personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
-
             let criteriaCount = 0;
             if (personnel < DISSOLUTION_PERSONNEL_THRESHOLD) criteriaCount++;
             if (cohesion <= DISSOLUTION_COHESION_THRESHOLD) criteriaCount++;
             if (morale <= DISSOLUTION_MORALE_THRESHOLD) criteriaCount++;
 
-            if (criteriaCount >= 2) {
+            const requiredCriteria = fm.tags?.includes('enclave') ? 3 : 2;
+            if (criteriaCount >= requiredCriteria) {
                 violations.push(
-                    `${id}: personnel=${personnel}, cohesion=${cohesion}, morale=${morale} (${criteriaCount}/3 criteria met)`
+                    `${id}: personnel=${personnel}, cohesion=${cohesion}, morale=${morale} (${criteriaCount}/3 criteria met)`,
                 );
-            }
-        }
-
-        // Allow up to 2 brigades exhausted-but-not-destroyed. These are genuinely
-        // combat-spent front brigades (cohesion/morale floored to 0 by sustained
-        // attrition) whose personnel stays well above the dissolution floor/cap, so
-        // the dissolution module correctly demotes them to readiness='degraded'
-        // (ENGINE-2 cohesion-only-dissolution prevention) rather than destroying them.
-        //
-        // TG activation (all 7 flags default-ON, commit 0b681ffe) is the driver of
-        // the 1→2 increase: TGs are the primary ops path, so more offensives launch
-        // and more front brigades fight to exhaustion. VERIFIED (40w, 2026-05-30): the
-        // two offending brigades (arbih_303rd_vitezka_mountain, arbih_330th_liberation)
-        // are 3rd-Corps light-infantry units that are NOT TG donors — no
-        // personnel_lent_by_tg, no tg_donations_this_scenario, no cohesion-bleed, no
-        // recovery-suppression, zero tg_participations. Their cohesion=0/morale=0 comes
-        // entirely from ordinary combat attrition, not from the TG Pyrrhic cost. The
-        // Pyrrhic cohesion-bleed only reduces a DONOR's cohesion (clamped >= 0; never
-        // touches personnel or morale), and the dissolution guard prevents any
-        // above-floor brigade from being destroyed — so TGs never push a home brigade
-        // toward dissolution. This is an intended consequence of higher op tempo, not
-        // a dissolution defect.
-        expect(violations.length, `Brigades meeting dissolution criteria but still active: ${violations.join(', ')}`).toBeLessThanOrEqual(2);
-    });
-
-    it('all active brigades have location_osid that exists in political_controllers or is null', () => {
-        if (skipped) return;
-        const formations = (state as any).military.formations;
-        const controllers = (state as any).political.political_controllers;
-        const violations: string[] = [];
-
-        for (const [id, f] of Object.entries(formations)) {
-            const fm = f as FormationState;
-            if (fm.status !== 'active') continue;
-            if (fm.kind !== 'brigade') continue;
-            if (fm.location_osid === null || fm.location_osid === undefined) continue;
-
-            if (!(fm.location_osid in controllers)) {
-                violations.push(`${id} at unknown OSID: ${fm.location_osid}`);
             }
         }
 

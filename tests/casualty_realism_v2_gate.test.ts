@@ -18,7 +18,7 @@
  * Determinism: each test snapshots/restores process.env and resets the override.
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
     isCasualtyRealismV2Enabled,
@@ -63,6 +63,16 @@ describe('B1 casualty-realism V2 gate', () => {
 
     it('defaults ON when env unset and no override (EH-2 MC-leak fix is standard)', () => {
         expect(isCasualtyRealismV2Enabled()).toBe(true);
+    });
+
+    it('defaults ON in browser runtimes where process is unavailable', () => {
+        const runtimeProcess = process;
+        vi.stubGlobal('process', undefined);
+        try {
+            expect(isCasualtyRealismV2Enabled()).toBe(true);
+        } finally {
+            vi.stubGlobal('process', runtimeProcess);
+        }
     });
 
     it('disables only on explicit falsy env values (default ON otherwise)', () => {

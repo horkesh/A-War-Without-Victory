@@ -99,7 +99,7 @@ export function CinematicVerdict({
             />
             <div className="relative grid gap-3 px-4 py-3 sm:gap-5 sm:px-7 sm:py-5 lg:grid-cols-[1.25fr_0.75fr]">
                 <div className="min-w-0">
-                    <div className="text-[10px] text-text-secondary">
+                    <div className="text-xs text-text-secondary">
                         {metricText(dateLabel)} / {metricText(durationLabel)} / {verdict.outcome_label}
                     </div>
                     <h1 className="mt-1 text-[24px] font-semibold leading-tight text-text-primary sm:mt-2 sm:text-[34px]">
@@ -116,16 +116,16 @@ export function CinematicVerdict({
                 </div>
 
                 <div className="min-w-0 border-t border-panel-border/70 pt-3 sm:pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-                    <div className="text-[10px] font-semibold text-text-primary">
+                    <div className="text-xs font-semibold text-text-primary">
                         {scene.costEmphasis.title}
                     </div>
-                    <p className="mt-1 text-[11px] leading-relaxed text-text-secondary sm:mt-2 sm:text-[12px]">
+                    <p className="mt-1 text-xs leading-relaxed text-text-secondary sm:mt-2 sm:text-[12px]">
                         {scene.costEmphasis.text}
                     </p>
                     {comparisonCallouts.length > 0 && (
                         <div className="mt-2 space-y-1 sm:mt-4 sm:space-y-2" data-awwv-cinematic-comparison={comparisonCallouts.length}>
                             {comparisonCallouts.map(callout => (
-                                <div key={callout} className="border-l-2 pl-2 text-[10px] leading-relaxed text-text-secondary sm:pl-3 sm:text-[11px]"
+                                <div key={callout} className="border-l-2 pl-2 text-xs leading-relaxed text-text-secondary sm:pl-3 sm:text-xs"
                                      style={{ borderLeftColor: accent }}>
                                     {formatHistoricalDivergenceNote(callout)}
                                 </div>
@@ -134,18 +134,18 @@ export function CinematicVerdict({
                     )}
                     <div className="mt-2 border-t border-panel-border/70 pt-2 sm:mt-4 sm:pt-3">
                         <div className="flex items-center justify-between gap-3">
-                            <div className="text-[10px] font-semibold text-text-primary">
+                            <div className="text-xs font-semibold text-text-primary">
                                 {t('verdict.shareSummary')}
                             </div>
                             <button
                                 type="button"
                                 onClick={copySummary}
-                                className="shrink-0 border border-panel-border px-3 py-1 text-[10px] font-semibold text-text-secondary hover:bg-white/5"
+                                className="shrink-0 border border-panel-border px-3 py-1 text-xs font-semibold text-text-secondary hover:bg-white/5"
                             >
                                 {t('verdict.copy')}
                             </button>
                         </div>
-                        <pre className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-[10px] leading-relaxed text-text-secondary/85 sm:block">
+                        <pre className="mt-2 hidden max-h-28 overflow-auto whitespace-pre-wrap break-words text-xs leading-relaxed text-text-secondary/85 sm:block">
                             {shareSummary}
                         </pre>
                     </div>
@@ -158,7 +158,7 @@ export function CinematicVerdict({
 function VerdictMetric({ label, value, accent }: { label: string; value: string; accent: string }) {
     return (
         <div className="min-w-0 border-t border-panel-border/70 pt-2">
-            <div className="text-[9px] text-text-secondary/70">{label}</div>
+            <div className="text-xs text-text-secondary/70">{label}</div>
             <div className="mt-1 break-words text-[12px] font-semibold text-text-primary" style={{ color: accent }}>
                 {value}
             </div>

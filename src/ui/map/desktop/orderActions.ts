@@ -5,7 +5,7 @@ import type { LastTurnReport, StagedOrder } from '../store/gameStore';
 import { playerFacingErrorCopy } from '../utils/errorCopy';
 
 interface AdvanceTurnDeps {
-    ipc: Pick<IPC, 'advanceTurn'>;
+    ipc: Pick<IPC, 'advanceTurn' | 'getCurrentGameState'>;
     loadSave: (jsonOrText: unknown | string) => Promise<void>;
     clearStagedOrders: () => void;
     setLoadError: (msg: string | null) => void;
@@ -54,15 +54,20 @@ export async function advanceTurnAndSync({
     const previousState = getCurrentState?.() ?? null;
     setTurnAftermathDigest?.(null);
     const result = await ipc.advanceTurn();
-    if (!result.ok || !result.stateJson) {
+    if (!result.ok) {
         setLoadError(playerFacingErrorCopy(result.error ?? 'Advance turn failed.'));
+        return;
+    }
+    const stateJson = await ipc.getCurrentGameState();
+    if (!stateJson) {
+        setLoadError('Turn advanced, but the updated player-visible state was unavailable.');
         return;
     }
     clearStagedOrders();
     const report = normalizeTurnReport(result.report);
     if (report) setLastTurnReport?.(report);
     try {
-        await loadSave(result.stateJson);
+        await loadSave(stateJson);
         const nextState = getCurrentState?.() ?? null;
         const aftermath = buildTurnAftermathView({
             previousState,

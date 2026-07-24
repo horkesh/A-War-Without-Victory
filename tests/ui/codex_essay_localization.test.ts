@@ -55,15 +55,15 @@ describe('Codex essay localization coverage', () => {
         }
     });
 
-    it('resolves localized Bosnian title, category, and paragraphs', () => {
+    it('resolves localized Bosnian title, category, and paragraphs from scenario start', () => {
         const essay = essays[0];
         const bcs = resolveCodexEssay(essay, {
-            firedEventIds: new Set([essay.event_id]),
-            gameOver: true,
+            firedEventIds: new Set(),
+            gameOver: false,
         }, 'bcs');
         const en = resolveCodexEssay(essay, {
-            firedEventIds: new Set([essay.event_id]),
-            gameOver: true,
+            firedEventIds: new Set(),
+            gameOver: false,
         }, 'en');
 
         expect(bcs.title).toBe(essay.localizations?.bcs?.title);

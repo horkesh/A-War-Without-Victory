@@ -5,10 +5,11 @@
  * Documentary tone. No sentimentality. The horror speaks for itself.
  *
  * Called from UI side (ChiefOfStaffBriefing) using adapter data.
- * NO Math.random(), NO Date.now() — determinism is sacred.
+ * Selection uses casualty evidence and canonical ordering only.
  */
 
 import type { TurnBattle } from '../state/turn_summary.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { splitKiaWiaMia } from './combat/attack_casualty_distribution.js';
 
 // ── Template & name pool types ──────────────────────────────────────
@@ -27,27 +28,22 @@ interface LetterHomeData {
     name_pools: Record<string, string[]>;
 }
 
-// ── Deterministic hash ──────────────────────────────────────────────
+const CANONICAL_FALLBACK_AGE = 18;
 
-/**
- * Deterministic hash from turn + casualties.
- * Used to select template, name, age, municipality without Math.random().
- * Multiply by primes, XOR, modulo.
- */
-function deterministicHash(turn: number, totalCasualties: number, salt: number): number {
-    return Math.abs(((turn * 2654435761) ^ (totalCasualties * 40503) ^ (salt * 12289)) | 0);
+function canonicalFirst(values: readonly string[]): string | undefined {
+    return [...values].sort(strictCompare)[0];
 }
 
-function selectTemplate(turn: number, totalCasualties: number, templateCount: number): number {
-    return deterministicHash(turn, totalCasualties, 1) % templateCount;
-}
-
-function selectName(turn: number, totalCasualties: number, poolSize: number, salt: number): number {
-    return deterministicHash(turn, totalCasualties, salt) % poolSize;
-}
-
-function computeAge(turn: number, totalCasualties: number): number {
-    return 18 + (deterministicHash(turn, totalCasualties, 7) % 30);
+function selectContextLocation(values: readonly string[], municipality: string): string {
+    const normalizedMunicipality = municipality.toLowerCase();
+    return [...values].sort((a, b) => {
+        const aMatches = normalizedMunicipality !== 'unknown'
+            && a.toLowerCase().includes(normalizedMunicipality);
+        const bMatches = normalizedMunicipality !== 'unknown'
+            && b.toLowerCase().includes(normalizedMunicipality);
+        if (aMatches !== bMatches) return aMatches ? -1 : 1;
+        return strictCompare(a, b);
+    })[0] ?? 'unknown';
 }
 
 // ── Casualty type determination ─────────────────────────────────────
@@ -123,6 +119,35 @@ interface BattleFormationInfo {
     turns_under_siege?: number;
 }
 
+interface CasualtyBattleCandidate {
+    battle: TurnBattle;
+    casualties: number;
+    isAttacker: boolean;
+    primaryBrigadeId: string;
+}
+
+function compareCasualtyBattles(a: CasualtyBattleCandidate, b: CasualtyBattleCandidate): number {
+    if (b.casualties !== a.casualties) return b.casualties - a.casualties;
+    const osidDifference = strictCompare(a.battle.osid, b.battle.osid);
+    if (osidDifference !== 0) return osidDifference;
+    return strictCompare(a.primaryBrigadeId, b.primaryBrigadeId);
+}
+
+function compareTemplatesByEvidence(
+    a: LetterTemplate,
+    b: LetterTemplate,
+    directFields: ReadonlySet<string>,
+): number {
+    const aDirect = a.required_fields.filter(field => directFields.has(field)).length;
+    const bDirect = b.required_fields.filter(field => directFields.has(field)).length;
+    if (bDirect !== aDirect) return bDirect - aDirect;
+
+    const aFallbacks = a.required_fields.length - aDirect;
+    const bFallbacks = b.required_fields.length - bDirect;
+    if (aFallbacks !== bFallbacks) return aFallbacks - bFallbacks;
+    return strictCompare(a.id, b.id);
+}
+
 // ── Main generation function ────────────────────────────────────────
 
 export interface LetterHomeInput {
@@ -148,8 +173,7 @@ export interface LetterHomeInput {
  */
 export function generateLetterHome(input: LetterHomeInput): string | null {
     const {
-        turn, faction,
-        factionKilled, factionWounded, factionMissing,
+        faction,
         factionBattles, formationLookup, templateData,
         locale = 'en',
     } = input;
@@ -163,8 +187,7 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     let turnMissing = 0;
     let wasAttacker = false;
     let siegeActive = false;
-    let primaryBrigadeId: string | null = null;
-    let battleOsid: string | null = null;
+    const casualtyBattles: CasualtyBattleCandidate[] = [];
 
     for (const battle of factionBattles) {
         const isAttacker = battle.attacker_faction === faction;
@@ -181,11 +204,10 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
 
         if (isAttacker) wasAttacker = true;
 
-        // Pick the first battle with casualties as the featured one
-        if (!primaryBrigadeId) {
-            primaryBrigadeId = isAttacker ? battle.primary_attacker_id : (battle.primary_defender_id ?? battle.primary_attacker_id);
-            battleOsid = battle.osid;
-        }
+        const primaryBrigadeId = isAttacker
+            ? battle.primary_attacker_id
+            : (battle.primary_defender_id ?? battle.primary_attacker_id);
+        casualtyBattles.push({ battle, casualties, isAttacker, primaryBrigadeId });
 
         // Check if any participating brigade has siege history
         const brigadeId = isAttacker ? battle.primary_attacker_id : battle.primary_defender_id;
@@ -200,79 +222,71 @@ export function generateLetterHome(input: LetterHomeInput): string | null {
     // Skip if zero casualties this turn
     if (turnKilled + turnWounded + turnMissing === 0) return null;
 
-    // Total cumulative KIA is the seed (spec says totalKIA)
-    const totalKIA = factionKilled;
+    casualtyBattles.sort(compareCasualtyBattles);
+    const featuredBattle = casualtyBattles[0]!;
+    const primaryBrigadeId = featuredBattle.primaryBrigadeId;
+    const battleOsid = featuredBattle.battle.osid;
+    const primaryFormation = formationLookup.get(primaryBrigadeId);
+
+    const directFields = new Set<string>();
+    if (primaryFormation?.home_osid) directFields.add('municipality');
+    if (primaryFormation?.name) directFields.add('brigade');
+    if (battleOsid) directFields.add('circumstance');
 
     // Determine casualty type
     const casualtyType = determineCasualtyType(turnKilled, turnWounded, turnMissing, siegeActive, wasAttacker);
 
     // Filter templates by casualty type
-    const matchingTemplates = templateData.templates.filter(t => t.casualty_type === casualtyType);
+    const matchingTemplates = templateData.templates
+        .filter(t => t.casualty_type === casualtyType)
+        .sort((a, b) => compareTemplatesByEvidence(a, b, directFields));
     if (matchingTemplates.length === 0) return null;
 
-    // Select template
-    const templateIdx = selectTemplate(turn, totalKIA, matchingTemplates.length);
-    const template = matchingTemplates[templateIdx];
+    const template = matchingTemplates[0]!;
 
     // Name pools
     const ethnicity = FACTION_ETHNICITY[faction] ?? 'bosniak';
-    const malePool = templateData.name_pools[`${ethnicity}_male`] ?? [];
-    const femalePool = templateData.name_pools[`${ethnicity}_female`] ?? [];
-    const surnamePool = templateData.name_pools[`${ethnicity}_surnames`] ?? [];
+    const malePool = [...(templateData.name_pools[`${ethnicity}_male`] ?? [])].sort(strictCompare);
+    const femalePool = [...(templateData.name_pools[`${ethnicity}_female`] ?? [])].sort(strictCompare);
+    const surnamePool = [...(templateData.name_pools[`${ethnicity}_surnames`] ?? [])].sort(strictCompare);
 
     if (malePool.length === 0 || surnamePool.length === 0) return null;
 
-    // Select names
-    const firstNameIdx = selectName(turn, totalKIA, malePool.length, 2);
-    const surnameIdx = selectName(turn, totalKIA, surnamePool.length, 3);
-    const femaleNameIdx = femalePool.length > 0 ? selectName(turn, totalKIA, femalePool.length, 4) : 0;
-
-    const firstName = malePool[firstNameIdx];
-    const surname = surnamePool[surnameIdx];
+    const firstName = canonicalFirst(malePool)!;
+    const surname = canonicalFirst(surnamePool)!;
     const fullName = `${firstName} ${surname}`;
-    const wifeName = femalePool.length > 0 ? femalePool[femaleNameIdx] : 'unknown';
+    const wifeName = canonicalFirst(femalePool) ?? 'unknown';
 
-    // Age
-    const age = computeAge(turn, totalKIA);
+    // No person-level age exists in state; use the explicit minimum-age fallback.
+    const age = CANONICAL_FALLBACK_AGE;
 
-    // Rank
+    // Rank order is semantic (lowest to highest), so the first authored rank is canonical.
     const rankPool = RANKS[locale] ?? RANKS.en;
-    const rankIdx = deterministicHash(turn, totalKIA, 5) % rankPool.length;
-    const rank = rankPool[rankIdx];
+    const rank = rankPool[0]!;
 
     // Municipality from brigade home_osid
     let municipality = 'unknown';
-    if (primaryBrigadeId) {
-        const info = formationLookup.get(primaryBrigadeId);
-        if (info?.home_osid) {
-            municipality = municipalityFromOsid(info.home_osid);
-        }
+    if (primaryFormation?.home_osid) {
+        municipality = municipalityFromOsid(primaryFormation.home_osid);
     }
 
     // Brigade display name
     let brigadeName = locale === 'bcs' ? 'njegova jedinica' : 'his unit';
-    if (primaryBrigadeId) {
-        const info = formationLookup.get(primaryBrigadeId);
-        if (info?.name) {
-            brigadeName = info.name;
-        }
+    if (primaryFormation?.name) {
+        brigadeName = primaryFormation.name;
     }
 
     // Circumstance from battle OSID
     let circumstance = locale === 'bcs' ? 'linija fronta' : 'the front line';
-    if (battleOsid) {
-        circumstance = municipalityFromOsid(battleOsid);
-    }
+    circumstance = municipalityFromOsid(battleOsid);
 
     // Displacement municipality (rear area)
     const rearMunicipalities = REAR_MUNICIPALITIES[faction] ?? REAR_MUNICIPALITIES['RBiH'];
-    const displacementIdx = deterministicHash(turn, totalKIA, 6) % rearMunicipalities.length;
-    const displacementMunicipality = rearMunicipalities[displacementIdx];
+    const displacementMunicipality = selectContextLocation(rearMunicipalities, municipality);
 
     // Hospital (for WIA templates)
     const hospitals = HOSPITALS[faction] ?? HOSPITALS['RBiH'];
-    const hospitalIdx = deterministicHash(turn, totalKIA, 8) % hospitals.length;
-    const hospital = hospitals[hospitalIdx];
+    const hospital = selectContextLocation(hospitals, municipality);
 
     // Substitute placeholders
     let text = locale === 'bcs' && template.text_template_bcs ? template.text_template_bcs : template.text_template;

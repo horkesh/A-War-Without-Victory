@@ -14,6 +14,8 @@ import { GameState } from '../state/game_state.js';
 import { maybeWriteHeapSnapshot } from './perf/heap_profile.js';
 import { earlyWarPhases } from './turn_phases/early_war_phases.js';
 import { warPhases } from './turn_phases/war_phases.js';
+import { runPostTurnInvariantBarrier } from './turn_phases/war_phase_reconciliation_steps.js';
+import type { ValidationIssue } from '../validate/validate.js';
 
 // Re-export all public types so existing importers (scenario_runner, tests, etc.) continue to work.
 export type {
@@ -31,11 +33,42 @@ export type {
 import type { TurnInput, TurnReport, TurnContext, Rng, NamedPhase } from './turn_pipeline_types.js';
 import { recordPhaseSkipDiagnostic } from './turn_pipeline_types.js';
 
+export interface TurnSuccess {
+    status: 'success';
+    nextState: GameState;
+    report: TurnReport;
+}
+
+export interface TurnInvariantFailure {
+    status: 'invariant_failure';
+    turn: number;
+    stage: 'post_turn';
+    issues: ValidationIssue[];
+    nextState: GameState;
+    report: TurnReport;
+}
+
+export type TurnResult = TurnSuccess | TurnInvariantFailure;
+
+/** Stop callers before they consume or persist a failed turn's diagnostic state. */
+export function assertTurnSuccess(result: TurnResult): asserts result is TurnSuccess {
+    if (result.status === 'success') return;
+
+    const details = result.issues
+        .map((issue) => `${issue.code}${issue.path ? ` at ${issue.path}` : ''}: ${issue.message}`)
+        .join('; ');
+    const error = new Error(
+        `Post-turn invariant failure at turn ${result.turn}: ${result.issues.length} issue(s): ${details}`,
+    );
+    Object.assign(error, { failure: result });
+    throw error;
+}
+
 // ═══════════════════════════════════════════════════════════════════════════
 // Orchestrator
 // ═══════════════════════════════════════════════════════════════════════════
 
-export async function runTurn(state: GameState, input: TurnInput): Promise<{ nextState: GameState; report: TurnReport }> {
+export async function runTurn(state: GameState, input: TurnInput): Promise<TurnResult> {
     const working = cloneGameState(state);
 
     // War-only pipeline: all games start in April 1992 (war phase).
@@ -68,7 +101,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
             }
         };
 
-        return { nextState: working, report };
+        return { status: 'success', nextState: working, report };
     }
 
     // Phase 12D.0: If end_state exists, short-circuit to report-only mode
@@ -94,7 +127,7 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
             }
         };
 
-        return { nextState: working, report };
+        return { status: 'success', nextState: working, report };
     }
 
     // Keep turn metadata deterministic and internal to the pipeline.
@@ -104,9 +137,8 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
         turn: working.meta.turn + 1
     };
 
-    const rng = createRng(input.seed);
     const report: TurnReport = { seed: input.seed, phases: [] };
-    const context: TurnContext = { state: working, rng, input, report };
+    const context: TurnContext = { state: working, rng: rejectRandomness, input, report };
 
     for (const step of warPhases) {
         await runNamedPhase(context, step, 'war');
@@ -131,13 +163,39 @@ export async function runTurn(state: GameState, input: TurnInput): Promise<{ nex
 
     await refreshFrontEdgeSnapshot(context.state, context.input);
 
+    const issues = runPostTurnInvariantBarrier(context);
+    if (issues.length > 0) {
+        return {
+            status: 'invariant_failure',
+            turn: context.state.meta.turn,
+            stage: 'post_turn',
+            issues,
+            nextState: context.state,
+            report,
+        };
+    }
+
+    if (context.pendingDisplacementEventStream && context.input.displacementEventStreamSink) {
+        context.input.displacementEventStreamSink(context.pendingDisplacementEventStream);
+    }
+
     // Heap-profile hook (LANE-NIGHTSHIFT-V093-HEAP-PROFILE-REDISPATCH).
     // Default-OFF env-flag-gated (HEAP_PROFILE_188W=true). When unset, this
     // call returns false in O(1) after a single boolean read — hash byte-
     // identical to predecessor baseline. See src/sim/perf/heap_profile.ts.
     maybeWriteHeapSnapshot(context.state.meta.turn, '', context.state.meta.seed);
 
-    return { nextState: context.state, report };
+    return { status: 'success', nextState: context.state, report };
+}
+
+/** Explicit development-only adapter for callers that want invariant failures to abort. */
+export async function runTurnWithInvariantThrowForDevelopment(
+    state: GameState,
+    input: TurnInput,
+): Promise<TurnSuccess> {
+    const result = await runTurn(state, input);
+    assertTurnSuccess(result);
+    return result;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -173,24 +231,6 @@ async function refreshFrontEdgeSnapshot(state: GameState, input: TurnInput): Pro
     state.military.front_edges = derivedFrontEdges;
 }
 
-function createRng(seed: string | number): Rng {
-    const numericSeed = typeof seed === 'number' ? seed : hashSeed(seed);
-    let a = numericSeed >>> 0;
-
-    return function rng(): number {
-        // Mulberry32 for fast, deterministic RNG
-        a = (a + 0x6D2B79F5) | 0;
-        let t = Math.imul(a ^ (a >>> 15), 1 | a);
-        t = t + Math.imul(t ^ (t >>> 7), 61 | t) ^ t;
-        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-}
-
-function hashSeed(seed: string): number {
-    let h = 1779033703 ^ seed.length;
-    for (let i = 0; i < seed.length; i += 1) {
-        h = Math.imul(h ^ seed.charCodeAt(i), 3432918353);
-        h = (h << 13) | (h >>> 19);
-    }
-    return (h ^ (h >>> 16)) >>> 0;
+function rejectRandomness(): never {
+    throw new Error('Engine Invariants 11.1 prohibits simulation randomness');
 }

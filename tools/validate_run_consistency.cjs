@@ -213,6 +213,147 @@ function computeNeededFrontBrigades(sector) {
 
 const LOCAL_FRONT_RELIEF_MAX_HOPS = 3;
 const FRONT_DONOR_HOME_DISTANCE_MAX_HOPS = 4;
+const ENCLAVE_TAG = 'enclave';
+const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
+
+// Keep synchronized with ENCLAVE_DEFINITIONS in enclave_resilience.ts. This
+// standalone CommonJS validator cannot import the TypeScript simulation module;
+// validate_run_consistency.test.ts pins exact geometry parity.
+const VALIDATOR_ENCLAVE_DEFINITIONS = [
+    {
+        id: 'bihac_pocket',
+        faction: 'RBiH',
+        osid_prefixes: [
+            'op:bihac:',
+            'op:cazin:',
+            'op:velika_kladusa:',
+            'op:bosanska_krupa:',
+        ],
+    },
+    {
+        id: 'srebrenica',
+        faction: 'RBiH',
+        osid_list: [
+            'op:srebrenica:bostahovine_2',
+            'op:srebrenica:brezovice_2',
+            'op:srebrenica:donji_potocari_2',
+            'op:srebrenica:mala_daljegosta_2',
+            'op:srebrenica:ljeskovik_2',
+            'op:srebrenica:luka_2',
+            'op:srebrenica:milacevici',
+            'op:srebrenica:radovcici',
+            'op:srebrenica:srebrenica_2',
+            'op:srebrenica:suceska',
+            'op:srebrenica:sulice_2',
+        ],
+    },
+    {
+        id: 'zepa',
+        faction: 'RBiH',
+        osid_list: ['op:rogatica:zepa_2'],
+    },
+    {
+        id: 'teocak',
+        faction: 'RBiH',
+        osid_list: ['op:ugljevik:teocak_krstac_2'],
+    },
+    {
+        id: 'gorazde',
+        faction: 'RBiH',
+        osid_list: [
+            'op:gorazde:bacci',
+            'op:gorazde:citluk_2',
+            'op:gorazde:faocici_2',
+            'op:gorazde:glamoc',
+            'op:gorazde:gorazde_2',
+            'op:gorazde:hrancici',
+            'op:gorazde:kamen',
+            'op:gorazde:kola',
+            'op:gorazde:kolovarice',
+            'op:gorazde:mravinjac_2',
+            'op:gorazde:novakovici',
+            'op:gorazde:osjecani_2',
+            'op:gorazde:semihova_2',
+            'op:gorazde:slatina_2',
+            'op:gorazde:sopotnica',
+            'op:gorazde:ustipraca_2',
+            'op:gorazde:zorlaci',
+            'op:gorazde:zorovici',
+        ],
+    },
+    {
+        id: 'sarajevo',
+        faction: 'RBiH',
+        osid_prefixes: [
+            'op:centar_sarajevo:',
+            'op:novi_grad_sarajevo:',
+            'op:novo_sarajevo:',
+            'op:stari_grad_sarajevo:',
+        ],
+    },
+    {
+        id: 'kiseljak',
+        faction: 'HRHB',
+        osid_list: [
+            'op:kiseljak:azapovici_2',
+            'op:kiseljak:brnjaci_2',
+            'op:kiseljak:gromiljak_2',
+            'op:kiseljak:kiseljak_2',
+            'op:kresevo:kresevo_2',
+            'op:kresevo:polje_2',
+        ],
+    },
+    {
+        id: 'lasva_valley',
+        faction: 'HRHB',
+        osid_list: [
+            'op:vitez:vitez_2',
+            'op:busovaca:bare_2',
+            'op:busovaca:buselji_2',
+            'op:busovaca:busovaca_2',
+            'op:busovaca:polje_2',
+            'op:novi_travnik:rankovici_2',
+            'op:novi_travnik:rat_2',
+            'op:novi_travnik:ruda_2',
+        ],
+    },
+    {
+        id: 'zepce',
+        faction: 'HRHB',
+        osid_list: [
+            'op:zepce:ozimica_2',
+            'op:zepce:viniste_2',
+            'op:zepce:zepce_2',
+        ],
+    },
+];
+
+function validatorOsidBelongsToEnclave(osid, enclave) {
+    if (enclave.osid_list) return enclave.osid_list.includes(osid);
+    return (enclave.osid_prefixes || []).some((prefix) => osid.startsWith(prefix));
+}
+
+function validatorFormationEnclaveForMovement(formation, originOsid) {
+    const tags = formation?.tags || [];
+    const isEnclave = tags.includes(ENCLAVE_TAG);
+    const isFixedHome = tags.includes(FIXED_HOME_OSID_TAG);
+    if (!isEnclave && !isFixedHome) return null;
+
+    for (const anchor of [formation.home_osid, originOsid]) {
+        if (!anchor) continue;
+        const enclave = VALIDATOR_ENCLAVE_DEFINITIONS.find((definition) =>
+            definition.faction === formation.faction
+            && validatorOsidBelongsToEnclave(anchor, definition));
+        if (enclave) return enclave;
+    }
+    return null;
+}
+
+function validatorEnclaveMovementDestinationAllowed(formation, originOsid, destinationOsid) {
+    const enclave = validatorFormationEnclaveForMovement(formation, originOsid);
+    if (!enclave) return !(formation?.tags || []).includes(ENCLAVE_TAG);
+    return validatorOsidBelongsToEnclave(destinationOsid, enclave);
+}
 
 function buildSectorCoverageDonorContext(state) {
     const sectors = Object.values(state.military?.corps_front_sectors ?? {});
@@ -267,6 +408,11 @@ function targetPreservesHomeDistance(formation, targetOsid, adjacency) {
 function findLegalReliefTarget(formation, targetOsids, ctx, maxHops = LOCAL_FRONT_RELIEF_MAX_HOPS) {
     for (const targetOsid of targetOsids) {
         if (!targetPreservesHomeDistance(formation, targetOsid, ctx.adjacency)) continue;
+        if (!validatorEnclaveMovementDestinationAllowed(
+            formation,
+            formation.location_osid,
+            targetOsid,
+        )) continue;
         const dist = friendlyDistanceToAny(
             formation.location_osid,
             new Set([targetOsid]),
@@ -371,6 +517,8 @@ function collectSectorFloorShortfallIssues(state) {
     const formations = state.military?.formations ?? {};
     const adjacency = loadOperationalAdjacency(state);
     const opParticipants = buildOperationParticipantSet(state);
+    const brigadeMovementState = state.military?.brigade_movement_state ?? {};
+    const brigadeMovementOrders = state.military?.brigade_movement_orders ?? {};
     const activeCounts = countActiveFieldBrigadesByOsid(state);
     const byFaction = new Map();
     for (const sector of sectors) {
@@ -434,6 +582,8 @@ function collectSectorFloorShortfallIssues(state) {
             if (!isFieldBrigadeKind(formation.kind)) continue;
             if ((formation.disrupted_turns ?? 0) > 0) continue;
             if (opParticipants.has(entry.bid)) continue;
+            if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
+            if (brigadeMovementOrders[entry.bid]) continue;
             const legalTarget = findLegalReliefTarget(
                 formation,
                 vacantFrontOsids,
@@ -482,6 +632,8 @@ function collectSectorFloorShortfallIssues(state) {
                 if (!isFieldBrigadeKind(formation.kind)) continue;
                 if ((formation.disrupted_turns ?? 0) > 0) continue;
                 if (opParticipants.has(entry.bid)) continue;
+                if (brigadeMovementState[entry.bid]?.status === 'in_transit') continue;
+                if (brigadeMovementOrders[entry.bid]) continue;
                 if (entry.donorRole === 'front') {
                     const claim = classifySectorPosition(
                         formation.location_osid,
@@ -785,6 +937,7 @@ function buildSectorCoverageFactions(state) {
         const brigadeIds = [
             ...(sector.assigned_brigade_ids ?? []),
             ...(sector.reserve_brigade_ids ?? []),
+            ...(sector.rear_brigade_ids ?? []),
         ].sort((a, b) => String(a).localeCompare(String(b)));
         const hasActiveCoverage = brigadeIds.some((brigadeId) => {
             const brigade = formations[brigadeId];
@@ -823,7 +976,8 @@ function collectEmptyContestedSectorIssues(state) {
         if (sector.unstaffed_front === true) continue;
         const assigned = sector.assigned_brigade_ids?.length ?? 0;
         const reserve = sector.reserve_brigade_ids?.length ?? 0;
-        if (assigned + reserve === 0) {
+        const rear = sector.rear_brigade_ids?.length ?? 0;
+        if (assigned + reserve + rear === 0) {
             const donorCandidates = collectLegalSectorDonorCandidates(state, sector, getSectorFrontOsids(sector));
             const issue = {
                 sector: sectorId,
@@ -849,6 +1003,7 @@ function collectUndefendedFrontSubsegmentIssues(state) {
     const unavoidableGap = [];
     const staleGap = [];
     for (const [sectorId, sector] of Object.entries(sectors).sort((a, b) => String(a[0]).localeCompare(String(b[0])))) {
+        if (sector.unstaffed_front === true) continue;
         for (const subSegment of sector.sub_segments ?? []) {
             const lengthEdges = subSegment.length_edges ?? subSegment.edge_ids?.length ?? 0;
             if (subSegment.gap === true && lengthEdges > 2) {
@@ -859,7 +1014,8 @@ function collectUndefendedFrontSubsegmentIssues(state) {
                 };
                 const assigned = sector.assigned_brigade_ids?.length ?? 0;
                 const reserve = sector.reserve_brigade_ids?.length ?? 0;
-                if (assigned + reserve > 0) {
+                const rear = sector.rear_brigade_ids?.length ?? 0;
+                if (assigned + reserve + rear > 0) {
                     staleGap.push(issue);
                     continue;
                 }
@@ -1367,6 +1523,8 @@ module.exports = {
     collectWarFrontSectorCoverageIssues,
     collectUndefendedFrontSubsegmentIssues,
     collectPhysicalSectorOwnershipIssues,
+    VALIDATOR_ENCLAVE_DEFINITIONS,
+    validatorEnclaveMovementDestinationAllowed,
     resolveRunInput,
     validateState,
 };

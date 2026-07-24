@@ -15,7 +15,7 @@
 import { useState, useMemo } from 'react';
 import { useGameStore } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
-import type { FactionVerdict, DimensionGrade } from '../../../state/negotiation_types.js';
+import type { FactionVerdict, DimensionGrade, GameVerdict } from '../../../state/negotiation_types.js';
 import { WarCostSummary } from './WarCostSummary';
 import type { CostLedger } from '../../../sim/endgame/cost_ledger.js';
 import type { ComparisonResult, MilestoneComparison, MilestoneComparisonStatus } from '../../../sim/endgame/endgame_comparison.js';
@@ -299,7 +299,7 @@ export function VerdictScreen() {
     const startReplayInspection = useGameStore((s) => s.startReplayInspection);
     const ipc = useIPC();
     const [locale] = useLocale();
-    const [selectedFaction, setSelectedFaction] = useState<string>('RBiH');
+    const [verdictSelection, setVerdictSelection] = useState<{ verdict: GameVerdict; faction: string } | null>(null);
     const [activeLowerSection, setActiveLowerSection] = useState<VerdictLowerSection>('report');
 
     // LANE-NIGHTSHIFT-DYNAMIC-CODEX-SLICE: build ghost entries via useMemo.
@@ -342,7 +342,8 @@ export function VerdictScreen() {
 
     const verdict = loadedGameState.gameVerdict;
     const turn = loadedGameState.turn ?? 0;
-    const date = loadedGameState.metadata?.date ?? turnToDateString(turn);
+    const metadataDate = loadedGameState.metadata?.date;
+    const date = metadataDate && metadataDate !== 'UNKNOWN' ? metadataDate : turnToDateString(turn);
     const years = Math.floor(turn / 52);
     const weeks = turn % 52;
 
@@ -385,6 +386,14 @@ export function VerdictScreen() {
         />;
     }
 
+    const playerFaction = loadedGameState.player_faction;
+    const defaultFaction = playerFaction && verdict.faction_verdicts[playerFaction]
+        ? playerFaction
+        : factionIds.find(faction => Boolean(verdict.faction_verdicts[faction])) ?? factionIds[0];
+    const selectedFaction = verdictSelection?.verdict === verdict
+        && verdict.faction_verdicts[verdictSelection.faction]
+        ? verdictSelection.faction
+        : defaultFaction;
     const currentVerdict = verdict.faction_verdicts[selectedFaction];
     const milestoneRows = buildMilestoneComparisonRows(
         loadedGameState.costLedger,
@@ -409,7 +418,8 @@ export function VerdictScreen() {
         <div className="fixed inset-0 flex items-center justify-center bg-black/90 backdrop-blur-sm"
              style={{ zIndex: Z.GAME_OVER }}
              data-awwv-endgame-surface="verdict"
-             data-awwv-endgame-outcome={verdict.outcome_label}>
+             data-awwv-endgame-outcome={verdict.outcome_label}
+             data-awwv-verdict-focus={selectedFaction}>
             <div className="w-[min(980px,calc(100vw-24px))] max-h-[92vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 <CinematicVerdict
                     verdict={verdict}
@@ -434,7 +444,7 @@ export function VerdictScreen() {
                                             type="button"
                                             onClick={() => setActiveLowerSection(section)}
                                             data-awwv-mobile-flow-tab={section}
-                                            className={`min-h-9 border px-2 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                                            className={`min-h-9 border px-2 text-xs font-bold uppercase tracking-wider transition-colors ${
                                                 active
                                                     ? 'border-accent-gold/60 bg-accent-gold/15 text-accent-gold'
                                                     : 'border-panel-border bg-black/20 text-text-secondary hover:bg-white/5'
@@ -460,7 +470,8 @@ export function VerdictScreen() {
                         return (
                             <button
                                 key={fid}
-                                onClick={() => setSelectedFaction(fid)}
+                                onClick={() => setVerdictSelection({ verdict, faction: fid })}
+                                aria-pressed={active}
                                 className={`flex-1 px-2 py-2 text-center transition-colors sm:px-4 sm:py-3 ${
                                     active
                                         ? 'bg-panel-card border-b-2'
@@ -468,7 +479,7 @@ export function VerdictScreen() {
                                 }`}
                                 style={active ? { borderBottomColor: FACTION_HEX[fid] } : undefined}
                             >
-                                <div className="text-[10px] font-bold uppercase tracking-wider"
+                                <div className="text-xs font-bold uppercase tracking-wider"
                                      style={{ color: FACTION_HEX[fid] }}>
                                     {FACTION_SHORT[fid] ?? fid}
                                 </div>
@@ -484,7 +495,7 @@ export function VerdictScreen() {
                                             </span>
                                         </div>
                                         <div
-                                            className={`mt-1 inline-block px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}
+                                            className={`mt-1 inline-block px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider sm:px-2 ${getOutcomeClassStyle(v.outcome_class)}`}
                                             data-awwv-faction-tab-outcome={fid}
                                         >
                                             {formatOutcomeClass(v.outcome_class)}
@@ -527,12 +538,12 @@ export function VerdictScreen() {
                     <section className={`border-t border-red-900/40 px-6 py-4 bg-red-950/20 sm:block ${mobileSectionClass('report')}`}
                              data-awwv-mobile-section="report"
                              data-awwv-rupture-receipts={ruptureReceipts.length}>
-                        <div className="text-[9px] uppercase tracking-[0.3em] text-red-300/70 font-semibold mb-2">
+                        <div className="text-xs uppercase tracking-[0.3em] text-red-300/70 font-semibold mb-2">
                             Historical Record
                         </div>
                         <ul className="space-y-3">
                             {ruptureReceipts.map((r) => (
-                                <li key={r.id} className="text-[11px] text-text-secondary leading-relaxed"
+                                <li key={r.id} className="text-xs text-text-secondary leading-relaxed"
                                     data-awwv-rupture-receipt="true"
                                     data-awwv-rupture-receipt-variant={r.variant}>
                                     {r.content}
@@ -562,7 +573,7 @@ export function VerdictScreen() {
                     <section className={`border-t border-panel-border px-6 py-4 bg-panel-card/20 sm:block ${mobileSectionClass('codex')}`}
                              data-awwv-mobile-section="codex"
                              data-awwv-codex-ghosts={codexGhosts.length}>
-                        <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
+                        <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold mb-2">
                             Codex &mdash; Paths Not Taken
                         </div>
                         <ul className="space-y-3">
@@ -573,7 +584,7 @@ export function VerdictScreen() {
                                 // the raw repo path that was shown before.
                                 const prose = resolveGhostEntryProse(g.ghost_id, locale);
                                 return (
-                                <li key={g.ghost_id} className="text-[10px] text-text-secondary"
+                                <li key={g.ghost_id} className="text-xs text-text-secondary"
                                     data-awwv-ghost-variant={g.variant}
                                     data-awwv-ghost-has-prose={prose !== null ? 'true' : 'false'}>
                                     <div className="text-text-primary font-semibold">{getPlayerSafeDisplayLabel(g.ghost_id, 'Path not taken')}</div>
@@ -611,26 +622,26 @@ export function VerdictScreen() {
 
                 {/* Footer */}
                 <div className="shrink-0 border-t border-panel-border bg-panel-card/30 px-4 py-2 sm:px-6 sm:py-4">
-                    <div className="mb-2 text-center text-[9px] italic text-text-secondary/60 sm:mb-3">
+                    <div className="mb-2 text-center text-xs italic text-text-secondary/60 sm:mb-3">
                         {t('verdict.footer.tagline')}
                     </div>
                     <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                         <button
                             onClick={() => useGameStore.getState().setWrappedOpen(true)}
-                            className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
+                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
                             {t('gameOver.viewYourWar')}
                         </button>
                         <button
                             onClick={() => window.location.reload()}
-                            className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
+                            className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                         >
                             {t('gameOver.newGame')}
                         </button>
                         {ipc.isAvailable && (
                             <button
                                 onClick={() => ipc.loadStateDialog?.()}
-                                className="min-h-8 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
+                                className="min-h-8 px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors sm:min-h-9 sm:px-6 sm:py-2"
                             >
                                 {t('gameOver.loadSave')}
                             </button>
@@ -651,7 +662,7 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
     return (
         <div className="px-6 pb-5 space-y-2"
              data-awwv-milestone-comparison={rows.length}>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary font-semibold">
+            <div className="text-xs uppercase tracking-[0.3em] text-text-secondary font-semibold">
                 {t('verdict.milestone.title')}
             </div>
             <div className="space-y-2">
@@ -660,10 +671,10 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
                          className="grid grid-cols-[1.4fr_0.6fr_0.6fr_0.7fr_0.7fr] gap-3 items-start rounded border border-panel-border bg-panel-card/30 px-3 py-2"
                          data-awwv-milestone-status={row.status}>
                         <div>
-                            <div className="text-[11px] text-text-primary font-semibold">
+                            <div className="text-xs text-text-primary font-semibold">
                                 {row.label}
                             </div>
-                            <div className="text-[9px] text-text-secondary leading-relaxed mt-0.5">
+                            <div className="text-xs text-text-secondary leading-relaxed mt-0.5">
                                 {row.summary}
                             </div>
                         </div>
@@ -681,10 +692,10 @@ export function EndgameMilestoneComparison({ rows }: { rows: EndgameMilestoneRow
 function MilestoneCell({ label, value }: { label: string; value: string }) {
     return (
         <div className="min-w-0">
-            <div className="text-[8px] uppercase tracking-wider text-text-secondary/70">
+            <div className="text-xs uppercase tracking-wider text-text-secondary/70">
                 {label}
             </div>
-            <div className="text-[10px] text-text-primary tabular-nums leading-snug break-words">
+            <div className="text-xs text-text-primary tabular-nums leading-snug break-words">
                 {value}
             </div>
         </div>
@@ -715,7 +726,7 @@ export function FactionReport({
         <div className="p-6 space-y-5">
             {/* Pyrrhic Score Hero — always-visible primary signal, NOT collapsible. */}
             <div data-testid="faction-report-score" className="text-center py-4">
-                <div className="text-[9px] uppercase tracking-[0.3em] text-text-secondary mb-1">
+                <div className="text-xs uppercase tracking-[0.3em] text-text-secondary mb-1">
                     {t('verdict.report.pyrrhicScore')}
                 </div>
                 <div className="text-[48px] font-bold tabular-nums leading-none"
@@ -731,24 +742,24 @@ export function FactionReport({
                 </div>
                 {/* Outcome Classification */}
                 <div className="mt-3 text-center">
-                    <span className={`inline-block px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider ${getOutcomeClassStyle(verdict.outcome_class)}`}>
+                    <span className={`inline-block px-3 py-1 rounded text-xs font-bold uppercase tracking-wider ${getOutcomeClassStyle(verdict.outcome_class)}`}>
                         {formatOutcomeClass(verdict.outcome_class)}
                     </span>
                 </div>
                 {/* Condemnation Flags — shown only when present */}
                 {verdict.condemnation_flags && verdict.condemnation_flags.length > 0 && (
                     <div className="mt-3 p-3 rounded bg-red-950/40 border border-red-800/40">
-                        <div className="text-[9px] uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
+                        <div className="text-xs uppercase tracking-wider text-red-400/80 font-semibold mb-1.5">
                             {t('verdict.report.internationalCondemnation')}
                         </div>
                         {verdict.condemnation_flags.map((flag: string, i: number) => (
-                            <div key={i} className="text-[10px] text-red-300/90 leading-relaxed">
+                            <div key={i} className="text-xs text-red-300/90 leading-relaxed">
                                 {formatCondemnationFlag(flag)}
                             </div>
                         ))}
                     </div>
                 )}
-                <div className="mt-2 text-[11px] text-text-secondary italic max-w-md mx-auto leading-relaxed">
+                <div className="mt-2 text-xs text-text-secondary italic max-w-md mx-auto leading-relaxed">
                     {verdict.grade_description}
                 </div>
             </div>
@@ -767,14 +778,14 @@ export function FactionReport({
                 className="block"
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                    <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
                         {t('verdict.report.capitalDimensions')}
                     </span>
-                    <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                    <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
                         {t('verdict.report.dimensionBars', { count: verdict.dimension_grades.length })}
                     </span>
                 </summary>
-                <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
                     {t('verdict.report.capitalDimensions')}
                 </div>
                 <div className="space-y-2">
@@ -791,14 +802,14 @@ export function FactionReport({
                 className="block"
             >
                 <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                    <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                    <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
                         {t('verdict.report.finalStatistics')}
                     </span>
-                    <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                    <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
                         {t('verdict.report.tapToToggle')}
                     </span>
                 </summary>
-                <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
                     {t('verdict.report.finalStatistics')}
                 </div>
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
@@ -843,17 +854,17 @@ export function FactionReport({
                     className="block"
                 >
                     <summary className="sm:hidden cursor-pointer list-none flex items-center justify-between rounded border border-panel-border bg-panel-card px-3 py-2 mb-2">
-                        <span className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold">
+                        <span className="text-xs uppercase tracking-wider text-text-secondary font-semibold">
                             {t('verdict.daytonAgreement')}
                         </span>
-                        <span className="text-[9px] uppercase tracking-[0.12em] text-text-muted">
+                        <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
                             {t('verdict.tapToToggle')}
                         </span>
                     </summary>
-                    <div className="hidden sm:block text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-3">
+                    <div className="hidden sm:block text-xs uppercase tracking-wider text-text-secondary font-semibold mb-3">
                         {t('verdict.daytonAgreement')}
                     </div>
-                    <div className="space-y-2 text-[11px] text-text-secondary">
+                    <div className="space-y-2 text-xs text-text-secondary">
                         {daytonResult.territorial_packages_accepted.length > 0 && (
                             <div>
                                 <span className="text-text-primary font-semibold">{t('verdict.packagesAccepted')} </span>
@@ -952,7 +963,7 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
 
     return (
         <div className="flex items-center gap-3">
-            <div className="w-[140px] text-[10px] text-text-secondary truncate">
+            <div className="w-[140px] text-xs text-text-secondary truncate">
                 {formatDimensionLabel(dg)}
             </div>
             <div className="flex-1 h-2 bg-black/30 rounded-full overflow-hidden">
@@ -961,10 +972,10 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
                     style={{ width: `${barWidth}%`, backgroundColor: factionColor, opacity: 0.7 }}
                 />
             </div>
-            <div className="w-[32px] text-right text-[10px] tabular-nums text-text-primary">
+            <div className="w-[32px] text-right text-xs tabular-nums text-text-primary">
                 {Math.round(dg.score)}
             </div>
-            <div className="w-[24px] text-[11px] font-bold text-right" style={{ color: gradeColor }}>
+            <div className="w-[24px] text-xs font-bold text-right" style={{ color: gradeColor }}>
                 {dg.grade}
             </div>
         </div>
@@ -973,7 +984,7 @@ function DimensionBar({ dg, factionColor }: { dg: DimensionGrade; factionColor: 
 
 function StatRow({ label, value }: { label: string; value: string }) {
     return (
-        <div className="flex justify-between text-[10px]">
+        <div className="flex justify-between text-xs">
             <span className="text-text-secondary">{label}</span>
             <span className="text-text-primary tabular-nums font-medium">{value}</span>
         </div>
@@ -1047,18 +1058,18 @@ function FallbackGameOver({
              data-awwv-endgame-outcome={display.title}>
             <div className="w-[560px] max-h-[85vh] bg-panel-bg border border-panel-border rounded-lg shadow-2xl flex flex-col overflow-hidden">
                 <div className="px-8 py-6 border-b border-panel-border bg-panel-card/50 text-center">
-                    <div className="text-[10px] font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
+                    <div className="text-xs font-mono uppercase tracking-[0.4em] text-accent-gold/60 mb-2">
                         {date} &mdash; A War Without Victory
                     </div>
                     <div className="text-xl font-bold text-text-primary uppercase tracking-wide mb-1">
                         {display.title}
                     </div>
-                    <div className="text-[11px] text-text-secondary italic leading-relaxed max-w-sm mx-auto">
+                    <div className="text-xs text-text-secondary italic leading-relaxed max-w-sm mx-auto">
                         {display.subtitle}
                     </div>
                 </div>
                 <div className="flex-1 overflow-auto p-6 space-y-4">
-                    <div className="text-[9px] uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
+                    <div className="text-xs uppercase tracking-wider text-text-secondary font-semibold mb-2">{t('gameOver.finalStandings')}</div>
                     {factionIds.map((fid) => {
                         const color = FACTION_HEX[fid] ?? '#888';
                         const osids = factionOsids[fid] ?? 0;
@@ -1071,9 +1082,9 @@ function FallbackGameOver({
                                         <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
                                         <span className="text-[12px] font-bold text-text-primary uppercase tracking-wide">{getPlayerSafeMilitaryFactionName(fid, fid)}</span>
                                     </div>
-                                    <span className="text-[11px] text-text-primary tabular-nums font-bold">{pct}%</span>
+                                    <span className="text-xs text-text-primary tabular-nums font-bold">{pct}%</span>
                                 </div>
-                                <div className="flex gap-4 text-[10px] text-text-secondary">
+                                <div className="flex gap-4 text-xs text-text-secondary">
                                     <span>{formatFallbackOsidsControlled(osids)}</span>
                                     <span>{formatFallbackActiveBrigades(brigades)}</span>
                                 </div>
@@ -1083,7 +1094,7 @@ function FallbackGameOver({
                             </div>
                         );
                     })}
-                    <div className="text-[10px] text-text-secondary text-center pt-2 border-t border-panel-border">
+                    <div className="text-xs text-text-secondary text-center pt-2 border-t border-panel-border">
                         {t('gameOver.campaignLasted', {
                             turn,
                             years: formatFallbackYearCount(years),
@@ -1094,20 +1105,20 @@ function FallbackGameOver({
                 <div className="px-6 py-4 border-t border-panel-border bg-panel-card/30 flex justify-center gap-3">
                     <button
                         onClick={() => useGameStore.getState().setWrappedOpen(true)}
-                        className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
+                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-amber-400/40 bg-amber-400/10 text-amber-400 hover:bg-amber-400/20 transition-colors"
                     >
                         {t('gameOver.viewYourWar')}
                     </button>
                     <button
                         onClick={() => window.location.reload()}
-                        className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
+                        className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
                     >
                         {t('gameOver.newGame')}
                     </button>
                     {ipc.isAvailable && (
                         <button
                             onClick={() => ipc.loadStateDialog?.()}
-                            className="px-6 py-2 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
+                            className="px-6 py-2 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
                         >
                             {t('gameOver.loadSave')}
                         </button>

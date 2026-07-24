@@ -161,8 +161,13 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
 
   it('Accept routes through acceptProposal and shows a next-turn receipt', async () => {
     const { acceptProposal, rejectProposal } = installIpc();
+    const onReceipt = vi.fn();
 
-    render(React.createElement(DirectiveCard, { directive: reviewProposalDirective, gameState: baseGameState }));
+    render(React.createElement(DirectiveCard, {
+      directive: reviewProposalDirective,
+      gameState: baseGameState,
+      onReceipt,
+    }));
 
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
@@ -173,6 +178,10 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
     expect((await screen.findByRole('status', { name: 'Directive receipt' })).textContent).toContain(
       'Directive staged for next turn',
     );
+    expect(onReceipt).toHaveBeenCalledWith({
+      kind: 'success',
+      message: expect.stringContaining('Directive staged for next turn'),
+    });
   });
 
   it('Withhold routes through rejectProposal and shows a next-turn receipt', async () => {
@@ -223,7 +232,7 @@ describe('Decision Room — proposal-review lever (single-surface approval)', ()
 
     render(React.createElement(DirectiveCard, { directive: reviewProposalDirective, gameState: baseGameState }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel directive' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
 
     expect(acceptProposal).not.toHaveBeenCalled();
     expect(rejectProposal).not.toHaveBeenCalled();

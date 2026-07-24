@@ -11,7 +11,10 @@ import { isLargeSettlementMun } from '../../state/formation_constants.js';
 import type { FactionId, GameState, MunicipalityId, SettlementId } from '../../state/game_state.js';
 import { isMunicipalityAlignedToRbih } from '../../state/rbih_aligned_municipalities.js';
 import { strictCompare } from '../../state/validateGameState.js';
-import { areRbihHrhbAllied } from './alliance_update.js';
+import {
+    areRbihHrhbAllied,
+    DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN,
+} from './alliance_update.js';
 import { buildSettlementsByMun } from './control_strain.js';
 import { computeAlliedDefense } from './mixed_municipality.js';
 import type { HoldoutScalingContext, SettlementFlipEvent } from './settlement_control.js';
@@ -194,7 +197,8 @@ function hasAdjacentHostile(
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return false;
     // Dynamic alliance check: use war_alliance_rbih_hrhb threshold (Peace-phase §4.8)
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
     // If ceasefire active, RBiH–HRHB flips are frozen
@@ -273,7 +277,8 @@ function getStrongestAdjacentAttacker(
     let best: { faction: FactionId; strength: number } | null = null;
     const strengthByMun = state.military.war_militia_strength ?? {};
     // Dynamic alliance check (Peace-phase §4.8); before earliest war turn treat RBiH–HRHB as allied (historical fidelity).
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
     const ceasefireActive = state.political.rbih_hrhb_state?.ceasefire_active === true;
@@ -312,7 +317,8 @@ function getStrongestAdjacentBrigadeAttacker(
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return null;
     let best: { faction: FactionId; strength: number } | null = null;
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
     const ceasefireActive = state.political.rbih_hrhb_state?.ceasefire_active === true;
@@ -343,7 +349,8 @@ function countAttackerControlledNeighborMuns(
 ): number {
     const neighbors = munAdjacency.get(munId);
     if (!neighbors) return 0;
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     const beforeEarliestWar = state.meta.turn < earliestTurn;
     const rbihHrhbAllied = beforeEarliestWar || areRbihHrhbAllied(state);
     const ceasefireActive = state.political.rbih_hrhb_state?.ceasefire_active === true;
@@ -636,4 +643,3 @@ export function runControlFlip(input: ControlFlipInput): ControlFlipReport {
     report.settlement_events = allSettlementEvents;
     return report;
 }
-

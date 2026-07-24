@@ -9,11 +9,11 @@ function StatBar({ label, value }: { label: string; value: number }) {
   const pct = (value / 5) * 100;
   return (
     <div className="flex items-center gap-2">
-      <span className="text-[9px] text-text-secondary w-20 shrink-0 uppercase tracking-wider">{label}</span>
+      <span className="text-xs text-text-secondary w-20 shrink-0 uppercase tracking-wider">{label}</span>
       <div className="flex-1 h-1.5 bg-black/30 rounded-full overflow-hidden">
         <div className="h-full bg-accent-gold/70 rounded-full" style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-[10px] text-text-primary tabular-nums w-4 text-right">{value}</span>
+      <span className="text-xs text-text-primary tabular-nums w-4 text-right">{value}</span>
     </div>
   );
 }
@@ -30,7 +30,7 @@ function OfficerCard({ name, competence, aggressiveness, defensiveSkill, highlig
       <div className="flex items-center justify-between mb-2">
         <span className="font-bold text-[12px] text-text-primary uppercase tracking-wide">{name}</span>
         {highlight && (
-          <span className="text-[8px] bg-accent-gold/20 text-accent-gold px-1.5 py-0.5 rounded border border-accent-gold/30 font-bold uppercase tracking-wider">
+          <span className="text-xs bg-accent-gold/20 text-accent-gold px-1.5 py-0.5 rounded border border-accent-gold/30 font-bold uppercase tracking-wider">
             {t('officerEvent.recommended')}
           </span>
         )}
@@ -62,10 +62,10 @@ export function OfficerEventBadge() {
       <button
         type="button"
         onClick={() => setModalOpen(true)}
-        className="relative px-2 py-1 rounded border border-accent-gold/30 bg-accent-gold/10 text-accent-gold text-[10px] font-bold uppercase tracking-wider hover:bg-accent-gold/20 transition-colors"
+        className="relative px-2 py-1 rounded border border-accent-gold/30 bg-accent-gold/10 text-accent-gold text-xs font-bold uppercase tracking-wider hover:bg-accent-gold/20 transition-colors"
       >
         {t('officerEvent.officers')}
-        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 rounded-full bg-red-600 text-white text-[9px] font-bold border border-red-400 shadow-lg">
+        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center px-1 rounded-full bg-red-600 text-white text-xs font-bold border border-red-400 shadow-lg">
           {unacknowledged.length}
         </span>
       </button>
@@ -130,13 +130,13 @@ function OfficerEventModal({ events, onClose }: {
         {/* Header */}
         <div className="px-5 py-3 border-b border-panel-border bg-panel-card/50 flex items-center justify-between shrink-0">
           <div>
-            <div className="text-[9px] font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">{t('officerEvent.personnelDirective')}</div>
+            <div className="text-xs font-mono uppercase tracking-[0.3em] text-accent-gold/70 mb-0.5">{t('officerEvent.personnelDirective')}</div>
             <div className="text-sm font-bold text-text-primary uppercase tracking-wide">
               {event.type === 'replacement_suggested' ? t('officerEvent.replacementAvailable') : t('officerEvent.newOfficerArrived')}
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-[9px] text-text-secondary font-mono">{Math.min(currentIndex + 1, remaining.length)}/{remaining.length}</span>
+            <span className="text-xs text-text-secondary font-mono">{Math.min(currentIndex + 1, remaining.length)}/{remaining.length}</span>
             <button onClick={onClose} className="text-text-secondary hover:text-text-primary text-lg leading-none">✕</button>
           </div>
         </div>
@@ -145,14 +145,14 @@ function OfficerEventModal({ events, onClose }: {
         <div className="flex-1 overflow-auto p-5 space-y-4">
           {event.type === 'replacement_suggested' ? (
             <>
-              <div className="text-[11px] text-text-secondary leading-relaxed">
+              <div className="text-xs text-text-secondary leading-relaxed">
                 {t('officerEvent.replacementBodyPrefix')} <span className="text-text-primary font-bold">{corpsLabel}</span>.
                 {t('officerEvent.replacementBodySuffix')}
               </div>
 
               {event.current_commander_name && (
                 <div>
-                  <div className="text-[9px] uppercase tracking-wider text-text-secondary mb-1.5">{t('officerEvent.currentCommander')}</div>
+                  <div className="text-xs uppercase tracking-wider text-text-secondary mb-1.5">{t('officerEvent.currentCommander')}</div>
                   <OfficerCard
                     name={event.current_commander_name}
                     competence={event.current_commander_competence ?? 3}
@@ -163,7 +163,7 @@ function OfficerEventModal({ events, onClose }: {
               )}
 
               <div>
-                <div className="text-[9px] uppercase tracking-wider text-text-secondary mb-1.5">{t('officerEvent.availableReplacement')}</div>
+                <div className="text-xs uppercase tracking-wider text-text-secondary mb-1.5">{t('officerEvent.availableReplacement')}</div>
                 <OfficerCard
                   name={event.officer_name}
                   competence={event.officer_competence}
@@ -175,7 +175,7 @@ function OfficerEventModal({ events, onClose }: {
             </>
           ) : (
             <>
-              <div className="text-[11px] text-text-secondary leading-relaxed">
+              <div className="text-xs text-text-secondary leading-relaxed">
                 {t('officerEvent.newOfficerBody')}
               </div>
               <OfficerCard
@@ -194,13 +194,13 @@ function OfficerEventModal({ events, onClose }: {
             <>
               <button
                 onClick={handleDismiss}
-                className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
+                className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-panel-border text-text-secondary hover:bg-white/5 transition-colors"
               >
                 {t('officerEvent.keepCurrent')}
               </button>
               <button
                 onClick={handleAcceptReplacement}
-                className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
+                className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
               >
                 {t('officerEvent.acceptReplacement')}
               </button>
@@ -208,7 +208,7 @@ function OfficerEventModal({ events, onClose }: {
           ) : (
             <button
               onClick={handleDismiss}
-              className="px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
+              className="px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded border border-accent-gold/40 bg-accent-gold/10 text-accent-gold hover:bg-accent-gold/20 transition-colors"
             >
               {t('event.acknowledged')}
             </button>

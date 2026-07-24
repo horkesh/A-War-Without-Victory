@@ -102,4 +102,37 @@ describe('commander sector reassignment emission truth', () => {
             to_sector_id: 'sector:test:1',
         }]);
     });
+
+    it('emits direct empty-sector relief ahead of a duplicate reserve shift', () => {
+        const output = emitCommanderOutput(
+            baseBriefing() as any,
+            [] as any,
+            { total_brigades: 2 } as any,
+            { zones: [], garrison_locks: [], surplus_pool: [] } as any,
+            { plan: null, action: 'none', reason: 'test', alternatives: [] } as any,
+            {
+                stance_changes: [],
+                reserve_shifts: [{
+                    brigade_id: 'shift_me',
+                    from_zone: 'zone:quiet',
+                    to_zone: 'zone:threat',
+                    reason: 'duplicate shift',
+                }],
+                empty_sector_relief_reassignments: [{
+                    brigade_id: 'shift_me',
+                    to_sector_id: 'sector:test:1',
+                    reason: 'empty front sector requires corps relief',
+                }],
+                reinforcement_requests: [],
+                activity_entries: [],
+            } as any,
+            { threatened_zones: [], global_threat_level: 'low' } as any,
+            null,
+        );
+
+        expect(output.directive.sector_reassignment_orders).toEqual([{
+            brigade_id: 'shift_me',
+            to_sector_id: 'sector:test:1',
+        }]);
+    });
 });

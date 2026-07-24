@@ -126,9 +126,24 @@ test('runJNATransition reports completed when withdrawal ≥ 0.95 and asset ≥ 
     expect(report.asset_transfer_after).toBe(0.95);
 });
 
-test('war runTurn default path omits phase_i JNA transition report', async () => {
+test('runJNATransition completes lifecycle when the withdrawal event flag is set', () => {
+    const state = statePhaseIWithRSDeclared();
+    state.military.event_flags = { jna_withdrawn: true };
+
+    const report = runJNATransition(state);
+
+    expect(report.started).toBe(true);
+    expect(report.completed).toBe(true);
+    expect(state.military.war_jna).toEqual({
+        transition_begun: true,
+        withdrawal_progress: 1,
+        asset_transfer_rs: 1,
+    });
+});
+
+test('war runTurn reports the JNA transition lifecycle', async () => {
     const state = statePhaseIWithRSDeclared();
     const { report } = await runTurn(state, { seed: 'jna-fixture' });
-    expect(report.war_jna_transition).toBe(undefined);
-    expect(report.phases.some((p) => p.name === 'phase-i-jna-transition')).toBe(false);
+    expect(report.war_jna_transition).toBeDefined();
+    expect(report.phases.some((p) => p.name === 'jna-transition')).toBe(true);
 });

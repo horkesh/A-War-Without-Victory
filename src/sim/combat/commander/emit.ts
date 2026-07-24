@@ -77,6 +77,8 @@ import { COMMITMENT_RATIO_UNBOUNDED_PERSISTED } from './zone_detection.js';
 import type { DecisionResult } from './decide.js';
 import { augmentOffensiveTargetsWithShifts } from './bot_priority_shift_augmentation.js';
 import { botOrdersPerfTime } from '../_perf_profile_bot_orders.js';
+import { shouldLaunchProbeInstead } from '../bot_corps_directives.js';
+import { getStalestSectorIntelConfidence } from '../sector_intel.js';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // Constants
@@ -613,7 +615,9 @@ function buildSectorReassignmentOrders(
     briefing: CommanderBriefing,
     zones: ZoneAssessment[],
 ): Array<{ brigade_id: string; to_sector_id: string }> {
-    if (decisions.reserve_shifts.length === 0) return [];
+    const directRelief = [...(decisions.empty_sector_relief_reassignments ?? [])]
+        .sort((left, right) => strictCompare(left.brigade_id, right.brigade_id));
+    if (decisions.reserve_shifts.length === 0 && directRelief.length === 0) return [];
 
     // Build zone-to-sector mapping: zone OSIDs → overlapping sector
     const corpsSectors = briefing.sectors
@@ -631,11 +635,16 @@ function buildSectorReassignmentOrders(
         }
     }
 
-    const orders: Array<{ brigade_id: string; to_sector_id: string }> = [];
+    const orders: Array<{ brigade_id: string; to_sector_id: string }> = directRelief.map((relief) => ({
+        brigade_id: relief.brigade_id,
+        to_sector_id: relief.to_sector_id,
+    }));
+    const orderedBrigades = new Set(orders.map((order) => order.brigade_id));
 
     for (const shift of [...decisions.reserve_shifts].sort((a, b) =>
         strictCompare(a.brigade_id, b.brigade_id),
     )) {
+        if (orderedBrigades.has(shift.brigade_id)) continue;
         // Find a sector in the destination zone
         // We need to find any OSID in the destination zone and look up its sector
         // Since we don't have zone->osid mapping here, use briefing.sectors territory
@@ -685,6 +694,7 @@ function buildSectorReassignmentOrders(
                 brigade_id: shift.brigade_id,
                 to_sector_id: targetSectorId,
             });
+            orderedBrigades.add(shift.brigade_id);
         }
     }
 
@@ -749,12 +759,13 @@ function buildOperations(
         // validation can still apply (prevents rear-area brigades entering the pool).
         // Root of the original ZEA / 13-15 turn stall bug — preserve this guard.
         const planTargetOsids = activePlan.target_osids;
+        const scopedPlanTargetOsids = primarySector
+            ? selectSectorObjectives(primarySector, planTargetOsids)
+            : [...planTargetOsids].sort(strictCompare);
         const firstObjectiveOsid = planTargetOsids.length > 0
-            ? [...planTargetOsids].sort(strictCompare)[0]!
-            : null;
-        const reachabilityObjectiveOsid = firstObjectiveOsid
-            ?? deriveTargetsFromSectors(briefing, 1)[0]
-            ?? null;
+            ? scopedPlanTargetOsids[0] ?? null
+            : deriveTargetsFromSectors(briefing, 1, primarySector)[0] ?? null;
+        const reachabilityObjectiveOsid = firstObjectiveOsid;
 
         const adjacencyMap = briefing.spatial.adjacency;
         const friendlyOsids = briefing.spatial.friendlyOsidsByFaction.get(briefing.faction);
@@ -894,7 +905,7 @@ function buildOperations(
             return ops;
         }
 
-        // Build the set of enemy OSIDs actually present in this corps's sector sub_segments.
+        // Build the set of enemy OSIDs actually present in the primary sector's sub_segments.
         // An objective that is no longer in any sub_segment.enemy_osids means the sector
         // front has shifted and collectObjectiveApproachOsids will return an empty approach
         // set — causing every brigade to have no valid attack position and the op to stall
@@ -903,8 +914,10 @@ function buildOperations(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.reachableEnemyOsids`,
             () => {
                 const reachableEnemyOsids = new Set<string>();
-                for (const sector of briefing.sectors) {
-                    if (sector.corps_id !== briefing.corps_id) continue;
+                const objectiveSectors = primarySector
+                    ? [primarySector]
+                    : briefing.sectors.filter(sector => sector.corps_id === briefing.corps_id);
+                for (const sector of objectiveSectors) {
                     for (const seg of sector.sub_segments ?? []) {
                         for (const osid of seg.enemy_osids ?? []) {
                             reachableEnemyOsids.add(osid);
@@ -919,8 +932,12 @@ function buildOperations(
             `${BUILD_OPERATIONS_PROFILE_PREFIX}.plan.objectives`,
             () => {
                 const rawObjectives = activePlan.target_osids.length > 0
-                    ? [...activePlan.target_osids].sort(strictCompare)
-                    : deriveTargetsFromSectors(briefing, Math.floor(participatingBrigades.length * 0.5));
+                    ? scopedPlanTargetOsids
+                    : deriveTargetsFromSectors(
+                        briefing,
+                        Math.floor(participatingBrigades.length * 0.5),
+                        primarySector,
+                    );
 
                 // Filter: drop any objective OSID not reachable from this corps's front segments.
                 // Only apply when the corps has at least one reachable enemy OSID (i.e., the set
@@ -935,6 +952,34 @@ function buildOperations(
         // creating this operation rather than injecting an empty-objectives op that
         // would immediately stall. The plan will be abandoned on the next assess cycle.
         if (objectives.length === 0) {
+            return ops;
+        }
+
+        const commandState = briefing.state_ref?.military.corps_command?.[briefing.corps_id];
+        const sectorIntelConfidence = briefing.state_ref && sectorId
+            ? getStalestSectorIntelConfidence(briefing.state_ref, sectorId)
+            : 0;
+        const launchProbe = shouldLaunchProbeInstead(
+            briefing.faction,
+            sectorIntelConfidence,
+            commandState?.consecutive_probes ?? 0,
+            briefing.turn,
+            briefing.state_ref?.military.war_timeline,
+        );
+        if (launchProbe) {
+            const probeOp = buildProbeOperation(
+                briefing.corps_id,
+                briefing.turn,
+                participatingBrigades[0]!,
+                sectorId ?? undefined,
+                objectives,
+            );
+            const conflictingProbe = briefing.active_operations.find(
+                (existing) => operationsOverlap(existing, probeOp),
+            );
+            if (!conflictingProbe) {
+                ops.push(probeOp);
+            }
             return ops;
         }
 
@@ -1514,7 +1559,45 @@ function buildPlanUpdates(
 // deriveTargetsFromSectors — fallback for opportunity plans with empty targets
 // ═══════════════════════════════════════════════════════════════════════════
 
-function deriveTargetsFromSectors(briefing: CommanderBriefing, maxTargets: number): string[] {
+function selectSectorObjectives(
+    sector: CommanderBriefing['sectors'][number],
+    planTargets: readonly string[],
+): string[] {
+    const targetSet = new Set(planTargets);
+    const subSegments = [...(sector.sub_segments ?? [])]
+        .sort((left, right) => strictCompare(left.sub_segment_id, right.sub_segment_id));
+
+    if (targetSet.size > 0) {
+        let selected: readonly string[] = [];
+        let selectedCount = 0;
+        for (const subSegment of subSegments) {
+            const matches = subSegment.enemy_osids
+                .filter(osid => targetSet.has(osid))
+                .sort(strictCompare);
+            if (matches.length > selectedCount) {
+                selected = matches;
+                selectedCount = matches.length;
+            }
+        }
+        return [...selected];
+    }
+
+    for (const subSegment of subSegments) {
+        const enemyOsids = [...subSegment.enemy_osids].sort(strictCompare);
+        if (enemyOsids.length > 0) return enemyOsids;
+    }
+    return [];
+}
+
+function deriveTargetsFromSectors(
+    briefing: CommanderBriefing,
+    maxTargets: number,
+    primarySector?: CommanderBriefing['sectors'][number],
+): string[] {
+    if (primarySector) {
+        return selectSectorObjectives(primarySector, []).slice(0, Math.max(1, maxTargets));
+    }
+
     const targets = new Set<string>();
     const corpsSectors = briefing.sectors
         .filter(s => s.corps_id === briefing.corps_id)

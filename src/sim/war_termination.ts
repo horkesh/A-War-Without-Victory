@@ -2,10 +2,11 @@
  * War termination detection: victory conditions, turn limit, faction collapse.
  * Called once per turn from the war_phases pipeline after combat/supply steps.
  *
- * Deterministic: sorted iteration via localeCompare, no Math.random().
+ * Deterministic: sorted iteration via strictCompare, no Math.random().
  */
 
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import { evaluateVictoryConditions } from '../scenario/victory_conditions.js';
 import { freezeEndgameSnapshot } from './endgame/endgame_snapshot.js';
 
@@ -112,7 +113,7 @@ function checkFactionCollapse(state: GameState): WarTerminationResult | null {
     const activeFactions = new Set<string>();
 
     // Count active brigades per faction (sorted iteration for determinism)
-    for (const formationId of Object.keys(formations).sort((a, b) => a.localeCompare(b))) {
+    for (const formationId of Object.keys(formations).sort(strictCompare)) {
         const f = formations[formationId];
         if (!f) continue;
         const kind = f.kind ?? 'brigade';

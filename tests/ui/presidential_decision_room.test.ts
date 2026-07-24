@@ -295,6 +295,29 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(view.cards.find((card) => card.id === 'briefing:briefing:settlement')?.sourceLabel).not.toBe('field_reports');
   });
 
+  it('surfaces every current command briefing item without a hidden four-card cap', () => {
+    const state = makeState({
+      commandBriefing: {
+        headline: 'Six current staff signals.',
+        criticalCount: 0,
+        pendingCount: 6,
+        items: Array.from({ length: 6 }, (_, index) => ({
+          id: `signal-${index + 1}`,
+          kind: 'command' as const,
+          severity: 'warning' as const,
+          title: `Staff signal ${index + 1}`,
+          detail: `Current command signal ${index + 1}.`,
+          target: { type: 'summary' as const },
+        })),
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.filter((card) => card.id.startsWith('briefing:signal-'))).toHaveLength(6);
+    expect(view.lenses.find((lens) => lens.id === 'briefing')?.count).toBe(6);
+  });
+
   it('routes cards to existing owners instead of duplicating inbox, records, cost, or Chronicle data', () => {
     const state = makeState({
       presidentialReviewQueue: {
@@ -409,6 +432,15 @@ describe('buildPresidentialDecisionRoomView', () => {
 
   it('routes peace-plan briefing cards to the inbox owner instead of generic Army HQ briefing', () => {
     const state = makeState({
+      pendingPeacePlan: {
+        planId: 'vance_owen',
+        planName: 'Vance-Owen Peace Plan',
+        narrative: 'A peace plan has been proposed.',
+        turnOffered: 40,
+        proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+        institutionalModel: 'cantons',
+        botResponses: {},
+      },
       commandBriefing: {
         headline: 'Peace plan requires response.',
         criticalCount: 1,
@@ -438,6 +470,15 @@ describe('buildPresidentialDecisionRoomView', () => {
   it('localizes peace-plan briefing action labels in BCS mode', () => {
     setLocale('bcs');
     const state = makeState({
+      pendingPeacePlan: {
+        planId: 'vance_owen',
+        planName: 'Vance-Owen Peace Plan',
+        narrative: 'A peace plan has been proposed.',
+        turnOffered: 40,
+        proposedSplit: { RBiH: 0, RS: 0, HRHB: 0 },
+        institutionalModel: 'cantons',
+        botResponses: {},
+      },
       commandBriefing: {
         headline: 'Peace plan requires response.',
         criticalCount: 1,
@@ -461,6 +502,32 @@ describe('buildPresidentialDecisionRoomView', () => {
 
     expect(card?.actionLabel).toBe('Pregledaj plan');
     expect(card?.actionLabel).not.toBe('Review Plan');
+  });
+
+  it('removes a stale peace-plan briefing card after the pending plan is resolved', () => {
+    const state = makeState({
+      pendingPeacePlan: undefined,
+      commandBriefing: {
+        headline: 'Peace plan requires response.',
+        criticalCount: 1,
+        pendingCount: 1,
+        items: [
+          {
+            id: 'dip-peace-plan',
+            kind: 'diplomatic',
+            severity: 'critical',
+            title: 'Peace plan requires response',
+            detail: 'A peace plan has been proposed.',
+            actionLabel: 'Review Plan',
+            target: { type: 'peace_plan', peacePlanId: 'vance_owen', label: 'Peace plan' },
+          },
+        ],
+      },
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.find((card) => card.id === 'briefing:dip-peace-plan')).toBeUndefined();
   });
 
   it('localizes command briefing collector fallback titles and details in BCS mode', () => {
@@ -790,13 +857,13 @@ describe('buildPresidentialDecisionRoomView', () => {
     const cardsById = Object.fromEntries(view.cards.map((card) => [card.id, card]));
 
     expect(cardsById['review:pending'].sourceLabel).toBe('Predsjednički sto');
-    expect(cardsById['paramilitary:pending'].actionLabel).toBe('Pregledaj raspoređivanje');
+    expect(cardsById['paramilitary:pending'].actionLabel).toBe('Pregledaj paravojsku');
     expect(cardsById['manifest:peace_plan'].sourceLabel).toBe('Mirovni prijedlog');
     expect(cardsById['manifest:peace_plan'].actionLabel).toBe('Otvori sto');
     expect(cardsById['manifest:convoy_decision'].sourceLabel).toBe('Pregled konvoja');
     expect(cardsById['manifest:convoy_decision'].actionLabel).toBe('Otvori sto');
     expect(Object.values(cardsById).map((card) => `${card.sourceLabel} ${card.actionLabel}`).join('\n'))
-      .not.toMatch(/Presidential Inbox|Diplomatic channel|Humanitarian channel|Review deployment|Review proposal|Review convoy/);
+      .not.toMatch(/Presidential Inbox|Diplomatic channel|Humanitarian channel|Review paramilitary|Review proposal|Review convoy/);
 
     expect(cardsById['review:pending'].title).toBe('Predsjednički pregledi na čekanju');
     expect(cardsById['review:pending'].sourceOwner).toBe('Predsjednički red pregleda');
@@ -804,7 +871,7 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(cardsById['paramilitary:pending'].title).toBe('Odobrenje paravojske na čekanju');
     expect(cardsById['paramilitary:pending'].evidence).toContain('rizik ratnih zločina');
     expect(cardsById['manifest:peace_plan'].title).toBe('Odgovor na mirovni plan na čekanju');
-    expect(cardsById['sitrep:front-exposed'].title).toBe('Operativni izvjestaj');
+    expect(cardsById['sitrep:front-exposed'].title).toBe('Tanko drzani frontovi');
     expect(cardsById['chronicle:review-memory'].title).toBe('Pamćenje Hronike ažurirano');
     expect(cardsById['review:pending'].title).not.toBe('Presidential reviews pending');
   });
@@ -825,6 +892,22 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.evidence).toContain('1 deployment request');
     expect(card?.evidence).toContain('estimated strength 150');
     expect(card?.evidence.join('\n')).not.toContain('600');
+  });
+
+  it('does not surface already-decided paramilitary request rows as blocking cards', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        player_faction: 'RBiH',
+        pendingParamilitaryRequests: [
+          { faction: 'RBiH', strength: 150, target_osid: 'op:sarajevo:stari_grad', estimated_civilian_risk: 12, mode: 'rear_pocket', decision: 'allow' },
+          { faction: 'RBiH', strength: 120, target_osid: 'op:sarajevo:novi_grad', estimated_civilian_risk: 10, mode: 'offensive', decision: 'deny' },
+          { faction: 'RBiH', strength: 80, target_osid: 'op:sarajevo:centar', estimated_civilian_risk: 6, mode: 'rear_pocket', decision: 'regular' },
+        ],
+      }),
+    });
+
+    expect(view.cards.find((entry) => entry.id === 'paramilitary:pending')).toBeUndefined();
+    expect(view.advanceReadiness.items.find((entry) => entry.id === 'paramilitary:pending')).toBeUndefined();
   });
 
   it('opens operation opportunity cards on the Decision Room opportunity lens', () => {
@@ -896,6 +979,63 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.title).toContain(turnToDateString(24));
     expect(card?.sourceLabel).toBe(turnToDateString(24));
     expect(card?.sourceLabel).not.toBe('Turn 24');
+  });
+
+  it('gives separate sitrep alerts distinct titles and alert-specific evidence', () => {
+    const view = buildPresidentialDecisionRoomView({
+      state: makeState({
+        operationalSitrep: makeSitrep({
+          front: {
+            engagedCount: 16,
+            exposedCount: 403,
+            edges: [],
+          },
+          sustainment: {
+            adequateCount: 10,
+            strainedCount: 2,
+            criticalCount: 0,
+            collapsedMunicipalities: [],
+            activeHostileTakeoverTimers: 14,
+            activeCamps: 0,
+          },
+          alerts: [
+            {
+              id: 'front-exposed',
+              severity: 'critical',
+              text: 'Widespread thinly held front sectors need staff review.',
+              evidence: [
+                'Affected fronts: West (Prijedor) - East (Sanski Most); +402 more.',
+                'Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.',
+              ],
+            },
+            {
+              id: 'hostile-takeovers',
+              severity: 'warning',
+              text: '14 hostile takeover timers remain active.',
+            },
+          ],
+        }),
+      }),
+    });
+
+    const front = view.cards.find((card) => card.id === 'sitrep:front-exposed');
+    const hostile = view.cards.find((card) => card.id === 'sitrep:hostile-takeovers');
+
+    expect(front).toMatchObject({
+      title: 'Thinly Held Fronts',
+      explanation: 'Widespread thinly held front sectors need staff review.',
+    });
+    expect(front?.evidence).toContain('403 thinly held fronts');
+    expect(front?.evidence).toContain('Affected fronts: West (Prijedor) - East (Sanski Most); +402 more.');
+    expect(front?.evidence).toContain('Staff handoff: inspect front sectors in War Summary; no direct presidential order is required.');
+    expect(front?.evidence.join('\n')).not.toContain('hostile takeover');
+
+    expect(hostile).toMatchObject({
+      title: 'Hostile Takeover Timers',
+      explanation: '14 hostile takeover timers remain active.',
+    });
+    expect(hostile?.evidence).toContain('14 hostile takeover timers');
+    expect(hostile?.evidence.join('\n')).not.toContain('403 thinly held fronts');
   });
 
   it('marks what should be reviewed before advancing without blocking beyond existing systems', () => {
@@ -1234,7 +1374,153 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(noActionCard?.directive).toBeUndefined();
   });
 
-  it('does not expose authorize-op directives when the opportunity review id is missing', () => {
+  it('shows the complete ready-plan dossier for an ordinary pending operation approval', () => {
+    const state = makeState({
+      pendingProposalReviews: [{
+        id: 'PROP_30_ops_0',
+        turn: 30,
+        faction: 'RBiH',
+        domain: 'ops',
+        description: 'Thin generated description that must not own the dossier.',
+        proposed_action: 'APPROVE_OP:arbih_1st_corps:plan_internal_30',
+      }],
+      opProposalCards: [{
+        proposal_id: 'PROP_30_ops_0',
+        corps_id: 'arbih_1st_corps',
+        corps_name: '1st Corps',
+        plan_id: 'plan_internal_30',
+        op_id: null,
+        op_name: 'Relieve Jajce',
+        commander: {
+          officer_id: 'off_dudakovic', name: 'Atif DudakoviÄ‡', rank: 'corps_commander',
+          lost: false, status: 'active',
+        },
+        objective: 'Relieve Jajce',
+        targets: ['Jajce'],
+        forces: ['Alpha Brigade', 'Beta Brigade'],
+        concentration_readiness: '100% concentrated; ready',
+        intel_assessment: '72% confidence',
+        supply_assessment: '80% continuity confidence',
+        risk_assessment: 'High pressure; 65% plan viability',
+        recommendation: 'Concentration complete; authorize launch.',
+        decision_deadline: 'Before the next turn advances',
+        force_ratio: 'Unreported',
+        opportunity_cost: 'Unreported',
+        summary: '1st Corps requests authorization to relieve Jajce with two ready brigades before the next turn.',
+        force_ratio_estimate: null,
+        commander_assessment: null,
+        donors: [],
+        total_personnel_lent: 0,
+        override_available: false,
+        override_ca_cost: 15,
+        framing: 'Atif DudakoviÄ‡ requests authorization to relieve Jajce.',
+      }],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_30_ops_0');
+
+    expect(card?.title).toBe('Relieve Jajce');
+    expect(card?.explanation).toContain('1st Corps requests authorization');
+    expect(card?.evidence).toEqual([
+      'Command: 1st Corps',
+      'Commander: Corps Commander Atif DudakoviÄ‡',
+      'Objective: Relieve Jajce',
+      'Targets: Jajce',
+      'Forces: Alpha Brigade, Beta Brigade',
+      'Concentration/readiness: 100% concentrated; ready',
+      'Intelligence: 72% confidence',
+      'Supply: 80% continuity confidence',
+      'Risk: High pressure; 65% plan viability',
+      'Recommendation: Concentration complete; authorize launch.',
+      'Deadline: Before the next turn advances',
+      'Force ratio: Unreported',
+      'Opportunity cost: Unreported',
+    ]);
+    expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
+      .not.toMatch(/arbih_1st_corps|plan_internal_30|op:jajce|zone:/);
+  });
+
+  it('uses map settlement names for generated ordinary proposal objectives and targets', () => {
+    const state = makeState({
+      player_faction: 'RS',
+      pendingProposalReviews: [{
+        id: 'PROP_2_ops_0',
+        turn: 2,
+        faction: 'RS',
+        domain: 'ops',
+        description: 'Generated operation approval.',
+        proposed_action: 'APPROVE_OP:vrs_2nd_krajina:plan_vrs_2nd_krajina_t1_opportunity',
+      }],
+      opProposalCards: [{
+        proposal_id: 'PROP_2_ops_0',
+        corps_id: 'vrs_2nd_krajina',
+        corps_name: '2nd Krajina Corps',
+        plan_id: 'plan_vrs_2nd_krajina_t1_opportunity',
+        op_id: null,
+        op_name: 'Advance from Racic (Bihac)',
+        commander: null,
+        objective: 'Advance from Racic (Bihac)',
+        objective_origin_osid: 'op:bihac:racic',
+        targets: ['Orasac (Bihac)'],
+        target_osids: ['op:bihac:orasac_2'],
+        forces: ['15th Bihac Infantry Brigade'],
+        concentration_readiness: '100% concentrated; ready',
+        intel_assessment: '35% confidence',
+        supply_assessment: '75% continuity confidence',
+        risk_assessment: 'Low pressure; 100% plan viability',
+        recommendation: 'Concentration complete; ready to launch.',
+        decision_deadline: 'Before the next turn advances',
+        force_ratio: 'Unreported',
+        opportunity_cost: 'Unreported',
+        summary: '2nd Krajina Corps requests authorization to advance from Racic with one brigade.',
+        force_ratio_estimate: null,
+        commander_assessment: null,
+        donors: [],
+        total_personnel_lent: 0,
+        override_available: false,
+        override_ca_cost: 15,
+        framing: '2nd Krajina Corps requests authorization.',
+      }],
+    });
+
+    const view = buildPresidentialDecisionRoomView({
+      state,
+      osidNameMap: {
+        'op:bihac:racic': 'Ra\u010dic (Biha\u0107)',
+        'op:bihac:orasac_2': 'Ora\u0161ac (Biha\u0107)',
+      },
+    });
+    const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_2_ops_0');
+
+    expect(card?.evidence).toContain('Objective: Advance from Ra\u010dic (Biha\u0107)');
+    expect(card?.evidence).toContain('Targets: Ora\u0161ac (Biha\u0107)');
+    expect(`${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`)
+      .not.toMatch(/zone:|op:|vrs_2nd_krajina|plan_vrs/);
+  });
+
+  it('uses neutral copy when an ordinary proposal has no ready-plan read model', () => {
+    const state = makeState({
+      pendingProposalReviews: [{
+        id: 'PROP_30_ops_sparse',
+        turn: 30,
+        faction: 'RBiH',
+        domain: 'ops',
+        description: 'APPROVE_OP arbih_1st_corps plan_internal_30 op:jajce',
+        proposed_action: 'APPROVE_OP:arbih_1st_corps:plan_internal_30',
+      }],
+      opProposalCards: [],
+    });
+
+    const view = buildPresidentialDecisionRoomView({ state });
+    const card = view.cards.find((entry) => entry.id === 'command:review-proposal:PROP_30_ops_sparse');
+    const playerCopy = `${card?.title} ${card?.explanation} ${card?.evidence.join(' ')}`;
+
+    expect(card).toBeDefined();
+    expect(playerCopy).not.toMatch(/APPROVE_OP|arbih_1st_corps|plan_internal_30|op:jajce/);
+  });
+
+  it('does not surface operation opportunity action cards when the live review id is missing', () => {
     const state = makeState({
       operationOpportunityProposals: [
         makeOpportunity({
@@ -1250,8 +1536,8 @@ describe('buildPresidentialDecisionRoomView', () => {
     const view = buildPresidentialDecisionRoomView({ state });
     const card = view.cards.find((entry) => entry.id === 'opportunity:opp_missing_review');
 
-    expect(card).toBeTruthy();
-    expect(card?.directive).toBeUndefined();
+    expect(card).toBeUndefined();
+    expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('opportunity:opp_missing_review');
   });
 
   it('renders opportunity recommendation enums as staff copy instead of raw ids', () => {
@@ -1528,6 +1814,25 @@ describe('buildPresidentialDecisionRoomView', () => {
 
   it('populates an elite-deploy directive (cost 25) carrying requestId + brigadeId for a player reserve request', () => {
     const state = makeState({
+      formations: [
+        { id: 'arbih_3rd_corps', faction: 'RBiH', name: '3rd Corps', kind: 'corps' },
+        { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+        {
+          id: 'elite_guards', faction: 'RBiH', name: 'Guards Brigade', kind: 'brigade',
+          readiness: 'ready', location_osid: 'op:visoko:visoko_2', corps_id: 'arbih_1st_corps',
+          eliteLoanState: {
+            on_loan: false, loaned_to_corps: null, loan_start_turn: null,
+            turns_deployed: 0, in_cooldown: false, permanently_degraded: false,
+            current_episode_id: null,
+          },
+        },
+      ] as LoadedGameState['formations'],
+      corpsFrontSectors: [{
+        sector_id: 'sector:central:west', corps_id: 'arbih_3rd_corps',
+        corps_name: '3rd Corps', display_name: 'Central Bosnia West', faction: 'RBiH',
+        opposing_factions: ['RS'], edge_ids: [], sub_segment_count: 1, length_edges: 1,
+        assigned_brigade_ids: [], reserve_brigade_ids: [],
+      }],
       pendingReserveRequests: [
         {
           request_id: 'reserve_alpha',
@@ -1538,6 +1843,7 @@ describe('buildPresidentialDecisionRoomView', () => {
           severityBand: 'critical',
           travel_hops: 3,
           description: 'A sector is buckling.',
+          why_needed: 'Corps arbih_3rd_corps requested 43 brigade(s) for zone:central:west.',
           suggested_brigade_id: 'elite_guards',
           turn_requested: 24,
         },
@@ -1568,7 +1874,10 @@ describe('buildPresidentialDecisionRoomView', () => {
       ] as LoadedGameState['pendingReserveRequests'],
     });
 
-    const view = buildPresidentialDecisionRoomView({ state });
+    const view = buildPresidentialDecisionRoomView({
+      state,
+      osidNameMap: { 'op:visoko:visoko_2': 'Visoko' },
+    });
     const alpha = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_alpha');
     const beta = view.cards.find((c) => c.id === 'command:elite-deploy:reserve_beta');
 
@@ -1587,8 +1896,29 @@ describe('buildPresidentialDecisionRoomView', () => {
       cost: 25,
       payload: { requestId: 'reserve_alpha', brigadeId: 'elite_guards' },
     });
-    // A request with no suggested brigade remains a staff-selection matter in Army Reserve.
-    expect(beta).toBeUndefined();
+    expect(alpha?.explanation).toBe('Anchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(alpha?.explanation).not.toMatch(/arbih_3rd_corps|zone:|43 brigade/);
+    expect(alpha?.evidence).toEqual([
+      'Reason: Sector Threat',
+      'Severity: Immediate Army Need',
+      'Requesting command: 3rd Corps',
+      'Recipient sector: Central Bosnia West',
+      'Candidate force: Guards Brigade',
+      'Donor command: 1st Corps',
+      'Source position: Visoko',
+      'Readiness: Ready',
+      'Travel time: about 2 weeks travel',
+      'Expected effect: Anchor the thinnest sector-front line and stabilize local defensive depth.',
+      'Weakened position: 1st Corps at Visoko; 0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
+      'Opportunity cost: 0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
+    ]);
+    // Missing staff candidate truth remains visible, but no release order can be issued.
+    expect(beta).toBeDefined();
+    expect(beta?.directive).toBeUndefined();
+    expect(beta?.evidence.join(' ')).toContain('Candidate force: Unreported');
+    expect(beta?.evidence.join(' ')).toContain('Donor command: Unreported');
+    expect(beta?.evidence.join(' ')).toContain('Source position: Unreported');
+    expect(beta?.evidence.join(' ')).toContain('Weakened position: Unreported');
     // Enemy-faction reserve requests never surface to the player.
     expect(view.cards.find((c) => c.id === 'command:elite-deploy:reserve_enemy')).toBeUndefined();
   });
@@ -1621,6 +1951,37 @@ describe('buildPresidentialDecisionRoomView', () => {
     expect(card?.title).not.toContain('arbih_1st_corps');
     expect(card?.evidence.join(' ')).toContain('Sector Threat');
     expect(card?.evidence.join(' ')).not.toContain('sector_threat');
+  });
+
+  it('localizes every reserve-request evidence label in BCS', () => {
+    setLocale('bcs');
+    const state = makeState({
+      formations: [
+        { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+      ] as LoadedGameState['formations'],
+      pendingReserveRequests: [{
+        request_id: 'reserve_bcs',
+        corps_id: 'arbih_1st_corps',
+        faction: 'RBiH',
+        reason: 'defensive_gap',
+        priority: 80,
+        severityBand: 'critical',
+        travel_hops: 3,
+        description: 'Thin line.',
+        suggested_brigade_id: null,
+        turn_requested: 24,
+      }] as LoadedGameState['pendingReserveRequests'],
+    });
+
+    const card = buildPresidentialDecisionRoomView({ state }).cards
+      .find((entry) => entry.id === 'command:elite-deploy:reserve_bcs');
+    const evidence = card?.evidence.join(' ') ?? '';
+
+    expect(evidence).toContain('Hitnost:');
+    expect(evidence).toContain('Komanda davaoca:');
+    expect(evidence).toContain('Polazni polozaj:');
+    expect(evidence).toContain('Oslabljeni polozaj:');
+    expect(evidence).not.toMatch(/Severity:|Donor command:|Source position:|Weakened position:/);
   });
 
   it('always emits a single front-visit directive card (cost 10, availability gated in the component)', () => {
@@ -1801,18 +2162,352 @@ describe('buildPresidentialDecisionRoomView — proactive force-launch (override
     const reviewCard = view.cards.find((c) => c.id === 'command:review-proposal:rev_1');
 
     expect(reviewCard?.title).toBe('Operation Test Plan');
-    expect(reviewCard?.severity).toBe('blocking');
-    expect(reviewCard?.actionLabel).toBe('Review authorization');
+    expect(reviewCard?.severity).toBe('warning');
+    expect(reviewCard?.actionLabel).toBe('Review recommendation');
     expect(reviewCard?.sourceLabel).toBe('Operation authorization');
-    expect(reviewCard?.explanation).toBe('Your staff is asking for authority to open this operation. It will not launch until you approve or withhold it.');
-    expect(reviewCard?.evidence.join(' ')).toContain('Historical operation awaiting presidential authorization');
-    expect(reviewCard?.evidence.join(' ')).toContain('Presidential launch authority required');
+    expect(reviewCard?.explanation).toBe('Staff recommends presidential authorization before launch, but this review is advisory and does not block ending the turn.');
+    expect(reviewCard?.evidence.join(' ')).toContain('Historical operation authorization');
+    expect(reviewCard?.evidence.join(' ')).toContain('Recommended staff review');
+    expect(reviewCard?.evidence.join(' ')).toContain('1 operation authorization unresolved');
+    expect(reviewCard?.evidence.join(' ')).not.toContain('Presidential launch authority required');
     expect(reviewCard?.sourceHandoffTarget).toEqual({
       kind: 'army-hq-corps-briefing',
       corpsId: 'arbih_1st_corps',
     });
-    expect(view.advanceReadiness.blockedByExistingSystems).toBe(true);
+    expect(view.advanceReadiness.blockedByExistingSystems).toBe(false);
+    expect(view.advanceReadiness.headline).toBe('Recommended before advance');
     expect(view.advanceReadiness.items.map((item) => item.id)).toContain('command:review-proposal:rev_1');
+    expect(view.activeDossier?.advanceLabel).toBe('Recommended before advance');
+  });
+
+  it('adds operation goals, command, commander, force, and provenance to historical authorizations', () => {
+    const state = makeState({
+      player_faction: 'RS',
+      formations: [
+        {
+          id: 'vrs_1st_krajina',
+          name: '1st Krajina Corps',
+          faction: 'RS',
+          kind: 'corps',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+        },
+        {
+          id: 'rs_43rd_prijedor_motorized',
+          name: '43rd Prijedor Motorized Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_1st_krajina',
+          personnel: 2800,
+        },
+        {
+          id: 'rs_5th_kozara_light_infantry',
+          name: '5th Kozara Light Infantry Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_1st_krajina',
+          personnel: 2000,
+        },
+      ],
+      namedOfficerData: [
+        {
+          id: 'vrs_talic',
+          name: 'Momir Talic',
+          faction: 'RS',
+          rank: 'corps_commander',
+          competence: 5,
+          aggressiveness: 4,
+          defensive_skill: 4,
+          political_reliability: 4,
+          origin: 'jna',
+          status: 'active',
+          assigned_corps_id: 'vrs_1st_krajina',
+          acting_commander: false,
+          turns_in_command: 0,
+          battles: 0,
+          victories: 0,
+        },
+      ],
+      pendingProposalReviews: [
+        {
+          id: 'rev_prijedor',
+          turn: 0,
+          faction: 'RS',
+          domain: 'ops',
+          description: 'Operation Prijedor - staff requests authorization to proceed.',
+          proposed_action: 'HISTORICAL_OP:preplanned:vrs_1st_krajina:Operation Prijedor',
+          current_value: 'awaiting_authorization',
+          proposed_value: 'authorize',
+        },
+      ],
+    });
+
+    const osidNameMap = {
+      'op:prijedor:prijedor_2': 'Prijedor',
+      'op:prijedor:ljubija_2': 'Ljubija',
+      'op:prijedor:kozarac_2': 'Kozarac',
+      'op:prijedor:kamicani': 'Kamicani',
+      'op:prijedor:raljas': 'Raljas',
+      'op:sanski_most:stari_majdan': 'Stari Majdan',
+      'op:sanski_most:sanski_most_2': 'Sanski Most',
+      'op:sanski_most:ilidza_2': 'Ilidza',
+      'op:kljuc:kljuc_2': 'Kljuc',
+      'op:kljuc:hadzici': 'Hadzici',
+      'op:kljuc:krasulje_2': 'Krasulje',
+    };
+
+    const view = buildPresidentialDecisionRoomView({
+      state,
+      osidNameMap,
+      selectedCardId: 'command:review-proposal:rev_prijedor',
+    });
+
+    const dossierText = [
+      view.activeDossier?.explanation,
+      ...(view.activeDossier?.evidence ?? []),
+    ].join(' ');
+
+    expect(dossierText).toContain('Prijedor Clean: Ljubija -> Kozarac -> Kamicani -> Raljas');
+    expect(dossierText).toContain('Command: 1st Krajina Corps');
+    expect(dossierText).toContain('Commander: Corps commander Momir Talic');
+    expect(dossierText).toContain('Force: 8 assigned formations; 4,800 reported personnel');
+    expect(dossierText).toContain('Execution assist: after authorization, field staff can move and attack only with assigned formations for this operation; other formations remain under your orders.');
+    expect(dossierText).toContain('Staging: Prijedor');
+    expect(dossierText).toContain('Timing: available now');
+    expect(dossierText).toContain('Source: scenario pre-planned operation definition');
+  });
+
+  it('adds triggered operation goals, strength, commander, and provenance to historical authorizations', () => {
+    const state = makeState({
+      player_faction: 'RS',
+      turn: 20,
+      formations: [
+        {
+          id: 'vrs_1st_krajina',
+          name: '1st Krajina Corps',
+          faction: 'RS',
+          kind: 'corps',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+        },
+        {
+          id: 'rs_1st_kotor_varo_light_infantry',
+          name: '1st Kotor Varo Light Infantry Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_1st_krajina',
+          personnel: 1200,
+        },
+        {
+          id: 'rs_12th_kotorsko_light_infantry',
+          name: '12th Kotorsko Light Infantry Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_1st_krajina',
+          personnel: 1100,
+        },
+        {
+          id: 'rs_22nd_krajina_infantry',
+          name: '22nd Krajina Infantry Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_1st_krajina',
+          personnel: 1400,
+        },
+      ],
+      namedOfficerData: [
+        {
+          id: 'vrs_mladic',
+          name: 'Ratko Mladic',
+          faction: 'RS',
+          rank: 'general',
+          competence: 5,
+          aggressiveness: 5,
+          defensive_skill: 4,
+          political_reliability: 4,
+          origin: 'jna',
+          status: 'active',
+          assigned_corps_id: 'vrs_1st_krajina',
+          acting_commander: false,
+          turns_in_command: 0,
+          battles: 0,
+          victories: 0,
+        },
+      ],
+      pendingProposalReviews: [
+        {
+          id: 'rev_kotor_varos',
+          turn: 20,
+          faction: 'RS',
+          domain: 'ops',
+          description: 'Operation Kotor Varos - staff requests authorization to proceed.',
+          proposed_action: 'HISTORICAL_OP:triggered:vrs_1st_krajina:Operation Kotor Varos',
+          current_value: 'awaiting_authorization',
+          proposed_value: 'authorize',
+        },
+      ],
+    });
+
+    const osidNameMap = {
+      'op:kotor_varos:kotor_varos_2': 'Kotor Varos',
+      'op:kotor_varos:vrbanjci_2': 'Vrbanjci',
+      'op:kotor_varos:prisocka_2': 'Prisocka',
+    };
+
+    const view = buildPresidentialDecisionRoomView({
+      state,
+      osidNameMap,
+      selectedCardId: 'command:review-proposal:rev_kotor_varos',
+    });
+
+    const reviewCard = view.cards.find((card) => card.id === 'command:review-proposal:rev_kotor_varos');
+    const dossierText = [
+      reviewCard?.title,
+      reviewCard?.explanation,
+      ...(view.activeDossier?.evidence ?? []),
+    ].join(' ');
+
+    expect(reviewCard?.title).toBe('Operation Kotor Varos');
+    expect(dossierText).toContain('Kotor Varos Siege: Kotor Varos -> Vrbanjci -> Prisocka');
+    expect(dossierText).toContain('Command: 1st Krajina Corps');
+    expect(dossierText).toContain('Commander: General Ratko Mladic');
+    expect(dossierText).toContain('Force: 3 assigned formations; 3,700 reported personnel');
+    expect(dossierText).toContain('Axes: Kotor Varos Siege');
+    expect(dossierText).toContain('Staging: Kotor Varos');
+    expect(dossierText).toContain('Timing: available now; 2-turn planning period');
+    expect(dossierText).toContain('Source: scenario triggered-operation definition');
+  });
+
+  it('labels Army HQ operation authorization provenance separately from triggered operations', () => {
+    const state = makeState({
+      player_faction: 'RS',
+      turn: 170,
+      formations: [
+        {
+          id: 'vrs_drina',
+          name: 'Drina Corps',
+          faction: 'RS',
+          kind: 'corps',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+        },
+        {
+          id: 'rs_1st_zvornik',
+          name: '1st Zvornik Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_drina',
+          personnel: 1800,
+        },
+        {
+          id: 'rs_1st_bratunac',
+          name: '1st Bratunac Brigade',
+          faction: 'RS',
+          kind: 'brigade',
+          readiness: 'ready',
+          status: 'active',
+          createdTurn: 0,
+          tags: [],
+          corps_id: 'vrs_drina',
+          personnel: 1300,
+        },
+      ],
+      pendingProposalReviews: [
+        {
+          id: 'rev_krivaja',
+          turn: 170,
+          faction: 'RS',
+          domain: 'ops',
+          description: 'Operation Krivaja-95 - staff requests authorization to proceed.',
+          proposed_action: 'HISTORICAL_OP:army_hq:vrs_drina:Operation Krivaja-95',
+          current_value: 'awaiting_authorization',
+          proposed_value: 'authorize',
+        },
+      ],
+    });
+
+    const osidNameMap = {
+      'op:srebrenica:donji_potocari_2': 'Donji Potocari',
+      'op:srebrenica:srebrenica_2': 'Srebrenica',
+      'op:srebrenica:bostahovine_2': 'Bostahovine',
+      'op:srebrenica:milacevici': 'Milacevici',
+      'op:srebrenica:suceska': 'Suceska',
+      'op:bratunac:bratunac_2': 'Bratunac',
+    };
+
+    const view = buildPresidentialDecisionRoomView({
+      state,
+      osidNameMap,
+      selectedCardId: 'command:review-proposal:rev_krivaja',
+    });
+
+    const dossierText = [
+      view.activeDossier?.explanation,
+      ...(view.activeDossier?.evidence ?? []),
+    ].join(' ');
+
+    expect(dossierText).toContain('Srebrenica Enclave: Donji Potocari -> Srebrenica -> Bostahovine -> Milacevici -> Suceska');
+    expect(dossierText).toContain('Command: Drina Corps');
+    expect(dossierText).toContain('Force: 5 assigned formations; 3,100 reported personnel');
+    expect(dossierText).toContain('Staging: Bratunac');
+    expect(dossierText).toContain('Timing: available now; 3-turn planning period');
+    expect(dossierText).toContain('Launch floor: repulsed');
+    expect(dossierText).toContain('Source: scenario Army HQ operation definition');
+    expect(dossierText).not.toContain('Source: scenario triggered-operation definition');
+  });
+
+  it('omits resolved operation authorization reviews from Decision Room priorities', () => {
+    const state = makeRawWithHeldPlan({
+      playerFaction: 'RBiH',
+      proposedAction: 'HISTORICAL_OP:triggered:arbih_1st_corps:Operation Test Plan',
+    });
+    state.pendingProposalReviews = [
+      {
+        id: 'rev_1',
+        turn: 24,
+        faction: 'RBiH',
+        domain: 'ops',
+        description: 'Approve held plan',
+        proposed_action: 'HISTORICAL_OP:triggered:arbih_1st_corps:Operation Test Plan',
+        accepted: true,
+        resolved_turn: 24,
+      } as NonNullable<LoadedGameState['pendingProposalReviews']>[number],
+    ];
+
+    const view = buildPresidentialDecisionRoomView({ state });
+
+    expect(view.cards.map((card) => card.id)).not.toContain('command:review-proposal:rev_1');
+    expect(view.advanceReadiness.items.map((item) => item.id)).not.toContain('command:review-proposal:rev_1');
   });
 
   it('emits no proactive cards when there is no player faction', () => {

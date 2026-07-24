@@ -42,7 +42,6 @@ import { runPhaseIITurn } from '../../sim/run_combat_browser.js';
 import type { FactionId } from '../../state/game_state.js';
 import { GameState } from '../../state/game_state.js';
 import { INTERNATIONAL_SANCTIONS_THRESHOLD } from '../../state/patron_pressure.js';
-import { deserializeState } from '../../state/serialize.js';
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
 import { checkWarTransition, findCriticalEvent, findWarMilestoneEvent, showDeclarationModal, showWarBeginsModal } from './components/DeclarationEventModal.js';
 import { getPlayerFaction, turnToWeekString } from './components/warroom_utils.js';
@@ -61,7 +60,7 @@ import { extractWarData } from './data/war_data_extractor.js';
 import { capturePreviousTurnSnapshot, getPreviousSnapshot, setPreviousSnapshot, setLastTurnReport, type LastTurnReport } from './data/warroom_state.js';
 import type { ShellHandoffCommand } from '../shared/shellHandoff.js';
 type DesktopBridge = {
-    advanceTurn?: (payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; stateJson?: string; report?: unknown }>;
+    advanceTurn?: (payload?: Record<string, unknown>) => Promise<{ ok: boolean; error?: string; report?: unknown }>;
     openTacticalMapWindow?: () => Promise<unknown>;
 };
 
@@ -433,20 +432,12 @@ export class ClickableRegionManager {
                     try {
                         const result = await bridge.advanceTurn();
                         this.modalManager?.hideModal();
-                        if (!result?.ok || !result.stateJson) {
-                            console.error('Desktop advance-turn failed:', result?.error ?? 'No state returned');
+                        if (!result?.ok) {
+                            console.error('Desktop advance-turn failed:', result?.error ?? 'Unknown error');
                             return;
                         }
 
-                        const newState = deserializeState(result.stateJson);
-                        this.playerFaction = getPlayerFacingFaction(newState.meta.player_faction) ?? undefined;
                         if (result.report) setLastTurnReport(result.report as LastTurnReport);
-
-                        this.onGameStateChange?.(newState);
-
-                        if (this.playerFaction) {
-                            await this.checkWarMilestone(newState, this.playerFaction);
-                        }
                     } catch (e) {
                         this.modalManager?.hideModal();
                         console.error('Desktop advance-turn exception', e);
@@ -493,7 +484,7 @@ export class ClickableRegionManager {
         if (!pf) {
             return `
                 <div class="wr-dialog-section" style="margin-top:12px;border-top:1px solid #333;padding-top:10px;">
-                    <div style="font-size:11px;font-weight:600;color:#8b8ba7;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>
+                    <div style="font-size: 12px;font-weight:600;color:#8b8ba7;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>
                     <div class="wr-dialog-row" style="color:#555570;font-style:italic;"><span class="wr-label">Player command identity unavailable.</span></div>
                 </div>
             `;
@@ -502,7 +493,7 @@ export class ClickableRegionManager {
 
         const lines: string[] = [];
         lines.push('<div class="wr-dialog-section" style="margin-top:12px;border-top:1px solid #333;padding-top:10px;">');
-        lines.push('<div style="font-size:11px;font-weight:600;color:#ffab00;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>');
+        lines.push('<div style="font-size: 12px;font-weight:600;color:#ffab00;margin-bottom:8px;letter-spacing:1px;">THIS WEEK</div>');
 
         // PENDING OPERATIONS
         const packing = snap.brigadeMovement.packing.length;
@@ -547,7 +538,7 @@ export class ClickableRegionManager {
         }
 
         if (warnings.length > 0) {
-            lines.push(`<div class="wr-dialog-info" style="color:#ff3d00;background:rgba(255,61,0,0.08);margin-top:6px;padding:6px 10px;border-radius:4px;font-size:11px;">`);
+            lines.push(`<div class="wr-dialog-info" style="color:#ff3d00;background:rgba(255,61,0,0.08);margin-top:6px;padding:6px 10px;border-radius:4px;font-size: 12px;">`);
             lines.push(`\u26a0 ${warnings.join(' \u2022 ')}`);
             lines.push('</div>');
         }
@@ -612,7 +603,7 @@ export class ClickableRegionManager {
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.textContent = `Review international pressure (${Math.round(composite * 100)}%)`;
-            btn.style.cssText = 'padding:6px 12px;font-size:11px;cursor:pointer;background:#eee;color:#111;border:1px solid #333;border-radius:4px;';
+            btn.style.cssText = 'padding:6px 12px;font-size: 12px;cursor:pointer;background:#eee;color:#111;border:1px solid #333;border-radius:4px;';
             btn.addEventListener('click', () => this.showIvpBreakdown(state));
             footer.appendChild(btn);
             wrapper.appendChild(footer);

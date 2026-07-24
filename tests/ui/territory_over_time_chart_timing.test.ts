@@ -58,4 +58,23 @@ describe('TerritoryOverTimeChart timing labels', () => {
         expect(text).toContain('Sep 1992');
         expect(text).not.toContain('Apr 1992');
     });
+
+    it('caps a 52-turn campaign at six evenly spaced calendar labels including both endpoints', () => {
+        useGameStore.setState({
+            loadedGameState: {
+                player_faction: 'RS',
+                turnSummaries: Array.from({ length: 52 }, (_, index) =>
+                    makeTurnSummary(index + 1, 0.4 + index / 1000, 0.4 - index / 2000, 0.2 - index / 2000)),
+            } as any,
+        });
+
+        const { container } = render(createElement(TerritoryOverTimeChart));
+        const labels = [...container.querySelectorAll<SVGTextElement>('[data-testid="territory-chart-x-label"]')];
+
+        expect(labels.length).toBeLessThanOrEqual(6);
+        expect(labels[0]?.textContent).toBe('Apr 1992');
+        expect(labels.at(-1)?.textContent).toBe('Apr 1993');
+        const xPositions = labels.map((label) => Number(label.getAttribute('x')));
+        expect(xPositions.every((x, index) => index === 0 || x - xPositions[index - 1]! >= 80)).toBe(true);
+    });
 });

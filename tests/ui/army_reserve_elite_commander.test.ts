@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArmyReservePanel } from '../../src/ui/map/components/ArmyReservePanel.js';
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 import type { LoadedGameState } from '../../src/ui/map/data/types.js';
+import { setLocale } from '../../src/ui/map/i18n/index.js';
 
 function makeReserveState(onLoan: boolean): LoadedGameState {
   return {
@@ -104,6 +105,7 @@ describe('ArmyReservePanel elite commander identity', () => {
 
   afterEach(() => {
     cleanup();
+    setLocale('en', undefined);
     useGameStore.setState(useGameStore.getInitialState());
   });
 
@@ -256,6 +258,19 @@ describe('ArmyReservePanel elite commander identity', () => {
       suggested_brigade_id: 'arbih_guards_brigade',
       turn_requested: 16,
     }];
+    state.corpsFrontSectors = [{
+      sector_id: 'sector:sarajevo:north',
+      corps_id: 'arbih_1st_corps',
+      corps_name: '1st Corps',
+      display_name: 'Sarajevo North',
+      faction: 'RBiH',
+      opposing_factions: ['RS'],
+      edge_ids: [],
+      sub_segment_count: 1,
+      length_edges: 1,
+      assigned_brigade_ids: [],
+      reserve_brigade_ids: [],
+    }];
     useGameStore.setState({
       loadedGameState: state,
       selectedArmyHqId: 'arbih_general_staff',
@@ -263,6 +278,17 @@ describe('ArmyReservePanel elite commander identity', () => {
     });
 
     render(React.createElement(ArmyReservePanel, { railSlot: 'primary', onOpenDecisionRoomTarget }));
+
+    const detail = screen.getByTestId('army-reserve-request-presentation-req-arbih-1');
+    expect(detail.className).toContain('text-[12px]');
+    expect(detail.getAttribute('aria-label')).toBe('Reserve request detail for 1st Corps');
+    expect(detail.textContent).toContain('Requesting command1st Corps');
+    expect(detail.textContent).toContain('Recipient sectorSarajevo North');
+    expect(detail.textContent).toContain('Candidate forceGuards Brigade');
+    expect(detail.textContent).toContain('ReadinessReady');
+    expect(detail.textContent).toContain('Travel timeabout 1 week travel');
+    expect(detail.textContent).toContain('Expected effectAnchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(detail.textContent).toContain('Opportunity cost0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.');
 
     fireEvent.click(screen.getByRole('button', {
       name: 'Review Guards Brigade reserve release for 1st Corps',
@@ -273,5 +299,36 @@ describe('ArmyReservePanel elite commander identity', () => {
       lens: 'command',
       cardId: 'command:elite-deploy:req-arbih-1',
     });
+  });
+
+  it('keeps reserve request detail labels and unavailable truth in BCS', () => {
+    setLocale('bcs', undefined);
+    const state = makeReserveState(false);
+    state.pendingReserveRequests = [{
+      request_id: 'req-arbih-sparse',
+      corps_id: 'arbih_1st_corps',
+      faction: 'RBiH',
+      reason: 'unknown',
+      priority: 45,
+      severityBand: 'routine',
+      travel_hops: -1,
+      description: '',
+      suggested_brigade_id: null,
+      turn_requested: 16,
+    }];
+    useGameStore.setState({
+      loadedGameState: state,
+      selectedArmyHqId: 'arbih_general_staff',
+      selectedFormationId: 'arbih_general_staff',
+    });
+
+    render(React.createElement(ArmyReservePanel, { railSlot: 'primary' }));
+
+    const detail = screen.getByTestId('army-reserve-request-presentation-req-arbih-sparse');
+    expect(detail.textContent).toContain('Komanda koja trazi1st Corps');
+    expect(detail.textContent).toContain('Sektor primateljNije prijavljeno');
+    expect(detail.textContent).toContain('Predlozena snagaNije prijavljeno');
+    expect(detail.textContent).toContain('SpremnostNije prijavljeno');
+    expect(detail.textContent).toContain('Vrijeme putovanjaNije prijavljeno');
   });
 });

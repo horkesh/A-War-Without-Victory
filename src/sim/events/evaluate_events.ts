@@ -1,6 +1,6 @@
 /**
  * B1→v0.4.1 Event evaluation: deterministic evaluation of event registry.
- * Uses caller-provided RNG for random events; stable iteration order.
+ * Event eligibility is derived from state, authored triggers, and pressure.
  * v0.4.1: applies mechanical effects via applyEventEffects; tracks fired_event_ids for once-only events.
  * v0.4.1 Phase 2: decision events — player faction queues pending decisions; bot factions auto-respond.
  * v0.6.0: recurrence model, priority queue (4/turn cap), pressure integration, dimension shifts.
@@ -163,6 +163,16 @@ export function applyDefinitionFlags(state: GameState, flags: Record<string, str
     for (const [key, value] of Object.entries(flags)) {
         state.military.event_flags[key] = value;
     }
+
+    const policyFlag = state.meta.player_faction === 'RS'
+        ? 'rs_paramilitary_policy'
+        : state.meta.player_faction === 'RBiH'
+            ? 'rbih_paramilitary_policy'
+            : null;
+    const policy = policyFlag ? flags[policyFlag] : undefined;
+    if (policy === 'always_allow' || policy === 'always_deny' || policy === 'ask') {
+        state.paramilitary_policy = policy;
+    }
 }
 
 /** Append a structured entry to `state.military.event_decision_log` recording
@@ -298,12 +308,11 @@ function uniqueStringsInOrder(values: readonly unknown[] | undefined): string[] 
 function isCandidateEligible(
     def: EventDefinition,
     state: GameState,
-    rng: Rng,
     currentTurn: number,
     edges?: EdgeRecord[],
 ): boolean {
     // Phase B Sub-slice B3: short-circuit on closed/disabled BEFORE pressure or
-    // probability rolls. Packet §3.2, §3.5 — closed events never reach pressure
+    // eligibility work. Packet §3.2, §3.5 — closed events never reach pressure
     // accumulation; required-enabled events skip eligibility cost when ungated.
     // 1. Soft foreclosure — `closed_event_ids` overrides everything (including
     //    recurrence / overflow re-eval). Readiness is NOT zeroed on close, so
@@ -329,7 +338,6 @@ function isCandidateEligible(
         return false;
     }
 
-    if (def.probability != null && rng() >= def.probability) return false;
     return true;
 }
 
@@ -409,8 +417,8 @@ const DEFAULT_BOT_COMMANDER = { aggressiveness: 3, competence: 3 };
 const POLITICAL_LOGICS = new Set<string>(['strategic_weighted', 'capital_based', 'capital_weighted']);
 
 /**
- * Evaluate events for the current turn. Deterministic: same state, turn, and rng sequence -> same fired list.
- * Phase 1: Collect candidates (recurrence gating, trigger/pressure matching, probability roll).
+ * Evaluate events for the current turn. Deterministic: same state and turn -> same fired list.
+ * Phase 1: Collect candidates (recurrence gating and trigger/pressure matching).
  * Phase 2: Sort by priority (lower first), cap at MAX_EVENTS_PER_TURN.
  * Phase 3: Fire top candidates — apply effects, record state, handle decisions.
  *
@@ -424,7 +432,7 @@ const POLITICAL_LOGICS = new Set<string>(['strategic_weighted', 'capital_based',
  */
 export function evaluateEvents(
     state: GameState,
-    rng: Rng,
+    _rng: Rng,
     currentTurn: number,
     registry?: EventDefinition[],
     edges?: EdgeRecord[]
@@ -459,7 +467,7 @@ export function evaluateEvents(
     for (const id of queuedIds) {
         const def = eventsById.get(id);
         if (!def) continue;
-        if (isCandidateEligible(def, state, rng, currentTurn, edges)) {
+        if (isCandidateEligible(def, state, currentTurn, edges)) {
             queuedCandidates.push(def);
         }
     }
@@ -468,7 +476,7 @@ export function evaluateEvents(
     const seenNewIds = new Set<string>();
     for (const def of canonicalEvents) {
         if (queuedIdSet.has(def.id) || seenNewIds.has(def.id)) continue;
-        if (isCandidateEligible(def, state, rng, currentTurn, edges)) {
+        if (isCandidateEligible(def, state, currentTurn, edges)) {
             newCandidates.push(def);
             seenNewIds.add(def.id);
         }

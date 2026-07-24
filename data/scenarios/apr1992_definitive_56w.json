@@ -38,7 +38,7 @@
   "max_recruits_per_faction_per_turn": 4,
   "init_alliance_rbih_hrhb": 0.75,
   "enable_rbih_hrhb_dynamics": true,
-  "rbih_hrhb_war_earliest_week": 26,
+  "rbih_hrhb_war_earliest_week": 40,
   "coercion_pressure_by_municipality": {
     "prijedor": 0.9,
     "zvornik": 0.85,

@@ -13,6 +13,25 @@ afterEach(() => {
 });
 
 describe('President desk DecisionCard fallback copy', () => {
+  it('keeps the full consequence summary readable without inaccessible line clamping', () => {
+    const subtitle = '2 deployment requests near Kotor Varos; 200 projected civilian casualties; +2 war crimes events; -4.04 international standing. Estimated standing after authorization: 45.96.';
+    const item: InboxItem = {
+      id: 'paramilitary:readability',
+      type: 'paramilitary_request',
+      severity: 'blocking',
+      title: 'Paramilitary authorization',
+      subtitle,
+      action: 'paramilitary_review',
+      priority: 100,
+    };
+
+    render(React.createElement(DecisionCard, { item, onAction: vi.fn() }));
+
+    const summary = screen.getByText(subtitle);
+    expect(summary.className).toContain('break-words');
+    expect(summary.className).not.toContain('line-clamp');
+  });
+
   it('uses neutral copy for unknown inbox families instead of enum-derived labels', () => {
     const item = {
       id: 'unknown-one',

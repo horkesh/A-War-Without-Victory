@@ -434,8 +434,10 @@ describe('decision consequence trail', () => {
       turn: 40,
       title: 'Vance-Owen Peace Plan',
       outcome: 'Rejected',
-      detail: 'Your government rejected the proposal; ARBiH accepted, VRS rejected, HVO accepted.',
+      detail: 'Your government rejected the proposal. Other delegations: ARBiH accepted, HVO accepted.',
     });
+    expect(ledger[0]?.detail.match(/VRS/g)).toBeNull();
+    expect(ledger[0]?.detail.match(/rejected/g)).toHaveLength(1);
     expect(`${ledger[0]?.family} ${ledger[0]?.title} ${ledger[0]?.outcome} ${ledger[0]?.detail}`).not.toMatch(/_/);
   });
 

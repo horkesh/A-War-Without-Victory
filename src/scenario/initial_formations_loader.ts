@@ -16,7 +16,14 @@ import type {
 } from '../state/game_state.js';
 
 const CANONICAL_FACTIONS: FactionId[] = ['RBiH', 'RS', 'HRHB'];
-const CANONICAL_KINDS: FormationKind[] = ['militia', 'brigade', 'operational_group', 'corps_asset'];
+const CANONICAL_KINDS: FormationKind[] = [
+    'militia',
+    'brigade',
+    'operational_group',
+    'corps_asset',
+    'corps',
+    'army_hq',
+];
 const CANONICAL_POSTURES: BrigadePosture[] = ['hold', 'defend', 'defend_at_all_costs', 'elastic_defense', 'counterattack', 'dig_in', 'attack', 'assault'];
 
 export interface InitialFormationRecord {

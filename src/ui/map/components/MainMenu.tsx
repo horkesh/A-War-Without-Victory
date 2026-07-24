@@ -36,11 +36,11 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                  background: 'radial-gradient(ellipse at center, #1a1816 0%, #0d0c0a 100%)',
                  fontFamily: 'Georgia, "Times New Roman", serif',
              }}>
-            <label className="absolute top-4 right-4 flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-[#8a7a60]"
+            <label className="absolute top-4 right-4 flex items-center gap-2 text-xs uppercase tracking-[0.14em] text-[#8a7a60]"
                    style={{ fontFamily: 'Courier New, monospace' }}>
                 <span>{t('settings.language.label')}</span>
                 <select
-                    className="rounded border border-[#8a7a60]/25 bg-[#1a1816] px-2 py-1 text-[11px] text-[#d5c9bc] outline-none hover:border-[#c4a35a]/40 focus:border-[#c4a35a]/60"
+                    className="rounded border border-[#8a7a60]/25 bg-[#1a1816] px-2 py-1 text-xs text-[#d5c9bc] outline-none hover:border-[#c4a35a]/40 focus:border-[#c4a35a]/60"
                     aria-label={t('settings.language.ariaLabel')}
                     value={locale}
                     onChange={(event) => setLocale(event.target.value as Locale)}
@@ -57,7 +57,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
 
             {/* Title */}
             <div className="text-center mb-12">
-                <div className="text-[10px] uppercase tracking-[0.5em] text-[#8a7a60]/60 mb-2">
+                <div className="text-xs uppercase tracking-[0.5em] text-[#8a7a60]/60 mb-2">
                     {t('mainMenu.presents')}
                 </div>
                 <h1 className="text-[36px] font-bold text-[#c4a35a] tracking-wider leading-tight"
@@ -77,7 +77,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
 
             <div className="mb-6 w-full max-w-2xl">
                 <div
-                    className="mb-3 text-center text-[10px] font-bold uppercase tracking-[0.24em] text-[#8a7a60]"
+                    className="mb-3 text-center text-xs font-bold uppercase tracking-[0.24em] text-[#8a7a60]"
                     style={{ fontFamily: 'Courier New, monospace' }}
                 >
                     {t('sidePicker.chooseFaction')}
@@ -104,7 +104,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
                                 {sidePickerFactionLabel(faction)}
                             </div>
                             {getArmyName(faction) && (
-                                <div className="mt-2 text-[10px] uppercase tracking-[0.16em] text-[#8a7a60]">
+                                <div className="mt-2 text-xs uppercase tracking-[0.16em] text-[#8a7a60]">
                                     {t('sidePicker.forces', { army: getArmyName(faction) ?? faction })}
                                 </div>
                             )}
@@ -147,7 +147,7 @@ export function MainMenu({ hasSave, starting = false, errorMessage, onNewGame, o
             </div>
 
             {/* Version */}
-            <div className="absolute bottom-4 right-4 text-[10px] text-[#8a7a60]/40"
+            <div className="absolute bottom-4 right-4 text-xs text-[#8a7a60]/40"
                  style={{ fontFamily: 'Courier New, monospace' }}>
                 {AWWV_APP_VERSION}
             </div>

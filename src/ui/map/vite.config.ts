@@ -45,6 +45,8 @@ function tacticalMapManualChunks(id: string): string | undefined {
   if (normalized.includes('/src/ui/map/components/onboarding/')) return 'feature-onboarding';
   if (normalized.includes('/src/ui/map/components/plan_ui/')) return 'feature-plan-ui';
   if (normalized.includes('/src/ui/map/components/verdict/')) return 'feature-verdict';
+  if (normalized.includes('/src/ui/map/map/builders/')) return 'map-geometry';
+  if (normalized.endsWith('/src/ui/map/map/generateFactionBorders.ts')) return 'map-geometry';
   if (normalized.includes('/src/ui/map/map/')) return 'map-rendering';
   return undefined;
 }

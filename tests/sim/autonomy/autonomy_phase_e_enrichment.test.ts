@@ -193,6 +193,14 @@ describe('buildOpProposalDescription: existing objective description', () => {
         const result = buildOpProposalDescription('1st Corps', cs, '');
         expect(result).not.toContain('Plan:');
     });
+
+    it('humanizes a raw OSID objective instead of exposing the token', () => {
+        const cs = makeCS({ currentPlan: false, overallPressure: 'low' });
+        const result = buildOpProposalDescription('1st Corps', cs, 'op:jajce:jajce_1');
+
+        expect(result).toContain('Plan: Jajce');
+        expect(result).not.toContain('op:jajce:jajce_1');
+    });
 });
 
 // ---------------------------------------------------------------------------
@@ -213,6 +221,15 @@ describe('buildOpProposalDescription: fallback safety', () => {
         (cs as unknown as { threat_assessment: { overall_pressure: '' } }).threat_assessment.overall_pressure = '';
         const result = buildOpProposalDescription('East Bosnia Corps', cs, '');
         expect(result).toBe('East Bosnia Corps offensive operation');
+    });
+
+    it('does not expose a raw corps token when the display name is unavailable', () => {
+        const cs = makeCS({ currentPlan: false, overallPressure: 'low' });
+        (cs as unknown as { threat_assessment: { overall_pressure: '' } }).threat_assessment.overall_pressure = '';
+        const result = buildOpProposalDescription('arbih_1st_corps', cs, '');
+
+        expect(result).toBe('Assigned command offensive operation');
+        expect(result).not.toContain('arbih_1st_corps');
     });
 
     it('returns objectiveDesc alone when only objectiveDesc is provided (no plan, no threat)', () => {

@@ -65,7 +65,26 @@ function buildMinimalState(
         meta,
         factions: [],
         military: {
-            formations: {},
+            formations: {
+                b_a: {
+                    id: 'b_a',
+                    name: 'Brigade A',
+                    kind: 'brigade',
+                    status: 'active',
+                    faction: 'RBiH',
+                    corps_id: primaryCorps,
+                    personnel: 1000,
+                },
+                b_b: {
+                    id: 'b_b',
+                    name: 'Brigade B',
+                    kind: 'brigade',
+                    status: 'active',
+                    faction: 'RBiH',
+                    corps_id: primaryCorps,
+                    personnel: 1000,
+                },
+            },
             front_segments: {},
             front_posture: {},
             front_posture_regions: {},
@@ -323,7 +342,7 @@ describe('operation_opportunities — Phase 2 decision surface', () => {
     });
 
     it('headless scenario bridge includes the player faction in bot brigade orders only when flagged', () => {
-        const state = buildMinimalState(176, 'RBiH', 1);
+        const state = buildMinimalState(176, 'RBiH', 0);
         state.factions = [{ id: 'RBiH' }, { id: 'RS' }, { id: 'HRHB' }] as GameState['factions'];
 
         expect(selectBotBrigadeOrderFactions(state)).toEqual(['HRHB', 'RS']);

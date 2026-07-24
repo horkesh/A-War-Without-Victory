@@ -7,7 +7,7 @@ import {
     checkHeroicStand,
     checkDefeatism,
 } from '../src/sim/combat/officer_experience.js';
-import { getFrictionChance, checkWarlordFriction } from '../src/sim/combat/warlord_friction.js';
+import { getFrictionCooldownTurns, checkWarlordFriction } from '../src/sim/combat/warlord_friction.js';
 import type { GameState } from '../src/state/game_state.js';
 import type { NamedOfficer, NamedOfficerState } from '../src/state/officer_types.js';
 
@@ -243,21 +243,21 @@ describe('checkDefeatism', () => {
 // Warlord friction
 // ═══════════════════════════════════════════════════════════════════════════
 
-describe('getFrictionChance', () => {
-    it('returns 0 for reliability >= 3', () => {
-        expect(getFrictionChance(3)).toBe(0);
-        expect(getFrictionChance(4)).toBe(0);
-        expect(getFrictionChance(5)).toBe(0);
+describe('getFrictionCooldownTurns', () => {
+    it('returns null for reliability >= 3', () => {
+        expect(getFrictionCooldownTurns(3)).toBeNull();
+        expect(getFrictionCooldownTurns(4)).toBeNull();
+        expect(getFrictionCooldownTurns(5)).toBeNull();
     });
 
-    it('returns scaled chance for low reliability', () => {
-        expect(getFrictionChance(2)).toBeCloseTo(0.05);
-        expect(getFrictionChance(1)).toBeCloseTo(0.10);
+    it('uses shorter explicit cadence for less reliable officers', () => {
+        expect(getFrictionCooldownTurns(2)).toBe(20);
+        expect(getFrictionCooldownTurns(1)).toBe(10);
     });
 });
 
 describe('checkWarlordFriction', () => {
-    it('is deterministic via deterministicRandom', () => {
+    it('is deterministic from state eligibility', () => {
         const state1 = makeMinimalState();
         addOfficer(state1, 'warlord1', 'RBiH', 2.0, { political_reliability: 1 });
 
@@ -282,76 +282,41 @@ describe('checkWarlordFriction', () => {
         expect(state.military.friction_events).toBeDefined();
     });
 
-    // ── Enclave-lock guard (Historian-flagged 2026-04-06) ──────────────────
-    // Officer IDs are chosen for specific djb2 % 10000 hash behaviour (verified
-    // by Node.js hash inspection before writing these tests):
-    //   't1': ALL 100 friction events in turns 0-999 are refused_release
-    //   'c1': ign_stance at turns 10–14+, unauth_op at 400–404, refused at 413–417+
-    //         (all three types present — suitable for mixed-type assertions)
+    it('maps permanent enclave isolation to ignored stance rather than refused release', () => {
+        const state = makeMinimalState({ meta: { turn: 10, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+        addOfficer(state, 'locked', 'RBiH', 3.0, {
+            political_reliability: 1,
+            enclave_lock: { enclave_id: 'srebrenica' },
+        } as any);
 
-    it('enclave-locked officer never emits refused_release (permanent lock)', () => {
-        // 'c1' produces all three friction types; permanent lock must suppress
-        // refused_release while leaving ignored_stance and unauthorized_op intact.
-        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
-        for (let turn = 0; turn < 1000; turn++) {
-            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
-            addOfficer(state, 'c1', 'RBiH', 3.0, {
-                political_reliability: 1,
-                enclave_lock: { enclave_id: 'srebrenica' },
-            } as any);
-            const report = checkWarlordFriction(state);
-            allEvents.push(...report.events);
-        }
-        expect(allEvents.filter(e => e.type === 'refused_release').length).toBe(0);
-        // Other friction types still fire — guard is refused_release-only
-        expect(allEvents.filter(e => e.type !== 'refused_release').length).toBeGreaterThan(0);
+        expect(checkWarlordFriction(state).events[0]?.type).toBe('ignored_stance');
     });
 
     it('enclave-locked officer emits refused_release after lock expires', () => {
-        // 'c1' fires first refused_release at turn 413.
-        // locked_until_turn=413 → turns [0,413) locked, turns [413,∞) free.
-        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
-        for (let turn = 0; turn < 1000; turn++) {
-            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
-            addOfficer(state, 'c1', 'RBiH', 3.0, {
-                political_reliability: 1,
-                enclave_lock: { enclave_id: 'zepa', locked_until_turn: 413 },
-            } as any);
-            const report = checkWarlordFriction(state);
-            allEvents.push(...report.events);
-        }
-        expect(allEvents.filter(e => e.type === 'refused_release' && e.turn < 413).length).toBe(0);
-        expect(allEvents.filter(e => e.type === 'refused_release' && e.turn >= 413).length).toBeGreaterThan(0);
+        const state = makeMinimalState({ meta: { turn: 20, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+        addOfficer(state, 'unlocked', 'RBiH', 3.0, {
+            political_reliability: 1,
+            enclave_lock: { enclave_id: 'zepa', locked_until_turn: 13 },
+        } as any);
+
+        expect(checkWarlordFriction(state).events[0]?.type).toBe('refused_release');
     });
 
-    it('non-enclave officer at pol_rel=1 can emit refused_release', () => {
-        // 't1' has 100% refused_release distribution — all 100 friction events
-        // in turns 0-999 produce refused_release when no enclave_lock is present.
-        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
-        for (let turn = 0; turn < 1000; turn++) {
-            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
-            addOfficer(state, 't1', 'RBiH', 3.0, { political_reliability: 1 });
-            const report = checkWarlordFriction(state);
-            allEvents.push(...report.events);
-        }
-        expect(allEvents.filter(e => e.type === 'refused_release').length).toBeGreaterThan(0);
+    it('maps the least reliable non-aggressive officer to refused release', () => {
+        const state = makeMinimalState({ meta: { turn: 10, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+        addOfficer(state, 'unreliable', 'RBiH', 3.0, { political_reliability: 1, aggressiveness: 3 });
+
+        expect(checkWarlordFriction(state).events[0]?.type).toBe('refused_release');
     });
 
-    it('enclave lock only blocks refused_release — ignored_stance and unauthorized_op still fire', () => {
-        // 'c1' with permanent enclave_lock: refused events (turns 413+) suppressed,
-        // ignored_stance (turns 10+) and unauthorized_op (turns 400+) still emit.
-        const allEvents: import('../src/sim/combat/warlord_friction.js').FrictionEvent[] = [];
-        for (let turn = 0; turn < 1000; turn++) {
-            const state = makeMinimalState({ meta: { turn, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
-            addOfficer(state, 'c1', 'RBiH', 3.0, {
-                political_reliability: 1,
-                enclave_lock: { enclave_id: 'gorazde' },
-            } as any);
-            const report = checkWarlordFriction(state);
-            allEvents.push(...report.events);
-        }
-        expect(allEvents.some(e => e.type === 'ignored_stance')).toBe(true);
-        expect(allEvents.some(e => e.type === 'unauthorized_op')).toBe(true);
-        expect(allEvents.every(e => e.type !== 'refused_release')).toBe(true);
+    it('maps an aggressive unreliable officer to unauthorized operation even when enclave-locked', () => {
+        const state = makeMinimalState({ meta: { turn: 10, phase: 'war', scenario_id: 'test', player_faction: 'RBiH' } as any });
+        addOfficer(state, 'aggressive', 'RBiH', 3.0, {
+            political_reliability: 1,
+            aggressiveness: 5,
+            enclave_lock: { enclave_id: 'gorazde' },
+        } as any);
+
+        expect(checkWarlordFriction(state).events[0]?.type).toBe('unauthorized_op');
     });
 });

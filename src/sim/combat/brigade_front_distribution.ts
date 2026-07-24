@@ -45,6 +45,7 @@ import { munFromOsid } from './osid_adjacency.js';
 import { bfsDistance } from './sector_utils.js';
 import { createColumnMovementOrder } from './brigade_movement_order_helpers.js';
 import { ENABLE_STANDING_OG_RESERVE_COMMIT } from './standing_og_defense.js';
+import { isEnclaveMovementDestinationAllowed } from './enclave_resilience.js';
 
 type CorpsAssetFormationState = FormationState & {
     active_operations?: CorpsCommandState['active_operations'];
@@ -97,6 +98,11 @@ const RESERVE_COMMIT_MIN_AFFINITY = 0.30;
 /** Brigades with this many entrenchment turns or more are NOT redistributed in Phase A.
  *  Only freshly-arrived brigades get spread — entrenched positions are too valuable to abandon. */
 const ENTRENCHMENT_REDISTRIBUTION_THRESHOLD = 1;
+
+function isFormationDestinationAllowed(formation: FormationState, targetOsid: string): boolean {
+    const originOsid = formation.location_osid;
+    return !originOsid || isEnclaveMovementDestinationAllowed(formation, originOsid, targetOsid);
+}
 
 /** Corps IDs whose siege sectors may legitimately keep dense front stacks. */
 const SIEGE_EXEMPT_CORPS = new Set(['arbih_1st_corps', 'vrs_sarajevo_romanija']);
@@ -272,6 +278,7 @@ function disperseStackedRearBrigadesForSector(
 
             const reachableTargets = targetPool
                 .filter(target => (activeCounts.get(target) ?? 0) === 0)
+                .filter(target => isFormationDestinationAllowed(f, target))
                 .map(target => ({
                     target,
                     dist: bfsDistance(f.location_osid as string, target, adjacency, friendlySet),
@@ -356,6 +363,7 @@ function commitReserveToThreatenedFront(
         .filter((entry) => !state.military.brigade_movement_orders?.[entry.bid])
         .map((entry) => {
             const reachableTargets = targetFrontOsids
+                .filter((target) => isFormationDestinationAllowed(entry.formation, target))
                 .filter((target) => hasReserveCommitPopulationAffinity(
                     entry.formation,
                     target,
@@ -472,6 +480,7 @@ function fillEmptyFrontSubsegmentsFromSectorReserve(
                 const distToTargets = (subSegment.friendly_osids ?? [])
                     .filter((target) => (activeCounts.get(target) ?? 0) === 0)
                     .filter((target) => !friendlySet || friendlySet.has(target))
+                    .filter((target) => isFormationDestinationAllowed(entry.formation, target))
                     .map((target) => ({
                         target,
                         dist: bfsDistance(entry.formation.location_osid as string, target, adjacency, friendlySet),
@@ -566,6 +575,7 @@ function deconflictSharedFrontOsidStacks(
             .filter((target) => target !== sharedOsid)
             .filter((target) => (activeCounts.get(target) ?? 0) === 0)
             .filter((target) => !friendlySet || friendlySet.has(target))
+            .filter((target) => isFormationDestinationAllowed(claim.formation, target))
             .map((target) => ({
                 target,
                 dist: bfsDistance(loc, target, adjacency, friendlySet),
@@ -723,6 +733,7 @@ function pinGarrisonToMustHoldFrontEdge(
                 .filter((e) => !state.military.brigade_movement_orders?.[e.bid])
                 .filter((e) => !pinnedBrigades.has(e.bid))                                 // one must-hold per brigade per pass
                 .filter((e) => e.f.location_osid !== target)
+                .filter((e) => isFormationDestinationAllowed(e.f, target))
                 .map((e) => ({
                     bid: e.bid,
                     f: e.f,
@@ -851,6 +862,7 @@ export function distributeBrigadesToFront(
                 const neighbors = adjacency.get(loc) ?? [];
                 const candidates = neighbors
                     .filter(n => frontOsidSet.has(n) && (osidCount.get(n) ?? 0) === 0)
+                    .filter(n => isFormationDestinationAllowed(f, n))
                     .sort(strictCompare);
 
                 if (candidates.length === 0) continue;
@@ -898,8 +910,11 @@ export function distributeBrigadesToFront(
                     ? resolvedFrontOsids.filter(osid =>
                         (adjacency.get(osid) ?? []).some(n => friendlySet.has(n)))
                     : resolvedFrontOsids;
+                const allowedFrontOsids = effectiveFrontOsids.filter(
+                    osid => isFormationDestinationAllowed(f, osid),
+                );
                 // If every candidate is an isolated island, skip Phase B for this brigade.
-                if (effectiveFrontOsids.length === 0) continue;
+                if (allowedFrontOsids.length === 0) continue;
 
                 // BFS friendly set: intersect with corps boundary when available
                 const bfsFriendly = (useCorpsBoundary && friendlySet)
@@ -908,12 +923,12 @@ export function distributeBrigadesToFront(
 
                 // Pre-compute distances to all candidates so target selection is distance-aware
                 const distToTarget = new Map<string, number>();
-                for (const osid of effectiveFrontOsids) {
+                for (const osid of allowedFrontOsids) {
                     distToTarget.set(osid, bfsDistance(loc, osid, adjacency, bfsFriendly));
                 }
 
                 // Pick distance-weighted least-cost target (score = stack_count + weight × dist)
-                const target = pickLeastStackedTarget(effectiveFrontOsids, osidCount, distToTarget);
+                const target = pickLeastStackedTarget(allowedFrontOsids, osidCount, distToTarget);
 
                 // Use pre-computed distance for march decision
                 const dist = distToTarget.get(target) ?? Infinity;

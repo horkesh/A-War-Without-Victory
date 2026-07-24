@@ -76,17 +76,17 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
 
                 <div id="convoy-decision-summary" className="grid grid-cols-3 gap-2 py-4">
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.route')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.route')}</div>
                         <div className="mt-1 text-sm font-semibold text-white">
                             {getPlayerSafePoliticalFactionName(convoy.route_faction)}
                         </div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.supply')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.supply')}</div>
                         <div className="mt-1 text-sm font-semibold text-white">{convoy.supply_amount}</div>
                     </div>
                     <div className="rounded border border-[rgba(180,160,130,0.14)] bg-[rgba(180,160,130,0.06)] p-2">
-                        <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.staged')}</div>
+                        <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('convoyDecision.staged')}</div>
                         <div className="mt-1 text-sm font-semibold text-white capitalize">{convoy.decision ?? t('common.none')}</div>
                     </div>
                 </div>
@@ -113,10 +113,10 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
                                 disabled={disabled}
                                 className={`rounded-md border px-3 py-3 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-45 ${copy.className}`}
                             >
-                                <div className="text-[11px] font-bold uppercase tracking-[0.12em]">
+                                <div className="text-xs font-bold uppercase tracking-[0.12em]">
                                     {pendingDecision === decision ? t('convoyDecision.staging') : t(copy.labelKey)}
                                 </div>
-                                <div className="mt-1 text-[10px] leading-snug opacity-80">{t(copy.detailKey)}</div>
+                                <div className="mt-1 text-xs leading-snug opacity-80">{t(copy.detailKey)}</div>
                             </button>
                         );
                     })}
@@ -125,7 +125,7 @@ export function ConvoyDecisionModal({ convoy, onClose, onDecide }: ConvoyDecisio
                     <button
                         type="button"
                         onClick={onClose}
-                        className="rounded border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary"
+                        className="rounded border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary hover:text-text-primary"
                     >
                         {t('common.close')}
                     </button>

@@ -11,6 +11,7 @@ import {
     getFormationStackPixelOffset,
     getViewportSafePixelOffset,
 } from '../src/ui/map/layers/buildTacticalDeckLayers.js';
+import { buildFormationCounterDomOverlayItems } from '../src/ui/map/layers/formationCounterDomOverlay.js';
 
 function makeFeature(id: string, isStackTop: boolean) {
     return {
@@ -21,6 +22,18 @@ function makeFeature(id: string, isStackTop: boolean) {
             icon_id: `brigade__RS__h100__m100_${id}`,
             white_icon_id: `white__brigade__RS__h100__m100_${id}`,
             is_stack_top: isStackTop,
+        },
+    };
+}
+
+function makeEnemyContactFeature(id: string, isStackTop: boolean) {
+    const feature = makeFeature(id, isStackTop);
+    return {
+        ...feature,
+        properties: {
+            ...feature.properties,
+            kind: 'enemy_contact',
+            is_enemy_contact: true,
         },
     };
 }
@@ -90,10 +103,18 @@ it('formation counter bodies are opaque so terrain and labels cannot bleed throu
     expect(source).toContain("RS: 'rgba(120, 30, 30, 1)'");
     expect(source).toContain("RBiH: 'rgba(30, 90, 45, 1)'");
     expect(source).toContain("HRHB: 'rgba(25, 65, 115, 1)'");
-    expect(source).toContain("const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)')");
-    expect(source).toContain("const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)')");
+    expect(source).toContain("const fill = isWhiteVariant ? 'rgba(255, 255, 255, 1)' : forming ? FORMING_FILL : (FACTION_FILL[canonicalFaction] ?? 'rgba(90, 90, 100, 1)')");
+    expect(source).toContain("const border = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : forming ? FORMING_BORDER : (FACTION_BORDER[canonicalFaction] ?? 'rgba(50, 50, 60, 1)')");
     expect(source).toContain("const symbolColor = isWhiteVariant ? 'rgba(20, 20, 20, 1)' : 'rgba(255, 255, 255, 1)'");
     expect(source).not.toContain('0.92');
+});
+
+it('forming counters use a gray fill, dashed border, and explicit label', () => {
+    const source = readFileSync('src/ui/map/map/formationIcons.ts', 'utf8');
+
+    expect(source).toContain("const FORMING_FILL = 'rgba(104, 108, 112, 1)'");
+    expect(source).toContain('ctx.setLineDash([10, 8])');
+    expect(source).toContain("ctx.fillText('FORMING'");
 });
 
 it('deck counters and labels do not write depth into the pitched 2.5D map scene', () => {
@@ -124,6 +145,45 @@ it('tactical map camera reserves screen-edge padding for labels and unit counter
     expect(source).toContain('padding: buildCounterAwareCameraPadding(map)');
 });
 
+it('clamps counter-aware camera padding before fitBounds so MapLibre can fit the canvas', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const helperStart = source.indexOf('function buildCounterAwareCameraPadding');
+    const helperEnd = source.indexOf('function stripPmtilesSourcesForCiFallback', helperStart);
+    const helper = source.slice(helperStart, helperEnd);
+
+    expect(source).toContain('function clampCameraPaddingForFit');
+    expect(source).toContain('const CAMERA_MIN_VISIBLE_BAND');
+    expect(helper).toContain('return clampCameraPaddingForFit(');
+    expect(helper).toContain('map.getCanvas()');
+});
+
+it('falls back to centered camera motion when fitBounds would collapse to a point', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const panEffectStart = source.indexOf('// Prefer pan to a selected formation/navigation anchor');
+    const panEffectEnd = source.indexOf('// OSID selection:', panEffectStart);
+    const panEffect = source.slice(panEffectStart, panEffectEnd);
+
+    expect(source).toContain('const MIN_CAMERA_BOUNDS_DELTA');
+    expect(source).toContain('function fitBoundsOrEaseTo');
+    expect(source).toContain('Math.abs(maxLng - minLng) < MIN_CAMERA_BOUNDS_DELTA');
+    expect(source).toContain('map.easeTo({ center');
+    expect(panEffect.match(/fitBoundsOrEaseTo\(map,/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+    expect(panEffect).not.toContain('map.fitBounds(');
+});
+
+it('operation map surfaces also guard collapsed fitBounds calls', () => {
+    const opsModalSource = readFileSync('src/ui/map/components/ops_modal/OpsMap.tsx', 'utf8');
+    const planRendererSource = readFileSync('src/ui/map/components/plan_ui/OpsMapRenderer.ts', 'utf8');
+
+    expect(opsModalSource).toContain('function fitOpsBoundsOrEaseTo');
+    expect(opsModalSource).toContain('lngCollapsed || latCollapsed');
+    expect(opsModalSource).toContain('fitOpsBoundsOrEaseTo(map, [[minLng, minLat], [maxLng, maxLat]], {');
+    expect(opsModalSource).not.toContain('map.fitBounds([[minLng, minLat], [maxLng, maxLat]]');
+    expect(planRendererSource).toContain('function fitOpsBoundsOrEaseTo');
+    expect(planRendererSource).toContain('fitOpsBoundsOrEaseTo(this.map, bounds, { padding: 60, maxZoom: 12 });');
+    expect(planRendererSource).not.toContain('this.map.fitBounds(bounds');
+});
+
 it('deck counter ownership hides native MapLibre formation symbol layers', () => {
     const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
 
@@ -136,6 +196,46 @@ it('deck counter ownership hides native MapLibre formation symbol layers', () =>
     expect(source).toContain("map.setPaintProperty(FORMATION_WHITE_OVERLAY_LAYER_ID, 'icon-opacity', 0)");
     expect(source).toContain('DEFAULT_DECK_LAYER_CAPABILITIES.deckFormationCounters ? EMPTY_GEOJSON : formationsGeoJson');
     expect(source.match(/hideNativeFormationSymbolLayersWhenDeckOwnsCounters/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+});
+
+it('does not block formation counter rendering on optional ghost-path source readiness', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const gateStart = source.indexOf("const osidSource = m.getSource('osid-control')");
+    const gateEnd = source.indexOf('// Only run heavy build once per state', gateStart);
+    const gate = source.slice(gateStart, gateEnd);
+
+    expect(gateStart).toBeGreaterThanOrEqual(0);
+    expect(gate).toContain("m.getSource('osid-control')");
+    expect(gate).toContain("m.getSource('front-lines')");
+    expect(gate).toContain("m.getSource('formations')");
+    expect(gate).toContain("m.getSource('order-arrows')");
+    expect(gate).not.toContain('GHOST_PATH_SOURCE_ID');
+    expect(source).toContain('safeEnsureSource(m, GHOST_PATH_SOURCE_ID');
+});
+
+it('renders DOM formation counters before the front-line rebuild stage', () => {
+    const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const controlFailure = source.indexOf("console.error('[MapContainer] overlay control failed:'");
+    const earlyStage = source.indexOf("awwvFormationCounterStage = 'early-counters'", controlFailure);
+    const frontStage = source.indexOf("awwvFormationCounterStage = 'front'", controlFailure);
+
+    expect(controlFailure).toBeGreaterThanOrEqual(0);
+    expect(earlyStage).toBeGreaterThan(controlFailure);
+    expect(frontStage).toBeGreaterThan(earlyStage);
+    const controlToFront = source.slice(controlFailure, frontStage);
+    expect(controlToFront).toContain('buildFormationsGeoJSON');
+    expect(controlToFront).toContain('renderFormationCounters');
+});
+
+it('makes each visible DOM counter an exact accessible interaction target', () => {
+    const mapSource = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
+    const overlaySource = readFileSync('src/ui/map/layers/formationCounterDomOverlay.ts', 'utf8');
+
+    expect(overlaySource).toContain('button.dataset.awwvFormationCounterId = control.item.id');
+    expect(overlaySource).toContain("intent: 'exact'");
+    expect(overlaySource).toContain('button.dataset.awwvFormationStackOsid');
+    expect(overlaySource).not.toContain('container.replaceChildren(...items.map');
+    expect(mapSource).toContain('onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent)');
 });
 
 it('deck counters derive clipping bounds from visible panel occluders', () => {
@@ -153,12 +253,22 @@ it('deck counters derive clipping bounds from visible panel occluders', () => {
     expect(mapSource).toContain('[data-awwv-counter-occluder="true"]');
     expect(mapSource).toContain('blockedHorizontalIntervals');
     expect(mapSource).toContain('bestGap');
+    expect(mapSource).toContain('const spansHorizontalBand');
+    expect(mapSource).toContain('if (spansHorizontalBand && rect.top <= mapRect.top + 96)');
+    expect(mapSource).toContain('if (spansHorizontalBand && rect.bottom >= mapRect.bottom - 96)');
     expect(mapSource).toContain('buildDeckCounterViewportPadding(map.getCanvas())');
     expect(mapSource).toContain('buildDeckCounterViewportOccluders(canvas)');
-    expect(mapSource).toContain('occluders: counterViewportOccluders');
+    expect(mapSource).toContain('function buildFormationCounterViewportClip');
+    const clipStart = mapSource.indexOf('function buildFormationCounterViewportClip');
+    const clipEnd = mapSource.indexOf('export function MapContainer', clipStart);
+    const clipSource = mapSource.slice(clipStart, clipEnd);
+    expect(clipSource).toContain('padding: buildDeckCounterViewportPadding(canvas)');
+    expect(clipSource).not.toContain('buildCounterAwareCameraPadding(map)');
+    expect(mapSource).toContain('occluders: buildDeckCounterViewportOccluders(canvas)');
     expect(mapSource).toContain('counterViewportPadding.top');
     expect(mapSource).toContain('window.setTimeout(reapplyAfterLayout, 120)');
     expect(mapSource).toContain('window.setTimeout(reapplyAfterLayout, 320)');
+    expect(mapSource).toContain('installFormationCounterOccluderObserver(document.body, reapplyAfterLayout)');
     expect(mapSource).toContain('lastDeckLayerInputsRef.current = null');
     expect(mapSource).toContain('minimapVisible');
     expect(oobSource).toContain('data-awwv-counter-occluder="true"');
@@ -223,7 +333,7 @@ it('keeps deck counters renderable by offsetting edge points inward instead of h
     }, { halfWidth: 44, halfHeight: 24 })).toEqual([-52, 30]);
 });
 
-it('keeps Deck counter layers inside the current uncluttered map band by filtering edge-near counters', () => {
+it('keeps owned Deck counters visible by clamping them into the current uncluttered map band', () => {
     const safe = makeFeature('safe', true);
     const underPanel = makeFeature('under-panel', true);
     (underPanel.geometry as any).coordinates = [18.8, 44.9];
@@ -252,7 +362,36 @@ it('keeps Deck counter layers inside the current uncluttered map band by filteri
     expect(highlightedLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
 });
 
-it('uses an expanded rendered-counter footprint and filters top-edge counters', () => {
+it('keeps enemy contact clutter out of the clamped counter band when safe counters already exist', () => {
+    const safe = makeFeature('safe', true);
+    const underPanelContact = makeEnemyContactFeature('enemy-under-panel', true);
+    (underPanelContact.geometry as any).coordinates = [18.8, 44.9];
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [safe, underPanelContact],
+    } as any;
+
+    const layers = buildTacticalDeckLayers(
+        formationsGeoJson,
+        false,
+        true,
+        10,
+        ['safe', 'enemy-under-panel'],
+        {
+            width: 400,
+            height: 300,
+            padding: { top: 16, right: 16, bottom: 80, left: 180 },
+            project: (coordinates) => coordinates[0] === 17.8 ? { x: 280, y: 120 } : { x: 40, y: 260 },
+        },
+    );
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const highlightedLayer = layers.find((layer: any) => layer.id === 'deck-formations-highlighted') as any;
+
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
+    expect(highlightedLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
+});
+
+it('uses an expanded rendered-counter footprint and omits covered top-edge counters', () => {
     const topEdge = makeFeature('top-edge', true);
     const safe = makeFeature('safe-top', true);
     (safe.geometry as any).coordinates = [18.8, 44.9];
@@ -280,6 +419,48 @@ it('uses an expanded rendered-counter footprint and filters top-edge counters', 
     expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe-top']);
 });
 
+it('does not pull formations hundreds of pixels outside the southern viewport onto the visible edge', () => {
+    const safe = makeFeature('safe', true);
+    const nearSouth = makeFeature('near-south', true);
+    (nearSouth.geometry as any).coordinates = [18.8, 44.9];
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [safe, nearSouth],
+    } as any;
+
+    const layers = buildTacticalDeckLayers(
+        formationsGeoJson,
+        false,
+        true,
+        8,
+        [],
+        {
+            width: 1386,
+            height: 837,
+            padding: { top: 72, right: 24, bottom: 64, left: 264 },
+            project: (coordinates) => coordinates[0] === 17.8 ? { x: 700, y: 300 } : { x: 872, y: 1040 },
+        },
+    );
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
+});
+
+it('does not relocate an owned counter whose footprint is beyond the southern viewport edge', () => {
+    const safe = makeFeature('safe', true);
+    const nearSouth = makeFeature('near-south', true);
+    (nearSouth.geometry as any).coordinates = [18.8, 44.9];
+    const layers = buildTacticalDeckLayers({ type: 'FeatureCollection', features: [safe, nearSouth] } as any, false, true, 8, [], {
+        width: 1386,
+        height: 837,
+        padding: { top: 72, right: 24, bottom: 64, left: 264 },
+        project: (coordinates) => coordinates[0] === 17.8 ? { x: 700, y: 300 } : { x: 872, y: 810 },
+    });
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.id)).toEqual(['safe']);
+});
+
 it('filters only counters too far outside the viewport to clamp honestly', () => {
     const nearLeft = makeFeature('near-left', true);
     const farLeft = makeFeature('far-left', true);
@@ -288,11 +469,118 @@ it('filters only counters too far outside the viewport to clamp honestly', () =>
     const filtered = filterViewportClampablePointFeatures([nearLeft, farLeft] as any, {
         width: 500,
         height: 360,
-        padding: { top: 124, right: 420, bottom: 184, left: 380 },
-        project: (coordinates) => coordinates[0] === 17.8 ? { x: 250, y: 160 } : { x: -260, y: 160 },
+        padding: { top: 40, right: 80, bottom: 40, left: 80 },
+        project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
     }, getCounterFootprintHalfSize(40));
 
     expect(filtered.map((feature: any) => feature.properties.id)).toEqual(['near-left']);
+});
+
+it('does not relocate counters into the safe band when their OSID is outside it', () => {
+    const nearLeft = makeFeature('near-left', true);
+    const farLeft = makeFeature('far-left', true);
+    (farLeft.geometry as any).coordinates = [16, 44.1];
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [nearLeft, farLeft],
+    } as any;
+
+    const layers = buildTacticalDeckLayers(
+        formationsGeoJson,
+        false,
+        true,
+        10,
+        [],
+        {
+            width: 500,
+            height: 360,
+            padding: { top: 40, right: 80, bottom: 40, left: 80 },
+            project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
+        },
+    );
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+
+    expect(baseLayer.props.data).toEqual([]);
+});
+
+it('does not create DOM counter hit targets away from the formation OSID', () => {
+    const nearLeft = makeFeature('near-left', true);
+    const farLeft = makeFeature('far-left', true);
+    (farLeft.geometry as any).coordinates = [16, 44.1];
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [nearLeft, farLeft],
+    } as any;
+
+    const items = buildFormationCounterDomOverlayItems({
+        formationsGeoJson,
+        formationsVisible: true,
+        zoom: 10,
+        viewportClip: {
+            width: 500,
+            height: 360,
+            padding: { top: 40, right: 80, bottom: 40, left: 80 },
+            project: (coordinates) => coordinates[0] === 17.8 ? { x: 20, y: 160 } : { x: -260, y: 160 },
+        },
+    });
+
+    expect(items).toEqual([]);
+});
+
+it('caps the visible exact-member fan while preserving the full stack count badge', () => {
+    const features = Array.from({ length: 20 }, (_, index) => ({
+        ...makeFeature(`stack-${index}`, true),
+        properties: {
+            ...makeFeature(`stack-${index}`, true).properties,
+            stack_index: index,
+            stack_count: 20,
+            is_stack_top: index === 0,
+        },
+    }));
+    const layers = buildTacticalDeckLayers(
+        { type: 'FeatureCollection', features } as any,
+        false,
+        true,
+        10,
+        [],
+        {
+            width: 800,
+            height: 600,
+            padding: { top: 20, right: 20, bottom: 20, left: 20 },
+            project: () => ({ x: 400, y: 350 }),
+        },
+    );
+    const baseLayer = layers.find((layer: any) => layer.id === 'deck-formations-icons') as any;
+    const countLayer = layers.find((layer: any) => layer.id === 'deck-formations-stack-text') as any;
+
+    expect(baseLayer.props.data).toHaveLength(12);
+    expect(baseLayer.props.data.map((feature: any) => feature.properties.stack_index)).toEqual(
+        Array.from({ length: 12 }, (_, index) => index),
+    );
+    expect(countLayer.props.getText(countLayer.props.data[0])).toBe('20');
+});
+
+it('does not expose a clamped owned counter underneath a live UI occluder', () => {
+    const covered = makeFeature('covered', true);
+    const formationsGeoJson = {
+        type: 'FeatureCollection',
+        features: [covered],
+    } as any;
+
+    const items = buildFormationCounterDomOverlayItems({
+        formationsGeoJson,
+        formationsVisible: true,
+        zoom: 10,
+        viewportClip: {
+            width: 500,
+            height: 360,
+            padding: { top: 20, right: 20, bottom: 20, left: 20 },
+            occluders: [{ left: 50, top: 100, right: 120, bottom: 200 }],
+            project: () => ({ x: -20, y: 150 }),
+        },
+    });
+
+    expect(items).toEqual([]);
 });
 
 it('uses bounded pixel offsets for stacked counters instead of map-coordinate drift', () => {
@@ -302,7 +590,7 @@ it('uses bounded pixel offsets for stacked counters instead of map-coordinate dr
         properties: { id: 'stacked', stack_index: 7, stack_count: 12 },
     };
 
-    expect(getFormationStackPixelOffset(stacked as any, 40)).toEqual([14, -16]);
+    expect(getFormationStackPixelOffset(stacked as any, 40)).toEqual([7, -16]);
     expect(getViewportSafePixelOffset(stacked as any, {
         width: 400,
         height: 300,

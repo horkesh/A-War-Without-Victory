@@ -1,6 +1,7 @@
 import type { DoctrineState, DoctrineType, FormationState, GameState, PostureLevel } from './game_state.js';
 import { getEffectiveEquipmentRatio } from './heavy_equipment.js';
 import type { SupplyStateDerivationReport, SupplyStateLevel } from './supply_state_derivation.js';
+import { strictCompare } from './validateGameState.js';
 
 const COORDINATED_STRIKE_PRESSURE_MULT = 1.4;
 const COORDINATED_STRIKE_DURATION = 4;
@@ -62,7 +63,7 @@ export function updateDoctrineState(
     supplyReport: SupplyStateDerivationReport | undefined,
     effectivePosture?: Record<string, { assignments?: Record<string, { posture: PostureLevel }> }>
 ): void {
-    const formations = Object.values(state.military.formations ?? {}).sort((a, b) => a.id.localeCompare(b.id));
+    const formations = Object.values(state.military.formations ?? {}).sort((a, b) => strictCompare(a.id, b.id));
     for (const formation of formations) {
         const doctrine = initializeDoctrineStateForFormation(formation);
         for (const d of DOCTRINES) {

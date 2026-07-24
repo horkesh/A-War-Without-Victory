@@ -2,14 +2,14 @@
  * Smuggling Routes — v0.4.3 Economy & War Production
  *
  * Each faction has 3 smuggling routes with distinct availability windows,
- * capacity growth, and disruption risk. Routes generate per-turn supply
+ * capacity growth, and explicit political access gates. Routes generate per-turn supply
  * income that feeds into the supply reserves system.
  *
- * Deterministic: uses deterministicRandom for disruption rolls.
+ * Deterministic: route state and political access determine every outcome.
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
-import { deterministicRandom } from '../../state/deterministic_random.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -41,9 +41,6 @@ export interface SmugglingRouteState {
 
 /** Per-turn capacity growth when a route is active and not disrupted. */
 export const SMUGGLING_CAPACITY_GROWTH = 2.0;
-
-/** Base disruption probability per turn [0–1]. */
-export const SMUGGLING_DISRUPTION_CHANCE = 0.08;
 
 /** Capacity lost when disrupted. */
 export const SMUGGLING_DISRUPTION_CAPACITY_LOSS = 10;
@@ -135,7 +132,7 @@ export const SMUGGLING_ROUTE_DEFS: readonly SmugglingRouteDef[] = [
         base_income_general: 0.2,
         base_income_heavy: 0.05,
     },
-].sort((a, b) => a.id.localeCompare(b.id));
+].sort((a, b) => strictCompare(a.id, b.id));
 
 // ── Initialization ───────────────────────────────────────────────────────────
 
@@ -160,8 +157,7 @@ export interface SmugglingUpdateReport {
 }
 
 /**
- * Update smuggling routes: grow capacity, check disruption, compute income.
- * Deterministic via deterministicRandom seeded on turn + route id.
+ * Update smuggling routes: grow capacity or apply an explicit political-access disruption.
  */
 export function updateSmugglingRoutes(state: GameState, turn: number): SmugglingUpdateReport {
     ensureSmugglingRoutes(state);
@@ -178,7 +174,7 @@ export function updateSmugglingRoutes(state: GameState, turn: number): Smuggling
     for (const def of SMUGGLING_ROUTE_DEFS) defById.set(def.id, def);
 
     // Sort for deterministic iteration
-    const sortedRoutes = [...routes].sort((a, b) => a.id.localeCompare(b.id));
+    const sortedRoutes = [...routes].sort((a, b) => strictCompare(a.id, b.id));
 
     for (const routeState of sortedRoutes) {
         const def = defById.get(routeState.id);
@@ -205,16 +201,6 @@ export function updateSmugglingRoutes(state: GameState, turn: number): Smuggling
                 report.routes_disrupted++;
                 continue;
             }
-        }
-
-        // Disruption check (deterministic)
-        const seed = `${turn}`;
-        const roll = deterministicRandom(seed, `smuggling:disruption:${routeState.id}`);
-        if (roll < SMUGGLING_DISRUPTION_CHANCE) {
-            routeState.disrupted = true;
-            routeState.capacity = Math.max(0, routeState.capacity - SMUGGLING_DISRUPTION_CAPACITY_LOSS);
-            report.routes_disrupted++;
-            continue;
         }
 
         // Not disrupted: grow capacity
@@ -251,7 +237,7 @@ export function getSmugglingIncome(state: GameState): SmugglingIncomeByFaction {
     const defById = new Map<string, SmugglingRouteDef>();
     for (const def of SMUGGLING_ROUTE_DEFS) defById.set(def.id, def);
 
-    for (const routeState of [...routes].sort((a, b) => a.id.localeCompare(b.id))) {
+    for (const routeState of [...routes].sort((a, b) => strictCompare(a.id, b.id))) {
         if (routeState.disrupted || routeState.capacity <= 0) continue;
         const def = defById.get(routeState.id);
         if (!def) continue;

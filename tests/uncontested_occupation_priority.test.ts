@@ -1,10 +1,136 @@
 import { describe, expect, it } from 'vitest';
 
 import { generateAllBotOrdersOsid } from '../src/sim/combat/bot_brigade_ai_osid.js';
+import { evaluateUncontestedOccupation } from '../src/sim/combat/bot_brigade_eval_attack.js';
 import type { GameState } from '../src/state/game_state.js';
 
-describe('uncontested occupation priority', () => {
-    it('lets a front brigade walk into adjacent undefended enemy territory before passive defense logic', () => {
+function makeScopedOccupationContext(options?: {
+    targetInAssignedSubsegment?: boolean;
+    directiveTargets?: string[];
+    defenderAtTarget?: boolean;
+}) {
+    const target = 'op:test:empty_enemy';
+    const sector = {
+        sector_id: 'sector:vrs_test:0',
+        corps_id: 'vrs_test',
+        faction: 'RS',
+        opposing_factions: ['RBiH'],
+        edge_ids: ['edge:test'],
+        sub_segments: [{
+            sub_segment_id: 'subseg:vrs_test:0',
+            edge_ids: ['edge:test'],
+            friendly_osids: ['op:test:front'],
+            enemy_osids: options?.targetInAssignedSubsegment === false ? ['op:test:other_enemy'] : [target],
+            length_edges: 1,
+            primary_brigade_ids: ['rs_test_brigade'],
+        }],
+        territory_osids: ['op:test:front'],
+        assigned_brigade_ids: ['rs_test_brigade'],
+        reserve_brigade_ids: [],
+        length_edges: 1,
+        density: 1,
+        threat_ratio: 1,
+        defensive_power: 1000,
+        sector_stance: 'defend',
+        stance_source: 'bot',
+    } as any;
+    const brigade = {
+        id: 'rs_test_brigade',
+        kind: 'brigade',
+        faction: 'RS',
+        status: 'active',
+        corps_id: 'vrs_test',
+        cohesion: 70,
+        morale: 70,
+        personnel: 1000,
+        location_osid: 'op:test:front',
+        assigned_sub_segment_id: 'subseg:vrs_test:0',
+    } as any;
+    const formations: Record<string, any> = { rs_test_brigade: brigade };
+    if (options?.defenderAtTarget) {
+        formations.rbih_defender = {
+            id: 'rbih_defender',
+            kind: 'brigade',
+            faction: 'RBiH',
+            status: 'active',
+            personnel: 1000,
+            location_osid: target,
+        };
+    }
+    const result = {
+        posture_orders: [],
+        attack_orders: {},
+        attack_scores: {},
+    } as any;
+    return {
+        brigade,
+        loc: 'op:test:front',
+        faction: 'RS',
+        adjacency: new Map([
+            ['op:test:front', [target]],
+            [target, ['op:test:front', 'op:test:friendly_escape']],
+            ['op:test:friendly_escape', [target]],
+        ]),
+        state: {
+            meta: { turn: 3, phase: 'war', seed: 'scoped-uncontested' },
+            military: { formations },
+            political: {
+                political_controllers: {
+                    'op:test:front': 'RS',
+                    [target]: 'RBiH',
+                    'op:test:friendly_escape': 'RS',
+                },
+            },
+        },
+        directive: {
+            assigned_front_ids: [],
+            offensive_targets: options?.directiveTargets ?? [],
+            hold_osids: [],
+            avoid_osids: [],
+            max_attackers_per_target: 2,
+            reserve_fraction: 0,
+            min_attack_outcome: 'costly_victory',
+            aggression_modifier: 0,
+        },
+        isActiveSectorOperationParticipant: false,
+        sectorAssignment: { sector, isReserve: false, frontOsids: new Set(['op:test:front']) },
+        result,
+    } as any;
+}
+
+describe('ops-only attack doctrine', () => {
+    it('permits a defended-command walkover only inside the brigade assigned subsegment', () => {
+        const ctx = makeScopedOccupationContext();
+
+        expect(evaluateUncontestedOccupation(ctx)).toBe(true);
+        expect(ctx.result.attack_orders.rs_test_brigade).toBe('op:test:empty_enemy');
+    });
+
+    it('rejects an otherwise empty target outside the assigned sector scope', () => {
+        const ctx = makeScopedOccupationContext({ targetInAssignedSubsegment: false });
+
+        expect(evaluateUncontestedOccupation(ctx)).toBe(false);
+        expect(ctx.result.attack_orders.rs_test_brigade).toBeUndefined();
+    });
+
+    it('allows an explicit corps directive target outside the assigned sector scope', () => {
+        const ctx = makeScopedOccupationContext({
+            targetInAssignedSubsegment: false,
+            directiveTargets: ['op:test:empty_enemy'],
+        });
+
+        expect(evaluateUncontestedOccupation(ctx)).toBe(true);
+        expect(ctx.result.attack_orders.rs_test_brigade).toBe('op:test:empty_enemy');
+    });
+
+    it('does not classify physically defended ground as uncontested', () => {
+        const ctx = makeScopedOccupationContext({ defenderAtTarget: true });
+
+        expect(evaluateUncontestedOccupation(ctx)).toBe(false);
+        expect(ctx.result.attack_orders.rs_test_brigade).toBeUndefined();
+    });
+
+    it('does not let a brigade attack adjacent undefended enemy territory without an operation', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'uncontested-occupation-priority' },
             corps_front_directives: {},
@@ -59,10 +185,10 @@ describe('uncontested occupation priority', () => {
             osidPopulationMap: new Map(),
         });
 
-        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBe('op:test:empty_enemy');
+        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBeUndefined();
     });
 
-    it('does not retry a recently repulsed walkover target as uncontested territory', () => {
+    it('does not issue an independent attack regardless of repulse memory', () => {
         const state = {
             meta: { turn: 10, phase: 'war', seed: 'uncontested-occupation-repulse-memory' },
             corps_front_directives: {},
@@ -121,7 +247,7 @@ describe('uncontested occupation priority', () => {
         expect(state.military.brigade_attack_orders?.rs_test_brigade).toBeUndefined();
     });
 
-    it('lets a defensive corps brigade walk into adjacent undefended enemy territory instead of passively digging in', () => {
+    it('keeps a defensive corps brigade from independently occupying empty enemy territory', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'defensive-uncontested-occupation-priority' },
             corps_front_directives: {},
@@ -176,10 +302,10 @@ describe('uncontested occupation priority', () => {
             osidPopulationMap: new Map(),
         });
 
-        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBe('op:test:empty_enemy');
+        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBeUndefined();
     });
 
-    it('keeps defensive counterattacks ahead of a different undefended walkover target', () => {
+    it('preserves the sole brigade-level exception for a recent-position counterattack', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'defensive-counterattack-priority' },
             corps_front_directives: {},
@@ -241,17 +367,9 @@ describe('uncontested occupation priority', () => {
         expect(state.military.brigade_attack_orders?.rs_test_brigade).toBe('op:test:counter_target');
     });
 
-    it('lets a hold-position brigade walk into adjacent undefended enemy territory before hold logic freezes it in place', () => {
+    it('keeps a hold-position brigade at its assigned position without an operation', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'hold-uncontested-occupation-priority' },
-            corps_front_directives: {
-                vrs_test: {
-                    hold_osids: ['op:test:front'],
-                    offensive_targets: [],
-                    reserve_fraction: 0,
-                    max_attackers_per_target: 2,
-                },
-            },
             political: {
                 political_controllers: {
                     'op:test:front': 'RS',
@@ -283,6 +401,12 @@ describe('uncontested occupation priority', () => {
                 corps_command: {
                     vrs_test: {
                         stance: 'defensive',
+                        directive: {
+                            hold_osids: ['op:test:front'],
+                            offensive_targets: [],
+                            reserve_fraction: 0,
+                            max_attackers_per_target: 2,
+                        },
                         active_operations: [],
                     },
                 },
@@ -335,10 +459,10 @@ describe('uncontested occupation priority', () => {
             osidPopulationMap: new Map(),
         });
 
-        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBe('op:test:empty_enemy');
+        expect(state.military.brigade_attack_orders?.rs_test_brigade).toBeUndefined();
     });
 
-    it('does not trim uncontested walkover orders behind formal operation attack slots', () => {
+    it('issues the formal operation attack without inventing a second independent attack', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'uncontested-walkover-cap-exempt' },
             corps_front_directives: {},
@@ -420,10 +544,10 @@ describe('uncontested occupation priority', () => {
         });
 
         expect(state.military.brigade_attack_orders?.rs_op_brigade).toBe('op:test:op_target');
-        expect(state.military.brigade_attack_orders?.rs_walkover_brigade).toBe('op:test:empty_enemy');
+        expect(state.military.brigade_attack_orders?.rs_walkover_brigade).toBeUndefined();
     });
 
-    it('does not let ARBiH warlord friction cancel uncontested walkover orders', () => {
+    it('does not invent independent ARBiH attacks outside the command chain', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'uncontested-walkover-friction-exempt' },
             corps_front_directives: {},
@@ -499,11 +623,11 @@ describe('uncontested occupation priority', () => {
             osidPopulationMap: new Map(),
         });
 
-        expect(state.military.brigade_attack_orders?.arbih_walkover_a).toBe('op:test:empty_a');
-        expect(state.military.brigade_attack_orders?.arbih_walkover_b).toBe('op:test:empty_b');
+        expect(state.military.brigade_attack_orders?.arbih_walkover_a).toBeUndefined();
+        expect(state.military.brigade_attack_orders?.arbih_walkover_b).toBeUndefined();
     });
 
-    it('lets a home-defense brigade occupy adjacent empty enemy territory instead of freezing on the line', () => {
+    it('does not let a home-defense brigade attack without corps authorization', () => {
         const state = {
             meta: { turn: 3, phase: 'war', seed: 'home-defense-walkover' },
             corps_front_directives: {},
@@ -559,6 +683,6 @@ describe('uncontested occupation priority', () => {
             osidPopulationMap: new Map(),
         });
 
-        expect(state.military.brigade_attack_orders?.arbih_home_guard).toBe('op:test:empty_enemy');
+        expect(state.military.brigade_attack_orders?.arbih_home_guard).toBeUndefined();
     });
 });

@@ -48,9 +48,9 @@ const OPENING_BRIEFS: Record<string, { titleKey: MessageKey; bulletKeys: Message
 };
 
 const SEVERITY_STYLES: Record<InboxSeverity, { badge: string; border: string; labelKey: MessageKey | null }> = {
-    blocking: { badge: 'bg-red-500 text-white', border: 'border-red-500/40', labelKey: 'inbox.severity.blocking' },
-    urgent: { badge: 'bg-amber-500 text-white', border: 'border-amber-500/30', labelKey: 'inbox.severity.urgent' },
-    normal: { badge: 'bg-sky-600 text-white', border: 'border-sky-600/20', labelKey: null },
+    blocking: { badge: 'bg-red-500 text-neutral-950', border: 'border-red-500/40', labelKey: 'inbox.severity.blocking' },
+    urgent: { badge: 'bg-amber-500 text-neutral-950', border: 'border-amber-500/30', labelKey: 'inbox.severity.urgent' },
+    normal: { badge: 'bg-sky-600 text-neutral-950', border: 'border-sky-600/20', labelKey: null },
     info: { badge: 'bg-stone-600 text-stone-300', border: 'border-stone-600/20', labelKey: null },
 };
 
@@ -87,20 +87,20 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
                 data-actionable={isActionable ? 'true' : 'false'}
             >
                 <div className="flex items-center gap-1.5 mb-1">
-                    <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+                    <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
                         {cardTypeLabel}
                     </span>
                     <button
                         type="button"
                         onClick={onClick}
-                        className="ml-auto text-[8px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                        className="ml-auto text-xs font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
                         aria-label={t('inbox.dismissIntel')}
                     >
                         {t('inbox.dismiss')}
                     </button>
                 </div>
-                <div className="text-[11px] font-bold text-text-primary leading-tight">{item.title}</div>
-                <div className="text-[10px] text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
+                <div className="text-xs font-bold text-text-primary leading-tight">{item.title}</div>
+                <div className="text-xs text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
             </div>
         );
     }
@@ -122,22 +122,22 @@ function InboxCard({ item, onClick }: { item: InboxItem; onClick: () => void }) 
             }`}
         >
             <div className="flex items-center gap-1.5 mb-1">
-                <span className={`text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
+                <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded ${style.badge}`}>
                     {severityLabel || cardTypeLabel}
                 </span>
                 {severityLabel && (
-                    <span className="text-[8px] font-bold uppercase tracking-widest text-text-secondary">
+                    <span className="text-xs font-bold uppercase tracking-widest text-text-secondary">
                         {cardTypeLabel}
                     </span>
                 )}
                 {(item.updateCount ?? 1) > 1 && (
-                    <span className="ml-auto text-[8px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
+                    <span className="ml-auto text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 rounded bg-white/8 text-text-secondary border border-white/10">
                         {t('inbox.updates', { count: (item.updateCount ?? 1) - 1 })}
                     </span>
                 )}
             </div>
-            <div className="text-[11px] font-bold text-text-primary leading-tight">{item.title}</div>
-            <div className="text-[10px] text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
+            <div className="text-xs font-bold text-text-primary leading-tight">{item.title}</div>
+            <div className="text-xs text-text-secondary leading-snug mt-0.5">{item.subtitle}</div>
         </button>
     );
 }
@@ -159,11 +159,11 @@ function OpeningBrief({
             className="p-3 rounded border border-accent-gold/30 bg-gradient-to-b from-panel-card to-transparent mb-3"
             data-testid="presidential-inbox-opening-brief"
         >
-            <div className="text-[9px] font-bold uppercase tracking-widest text-accent-gold mb-1.5">
+            <div className="text-xs font-bold uppercase tracking-widest text-accent-gold mb-1.5">
                 {t('inbox.openingBrief.label')}
             </div>
             <div className="text-[12px] font-bold text-text-primary mb-1">{t(brief.titleKey)}</div>
-            <ul className="space-y-1 text-[10px] text-text-secondary leading-relaxed">
+            <ul className="space-y-1 text-xs text-text-secondary leading-relaxed">
                 {brief.bulletKeys.map((bulletKey) => (
                     <li key={bulletKey} className="flex gap-2">
                         <span className="mt-[0.45em] h-1 w-1 shrink-0 rounded-full bg-accent-gold/70" />
@@ -176,7 +176,7 @@ function OpeningBrief({
                 real win/lose axis: there is no conquest victory; the war is
                 judged at Dayton by its human cost. Mirrors the deck's beats
                 1+3 at first contact. */}
-            <p className="mt-2 border-t border-accent-gold/15 pt-2 text-[9px] italic leading-snug text-text-secondary/90">
+            <p className="mt-2 border-t border-accent-gold/15 pt-2 text-xs italic leading-snug text-text-secondary/90">
                 {t('inbox.openingBrief.thesis')}
             </p>
             <div className="mt-2.5 flex items-center justify-between gap-3">
@@ -187,7 +187,7 @@ function OpeningBrief({
                         onOpenDesk();
                         onDismiss();
                     }}
-                    className="text-[9px] font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
+                    className="text-xs font-bold uppercase tracking-widest text-accent-gold hover:text-white transition-colors"
                 >
                     {t('inbox.openDesk')}
                 </button>
@@ -195,7 +195,7 @@ function OpeningBrief({
                     type="button"
                     data-testid="presidential-inbox-opening-brief-read-later"
                     onClick={onDismiss}
-                    className="text-[9px] font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
+                    className="text-xs font-bold uppercase tracking-widest text-text-secondary hover:text-white transition-colors"
                 >
                     {t('inbox.openingBrief.readLater')}
                 </button>
@@ -209,17 +209,17 @@ function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void
         <div className="rounded border border-panel-border bg-panel-card/80 p-3 space-y-2" data-testid="presidential-inbox-quiet-capsule">
             <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                    <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                    <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
                         {t('inbox.commandWatch')}
                     </div>
                     <div className="mt-1 text-[12px] font-bold text-text-primary">
                         {t('inbox.noOrders')}
                     </div>
-                    <div className="mt-1 text-[10px] leading-snug text-text-secondary">
+                    <div className="mt-1 text-xs leading-snug text-text-secondary">
                         {t('inbox.quietTurn')}
                     </div>
                 </div>
-                <div className="h-2 w-2 shrink-0 rounded-full bg-green-400/80 shadow-[0_0_10px_rgba(74,222,128,0.45)]" />
+                <div className="h-2 w-2 shrink-0 rounded-full bg-amber-300/80 shadow-[0_0_10px_rgba(252,211,77,0.35)]" />
             </div>
             <div className="grid grid-cols-2 gap-1.5">
                 <button
@@ -228,18 +228,18 @@ function QuietInboxCapsule({ onOpenDesk, recordFiled }: { onOpenDesk: () => void
                     data-testid="presidential-inbox-quiet-open-desk"
                     className="rounded border border-accent-gold/25 bg-accent-gold/8 px-2 py-2 text-left hover:bg-accent-gold/12 transition-colors"
                 >
-                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-accent-gold">
+                    <div className="text-xs font-bold uppercase tracking-[0.14em] text-accent-gold">
                         {t('inbox.decisionRoom')}
                     </div>
-                    <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
+                    <div className="mt-0.5 text-xs leading-snug text-text-secondary">
                         {t('inbox.openDesk')}
                     </div>
                 </button>
                 <div className="rounded border border-panel-border/80 bg-black/10 px-2 py-2">
-                    <div className="text-[9px] font-bold uppercase tracking-[0.14em] text-text-primary">
+                    <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-primary">
                         {t('inbox.chronicle')}
                     </div>
-                    <div className="mt-0.5 text-[10px] leading-snug text-text-secondary">
+                    <div className="mt-0.5 text-xs leading-snug text-text-secondary">
                         {t(recordFiled ? 'inbox.latestRecordFiled' : 'inbox.noRecordFiledYet')}
                     </div>
                 </div>
@@ -278,12 +278,12 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
             {/* Header */}
             <div className="px-3 py-2.5 border-b border-panel-border flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-text-primary">
+                    <span className="text-xs font-bold uppercase tracking-[0.15em] text-text-primary">
                         {t('inbox.title')}
                     </span>
                     {actionableCount > 0 && (
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                            blocking ? 'bg-red-500 text-white' : 'bg-amber-500/80 text-white'
+                        <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${
+                            blocking ? 'bg-red-500 text-neutral-950' : 'bg-amber-500/80 text-neutral-950'
                         }`}>
                             {actionableCount}
                         </span>
@@ -327,7 +327,7 @@ export function PresidentialInbox({ onAction, eventCatalog }: PresidentialInboxP
                 {situationItems.length > 0 && (
                     <>
                         <div className="border-t border-panel-border/50 pt-2 mt-2">
-                            <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-tertiary mb-1.5">
+                            <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-tertiary mb-1.5">
                                 {t('inbox.situation')}
                             </div>
                         </div>
@@ -364,7 +364,7 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
             <button
                 type="button"
                 onClick={onClick}
-                className="text-[9px] font-bold uppercase tracking-[0.1em] text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
+                className="text-xs font-bold uppercase tracking-[0.1em] text-text-secondary hover:text-text-primary transition-colors px-2 py-1"
                 title={t('inbox.badgeTitleEmpty')}
             >
                 {t('inbox.title')}
@@ -378,7 +378,7 @@ export function InboxBadge({ onClick }: { onClick: () => void }) {
         <button
             type="button"
             onClick={onClick}
-            className={`text-[9px] font-bold uppercase tracking-[0.1em] px-2 py-1 rounded transition-colors ${
+            className={`text-xs font-bold uppercase tracking-[0.1em] px-2 py-1 rounded transition-colors ${
                 blocking
                     ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
                     : 'bg-amber-500/20 text-amber-400 hover:bg-amber-500/30'

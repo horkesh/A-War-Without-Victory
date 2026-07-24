@@ -60,10 +60,17 @@ describe('war-phase step ordering', () => {
         // new CO is in command the same turn.
         assertBefore('inject-op-directive', 'apply-co-replacements');
         assertBefore('apply-co-replacements', 'ai-corps-decisions');
+        assertBefore('apply-autonomy-transition', 'generate-bot-corps-orders');
+        assertBefore('generate-bot-corps-orders', 'generate-level1-op-proposals');
+
+        // Event truth must update JNA lifecycle before phantom/operation reconciliation.
+        assertBefore('evaluate-events', 'jna-transition');
+        assertBefore('jna-transition', 'jna-phantom-withdrawals');
 
         // Live operation rosters must be reconciled before sector offensives advance
         assertBefore('jna-phantom-withdrawals', 'reconcile-live-operation-truth');
-        assertBefore('reconcile-live-operation-truth', 'advance-sector-offensives');
+        assertBefore('reconcile-live-operation-truth', 'inject-player-pre-planned-operations');
+        assertBefore('inject-player-pre-planned-operations', 'advance-sector-offensives');
 
         // Warlord friction and officer maturity run after officer succession
         assertBefore('officer-succession', 'check-warlord-friction');
@@ -83,9 +90,7 @@ describe('war-phase step ordering', () => {
         assertBefore('reconcile-final-operation-truth', 'reconcile-final-sector-truth-after-ops');
         assertBefore('reconcile-final-sector-truth-after-ops', 'final-distribute-brigades-to-front');
         assertBefore('final-distribute-brigades-to-front', 'seal-final-sector-truth-after-distribution');
-        assertBefore('seal-final-sector-truth-after-distribution', 'assert-final-operation-lifecycle');
-        assertBefore('reconcile-final-sector-truth-after-ops', 'assert-final-operation-lifecycle');
-        assertBefore('reconcile-final-sector-truth', 'assert-formations-in-friendly-territory');
+        expect(stepNames.filter(name => name.startsWith('assert-'))).toEqual([]);
     });
 
     it('has no duplicate step names', () => {
@@ -214,6 +219,12 @@ describe('war-phase step ordering', () => {
         //        pools can materialize deterministically before reinforcement consumes them.
         //        DETERMINISM EARLY-OUT: performs ZERO state mutation when no active
         //        formation_spawn_directive is present.
-        expect(stepNames.length).toBe(189);
+        // +1 from inject-player-pre-planned-operations, before operation lifecycle
+        // advancement so accepted player operations share headless timing.
+        // -4 assertion steps; Engine Invariants section 1 now runs one barrier after the pipeline.
+        // +1 from jna-transition (event-backed JNA withdrawal lifecycle projection).
+        // -1 from consolidating offensive paramilitary detection into the bounded sweep path.
+        // +1 from rear-pocket-consolidation after the paramilitary fade week.
+        expect(stepNames.length).toBe(187);
     });
 });

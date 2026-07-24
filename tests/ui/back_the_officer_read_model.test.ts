@@ -173,6 +173,9 @@ describe('back-the-officer read-model', () => {
 // ──────────────────────────────────────────────────────────────────────────
 
 function proposalState(opOverrides: Record<string, unknown>) {
+  const objective = typeof opOverrides.objective_description === 'string'
+    ? opOverrides.objective_description
+    : 'Operation Trnovo';
   return {
     military: {
       formations: {
@@ -196,8 +199,19 @@ function proposalState(opOverrides: Record<string, unknown>) {
           },
         },
       },
+      named_officers: {
+        off_dudakovic: { status: 'active', assigned_corps_id: '1st_corps' },
+      },
       corps_command: {
         '1st_corps': {
+          commander_state: {
+            current_plan: {
+              plan_id: 'plan_trnovo', status: 'ready', objective_description: objective,
+              target_osids: ['op:trnovo:trnovo_1'], assigned_brigades: [],
+              concentration_progress: 1, viability_score: 0.8, staging_zone: 'zone:trnovo:main',
+            },
+            last_plan_reason: 'Authorize launch',
+          },
           active_operations: [
             {
               id: 'op_trnovo',
@@ -223,6 +237,190 @@ const OP_PROPOSAL: OpProposalReviewRow = {
 };
 
 describe('op-proposal decision cards (Phase 2 slice 1)', () => {
+  it('projects an ordinary approval dossier from the ready current plan, never a live operation', () => {
+    const state = {
+      meta: { turn: 30, player_faction: 'RBiH' },
+      military: {
+        formations: {
+          '1st_corps': { name: '1st Corps', faction: 'RBiH' },
+          bde_alpha: { name: 'Alpha Brigade' },
+          bde_beta: { name: 'Beta Brigade' },
+        },
+        named_officers: {
+          off_dudakovic: { status: 'active', assigned_corps_id: '1st_corps' },
+        },
+        corps_command: {
+          '1st_corps': {
+            commander_state: {
+              current_plan: {
+                plan_id: 'plan_trnovo',
+                status: 'ready',
+                objective_description: 'Relieve Jajce',
+                target_osids: ['op:jajce:jajce_1'],
+                assigned_brigades: ['bde_alpha', 'bde_beta'],
+                required_brigades: 2,
+                concentration_progress: 1,
+                viability_score: 0.65,
+                target_ready_turn: 30,
+                staging_zone: 'zone:donji_vakuf:main_body',
+              },
+              threat_assessment: { overall_pressure: 'heavy' },
+              intel_picture: { zone_confidence: { 'zone:donji_vakuf:main_body': 0.72 } },
+              belief_state: { supply_continuity_confidence: 0.8 },
+              last_plan_reason: 'Concentration complete; authorize launch.',
+            },
+            active_operations: [{
+              id: 'op_wrong',
+              name: 'plan_internal_wrong',
+              plan_id: 'plan_trnovo',
+              force_ratio_estimate: 9.9,
+              commander_assessment: 'abort',
+            }],
+          },
+        },
+      },
+    };
+
+    const [card] = buildOpProposalCards(state, ROSTER, [OP_PROPOSAL]);
+
+    expect(card).toMatchObject({
+      corps_name: '1st Corps',
+      op_name: 'Relieve Jajce',
+      objective: 'Relieve Jajce',
+      targets: ['Jajce'],
+      forces: ['Alpha Brigade', 'Beta Brigade'],
+      concentration_readiness: '100% concentrated; ready',
+      intel_assessment: '72% confidence',
+      supply_assessment: '80% continuity confidence',
+      risk_assessment: 'High pressure; 65% plan viability',
+      recommendation: 'Concentration complete; authorize launch.',
+      decision_deadline: 'Before the next turn advances',
+      force_ratio: 'Unreported',
+      opportunity_cost: 'Unreported',
+      op_id: null,
+      force_ratio_estimate: null,
+      commander_assessment: null,
+      override_available: false,
+    });
+    expect(card.commander?.name).toBe(ROSTER[0]?.name);
+    const playerCopy = [
+      card.corps_name,
+      card.op_name,
+      card.objective,
+      ...(card.targets ?? []),
+      ...(card.forces ?? []),
+      card.concentration_readiness,
+      card.intel_assessment,
+      card.supply_assessment,
+      card.risk_assessment,
+      card.recommendation,
+      card.decision_deadline,
+      card.force_ratio,
+      card.opportunity_cost,
+      card.summary,
+    ].join(' ');
+    expect(playerCopy).not.toMatch(/op_wrong|plan_internal_wrong|op:jajce|zone:donji|plan_trnovo|arbih_1st_corps/);
+  });
+
+  it('humanizes raw command and formation names before they enter proposal copy', () => {
+    const state = {
+      military: {
+        formations: {
+          arbih_1st_corps: { name: 'arbih_1st_corps' },
+          bde_alpha_internal: { name: 'bde_alpha_internal' },
+        },
+        corps_command: {
+          arbih_1st_corps: {
+            commander_state: {
+              current_plan: {
+                plan_id: 'plan_internal', status: 'ready', objective_description: 'op:jajce:jajce_1',
+                target_osids: ['op:jajce:jajce_1'], assigned_brigades: ['bde_alpha_internal'],
+                concentration_progress: 1, viability_score: 0.7, staging_zone: 'zone:jajce:main',
+              },
+              last_plan_reason: 'launch_opportunity',
+            },
+          },
+        },
+      },
+    };
+    const proposal = {
+      ...OP_PROPOSAL,
+      proposed_action: 'APPROVE_OP:arbih_1st_corps:plan_internal',
+    };
+
+    const [card] = buildOpProposalCards(state, ROSTER, [proposal]);
+
+    expect(card.corps_name).toBe('1st Corps');
+    expect(card.objective).toBe('Jajce');
+    expect(card.forces).toEqual(['Bde Alpha Internal']);
+    expect(card.recommendation).toBe('Authorize launch');
+    expect(`${card.corps_name} ${card.objective} ${card.forces?.join(' ')} ${card.recommendation}`)
+      .not.toMatch(/arbih_1st_corps|bde_alpha_internal|op:jajce|launch_opportunity/);
+  });
+
+  it('projects generated opportunity zones as settlement objectives without leaking routing ids', () => {
+    const state = {
+      military: {
+        formations: {
+          vrs_2nd_krajina: { name: '2nd Krajina Corps' },
+          rs_15th_biha_infantry: { name: '15th Bihac Infantry Brigade' },
+          rs_1st_drvar_light_infantry: { name: '1st Drvar Light Infantry Brigade' },
+          rs_3rd_petrovac_light_infantry: { name: '3rd Petrovac Light Infantry Brigade' },
+        },
+        corps_command: {
+          vrs_2nd_krajina: {
+            commander_state: {
+              current_plan: {
+                plan_id: 'plan_vrs_2nd_krajina_t1_opportunity',
+                status: 'ready',
+                objective_description: 'offensive opportunity from zone:vrs_2nd_krajina:op:bihac:racic',
+                target_osids: ['op:bihac:orasac_2'],
+                assigned_brigades: [
+                  'rs_15th_biha_infantry',
+                  'rs_1st_drvar_light_infantry',
+                  'rs_3rd_petrovac_light_infantry',
+                ],
+                concentration_progress: 1,
+                viability_score: 1,
+                staging_zone: 'zone:vrs_2nd_krajina:op:bihac:racic',
+              },
+              intel_picture: {
+                zone_confidence: { 'zone:vrs_2nd_krajina:op:bihac:racic': 0.35 },
+              },
+              belief_state: { supply_continuity_confidence: 0.75 },
+              threat_assessment: { overall_pressure: 'low' },
+              last_plan_reason: 'concentration complete (100%), ready to launch',
+            },
+          },
+        },
+      },
+    };
+    const proposal = {
+      id: 'PROP_2_ops_0',
+      faction: 'RS',
+      domain: 'ops',
+      description: 'Generated operation approval.',
+      proposed_action: 'APPROVE_OP:vrs_2nd_krajina:plan_vrs_2nd_krajina_t1_opportunity',
+    };
+
+    const [card] = buildOpProposalCards(state, [], [proposal]);
+
+    expect(card).toMatchObject({
+      corps_name: '2nd Krajina Corps',
+      op_name: 'Advance from Racic (Bihac)',
+      objective: 'Advance from Racic (Bihac)',
+      objective_origin_osid: 'op:bihac:racic',
+      targets: ['Orasac (Bihac)'],
+      target_osids: ['op:bihac:orasac_2'],
+    });
+    expect([
+      card.op_name,
+      card.objective,
+      ...(card.targets ?? []),
+      card.summary,
+    ].join(' ')).not.toMatch(/zone:|op:|vrs_2nd_krajina|plan_vrs/);
+  });
+
   it('joins proposal → active op for officer, force ratio, donors, and assessment', () => {
     const state = proposalState({ force_ratio_estimate: 2.4, commander_assessment: 'launch' });
     const cards = buildOpProposalCards(state, ROSTER, [OP_PROPOSAL]);
@@ -232,25 +430,26 @@ describe('op-proposal decision cards (Phase 2 slice 1)', () => {
     expect(c.corps_id).toBe('1st_corps');
     expect(c.corps_name).toBe('1st Corps');
     expect(c.plan_id).toBe('plan_trnovo');
-    expect(c.op_id).toBe('op_trnovo');
+    expect(c.op_id).toBeNull();
     expect(c.op_name).toBe('Operation Trnovo');
     expect(c.commander?.name).toBe('Atif Dudaković');
     expect(c.commander?.rank).toBe('corps_commander');
-    expect(c.force_ratio_estimate).toBe(2.4);
-    expect(c.commander_assessment).toBe('launch');
-    expect(c.donors.map((d) => d.corps_id)).toEqual(['5th_corps', '7th_corps']);
-    expect(c.total_personnel_lent).toBe(1400);
+    expect(c.force_ratio_estimate).toBeNull();
+    expect(c.force_ratio).toBe('Unreported');
+    expect(c.commander_assessment).toBeNull();
+    expect(c.donors).toEqual([]);
+    expect(c.total_personnel_lent).toBe(0);
     // 'launch' → no override offered.
     expect(c.override_available).toBe(false);
     expect(c.override_ca_cost).toBe(FORCE_LAUNCH_COST);
     expect(c.framing).toContain('Atif Dudaković');
-    expect(c.framing).toContain('2.4:1');
+    expect(c.framing).not.toContain('2.4:1');
   });
 
   it('offers override only when the commander recommends postpone or abort', () => {
     for (const assessment of ['postpone', 'abort'] as const) {
       const cards = buildOpProposalCards(proposalState({ commander_assessment: assessment }), ROSTER, [OP_PROPOSAL]);
-      expect(cards[0].override_available).toBe(true);
+      expect(cards[0].override_available).toBe(false);
       expect(cards[0].override_ca_cost).toBe(FORCE_LAUNCH_COST);
     }
     const launch = buildOpProposalCards(proposalState({ commander_assessment: 'launch' }), ROSTER, [OP_PROPOSAL]);

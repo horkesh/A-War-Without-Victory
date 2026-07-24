@@ -63,7 +63,7 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
 
             <div className="flex-1 p-2 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                    <span className={`font-mono text-[10px] font-bold shrink-0 ${isAssigned ? 'text-white' : 'text-accent-gold'}`}>{natoSymbolText}</span>
+                    <span className={`font-mono text-xs font-bold shrink-0 ${isAssigned ? 'text-white' : 'text-accent-gold'}`}>{natoSymbolText}</span>
                     <span className={`font-semibold text-xs truncate ${isAssigned ? 'text-white' : 'text-text-primary'}`}>
                         {name}
                     </span>
@@ -71,7 +71,7 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
 
                 <div className="flex justify-between items-end mt-1.5">
                     {/* Stats */}
-                    <div className="flex gap-2 text-[10px] text-text-secondary font-mono">
+                    <div className="flex gap-2 text-xs text-text-secondary font-mono">
                         <span title={t('formationDetail.personnel')} className="flex items-center gap-0.5">
                             <span className="opacity-50">#</span>{pers == null ? t('corpsFront.unreported') : pers.toLocaleString()}
                         </span>
@@ -103,7 +103,7 @@ export function TacticalCard({ formation, isAssigned, onClick, axisColor, axisLa
             </div>
 
             {/* Right quick-assign icon (hover) */}
-            <div className={`w-6 shrink-0 flex items-center justify-center bg-black/20 text-[10px] ${isAssigned ? 'text-interactive/80 hover:bg-red-500/20 hover:text-red-400' : 'text-transparent group-hover:text-interactive/80 group-hover:bg-interactive/10'} transition-all border-l border-panel-border/30`}>
+            <div className={`w-6 shrink-0 flex items-center justify-center bg-black/20 text-xs ${isAssigned ? 'text-interactive/80 hover:bg-red-500/20 hover:text-red-400' : 'text-transparent group-hover:text-interactive/80 group-hover:bg-interactive/10'} transition-all border-l border-panel-border/30`}>
                 {isAssigned ? '&#10005;' : '&#65291;'}
             </div>
         </button>

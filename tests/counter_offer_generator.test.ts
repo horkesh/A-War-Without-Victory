@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateCounterOffer } from '../src/sim/negotiation/counter_offer_generator.js';
+import {
+    generateCounterOffer,
+    submitPlayerCounterOffer,
+} from '../src/sim/negotiation/counter_offer_generator.js';
 import { getCounterOfferEnvelopeForPlan } from '../src/sim/negotiation/historical_envelopes.js';
 import { getPeacePlanById } from '../src/sim/negotiation/peace_plan_data.js';
 import type { GameState } from '../src/state/game_state.js';
@@ -94,5 +97,69 @@ describe('generateCounterOffer', () => {
         const second = generateCounterOffer(makeState(), 'HRHB', plan, envelope);
 
         expect(JSON.stringify(second)).toBe(JSON.stringify(first));
+    });
+
+    it('consumes only the exact source when the player submits a counter-offer', () => {
+        const state = makeState();
+        state.military.negotiation!.pending_counter_offers = [
+            {
+                id: 'RS_002',
+                author: 'RS',
+                parent_offer_id: 'owen_stoltenberg',
+                delta: {
+                    plan_id: 'owen_stoltenberg',
+                    response: 'counter',
+                    proposed_split: { RBiH: 30, RS: 55, HRHB: 15 },
+                    source_citation: 'BB1 p.49',
+                },
+                chain_depth: 1,
+                created_turn: 70,
+            },
+            {
+                id: 'HRHB_001',
+                author: 'HRHB',
+                parent_offer_id: 'owen_stoltenberg',
+                delta: {
+                    plan_id: 'owen_stoltenberg',
+                    response: 'conditional_accept',
+                    proposed_split: { RBiH: 33, RS: 52, HRHB: 15 },
+                    source_citation: 'BB1 p.49',
+                },
+                chain_depth: 1,
+                created_turn: 70,
+            },
+            {
+                id: 'RBiH_001',
+                author: 'RBiH',
+                parent_offer_id: 'owen_stoltenberg',
+                delta: {
+                    plan_id: 'owen_stoltenberg',
+                    response: 'conditional_accept',
+                    proposed_split: { RBiH: 33, RS: 52, HRHB: 15 },
+                    source_citation: 'BB1 p.49',
+                },
+                chain_depth: 1,
+                created_turn: 70,
+            },
+        ];
+
+        const submitted = submitPlayerCounterOffer(state, {
+            parentOfferId: 'HRHB_001',
+            planId: 'owen_stoltenberg',
+            response: 'conditional_accept',
+            proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },
+        });
+
+        expect(submitted).toMatchObject({
+            id: 'PLAYER_001',
+            author: 'PLAYER',
+            parent_offer_id: 'HRHB_001',
+            chain_depth: 2,
+        });
+        expect(state.military.negotiation!.pending_counter_offers).toEqual([
+            submitted,
+            expect.objectContaining({ id: 'RBiH_001' }),
+            expect.objectContaining({ id: 'RS_002' }),
+        ]);
     });
 });

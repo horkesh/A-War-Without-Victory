@@ -421,7 +421,7 @@ export function applyPhase3CExhaustionCollapseGating(
         };
     }
 
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
     if (factions.length === 0) {
         return {
             applied: false,
@@ -655,7 +655,7 @@ export function applyPhase3CExhaustionCollapseGating(
     }
 
     // Evaluate Tier-1 eligibility per entity
-    const entityIds = [...exposureByEntity.keys()].sort((a, b) => a.localeCompare(b));
+    const entityIds = [...exposureByEntity.keys()].sort(strictCompare);
     for (const entityId of entityIds) {
         const exposure = exposureByEntity.get(entityId) ?? 0;
         if (exposure > maxExposure) maxExposure = exposure;
@@ -802,7 +802,7 @@ export function applyPhase3CExhaustionCollapseGating(
     // Sort exposure entities by exposure desc, then entity_id asc (deterministic)
     exposureEntities.sort((a, b) => {
         if (b.exposure !== a.exposure) return b.exposure - a.exposure;
-        return a.entity_id.localeCompare(b.entity_id);
+        return strictCompare(a.entity_id, b.entity_id);
     });
     const top10Exposure = exposureEntities.slice(0, 10);
 

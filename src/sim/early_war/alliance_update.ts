@@ -61,6 +61,7 @@ export const FULL_WAR_THRESHOLD = -0.50;
 
 /** Alliance floor before war: prevents premature collapse. Alliance cannot drop below this until war_earliest_turn. */
 export const ALLIANCE_FLOOR_BEFORE_WAR = 0.40;
+export const DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN = 40;
 
 /** Number of turns between mobilization start (alliance ≤ ALLIED_THRESHOLD) and combat enablement. */
 export const MOBILIZATION_DURATION_TURNS = 4;
@@ -151,7 +152,7 @@ export function isRbihHrhbCombatEnabled(state: GameState): boolean {
 /**
  * Returns true if a combat order between attacker and defender must be blocked because
  * the pair is RBiH↔HRHB and one of:
- *   - turn < rbih_hrhb_war_earliest_turn (default 26)
+ *   - turn < rbih_hrhb_war_earliest_turn (default 40)
  *   - !isRbihHrhbCombatEnabled (still allied or in mobilization)
  *   - bilateral ceasefire active
  *   - Washington Agreement signed
@@ -174,7 +175,8 @@ export function isRbihHrhbCombatBlocked(
         (attackerFaction === 'HRHB' && defenderFaction === 'RBiH');
     if (!isRbihVsHrhb) return false;
     const turn = state.meta?.turn ?? 0;
-    const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+    const earliestTurn = state.meta?.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     if (turn < earliestTurn) return true;
     if (!isRbihHrhbCombatEnabled(state)) return true;
     const rhs = state.political.rbih_hrhb_state;
@@ -295,7 +297,8 @@ export function updateAllianceValue(state: GameState): AllianceUpdateReport {
     // Apply delta, clamp to [-1, 1]
     let newValue = Math.max(-1, Math.min(1, previousValue + delta));
     // Peace-phase §4.8 (historical fidelity): no open war before rbih_hrhb_war_earliest_turn (e.g. Oct 1992 for Apr 1992 start).
-    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn ?? 40;
+    const earliestTurn = state.meta.rbih_hrhb_war_earliest_turn
+        ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
     if (state.meta.turn < earliestTurn) {
         newValue = Math.max(newValue, ALLIANCE_FLOOR_BEFORE_WAR);
     }

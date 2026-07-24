@@ -14,6 +14,7 @@
  */
 
 import type { FactionId, FormationState, GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { deductCombatExpenditure } from '../../state/supply_reserves.js';
 import { FACILITY_COMBAT_DAMAGE_RATE } from '../../state/supply_reserve_constants.js';
 import { FATIGUE_MAX } from '../../state/formation_constants.js';
@@ -69,7 +70,7 @@ export function applyFacilityCombatDamage(params: {
         const osidParts = targetOsid.split(':');
         if (osidParts.length >= 2) {
             const munId = osidParts[1];
-            const facilityIds = Object.keys(state.military.production_facilities).sort((a, b) => a.localeCompare(b));
+            const facilityIds = Object.keys(state.military.production_facilities).sort(strictCompare);
             for (const fId of facilityIds) {
                 const facility = state.military.production_facilities[fId];
                 if (facility && facility.municipality_id === munId) {

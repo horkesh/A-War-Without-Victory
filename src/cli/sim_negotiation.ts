@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import type { NegotiationPressureStepReport } from '../state/negotiation_pressure.js';
 import { deserializeState } from '../state/serialize.js';
 
@@ -49,7 +49,9 @@ async function main(): Promise<void> {
     const graph = await loadSettlementGraph();
 
     // Run one turn to compute negotiation pressure report
-    const { report } = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+    const result = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+    assertTurnSuccess(result);
+    const { report } = result;
 
     const negotiationReport: NegotiationPressureStepReport | undefined = report.negotiation_pressure;
 

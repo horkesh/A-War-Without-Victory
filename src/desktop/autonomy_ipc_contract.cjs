@@ -4,13 +4,20 @@ const OPPORTUNITY_PREFIX = 'OPPORTUNITY:';
 const OPPORTUNITY_DECISIONS = new Set(['approve', 'delay', 'redirect', 'under_resource', 'decline']);
 const COMMITMENT_PROFILES = new Set(['minimum', 'standard', 'reinforced']);
 
+function isResolvedProposalReviewRecord(proposal) {
+  return proposal?.accepted != null
+    || proposal?.resolved_turn != null
+    || proposal?.opportunity_decision != null;
+}
+
 function getPendingProposalReviewsForPlayer(state) {
   const proposals = Array.isArray(state?.meta?.pending_proposal_reviews)
     ? state.meta.pending_proposal_reviews
     : [];
   const playerFaction = state?.meta?.player_faction ?? null;
-  if (!playerFaction) return proposals;
-  return proposals.filter((proposal) => proposal?.faction === playerFaction);
+  const unresolved = proposals.filter((proposal) => !isResolvedProposalReviewRecord(proposal));
+  if (!playerFaction) return unresolved;
+  return unresolved.filter((proposal) => proposal?.faction === playerFaction);
 }
 
 function resolvePendingProposalAccess(proposals, proposalId, playerFaction) {
@@ -26,6 +33,9 @@ function resolvePendingProposalAccess(proposals, proposalId, playerFaction) {
   const proposal = proposals[proposalIndex];
   if (playerFaction && proposal?.faction !== playerFaction) {
     return { index: -1, error: 'proposal_not_owned_by_player' };
+  }
+  if (isResolvedProposalReviewRecord(proposal)) {
+    return { index: -1, error: 'already_resolved' };
   }
 
   return { index: proposalIndex, error: null };
@@ -83,7 +93,7 @@ function resolveOpportunityDecisionPayload(proposals, payload, playerFaction) {
   if (action.slice(OPPORTUNITY_PREFIX.length) !== proposalId) {
     return { index: -1, error: 'proposal_id_mismatch' };
   }
-  if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) {
+  if (isResolvedProposalReviewRecord(proposal)) {
     return { index: -1, error: 'already_resolved' };
   }
 
@@ -170,14 +180,14 @@ function parseApproveOpAction(action) {
   return { corpsId: parts[1], planId: parts.slice(2).join(':') };
 }
 
-function findActiveOpForPlan(cc, planId) {
+function findReadyPlan(cc, planId) {
   if (!cc || typeof cc !== 'object') return null;
-  const ops = Array.isArray(cc.active_operations)
-    ? cc.active_operations
-    : (cc.active_operation && typeof cc.active_operation === 'object' ? [cc.active_operation] : []);
-  if (ops.length === 0) return null;
-  const byPlan = ops.find((o) => o && (o.plan_id === planId || o.id === planId));
-  return byPlan || null;
+  const commanderState = cc.commander_state && typeof cc.commander_state === 'object' ? cc.commander_state : null;
+  const plan = commanderState && commanderState.current_plan && typeof commanderState.current_plan === 'object'
+    ? commanderState.current_plan
+    : null;
+  if (!plan || plan.plan_id !== planId || plan.status !== 'ready') return null;
+  return { commanderState, plan };
 }
 
 function safeStr(v) {
@@ -192,9 +202,104 @@ function humanizeRank(rank) {
     .join(' ');
 }
 
+function humanizeIdentifier(value) {
+  return String(value)
+    .replace(/[:_-]+/g, ' ')
+    .replace(/\b[a-z]/g, (char) => char.toUpperCase());
+}
+
+function looksLikeRawToken(value) {
+  const raw = safeStr(value);
+  return Boolean(raw && (
+    /\b(?:op|evt|event|csq|sector|formation|corps|cmd):[a-z0-9_:-]+\b/i.test(raw)
+    || /\b[a-z]{2,}_[a-z0-9_]{2,}\b/i.test(raw)
+    || /\b[A-Z]{2,}_[A-Z0-9_]{2,}\b/.test(raw)
+  ));
+}
+
+function playerSafeCorpsName(name, id) {
+  const rawName = safeStr(name);
+  if (rawName && !looksLikeRawToken(rawName)) return rawName;
+  const rawId = safeStr(id);
+  if (!rawId) return 'Unreported command';
+  const withoutFaction = rawId.replace(/^(?:arbih|rbih|vrs|rs|hrhb|hvo)_/i, '');
+  return humanizeIdentifier(withoutFaction.replace(/_corps$/i, ' Corps')) || 'Unreported command';
+}
+
+function playerSafeFormationName(name) {
+  const raw = safeStr(name);
+  if (!raw) return 'Unreported formation';
+  return looksLikeRawToken(raw) ? humanizeIdentifier(raw) : raw;
+}
+
+function humanizeOsid(value) {
+  const parts = String(value || '').split(':').filter(Boolean);
+  const slug = parts.length >= 3 ? parts[parts.length - 1] : parts[parts.length - 1] || '';
+  const municipality = parts.length >= 3 ? parts[parts.length - 2] : '';
+  const humanize = (token) => String(token || '')
+    .replace(/_\d+$/, '')
+    .split(/[_-]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+  const label = humanize(slug) || 'Unreported';
+  const municipalityLabel = humanize(municipality);
+  return municipalityLabel && municipalityLabel.toLowerCase() !== label.toLowerCase()
+    ? `${label} (${municipalityLabel})`
+    : label;
+}
+
+function zoneAnchorOsid(value) {
+  const parts = String(value || '').split(':').filter(Boolean);
+  if (parts[0] === 'zone' && parts.length >= 4) {
+    const anchor = parts.slice(2).join(':');
+    return anchor.startsWith('op:') ? anchor : null;
+  }
+  return parts[0] === 'op' && parts.length >= 3 ? parts.join(':') : null;
+}
+
+function playerSafePlanName(value, fallbackAnchor) {
+  const candidates = [
+    { raw: safeStr(value), fallback: false },
+    { raw: safeStr(fallbackAnchor), fallback: true },
+  ];
+  for (const candidate of candidates) {
+    const raw = candidate.raw;
+    if (!raw) continue;
+    const opportunityMatch = raw.match(/\boffensive opportunity from\s+((?:zone|op):[a-z0-9_:-]+)/i);
+    if (opportunityMatch && opportunityMatch[1]) {
+      const originOsid = zoneAnchorOsid(opportunityMatch[1]);
+      if (originOsid) return { label: `Advance from ${humanizeOsid(originOsid)}`, originOsid };
+    }
+    const osid = zoneAnchorOsid(raw);
+    if (osid) {
+      return {
+        label: `${candidate.fallback ? 'Advance from ' : ''}${humanizeOsid(osid)}`,
+        originOsid: candidate.fallback ? osid : null,
+      };
+    }
+    if (/^plan[_:-]|^op[_:-]|^[a-z0-9]+(?:[_:][a-z0-9]+)+$/i.test(raw)) continue;
+    return { label: raw, originOsid: null };
+  }
+  return { label: 'Unspecified operation', originOsid: null };
+}
+
+function playerSafeTarget(value) {
+  const raw = safeStr(value);
+  if (!raw) return 'Unreported';
+  const osid = zoneAnchorOsid(raw);
+  return osid ? humanizeOsid(osid) : humanizeIdentifier(raw);
+}
+
+function percentage(value, suffix) {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${Math.round(Math.max(0, Math.min(1, value)) * 100)}% ${suffix}`
+    : 'Unreported';
+}
+
 /**
- * Build the named-officer decision cards for pending 'ops' proposals, joining
- * each APPROVE_OP:<corps>:<plan> proposal to the matching active operation.
+ * Build the named-officer decision cards for pending 'ops' proposals from the
+ * exact ready current_plan referenced by APPROVE_OP:<corps>:<plan>.
  *
  * Pure / defensive: every join is best-effort; officer / op fields are null
  * when unresolved. Mirrors src/ui/map/data/backTheOfficer.ts buildOpProposalCards
@@ -221,6 +326,13 @@ function buildOpProposalCardData(state, proposals) {
       status: os && typeof os.status === 'string' ? os.status : 'active',
     });
   }
+  const commanderIdByCorps = new Map();
+  for (const officerId of Object.keys(officerState).sort()) {
+    const officer = officerState[officerId];
+    if (!officer || typeof officer !== 'object' || officer.status !== 'active') continue;
+    const corpsId = safeStr(officer.assigned_corps_id);
+    if (corpsId && !commanderIdByCorps.has(corpsId)) commanderIdByCorps.set(corpsId, officerId);
+  }
 
   const cards = [];
   for (const proposal of proposals) {
@@ -229,9 +341,11 @@ function buildOpProposalCardData(state, proposals) {
     if (!parsed) continue;
     const { corpsId, planId } = parsed;
     const cc = corpsCommand[corpsId] || null;
-    const op = findActiveOpForPlan(cc, planId);
+    const ready = findReadyPlan(cc, planId);
+    const plan = ready ? ready.plan : null;
+    const commanderState = ready ? ready.commanderState : null;
 
-    const commanderId = op && (safeStr(op.tg_commander_officer_id) || safeStr(op.commander_officer_id));
+    const commanderId = ready ? commanderIdByCorps.get(corpsId) : undefined;
     const rosterRow = commanderId ? rosterById.get(commanderId) : undefined;
     const commander = commanderId
       ? {
@@ -241,33 +355,70 @@ function buildOpProposalCardData(state, proposals) {
         }
       : null;
 
-    const forceRatio = op && typeof op.force_ratio_estimate === 'number' && Number.isFinite(op.force_ratio_estimate)
-      ? op.force_ratio_estimate
-      : null;
-    const assessment = op && (op.commander_assessment === 'launch' || op.commander_assessment === 'postpone' || op.commander_assessment === 'abort')
-      ? op.commander_assessment
-      : null;
-    const overrideAvailable = assessment === 'postpone' || assessment === 'abort';
-
-    const corpsName = (formations[corpsId] && typeof formations[corpsId].name === 'string')
-      ? formations[corpsId].name
-      : corpsId;
-    const opName = op ? (safeStr(op.name) || safeStr(op.objective_description) || null) : null;
+    const corpsName = playerSafeCorpsName(formations[corpsId] && formations[corpsId].name, corpsId);
+    const objective = playerSafePlanName(plan && plan.objective_description, plan && plan.staging_zone);
+    const opName = objective.label;
+    const targetIds = plan && Array.isArray(plan.target_osids) ? plan.target_osids : [];
+    const targets = targetIds.length > 0 ? targetIds.map(playerSafeTarget) : ['Unreported'];
+    const brigadeIds = plan && Array.isArray(plan.assigned_brigades) ? plan.assigned_brigades : [];
+    const forces = brigadeIds.length > 0
+      ? brigadeIds.map((id) => playerSafeFormationName(formations[id] && formations[id].name))
+      : ['Unreported'];
+    const concentration = percentage(plan && plan.concentration_progress, 'concentrated');
+    const concentrationReadiness = concentration === 'Unreported' ? concentration : `${concentration}; ready`;
+    const stagingZone = plan && safeStr(plan.staging_zone);
+    const zoneConfidence = commanderState && commanderState.intel_picture && typeof commanderState.intel_picture.zone_confidence === 'object'
+      ? commanderState.intel_picture.zone_confidence
+      : {};
+    const intelAssessment = percentage(stagingZone ? zoneConfidence[stagingZone] : undefined, 'confidence');
+    const supplyAssessment = percentage(
+      commanderState && commanderState.belief_state && commanderState.belief_state.supply_continuity_confidence,
+      'continuity confidence',
+    );
+    const pressureMap = { low: 'Low', moderate: 'Moderate', heavy: 'High', critical: 'Critical' };
+    const pressure = commanderState && commanderState.threat_assessment
+      ? pressureMap[commanderState.threat_assessment.overall_pressure] || 'Unreported'
+      : 'Unreported';
+    const viability = percentage(plan && plan.viability_score, 'plan viability');
+    const riskAssessment = pressure === 'Unreported' && viability === 'Unreported' ? 'Unreported' : `${pressure} pressure; ${viability}`;
+    const rawRecommendation = safeStr(commanderState && commanderState.last_plan_reason);
+    const recommendation = rawRecommendation && !looksLikeRawToken(rawRecommendation)
+      ? rawRecommendation
+      : ready ? 'Authorize launch' : 'Unreported';
+    const forceSummary = forces.length > 0 ? forces.join(' and ') : 'forces unreported';
+    const commanderSummary = commander && commander.name ? ` commander ${commander.name}` : '';
+    const summary = ready
+      ? `${corpsName}${commanderSummary} requests authorization to ${opName.charAt(0).toLowerCase()}${opName.slice(1)} with ${forceSummary}; decision due before the next turn advances.`
+      : `${corpsName} has an operation approval record, but the ready plan is unreported.`;
 
     cards.push({
       proposal_id: proposal.id,
       corps_id: corpsId,
       corps_name: corpsName,
       plan_id: planId,
-      op_id: op && safeStr(op.id) ? op.id : null,
+      op_id: null,
       op_name: opName,
       commander: commander
         ? { officer_id: commander.officer_id, name: commander.name, rank: commander.rank, display: commander.rank ? `${humanizeRank(commander.rank)} ${commander.name}` : commander.name }
         : null,
-      force_ratio_estimate: forceRatio,
-      commander_assessment: assessment,
-      override_available: overrideAvailable,
+      force_ratio_estimate: null,
+      commander_assessment: null,
+      override_available: false,
       override_ca_cost: FORCE_LAUNCH_COST,
+      objective: opName,
+      ...(objective.originOsid ? { objective_origin_osid: objective.originOsid } : {}),
+      targets,
+      target_osids: targetIds.filter((value) => typeof value === 'string' && value.length > 0),
+      forces,
+      concentration_readiness: concentrationReadiness,
+      intel_assessment: intelAssessment,
+      supply_assessment: supplyAssessment,
+      risk_assessment: riskAssessment,
+      recommendation,
+      decision_deadline: 'Before the next turn advances',
+      force_ratio: 'Unreported',
+      opportunity_cost: 'Unreported',
+      summary,
     });
   }
 
@@ -358,7 +509,7 @@ function buildForceableReadyPlanData(state, proposals) {
       corps_id: corpsId,
       corps_name: corpsName,
       plan_id: planId,
-      op_name: safeStr(plan.objective_description) || planId,
+      op_name: playerSafePlanName(plan.objective_description, plan.staging_zone).label,
       commander: commanderId
         ? {
             officer_id: commanderId,
@@ -382,6 +533,7 @@ module.exports = {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
+  isResolvedProposalReviewRecord,
   buildOpProposalCardData,
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,

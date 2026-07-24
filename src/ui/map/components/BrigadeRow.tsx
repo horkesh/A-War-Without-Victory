@@ -93,7 +93,8 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
 
   // Status determination — disrupted overrides normal status
   const isDisrupted = (formation.disrupted_turns ?? 0) > 0;
-  const displayStatus = isDisrupted ? 'disrupted' : formation.status.toLowerCase();
+  const isForming = String(formation.readiness).toLowerCase() === 'forming';
+  const displayStatus = isDisrupted ? 'disrupted' : isForming ? 'forming' : formation.status.toLowerCase();
   const badge = STATUS_BADGE[displayStatus] ?? STATUS_BADGE.recorded;
   const statusLabel = t(badge.labelKey);
   const personnelLabel = formation.personnel != null
@@ -139,7 +140,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
         const ht = getHighestTier(decorations);
         const dn = ht ? getDecorationName(formation.faction ?? '', ht) : '';
         return (
-          <span className={`shrink-0 text-[9px] leading-none ${prestigePipColor}`} title={dn}>
+          <span className={`shrink-0 text-xs leading-none ${prestigePipColor}`} title={dn}>
             <Icon name="star" size={9} />
           </span>
         );
@@ -147,7 +148,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
 
       {/* Personnel count */}
       {formation.personnel != null && (
-        <span className="shrink-0 text-[10px] tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
+        <span className="shrink-0 text-xs tabular-nums text-text-secondary flex items-center gap-0.5" title={t('brigadeRow.personnelTitle', { personnel: formation.personnel.toLocaleString() })}>
           <Icon name="personnel" size={9} />
           {formation.personnel >= 1000 ? `${(formation.personnel / 1000).toFixed(1)}k` : formation.personnel}
         </span>
@@ -156,7 +157,7 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       {/* Cohesion bar */}
       <div className="flex items-center gap-0.5 shrink-0" aria-label={t('brigadeRow.cohesionAria', { cohesion: cohesionLabel })}>
         {cohesion == null ? (
-          <span className="text-[9px] italic text-text-secondary">{t('corpsFront.unreported')}</span>
+          <span className="text-xs italic text-text-secondary">{t('corpsFront.unreported')}</span>
         ) : (
           Array.from({ length: 5 }, (_, idx) => (
             <span
@@ -168,14 +169,14 @@ export const BrigadeRow = memo(function BrigadeRow({ formation, compact, highlig
       </div>
 
       {/* Fatigue */}
-      <div className={`w-5 text-right shrink-0 tabular-nums text-[10px] ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
+      <div className={`w-5 text-right shrink-0 tabular-nums text-xs ${fatClass} flex items-center justify-end gap-0.5`} aria-label={t('brigadeRow.fatigueAria', { fatigue: fatigueLabel })}>
         <Icon name="fatigue" size={8} />
         {fatigueLabel}
       </div>
 
       {/* Status badge — rubber stamp style */}
       <span
-        className={`shrink-0 text-[8px] uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
+        className={`shrink-0 text-xs uppercase px-1 py-px rounded border font-bold tracking-wider ${badge.class}`}
         style={{ transform: 'rotate(-1.5deg)' }}
       >
         {statusLabel}

@@ -720,4 +720,46 @@ describe('DirectiveCard stop-op action host', () => {
     fireEvent.click(issue);
     expect(initiateFrontVisit).not.toHaveBeenCalled();
   });
+
+  it('shows the full reserve commitment packet before issuing the existing elite-deploy action', () => {
+    installIpc();
+    const state = {
+      ...baseGameState,
+      formations: [
+        ...baseGameState.formations,
+        {
+          id: 'elite_brigade_alpha', faction: 'RBiH', name: 'Guards Brigade', kind: 'brigade',
+          readiness: 'ready', location_osid: 'op:visoko:visoko_2',
+          eliteLoanState: {
+            on_loan: false, loaned_to_corps: null, loan_start_turn: null,
+            turns_deployed: 0, in_cooldown: false, permanently_degraded: false,
+            current_episode_id: null,
+          },
+        },
+      ],
+      pendingReserveRequests: [{
+        request_id: 'reserve_request_alpha', corps_id: 'arbih_3rd_corps', faction: 'RBiH',
+        reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
+        description: 'Thin line', suggested_brigade_id: 'elite_brigade_alpha', turn_requested: 12,
+      }],
+      corpsFrontSectors: [{
+        sector_id: 'sector:central:west', corps_id: 'arbih_3rd_corps',
+        corps_name: '3rd Corps', display_name: 'Central Bosnia West', faction: 'RBiH',
+      }],
+    } as unknown as LoadedGameState;
+    useGameStore.setState({ osidDisplayNames: { 'op:visoko:visoko_2': 'Visoko' } });
+
+    render(React.createElement(DirectiveCard, { directive: eliteDeployDirective, gameState: state }));
+
+    const detail = screen.getByRole('group', { name: 'Reserve commitment detail' });
+    expect(detail.className).toContain('text-[12px]');
+    expect(detail.textContent).toContain('Requesting command3rd Corps');
+    expect(detail.textContent).toContain('Recipient sectorCentral Bosnia West');
+    expect(detail.textContent).toContain('Candidate forceGuards Brigade');
+    expect(detail.textContent).toContain('ReadinessReady');
+    expect(detail.textContent).toContain('Travel timeabout 1 week travel');
+    expect(detail.textContent).toContain('Expected effectAnchor the thinnest sector-front line and stabilize local defensive depth.');
+    expect(detail.textContent).toContain('Opportunity cost0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.');
+    expect(screen.getByRole('button', { name: 'Issue (25)' })).toBeTruthy();
+  });
 });

@@ -234,7 +234,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                     <button
                         type="button"
                         onClick={() => setTransmitted(true)}
-                        className="text-[9px] text-text-secondary/50 hover:text-text-secondary transition-colors"
+                        className="text-xs text-text-secondary/50 hover:text-text-secondary transition-colors"
                     >
                         {t('opsPlanning.authorize.skipAnimation')}
                     </button>
@@ -247,7 +247,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                     <div className="text-accent-gold font-bold text-sm uppercase tracking-[0.3em]">
                         {t('opsPlanning.authorize.transmittedStamp')}
                     </div>
-                    <div className="text-text-secondary text-[10px] mt-1">{t('opsPlanning.authorize.directiveTransmitted')}</div>
+                    <div className="text-text-secondary text-xs mt-1">{t('opsPlanning.authorize.directiveTransmitted')}</div>
                 </div>
             )}
 
@@ -257,11 +257,11 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                 <div className="relative z-10 mt-5 w-[min(90vw,42rem)] rounded-lg border border-[rgba(180,160,130,0.15)]
                                 bg-[rgba(20,18,15,0.6)] px-4 py-3 text-left">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-text-secondary/80">
+                        <span className="text-xs uppercase tracking-[0.2em] text-text-secondary/80">
                             {t('opsPlanning.authorize.eligibility.title')}
                         </span>
                         <span
-                            className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded
+                            className={`text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded
                                 ${eligibility.affordable
                                     ? 'bg-[#2d6a4f]/20 text-[#4a9a55] border border-[#2d6a4f]/30'
                                     : 'bg-red-500/15 text-red-400 border border-red-500/30'}`}
@@ -273,7 +273,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         </span>
                     </div>
                     {/* Operation-slot accounting — slot exhaustion is silent in-engine. */}
-                    <div className="flex items-center justify-between mb-2 text-[10px]">
+                    <div className="flex items-center justify-between mb-2 text-xs">
                         <span className="text-text-secondary/70">
                             {t('opsPlanning.authorize.eligibility.slots')}: {eligibility.slots_used}/{eligibility.slots_max}
                         </span>
@@ -284,30 +284,30 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                         )}
                     </div>
                     {eligibility.has_available_slot && eligibilityErrors.length === 0 && eligibilityWarnings.length === 0 ? (
-                        <div className="text-[11px] text-[#4a9a55]">
+                        <div className="text-xs text-[#4a9a55]">
                             {t('opsPlanning.authorize.eligibility.clean')}
                         </div>
                     ) : (
                         <ul className="space-y-1">
                             {!eligibility.has_available_slot && (
-                                <li className="flex items-start gap-2 text-[11px] text-red-400">
-                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                <li className="flex items-start gap-2 text-xs text-red-400">
+                                    <span className="font-bold uppercase text-xs mt-[1px]">
                                         {t('opsPlanning.authorize.eligibility.block')}
                                     </span>
                                     <span>{t('opsPlanning.authorize.eligibility.slotExhaustedDetail')}</span>
                                 </li>
                             )}
                             {eligibilityErrors.map((w, i) => (
-                                <li key={`e${i}`} className="flex items-start gap-2 text-[11px] text-red-400">
-                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                <li key={`e${i}`} className="flex items-start gap-2 text-xs text-red-400">
+                                    <span className="font-bold uppercase text-xs mt-[1px]">
                                         {t('opsPlanning.authorize.eligibility.block')}
                                     </span>
                                     <span>{playerSafeEligibilityMessage(w)}</span>
                                 </li>
                             ))}
                             {eligibilityWarnings.map((w, i) => (
-                                <li key={`w${i}`} className="flex items-start gap-2 text-[11px] text-amber-400/90">
-                                    <span className="font-bold uppercase text-[9px] mt-[1px]">
+                                <li key={`w${i}`} className="flex items-start gap-2 text-xs text-amber-400/90">
+                                    <span className="font-bold uppercase text-xs mt-[1px]">
                                         {t('opsPlanning.authorize.eligibility.warn')}
                                     </span>
                                     <span>{playerSafeEligibilityMessage(w)}</span>
@@ -332,7 +332,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                            border border-amber-500/30 disabled:opacity-50"
                             >
                                 {t('opsPlanning.authorize.orderProbePrimary')}
-                                <div className="text-[8px] font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.orderProbeSub')}</div>
+                                <div className="text-xs font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.orderProbeSub')}</div>
                             </button>
                             <button
                                 type="button"
@@ -356,7 +356,7 @@ export function AuthorizePhase({ plan, prediction, corpsId, officerId, originSec
                                        border border-[#2d6a4f]/30 disabled:opacity-50"
                         >
                             {t('opsPlanning.authorize.authorizePrimary')}
-                            <div className="text-[8px] font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.authorizeSub')}</div>
+                            <div className="text-xs font-normal mt-0.5 opacity-70">{t('opsPlanning.authorize.authorizeSub')}</div>
                         </button>
                     )}
                 </div>

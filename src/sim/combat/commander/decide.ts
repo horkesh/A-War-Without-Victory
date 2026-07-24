@@ -30,6 +30,10 @@
 
 import type { FormationId, SectorStance, SectorIntelRecord, CorpsFrontSector } from '../../../state/game_state.js';
 import { strictCompare } from '../../../state/validateGameState.js';
+import { spatialFriendlyDistance } from '../../spatial_context.js';
+import { isEnclaveMovementDestinationAllowed } from '../enclave_resilience.js';
+import { isSectorRosterEligibleFormation } from '../sector_roster_eligibility.js';
+import { TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS } from '../brigade_assignment.js';
 import type {
     CommanderBeliefState,
     CommanderBriefing,
@@ -94,6 +98,8 @@ export interface DecisionResult {
     stance_changes: Array<{ sector_id: string; new_stance: SectorStance; reason: string }>;
     /** Reserves to shift between zones. */
     reserve_shifts: Array<{ brigade_id: FormationId; from_zone: ZoneId; to_zone: ZoneId; reason: string }>;
+    /** Direct same-corps relief for an empty, legally reachable front sector. */
+    empty_sector_relief_reassignments?: EmptySectorReliefReassignment[];
     /** Updated intel picture. */
     intel_picture: IntelPicture;
     /** Sector activity log entries for this turn. */
@@ -103,6 +109,12 @@ export interface DecisionResult {
     suspend_reason?: string;
     /** Reinforcement requests to army HQ. */
     reinforcement_requests: Array<{ zone_id: ZoneId; brigades_needed: number; priority: 'critical' | 'high' | 'medium' | 'low' }>;
+}
+
+export interface EmptySectorReliefReassignment {
+    brigade_id: FormationId;
+    to_sector_id: string;
+    reason: 'empty front sector requires corps relief';
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -143,6 +155,10 @@ export function makeDecisions(
         beliefState ?? null,
     );
 
+    // 4b. Empty-sector relief is explicit T1 intent. T2/T3 perform the march;
+    // this decision phase never mutates formation location or sector buckets.
+    const emptySectorReliefReassignments = computeEmptySectorReliefReassignments(briefing);
+
     // 5. Plan suspension check
     const { suspend_plan, suspend_reason } = evaluatePlanSuspension(
         currentPlan, zones, threats, previousState, turn,
@@ -154,12 +170,173 @@ export function makeDecisions(
     return {
         stance_changes: stanceChanges,
         reserve_shifts: reserveShifts,
+        empty_sector_relief_reassignments: emptySectorReliefReassignments,
         intel_picture: intelPicture,
         activity_entries: activityEntries,
         suspend_plan,
         suspend_reason,
         reinforcement_requests: reinforcementRequests,
     };
+}
+
+function getSectorFrontOsids(sector: CorpsFrontSector): string[] {
+    const osids = new Set<string>();
+    for (const subSegment of sector.sub_segments) {
+        for (const osid of subSegment.friendly_osids) osids.add(osid);
+    }
+    return [...osids].sort(strictCompare);
+}
+
+function buildActiveOperationParticipantSet(briefing: CommanderBriefing): Set<FormationId> {
+    const participants = new Set<FormationId>();
+    const commands = briefing.state_ref?.military.corps_command ?? {};
+    for (const corpsId of Object.keys(commands).sort(strictCompare)) {
+        for (const operation of commands[corpsId]?.active_operations ?? []) {
+            for (const brigadeId of operation.participating_brigades ?? []) participants.add(brigadeId);
+        }
+    }
+    return participants;
+}
+
+function hasPendingReliefForTargets(
+    briefing: CommanderBriefing,
+    targetOsids: ReadonlySet<string>,
+): boolean {
+    const state = briefing.state_ref;
+    if (!state) return false;
+    for (const order of Object.values(state.military.brigade_movement_orders ?? {})) {
+        if (order.destination_sids.some((osid) => targetOsids.has(osid))) return true;
+    }
+    for (const movement of Object.values(state.military.brigade_movement_state ?? {})) {
+        if (movement.destination_sids?.some((osid) => targetOsids.has(osid))) return true;
+    }
+    return false;
+}
+
+type ReliefDonorPlacement = {
+    tier: 0 | 1 | 2;
+    sector: CorpsFrontSector;
+};
+
+function buildReliefDonorPlacements(
+    sectors: readonly CorpsFrontSector[],
+): Map<FormationId, ReliefDonorPlacement> {
+    const placements = new Map<FormationId, ReliefDonorPlacement>();
+    const consider = (brigadeId: FormationId, tier: 0 | 1 | 2, sector: CorpsFrontSector): void => {
+        const previous = placements.get(brigadeId);
+        if (!previous || tier < previous.tier) placements.set(brigadeId, { tier, sector });
+    };
+    for (const sector of [...sectors].sort((a, b) => strictCompare(a.sector_id, b.sector_id))) {
+        for (const brigadeId of [...(sector.rear_brigade_ids ?? [])].sort(strictCompare)) consider(brigadeId, 0, sector);
+        for (const brigadeId of [...sector.reserve_brigade_ids].sort(strictCompare)) consider(brigadeId, 1, sector);
+        for (const brigadeId of [...sector.assigned_brigade_ids].sort(strictCompare)) consider(brigadeId, 2, sector);
+    }
+    return placements;
+}
+
+function canReleaseReliefDonor(placement: ReliefDonorPlacement): boolean {
+    if (placement.tier < 2) return true;
+    const donor = placement.sector;
+    const minimumLine = Math.max(1, Math.ceil(donor.length_edges / 8));
+    return donor.assigned_brigade_ids.length > minimumLine
+        && donor.threat_ratio <= 250;
+}
+
+/**
+ * Select one legally march-capable same-corps donor for each truly empty sector.
+ * This emits intent only; normal sector-march and column-movement phases perform
+ * the physical move over subsequent turns.
+ */
+export function computeEmptySectorReliefReassignments(
+    briefing: CommanderBriefing,
+): EmptySectorReliefReassignment[] {
+    const state = briefing.state_ref;
+    if (!state) return [];
+
+    const corpsSectors = briefing.sectors
+        .filter((sector) => sector.corps_id === briefing.corps_id)
+        .sort((left, right) => {
+            const leftFront = getSectorFrontOsids(left);
+            const rightFront = getSectorFrontOsids(right);
+            const leftMustHold = left.must_hold === true || leftFront.some((osid) => briefing.must_hold_osids.includes(osid));
+            const rightMustHold = right.must_hold === true || rightFront.some((osid) => briefing.must_hold_osids.includes(osid));
+            if (leftMustHold !== rightMustHold) return leftMustHold ? -1 : 1;
+            if (left.threat_ratio !== right.threat_ratio) return right.threat_ratio - left.threat_ratio;
+            if (left.length_edges !== right.length_edges) return right.length_edges - left.length_edges;
+            return strictCompare(left.sector_id, right.sector_id);
+        });
+    const emptySectors = corpsSectors.filter((sector) =>
+        sector.edge_ids.length > 0
+        && sector.unstaffed_front !== true
+        && sector.assigned_brigade_ids.length === 0
+        && sector.reserve_brigade_ids.length === 0
+        && (sector.rear_brigade_ids?.length ?? 0) === 0
+        && getSectorFrontOsids(sector).length > 0,
+    );
+    if (emptySectors.length === 0) return [];
+
+    const operationParticipants = buildActiveOperationParticipantSet(briefing);
+    const pendingDigIn = new Set(
+        (state.military.brigade_posture_orders ?? [])
+            .filter((order) => order.posture === 'dig_in')
+            .map((order) => order.brigade_id),
+    );
+    const placements = buildReliefDonorPlacements(corpsSectors);
+    const reservedDonors = new Set<FormationId>();
+    const results: EmptySectorReliefReassignment[] = [];
+
+    for (const targetSector of emptySectors) {
+        const targetOsids = new Set(getSectorFrontOsids(targetSector));
+        if (hasPendingReliefForTargets(briefing, targetOsids)) continue;
+
+        const candidates = briefing.brigades
+            .filter((brigade) => {
+                if (brigade.faction !== briefing.faction || brigade.corps_id !== briefing.corps_id) return false;
+                if (!isSectorRosterEligibleFormation(brigade) || !brigade.location_osid) return false;
+                if (reservedDonors.has(brigade.id) || operationParticipants.has(brigade.id)) return false;
+                if ((brigade.disrupted_turns ?? 0) > 0 || brigade.disrupted === true) return false;
+                if (brigade.posture === 'dig_in' || pendingDigIn.has(brigade.id)) return false;
+                if (brigade.elite_loan_state?.on_loan) return false;
+                if (state.military.brigade_movement_orders?.[brigade.id]) return false;
+                const movementState = state.military.brigade_movement_state?.[brigade.id];
+                if (movementState && movementState.status !== 'deployed') return false;
+                const placement = placements.get(brigade.id);
+                return placement != null && canReleaseReliefDonor(placement);
+            })
+            .map((brigade) => {
+                const originOsid = brigade.location_osid!;
+                let distance = -1;
+                for (const targetOsid of targetOsids) {
+                    if (!isEnclaveMovementDestinationAllowed(brigade, originOsid, targetOsid)) continue;
+                    const candidateDistance = spatialFriendlyDistance(
+                        briefing.spatial,
+                        briefing.faction,
+                        originOsid,
+                        targetOsid,
+                        TRUTHFUL_SECTOR_REACHABILITY_MAX_HOPS,
+                    );
+                    if (candidateDistance >= 0 && (distance < 0 || candidateDistance < distance)) distance = candidateDistance;
+                }
+                return { brigade, placement: placements.get(brigade.id)!, distance };
+            })
+            .filter((candidate) => candidate.distance >= 0)
+            .sort((left, right) =>
+                left.placement.tier - right.placement.tier
+                || left.distance - right.distance
+                || strictCompare(left.brigade.id, right.brigade.id),
+            );
+
+        const selected = candidates[0];
+        if (!selected) continue;
+        reservedDonors.add(selected.brigade.id);
+        results.push({
+            brigade_id: selected.brigade.id,
+            to_sector_id: targetSector.sector_id,
+            reason: 'empty front sector requires corps relief',
+        });
+    }
+
+    return results;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════

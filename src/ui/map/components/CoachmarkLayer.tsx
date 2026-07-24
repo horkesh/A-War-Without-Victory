@@ -135,10 +135,10 @@ export function CoachmarkLayer(): JSX.Element | null {
       }}
       className="rounded border border-amber-400/35 bg-[#16140f]/95 px-3 py-2 text-[#f3ead0] shadow-2xl"
     >
-      <div className="text-[9px] font-bold uppercase tracking-[0.18em] text-amber-300">
+      <div className="text-xs font-bold uppercase tracking-[0.18em] text-amber-300">
         {t(active.coachmark.titleKey)}
       </div>
-      <div className="mt-1 text-[11px] leading-snug text-[#d7cab7]">
+      <div className="mt-1 text-xs leading-snug text-[#d7cab7]">
         {t(active.coachmark.bodyKey)}
       </div>
     </div>

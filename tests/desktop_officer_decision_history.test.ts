@@ -85,6 +85,70 @@ describe('desktop officer decision history', () => {
       current_commander_id: 'old_commander',
       new_officer_id: 'new_commander',
       outgoing_officer_id: 'old_commander',
+      matter_key: 'replacement:old_commander:vrs_drina_corps:new_commander',
+    });
+  });
+
+  it('dedupes turn-stamped replacement events by stable matter identity', () => {
+    const state: any = { military: {} };
+    const baseEvent = {
+      type: 'replacement_suggested',
+      faction: 'RS',
+      officer_id: 'new_commander',
+      current_commander_id: 'old_commander',
+      corps_id: 'vrs_drina_corps',
+    };
+
+    fileOfficerDecisionRecord(state, {
+      ...baseEvent,
+      event_id: 'replacement_old_commander_t18',
+      turn: 18,
+    }, 'acknowledged');
+    fileOfficerDecisionRecord(state, {
+      ...baseEvent,
+      event_id: 'replacement_old_commander_t19',
+      turn: 19,
+    }, 'acknowledged');
+
+    expect(state.military.officer_decision_history).toHaveLength(1);
+    expect(state.military.officer_decision_history[0]).toMatchObject({
+      turn: 19,
+      event_id: 'replacement_old_commander_t19',
+      matter_key: 'replacement:old_commander:vrs_drina_corps:new_commander',
+    });
+  });
+
+  it('replaces a legacy replacement row that predates persisted matter keys', () => {
+    const state: any = {
+      military: {
+        officer_decision_history: [{
+          id: 'officer:18:replacement_old_commander_t18:acknowledged',
+          turn: 18,
+          faction: 'RS',
+          event_id: 'replacement_old_commander_t18',
+          event_type: 'replacement_suggested',
+          officer_id: 'new_commander',
+          current_commander_id: 'old_commander',
+          corps_id: 'vrs_drina_corps',
+          decision: 'acknowledged',
+        }],
+      },
+    };
+
+    fileOfficerDecisionRecord(state, {
+      event_id: 'replacement:old_commander:vrs_drina_corps:new_commander',
+      type: 'replacement_suggested',
+      faction: 'RS',
+      turn: 19,
+      officer_id: 'new_commander',
+      current_commander_id: 'old_commander',
+      corps_id: 'vrs_drina_corps',
+    }, 'acknowledged');
+
+    expect(state.military.officer_decision_history).toHaveLength(1);
+    expect(state.military.officer_decision_history[0]).toMatchObject({
+      turn: 19,
+      matter_key: 'replacement:old_commander:vrs_drina_corps:new_commander',
     });
   });
 

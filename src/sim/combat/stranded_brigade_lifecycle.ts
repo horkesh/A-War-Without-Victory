@@ -8,9 +8,9 @@
  *   none/undefined -> holding:      first classified as stranded
  *   holding -> holding:             still stranded, degrade cohesion/morale
  *   holding -> reconnected:         friendly path restored to same-corps sector
- *   holding -> collapsed:           cohesion <= 10 OR held 12+ turns
  *   reconnected -> none:            next turn after reconnection (clear fields)
- *   collapsed -> destroyed:         brigade dissolved (existing dissolution machinery)
+ *
+ * Brigade removal remains owned by the canonical dissolution pass.
  *
  * Deterministic: sorted iteration by formation ID, BFS over sorted adjacency.
  * No Math.random(), no timestamps, no Date.now().
@@ -18,7 +18,6 @@
 
 import type { GameState, FormationId, FactionId } from '../../state/game_state.js';
 import { isEnclaveBrigade } from './enclave_resilience.js';
-import { removeFromActiveOperation } from './brigade_dissolution.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import type { Osid } from './osid_adjacency.js';
 
@@ -30,12 +29,6 @@ export const STRANDED_COHESION_DECAY = 3;
 /** Morale degradation per turn while holding (stranded). */
 export const STRANDED_MORALE_DECAY = 2;
 
-/** Cohesion floor: collapse when cohesion drops to this or below. */
-export const STRANDED_COLLAPSE_COHESION = 10;
-
-/** Maximum turns a brigade can hold while stranded before collapsing. */
-export const STRANDED_MAX_HOLD_TURNS = 12;
-
 // ── Report type ──────────────────────────────────────────────────────────────
 
 export interface StrandedBrigadeReport {
@@ -43,6 +36,7 @@ export interface StrandedBrigadeReport {
     newly_stranded: string[];
     still_holding: string[];
     reconnected: string[];
+    /** Retained for report compatibility; canonical dissolution owns removal. */
     collapsed: string[];
 }
 
@@ -169,10 +163,8 @@ export function updateStrandedBrigadeLifecycle(
             continue;
         }
 
-        // --- Phase 2: Handle collapsed brigades (dissolve) ---
+        // --- Phase 2: Preserve legacy collapsed records from older saves ---
         if (f.stranded_status === 'collapsed') {
-            // Already processed — dissolution happened on the turn it collapsed.
-            // Skip further processing.
             continue;
         }
 
@@ -222,44 +214,16 @@ export function updateStrandedBrigadeLifecycle(
                 report.updated++;
             } else if (currentStatus === 'holding') {
                 // Still holding — degrade
-                const heldTurns = turn - (f.stranded_since_turn ?? turn);
-
                 // Apply degradation
                 const cohesion = f.cohesion ?? 50;
                 const morale = f.morale ?? 50;
                 f.cohesion = Math.max(0, cohesion - STRANDED_COHESION_DECAY);
                 f.morale = Math.max(0, morale - STRANDED_MORALE_DECAY);
 
-                // Check collapse conditions
-                if (f.cohesion <= STRANDED_COLLAPSE_COHESION || heldTurns >= STRANDED_MAX_HOLD_TURNS) {
-                    // Collapse — dissolve the brigade
-                    f.stranded_status = 'collapsed';
-
-                    // Use existing dissolution pattern
-                    removeFromActiveOperation(state, fid, f.corps_id);
-
-                    // Transfer remaining personnel to strategic reserve
-                    const personnel = f.personnel ?? 0;
-                    const personnelToReserve = Math.floor(personnel * 0.3); // Lower salvage rate for stranded units
-                    if (state.military.strategic_reserves && f.faction) {
-                        const factionReserve = state.military.strategic_reserves[f.faction];
-                        if (typeof factionReserve === 'number') {
-                            (state.military.strategic_reserves as Record<string, number>)[f.faction] =
-                                factionReserve + personnelToReserve;
-                        }
-                    }
-
-                    f.status = 'inactive';
-                    f.lifecycle_status = 'destroyed';
-                    f.personnel = 0;
-                    f.destruction_turn = turn;
-
-                    report.collapsed.push(fid);
-                    report.updated++;
-                } else {
-                    report.still_holding.push(fid);
-                    report.updated++;
-                }
+                // The later canonical dissolution pass evaluates the resulting
+                // personnel/cohesion/morale state and owns any removal.
+                report.still_holding.push(fid);
+                report.updated++;
             }
         }
     }

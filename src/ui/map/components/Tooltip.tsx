@@ -74,7 +74,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
   if (!battle) {
     const location = getOsidDisplayName(osid, osidDisplayNames) || getPlayerSafeSettlementName(osid, t('tooltip.thisPosition'));
     return (
-      <div className="text-[11px] text-text-secondary">
+      <div className="text-xs text-text-secondary">
         {t('tooltip.battleAtPosition', { location })}
       </div>
     );
@@ -91,8 +91,8 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
       <div className="font-sans text-xs font-semibold uppercase tracking-wide border-b border-panel-border pb-1 mb-2" style={{ color: outcomeColor }}>
         {outcomeLabel}
       </div>
-      <div className="text-[11px] text-text-primary mb-1">{locationName}</div>
-      <div className="text-[10px] text-text-secondary mb-1.5">
+      <div className="text-xs text-text-primary mb-1">{locationName}</div>
+      <div className="text-xs text-text-secondary mb-1.5">
         <span style={{ color: FACTION_COLORS[attackerFaction ?? ''] ?? '#aaa' }}>
           {getPlayerSafeMilitaryFactionName(attackerFaction)}
         </span>
@@ -106,17 +106,17 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
           </span>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-x-3 text-[10px] tabular-nums">
+      <div className="grid grid-cols-2 gap-x-3 text-xs tabular-nums">
         <div className="text-text-secondary">{t('tooltip.attackerLosses')}</div>
         <div className="text-text-primary">{formatReportedLoss(battle.attacker_casualties)}</div>
         <div className="text-text-secondary">{t('tooltip.defenderLosses')}</div>
         <div className="text-text-primary">{formatReportedLoss(battle.defender_casualties)}</div>
       </div>
       {battle.territory_flipped && (
-        <div className="mt-1 text-[9px] text-amber-400">{t('tooltip.territoryCaptured')}</div>
+        <div className="mt-1 text-xs text-amber-400">{t('tooltip.territoryCaptured')}</div>
       )}
       {battle.execution_friction && (
-        <div className="mt-1 text-[9px] text-amber-300">
+        <div className="mt-1 text-xs text-amber-300">
           {battle.execution_friction.labels.map((label) => t(INTEL_FRICTION_LABEL_KEY[label] ?? 'aar.friction.commandFriction')).join(' / ')}
           {battle.execution_friction.attacker_confidence_band
             ? ` (${t('aar.confidenceBand', {
@@ -125,7 +125,7 @@ function BattleTooltipContent({ osid, battles, osidDisplayNames }: {
             : ''}
         </div>
       )}
-      <div className="mt-1.5 text-[9px] text-text-muted italic">{t('tooltip.clickForBattleSettlement')}</div>
+      <div className="mt-1.5 text-xs text-text-muted italic">{t('tooltip.clickForBattleSettlement')}</div>
     </div>
   );
 }
@@ -154,7 +154,7 @@ function FormationTooltipContent({
     locale,
   });
   if (!formation && !formationId.startsWith('enemy_contact:')) {
-    return <div className="text-[11px] text-text-secondary">{t('tooltip.unknownFormation')}</div>;
+    return <div className="text-xs text-text-secondary">{t('tooltip.unknownFormation')}</div>;
   }
 
   if (model.classification === 'enemy_contact') {
@@ -164,11 +164,11 @@ function FormationTooltipContent({
           {model.title}
         </div>
         {model.subtitle && (
-          <div className="text-[11px] text-text-secondary mb-1">{model.subtitle}</div>
+          <div className="text-xs text-text-secondary mb-1">{model.subtitle}</div>
         )}
-        <div className="text-[11px] text-text-secondary">{t('tooltip.enemyPresenceConfirmed')}</div>
+        <div className="text-xs text-text-secondary">{t('tooltip.enemyPresenceConfirmed')}</div>
         {model.statusLine && (
-          <div className="text-[10px] text-text-muted mt-1">{model.statusLine}</div>
+          <div className="text-xs text-text-muted mt-1">{model.statusLine}</div>
         )}
       </div>
     );
@@ -184,19 +184,19 @@ function FormationTooltipContent({
         {model.title}
       </div>
       {model.subtitle && (
-        <div className="text-[11px] text-text-secondary mb-1">
+        <div className="text-xs text-text-secondary mb-1">
           {model.subtitle}
         </div>
       )}
       {model.showHomeMunicipality && (
-        <div className="text-[10px] text-green-400 mb-1">⌂ {t('tooltip.homeMunicipality')}</div>
+        <div className="text-xs text-green-400 mb-1">⌂ {t('tooltip.homeMunicipality')}</div>
       )}
       {model.personnel != null && (
-        <div className="text-[11px] text-text-secondary mb-1">
+        <div className="text-xs text-text-secondary mb-1">
           {t('tooltip.personnel', { count: model.personnel.toLocaleString() })}
         </div>
       )}
-      <div className="flex items-center gap-2 text-[11px] mb-1">
+      <div className="flex items-center gap-2 text-xs mb-1">
         <span className="text-text-secondary">{t('tooltip.cohesion')}</span>
         <div className="flex gap-0.5">
           {Array.from({ length: 5 }, (_, i) => (
@@ -211,25 +211,25 @@ function FormationTooltipContent({
         </span>
       </div>
       {model.posture && (
-        <div className="text-[11px] text-text-secondary mb-1">
+        <div className="text-xs text-text-secondary mb-1">
           <span>{t('tooltip.currentPosture')}</span>{' '}
           <span className="text-text-primary">{model.posture}</span>
         </div>
       )}
       {model.aorSummary && (
-        <div className="text-[11px] text-text-secondary mb-1">
+        <div className="text-xs text-text-secondary mb-1">
           <span>{t('tooltip.areaOfResponsibility')}</span>{' '}
           <span className="text-text-primary">{model.aorSummary}</span>
         </div>
       )}
       {model.orderLine && (
-        <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
+        <div className="text-xs text-text-secondary border-t border-panel-border pt-1">
           <span>{t('tooltip.currentOrder')}</span>{' '}
           <span className="text-text-primary">{model.orderLine}</span>
         </div>
       )}
       {model.statusLine && (
-        <div className="text-[11px] text-text-secondary mt-0.5">
+        <div className="text-xs text-text-secondary mt-0.5">
           <span>{t('tooltip.readiness')}</span>{' '}
           <span className="text-text-primary">{model.statusLine}</span>
         </div>
@@ -286,44 +286,44 @@ function FrontTooltipContent({
         {model.title}
       </div>
       {model.sectorName && (
-        <div className="text-[11px] text-text-secondary mb-1.5">
+        <div className="text-xs text-text-secondary mb-1.5">
           <span>{t('tooltip.sector')}</span>{' '}
           <span className="text-text-primary">{model.sectorName}</span>
         </div>
       )}
-      <div className="text-[11px] text-text-secondary mb-1">
+      <div className="text-xs text-text-secondary mb-1">
         <span>{t('tooltip.frontExtent')}</span>{' '}
         <span className="text-text-primary">{persistenceLine}</span>
       </div>
-      <div className="text-[11px] text-text-secondary mb-1">
+      <div className="text-xs text-text-secondary mb-1">
         <span>{t('tooltip.pressure')}</span>{' '}
         <span className="text-text-primary">{model.pressureLine}</span>
       </div>
       {model.sectorStatusLine && (
-        <div className="text-[11px] text-amber-300 mb-1">
+        <div className="text-xs text-amber-300 mb-1">
           {model.sectorStatusLine}
         </div>
       )}
       {model.densityValue != null && model.densityLabel && (
-        <div className="text-[11px] text-text-secondary mb-1">
+        <div className="text-xs text-text-secondary mb-1">
           <span>{t('tooltip.density')}</span>{' '}
           <span className={densityColorClass(model.densityValue)}>{model.densityValue.toFixed(2)} ({model.densityLabel})</span>
         </div>
       )}
       {model.threatSummary && (
-        <div className="text-[11px] text-text-secondary mb-2">
+        <div className="text-xs text-text-secondary mb-2">
           <span>{t('tooltip.threat')}</span>{' '}
           <span className="text-amber-300 uppercase">{model.threatSummary}</span>
         </div>
       )}
       {model.ownFormationLabels.length > 0 && (
-        <div className="text-[11px] mb-1 border-t border-panel-border pt-1">
+        <div className="text-xs mb-1 border-t border-panel-border pt-1">
           <span className={FACTION_COLORS[playerFaction ?? ''] ?? 'text-text-primary'}>{playerFaction ? getPlayerSafeMilitaryFactionName(playerFaction) : 'Own'}:</span>{' '}
           {model.ownFormationLabels.join(', ')}
         </div>
       )}
       {model.enemyContactSummary && (
-        <div className="text-[11px] text-text-secondary border-t border-panel-border pt-1">
+        <div className="text-xs text-text-secondary border-t border-panel-border pt-1">
           {model.enemyContactSummary}
         </div>
       )}
@@ -395,11 +395,11 @@ function DefensePreviewContent({
 
   return (
     <div className="mt-2 pt-2 border-t border-panel-border/40">
-      <div className="text-[9px] text-text-muted uppercase tracking-wide mb-1">{t('tooltip.defensePreview')}</div>
-      <div className="text-[10px] text-text-secondary flex gap-2">
+      <div className="text-xs text-text-muted uppercase tracking-wide mb-1">{t('tooltip.defensePreview')}</div>
+      <div className="text-xs text-text-secondary flex gap-2">
         <span>{t('tooltip.sectorStance')} <span className="text-text-primary">{stanceLabel}</span></span>
       </div>
-      <div className="text-[10px] text-text-secondary mt-0.5">
+      <div className="text-xs text-text-secondary mt-0.5">
         {info.physicalCount > 0
           ? <span>{t('tooltip.brigadesAtPosition', { count: info.physicalCount })}</span>
           : <span className="text-amber-400">{t('tooltip.noBrigadesAtOsid')}</span>
@@ -411,14 +411,14 @@ function DefensePreviewContent({
       {info.brigades.length > 0 && (
         <div className="mt-1 space-y-px">
           {info.brigades.slice(0, 5).map(b => (
-            <div key={b.id} className="text-[9px] text-text-muted flex items-center gap-1">
+            <div key={b.id} className="text-xs text-text-muted flex items-center gap-1">
               <span className="text-text-secondary">{b.atOsid ? '⊕' : '↷'}</span>
               {b.isHome && <span title={t('tooltip.homeMunicipality')}>⌂</span>}
               <span className="truncate">{b.name}</span>
             </div>
           ))}
           {info.brigades.length > 5 && (
-            <div className="text-[9px] text-text-muted">{t('tooltip.moreBrigades', { count: info.brigades.length - 5 })}</div>
+            <div className="text-xs text-text-muted">{t('tooltip.moreBrigades', { count: info.brigades.length - 5 })}</div>
           )}
         </div>
       )}
@@ -429,6 +429,9 @@ function DefensePreviewContent({
 export const Tooltip = React.memo(function Tooltip() {
   const tooltipTarget = useGameStore((s) => s.tooltipTarget);
   const tooltipPosition = useGameStore((s) => s.tooltipPosition);
+  const selectedOsid = useGameStore((s) => s.selectedOsid);
+  const selectedFormationId = useGameStore((s) => s.selectedFormationId);
+  const selectedCorpsFrontSectorId = useGameStore((s) => s.selectedCorpsFrontSectorId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
@@ -454,6 +457,7 @@ export const Tooltip = React.memo(function Tooltip() {
     setDelayedTarget(tooltipTarget);
   }, [visible, tooltipTarget]);
 
+  if (selectedOsid || selectedFormationId || selectedCorpsFrontSectorId) return null;
   if (!delayedTarget || !visible) return null;
 
   const position = tooltipPosition ?? { x: 24, y: 24 };

@@ -169,7 +169,7 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
       <div className="absolute left-1.5 top-1.5">
         <span
           data-testid={`command-card-role-${category.id}`}
-          className="rounded border border-accent-gold/35 bg-black/65 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.13em] text-accent-gold"
+          className="rounded border border-accent-gold/35 bg-black/65 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.13em] text-accent-gold"
         >
           {roleLabel}
         </span>
@@ -185,7 +185,7 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
           />
         )}
         <span
-          className={`min-w-[1.4rem] rounded border px-1.5 py-0.5 text-center text-[10px] font-bold tabular-nums ${
+          className={`min-w-[1.4rem] rounded border px-1.5 py-0.5 text-center text-xs font-bold tabular-nums ${
             category.urgentCount > 0
               ? 'border-red-300/55 bg-red-950/70 text-red-100'
               : category.count > 0
@@ -202,10 +202,10 @@ export function CommandCard({ category, playerFaction, onSelect }: CommandCardPr
         <div className="text-[12px] font-bold leading-tight text-text-primary drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
           {title}
         </div>
-        <div className="mt-0.5 line-clamp-2 text-[9px] leading-snug text-stone-200/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
+        <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-stone-200/85 drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]">
           {blurb}
         </div>
-        <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-stone-300/80">
+        <div className="mt-1 text-xs font-bold uppercase tracking-[0.13em] text-stone-300/80">
           {footer}
         </div>
       </div>

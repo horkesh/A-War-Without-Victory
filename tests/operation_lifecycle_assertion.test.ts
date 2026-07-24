@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
+
 import { assertOperationLifecycle } from '../src/sim/combat/assert_operation_lifecycle.js';
-import type { GameState, CorpsOperation, FormationState, CorpsCommandState } from '../src/state/game_state.js';
+import type { CorpsCommandState, CorpsOperation, FormationState, GameState } from '../src/state/game_state.js';
 
 function makeState(overrides: {
     corps_command?: Record<string, Partial<CorpsCommandState>>;
@@ -24,101 +25,82 @@ function makeOp(overrides: Partial<CorpsOperation> = {}): CorpsOperation {
         started_turn: 5,
         phase_started_turn: 8,
         participating_brigades: [],
+        objectives: ['op:test:target'],
         ...overrides,
     } as CorpsOperation;
 }
 
 describe('assertOperationLifecycle', () => {
-    it('logs error when participant is not found in formations', () => {
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('returns structured issues for missing and inactive participants', () => {
         const state = makeState({
             corps_command: {
-                corps_1: { active_operations: [makeOp({ participating_brigades: ['ghost_brig'] })] } as any,
-            },
-            formations: {},
-        });
-
-        assertOperationLifecycle(state);
-
-        expect(spy).toHaveBeenCalledOnce();
-        expect(spy.mock.calls[0][0]).toContain('ghost_brig');
-        expect(spy.mock.calls[0][0]).toContain('not found');
-        spy.mockRestore();
-    });
-
-    it('logs error when participant is inactive', () => {
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const state = makeState({
-            corps_command: {
-                corps_1: { active_operations: [makeOp({ participating_brigades: ['brig_1'] })] } as any,
+                corps_1: {
+                    active_operations: [makeOp({ participating_brigades: ['ghost_brig', 'inactive_brig'] })],
+                } as CorpsCommandState,
             },
             formations: {
-                brig_1: { id: 'brig_1', status: 'inactive', faction: 'RS' } as any,
+                inactive_brig: { id: 'inactive_brig', status: 'inactive', faction: 'RS' },
             },
         });
 
-        assertOperationLifecycle(state);
-
-        expect(spy).toHaveBeenCalledOnce();
-        expect(spy.mock.calls[0][0]).toContain("status='inactive'");
-        spy.mockRestore();
+        expect(assertOperationLifecycle(state)).toEqual([
+            {
+                severity: 'error',
+                code: 'operation.execution_no_active_participants',
+                message: "corps_1 operation 'Test Op' is executing without an active participant",
+                path: 'military.corps_command.corps_1.active_operations.0.participating_brigades',
+            },
+            {
+                severity: 'error',
+                code: 'operation.participant_missing',
+                message: "corps_1 operation 'Test Op' references missing participant ghost_brig",
+                path: 'military.corps_command.corps_1.active_operations.0.participating_brigades.0',
+            },
+            {
+                severity: 'error',
+                code: 'operation.participant_inactive',
+                message: "corps_1 operation 'Test Op' references inactive participant inactive_brig",
+                path: 'military.corps_command.corps_1.active_operations.0.participating_brigades.1',
+            },
+        ]);
     });
 
-    it('logs error for execution phase with zero active participants', () => {
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('rejects execution operations with empty participants and targets', () => {
         const state = makeState({
             corps_command: {
                 corps_1: {
                     active_operations: [makeOp({
-                        phase: 'execution',
-                        participating_brigades: ['brig_1'],
+                        participating_brigades: [],
+                        objectives: [],
+                        target_settlements: [],
+                        axes: [],
                     })],
-                } as any,
-            },
-            formations: {
-                brig_1: { id: 'brig_1', status: 'inactive', faction: 'RS' } as any,
+                } as CorpsCommandState,
             },
         });
 
-        assertOperationLifecycle(state);
-
-        expect(spy).toHaveBeenCalledOnce();
-        const msg = spy.mock.calls[0][0] as string;
-        expect(msg).toContain('0/1 active participants');
-        spy.mockRestore();
+        expect(assertOperationLifecycle(state).map(issue => issue.code)).toEqual([
+            'operation.execution_no_targets',
+            'operation.execution_no_active_participants',
+        ]);
     });
 
-    it('does not log when all participants are active', () => {
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('accepts active participants and axis targets', () => {
         const state = makeState({
             corps_command: {
                 corps_1: {
-                    active_operations: [makeOp({ participating_brigades: ['brig_1', 'brig_2'] })],
-                } as any,
+                    active_operations: [makeOp({
+                        participating_brigades: ['brig_1'],
+                        objectives: [],
+                        axes: [{ objectives: ['op:test:axis-target'] } as NonNullable<CorpsOperation['axes']>[number]],
+                    })],
+                } as CorpsCommandState,
             },
             formations: {
-                brig_1: { id: 'brig_1', status: 'active', faction: 'RS' } as any,
-                brig_2: { id: 'brig_2', status: 'active', faction: 'RS' } as any,
+                brig_1: { id: 'brig_1', status: 'active', faction: 'RS' },
             },
         });
 
-        assertOperationLifecycle(state);
-
-        expect(spy).not.toHaveBeenCalled();
-        spy.mockRestore();
-    });
-
-    it('does not log when no active operations exist', () => {
-        const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-        const state = makeState({
-            corps_command: {
-                corps_1: { active_operations: [] } as any,
-            },
-        });
-
-        assertOperationLifecycle(state);
-
-        expect(spy).not.toHaveBeenCalled();
-        spy.mockRestore();
+        expect(assertOperationLifecycle(state)).toEqual([]);
     });
 });

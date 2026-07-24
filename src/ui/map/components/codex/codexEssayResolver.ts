@@ -24,10 +24,10 @@ export interface DynamicSection {
  * subject of the event-dependency-graph gate (A1b). 0-based so the previously
  * dead `EssayEntry.tier?` field defaults to FIXED when absent (`tier ?? FIXED`).
  *
- *   FIXED       — international scaffold; visible once its event fires.
- *   CONDITIONAL — binary: fires in the player's war, or surfaces as a ghost.
- *   SHAPEABLE   — fires but its detail paragraphs morph with player actions.
- *   AHISTORICAL — counterfactual / player-only; exists only in this war.
+ *   FIXED       — canonical history, visible from scenario start.
+ *   CONDITIONAL — canonical history visible from start; ghost prose is gated.
+ *   SHAPEABLE   — canonical history visible from start; dynamic prose is gated.
+ *   AHISTORICAL — campaign-only entry, hidden until its predicate fires.
  *
  * The mapping is owner-tunable DATA: each essay's `tier` lives in
  * `essay_index.json`. `deriveDefaultTier()` is the rule used to seed that data
@@ -135,9 +135,10 @@ export interface ResolvedEssayParagraph {
     variant?: DynamicSection['variant'];
 }
 
-/** Why a not-yet-unlocked essay is gated. `null` for unlocked essays. Used by
- *  the panel to surface a soft "unlocks after X" hint without leaking the
- *  canonical body. `event`/`essay` carry the first unmet upstream dependency id
+/** Why a not-yet-visible Tier 3 campaign entry is gated. Tier 0-2 canonical
+ *  records never carry a lock reason. Used by the panel to surface a soft
+ *  campaign-entry hint without leaking the Tier 3 title or body. `event`/`essay`
+ *  carry the first unmet upstream dependency id
  *  (deterministic: strictCompare-min over the unmet set); `turn` carries the
  *  unmet `unlock_turn_min`; `event_fire` is the plain "experience this event"
  *  case (no graph dependency). */
@@ -149,6 +150,8 @@ export interface CodexLockReason {
 }
 
 export interface ResolvedEssay {
+    /** Whether the essay body may be shown. Always true for Tier 0-2 canonical
+     *  history; campaign-predicate gated for Tier 3. */
     isUnlocked: boolean;
     isGhost: boolean;
     title: string;
@@ -723,16 +726,16 @@ function strictMin(values: readonly string[]): string | undefined {
 }
 
 /**
- * A1b dependency-graph gate. Evaluates the THREE gate fields layered ON TOP of
- * the base event-fire/ghost unlock. Returns `null` when all gates pass (essay
- * may unlock), or the FIRST unmet `CodexLockReason` in a fixed precedence:
+ * A1b Tier 3 dependency-graph gate. Evaluates the three gate fields after the
+ * campaign entry's event/ghost predicate. Returns `null` when all gates pass,
+ * or the first unmet `CodexLockReason` in a fixed precedence:
  * requires_events → requires_essays → unlock_turn_min. Pure & deterministic
  * (strictCompare-min over unmet ids; no Date/RNG).
  *
- * Tolerant by design: a missing `essayUnlockedById` resolver (single-essay
+ * Tolerant by design: a missing `essayUnlockedById` resolver (single-entry
  * caller) treats requires_essays as satisfied; a missing `currentTurn` treats
- * unlock_turn_min as satisfied. These never HIDE an otherwise-unlocked essay
- * for a caller that lacks the relevant handle — graceful degradation matching
+ * unlock_turn_min as satisfied. These never hide an otherwise-visible Tier 3
+ * entry for a caller that lacks the relevant handle, matching
  * the existing comparison-atom convention.
  */
 function evaluateDependencyGate(essay: EssayEntry, context: CodexRenderContext): CodexLockReason | null {
@@ -767,26 +770,27 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
     const sources = localized?.sources && localized.sources.length > 0 ? localized.sources : essay.sources;
     const tier = effectiveTier(essay);
     const eventUnlocked = context.firedEventIds.has(essay.event_id);
-    // T2-C / content C2 (orphaned-wiring audit): a FIXED (tier-0) essay is
-    // canonical history that always happened — it is NEVER a counterfactual
-    // "path not taken" ghost. So when a FIXED essay unlocks via its
-    // `ghost_when` (its `event_id` has no backing event, e.g.
-    // `independence_referendum_1992` — the war's pre-history origin), it base-
-    // unlocks and renders its full canonical prose WITHOUT the ghost framing.
-    // CONDITIONAL/SHAPEABLE/AHISTORICAL keep the binary fired-or-ghost behavior.
     const conditionMet = !eventUnlocked && evaluateEssayCondition(essay.ghost_when, context);
-    const isGhost = conditionMet && tier !== CodexTier.FIXED;
-    const baseUnlocked = eventUnlocked || conditionMet;
-
-    // A1b: the dependency graph gates ON TOP of the base unlock — it can only
-    // KEEP an otherwise-unlocked essay locked, never force one open. An essay
-    // whose base unlock has not fired stays locked regardless of the graph.
-    const dependencyGate = baseUnlocked ? evaluateDependencyGate(essay, context) : null;
-    const isUnlocked = baseUnlocked && dependencyGate === null;
+    const campaignPredicateMet = eventUnlocked || conditionMet;
+    const dependencyGate = tier === CodexTier.AHISTORICAL && campaignPredicateMet
+        ? evaluateDependencyGate(essay, context)
+        : null;
+    const isUnlocked = tier !== CodexTier.AHISTORICAL
+        || (campaignPredicateMet && dependencyGate === null);
+    const isGhost = conditionMet && (tier !== CodexTier.AHISTORICAL || dependencyGate === null);
 
     if (!isUnlocked) {
         const lockReason: CodexLockReason = dependencyGate ?? { kind: 'event_fire' };
-        return { isUnlocked: false, isGhost: false, title, category, sources, paragraphs: [], tier, lockReason };
+        return {
+            isUnlocked: false,
+            isGhost: false,
+            title: '',
+            category,
+            sources: undefined,
+            paragraphs: [],
+            tier,
+            lockReason,
+        };
     }
 
     const canonicalParagraphs = splitParagraphs(localized?.content ?? essay.content);
@@ -799,7 +803,10 @@ export function resolveCodexEssay(essay: EssayEntry, context: CodexRenderContext
     const rawDynamicSections = Array.isArray(essay.dynamic_sections) ? essay.dynamic_sections : [];
     for (const section of rawDynamicSections) {
         if (!section || typeof section.content !== 'string') continue;
-        if (section.condition && !evaluateEssayCondition(section.condition, context)) continue;
+        const sectionPredicateMet = section.condition
+            ? evaluateEssayCondition(section.condition, context)
+            : eventUnlocked;
+        if (!sectionPredicateMet) continue;
 
         const content = localizedSection(section, locale)?.content ?? section.content;
         const renderedParagraphs = splitParagraphs(interpolateDynamicContent(content, context))

@@ -103,6 +103,8 @@ test('war runTurn with formation_spawn_directive remains stable', async () => {
 
 test('war formation-spawn phase consumes eligible directive pools', async () => {
     const state = statePhaseI();
+    state.political.political_controllers ??= {};
+    state.political.political_controllers['op:MUN_A:center'] = 'RBiH';
     state.military.formation_spawn_directive = { kind: 'brigade' };
     state.military.militia_pools = {
         'MUN_A:RBiH': {
@@ -131,6 +133,7 @@ test('war formation-spawn phase consumes eligible directive pools', async () => 
     expect(Object.values(state.military.formations ?? {}).some((f: any) =>
         f.faction === 'RBiH'
         && f.kind === 'brigade'
+        && f.location_osid === 'op:MUN_A:center'
         && f.tags?.includes('generated_phase_i0')
         && f.tags?.includes('mun:MUN_A'))).toBe(true);
     expect(state.military.militia_pools?.['MUN_A:RBiH']?.available).toBe(800);

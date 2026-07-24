@@ -19,7 +19,12 @@ import type { FormationFatigueStepReport } from '../state/formation_fatigue.js';
 import type { FormationLifecycleStepReport } from '../state/formation_lifecycle.js';
 import type { CommitmentStepReport } from '../state/front_posture_commitment.js';
 import type { FrontPressureStepReport } from '../state/front_pressure.js';
-import { GameState, type FactionId, type FrontDescriptor } from '../state/game_state.js';
+import {
+    GameState,
+    type DisplacementEvent,
+    type FactionId,
+    type FrontDescriptor
+} from '../state/game_state.js';
 import type { MilitiaFatigueStepReport } from '../state/militia_fatigue.js';
 import type { NegotiationCapitalStepReport } from '../state/negotiation_capital.js';
 import type {
@@ -58,6 +63,7 @@ import type { ReconstitutionReport } from './combat/brigade_reconstitution.js';
 import type { OperationStormCheckReport } from './combat/operation_storm.js';
 import type { AttackResolutionOsidReport } from './combat/attack_resolution_osid.js';
 import type { BotOrderDiagnosticsSnapshot } from '../scenario/combat_causality.js';
+import type { BotOrderGenerationDiagnostics } from './combat/bot_brigade_ai_osid.js';
 import type { CorpsAiReportEntry } from './combat/bot_corps_ai.js';
 import type { CohesionDriftReport } from './combat/cohesion_drift.js';
 import type { EnclaveResilienceReport } from './combat/enclave_resilience.js';
@@ -112,15 +118,17 @@ export interface TurnInput {
     historicalNameLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, emergent brigades inherit historical OOB corps for (faction, mun_id, ordinal). */
     historicalCorpsLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
+    /** When provided, emergent brigades retain the canonical OOB identity they already represent. */
+    historicalOobIdLookup?: (faction: string, mun_id: string, ordinal: number) => string | null;
     /** When provided, Peace phase wave flip uses ethnicity for holdout decisions (avoids 0/0 → all flips). */
     settlementDataRaw?: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }>;
     /** When provided, historical event definitions loaded from scenario JSON files. */
     eventDefinitions?: import('./events/event_types.js').EventDefinition[];
     /**
      * LANE D-CONTENT (Path A): optional sink for per-turn displacement events.
-     * Called once per turn at end-of-pipeline by the `clear-displacement-event-log`
-     * step BEFORE the buffer is cleared. The sink receives a copy of the current
-     * turn's events; the buffer is then truncated to length 0 for next turn.
+     * Called once per successful turn after the post-turn invariant barrier.
+     * The sink receives a copy of the current turn's events after the state
+     * buffer has been cleared for the next turn.
      *
      * scenario_runner.ts wires this to a JSONL stream
      * (displacement_event_log.jsonl) mirroring brigade_temporal_log.jsonl /
@@ -134,6 +142,8 @@ export interface TurnReport {
     seed: string;
     phases: { name: string }[];
     phase_skip_diagnostics?: PhaseSkipDiagnostic[];
+    player_assisted_execution?: BotOrderGenerationDiagnostics;
+    player_historical_operation_assist?: BotOrderGenerationDiagnostics;
     region_posture_expansion?: { expanded_edges_count: number };
     formation_fatigue?: FormationFatigueStepReport;
     formation_lifecycle?: FormationLifecycleStepReport;
@@ -281,6 +291,8 @@ export interface TurnReport {
     }>;
     /** Paramilitary rear pocket cleanup report */
     paramilitary_sweep?: import('./combat/paramilitary_sweep.js').ParamilitarySweepReport;
+    /** Post-paramilitary regular-force consolidation of surrounded undefended pockets. */
+    rear_pocket_consolidation?: import('./combat/rear_pocket_consolidation.js').RearPocketConsolidationReport;
     /** Sector combat power ratings report */
     sector_combat_ratings?: import('./combat/sector_combat_rating.js').SectorCombatRatingReport;
     /** Operation preparation phase events (intel, staging, probes, assessments). */
@@ -310,6 +322,8 @@ export interface TurnContext {
     rng: Rng;
     input: TurnInput;
     report: TurnReport;
+    /** Internal side-effect batch withheld until post-turn validation succeeds. */
+    pendingDisplacementEventStream?: DisplacementEvent[];
 }
 
 export type PhaseHandler = (context: TurnContext) => void | Promise<void>;

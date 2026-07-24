@@ -101,5 +101,6 @@ export interface AiResponse {
     model: string;
     prompt_tokens: number;
     completion_tokens: number;
-    latency_ms: number;
+    /** Optional deterministic diagnostic supplied by test/offline clients; live wall-clock timing is never persisted. */
+    latency_ms?: number;
 }

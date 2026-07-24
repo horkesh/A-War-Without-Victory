@@ -18,12 +18,16 @@ const DEFAULT_INPUT = join(ROOT, 'data/source/1990 to 1995 municipalities_BiH.xl
 const OUTPUT_PATH = join(ROOT, 'data/source/municipality_political_controllers.json');
 
 function runExtract1990(): Promise<{ code: number }> {
-    return new Promise((resolve) => {
-        const proc = spawn('npm', ['run', 'data:extract1990'], {
+    return new Promise((resolve, reject) => {
+        const invocation = process.platform === 'win32'
+            ? { command: 'cmd.exe', args: ['/d', '/s', '/c', 'npm.cmd run data:extract1990'] }
+            : { command: 'npm', args: ['run', 'data:extract1990'] };
+        const proc = spawn(invocation.command, invocation.args, {
             cwd: ROOT,
-            shell: true,
+            shell: false,
             stdio: ['ignore', 'pipe', 'pipe']
         });
+        proc.on('error', reject);
         proc.on('close', (code) => resolve({ code: code ?? 1 }));
     });
 }

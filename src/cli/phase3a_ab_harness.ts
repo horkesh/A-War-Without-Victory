@@ -24,7 +24,7 @@ import {
     type EffectivePressureEdge,
     type Phase3AAuditSummary
 } from '../sim/pressure/phase3a_pressure_eligibility.js';
-import { runTurn, type TurnReport } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn, type TurnReport } from '../sim/turn_pipeline.js';
 import { CURRENT_SCHEMA_VERSION, type GameState } from '../state/game_state.js';
 import type { EdgeRecord } from '../map/settlements.js';
 
@@ -731,11 +731,13 @@ async function runScenario(
         let state = JSON.parse(JSON.stringify(initialState)) as GameState;
 
         for (let turn = 1; turn <= turns; turn++) {
-            const { nextState, report } = await runTurn(state, {
+            const result = await runTurn(state, {
                 seed: state.meta.seed,
                 settlementEdges,
                 applyNegotiation: false
             });
+            assertTurnSuccess(result);
+            const { nextState, report } = result;
             state = nextState;
             const phase3aAudit = enablePhase3A ? report.phase3a_pressure_eligibility : undefined;
 
@@ -790,11 +792,13 @@ async function probeScenario(
     try {
         let state = JSON.parse(JSON.stringify(initialState)) as GameState;
         for (let turn = 1; turn <= 2; turn++) {
-            const { nextState } = await runTurn(state, {
+            const result = await runTurn(state, {
                 seed: state.meta.seed,
                 settlementEdges: edges,
                 applyNegotiation: false
             });
+            assertTurnSuccess(result);
+            const { nextState } = result;
             state = nextState;
         }
         return computePressureSum(state);

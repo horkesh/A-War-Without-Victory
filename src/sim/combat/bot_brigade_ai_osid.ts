@@ -65,7 +65,7 @@ import { buildSectorDefenseByFactionAndOsid } from './corps_front_sectors.js';
 
 import { evaluateGarrisonAndDetachments, evaluateReserve, evaluateHold } from './bot_brigade_eval_hold.js';
 import { evaluateSectorMarch, evaluateReturnToCorps, evaluatePocketEvacuation, evaluateFrontCoverage } from './bot_brigade_eval_front.js';
-import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive, evaluateUncontestedOccupation, UNCONTESTED_OCCUPATION_SCORE } from './bot_brigade_eval_attack.js';
+import { evaluateHomeDefense, evaluateSupplyGate, evaluateSectorAttack, evaluateReorganize, evaluateDefensive, evaluateOffensive } from './bot_brigade_eval_attack.js';
 import { evaluateInteriorMovement } from './bot_brigade_eval_movement.js';
 import type { BrigadeEvaluationContext } from './bot_brigade_eval_types.js';
 
@@ -217,6 +217,13 @@ export interface OsidBotOrdersResult {
 
 export interface BotOrderGenerationDiagnostics {
     eligible_attackers_by_corps: Record<FormationId, number>;
+}
+
+export interface BotOrderGenerationOptions {
+    /** Limit the generated orders to a caller-approved subset of formations. */
+    brigadeFilter?: (formation: FormationState) => boolean;
+    /** Merge generated orders into existing state orders instead of replacing the full order maps. */
+    mergeWithExistingOrders?: boolean;
 }
 
 interface BrigadeContext {
@@ -641,7 +648,6 @@ function executeFactionDirectivesImpl(
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reserve', () => evaluateReserve(ctx))) return true;
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.supplyGate', () => evaluateSupplyGate(ctx))) return true;
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.sectorAttack', () => evaluateSectorAttack(ctx))) return true;
-            if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.uncontestedOccupation', () => evaluateUncontestedOccupation(ctx))) return true;
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.hold', () => evaluateHold(ctx))) return true;
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.reorganize', () => evaluateReorganize(ctx))) return true;
             if (botOrdersPerfTime('bot_orders.executeFactionDirectives.eval.defensive', () => evaluateDefensive(ctx))) return true;
@@ -674,7 +680,8 @@ function executeFactionDirectivesImpl(
 export function generateAllBotOrdersOsid(
     state: GameState,
     botFactions: FactionId[],
-    ctx: OsidBotContext
+    ctx: OsidBotContext,
+    options: BotOrderGenerationOptions = {},
 ): BotOrderGenerationDiagnostics {
     const adjacency = (ctx.adjacency as Map<Osid, Osid[]>) ?? buildOsidAdjacency(ctx.edges);
     const terrainCache = buildTerrainCache(ctx.reverseMap);
@@ -695,7 +702,8 @@ export function generateAllBotOrdersOsid(
                 f.status === 'active' &&
                 (f.kind === 'brigade' || f.kind === 'og' || f.kind === 'operational_group' || f.kind === 'militia' || f.kind === 'jna_phantom' || f.kind === 'hv_phantom') &&
                 f.location_osid != null
-            );
+            )
+            .filter((f) => options.brigadeFilter ? options.brigadeFilter(f) : true);
 
         if (brigades.length === 0) continue;
 
@@ -751,7 +759,6 @@ export function generateAllBotOrdersOsid(
             const pinned = attacks.filter((entry) => isPinnedActiveOperationAttacker(state, entry.bid));
             const trimmable = attacks.filter((entry) =>
                 !isPinnedActiveOperationAttacker(state, entry.bid)
-                && entry.score !== UNCONTESTED_OCCUPATION_SCORE
             );
             const keepTrimmable = Math.max(0, maxCorpsAttacks - pinned.length);
             const trimmed = trimmable.slice(keepTrimmable);
@@ -771,7 +778,6 @@ export function generateAllBotOrdersOsid(
             for (const [cid, attacks] of [...attacksByCorps.entries()].sort((a, b) => strictCompare(a[0], b[0]))) {
                 const trimmable = attacks.filter((entry) =>
                     !isPinnedActiveOperationAttacker(state, entry.bid)
-                    && entry.score !== UNCONTESTED_OCCUPATION_SCORE
                 );
                 if (trimmable.length <= 1) continue; // Need at least 2 non-operation attackers for friction
                 // Sort by bid for deterministic selection
@@ -846,12 +852,54 @@ export function generateAllBotOrdersOsid(
         }
     }
 
-    // Write to state
-    if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];
-    state.military.brigade_posture_orders.push(...allPostureOrders);
+    // COHA suspends combat. Keep movement/redeployment output, but do not
+    // stage attacks or charge attack/assault posture costs during the pause.
+    if (state.military.event_flags?.coha_active === true) {
+        for (const brigadeId of Object.keys(allAttackOrders).sort(strictCompare)) {
+            delete allAttackOrders[brigadeId as FormationId];
+        }
+        for (const corpsId of Object.keys(allEligibleAttackersByCorps).sort(strictCompare)) {
+            delete allEligibleAttackersByCorps[corpsId as FormationId];
+        }
+        for (const order of allPostureOrders) {
+            if (order.posture === 'attack' || order.posture === 'assault') {
+                order.posture = 'hold';
+            }
+        }
+    }
 
-    if (Object.keys(allAttackOrders).length > 0) {
-        state.military.brigade_attack_orders = allAttackOrders;
+    // Write to state. In merge mode, existing orders are player-authored or
+    // already-staged orders and must remain authoritative for the same brigade.
+    // In replacement mode, preserve orders for factions this call did not
+    // process; the war pipeline uses a bot-faction pass followed by a separate
+    // player-assist pass, so ordinary bot replacement must not erase manual
+    // player orders before the player pass can merge around them.
+    const processedFactions = new Set(sortedFactions);
+    const isUnprocessedFactionOrder = (brigadeId: string): boolean => {
+        const faction = state.military.formations?.[brigadeId]?.faction;
+        return faction != null && !processedFactions.has(faction);
+    };
+
+    if (!state.military.brigade_posture_orders) state.military.brigade_posture_orders = [];
+    const postureOrdersToWrite = options.mergeWithExistingOrders
+        ? allPostureOrders.filter((order) =>
+            !state.military.brigade_posture_orders?.some((existing) => existing.brigade_id === order.brigade_id)
+        )
+        : allPostureOrders;
+    state.military.brigade_posture_orders.push(...postureOrdersToWrite);
+
+    if (Object.keys(allAttackOrders).length > 0 || !options.mergeWithExistingOrders) {
+        const preservedAttackOrders: Record<FormationId, Osid> = {};
+        if (!options.mergeWithExistingOrders) {
+            for (const [bid, target] of Object.entries(state.military.brigade_attack_orders ?? {})) {
+                if (target != null && isUnprocessedFactionOrder(bid)) {
+                    preservedAttackOrders[bid as FormationId] = target as Osid;
+                }
+            }
+        }
+        state.military.brigade_attack_orders = options.mergeWithExistingOrders
+            ? { ...allAttackOrders, ...(state.military.brigade_attack_orders ?? {}) }
+            : { ...preservedAttackOrders, ...allAttackOrders };
     }
 
     // Movement orders: merge regular moves + column march destinations
@@ -865,7 +913,17 @@ export function generateAllBotOrdersOsid(
         mergedMovement[bid as FormationId] = { destination_sids: [dest], stance: 'column' };
     }
     if (Object.keys(mergedMovement).length > 0) {
-        state.military.brigade_movement_orders = mergedMovement;
+        const preservedMovementOrders: Record<FormationId, BrigadeMovementOrder> = {};
+        if (!options.mergeWithExistingOrders) {
+            for (const [bid, order] of Object.entries(state.military.brigade_movement_orders ?? {})) {
+                if (order != null && isUnprocessedFactionOrder(bid)) {
+                    preservedMovementOrders[bid as FormationId] = order as BrigadeMovementOrder;
+                }
+            }
+        }
+        state.military.brigade_movement_orders = options.mergeWithExistingOrders
+            ? { ...mergedMovement, ...(state.military.brigade_movement_orders ?? {}) }
+            : { ...preservedMovementOrders, ...mergedMovement };
     }
 
     return {

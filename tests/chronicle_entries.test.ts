@@ -52,6 +52,43 @@ function buildDecisionEventDef(id: string): EventDefinition {
 }
 
 describe('generateChronicleEntries', () => {
+    it('maps every canonical combat outcome to a distinct truthful player label', () => {
+        const outcomes = [
+            ['decisive_victory', 'Decisive attacker victory'],
+            ['victory', 'Attacker victory'],
+            ['costly_victory', 'Costly attacker victory'],
+            ['stalemate', 'Stalemate'],
+            ['repulsed', 'Attack repulsed'],
+            ['catastrophic', 'Catastrophic attacker defeat'],
+            [null, 'Result unreported'],
+            ['future_outcome', 'Result unreported'],
+        ] as const;
+
+        const state = {
+            turnSummaries: outcomes.map(([outcome], index) => makeTurnSummary(index + 1, {
+                battles: [{
+                    osid: `op:test:test_${index + 1}`,
+                    attacker_faction: 'RBiH',
+                    defender_faction: 'RS',
+                    outcome,
+                    attacker_casualties: 80,
+                    defender_casualties: 80,
+                    territory_flipped: false,
+                }],
+            })),
+        };
+
+        const combatEntries = generateChronicleEntries(state as any)
+            .filter(entry => entry.type === 'combat');
+        const renderedLabels = combatEntries.map(entry => {
+            const match = entry.detail.match(/^(.+?) - /);
+            return match?.[1] ?? '';
+        });
+
+        expect(renderedLabels).toEqual(outcomes.map(([, label]) => label));
+        expect(new Set(renderedLabels.slice(0, 6)).size).toBe(6);
+    });
+
     it('returns empty array for null state', () => {
         expect(generateChronicleEntries(null as any)).toEqual([]);
     });
@@ -716,7 +753,7 @@ describe('generateChronicleEntries', () => {
         expect(ghostEntry?.detail).toContain('Srebrenica enclave survived in your war');
     });
 
-    it('creates a personnel spotlight for a named commander who completes an operation', () => {
+    it('keeps a named commander on the single narrative for a completed operation', () => {
         const state = {
             player_faction: 'RBiH',
             turn: 24,
@@ -746,15 +783,19 @@ describe('generateChronicleEntries', () => {
         };
 
         const entries = generateChronicleEntries(state as any);
-        const spotlight = entries.find(e => (e.type as string) === 'personnel');
+        const operationEntries = entries.filter(e => e.metadata?.operationAarId === 'op-vitez-relief');
 
-        expect(spotlight).toBeDefined();
-        expect(spotlight?.headline).toBe(true);
-        expect(spotlight?.title).toBe('Officer of the Week: General Enver Hadzihasanovic');
-        expect(spotlight?.detail).toContain('Vitez Relief');
-        expect(spotlight?.detail).toContain('1/2 objectives held at close');
-        expect(spotlight?.detail).not.toContain('1/2 objectives |');
-        expect(spotlight?.metadata?.operationAarId).toBe('op-vitez-relief');
+        expect(operationEntries).toHaveLength(1);
+        expect(operationEntries[0].headline).toBe(true);
+        expect(operationEntries[0].title).toBe('Vitez Relief concluded');
+        expect(operationEntries[0].detail).toContain('1/2 objectives held at close');
+        expect(operationEntries[0].detail).not.toContain('1/2 objectives |');
+        expect(operationEntries[0].metadata).toMatchObject({
+            operationAarId: 'op-vitez-relief',
+            officerName: 'Enver Hadzihasanovic',
+            officerRank: 'General',
+        });
+        expect(entries.some(e => (e.type as string) === 'personnel')).toBe(false);
     });
 
     it('does not promote final-held-only operation objectives as captured Chronicle achievements', () => {
@@ -786,13 +827,11 @@ describe('generateChronicleEntries', () => {
 
         const entries = generateChronicleEntries(state as any);
         const operation = entries.find(e => e.id === 'operation-aar-op-final-held');
-        const spotlight = entries.find(e => e.id === 'officer-week-op-final-held');
 
         expect(operation?.headline).toBe(false);
-        expect(spotlight?.headline).toBe(false);
         expect(operation?.detail).toContain('0/2 objectives captured in execution; 1 held at close');
-        expect(spotlight?.detail).toContain('0/2 objectives captured in execution; 1 held at close');
         expect(operation?.detail).not.toContain('1/2 objectives held at close');
+        expect(entries.filter(e => e.metadata?.operationAarId === 'op-final-held')).toHaveLength(1);
     });
 
     it('keeps generated Chronicle scaffolding localized in BCS mode while preserving names', () => {
@@ -847,7 +886,6 @@ describe('generateChronicleEntries', () => {
         expect(text).toContain('312th Brigade formirana');
         expect(text).toContain('305th Brigade unistena');
         expect(text).toContain('Vitez Relief zakljucena');
-        expect(text).toContain('Oficir sedmice: General Enver Hadzihasanovic');
         expect(text).toContain('Historija je vodila vlastitu knjigu');
         expect(text).not.toMatch(/\b(?:Battle of|Displacement wave|formed|destroyed|Officer of the Week|History kept its own ledger|friendly casualties|objectives held at close|attacks|stars)\b/);
     });

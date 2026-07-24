@@ -75,7 +75,7 @@ describe('decision family modals', () => {
     expect(container.textContent).not.toContain('offensive_support');
     expect(screen.queryByText('offensive')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Open reserve pool' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Choose from reserve pool' }));
 
     expect(onOpenReservePanel).toHaveBeenCalledOnce();
 
@@ -112,7 +112,7 @@ describe('decision family modals', () => {
       configurable: true,
     });
     const onClose = vi.fn();
-    const onOpenDecisionRoomTarget = vi.fn();
+    const onOpenDecisionRoomTarget = vi.fn(() => true);
 
     render(React.createElement(ReserveRequestModal, {
       requestId: 'reserve:req-accept',
@@ -140,7 +140,13 @@ describe('decision family modals', () => {
       onOpenDecisionRoomTarget,
     }));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Review 1st Guards Motorized' }));
+    const modal = screen.getByTestId('reserve-request-modal');
+    expect(modal.getAttribute('data-request-id')).toBe('req-accept');
+    expect(screen.getByTestId('reserve-request-close')).toBeTruthy();
+    expect(screen.getByTestId('reserve-request-decline')).toBeTruthy();
+    expect(screen.getByTestId('reserve-request-open-pool')).toBeTruthy();
+
+    fireEvent.click(screen.getByTestId('reserve-request-review-suggested'));
 
     await waitFor(() => expect(onOpenDecisionRoomTarget).toHaveBeenCalledWith({
       kind: 'decision-room',
@@ -150,6 +156,142 @@ describe('decision family modals', () => {
     expect(approveReserveRequest).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
     delete (window as unknown as { awwv?: unknown }).awwv;
+  });
+
+  it('keeps the reserve request open when the Decision Room cannot take ownership', () => {
+    const onClose = vi.fn();
+    const onOpenDecisionRoomTarget = vi.fn(() => false);
+
+    render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-blocked',
+      state: makeState({
+        formations: [
+          { id: 'drina_corps', name: 'Drina Corps' },
+          { id: 'elite_1', name: '1st Guards Motorized' },
+        ] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-blocked',
+          corps_id: 'drina_corps',
+          faction: 'RS',
+          reason: 'defensive_gap',
+          purpose: 'defensive',
+          priority: 80,
+          severityBand: 'critical',
+          travel_hops: 2,
+          description: 'Drina Corps requests reinforcement.',
+          suggested_brigade_id: 'elite_1',
+          turn_requested: 1,
+        }],
+      }),
+      onClose,
+      onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget,
+    }));
+
+    fireEvent.click(screen.getByTestId('reserve-request-review-suggested'));
+
+    expect(onOpenDecisionRoomTarget).toHaveBeenCalledOnce();
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId('reserve-request-modal')).toBeTruthy();
+  });
+
+  it('shows reserve donor truth and keeps a missing candidate visible but non-issuable', () => {
+    const state = makeState({
+      formations: [
+        { id: 'drina_corps', name: 'Drina Corps', faction: 'RS', kind: 'corps' },
+        { id: 'east_bosnia_corps', name: 'East Bosnia Corps', faction: 'RS', kind: 'corps' },
+        {
+          id: 'elite_1', name: '1st Guards Motorized', faction: 'RS', kind: 'brigade',
+          corps_id: 'east_bosnia_corps', readiness: 'ready', location_osid: 'op:visoko:visoko_2',
+        },
+      ] as LoadedGameState['formations'],
+      pendingReserveRequests: [{
+        request_id: 'req-truth',
+        corps_id: 'drina_corps',
+        faction: 'RS',
+        reason: 'defensive_gap',
+        purpose: 'defensive',
+        priority: 80,
+        severityBand: 'critical',
+        travel_hops: 3,
+        description: 'Thin request description.',
+        suggested_brigade_id: 'elite_1',
+        turn_requested: 1,
+      }],
+    });
+
+    const { rerender } = render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-truth',
+      state,
+      onClose: vi.fn(),
+      onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget: vi.fn(),
+    }));
+
+    expect(screen.getByText('Candidate force').parentElement?.textContent).toContain('1st Guards Motorized');
+    expect(screen.getByText('Urgency').parentElement?.textContent).toContain('Immediate Army Need');
+    expect(screen.queryByText('Priority')).toBeNull();
+    expect(screen.getByText('Donor command').parentElement?.textContent).toContain('East Bosnia Corps');
+    expect(screen.getByText('Source position').parentElement?.textContent).not.toContain('op:visoko');
+    expect(screen.getByText('Recipient sector').parentElement?.textContent).toContain('Unreported');
+    expect(screen.getAllByText('about 2 weeks travel')).toHaveLength(1);
+    expect(screen.getByText('Expected effect').parentElement?.textContent).not.toContain('defensive_gap');
+    expect(screen.getByText('Weakened position').parentElement?.textContent).toContain('East Bosnia Corps');
+    expect(screen.queryByText('Severity')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Decide later' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Decline request' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Open 1st Guards Motorized dossier' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choose from reserve pool' })).toBeTruthy();
+
+    rerender(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-missing',
+      state: makeState({
+        formations: [{ id: 'drina_corps', name: 'Drina Corps', faction: 'RS', kind: 'corps' }] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-missing', corps_id: 'drina_corps', faction: 'RS', reason: 'defensive_gap',
+          purpose: 'defensive', priority: 80, severityBand: 'critical', travel_hops: 3,
+          description: 'No staff candidate.', suggested_brigade_id: null, turn_requested: 1,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget: vi.fn(),
+    }));
+
+    expect(screen.getByText('No reserve formation is recommended. Open the reserve pool to evaluate available formations, or decline this request.')).toBeTruthy();
+    expect(screen.getByText('Select a formation to calculate')).toBeTruthy();
+    expect(screen.queryByText('Candidate force')).toBeNull();
+    expect(screen.queryByText('Donor command')).toBeNull();
+    expect(screen.queryByText('Source position')).toBeNull();
+    expect(screen.queryByText('Weakened position')).toBeNull();
+    expect(screen.queryByText('Readiness')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Open Unreported dossier/i })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Choose from reserve pool' })).toBeTruthy();
+  });
+
+  it('humanizes engine-style reserve candidate and donor names everywhere in the modal', () => {
+    const { container } = render(React.createElement(ReserveRequestModal, {
+      requestId: 'reserve:req-raw-names',
+      state: makeState({
+        formations: [
+          { id: 'arbih_1st_corps', name: 'arbih_1st_corps', faction: 'RBiH', kind: 'corps' },
+          { id: 'elite_internal_brigade', name: 'elite_internal_brigade', faction: 'RBiH', kind: 'brigade', corps_id: 'arbih_1st_corps' },
+          { id: 'arbih_3rd_corps', name: '3rd Corps', faction: 'RBiH', kind: 'corps' },
+        ] as LoadedGameState['formations'],
+        pendingReserveRequests: [{
+          request_id: 'req-raw-names', corps_id: 'arbih_3rd_corps', faction: 'RBiH', reason: 'defensive_gap',
+          purpose: 'defensive', priority: 80, severityBand: 'critical', travel_hops: 1,
+          description: 'Reserve support requested.', suggested_brigade_id: 'elite_internal_brigade', turn_requested: 1,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenReservePanel: vi.fn(),
+      onOpenDecisionRoomTarget: vi.fn(),
+    }));
+
+    expect(container.textContent).toContain('Elite Internal Brigade');
+    expect(container.textContent).toContain('1st Corps');
+    expect(container.textContent).not.toMatch(/elite_internal_brigade|arbih_1st_corps/);
   });
 
   it('uses high-contrast decision header treatment over bright packet images', () => {
@@ -297,9 +439,35 @@ describe('decision family modals', () => {
     expect(screen.getByText('Second Officer')).toBeTruthy();
     expect(screen.queryByText('First Officer')).toBeNull();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Acknowledge' }));
+    expect(screen.queryByRole('button', { name: 'Acknowledge arrival' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Keep current commander' }));
     await waitFor(() => expect(acknowledgeOfficerEvent).toHaveBeenCalledWith('evt-second'));
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('labels a new officer arrival as an acknowledgement rather than a retention decision', () => {
+    render(React.createElement(OfficerMatterModal, {
+      itemId: 'officer:arrival-event',
+      state: makeState({
+        pendingOfficerEvents: [{
+          event_id: 'arrival-event',
+          type: 'officer_available',
+          faction: 'RS',
+          turn: 4,
+          officer_id: 'arriving-officer',
+          officer_name: 'Arriving Officer',
+          officer_competence: 3,
+          officer_aggressiveness: 3,
+          officer_defensive_skill: 3,
+          acknowledged: false,
+        }],
+      }),
+      onClose: vi.fn(),
+      onOpenPersonnel: vi.fn(),
+    }));
+
+    expect(screen.getByRole('button', { name: 'Acknowledge arrival' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Keep current commander' })).toBeNull();
   });
 
   it('does not substitute the first officer matter when the requested id is stale', () => {
@@ -398,7 +566,7 @@ describe('decision family modals', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit as counter-proposal' }));
 
     await waitFor(() => expect(submitCounterOffer).toHaveBeenCalledWith({
-      parentOfferId: 'owen_stoltenberg',
+      parentOfferId: 'HRHB_001',
       planId: 'owen_stoltenberg',
       response: 'conditional_accept',
       proposedSplit: { RBiH: 33, RS: 52, HRHB: 15 },

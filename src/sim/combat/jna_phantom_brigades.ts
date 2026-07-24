@@ -294,6 +294,32 @@ const JNA_PHANTOM_DEFS: PhantomDef[] = [
     },
 ];
 
+const SYNTHETIC_JNA_COMMAND_IDS = ['jna_herzegovina_command'] as const;
+
+function retireEmptySyntheticJnaCommands(state: GameState): void {
+    const formations = state.military.formations ?? {};
+    const spawned = new Set(state.military.phantoms_spawned ?? []);
+
+    for (const commandId of SYNTHETIC_JNA_COMMAND_IDS) {
+        const command = formations[commandId];
+        if (!command || command.status !== 'active') continue;
+
+        const syntheticPhantomIds = JNA_PHANTOM_DEFS
+            .filter((definition) => definition.corps_id === commandId)
+            .map((definition) => definition.id);
+        if (!syntheticPhantomIds.some((phantomId) => spawned.has(phantomId))) continue;
+
+        const hasActiveSubordinate = Object.values(formations).some((formation) => (
+            formation?.corps_id === commandId && formation.status === 'active'
+        ));
+        if (hasActiveSubordinate) continue;
+
+        command.status = 'inactive';
+        command.lifecycle_status = 'withdrawn';
+        command.readiness = 'degraded';
+    }
+}
+
 /**
  * HV (Croatian Army) phantom brigades — temporary formations representing
  * Croatian Army assets that supported HVO in Operation Jackal (June 1992).
@@ -835,6 +861,7 @@ export function processJnaWithdrawals(state: GameState): JnaWithdrawalEvent[] {
         delete state.military.formations[phantomId];
     }
 
+    retireEmptySyntheticJnaCommands(state);
     return events;
 }
 

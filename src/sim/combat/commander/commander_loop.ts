@@ -214,17 +214,7 @@ export function applyCommanderOutput(
     // 2. Mark this corps as AI-decided (so old formula bot skips it)
     corps.ai_decided = true;
 
-    // 3. Add new operations (don't replace existing active ones)
-    for (const op of output.operations) {
-        // Reject duplicate commander emissions that target the same theater or reuse the
-        // same brigades, even when the generated name differs by turn suffix.
-        const existing = corps.active_operations.find(ao => operationsConflict(ao, op));
-        if (!existing) {
-            corps.active_operations.push(op as typeof corps.active_operations[number]);
-        }
-    }
-
-    // 4. Apply sector stances
+    // 3. Apply sector stances
     const sectorLookup = state.military.corps_front_sectors;
     if (sectorLookup) {
         for (const stanceUpdate of output.sector_stances) {
@@ -236,7 +226,7 @@ export function applyCommanderOutput(
         }
     }
 
-    // 5. Persist commander state for next turn's continuity.
+    // 4. Gate Level-1 execution before admitting commander operations.
     //    v0.8.4 Phase D — Level 1 plan-launch guard:
     //    If autonomy_level === 1, block plan from advancing to 'executing' unless
     //    player_op_response exists and approved === true for this plan.
@@ -244,9 +234,31 @@ export function applyCommanderOutput(
     //    If no response yet → hold the plan at 'ready' (do not emit the operation).
     //    Guard against headless/test states where meta may be absent.
     const autonomyLevel = state.meta?.autonomy_level ?? 0;
+    const updatedPlan = output.updated_state.current_plan;
+    const playerOpResp = corps.player_op_response;
+    const activatedOperations: Array<typeof corps.active_operations[number]> = [];
+    let operationsAdmitted = false;
+    // The exact same active operation satisfies a retried write; a conflicting
+    // operation with a different identity leaves the approval pending.
+    const admitCommanderOperations = (): void => {
+        operationsAdmitted = true;
+        for (const op of output.operations) {
+            const candidate = op as typeof corps.active_operations[number];
+            const existing = corps.active_operations.find(active => operationsConflict(active, candidate));
+            if (!existing) {
+                corps.active_operations.push(candidate);
+                activatedOperations.push(candidate);
+                if (op.type === 'probe') {
+                    corps.consecutive_probes = (corps.consecutive_probes ?? 0) + 1;
+                } else if (op.type === 'sector_attack') {
+                    corps.consecutive_probes = 0;
+                }
+            } else if (existing.name === candidate.name) {
+                activatedOperations.push(existing);
+            }
+        }
+    };
     if (autonomyLevel === 1) {
-        const updatedPlan = output.updated_state.current_plan;
-        const playerOpResp = corps.player_op_response;
         if (updatedPlan && updatedPlan.status === 'executing') {
             const planApproved =
                 playerOpResp !== undefined &&
@@ -261,12 +273,20 @@ export function applyCommanderOutput(
                 // Player rejected — abandon plan, emit no new operations from it this turn.
                 corps.commander_state = { ...output.updated_state, current_plan: null };
                 corps.status_reason = 'plan abandoned: player rejected op proposal at Level 1';
+                corps.player_op_response = undefined;
                 return;
             } else if (!planApproved) {
                 // No player response yet — hold plan at 'ready', emit no new operations.
                 const heldPlan = { ...updatedPlan, status: 'ready' as const };
                 corps.commander_state = { ...output.updated_state, current_plan: heldPlan };
                 corps.status_reason = 'plan held at ready: awaiting player approval at Level 1';
+                return;
+            }
+            admitCommanderOperations();
+            if (activatedOperations.length === 0) {
+                const heldPlan = { ...updatedPlan, status: 'ready' as const };
+                corps.commander_state = { ...output.updated_state, current_plan: heldPlan };
+                corps.status_reason = 'approved plan held at ready: operation emission blocked';
                 return;
             }
             // planApproved === true → fall through, apply output normally.
@@ -276,21 +296,22 @@ export function applyCommanderOutput(
             // player_op_response.force_launched. An ordinary Commit (accept-proposal)
             // also stages player_op_response.approved === true but is NOT a force-launch
             // and must not be tagged (downstream command-strain/history treats
-            // was_force_launched as Direct Intervention). The emitted ops were pushed
-            // by reference from output.operations in step 3, so tagging those objects
-            // tags the ops now on corps.active_operations.
+            // was_force_launched as Direct Intervention).
             //
             // Headless/bot runs never set player_op_response and stay at autonomy
             // level 0, so this branch is never taken outside human play — baseline
             // stays byte-identical. No clock / RNG used.
             if (playerOpResp?.force_launched === true) {
-                for (const emittedOp of output.operations) {
-                    emittedOp.force_launch = true;
-                    emittedOp.was_force_launched = true;
+                for (const operation of activatedOperations) {
+                    operation.force_launch = true;
+                    operation.was_force_launched = true;
                 }
             }
+            corps.player_op_response = undefined;
         }
     }
+    if (!operationsAdmitted) admitCommanderOperations();
+    // 5. Persist commander state for next turn's continuity.
     corps.commander_state = output.updated_state;
 
     // 6. Persist commander reinforcement pressure so Army HQ can consume it next turn.

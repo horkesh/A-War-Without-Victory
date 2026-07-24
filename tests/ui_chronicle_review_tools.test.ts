@@ -4,6 +4,7 @@ import {
     countChronicleEntriesByFilter,
     filterChronicleEntries,
 } from '../src/ui/map/components/chronicle/ChronicleReviewFilters.js';
+import * as chronicleReviewTools from '../src/ui/map/components/chronicle/ChronicleReviewFilters.js';
 import type { ChronicleEntry } from '../src/ui/map/components/chronicle/generateChronicleEntries.js';
 
 const entries: ChronicleEntry[] = [
@@ -58,5 +59,38 @@ describe('Chronicle review tools wiring', () => {
             'Officer of the Week',
         ]);
         expect(filterChronicleEntries(entries, 'humanitarian')).toEqual([]);
+    });
+
+    it('hides zero-count review filters while always retaining All', () => {
+        const getVisibleChronicleFilters = (chronicleReviewTools as Record<string, unknown>)
+            .getVisibleChronicleFilters;
+
+        expect(typeof getVisibleChronicleFilters).toBe('function');
+        if (typeof getVisibleChronicleFilters !== 'function') return;
+
+        const visible = getVisibleChronicleFilters(countChronicleEntriesByFilter([
+            entries[0],
+        ])) as typeof CHRONICLE_FILTERS;
+
+        expect(visible.map(filter => filter.id)).toEqual(['all', 'headlines', 'combat']);
+    });
+
+    it('restores Personnel when a synthetic personnel entry appears', () => {
+        const getVisibleChronicleFilters = (chronicleReviewTools as Record<string, unknown>)
+            .getVisibleChronicleFilters;
+
+        expect(typeof getVisibleChronicleFilters).toBe('function');
+        if (typeof getVisibleChronicleFilters !== 'function') return;
+
+        const withoutPersonnel = getVisibleChronicleFilters(countChronicleEntriesByFilter([
+            entries[0],
+        ])) as typeof CHRONICLE_FILTERS;
+        const withPersonnel = getVisibleChronicleFilters(countChronicleEntriesByFilter([
+            entries[0],
+            entries[4],
+        ])) as typeof CHRONICLE_FILTERS;
+
+        expect(withoutPersonnel.some(filter => filter.id === 'personnel')).toBe(false);
+        expect(withPersonnel.some(filter => filter.id === 'personnel')).toBe(true);
     });
 });

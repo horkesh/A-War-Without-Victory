@@ -14,6 +14,7 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type { CollapseDomain } from '../pressure/phase3c_exhaustion_collapse_gating.js';
 import { getEnablePhase3C } from '../pressure/phase3c_exhaustion_collapse_gating.js';
 import type { EntityId } from '../pressure/pressure_exposure.js';
@@ -279,7 +280,7 @@ function updateCapacityModifiers(
 export function recomputePhase3DCapacityModifiersFromDamage(state: GameState): void {
     const byEntity = state.political.collapse_damage?.by_entity;
     if (!byEntity || typeof byEntity !== 'object') return;
-    const entityIds = Object.keys(byEntity).sort((a, b) => a.localeCompare(b));
+    const entityIds = Object.keys(byEntity).sort(strictCompare);
     for (const entityId of entityIds) {
         const damage = byEntity[entityId];
         if (!damage || typeof damage !== 'object') continue;
@@ -416,7 +417,7 @@ export function applyPhase3DCollapseResolution(
     }> = [];
 
     // Process all entities with Tier-1 eligibility
-    const entityIds = Object.keys(tier1Eligibility).sort((a, b) => a.localeCompare(b));
+    const entityIds = Object.keys(tier1Eligibility).sort(strictCompare);
 
     for (const entityId of entityIds) {
         const tier1State = tier1Eligibility[entityId];
@@ -506,7 +507,7 @@ export function applyPhase3DCollapseResolution(
     // Sort events by entity ID, then domain (deterministic ordering)
     appliedEvents.sort((a, b) => {
         if (a.sid !== b.sid) {
-            return a.sid.localeCompare(b.sid);
+            return strictCompare(a.sid, b.sid);
         }
         const domainOrder: Record<CollapseDomain, number> = { authority: 0, cohesion: 1, spatial: 2 };
         return domainOrder[a.domain] - domainOrder[b.domain];

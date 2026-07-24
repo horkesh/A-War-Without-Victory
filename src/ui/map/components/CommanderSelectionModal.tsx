@@ -134,7 +134,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
         >
             <>
                 <div className="px-4 py-3 border-b-2 border-panel-border bg-panel-card/80">
-                    <div id="commander-selection-title" className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">{t('commanderSelect.title')}</div>
+                    <div id="commander-selection-title" className="text-xs uppercase font-bold text-neutral-500 tracking-wider">{t('commanderSelect.title')}</div>
                     <div className="text-sm font-bold mt-0.5">
                         {operationDisplayName} - {corpsName}
                     </div>
@@ -156,14 +156,14 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                                         <div className="font-bold text-[12px]">
                                             {formatRank(officer.rank)} {officer.name}
                                         </div>
-                                        <div className="text-[9px] text-text-muted italic">{getArchetype(officer)}</div>
+                                        <div className="text-xs text-text-muted italic">{getArchetype(officer)}</div>
                                     </div>
-                                    <span className={`text-[8px] uppercase font-bold ${fit.color}`}>
+                                    <span className={`text-xs uppercase font-bold ${fit.color}`}>
                                         {fit.label}
                                     </span>
                                 </div>
 
-                                <div className="mt-1.5 flex gap-4 text-[9px]">
+                                <div className="mt-1.5 flex gap-4 text-xs">
                                     <span>
                                         <span className="text-neutral-500">{t('commanderSelect.comp')} </span>
                                         <span className={`font-mono ${getRatingColor(officer.competence)}`}>{formatPips(officer.competence)}</span>
@@ -176,12 +176,12 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                                     </span>
                                 </div>
 
-                                <div className="mt-1 text-[9px] text-text-muted italic">
+                                <div className="mt-1 text-xs text-text-muted italic">
                                     {t('commanderSelect.personalityPrep', { personality, turns: prepEst })}
                                 </div>
 
                                 {officer.casualty_vulnerability != null && officer.casualty_vulnerability > 0.5 && (
-                                    <div className="mt-0.5 text-[9px] text-red-300 font-semibold">{t('commanderSelect.highCasualtyRisk')}</div>
+                                    <div className="mt-0.5 text-xs text-red-300 font-semibold">{t('commanderSelect.highCasualtyRisk')}</div>
                                 )}
                             </button>
                         );
@@ -189,18 +189,18 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
 
                     {unavailableOfficers.length > 0 && (
                         <div className="pt-2 border-t border-panel-border">
-                            <div className="text-[8px] uppercase text-neutral-400 font-bold mb-1">{t('commanderSelect.unavailable')}</div>
+                            <div className="text-xs uppercase text-neutral-400 font-bold mb-1">{t('commanderSelect.unavailable')}</div>
                             {unavailableOfficers.map(({ officer, reason }) => (
-                                <div key={officer.id} className="px-3 py-1.5 text-neutral-400 text-[10px]">
+                                <div key={officer.id} className="px-3 py-1.5 text-neutral-400 text-xs">
                                     <span className="font-semibold">{formatRank(officer.rank)} {officer.name}</span>
-                                    <span className="ml-2 text-[8px] uppercase">[{reason}]</span>
+                                    <span className="ml-2 text-xs uppercase">[{reason}]</span>
                                 </div>
                             ))}
                         </div>
                     )}
 
                     {availableOfficers.length === 0 && unavailableOfficers.length === 0 && (
-                        <div className="text-[10px] text-text-muted italic text-center py-8">{t('commanderSelect.noOfficers')}</div>
+                        <div className="text-xs text-text-muted italic text-center py-8">{t('commanderSelect.noOfficers')}</div>
                     )}
                 </div>
 
@@ -208,7 +208,7 @@ export function CommanderSelectionModal({ isOpen, onClose, onSelect }: Commander
                     <button
                         type="button"
                         onClick={onClose}
-                        className="kbd-focus px-4 py-1.5 text-[10px] uppercase font-bold bg-panel-card hover:bg-panel-border border border-panel-border transition-colors"
+                        className="kbd-focus px-4 py-1.5 text-xs uppercase font-bold bg-panel-card hover:bg-panel-border border border-panel-border transition-colors"
                     >
                         {t('commanderSelect.backToDraft')}
                     </button>

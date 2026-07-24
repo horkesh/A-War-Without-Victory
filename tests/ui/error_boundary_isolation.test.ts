@@ -84,8 +84,9 @@ describe('RootErrorBoundary panel isolation', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
     const armyHqSource = readFileSync('src/ui/map/components/army_hq/ArmyHQModal.tsx', 'utf8');
 
-    expect(appSource).toMatch(/<RootErrorBoundary zone="army hq">[\s\S]*<ArmyHQModal onDecisionRoomNavigateTarget=\{openDecisionRoomTarget\} eventCatalog=\{eventCatalogFull\} \/>[\s\S]*<\/RootErrorBoundary>/);
-    expect(appSource).toMatch(/<RootErrorBoundary zone="ops planning">[\s\S]*<OpsPlanningModal \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(appSource).toMatch(/<RootErrorBoundary zone="army hq">[\s\S]*<ArmyHQModal[\s\S]*?\/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(appSource).not.toContain("import { OpsPlanningModal }");
+    expect(appSource).not.toContain('<OpsPlanningModal />');
     expect(armyHqSource).not.toContain('PresidentialDecisionRoomPanel');
     expect(armyHqSource).toContain('data-testid="army-hq-decision-room-handoff"');
     expect(armyHqSource).toMatch(/<RootErrorBoundary zone="presidential decisions">[\s\S]*<PresidentialAttentionPanel[\s\S]*<\/RootErrorBoundary>/);

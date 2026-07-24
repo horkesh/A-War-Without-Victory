@@ -9,6 +9,7 @@ import { computeFrontBreaches } from './front_breaches.js';
 import type { FactionId, GameState, NegotiationStatus } from './game_state.js';
 import type { MilitiaFatigueStepReport } from './militia_fatigue.js';
 import { computeSupplyReachability } from './supply_reachability.js';
+import { strictCompare } from './validateGameState.js';
 
 // Constants
 const PRESSURE_THRESHOLD = 10;
@@ -411,7 +412,7 @@ export function generateNegotiationOffers(
         const kindA = kindOrder[a.offer.kind];
         const kindB = kindOrder[b.offer.kind];
         if (kindA !== kindB) return kindA - kindB;
-        return a.scopeHash.localeCompare(b.scopeHash);
+        return strictCompare(a.scopeHash, b.scopeHash);
     });
 
     const selectedOffer = scoredCandidates.length > 0 ? scoredCandidates[0].offer : null;

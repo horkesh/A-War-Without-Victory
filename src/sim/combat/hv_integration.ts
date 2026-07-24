@@ -49,7 +49,10 @@ export interface HvBrigadeDef {
     morale: number;
     experience: number;
     equipment_class: string;
+    /** Preferred deployment OSID when it is HRHB-controlled. */
     location_osid: string;
+    /** Ordered western entry fallbacks; authored order is deterministic. */
+    fallback_location_osids: readonly string[];
     composition: BrigadeComposition;
     /** True = elite formation (no home distance penalty). */
     is_elite: boolean;
@@ -69,6 +72,7 @@ export const HV_BRIGADE_DEFS: readonly HvBrigadeDef[] = [
         experience: 0.65,
         equipment_class: 'mechanized',
         location_osid: 'op:livno:livno_2',
+        fallback_location_osids: ['op:duvno:tomislavgrad_2'],
         is_elite: true,
         composition: {
             infantry: 2000,
@@ -87,7 +91,8 @@ export const HV_BRIGADE_DEFS: readonly HvBrigadeDef[] = [
         morale: 85,
         experience: 0.60,
         equipment_class: 'motorized',
-        location_osid: 'op:tomislavgrad:tomislavgrad_2',
+        location_osid: 'op:duvno:tomislavgrad_2',
+        fallback_location_osids: ['op:livno:livno_2'],
         is_elite: true,
         composition: {
             infantry: 1800,
@@ -107,6 +112,7 @@ export const HV_BRIGADE_DEFS: readonly HvBrigadeDef[] = [
         experience: 0.70,
         equipment_class: 'motorized',
         location_osid: 'op:glamoc:glamoc_2',
+        fallback_location_osids: ['op:livno:livno_2', 'op:duvno:tomislavgrad_2'],
         is_elite: true,
         composition: {
             infantry: 1400,
@@ -126,6 +132,7 @@ export const HV_BRIGADE_DEFS: readonly HvBrigadeDef[] = [
         experience: 0.55,
         equipment_class: 'light_infantry',
         location_osid: 'op:kupres:bucovaca',
+        fallback_location_osids: ['op:duvno:tomislavgrad_2', 'op:livno:livno_2'],
         is_elite: false,
         composition: {
             infantry: 2000,
@@ -169,7 +176,7 @@ type HvFormationState = FormationState & {
  * Spawn a single HV brigade into the game state.
  * Called by tickHvIntegration when conditions are met.
  */
-function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
+function spawnHvBrigade(state: GameState, def: HvBrigadeDef, locationOsid: string): void {
     const turn = state.meta.turn;
 
     const formation: HvFormationState = {
@@ -182,8 +189,8 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
         kind: 'brigade',
         personnel: def.personnel,
         corps_id: HV_CORPS_ID,
-        location_osid: def.location_osid,
-        home_osid: def.location_osid,
+        location_osid: locationOsid,
+        home_osid: locationOsid,
         posture: 'attack',
         cohesion: def.cohesion,
         morale: def.morale,
@@ -203,6 +210,12 @@ function spawnHvBrigade(state: GameState, def: HvBrigadeDef): void {
     }
 
     state.military.formations[def.id] = formation;
+}
+
+function resolveHvDeploymentOsid(state: GameState, def: HvBrigadeDef): string | undefined {
+    const controllers = state.political.political_controllers ?? {};
+    const candidates = [def.location_osid, ...def.fallback_location_osids];
+    return candidates.find(osid => controllers[osid] === 'HRHB');
 }
 
 /**
@@ -255,12 +268,29 @@ export function tickHvIntegration(state: GameState): HvIntegrationReport {
     // Spawn HV brigades
     if (!state.military.formations) state.military.formations = {};
 
+    const placements = new Map<FormationId, string>();
+    for (const def of HV_BRIGADE_DEFS) {
+        if (state.military.formations[def.id]) continue;
+        const locationOsid = resolveHvDeploymentOsid(state, def);
+        if (!locationOsid) {
+            return {
+                washington_signed: true,
+                washington_turn: rhs.washington_turn,
+                already_spawned: false,
+                spawned_this_turn: false,
+                spawned_brigade_ids: [],
+                turns_until_spawn: 0,
+            };
+        }
+        placements.set(def.id, locationOsid);
+    }
+
     const spawnedIds: string[] = [];
     for (const def of HV_BRIGADE_DEFS) {
-        // Guard: don't spawn if somehow already exists
         if (state.military.formations[def.id]) continue;
-
-        spawnHvBrigade(state, def);
+        const locationOsid = placements.get(def.id);
+        if (!locationOsid) continue;
+        spawnHvBrigade(state, def, locationOsid);
         spawnedIds.push(def.id);
     }
 

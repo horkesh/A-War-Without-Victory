@@ -58,10 +58,10 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
 
             {/* Header block — WP3b: darkened text colors for WCAG AA */}
             <div className="text-center mb-6 space-y-0.5">
-                <div className="text-[9px] uppercase tracking-[0.3em] text-[#3a3228]">{headers.republic}</div>
-                <div className="text-[9px] uppercase tracking-[0.3em] text-[#3a3228]">{headers.army}</div>
-                <div className="text-[10px] font-bold text-[#1a1610] mt-2">{corpsName} \u2014 {t('opsPlanning.narrative.g2Office')}</div>
-                <div className="text-[9px] text-[#4a4238]">
+                <div className="text-xs uppercase tracking-[0.3em] text-[#3a3228]">{headers.republic}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-[#3a3228]">{headers.army}</div>
+                <div className="text-xs font-bold text-[#1a1610] mt-2">{corpsName} \u2014 {t('opsPlanning.narrative.g2Office')}</div>
+                <div className="text-xs text-[#4a4238]">
                     Ref: G2/{date.replace(/-/g, '')}/OPS \u2022 {date}
                 </div>
             </div>
@@ -70,8 +70,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
 
             {/* WP3d: Quick Assessment summary box */}
             <div className="mb-4 p-3 rounded border border-[#c0b090] bg-[#f0ead8]">
-                <div className="text-[9px] font-bold uppercase tracking-wider text-[#1a1610] mb-2">{t('opsPlanning.narrative.quickAssessment')}</div>
-                <div className="grid grid-cols-2 gap-1 text-[9px]">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#1a1610] mb-2">{t('opsPlanning.narrative.quickAssessment')}</div>
+                <div className="grid grid-cols-2 gap-1 text-xs">
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.forceBalance')}</span>
                     <span className={`font-bold uppercase ${forceBalance?.toneClass ?? 'text-[#1a1610]'}`}>{forceBalance?.label ?? t('corpsFront.unreported')}</span>
                     <span className="text-[#3a3228]">{t('opsPlanning.narrative.intelConfidence')}</span>
@@ -87,10 +87,10 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
             {sections.length > 0 ? (
                 sections.map((section, idx) => (
                     <div key={idx} className="mb-4">
-                        <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
+                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
                             {idx + 1}. {translateTitle(section.title)}
                         </div>
-                        <div className="text-[10px] text-[#2a2218] leading-relaxed whitespace-pre-wrap">
+                        <div className="text-xs text-[#2a2218] leading-relaxed whitespace-pre-wrap">
                             {section.content}
                         </div>
                     </div>
@@ -99,10 +99,10 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                 // Fallback: generate from quantitative data
                 <div className="space-y-4">
                     <div>
-                        <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
+                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
                             {t('opsPlanning.narrative.enemyTitle')}
                         </div>
-                        <div className="text-[10px] text-[#2a2218] leading-relaxed">
+                        <div className="text-xs text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.enemyLine', {
                                 summary: forceBalance?.summary ?? t('corpsFront.unreported'),
                                 confidence: prediction.overall.intelConfidence == null ? t('corpsFront.unreported') : (prediction.overall.intelConfidence * 100).toFixed(0),
@@ -110,10 +110,10 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                         </div>
                     </div>
                     <div>
-                        <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
+                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
                             {t('opsPlanning.narrative.ownTitle')}
                         </div>
-                        <div className="text-[10px] text-[#2a2218] leading-relaxed">
+                        <div className="text-xs text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.ownLine', {
                                 casualties: prediction.overall.estimatedCasualties == null ? t('corpsFront.unreported') : prediction.overall.estimatedCasualties.toLocaleString(),
                                 outcome: predictedOutcomeLabel,
@@ -121,10 +121,10 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
                         </div>
                     </div>
                     <div>
-                        <div className="text-[10px] font-bold text-[#1a1610] uppercase tracking-wider mb-1">
+                        <div className="text-xs font-bold text-[#1a1610] uppercase tracking-wider mb-1">
                             {t('opsPlanning.narrative.assessmentTitle')}
                         </div>
-                        <div className="text-[10px] text-[#2a2218] leading-relaxed">
+                        <div className="text-xs text-[#2a2218] leading-relaxed">
                             {t('opsPlanning.narrative.assessmentLine', { action: recommendedActionLabel })}
                         </div>
                     </div>
@@ -133,8 +133,8 @@ export function NarrativeTab({ prediction, commanderName, corpsName, faction, da
 
             {/* Signature */}
             <div className="border-t border-[#c0b090] mt-6 pt-3">
-                <div className="text-[9px] text-[#4a4238]">{t('opsPlanning.narrative.g2Chief')}</div>
-                <div className="text-[10px] font-bold text-[#1a1610] mt-1">{commanderName}</div>
+                <div className="text-xs text-[#4a4238]">{t('opsPlanning.narrative.g2Chief')}</div>
+                <div className="text-xs font-bold text-[#1a1610] mt-1">{commanderName}</div>
             </div>
         </div>
     );

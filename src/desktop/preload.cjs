@@ -58,12 +58,6 @@ contextBridge.exposeInMainWorld('awwv', {
   openTacticalMapWindow: (payload) => ipcRenderer.invoke('open-tactical-map-window', payload),
   getRecruitmentCatalog: () => ipcRenderer.invoke('get-recruitment-catalog'),
   applyRecruitment: (brigadeId, equipmentClass) => ipcRenderer.invoke('apply-recruitment', { brigadeId, equipmentClass }),
-  stageAttackOrder: (brigadeId, targetSettlementId) => ipcRenderer.invoke('stage-attack-order', { brigadeId, targetSettlementId }),
-  stagePostureOrder: (brigadeId, posture) => ipcRenderer.invoke('stage-posture-order', { brigadeId, posture }),
-  stageMoveOrder: (brigadeId, targetMunicipalityId) => ipcRenderer.invoke('stage-move-order', { brigadeId, targetMunicipalityId }),
-  stageDeployOrder: (brigadeId) => ipcRenderer.invoke('stage-deploy-order', { brigadeId }),
-  stageUndeployOrder: (brigadeId) => ipcRenderer.invoke('stage-undeploy-order', { brigadeId }),
-  assignBrigadeToSector: (brigadeId, sectorId) => ipcRenderer.invoke('assign-brigade-to-sector', { brigadeId, sectorId }),
   queryMovementRange: (brigadeId) => ipcRenderer.invoke('query-movement-range', { brigadeId }),
   queryMovementPath: (brigadeId, destinationSid) => ipcRenderer.invoke('query-movement-path', { brigadeId, destinationSid }),
   queryCombatEstimate: (brigadeId, targetSettlementId) => ipcRenderer.invoke('query-combat-estimate', { brigadeId, targetSettlementId }),
@@ -72,8 +66,6 @@ contextBridge.exposeInMainWorld('awwv', {
   queryBattleEvents: () => ipcRenderer.invoke('query-battle-events'),
   clearOrders: (brigadeId) => ipcRenderer.invoke('clear-orders', { brigadeId }),
   stageLogisticsPriority: (faction, sectorId, priority) => ipcRenderer.invoke('stage-logistics-priority', { faction, sectorId, priority }),
-  stageCorpsOperationOrder: (payload) => ipcRenderer.invoke('stage-corps-operation-order', payload),
-  queryOperationPrediction: (payload) => ipcRenderer.invoke('query-operation-prediction', payload),
   // Force-op pushback OBJECTION query: read-only candidate plan + commander go/no-go for
   // a REQUEST-OP target ({ forceRatio, estimatedCasualties, recommendedAction, rejectionReason? }).
   queryDirectiveObjection: (payload) => ipcRenderer.invoke('query-directive-objection', payload),
@@ -93,7 +85,6 @@ contextBridge.exposeInMainWorld('awwv', {
   stageMunicipalitySupportOrder: (payload) => ipcRenderer.invoke('stage-municipality-support-order', payload),
   focusWarroom: () => ipcRenderer.invoke('focus-warroom'),
   getMapServerUrl: () => ipcRenderer.invoke('get-map-server-url'),
-  stageAssignOperationCommander: (payload) => ipcRenderer.invoke('stage-assign-operation-commander', payload),
   // REPLACE-CO presidential lever (Presidential Command Model slice 3/N): costed sack +
   // install. Supersedes the removed broken assign-commander / dismiss-officer handlers
   // (which read the stale state.named_officers path and applied no cost).
@@ -113,7 +104,10 @@ contextBridge.exposeInMainWorld('awwv', {
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
   resolvePeacePlan: (planId, response) => ipcRenderer.invoke('resolve-peace-plan', { planId, response }),
   submitCounterOffer: (payload) => ipcRenderer.invoke('submit-counter-offer', payload),
-  resolveParamilitaryRequests: (decisions) => ipcRenderer.invoke('resolve-paramilitary-requests', { decisions }),
+  resolveParamilitaryRequests: (decisions, options) => ipcRenderer.invoke('resolve-paramilitary-requests', {
+    decisions,
+    policy: options?.policy,
+  }),
   resolveDayton: (proposal) => ipcRenderer.invoke('resolve-dayton', proposal),
   // Read-only Dayton preview (Dayton Phase-4): bot responses + authoritative readouts, no mutation.
   previewDayton: (proposal) => ipcRenderer.invoke('preview-dayton', proposal),

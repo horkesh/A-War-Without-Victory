@@ -1,4 +1,7 @@
-import { areRbihHrhbAllied } from '../sim/early_war/alliance_update.js';
+import {
+    areRbihHrhbAllied,
+    DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN,
+} from '../sim/early_war/alliance_update.js';
 import { GameState } from '../state/game_state.js';
 import { getPoliticalControllerOSID, getSettlementControlStatus } from '../state/settlement_control.js';
 import { strictCompare } from '../state/validateGameState.js';
@@ -52,7 +55,8 @@ export function computeFrontEdges(
                 (sideA === 'RBiH' && sideB === 'HRHB') || (sideA === 'HRHB' && sideB === 'RBiH');
             if (isRbihHrhbPair) {
                 const turn = state.meta?.turn ?? 0;
-                const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+                const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn
+                    ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
                 const beforeWar = turn < earliestWar;
                 if (beforeWar || areRbihHrhbAllied(state)) continue;
             }
@@ -124,7 +128,8 @@ export function computeFrontEdgesOsid(
         const isRbihHrhbPair = (sideA === 'RBiH' && sideB === 'HRHB') || (sideA === 'HRHB' && sideB === 'RBiH');
         if (isRbihHrhbPair) {
             const turn = state.meta?.turn ?? 0;
-            const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn ?? 26;
+            const earliestWar = state.meta?.rbih_hrhb_war_earliest_turn
+                ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
             if (turn < earliestWar || areRbihHrhbAllied(state)) continue;
         }
         const [a, b, side_a, side_b] = edge.a < edge.b

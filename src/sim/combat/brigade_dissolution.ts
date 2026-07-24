@@ -2,9 +2,9 @@
  * Brigade dissolution — automatically dissolve combat-ineffective brigades.
  *
  * Criteria (TWO of three must be true):
- * - personnel < DISSOLUTION_PERSONNEL_THRESHOLD (300)
- * - cohesion <= DISSOLUTION_COHESION_THRESHOLD (15)
- * - morale <= DISSOLUTION_MORALE_THRESHOLD (10)
+ * - personnel < DISSOLUTION_PERSONNEL_THRESHOLD (400)
+ * - cohesion <= DISSOLUTION_COHESION_THRESHOLD (20)
+ * - morale <= DISSOLUTION_MORALE_THRESHOLD (15)
  *
  * Historical: BB1 p.455 confirms brigades were destroyed (9th Grahovo LIB).
  * BB1 p.443: After Srebrenica, survivors reconstituted into 28th Division —
@@ -54,10 +54,6 @@ export const DISSOLUTION_ABSOLUTE_FLOOR = 150;
 /** Enclave brigades use a lower absolute floor — they are last-line defenders
  *  with nowhere to dissolve to. Historically survived at remnant strength (Goražde, Srebrenica). */
 export const ENCLAVE_DISSOLUTION_ABSOLUTE_FLOOR = 50;
-/** Personnel cap: brigades above this can't dissolve from morale+cohesion alone.
- *  A 1400-man brigade with low morale is demoralized, not destroyed —
- *  combat multipliers already penalize it at 30% effectiveness. */
-export const DISSOLUTION_PERSONNEL_CAP = 800;
 export const DISSOLUTION_PERSONNEL_TO_RESERVE_RATE = 0.5;
 export const DISSOLUTION_EQUIPMENT_TRANSFER_RATE = 0.7;
 
@@ -66,7 +62,7 @@ export const DISSOLUTION_EQUIPMENT_TRANSFER_RATE = 0.7;
  * Systems Manual v0.7.0 §6.4, 2026-05-03): turns of sustained morale
  * collapse (morale ≤ 15 with hysteresis reset > 20, tracked in
  * morale_drift.ts) before the morale-collapse override path bypasses
- * the personnel cap and 2-of-3 criteria. Gated behind env flag
+ * the 2-of-3 criteria. Gated behind env flag
  * MORALE_OVERRIDE_ENABLED (default false) — counter still increments
  * for diagnostic visibility when the gate is off.
  */
@@ -137,21 +133,14 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // LANE-NIGHTSHIFT-N4-CANON-AMENDMENT (Engine Invariants v0.7.0 §6.2.4 +
         // Systems Manual v0.7.0 §6.4, 2026-05-03): morale-collapse override.
         // A brigade with morale_low_streak ≥ MORALE_OVERRIDE_TURNS (8) dissolves
-        // regardless of personnel cap. The streak counter is incremented in
+        // regardless of personnel. The streak counter is incremented in
         // morale_drift.ts whenever morale ≤ 15; reset when morale > 20.
         // Override is gated behind env flag MORALE_OVERRIDE_ENABLED (default
-        // false) — when off, the personnel cap exit fires as before. The
-        // streak counter still increments for diagnostic visibility.
+        // false). The streak counter still increments for diagnostic visibility.
         const moraleOverrideEnabled = process.env.MORALE_OVERRIDE_ENABLED === 'true';
         const streak = typeof f.morale_low_streak === 'number' ? f.morale_low_streak : 0;
         const moraleCollapseTrigger =
             moraleOverrideEnabled && streak >= MORALE_OVERRIDE_TURNS;
-
-        // Personnel cap: brigades above DISSOLUTION_PERSONNEL_CAP can't dissolve from
-        // morale+cohesion alone. A 1400-man brigade with low morale is demoralized, not
-        // destroyed — combat multipliers already penalize it at 30% effectiveness.
-        // Morale-collapse override (above) bypasses this cap.
-        if (!moraleCollapseTrigger && personnel >= DISSOLUTION_PERSONNEL_CAP) continue;
 
         // Dissolution criteria: always require at least requiredCriteria to be met.
         // The absolute floor counts as the "low personnel" criterion automatically.
@@ -180,25 +169,6 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // LANE-NIGHTSHIFT-N4: morale-collapse override is the fourth, independent
         // dissolution path and bypasses the 2-of-3 (or 3-of-3 enclave) criteria.
         if (!moraleCollapseTrigger && criteriaCount < requiredCriteria) continue;
-
-        // LANE-WAVE-30-REDO / ENGINE-2 Clause 1 (memo
-        // docs/40_reports/proposals/20260523_ENGINE_2_BRIGADE_LIFECYCLE_DESIGN.md
-        // §Part 4). Cohesion-only dissolution prevention: when the 2-of-3 (or
-        // 3-of-3 enclave) gate is met but the failing criteria are ONLY
-        // cohesion+morale (no morale-collapse override, no structural
-        // personnel destruction), demote the brigade to readiness='degraded'
-        // and continue — do NOT mark inactive/destroyed. Preserves the two
-        // genuine destruction paths: (i) moraleCollapseTrigger (catastrophic
-        // psychological breakdown after MORALE_OVERRIDE_TURNS sustained
-        // collapse) and (ii) lowPersonnel (structural combat destruction).
-        // Wave 30 ran this guard standalone; Engine-2 reintroduces it as the
-        // first half of a combined fix whose second half (reserve-fallback
-        // reconstitution in brigade_reconstitution.ts) closes the loop on
-        // brigades that did dissolve under (i)/(ii).
-        if (!moraleCollapseTrigger && !lowPersonnel) {
-            f.readiness = 'degraded';
-            continue;
-        }
 
         // Dissolve
         const personnelToReserve = Math.floor(personnel * DISSOLUTION_PERSONNEL_TO_RESERVE_RATE);
@@ -258,6 +228,7 @@ export function dissolveCombatIneffectiveBrigades(state: GameState): Dissolution
         // Mark as destroyed
         f.status = 'inactive';
         f.lifecycle_status = 'destroyed';
+        f.readiness = 'degraded';
         f.personnel = 0;
         // Record destruction turn for reconstitution delay
         f.destruction_turn = state.meta?.turn ?? 0;

@@ -34,7 +34,7 @@ export interface FactionReconProfile {
  * negative, so only combat or probes keep confidence high.
  *
  * Net in-contact rate = passive_buildup - confidence_decay:
- *   RS:   0.08 - 0.12 = -0.04/turn → combat intel (1.0) drops to threshold (0.35) in ~16 turns
+ *   RS:   0.08 - 0.12 = -0.04/turn → combat intel (1.0) drops to threshold (0.25) in ~19 turns
  *   RBiH: 0.12 - 0.10 = +0.02/turn → sustains above threshold indefinitely in contact
  *   HRHB: 0.08 - 0.12 = -0.04/turn → combat intel (1.0) drops to threshold (0.30) in ~18 turns
  */
@@ -102,7 +102,7 @@ export const SECTOR_INTEL_SOURCE_CONFIDENCE_BONUS = {
  * ARBiH starts blind (higher threshold to compensate), HRHB moderate.
  */
 export const INTEL_GATE_LAUNCH_THRESHOLD: Record<NonNullable<FactionId>, number> = {
-    RS: 0.35,    // Post-blitz VRS should probe before committing corps-level ops
+    RS: 0.25,    // JNA inheritance permits lower-confidence commitments
     RBiH: 0.40,  // Starting blind — need more intel before committing
     HRHB: 0.30,  // Croatian SIS provides moderate baseline
 };

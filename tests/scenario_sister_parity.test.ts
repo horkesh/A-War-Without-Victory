@@ -22,7 +22,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'fs';
+import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 // Fields that are intentionally INLINE-only in 40w (e.g., osid_control_overrides)
@@ -105,5 +105,24 @@ describe('scenario sister-parity (issue #25 sub-task E)', () => {
         }
 
         expect(wronglyAllowListed, wronglyAllowListed.join('\n')).toEqual([]);
+    });
+
+    it('all active definitive April 1992 scenarios use the canonical turn-40 bilateral-war floor', () => {
+        const scenarioNames = readdirSync(join(process.cwd(), 'data', 'scenarios'))
+            .filter((name) => /^apr1992_definitive_.*\.json$/.test(name))
+            .sort();
+        const mismatches: string[] = [];
+
+        for (const scenarioName of scenarioNames) {
+            const scenario = loadScenario(scenarioName);
+            if (scenario.enable_rbih_hrhb_dynamics !== true) continue;
+            if (scenario.rbih_hrhb_war_earliest_week !== 40) {
+                mismatches.push(
+                    `${scenarioName}: ${String(scenario.rbih_hrhb_war_earliest_week)}`,
+                );
+            }
+        }
+
+        expect(mismatches, mismatches.join('\n')).toEqual([]);
     });
 });

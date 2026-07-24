@@ -162,6 +162,20 @@ describe('VerdictScreen mount — verdict content', () => {
 
     it('outcome label', () => { expect(render()).toContain('Stalemate'); });
     it('date', () => { expect(render()).toContain('1995-10-01'); });
+    it('defaults focus to the player faction and replaces an unknown date sentinel', () => {
+        storeState = {
+            loadedGameState: endgame({
+                turn: 40,
+                player_faction: 'RS',
+                metadata: { turn: 40, date: 'UNKNOWN' },
+            }),
+        };
+        const html = render();
+        expect(html).toContain('data-awwv-verdict-focus="RS"');
+        expect(html).toContain('Territorial gains tainted by condemnation');
+        expect(html).toContain(turnToDateString(40));
+        expect(html).not.toContain('UNKNOWN');
+    });
     it('all faction tabs with outcome badges', () => {
         const h = render();
         expect(h).toContain('ARBiH'); expect(h).toContain('VRS'); expect(h).toContain('HVO');

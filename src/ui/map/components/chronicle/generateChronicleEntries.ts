@@ -43,6 +43,8 @@ import { buildWarWearinessChronicleEntries } from './warWearinessChronicle.js';
 import { buildRefugeeFlowChronicleEntries } from './refugeeFlowChronicle.js';
 import { buildSarajevoSiegeChronicleEntries } from './sarajevoSiegeChronicle.js';
 import { buildGeneralsDigestChronicleEntries } from './generalsDigestChronicle.js';
+import { projectOperationLifecycle } from '../../data/operationLifecycleProjection.js';
+import type { LoadedGameState } from '../../data/types.js';
 import { shouldNarrateTerritorySummary } from '../../data/territorySummaryGuard.js';
 import { t, type MessageKey } from '../../i18n/index.js';
 import type { EventDefinition } from '../../../../sim/events/event_types.js';
@@ -54,7 +56,6 @@ import {
     getPlayerSafeDisplacementGroupLabel,
     getPlayerSafeDisplayLabel,
     getPlayerSafeMilitaryFactionName,
-    getPlayerSafeOfficerName,
     getPlayerSafeOperationName,
     getPlayerSafeSettlementName,
 } from '../../utils/playerSafeText.js';
@@ -71,11 +72,28 @@ function reportedNumber(value: unknown): number | null {
     return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
-function formatOutcome(outcome: string): string {
+function formatOutcome(outcome: string | null | undefined): string {
     let key: MessageKey;
     switch (outcome) {
-        case 'attacker_victory':
+        case 'decisive_victory':
+            key = 'chronicle.generated.outcome.decisiveVictory';
+            break;
         case 'victory':
+            key = 'chronicle.generated.outcome.victory';
+            break;
+        case 'costly_victory':
+            key = 'chronicle.generated.outcome.costlyVictory';
+            break;
+        case 'stalemate':
+            key = 'chronicle.generated.outcome.stalemate';
+            break;
+        case 'repulsed':
+            key = 'chronicle.generated.outcome.repulsed';
+            break;
+        case 'catastrophic':
+            key = 'chronicle.generated.outcome.catastrophic';
+            break;
+        case 'attacker_victory':
         case 'success':
             key = 'chronicle.generated.outcome.attackerAdvance';
             break;
@@ -85,7 +103,6 @@ function formatOutcome(outcome: string): string {
             key = 'chronicle.generated.outcome.defenderHeld';
             break;
         case 'draw':
-        case 'stalemate':
             key = 'chronicle.generated.outcome.indecisive';
             break;
         case 'partial':
@@ -309,11 +326,11 @@ function operationObjectiveSummary(op: any): {
 }
 
 function buildOperationHistoryEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
-    if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
+    if (!playerFaction) return [];
 
     const entries: ChronicleEntry[] = [];
-    for (const op of state.operationHistory) {
-        if (op?.faction !== playerFaction) continue;
+    for (const row of projectOperationLifecycle(state as LoadedGameState).historyRows) {
+        const op = row.operation;
 
         const objectives = operationObjectiveSummary(op);
         const attacks = Number(op.total_attacks ?? 0);
@@ -327,7 +344,7 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
             || (objectives.heldAtClose === 0 && (outcome === 'success' || outcome === 'partial'));
 
         entries.push({
-            id: typeof op.operation_id === 'string' ? `operation-aar-${op.operation_id}` : undefined,
+            id: `operation-aar-${row.id}`,
             turn: Number(op.ended_turn ?? state.turn ?? 0),
             type: 'military',
             headline,
@@ -344,59 +361,8 @@ function buildOperationHistoryEntries(state: any, playerFaction: string | null):
                 operationAarId: typeof op.operation_id === 'string' ? op.operation_id : undefined,
                 operationName,
                 operationOutcome: outcome,
-            },
-        });
-    }
-
-    return entries;
-}
-
-function buildOfficerSpotlightEntries(state: any, playerFaction: string | null): ChronicleEntry[] {
-    if (!playerFaction || !Array.isArray(state?.operationHistory)) return [];
-
-    const entries: ChronicleEntry[] = [];
-    for (const op of state.operationHistory) {
-        if (op?.faction !== playerFaction) continue;
-
-        const commanderName = getPlayerSafeOfficerName(
-            typeof op.commander_name === 'string' ? op.commander_name : null,
-            '',
-        );
-        if (!commanderName) continue;
-
-        const commanderRank = typeof op.commander_rank === 'string' && op.commander_rank.trim().length > 0
-            ? op.commander_rank.trim()
-            : undefined;
-        const displayName = commanderRank ? `${commanderRank} ${commanderName}` : commanderName;
-        const objectives = operationObjectiveSummary(op);
-        const attacks = Number(op.total_attacks ?? 0);
-        const stars = Number(op.grade?.stars ?? 0);
-        const outcome = typeof op.outcome === 'string' ? op.outcome : 'unknown';
-        const operationName = getOperationDisplayName(op);
-        const headline = objectives.loggedCaptured > 0
-            || (!objectives.hasLoggedCaptureField && objectives.heldAtClose > 0)
-            || (objectives.heldAtClose === 0 && (outcome === 'success' || outcome === 'partial'));
-
-        entries.push({
-            id: typeof op.operation_id === 'string' ? `officer-week-${op.operation_id}` : undefined,
-            turn: Number(op.ended_turn ?? state.turn ?? 0),
-            type: 'personnel',
-            headline,
-            title: t('chronicle.generated.officer.title', { displayName }),
-            detail: [
-                operationName,
-                formatOperationOutcome(outcome),
-                objectives.detail,
-                t(attacks === 1 ? 'chronicle.generated.operation.attacks.one' : 'chronicle.generated.operation.attacks.many', { count: attacks }),
-                t(stars === 1 ? 'chronicle.generated.operation.stars.one' : 'chronicle.generated.operation.stars.many', { count: stars }),
-            ].join(' | '),
-            metadata: {
-                corpsId: typeof op.corps_id === 'string' ? op.corps_id : undefined,
-                operationAarId: typeof op.operation_id === 'string' ? op.operation_id : undefined,
-                operationName,
-                operationOutcome: outcome,
-                officerName: commanderName,
-                officerRank: commanderRank,
+                officerName: typeof op.commander_name === 'string' ? op.commander_name : undefined,
+                officerRank: typeof op.commander_rank === 'string' ? op.commander_rank : undefined,
             },
         });
     }
@@ -704,7 +670,6 @@ export function generateChronicleEntries(
 
     entries.push(...buildEndgameComparisonEntries(state));
     entries.push(...buildOperationHistoryEntries(state, playerFaction));
-    entries.push(...buildOfficerSpotlightEntries(state, playerFaction));
     entries.push(...buildDecisionLedgerEntries(state));
     entries.push(...buildConsequenceReceiptEntries(state, eventCatalog));
 

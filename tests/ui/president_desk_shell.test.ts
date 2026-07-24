@@ -66,10 +66,10 @@ describe('PresidentDeskShell', () => {
 
     expect(screen.getByRole('region', { name: 'President desk' })).toBeTruthy();
     expect(screen.getAllByText('Paramilitary authorization').length).toBeGreaterThan(0);
-    expect(screen.getByText('Review deployment')).toBeTruthy();
+    expect(screen.getByText('Review paramilitary')).toBeTruthy();
     expect(screen.getByRole('img', { name: 'Paramilitary authorization packet' }).getAttribute('src')).toContain('packet_thumb_paramilitary');
 
-    fireEvent.click(screen.getByText('Review deployment'));
+    fireEvent.click(screen.getByText('Review paramilitary'));
 
     expect(onAction).toHaveBeenCalledWith('paramilitary_review', 'paramilitary:1');
   });
@@ -103,6 +103,58 @@ describe('PresidentDeskShell', () => {
     const action = screen.getByTestId('desk-action-advance-clearance');
     expect(action.className).toContain('text-accent-gold');
     expect(action.className).not.toContain('text-red-100');
+  });
+
+  it('distinguishes optional review from a clear desk and opens advance review', () => {
+    const onAdvance = vi.fn();
+    const onReviewAdvance = vi.fn();
+    renderDesk({
+      onAdvance,
+      onReviewAdvance,
+      state: makeState({
+        pendingReserveRequests: [{
+          request_id: 'reserve-review',
+          corps_id: 'vrs_1st_krajina_corps',
+          faction: 'RS',
+          reason: 'defensive_gap',
+          priority: 40,
+          severityBand: 'routine',
+          travel_hops: 2,
+          description: 'Staff recommends reviewing reserve posture.',
+          suggested_brigade_id: null,
+          turn_requested: 1,
+        }],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(screen.getByText('Review recommended')).toBeTruthy();
+    expect(screen.queryByText('Ready')).toBeNull();
+    fireEvent.click(screen.getByTestId('desk-action-review-priorities'));
+    expect(onReviewAdvance).toHaveBeenCalledOnce();
+    expect(onAdvance).not.toHaveBeenCalled();
+  });
+
+  it('renders every advisory decision in the scrollable desk packet', () => {
+    const pendingReserveRequests = Array.from({ length: 5 }, (_, index) => ({
+      request_id: `reserve-${index + 1}`,
+      corps_id: `vrs_corps_${index + 1}`,
+      faction: 'RS' as const,
+      reason: 'defensive_gap',
+      priority: 40 + index,
+      severityBand: 'routine' as const,
+      travel_hops: 2,
+      description: `Reserve request ${index + 1}.`,
+      suggested_brigade_id: null,
+      turn_requested: 1,
+    }));
+    const { container } = renderDesk({
+      state: makeState({ pendingReserveRequests } as Partial<LoadedGameState>),
+    });
+
+    expect(container.querySelectorAll('[data-testid="desk-card-reserve_request"]')).toHaveLength(5);
+    for (const request of pendingReserveRequests) {
+      expect(container.querySelector(`[data-inbox-item-id="reserve:${request.request_id}"]`)).toBeTruthy();
+    }
   });
 
   it('can close when rendered as a warroom overlay', () => {

@@ -54,11 +54,11 @@ function IntelBar({ value, label }: { value: number; label: string }) {
     const barColor = pct >= 70 ? 'bg-emerald-500' : pct >= 40 ? 'bg-amber-500' : 'bg-red-500';
     return (
         <div className="flex items-center gap-2">
-            <span className="text-text-secondary/60 w-14 shrink-0 text-[9px] uppercase tracking-wider">{label}</span>
+            <span className="text-text-secondary w-14 shrink-0 text-xs uppercase tracking-wider">{label}</span>
             <div className="flex-1 h-1.5 bg-panel-border/30 rounded-full overflow-hidden">
                 <div className={`h-full ${barColor} rounded-full transition-all`} style={{ width: `${pct}%` }} />
             </div>
-            <span className={`tabular-nums w-8 text-right text-[10px] font-bold ${pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{pct}%</span>
+            <span className={`tabular-nums w-8 text-right text-xs font-bold ${pct >= 70 ? 'text-emerald-400' : pct >= 40 ? 'text-amber-400' : 'text-red-400'}`}>{pct}%</span>
         </div>
     );
 }
@@ -83,12 +83,12 @@ function reportedBattleLossLabel(battle: TurnBattle): string {
 
 function reportedCohesionLabel(value: number | undefined | null): { label: string; className: string } {
     if (!isReportedNumber(value)) {
-        return { label: t('corpsFront.unreported'), className: 'text-text-secondary/60 italic' };
+        return { label: t('corpsFront.unreported'), className: 'text-text-secondary italic' };
     }
     const cohesion = Math.round(value);
     return {
         label: `${cohesion}%`,
-        className: cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-500',
+        className: cohesion >= 70 ? 'text-emerald-400' : cohesion >= 40 ? 'text-accent-gold' : 'text-red-400',
     };
 }
 
@@ -101,7 +101,7 @@ const STRENGTH_CLASS_COLORS: Record<string, string> = {
     strong: 'text-emerald-400/80',
     adequate: 'text-accent-gold',
     thin: 'text-amber-500',
-    critical: 'text-red-500',
+    critical: 'text-red-400',
 };
 
 const THREAT_INTEL_CONFIDENCE_MIN = 0.4;
@@ -152,28 +152,28 @@ function SectorExpandedDetail({
     const hasThreatIntel = isReportedNumber(sector.intel_confidence) && sector.intel_confidence >= THREAT_INTEL_CONFIDENCE_MIN;
 
     return (
-        <div className="px-4 py-3 space-y-4 text-[11px] border-t border-panel-border/50 bg-panel-card font-mono">
+        <div className="px-4 py-3 space-y-4 text-xs border-t border-panel-border/50 bg-panel-card font-mono">
             <div className="space-y-2">
                 {isReportedNumber(sector.intel_confidence)
                     ? <IntelBar value={sector.intel_confidence} label={t('sectorsSection.intel')} />
-                    : <div className="text-[10px] text-text-secondary/60">{t('corpsFront.unreported')}</div>}
+                    : <div className="text-xs text-text-secondary">{t('corpsFront.unreported')}</div>}
                 {!hasThreatIntel && hasReportedThreat && threatRatio > 0 && (
-                    <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
                         {t('sectorsSection.threatUnconfirmed')}
                     </div>
                 )}
                 {hasThreatIntel && sector.offensive_signs && (
-                    <div className="flex items-center gap-2 text-[10px] text-red-400 font-bold animate-pulse">
-                        <span className="text-red-500">!</span> {t('sectorsSection.offensiveSignsDetected', { threat: threatPresentation?.label ?? t('corpsFront.unreported') })}
+                    <div className="flex items-center gap-2 text-xs text-red-400 font-bold animate-pulse">
+                        <span className="text-red-400">!</span> {t('sectorsSection.offensiveSignsDetected', { threat: threatPresentation?.label ?? t('corpsFront.unreported') })}
                     </div>
                 )}
                 {hasThreatIntel && !sector.offensive_signs && hasReportedThreat && threatRatio > 0 && threatPresentation && (
-                    <div className="flex items-center gap-2 text-[10px] text-text-secondary/60">
+                    <div className="flex items-center gap-2 text-xs text-text-secondary">
                         {t('sectorsSection.threat')} <span className={`font-bold ${threatPresentation.toneClass}`}>{threatPresentation.summary.toUpperCase()}</span>
                     </div>
                 )}
                 {hasThreatIntel && stanceHint !== null && currentStance !== null && stanceHint !== currentStance && (
-                    <div className="text-[9px] text-amber-400/80 uppercase tracking-wider">
+                    <div className="text-xs text-amber-400/80 uppercase tracking-wider">
                         {t('sectorsSection.recommend', {
                             stance: getPlayerSafeSectorStanceLabel(stanceHint),
                             current: getPlayerSafeSectorStanceLabel(currentStance),
@@ -183,14 +183,14 @@ function SectorExpandedDetail({
             </div>
 
             {hasCurrentFieldedLine && sector.combat_strength_class && (
-                <div className="flex flex-wrap gap-x-5 gap-y-1 text-[10px] text-text-secondary/60 uppercase tracking-wider border-t border-panel-border/30 pt-2">
+                <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-secondary uppercase tracking-wider border-t border-panel-border/30 pt-2">
                     <span>{t('sectorsSection.class')} <span className={`font-bold ${STRENGTH_CLASS_COLORS[sector.combat_strength_class] ?? 'text-text-secondary'}`}>{getPlayerSafeSectorStrengthLabel(sector.combat_strength_class)}</span></span>
                     {sector.combat_defense_per_edge != null && <span>{t('sectorsSection.defPerEdge')} <span className="font-bold text-text-secondary">{Math.round(sector.combat_defense_per_edge)}</span></span>}
                     {sector.combat_morale_avg != null && (
-                        <span>{t('sectorsSection.morShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-500'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_morale_avg) : Math.round(sector.combat_morale_avg)}</span></span>
+                        <span>{t('sectorsSection.morShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_morale_avg >= 60 ? 'text-emerald-400' : sector.combat_morale_avg >= 35 ? 'text-accent-gold' : 'text-red-400'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_morale_avg) : Math.round(sector.combat_morale_avg)}</span></span>
                     )}
                     {sector.combat_fatigue_avg != null && (
-                        <span>{t('sectorsSection.fatShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-500'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_fatigue_avg) : Math.round(sector.combat_fatigue_avg)}</span></span>
+                        <span>{t('sectorsSection.fatShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : sector.combat_fatigue_avg <= 8 ? 'text-emerald-400' : sector.combat_fatigue_avg <= 16 ? 'text-accent-gold' : 'text-red-400'}`}>{hasPartialLineReports ? partialAggregateLabel(sector.combat_fatigue_avg) : Math.round(sector.combat_fatigue_avg)}</span></span>
                     )}
                     {sector.combat_personnel != null && (
                         <span>{t('sectorsSection.persShort')} <span className={`font-bold ${hasPartialLineReports ? 'text-amber-400' : 'text-text-secondary'}`}>{hasPartialLineReports ? t('corpsFront.partialPersonnel', { personnel: formatPersonnel(sector.combat_personnel) }) : formatPersonnel(sector.combat_personnel)}</span></span>
@@ -200,11 +200,11 @@ function SectorExpandedDetail({
 
             {frontIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.frontLineDeployment', { count: frontIds.length })}</div>
+                    <div className="text-xs font-bold uppercase text-text-secondary tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.frontLineDeployment', { count: frontIds.length })}</div>
                     <div className="space-y-1.5">
                         {frontIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary italic">{t('sectorsSection.unknownFormation')}</div>;
                             const cohesion = reportedCohesionLabel(b.cohesion);
                             const isDisrupted = (b.disrupted_turns ?? 0) > 0;
                             return (
@@ -217,7 +217,7 @@ function SectorExpandedDetail({
                                         <span className={`tabular-nums w-10 text-right shrink-0 font-bold ${cohesion.className}`}>
                                             {cohesion.label}
                                         </span>
-                                        {isDisrupted && <span className="text-red-500 font-bold shrink-0 animate-pulse text-[9px]">{t('sectorsSection.disrupted')}</span>}
+                                        {isDisrupted && <span className="text-red-400 font-bold shrink-0 animate-pulse text-xs">{t('sectorsSection.disrupted')}</span>}
                                         <button
                                             type="button"
                                             data-testid="army-hq-sector-brigade-inspect"
@@ -231,13 +231,13 @@ function SectorExpandedDetail({
                                                 corpsId: sector.corps_id,
                                                 osid: b.location_osid ?? null,
                                             })}
-                                            className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                            className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                         >
                                             {t('sectorsSection.inspect')}
                                         </button>
                                     </div>
                                     {b.location_osid && (
-                                        <div className="text-[9px] text-text-secondary/40 ml-4 mt-0.5 truncate">
+                                        <div className="text-xs text-text-secondary ml-4 mt-0.5 break-words">
                                             @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </div>
                                     )}
@@ -250,11 +250,11 @@ function SectorExpandedDetail({
 
             {reserveIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.sectorReserves', { count: reserveIds.length })}</div>
+                    <div className="text-xs font-bold uppercase text-text-secondary tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.sectorReserves', { count: reserveIds.length })}</div>
                     <div className="space-y-1.5">
                         {reserveIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary italic">{t('sectorsSection.unknownFormation')}</div>;
                             return (
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
@@ -262,7 +262,7 @@ function SectorExpandedDetail({
                                         {reportedPersonnelLabel(b.personnel)}
                                     </span>
                                     {b.location_osid && (
-                                        <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
+                                        <span className="text-xs text-text-secondary break-words max-w-[120px]">
                                             @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </span>
                                     )}
@@ -279,7 +279,7 @@ function SectorExpandedDetail({
                                             corpsId: sector.corps_id,
                                             osid: b.location_osid ?? null,
                                         })}
-                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
                                         {t('sectorsSection.inspect')}
                                     </button>
@@ -292,11 +292,11 @@ function SectorExpandedDetail({
 
             {rearIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-text-secondary/60 tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('corpsFront.rearSupportElements', { count: rearIds.length })}</div>
+                    <div className="text-xs font-bold uppercase text-text-secondary tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('corpsFront.rearSupportElements', { count: rearIds.length })}</div>
                     <div className="space-y-1.5">
                         {rearIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary italic">{t('sectorsSection.unknownFormation')}</div>;
                             return (
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
@@ -304,7 +304,7 @@ function SectorExpandedDetail({
                                         {reportedPersonnelLabel(b.personnel)}
                                     </span>
                                     {b.location_osid && (
-                                        <span className="text-[9px] text-text-secondary/40 truncate max-w-[120px]">
+                                        <span className="text-xs text-text-secondary break-words max-w-[120px]">
                                             @ {getOsidDisplayName(b.location_osid, osidDisplayNames)}
                                         </span>
                                     )}
@@ -321,7 +321,7 @@ function SectorExpandedDetail({
                                             corpsId: sector.corps_id,
                                             osid: b.location_osid ?? null,
                                         })}
-                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
                                         {t('sectorsSection.inspect')}
                                     </button>
@@ -334,18 +334,18 @@ function SectorExpandedDetail({
 
             {overrideIds.length > 0 && (
                 <div>
-                    <div className="text-[10px] font-bold uppercase text-accent-gold tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.commandDirected', { count: overrideIds.length })}</div>
+                    <div className="text-xs font-bold uppercase text-accent-gold tracking-widest mb-1.5 border-b border-panel-border/30 pb-0.5">{t('sectorsSection.commandDirected', { count: overrideIds.length })}</div>
                     <div className="space-y-1.5">
                         {overrideIds.map((id) => {
                             const b = formationMap.get(id);
-                            if (!b) return <div key={id} className="text-text-secondary/60 italic">{t('sectorsSection.unknownFormation')}</div>;
+                            if (!b) return <div key={id} className="text-text-secondary italic">{t('sectorsSection.unknownFormation')}</div>;
                             return (
                                 <div key={id} className="flex items-center gap-3 text-text-secondary">
                                     <span className="truncate flex-1 min-w-0 font-bold">{getLocalizedFormationName(b, locale)}</span>
                                     <span className="tabular-nums w-12 text-right shrink-0">
                                         {reportedPersonnelLabel(b.personnel)}
                                     </span>
-                                    <span className="text-[9px] uppercase tracking-wide text-accent-gold shrink-0">{t('sectorsSection.overrideBadge')}</span>
+                                    <span className="text-xs uppercase tracking-wide text-accent-gold shrink-0">{t('sectorsSection.overrideBadge')}</span>
                                     <button
                                         type="button"
                                         data-testid="army-hq-sector-brigade-inspect"
@@ -359,7 +359,7 @@ function SectorExpandedDetail({
                                             corpsId: sector.corps_id,
                                             osid: b.location_osid ?? null,
                                         })}
-                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                        className="shrink-0 rounded border border-panel-border/60 bg-black/20 px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] text-amber-400/75 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
                                         {t('sectorsSection.inspect')}
                                     </button>
@@ -376,10 +376,10 @@ function SectorExpandedDetail({
                     data-stale-roster-count={unresolvedRosterIds.length}
                     data-stale-roster-ids={unresolvedRosterIds.join(' ')}
                 >
-                    <div className="text-[10px] font-bold uppercase text-red-400 tracking-widest mb-1.5 border-b border-red-500/20 pb-0.5">
+                    <div className="text-xs font-bold uppercase text-red-400 tracking-widest mb-1.5 border-b border-red-500/20 pb-0.5">
                         {t(unresolvedRosterIds.length === 1 ? 'corpsFront.staleRosterEntries.one' : 'corpsFront.staleRosterEntries.many', { count: unresolvedRosterIds.length })}
                     </div>
-                    <div className="text-[10px] text-text-secondary/70">
+                    <div className="text-xs text-text-secondary">
                         {t('corpsFront.staleRosterHelp')}
                     </div>
                 </div>
@@ -387,25 +387,25 @@ function SectorExpandedDetail({
 
             {sectorBattles.length > 0 && (
                 <div className="border-t border-panel-border/50 pt-3">
-                    <div className="text-[10px] font-bold uppercase text-red-500/60 tracking-widest mb-1.5 border-b border-red-500/5 pb-0.5">{t('sectorsSection.recentEngagements', { count: sectorBattles.length })}</div>
+                    <div className="text-xs font-bold uppercase text-red-400 tracking-widest mb-1.5 border-b border-red-500/5 pb-0.5">{t('sectorsSection.recentEngagements', { count: sectorBattles.length })}</div>
                     <div className="space-y-1">
                         {sectorBattles.map((battle, i) => (
                             <div key={i} className="flex items-center gap-3">
-                                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded border leading-none shrink-0"
+                                <span className="text-xs font-bold uppercase px-2 py-0.5 rounded border leading-none shrink-0"
                                     style={{ color: OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0', borderColor: (OUTCOME_COLORS[battle.outcome] ?? '#d4c5a0') + '40' }}>
                                     {sectorBattleOutcomeLabel(battle.outcome)}
                                 </span>
                                 <span className="text-text-secondary truncate flex-1">
                                     {getOsidDisplayName(battle.osid, osidDisplayNames)}
                                 </span>
-                                <span className="text-red-500 font-bold shrink-0">{reportedBattleLossLabel(battle)}</span>
+                                <span className="text-red-400 font-bold shrink-0">{reportedBattleLossLabel(battle)}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             )}
 
-            <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary/60 text-[10px] uppercase tracking-wider">
+            <div className="border-t border-panel-border/50 pt-3 flex flex-wrap gap-x-6 gap-y-2 text-text-secondary text-xs uppercase tracking-wider">
                 <span data-testid="army-hq-sector-frontage" data-front-segments={sector.length_edges}>{t('sectorsSection.frontage', { count: sector.length_edges })}</span>
                 {hasCurrentFieldedLine && (
                     <>
@@ -593,12 +593,12 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 {sectorLabel}
                                             </span>
                                             {hasBattle && (
-                                                <span className="text-[9px] font-bold px-2 py-0.5 rounded-sm bg-red-900/40 text-red-400 border border-red-500/30 animate-pulse">
+                                                <span className="text-xs font-bold px-2 py-0.5 rounded-sm bg-red-900/40 text-red-400 border border-red-500/30 animate-pulse">
                                                     {t('sectorsSection.contacts', { count: battleCount })}
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="text-[10px] text-text-secondary tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
+                                        <div className="text-xs text-text-secondary tabular-nums mt-1.5 ml-5 font-mono uppercase tracking-tight">
                                             {sectorSummaryLine(
                                                 sectorAssignment.lineHoldingIds.length,
                                                 sectorAssignment.reserveIds.length,
@@ -624,7 +624,7 @@ export function SectorsSection({ corpsId, sectors, factionBattles, defaultOpen =
                                                 osid: pickSectorInspectAnchorOsid(sector),
                                             });
                                         }}
-                                        className="ml-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
+                                        className="ml-3 shrink-0 rounded border border-panel-border/70 bg-black/20 px-2 py-1 text-xs font-bold uppercase tracking-[0.14em] text-amber-400/80 transition-colors hover:border-amber-400/40 hover:text-amber-300"
                                     >
                                         {t('sectorsSection.inspect')}
                                     </button>

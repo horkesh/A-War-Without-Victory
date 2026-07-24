@@ -232,16 +232,18 @@ describe('run diagnostics (40w)', () => {
     // ─── 3. Empty Sectors ─────────────────────────────────────────────────
 
     describe('empty sectors', () => {
-        it('fewer than 8 sectors with >3 edges have zero assigned brigades', () => {
+        it('at most two large sectors are empty and each is explicitly unstaffable', () => {
             if (skipped) return;
             const sectors = (state as any).military.corps_front_sectors as Record<string, CorpsFrontSector> ?? {};
             const gaps: string[] = [];
+            const unclassifiedGaps: string[] = [];
 
             for (const [sid, sec] of Object.entries(sectors)) {
                 const edgeCount = (sec.edge_ids ?? []).length;
                 const brigCount = (sec.assigned_brigade_ids ?? []).length;
                 if (edgeCount > 3 && brigCount === 0) {
                     gaps.push(`${sid}: ${edgeCount} edges, 0 brigades (faction=${sec.faction}, corps=${sec.corps_id})`);
+                    if (sec.unstaffed_front !== true) unclassifiedGaps.push(sid);
                 }
             }
 
@@ -250,9 +252,12 @@ describe('run diagnostics (40w)', () => {
                 for (const line of gaps) console.log(`  ${line}`);
             }
 
+            expect(unclassifiedGaps,
+                `Large empty sectors without explicit unstaffed-front truth: ${unclassifiedGaps.join(', ')}`
+            ).toEqual([]);
             expect(gaps.length,
-                `${gaps.length} sectors with >3 edges have 0 brigades — should be <8`
-            ).toBeLessThan(8);
+                `${gaps.length} sectors with >3 edges have 0 brigades — expected no more than the two legally isolated fronts`
+            ).toBeLessThanOrEqual(2);
         });
     });
 

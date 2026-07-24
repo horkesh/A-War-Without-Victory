@@ -20,7 +20,10 @@ describe('EventModal dismissal contract', () => {
         const onAcknowledge = vi.fn();
         const { unmount } = render(createElement(EventModal, { event: EVENT, onAcknowledge }));
 
-        fireEvent.click(screen.getByRole('button', { name: 'Acknowledged' }));
+        const acknowledge = screen.getByTestId('event-notice-acknowledge');
+        expect(acknowledge.textContent).toBe('Acknowledged');
+        expect(acknowledge.getAttribute('data-event-id')).toBe(EVENT.id);
+        fireEvent.click(acknowledge);
         expect(onAcknowledge).toHaveBeenCalledTimes(1);
 
         fireEvent.keyDown(window, { key: 'Escape' });
@@ -36,6 +39,22 @@ describe('EventModal dismissal contract', () => {
 
         const dialog = screen.getByRole('dialog', { name: 'Dispatch From Sarajevo' });
         expect(dialog).toBeTruthy();
+        unmount();
+    });
+
+    it('keeps the acknowledge action outside the narrative scroll region', () => {
+        const longEvent: EventDisplayData = {
+            ...EVENT,
+            narrative: 'A long field report. '.repeat(200),
+        };
+        const { unmount } = render(createElement(EventModal, { event: longEvent, onAcknowledge: vi.fn() }));
+
+        const scrollRegion = screen.getByTestId('event-modal-scroll-region');
+        const actionBar = screen.getByTestId('event-modal-action-bar');
+        const acknowledge = screen.getByTestId('event-notice-acknowledge');
+
+        expect(scrollRegion.contains(acknowledge)).toBe(false);
+        expect(actionBar.contains(acknowledge)).toBe(true);
         unmount();
     });
 });

@@ -29,13 +29,16 @@ const TIMESTAMP_PHRASES = [
 ];
 
 function runAuditState(): void {
-    const r = spawnSync('npm', ['run', 'audit:state'], {
+    const invocation = process.platform === 'win32'
+        ? { command: 'cmd.exe', args: ['/d', '/s', '/c', 'npm.cmd run audit:state'] }
+        : { command: 'npm', args: ['run', 'audit:state'] };
+    const r = spawnSync(invocation.command, invocation.args, {
         cwd: ROOT,
-        shell: true,
+        shell: false,
         encoding: 'utf8',
     });
     if (r.status !== 0) {
-        throw new Error(`audit:state failed: ${r.stderr || r.stdout}`);
+        throw new Error(`audit:state failed: ${r.error?.message || r.stderr || r.stdout}`);
     }
 }
 

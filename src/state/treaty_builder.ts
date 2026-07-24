@@ -8,6 +8,7 @@ import type { TerritorialValuationReport } from './territorial_valuation.js';
 import type { TreatyClause, TreatyDraft, TreatyScope } from './treaty.js';
 import { computeClauseAcceptanceImpact, computeClauseCost, getClauseEnforcementBurden } from './treaty_clause_library.js';
 import { computePackageWarnings } from './treaty_package_warnings.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Generate deterministic scope hash for sorting.
@@ -41,17 +42,17 @@ function sortClauses(clauses: TreatyClause[]): TreatyClause[] {
         if (annexDiff !== 0) return annexDiff;
 
         // Then by kind
-        const kindDiff = a.kind.localeCompare(b.kind);
+        const kindDiff = strictCompare(a.kind, b.kind);
         if (kindDiff !== 0) return kindDiff;
 
         // Then by scope hash
         const scopeHashA = generateScopeHash(a.scope);
         const scopeHashB = generateScopeHash(b.scope);
-        const scopeDiff = scopeHashA.localeCompare(scopeHashB);
+        const scopeDiff = strictCompare(scopeHashA, scopeHashB);
         if (scopeDiff !== 0) return scopeDiff;
 
         // Finally by id
-        return a.id.localeCompare(b.id);
+        return strictCompare(a.id, b.id);
     });
 }
 

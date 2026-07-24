@@ -149,6 +149,7 @@ describe('gradeOperation', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 4,
+            total_attacks: 4,
             casualties_suffered: 50,
             casualties_inflicted: 200,
             initial_strength: 5000,
@@ -166,6 +167,7 @@ describe('gradeOperation', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 0,
+            total_attacks: 8,
             casualties_suffered: 500,
             casualties_inflicted: 100,
             initial_strength: 5000,
@@ -178,10 +180,11 @@ describe('gradeOperation', () => {
         expect(grade.factors.objective_completion).toBe(0);
     });
 
-    it('2-star pyrrhic advance', () => {
+    it('grades a failed advance with poor exchange and heavy losses as a disaster', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 2,
+            total_attacks: 6,
             casualties_suffered: 400,
             casualties_inflicted: 150,
             initial_strength: 5000,
@@ -193,10 +196,11 @@ describe('gradeOperation', () => {
         expect(grade.verdict).toBe('Disaster');
     });
 
-    it('2-star pyrrhic with some objectives but heavy losses', () => {
+    it('grades a costly two-star objective gain as a pyrrhic advance', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 3,
+            total_attacks: 6,
             casualties_suffered: 400,
             casualties_inflicted: 150,
             initial_strength: 5000,
@@ -205,13 +209,14 @@ describe('gradeOperation', () => {
             expected_duration: 4,
         });
         expect(grade.stars).toBe(2);
-        expect(grade.verdict).toBe('Costly Stalemate');
+        expect(grade.verdict).toBe('Pyrrhic Advance');
     });
 
     it('3-star baseline mediocre operation', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 2,
+            total_attacks: 5,
             casualties_suffered: 100,
             casualties_inflicted: 120,
             initial_strength: 5000,
@@ -227,6 +232,7 @@ describe('gradeOperation', () => {
         const grade = gradeOperation({
             objectives_targeted: 10,
             objectives_captured: 0,
+            total_attacks: 12,
             casualties_suffered: 1000,
             casualties_inflicted: 50,
             initial_strength: 5000,
@@ -241,6 +247,7 @@ describe('gradeOperation', () => {
         const grade = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 4,
+            total_attacks: 4,
             casualties_suffered: 10,
             casualties_inflicted: 500,
             initial_strength: 5000,
@@ -255,6 +262,7 @@ describe('gradeOperation', () => {
         const withCaptures = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 2,
+            total_attacks: 5,
             casualties_suffered: 100,
             casualties_inflicted: 120,
             initial_strength: 5000,
@@ -265,6 +273,7 @@ describe('gradeOperation', () => {
         const withoutCaptures = gradeOperation({
             objectives_targeted: 4,
             objectives_captured: 0,
+            total_attacks: 5,
             casualties_suffered: 100,
             casualties_inflicted: 120,
             initial_strength: 5000,
@@ -273,8 +282,61 @@ describe('gradeOperation', () => {
             expected_duration: 4,
         });
         expect(withCaptures.verdict).toBe('Partial Success');
-        expect(withoutCaptures.verdict).toBe('Pyrrhic Advance');
+        expect(withoutCaptures.verdict).toBe('Costly Stalemate');
         expect(withCaptures.verdict).not.toBe(withoutCaptures.verdict);
+    });
+
+    it('does not report an advance when combat captures no objective', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 2,
+            objectives_captured: 0,
+            total_attacks: 4,
+            casualties_suffered: 50,
+            casualties_inflicted: 200,
+            initial_strength: 5000,
+            final_strength: 4800,
+            duration_turns: 3,
+            expected_duration: 4,
+        });
+
+        expect(grade.stars).toBe(4);
+        expect(grade.verdict).toBe('Favorable Stalemate');
+        expect(grade.verdict).not.toContain('Advance');
+    });
+
+    it('grades a zero-attempt operation as no assault without a duration reward', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 2,
+            objectives_captured: 0,
+            total_attacks: 0,
+            casualties_suffered: 0,
+            casualties_inflicted: 0,
+            initial_strength: 2000,
+            final_strength: 2000,
+            duration_turns: 1,
+            expected_duration: 4,
+        });
+
+        expect(grade.stars).toBe(1);
+        expect(grade.verdict).toBe('No Assault Attempted');
+        expect(grade.verdict).not.toBe('Pyrrhic Advance');
+        expect(grade.factors.tempo).toBe(0);
+    });
+
+    it('caps ending-force strength at 100 when reinforcements grow the force', () => {
+        const grade = gradeOperation({
+            objectives_targeted: 1,
+            objectives_captured: 0,
+            total_attacks: 1,
+            casualties_suffered: 0,
+            casualties_inflicted: 0,
+            initial_strength: 1000,
+            final_strength: 1400,
+            duration_turns: 8,
+            expected_duration: 4,
+        });
+
+        expect(grade.factors.preservation).toBe(100);
     });
 });
 
@@ -977,6 +1039,26 @@ describe('finalizeOperationAAR', () => {
         expect(aar.grade.stars).toBeLessThanOrEqual(5);
     });
 
+    it('files a truthful no-action AAR after all participants have withdrawn', () => {
+        const op = makeFinalizableOp({
+            participating_brigades: [],
+            weekly_log: [],
+            attack_attempt_count: 0,
+            initial_strength: 0,
+            recovery_reason: 'no_logged_attempt',
+        });
+        const state = makeFinalizeState({ corps_1kr: op }, {});
+
+        const aar = finalizeOperationAAR(state, 'corps_1kr', op);
+
+        expect(aar.participating_brigades).toEqual([]);
+        expect(aar.final_strength).toBe(0);
+        expect(aar.total_attacks).toBe(0);
+        expect(aar.grade.stars).toBe(1);
+        expect(aar.grade.verdict).toBe('No Assault Attempted');
+        expect(aar.grade.factors.tempo).toBe(0);
+    });
+
     it('derives outcome=success from completed + all objectives held', () => {
         const op = makeFinalizableOp({ recovery_reason: 'completed' });
         const state = makeFinalizeState(
@@ -993,8 +1075,8 @@ describe('finalizeOperationAAR', () => {
         expect(state.operation_history[0].outcome).toBe('success');
     });
 
-    it('derives outcome=failure from max_failures + 0 objectives held', () => {
-        const op = makeFinalizableOp({ recovery_reason: 'max_failures' });
+    it('derives outcome=failure when no objective has a causal capture receipt', () => {
+        const op = makeFinalizableOp({ recovery_reason: 'max_failures', weekly_log: [] });
         const state = makeFinalizeState(
             { corps_1kr: op },
             {
@@ -1009,8 +1091,11 @@ describe('finalizeOperationAAR', () => {
         expect(state.operation_history[0].outcome).toBe('failure');
     });
 
-    it('derives outcome=partial from completed + some objectives held', () => {
-        const op = makeFinalizableOp({ recovery_reason: 'completed' });
+    it('derives outcome=partial when some objectives have causal capture receipts', () => {
+        const op = makeFinalizableOp({
+            recovery_reason: 'completed',
+            weekly_log: makeFinalizableOp().weekly_log?.slice(0, 1),
+        });
         const state = makeFinalizeState(
             { corps_1kr: op },
             {
@@ -1210,7 +1295,7 @@ describe('finalizeOperationAAR', () => {
         ]);
     });
 
-    it('records logged capture provenance separately from final held objectives', () => {
+    it('uses attack-backed capture receipts rather than final control for AAR captures', () => {
         const op = makeFinalizableOp({
             objectives: ['op:brcko:brcko_1', 'op:brcko:brcko_2'],
             weekly_log: [
@@ -1243,10 +1328,34 @@ describe('finalizeOperationAAR', () => {
         finalizeOperationAAR(state, 'corps_1kr', op);
 
         const aar: OperationAAR = state.operation_history[0];
-        expect(aar.objectives_captured).toEqual(['op:brcko:brcko_1', 'op:brcko:brcko_2']);
+        expect(aar.objectives_captured).toEqual(['op:brcko:brcko_1']);
         expect(aar.objectives_logged_captured).toEqual(['op:brcko:brcko_1']);
         expect(aar.objectives_held_without_logged_capture).toEqual(['op:brcko:brcko_2']);
         expect(aar.capture_provenance).toBe('mixed');
+        expect(aar.outcome).toBe('partial');
+    });
+
+    it('removes a later-lost objective from lifecycle-net capture credit', () => {
+        const op = makeFinalizableOp();
+        op.weekly_log![1] = {
+            ...op.weekly_log![1]!,
+            objectives_lost_this_turn: ['op:brcko:brcko_1'],
+        };
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:brcko:brcko_1': 'RBiH', 'op:brcko:brcko_2': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.objectives_captured).toEqual(['op:brcko:brcko_2']);
+        expect(aar.outcome).toBe('partial');
+        expect(aar.grade.factors.objective_completion).toBe(50);
     });
 
     it('marks held objectives with zero logged attacks as held_without_logged_attack provenance', () => {
@@ -1286,6 +1395,47 @@ describe('finalizeOperationAAR', () => {
         expect(aar.objectives_logged_captured).toEqual([]);
         expect(aar.objectives_held_without_logged_capture).toEqual(['op:visegrad:center']);
         expect(aar.capture_provenance).toBe('held_without_logged_attack');
+        expect(aar.objectives_captured).toEqual([]);
+        expect(aar.outcome).toBe('failure');
+        expect(aar.grade.stars).toBeLessThan(5);
+        expect(aar.grade.verdict).not.toBe('Brilliant Victory');
+    });
+
+    it('does not treat a zero-attack control-diff log as a combat capture receipt', () => {
+        const op = makeFinalizableOp({
+            objectives: ['op:visegrad:center'],
+            weekly_log: [{
+                turn: 6,
+                phase: 'execution',
+                attacks_this_turn: 0,
+                objectives_captured_this_turn: ['op:visegrad:center'],
+                objectives_lost_this_turn: [],
+                casualties_suffered: { killed: 0, wounded: 0 },
+                casualties_inflicted: { killed: 0, wounded: 0 },
+                equipment_lost: { tanks: 0, artillery: 0 },
+                equipment_destroyed: { tanks: 0, artillery: 0 },
+                equipment_captured: { tanks: 0, artillery: 0 },
+                brigade_count: 2,
+                momentum: 0,
+                notable_events: [],
+            }],
+        });
+        const state = makeFinalizeState(
+            { corps_1kr: op },
+            {
+                bde_1: { personnel: 1300, faction: 'RS', status: 'active' },
+                bde_2: { personnel: 1200, faction: 'RS', status: 'active' },
+            },
+            { 'op:visegrad:center': 'RS' },
+        );
+
+        finalizeOperationAAR(state, 'corps_1kr', op);
+
+        const aar: OperationAAR = state.operation_history[0];
+        expect(aar.objectives_logged_captured).toEqual(['op:visegrad:center']);
+        expect(aar.objectives_captured).toEqual([]);
+        expect(aar.outcome).toBe('failure');
+        expect(aar.grade.stars).toBeLessThan(5);
     });
 
     it('builds axis_summaries for multi-axis ops', () => {
@@ -1382,7 +1532,7 @@ describe('finalizeOperationAAR', () => {
         expect(north.axis_name).toBe('Northern Push');
         expect(north.brigades).toEqual(['bde_1']);
         expect(north.objectives_targeted).toEqual(['op:brcko:brcko_1']);
-        expect(north.objectives_captured).toEqual(['op:brcko:brcko_1']);
+        expect(north.objectives_captured).toEqual([]);
         expect(north.total_attacks).toBe(3);
         expect(north.casualties_suffered.killed).toBe(5);
 

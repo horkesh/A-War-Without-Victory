@@ -1,60 +1,75 @@
-/**
- * Invariant assertion: operation lifecycle consistency.
- *
- * 1. participating_brigades must all be active formations.
- * 2. Operations in 'execution' phase must have at least one active participant.
- *
- * Assertion-only — never throws, never modifies state. Logs violations via console.error.
- */
-
-import type { GameState } from '../../state/game_state.js';
+import type { CorpsOperation, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
+import type { ValidationIssue } from '../../validate/validate.js';
 
-/**
- * Assert that all active operations reference only active formations
- * and have at least one participant in execution phase.
- */
-export function assertOperationLifecycle(state: GameState): void {
-    const corpsCmd = state.military.corps_command;
-    if (!corpsCmd) return;
+function compareIssues(a: ValidationIssue, b: ValidationIssue): number {
+    return strictCompare(a.path ?? '', b.path ?? '')
+        || strictCompare(a.code, b.code)
+        || strictCompare(a.message, b.message);
+}
 
+function operationHasTarget(operation: CorpsOperation): boolean {
+    if ((operation.target_settlements?.length ?? 0) > 0) return true;
+    if ((operation.objectives?.length ?? 0) > 0) return true;
+    return (operation.axes ?? []).some(axis => (axis.objectives?.length ?? 0) > 0);
+}
+
+/** Return deterministic operation-lifecycle invariant issues without mutating state. */
+export function assertOperationLifecycle(state: GameState): ValidationIssue[] {
+    const issues: ValidationIssue[] = [];
+    const corpsCommand = state.military.corps_command ?? {};
     const formations = state.military.formations ?? {};
-    const violations: string[] = [];
 
-    for (const cid of Object.keys(corpsCmd).sort(strictCompare)) {
-        const cmd = corpsCmd[cid]!;
-        for (const op of cmd.active_operations) {
+    for (const corpsId of Object.keys(corpsCommand).sort(strictCompare)) {
+        const operations = corpsCommand[corpsId]?.active_operations ?? [];
+        for (let operationIndex = 0; operationIndex < operations.length; operationIndex += 1) {
+            const operation = operations[operationIndex]!;
+            const operationPath = `military.corps_command.${corpsId}.active_operations.${operationIndex}`;
+            const participants = operation.participating_brigades ?? [];
+            let activeParticipantCount = 0;
 
-        const participants = op.participating_brigades ?? [];
-        let activeCount = 0;
+            for (let participantIndex = 0; participantIndex < participants.length; participantIndex += 1) {
+                const participantId = participants[participantIndex]!;
+                const formation = formations[participantId];
+                if (!formation) {
+                    issues.push({
+                        severity: 'error',
+                        code: 'operation.participant_missing',
+                        message: `${corpsId} operation '${operation.name}' references missing participant ${participantId}`,
+                        path: `${operationPath}.participating_brigades.${participantIndex}`,
+                    });
+                } else if (formation.status !== 'active') {
+                    issues.push({
+                        severity: 'error',
+                        code: 'operation.participant_inactive',
+                        message: `${corpsId} operation '${operation.name}' references inactive participant ${participantId}`,
+                        path: `${operationPath}.participating_brigades.${participantIndex}`,
+                    });
+                } else {
+                    activeParticipantCount += 1;
+                }
+            }
 
-        for (const bid of participants) {
-            const f = formations[bid];
-            if (!f) {
-                violations.push(
-                    `${cid} op '${op.name}': participant ${bid} not found in formations`
-                );
-            } else if (f.status !== 'active') {
-                violations.push(
-                    `${cid} op '${op.name}': participant ${bid} has status='${f.status}'`
-                );
-            } else {
-                activeCount++;
+            if (operation.phase !== 'execution') continue;
+
+            if (activeParticipantCount === 0) {
+                issues.push({
+                    severity: 'error',
+                    code: 'operation.execution_no_active_participants',
+                    message: `${corpsId} operation '${operation.name}' is executing without an active participant`,
+                    path: `${operationPath}.participating_brigades`,
+                });
+            }
+            if (!operationHasTarget(operation)) {
+                issues.push({
+                    severity: 'error',
+                    code: 'operation.execution_no_targets',
+                    message: `${corpsId} operation '${operation.name}' is executing without a target`,
+                    path: `${operationPath}.objectives`,
+                });
             }
         }
-
-        // Execution-phase operations with zero active participants are stale
-        if (op.phase === 'execution' && activeCount === 0 && participants.length > 0) {
-            violations.push(
-                `${cid} op '${op.name}': execution phase with 0/${participants.length} active participants`
-            );
-        }
-        } // end for-of active_operations
     }
 
-    if (violations.length > 0) {
-        console.error(
-            `OPERATION LIFECYCLE VIOLATION (${violations.length} issues):\n  ${violations.join('\n  ')}`
-        );
-    }
+    return issues.sort(compareIssues);
 }

@@ -2,7 +2,7 @@
  * Brigade dissolution path coverage for the n292 threshold closeout.
  *
  * These fixtures pin the existing gates in src/sim/combat/brigade_dissolution.ts:
- * personnel/cohesion/morale criteria, personnel cap, enclave 3-of-3,
+ * personnel/cohesion/morale criteria at any personnel, enclave 3-of-3,
  * morale-collapse override, reserve/equipment salvage, operation removal, and
  * deterministic report ordering. This file intentionally does not change
  * threshold data or production code.
@@ -14,7 +14,6 @@ import {
     DISSOLUTION_COHESION_THRESHOLD,
     DISSOLUTION_EQUIPMENT_TRANSFER_RATE,
     DISSOLUTION_MORALE_THRESHOLD,
-    DISSOLUTION_PERSONNEL_CAP,
     DISSOLUTION_PERSONNEL_THRESHOLD,
     DISSOLUTION_PERSONNEL_TO_RESERVE_RATE,
     MORALE_OVERRIDE_TURNS,
@@ -40,6 +39,7 @@ function makeBrigade(overrides: Partial<FormationState> = {}): FormationState {
         kind: 'brigade',
         status: 'active',
         lifecycle_status: 'active',
+        readiness: 'active',
         assignment: null,
         created_turn: 1,
         corps_id: 'rs_test_corps',
@@ -109,6 +109,7 @@ describe('brigade dissolution path coverage', () => {
         expect(report.dissolved_brigades[0]?.id).toBe(brigade.id);
         expect(brigade.status).toBe('inactive');
         expect(brigade.lifecycle_status).toBe('destroyed');
+        expect(brigade.readiness).toBe('degraded');
     });
 
     it('D2 preserves passive-drain remnants when only low personnel fires', () => {
@@ -125,10 +126,10 @@ describe('brigade dissolution path coverage', () => {
         expect(brigade.status).toBe('active');
     });
 
-    it('D3 preserves demoralized but large brigades while the override is disabled', () => {
+    it('D3 dissolves non-enclave brigades meeting cohesion and morale criteria at high personnel', () => {
         delete process.env.MORALE_OVERRIDE_ENABLED;
         const brigade = makeBrigade({
-            personnel: DISSOLUTION_PERSONNEL_CAP + 400,
+            personnel: 1400,
             cohesion: 10,
             morale: 8,
             morale_low_streak: MORALE_OVERRIDE_TURNS,
@@ -137,8 +138,9 @@ describe('brigade dissolution path coverage', () => {
 
         const report = dissolveCombatIneffectiveBrigades(state);
 
-        expect(report.dissolved_count).toBe(0);
-        expect(brigade.status).toBe('active');
+        expect(report.dissolved_count).toBe(1);
+        expect(brigade.status).toBe('inactive');
+        expect(brigade.lifecycle_status).toBe('destroyed');
     });
 
     it('D4 gates morale-collapse dissolution behind MORALE_OVERRIDE_ENABLED', () => {

@@ -488,17 +488,17 @@ export function SettlementDetailContent({
       {/* Strategic Tags */}
       <div className="flex flex-wrap gap-1 mb-2">
         {isStrategic && (
-          <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-[9px] font-bold uppercase tracking-tighter rounded border border-accent-gold/30">
+          <span className="px-1.5 py-0.5 bg-accent-gold/20 text-accent-gold text-xs font-bold uppercase tracking-tighter rounded border border-accent-gold/30">
             {t('settlement.strategicCenter')}
           </span>
         )}
         {isHub && (
-          <span className="px-1.5 py-0.5 bg-interactive/20 text-interactive text-[9px] font-bold uppercase tracking-tighter rounded border border-interactive/30">
+          <span className="px-1.5 py-0.5 bg-interactive/20 text-interactive text-xs font-bold uppercase tracking-tighter rounded border border-interactive/30">
             {t('settlement.transitHub')}
           </span>
         )}
         {terrainModifier && (
-          <span className="px-1.5 py-0.5 bg-white/5 text-text-secondary text-[9px] font-bold uppercase tracking-tighter rounded border border-white/10">
+          <span className="px-1.5 py-0.5 bg-white/5 text-text-secondary text-xs font-bold uppercase tracking-tighter rounded border border-white/10">
             {terrain}: {terrainModifier}
           </span>
         )}
@@ -519,7 +519,7 @@ export function SettlementDetailContent({
               aria-controls={`settlement-panel-${id}`}
               id={`settlement-tab-${id}`}
               onClick={() => setActiveTab(id)}
-              className={`kbd-focus px-3 py-2 text-[10px] font-bold uppercase border-b-2 transition-colors ${
+              className={`kbd-focus px-3 py-2 text-xs font-bold uppercase border-b-2 transition-colors ${
                 activeTab === id
                   ? 'border-accent-gold text-accent-gold bg-panel-bg'
                   : 'border-transparent text-text-secondary hover:text-text-primary hover:bg-panel-card/50'
@@ -539,14 +539,14 @@ export function SettlementDetailContent({
         aria-labelledby={isPanel ? `settlement-tab-${activeTab}` : undefined}
       >
         {(!isPanel || activeTab === 'overview') && municipality && (
-          <div className="flex justify-between items-center text-[11px]">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-text-secondary">{t('settlement.municipality')}</span>
             <span className="text-text-primary font-medium">{municipality}</span>
           </div>
         )}
 
         {isPanel && activeTab === 'overview' && settlementStatusLabel && (
-          <div className="flex justify-between items-center text-[11px]">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-text-secondary">{t('settlement.status')}</span>
             <span className="text-amber-400 font-semibold uppercase tracking-wide">{settlementStatusLabel}</span>
           </div>
@@ -555,14 +555,14 @@ export function SettlementDetailContent({
         {isPanel && activeTab === 'overview' && supplyExplanation && (
           <div
             data-testid="settlement-supply-status"
-            className="flex justify-between items-start gap-3 text-[11px]"
+            className="flex justify-between items-start gap-3 text-xs"
           >
             <span className="text-text-secondary shrink-0">{t('settlement.supply.label')}</span>
             <span className="text-right">
               <span className={`font-semibold ${SUPPLY_TONE_CLASS[supplyExplanation.tone]}`}>
                 {t(supplyExplanation.labelKey)}
               </span>
-              <span className="block text-[10px] text-text-secondary/80 mt-0.5">
+              <span className="block text-xs text-text-secondary/80 mt-0.5">
                 {t(supplyExplanation.explanationKey)}
               </span>
             </span>
@@ -570,7 +570,7 @@ export function SettlementDetailContent({
         )}
 
         {(!isPanel || activeTab === 'overview') && isPanel && sectorName && (
-          <div className="flex justify-between items-center text-[11px]">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-text-secondary">{t('settlement.frontSector')}</span>
             {sectorId ? (
               <button
@@ -592,7 +592,7 @@ export function SettlementDetailContent({
 
         {(!isPanel || activeTab === 'overview') && isPanel && operationsTargetingOsid && operationsTargetingOsid.length > 0 && (
           <div className="pt-2 border-t border-panel-border/30">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">{t('settlement.operationTarget')}</div>
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1">{t('settlement.operationTarget')}</div>
             <ul className="space-y-1">
               {operationsTargetingOsid.map((op, i) => {
                 const isClickable = Boolean(op.operationKey);
@@ -600,11 +600,11 @@ export function SettlementDetailContent({
                   <>
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${op.faction === 'RBiH' ? 'bg-green-600' : op.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
                     <span className="text-text-primary font-medium truncate">{op.name}</span>
-                    <span className="text-[9px] text-text-secondary">({getPlayerSafeOperationPhaseLabel(op.phase)})</span>
+                    <span className="text-xs text-text-secondary">({getPlayerSafeOperationPhaseLabel(op.phase)})</span>
                   </>
                 );
                 return (
-                  <li key={i} className="text-[11px] flex items-center gap-2">
+                  <li key={i} className="text-xs flex items-center gap-2">
                     {isClickable ? (
                       <button
                         type="button"
@@ -631,8 +631,8 @@ export function SettlementDetailContent({
         {/* Pending orders (attack/move/reposition affecting this settlement) */}
         {(!isPanel || activeTab === 'overview') && isPanel && pendingOrders && (pendingOrders.attack.length > 0 || pendingOrders.move.length > 0 || pendingOrders.reposition.length > 0) && (
           <div className="pt-2 border-t border-panel-border/30">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1">{t('settlement.pendingOrders')}</div>
-            <ul className="space-y-1 text-[10px]">
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1">{t('settlement.pendingOrders')}</div>
+            <ul className="space-y-1 text-xs">
               {pendingOrders.attack.map(({ brigadeId, brigadeName }) => (
                 <li key={`attack-${brigadeId}`} className="text-amber-300/90">
                   {t('settlement.order.attack', { brigade: getPlayerSafeBrigadeName(brigadeName) })}
@@ -655,17 +655,17 @@ export function SettlementDetailContent({
         {/* Population — dramatic in panel: pre-war → now, displaced out/in/lost, arrived by faction, departed from here */}
         {(!isPanel || activeTab === 'overview') && (popOriginal > 0 || currentPop != null || (isPanel && disp)) && (
           <div className="pt-2 border-t border-panel-border/30">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">{t('settlement.population')}</div>
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1.5">{t('settlement.population')}</div>
             {isPanel && disp ? (
               <>
                 <div className="flex items-baseline justify-between gap-3 mb-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-text-secondary text-[10px]">{t('settlement.preWar')}</span>
+                    <span className="text-text-secondary text-xs">{t('settlement.preWar')}</span>
                     <span className="text-sm font-mono text-text-primary">{popOriginal.toLocaleString()}</span>
                   </div>
                   <span className="text-text-secondary">→</span>
                   <div className="flex items-baseline gap-2 text-right">
-                    <span className="text-text-secondary text-[10px]">{t('settlement.now')}</span>
+                    <span className="text-text-secondary text-xs">{t('settlement.now')}</span>
                     <span className="text-sm font-mono font-semibold text-text-primary">
                       {(currentPop ?? popOriginal).toLocaleString()}
                     </span>
@@ -681,17 +681,20 @@ export function SettlementDetailContent({
                   </div>
                 </div>
                 {noDisplacementYet ? (
-                  <div className="text-[10px] text-text-secondary/70 italic mb-1.5">
+                  <div
+                    data-testid="settlement-displacement-empty"
+                    className="mb-1.5 text-xs leading-snug text-text-secondary"
+                  >
                     {t('settlement.noDisplacementYet')}
                   </div>
                 ) : (
                   <>
-                    <div className="text-[10px] text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
+                    <div className="text-xs text-text-secondary/80 mb-1.5" aria-label={t('settlement.populationFormulaAria')}>
                       {t('settlement.populationFormula')}
                     </div>
                     {settlementDisplacementEstimated && (
                       <div
-                        className="text-[10px] text-amber-300/90 italic mb-1.5"
+                        className="text-xs text-amber-300/90 italic mb-1.5"
                         data-testid="settlement-displacement-estimate-note"
                       >
                         {t('settlement.estimatedFromMunicipality')}
@@ -699,7 +702,7 @@ export function SettlementDetailContent({
                     )}
                   </>
                 )}
-                <div className="grid grid-cols-3 gap-2 text-[10px] mb-1.5">
+                <div className="grid grid-cols-3 gap-2 text-xs mb-1.5">
                   {outSettlement > 0 && (
                     <div className="bg-black/20 rounded px-2 py-1 text-center">
                       <span className="text-amber-400/90">{t('settlement.displaced')}</span>
@@ -726,7 +729,7 @@ export function SettlementDetailContent({
                   if (entries.length === 0) return null;
                   const scale = settlementShare > 0 ? settlementShare : 1;
                   return (
-                    <div className="text-[10px] mb-1">
+                    <div className="text-xs mb-1">
                       <span className="text-text-secondary">{t('settlement.arrivedHere')}: </span>
                       {entries.map(([faction, n]) => (
                         <span key={faction} className={FACTION_COLORS_SUBTLE[faction] ?? 'text-text-primary'}>
@@ -737,7 +740,7 @@ export function SettlementDetailContent({
                   );
                 })()}
                 {departedByEthnicity && Object.keys(departedByEthnicity).length > 0 && (
-                  <div className="text-[10px] pt-1 border-t border-panel-border/20">
+                  <div className="text-xs pt-1 border-t border-panel-border/20">
                     <span className="text-text-secondary">{t('settlement.fledHere')}: </span>
                     {(() => {
                       const totalFled = Object.values(departedByEthnicity).reduce((a, n) => a + (n ?? 0), 0);
@@ -774,7 +777,7 @@ export function SettlementDetailContent({
                   </div>
                 )}
                 {!(departedByEthnicity && Object.keys(departedByEthnicity).length > 0) && (outSettlement + lostSettlement) > 0 && (
-                  <div className="text-[10px] pt-1 border-t border-panel-border/20">
+                  <div className="text-xs pt-1 border-t border-panel-border/20">
                     <span className="text-text-secondary">{t('settlement.leftHere')}: </span>
                     <span className="text-amber-300/90">{(outSettlement + lostSettlement).toLocaleString()}</span>
                     <span className="text-text-secondary/80"> {t('settlement.breakdownNotRecorded')}</span>
@@ -784,11 +787,11 @@ export function SettlementDetailContent({
             ) : (
               <>
                 <div className="flex justify-between items-end mb-1">
-                  <span className="text-[10px] text-text-secondary uppercase font-semibold">{t('settlement.population')}</span>
+                  <span className="text-xs text-text-secondary uppercase font-semibold">{t('settlement.population')}</span>
                   <div className="text-right">
                     <span className="text-xs font-mono text-text-primary">{(currentPop ?? popOriginal).toLocaleString()}</span>
                     {popDelta != null && popDelta !== 0 && (
-                      <span className={`ml-1.5 text-[10px] font-mono ${popDelta < 0 ? 'text-alert' : 'text-success'}`}>
+                      <span className={`ml-1.5 text-xs font-mono ${popDelta < 0 ? 'text-alert' : 'text-success'}`}>
                         {popDelta > 0 ? '+' : ''}{popDelta.toLocaleString()}
                       </span>
                     )}
@@ -802,7 +805,7 @@ export function SettlementDetailContent({
                         style={{ width: `${Math.min(100, (currentPop / popOriginal) * 100)}%` }}
                       />
                     </div>
-                    <span className="text-[10px] text-text-secondary font-mono w-7 text-right">
+                    <span className="text-xs text-text-secondary font-mono w-7 text-right">
                       {Math.round((currentPop / popOriginal) * 100)}%
                     </span>
                   </div>
@@ -815,11 +818,11 @@ export function SettlementDetailContent({
         {/* Pre-war ethnic structure */}
         {(!isPanel || activeTab === 'overview') && ethnic.some((e) => e.pct > 0) && (
           <div className="pt-1 space-y-1">
-            {isPanel && <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.preWarEthnicStructure')}</div>}
+            {isPanel && <div className="text-xs text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.preWarEthnicStructure')}</div>}
             {ethnic.filter((e) => e.pct > 2).map((e) => {
               const count = Math.round(popOriginal * e.pct / 100);
               return (
-                <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-xs">
                   <span className="text-text-secondary truncate">{e.label}</span>
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div
@@ -848,9 +851,9 @@ export function SettlementDetailContent({
           if (cur.length === 0) return null;
           return (
             <div className="pt-2 border-t border-panel-border/30 space-y-1">
-              {isPanel && <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.currentEthnicStructure')}</div>}
+              {isPanel && <div className="text-xs text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.currentEthnicStructure')}</div>}
               {cur.map((e) => (
-                <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-xs">
                   <span className="text-text-secondary truncate">{e.label}</span>
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div
@@ -869,7 +872,7 @@ export function SettlementDetailContent({
         {/* Stationed Units */}
         {(!isPanel || activeTab === 'overview') && formationsAtOsid.length > 0 && (
           <div className="pt-2 border-t border-panel-border/50">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5 flex justify-between items-center">
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1.5 flex justify-between items-center">
               <span>{t('settlement.stationedUnits')}</span>
               {isPanel && brigadeCountByFaction && Object.keys(brigadeCountByFaction).length > 0 ? (
                 <span className="text-accent-gold font-normal normal-case">
@@ -894,9 +897,9 @@ export function SettlementDetailContent({
                     <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${f.faction === 'RBiH' ? 'bg-green-600' : f.faction === 'RS' ? 'bg-red-600' : 'bg-blue-600'}`} />
                     <div className="flex-1 min-w-0 flex flex-col gap-0.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
+                        <span className="text-xs text-text-primary font-medium truncate">{getLocalizedFormationName(f, locale)}</span>
                         {isPanel && f.readiness && (
-                          <span className="text-[8px] px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
+                          <span className="text-xs px-1 py-0.5 rounded bg-white/10 text-text-secondary flex-shrink-0">
                             {getPlayerSafeFormationReadinessLabel(f.readiness)}
                           </span>
                         )}
@@ -909,12 +912,12 @@ export function SettlementDetailContent({
                               style={{ width: `${Math.min(100, Math.max(0, f.cohesion))}%` }}
                             />
                           </div>
-                          <span className="text-[8px] text-text-secondary font-mono tabular-nums">{Math.round(f.cohesion)}%</span>
+                          <span className="text-xs text-text-secondary font-mono tabular-nums">{Math.round(f.cohesion)}%</span>
                         </div>
                       )}
                     </div>
                     {f.personnel != null && (
-                      <span className="text-[9px] text-text-secondary font-mono tabular-nums flex-shrink-0">
+                      <span className="text-xs text-text-secondary font-mono tabular-nums flex-shrink-0">
                         {f.personnel > 1000 ? `${(f.personnel / 1000).toFixed(1)}k` : f.personnel}
                       </span>
                     )}
@@ -937,7 +940,7 @@ export function SettlementDetailContent({
                 );
               })}
               {restCount > 0 && (
-                <div className="text-[9px] text-text-secondary text-right italic pt-0.5">{t('settlement.additionalUnits', { count: restCount })}</div>
+                <div className="text-xs text-text-secondary text-right italic pt-0.5">{t('settlement.additionalUnits', { count: restCount })}</div>
               )}
             </div>
           </div>
@@ -945,10 +948,10 @@ export function SettlementDetailContent({
 
         {isPanel && activeTab === 'overview' && enemyContactCount > 0 && (
           <div data-testid="settlement-enemy-contact-summary" className="pt-2 border-t border-panel-border/50">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1.5">
               {t('tooltip.enemyContactTitle')}
             </div>
-            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-[11px] text-amber-300/90">
+            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-xs text-amber-300/90">
               {t(enemyContactCount === 1 ? 'settlement.enemyContactObserved' : 'settlement.enemyContactsObserved', { count: enemyContactCount })}
             </div>
           </div>
@@ -956,10 +959,10 @@ export function SettlementDetailContent({
 
         {isPanel && activeTab === 'overview' && formationsAtOsid.length === 0 && (
           <div data-testid="settlement-stationed-units-empty" className="pt-2 border-t border-panel-border/50">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold mb-1.5">
+            <div className="text-xs text-text-secondary uppercase font-semibold mb-1.5">
               {t('settlement.stationedUnits')}
             </div>
-            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-[11px] text-text-secondary italic">
+            <div className="rounded border border-white/10 bg-black/10 px-2 py-1.5 text-xs text-text-secondary italic">
               {t(enemyContactCount > 0 ? 'settlement.noFriendlyStationedUnits' : 'settlement.noStationedUnits')}
             </div>
           </div>
@@ -968,41 +971,41 @@ export function SettlementDetailContent({
         {/* Municipality-level population and displacement summary */}
         {isPanel && activeTab === 'municipality' && disp && (
           <div className="pt-2 space-y-2">
-            <div className="text-[10px] text-text-secondary uppercase font-semibold">
+            <div className="text-xs text-text-secondary uppercase font-semibold">
               {t('settlement.municipalityPopulation', { municipality: municipality || getPlayerSafeMunicipalityName(munId, t('settlement.municipality')) })}
             </div>
-            <div className="flex items-center gap-2 text-[11px]">
+            <div className="flex items-center gap-2 text-xs">
               <span className="text-text-secondary">{t('settlement.preWar')}</span>
               <span className="font-mono font-bold text-text-primary">{disp.originalPopulation.toLocaleString()}</span>
               <span className="text-text-secondary">→</span>
               <span className="text-text-secondary">{t('settlement.now')}</span>
               <span className="font-mono font-bold text-text-primary">{disp.currentPopulation.toLocaleString()}</span>
-              <span className={`font-mono text-[10px] ${disp.currentPopulation < disp.originalPopulation ? 'text-red-400' : 'text-emerald-400'}`}>
+              <span className={`font-mono text-xs ${disp.currentPopulation < disp.originalPopulation ? 'text-red-400' : 'text-emerald-400'}`}>
                 {disp.currentPopulation >= disp.originalPopulation ? '+' : ''}{(disp.currentPopulation - disp.originalPopulation).toLocaleString()}
               </span>
             </div>
             <div className="flex gap-2">
               {disp.displacedOut > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
-                  <span className="text-[9px] text-red-400/80">{t('settlement.displaced')}</span>
-                  <div className="font-mono font-semibold text-red-400 text-[11px]">-{disp.displacedOut.toLocaleString()}</div>
+                  <span className="text-xs text-red-400/80">{t('settlement.displaced')}</span>
+                  <div className="font-mono font-semibold text-red-400 text-xs">-{disp.displacedOut.toLocaleString()}</div>
                 </div>
               )}
               {disp.lostPopulation > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
-                  <span className="text-[9px] text-red-300/80">{t('settlement.killedFled')}</span>
-                  <div className="font-mono font-semibold text-red-300 text-[11px]">-{disp.lostPopulation.toLocaleString()}</div>
+                  <span className="text-xs text-red-300/80">{t('settlement.killedFled')}</span>
+                  <div className="font-mono font-semibold text-red-300 text-xs">-{disp.lostPopulation.toLocaleString()}</div>
                 </div>
               )}
               {disp.displacedIn > 0 && (
                 <div className="bg-black/20 rounded px-2 py-1 text-center flex-1">
-                  <span className="text-[9px] text-emerald-500/80">{t('settlement.arrived')}</span>
-                  <div className="font-mono font-semibold text-emerald-400 text-[11px]">+{disp.displacedIn.toLocaleString()}</div>
+                  <span className="text-xs text-emerald-500/80">{t('settlement.arrived')}</span>
+                  <div className="font-mono font-semibold text-emerald-400 text-xs">+{disp.displacedIn.toLocaleString()}</div>
                 </div>
               )}
             </div>
             {disp.arrivedByFaction && Object.keys(disp.arrivedByFaction).length > 0 && (
-              <div className="text-[10px]">
+              <div className="text-xs">
                 <span className="text-text-secondary">{t('settlement.arrivedByFaction')}: </span>
                 {Object.entries(disp.arrivedByFaction)
                   .filter(([, n]) => (n ?? 0) > 0)
@@ -1017,16 +1020,16 @@ export function SettlementDetailContent({
           </div>
         )}
         {isPanel && activeTab === 'municipality' && !disp && (
-          <div className="pt-2 text-[10px] text-text-secondary italic">{t('settlement.noMunicipalityDisplacement')}</div>
+          <div className="pt-2 text-xs text-text-secondary italic">{t('settlement.noMunicipalityDisplacement')}</div>
         )}
 
         {/* Municipality-level ethnic structure — pre-war and current */}
         {isPanel && activeTab === 'municipality' && munEthnicData && (
           <>
             <div className="pt-2 border-t border-panel-border/30 space-y-1">
-              <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.preWarEthnicStructure')}</div>
+              <div className="text-xs text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.preWarEthnicStructure')}</div>
               {munEthnicData.preWar.filter((e) => e.pct > 2).map((e) => (
-                <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                <div key={e.label} className="grid grid-cols-[50px_1fr_50px_30px] items-center gap-2 text-xs">
                   <span className="text-text-secondary truncate">{e.label}</span>
                   <div className="h-1 bg-black/30 rounded overflow-hidden">
                     <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
@@ -1038,9 +1041,9 @@ export function SettlementDetailContent({
             </div>
             {munEthnicData.current && (
               <div className="pt-2 border-t border-panel-border/30 space-y-1">
-                <div className="text-[10px] text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.currentEthnicStructure')}</div>
+                <div className="text-xs text-text-secondary uppercase font-semibold mb-0.5">{t('settlement.currentEthnicStructure')}</div>
                 {munEthnicData.current.filter((e) => e.pct > 0.5).map((e) => (
-                  <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-[10px]">
+                  <div key={e.label} className="grid grid-cols-[60px_1fr_50px_30px] items-center gap-2 text-xs">
                     <span className="text-text-secondary truncate">{e.label}</span>
                     <div className="h-1 bg-black/30 rounded overflow-hidden">
                       <div className={`h-full ${ethnicBarColor(e.label)}`} style={{ width: `${e.pct}%` }} />
@@ -1057,19 +1060,19 @@ export function SettlementDetailContent({
         {(!isPanel || activeTab === 'overview') && terrain && (
           <div className="pt-1 space-y-0.5">
             {!terrainModifier && (
-              <div className="flex justify-between text-[10px] text-text-secondary italic">
+              <div className="flex justify-between text-xs text-text-secondary italic">
                 <span>{t('settlement.terrainContext')}</span>
                 <span>{terrain}</span>
               </div>
             )}
             {elevation != null && (
-              <div className="flex justify-between text-[10px] text-text-secondary">
+              <div className="flex justify-between text-xs text-text-secondary">
                 <span>{t('settlement.elevation')}</span>
                 <span>{elevation}m{typeof props.river_crossing_penalty === 'number' && props.river_crossing_penalty > 0 ? ` | ${t('settlement.riverCrossing')}` : ''}</span>
               </div>
             )}
             {typeof props.road_access_index === 'number' && props.road_access_index < 0.5 && (
-              <div className="flex justify-between text-[10px] text-amber-400/80">
+              <div className="flex justify-between text-xs text-amber-400/80">
                 <span>{t('settlement.roadAccess')}</span>
                 <span>{t('settlement.poorPct', { pct: Math.round(props.road_access_index as number * 100) })}</span>
               </div>

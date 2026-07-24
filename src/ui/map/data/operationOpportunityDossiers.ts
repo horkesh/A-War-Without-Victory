@@ -190,7 +190,7 @@ export function isOperationOpportunityReview(review: {
 }
 
 function isLivePlayerOpportunityReview(review: RawRecord, playerFaction: string | null | undefined): boolean {
-    if (review.accepted != null || review.resolved_turn != null) return false;
+    if (review.accepted != null || review.opportunity_decision != null || review.resolved_turn != null) return false;
     const faction = typeof review.faction === 'string' ? review.faction : undefined;
     return playerFactionMatch(faction, playerFaction);
 }

@@ -1,12 +1,253 @@
 import assert from 'node:assert';
 import { test } from 'vitest';
 
-import { parseGameState } from '../src/ui/map/data/GameStateAdapter.js';
+import {
+    buildFactionStrategicObjectiveViews,
+    parseGameState,
+} from '../src/ui/map/data/GameStateAdapter.js';
+import type { LoadedGameState } from '../src/ui/map/data/types.js';
 import { deriveInboxItems } from '../src/ui/map/data/inboxItems.js';
-import { buildPresidentialDecisionRoomView } from '../src/ui/map/data/presidentialDecisionRoom.js';
+import {
+    buildPresidentialDecisionRoomView,
+    buildReserveRequestPresentation,
+} from '../src/ui/map/data/presidentialDecisionRoom.js';
+import { buildReserveRequestSummary } from '../src/ui/map/data/reserveRequestPresentation.js';
+import { setLocale } from '../src/ui/map/i18n/index.js';
 import { extractWarData } from '../src/ui/warroom/data/war_data_extractor.js';
 import { getOperationalSitrepView } from '../src/ui/shared/operational_sitrep_views.js';
 import { readFileSync } from 'node:fs';
+
+test('B4 defines canonical strategic-objective and reserve-request read models', () => {
+    const adapterSource = readFileSync(
+        new URL('../src/ui/map/data/GameStateAdapter.ts', import.meta.url),
+        'utf8',
+    );
+    const reservePresentationSource = readFileSync(
+        new URL('../src/ui/map/data/reserveRequestPresentation.ts', import.meta.url),
+        'utf8',
+    );
+
+    assert.ok(adapterSource.includes('export function buildFactionStrategicObjectiveViews'));
+    assert.ok(reservePresentationSource.includes('export function buildReserveRequestPresentation'));
+});
+
+test('B4 exposes four RBiH strategic objectives with command ownership and sparse truth', () => {
+    const state = {
+        player_faction: 'RBiH',
+        turn: 20,
+        formations: [
+            { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+        ],
+        strategicDimensions: {
+            RBiH: {
+                territorial_legitimacy: { base_value: 40, event_modifier: -5, effective_value: 35 },
+                military_credibility: { base_value: 64, event_modifier: 8, effective_value: 72 },
+                internal_cohesion: { base_value: 55, event_modifier: 0, effective_value: 55 },
+            },
+        },
+        operationalSitrep: { front: { engagedCount: 2, exposedCount: 1 } },
+        operations: [{
+            corps_id: 'arbih_1st_corps', corps_name: '1st Corps', faction: 'RBiH',
+            name: 'operation_sarajevo_relief', display_name: 'Sarajevo Relief', phase: 'execution',
+            participating_brigade_count: 3,
+        }],
+        pendingReserveRequests: [{
+            request_id: 'reserve_alpha', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+            reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
+            description: 'Thin line', suggested_brigade_id: 'arbih_guards', turn_requested: 20,
+        }],
+        allControlEvents: [
+            { turn: 20, settlementId: 'op:test:lost', from: 'RBiH', to: 'RS', mechanism: 'combat' },
+        ],
+        war_alliance_rbih_hrhb: 0.42,
+    } as unknown as LoadedGameState;
+
+    const objectives = buildFactionStrategicObjectiveViews(state);
+
+    assert.equal(objectives.length, 4);
+    assert.deepEqual(objectives[0], {
+        id: 'state_survival',
+        title: 'Protect state survival',
+        status: 'critical',
+        trend: 'worsening',
+        responsibleCommand: '1st Corps',
+        currentCommitment: '2 front contacts / 1 thinly held',
+        nextLever: {
+            owner: 'decision_room',
+            label: 'Review reserve commitment',
+            navigationTarget: {
+                kind: 'decision-room',
+                lens: 'command',
+                cardId: 'command:elite-deploy:reserve_alpha',
+            },
+        },
+        lastConsequence: 'Turn 20: territorial control was lost.',
+    });
+    assert.deepEqual(objectives[1], {
+        id: 'military_credibility',
+        title: 'Build military credibility',
+        status: 'secure',
+        trend: 'improving',
+        responsibleCommand: '1st Corps',
+        currentCommitment: '1 active operation committing 3 brigades',
+        nextLever: {
+            owner: 'army_hq',
+            label: 'Review Army HQ briefing',
+            navigationTarget: { kind: 'army-hq-corps-briefing', corpsId: 'arbih_1st_corps' },
+        },
+        lastConsequence: null,
+    });
+    assert.deepEqual(objectives[2], {
+        id: 'international_standing',
+        title: 'Preserve international standing',
+        status: 'unreported',
+        trend: 'unreported',
+        responsibleCommand: null,
+        currentCommitment: null,
+        nextLever: {
+            owner: 'decision_room',
+            label: 'Review political decisions',
+            navigationTarget: { kind: 'decision-room', lens: 'decision' },
+        },
+        lastConsequence: null,
+    });
+    assert.equal(objectives[3]?.id, 'internal_cohesion');
+    assert.equal(objectives[3]?.currentCommitment, 'RBiH-HRHB alliance at 42%');
+});
+
+test('war-summary commitment pluralizes brigade count independently of operation count', () => {
+    const state = {
+        player_faction: 'RBiH',
+        turn: 20,
+        formations: [{ id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' }],
+        strategicDimensions: {
+            RBiH: {
+                military_credibility: { base_value: 64, event_modifier: 0, effective_value: 64 },
+            },
+        },
+        operations: [{
+            corps_id: 'arbih_1st_corps', corps_name: '1st Corps', faction: 'RBiH',
+            name: 'operation_test', display_name: 'Test Operation', phase: 'execution',
+            participating_brigade_count: 1,
+        }],
+    } as unknown as LoadedGameState;
+
+    const objective = buildFactionStrategicObjectiveViews(state)
+        .find((view) => view.id === 'military_credibility');
+
+    assert.equal(objective?.currentCommitment, '1 active operation committing 1 brigade');
+});
+
+test('B4 reserve presentation names the command, sector, candidate, effect, and opportunity cost', () => {
+    const request = {
+        request_id: 'reserve_alpha', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+        reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
+        description: 'Thin line', suggested_brigade_id: 'arbih_guards', turn_requested: 20,
+    } as NonNullable<LoadedGameState['pendingReserveRequests']>[number];
+    const state = {
+        formations: [
+            { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+            {
+                id: 'arbih_guards', faction: 'RBiH', name: 'Guards Brigade', kind: 'brigade',
+                readiness: 'ready', location_osid: 'op:visoko:visoko_2',
+                eliteLoanState: {
+                    on_loan: false, loaned_to_corps: null, loan_start_turn: null,
+                    turns_deployed: 0, in_cooldown: false, permanently_degraded: false,
+                    current_episode_id: null,
+                },
+            },
+        ],
+        corpsFrontSectors: [{
+            sector_id: 'sector:sarajevo:north', corps_id: 'arbih_1st_corps',
+            corps_name: '1st Corps', display_name: 'Sarajevo North', faction: 'RBiH',
+        }],
+    } as unknown as LoadedGameState;
+
+    assert.deepEqual(
+        buildReserveRequestPresentation(state, request, { 'op:visoko:visoko_2': 'Visoko' }),
+        {
+            requestingCommand: '1st Corps',
+            recipientSector: 'Sarajevo North',
+            recipient: '1st Corps - Sarajevo North',
+            candidateForce: 'Guards Brigade',
+            donorCommand: 'Unreported',
+            sourcePosition: 'Visoko',
+            readiness: 'Ready',
+            travelTime: 'about 1 week travel',
+            expectedEffect: 'Anchor the thinnest sector-front line and stabilize local defensive depth.',
+            weakenedPosition: 'Unreported',
+            opportunityCost: '0 ready reserve formations remain; Visoko loses this immediate strategic-reserve fallback.',
+            severity: 'Immediate Army Need',
+        },
+    );
+});
+
+test('B4 reserve presentation keeps genuinely absent request details unreported', () => {
+    const request = {
+        request_id: 'reserve_sparse', corps_id: 'missing_corps', faction: 'RBiH',
+        reason: 'unknown', priority: 40, severityBand: 'routine', travel_hops: -1,
+        description: '', suggested_brigade_id: null, turn_requested: 20,
+    } as NonNullable<LoadedGameState['pendingReserveRequests']>[number];
+    const state = { formations: [], corpsFrontSectors: [] } as unknown as LoadedGameState;
+
+    assert.deepEqual(buildReserveRequestPresentation(state, request), {
+        requestingCommand: 'Unreported',
+        recipientSector: 'Unreported',
+        recipient: 'Unreported',
+        candidateForce: 'Unreported',
+        donorCommand: 'Unreported',
+        sourcePosition: 'Unreported',
+        readiness: 'Unreported',
+        travelTime: 'Unreported',
+        expectedEffect: 'Unreported',
+        weakenedPosition: 'Unreported',
+        opportunityCost: 'Unreported',
+        severity: 'Reserve Review',
+    });
+});
+
+test('reserve transfer sentences respect the active BCS locale', () => {
+    const request = {
+        request_id: 'reserve_bcs', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+        reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
+        description: 'Thin line', suggested_brigade_id: 'arbih_guards', turn_requested: 20,
+    } as NonNullable<LoadedGameState['pendingReserveRequests']>[number];
+    const state = {
+        formations: [
+            { id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps' },
+            { id: 'arbih_2nd_corps', faction: 'RBiH', name: '2nd Corps', kind: 'corps' },
+            {
+                id: 'arbih_guards', faction: 'RBiH', name: 'Guards Brigade', kind: 'brigade',
+                corps_id: 'arbih_2nd_corps', readiness: 'ready', location_osid: 'op:visoko:visoko_2',
+                eliteLoanState: {
+                    on_loan: false, loaned_to_corps: null, loan_start_turn: null,
+                    turns_deployed: 0, in_cooldown: false, permanently_degraded: false,
+                    current_episode_id: null,
+                },
+            },
+        ],
+        corpsFrontSectors: [{
+            sector_id: 'sector:sarajevo:north', corps_id: 'arbih_1st_corps',
+            corps_name: '1st Corps', display_name: 'Sarajevo North', faction: 'RBiH',
+        }],
+    } as unknown as LoadedGameState;
+
+    setLocale('bcs', undefined);
+    try {
+        const presentation = buildReserveRequestPresentation(
+            state,
+            request,
+            { 'op:visoko:visoko_2': 'Visoko' },
+        );
+        const summary = buildReserveRequestSummary(presentation);
+
+        assert.match(presentation.weakenedPosition, /na polozaju Visoko/);
+        assert.doesNotMatch(presentation.weakenedPosition, /\sat\s/);
+        assert.doesNotMatch(summary, /\b(?:from|to|Weakened position)\b|\sat\s/);
+    } finally {
+        setLocale('en', undefined);
+    }
+});
 
 test('parseGameState extracts deterministic order lists and events', () => {
     const parsed = parseGameState({
@@ -566,6 +807,72 @@ test('parseGameState scopes pending event decisions and review queue to player f
     assert.strictEqual(foreignOnly.pendingEventDecisions, undefined);
     assert.strictEqual(foreignOnly.presidentialReviewQueue, undefined);
     assert.ok(!buildPresidentialDecisionRoomView({ state: foreignOnly }).cards.some((card) => card.id === 'review:pending'));
+});
+
+test('parseGameState projects only the player faction command-interpretation record', () => {
+    const parsed = parseGameState({
+        meta: { turn: 12, phase: 'war', player_faction: 'RBiH' },
+        military: {
+            formations: {
+                arbih_1st_corps: { id: 'arbih_1st_corps', name: '1st Corps', faction: 'RBiH', kind: 'corps' },
+                vrs_drina_corps: { id: 'vrs_drina_corps', name: 'Drina Corps', faction: 'RS', kind: 'corps' },
+            },
+            army_co_decision_traces: {
+                RBiH: [
+                    { turn: 12, campaign_role: 'PRESS_OFFENSIVE', rationale: 'The Main Staff accepted the offensive intent.' },
+                    { turn: 11, campaign_role: 'BALANCE_FRONTS', rationale: 'The Main Staff balanced the fronts.' },
+                ],
+                RS: [{ turn: 12, campaign_role: 'HOLD_AT_ALL_COSTS', rationale: 'Foreign command rationale.' }],
+            },
+            army_corps_directives_by_faction: {
+                RBiH: {
+                    arbih_1st_corps: {
+                        corps_id: 'arbih_1st_corps', role: 'secondary', deviated: true,
+                        deviation_reason: 'cautious_preference',
+                    },
+                },
+                RS: {
+                    vrs_drina_corps: { corps_id: 'vrs_drina_corps', role: 'primary', deviated: false },
+                },
+            },
+            corps_command: {
+                arbih_1st_corps: {
+                    commander_state: {
+                        last_assessment_turn: 12,
+                        last_plan_action: 'launched',
+                        last_plan_reason: 'Plan ready; operation launched.',
+                        decision_trace: { turn: 12, winning_intent_id: 'plan_internal_12', hard_constraints: [] },
+                    },
+                },
+                vrs_drina_corps: {
+                    commander_state: {
+                        last_assessment_turn: 12,
+                        last_plan_action: 'advanced',
+                        last_plan_reason: 'Foreign action.',
+                    },
+                },
+            },
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.deepStrictEqual(parsed.armyCoDecisionTraces, {
+        RBiH: [
+            { turn: 11, campaign_role: 'BALANCE_FRONTS', rationale: 'The Main Staff balanced the fronts.' },
+            { turn: 12, campaign_role: 'PRESS_OFFENSIVE', rationale: 'The Main Staff accepted the offensive intent.' },
+        ],
+    });
+    assert.deepStrictEqual(parsed.armyCorpsDirectives, [{
+        corpsId: 'arbih_1st_corps', role: 'secondary', deviated: true,
+        deviationReason: 'cautious_preference',
+    }]);
+    assert.deepStrictEqual(parsed.corpsCommanderActions, [{
+        corpsId: 'arbih_1st_corps', turn: 12, action: 'launched',
+        reason: 'Plan ready; operation launched.',
+    }]);
+    assert.ok(!JSON.stringify(parsed.armyCoDecisionTraces).includes('Foreign'));
+    assert.ok(!JSON.stringify(parsed.armyCorpsDirectives).includes('vrs_drina_corps'));
+    assert.ok(!JSON.stringify(parsed.corpsCommanderActions).includes('vrs_drina_corps'));
 });
 
 test('parseGameState extracts canonical front edge and pressure views', () => {
@@ -1729,6 +2036,7 @@ test('parseGameState derives an army-owned reserve queue summary without folding
         'reserve-critical-defense',
         'reserve-offensive',
     ]);
+    assert.deepEqual(parsed.pendingReserveRequests?.map((request) => request.travel_hops), [-1, -1]);
     assert.deepEqual(parsed.pendingReserveRequests?.map((request) => ({
         request_id: request.request_id,
         severityBand: request.severityBand,
@@ -2255,6 +2563,46 @@ test('parseGameState derives player-scoped pending operation opportunity proposa
             ['decline', true],
         ],
     );
+});
+
+test('parseGameState excludes resolved operation opportunity reviews from player-facing pending work', () => {
+    const parsed = parseGameState({
+        meta: {
+            turn: 176,
+            phase: 'war',
+            player_faction: 'RBiH',
+            pending_proposal_reviews: [{
+                id: 'PROP_176_opportunity_0',
+                turn: 176,
+                faction: 'RBiH',
+                domain: 'ops',
+                description: 'Operation Sana - staff recommendation: approve',
+                proposed_action: 'OPPORTUNITY:OPP_175_sana_95',
+                current_value: 'pending_review',
+                proposed_value: 'approve',
+                opportunity_decision: 'approve',
+                resolved_turn: 176,
+            }],
+        },
+        military: {
+            formations: {},
+            operation_opportunities: [{
+                opportunity_id: 'sana_95',
+                proposal_id: 'OPP_175_sana_95',
+                eligibility_turn: 175,
+                expires_turn: 199,
+                status: 'eligible_pending_review',
+                approver_faction: 'RBiH',
+                last_axis_evaluation: [],
+            }],
+        } as any,
+        political: { political_controllers: {} } as any,
+    });
+
+    assert.equal(parsed.pendingProposalReviews, undefined);
+    assert.equal(parsed.operationOpportunityProposals?.length, 1);
+    assert.equal(parsed.operationOpportunityProposals?.[0]?.review_id, undefined);
+    assert.equal(parsed.presidentialReviewQueue, undefined);
 });
 
 test('parseGameState keeps sparse operation opportunity axes unreported', () => {

@@ -50,6 +50,8 @@ interface IndexEssay {
     title: string;
     year: number;
     category: string;
+    tier?: number;
+    ghost_when?: string;
 }
 
 interface DiskEssay extends IndexEssay {
@@ -112,6 +114,13 @@ function loadDiskEssays(): DiskEssay[] {
 }
 
 describe('essay_index_integrity', () => {
+    it('keeps the independence referendum as start-visible history without an unlock-only ghost workaround', () => {
+        const referendum = loadIndex().find((row) => row.id === 'essay_independence_referendum_1992');
+        expect(referendum).toBeTruthy();
+        expect(referendum?.tier).toBe(0);
+        expect(referendum?.ghost_when).toBeUndefined();
+    });
+
     it('every index row resolves to an on-disk essay file (index → disk)', () => {
         const index = loadIndex();
         expect(index.length).toBeGreaterThan(0);

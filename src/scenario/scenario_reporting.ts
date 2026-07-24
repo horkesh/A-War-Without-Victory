@@ -43,6 +43,7 @@ export interface WeeklyCombatCausalitySummary {
 export interface WeeklyControlChangeAttributionSummary {
     total_changes: number;
     combat: number;
+    paramilitary: number;
     consolidation: number;
     abandoned: number;
     init_overrides: number;

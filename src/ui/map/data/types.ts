@@ -539,7 +539,7 @@ export interface LoadedParamilitaryRequest {
     strength: number;
     target_osid: string;
     estimated_civilian_risk: number;
-    decision?: 'allow' | 'deny';
+    decision?: 'allow' | 'deny' | 'regular';
     mode?: 'rear_pocket' | 'offensive';
 }
 
@@ -1103,6 +1103,27 @@ export interface LoadedGameState {
     }>;
     recruitment?: RecruitmentView;
     armyStance?: Record<string, string>;
+    /** Player-faction Army CO interpretation trace, oldest first. */
+    armyCoDecisionTraces?: Record<string, Array<{
+        turn: number;
+        campaign_role: string;
+        rationale: string;
+        raw_directive_id?: string;
+    }>>;
+    /** Current player-faction corps assignments after Army CO interpretation. */
+    armyCorpsDirectives?: Array<{
+        corpsId: string;
+        role: 'primary' | 'secondary' | 'economy' | 'contain';
+        deviated: boolean;
+        deviationReason?: 'aggressive_preference' | 'cautious_preference' | 'compliance_score_low';
+    }>;
+    /** Latest player-faction corps commander plan action, projected from commander state. */
+    corpsCommanderActions?: Array<{
+        corpsId: string;
+        turn: number;
+        action: 'created' | 'advanced' | 'suspended' | 'abandoned' | 'launched' | 'none';
+        reason: string;
+    }>;
     casualtyLedger?: Record<string, CasualtyLedgerEntryView>;
     civilianCasualties?: Record<string, CivilianCasualtyView>;
     internationalVisibilityPressure?: InternationalVisibilityPressureView;
@@ -1260,7 +1281,7 @@ export interface LoadedGameState {
     latestTurnSummary: import('../../../state/turn_summary.js').TurnSummary | null;
     /** All turn summaries (for Chronicle timeline). */
     turnSummaries: import('../../../state/turn_summary.js').TurnSummary[];
-    /** Completed operation AARs. */
+    /** Completed operation AARs scoped to the player faction for compatibility consumers. */
     operationHistory?: Array<{
         operation_id: string;
         /** Raw engine/catalog operation name. Keep for joins and metadata, not display text. */
@@ -1307,6 +1328,8 @@ export interface LoadedGameState {
         /** Snapshot of commander's recommendation at the moment of presidential decision. */
         commander_assessment_at_launch?: 'launch' | 'postpone' | 'abort';
     }>;
+    /** Complete operation AAR ledger before player-faction presentation filtering. */
+    rawOperationHistory?: NonNullable<LoadedGameState['operationHistory']>;
     /** Player-issued permanent sector assignments (brigade_sector_override). */
     brigadeSectorOverride?: Record<string, string>;
     /** Pending army reserve loan requests awaiting player decision. */
@@ -1614,6 +1637,9 @@ export interface LoadedGameState {
         proposed_action?: string;
         current_value?: string;
         proposed_value?: string;
+        accepted?: boolean | null;
+        resolved_turn?: number | null;
+        opportunity_decision?: unknown;
     }>;
 
     /**

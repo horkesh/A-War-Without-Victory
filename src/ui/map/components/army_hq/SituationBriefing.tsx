@@ -63,16 +63,16 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
             className="bg-panel-card border border-panel-border rounded-lg mb-4"
         >
             <summary className="cursor-pointer list-none flex items-center justify-between px-4 py-2.5 border-b border-panel-border">
-                <span className="text-[9px] uppercase tracking-[0.25em] font-bold text-text-secondary">
+                <span className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary">
                     {t('situationBriefing.title')}
                 </span>
-                <span className="text-[9px] uppercase tracking-[0.15em] text-text-muted tabular-nums">
+                <span className="text-xs uppercase tracking-[0.15em] text-text-muted tabular-nums">
                     {summaryLabel}
                 </span>
             </summary>
 
             {items.length === 0 ? (
-                <div className="px-4 py-2 text-[11px] text-text-secondary italic">
+                <div className="px-4 py-2 text-xs text-text-secondary italic">
                     {t('situationBriefing.empty')}
                 </div>
             ) : (
@@ -113,22 +113,22 @@ export function SituationBriefing({ items, onNavigate }: SituationBriefingProps)
                                 <div className="flex items-start gap-2">
                                     <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1 ${dotColor}`} />
                                     <div className="min-w-0 flex-1">
-                                        <div className="text-[11px] text-text-primary leading-snug font-semibold">
+                                        <div className="text-xs text-text-primary leading-snug font-semibold">
                                             {copy.title}
                                         </div>
                                         {copy.detail && (
-                                            <div className="text-[10px] text-text-secondary leading-snug mt-0.5">
+                                            <div className="text-xs text-text-secondary leading-snug mt-0.5">
                                                 {copy.detail}
                                             </div>
                                         )}
                                         {disabledReason && (
-                                            <div className="text-[9px] text-text-secondary/70 leading-snug mt-1">
+                                            <div className="text-xs text-text-secondary leading-snug mt-1">
                                                 {disabledReason}
                                             </div>
                                         )}
                                     </div>
                                     {hasTarget && onNavigate && targetLabel && (
-                                        <span className="text-amber-400/50 group-hover:text-amber-400 text-[9px] font-mono font-bold shrink-0 transition-colors">
+                                        <span className="text-amber-300 group-hover:text-amber-200 text-xs font-mono font-bold shrink-0 transition-colors">
                                             {targetLabel}
                                         </span>
                                     )}

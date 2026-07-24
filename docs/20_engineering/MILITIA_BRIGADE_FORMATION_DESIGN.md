@@ -124,9 +124,9 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 - **Not pool-sourced:** Spawned directly by graph analysis when rear enemy pockets detected, not from militia pools
 - **Not reinforceable:** `isEligibleForReinforcement()` returns false
 - **Not bot-AI-controlled:** No `corps_id`; bot corps/brigade AI skips them
-- **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded`)
+- **Short lifecycle:** Spawn → instant capture (MARCH_TURNS=0, rear pockets already surrounded) → dissolve (set to `inactive` + `disbanded` + `degraded`, personnel zero); formations found after the final active week dissolve before acting
 - **Low combat value:** Cohesion 20 (vs brigade 45-72); cannot hold positions or provide garrison defense
-- **Faction-differentiated:** RS 0.85, HRHB 0.55, RBiH 0.30 spawn probability (organizational penetration)
+- **Deterministic selection:** eligible undefended pockets must pass local organizational-penetration and dominance floors, then rank by attacker paramilitary penetration, party penetration, adjacent friendly support, dominance margin, municipality, and OSID
 
 **Constants (formation_constants.ts):**
 
@@ -135,7 +135,11 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_UNIT_SIZE | 150 | Personnel per unit |
 | PARAMILITARY_MARCH_TURNS | 0 | Instant capture (rear pockets already surrounded) |
 | PARAMILITARY_FADE_WEEK | 20 | Cutoff week (war professionalizes) |
-| PARAMILITARY_SPAWN_RATE | RS=0.85, HRHB=0.55, RBiH=0.30 | Per-faction spawn probability |
+| PARAMILITARY_MAX_REAR_DEPLOYMENTS_PER_FACTION_TURN | 2 | Rear-pocket deployment cap per faction and turn |
+| OFFENSIVE_PARA_MAX_DEPLOYMENTS_PER_FACTION_TURN | 2 | Offensive deployment cap per faction and turn |
+| PARAMILITARY_MAX_DEPLOYMENTS_PER_MUNICIPALITY_TURN | 1 | Combined deployment cap per municipality and turn |
+| PARAMILITARY_REAR_MIN_ORGANIZATIONAL_PENETRATION | 25 | Rear-pocket attacker penetration floor |
+| OFFENSIVE_PARA_MIN_ORGANIZATIONAL_PENETRATION | 60 | Offensive attacker penetration floor |
 | PARAMILITARY_CASUALTY_RATE | 0.08 | Military casualty fraction per sweep |
 | PARAMILITARY_CIVILIAN_CASUALTY_RATE | 0.02 | Civilian casualty fraction (war crimes) |
 | PARAMILITARY_COHESION | 20 | Very low — irregular forces |
@@ -143,6 +147,8 @@ Paramilitary formations (`kind: 'paramilitary'`) are a separate formation kind f
 | PARAMILITARY_TARGET_AVG_POPULATION | 5000 | Avg civilian pop at target OSID |
 
 **Player agency:** `paramilitary_policy` ('ask'/'always_allow'/'always_deny') + per-request decisions. Bot factions auto-approve. `paramilitary_deployment_count` tracks cumulative deployments.
+
+**Truth writes:** Captures emit `control_events` with `mechanism: 'paramilitary'`. Civilian killings update the faction casualty ledger, displacement event log/aggregates, and target municipality `displacement_state.lost_population` in the same resolution.
 
 **Code:** `src/sim/combat/paramilitary_sweep.ts`. Pipeline: `paramilitary-detect` + `paramilitary-advance` after `partition-corps-front-sectors`.
 

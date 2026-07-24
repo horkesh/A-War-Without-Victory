@@ -124,7 +124,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
             zIndex={Z.GLASS_PANEL_EVENT_MODAL}
             ariaLabelledBy="event-modal-title"
             backdropClassName="bg-black/50 backdrop-blur-sm"
-            panelClassName="relative bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
+            panelClassName="relative flex flex-col bg-panel-bg/95 backdrop-blur-md border border-[rgba(180,160,130,0.15)] shadow-xl rounded-lg overflow-hidden animate-slideUp"
             panelStyle={{ width: '520px', maxHeight: '84vh' }}
             testIdBackdrop="event-modal-backdrop"
             testIdPanel="event-modal-panel"
@@ -144,7 +144,10 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                     &times;
                 </button>
             </div>
-            <div className="overflow-y-auto px-2.5 py-2" style={{ maxHeight: 'calc(84vh - 38px)' }}>
+            <div
+                className="min-h-0 overflow-y-auto px-2.5 py-2"
+                data-testid="event-modal-scroll-region"
+            >
             {/* Queue indicator */}
             {queueTotal != null && queueTotal > 1 && (
                 <div className="text-right text-xs mb-2" style={{ color: '#8a8578' }}>
@@ -216,7 +219,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                             {factions.map(fid => (
                                 <span
                                     key={fid}
-                                    className="text-[10px] px-2 py-0.5 rounded font-bold tracking-wider"
+                                    className="text-xs px-2 py-0.5 rounded font-bold tracking-wider"
                                     style={{
                                         backgroundColor: `${FACTION_COLORS[fid] ?? '#888'}18`,
                                         color: FACTION_COLORS[fid] ?? '#888',
@@ -256,7 +259,7 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                             }}
                         >
                             <div
-                                className="text-[10px] uppercase tracking-[0.15em] mb-2 font-bold"
+                                className="text-xs uppercase tracking-[0.15em] mb-2 font-bold"
                                 style={{ color: '#8a7e68' }}
                             >
                                 {t('event.intelligenceAssessment')}
@@ -276,30 +279,38 @@ export function EventModal({ event, queuePosition, queueTotal, onAcknowledge }: 
                         </div>
                     )}
 
-                    {/* Acknowledge — non-decision events only. Presidential decisions
-                        are executed by PresidentialAttentionPanel, not here. */}
-                    <div className="flex justify-end pt-2">
-                        <button
-                            onClick={onAcknowledge}
-                            className="px-5 py-2 rounded-sm text-sm font-bold uppercase tracking-wider transition-all"
-                            style={{
-                                backgroundColor: 'rgba(60,80,50,0.12)',
-                                color: '#5a6a4a',
-                                border: '1px solid rgba(60,80,50,0.25)',
-                                fontFamily: 'Georgia, serif',
-                            }}
-                            onMouseEnter={e => {
-                                (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';
-                            }}
-                            onMouseLeave={e => {
-                                (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
-                            }}
-                        >
-                            {t('event.acknowledged')}
-                        </button>
-                    </div>
                 </div>
             </div>
+            </div>
+            {/* Keep the only completion action visible while long dispatches scroll. */}
+            <div
+                className="shrink-0 flex justify-end px-5 py-2.5 border-t"
+                data-testid="event-modal-action-bar"
+                style={{
+                    background: 'linear-gradient(165deg, #eee5d2 0%, #e2d9c2 100%)',
+                    borderColor: 'rgba(60,50,35,0.16)',
+                }}
+            >
+                <button
+                    data-testid="event-notice-acknowledge"
+                    data-event-id={event.id}
+                    onClick={onAcknowledge}
+                    className="px-5 py-2 rounded-sm text-sm font-bold uppercase tracking-wider transition-all"
+                    style={{
+                        backgroundColor: 'rgba(60,80,50,0.12)',
+                        color: '#5a6a4a',
+                        border: '1px solid rgba(60,80,50,0.25)',
+                        fontFamily: 'Georgia, serif',
+                    }}
+                    onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.22)';
+                    }}
+                    onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(60,80,50,0.12)';
+                    }}
+                >
+                    {t('event.acknowledged')}
+                </button>
             </div>
         </Modal>
     );

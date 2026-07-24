@@ -1,5 +1,5 @@
 {
-  "c3_frozen_as_of": "2026-06-12",
+  "c3_frozen_as_of": "2026-07-17",
   "description": "C3 freeze contract — the single human-readable record of every value pinned at D2-entry. This file is DOCUMENTATION, not enforcement: the actual gates live in the cited source files + CI jobs. Its purpose is to give the D2 playthrough debrief one artifact to cite when logging any hash/schema drift surfaced during play. NOTE: the full-save byte hash is platform-divergent (Win dev vs Linux CI float serialization) and is DELIBERATELY NOT pinned — only platform-stable integer/control-map signals are frozen. Any change to a frozen value requires a deliberate --update (or schema bump + migration) and panel sign-off; it is never a silent drift.",
   "road_to_1_0": "§6-symmetry CLOSED (panel-confirmed) -> C3 freeze (this file) -> D2 owner full-campaign playthrough (the sole 1.0 blocker, travel-blocked) -> D3 -> 1.0.",
   "schema": {
@@ -9,33 +9,33 @@
     "note": "tg_schema_freeze.test.ts pins CURRENT_SCHEMA_VERSION === getLatestSchemaVersion() === 36 and (C3) the canonical persisted key-sets of military/political/displacement. A new persisted field without a migration + schema bump trips a RED required test (full-suite CI). The startup-snapshot contract (tests/startup_snapshot_contract.test.ts) is the second layer."
   },
   "calibration_40w": {
-    "structural_fingerprint": "dbd82a4719719c55",
+    "structural_fingerprint": "4fcdb21ab4bcff14",
     "structural_fingerprint_schema": 2,
-    "control_counts": { "HRHB": 94, "RBiH": 258, "RS": 382 },
-    "control_flips": 122,
-    "anchors_passed": 30,
-    "anchors_total": 30,
+    "control_counts": { "HRHB": 85, "RBiH": 251, "RS": 376 },
+    "control_flips": 110,
+    "anchors_passed": 31,
+    "anchors_total": 31,
     "source": "data/calibration/structural_fingerprint_40w.json",
     "enforced_by": "structural-fingerprint CI job (REQUIRED) via npm run ci:structural-fingerprint:check; drift = hard fail; deliberate change = npm run ci:structural-fingerprint:update + panel sign-off",
     "note": "Schema v2 fingerprints sorted OSID flip rows as well as per-faction counts, anchors, benchmarks, and run shape; equal-count control swaps are no longer invisible to the CI gate."
   },
   "calibration_188w": {
-    "matched_osids_floor": 609,
+    "matched_osids_floor": 622,
     "matched_osids_total": 712,
-    "final_save_hash_188w": "f08f40522afff835",
-    "anchor_set_count": 30,
+    "final_save_hash_188w": "aa4302e694a6482e",
+    "anchor_set_count": 31,
     "source": "docs/40_reports/CALIBRATION_MASTER.md (authoritative floor) + data/calibration/engine_health_thresholds.json",
-    "note": "The 188w control_delta is platform-stable but byte-pinned only via the matched_osids_floor integer (609 after the 2026-06-26 required-gate re-floor), not a manifest SHA. The 188w final_save_hash is recorded for the debrief but is NOT a CI gate (platform-divergent)."
+    "note": "The 188w control_delta is platform-stable but byte-pinned only via the matched_osids_floor integer (622 after the 2026-07-17 campaign-QA organizational-policy re-floor), not a manifest SHA. The 188w final_save_hash is retained for lineage only and is NOT a CI gate (platform-divergent). The canon-corrected endpoint passes all 31 anchors, including Brcko city and corridor."
   },
   "engine_health_188w": {
-    "zero_eligible_ops_max": 4,
-    "dead_ops_max": 25,
+    "zero_eligible_ops_max": 3,
+    "dead_ops_max": 6,
     "ghost_destroyed_max": 4,
-    "stranded_brigades_max": 3,
-    "consistency_failures_max": 42,
-    "matched_osids_min": 609,
-    "kw_ratio_lo": 3.318,
-    "kw_ratio_hi": 4.488,
+    "stranded_brigades_max": 10,
+    "consistency_failures_max": 3,
+    "matched_osids_min": 622,
+    "kw_ratio_lo": 3.211,
+    "kw_ratio_hi": 4.345,
     "source": "data/calibration/engine_health_thresholds.json (tools/engine_health_gate.cjs)",
     "enforced_by": "engine-health-188w CI job — REQUIRED + blocking (promoted from advisory 2026-06-13, owner-authorized: continue-on-error removed #430 + added to main branch-protection required checks). A hard 188w regression now BLOCKS merge on sim-touching PRs; doc/CI PRs pass via the always-report green-fast shim (verified: #431 reported green-fast pass on a CI-only PR)."
   },

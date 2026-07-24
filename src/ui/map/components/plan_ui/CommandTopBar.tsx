@@ -43,10 +43,10 @@ export function CommandTopBar({
                         <img src={crestSrc} alt="" className="w-9 h-9 drop-shadow-[0_0_6px_rgba(196,163,90,0.3)]" />
                     )}
                     <div className="flex flex-col">
-                        <h2 className="text-[11px] font-bold text-accent-gold uppercase tracking-[0.3em] drop-shadow-[0_0_8px_rgba(200,165,110,0.4)]">
+                        <h2 className="text-xs font-bold text-accent-gold uppercase tracking-[0.3em] drop-shadow-[0_0_8px_rgba(200,165,110,0.4)]">
                             {corpsDisplayName ?? t('planUi.operationsCommand')}
                         </h2>
-                        <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider">
+                        <span className="text-xs text-text-secondary font-bold uppercase tracking-wider">
                             {t('formationDetail.sector')} {sectorName}
                         </span>
                     </div>
@@ -56,7 +56,7 @@ export function CommandTopBar({
 
                 <div className="flex items-center gap-6">
                     <div className="flex flex-col gap-1">
-                        <label htmlFor="command-topbar-directive-name" className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.directiveName')}</label>
+                        <label htmlFor="command-topbar-directive-name" className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('planUi.directiveName')}</label>
                         <input
                             id="command-topbar-directive-name"
                             type="text"
@@ -68,7 +68,7 @@ export function CommandTopBar({
                     </div>
 
                     <div className="flex flex-col gap-1">
-                        <label className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{t('planUi.operationsCommander')}</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">{t('planUi.operationsCommander')}</label>
                         <button
                             onClick={onCommanderClick}
                             className="h-[31px] min-w-[180px] bg-black/40 border border-white/10 rounded px-3 flex items-center justify-between hover:border-accent-gold transition-all group"
@@ -76,7 +76,7 @@ export function CommandTopBar({
                             <span className="text-xs font-bold text-slate-300 group-hover:text-white">
                                 {commanderLabel}
                             </span>
-                            <span className="text-[9px] text-accent-gold opacity-50">&#9660;</span>
+                            <span className="text-xs text-accent-gold opacity-50">&#9660;</span>
                         </button>
                     </div>
                 </div>
@@ -84,7 +84,7 @@ export function CommandTopBar({
 
             <div className="flex items-center gap-4">
                 {statusMessage && (
-                    <div className="text-[10px] font-bold text-accent-gold bg-accent-gold/5 border border-accent-gold/20 px-3 py-1.5 rounded animate-pulse">
+                    <div className="text-xs font-bold text-accent-gold bg-accent-gold/5 border border-accent-gold/20 px-3 py-1.5 rounded animate-pulse">
                         {statusMessage}
                     </div>
                 )}

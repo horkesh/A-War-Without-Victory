@@ -48,6 +48,7 @@ const MISTRAL_BRIGADES = [
     'hvo_1st_guard_abb',
     'hv_4th_guards_split',
     'hvo_2nd_guard_mechanized',
+    'hv_112th_infantry_1995',
     'hvo_3rd_guard_jastrebovi',
     'hvo_rama_brigade',
 ];
@@ -117,8 +118,11 @@ function buildMistralState(opts: {
         formations[id] = {
             id,
             name: id,
+            kind: id === 'hv_112th_infantry_1995' ? 'hv_phantom' : 'brigade',
+            status: 'active',
             faction: 'HRHB',
-            own_corps_cmd: id === 'hvo_1st_guard_abb' ? 'hvo_main_staff' : 'hvo_tomislavgrad',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1500,
             strength: 1500,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
             cohesion: opts.axisCoordinationLow ? 34 : 70,
@@ -208,8 +212,11 @@ function buildSouthernMoveState(opts: {
         state.military.formations[id] ??= {
             id,
             name: id,
+            kind: 'brigade',
+            status: 'active',
             faction: 'HRHB',
-            own_corps_cmd: 'hvo_tomislavgrad',
+            corps_id: 'hvo_tomislavgrad',
+            personnel: 1500,
             strength: 1500,
             officer_quality: opts.axisCoordinationLow ? 0.25 : 0.72,
             cohesion: opts.axisCoordinationLow ? 34 : 70,
@@ -390,6 +397,45 @@ describe('Federation / Western Bosnia operation opportunity catalog', () => {
         expect(op.axes!.map(axis => axis.axis_id).sort()).toEqual(['mistral_drvar_grahovo', 'mistral_sipovo']);
         expect(op.axes!.flatMap(axis => axis.objectives))
             .not.toContain('op:mrkonjic_grad:mrkonjic_grad_2');
+    });
+
+    it('reconciles Mistral 2 participants against the attack floor without changing authored order or identity', () => {
+        const state = buildMistralState({ turn: 180 });
+        state.military.formations.hvo_rama_brigade!.personnel = 313;
+        runOpportunityEvaluationStep(state, 180);
+        const proposalId = buildProposalId('mistral_2_95', 180);
+
+        const approved = applyOpportunityDecision(state, 180, proposalId, 'approve');
+
+        expect(approved?.executed_op_id).toBe('Operation Mistral 2');
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
+        expect(op.name).toBe('Operation Mistral 2');
+        expect(op.participating_brigades).not.toContain('hvo_rama_brigade');
+        expect(op.axes!.find(axis => axis.axis_id === 'mistral_drvar_grahovo')!.assigned_brigades)
+            .toEqual([
+                'hvo_1st_guard_abb',
+                'hv_4th_guards_split',
+                'hvo_2nd_guard_mechanized',
+                'hv_112th_infantry_1995',
+            ]);
+        expect(op.axes!.find(axis => axis.axis_id === 'mistral_sipovo')!.assigned_brigades)
+            .toEqual(['hvo_3rd_guard_jastrebovi']);
+    });
+
+    it('uses later eligible authored participants as deterministic minimum-commitment reserves', () => {
+        const state = buildMistralState({ turn: 180 });
+        state.military.formations.hvo_1st_guard_abb!.personnel = 313;
+        runOpportunityEvaluationStep(state, 180);
+        const proposalId = buildProposalId('mistral_2_95', 180);
+
+        applyOpportunityDecision(state, 180, proposalId, 'under_resource');
+
+        const op = state.military.corps_command!.hvo_tomislavgrad.active_operations[0];
+        expect(op.axes!.find(axis => axis.axis_id === 'mistral_drvar_grahovo')!.assigned_brigades)
+            .toEqual([
+                'hv_4th_guards_split',
+                'hvo_2nd_guard_mechanized',
+            ]);
     });
 
     it('surfaces Southern Move after Sipovo staging anchors are held', () => {

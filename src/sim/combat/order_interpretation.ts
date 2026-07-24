@@ -24,6 +24,7 @@ import type {
     OrderSnapshot,
     OfficerEventType,
 } from '../../state/officer_types.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import { getCorpsCommander } from './officer_system.js';
 import { getActivePatronDirective } from './patron_directive_scope.js';
 
@@ -894,7 +895,7 @@ export function relieveOfficer(
             const bTier = TIER_PRIORITY[b.pool_tier] ?? 99;
             if (aTier !== bTier) return aTier - bTier;
             if (a.competence !== b.competence) return b.competence - a.competence;
-            return a.id.localeCompare(b.id);
+            return strictCompare(a.id, b.id);
         });
 
     let replacementId: string | null = null;

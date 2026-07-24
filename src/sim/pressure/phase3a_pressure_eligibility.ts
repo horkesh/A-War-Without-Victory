@@ -10,6 +10,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 
 
 // Feature flag (OFF by default)
@@ -369,9 +370,9 @@ export function buildPressureEligibilityPhase3A(
         const a2 = e2.a < e2.b ? e2.a : e2.b;
         const b2 = e2.a < e2.b ? e2.b : e2.a;
 
-        if (a1 !== a2) return a1.localeCompare(a2);
-        if (b1 !== b2) return b1.localeCompare(b2);
-        return (e1.type || '').localeCompare(e2.type || '');
+        if (a1 !== a2) return strictCompare(a1, a2);
+        if (b1 !== b2) return strictCompare(b1, b2);
+        return strictCompare(e1.type || '', e2.type || '');
     });
 
     const edgesEffective: EffectivePressureEdge[] = [];
@@ -486,7 +487,7 @@ export function buildPressureEligibilityPhase3A(
             if (e2.w !== e1.w) return e2.w - e1.w; // Descending by weight
             const key1 = e1.a < e1.b ? `${e1.a}--${e1.b}` : `${e1.b}--${e1.a}`;
             const key2 = e2.a < e2.b ? `${e2.a}--${e2.b}` : `${e2.b}--${e2.a}`;
-            return key1.localeCompare(key2);
+            return strictCompare(key1, key2);
         });
 
         audit = {

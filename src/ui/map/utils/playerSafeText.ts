@@ -286,6 +286,13 @@ export function getPlayerSafeOperationName(
     const safeName = (name ?? '').trim();
     if (!safeName) return fallback;
 
+    if (
+        opOrCorpsId === 'jna_herzegovina_command'
+        && safeName.toLowerCase() === 'operation herzegovina'
+    ) {
+        return 'JNA Operations in Herzegovina';
+    }
+
     // Already human-looking: has a space + an uppercase letter, no underscore.
     if (!safeName.includes('_') && /\s/.test(safeName) && /[A-Z]/.test(safeName)) {
         return safeName;

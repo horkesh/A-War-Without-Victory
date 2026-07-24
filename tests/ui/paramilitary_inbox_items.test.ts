@@ -67,8 +67,33 @@ describe('paramilitary Presidential Inbox items', () => {
 
         expect(loaded.pendingParamilitaryRequests).toEqual([
             { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', mode: 'offensive', estimated_civilian_risk: 250 },
-            { faction: 'RS', strength: 75, target_osid: 'op:brcko:brcko_2', decision: 'deny', estimated_civilian_risk: 100 },
         ]);
+    });
+
+    it('drops already-decided paramilitary requests from adapter readback and inbox blockers', () => {
+        const loaded = parseGameState(makeRawState({
+            pending_paramilitary_requests: [
+                { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 250 },
+                { faction: 'RS', strength: 75, target_osid: 'op:brcko:brcko_2', decision: 'allow', estimated_civilian_risk: 100 },
+                { faction: 'RS', strength: 50, target_osid: 'op:prijedor:prijedor_2', decision: 'deny', estimated_civilian_risk: 80 },
+                { faction: 'RS', strength: 30, target_osid: 'op:doboj:doboj_2', decision: 'regular', estimated_civilian_risk: 20 },
+            ],
+        }));
+
+        expect(loaded.pendingParamilitaryRequests).toEqual([
+            { faction: 'RS', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 250 },
+        ]);
+        expect(deriveInboxItems(loaded, null).filter((item) => item.type === 'paramilitary_request')).toHaveLength(1);
+
+        const decidedOnly = makeLoadedState({
+            pendingParamilitaryRequests: [
+                { faction: 'RS', strength: 75, target_osid: 'op:brcko:brcko_2', decision: 'allow', estimated_civilian_risk: 100 },
+                { faction: 'RS', strength: 50, target_osid: 'op:prijedor:prijedor_2', decision: 'deny', estimated_civilian_risk: 80 },
+                { faction: 'RS', strength: 30, target_osid: 'op:doboj:doboj_2', decision: 'regular', estimated_civilian_risk: 20 },
+            ],
+            paramilitaryPolicy: 'ask',
+        });
+        expect(deriveInboxItems(decidedOnly, null).some((item) => item.type === 'paramilitary_request')).toBe(false);
     });
 
     it('surfaces pending paramilitary requests with explicit warning copy', () => {
@@ -89,7 +114,7 @@ describe('paramilitary Presidential Inbox items', () => {
         expect(`${paramilitary?.title} ${paramilitary?.subtitle}`.toLowerCase()).toContain('war crimes');
         expect(paramilitary?.subtitle).toContain('1 deployment request near Bijeljina');
         expect(paramilitary?.subtitle).toContain('100 projected civilian casualties');
-        expect(paramilitary?.subtitle).toContain('-2 international standing');
+        expect(paramilitary?.subtitle).toContain('-2.02 international standing');
         expect(paramilitary?.subtitle).toContain('Estimated strength 150');
         // Internal engineering content-gate term must not leak to players.
         expect(paramilitary?.subtitle).not.toContain('Sensitive History Design Gate');
@@ -122,7 +147,7 @@ describe('paramilitary Presidential Inbox items', () => {
         expect(copy).toContain('2 zahtjeva za rasporedivanje kod Bijeljina');
         expect(copy).toContain('150 predvidenih civilnih zrtava');
         expect(copy).toContain('2 dogadaja ratnih zlocina');
-        expect(copy).toContain('-4 medunarodni ugled');
+        expect(copy).toContain('-4,03 medunarodni ugled');
         expect(copy).toContain('Procijenjena snaga 225');
         expect(copy).not.toMatch(/deployment request|projected civilian casualties|war crimes events|international standing|Estimated strength/i);
     });

@@ -124,7 +124,7 @@ export function assignBrigadesToSubSegments(
         if (commanderAggr >= 4) {
             const sorted = [...frontBrigadeIds].sort((a, b) =>
                 (brigadePersonnel.get(b) ?? 0) - (brigadePersonnel.get(a) ?? 0) ||
-                a.localeCompare(b));
+                strictCompare(a, b));
             const halfCount = Math.ceil(sorted.length / 2);
             for (let i = 0; i < halfCount; i++) topHalfPersonnel.add(sorted[i]!);
         }
@@ -174,7 +174,7 @@ export function assignBrigadesToSubSegments(
         for (const { idx } of ssOrder) {
             const candidates = affinities
                 .filter(a => a.ssIdx === idx && !assignedBrigades.has(a.bid))
-                .sort((a, b) => b.score - a.score || a.bid.localeCompare(b.bid));
+                .sort((a, b) => b.score - a.score || strictCompare(a.bid, b.bid));
 
             if (candidates.length > 0) {
                 const best = candidates[0]!;

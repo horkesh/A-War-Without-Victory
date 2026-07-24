@@ -171,7 +171,7 @@ describe('derivePresidentialBlockers', () => {
       type: 'paramilitary_request',
       title: 'Paramilitary authorization',
       action: 'paramilitary_review',
-      actionLabel: 'Review deployment',
+      actionLabel: 'Review paramilitary',
     });
   });
 

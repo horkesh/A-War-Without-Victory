@@ -69,6 +69,38 @@ function makeAdjacency(): Map<Osid, Osid[]> {
 }
 
 describe('ensureMinimumSectorCoverage truth preservation', () => {
+    it('does not move a fixed-home Zepa defender to a Srebrenica sector', () => {
+        const zepa = 'op:rogatica:zepa_2';
+        const srebrenica = 'op:srebrenica:srebrenica_2';
+        const suceska = 'op:srebrenica:suceska';
+        const sector = makeSector(
+            'sector:arbih_2nd_corps:0',
+            [srebrenica, suceska],
+            [srebrenica, suceska],
+            [],
+        );
+        sector.faction = 'RBiH';
+        sector.corps_id = 'arbih_2nd_corps';
+        sector.reserve_brigade_ids = ['arbih_285th_light'];
+        const defender = makeFormation('arbih_285th_light', zepa);
+        defender.faction = 'RBiH';
+        defender.corps_id = 'arbih_2nd_corps';
+        defender.home_osid = zepa;
+        defender.tags = ['enclave', 'placement:fixed_home_osid'];
+        const formations = { arbih_285th_light: defender };
+        const adjacency = new Map<Osid, Osid[]>([
+            [zepa as Osid, [srebrenica as Osid]],
+            [srebrenica as Osid, [zepa as Osid, suceska as Osid]],
+            [suceska as Osid, [srebrenica as Osid]],
+        ]);
+        const friendly = new Set([zepa, srebrenica, suceska]);
+        const components = new Map([[zepa, 0], [srebrenica, 0], [suceska, 0]]);
+
+        ensureMinimumSectorCoverage([sector], formations, adjacency, friendly, components);
+
+        expect(defender.location_osid).toBe(zepa);
+    });
+
     it('promotes a reserve brigade to the stable nearest vacant front target', () => {
         const sector = makeSector(
             'sector:corps_a:0',

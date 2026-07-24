@@ -31,6 +31,20 @@ export function isFieldedTacticalFormation(formation: { kind?: unknown; status?:
     && isReadyForFieldDisplay(formation);
 }
 
+export function isPlayerVisibleTacticalMarker(
+  formation: { kind?: unknown; status?: unknown; readiness?: unknown; faction?: unknown } | null | undefined,
+  state: LoadedGameState | null | undefined,
+): boolean {
+  if (isFieldedTacticalFormation(formation)) return true;
+  if (
+    formation?.kind !== 'brigade'
+    || !isActiveFormationStatus(formation)
+    || String(formation.readiness).toLowerCase() !== 'forming'
+  ) return false;
+  const playerFaction = resolvePlayerFacingFaction(state);
+  return playerFaction == null || formation.faction === playerFaction;
+}
+
 function isActiveFormationStatus(formation: { status?: unknown; readiness?: unknown } | null | undefined): boolean {
   if (formation?.status == null) return false;
   return String(formation.status).toLowerCase() === 'active';

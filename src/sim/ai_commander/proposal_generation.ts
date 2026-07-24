@@ -44,6 +44,23 @@ function formatThreatLabel(pressure: string): string {
     }
 }
 
+function playerFacingCommandName(name: string): string {
+    return /(?:^|[_:])(corps|korpus)(?:[_:]|$)/i.test(name) || /^[a-z0-9]+(?:[_:][a-z0-9]+)+$/i.test(name)
+        ? 'Assigned command'
+        : name;
+}
+
+function playerFacingObjective(objective: string): string {
+    const parts = objective.split(':').filter(Boolean);
+    if ((parts[0] === 'op' || parts[0] === 'zone') && parts[1]) {
+        return formatPlayerFacingZoneLabel(parts[1]);
+    }
+    if (/^plan[_:-]|^[a-z0-9]+(?:[_:][a-z0-9]+)+$/i.test(objective)) {
+        return 'offensive operation';
+    }
+    return objective;
+}
+
 /**
  * Builds an enriched single-string description for an op proposal.
  *
@@ -81,12 +98,12 @@ export function buildOpProposalDescription(
 
     // Existing objective description always appended last.
     if (objectiveDesc) {
-        parts.push(`Plan: ${objectiveDesc}`);
+        parts.push(`Plan: ${playerFacingObjective(objectiveDesc)}`);
     }
 
     // If enrichment added nothing and objectiveDesc is empty, fall back to corps name.
     if (parts.length === 0) {
-        return `${corpsName} offensive operation`;
+        return `${playerFacingCommandName(corpsName)} offensive operation`;
     }
 
     return parts.join('. ');
@@ -156,8 +173,7 @@ export function generateLevel1StanceProposals(
 
 /**
  * v0.8.4 Phase D: Generate Level 1 Assisted op-planning proposals for the player faction.
- * Returns proposals where a corps commander has a plan that is 'ready' to launch,
- * OR whose decision_trace winning_intent_id contains 'stage_operation' or 'launch_opportunity'.
+ * Returns proposals where a corps commander has a current plan that is ready to launch.
  * Returns [] when autonomy_level !== 1 or no corps qualifies.
  *
  * Caller writes returned proposals to state.meta.pending_proposal_reviews.
@@ -187,33 +203,32 @@ export function generateLevel1OpProposals(
         const cs = cmd.commander_state;
         if (!cs) continue;
 
-        // Determine if this corps has a ready plan or a decision trace signalling intent to launch.
+        // A trace records deliberation, not an issuable operation. Only a concrete
+        // ready plan can cross into the presidential approval queue.
         const plan = cs.current_plan ?? null;
-        const trace = cs.decision_trace ?? null;
-
         const planIsReady = plan !== null && plan.status === 'ready';
-        const traceSignalsLaunch =
-            trace !== null &&
-            trace.winning_intent_id !== null &&
-            (trace.winning_intent_id.includes('stage_operation') ||
-                trace.winning_intent_id.includes('launch_opportunity'));
+        if (!planIsReady) continue;
+        if (!Array.isArray(plan.target_osids) || plan.target_osids.length === 0) continue;
 
-        if (!planIsReady && !traceSignalsLaunch) continue;
-
-        // Skip if player already has a response pending for this plan this turn
-        // (defensive guard against double-run).
+        // A response remains authoritative until the matching commander loop
+        // consumes it. Its originating turn does not change the plan identity.
         if (
-            plan !== null &&
             cmd.player_op_response !== undefined &&
-            cmd.player_op_response.plan_id === plan.plan_id &&
-            cmd.player_op_response.turn === state.meta.turn
+            cmd.player_op_response.plan_id === plan.plan_id
         ) {
             continue;
         }
 
-        const corpsName = formations[corpsId]?.name ?? corpsId;
-        const planId = plan?.plan_id ?? `opportunity_${corpsId}_t${state.meta.turn}`;
-        const objectiveDesc = plan?.objective_description ?? 'offensive operation';
+        const corpsName = formations[corpsId]?.name ?? 'Assigned command';
+        const planId = plan.plan_id;
+        const proposedAction = `APPROVE_OP:${corpsId}:${planId}`;
+        const exactPlanWasResolved = (state.meta.pending_proposal_reviews ?? []).some((review) =>
+            review.faction === playerFaction
+            && review.proposed_action === proposedAction
+            && (review.accepted === true || review.accepted === false || review.resolved_turn != null)
+        );
+        if (exactPlanWasResolved) continue;
+        const objectiveDesc = plan.objective_description || 'offensive operation';
 
         const description = buildOpProposalDescription(corpsName, cs, objectiveDesc);
 
@@ -224,7 +239,7 @@ export function generateLevel1OpProposals(
             faction: playerFaction,
             domain: 'ops',
             description,
-            proposed_action: `APPROVE_OP:${corpsId}:${planId}`,
+            proposed_action: proposedAction,
             current_value: 'pending',
             proposed_value: 'approved',
         });

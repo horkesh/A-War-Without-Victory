@@ -2,6 +2,7 @@ import type { FactionId, GameState, InternationalVisibilityPressure, PatronState
 import { clamp01 } from '../utils/math.js';
 import { getYearForTurn } from '../utils/time.js';
 import { getDimensionEffective } from '../sim/events/strategic_dimensions.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Emergent-only severity of the patron-defiance supply penalty by faction.
@@ -107,7 +108,7 @@ export function sortIvpConsequenceIds(ids: readonly string[]): string[] {
     return [...ids].sort(
         (a, b) =>
             IVP_CONSEQUENCE_ORDER.indexOf(a as (typeof IVP_CONSEQUENCE_ORDER)[number]) -
-                IVP_CONSEQUENCE_ORDER.indexOf(b as (typeof IVP_CONSEQUENCE_ORDER)[number]) || a.localeCompare(b)
+                IVP_CONSEQUENCE_ORDER.indexOf(b as (typeof IVP_CONSEQUENCE_ORDER)[number]) || strictCompare(a, b)
     );
 }
 

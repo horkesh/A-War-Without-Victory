@@ -1,6 +1,7 @@
 import { ensureEmbargoProfiles, getEffectiveHeavyEquipmentAccess } from './embargo.js';
 import type { FactionId, FormationState, GameState, PostureLevel } from './game_state.js';
 import { clamp01 } from '../utils/math.js';
+import { strictCompare } from './validateGameState.js';
 
 export const BASE_DEGRADATION_RATE = 0.02;
 export const OPERATIONAL_TEMPO_OFFENSIVE = 1.5;
@@ -80,7 +81,7 @@ export function updateHeavyEquipmentState(
     doctrineTempoByFormation?: Record<string, number>
 ): void {
     const turn = state.meta.turn;
-    const formationIds = Object.keys(state.military.formations ?? {}).sort((a, b) => a.localeCompare(b));
+    const formationIds = Object.keys(state.military.formations ?? {}).sort(strictCompare);
 
     for (const fid of formationIds) {
         const formation = state.military.formations[fid];

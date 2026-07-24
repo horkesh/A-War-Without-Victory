@@ -18,6 +18,11 @@ const CUTILEIRO_PLAN: PeacePlanDefinition = {
     id: 'cutileiro',
     name: 'Cutileiro Plan (Lisbon Agreement)',
     trigger_week: 0,
+    historical_responses: {
+        RBiH: 'rejected',
+        RS: 'accepted',
+        HRHB: 'accepted',
+    },
     proposed_split: {
         RBiH: 44,
         RS: 44,
@@ -51,6 +56,11 @@ const VANCE_OWEN_PLAN: PeacePlanDefinition = {
     id: 'vance_owen',
     name: 'Vance-Owen Peace Plan',
     trigger_week: 40,
+    historical_responses: {
+        RBiH: 'accepted',
+        RS: 'rejected',
+        HRHB: 'accepted',
+    },
     // VOPP: Serb-majority provinces ~43% of BiH territory. Source: Owen Balkan Odyssey pp. 98-105
     // RBiH 39% = ~33% Bosniak-majority provinces + ~6% Sarajevo special district (majority Bosniak/mixed).
     // RS 43% = three Serb-majority provinces. HRHB 18% = three Croat-majority provinces.
@@ -92,6 +102,11 @@ const OWEN_STOLTENBERG_PLAN: PeacePlanDefinition = {
     id: 'owen_stoltenberg',
     name: 'Owen-Stoltenberg Plan',
     trigger_week: 70,
+    historical_responses: {
+        RBiH: 'rejected',
+        RS: 'accepted',
+        HRHB: 'accepted',
+    },
     proposed_split: {
         RBiH: 33,
         RS: 52,
@@ -125,6 +140,11 @@ const CONTACT_GROUP_PLAN: PeacePlanDefinition = {
     id: 'contact_group',
     name: 'Contact Group Plan',
     trigger_week: 118,
+    historical_responses: {
+        RBiH: 'accepted',
+        RS: 'rejected',
+        HRHB: 'accepted',
+    },
     proposed_split: {
         RBiH: 33,
         RS: 49,
@@ -160,6 +180,11 @@ export const DAYTON_PLAN: PeacePlanDefinition = {
     id: 'dayton',
     name: 'Dayton Peace Agreement',
     trigger_week: 185,
+    historical_responses: {
+        RBiH: 'accepted',
+        RS: 'accepted',
+        HRHB: 'accepted',
+    },
     proposed_split: {
         RBiH: 33,
         RS: 49,

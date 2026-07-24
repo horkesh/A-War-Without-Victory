@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import type { FormationFatigueStepReport } from '../state/formation_fatigue.js';
 import { canonicalizePoliticalSideId } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
@@ -422,7 +422,9 @@ async function runEvalMode(opts: EvalOptions): Promise<void> {
     const graph = await loadSettlementGraph();
 
     // Run one turn to get current state and reports
-    const { nextState, report } = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+    const result = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+    assertTurnSuccess(result);
+    const { nextState, report } = result;
 
     // Compute front edges
     const frontEdges = computeFrontEdges(nextState, graph.edges);

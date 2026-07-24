@@ -1,4 +1,40 @@
 <!-- LEDGER ARCHIVE POINTERS -->
+## [2026-07-11] feat(desktop): add Level 1 broad staff-assisted execution
+
+**Type:** Local desktop player-mode simulation / autonomy behavior / bot-order merge semantics / UI copy / docs / tests.
+
+**Fix:** Promoted the existing Level 1 Assisted autonomy mode from recommendation-only behavior to explicit routine staff execution for the selected player faction. `meta.autonomy_level === 0` remains manual except for accepted historical-operation participants. At `meta.autonomy_level >= 1`, the player faction is included in deterministic corps and brigade staff execution; the player-faction brigade pass runs separately with merge semantics so player-staged attack, movement, and posture orders remain authoritative. Ordinary non-player bot replacement now preserves existing orders for factions not processed by that pass, preventing a non-player pass from erasing player orders before the assisted player pass runs. EN/BCS autonomy copy now states that staff executes routine orders and player overrides take precedence.
+
+**Verification:** Red/green proof first failed on autonomy faction selection, merge-mode manual-order preservation, and replacement-mode cross-faction order preservation, then passed after implementation. Focused proof passed `npx.cmd vitest run tests\desktop_start_campaign_authorization.test.ts tests\bot_operation_objective_focus.test.ts tests\pre_planned_operations.test.ts tests\ui\presidential_decision_room.test.ts --pool=forks --reporter=dot` (4 files / 101 tests). `npm.cmd run typecheck` passed. `npm.cmd run ci:structural-fingerprint:check` passed with fingerprint `6806ddd157044afa` matching expected. `npm.cmd run qa:player-journeys` passed 44 files / 718 tests. `npm.cmd run desktop:release:check` passed. `git diff --check` exited 0 with existing CRLF normalization warnings only. Local 20-turn RS Level 1 Assisted probe `tmp-paradox-qa-20260710/desktop-rs-20turn-level1-assisted-execution-v1.json` reached turn 20 with final control HRHB 88 / RBiH 260 / RS 364, only -3 RS versus the 20-week headless comparator and +75 RS versus historical-operation-only assist; pending historical reviews were empty and `opInjectionWarningCount` was 0.
+
+**Scope/determinism:** Local-only player-mode source/docs/test/probe work. Headless auto-control remains separate and unchanged by the player-only assisted path. No staging, commit, push, PR, installer, release artifact, event JSON, scenario source data, canon/FORAWWV text, baseline manifest, structural fingerprint artifact, randomness, timestamps, or locale sorting changed.
+
+---
+
+## [2026-07-11] feat(desktop): add operation-scoped assist for accepted historical operations
+
+**Type:** Local desktop player-mode simulation / historical-operation authorization / Decision Room read-model / docs.
+
+**Fix:** Added a player-only assist path for accepted historical operations. `meta.player_faction` remains excluded from ordinary bot order generation, but active accepted historical operation participants now reuse the existing brigade order evaluator for operation-scoped movement/attack pressure. The path covers pre-planned, triggered, and Army-HQ historical operation definitions, excludes authored/requested player operations, and is inert for headless auto-control. Also fixed the pre-planned chain owner boundary so completed operations are not re-offered and queued follow-ons cannot be bypassed by the player injector. Decision Room dossiers now state that authorization assists only assigned formations for the named operation.
+
+**Verification:** Focused red/green proof passed `npx.cmd vitest run tests/desktop_start_campaign_authorization.test.ts tests/pre_planned_operations.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/pre_advance_command_review.test.ts --pool=forks --reporter=dot` (4 files / 101 tests). Local 20-turn RS assisted probe `tmp-paradox-qa-20260710/desktop-rs-20turn-accepted-all-historical-ops-assisted-v1.json` reached turn 20 with final control HRHB 114 / RBiH 309 / RS 289, improving RS by +20 over the prior accepted-starting-only desktop probe; only the pre-existing HRHB Jackal moot-operation warning remained.
+
+**Scope/determinism:** Local-only source/docs/test/probe work. No staging, commit, push, PR, installer, release artifact, event JSON, scenario source data, canon/FORAWWV text, baseline manifest, structural fingerprint artifact, randomness, timestamps, or locale sorting changed. Headless calibration remains gated off from the player assist path.
+
+---
+
+## [2026-07-10] fix(ui): close local RS first-20-turn QA findings
+
+**Type:** Local desktop QA / UI read-model truth / decision-surface routing / test harness / docs.
+
+**Fix:** Completed the owner-directed local RS first-20-turn review without staging, committing, pushing, or opening a PR. The exact-turn `first20-rs-completion-v12` Electron harness run reached turn 20 with 385 screenshots/events, empty stderr, visible Krajina counters at every overview checkpoint, no remaining paramilitary requests, and no reproduced advance-blocking loop. Local fixes preserve paramilitary request mode truth, filter final paramilitary decisions from blocker/review surfaces, keep `null` proposal reviews unresolved while treating concrete decisions as resolved, split required vs advisory event-decision inbox copy, enrich historical operation authorization reviews with operation goals/command/commander/force/staging/timing/provenance for pre-planned, triggered, and Army-HQ-marked operations, guard Warroom tactical iframe document access by origin, clear tactical overlays before Warroom command surfaces, and harden the local click-everything QA harness for exact-turn evidence.
+
+**Verification:** `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui/inbox_items.test.ts tests/triggered_operations.test.ts --pool=forks --reporter=dot` passed 3 files / 125 tests; `npm.cmd run typecheck` passed; `node --check tmp-paradox-qa-20260710\paradox-local-qa.cjs` passed; `npx.cmd vitest run tests/paramilitary_sweep.test.ts tests/player_decision_manifest.test.ts tests/ui/paramilitary_inbox_items.test.ts tests/ui/inbox_items.test.ts tests/ui/dev_host_consistency.test.ts tests/desktop_autonomy_boundary_truth.test.ts tests/ui/decision_surface_registry.test.ts tests/ui/president_desk_shell.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/presidential_blockers.test.ts tests/ui/presidential_decision_room.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_shell_accessibility.test.ts --pool=forks --reporter=dot` passed 14 files / 262 tests; `npm.cmd run desktop:release:check` passed. The local playtest diary is `docs/40_reports/playtests/20260710_rs_first20_local_qa.md`.
+
+**Scope/determinism:** Player-facing UI/read-model truth, desktop boundary helpers, local QA harness, and docs only. No scenario source data, event JSON, canon/FORAWWV text, baseline manifest, structural fingerprint artifact, randomness, timestamps, locale sorting, installer artifact, remote branch, or GitHub state changed. Remaining repeated-modal cadence is a product/design diary follow-up, not a technical-road reopening.
+
+---
+
 ## [2026-07-09] docs(process): record owner approvals for #192 and #194
 
 **Type:** Documentation / issue-tracker process / owner-decision closeout.
@@ -23920,3 +23956,466 @@ Updated `docs/plans/COMMAND_BOARD.md`, `docs/plans/MASTER_ROADMAP.md`, and `docs
 Verification: docs-only change; `git diff --check` passed.
 
 Determinism/scope: documentation/design decision only. No runtime behavior, simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.
+
+## 2026-07-09 - Warroom new-campaign overlay hide fix
+
+Fixed the desktop Warroom new-campaign handoff where selecting a starting faction appeared to return the player to the initial Command Post screen. Faction selection was already creating a valid campaign state, but the Command Post overlay stayed visible because the higher-specificity `#main-menu { display: grid }` rule overrode the shared `.mm-overlay.mm-hidden { display: none }` rule. `#main-menu.mm-hidden` now explicitly hides the Command Post overlay, and the Warroom flow truth tests guard that selector.
+
+Verification:
+- Live Electron proof with Playwright after `npm run desktop` equivalent launch: New Campaign -> `RBiH` produced `meta.player_faction="RBiH"`, `meta.turn=0`, `#main-menu` computed `display: none`, tactical scene computed `display: block`, and the embedded tactical frame showed `WAR BEGINS: 6 APR 1992`.
+- `npx.cmd vitest run tests/warroom_new_campaign_flow_truth.test.ts tests/ui/app_boot_main_menu.test.ts tests/browser_campaign_start_fallback.test.ts --pool=forks --reporter=dot` passed, 3 files / 25 tests.
+- `npm.cmd run warroom:build` passed.
+- `npm.cmd run desktop:release:check` passed.
+
+Determinism/scope: desktop Warroom UI visibility only. No simulation behavior, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.
+
+## 2026-07-09 - Local game review first-hour UI repair
+
+Fixed the local desktop playtest blockers reported from the RS first-hour game review:
+
+- Decision Room situation cards now have distinct sitrep evidence/titles instead of duplicate "Operational Situation Report" cards, and the dossier/right-side Review action routes to the owning source target instead of reselecting the same card.
+- Decision Room card/dossier panels were darkened for legibility against the blurred command-room background.
+- Event decision response controls now sit above the scroll-heavy dossier body so the required response is visible without hunting at the bottom of the modal.
+- The war-start splash dismisses from the central content area, not just the empty backdrop.
+- Accepted historical operation proposals are filtered out of desktop pending proposal readback, and unresolved operation authorization cards remain reviewable without hard-blocking turn advancement after required presidential decisions are clear.
+- Live formation counters now have a DOM fallback overlay that uses the same viewport clamp contract as Deck counters, does not wait on optional `ghost-paths` readiness, and renders from player-visible formation GeoJSON as soon as control GeoJSON is ready. This fixes the RS War Map appearing to have zero brigade icons while the underlying state had formations.
+- Updated `docs/20_engineering/TACTICAL_MAP_SYSTEM.md`, `docs/PROJECT_LEDGER_KNOWLEDGE.md`, and `.claude/napkin*` with the critical-counter startup rule.
+
+Verification:
+- `npx.cmd vitest run tests/ui_map_deck_counter_visibility.test.ts --pool=forks --reporter=dot` passed, 1 file / 21 tests.
+- `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui/decision_room_flat_contract.test.ts tests/ui/game_start_intro.test.ts tests/ui/event_decision_modal_phase3.test.ts tests/ui_map_deck_counter_visibility.test.ts tests/desktop_autonomy_boundary_truth.test.ts tests/ui/pre_advance_command_review.test.ts --pool=forks --reporter=dot` passed, 7 files / 128 tests.
+- `npm.cmd run desktop:map:build` passed.
+- `npm.cmd run desktop:sim:build` passed.
+- `npm.cmd run warroom:build` passed.
+- `npm.cmd run typecheck` passed.
+- Live Electron RS War Map proof: New Campaign -> RS -> war-start dismiss -> War Map rendered 38 DOM formation counters from 147 player-visible formation features; screenshot artifact `tmp-rs-live-war-map-counters-early.png` confirmed visible counters.
+- Live Electron RS advance proof: after RS start, bridge state reported `turn=0`, `phase=war`, `player_faction=RS`; after resolving the required RS strategic-goals decision, pending player decisions were `0`; the next Advance moved bridge state to `turn=1` with no pending player decisions.
+
+Determinism/scope: local desktop/UI review fixes only. No simulation turn rules, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed. Historical operation proposal readback and advance blocking are desktop/player-facing UI contract changes; operation proposal state itself is not auto-accepted or auto-resolved.
+
+## 2026-07-09 - Local RS 10-turn playtest stack closure
+
+Closed the remaining blocker found while driving a fresh RS campaign through the visible Electron UI. Required event decision modals no longer auto-launch or render behind Turn Aftermath; Turn Aftermath keeps focus until closed, then the required event modal can take ownership. This prevents a response-required decision from existing in the DOM while its controls are covered by the aftermath modal and unclickable.
+
+Additional local playtest evidence after the first-hour repairs:
+
+- Fresh RS desktop playthrough reached turn 10 through visible UI with no hard advance freeze.
+- The operation-authorization probe accepted one operation; raw historical proposal state retained the resolved row for audit, but the player-facing queue advanced to the next unresolved operation.
+- Formation counter proof showed 132 rendered counters and all 77 RS-owned counters, including `vrs_1st_laktasi`; Krajina/near-Krajina formations were present on the live map.
+- The Decision Room right-side review route, duplicate sitrep wording, and readability fixes remained active during the probe.
+
+Verification:
+- Red/green modal-stack proof: `tests/ui/modal_stack_priority.test.ts` failed before implementation because `EventDecisionModal` auto-launch was not guarded by `turnAftermathOpen`, then passed after the Turn Aftermath ownership guard was added.
+- Focused UI regression suite passed: `npx.cmd vitest run tests/ui/modal_stack_priority.test.ts tests/ui/event_decision_auto_launch_contract.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui_map_game_state_adapter.test.ts tests/ui_map_deck_counter_visibility.test.ts --pool=forks --reporter=dot` passed, 8 files / 198 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run desktop:release:check` passed, including `desktop:map:build`, `desktop:sim:build`, and `warroom:build`.
+- Live Electron RS proof: `node tmp-playtest-rs-10turn\current-local-rs-playtest.cjs` reached turn 10; `node tmp-playtest-rs-10turn\current-local-rs-playtest.cjs --op-probe-only` resolved one operation authorization via `Accept` and left the visible review queue on the next unresolved operation.
+
+Determinism/scope: desktop UI modal ownership, player-facing operation review filtering, and map counter rendering only. No simulation turn rules, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed. Operation proposal rows remain retained as historical/audit state after resolution; only live desktop review surfaces filter them out of pending player work.
+
+## 2026-07-10 - Local RS first-hour and first-20 QA closeout reconciliation
+
+Reconciled the earlier local first-hour/historical-operation/first-20 QA notes after the completed exact-turn `first20-rs-completion-v12` run. The tracked closeout is now `docs/plans/2026-07-10-first-20-turn-game-review-plan.md` plus `docs/40_reports/playtests/20260710_rs_first20_local_qa.md`; the raw evidence is `tmp-paradox-qa-20260710/paradox-local-qa-first20-rs-completion-v12.json` and `tmp-paradox-qa-20260710/screenshots/first20-rs-completion-v12-*.png`.
+
+Completed local findings/fixes:
+- Paramilitary request state preserves `rear_pocket` vs `offensive` mode through pending requests and decision history, and final `allow` / `deny` / `regular` rows are filtered from unresolved player-decision surfaces.
+- Proposal-review resolution uses concrete non-null decisions as resolved while keeping `null` unresolved.
+- Advisory event-decision inbox rows use review-only copy; required rows retain required-response copy.
+- Historical operation authorizations now remain advisory but factual, with Decision Room dossiers deriving operation goals/objective chains, command, commander, assigned formation count, reported personnel, staging, timing, launch floor when present, and source provenance from pre-planned and triggered operation definitions plus the current save.
+- Warroom tactical iframe setup guards direct iframe `document` access by origin while preserving postMessage handoff.
+- Warroom command-surface entry clears tactical overlays that previously polluted Decision Room/Command Surface screenshots.
+- The local Electron QA harness reads pending event decisions from adapter/meta/military state shapes, writes run-label-specific artifacts, dismisses transient overlays before surface sweeps, and holds at the requested target turn instead of clicking beyond it.
+
+Completed run evidence:
+- `first20-rs-completion-v12` reached exact turn 20 as RS with 385 captured events/screenshots and empty stderr.
+- Action counts were `advance-turn-modal: 20`, `continue-aftermath: 14`, `review-blockers: 14`, `paramilitary-deny-all-submit: 14`, and `acknowledge-event: 1`.
+- Final paramilitary requests were `0`.
+- Final stop-point work was one advisory event plus the Kotor Varos historical-operation proposal; this was stop-point work, not a turn 1-20 blocker.
+- Krajina was not empty: every overview checkpoint reported 47-48 Krajina-owned formations and 17 rendered RS Krajina counters in the current overview.
+
+Verification:
+- `npx.cmd vitest run tests/ui/presidential_decision_room.test.ts tests/ui/inbox_items.test.ts tests/triggered_operations.test.ts --pool=forks --reporter=dot` passed, 3 files / 125 tests.
+- `npm.cmd run typecheck` passed.
+- `node --check tmp-paradox-qa-20260710\paradox-local-qa.cjs` passed.
+- `npx.cmd vitest run tests/paramilitary_sweep.test.ts tests/player_decision_manifest.test.ts tests/ui/paramilitary_inbox_items.test.ts tests/ui/inbox_items.test.ts tests/ui/dev_host_consistency.test.ts tests/desktop_autonomy_boundary_truth.test.ts tests/ui/decision_surface_registry.test.ts tests/ui/president_desk_shell.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/presidential_blockers.test.ts tests/ui/presidential_decision_room.test.ts tests/operation_opportunities_phase2_decisions.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_shell_accessibility.test.ts --pool=forks --reporter=dot` passed, 14 files / 262 tests.
+- `npm.cmd run desktop:release:check` passed after the final source edits.
+
+Remaining follow-up: repeated early modal cadence, especially paramilitary packets, remains a product/design diary item. It is not a hard blocker from this local repair pass and does not reopen the technical road.
+
+Determinism/scope: desktop/UI read-model copy, historical-operation dossier projection, paramilitary decision metadata, player-decision manifest filtering, Warroom iframe/overlay setup, local QA harness, and docs only. No simulation turn rules, operation injection behavior, combat resolution math, event evaluator mechanics, event JSON, scenario source data, startup artifact construction, save schema migration, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, persisted output ordering, canon docs, or FORAWWV content changed.
+
+## 2026-07-10 - Owner-promoted first-20 friction resolution
+
+Completed the local-only follow-up that the owner promoted from first-20-turn diary friction to implementation scope. The packet resolves the repeated early paramilitary paperwork cadence, lingering Command Briefing overlay after blocker review, selected Decision Room same-dossier no-op affordance, primary Decision Room text truncation, and MapLibre fit warning noise.
+
+Completed local changes:
+- `ParamilitaryReviewModal`, desktop preload/IPC, and Electron main now support packet-only decisions plus standing `always_deny` / `always_allow` policy submission.
+- Save migration preserves string `paramilitary_policy` values (`ask`, `always_deny`, `always_allow`) instead of clobbering them to `{}`.
+- Rear-pocket and offensive paramilitary sweeps consume stale player requests under standing policy before normal sweep work and before fade-week early returns.
+- Command Briefing is suppressed for the current turn when tactical review overlays are cleared.
+- Decision Room same-dossier actions render disabled `Current Dossier` instead of active-looking no-op `Review` buttons, and primary dossier/source/advance/same-surface text wraps.
+- Main-map and operation-map camera fit calls clamp padding and guard degenerate bounds before `fitBounds`.
+- Turn Aftermath persistent footer actions retain `Next presidential action` in the accessible label after the broader player-journey gate caught stale copy.
+
+Verification:
+- Red/green proof passed: `npx.cmd vitest run tests/paramilitary_sweep.test.ts tests/save_migration.test.ts --pool=forks --reporter=dot`, 2 files / 44 tests.
+- Affected suite passed: `npx.cmd vitest run tests/paramilitary_sweep.test.ts tests/player_decision_manifest.test.ts tests/ui/paramilitary_inbox_items.test.ts tests/ui/inbox_items.test.ts tests/desktop_persistence_contract.test.ts tests/save_migration.test.ts tests/ui/paramilitary_review_modal.test.ts tests/ui/paramilitary_review_modal_i18n.test.ts tests/ui/decision_room_flat_contract.test.ts tests/ui/pre_advance_command_review.test.ts tests/ui/presidential_decision_room.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/warroom_shell_accessibility.test.ts tests/ui_map_deck_counter_visibility.test.ts tests/ui_map_game_state_adapter.test.ts --pool=forks --reporter=dot`, 15 files / 316 tests.
+- Player-journey gate passed: `npm.cmd run qa:player-journeys`, 44 files / 718 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run desktop:release:check` passed.
+- Local Electron harness proof passed: `node tmp-paradox-qa-20260710\paradox-local-qa.cjs --faction=RS --turns=20 --label=first20-rs-friction-resolved-v6-turnflow --skip-initial-tour --no-checkpoint-tour` reached turn 20 as RS with 51 screenshots, 0 console messages, 0 flagged actions, and 0 final paramilitary requests.
+
+Determinism/scope: local desktop/UI friction, player-facing IPC contract, save-migration normalization of a player-only policy field, paramilitary pending-request cleanup under explicit standing policy, map camera warning hygiene, docs, and local QA harness only. No event JSON, scenario source data, startup artifact construction, operation injection behavior, combat resolution math, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, canon docs, or FORAWWV content changed. No staging, commit, push, PR, packaging, or release artifact was performed.
+
+## 2026-07-10 - RS 20-turn calibration comparison and historical-op lifecycle repair
+
+Completed the requested local 20-turn RS comparison against calibration and corrected the historical-operation authorization lifecycle defect exposed by the comparison. The Electron player run reached turn 20, but its final control counts (HRHB 115 / RBiH 328 / RS 269) diverged sharply from the headless 20-week comparator (HRHB 93 / RBiH 252 / RS 367) because the live player path excludes the player faction from bot control. The comparison also found a real bug: unresolved turn-0 `HISTORICAL_OP:*` reviews could be garbage-collected on advance, silently losing opening operation authorizations.
+
+Completed local changes:
+- Historical-operation authorization predicates now distinguish `HISTORICAL_OP:*` proposal rows.
+- Proposal cleanup preserves unresolved historical-operation reviews and explicit declines while allowing accepted rows to expire after injection consumes them.
+- A live-player-only `inject-player-pre-planned-operations` war step injects accepted selected-faction pre-planned operations without touching headless calibration.
+- `injectPrePlannedOperations` accepts a faction filter for this live-player path.
+- Desktop regression coverage proves unresolved Drina survives advance, accepted Drina launches and queues the follow-on Drina chain, and the consumed accepted review row is removed.
+- Local report added: `docs/40_reports/playtests/20260710_rs20_calibration_comparison.md`.
+- Engineering/report indexes synced: `DESKTOP_GUI_IPC_CONTRACT.md` records the player-only historical-operation authorization lifecycle, and the docs/report indexes now expose the local RS playtest and calibration-comparison evidence.
+
+Verification:
+- Focused regression suite passed: `npx.cmd vitest run tests/desktop_start_campaign_authorization.test.ts tests/pre_planned_operations.test.ts tests/ui/pre_advance_command_review.test.ts --pool=forks --reporter=dot`, 3 files / 43 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run ci:structural-fingerprint:check` passed; structural fingerprint `6806ddd157044afa` matched expected.
+- `npm.cmd run qa:player-journeys` passed, 44 files / 718 tests.
+- `npm.cmd run desktop:release:check` passed.
+- `git diff --check` exited 0 with only pre-existing CRLF normalization warnings.
+- Post-fix desktop logic probe `tmp-paradox-qa-20260710/desktop-rs-20turn-accepted-starting-historical-ops-v2.json` reached turn 20 with accepted starting RS authorizations consumed, later operation authorizations pending, and no repeated objective-overlap warning loop.
+
+Remaining product finding: accepting historical operations now creates/truthfully advances them, but a no-player-orders live RS path still does not match the bot-calibrated RS tempo. If promoted, the next agent-actionable work is an explicit player assisted-execution mode or first-operation command tutorial that tells the player how to convert authorization into battlefield pressure, then compare that assisted/player-command path to the calibration corridor.
+
+Determinism/scope: player-faction desktop operation authorization lifecycle, live-player operation injection, and matching engineering/report-index documentation only. Headless calibration is gated by `headless_scenario_auto_control` and structural fingerprint stayed unchanged. No event JSON, scenario source data, startup artifact construction, combat resolution math, baseline/golden manifest, structural fingerprint artifact, packaged installer artifact, randomness, timestamps, locale persistence, canon docs, or FORAWWV content changed. No staging, commit, push, PR, packaging, or release artifact was performed.
+
+## 2026-07-11 - Opening-turn authorization clock and calibration provenance correction
+
+Completed the local-only correction plan in `docs/plans/2026-07-11-opening-turn-calibration-equivalence-plan.md`. The prior `RS -3` comparison was invalid because its probe mixed the desktop `apr1992_definitive_52w` startup with hardcoded totals from `apr1992_definitive_40w` and did not record the player/headless decision boundary. That interpretation is superseded by a scenario-bound, decision-auditable run.
+
+Completed local changes:
+- Accepted `HISTORICAL_OP:*` reviews expose their deterministic acceptance clock through `getAcceptedHistoricalOperationAuthorizationTurn`, using integer `resolved_turn` and falling back to the original review turn only for migrated accepted rows without `resolved_turn`.
+- Player-owned pre-planned operations inject immediately before `advance-sector-offensives`, after spatial reconciliation and before lifecycle advancement, so accepted turn-0 operations can generate first-advance orders without affecting the inert headless path.
+- The new `qa:desktop-calibration` CLI runs both branches from one exact startup snapshot and records the snapshot SHA-256, scenario source/id, branch classification, decision policies, ordered decision transcript, per-turn controls/orders/flips/captures, and state hashes.
+- Regression tests cover first-advance equivalence against preserved startup operations and deterministic/provenance-complete comparator output.
+- The corrected artifact is `tmp-paradox-qa-20260710/desktop-rs-20turn-calibration-comparison-v2.json`; report, IPC contract, determinism matrix, command board, roadmap, plan index, and local runbook guidance were synchronized.
+
+Corrected evidence:
+- Both branches used `apr1992_definitive_52w` and startup snapshot SHA-256 `e8bc41926f783b7040d64d2ca1e75dd0a0331216a885063cce72f78fbd57f59f`.
+- Turn 1 produced nine RS attack orders and six combat flips in both branches. The player RS total was four lower because the explicit player policy deferred paramilitary requests while headless captured four municipalities.
+- Turn 20 ended at headless HRHB/RBiH/RS `87/238/387` and player `89/269/354`. The RS `-33` is deterministic player-choice divergence under deferred event and paramilitary policies, not evidence of nondeterminism or exact calibration equivalence.
+
+Verification:
+- `npx.cmd vitest run tests/desktop_start_campaign_authorization.test.ts tests/desktop_calibration_compare.test.ts --pool=forks --reporter=dot` passed, 2 files / 8 tests.
+- `npx.cmd vitest run tests/pre_planned_operations.test.ts tests/bot_operation_objective_focus.test.ts tests/turn_pipeline_order.test.ts --pool=forks --reporter=dot` passed, 3 files / 42 tests.
+- `npm.cmd run typecheck`, `npm.cmd run desktop:startup-snapshot:check`, `npm.cmd run ci:structural-fingerprint:check`, `npm.cmd run qa:player-journeys`, and `npm.cmd run desktop:release:check` passed.
+- Two independent one-turn comparator artifacts were byte-identical at SHA-256 `be254d456648b81689fa1f580f90f7675259335ba1c8949a88fae200b5755d51`; both recorded identical player/headless final state hashes.
+- The structural fingerprint remained `6806ddd157044afa`.
+
+Determinism/scope: the behavior change is restricted to player-faction operation authorization timing; the headless injection path remains inert. The comparator uses stable ordering and records all branch inputs without timestamps, random IDs, or locale-dependent persistence. No event JSON, scenario source data, startup snapshot, combat math, calibration baseline, golden manifest, structural fingerprint artifact, canon document, packaged artifact, or FORAWWV content changed. No staging, commit, push, PR, packaging, or release artifact was performed.
+
+## 2026-07-11 - Player/headless input-equivalence deep investigation
+
+Completed a local phase-level investigation after the owner asked whether matching player choices should reproduce the headless 20-turn control total. Matching labels do not currently mean identical inputs: the desktop and headless branches differ at 19 turn-0 paths, player decisions resolve between turns while bot decisions resolve inside phases, player offensive paramilitary candidates are intentionally unrestricted while headless candidates are municipality-scoped, and Army HQ gathering intentionally excludes `player_faction`.
+
+Implemented local corrections:
+- `resolvePlayerParamilitaryDecisions` now passes each allowed request's authored mode into formation spawning. Offensive approvals retain the 600-person offensive form and one-turn ETA instead of becoming 150-person zero-ETA rear-pocket units.
+- `qa:desktop-calibration --event-policy historical_default` now also sets non-player factions to historical decision mode and uses headless's first-response fallback when explicit historical-default metadata is absent.
+- The comparator adds `standing_allow` to distinguish same-turn standing authorization from between-turn request approval and records decision timing, target scope, paramilitary capture targets, player-faction Army HQ campaign-plan presence, pending proposal categories, and pending event ids.
+
+Evidence:
+- Closest ordinary policy artifact: `tmp-paradox-qa-20260710/desktop-rs-20turn-closest-headless-policy-v3.json`.
+- Turn 1: both branches issued nine RS attacks and applied six combat flips; headless ended RS 297 and player RS 296.
+- Rear-pocket targets matched. Headless's municipality-scoped offensive pass captured two Bosanski Novi targets; the unrestricted player pass selected Banovici and Bijeljina but captured only Bijeljina. The player branch never receives the headless target packet.
+- The one-OSID topology difference grew to turn-20 headless HRHB/RBiH/RS `87/238/387` versus player `87/259/366`.
+- Headless RS received Army HQ campaign plans at turns 8 and 16; player RS received none, matching the existing Level 1 ownership boundary.
+- Accepting all 21 routine `APPROVE_OP:*` player staff proposals at the earliest available boundary produced the same `87/259/366` result, so unresolved routine proposals did not explain the measured control gap.
+
+Verification:
+- Red proof failed on offensive formation id/mode and missing comparator policy metadata.
+- Green proof passed `tests/paramilitary_sweep.test.ts` plus `tests/desktop_calibration_compare.test.ts`, 2 files / 43 tests.
+- `npm.cmd run typecheck` passed after the diagnostic expansion.
+- Final affected proof passed `tests/paramilitary_sweep.test.ts`, `tests/desktop_calibration_compare.test.ts`, and `tests/desktop_start_campaign_authorization.test.ts`, 3 files / 49 tests.
+- `npm.cmd run ci:structural-fingerprint:check` passed with fingerprint `6806ddd157044afa` unchanged.
+- `npm.cmd run qa:player-journeys` passed, 44 files / 718 tests.
+- `npm.cmd run desktop:release:check` passed, rebuilding the tactical map, desktop simulation bundle, and Warroom.
+- `git diff --check` exited 0 with only pre-existing CRLF normalization warnings.
+
+Determinism/scope: all measured branches remain repeatable. The control gap is input/path sensitivity, not random drift. Exact equality still requires identical state and phase inputs or a future dedicated headless-action replay/delegation mode. No scenario data, event JSON, startup snapshot, combat math, calibration baseline, structural fingerprint artifact, canon/FORAWWV content, package, commit, push, or PR changed.
+
+## 2026-07-11 - Canonical defended-target guard for paramilitary dispatch
+
+The owner directed the engine to follow the current paramilitary rule after review found that the live offensive path could generate a deployment against an exactly defended OSID and could capture through an uncodified 500-person light-defense threshold. Current authority already described paramilitaries as autonomous rear-pocket cleanup and the implemented feature report required defended pockets to be skipped, while the later offensive-sweep proposal remained superseded rather than current canon.
+
+Completed local changes:
+- `detectOffensiveParamilitaryTargets` now applies the same exact-defense exclusion used by rear-pocket detection before creating either bot formations or player requests. Existing adjacent same-controller organized-defense projection remains binding.
+- `advanceParamilitaries` no longer permits offensive capture through light defense. Any non-paramilitary enemy formation occupying the target at resolution causes paramilitary retreat casualties and dissolution, with no control change and no defender casualties.
+- Removed the dead `OFFENSIVE_PARA_LIGHT_DEFENSE_THRESHOLD`, defended-capture multiplier, overwhelmed-defender loss fraction, and defender-casualty mutation helpers.
+- Preserved the earlier request-mode fix: allowed offensive requests still spawn as authored 600-person, one-turn-ETA offensive formations.
+- Added red/green regression coverage for exactly defended bot targets, exactly defended player request candidates, and defense arriving before resolution.
+- Synchronized Engine Invariants section 14.8a, Systems Manual section 13, desktop IPC contract, determinism matrix, comparison report, command board, master roadmap, execution plan, runbook index, and reusable ledger knowledge. FORAWWV was not edited.
+
+Evidence:
+- Artifact: `tmp-paradox-qa-20260710/desktop-rs-20turn-defended-target-guard-v4.json`.
+- Turn 1: both branches issue nine RS attack orders, apply six combat flips, and end at HRHB/RBiH/RS `103/312/297` with four RS paramilitary captures. Exact captures differ: headless uses Dragocaj, Potkozarje 3, Blagaj Japra, and Novi Grad 3; player uses Dragocaj, Potkozarje 3, Bijeljina 2, and Zausje.
+- Turn 20: headless ends `87/237/388`; player ends `83/249/380`, an RS delta of `-8`. Equal turn-1 totals are not state equality because exact controlled OSIDs differ.
+- The committed 40-week structural result remains final state hash `82dae12f3f42b3b6` and fingerprint `6806ddd157044afa`.
+
+Verification:
+- Focused defended-target test passed 1 file / 41 tests.
+- Final affected suite passed `tests/paramilitary_sweep.test.ts`, `tests/desktop_calibration_compare.test.ts`, and `tests/desktop_start_campaign_authorization.test.ts`: 3 files / 51 tests.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run qa:player-journeys` passed: 44 files / 718 tests.
+- `npm.cmd run desktop:release:check` passed all tactical-map, desktop-simulation, and Warroom builds.
+- `npm.cmd run ci:structural-fingerprint:check` passed with fingerprint `6806ddd157044afa` and final state hash `82dae12f3f42b3b6`; the existing nonfatal Lopare formation warning remains.
+- Strict `npm.cmd run test:baselines` first exposed the accumulated local output drift. `UPDATE_BASELINES=1 npm.cmd run test:baselines` refreshed 12 manifest hashes: all eight `apr1992_52w` artifacts plus `final_save.json` and `run_summary.json` for both 4-week fixtures. A fresh strict rerun then passed all scenarios.
+- `git diff --check` passed with only pre-existing CRLF normalization warnings in unrelated touched files.
+
+Determinism/scope: the guard uses existing stable formation/OSID ordering and adds no randomness, timestamps, locale dependence, schema fields, or scenario inputs. This is an intentional simulation-output correction plus an auditable local baseline re-floor for the accumulated local work. No scenario source, event JSON, startup snapshot, structural fingerprint expectation, FORAWWV content, package, installer, commit, push, or PR changed.
+
+## 2026-07-12 - RBiH 52-week local remediation replay closeout
+
+Reconciled the planning/report/status documentation to the completed `rbih-52w-remediation-final-v7` local proof while preserving the July 11 player-experience NO-GO as historical defect evidence. The new closeout report is `docs/40_reports/playtests/20260712_rbih_52w_remediation_replay.md`; the governing plan remains `docs/plans/2026-07-11-rbih-52w-remediation-and-replay-plan.md` until the strengthened final verification artifacts finish.
+
+Exact local evidence:
+- Electron reached target/final/max turn `52/52/52` with HRHB/RBiH/RS control `85/255/372`.
+- The run recorded 205 screenshots/events and 26 contact sheets.
+- Console messages, page errors, and network failures were all `0`.
+- Pending event decisions, unresolved proposals, and paramilitary requests were all `0` at closeout.
+- Recruitment succeeded once; Command Autonomy opened and selected Assisted; `front-visit` and `address-nation` each issued and resolved successfully through Command Authority.
+- The Electron transcript accepted 25 strategic proposals and resolved Vance-Owen through the production desktop boundary without a runtime bridge.
+
+Comparator and generated-artifact boundary:
+- Bound comparator `tmp-paradox-qa-20260710/rbih-52w-remediation-final-v7-calibration-bound.json` ended Electron `85/255/372`, controlled player `85/251/376`, and headless `84/252/376` in HRHB/RBiH/RS order; it records `nondeterminism_claimed: false` and does not allocate exact territorial causality to each Electron-only action.
+- The Electron run's one recruitment, two CA actions, and 25 proposal acceptances are Electron-only inputs. Its distinct state path is attributed divergence, not nondeterminism; `player_choice_vs_headless` is not a byte-equivalence claim.
+- Current structural fingerprint is `89efaf6525c82bca`.
+- Current startup snapshot SHA-256 is `91dfde48f6538c6992a0073aef9be5d68039820b479d08550e46ab8b8789e4ae`.
+- The required 188-week engine-health floor remains `609/712`; this replay did not remeasure or replace it.
+
+Additional current-build evidence and open gates:
+- `rbih-52w-readability-proof-v3` resumed the v7 autosave at exact turn 52 and captured 22 bounded overview/counter/map-inspection screenshots with zero runtime diagnostics or unresolved required blockers.
+- That resume proof is not exhaustive and is not a fresh campaign. The strengthened exhaustive current-build final tour and fresh current-build exact-52 replay are still running; no completion claim is recorded for either.
+- Local remediation is PASS based on v7. D2 owner full-campaign play, packaging, release, commit, push, and PR remain open or out of scope.
+
+Documentation synchronized: historical playtest report, remediation plan, command board, master roadmap, plans index, start-here index, reports index, calibration master, GUI master, and this append-only ledger. No canon, engineering, FORAWWV, source, test, scenario, generated artifact, package, commit, push, or PR was changed by this documentation-only reconciliation.
+
+## 2026-07-12 - RBiH v47 exact-52 local remediation closeout
+
+This entry supersedes the interim v7 acceptance status above without rewriting its historical evidence. The final local acceptance run is `rbih-52w-remediation-final-v47`; D2 owner play remains open.
+
+Implemented final agent-actionable corrections:
+- Made map readiness current-state specific: the prior map is covered and inert while turn/save-fingerprint revisions render, and stale fallback/Deck datasets cannot remain interactive.
+- Made counter placement truthful: off-screen or occluded counters are omitted rather than relocated to a false viewport-edge position; co-located counters use a deterministic fan capped at 12 visible members, with complete stable membership through the stack picker and exact named-member selection.
+- Added DOM enemy-contact hover parity and kept Deck as visual owner after fallback readiness.
+- Made Decision Room category filters explicit and clearable, including exact empty-category rendering; dossier Review now uses the selected card's exact source handoff, including grouped same-corps cases.
+- Strengthened the Electron harness with current-map stack/empty-category assertions and embedded-frame network-idle startup waiting, removing harness-induced local chunk/document aborts.
+- Removed Node DEP0190 exposure from two subprocess tests by using explicit `cmd.exe /d /s /c npm.cmd ...` invocation with `shell:false`.
+- Synchronized the remediation report, implementation plan, command board, master roadmap, plan/report indexes, GUI/calibration masters, engineering map/determinism references, runbook, and reusable knowledge ledger. Older counter-clamping guidance is explicitly superseded. FORAWWV was not edited.
+
+Exact v47 campaign evidence:
+- Electron reached target/final/max turn `52/52/52` with HRHB/RBiH/RS control `85/255/372`.
+- Final formations were `45/98/126`; active located formations were `34/92/85`; unlocated active combat formations across all factions were `0`.
+- The run captured 334 screenshots/events. All 334 were assembled into 42 contact sheets and manually inspected.
+- Console messages, page errors, network failures, and expected request aborts were all `0`.
+- Pending event decisions, unresolved proposals, and paramilitary requests were `0` at closeout.
+- Recruitment succeeded once; Command Autonomy selected Assisted; `front-visit` and `address-nation` each issued and resolved; 25 strategic proposals were accepted.
+- Final stack proof used `op:busovaca:kacuni_2`, exposed a two-member stack, and opened exact formation `F_RBiH_0006`. Final empty-category proof selected `cat_conscience` and rendered the explicit empty state with no cards/dossier/aside.
+- All required routes, Army HQ tabs, three corps, Decision Room lenses, Records, Chronicle, Codex, and map inspections passed.
+
+Evidence and comparison:
+- Electron log: `tmp-paradox-qa-20260710/paradox-local-qa-rbih-52w-remediation-final-v47.json`, SHA-256 `7c3c01e77ca5b0413d3db547d88015cbb345c98b70a587d03e92d3c81b0d5cc1`.
+- Autosave: `tmp-paradox-qa-20260710/rbih-52w-remediation-final-v47-autosave.json`, SHA-256 `8771e5481dab6d1510dfa7542efc18e41d592696609d02133adecd5a7aced217`.
+- Bound comparator: `tmp-paradox-qa-20260710/rbih-52w-remediation-final-v47-calibration-bound.json`.
+- Contact-sheet manifest: `tmp-paradox-qa-20260710/contact-sheets-rbih-52w-remediation-final-v47/manifest.json`.
+- Startup snapshot SHA-256: `91dfde48f6538c6992a0073aef9be5d68039820b479d08550e46ab8b8789e4ae`.
+- Comparator final control: Electron `85/255/372`, controlled player `85/251/376`, headless `84/252/376`; deltas are `0/+4/-4`, `+1/+3/-4`, and `+1/-1/0` respectively.
+- Comparator attributes one recruitment, two Command Authority actions, and 25 proposal acceptances (28 Electron-only actions) as expected input/path divergence and records `nondeterminism_claimed: false`.
+
+Fresh final verification:
+- `npm.cmd run typecheck` passed.
+- Focused map/Decision Room/harness proof passed 9 files / 116 tests under `NODE_OPTIONS=--throw-deprecation`.
+- Full current-tree suite passed 3,397 / 3,397 suites: 11,322 passed tests, 29 pending, 0 failed. Artifact: `tmp-paradox-qa-20260710/vitest-full-results-v47-current.json`.
+- `npm.cmd run qa:player-experience` passed typecheck, desktop release builds, 44 files / 729 journey tests, first-hour browser proof, live-surface browser proof, and output scan. Log: `tmp-paradox-qa-20260710/qa-player-experience-v47-current.log`.
+- `npm.cmd run test:baselines` reported all scenarios match.
+- `npm.cmd run desktop:startup-snapshot:check` passed.
+- `npm.cmd run ci:structural-fingerprint:check` matched `89efaf6525c82bca`.
+- `git diff --check` exited 0 with line-ending notices only.
+
+Scope and open gates: all work remains local in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, release publication, or remote-green claim was performed. Agent-actionable remediation is complete locally; D2 owner full-campaign play is the next product gate, followed by separately authorized D3/D4 operator/release work.
+
+## 2026-07-13 - Operation AAR grading truth
+
+- **Summary:** Corrected operation after-action grading so inactivity, reinforcements, and no-capture results cannot produce false favorable assessments.
+- **Change:** `gradeOperation` now consumes the canonical attack-attempt count. Zero-attempt operations are always one star with `No Assault Attempted`, receive no duration star bonus, and report zero duration efficiency. Two-star `Pyrrhic Advance` now requires causal objective capture; no-capture two-star results are `Costly Stalemate`, and reachable no-capture four-star results are `Favorable Stalemate`. Ending force versus start is clamped to `[0, 100]`. Army HQ Operations and Records label the factors as `Objective progress`, `Exchange ratio`, `Duration efficiency`, and `Ending force vs start`. Empty participant arrays finalize without lifecycle intervention and produce truthful no-action AARs.
+- **Failure mode prevented:** Prevents zero-action operations from receiving three stars or advance language, elapsed inactivity from earning tempo credit, reinforcements from producing preservation above 100, and current factor keys from rendering as generic or misleading labels.
+- **Files modified:** `.claude/napkin.md`; `src/sim/combat/operation_aar.ts`; `src/ui/map/components/army_hq/OperationsSection.tsx`; `src/ui/map/components/OperationHistoryPanel.tsx`; `tests/operation_aar.test.ts`; `tests/ui/army_hq_timing_copy.test.ts`; `tests/ui/operation_aar_records_review.test.ts`; `docs/10_canon/Engine_Invariants_v0_9_0.md`; `docs/10_canon/Systems_Manual_v0_9_0.md`; `docs/10_canon/Rulebook_v0_9_0.md`; `docs/PROJECT_LEDGER_KNOWLEDGE.md`; `docs/PROJECT_LEDGER.md`.
+- **Mistake guard:** No action is not tempo; no causal capture is not an advance; reinforced ending strength is not original-force preservation.
+- **FORAWWV note:** No FORAWWV file was edited. The grading correction is mapped to existing operation AAR causality and player-truth canon.
+
+Verification:
+- Red proof: the initial focused run failed seven assertions for inverted two-star verdicts, zero-attempt three-star grading, duration reward on no action, 140% preservation, empty-participant finalization, and both UI label maps. A separate four-star no-capture regression failed on the old `Successful Advance` verdict before the final label correction.
+- Green proof: `npx.cmd vitest run tests/operation_aar.test.ts tests/ui/army_hq_timing_copy.test.ts tests/ui/operation_aar_records_review.test.ts tests/ui_opord_player_safe_labels.test.ts tests/ui/filed_record_truth.test.ts --pool=forks --reporter=dot` passed 5 files / 113 tests.
+- `npm.cmd run typecheck` passed.
+- `git diff --check` passed for the implementation, tests, and canon files before this ledger append; a final whole-scope check follows the append.
+- Read-only `npm.cmd run test:baselines` stopped on the shared dirty tree's existing `apr1992_52w/activity_summary.json` mismatch (`f70a0d2263392b810ad166dfa1e67b40872be555317412aefb1ea74f0d132b56` expected, `6c7af00158b5ccefd4561b685cb63f651c5a9dd5490bf85b60c21c4521e26447` actual). The mismatch is outside AAR grading; no baseline manifest or generated artifact was refreshed.
+
+Determinism/scope: pure deterministic arithmetic over existing canonical AAR counters; no iteration order, randomness, timestamp, state schema, scenario input, operation lifecycle owner, JNA withdrawal behavior, baseline manifest, generated scenario artifact, FORAWWV content, package, commit, push, or PR changed.
+
+## 2026-07-13 - Canonical stranded brigade dissolution ownership
+
+Corrected War-phase brigade lifecycle behavior to conform to Engine Invariants v0.9.0 section 6.2 and Systems Manual v0.9.0 sections 5 and 6.9. Sector assignment and stranded-state tracking no longer destroy brigades outside the canonical dissolution evaluator.
+
+Completed local changes:
+- Removed the formation-ID and `pocket_destroyable` deletion paths from brigade sector assignment. Unreachable brigades, including the 103rd Derventa and Hrvoje Vukcic brigades, remain unresolved for existing movement, reconnection, and lifecycle systems instead of being deleted by assignment topology.
+- Removed stranded collapse-by-cohesion and collapse-by-elapsed-time deletion. Stranded brigades continue deterministic cohesion/morale degradation; the later canonical dissolution pass alone evaluates the resulting two-of-three personnel/cohesion/morale rule, including the existing enclave and morale-override handling.
+- Canonically dissolved formations now set `readiness = 'degraded'` when they become inactive/destroyed, preventing stale operational readiness on removed formations.
+- Added named-unit regression coverage for the 103rd Derventa, Travnik, and Hrvoje Vukcic brigades and readiness coverage at the canonical dissolution boundary.
+
+Verification:
+- Red proof: the focused run failed 5 tests because the named assignment/stranded paths still destroyed formations and canonical dissolution retained active readiness.
+- Green proof: `npm.cmd exec -- vitest run tests/stranded_brigade_lifecycle.test.ts tests/brigade_territory_reconciliation.test.ts tests/brigade_dissolution_paths.test.ts` passed 3 files / 60 tests.
+- Final focused proof, including the NW Bosnia OOB metadata contract, passed 4 files / 67 tests.
+- `npm.cmd run typecheck` passed.
+
+Determinism/scope: the fix removes topology- and ID-driven deletion branches while retaining existing sorted assignment and stranded iteration. It adds no randomness, timestamps, locale dependence, schema fields, or scenario inputs. This intentionally changes War-phase formation survival and downstream simulation outputs. No scenario data, baseline artifact, canon, FORAWWV content, package, commit, push, or PR was changed.
+
+## 2026-07-13 - Paramilitary truth fixes
+
+Corrected the canonical paramilitary lifecycle, population accounting, and control attribution boundaries.
+
+Completed local changes:
+- Set week 20 as the final active week for ordinary paramilitary spawning and activity. Existing week-21 formations dissolve before movement, capture, or casualty effects, and late approved requests do not spawn.
+- Made every paramilitary dissolution set inactive status, disbanded lifecycle, degraded readiness, and zero personnel.
+- Made paramilitary civilian killings update the casualty total, displacement event log, and existing municipal `lost_population` aggregate with `last_updated_turn`.
+- Added the typed `paramilitary` control-event mechanism across production, consistency validation, scenario attribution, and reporting so these flips are not labeled combat.
+- Updated Engine Invariants, Systems Manual, determinism, formation-design, cascade-architecture, implementation-report, runbook, and knowledge-ledger documentation. FORAWWV was not edited.
+
+Verification:
+- Red proof covered late spawning/activity, stale readiness, missing population loss, combat mislabeling, missing attribution, and validator rejection.
+- Final focused suite passed 4 files / 79 tests: `tests/paramilitary_sweep.test.ts`, `tests/control_change_attribution.test.ts`, `tests/control_event_consistency.test.ts`, and `tests/scenario_operation_diagnostics.test.ts`.
+- `npm.cmd run typecheck` passed.
+- `npm.cmd run canon:check` was stopped without a result at the user's direction to avoid further broad checks in the shared tree.
+- The earlier read-only baseline run stopped on shared `apr1992_52w/activity_summary.json` drift (`f70a0d2263392b810ad166dfa1e67b40872be555317412aefb1ea74f0d132b56` expected, `6c7af00158b5ccefd4561b685cb63f651c5a9dd5490bf85b60c21c4521e26447` actual). No baseline manifest or generated artifact was refreshed.
+
+Determinism/scope: stable existing formation and candidate ordering is preserved; all new writes are deterministic integer updates. This intentionally changes post-week-20 activity, population availability, control-event attribution, and derived scenario outputs. No scenario source, baseline artifact, generated startup state, FORAWWV content, package, commit, push, or PR was changed. Full report: `docs/40_reports/implemented/20260713_PARAMILITARY_TRUTH_FIXES.md`.
+
+## 2026-07-13 - JNA withdrawal lifecycle and presentation coherence
+
+Connected the canonical War pipeline's turn-5 `jna_withdrawal_1992` event to the persisted JNA lifecycle and removed terminal empty synthetic commands from live presentation without removing completed operation history.
+
+Completed local changes:
+- Added the JNA transition phase immediately after event evaluation. The authoritative `jna_withdrawn=true` flag now completes `military.war_jna` with transition begun, withdrawal progress 1, and RS asset transfer 1.
+- Retired `jna_herzegovina_command` as inactive/withdrawn only after its final spawned subordinate withdraws.
+- Filtered terminal empty synthetic JNA commands in the map adapter and Army HQ card fallback. Historical completed AAR records continue to derive from `operation_history` independently.
+- Added focused engine, phase-order, adapter, and component regressions; synchronized the Systems Manual, determinism matrix, reusable knowledge ledger, and napkin guidance.
+
+Verification:
+- Red proof: the initial focused run failed 7 assertions and passed 29, covering missing War-phase execution, stale lifecycle counters, stale command status, and both presentation paths.
+- Green proof: the focused run passed 4 files / 36 tests.
+- `npm.cmd run typecheck` passed.
+- Scoped `git diff --check` passed with line-ending notices only.
+
+Determinism/scope: fixed phase ordering, fixed synthetic-command IDs, and deterministic state predicates only; no randomness, timestamps, state schema, scenario source, baseline artifact, startup snapshot, AAR grading/lifecycle implementation, FORAWWV content, package, commit, push, or PR changed. Existing completed AAR records remain visible. Canon basis: Phase Specifications section 2.1, War Specification section 2.1, Systems Manual section 3, and Engine Invariants section 8.
+
+## 2026-07-17 - RS post-acceptance engine and local QA closeout
+
+Closed every agent-actionable finding from the owner-directed RS 52-week canon/player-experience review while preserving the accepted `rs-52w-canon-player-experience-final-v17` Electron evidence as an immutable historical player path.
+
+Completed behavior and harness corrections:
+- Added canonical post-week-20 `rear-pocket-consolidation` immediately after `paramilitary-advance`; the exact probe consolidates only legally surrounded, undefended clusters under the deliberate one-to-six limit.
+- Classified sector staffing through roster eligibility plus legal connectivity/enclave reachability. Reachable empty same-corps fronts now emit deterministic reassignment intent, become column movement orders on the following cycle, and move physically later; inaccessible gaps remain visible as `unstaffed_front`.
+- Proved the exact Todorovici relief path with `arbih_131st_light` arriving physically instead of being teleported or paper-assigned.
+- Retained resolved historical-operation authorization rows as durable audit/no-reprompt receipts while keeping terminal rows out of live blockers and Decision Room action surfaces.
+- Replaced direct awaiting of large renderer fixture loads in the live-surface browser sweep with a unique token and synchronous status polling, eliminating Chromium's intermittent `Promise was collected` harness failure without suppressing product failures.
+- Regenerated the baked desktop startup snapshot after the intentional engine-output corrections. Current SHA-256: `1341987cccde0cc0dca4bec4547f4a0247fd02e92e4d6899e1bafb609ca0d57b`.
+
+Deterministic result and calibration evidence:
+- Exact 40-week control is HRHB/RBiH/RS `86/262/364`.
+- Final state hash is `702a2be4a3c3e7c3`; structural fingerprint v2 is `66ac3f76cb351904`.
+- Historical anchors pass `31/31`; campaign benchmarks pass `6/6`.
+- There are zero staffable walkovers. The two remaining large empty sectors are legally isolated and explicitly `unstaffed_front`.
+- Output-changing baseline hashes were intentionally refreshed during implementation; the final strict no-update baseline run reports all scenarios match.
+
+Final local verification:
+- Full Vitest suite: 1,205 files; 11,640 passed; 29 skipped; 0 failed.
+- `npm.cmd run qa:player-experience`: PASS, including typecheck, desktop release builds, 44 files / 756 journey assertions, first-hour browser proof, live-surface browser proof, and output scan.
+- `npm.cmd run test:baselines`: PASS, all scenarios match.
+- `npm.cmd run ci:structural-fingerprint:check`: PASS at `66ac3f76cb351904` / `702a2be4a3c3e7c3`.
+- `npm.cmd run desktop:startup-snapshot:check`: PASS.
+- `npm.cmd run canon:check`: PASS on the documentation-complete local tree.
+- Repository integrity: `git diff --check` PASS, FORAWWV unchanged, staging empty.
+
+Documentation synchronized: Systems Manual, Engine Invariants, context, Movement Authority, pipeline entrypoints, map/product/calibration/report indexes, command board, master roadmap, release-review plan, acceptance report, reusable knowledge ledger, napkin, and this append-only ledger.
+
+Scope: all work remains local in the existing dirty workspace. No staging, commit, push, PR, package, installer, tag, publication, or remote-green claim was performed. The next product gate is D2 owner play; D3/D4 and release operation remain separately authorized owner/operator work.
+
+## 2026-07-17 - PR #477 clean-checkout Electron harness repair
+
+GitHub Baseline Regression exposed a clean-checkout dependency that the local full suite could not reveal: `tests/paradox_local_qa_harness.test.ts` read `tmp-paradox-qa-20260710/paradox-local-qa.cjs`, which existed inside the local 50 GB evidence tree but was correctly excluded from commit `edc0c3ea2`. The CI `test` job failed with repeated `ENOENT`; downstream `engine-health-188w` failed because its required test dependency failed, and `scenarios` was skipped.
+
+Correction:
+- Promoted the executable Electron QA harness to tracked `tools/ui/paradox_local_qa.cjs`.
+- Kept generated screenshots, user data, saves, logs, and evidence under the untracked `tmp-paradox-qa-20260710/` output root.
+- Updated the harness repository-root calculation for its tracked location.
+- Pointed the 38-test harness contract and current engineering/planning references at the tracked path.
+- Left historical report command lines unchanged where they record the exact path used by prior local evidence runs.
+
+Verification:
+- `node --check tools/ui/paradox_local_qa.cjs`: PASS.
+- `npx.cmd vitest run tests/paradox_local_qa_harness.test.ts --reporter=dot`: PASS, 1 file / 38 tests.
+- The generated evidence roots remain untracked and FORAWWV remains unchanged.
+
+Scope: CI reproducibility and documentation only; no simulation behavior, scenario source, baseline artifact, structural fingerprint, startup snapshot, package, installer, tag, or release changed.
+
+## 2026-07-17 - Long-horizon campaign QA canon integration
+
+Completed the owner-directed RBiH and RS long-horizon campaign review packet and reconciled simulation behavior, player-visible truth, calibration artifacts, CI thresholds, canon, planning documents, and regression coverage.
+
+Implemented corrections:
+- COHA now suppresses operation attack/posture orders with explicit receipts, preserves legal movement, and pauses the affected operation lifecycle clock.
+- Battle receipts carry exact attacker-brigade and contributing-operation ids; scenario diagnostics no longer infer causality from a shared target.
+- Bot uncontested occupation is bounded by assigned sector/subsegment or explicit directive targets and applies defense, operation, disruption, cooldown, enclave, and connectivity guards.
+- Commander objective/fallback selection uses the deterministic primary sector. Historical operation opportunities filter authored participants through live eligibility while preserving authored order.
+- Forming formations cannot enter elite-loan rescue or operation-participant paths.
+- Cincar staging requires HRHB control. HV integration uses deterministic all-or-nothing legal placement and records truthful BiH station/home locations.
+- Paramilitary spawning uses local organizational penetration and dominance after organized-defense exclusions, with deterministic mode, faction, and municipality caps.
+- Historical-default peace plans use explicit faction dispositions; Cutileiro catches up once at the first War turn, while Dayton remains owned by its dedicated resolver.
+- The standalone consistency validator now mirrors all nine canonical enclave geometries.
+
+Pre-publication bilateral-war correction:
+- Fresh analysis found three turn-21 RBiH seizures of HRHB territory through rear-pocket consolidation.
+- Rear-pocket consolidation now calls the centralized RBiH-HRHB combat-permission gate.
+- The shared runtime default and every active definitive April 1992 scenario use the canonical turn-40 earliest-war floor.
+- Red proof failed two consolidation assertions before the fix. The green timing/consolidation pack passed 9 files / 91 tests with 4 intentional skips.
+- The first final whole-tree run then exposed one stale test fixture that expected an RBiH-HRHB edge at turn 30. Moving that fixture to turn 40 made the focused four-file / 50-test pack pass without changing production behavior.
+
+Deterministic calibration evidence:
+- Exact accepted 188-week A/B runs finished byte-identically at final-state hash `aa4302e694a6482e`.
+- Initial save SHA-256: `3E0D781E6E5A232BE9646690F862837EC1D0905AF2AFA70A0AC429EA6623763D`.
+- Final save SHA-256: `AA4302E694A6482E22AE2EE3548F862BAAC10D54D858CBBB503F3A869293B51F`.
+- Run-summary SHA-256: `AA77351C4B70882A4C5EA73A7012890621F5869AA6887E45C0414EBCA9FD825F`.
+- Control-delta SHA-256: `8C5B29F55B3694C0B31D897AD2F3FE2CA46DAB928BFAA401E4FEE5F6EFCE01A1`.
+- Formation-delta SHA-256: `0F0A10A5B17BEDFC9DE521997E49D6D624C0B076E426F94D5B02993895240C61`.
+- Engine health: 622/712 matched OSIDs, zero zero-eligible operations, three dead operations, zero ghost-destroyed formations, three stranded brigades, zero consistency failures, K:W 3.813, and 31/31 endpoint anchors.
+- The accepted run contains zero pre-turn-40 RBiH-HRHB control events.
+- Current 40-week structural proof is HRHB/RBiH/RS `85/251/376`, 110 flips, final hash `b4411ca087401148`, fingerprint `4fcdb21ab4bcff14`, 31/31 anchors, and 6/6 benchmarks.
+- Startup snapshot SHA-256 is `FCB9AFD6CA6C5E8AC4B5DDB635B5F103624EFDE053F323DEB5B1C1BCF1EA93F0`.
+
+Final local verification:
+- Full Vitest suite passed: 1,204 files passed, 4 skipped; 11,683 tests passed, 29 skipped; 0 failed.
+- `npm run qa:player-experience` passed, including desktop release builds, 8 files / 81 Electron-runtime tests, 44 files / 756 player-journey tests, first-hour browser proof, live-surface proof with all 42 screenshots, and output scan.
+- `npm run desktop:startup-snapshot:check`, `npm run ci:structural-fingerprint:check`, and `npm run test:baselines` passed.
+- `npm run canon:check` passed, including the determinism static scan and baseline regression.
+- `npm run typecheck` and `npm run build` passed.
+- A transient Windows localhost `ERR_NO_BUFFER_SPACE` occurred only after one live-surface capture set; the standalone rerun and final aggregate player-experience run both passed cleanly.
+- `git diff --check` passed before final documentation reconciliation.
+
+Residual non-gating balance/deployment advisories are recorded in `docs/40_reports/implemented/20260717_CAMPAIGN_QA_CANON_INTEGRATION.md`: high decisive-battle share, unused assigned formations, out-of-area corps, casualty asymmetry, one four-brigade stack, three low-density RBiH sectors, and 17 distant brigades.
+
+Documentation synchronized: Engine Invariants, Systems Manual, War Termination Spec, Determinism Test Matrix, C3 freeze manifest, calibration and game-state masters, report indexes, Command Board, Master Roadmap, release-review plans, reusable knowledge ledger, napkin, implementation report, and this append-only ledger. `docs/10_canon/FORAWWV.md` was not edited.
+
+Scope: this packet changes deterministic simulation outputs, scenario defaults, generated startup/baseline/calibration artifacts, and the required 188-week CI health floor. It does not create a package, installer, tag, or release publication.

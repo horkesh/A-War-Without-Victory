@@ -3,6 +3,8 @@ import { test } from 'vitest';
 
 import type { FrontEdge } from '../src/map/front_edges.js';
 import { BotManager } from '../src/sim/bot/bot_manager.js';
+import { SimpleGeneralBot } from '../src/sim/bot/simple_general_bot.js';
+import { getBotStrategyProfile } from '../src/sim/bot/bot_strategy.js';
 import type { GameState } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -58,6 +60,21 @@ test('bot manager decisions are deterministic with same seed and difficulty', ()
     assert.deepStrictEqual(stateA.military.formations, stateB.military.formations);
     assert.deepStrictEqual(diagA, diagB);
     assert.strictEqual(diagA.by_bot.length, 3);
+});
+
+test('simple general bot ranks state mismatches without consuming RNG', () => {
+    const state = makeState();
+    state.military.formations.F_R_1!.assignment = { kind: 'edge', edge_id: 'S1__S2' };
+    const bot = new SimpleGeneralBot('bot_rbih', 'RBiH', 0.5);
+
+    assert.doesNotThrow(() => bot.makeDecisions(state, FRONT_EDGES, {
+        rng: () => {
+            throw new Error('Engine Invariants 11.1: bot consumed RNG');
+        },
+        difficulty: 'medium',
+        strategy: getBotStrategyProfile('RBiH'),
+        timeContext: { global_week: state.meta.turn },
+    }));
 });
 
 test('bot manager difficulty changes posture aggressiveness', () => {

@@ -7,6 +7,7 @@
 
 import type { GameState } from './game_state.js';
 import type { ControlSide, ControlStatus } from './political_control_types.js';
+import { strictCompare } from './validateGameState.js';
 
 
 /** Policy for when AoR fallback may apply. Default: only when controller field is missing. */
@@ -80,7 +81,7 @@ export function getPoliticalControllerOSID(
     const canonicalSids = operationalToCanonical?.get(osid);
     if (!canonicalSids || canonicalSids.length === 0) return null;
 
-    const sorted = [...canonicalSids].sort((a, b) => a.localeCompare(b));
+    const sorted = [...canonicalSids].sort(strictCompare);
     const counts = new Map<ControlSide, number>();
     for (const sid of sorted) {
         const c = pc[sid];
@@ -101,6 +102,6 @@ export function getPoliticalControllerOSID(
         }
     }
     if (tied.length === 0) return null;
-    tied.sort((a, b) => a.localeCompare(b));
+    tied.sort(strictCompare);
     return tied[0] ?? null;
 }

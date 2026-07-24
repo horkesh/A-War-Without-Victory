@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MapContainer } from './map/MapContainer';
 import { PresidentialToolbar } from './components/PresidentialToolbar';
 import { SelectionPanel } from './components/SelectionPanel';
@@ -15,13 +15,11 @@ import { OperationsPanel } from './components/OperationsPanel';
 import { OrbatPanel } from './components/OrbatPanel';
 import { OrderQueue } from './components/OrderQueue';
 import { Tooltip } from './components/Tooltip';
-import { AttackConfirmation } from './components/AttackConfirmation';
 import { SidePickerOverlay } from './components/SidePickerOverlay';
 import { RecruitmentModal } from './components/RecruitmentModal';
+import { AutonomyPanel } from './components/AutonomyPanel';
 import { WarSummaryModal } from './components/WarSummaryModal';
 import { TurnAftermathModal } from './components/TurnAftermathModal';
-import { OpsPlanningModal } from './components/ops_modal/OpsPlanningModal';
-import { CommanderSelectionModal } from './components/CommanderSelectionModal';
 import { OperationBriefingModal } from './components/OperationBriefingModal';
 import { SupplyPanel } from './components/SupplyPanel';
 import { EconomyPanel } from './components/EconomyPanel';
@@ -34,7 +32,7 @@ import { PresidentialInbox } from './components/PresidentialInbox';
 import type { EventDisplayData } from './components/EventModal';
 import { CommandBriefingLayer } from './components/CommandBriefingLayer';
 import { PeacePlanModal } from './components/PeacePlanModal';
-import { OnboardingOverlay, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
+import { OnboardingOverlay, shouldShowOnboarding, type TutorialStateShape } from './components/onboarding/OnboardingOverlay';
 import { ParamilitaryReviewModal } from './components/ParamilitaryReviewModal';
 import { EventDecisionModal } from './components/EventDecisionModal';
 import { ConvoyDecisionModal } from './components/ConvoyDecisionModal';
@@ -67,9 +65,10 @@ import { CommandCardStrip } from './components/warroom/CommandCardStrip';
 import type { PresidentialCommandCategoryId } from './data/presidentialCategories';
 import { PresidentDeskShell } from './components/presidential_desk/PresidentDeskShell';
 import { PresidentialDecisionRoomPanel } from './components/army_hq/PresidentialDecisionRoomPanel';
+import { Z } from '../shared/zIndex';
 import { RootErrorBoundary } from './components/RootErrorBoundary';
 import { PanelBreadcrumb } from './components/PanelBreadcrumb';
-import { derivePanelRailState, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
+import { derivePanelRailState, shouldRenderCommandBriefing, shouldRenderInboxPanel, shouldRenderTacticalDetailRails } from './components/panelRail';
 import { useGameStore, isDevMode } from './store/gameStore';
 import { loadLatestRunSaveAsText, loadEventDefinitions, loadEventDefinitionsFull } from './data/DataLoader';
 import type { EventDefinition } from '../../sim/events/event_types';
@@ -81,7 +80,6 @@ import {
 } from './data/officerResentmentReceipts';
 import { getOsidDisplayName } from './utils/osidDisplayName';
 import { t } from './i18n';
-import { getFormationsAtOsid } from './utils/formationAtOsid';
 import { getPlayerSafeMilitaryFactionName } from './utils/playerSafeText';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useDesktopSession } from './hooks/useDesktopSession';
@@ -238,38 +236,6 @@ function resolveEventDecisionAdvisor(
   if (factionOfficers.length === 0) return undefined;
   const advisor = factionOfficers.find((o) => o.acting_commander) ?? factionOfficers[0];
   return { name: advisor.name, rank: advisor.rank };
-}
-
-function CommanderSelectionModalWrapper() {
-  const ctx = useGameStore((s) => s.commanderSelectionContext);
-  const setCtx = useGameStore((s) => s.setCommanderSelectionContext);
-  const ipc = useIPC();
-
-  const handleSelect = async (officerId: string) => {
-    if (!ctx) return;
-    useGameStore.getState().setLastSelectedOfficerId(officerId);
-    try {
-      const result = await ipc.stageAssignOperationCommander({
-        corpsId: ctx.corpsId,
-        operationName: ctx.operationName,
-        officerId,
-      });
-      if (!result.ok) {
-        console.warn('[CommanderSelection] assign failed (likely safe if draft):', result.error);
-      }
-    } catch (err) {
-      console.warn('[CommanderSelection] assign error:', err);
-    }
-    setCtx(null);
-  };
-
-  return (
-    <CommanderSelectionModal
-      isOpen={!!ctx}
-      onClose={() => setCtx(null)}
-      onSelect={handleSelect}
-    />
-  );
 }
 
 function OperationBriefingModalWrapper() {
@@ -463,11 +429,11 @@ function WarroomNativeOverlay({
           onClose();
         }
       }}
-      className="pointer-events-auto absolute left-4 top-24 z-[7] w-[min(30rem,calc(100vw-2rem))] border border-panel-border/80 bg-panel-bg/94 p-4 shadow-[0_24px_80px_rgba(0,0,0,0.58)] backdrop-blur-md md:left-6 xl:left-10"
+      className="pointer-events-auto absolute left-4 top-24 z-[7] w-[min(30rem,calc(100vw-2rem))] border border-panel-border/80 bg-[#11141b] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.58)] md:left-6 xl:left-10"
     >
       <div className="flex items-start justify-between gap-4 border-b border-panel-border/70 pb-3">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t(copy.eyebrowKey)}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.22em] text-accent-gold">{t(copy.eyebrowKey)}</div>
           <h2 className="mt-1 text-[18px] font-bold leading-tight text-text-primary">{title}</h2>
         </div>
         <button
@@ -475,7 +441,7 @@ function WarroomNativeOverlay({
           onClick={onClose}
           aria-label={t('warroom.overlay.closeAria', { title })}
           data-testid={`warroom-overlay-${surface}-close`}
-          className="border border-panel-border/80 bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          className="border border-panel-border/80 bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           {t('warroom.overlay.close')}
         </button>
@@ -485,7 +451,7 @@ function WarroomNativeOverlay({
         type="button"
         onClick={onDrillIn}
         data-testid={`warroom-overlay-${surface}-drill-in`}
-        className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-[10px] font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
+        className="mt-4 border border-accent-gold/45 bg-accent-gold/12 px-3 py-2 text-left text-xs font-bold uppercase tracking-[0.14em] text-accent-gold transition-colors hover:bg-accent-gold/20"
       >
         {t(copy.drillInLabelKey)}
       </button>
@@ -500,8 +466,6 @@ function App() {
   const ipc = useIPC();
   const devMode = useGameStore((s) => s.devMode);
 
-  const pendingAttackConfirmation = useGameStore((s) => s.pendingAttackConfirmation);
-  const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const openingBriefDismissed = useGameStore((s) => s.openingBriefDismissed);
   const setOpeningBriefDismissed = useGameStore((s) => s.setOpeningBriefDismissed);
@@ -514,8 +478,6 @@ function App() {
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const selectedOrbatCorpsId = useGameStore((s) => s.selectedOrbatCorpsId);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
-  const osidPropertiesMap = useGameStore((s) => s.osidPropertiesMap);
-  const setConfirmPrimaryAction = useGameStore((s) => s.setConfirmPrimaryAction);
   const loadSave = useGameStore((s) => s.loadSave);
   const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const setLoadError = useGameStore((s) => s.setLoadError);
@@ -531,6 +493,11 @@ function App() {
   const armyHQOpen = useGameStore((s) => s.armyHQOpen);
   const codexOpen = useGameStore((s) => s.codexOpen);
   const chronicleOpen = useGameStore((s) => s.chronicleOpen);
+  const advanceTurnPending = useGameStore((s) => s.advanceTurnPending);
+  const opsPlanningModalOpen = useGameStore((s) => s.opsPlanningModalOpen);
+  const commanderSelectionContext = useGameStore((s) => s.commanderSelectionContext);
+  const operationBriefingContext = useGameStore((s) => s.operationBriefingContext);
+  const wrappedOpen = useGameStore((s) => s.wrappedOpen);
   const railState = derivePanelRailState({
     selectedOsid,
     selectedArmyId,
@@ -570,6 +537,7 @@ function App() {
   const [sidePickerDismissed, setSidePickerDismissed] = useState(false);
   const [campaignStarting, setCampaignStarting] = useState(false);
   const [recruitmentOpen, setRecruitmentOpen] = useState(false);
+  const [autonomyOpen, setAutonomyOpen] = useState(false);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [summaryFocus, setSummaryFocus] = useState<SummaryFocusSection>('overview');
   const [enclaveDashboardOpen, setEnclaveDashboardOpen] = useState(false);
@@ -582,11 +550,11 @@ function App() {
   const [aiAdvisorResponse, setAiAdvisorResponse] = useState<any>(null);
   const [eventQueue, setEventQueue] = useState<EventDisplayData[]>([]);
   const [eventQueueIndex, setEventQueueIndex] = useState(0);
-  const [acknowledgedEventIds, setAcknowledgedEventIds] = useState<Set<string>>(new Set());
   const [shownEventModalIds, setShownEventModalIds] = useState<Set<string>>(new Set());
   const [requestedCodexEventId, setRequestedCodexEventId] = useState<string | null>(null);
   const [dismissedPeacePlanKey, setDismissedPeacePlanKey] = useState<string | null>(null);
   const [paramilitaryReviewOpen, setParamilitaryReviewOpen] = useState(false);
+  const [commandBriefingSuppressedTurn, setCommandBriefingSuppressedTurn] = useState<number | null>(null);
   /** Active blocking event decision id surfaced as a modal. `null` = no modal.
    *  Set by (a) inbox click on `event_modal` action, or (b) the auto-launch effect
    *  below when a new turn surfaces pending decisions for the player faction. */
@@ -598,12 +566,19 @@ function App() {
   const [selectedIntelligenceBriefId, setSelectedIntelligenceBriefId] = useState<string | null>(null);
   const [selectedCounterOfferId, setSelectedCounterOfferId] = useState<string | null>(null);
   const [recentlyAcceptedEventDecisionId, setRecentlyAcceptedEventDecisionId] = useState<string | null>(null);
+  const [actionReceiptMessage, setActionReceiptMessage] = useState<string | null>(null);
   const [selectedConvoyDecisionId, setSelectedConvoyDecisionId] = useState<string | null>(null);
   const [recruitmentLoading, setRecruitmentLoading] = useState(false);
   const [recruitmentApplying, setRecruitmentApplying] = useState(false);
   const [recruitmentCatalog, setRecruitmentCatalog] = useState<RecruitmentCatalogBrigade[]>([]);
   const recruitmentCatalogRequestId = useRef(0);
   const initialShellHandoffApplied = useRef(false);
+
+  useEffect(() => {
+    if (!actionReceiptMessage) return undefined;
+    const timeout = window.setTimeout(() => setActionReceiptMessage(null), 6000);
+    return () => window.clearTimeout(timeout);
+  }, [actionReceiptMessage]);
 
   useEffect(() => {
     if (!loadedGameState || typeof window === 'undefined') return;
@@ -692,17 +667,16 @@ function App() {
     [officerResentmentReceipts, turnAftermath],
   );
 
-  // Reset dismissal/acknowledgement state when a new save is loaded.
-  // Without this, stale flags from a previous save hide real pending items.
-  const stateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
-  useEffect(() => {
+  const resetCampaignScopedUiState = useCallback(() => {
     setDismissedPeacePlanKey(null);
-    setAcknowledgedEventIds(new Set());
     setShownEventModalIds(new Set());
+    setEventQueue([]);
+    setEventQueueIndex(0);
     setRequestedCodexEventId(null);
     setActiveEventDecisionId(null);
     setRecentlyAcceptedEventDecisionId(null);
-  }, [stateFingerprint]);
+    setCommandBriefingSuppressedTurn(null);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -714,24 +688,6 @@ function App() {
 
   // C4.3: Combat odds — call existing query-combat-estimate when modal opens; show "—" if unavailable.
   // Phase 5 could add a dedicated combat-estimate IPC if needed; we use existing query-combat-estimate only.
-  const [combatOdds, setCombatOdds] = useState('—');
-  useEffect(() => {
-    if (!pendingAttackConfirmation) {
-      setCombatOdds('—');
-      setConfirmPrimaryAction(null);
-      return;
-    }
-    const { attackerFormationId, targetOsid } = pendingAttackConfirmation;
-    setCombatOdds('—');
-    ipc.queryCombatEstimate(attackerFormationId, targetOsid).then((r) => {
-      if (r?.ok && r.win_probability != null) {
-        setCombatOdds(`${Math.round(r.win_probability * 100)}% win`);
-      } else {
-        setCombatOdds('—');
-      }
-    }).catch(() => setCombatOdds('—'));
-  }, [pendingAttackConfirmation, setConfirmPrimaryAction]);
-
   useEffect(() => {
     // Task #80 — when a save/state loads, close the SidePicker. We deliberately
     // do NOT auto-open it when no state is loaded: faction choice is offered
@@ -771,6 +727,7 @@ function App() {
   useEffect(() => {
     window.handleManualSaveLoad = async (json: unknown) => {
       try {
+        resetCampaignScopedUiState();
         await loadSave(json);
         setSidePickerOpen(false);
         setSidePickerDismissed(false);
@@ -783,6 +740,7 @@ function App() {
       try {
         const text = await loadLatestRunSaveAsText();
         const json: unknown = JSON.parse(text);
+        resetCampaignScopedUiState();
         await loadSave(json);
         setSidePickerOpen(false);
         setSidePickerDismissed(false);
@@ -795,7 +753,7 @@ function App() {
       delete window.handleManualSaveLoad;
       delete window.handleContinueLastRun;
     };
-  }, [loadSave, setLoadError]);
+  }, [loadSave, resetCampaignScopedUiState, setLoadError]);
 
   // v0.4.1 Phase 5: detect new events from game state and queue for display
   // Only show in live gameplay (Electron IPC), not dev map inspection
@@ -803,8 +761,8 @@ function App() {
     if (!ipc.isAvailable) return;
     if (!loadedGameState) return;
     // Task #80 — do not queue acknowledgement flashes while booted to the Main
-    // Menu; they would pop the EventModal over it (and the auto-dismiss timer
-    // would clear them unseen). Defer until past the menu — the effect re-runs
+    // Menu; they would pop the EventModal over it before the campaign surface is
+    // ready. Defer until past the menu — the effect re-runs
     // when `appScreen` leaves 'mainMenu' (it is in the dep list below).
     if (appScreen === 'mainMenu') return;
     const fired = loadedGameState.firedEvents;
@@ -854,15 +812,18 @@ function App() {
     loadedGameState,
     peaceWarTransitionSeen,
   );
+  const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);
+  const requiredPlayerEventDecisionPending = (loadedGameState?.pendingEventDecisions ?? [])
+    .some((decision) => decision.faction === playerFaction && isRequiredPendingEventDecision(decision));
   const presidentialBlockingSurfaceActive = (
     sidePickerOpen ||
     peaceWarTransitionActive ||
+    (requiredPlayerEventDecisionPending && !openingBriefPending) ||
     activeEventDecisionId !== null ||
     showPeacePlanModal ||
     Boolean(loadedGameState?.pendingDayton && !loadedGameState?.gameOver)
   );
   const tacticalChromeVisible = !presidentialBlockingSurfaceActive;
-  const openingBriefPending = shouldShowOpeningBrief(loadedGameState, openingBriefDismissed);
   const onboardingBlockingOverlayActive = (
     presidentialBlockingSurfaceActive ||
     openingBriefPending ||
@@ -881,12 +842,68 @@ function App() {
     diplomacyOpen ||
     aiAdvisorOpen ||
     recruitmentOpen ||
+    autonomyOpen ||
     paramilitaryReviewOpen ||
     eventQueue.length > 0 ||
     pauseOpen ||
     settingsOpen ||
     creditsOpen
   );
+  const onboardingOverlayOpen = (
+    appScreen === 'game' &&
+    loadedGameState !== null &&
+    !onboardingBlockingOverlayActive &&
+    shouldShowOnboarding(
+      ipc.isAvailable
+        ? loadedGameState.tutorial_state
+        : (browserPreviewTutorialStateMemory ?? loadedGameState.tutorial_state),
+    )
+  );
+  const commandBriefingFullOverlayOpen = (
+    appScreen !== 'game' ||
+    !loadedGameState ||
+    presidentialBlockingSurfaceActive ||
+    openingBriefPending ||
+    onboardingOverlayOpen ||
+    turnAftermathOpen ||
+    summaryOpen ||
+    enclaveDashboardOpen ||
+    economyOpen ||
+    humanitarianLedgerOpen ||
+    aiSettingsOpen ||
+    diplomacyOpen ||
+    aiAdvisorOpen ||
+    paramilitaryReviewOpen ||
+    eventQueue.length > 0 ||
+    selectedReserveRequestId !== null ||
+    selectedOfficerMatterId !== null ||
+    selectedIntelligenceBriefId !== null ||
+    selectedCounterOfferId !== null ||
+    selectedConvoyDecisionId !== null ||
+    opsPlanningModalOpen ||
+    commanderSelectionContext !== null ||
+    operationBriefingContext !== null ||
+    wrappedOpen ||
+    advanceTurnPending ||
+    warroomDeskOpen ||
+    warroomDecisionRoomOpen ||
+    warroomOverlaySurface !== null ||
+    commandStripOpen ||
+    pauseOpen ||
+    settingsOpen ||
+    creditsOpen ||
+    loadedGameState.gameOver === true
+  );
+  const commandBriefingVisible = shouldRenderCommandBriefing({
+    panel: railState.panel,
+    operationsPanelOpen: isOperationsPanelOpen,
+    armyHQOpen,
+    recruitmentOpen,
+    autonomyOpen,
+    chronicleOpen,
+    codexOpen,
+    fullOverlayOpen: commandBriefingFullOverlayOpen,
+  });
 
   // v0.9 presidential design: auto-launch the EventDecisionModal for the first
   // blocking event decision when a new turn surfaces one. Memory:
@@ -898,6 +915,7 @@ function App() {
     if (peaceWarTransitionActive) return;
     if (openingBriefPending) return;
     if (showPeacePlanModal) return;
+    if (turnAftermathOpen) return;
     // Task #80 — the boot-to-menu default means an auto-loaded save with a
     // pending decision must NOT auto-pop the (non-dismissible) EventDecisionModal
     // over the Main Menu. Defer until the player is past the menu (Continue /
@@ -916,9 +934,23 @@ function App() {
     peaceWarTransitionActive,
     openingBriefPending,
     showPeacePlanModal,
+    turnAftermathOpen,
     recentlyAcceptedEventDecisionId,
     appScreen,
   ]);
+
+  // Async presidential blockers own the full interaction surface. Preserve
+  // map selection/camera state, but suspend every Warroom shell that could
+  // otherwise remain clickable behind the required response.
+  useEffect(() => {
+    if (activeEventDecisionId === null) return;
+    setWarroomDeskOpen(false);
+    setWarroomDecisionRoomOpen(false);
+    setWarroomOverlaySurface(null);
+    setCommandStripOpen(false);
+    setCommandStripCategoryId(null);
+    setDiplomacyOpen(false);
+  }, [activeEventDecisionId]);
 
   useEffect(() => {
     if (activeEventDecisionId === null) return;
@@ -938,29 +970,7 @@ function App() {
     }
   }, [loadedGameState?.pendingEventDecisions, playerFaction, recentlyAcceptedEventDecisionId]);
 
-  // Auto-dismiss non-decision events after 4 seconds
-  useEffect(() => {
-    if (eventQueue.length === 0) return;
-    const current = eventQueue[eventQueueIndex];
-    if (!current || current.isDecision) return;
-    const timer = setTimeout(() => {
-      // Inline dismiss logic to avoid stale closure over handleEventAcknowledge
-      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
-      if (eventQueueIndex < eventQueue.length - 1) {
-        setEventQueueIndex(eventQueueIndex + 1);
-      } else {
-        setEventQueue([]);
-        setEventQueueIndex(0);
-      }
-    }, 4000);
-    return () => clearTimeout(timer);
-  }, [eventQueue, eventQueueIndex]);
-
   const handleEventAcknowledge = () => {
-    const current = eventQueue[eventQueueIndex];
-    if (current) {
-      setAcknowledgedEventIds(prev => new Set(prev).add(current.id));
-    }
     if (eventQueueIndex < eventQueue.length - 1) {
       setEventQueueIndex(eventQueueIndex + 1);
     } else {
@@ -968,60 +978,6 @@ function App() {
       setEventQueueIndex(0);
     }
   };
-
-  // Phase C4: Attack confirmation modal payload and render
-  const attackerFormation = pendingAttackConfirmation && loadedGameState
-    ? loadedGameState.formations.find((f) => f.id === pendingAttackConfirmation.attackerFormationId)
-    : null;
-  const targetDisplayName = pendingAttackConfirmation
-    ? getOsidDisplayName(pendingAttackConfirmation.targetOsid, osidDisplayNames)
-    : '';
-  const defendersAtTarget = pendingAttackConfirmation && loadedGameState
-    ? getFormationsAtOsid(loadedGameState.formations, pendingAttackConfirmation.targetOsid).sort((a, b) => a.id.localeCompare(b.id))
-    : [];
-  const defenderFormation = defendersAtTarget[0] ?? null;
-  const terrainSummary = pendingAttackConfirmation && osidPropertiesMap?.[pendingAttackConfirmation.targetOsid]
-    ? String((osidPropertiesMap[pendingAttackConfirmation.targetOsid].terrain ?? osidPropertiesMap[pendingAttackConfirmation.targetOsid].zone_type) ?? '—')
-    : '—';
-
-  const submitAttackOrder = (attackerFormationId: string, targetOsid: string, onDone: () => void) => {
-    ipc.stageAttackOrder(attackerFormationId, targetOsid).then((r) => {
-      if (!r.ok) console.warn('[AttackConfirmation] stageAttackOrder failed:', r.error);
-      onDone();
-    }).catch((err) => {
-      console.warn('[AttackConfirmation] stageAttackOrder error:', err);
-      onDone();
-    });
-  };
-
-  const handleAttackConfirm = () => {
-    if (!pendingAttackConfirmation) return;
-    const { attackerFormationId, targetOsid } = pendingAttackConfirmation;
-    submitAttackOrder(attackerFormationId, targetOsid, () => setPendingAttackConfirmation(null));
-  };
-
-  const handleAttackCancel = () => {
-    setPendingAttackConfirmation(null);
-  };
-
-  // When modal is open, Enter confirms (read from store to avoid stale closure)
-  useEffect(() => {
-    if (!pendingAttackConfirmation) {
-      setConfirmPrimaryAction(null);
-      return;
-    }
-    setConfirmPrimaryAction(() => {
-      const state = useGameStore.getState();
-      const pending = state.pendingAttackConfirmation;
-      if (!pending) return;
-      submitAttackOrder(
-        pending.attackerFormationId,
-        pending.targetOsid,
-        () => useGameStore.getState().setPendingAttackConfirmation(null)
-      );
-    });
-    return () => setConfirmPrimaryAction(null);
-  }, [pendingAttackConfirmation, setConfirmPrimaryAction, ipc]);
 
   const refreshRecruitmentCatalog = async () => {
     if (!ipc.isAvailable) return;
@@ -1034,11 +990,13 @@ function App() {
   };
 
   const openRecruitmentModal = () => {
+    setAutonomyOpen(false);
     setRecruitmentOpen(true);
     void refreshRecruitmentCatalog();
   };
 
   const handleSelectFaction = async (faction: StartNewCampaignPayload['playerFaction']) => {
+    resetCampaignScopedUiState();
     setCampaignStarting(true);
     setOpeningBriefDismissed(false);
     // Use scenarioKey 'apr_1992' as default for dev map, mirroring Warroom fix
@@ -1055,6 +1013,7 @@ function App() {
 
   const handleMainMenuLoadGame = async (json: unknown) => {
     try {
+      resetCampaignScopedUiState();
       await loadSave(json);
       setSidePickerOpen(false);
       setSidePickerDismissed(false);
@@ -1163,12 +1122,44 @@ function App() {
     setSummaryOpen(false);
   };
 
+  const suppressCommandBriefingForCurrentTurn = () => {
+    const turn = useGameStore.getState().loadedGameState?.turn;
+    setCommandBriefingSuppressedTurn(typeof turn === 'number' ? turn : null);
+  };
+
+  const clearTacticalInspectionOverlays = () => {
+    const gs = useGameStore.getState();
+    gs.setArmyHQOpen(false);
+    gs.setCodexOpen(false);
+    gs.setChronicleOpen(false);
+    gs.setIsOperationsPanelOpen(false);
+    gs.setOpsPlanningModalOpen(false);
+    gs.setSelectedOsid(null);
+    gs.setSelectedFormationId(null);
+    gs.setSelectedCorpsId(null);
+    gs.setSelectedCorpsFrontSectorId(null);
+    gs.setSelectedArmyId(null);
+    gs.setSelectedArmyHqId(null);
+    gs.setSelectedOperationKey(null);
+    gs.setSelectedOrbatCorpsId(null);
+    gs.setExpandedStackOsid(null);
+    gs.clearTooltipTarget();
+    setTurnAftermathOpen(false);
+    setSummaryOpen(false);
+    setEnclaveDashboardOpen(false);
+    setEconomyOpen(false);
+    setHumanitarianLedgerOpen(false);
+    setAiAdvisorOpen(false);
+    suppressCommandBriefingForCurrentTurn();
+  };
+
   const openWarroomDecisionRoomFromField = (
     lens: Parameters<typeof requestDecisionRoomLens>[0] = 'all',
     cardId: string | null = null,
   ) => {
-    if (activeEventDecisionId !== null) return;
+    if (activeEventDecisionId !== null) return false;
     const gs = useGameStore.getState();
+    clearTacticalInspectionOverlays();
     requestDecisionRoomLens(lens, null, cardId);
     gs.setArmyHQOpen(false);
     gs.setCodexOpen(false);
@@ -1181,6 +1172,7 @@ function App() {
     setDiplomacyOpen(false);
     setAppScreen('warroom');
     setSummaryOpen(false);
+    return true;
   };
 
   const reviewPreAdvancePriorities = () => {
@@ -1243,8 +1235,7 @@ function App() {
 
   const openDecisionRoomTarget = (target: PresidentialDecisionRoomNavigationTarget) => {
     if (target.kind === 'decision-room') {
-      openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
-      return true;
+      return openWarroomDecisionRoomFromField(target.lens, target.cardId ?? null);
     }
     if (target.kind === 'counter-offer') {
       setSelectedCounterOfferId(target.counterOfferId);
@@ -1357,6 +1348,7 @@ function App() {
   const openWarroomDeskFromField = () => {
     if (activeEventDecisionId !== null) return;
     const gs = useGameStore.getState();
+    clearTacticalInspectionOverlays();
     gs.setArmyHQOpen(false);
     gs.setCodexOpen(false);
     gs.setChronicleOpen(false);
@@ -1516,8 +1508,8 @@ function App() {
 
   const openInboxHome = () => {
     const gs = useGameStore.getState();
-    setTurnAftermathOpen(false);
-    setSummaryOpen(false);
+    clearTacticalInspectionOverlays();
+    setWarroomDecisionRoomOpen(false);
     openWarroomDeskFromField();
     gs.setSelectedOsid(null);
     gs.setSelectedFormationId(null);
@@ -1553,6 +1545,7 @@ function App() {
       }
 
       if (event.data?.type === 'awwv-shell:fresh-campaign-started') {
+        resetCampaignScopedUiState();
         const view = new URLSearchParams(window.location.search).get('view');
         setAppScreen(view === 'warroom' ? 'warroom' : 'game');
         setOpeningBriefDismissed(false);
@@ -1674,11 +1667,14 @@ function App() {
       </header>
       {tacticalChromeVisible && (
         <>
-          <CommandBriefingLayer
-            onOpenSummary={openSummary}
-            onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
-            onOpenPeacePlan={() => setDismissedPeacePlanKey(null)}
-          />
+          {commandBriefingVisible && (
+            <CommandBriefingLayer
+              onOpenSummary={openSummary}
+              onOpenEnclaves={() => setEnclaveDashboardOpen(true)}
+              onOpenPeacePlan={() => setDismissedPeacePlanKey(null)}
+              suppressedTurn={commandBriefingSuppressedTurn}
+            />
+          )}
           <aside
             aria-label="Order of Battle"
             style={{ display: 'contents' }}
@@ -1708,18 +1704,6 @@ function App() {
       )}
       <Tooltip />
       </>
-      )}
-      {pendingAttackConfirmation && attackerFormation && (
-        <AttackConfirmation
-          attacker={{ id: attackerFormation.id, name: attackerFormation.name, faction: attackerFormation.faction }}
-          targetOsid={pendingAttackConfirmation.targetOsid}
-          targetDisplayName={targetDisplayName}
-          defender={defenderFormation ? { id: defenderFormation.id, name: defenderFormation.name, faction: defenderFormation.faction, strength: defenderFormation.personnel ?? '—' } : null}
-          terrainSummary={terrainSummary}
-          combatOdds={combatOdds}
-          onConfirm={handleAttackConfirm}
-          onCancel={handleAttackCancel}
-        />
       )}
       <SidePickerOverlay
         // Task #80 — gate on `sidePickerOpen` alone. After the boot-to-menu
@@ -1753,6 +1737,13 @@ function App() {
         onApply={(brigadeId, equipmentClass) => void handleApplyRecruitment(brigadeId, equipmentClass)}
         onClose={() => setRecruitmentOpen(false)}
       />
+      {autonomyOpen && (
+        <AutonomyPanel
+          onClose={() => setAutonomyOpen(false)}
+          playerFaction={playerFaction}
+          namedOfficerData={loadedGameState?.namedOfficerData}
+        />
+      )}
       <WarSummaryModal
         isOpen={summaryOpen}
         focusSection={summaryFocus}
@@ -1789,15 +1780,19 @@ function App() {
         }}
       />
       <RootErrorBoundary zone="army hq">
-        <ArmyHQModal onDecisionRoomNavigateTarget={openDecisionRoomTarget} eventCatalog={eventCatalogFull} />
+        <ArmyHQModal
+          onDecisionRoomNavigateTarget={openDecisionRoomTarget}
+          eventCatalog={eventCatalogFull}
+          onOpenRecruitment={openRecruitmentModal}
+          onOpenAutonomy={() => {
+            setRecruitmentOpen(false);
+            setAutonomyOpen(true);
+          }}
+        />
       </RootErrorBoundary>
       <ChronicleOverlay />
       <WrappedOverlay eventCatalog={eventCatalogFull} />
       <CodexPanelWrapper eventCatalog={eventCatalogFull} requestedEventId={requestedCodexEventId} />
-      <RootErrorBoundary zone="ops planning">
-        <OpsPlanningModal />
-      </RootErrorBoundary>
-      <CommanderSelectionModalWrapper />
       <OperationBriefingModalWrapper />
       {loadedGameState && (
         <EnclaveDashboard
@@ -1837,10 +1832,15 @@ function App() {
       )}
       {loadedGameState?.phase === 'peace' && <PeaceStatusPanel />}
       {/* v0.4.1 Phase 5: Event modal (queue-based).
-          Non-decision fired events only — acknowledgement flash with auto-dismiss.
+          Non-decision fired events only — remains visible until acknowledged.
           Presidential event decisions are owned by EventDecisionModal below,
           launched from pending_event_decisions or the President's Desk inbox. */}
-      {eventQueue.length > 0 && eventQueue[eventQueueIndex] && (
+      {eventQueue.length > 0 &&
+        eventQueue[eventQueueIndex] &&
+        !presidentialBlockingSurfaceActive &&
+        !turnAftermathOpen &&
+        !requiredPlayerEventDecisionPending &&
+        activeEventDecisionId === null && (
         <EventModal
           event={eventQueue[eventQueueIndex]}
           queuePosition={eventQueueIndex + 1}
@@ -1852,7 +1852,7 @@ function App() {
           Task #80 — gated on `appScreen !== 'mainMenu'` so an auto-loaded save with
           a pending plan does not auto-pop it over the boot Main Menu (same contract
           as the EventDecisionModal auto-launch above). Shows once past the menu. */}
-      {appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (
+      {appScreen !== 'mainMenu' && !turnAftermathOpen && showPeacePlanModal && pendingPeacePlan && (
         <PeacePlanModal
           plan={pendingPeacePlan}
           onDismiss={() => setDismissedPeacePlanKey(getPeacePlanDismissalKey(pendingPeacePlan))}
@@ -1869,7 +1869,7 @@ function App() {
           (event_modal action handler routes here). The modal is non-dismissible;
           the only exit is to respond, which calls ipc.respondToEventDecision and
           the engine clears the entry from pending_event_decisions. */}
-      {activeEventDecisionId !== null && (() => {
+      {activeEventDecisionId !== null && !turnAftermathOpen && (() => {
         const decision = (loadedGameState?.pendingEventDecisions ?? [])
           .find((d) => d.event_id === activeEventDecisionId && d.faction === playerFaction);
         if (!decision) return null;
@@ -1882,11 +1882,17 @@ function App() {
             errorMessage={loadError}
             onDismissError={dismissActiveEventDecisionError}
             onRespond={async (eventId, responseId) => {
+              const responseLabel = decision.response_options
+                .find((option) => option.id === responseId)?.label ?? responseId;
+              const publishResponseReceipt = () => setActionReceiptMessage(
+                t('firedEvent.wrapper.responseRecorded', { response: responseLabel }),
+              );
               if (ipc.isAvailable) {
                 const result = await ipc.respondToEventDecision(eventId, responseId);
                 if (result.ok === true) {
                   setRecentlyAcceptedEventDecisionId(eventId);
                   setActiveEventDecisionId(null);
+                  publishResponseReceipt();
                 } else {
                   setLoadError(result.error ?? 'Failed to record event decision.');
                 }
@@ -1903,6 +1909,7 @@ function App() {
                 await loadSave(nextState);
                 setRecentlyAcceptedEventDecisionId(eventId);
                 setActiveEventDecisionId(null);
+                publishResponseReceipt();
               } catch (err) {
                 console.warn('[EventDecisionModal] browser fallback failed', err);
                 setLoadError('Failed to record event decision.');
@@ -1981,11 +1988,13 @@ function App() {
               setSidePickerDismissed(false);
             }}
             statusDock={(
-              <WarroomStatusBar
-                onReviewPriorities={reviewPreAdvancePriorities}
-                onReviewItem={reviewPreAdvanceItem}
-                onReviewTarget={reviewPreAdvanceTarget}
-              />
+              !presidentialBlockingSurfaceActive ? (
+                <WarroomStatusBar
+                  onReviewPriorities={reviewPreAdvancePriorities}
+                  onReviewItem={reviewPreAdvanceItem}
+                  onReviewTarget={reviewPreAdvanceTarget}
+                />
+              ) : null
             )}
             onNavigate={(command) => {
               if (isWarroomLocalCommand(command)) {
@@ -2060,11 +2069,14 @@ function App() {
               aria-label={t('warroomDecisionRoom.host.aria')}
               aria-modal="false"
               data-testid="warroom-decision-room-host"
-              className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto max-h-[76%] max-w-6xl overflow-y-auto rounded-md border border-accent-gold/35 bg-panel-bg/96 p-4 shadow-[0_28px_90px_rgba(0,0,0,0.6)] backdrop-blur-md xl:left-10 xl:right-10"
+              className="pointer-events-auto absolute inset-x-3 bottom-20 z-[6] mx-auto flex max-h-[76%] max-w-6xl flex-col overflow-hidden rounded-md border border-accent-gold/35 bg-[#0f131a]/98 shadow-[0_28px_90px_rgba(0,0,0,0.7)] backdrop-blur-sm xl:left-10 xl:right-10"
             >
-              <div className="mb-3 flex items-end justify-between gap-2 border-b border-panel-border/70 pb-2">
+              <div
+                data-decision-room-fixed-header="true"
+                className="z-20 flex shrink-0 items-end justify-between gap-2 border-b border-panel-border/70 bg-[#0f131a] px-4 pb-3 pt-4"
+              >
                 <div>
-                  <div className="text-[8px] font-bold uppercase tracking-[0.22em] text-accent-gold">{t('warroomDecisionRoom.host.eyebrow')}</div>
+                  <div className="text-xs font-bold uppercase tracking-[0.1em] text-accent-gold">{t('warroomDecisionRoom.host.eyebrow')}</div>
                   <h2 className="mt-0.5 text-[15px] font-bold leading-tight text-text-primary">{t('warroomDecisionRoom.host.title')}</h2>
                 </div>
                 <button
@@ -2075,12 +2087,14 @@ function App() {
                   }}
                   aria-label={t('warroomDecisionRoom.host.closeAria')}
                   data-testid="warroom-decision-room-close"
-                  className="shrink-0 rounded border border-panel-border bg-black/30 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+                  className="shrink-0 rounded border border-panel-border bg-black/60 px-2.5 py-1 text-xs font-bold uppercase tracking-[0.08em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                 >
                   {t('warroomDecisionRoom.host.close')}
                 </button>
               </div>
-              <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />
+              <div data-decision-room-scroll-owner="true" className="min-h-0 overflow-y-auto px-4 pb-4 pt-3">
+                <PresidentialDecisionRoomPanel onNavigateTarget={reviewPreAdvanceTarget} />
+              </div>
             </div>
           )}
           {warroomOverlaySurface && (
@@ -2146,6 +2160,17 @@ function App() {
           message={loadError}
           onDismiss={() => setLoadError(null)}
         />
+      )}
+      {!sidePickerOpen && actionReceiptMessage && (
+        <div
+          role="status"
+          aria-live="polite"
+          data-testid="action-receipt-toast"
+          className="pointer-events-none fixed left-1/2 top-20 w-[min(34rem,calc(100vw-2rem))] -translate-x-1/2 rounded border border-emerald-400/45 bg-[#10151d] px-4 py-3 text-center text-sm font-semibold text-emerald-100 shadow-2xl"
+          style={{ zIndex: Z.MODAL_HARD }}
+        >
+          {actionReceiptMessage}
+        </div>
       )}
     </div>
   );

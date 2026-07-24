@@ -76,6 +76,27 @@ describe('event system integration', () => {
         }
     });
 
+    it('does not announce the Cerska fall unless RS controls the canonical Cerska OSID', () => {
+        const event = allEvents.find((candidate) => candidate.id === 'vrs_cerska_offensive_1993')!;
+        const state = {
+            political: { political_controllers: { 'op:vlasenica:cerska_2': 'RBiH' } },
+            military: { formations: {}, fired_event_ids: [] },
+            displacement: {},
+            factions: [],
+            meta: { turn: 44, phase: 'war', seed: 'cerska-truth' },
+        } as unknown as GameState;
+
+        expect(event.trigger.condition).toEqual({
+            type: 'territory_control',
+            osid: 'op:vlasenica:cerska_2',
+            faction: 'RS',
+        });
+        expect(evaluateCondition(event.trigger.condition!, state)).toBe(false);
+
+        state.political.political_controllers!['op:vlasenica:cerska_2'] = 'RS';
+        expect(evaluateCondition(event.trigger.condition!, state)).toBe(true);
+    });
+
     it('control_change effect flips OSID controller', () => {
         const state = {
             meta: { turn: 10, phase: 'war', seed: 'x' },

@@ -300,19 +300,56 @@ describe('player decision manifest', () => {
 
         const summary = summarizePlayerDecisions(state);
 
-        expect(summary.totalCount).toBe(4);
-        expect(summary.blockingCount).toBe(1);
+        expect(summary.totalCount).toBe(3);
+        expect(summary.blockingCount).toBe(0);
         expect(summary.families.map((family) => [family.id, family.count, family.blockingCount])).toEqual([
             ['event_decision', 1, 0],
             ['peace_plan', 0, 0],
             ['dayton_negotiation', 0, 0],
-            ['paramilitary_request', 1, 1],
+            ['paramilitary_request', 0, 0],
             ['convoy_decision', 0, 0],
             ['reserve_request', 1, 0],
             ['officer_event', 0, 0],
             ['autonomy_proposal', 0, 0],
             ['operation_opportunity', 1, 0],
         ]);
-        expect(listBlockingPlayerDecisions(state).map((item) => item.familyId)).toEqual(['paramilitary_request']);
+        expect(listBlockingPlayerDecisions(state).map((item) => item.familyId)).toEqual([]);
+    });
+
+    it('treats null proposal resolution fields as unresolved and concrete values as resolved', () => {
+        const state: any = {
+            meta: {
+                player_faction: 'RS',
+                pending_proposal_reviews: [
+                    {
+                        id: 'PROP_null_fields',
+                        turn: 20,
+                        faction: 'RS',
+                        domain: 'military',
+                        description: 'Null resolution fields are still pending.',
+                        proposed_action: 'set_corps_stance',
+                        accepted: null,
+                        resolved_turn: null,
+                        opportunity_decision: null,
+                    },
+                    {
+                        id: 'PROP_false_accepted',
+                        turn: 20,
+                        faction: 'RS',
+                        domain: 'military',
+                        description: 'False accepted is a resolved rejection.',
+                        proposed_action: 'set_corps_stance',
+                        accepted: false,
+                    },
+                ],
+            },
+        };
+
+        const summary = summarizePlayerDecisions(state);
+
+        expect(summary.families.find((family) => family.id === 'autonomy_proposal')).toMatchObject({
+            count: 1,
+            blockingCount: 0,
+        });
     });
 });

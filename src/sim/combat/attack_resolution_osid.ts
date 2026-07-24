@@ -63,7 +63,7 @@ import {
 } from './ethnic_defense.js';
 import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 import { getPostWashingtonJointPressureMultiplier } from '../early_war/washington_agreement.js';
-import { findBrigadeOperation, findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
+import { findBrigadeOperationAnywhere, countAxisConcentrationSupport } from './corps_operation_helpers.js';
 import { getBrigadeAxis } from './bot_brigade_ai_osid.js';
 
 // ── Shared combat math ──────────────────────────────────────────────────
@@ -518,8 +518,29 @@ export function resolveAttackOrdersOsid(
         battles: []
     };
 
-    // COHA ceasefire suppresses all combat (v0.7.0 Phase 4)
-    if (state.military.event_flags?.coha_active === true) return report;
+    // COHA suppresses combat, but the attempted orders remain auditable and
+    // must be consumed so they cannot leak into a later turn.
+    if (state.military.event_flags?.coha_active === true) {
+        report.combat_suppressed_reason = 'coha_ceasefire';
+        report.operation_lifecycle_paused_reason = 'coha_ceasefire';
+        const suppressedOrders = state.military.brigade_attack_orders ?? {};
+        for (const brigadeId of Object.keys(suppressedOrders).sort(strictCompare) as FormationId[]) {
+            const target = suppressedOrders[brigadeId];
+            if (!target) continue;
+            (report.orders_seen_by_brigade ??= {})[brigadeId] = target;
+            (report.suppressed_attack_orders ??= []).push({
+                brigade_id: brigadeId,
+                target_osid: target,
+                reason: 'coha_ceasefire',
+            });
+            const faction = state.military.formations?.[brigadeId]?.faction;
+            if (faction) {
+                report.orders_by_faction[faction] = (report.orders_by_faction[faction] ?? 0) + 1;
+            }
+        }
+        state.military.brigade_attack_orders = undefined;
+        return report;
+    }
 
     const terrainMultByOsid = buildTerrainMultByOsid(reverseMap, terrainData);
     const slopeByOsid = buildSlopeByOsid(reverseMap, terrainData);
@@ -1182,14 +1203,23 @@ export function resolveAttackOrdersOsid(
         battleEquipCapturedArt = transfers.capturedArt;
         battleEquipCapturedBy = transfers.capturedBy;
 
-        const attackerCorpsId = firstAttacker.corps_id;
-        const attackerCmd = attackerCorpsId && state.military.corps_command
-            ? state.military.corps_command[attackerCorpsId]
-            : null;
-        const activeOp = attackerCmd ? findBrigadeOperation(attackerCmd, firstAttacker.id) : null;
-        const executionOp = activeOp && activeOp.phase === 'execution' ? activeOp : null;
-        const activeOperationId = executionOp
-            ? `${attackerCorpsId}:${executionOp.name}:t${executionOp.started_turn}`
+        const attackerBrigadeIds = attackerFormations
+            .map((attacker) => attacker.id)
+            .sort(strictCompare);
+        const contributingOperationIds = Array.from(new Set(
+            attackerFormations.flatMap((attacker) => {
+                const match = findBrigadeOperationAnywhere(state, attacker.id);
+                return match?.op.phase === 'execution'
+                    ? [`${match.corps_id}:${match.op.name}:t${match.op.started_turn}`]
+                    : [];
+            }),
+        )).sort(strictCompare);
+        const activeOpMatch = findBrigadeOperationAnywhere(state, firstAttacker.id);
+        const activeOp = activeOpMatch?.op ?? null;
+        const attackerCorpsId = activeOpMatch?.corps_id ?? firstAttacker.corps_id;
+        const executionOp = activeOp?.phase === 'execution' ? activeOp : null;
+        const activeOperationId = executionOp && activeOpMatch
+            ? `${activeOpMatch.corps_id}:${executionOp.name}:t${executionOp.started_turn}`
             : undefined;
 
         // Compute deterministic battle_id join key
@@ -1199,6 +1229,8 @@ export function resolveAttackOrdersOsid(
         report.battles.push({
             battle_id: battleId,
             attacker_brigade: firstAttacker.id,
+            attacker_brigades: attackerBrigadeIds,
+            contributing_operation_ids: contributingOperationIds,
             attacker_faction: attackerFaction,
             defender_faction: controller ?? attackerFaction,
             target_osid: targetOsid,
@@ -1356,6 +1388,15 @@ export function resolveAttackOrdersOsid(
             if (activeAxis) {
                 activeAxis.battles_this_turn = (activeAxis.battles_this_turn ?? 0) + 1;
                 activeAxis.total_battles = (activeAxis.total_battles ?? 0) + 1;
+                const currentAxisObjective = activeAxis.objectives[activeAxis.current_objective_index ?? 0];
+                if (currentAxisObjective === targetOsid) {
+                    activeAxis.objective_battles_this_turn = (activeAxis.objective_battles_this_turn ?? 0) + 1;
+                }
+            } else {
+                const currentObjective = activeOp.objectives?.[activeOp.current_objective_index ?? 0];
+                if (currentObjective === targetOsid) {
+                    activeOp.objective_battles_this_turn = (activeOp.objective_battles_this_turn ?? 0) + 1;
+                }
             }
             if (flip) {
                 activeOp.territory_gained_this_turn = (activeOp.territory_gained_this_turn ?? 0) + 1;

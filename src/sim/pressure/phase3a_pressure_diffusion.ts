@@ -8,6 +8,7 @@
  */
 
 import type { GameState } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type { EffectivePressureEdge } from './phase3a_pressure_eligibility.js';
 
 const DIFFUSE_FRACTION = 0.05;
@@ -113,7 +114,7 @@ function runPhase3APressureDiffusionInternal(
         const v = (fp as Record<string, { value?: unknown }>)[k];
         return v && typeof v === 'object' && typeof (v as { value: number }).value === 'number';
     });
-    edgeIds.sort((a, b) => a.localeCompare(b));
+    edgeIds.sort(strictCompare);
 
     if (edgeIds.length === 0) {
         return {
@@ -177,7 +178,7 @@ function runPhase3APressureDiffusionInternal(
         neighborWeights.get(e.b)!.push({ b: e.a, w });
     }
 
-    const nodes = [...frontNodes].sort((a, b) => a.localeCompare(b));
+    const nodes = [...frontNodes].sort(strictCompare);
     const p: Record<string, number> = {};
     const pOld: Record<string, number> = {};
     const alloc: Record<string, Record<string, number>> = {};

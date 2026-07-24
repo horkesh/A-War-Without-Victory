@@ -144,6 +144,7 @@ describe('buildWarroomPriorityDocketView', () => {
         personnelDirectiveCount: 0,
         operationOpportunityCount: 1,
       },
+      pendingEventDecisions: [],
       operationOpportunityProposals: [makeOpportunity()],
       operationalSitrep: makeSitrep(),
       latestTurnSummary: makeSummary({
@@ -156,11 +157,12 @@ describe('buildWarroomPriorityDocketView', () => {
     const second = buildWarroomPriorityDocketView({ state, limit: 3 });
 
     expect(second.items.map((item) => item.id)).toEqual(first.items.map((item) => item.id));
-    expect(first.status).toBe('blocked');
-    expect(first.statusLabel).toBe('Advance blocked');
+    expect(first.status).toBe('review');
+    expect(first.statusLabel).toBe('Review before advance');
     expect(first.statusLabel).not.toBe(first.status);
     expect(first.tone).toBe('danger');
-    expect(first.headline).toBe('Review before advance');
+    expect(first.headline).toBe('Recommended before advance');
+    expect(first.blockingDecisionCount).toBe(0);
     expect(first.summary).toBe('4 advance items / 4 urgent / 2 pending');
     expect(first.items.map((item) => item.id)).toEqual([
       'review:pending',
@@ -169,7 +171,7 @@ describe('buildWarroomPriorityDocketView', () => {
     ]);
     expect(first.items[0]).toMatchObject({
       category: 'decision',
-      severity: 'blocking',
+      severity: 'critical',
       actionLabel: "Open President's Desk",
       navigationTarget: { kind: 'inbox' },
     });
@@ -246,6 +248,7 @@ describe('buildWarroomPriorityDocketView', () => {
         personnelDirectiveCount: 0,
         operationOpportunityCount: 1,
       },
+      pendingEventDecisions: [],
       operationOpportunityProposals: [makeOpportunity()],
       operationalSitrep: makeSitrep(),
       latestTurnSummary: makeSummary({
@@ -260,7 +263,7 @@ describe('buildWarroomPriorityDocketView', () => {
     expect(view.summary).toBe('4 stavke za napredovanje / 4 hitno / 2 na čekanju');
     expect(view.sourceHandoffSummary).toBe('4 izvorna prijenosa / 4 hitno');
     expect(view.openBoardLabel).toBe('Otvori sobu odluka');
-    expect(view.statusLabel).toBe('Napredovanje blokirano');
+    expect(view.statusLabel).toBe('Pregled prije napredovanja');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('advance items');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('source handoffs');
     expect(view.summary + view.sourceHandoffSummary + view.openBoardLabel).not.toContain('Open Desk');

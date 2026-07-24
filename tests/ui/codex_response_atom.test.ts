@@ -49,16 +49,16 @@ describe('codex RESPONSE: atom', () => {
         expect(evaluateEssayCondition('RESPONSE:rs_strategic_goals:all_six', ctx)).toBe(false);
     });
 
-    it('unlocks a ghost essay gated on a RESPONSE: condition', () => {
-        // Ghost path is the condition-driven unlock channel (the source event has not
-        // fired, but a player decision surfaces the counterfactual essay).
+    it('keeps canonical prose visible while RESPONSE: gates only the ghost annotation', () => {
         const gated = essay({
             ghost_when: 'NOT EVENT:test_event AND RESPONSE:rs_strategic_goals:all_six',
             ghost_summary: 'Your endorsement reshaped what this entry records.',
         });
-        // Decision absent -> stays locked.
-        expect(resolveCodexEssay(gated, context()).isUnlocked).toBe(false);
-        // Decision present (and event not fired) -> ghost-unlocks.
+        const beforeDecision = resolveCodexEssay(gated, context());
+        expect(beforeDecision.isUnlocked).toBe(true);
+        expect(beforeDecision.isGhost).toBe(false);
+        expect(beforeDecision.paragraphs.every((paragraph) => paragraph.kind === 'canonical')).toBe(true);
+
         const resolved = resolveCodexEssay(
             gated,
             context({ decisionResponses: new Set(['rs_strategic_goals:all_six']) }),

@@ -345,12 +345,14 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('6 Apr 1992');
   });
 
-  it('does not persist an override when clicking the automatic current sector row', () => {
-    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+  it('keeps sector responsibility read-only for fielded brigades', () => {
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
 
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-    fireEvent.click(screen.getByRole('button', { name: /Northern line/i }));
 
+    expect(view.container.textContent).toContain('managed by the corps commander');
+    expect(screen.queryByText('Clear override')).toBeNull();
+    expect(screen.queryByTestId('formation-detail-sector-option')).toBeNull();
     expect(assignBrigadeToSector).not.toHaveBeenCalled();
   });
 
@@ -466,13 +468,8 @@ describe('Formation Detail parity display', () => {
     expect(overviewCopy).not.toContain('Northern lineOverride');
 
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const southButton = screen.getByRole('button', { name: /Southern line/i });
-    const northButton = screen.getByRole('button', { name: /Northern line/i });
-
-    expect(southButton.textContent ?? '').toContain('Override');
-    expect(southButton.textContent ?? '').not.toContain('Current');
-    expect(northButton.textContent ?? '').not.toContain('Current');
+    expect(screen.queryByTestId('formation-detail-sector-option')).toBeNull();
+    expect(view.container.textContent).toContain('managed by the corps commander');
   });
 
   it('uses shared sector assignment projection for current sector ownership', () => {
@@ -509,145 +506,15 @@ describe('Formation Detail parity display', () => {
     expect(copy).not.toContain('Northern line');
   });
 
-  it('uses projected current brigade counts in the sector assignment picker', () => {
-    const state = makeFormationDetailState();
-    state.formations = [
-      ...state.formations,
-      {
-        id: 'rbih_override_brigade',
-        faction: 'RBiH',
-        name: 'Override Brigade',
-        kind: 'brigade',
-        readiness: 'ready',
-        cohesion: 62,
-        fatigue: 4,
-        status: 'active',
-        createdTurn: 0,
-        tags: [],
-        corps_id: 'rbih_1st_corps',
-        personnel: 1000,
-        posture: 'defend',
-        sectorOverrideId: 'sector_south',
-      },
-    ] as LoadedGameState['formations'];
-    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => {
-      if (sector.sector_id === 'sector_north') {
-        return { ...sector, assigned_brigade_ids: ['rbih_heroic_brigade', 'rbih_override_brigade'] };
-      }
-      if (sector.sector_id === 'sector_south') {
-        return { ...sector, reserve_brigade_ids: ['rbih_rear_brigade'] };
-      }
-      return sector;
-    });
-    useGameStore.setState({ loadedGameState: state });
-
-    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const southButton = screen.getByRole('button', { name: /Southern line/i });
-    const northButton = screen.getByRole('button', { name: /Northern line/i });
-    expect(southButton.textContent ?? '').toContain('1 current brigade');
-    expect(southButton.textContent ?? '').not.toContain('1 current brigades');
-    expect(southButton.getAttribute('aria-label')).toBe('Southern line, 1 current brigade. Select this sector for command responsibility.');
-    expect(southButton.textContent ?? '').not.toMatch(/\b0b\b/);
-    expect(northButton.textContent ?? '').toContain('1 current brigade');
-    expect(northButton.textContent ?? '').not.toContain('1 current brigades');
-    expect(northButton.getAttribute('aria-label')).toBe('Northern line, 1 current brigade. Already the automatic sector assignment.');
-    expect(northButton.textContent ?? '').not.toContain('2 current brigades');
-  });
-
-  it('explains why sector assignment options are disabled', () => {
-    const state = makeFormationDetailState();
-    state.formations = state.formations.map((formation) => (
-      formation.id === 'rbih_heroic_brigade'
-        ? { ...formation, sectorOverrideId: 'sector_south' }
-        : formation
-    ));
-    useGameStore.setState({ loadedGameState: state });
-
-    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const southButton = screen.getByRole('button', { name: /Southern line/i });
-    expect((southButton as HTMLButtonElement).disabled).toBe(true);
-    expect(southButton.getAttribute('aria-label')).toContain('Already the active override sector.');
-    expect(southButton.getAttribute('title')).toContain('Already the active override sector.');
-
-    delete (window as unknown as { awwv?: unknown }).awwv;
-    cleanup();
-    useGameStore.setState({ loadedGameState: state });
-    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const northButton = screen.getByRole('button', { name: /Northern line/i });
-    expect((northButton as HTMLButtonElement).disabled).toBe(true);
-    expect(northButton.getAttribute('aria-label')).toContain('Desktop command bridge unavailable.');
-    expect(northButton.getAttribute('title')).toContain('Desktop command bridge unavailable.');
-  });
-
-  it('describes sector overrides as command responsibility rather than physical movement orders', () => {
+  it('explains delegated command ownership without exposing retired sector controls', () => {
     const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
 
     const copy = view.container.textContent ?? '';
-    expect(copy).toContain('sector command responsibility');
-    expect(copy).toContain('physical movement remains governed by field orders');
-    expect(copy).not.toMatch(/new frontline position/i);
-  });
-
-  it('exposes sector picker proof hooks for zero-current options', () => {
-    const state = makeFormationDetailState();
-    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
-      ? { ...sector, assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: [] }
-      : sector);
-    useGameStore.setState({ loadedGameState: state });
-
-    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const southButton = view.container.querySelector('[data-testid="formation-detail-sector-option"][data-sector-id="sector_south"]');
-    expect(southButton).not.toBeNull();
-    expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
-    expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
-    expect(southButton?.getAttribute('data-rear-brigade-count')).toBe('0');
-    expect(southButton?.getAttribute('aria-label')).toContain('Southern line');
-    expect(southButton?.textContent ?? '').toContain('0 current brigades');
-  });
-
-  it('keeps rear support out of sector picker current counts', () => {
-    const state = makeFormationDetailState();
-    state.formations = [
-      ...state.formations,
-      {
-        id: 'rbih_ready_rear_support',
-        faction: 'RBiH',
-        name: 'Ready Rear Support',
-        kind: 'brigade',
-        readiness: 'ready',
-        cohesion: 62,
-        fatigue: 4,
-        status: 'active',
-        createdTurn: 0,
-        tags: [],
-        corps_id: 'rbih_1st_corps',
-        personnel: 1000,
-        posture: 'defend',
-      },
-    ] as LoadedGameState['formations'];
-    state.corpsFrontSectors = state.corpsFrontSectors?.map((sector) => sector.sector_id === 'sector_south'
-      ? { ...sector, assigned_brigade_ids: [], reserve_brigade_ids: [], rear_brigade_ids: ['rbih_ready_rear_support'] }
-      : sector);
-    useGameStore.setState({ loadedGameState: state });
-
-    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
-    fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-
-    const southButton = view.container.querySelector('[data-testid="formation-detail-sector-option"][data-sector-id="sector_south"]');
-    expect(southButton).not.toBeNull();
-    expect(southButton?.getAttribute('data-current-brigade-count')).toBe('0');
-    expect(southButton?.getAttribute('data-frontline-brigade-count')).toBe('0');
-    expect(southButton?.getAttribute('data-rear-brigade-count')).toBe('1');
-    expect(southButton?.textContent ?? '').toContain('0 current brigades');
+    expect(copy).toContain('Field orders and sector responsibility are managed by the corps commander.');
+    expect(copy).toContain('Presidential intervention is issued through Army HQ directives.');
+    expect(screen.queryByText('Clear override')).toBeNull();
+    expect(view.container.querySelector('[data-testid="formation-detail-sector-option"]')).toBeNull();
   });
 
   it('does not badge a stale missing override as the active sector assignment', () => {
@@ -998,7 +865,7 @@ describe('Formation Detail parity display', () => {
     expect([...postureLabels, ...stanceLabels]).not.toContain('review posture');
   });
 
-  it('disables formation command controls when the desktop command bridge is unavailable', () => {
+  it('disables the presidential elite-recall lever when the desktop bridge is unavailable', () => {
     delete (window as unknown as { awwv?: unknown }).awwv;
     const state = makeFormationDetailState();
     state.formations = state.formations.map((formation) => {
@@ -1032,12 +899,12 @@ describe('Formation Detail parity display', () => {
 
     useGameStore.setState({ selectedFormationId: 'rbih_heroic_brigade' });
     cleanup();
-    render(React.createElement(FormationDetail, { railSlot: 'primary' }));
+    const view = render(React.createElement(FormationDetail, { railSlot: 'primary' }));
     fireEvent.click(screen.getByRole('tab', { name: 'Orders' }));
-    expect((screen.getByRole('button', { name: /Clear Override/i }) as HTMLButtonElement).disabled).toBe(true);
-    const southButton = screen.getAllByTestId('formation-detail-sector-option')
-      .find((button) => button.getAttribute('data-sector-id') === 'sector_north') as HTMLButtonElement | undefined;
-    expect(southButton?.disabled).toBe(true);
+    expect(view.container.textContent).toContain('managed by the corps commander');
+    expect(view.container.textContent).not.toContain('Desktop command bridge unavailable');
+    expect(screen.queryByText('Clear override')).toBeNull();
+    expect(screen.queryByTestId('formation-detail-sector-option')).toBeNull();
   });
 
   it('uses shared combat labels and neutral fallback copy for recent engagement outcomes', () => {

@@ -133,7 +133,7 @@ export function OrderQueue() {
             <button
               type="button"
               onClick={() => clearStagedOrders()}
-              className="text-[10px] font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border hover:bg-panel-hover"
+              className="text-xs font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border hover:bg-panel-hover"
             >
               {t('orderQueue.clearAll')}
             </button>
@@ -169,7 +169,7 @@ export function OrderQueue() {
               <button
                 type="button"
                 onClick={() => removeStagedOrder(order.id)}
-                className="shrink-0 ml-auto text-[10px] font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border opacity-70 group-hover:opacity-100"
+                className="shrink-0 ml-auto text-xs font-mono uppercase text-text-secondary hover:text-interactive px-1.5 py-0.5 rounded border border-panel-border opacity-70 group-hover:opacity-100"
               >
                 {t('orderQueue.remove')}
               </button>

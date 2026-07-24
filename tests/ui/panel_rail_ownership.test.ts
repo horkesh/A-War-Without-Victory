@@ -4,6 +4,7 @@ import {
   shouldRenderInboxPanel,
   shouldRenderTacticalDetailRails,
 } from '../../src/ui/map/components/panelRail.js';
+import * as panelRail from '../../src/ui/map/components/panelRail.js';
 
 describe('panel rail ownership', () => {
   it('renders the inbox only when it owns the primary rail and operations are closed', () => {
@@ -47,5 +48,64 @@ describe('panel rail ownership', () => {
       codexOpen: false,
       chronicleOpen: true,
     })).toBe(false);
+  });
+
+  it('gives Command Briefing ownership only to the unobstructed base inbox', () => {
+    const shouldRenderCommandBriefing = (panelRail as Record<string, unknown>)
+      .shouldRenderCommandBriefing;
+
+    expect(typeof shouldRenderCommandBriefing).toBe('function');
+    if (typeof shouldRenderCommandBriefing !== 'function') return;
+
+    const baseState = {
+      panel: 'inbox',
+      operationsPanelOpen: false,
+      armyHQOpen: false,
+      recruitmentOpen: false,
+      autonomyOpen: false,
+      chronicleOpen: false,
+      codexOpen: false,
+      fullOverlayOpen: false,
+    } as const;
+
+    expect(shouldRenderCommandBriefing(baseState)).toBe(true);
+
+    for (const panel of ['settlement', 'formation', 'corps', 'army', 'army_reserve', 'sector', 'operation', 'orbat']) {
+      expect(shouldRenderCommandBriefing({ ...baseState, panel })).toBe(false);
+    }
+
+    for (const owner of [
+      'operationsPanelOpen',
+      'armyHQOpen',
+      'recruitmentOpen',
+      'autonomyOpen',
+      'chronicleOpen',
+      'codexOpen',
+      'fullOverlayOpen',
+    ] as const) {
+      expect(shouldRenderCommandBriefing({ ...baseState, [owner]: true })).toBe(false);
+    }
+  });
+
+  it('returns Command Briefing ownership after the active owner closes', () => {
+    const shouldRenderCommandBriefing = (panelRail as Record<string, unknown>)
+      .shouldRenderCommandBriefing;
+
+    expect(typeof shouldRenderCommandBriefing).toBe('function');
+    if (typeof shouldRenderCommandBriefing !== 'function') return;
+
+    const baseState = {
+      panel: 'inbox',
+      operationsPanelOpen: false,
+      armyHQOpen: false,
+      recruitmentOpen: false,
+      autonomyOpen: false,
+      chronicleOpen: false,
+      codexOpen: false,
+      fullOverlayOpen: false,
+    } as const;
+
+    expect(shouldRenderCommandBriefing({ ...baseState, chronicleOpen: true })).toBe(false);
+    expect(shouldRenderCommandBriefing(baseState)).toBe(true);
   });
 });

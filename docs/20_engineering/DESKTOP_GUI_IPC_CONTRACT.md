@@ -9,9 +9,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - Renderer consumers: `src/ui/warroom/warroom.ts`, `src/ui/map/MapApp.ts` (via embedded iframe)
 - Sim adapter: `src/desktop/desktop_sim.ts`
 
-**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` must treat those as compatibility/history residue rather than active shell concepts. The current player shell centers on canonical front edges, corps sectors, sector overrides, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
+**State contract (current player shell):** The same serialized `GameState` is pushed to all renderers via `game-state-updated`. The raw payload may still contain compatibility-era state such as `assignable_front_segments`, `brigade_front_assignment`, `brigade_sector_override`, `theatres`, and `army_theatre_assignment`, but the live tactical-map `LoadedGameState` treats those as compatibility/history or read-only assignment context rather than active presidential controls. The current player shell centers on canonical front edges, corps sectors, presidential directives, and `military.campaign_plans` (read-only; CampaignPlan objects produced by Army HQ Gathering — see `army_hq_gathering.ts`). See [TACTICAL_MAP_SYSTEM.md](TACTICAL_MAP_SYSTEM.md) §10.4 for current single-source notes.
 
 **Derived adapter fields (not IPC channels):** `GameStateAdapter.ts` derives additional view-model fields from the raw `GameState` payload. Notable: `sectorIntel` (`SectorIntelRecordView[]`) — derived from `state.sector_intel` and `state.military.corps_front_sectors` in a single merged pass (also produces `fogOfWar`). The live player DTO is intentionally reduced: it carries only the friendly-sector threat summary fields the Army HQ shell actually renders (`friendly_sector_id`, `enemy_sector_id`, strength category, posture, offensive signs, confidence, turns-in-contact, visible brigades, front-edge count). Raw enemy faction/corps identity stays engine-side unless and until a player-safe shell explicitly needs it. No IPC round-trip — entirely client-side derivation from the `game-state-updated` payload.
+
+**Canonical mutation transaction:** `electron-main.cjs` owns mutation completion through `writeCanonicalCurrentState(...)`. A mutating handler is successful only when it has serialized the new state, completed autosave, and broadcast that exact serialization through `game-state-updated` to every live renderer, including the caller. If autosave fails, the helper restores the previous in-memory serialization and the invoke fails. Mutating handlers must not hand-roll a response-only or broadcast-only success path.
 
 ## Channels
 
@@ -31,7 +33,13 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `advance-turn` (invoke)
   - Payload (optional): `{}`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, report?: { phase: string, turn: number, details?: unknown } | null }`
-  - Behavior: advances exactly one war-phase turn on current in-memory state using `runTurn`. Returns updated serialized state plus phase report metadata.
+  - Behavior: advances exactly one war-phase turn on current in-memory state using `runTurn`. Returns updated serialized state plus phase report metadata. In desktop player campaigns, unresolved `HISTORICAL_OP:*` authorization reviews are preserved across proposal cleanup. Accepted selected-faction pre-planned operations inject immediately before `advance-sector-offensives`, using the review's deterministic `resolved_turn` as their planning clock; an opening plan accepted at turn 0 can therefore enter execution and issue orders on the first advance instead of losing a week behind the preserved headless operation. Consumed accepted rows then expire so completed operations are not re-offered. At `meta.autonomy_level === 0`, active accepted historical operations receive operation-scoped assist orders only for assigned participants. At `meta.autonomy_level >= 1`, the selected player faction is included in deterministic corps/brigade staff execution; the player-faction brigade pass merges around existing player-staged attack, movement, and posture orders, so explicit player orders remain authoritative. Headless auto-control runs are unaffected by these player-only desktop paths.
+  - Ordinary Level-1 operation proposals use exact `APPROVE_OP:<corps_id>:<plan_id>` identity. Only ready plans with targets may surface. A matching approval is consumed only after the same operation is admitted; blocked emission leaves the plan ready and the approval authoritative. A matching rejection clears the plan. Resolved exact-plan rows remain as no-reprompt records rather than becoming new blockers.
+
+- `resolve-paramilitary-requests` (invoke)
+  - Payload: `{ decisions: Array<{ target_osid: string, decision: 'allow' | 'deny' }>, policy?: 'ask' | 'always_deny' | 'always_allow' }`
+  - Returns: `{ ok: boolean, error?: string, stateJson?: string, report?: unknown }`
+  - Behavior: validates a complete selected-player-faction decision packet, optionally persists standing policy, resolves the packet through `resolvePlayerParamilitaryDecisions`, serializes, and broadcasts state. Allowed requests retain their authored `rear_pocket` or `offensive` mode; offensive requests therefore spawn the 600-person, one-turn-ETA offensive formation rather than being downgraded to the 150-person rear-pocket form. Detection creates requests only for undefended targets: exact organized defense and organized defense adjacent to the target for its current controller exclude the target. If organized defense occupies the target before an already-dispatched formation arrives, the formation dissolves without capture or defender casualties. Requests generated during a turn remain between-turn player decisions unless an already-active standing policy resolves them inside the detection phase.
 
 - `stage-attack-order` (invoke)
   - Payload: `{ brigadeId: string, targetSettlementId: string }`
@@ -61,12 +69,12 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `assign-brigade-to-sector` (invoke)
   - Payload: `{ brigadeId: string, sectorId: string | null }`
   - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: permanent player sector override. Validates same-corps constraint: sector `corps_id` must match brigade `corps_id`. Writes `state.military.brigade_sector_override[brigadeId] = sectorId`; `null` clears the override. Persists until explicitly cleared. `classifyBrigadesByTerritory` respects this override before its Phase 1 (frontline-by-position) logic. Invalid/stale overrides (wrong corps, brigade dissolved) fall through silently to normal assignment. Reserializes and broadcasts update. Source: `desktop_sim.ts::assignBrigadeToSector`.
+  - Behavior: **compatibility-only main-process handler.** It is not exposed by `preload.cjs` and has no live player UI route under the locked presidential command model. Existing saves may still contain `brigade_sector_override`; the tactical map may display that assignment as historical/read-only context. Do not restore a preload or Formation Detail action for this channel.
 
 - `stage-brigade-aor-order` (invoke)
   - Payload: `{ settlementId: string, fromBrigadeId: string, toBrigadeId: string }`
-  - Returns: `{ ok: boolean, error?: string }`
-  - Behavior: validates the AoR reshape order (same-faction, contiguity, adjacency) via settlement graph in main; if valid, appends `{ settlement_id, from_brigade, to_brigade }` to `state.brigade_aor_orders`, reserializes, sends state via `game-state-updated`. If invalid, returns `{ ok: false, error }` and does not mutate state.
+  - Returns: no live contract; the channel is absent from main, preload, and renderer bridges.
+  - Behavior: retired compatibility-era channel. Old saves and reports may retain AoR rows, but consumers must treat those as compatibility/history residue rather than active shell concepts. Do not restore a main-process handler or player-facing action.
 
 - `stage-brigade-movement-order` (invoke) — Phase K
   - Payload: `{ brigadeId: string, targetSettlementIds: string[] }`
@@ -169,6 +177,11 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
     - Returns: `{ ok: boolean, error?: string }`
     - Behavior: recalls brigade from current corps and immediately re-deploys to `newCorpsId`. Validates both corps exist and brigade is currently on loan. Reserializes, sends state via `game-state-updated`. (IPC wired; UI redirect button not yet implemented.)
 
+- `resolve-peace-plan` (invoke)
+  - Payload: `{ planId: string, response: 'accepted' | 'rejected' }`
+  - Returns: `{ ok: boolean, error?: string, all_accepted?: boolean, rejection_factions?: string[] }`
+  - Behavior: resolves the pending plan through the canonical negotiation helper and persists it through the canonical mutation transaction. For `vance_owen`, the peace-plan path is the single decision owner: it synchronizes one durable event-decision receipt, consumes the duplicate pending Vance-Owen event, and appends one peace-plan-history row.
+
 ### Read-only query channels (no state mutation)
 
 - `query-movement-range` (invoke)
@@ -226,7 +239,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 
 - `game-state-updated` (event)
   - Payload: `stateJson: string`
-  - Behavior: pushed from main process whenever scenario/state load, order staging, recruitment, or turn advance mutates current desktop state. Broadcast to warroom and tactical-map renderers.
+  - Behavior: pushed from main process whenever scenario/state load, order staging, recruitment, decision resolution, or turn advance mutates current desktop state. Canonical mutations emit only after autosave succeeds and broadcast to warroom and tactical-map renderers, including the invoking renderer.
 
 - `turn-report-updated` (event)
   - Payload: `report: { phase: string, turn: number, details?: { officer_succession?: ... } | unknown }`
@@ -247,7 +260,7 @@ This document defines the Electron main <-> renderer IPC used by the desktop app
 - `apply-recruitment` (invoke)
   - Payload: `{ brigadeId: string, equipmentClass: string }`
   - Returns: `{ ok: boolean, error?: string, stateJson?: string, newFormationId?: string }`
-  - Behavior: applies one player recruitment (recruitBrigade + applyRecruitment); on success main updates current state and sends via `game-state-updated`; returns updated stateJson and newFormationId for placement feedback.
+  - Behavior: applies one player recruitment using the same scenario catalog, faction/turn context, and `evaluateRecruitmentEligibility` result used by the catalog UI. Eligibility reasons are explicit (`wrong_faction`, `not_yet_available`, `already_recruited`, `no_control`, `no_manpower`, `no_capital`, `no_equipment`). On success, placement uses a controlled OSID in the home municipality, preferring the controlled municipality HQ and then a strict-sorted controlled fallback; no valid placement means no activation. The canonical mutation transaction autosaves and broadcasts the resulting state, then returns `stateJson` and `newFormationId` for placement feedback.
 
 - `get-settings` (invoke)
   - Returns: `ProjectSettings`

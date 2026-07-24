@@ -177,10 +177,10 @@ describe('officer mini-bio UI', () => {
 
         render(createElement(PersonnelContent));
 
-        expect(screen.getByText('MOBILIZATION')).toBeTruthy();
+        expect(screen.getByText('CUMULATIVE MOBILIZATION THROUGHPUT')).toBeTruthy();
         expect(screen.getByText('Available Pool')).toBeTruthy();
         expect(screen.getByText('1,234')).toBeTruthy();
-        expect(screen.getByText('Committed')).toBeTruthy();
+        expect(screen.getByText('Committed over campaign')).toBeTruthy();
         expect(screen.getByText('456')).toBeTruthy();
         expect(screen.getByText('Exhausted')).toBeTruthy();
         expect(screen.getByText('310')).toBeTruthy();
@@ -212,10 +212,10 @@ describe('officer mini-bio UI', () => {
 
         render(createElement(PersonnelContent));
 
-        expect(screen.getByText('MOBILIZATION')).toBeTruthy();
+        expect(screen.getByText('CUMULATIVE MOBILIZATION THROUGHPUT')).toBeTruthy();
         expect(screen.getByText('Available Pool')).toBeTruthy();
         expect(screen.getByText('1,234')).toBeTruthy();
-        expect(screen.getByText('Committed')).toBeTruthy();
+        expect(screen.getByText('Committed over campaign')).toBeTruthy();
         expect(screen.getByText('456')).toBeTruthy();
         expect(screen.getByText('Exhausted')).toBeTruthy();
         expect(screen.getByText('310')).toBeTruthy();

@@ -153,6 +153,19 @@ function chainAdj(n: number, prefix = 'op:mun:o'): Map<Osid, Osid[]> {
     return adj;
 }
 
+function makeChainFriendlyToCorps(state: GameState, faction: FactionId, count = 6): void {
+    state.political.political_controllers = Object.fromEntries(
+        Array.from({ length: count }, (_, index) => [`op:mun:o${index}`, faction]),
+    ) as GameState['political']['political_controllers'];
+    for (const sector of Object.values(state.military.corps_front_sectors ?? {})) {
+        if ((sector.territory_osids ?? []).length > 0) continue;
+        const formation = Object.values(state.military.formations ?? {})
+            .find((entry) => entry.corps_id === sector.corps_id && entry.status === 'active');
+        const location = formation?.location_osid ?? formation?.home_osid;
+        if (location) sector.territory_osids = [location];
+    }
+}
+
 // ── computeDeployPriority ─────────────────────────────────────────────────────
 
 describe('computeDeployPriority', () => {
@@ -848,7 +861,7 @@ describe('tickEliteLoans', () => {
         expect(brigade.elite_loan_state!.on_loan).toBe(false);
     });
 
-    it('does not reissue deployment orders for active loans from sector-exempt organic corps', () => {
+    it('refreshes deployment orders when an active army-HQ loan remains outside receiving-corps territory', () => {
         const brigade = makeOnLoanBrigade('rs_1st_guards', { loanStartTurn: 0 });
         brigade.location_osid = 'op:mun:o0';
         brigade.assignment = null;
@@ -872,10 +885,19 @@ describe('tickEliteLoans', () => {
         tickEliteLoans(state, 10, chainAdj(3));
 
         expect(brigade.elite_loan_state!.on_loan).toBe(true);
-        expect(state.military.brigade_movement_orders?.rs_1st_guards).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.rs_1st_guards).toEqual({
+            destination_sids: ['op:mun:o2'],
+            stance: 'column',
+        });
+        expect(collectUnresolvedSectorBrigades(
+            state,
+            { [sector.sector_id]: sector },
+            state.military.formations!,
+            chainAdj(3),
+        )).toEqual([]);
     });
 
-    it('does not reissue deployment orders for active loans from non-exempt organic corps', () => {
+    it('refreshes deployment orders for any active loan still outside receiving-corps territory', () => {
         const brigade = makeOnLoanBrigade('rs_line_elite', { loanStartTurn: 0 });
         brigade.corps_id = 'vrs_1st_krajina';
         brigade.location_osid = 'op:mun:o0';
@@ -900,7 +922,10 @@ describe('tickEliteLoans', () => {
         tickEliteLoans(state, 10, chainAdj(3));
 
         expect(brigade.elite_loan_state!.on_loan).toBe(true);
-        expect(state.military.brigade_movement_orders?.rs_line_elite).toBeUndefined();
+        expect(state.military.brigade_movement_orders?.rs_line_elite).toEqual({
+            destination_sids: ['op:mun:o2'],
+            stance: 'column',
+        });
     });
 
     it('auto-joins a newly launched execution operation through axis membership as well', () => {
@@ -1061,6 +1086,292 @@ describe('evaluateArmyReserveAssignments', () => {
 });
 
 describe('generateArmyReserveRequests', () => {
+    it('emits one actionable request when multiple corps compete for the same elite brigade', () => {
+        const adj = chainAdj(5);
+        const state = makeState({
+            formations: {
+                rs_shared_elite: makeElite('rs_shared_elite', 'RS', 'op:mun:o2'),
+                corps_alpha_line: {
+                    id: 'corps_alpha_line',
+                    faction: 'RS',
+                    name: 'Alpha Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_alpha',
+                    location_osid: 'op:mun:o0',
+                    home_osid: 'op:mun:o0',
+                } as FormationState,
+                corps_zulu_line: {
+                    id: 'corps_zulu_line',
+                    faction: 'RS',
+                    name: 'Zulu Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_zulu',
+                    location_osid: 'op:mun:o4',
+                    home_osid: 'op:mun:o4',
+                } as FormationState,
+            },
+            corps_command: {
+                corps_alpha: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:alpha', brigades_needed: 1, priority: 'high' },
+                    ],
+                    active_operations: [],
+                },
+                corps_zulu: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:zulu', brigades_needed: 1, priority: 'critical' },
+                    ],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                alpha_sector: makeSector('corps_alpha', 'RS', 'op:mun:o0', { threat_ratio: 1 }),
+                zulu_sector: makeSector('corps_zulu', 'RS', 'op:mun:o4', { threat_ratio: 1 }),
+            },
+            player_faction: 'RS',
+            turn: 12,
+        });
+        makeChainFriendlyToCorps(state, 'RS', 5);
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'corps_zulu',
+            suggested_brigade_id: 'rs_shared_elite',
+        });
+    });
+
+    it('uses a deterministic augmenting path when a later corps has only one feasible elite', () => {
+        const adj = chainAdj(11);
+        const state = makeState({
+            formations: {
+                rs_elite_a: makeElite('rs_elite_a', 'RS', 'op:mun:o1'),
+                rs_elite_b: makeElite('rs_elite_b', 'RS', 'op:mun:o10'),
+                corps_high_line: {
+                    id: 'corps_high_line',
+                    faction: 'RS',
+                    name: 'High Priority Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_high',
+                    location_osid: 'op:mun:o2',
+                    home_osid: 'op:mun:o2',
+                } as FormationState,
+                corps_low_line: {
+                    id: 'corps_low_line',
+                    faction: 'RS',
+                    name: 'Lower Priority Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_low',
+                    location_osid: 'op:mun:o0',
+                    home_osid: 'op:mun:o0',
+                } as FormationState,
+            },
+            corps_command: {
+                corps_low: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:low', brigades_needed: 1, priority: 'high' },
+                    ],
+                    active_operations: [],
+                },
+                corps_high: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:high', brigades_needed: 1, priority: 'critical' },
+                    ],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                low_sector: makeSector('corps_low', 'RS', 'op:mun:o0', { threat_ratio: 1 }),
+                high_sector: makeSector('corps_high', 'RS', 'op:mun:o2', { threat_ratio: 1 }),
+            },
+            player_faction: 'RS',
+            turn: 12,
+        });
+        makeChainFriendlyToCorps(state, 'RS', 11);
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(2);
+        const byCorps = Object.fromEntries(
+            (state.military.pending_reserve_requests ?? []).map(request => [request.corps_id, request]),
+        );
+        expect(byCorps.corps_high).toMatchObject({
+            suggested_brigade_id: 'rs_elite_b',
+            travel_hops: 8,
+        });
+        expect(byCorps.corps_low).toMatchObject({
+            suggested_brigade_id: 'rs_elite_a',
+            travel_hops: 1,
+        });
+        expect(new Set(
+            (state.military.pending_reserve_requests ?? []).map(request => request.suggested_brigade_id),
+        ).size).toBe(2);
+    });
+
+    it('breaks equal-priority and equal-distance matches by corps and formation ID', () => {
+        const adj = chainAdj(3);
+        const state = makeState({
+            formations: {
+                rs_elite_z: makeElite('rs_elite_z', 'RS', 'op:mun:o1'),
+                rs_elite_a: makeElite('rs_elite_a', 'RS', 'op:mun:o1'),
+                corps_zulu_line: {
+                    id: 'corps_zulu_line',
+                    faction: 'RS',
+                    name: 'Zulu Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_zulu',
+                    location_osid: 'op:mun:o2',
+                    home_osid: 'op:mun:o2',
+                } as FormationState,
+                corps_alpha_line: {
+                    id: 'corps_alpha_line',
+                    faction: 'RS',
+                    name: 'Alpha Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'corps_alpha',
+                    location_osid: 'op:mun:o0',
+                    home_osid: 'op:mun:o0',
+                } as FormationState,
+            },
+            corps_command: {
+                corps_zulu: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:zulu', brigades_needed: 1, priority: 'high' },
+                    ],
+                    active_operations: [],
+                },
+                corps_alpha: {
+                    commander_reinforcement_requests: [
+                        { zone_id: 'zone:alpha', brigades_needed: 1, priority: 'high' },
+                    ],
+                    active_operations: [],
+                },
+            },
+            corps_front_sectors: {
+                zulu_sector: makeSector('corps_zulu', 'RS', 'op:mun:o2', { threat_ratio: 1 }),
+                alpha_sector: makeSector('corps_alpha', 'RS', 'op:mun:o0', { threat_ratio: 1 }),
+            },
+            player_faction: 'RS',
+            turn: 12,
+        });
+        makeChainFriendlyToCorps(state, 'RS', 3);
+
+        generateArmyReserveRequests(state, adj);
+
+        expect((state.military.pending_reserve_requests ?? []).map(request => request.corps_id)).toEqual([
+            'corps_alpha',
+            'corps_zulu',
+        ]);
+        expect(state.military.pending_reserve_requests?.[0].suggested_brigade_id).toBe('rs_elite_a');
+        expect(state.military.pending_reserve_requests?.[1].suggested_brigade_id).toBe('rs_elite_z');
+    });
+
+    it('suggests the nearest elite with a friendly route to receiving corps territory', () => {
+        const adj = new Map<Osid, Osid[]>([
+            ['op:test:isolated', ['op:test:enemy'] as Osid[]],
+            ['op:test:enemy', ['op:test:isolated', 'op:test:target'] as Osid[]],
+            ['op:test:reachable', ['op:test:friendly-1'] as Osid[]],
+            ['op:test:friendly-1', ['op:test:reachable', 'op:test:friendly-2'] as Osid[]],
+            ['op:test:friendly-2', ['op:test:friendly-1', 'op:test:target'] as Osid[]],
+            ['op:test:target', ['op:test:enemy', 'op:test:friendly-2'] as Osid[]],
+        ]);
+        const state = makeState({
+            formations: {
+                elite_isolated: makeElite('elite_isolated', 'RS', 'op:test:isolated'),
+                elite_reachable: makeElite('elite_reachable', 'RS', 'op:test:reachable'),
+                corps_line: {
+                    id: 'corps_line',
+                    faction: 'RS',
+                    name: 'Corps Line Brigade',
+                    created_turn: 0,
+                    status: 'active',
+                    kind: 'brigade',
+                    assignment: null,
+                    personnel: 1200,
+                    morale: 60,
+                    cohesion: 55,
+                    corps_id: 'vrs_test_corps',
+                    location_osid: 'op:test:target',
+                    home_osid: 'op:test:target',
+                } as FormationState,
+            },
+            corps_command: {
+                vrs_test_corps: {
+                    commander_reinforcement_requests: [],
+                    active_operations: [{
+                        name: 'Operation Reachability',
+                        phase: 'execution',
+                        momentum: 1,
+                        participating_brigades: ['corps_line'],
+                        axes: [],
+                    }],
+                },
+            },
+            corps_front_sectors: {
+                test_sector: makeSector('vrs_test_corps', 'RS', 'op:test:target', {
+                    threat_ratio: 1,
+                    assigned_brigade_ids: ['corps_line'],
+                }),
+            },
+            player_faction: 'RS',
+            turn: 1,
+        });
+        state.political.political_controllers = {
+            'op:test:isolated': 'RS',
+            'op:test:enemy': 'RBiH',
+            'op:test:reachable': 'RS',
+            'op:test:friendly-1': 'RS',
+            'op:test:friendly-2': 'RS',
+            'op:test:target': 'RS',
+        } as GameState['political']['political_controllers'];
+
+        generateArmyReserveRequests(state, adj);
+
+        expect(state.military.pending_reserve_requests).toHaveLength(1);
+        expect(state.military.pending_reserve_requests?.[0]).toMatchObject({
+            corps_id: 'vrs_test_corps',
+            suggested_brigade_id: 'elite_reachable',
+            travel_hops: 3,
+        });
+    });
+
     it('preserves active-operation execution evidence when a live offensive drives a reserve request', () => {
         const adj = chainAdj(6);
         const elite = makeElite('arbih_guards', 'RBiH', 'op:mun:o1');
@@ -1122,6 +1433,7 @@ describe('generateArmyReserveRequests', () => {
             turn: 10,
         });
 
+        makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 
         expect(state.military.pending_reserve_requests).toHaveLength(1);
@@ -1184,6 +1496,7 @@ describe('generateArmyReserveRequests', () => {
             turn: 10,
         });
 
+        makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 
         expect(state.military.pending_reserve_requests).toHaveLength(1);
@@ -1261,6 +1574,7 @@ describe('generateArmyReserveRequests', () => {
             turn: 10,
         });
 
+        makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 
         expect(state.military.pending_reserve_requests).toHaveLength(1);
@@ -1316,6 +1630,7 @@ describe('generateArmyReserveRequests', () => {
             turn: 10,
         });
 
+        makeChainFriendlyToCorps(state, 'RBiH');
         generateArmyReserveRequests(state, adj);
 
         expect(state.military.pending_reserve_requests).toHaveLength(1);
@@ -1373,6 +1688,7 @@ describe('generateArmyReserveRequests', () => {
             turn: 10,
         });
 
+        makeChainFriendlyToCorps(state, 'RS');
         generateArmyReserveRequests(state, adj);
 
         expect(state.military.pending_reserve_requests).toHaveLength(1);
@@ -1386,8 +1702,12 @@ describe('generateArmyReserveRequests', () => {
             commander_focus_zone_id: 'zone:vrs_2nd_krajina:ozren',
             suggested_brigade_id: 'rs_1st_guards',
         });
-        expect(state.military.pending_reserve_requests?.[0].description).toContain('Commander requested 3 brigade(s)');
-        expect(state.military.pending_reserve_requests?.[0].description).toContain('critical priority');
+        expect(state.military.pending_reserve_requests?.[0].description).toBe(
+            'Commander reports critical reinforcement pressure across the active front',
+        );
+        expect(state.military.pending_reserve_requests?.[0].why_needed).not.toMatch(
+            /vrs_2nd_krajina|zone:|3 brigade\(s\)/,
+        );
         expect(state.military.pending_reserve_requests?.[0].priority).toBeGreaterThan(0);
     });
 });

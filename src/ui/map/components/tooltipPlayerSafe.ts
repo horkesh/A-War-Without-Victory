@@ -78,6 +78,21 @@ export function getSyntheticEnemyContactOsid(formationId: string): string | null
   return osid.length > 0 ? osid : null;
 }
 
+export function resolveHoveredFormationSectorId(args: {
+  formationId: string;
+  contactLocationOsid: unknown;
+  formationSectorId: string | null | undefined;
+  osidToSector: ReadonlyMap<string, string>;
+}): string | null {
+  if (!args.formationId.startsWith('enemy_contact:')) {
+    return args.formationSectorId ?? null;
+  }
+  const contactOsid = typeof args.contactLocationOsid === 'string'
+    ? args.contactLocationOsid
+    : getSyntheticEnemyContactOsid(args.formationId);
+  return contactOsid ? (args.osidToSector.get(contactOsid) ?? null) : null;
+}
+
 export function getPlayerSafeSettlementTooltipFormations(
   state: LoadedGameState | null | undefined,
   osid: string,

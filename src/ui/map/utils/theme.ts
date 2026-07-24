@@ -35,6 +35,13 @@ export const FACTION_COLORS: Record<string, string> = expandFactionMap({
   HRHB: 'text-faction-hrhb',
 });
 
+/** Faction identity colors with WCAG AA contrast on light paper surfaces. */
+export const FACTION_COLORS_ON_LIGHT: Record<string, string> = expandFactionMap({
+  RS: 'text-[#a62d2d]',
+  RBiH: 'text-[#286a32]',
+  HRHB: 'text-[#285f94]',
+});
+
 export const FACTION_BG_SUBTLE: Record<string, string> = expandFactionMap({
   RS: 'bg-faction-rs-subtle',
   RBiH: 'bg-faction-rbih-subtle',
@@ -73,5 +80,5 @@ export function getCohesionColor(cohesion: number): string {
 /** Battle outcome → hex color for badges and labels. */
 export const OUTCOME_COLORS: Record<string, string> = {
   decisive_victory: '#2d7a3a', victory: '#4a9a55', costly_victory: '#8a9a40',
-  stalemate: '#8a7a60', repulsed: '#c28040', catastrophic_defeat: '#c24040',
+  stalemate: '#c7b88e', repulsed: '#c28040', catastrophic_defeat: '#c24040',
 };

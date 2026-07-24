@@ -100,7 +100,7 @@ describe('LANE-D1 war_ended_early producer', () => {
 
         // Direct termination signal — pre-existing behavior (regression guard).
         expect(state.meta.game_over).toBe(true);
-        expect(state.meta.outcome).toBe(`peace_plan:${planId}`);
+        expect(state.meta.outcome).toBe(`negotiated_peace:${planId}`);
 
         // LANE-D1 producer: war_ended_early flag is now set.
         expect(state.military.event_flags).toBeDefined();

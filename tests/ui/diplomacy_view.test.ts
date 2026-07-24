@@ -143,6 +143,18 @@ describe('buildDiplomacyView', () => {
         expect(view.externalActors).toHaveLength(1);
     });
 
+    it('does not invent an International Community patron for RBiH', () => {
+        const view = buildDiplomacyView(makeDiplomacyState(), 'RBiH');
+
+        expect(view.playerFaction).toBe('RBiH');
+        expect(view.patronStance).toBeUndefined();
+        expect(view.patronConfidence).toBeUndefined();
+        expect(view.patronDefianceCuts).toBeUndefined();
+        expect(view.externalActors.map((actor) => actor.faction)).not.toContain('RBiH');
+        expect(view.pressureReasons.length).toBeGreaterThan(0);
+        expect(view.activeProposals.length).toBeGreaterThan(0);
+    });
+
     it('routes raw faction slugs and snake_case event ids through player-safe resolvers in the timeline', () => {
         const view = buildDiplomacyView(makeDiplomacyState(), 'RS');
         // RS relationship_events: ['belgrade_border_pressure'] → "Serbia: Belgrade Border Pressure".

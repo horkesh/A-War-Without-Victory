@@ -129,6 +129,8 @@ Formations differ in manpower, cohesion, supply, and experience.
 
 **OSID location:** Each brigade occupies one OSID (`location_osid`). Stacking is allowed. Only **deployed** brigades (not in column: packing / in_transit / unpacking) participate in combat.
 
+Corps and army HQ markers describe command relationships and navigation; they are not a brigade's physical position. Combat, movement, map counters, and placement checks use the brigade's `location_osid`. A newly raised brigade appears only on a friendly-controlled OSID in its home municipality.
+
 **Redeployment:** The president does not issue brigade movement orders directly. Corps commanders propose marches as part of their directives, and the president authorizes or declines them through the command chain (propose→approve); redeployment is then engine-resolved via `brigade_movement_orders.ts` (apply-brigade-movement pipeline step). Column movement allows multi-hop redeployment through friendly rear (terrain-weighted path, composition-dependent rate); brigades in column are in_transit and do not fight until they arrive.
 
 **Retreat (prefer rear):** When retreating, valid destinations are friendly-controlled OSIDs. Tie-break among valid destinations: **enemy adjacency count ascending** (prefer rear), then **OSID string sort** (determinism). No ZoC blocking of retreat destinations.
@@ -339,6 +341,8 @@ Before an operation executes, it passes through a **five-phase preparation state
 
 Once launched, the operation enters execution. Brigades march toward the objective through friendly territory first; attacking through enemy territory is a last resort when no friendly path exists. Operations track total failures (max 5) and consecutive failures on the current target (max 3). Movement-only stalls are capped at 4 turns. When an operation stalls or exhausts its failure budget, it concludes and participating brigades return to normal sector duties.
 
+Operations move through proposed, planning, executing, recovery, completed, and archived states. **Records** is the authoritative operational ledger and shows active, completed, archived, and player-generated operations. **Chronicle** is narrative memory: it adds one narrative entry for each completed operation shown by the ledger, but it does not replace the ledger or duplicate its receipts. An AAR credits an objective as captured only when the operation's attack record caused the capture; merely holding the objective when the operation closes is not credited as an operational capture. An operation with no attack attempts is filed as a one-star `No Assault Attempted` result and receives no reward for ending quickly. An advance verdict requires a causally captured objective, and ending-force-versus-start scoring cannot exceed 100 when reinforcements joined during the operation.
+
 ### 7.4 Event Conditions (v0.6.0 expansion)
 
 **v0.6.0 expansion:** 14 additional condition types: `supply_below/above`, `territory_percentage`, `dimension_above/below`, `flag_equals/not_set`, `patron_pressure_above`, `war_crimes_above`, `morale_average_below`, `week_since_event`, `event_fire_count`, `enclave_supply_status`, `corridor_severed`.
@@ -370,6 +374,8 @@ Enclaves are isolated areas under pressure that generate humanitarian and politi
 ### 10.1 Population as resource and constraint
 
 Population is both a resource and a constraint. Recruitment depends on authority, legitimacy, and exhaustion.
+
+The recruitment list and the final activation check use the same current-turn eligibility: faction, availability, existing formation, home-municipality control and manpower, recruitment capital, and equipment. Player autonomy also sets the boundary: at autonomy 0 or 1 the staff does not recruit automatically for the player's faction; at autonomy 2 or above it may. Other factions and fully headless campaigns continue deterministic automatic recruitment.
 
 ### 10.2 Displacement effects
 
@@ -434,6 +440,8 @@ The war ends through negotiation, collapse, or imposed settlement. Military succ
 ### 15.2 Peace treaty mechanics
 
 Peace treaties contain territorial clauses (transfer_settlements or recognize_control_settlements) which are peace-triggering. If accepted, peace ends the war and sets the end state; all war dynamics stop thereafter.
+
+For the Vance-Owen plan, the peace-plan response is the single player choice. The campaign records one decision receipt and one peace-plan history entry; it does not present or record a duplicate event decision for the same response.
 
 ### 15.3 Territorial clauses
 
@@ -506,14 +514,15 @@ Each turn the player:
 
 The player commands through approving/declining CO proposals and authorizing operations, not direct posture-setting or unit movement. Command friction may degrade order execution.
 
+An operation authorization is tied to one named corps plan. Once the player approves or declines it, that exact plan does not return as the same unanswered decision. Approval stays in force while the general completes the launch process; a temporary staff delay does not require the president to authorize the same plan again.
+
 ### 17.3 War phase (Mid-War to Late-War)
 
 Each turn the player:
 1. **Reviews** reports: front status, exhaustion, supply pressure, corps operations, recent battles, officer status
 2. **Reviews and approves/declines CO-proposed brigade postures** and **sector defensive stances**. Note: brigades do not attack independently — all attacks flow through corps operations (see §6.4). The president approves a CO-proposed posture as a readiness directive; the sector and operation machinery decides when and where to attack.
-3. **Manages corps operations**: front assignments, operational groups, attack axes, tempo, launch timing, and deception tools such as feints or probes. Operations now include a **preparation phase** before execution (see §7.2) — the player reviews readiness briefings, selects commanders, may order probes, and makes go/no-go decisions. Commander personality (competence x aggressiveness) shapes preparation tempo and launch recommendations
-3a. **Brigade sector override** (n717): the president directs the corps CO to concentrate a brigade on a specific same-corps sector (the CO executes the march) via the brigade's Orders tab. The sector commander then orders the brigade to march to its frontline position. Useful for concentrating a veteran unit on a key sector or pulling a brigade back from a threatened flank. Override persists until cleared. Effectiveness cost shown in the panel: brigades operating far from their home municipality perform at reduced effectiveness (up to 30% penalty; elite mechanized/motorized brigades have a gentler decay curve).
-4. **Manages the officer corps**: responds to succession events, assigns replacement commanders, reviews officer combat records. Selects operation commanders for upcoming operations.
+3. **Exercises presidential operation authority**: authorizes or rejects concrete corps plans, requests an operation against a strategic objective, and orders an operation stopped when required. Corps commanders own brigade assignments, attack axes, tempo, preparation, and launch execution. Commander personality (competence x aggressiveness) shapes preparation tempo, recommendations, and institutional resistance.
+4. **Manages the officer corps**: responds to succession events, appoints or replaces corps commanders through the presidential personnel process, and reviews officer combat records. Operation-command appointments and brigade assignments remain staff responsibilities rather than direct player controls.
 5. **Manages army reserves**: reviews elite brigade loan requests from corps commanders, approves or denies deployments, recalls loaned brigades when the need has passed.
 6. **Allocates constrained supply agency**: enclave airdrops, convoy decisions, smuggling focus, municipality support, and related relief choices where available
 7. **Monitors** exhaustion, recruitment, equipment degradation, alliance dynamics, truce status (Graz Accords), and international visibility pressure consequences

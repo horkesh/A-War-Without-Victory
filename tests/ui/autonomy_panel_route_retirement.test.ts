@@ -8,13 +8,14 @@ function readRepoFile(path: string): string {
   return readFileSync(resolve(repoRoot, path), 'utf8');
 }
 
-describe('legacy autonomy_panel route retirement', () => {
-  it('keeps generated proposal reviews owned by Decision Room, not the stale AutonomyPanel route', () => {
+describe('autonomy control route ownership', () => {
+  it('mounts command-level controls while keeping proposal decisions in Decision Room', () => {
     const app = readRepoFile('src/ui/map/App.tsx');
     const registry = readRepoFile('src/ui/map/data/decisionSurfaceRegistry.ts');
     const inboxItems = readRepoFile('src/ui/map/data/inboxItems.ts');
 
-    expect(app).not.toContain("import { AutonomyPanel }");
+    expect(app).toContain("import { AutonomyPanel }");
+    expect(app).toContain('<AutonomyPanel');
     expect(app).not.toContain('autonomyPanelOpen');
     expect(app).not.toContain("action === 'autonomy_panel'");
     expect(registry).not.toContain("'autonomy_panel'");

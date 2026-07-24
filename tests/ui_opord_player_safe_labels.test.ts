@@ -117,7 +117,8 @@ describe('buildOpordDisplayModel', () => {
         expect(corpsDetailSource).toContain('getPlayerSafeMilitaryFactionName(corpsFormation.faction)');
         expect(corpsDetailSource).toContain('filterPlayerFacingOperations');
         expect(corpsDetailSource).not.toContain('loadedGameState?.operations?.filter');
-        expect(corpsDetailSource).toContain("t('corpsDetail.prepareOperationInHq')");
+        expect(corpsDetailSource).toContain("t('corpsDetail.delegatedOperations')");
+        expect(corpsDetailSource).not.toContain("t('corpsDetail.prepareOperationInHq')");
         expect(sectorPanelSource).toContain('getPlayerSafeMilitaryFactionName(sector.faction)');
         expect(sectorPanelSource).toContain('filterPlayerFacingOperations');
         expect(sectorPanelSource).not.toContain('loadedGameState?.operations ?? []');

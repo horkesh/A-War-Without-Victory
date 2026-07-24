@@ -1,4 +1,4 @@
-import type { CommandBriefingItemView, CommandBriefingView } from './types';
+import type { CommandBriefingItemView, CommandBriefingView, LoadedGameState } from './types';
 import { t, type MessageKey } from '../i18n';
 
 interface ResolvedCommandBriefingItemCopy {
@@ -70,18 +70,40 @@ function localizedTargetLabel(item: CommandBriefingItemView): string | undefined
   return item.actionChipLabel ?? item.target.label;
 }
 
-export function resolveCommandBriefingHeadline(briefing: Pick<CommandBriefingView, 'criticalCount' | 'pendingCount' | 'items' | 'headline'>): string {
-  if (briefing.criticalCount > 0) {
-    return t(countKey('commandBriefing.headline.critical', briefing.criticalCount), { count: briefing.criticalCount });
-  }
+type CommandBriefingHeadlineInput = Omit<
+  Pick<CommandBriefingView, 'criticalCount' | 'pendingCount' | 'items' | 'headline'>,
+  'items'
+> & { items: Array<Pick<CommandBriefingItemView, 'severity'>> };
+
+export function resolveCommandBriefingHeadline(briefing: CommandBriefingHeadlineInput): string {
+  const totalCount = briefing.items.length;
+  const criticalCount = briefing.items.filter((item) => item.severity === 'critical').length;
   const warningCount = briefing.items.filter((item) => item.severity === 'warning').length;
+  const totalSummary = totalCount > 0
+    ? t(countKey('commandBriefing.headline.total', totalCount), { count: totalCount })
+    : '';
+  if (criticalCount > 0) {
+    const severitySummary = t(countKey('commandBriefing.headline.critical', criticalCount), { count: criticalCount });
+    return criticalCount === totalCount ? severitySummary : `${totalSummary} ${severitySummary}`;
+  }
   if (warningCount > 0) {
-    return t(countKey('commandBriefing.headline.warning', warningCount), { count: warningCount });
+    const severitySummary = t(countKey('commandBriefing.headline.warning', warningCount), { count: warningCount });
+    return warningCount === totalCount ? severitySummary : `${totalSummary} ${severitySummary}`;
   }
-  if (briefing.pendingCount > 0) {
-    return t(countKey('commandBriefing.headline.review', briefing.pendingCount), { count: briefing.pendingCount });
-  }
+  if (totalCount > 0) return t(countKey('commandBriefing.headline.review', totalCount), { count: totalCount });
   return t('commandBriefing.headline.none');
+}
+
+export function isCommandBriefingItemCurrent(
+  item: Pick<CommandBriefingItemView, 'id' | 'target'>,
+  pendingPeacePlan: LoadedGameState['pendingPeacePlan'],
+): boolean {
+  if (item.target.type !== 'peace_plan' && item.id !== 'dip-peace-plan') return true;
+  return Boolean(
+    pendingPeacePlan
+    && item.target.peacePlanId
+    && item.target.peacePlanId === pendingPeacePlan.planId,
+  );
 }
 
 export function resolveCommandBriefingItemCopy(item: CommandBriefingItemView): ResolvedCommandBriefingItemCopy {

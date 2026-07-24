@@ -162,7 +162,7 @@ export function AttackConfirmation({
             ref={confirmRef}
             type="button"
             onClick={onConfirm}
-            className="px-3 py-1.5 bg-interactive text-white hover:bg-panel-hover rounded border border-panel-border text-xs font-sans"
+            className="px-3 py-1.5 bg-interactive text-neutral-950 hover:bg-panel-hover rounded border border-panel-border text-xs font-sans"
           >
             {t('common.confirm')}
           </button>

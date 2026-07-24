@@ -115,4 +115,29 @@ describe('save_migration', () => {
         const drk = state.military.corps_command['corps_drk'];
         expect(drk.active_operations).toEqual([fakeOp]);
     });
+
+    it('preserves string paramilitary standing policy while migrating optional save fields', () => {
+        const state = {
+            schema_version: 11,
+            paramilitary_policy: 'always_deny',
+            pending_paramilitary_requests: [],
+            military: {},
+        } as any;
+
+        applyMigrations(state);
+
+        expect(state.paramilitary_policy).toBe('always_deny');
+    });
+
+    it('preserves per-faction paramilitary deployment counts through the v12 migration', () => {
+        const state = {
+            schema_version: 11,
+            paramilitary_deployment_count: { HRHB: 9, RBiH: 7, RS: 44 },
+            military: {},
+        } as any;
+
+        applyMigrations(state);
+
+        expect(state.paramilitary_deployment_count).toEqual({ HRHB: 9, RBiH: 7, RS: 44 });
+    });
 });

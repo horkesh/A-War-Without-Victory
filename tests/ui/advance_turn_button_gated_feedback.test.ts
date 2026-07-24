@@ -43,6 +43,17 @@ function makeState(overrides: Partial<LoadedGameState> = {}): LoadedGameState {
   } as LoadedGameState;
 }
 
+function makeRequiredEventDecisions(count: number) {
+  return Array.from({ length: count }, (_, index) => ({
+    event_id: `required_event_${index + 1}`,
+    event_title: `Required decision ${index + 1}`,
+    faction: 'RS',
+    turn_fired: 40,
+    requires_player_response: true,
+    response_options: [{ id: 'answer', label: 'Answer', effects: [] }],
+  }));
+}
+
 function setLoadedState(state: LoadedGameState) {
   useGameStore.setState({
     loadedGameState: state,
@@ -81,6 +92,7 @@ describe('ADVANCE_TURN gated feedback', () => {
 
   it('toolbar explains a pending-decision block and opens the existing advance review path instead of advancing', () => {
     setLoadedState(makeState({
+      pendingEventDecisions: makeRequiredEventDecisions(2),
       presidentialReviewQueue: {
         pendingCount: 2,
         criticalCount: 1,
@@ -123,6 +135,7 @@ describe('ADVANCE_TURN gated feedback', () => {
   it('advance modal disables the final advance action while review blockers remain', () => {
     const onReviewPriorities = vi.fn();
     setLoadedState(makeState({
+      pendingEventDecisions: makeRequiredEventDecisions(2),
       presidentialReviewQueue: {
         pendingCount: 2,
         criticalCount: 1,
@@ -348,6 +361,7 @@ describe('ADVANCE_TURN gated feedback', () => {
   it('toolbar localizes the pending-decision advance gate title in BCS mode', () => {
     setLocale('bcs');
     setLoadedState(makeState({
+      pendingEventDecisions: makeRequiredEventDecisions(2),
       presidentialReviewQueue: {
         pendingCount: 2,
         criticalCount: 1,

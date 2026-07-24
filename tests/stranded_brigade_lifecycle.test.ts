@@ -10,11 +10,13 @@ import {
     updateStrandedBrigadeLifecycle,
     STRANDED_COHESION_DECAY,
     STRANDED_MORALE_DECAY,
-    STRANDED_COLLAPSE_COHESION,
-    STRANDED_MAX_HOLD_TURNS,
 } from '../src/sim/combat/stranded_brigade_lifecycle.js';
+import { dissolveCombatIneffectiveBrigades } from '../src/sim/combat/brigade_dissolution.js';
 import type { GameState, FormationState, CorpsFrontSector, CorpsCommandState } from '../src/state/game_state.js';
 import type { Osid } from '../src/sim/combat/osid_adjacency.js';
+
+const PREVIOUS_STRANDED_COLLAPSE_COHESION = 10;
+const PREVIOUS_STRANDED_MAX_HOLD_TURNS = 12;
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -259,67 +261,112 @@ describe('stranded_brigade_lifecycle', () => {
         });
     });
 
-    describe('collapse from low cohesion', () => {
-        it('collapses when cohesion drops to threshold', () => {
+    describe('canonical dissolution ownership', () => {
+        it('keeps Travnik Brigade active when stranded decay meets only the cohesion criterion', () => {
             const formations = {
-                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:o3', {
+                hrhb_travnik_brigade: makeBrigade('hrhb_travnik_brigade', 'HRHB', 'hvo_central_bosnia', 'op:mun:o3', {
                     stranded_status: 'holding',
                     stranded_since_turn: 5,
-                    cohesion: STRANDED_COLLAPSE_COHESION + STRANDED_COHESION_DECAY, // Will hit threshold after decay
+                    cohesion: PREVIOUS_STRANDED_COLLAPSE_COHESION + STRANDED_COHESION_DECAY,
                     morale: 50,
-                    personnel: 800,
+                    personnel: 700,
+                    readiness: 'active',
+                    lifecycle_status: 'active',
                 }),
             };
             const sectors = {
-                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:o1']),
+                'sector:hvo_central_bosnia': makeSector('hvo_central_bosnia', 'HRHB', ['op:mun:o1']),
             };
             const controllers: Record<string, string | null> = {
-                'op:mun:o1': 'RBiH',
+                'op:mun:o1': 'HRHB',
                 'op:mun:o2': 'RS',
-                'op:mun:o3': 'RBiH',
+                'op:mun:o3': 'HRHB',
             };
             const adj = chainAdj(['op:mun:o1', 'op:mun:o2', 'op:mun:o3']);
             const state = makeState({ formations, corps_front_sectors: sectors, political_controllers: controllers, turn: 8 });
 
             const report = updateStrandedBrigadeLifecycle(state, adj);
 
-            expect(report.collapsed).toEqual(['brig_1']);
-            expect(formations.brig_1.stranded_status).toBe('collapsed');
-            expect(formations.brig_1.lifecycle_status).toBe('destroyed');
-            expect(formations.brig_1.status).toBe('inactive');
-            expect(formations.brig_1.personnel).toBe(0);
+            expect(report.collapsed).toEqual([]);
+            expect(report.still_holding).toEqual(['hrhb_travnik_brigade']);
+            expect(formations.hrhb_travnik_brigade.stranded_status).toBe('holding');
+            expect(formations.hrhb_travnik_brigade.lifecycle_status).toBe('active');
+            expect(formations.hrhb_travnik_brigade.status).toBe('active');
+            expect(formations.hrhb_travnik_brigade.personnel).toBe(700);
         });
-    });
 
-    describe('collapse from max hold turns', () => {
-        it('collapses after 12+ turns stranded', () => {
-            const strandedSince = 5;
-            const currentTurn = strandedSince + STRANDED_MAX_HOLD_TURNS;
+        it('defers destruction to canonical dissolution after stranded decay meets two criteria', () => {
             const formations = {
-                brig_1: makeBrigade('brig_1', 'RBiH', 'corps_5', 'op:mun:o3', {
+                hrhb_travnik_brigade: makeBrigade('hrhb_travnik_brigade', 'HRHB', 'hvo_central_bosnia', 'op:mun:o3', {
                     stranded_status: 'holding',
-                    stranded_since_turn: strandedSince,
-                    cohesion: 80, // High cohesion — collapse from time, not cohesion
-                    morale: 70,
-                    personnel: 1000,
+                    stranded_since_turn: 5,
+                    cohesion: PREVIOUS_STRANDED_COLLAPSE_COHESION + STRANDED_COHESION_DECAY,
+                    morale: 15 + STRANDED_MORALE_DECAY,
+                    personnel: 700,
+                    readiness: 'active',
+                    lifecycle_status: 'active',
                 }),
             };
             const sectors = {
-                'sector:corps_5': makeSector('corps_5', 'RBiH', ['op:mun:o1']),
+                'sector:hvo_central_bosnia': makeSector('hvo_central_bosnia', 'HRHB', ['op:mun:o1']),
             };
             const controllers: Record<string, string | null> = {
-                'op:mun:o1': 'RBiH',
+                'op:mun:o1': 'HRHB',
                 'op:mun:o2': 'RS',
-                'op:mun:o3': 'RBiH',
+                'op:mun:o3': 'HRHB',
             };
             const adj = chainAdj(['op:mun:o1', 'op:mun:o2', 'op:mun:o3']);
-            const state = makeState({ formations, corps_front_sectors: sectors, political_controllers: controllers, turn: currentTurn });
+            const state = makeState({ formations, corps_front_sectors: sectors, political_controllers: controllers, turn: 8 });
+
+            const strandedReport = updateStrandedBrigadeLifecycle(state, adj);
+
+            expect(strandedReport.collapsed).toEqual([]);
+            expect(formations.hrhb_travnik_brigade.status).toBe('active');
+
+            const dissolutionReport = dissolveCombatIneffectiveBrigades(state);
+
+            expect(dissolutionReport.dissolved_brigades.map(row => row.id)).toEqual(['hrhb_travnik_brigade']);
+            expect(formations.hrhb_travnik_brigade.status).toBe('inactive');
+            expect(formations.hrhb_travnik_brigade.lifecycle_status).toBe('destroyed');
+            expect(formations.hrhb_travnik_brigade.readiness).toBe('degraded');
+        });
+
+        it('does not destroy a high-readiness brigade based only on elapsed stranded time', () => {
+            const strandedSince = 5;
+            const formations = {
+                hrhb_travnik_brigade: makeBrigade('hrhb_travnik_brigade', 'HRHB', 'hvo_central_bosnia', 'op:mun:o3', {
+                    stranded_status: 'holding',
+                    stranded_since_turn: strandedSince,
+                    cohesion: 80,
+                    morale: 70,
+                    personnel: 1000,
+                    readiness: 'active',
+                    lifecycle_status: 'active',
+                }),
+            };
+            const sectors = {
+                'sector:hvo_central_bosnia': makeSector('hvo_central_bosnia', 'HRHB', ['op:mun:o1']),
+            };
+            const controllers: Record<string, string | null> = {
+                'op:mun:o1': 'HRHB',
+                'op:mun:o2': 'RS',
+                'op:mun:o3': 'HRHB',
+            };
+            const adj = chainAdj(['op:mun:o1', 'op:mun:o2', 'op:mun:o3']);
+            const state = makeState({
+                formations,
+                corps_front_sectors: sectors,
+                political_controllers: controllers,
+                turn: strandedSince + PREVIOUS_STRANDED_MAX_HOLD_TURNS,
+            });
 
             const report = updateStrandedBrigadeLifecycle(state, adj);
 
-            expect(report.collapsed).toEqual(['brig_1']);
-            expect(formations.brig_1.stranded_status).toBe('collapsed');
-            expect(formations.brig_1.lifecycle_status).toBe('destroyed');
+            expect(report.collapsed).toEqual([]);
+            expect(report.still_holding).toEqual(['hrhb_travnik_brigade']);
+            expect(formations.hrhb_travnik_brigade.stranded_status).toBe('holding');
+            expect(formations.hrhb_travnik_brigade.lifecycle_status).toBe('active');
+            expect(formations.hrhb_travnik_brigade.status).toBe('active');
         });
     });
 

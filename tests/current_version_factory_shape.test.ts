@@ -31,6 +31,7 @@ import { expect, test } from 'vitest';
 
 import { checkDataPrereqs } from '../src/data_prereq/check_data_prereqs.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
+import { deserializeState, serializeState } from '../src/state/serialize.js';
 import { serializeGameState } from '../src/state/serializeGameState.js';
 import { validateGameStateShape } from '../src/state/validateGameState.js';
 import { canonicalizeStartupState, createInitialGameState } from '../src/scenario/scenario_runner.js';
@@ -62,4 +63,49 @@ test('canonical new-game birth state passes same-version shape validation (P2-A 
     const parsed = JSON.parse(serializeGameState(canonical)) as unknown;
     const roundTrip = validateGameStateShape(parsed, { requireVersion: CURRENT_SCHEMA_VERSION });
     expect(roundTrip.ok, roundTrip.ok ? '' : `same-version save round-trip fails shape validation:\n${(roundTrip as { errors: string[] }).errors.join('\n')}`).toBe(true);
+});
+
+test('canonical save round-trip preserves faction paramilitary deployment counts', { timeout: 120000 }, async () => {
+    const prereq = checkDataPrereqs({ baseDir: process.cwd() });
+    if (!prereq.ok) return;
+
+    const raw = await createInitialGameState('paramilitary-count-round-trip');
+    raw.meta.player_faction = 'RS';
+    raw.paramilitary_deployment_count = { HRHB: 9, RBiH: 7, RS: 44 };
+    const canonical = canonicalizeStartupState(raw).state;
+
+    const hydrated = deserializeState(serializeState(canonical));
+
+    expect(hydrated.paramilitary_deployment_count).toEqual({ HRHB: 9, RBiH: 7, RS: 44 });
+});
+
+test('same-version saves with the corrupted scalar count reconstruct deployments from formations', { timeout: 120000 }, async () => {
+    const prereq = checkDataPrereqs({ baseDir: process.cwd() });
+    if (!prereq.ok) return;
+
+    const raw = await createInitialGameState('paramilitary-count-recovery');
+    raw.meta.player_faction = 'RS';
+    const canonical = canonicalizeStartupState(raw).state;
+    canonical.paramilitary_deployment_count = 0 as any;
+    canonical.military.formations!['opara_rs_t1_0'] = {
+        id: 'opara_rs_t1_0',
+        faction: 'RS',
+        name: 'Recovered RS paramilitary',
+        kind: 'paramilitary',
+        status: 'inactive',
+        personnel: 0,
+    } as any;
+    canonical.military.formations!['opara_rbih_t1_0'] = {
+        id: 'opara_rbih_t1_0',
+        faction: 'RBiH',
+        name: 'Recovered RBiH paramilitary',
+        kind: 'paramilitary',
+        status: 'inactive',
+        personnel: 0,
+    } as any;
+    const payload = serializeGameState(canonical);
+
+    const hydrated = deserializeState(payload);
+
+    expect(hydrated.paramilitary_deployment_count).toEqual({ RBiH: 1, RS: 1 });
 });

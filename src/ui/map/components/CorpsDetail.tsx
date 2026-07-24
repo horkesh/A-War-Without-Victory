@@ -23,7 +23,6 @@ import {
 import { aggregateEffectiveness, effectivenessBandLabel } from '../utils/combatEffectiveness';
 import { Icon } from './icons/Icon';
 import { filterPlayerFacingOperations, isFieldedTacticalFormation } from '../../shared/playerVisibility';
-import { chooseOpsPlanningSector } from './ops_modal/stagingChoice';
 import {
   addEquipmentCondition,
   emptyEquipmentConditionSummary,
@@ -70,11 +69,9 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
   const operationsPanelOpen = useGameStore((s) => s.isOperationsPanelOpen);
   const selectedOperationKey = useGameStore((s) => s.selectedOperationKey);
   const setSelectedCorpsFrontSectorId = useGameStore((s) => s.setSelectedCorpsFrontSectorId);
-  const setOpsPlanningContext = useGameStore((s) => s.setOpsPlanningContext);
   const setHoveredOsids = useGameStore((s) => s.setHoveredOsids);
   const setHoveredCorpsId = useGameStore((s) => s.setHoveredCorpsId);
   const setHoveredSectorId = useGameStore((s) => s.setHoveredSectorId);
-  const setLoadError = useGameStore((s) => s.setLoadError);
   const setTooltipTargetWithPosition = useGameStore((s) => s.setTooltipTargetWithPosition);
   const clearTooltipTarget = useGameStore((s) => s.clearTooltipTarget);
 
@@ -185,22 +182,6 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
     },
     { id: 'orders'   as const, label: t('corpsDetail.orders') },
   ];
-  const primaryOpsPlanningSector = chooseOpsPlanningSector(corpsSectors);
-  const primaryOpsPlanningSectorLabel = primaryOpsPlanningSector
-    ? getPlayerFacingSectorName(primaryOpsPlanningSector.sector_id, corpsSectors)
-    : null;
-  const opsPlanningLabel = primaryOpsPlanningSectorLabel
-    ? t('corpsDetail.prepareOperationInHqForSector', { sector: primaryOpsPlanningSectorLabel })
-    : t('corpsDetail.prepareOperationInHq');
-
-  const handleOpenOpsPlanning = () => {
-    if (primaryOpsPlanningSector) {
-      setOpsPlanningContext(selectedCorpsId, primaryOpsPlanningSector.sector_id);
-    } else {
-      setLoadError(t('corpsDetail.opsPlanningRequiresSector'));
-    }
-  };
-
   const inspectFormationInCorps = (formationId: string) => {
     const formation = loadedGameState.formations.find((item) => item.id === formationId);
     inspectOnField(useGameStore.getState(), {
@@ -233,6 +214,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
 
   return (
     <div
+      data-testid="corps-detail-panel"
       data-awwv-counter-occluder="true"
       className="panel-slide-in-right flex flex-col bg-panel-bg/95 backdrop-blur-sm border border-panel-border rounded-lg shadow-xl overflow-hidden"
       style={getPanelRailStyle(railSlot, '24rem', 'left')}
@@ -269,7 +251,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {/* ── OVERVIEW ── */}
         {activeTab === 'overview' && (
           <div className="p-3 space-y-3">
-            <div className="text-text-secondary text-[11px]">
+            <div className="text-text-secondary text-xs">
               <span className={FACTION_COLORS[corpsFormation.faction] ?? 'text-text-primary'}>
                 {getPlayerSafeMilitaryFactionName(corpsFormation.faction)}
               </span>
@@ -318,14 +300,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                       className="font-semibold"
                       title={t('effectiveness.exactTooltip', { value: agg.totalEffectiveness.toLocaleString() })}
                     >
-                      <span className="text-[10px] font-bold" style={{ color: gradeColor }}>
+                      <span className="text-xs font-bold" style={{ color: gradeColor }}>
                         {band.grade}
                       </span>
                       <span className="ml-1 text-text-primary">
                         {t(band.labelKey)}
                       </span>
                       {band.grade !== 'UNREPORTED' && agg.ineffectiveCount > 0 && (
-                        <span className="text-[9px] text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
+                        <span className="text-xs text-red-400 ml-1">{t('corpsDetail.weakCount', { count: agg.ineffectiveCount })}</span>
                       )}
                     </span>
                   </div>
@@ -376,7 +358,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
               };
               return (
                 <div className="border-t border-panel-border pt-3 space-y-1.5">
-                  <div className="text-text-secondary text-[10px] uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
+                  <div className="text-text-secondary text-xs uppercase tracking-wider mb-1">{t('corpsDetail.equipment')}</div>
                   {tanks.total > 0 && (
                     <div className="flex justify-between">
                       <span className="text-text-secondary flex items-center gap-1"><Icon name="tanks" size={12} /> {t('corpsCard.tanks')}</span>
@@ -488,8 +470,8 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                   className="w-full flex items-center justify-between px-2 py-1.5 rounded border border-panel-border bg-panel-card hover:bg-panel-hover transition-colors text-left"
                 >
                   <div className="min-w-0">
-                    <div className="text-text-primary text-[11px] font-medium truncate">{sectorLabel}</div>
-                    <div className="text-text-secondary text-[10px] tabular-nums">
+                    <div className="text-text-primary text-xs font-medium truncate">{sectorLabel}</div>
+                    <div className="text-text-secondary text-xs tabular-nums">
                       {t('oob.sectorLineCount', { count: sectorAssignment.frontlineIds.length.toString() })}
                       {sectorAssignment.reserveIds.length > 0 && ` + ${t('oob.sectorHeldBackCount', { count: sectorAssignment.reserveIds.length.toString() })}`}
                       {sectorAssignment.rearIds.length > 0 && ` + ${t('oob.sectorRearSupportCount', { count: sectorAssignment.rearIds.length.toString() })}`}
@@ -499,7 +481,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                     </div>
                   </div>
                   <div className="shrink-0 ml-2 text-right">
-                    <div className="text-[10px] tabular-nums">
+                    <div className="text-xs tabular-nums">
                       <span className="text-text-secondary">{t('corpsDetail.effShort')} </span>
                       <span
                         className="text-text-primary"
@@ -508,10 +490,10 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                         {sectorBand ? `${sectorBand.grade} ${t(sectorBand.labelKey)}` : '--'}
                       </span>
                     </div>
-                    <div className="text-[10px] text-text-secondary tabular-nums">
+                    <div className="text-xs text-text-secondary tabular-nums">
                       {t('oob.sectorCoverage.label')}: {t(SECTOR_COVERAGE_KEYS[coverageTier])}
                     </div>
-                    <div className="text-[9px] uppercase text-text-secondary opacity-70">
+                    <div className="text-xs uppercase text-text-secondary opacity-70">
                       {formatCorpsDetailStance(s.sector_stance)}
                       {s.stance_source === 'player' && <span className="ml-1 text-accent-gold">●</span>}
                     </div>
@@ -526,10 +508,10 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
         {/* ── OPS ── */}
         {activeTab === 'ops' && (
           <div className="p-3 space-y-2.5">
-            <div className="text-[10px] uppercase tracking-widest text-text-secondary font-bold">
+            <div className="text-xs uppercase tracking-widest text-text-secondary font-bold">
               {t('corpsDetail.fieldSnapshot')}
             </div>
-            <div className="text-[10px] text-text-secondary -mt-1">
+            <div className="text-xs text-text-secondary -mt-1">
               {t('corpsDetail.fieldSnapshotHelp')}
             </div>
             {corpsOps.length === 0 ? (
@@ -563,14 +545,14 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                   >
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-semibold text-text-primary text-[12px] uppercase tracking-wide">{op.display_name}</div>
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold tracking-wider ${phaseBg}`}>
+                      <span className={`px-1.5 py-0.5 rounded text-xs uppercase font-bold tracking-wider ${phaseBg}`}>
                         {phaseLabel}
                       </span>
                     </div>
 
                     {op.phase === 'execution' && (
                       <div className="mt-2 space-y-1">
-                        <div className="flex justify-between text-[10px] text-text-secondary">
+                        <div className="flex justify-between text-xs text-text-secondary">
                           <span>{t('operationsPanel.momentum')}</span>
                           {momentum != null && (
                             <span className={momentum >= 0 ? 'text-[#55d48a]' : 'text-[#d45555]'}>
@@ -593,7 +575,7 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
                       </div>
                     )}
 
-                    <div className="flex items-center justify-between text-[10px] mt-2 pt-1.5 border-t border-panel-border/30">
+                    <div className="flex items-center justify-between text-xs mt-2 pt-1.5 border-t border-panel-border/30">
                       <span className="text-text-secondary">{t('corpsDetail.brigadeCount', { count: op.participating_brigade_count })}</span>
                       {Array.isArray(op.objectives) && op.objectives.length > 0 && op.current_objective_index !== undefined && (
                         <span className="text-accent-gold">
@@ -606,36 +588,20 @@ export function CorpsDetail({ railSlot = 'primary', breadcrumb }: CorpsDetailPro
               })
             )}
 
-            <div className="pt-1 border-t border-panel-border">
-              <button
-                type="button"
-                onClick={handleOpenOpsPlanning}
-                aria-label={opsPlanningLabel}
-                title={opsPlanningLabel}
-                className="w-full text-xs font-sans px-2 py-2 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
-              >
-                {t('corpsDetail.prepareOperationInHq')}
-              </button>
-            </div>
           </div>
         )}
 
         {/* ── ORDERS ── */}
         {activeTab === 'orders' && (
           <div className="p-3 space-y-3">
-            <div>
-              <div className="text-[10px] text-text-secondary uppercase tracking-widest font-bold mb-2">
-                {t('operationHistory.title')}
-              </div>
-              <button
-                type="button"
-                onClick={handleOpenOpsPlanning}
-                aria-label={opsPlanningLabel}
-                title={opsPlanningLabel}
-                className="w-full text-xs font-sans px-2 py-2.5 rounded border border-panel-border text-interactive hover:bg-panel-hover transition-colors"
-              >
-                {t('corpsDetail.prepareOperationInHq')}
-              </button>
+            <div className="text-xs text-text-secondary uppercase tracking-widest font-bold">
+              {t('operationHistory.title')}
+            </div>
+            <div
+              data-testid="corps-detail-delegated-command-note"
+              className="text-xs text-text-secondary px-2 py-1.5 bg-black/10 border border-panel-border/30 rounded"
+            >
+              {t('corpsDetail.delegatedOperations')}
             </div>
           </div>
         )}

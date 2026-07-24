@@ -16,6 +16,8 @@
  *   - determinism: eligible formations are id/kind-sorted; pure over state
  */
 import { createRequire } from 'node:module';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const require = createRequire(import.meta.url);
@@ -27,6 +29,37 @@ const decorateContract = require('../src/desktop/decorate_unit_contract.cjs');
 const FRONT_VISIT_COST: number = require('../src/desktop/autonomy_ipc_contract.cjs').FRONT_VISIT_COST;
 const ADDRESS_NATION_COST: number = require('../src/desktop/autonomy_ipc_contract.cjs').ADDRESS_NATION_COST;
 const DECORATE_UNIT_COST: number = require('../src/desktop/autonomy_ipc_contract.cjs').DECORATE_UNIT_COST;
+
+describe('leadership action desktop wiring', () => {
+  it('receives the Electron event before refreshing the initiating renderer', () => {
+    const source = readFileSync(resolve(process.cwd(), 'src/desktop/electron-main.cjs'), 'utf8');
+
+    for (const channel of ['initiate-front-visit', 'initiate-address-nation', 'initiate-decorate-unit']) {
+      const handlerStart = source.indexOf(`ipcMain.handle('${channel}'`);
+      const handlerEnd = source.indexOf('\n  });', handlerStart);
+      const handler = source.slice(handlerStart, handlerEnd);
+
+      expect(handlerStart).toBeGreaterThanOrEqual(0);
+      expect(handler).toContain(`ipcMain.handle('${channel}', async (_event) =>`);
+      expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
+    }
+  });
+
+  it('places directive controls before optional dossier artwork', () => {
+    const source = readFileSync(
+      resolve(process.cwd(), 'src/ui/map/components/army_hq/DirectiveCard.tsx'),
+      'utf8',
+    );
+    const componentStart = source.indexOf('return (', source.indexOf('export function DirectiveCard'));
+    const component = source.slice(componentStart);
+
+    expect(component.indexOf('onClick={handleConfirm}')).toBeGreaterThanOrEqual(0);
+    expect(component.indexOf('data-testid="directive-card-header-art"')).toBeGreaterThanOrEqual(0);
+    expect(component.indexOf('onClick={handleConfirm}')).toBeLessThan(
+      component.indexOf('data-testid="directive-card-header-art"'),
+    );
+  });
+});
 
 function makeAddressEventDef() {
   return {

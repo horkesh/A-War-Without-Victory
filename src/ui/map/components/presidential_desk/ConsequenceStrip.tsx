@@ -49,8 +49,8 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-[8px] font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
-          <div className="mt-1 text-[11px] text-text-secondary">
+          <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-muted">{t('desk.consequences.heading')}</div>
+          <div className="mt-1 text-xs text-text-secondary">
             {latestFiledTurn != null ? t('desk.consequences.lastFiled', { date: turnToDateString(latestFiledTurn) }) : t('desk.consequences.noRecord')}
           </div>
         </div>
@@ -58,26 +58,26 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
           type="button"
           onClick={onOpenRecords}
           data-testid="desk-consequence-open-records"
-          className="border border-panel-border bg-black/20 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+          className="border border-panel-border bg-black/20 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.13em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
         >
           {t('desk.consequences.records')}
         </button>
       </div>
       <div className="mt-3 grid grid-cols-4 gap-2">
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.battles')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.battles')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{battleCount}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.displaced')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.displaced')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{displacement}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.events')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.events')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{notableEvents}</div>
         </div>
         <div className="border border-panel-border/70 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.decisions')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('desk.consequences.decisions')}</div>
           <div className="mt-1 text-[16px] font-bold text-text-primary">{decisionRecordCount}</div>
         </div>
       </div>
@@ -111,13 +111,13 @@ export function ConsequenceStrip({ state, onOpenRecords, onOpenDecisionRecords, 
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <div className="truncate text-[11px] font-bold text-text-primary">{title}</div>
-                  <div className="shrink-0 text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold">{outcome}</div>
+                  <div className="truncate text-xs font-bold text-text-primary">{title}</div>
+                  <div className="shrink-0 text-xs font-bold uppercase tracking-[0.14em] text-accent-gold">{outcome}</div>
                 </div>
-                <div className="mt-1 truncate text-[9px] text-text-secondary">
+                <div className="mt-1 truncate text-xs text-text-secondary">
                   {familyLabel(record)} / {t('decisionConsequences.date', { date: turnToDateString(record.turn) })} / {detail}
                 </div>
-                <div className="mt-1 text-[8px] font-bold uppercase tracking-[0.13em] text-text-muted">
+                <div className="mt-1 text-xs font-bold uppercase tracking-[0.13em] text-text-muted">
                   {record.recordTarget === 'chronicle'
                     ? t('desk.consequences.openChronicle')
                     : t('desk.consequences.openRecords')}

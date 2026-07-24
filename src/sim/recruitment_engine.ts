@@ -11,7 +11,7 @@
 
 import { resolveLocationOsid, type CanonicalToOperationalMap } from '../data/operational_data_types.js';
 import type { OobBrigade, OobCorps } from '../scenario/oob_loader.js';
-import { factionHasPresenceInMun } from '../scenario/oob_early_war_entry.js';
+import { factionHasPresenceInMun, resolveFactionControlledFormationPlacement } from '../scenario/oob_early_war_entry.js';
 import type { BrigadeDecoration } from '../state/decoration_types.js';
 import { deriveMaxPersonnel, ENCLAVE_FORMATION_CAPACITY_THRESHOLD, ENCLAVE_MAX_PERSONNEL, ENCLAVE_MUNICIPALITY_IDS, FORMATION_CAPACITY_THRESHOLD, MIN_MANDATORY_SPAWN } from '../state/formation_constants.js';
 import { BRIGADE_BASE_COHESION } from '../state/formation_lifecycle.js';
@@ -42,83 +42,13 @@ import {
     getEquipmentCost
 } from '../state/recruitment_types.js';
 import { getRsJnaHeavyComposition, getRsMountainComposition } from './combat/equipment_effects.js';
-import { ENCLAVE_DEFINITIONS, isEnclaveBrigade, osidBelongsToEnclave } from './combat/enclave_resilience.js';
+import { isEnclaveBrigade } from './combat/enclave_resilience.js';
 import { getFactionDefaultOfficerQuality } from './combat/combat_math.js';
 import { effectivePersonnel } from './combat/tactical_group_personnel.js';
-import { isFriendlyFaction } from './early_war/alliance_update.js';
 import { initializeDoctrineStateForFormation } from '../state/doctrine.js';
 import { initializeEquipmentStateForFormation } from '../state/heavy_equipment.js';
 
 const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
-
-function isFriendlyControlledPlacement(
-    state: GameState,
-    faction: FactionId,
-    osid: string | undefined
-): boolean {
-    if (!osid) return false;
-    const controller = state.political.political_controllers?.[osid];
-    if (controller == null) return true;
-    return isFriendlyFaction(controller, faction, state);
-}
-
-function chooseFriendlyEnclavePlacementOsid(
-    state: GameState,
-    brigade: OobBrigade
-): string | undefined {
-    if (!isEnclaveBrigade(brigade)) return undefined;
-
-    const homePrefix = `op:${brigade.home_mun}:`;
-    const controllers = state.political.political_controllers ?? {};
-    const candidates: string[] = [];
-
-    const sortedDefinitions = [...ENCLAVE_DEFINITIONS]
-        .filter((enclave) => {
-            if (enclave.faction !== brigade.faction) return false;
-            if (enclave.capital_osid?.startsWith(homePrefix)) return true;
-            if (enclave.osid_list?.some((osid) => osid.startsWith(homePrefix))) return true;
-            if (enclave.osid_prefixes?.some((prefix) => prefix === homePrefix)) return true;
-            return false;
-        })
-        .sort((a, b) => strictCompare(a.id, b.id));
-
-    for (const enclave of sortedDefinitions) {
-        if (enclave.capital_osid?.startsWith(homePrefix)) {
-            candidates.push(enclave.capital_osid);
-        }
-        for (const osid of [...(enclave.osid_list ?? [])].sort(strictCompare)) {
-            if (osid.startsWith(homePrefix)) candidates.push(osid);
-        }
-        for (const osid of Object.keys(controllers).sort(strictCompare)) {
-            if (!osid.startsWith(homePrefix)) continue;
-            if (osidBelongsToEnclave(osid, enclave)) candidates.push(osid);
-        }
-    }
-
-    for (const osid of [...new Set(candidates)]) {
-        if (isFriendlyControlledPlacement(state, brigade.faction, osid)) return osid;
-    }
-    return undefined;
-}
-
-function chooseRecruitmentPlacementOsid(
-    state: GameState,
-    brigade: OobBrigade,
-    resolvedLocationOsid?: string
-): string | undefined {
-    if (isFriendlyControlledPlacement(state, brigade.faction, brigade.deployment_osid)) {
-        return brigade.deployment_osid;
-    }
-    if (isFriendlyControlledPlacement(state, brigade.faction, brigade.home_osid)) {
-        return brigade.home_osid;
-    }
-    const enclavePlacement = chooseFriendlyEnclavePlacementOsid(state, brigade);
-    if (enclavePlacement) return enclavePlacement;
-    if (isFriendlyControlledPlacement(state, brigade.faction, resolvedLocationOsid)) {
-        return resolvedLocationOsid;
-    }
-    return undefined;
-}
 
 function resolveRecruitmentLocationOsid(
     hqSid: string | undefined,
@@ -273,7 +203,7 @@ function buildRecruitmentTags(
     tags.push(`equip:${equipClass}`);
     if (oobTags) tags.push(...oobTags);
     if (fixedHomeOsid) tags.push(FIXED_HOME_OSID_TAG);
-    tags.sort((a, b) => a.localeCompare(b));
+    tags.sort(strictCompare);
     return tags;
 }
 
@@ -292,6 +222,10 @@ function buildRecruitedFormation(
     const effectivePersonnel = brigade.initial_personnel ?? personnel;
     const defaultCohesion = isMandatory ? BRIGADE_BASE_COHESION + 10 : BRIGADE_BASE_COHESION;
     const effectiveCohesion = brigade.initial_cohesion ?? defaultCohesion;
+    const exactHomeOsid = brigade.home_osid
+        && state.political.political_controllers?.[brigade.home_osid] === brigade.faction
+        ? brigade.home_osid
+        : undefined;
     const formation: FormationState = {
         id: brigade.id as FormationId,
         faction: brigade.faction,
@@ -299,7 +233,13 @@ function buildRecruitedFormation(
         created_turn: currentTurn,
         status: 'active',
         assignment: null,
-        tags: buildRecruitmentTags(brigade.home_mun, brigade.corps, equipClass, brigade.tags, brigade.home_osid),
+        tags: buildRecruitmentTags(
+            brigade.home_mun,
+            brigade.corps,
+            equipClass,
+            brigade.tags,
+            exactHomeOsid === locationOsid ? exactHomeOsid : undefined,
+        ),
         kind: brigade.kind,
         personnel: effectivePersonnel,
         readiness: isMandatory ? 'active' : 'forming',
@@ -320,7 +260,7 @@ function buildRecruitedFormation(
         ...(locationOsid != null ? { location_osid: locationOsid } : {}),
         equipment_class: equipClass,
         max_personnel: brigade.max_personnel ?? deriveMaxPersonnel(equipClass, brigade.faction),
-        home_osid: brigade.home_osid ?? locationOsid
+        home_osid: exactHomeOsid ?? locationOsid
     };
     initializeEquipmentStateForFormation(formation, brigade.faction, state);
     initializeDoctrineStateForFormation(formation);
@@ -422,7 +362,7 @@ function resolveValidHqSid(
     }
 
     if (candidates.length === 0) return undefined;
-    candidates.sort((a, b) => a.localeCompare(b));
+    candidates.sort(strictCompare);
     return candidates[0];
 }
 
@@ -432,9 +372,68 @@ function resolveValidHqSid(
 
 export interface RecruitBrigadeResult {
     success: boolean;
-    reason?: string;
+    reason?: RecruitmentEligibilityReason;
     action?: RecruitmentAction;
     formation?: FormationState;
+}
+
+export type RecruitmentEligibilityReason =
+    | 'wrong_faction'
+    | 'not_yet_available'
+    | 'already_recruited'
+    | 'no_control'
+    | 'no_manpower'
+    | 'no_capital'
+    | 'no_equipment';
+
+export interface RecruitmentEligibility {
+    eligible: boolean;
+    reason_codes: RecruitmentEligibilityReason[];
+}
+
+export function evaluateRecruitmentEligibility(
+    state: GameState,
+    brigade: OobBrigade,
+    chosenClass: EquipmentClass,
+    resources: RecruitmentResourceState,
+    sidToMun: Map<SettlementId, MunicipalityId>,
+    municipalityHqSettlement: Record<string, string>,
+    canonicalToOperational?: CanonicalToOperationalMap,
+    requiredFaction?: FactionId,
+): RecruitmentEligibility {
+    const reasons: RecruitmentEligibilityReason[] = [];
+    if (requiredFaction && brigade.faction !== requiredFaction) reasons.push('wrong_faction');
+    if (state.meta.turn < brigade.available_from) reasons.push('not_yet_available');
+    if (resources.recruited_brigade_ids.includes(brigade.id) || state.military.formations?.[brigade.id]) {
+        reasons.push('already_recruited');
+    }
+    if (!isEnclaveBrigade(brigade) && !factionHasPresenceInMun(state, brigade.faction, brigade.home_mun, sidToMun)) {
+        reasons.push('no_control');
+    }
+
+    const preferredPoolFaction = brigade.recruit_pool_faction ?? brigade.faction;
+    const preferredPool = state.military.militia_pools?.[militiaPoolKey(brigade.home_mun, preferredPoolFaction)];
+    const ownPool = state.military.militia_pools?.[militiaPoolKey(brigade.home_mun, brigade.faction)];
+    const pool = preferredPool?.available >= brigade.manpower_cost ? preferredPool : ownPool;
+    if (!pool || pool.available < brigade.manpower_cost) reasons.push('no_manpower');
+    if ((resources.recruitment_capital[brigade.faction]?.points ?? 0) < brigade.capital_cost) reasons.push('no_capital');
+    if ((resources.equipment_pools[brigade.faction]?.points ?? 0) < getEquipmentCost(chosenClass)) reasons.push('no_equipment');
+
+    if (!reasons.includes('no_control')) {
+        const placement = resolveFactionControlledFormationPlacement(
+            state,
+            brigade.faction,
+            brigade.home_mun,
+            municipalityHqSettlement,
+            sidToMun,
+            canonicalToOperational,
+            [brigade.deployment_osid, brigade.home_osid],
+        );
+        if (!placement) {
+            reasons.push('no_control');
+        }
+    }
+    return { eligible: reasons.length === 0, reason_codes: reasons };
 }
 
 /**
@@ -499,9 +498,22 @@ export function recruitBrigade(
     resources: RecruitmentResourceState,
     sidToMun: Map<SettlementId, MunicipalityId>,
     municipalityHqSettlement: Record<string, string>,
-    canonicalToOperational?: CanonicalToOperationalMap
+    canonicalToOperational?: CanonicalToOperationalMap,
+    requiredFaction?: FactionId,
 ): RecruitBrigadeResult {
     const { faction, home_mun, id } = brigade;
+
+    const eligibility = evaluateRecruitmentEligibility(
+        state,
+        brigade,
+        chosenClass,
+        resources,
+        sidToMun,
+        municipalityHqSettlement,
+        canonicalToOperational,
+        requiredFaction,
+    );
+    if (!eligibility.eligible) return { success: false, reason: eligibility.reason_codes[0] };
 
     // Already recruited?
     if (resources.recruited_brigade_ids.includes(id) || state.military.formations?.[id]) {
@@ -542,9 +554,16 @@ export function recruitBrigade(
 
     // All checks pass -- build formation
     const hq_sid = resolveValidHqSid(state, faction, home_mun, municipalityHqSettlement, sidToMun);
-    const resolvedLocationOsid = resolveRecruitmentLocationOsid(hq_sid, canonicalToOperational);
-    const location_osid = chooseRecruitmentPlacementOsid(state, brigade, resolvedLocationOsid);
-    if (!location_osid && !isEnclaveBrigade(brigade)) {
+    const location_osid = resolveFactionControlledFormationPlacement(
+        state,
+        faction,
+        home_mun,
+        municipalityHqSettlement,
+        sidToMun,
+        canonicalToOperational,
+        [brigade.deployment_osid, brigade.home_osid],
+    );
+    if (!location_osid) {
         return { success: false, reason: 'no_control' };
     }
     // Dynamic recruitment: no JNA override — newly formed brigades are militia/TDF,
@@ -619,6 +638,8 @@ export interface RunBotRecruitmentOptions {
     maxElectivePerFaction?: number;
     /** When set, formations get location_osid from hq_sid via canonical_to_operational_map. */
     canonicalToOperational?: CanonicalToOperationalMap;
+    /** Restrict automatic recruitment to these factions. */
+    factionIds?: readonly FactionId[];
 }
 
 function markExistingFormationAsRecruited(
@@ -626,7 +647,13 @@ function markExistingFormationAsRecruited(
     resources: RecruitmentResourceState,
     brigadeId: string
 ): boolean {
-    if (!state.military.formations?.[brigadeId]) return false;
+    const formations = state.military.formations ?? {};
+    const hasExactFormation = formations[brigadeId] != null;
+    const oobTag = `oob:${brigadeId}`;
+    const hasGeneratedRepresentative = Object.keys(formations)
+        .sort(strictCompare)
+        .some((formationId) => formations[formationId]?.tags?.includes(oobTag));
+    if (!hasExactFormation && !hasGeneratedRepresentative) return false;
     if (!resources.recruited_brigade_ids.includes(brigadeId)) {
         resources.recruited_brigade_ids.push(brigadeId);
     }
@@ -696,10 +723,21 @@ export function runBotRecruitment(
     }
 
     // Process factions in deterministic order
-    const factions = [...new Set(oobBrigades.map(b => b.faction))].sort();
+    const allowedFactions = options?.factionIds ? new Set(options.factionIds) : null;
+    const factions = [...new Set(oobBrigades.map(b => b.faction))]
+        .filter((faction) => allowedFactions == null || allowedFactions.has(faction))
+        .sort(strictCompare);
 
     for (const faction of factions) {
         const factionBrigades = oobBrigades.filter(b => b.faction === faction);
+
+        // Pool-generated formations can already be historical brigades under a
+        // runtime ID. Claim those OOB identities before eligibility gates so a
+        // later catalog pass cannot create duplicate live counters.
+        for (const brigade of [...factionBrigades].sort((a, b) => strictCompare(a.id, b.id))) {
+            if (brigade.available_from > currentTurn) continue;
+            markExistingFormationAsRecruited(state, resources, brigade.id);
+        }
 
         // Step 1: Recruit mandatory formations first (zero cost for capital/equipment)
         // Pool-gated emergent formation: turn-0 brigades spawn unconditionally;
@@ -718,7 +756,7 @@ export function runBotRecruitment(
                     const threshold = ENCLAVE_MUNICIPALITY_IDS.has(b.home_mun) ? ENCLAVE_FORMATION_CAPACITY_THRESHOLD : FORMATION_CAPACITY_THRESHOLD;
                     return canFormEmergentBrigade(munBrigades, pool, b.initial_personnel ?? b.manpower_cost ?? 500, currentTurn, b.available_from, threshold);
                 })
-                .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id))
+                .sort((a, b) => a.priority - b.priority || strictCompare(a.id, b.id))
             : [];
 
         let mandatoryRecruitedForFaction = 0;
@@ -737,6 +775,21 @@ export function runBotRecruitment(
             // (e.g. "han_pijesak" vs "hanpijesak"), and they spawn unconditionally from a national pool.
             // Enclave brigades bypass — they exist in enemy-surrounded territory at their home_osid.
             if (!brigade.is_elite && !isEnclaveBrigade(brigade) && !factionHasPresenceInMun(state, faction, brigade.home_mun, sidToMun)) {
+                report.brigades_skipped_no_control++;
+                continue;
+            }
+            const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
+            const location_osid = resolveFactionControlledFormationPlacement(
+                state,
+                faction,
+                brigade.home_mun,
+                municipalityHqSettlement,
+                sidToMun,
+                options?.canonicalToOperational,
+                [brigade.deployment_osid, brigade.home_osid],
+                true,
+            );
+            if (!location_osid) {
                 report.brigades_skipped_no_control++;
                 continue;
             }
@@ -793,13 +846,6 @@ export function runBotRecruitment(
             }
 
             // Build formation directly for mandatory (bypass normal cost checks)
-            const hq_sid = resolveValidHqSid(state, faction, brigade.home_mun, municipalityHqSettlement, sidToMun);
-            const resolvedLocationOsid = resolveRecruitmentLocationOsid(hq_sid, options?.canonicalToOperational);
-            const location_osid = chooseRecruitmentPlacementOsid(state, brigade, resolvedLocationOsid);
-            if (!location_osid && !isEnclaveBrigade(brigade)) {
-                report.brigades_skipped_no_control++;
-                continue;
-            }
             const formation = buildRecruitedFormation(
                 state, brigade, brigade.default_equipment_class, effectiveManpower, currentTurn, hq_sid, true, location_osid
             );
@@ -850,7 +896,7 @@ export function runBotRecruitment(
         scored.sort((a, b) => {
             const s = b.score - a.score;
             if (s !== 0) return s;
-            return a.brigade.id.localeCompare(b.brigade.id);
+            return strictCompare(a.brigade.id, b.brigade.id);
         });
 
         let electiveRecruitedForFaction = 0;
@@ -912,15 +958,21 @@ export function isEmergentFormationSuppressed(
     munId: MunicipalityId,
     faction: FactionId
 ): boolean {
-    if (!state.military.recruitment_state) return false; // not using recruitment system
+    const recruitmentState = state.military.recruitment_state;
+    if (!recruitmentState) return false; // not using recruitment system
     const formations = state.military.formations ?? {};
     const tag = `mun:${munId}`;
     for (const f of Object.values(formations)) {
         if (!f || f.faction !== faction) continue;
         if (f.kind !== 'brigade') continue;
         if (!f.tags?.includes(tag)) continue;
-        // Check if this is a recruited OOB brigade (has an ID in the recruited list)
-        if (state.military.recruitment_state.recruited_brigade_ids.includes(f.id)) {
+        const representedOobIds = (f.tags ?? [])
+            .filter((entry) => entry.startsWith('oob:'))
+            .map((entry) => entry.slice('oob:'.length));
+        if (
+            recruitmentState.recruited_brigade_ids.includes(f.id)
+            || representedOobIds.some((id) => recruitmentState.recruited_brigade_ids.includes(id))
+        ) {
             return true;
         }
     }
@@ -993,8 +1045,8 @@ export function reroutePoolSurplus(
     }
 
     // Deterministic sort
-    surplusMuns.sort((a, b) => b.available - a.available || a.mun.localeCompare(b.mun));
-    deficitMuns.sort((a, b) => a.needed - b.needed || a.mun.localeCompare(b.mun));
+    surplusMuns.sort((a, b) => b.available - a.available || strictCompare(a.mun, b.mun));
+    deficitMuns.sort((a, b) => a.needed - b.needed || strictCompare(a.mun, b.mun));
 
     // 2. Transfer
     for (const deficit of deficitMuns) {

@@ -56,7 +56,24 @@ function buildMinimalState(turn: number, primaryCorps = 'arbih_5th_corps'): Game
         meta: { turn, seed: 'test', phase: 'war' as const },
         factions: [],
         military: {
-            formations: {},
+            formations: Object.fromEntries(
+                [
+                    'arbih_5_brigade_a',
+                    'arbih_5_brigade_b',
+                    'b_a',
+                    'b_b',
+                    'b_c',
+                    'b_d',
+                ].map((id) => [id, {
+                    id,
+                    name: id,
+                    kind: 'brigade',
+                    status: 'active',
+                    faction: 'RBiH',
+                    corps_id: 'arbih_5th_corps',
+                    personnel: 1000,
+                }]),
+            ),
             front_segments: {},
             front_posture: {},
             front_posture_regions: {},

@@ -63,6 +63,7 @@ function makeAftermathView(overrides: Partial<TurnAftermathView> = {}): TurnAfte
       topItems: [],
     },
     ...overrides,
+    commandRecord: overrides.commandRecord ?? { directives: [], rows: [] },
   };
 }
 
@@ -158,7 +159,10 @@ describe('turn aftermath quiet digest', () => {
     const setTurnAftermathDigest = vi.fn();
 
     await advanceTurnAndSync({
-      ipc: { advanceTurn: vi.fn(async () => ({ ok: true, stateJson: '{}' })) },
+      ipc: {
+        advanceTurn: vi.fn(async () => ({ ok: true })),
+        getCurrentGameState: vi.fn(async () => '{}'),
+      },
       loadSave: vi.fn(async () => { currentState = makeLoadedState({ turn: 13 }); }),
       clearStagedOrders: vi.fn(),
       setLoadError: vi.fn(),
@@ -184,7 +188,10 @@ describe('turn aftermath quiet digest', () => {
     const setTurnAftermathDigest = vi.fn();
 
     await advanceTurnAndSync({
-      ipc: { advanceTurn: vi.fn(async () => ({ ok: true, stateJson: '{}' })) },
+      ipc: {
+        advanceTurn: vi.fn(async () => ({ ok: true })),
+        getCurrentGameState: vi.fn(async () => '{}'),
+      },
       loadSave: vi.fn(async () => {
         currentState = makeLoadedState({
           turn: 13,

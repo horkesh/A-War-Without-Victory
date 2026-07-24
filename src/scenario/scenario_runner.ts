@@ -18,7 +18,10 @@ import { getBotStrategyProfile } from '../sim/bot/bot_strategy.js';
 import { getFrontActiveSettlements } from '../sim/emergence/aor_instantiation.js';
 import { getEligiblePressureEdges } from '../sim/emergence/pressure_eligibility.js';
 import { aggregateSettlementDisplacementToMunicipalities } from '../sim/displacement_pipeline/displacement_municipality_aggregation.js';
-import { ensureRbihHrhbState } from '../sim/early_war/alliance_update.js';
+import {
+    DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN,
+    ensureRbihHrhbState,
+} from '../sim/early_war/alliance_update.js';
 import { buildSettlementsByMun } from '../sim/early_war/control_strain.js';
 import { updateMilitiaEmergence } from '../sim/early_war/militia_emergence.js';
 import { applyRsJnaInheritanceBonus, runPoolPopulation } from '../sim/early_war/pool_population.js';
@@ -32,7 +35,7 @@ import {
     runBotRecruitment
 } from '../sim/recruitment_engine.js';
 import type { MunicipalityPopulation1991 } from '../sim/turn_pipeline.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { loadEventDefinitions } from '../sim/events/event_loader.js';
 import {
     applyControlFlipProposals,
@@ -137,6 +140,8 @@ import {
     type ActiveOperationSummary
 } from './scenario_end_report.js';
 import {
+    evaluateHistoricalControlBand,
+    HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992,
     HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992 as CANONICAL_HISTORICAL_SETTLEMENT_ANCHORS_APR1992_TO_DEC1992,
     resolveEpochOsidAnchors,
 } from './historical_anchors.js';
@@ -500,7 +505,7 @@ function computeControlShareByFaction(state: GameState): Array<{ faction: string
         byFaction.set(key, (byFaction.get(key) ?? 0) + 1);
     }
     return Array.from(byFaction.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => strictCompare(a[0], b[0]))
         .map(([faction, count]) => ({
             faction,
             control_share: totalSettlements > 0 ? Math.round((count / totalSettlements) * 1e6) / 1e6 : 0
@@ -661,7 +666,7 @@ interface HistoricalControlAlignmentDiagnostics {
 }
 
 interface HistoricalAnchorCheck {
-    anchor_type: 'settlement' | 'osid';
+    anchor_type: 'settlement' | 'osid' | 'control_band';
     anchor_id: string;
     expected_controller: string;
     actual_controller: string | null;
@@ -846,7 +851,22 @@ function computeHistoricalAnchorChecks(
             passed: actual === anchor.expected_controller
         };
     });
-    return [...settlementChecks, ...osidChecks];
+    const controllers = Object.fromEntries(bySid.entries());
+    const controlBandChecks = HISTORICAL_CONTROL_BAND_ANCHORS_APR1992_TO_DEC1992.map((anchor) => {
+        const evaluation = evaluateHistoricalControlBand(anchor, controllers);
+        return {
+            anchor_type: 'control_band' as const,
+            anchor_id: anchor.anchor_id,
+            expected_controller: anchor.clauses
+                .map((clause) => `${clause.clause_id}>=${clause.min_count}/${clause.osids.length}`)
+                .join(';'),
+            actual_controller: evaluation.clauses
+                .map((clause) => `${clause.clause_id}=${clause.actual_count}/${clause.total_count}`)
+                .join(';'),
+            passed: evaluation.passed,
+        };
+    });
+    return [...settlementChecks, ...osidChecks, ...controlBandChecks];
 }
 
 function buildOverrideInventory(scenario: Scenario): OverrideInventoryEntry[] {
@@ -1314,6 +1334,7 @@ function collectActiveOperations(state: GameState): ActiveOperationSummary[] {
 
 type HistoricalNameLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
 type HistoricalCorpsLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
+type HistoricalOobIdLookup = (faction: string, mun_id: string, ordinal: number) => string | null;
 
 interface ScenarioStartupBuildResult {
     state: GameState;
@@ -1328,6 +1349,7 @@ interface ScenarioStartupBuildResult {
     operationalCentroids: Awaited<ReturnType<typeof loadOperationalCentroids>> | undefined;
     historicalNameLookup?: HistoricalNameLookup;
     historicalCorpsLookup?: HistoricalCorpsLookup;
+    historicalOobIdLookup?: HistoricalOobIdLookup;
     sidToMun: Map<string, string>;
     initOverrideChangeCount: number;
 }
@@ -1420,7 +1442,7 @@ export async function buildScenarioStartupState(
     let settlementDataRaw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> | undefined;
     try {
         const ethnicityData = await loadSettlementEthnicityData(join(baseDir, 'data/derived/settlement_ethnicity_data.json'));
-        const sids = Array.from(graph.settlements.keys()).sort((a, b) => a.localeCompare(b));
+        const sids = Array.from(graph.settlements.keys()).sort(strictCompare);
         const raw: Array<{ sid: string; ethnicity?: { composition?: Record<string, number> }; population?: number }> = [];
         for (const sid of sids) {
             const entry = ethnicityData.by_settlement_id?.[sid];
@@ -1459,15 +1481,15 @@ export async function buildScenarioStartupState(
         oobBrigades = await loadOobBrigades(baseDir);
     }
     /** Historical emergent brigade data: (faction, home_mun) -> entries in deterministic name order. */
-    const oobEntriesByFactionMun = new Map<string, Array<{ name: string; corps: string | null }>>();
+    const oobEntriesByFactionMun = new Map<string, Array<{ id: string; name: string; corps: string | null }>>();
     for (const b of oobBrigades) {
         const key = `${b.faction}:${b.home_mun}`;
         const list = oobEntriesByFactionMun.get(key) ?? [];
-        list.push({ name: b.name, corps: b.corps ?? null });
+        list.push({ id: b.id, name: b.name, corps: b.corps ?? null });
         oobEntriesByFactionMun.set(key, list);
     }
     for (const list of oobEntriesByFactionMun.values()) {
-        list.sort((a, b) => a.name.localeCompare(b.name));
+        list.sort((a, b) => strictCompare(a.name, b.name));
     }
     const historicalNameLookup =
         oobEntriesByFactionMun.size > 0
@@ -1481,6 +1503,13 @@ export async function buildScenarioStartupState(
             ? (faction: string, mun_id: string, ordinal: number): string | null => {
                 const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
                 return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.corps ?? null : null;
+            }
+            : undefined;
+    const historicalOobIdLookup =
+        oobEntriesByFactionMun.size > 0
+            ? (faction: string, mun_id: string, ordinal: number): string | null => {
+                const list = oobEntriesByFactionMun.get(`${faction}:${mun_id}`);
+                return list != null && ordinal >= 1 && ordinal <= list.length ? list[ordinal - 1]?.id ?? null : null;
             }
             : undefined;
     let sidToMun = buildSidToMunFromSettlements(graph.settlements);
@@ -1585,7 +1614,7 @@ export async function buildScenarioStartupState(
             }
             if (bySettlementId) {
                 const pc = state.political.political_controllers ?? {};
-                const sortedOsids = Object.keys(bySettlementId).sort((a, b) => a.localeCompare(b));
+                const sortedOsids = Object.keys(bySettlementId).sort(strictCompare);
                 for (const osid of sortedOsids) {
                     const faction = bySettlementId[osid];
                     if (faction) pc[osid] = faction;
@@ -1753,7 +1782,8 @@ export async function buildScenarioStartupState(
         state.meta.peace_scheduled_referendum_turn = null;
         state.meta.peace_scheduled_war_start_turn = null;
         state.meta.peace_war_start_control_path = null;
-        state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week ?? 26;
+        state.meta.rbih_hrhb_war_earliest_turn = scenario.rbih_hrhb_war_earliest_week
+            ?? DEFAULT_RBIH_HRHB_WAR_EARLIEST_TURN;
         if (scenario.enable_rbih_hrhb_dynamics === false) {
             state.meta.enable_rbih_hrhb_dynamics = false;
         }
@@ -1922,6 +1952,7 @@ export async function buildScenarioStartupState(
         operationalCentroids,
         historicalNameLookup,
         historicalCorpsLookup,
+        historicalOobIdLookup,
         sidToMun,
         initOverrideChangeCount
     };
@@ -2040,6 +2071,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             operationalCentroids,
             historicalNameLookup,
             historicalCorpsLookup,
+            historicalOobIdLookup,
             sidToMun,
             initOverrideChangeCount
         } = startup;
@@ -2358,6 +2390,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     municipalityHqSettlement: Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
                     historicalNameLookup,
                     historicalCorpsLookup,
+                    historicalOobIdLookup,
                     eventDefinitions,
                     // LANE D-CONTENT (Path A): wire per-turn displacement event sink.
                     // Engine clear-displacement-event-log step calls this with the
@@ -2368,6 +2401,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                         }
                     }
                 });
+                assertTurnSuccess(runResult);
                 state = runResult.nextState;
                 turnReport = runResult.report;
                 autoResolveOpportunityProposalReviews(
@@ -2653,7 +2687,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
                     agg.stances[entry.stance] = (agg.stances[entry.stance] ?? 0) + 1;
                 }
                 corpsSummary = [...byFaction.entries()]
-                    .sort((a, b) => a[0].localeCompare(b[0]))
+                    .sort((a, b) => strictCompare(a[0], b[0]))
                     .map(([faction, agg]) => ({
                         faction,
                         corps_count: agg.count,
@@ -2947,7 +2981,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             | undefined;
         if (botManager) {
             const benchmarks: BotBenchmarkDefinition[] = [];
-            const factions = [...(state.factions ?? [])].map((f) => f.id).sort((a, b) => a.localeCompare(b));
+            const factions = [...(state.factions ?? [])].map((f) => f.id).sort(strictCompare);
             for (const faction of factions) {
                 const profile = getBotStrategyProfile(faction);
                 for (const target of profile.benchmarks) {
@@ -3117,7 +3151,7 @@ export async function runScenario(options: RunScenarioOptions): Promise<RunScena
             ...(botBenchmarkSummary ? { bot_benchmark_evaluation: botBenchmarkSummary } : {}),
             ...(victoryEvaluation ? { victory: victoryEvaluation } : {}),
             ...(breachDiagnostic ? { breach_diagnostic: breachDiagnostic } : {}),
-            ...(state.meta.phase === 'war'
+            ...(state.meta.phase === 'war' && attackResolutionSummary.weeks_at_war === 0
                 ? {
                       early_war_note: {
                           message:

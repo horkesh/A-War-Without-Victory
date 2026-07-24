@@ -1,3 +1,5 @@
+import { strictCompare } from '../state/validateGameState.js';
+
 /**
  * Browser-safe pure parser for settlement graph data.
  * No Node/fs imports. Used by warroom to build LoadedSettlementGraph from fetched JSON.
@@ -131,7 +133,7 @@ export function buildGraphFromJSON(
 ): LoadedSettlementGraph {
     const settlementsUnsorted = parseSettlements(settlementsJson);
     const edges = parseEdges(edgesJson);
-    const sortedSids = Array.from(settlementsUnsorted.keys()).sort((a, b) => a.localeCompare(b));
+    const sortedSids = Array.from(settlementsUnsorted.keys()).sort(strictCompare);
     const settlements = new Map<string, SettlementRecord>();
     for (const sid of sortedSids) {
         const r = settlementsUnsorted.get(sid);

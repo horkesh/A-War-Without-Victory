@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import type { NegotiationCapitalStepReport } from '../state/negotiation_capital.js';
 import { spendNegotiationCapital } from '../state/negotiation_capital.js';
@@ -172,7 +172,9 @@ async function runViewMode(opts: ViewOptions): Promise<void> {
 
     // Run N turns
     for (let t = 0; t < opts.turns; t += 1) {
-        const { nextState, report } = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        const result = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        assertTurnSuccess(result);
+        const { nextState, report } = result;
         state = nextState;
 
         const capitalReport: NegotiationCapitalStepReport | undefined = report.negotiation_capital;
@@ -229,6 +231,7 @@ async function runViewMode(opts: ViewOptions): Promise<void> {
     // Write report if requested
     if (opts.reportOutPath) {
         const finalReport = await runTurn(state, { seed: state.meta.seed, settlementEdges: graph.edges });
+        assertTurnSuccess(finalReport);
         const reportOutput: any = {
             turn: finalReport.nextState.meta.turn,
             negotiation_capital: finalReport.report.negotiation_capital

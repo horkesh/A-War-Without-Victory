@@ -7,6 +7,7 @@
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import type { BrigadeComposition, FactionId } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { HistoricalDecoration } from '../state/decoration_types.js';
 import type { EquipmentClass } from '../state/recruitment_types.js';
 import { isValidEquipmentClass, RECRUITMENT_DEFAULTS } from '../state/recruitment_types.js';
@@ -285,9 +286,9 @@ export async function loadOobBrigades(baseDir: string): Promise<OobBrigade[]> {
     }
 
     result.sort((a, b) => {
-        const fc = a.faction.localeCompare(b.faction);
+        const fc = strictCompare(a.faction, b.faction);
         if (fc !== 0) return fc;
-        return a.name.localeCompare(b.name);
+        return strictCompare(a.name, b.name);
     });
     return result;
 }
@@ -344,9 +345,9 @@ export async function loadOobCorps(baseDir: string): Promise<OobCorps[]> {
     }
 
     result.sort((a, b) => {
-        const fc = a.faction.localeCompare(b.faction);
+        const fc = strictCompare(a.faction, b.faction);
         if (fc !== 0) return fc;
-        return a.name.localeCompare(b.name);
+        return strictCompare(a.name, b.name);
     });
     return result;
 }

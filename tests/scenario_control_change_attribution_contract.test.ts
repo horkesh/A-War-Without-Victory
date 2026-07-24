@@ -73,6 +73,7 @@ describe('scenario control change attribution contract', () => {
         control_change_attribution?: {
           total_changes: number;
           combat: number;
+          paramilitary: number;
           consolidation: number;
           abandoned: number;
           init_overrides: number;
@@ -106,6 +107,7 @@ describe('scenario control change attribution contract', () => {
 
       expect(summary.control_change_attribution?.total_changes).toBe(
         (summary.control_change_attribution?.combat ?? 0)
+        + (summary.control_change_attribution?.paramilitary ?? 0)
         + (summary.control_change_attribution?.consolidation ?? 0)
         + (summary.control_change_attribution?.abandoned ?? 0)
         + (summary.control_change_attribution?.init_overrides ?? 0)

@@ -273,6 +273,58 @@ describe('SettlementDetailContent supply status surface', () => {
       .toContain('Estimated from municipality records');
   });
 
+  it('explains the four-turn hostile-takeover delay when displacement records exist but remain empty', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 100,
+        },
+      },
+      displacementByMun: {
+        testmun: {
+          originalPopulation: 100,
+          currentPopulation: 100,
+          displacedOut: 0,
+          displacedIn: 0,
+          lostPopulation: 0,
+        },
+      },
+    }));
+
+    const copy = screen.getByTestId('settlement-displacement-empty').textContent ?? '';
+    expect(copy).toContain('No displacement recorded');
+    expect(copy).toContain('only after hostile control holds for four turns');
+    expect(copy).not.toMatch(/takeover (?:is|has been) active/i);
+  });
+
+  it('does not show hostile-takeover timing copy once displacement is recorded', () => {
+    render(createElement(SettlementDetailContent, {
+      ...BASE_PROPS,
+      osidPropertiesMap: {
+        'op:test:a': {
+          mun1990_id: 'testmun',
+          mun1990_name: 'Testmun',
+          population_total: 100,
+        },
+      },
+      displacementByMun: {
+        testmun: {
+          originalPopulation: 100,
+          currentPopulation: 88,
+          displacedOut: 12,
+          displacedIn: 0,
+          lostPopulation: 0,
+        },
+      },
+    }));
+
+    expect(screen.queryByTestId('settlement-displacement-empty')).toBeNull();
+    expect(document.body.textContent).not.toContain('only after hostile control holds for four turns');
+  });
+
   it('renders stationed-unit drilldowns as native buttons when they are clickable', () => {
     const onFormationClick = vi.fn();
     render(createElement(SettlementDetailContent, {

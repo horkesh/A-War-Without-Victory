@@ -71,6 +71,89 @@ export function factionHasPresenceInMun(
     return false;
 }
 
+function resolveExactControlledCandidate(
+    state: GameState,
+    faction: FactionId,
+    candidate: string | undefined,
+    canonicalToOperational?: CanonicalToOperationalMap,
+): string | undefined {
+    if (!candidate) return undefined;
+    const controllers = state.political.political_controllers ?? {};
+    if (canonicalToOperational) {
+        const resolved = resolveLocationOsid(candidate, canonicalToOperational);
+        if (resolved && controllers[resolved] === faction) return resolved;
+        if (!candidate.startsWith('op:')) return undefined;
+    }
+    return controllers[candidate] === faction ? candidate : undefined;
+}
+
+/** Resolve physical placement only to territory controlled by the exact faction. */
+export function resolveFactionControlledFormationPlacement(
+    state: GameState,
+    faction: FactionId,
+    homeMun: MunicipalityId,
+    municipalityHqSettlement: Record<string, string>,
+    sidToMun: Map<SettlementId, MunicipalityId>,
+    canonicalToOperational?: CanonicalToOperationalMap,
+    preferredCandidates: readonly (string | undefined)[] = [],
+    preferAuthoredPlacement = false,
+): string | undefined {
+    const homePrefix = `op:${homeMun}:`;
+    const belongsToHomeMunicipality = (candidate: string): boolean => (
+        sidToMun.get(candidate) === homeMun || candidate.startsWith(homePrefix)
+    );
+
+    // Authored OOB placement is authoritative when the exact destination is
+    // controlled, including a deployment away from the formation's home municipality.
+    if (preferAuthoredPlacement) {
+        for (const candidate of preferredCandidates) {
+            const preferredPlacement = resolveExactControlledCandidate(
+                state,
+                faction,
+                candidate,
+                canonicalToOperational,
+            );
+            if (preferredPlacement) return preferredPlacement;
+        }
+    }
+
+    const hqPlacement = resolveExactControlledCandidate(
+        state,
+        faction,
+        municipalityHqSettlement[homeMun],
+        canonicalToOperational,
+    );
+    if (hqPlacement && belongsToHomeMunicipality(hqPlacement)) return hqPlacement;
+
+    const controllers = state.political.political_controllers ?? {};
+    const fallbacks = new Set<string>();
+    const addControlledCandidate = (candidate: string): void => {
+        if (canonicalToOperational) {
+            const resolved = resolveLocationOsid(candidate, canonicalToOperational);
+            if (
+                resolved
+                && belongsToHomeMunicipality(resolved)
+                && controllers[resolved] === faction
+            ) {
+                fallbacks.add(resolved);
+            }
+            if (!candidate.startsWith('op:')) return;
+        }
+        if (belongsToHomeMunicipality(candidate) && controllers[candidate] === faction) {
+            fallbacks.add(candidate);
+        }
+    };
+
+    for (const [sid, munId] of sidToMun) {
+        if (munId === homeMun) addControlledCandidate(sid);
+    }
+    for (const osid of Object.keys(controllers)) {
+        if (osid.startsWith(homePrefix)) addControlledCandidate(osid);
+    }
+
+    return [...fallbacks].sort(strictCompare)[0];
+}
+
 /**
  * Build sid → mun1990_id map from a settlements Map (e.g. LoadedSettlementGraph.settlements).
  * Only includes entries where mun1990_id is present.
@@ -104,7 +187,7 @@ export function buildOsidToMunFromReverseMap(
     canonicalSidToMun: Map<SettlementId, MunicipalityId>
 ): Map<SettlementId, MunicipalityId> {
     const out = new Map<SettlementId, MunicipalityId>();
-    const osids = Array.from(operationalToCanonical.keys()).sort((a, b) => a.localeCompare(b));
+    const osids = Array.from(operationalToCanonical.keys()).sort(strictCompare);
     for (const osid of osids) {
         // Primary: extract municipality from OSID key format op:<mun>:<cluster>
         const parts = osid.split(':');
@@ -213,15 +296,31 @@ export function createOobFormations(
         // RS brigades are created at turn 0 (VRS JNA exception).
         if (isBottomUp && b.faction !== 'RS') continue;
         if (state.military.formations[b.id]) continue;
-        // Enclave brigades bypass municipality presence check — they spawn in enemy-surrounded
-        // territory at their home_osid (e.g. 255th at Teočak in RS-controlled Ugljevik).
+        // Enclaves bypass municipality-level presence, but not exact-control placement.
         if (!isEnclaveBrigade(b) && !factionHasPresenceInMun(state, b.faction, b.home_mun, sidToMun)) continue;
         const hq_sid = municipalityHqSettlement[b.home_mun];
+        const location_osid = resolveFactionControlledFormationPlacement(
+            state,
+            b.faction,
+            b.home_mun,
+            municipalityHqSettlement,
+            sidToMun,
+            canonicalToOperational,
+            [b.deployment_osid, b.home_osid],
+            true,
+        );
+        if (!location_osid) continue;
+        const exactHomeOsid = resolveExactControlledCandidate(
+            state,
+            b.faction,
+            b.home_osid,
+            canonicalToOperational,
+        );
         const tags = [`mun:${b.home_mun}`];
         if (b.corps) tags.push(`corps:${b.corps}`);
         if (b.tags) tags.push(...b.tags);
-        if (b.home_osid) tags.push(FIXED_HOME_OSID_TAG);
-        tags.sort((x, y) => x.localeCompare(y));
+        if (exactHomeOsid === location_osid) tags.push(FIXED_HOME_OSID_TAG);
+        tags.sort(strictCompare);
         const eligiblePop = getEligiblePopulationCount(population1991ByMun, b.home_mun, b.faction);
         const ordinal = (brigadeCountByFactionMun.get(`${b.faction}:${b.home_mun}`) ?? 0) + 1;
         brigadeCountByFactionMun.set(`${b.faction}:${b.home_mun}`, ordinal);
@@ -229,10 +328,6 @@ export function createOobFormations(
             population1991ByMun != null && eligiblePop < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE
                 ? resolveFormationName(b.faction, b.home_mun, 'brigade', ordinal)
                 : b.name;
-        // Resolve location OSID: deployment_osid overrides home_osid for initial placement (elite units deployed away from home).
-        const location_osid = b.deployment_osid
-            ?? b.home_osid
-            ?? (canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined);
         // Per-brigade personnel/cohesion overrides (April 1992 defaults; Phase 0 gameplay overrides these).
         const initialPersonnel = b.initial_personnel ?? FACTION_INITIAL_PERSONNEL[b.faction] ?? MIN_BRIGADE_SPAWN;
         const initialCohesion = b.initial_cohesion ?? FACTION_INITIAL_COHESION[b.faction] ?? 60;
@@ -248,7 +343,7 @@ export function createOobFormations(
             personnel: initialPersonnel,
             cohesion: initialCohesion,
             origin_mun: b.home_mun,
-            home_osid: b.home_osid ?? location_osid,
+            home_osid: exactHomeOsid ?? location_osid,
             ...(b.honor ? { honor: b.honor } : {}),
             ...(hq_sid ? { hq_sid } : {}),
             ...(location_osid != null ? { location_osid } : {})

@@ -31,7 +31,7 @@ const sharedBoundaryCache = new WeakMap<EdgeRecord[], Map<Osid, Osid[]>>();
 
 /**
  * Build OSID → sorted list of adjacent OSIDs from edge list.
- * Determinism: each neighbor list is sorted with localeCompare.
+ * Determinism: each neighbor list is sorted with strictCompare.
  * Memoized per-edges-array (see module header).
  */
 export function buildOsidAdjacency(edges: EdgeRecord[]): Map<Osid, Osid[]> {

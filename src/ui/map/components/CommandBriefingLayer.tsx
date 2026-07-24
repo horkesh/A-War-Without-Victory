@@ -1,15 +1,20 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CommandBriefingItemView, SummaryFocusSection } from '../data/types';
 import type { ArmyHQTab } from '../../shared/shellHandoff';
 import { useGameStore } from '../store/gameStore';
 import { t } from '../i18n';
 import { inspectOnField, openArmyHQBriefingForCorps, openArmyHQTab } from '../utils/shellNavigation';
-import { resolveCommandBriefingHeadline, resolveCommandBriefingItemCopy } from '../data/commandBriefingCopy';
+import {
+  isCommandBriefingItemCurrent,
+  resolveCommandBriefingHeadline,
+  resolveCommandBriefingItemCopy,
+} from '../data/commandBriefingCopy';
 
 interface CommandBriefingLayerProps {
   onOpenSummary: (focus?: SummaryFocusSection) => void;
   onOpenEnclaves: () => void;
   onOpenPeacePlan?: () => void;
+  suppressedTurn?: number | null;
 }
 
 const SEVERITY_DOT: Record<CommandBriefingItemView['severity'], string> = {
@@ -36,21 +41,30 @@ const SEVERITY_BG: Record<CommandBriefingItemView['severity'], string> = {
   info: 'bg-sky-950/30',
 };
 
-export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeacePlan }: CommandBriefingLayerProps) {
-  const commandBriefing = useGameStore((state) => state.loadedGameState?.commandBriefing);
+export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeacePlan, suppressedTurn = null }: CommandBriefingLayerProps) {
+  const loadedGameState = useGameStore((state) => state.loadedGameState);
+  const commandBriefing = loadedGameState?.commandBriefing;
   const setArmyHQExpandedCorpsId = useGameStore((state) => state.setArmyHQExpandedCorpsId);
   const setIsOperationsPanelOpen = useGameStore((state) => state.setIsOperationsPanelOpen);
   const devMode = useGameStore((state) => state.devMode);
   const [dismissed, setDismissed] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const turn = useGameStore((state) => state.loadedGameState?.turn);
-  const lastDismissedTurn = useRef<number | null>(null);
+  const lastObservedTurn = useRef<number | null>(turn ?? null);
 
-  // Reset dismissed state when turn changes (new briefing after advance)
-  if (turn != null && lastDismissedTurn.current !== turn && dismissed) {
+  useEffect(() => {
+    if (turn == null || lastObservedTurn.current === turn) return;
+    lastObservedTurn.current = turn;
     setDismissed(false);
-  }
+    setExpanded(false);
+  }, [turn]);
 
-  if (!commandBriefing || commandBriefing.items.length === 0 || dismissed) return null;
+  const visibleItems = commandBriefing?.items.filter((item) => (
+    isCommandBriefingItemCurrent(item, loadedGameState?.pendingPeacePlan)
+  )) ?? [];
+
+  if (turn != null && suppressedTurn === turn) return null;
+  if (!commandBriefing || visibleItems.length === 0 || dismissed) return null;
 
   const handleOpenItem = (item: CommandBriefingItemView) => {
     if (item.briefingCategory === 'active_operations') {
@@ -104,7 +118,8 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
 
   // Position below the floating crest (~120px tall) — dev strip adds another row
   const topOffset = devMode ? 'top-[8.5rem]' : 'top-[7.5rem]';
-  const criticalCount = commandBriefing.items.filter((i) => i.severity === 'critical').length;
+  const visibleBriefing = { ...commandBriefing, items: visibleItems };
+  const criticalCount = visibleItems.filter((i) => i.severity === 'critical').length;
   const hasCritical = criticalCount > 0;
 
   return (
@@ -114,35 +129,47 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
     >
       <div
         data-testid="command-briefing-banner"
-        className={`pointer-events-auto relative mt-2 rounded-md backdrop-blur-md shadow-2xl px-4 py-4 ${
+        className={`pointer-events-auto relative mt-2 rounded-md backdrop-blur-md shadow-2xl px-4 ${expanded ? 'py-4' : 'py-2.5'} ${
           hasCritical
             ? 'bg-red-950/95 border-2 border-red-500/70 alert-pulse'
             : 'bg-panel-bg/95 border border-panel-border'
         }`}
       >
         {/* Header line with persistent alert count */}
-        <div className="flex items-center justify-start gap-3 pr-24 mb-3">
+        <div className={`flex min-w-0 flex-wrap items-center gap-2.5 ${expanded ? 'mb-3' : ''}`}>
           <span className="text-xs font-mono font-bold uppercase tracking-[0.25em] text-accent-gold">
             {t('commandBriefing.title')}
           </span>
-          <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-red-600 text-white text-[11px] font-bold tabular-nums">
-            {commandBriefing.items.length}
+          <span className="inline-flex items-center justify-center min-w-[1.5rem] h-6 px-1.5 rounded-full bg-red-600 text-white text-xs font-bold tabular-nums">
+            {visibleItems.length}
           </span>
-          <span className="text-[10px] font-mono font-semibold text-text-primary">
-            {resolveCommandBriefingHeadline(commandBriefing)}
+          <span className="min-w-0 flex-1 text-xs font-mono font-semibold text-text-primary">
+            {resolveCommandBriefingHeadline(visibleBriefing)}
           </span>
           <button
             type="button"
-            onClick={() => { lastDismissedTurn.current = turn ?? null; setDismissed(true); }}
-            className="absolute right-4 top-3 flex items-center gap-1.5 px-2.5 py-1.5 rounded bg-red-950/50 border border-red-500/30 text-red-400 hover:bg-red-900/50 hover:border-red-500/50 hover:text-red-300 transition-all"
+            data-testid="command-briefing-toggle"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+            className="shrink-0 rounded border border-accent-gold/45 bg-black/25 px-2.5 py-1.5 text-xs font-mono font-bold uppercase tracking-wider text-accent-gold hover:bg-accent-gold/15"
           >
-            <span className="text-[14px] font-bold leading-none">&times;</span>
-            <span className="text-[8px] font-mono font-bold uppercase tracking-wider">{t('commandBriefing.dismiss')}</span>
+            {t(expanded ? 'commandBriefing.collapse' : 'commandBriefing.expand')}
+          </button>
+          <button
+            type="button"
+            data-testid="command-briefing-dismiss"
+            aria-label={t('commandBriefing.dismiss')}
+            title={t('commandBriefing.dismiss')}
+            onClick={() => setDismissed(true)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-red-500/35 bg-red-950/50 text-[14px] font-bold leading-none text-red-300 hover:bg-red-900/60 hover:text-white"
+          >
+            &times;
           </button>
         </div>
         {/* Item cards — taller, severity-colored */}
+        {expanded && (
         <div className="flex flex-col gap-2.5 max-h-[38vh] overflow-y-auto pr-1">
-          {commandBriefing.items.map((item) => {
+          {visibleItems.map((item) => {
             const copy = resolveCommandBriefingItemCopy(item);
             return (
               <button
@@ -157,7 +184,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
                     {copy.title}
                   </span>
                   {copy.actionLabel && (
-                    <span className="text-[9px] font-mono uppercase text-accent-gold/60 group-hover:text-accent-gold transition-colors">
+                    <span className="text-xs font-mono uppercase text-accent-gold/60 group-hover:text-accent-gold transition-colors">
                       {copy.actionLabel}
                     </span>
                   )}
@@ -166,6 +193,7 @@ export function CommandBriefingLayer({ onOpenSummary, onOpenEnclaves, onOpenPeac
             );
           })}
         </div>
+        )}
       </div>
       {/* CSS animation for critical pulse */}
       <style>{`

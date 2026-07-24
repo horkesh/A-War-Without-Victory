@@ -7,6 +7,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import {
+    classifyBrigadesByTerritory,
     rescueUnassignedLoanedElitesInTerritory,
     MAX_RESERVES_PER_SECTOR,
 } from '../src/sim/combat/corps_front_sectors.js';
@@ -121,6 +122,57 @@ describe('rescueUnassignedLoanedElitesInTerritory reserve cap', () => {
         const assignedCopy = [...sector.assigned_brigade_ids];
         assignedCopy.sort();
         expect(sector.assigned_brigade_ids).toEqual(assignedCopy);
+    });
+
+    it('does not rescue a loaned elite before it is field-ready', () => {
+        const sector = makeSector();
+        const sectors: Record<string, CorpsFrontSector> = { [sector.sector_id]: sector };
+        const formingElite = makeLoanedElite('elite_forming', {
+            readiness: 'forming',
+        });
+        const formations: Record<FormationId, FormationState> = {
+            ['elite_forming' as FormationId]: formingElite,
+        };
+
+        rescueUnassignedLoanedElitesInTerritory(sectors, formations);
+
+        expect(sector.assigned_brigade_ids).not.toContain('elite_forming');
+        expect(sector.reserve_brigade_ids).not.toContain('elite_forming');
+    });
+
+    it('does not add a forming loaned elite through territory classification fallback', () => {
+        const sector = makeSector({
+            sub_segments: [{
+                sub_segment_id: 'subseg:vrs_drina:0',
+                edge_ids: ['op:test:a__op:test:b'],
+                friendly_osids: ['op:test:a'],
+                enemy_osids: ['op:test:b'],
+                primary_brigade_ids: [],
+                length_edges: 1,
+            }],
+        });
+        const formingElite = makeLoanedElite('elite_forming_classification', {
+            readiness: 'forming',
+        });
+        const formations = {
+            elite_forming_classification: formingElite,
+        } as Record<FormationId, FormationState>;
+
+        classifyBrigadesByTerritory(
+            [sector],
+            'RS',
+            formations,
+            new Map([
+                ['op:test:a', ['op:test:b']],
+                ['op:test:b', ['op:test:a']],
+            ]),
+            new Set(['op:test:a']),
+            new Map([['op:test:a', 0]]),
+            new Map(),
+        );
+
+        expect(sector.assigned_brigade_ids).not.toContain('elite_forming_classification');
+        expect(sector.reserve_brigade_ids).not.toContain('elite_forming_classification');
     });
 
     it('MAX_RESERVES_PER_SECTOR is 1', () => {

@@ -7,6 +7,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
+import { releaseMapWebGlContext } from '../map/mapContextLifecycle';
 import type { GeoJSONSource } from 'maplibre-gl';
 import type { FeatureCollection, Feature, Polygon } from 'geojson';
 import { useGameStore } from '../store/gameStore';
@@ -158,7 +159,7 @@ export const Minimap = React.memo(function Minimap() {
     });
 
     return () => {
-      map.remove();
+      releaseMapWebGlContext(map);
       mapRef.current = null;
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps

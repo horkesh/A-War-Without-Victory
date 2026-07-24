@@ -257,7 +257,7 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
 
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
-            <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
+            <div className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
                 {t('forceReadiness.title')}
             </div>
             <div className="space-y-1">
@@ -269,17 +269,17 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                         <div className="min-w-0 flex-1">
                             <div className="text-[12px] leading-snug flex items-center gap-2">
                                 <span className="text-text-primary font-bold">{item.corpsName}</span>
-                                <span className="text-[10px] text-text-secondary">—</span>
-                                <span className={`text-[10px] font-bold uppercase tracking-wider ${GRADE_COLORS[item.grade]}`}>
+                                <span className="text-xs text-text-secondary">—</span>
+                                <span className={`text-xs font-bold uppercase tracking-wider ${GRADE_COLORS[item.grade]}`}>
                                     {readinessGradeLabel(item.grade)}
                                 </span>
                                 {item.hasThreat && (
-                                    <span className="text-[9px] text-red-400 font-bold animate-pulse tracking-widest">
+                                    <span className="text-xs text-red-400 font-bold animate-pulse tracking-widest">
                                         {t('forceReadiness.incoming')}
                                     </span>
                                 )}
                             </div>
-                            <div className="text-[11px] text-text-secondary leading-snug flex flex-wrap gap-x-3">
+                            <div className="text-xs text-text-secondary leading-snug flex flex-wrap gap-x-3">
                                 {item.ineffectiveCount > 0 && (
                                     <span>{t('forceReadiness.ineffectiveCount', { count: item.ineffectiveCount })}</span>
                                 )}
@@ -311,12 +311,12 @@ export function ForceReadiness({ items, onCorpsClick }: ForceReadinessProps) {
                             </div>
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
-                            <span className="text-[10px] text-text-secondary/60 italic">{recommendationLabel(item)}</span>
+                            <span className="text-xs text-text-secondary/60 italic">{recommendationLabel(item)}</span>
                             {onCorpsClick && (
                                 <button
                                     type="button"
                                     onClick={() => onCorpsClick(item.corpsId)}
-                                    className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap"
+                                    className="text-amber-400 hover:underline cursor-pointer text-xs whitespace-nowrap"
                                 >
                                     {t('forceReadiness.openCorps')}
                                 </button>

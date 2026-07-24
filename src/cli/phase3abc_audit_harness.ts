@@ -49,7 +49,7 @@ import {
     resetEnablePhase3C,
     setEnablePhase3C
 } from '../sim/pressure/phase3c_exhaustion_collapse_gating.js';
-import { runTurn, type TurnReport } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn, type TurnReport } from '../sim/turn_pipeline.js';
 import type { GameState } from '../state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../state/game_state.js';
 import type { EdgeRecord } from '../map/settlements.js';
@@ -1196,11 +1196,13 @@ async function runScenarioAndWriteReport(s: ScenarioSpec, enablePhase3B: boolean
         for (let t = 1; t <= TURNS; t++) {
             built.postureProgram?.(state, t, built.seed);
 
-            const { nextState, report }: { nextState: GameState; report: TurnReport } = await runTurn(state, {
+            const result = await runTurn(state, {
                 seed: state.meta.seed,
                 settlementEdges: edges,
                 applyNegotiation: false
             });
+            assertTurnSuccess(result);
+            const { nextState, report }: { nextState: GameState; report: TurnReport } = result;
             state = nextState;
 
             // Phase 3A effective edges for diffusion/metrics (rebuilt per turn to match current state).

@@ -1,7 +1,7 @@
 /**
  * War phase: Per-turn pool growth from conscription, displacement, and cross-ethnic contributions.
  * Runs before phase-ii-brigade-reinforcement so freshly mobilized manpower is available same turn.
- * Deterministic: sorted mun_id then faction; controller tie-break by localeCompare.
+ * Deterministic: sorted mun_id then faction; controller tie-break by strictCompare.
  */
 
 import type { SettlementRecord } from '../../map/settlements.js';

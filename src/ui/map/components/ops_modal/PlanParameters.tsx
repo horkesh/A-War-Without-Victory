@@ -109,10 +109,10 @@ function ParamGroup({ label, description, children }: { label: string; descripti
         <div className="flex flex-col gap-1.5 rounded-md border border-[rgba(180,160,130,0.12)]
                         bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
             <div className="flex items-baseline gap-2">
-                <span className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-secondary/60">
+                <span className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/60">
                     {label}
                 </span>
-                <span className="text-[9px] text-text-secondary/45 italic">
+                <span className="text-xs text-text-secondary/45 italic">
                     {description}
                 </span>
             </div>
@@ -143,7 +143,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             bg-[rgba(20,18,15,0.4)] px-2.5 py-1.5">
                 <label
                     htmlFor="plan-params-op-name"
-                    className="text-[9px] font-bold uppercase tracking-[0.18em] text-text-secondary/60"
+                    className="text-xs font-bold uppercase tracking-[0.18em] text-text-secondary/60"
                 >
                     {t('opsPlanning.param.name')}
                 </label>
@@ -153,7 +153,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                     value={plan.opName}
                     onChange={(e) => onUpdate({ opName: e.target.value })}
                     className="bg-[rgba(40,36,30,0.5)] border border-[rgba(180,160,130,0.1)] rounded px-2 py-0.5
-                               text-[11px] text-white w-52 focus:border-accent-gold/40 focus:outline-none"
+                               text-xs text-white w-52 focus:border-accent-gold/40 focus:outline-none"
                     style={{ fontFamily: "'Courier New', monospace" }}
                 />
             </div>
@@ -166,11 +166,11 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         type="button"
                         onClick={() => onUpdate({ opType })}
                         title={t(PILL_TITLE_KEYS[opType])}
-                        className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
+                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.opType === opType)}`}
                     >
                         <span>{t(OP_TYPE_MESSAGE_KEYS[opType])}</span>
-                        <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
+                        <span className="text-xs font-normal normal-case tracking-normal text-text-secondary/55">
                             {t(PILL_SUBTITLES[opType])}
                         </span>
                     </button>
@@ -185,11 +185,11 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         type="button"
                         onClick={() => onUpdate({ tempo })}
                         title={t(PILL_TITLE_KEYS[tempo])}
-                        className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
+                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
                             ${pillClass(plan.tempo === tempo)}`}
                     >
                         <span>{t(TEMPO_MESSAGE_KEYS[tempo])}</span>
-                        <span className="text-[9px] font-normal normal-case tracking-normal text-text-secondary/55">
+                        <span className="text-xs font-normal normal-case tracking-normal text-text-secondary/55">
                             {t(PILL_SUBTITLES[tempo])}
                         </span>
                     </button>
@@ -207,11 +207,11 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                             type="button"
                             onClick={() => onUpdate({ tolerance })}
                             title={t(PILL_TITLE_KEYS[tolerance])}
-                            className={`px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all flex flex-col items-center
+                            className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all flex flex-col items-center
                                 ${isDanger ? dangerPillClass(isActive) : pillClass(isActive)}`}
                         >
                             <span>{t(TOLERANCE_MESSAGE_KEYS[tolerance])}</span>
-                            <span className={`text-[9px] font-normal normal-case tracking-normal ${
+                            <span className={`text-xs font-normal normal-case tracking-normal ${
                                 isDanger ? 'text-red-400/70' : 'text-text-secondary/50'
                             }`}>
                                 {t(PILL_SUBTITLES[tolerance])}
@@ -230,7 +230,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         title={plan.artilleryPreparation
                             ? t('opsPlanning.param.artyOnTitle')
                             : t('opsPlanning.param.artyOffTitle')}
-                        className={`px-2.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider transition-all
+                        className={`px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider transition-all
                             ${plan.artilleryPreparation
                                 ? 'bg-red-500/15 text-red-400 border border-red-400/30 shadow-[0_0_6px_rgba(239,68,68,0.12)]'
                                 : 'bg-transparent text-text-secondary/70 border border-transparent hover:text-text-secondary hover:bg-[rgba(180,160,130,0.06)]'
@@ -239,7 +239,7 @@ export function PlanParameters({ plan, onUpdate }: PlanParametersProps) {
                         {plan.artilleryPreparation ? `\u25C6 ${t('opsPlanning.param.artyOn')}` : `\u25C7 ${t('opsPlanning.param.artyOff')}`}
                     </button>
                     {/* WP1e: Artillery prep info text */}
-                    <span className={`text-[9px] mt-0.5 ${
+                    <span className={`text-xs mt-0.5 ${
                         plan.artilleryPreparation ? 'text-red-400/60' : 'text-text-secondary/40'
                     }`}>
                         {plan.artilleryPreparation ? t('opsPlanning.param.artyOnDetail') : t('opsPlanning.param.artyOffDetail')}

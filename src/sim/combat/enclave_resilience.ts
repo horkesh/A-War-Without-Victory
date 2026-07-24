@@ -18,7 +18,7 @@
  * Deterministic: sorted iteration, pure arithmetic.
  */
 
-import type { EnclaveResilienceEntry, FactionId, GameState } from '../../state/game_state.js';
+import type { EnclaveResilienceEntry, FactionId, FormationState, GameState } from '../../state/game_state.js';
 import type { SupplyStateByOsidReport } from '../../state/supply_state_derivation.js';
 import type { SupplyReachabilityOsidReport } from '../../state/supply_reachability_osid.js';
 import {
@@ -35,10 +35,39 @@ import { strictCompare } from '../../state/validateGameState.js';
 
 /** Canonical tag string used to identify enclave brigades in formation tags. */
 export const ENCLAVE_TAG = 'enclave';
+export const FIXED_HOME_OSID_TAG = 'placement:fixed_home_osid';
 
 /** Check whether a formation is tagged as an enclave brigade. */
 export function isEnclaveBrigade(f: { tags?: string[] }): boolean {
     return f.tags?.includes(ENCLAVE_TAG) === true;
+}
+
+export function getFormationEnclaveForMovement(
+    formation: FormationState,
+    originOsid: string,
+): EnclaveDefinition | null {
+    const isFixedHome = formation.tags?.includes(FIXED_HOME_OSID_TAG) === true;
+    if (!isEnclaveBrigade(formation) && !isFixedHome) return null;
+
+    for (const anchor of [formation.home_osid, originOsid]) {
+        if (!anchor) continue;
+        const enclave = ENCLAVE_DEFINITIONS.find(definition => (
+            definition.faction === formation.faction
+            && osidBelongsToEnclave(anchor, definition)
+        ));
+        if (enclave) return enclave;
+    }
+    return null;
+}
+
+export function isEnclaveMovementDestinationAllowed(
+    formation: FormationState,
+    originOsid: string,
+    destinationOsid: string,
+): boolean {
+    const enclave = getFormationEnclaveForMovement(formation, originOsid);
+    if (!enclave) return !isEnclaveBrigade(formation);
+    return osidBelongsToEnclave(destinationOsid, enclave);
 }
 
 // ── Enclave definitions ─────────────────────────────────────────────────────

@@ -32,26 +32,32 @@ function buildTinyState(): { state: GameState; edges: EdgeRecord[] } {
             // This gives friction_factor = 3000/3000 = 1.0, so effective_weight = 3, matching pre-Phase 9 behavior
             F_A_0001: {
                 id: 'F_A_0001',
-                faction: 'A',
+                faction: 'RBiH',
                 name: 'Test Formation 1',
                 created_turn: 0,
+                kind: 'brigade',
                 status: 'active',
+                location_osid: 's1',
                 assignment: { kind: 'edge', edge_id: 's1__s2' }
             },
             F_A_0002: {
                 id: 'F_A_0002',
-                faction: 'A',
+                faction: 'RBiH',
                 name: 'Test Formation 2',
                 created_turn: 0,
+                kind: 'brigade',
                 status: 'active',
+                location_osid: 's1',
                 assignment: { kind: 'edge', edge_id: 's1__s2' }
             },
             F_A_0003: {
                 id: 'F_A_0003',
-                faction: 'A',
+                faction: 'RBiH',
                 name: 'Test Formation 3',
                 created_turn: 0,
+                kind: 'brigade',
                 status: 'active',
+                location_osid: 's1',
                 assignment: { kind: 'edge', edge_id: 's1__s2' }
             }
         },

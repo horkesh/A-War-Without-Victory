@@ -151,7 +151,7 @@ function DecisionHistoryRecordRow({
       >
         <span
           data-testid="decision-history-turn"
-          className="w-16 shrink-0 text-[10px] font-mono tabular-nums text-text-muted"
+          className="w-16 shrink-0 text-xs font-mono tabular-nums text-text-muted"
         >
           {turnToDateString(decision.turn)}
         </span>
@@ -167,12 +167,12 @@ function DecisionHistoryRecordRow({
           <span
             data-testid="decision-history-chosen-option"
             {...(diagMode ? { 'data-response-id': decision.response_id } : {})}
-            className="mt-0.5 block truncate text-[10px] leading-snug text-text-secondary"
+            className="mt-0.5 block truncate text-xs leading-snug text-text-secondary"
             title={optionLabel}
           >
             {optionLabel}
           </span>
-          <span className="mt-1 block text-[8px] uppercase tracking-[0.12em] text-text-muted">
+          <span className="mt-1 block text-xs uppercase tracking-[0.12em] text-text-muted">
             {diagMode && (
               <span data-testid="decision-history-family">{t('decisionHistory.familyDiagnostic', { family })}</span>
             )}
@@ -199,7 +199,7 @@ function DecisionHistoryRecordRow({
         </span>
         <span
           data-testid={diverged ? 'decision-history-divergence-badge' : 'decision-history-historical-badge'}
-          className={`shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.12em] ${
+          className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.12em] ${
             diverged
               ? 'bg-amber-400/15 text-amber-300'
               : 'bg-panel-border/45 text-text-secondary'
@@ -213,7 +213,7 @@ function DecisionHistoryRecordRow({
           data-testid="decision-history-row-expanded"
           className="border-t border-panel-border/50 bg-black/15 px-3 pb-2 pt-2"
         >
-          <div className="mb-1 text-[8px] uppercase tracking-[0.12em] text-text-muted">
+          <div className="mb-1 text-xs uppercase tracking-[0.12em] text-text-muted">
             {t('decisionHistory.descendants.heading', { count: descendants.length })}
           </div>
           {descendants.length > 0 ? (
@@ -223,7 +223,7 @@ function DecisionHistoryRecordRow({
                   key={id}
                   data-testid="decision-history-descendant-row"
                   {...(diagMode ? { 'data-event-id': id } : {})}
-                  className="text-[10px] leading-snug text-text-secondary"
+                  className="text-xs leading-snug text-text-secondary"
                 >
                   {resolveDescendantLabel(id, eventCatalog)}
                 </li>
@@ -232,7 +232,7 @@ function DecisionHistoryRecordRow({
           ) : (
             <div
               data-testid="decision-history-no-descendants"
-              className="mb-2 text-[10px] italic text-text-muted"
+              className="mb-2 text-xs italic text-text-muted"
             >
               {t('decisionHistory.descendants.empty')}
             </div>
@@ -240,9 +240,9 @@ function DecisionHistoryRecordRow({
           {sourceNoteExcerpt && (
             <div
               data-testid="decision-history-source-note"
-              className="text-[10px] leading-relaxed text-text-secondary"
+              className="text-xs leading-relaxed text-text-secondary"
             >
-              <span className="text-[8px] uppercase tracking-[0.12em] text-text-muted">
+              <span className="text-xs uppercase tracking-[0.12em] text-text-muted">
                 {t('decisionHistory.sourcePrefix')}
               </span>
               {sourceNoteExcerpt}
@@ -288,16 +288,16 @@ function DecisionHistoryRecordsSection({
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-accent-gold">
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-accent-gold">
             {t('decisionHistory.records.title')}
           </div>
-          <div className="mt-1 text-[10px] text-text-secondary">
+          <div className="mt-1 text-xs text-text-secondary">
             {t('decisionHistory.records.subtitle')}
           </div>
         </div>
         <div
           data-testid="decision-history-count"
-          className="shrink-0 text-[10px] font-semibold tabular-nums text-text-secondary"
+          className="shrink-0 text-xs font-semibold tabular-nums text-text-secondary"
         >
           {t(decisions.length === 1 ? 'decisionHistory.count.one' : 'decisionHistory.count.many', { count: decisions.length })}
         </div>
@@ -305,7 +305,7 @@ function DecisionHistoryRecordsSection({
       {decisions.length === 0 ? (
         <div
           data-testid="decision-history-no-decisions"
-          className="mt-3 rounded border border-panel-border/60 bg-black/20 px-3 py-3 text-[11px] text-text-secondary"
+          className="mt-3 rounded border border-panel-border/60 bg-black/20 px-3 py-3 text-xs text-text-secondary"
         >
           {t('decisionHistory.noDecisions')}
         </div>
@@ -368,35 +368,35 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
     >
       <div className="flex items-start justify-between gap-3 border-b border-panel-border/70 pb-3">
         <div>
-          <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-accent-gold">{t('decisionConsequences.title')}</div>
-          <div className="mt-1 text-[11px] text-text-secondary">
+          <div className="text-xs font-bold uppercase tracking-[0.18em] text-accent-gold">{t('decisionConsequences.title')}</div>
+          <div className="mt-1 text-xs text-text-secondary">
             {t('decisionConsequences.subtitle')}
           </div>
         </div>
         <div className="text-right">
-          <div className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionConsequences.filed')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">{t('decisionConsequences.filed')}</div>
           <div className="text-[18px] font-bold text-text-primary">{summary.total}</div>
         </div>
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
         <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.recordsRoute')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.recordsRoute')}</div>
           <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{summary.recordsRouteCount}</div>
         </div>
         <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.chronicleRoute')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.chronicleRoute')}</div>
           <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">{summary.chronicleRouteCount}</div>
         </div>
         <div className="rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.latestTurn')}</div>
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.latestTurn')}</div>
           <div className="mt-1 text-[14px] font-bold tabular-nums text-text-primary">
             {summary.latestTurn != null ? turnToDateString(summary.latestTurn) : '-'}
           </div>
         </div>
         <div className="min-w-0 rounded border border-panel-border/60 bg-black/20 px-2 py-2">
-          <div className="text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.families')}</div>
-          <div className="mt-1 truncate text-[11px] text-text-secondary">
+          <div className="text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{t('decisionConsequences.families')}</div>
+          <div className="mt-1 truncate text-xs text-text-secondary">
             {visibleRecords.length > 0
               ? Array.from(new Map(visibleRecords.map((record) => [record.familyId, familyLabel(record)])).values()).join(' / ')
               : '-'}
@@ -437,17 +437,17 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="truncate text-[13px] font-bold text-text-primary">{title}</div>
-                    <div className="mt-1 text-[10px] uppercase tracking-[0.14em] text-text-muted">
+                    <div className="mt-1 text-xs uppercase tracking-[0.14em] text-text-muted">
                       {`${familyLabel(record)} / ${turnToDateString(record.turn)}`}
                     </div>
                   </div>
-                  <div className="shrink-0 rounded border border-accent-gold/35 bg-accent-gold/10 px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-accent-gold">
+                  <div className="shrink-0 rounded border border-accent-gold/35 bg-accent-gold/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold">
                     {outcome}
                   </div>
                 </div>
-                <div className="mt-2 text-[11px] leading-5 text-text-secondary">{detail}</div>
+                <div className="mt-2 text-xs leading-5 text-text-secondary">{detail}</div>
                 <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary">
+                  <span className="rounded border border-panel-border/60 bg-panel-bg/60 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">
                     {t('decisionConsequences.filedTo', { route: routeLabel(record) })}
                   </span>
                   {record.recordTarget === 'chronicle' ? (
@@ -456,12 +456,12 @@ export function DecisionConsequenceRecordsPanel({ eventCatalog }: DecisionConseq
                       data-testid="decision-consequence-open-chronicle"
                       data-record-id={record.id}
                       onClick={() => openChronicleDecisionRecord(useGameStore.getState(), record.id)}
-                      className="rounded border border-panel-border bg-black/20 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
+                      className="rounded border border-panel-border bg-black/20 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary transition-colors hover:border-accent-gold/45 hover:text-accent-gold"
                     >
                       {t('decisionConsequences.openChronicle')}
                     </button>
                   ) : (
-                    <span className="rounded border border-panel-border/50 bg-black/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.12em] text-text-muted">
+                    <span className="rounded border border-panel-border/50 bg-black/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] text-text-muted">
                       {t('decisionConsequences.reviewInRecords')}
                     </span>
                   )}

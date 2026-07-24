@@ -1,11 +1,24 @@
 'use strict';
 
 function strictCompare(a, b) {
-  return String(a).localeCompare(String(b));
+  const left = String(a);
+  const right = String(b);
+  return left < right ? -1 : left > right ? 1 : 0;
 }
 
 function asTurn(value) {
   return Number.isFinite(Number(value)) ? Number(value) : 0;
+}
+
+function replacementMatterKey(event, details) {
+  if ((event.type ?? event.event_type) !== 'replacement_suggested') return null;
+  const outgoingOfficerId = details.outgoing_officer_id ?? event.outgoing_officer_id ?? event.current_commander_id;
+  const corpsId = event.corps_id;
+  const proposedSuccessorId = details.new_officer_id ?? event.new_officer_id ?? event.officer_id;
+  if (![outgoingOfficerId, corpsId, proposedSuccessorId].every((value) => typeof value === 'string' && value.length > 0)) {
+    return null;
+  }
+  return `replacement:${outgoingOfficerId}:${corpsId}:${proposedSuccessorId}`;
 }
 
 function fileOfficerDecisionRecord(state, event, decision, details = {}) {
@@ -18,6 +31,7 @@ function fileOfficerDecisionRecord(state, event, decision, details = {}) {
   }
 
   const turn = asTurn(event.turn);
+  const matterKey = replacementMatterKey(event, details);
   const record = {
     id: `officer:${turn}:${event.event_id}:${decision}`,
     turn,
@@ -30,10 +44,15 @@ function fileOfficerDecisionRecord(state, event, decision, details = {}) {
     decision,
     ...(typeof details.new_officer_id === 'string' ? { new_officer_id: details.new_officer_id } : {}),
     ...(typeof details.outgoing_officer_id === 'string' ? { outgoing_officer_id: details.outgoing_officer_id } : {}),
+    ...(matterKey ? { matter_key: matterKey } : {}),
   };
 
   const existing = Array.isArray(state.military.officer_decision_history)
-    ? state.military.officer_decision_history.filter((entry) => entry && entry.id !== record.id)
+    ? state.military.officer_decision_history.filter((entry) => (
+      entry
+      && entry.id !== record.id
+      && (!matterKey || replacementMatterKey(entry, entry) !== matterKey)
+    ))
     : [];
   existing.push(record);
   existing.sort((a, b) => {

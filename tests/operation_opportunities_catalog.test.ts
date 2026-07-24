@@ -358,8 +358,11 @@ function buildState(opts: BuildOpts): GameState {
             formations[id] = {
                 id,
                 name: id,
+                kind: 'brigade',
+                status: 'active',
                 faction: 'RBiH',
-                own_corps_cmd: 'arbih_5th_corps',
+                corps_id: 'arbih_5th_corps',
+                personnel: 1500,
                 strength: 1500,
                 officer_quality: 0.85,
                 cohesion: 65,

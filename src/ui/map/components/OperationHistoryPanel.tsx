@@ -7,9 +7,8 @@ import { useGameStore } from '../store/gameStore';
 import { getOsidDisplayName } from '../utils/osidDisplayName';
 import type { LoadedGameState } from '../data/types';
 import {
-    filterPlayerFacingActiveOperations,
     filterPlayerFacingFormations,
-    filterPlayerFacingOperationHistory,
+    resolvePlayerFacingFaction,
 } from '../../shared/playerVisibility';
 import {
     getPlayerSafeMilitaryFactionName,
@@ -19,6 +18,7 @@ import {
 import { turnToDateString } from '../utils/formatters';
 import { deriveOperationOutcomeCategory, buildOperationTrendSummary } from '../data/command_strain';
 import { t, type MessageKey } from '../i18n';
+import { projectOperationLifecycle } from '../data/operationLifecycleProjection';
 
 // --- Faction styling ---
 const FACTION_COLOR: Record<string, string> = {
@@ -73,8 +73,8 @@ const GRADE_FACTOR_LABEL: Record<string, string> = {
     objective_pct: 'Objective progress',
     exchange_ratio: 'Exchange ratio',
     attack_tempo: 'Attack tempo',
-    tempo: 'Tempo',
-    preservation: 'Force preservation',
+    tempo: 'Duration efficiency',
+    preservation: 'Ending force vs start',
 };
 
 const COMMANDER_ASSESSMENT_LABEL: Record<string, string> = {
@@ -179,14 +179,14 @@ function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
 
     if (category === 'direct_intervention') {
         return (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/60">
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/60">
                 {t('operationHistory.directIntervention')}
             </span>
         );
     }
     // reluctant_compliance
     return (
-        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-amber-400/5 text-amber-500/80 border border-amber-400/40">
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold uppercase tracking-wider bg-amber-400/5 text-amber-500/80 border border-amber-400/40">
             {t('operationHistory.approvedAgainstRecommendation')}
         </span>
     );
@@ -195,7 +195,7 @@ function OutcomeCategoryBadge({ assessmentAtLaunch, wasForce }: {
 function FactionTag({ faction }: { faction: string }) {
     return (
         <span
-            className="text-[9px] font-mono px-1 rounded border"
+            className="text-xs font-mono px-1 rounded border"
             style={{ color: FACTION_COLOR[faction] ?? '#aaa', borderColor: `${FACTION_COLOR[faction] ?? '#555'}44` }}
         >
             {getPlayerSafeMilitaryFactionName(faction, t('operationHistory.unknownForce'))}
@@ -210,7 +210,7 @@ function StarRating({ stars, verdict }: { stars: number; verdict: string }) {
             <span className="text-[12px]" style={{ color: '#d4a644' }}>
                 {'\u2605'.repeat(filled) + '\u2606'.repeat(5 - filled)}
             </span>
-            <span className="text-[9px] text-text-secondary font-mono">{verdict}</span>
+            <span className="text-xs text-text-secondary font-mono">{verdict}</span>
         </span>
     );
 }
@@ -248,7 +248,7 @@ function CasualtyLine({ label, cas }: { label: string; cas: { killed: number; wo
     const total = cas.killed + cas.wounded;
     if (total === 0) return null;
     return (
-        <div className="text-[10px] text-text-muted tabular-nums">
+        <div className="text-xs text-text-muted tabular-nums">
             {t('operationHistory.casualtyLine', { label, total: total.toLocaleString(), killed: cas.killed.toLocaleString(), wounded: cas.wounded.toLocaleString() })}
         </div>
     );
@@ -260,7 +260,7 @@ function ExchangeRatio({ suffered, inflicted }: { suffered: { killed: number; wo
     const ratio = totalSuffered > 0 ? (totalInflicted / totalSuffered) : (totalInflicted > 0 ? Infinity : 0);
     const color = ratio >= 2.0 ? 'text-green-400' : ratio >= 1.0 ? 'text-amber-400' : 'text-red-400';
     return (
-        <span className={`text-[10px] font-mono ${color}`}>
+        <span className={`text-xs font-mono ${color}`}>
             {ratio === Infinity
                 ? t('operationHistory.exchangeNoFriendlyLosses')
                 : t('operationHistory.exchange', { ratio: ratio.toFixed(2) })}
@@ -285,7 +285,7 @@ function ObjectiveReviewChip({
     className: string;
 }) {
     return (
-        <span className={`inline-flex items-center rounded border px-2 py-1 text-[10px] font-mono ${className}`}>
+        <span className={`inline-flex items-center rounded border px-2 py-1 text-xs font-mono ${className}`}>
             {label}
         </span>
     );
@@ -310,14 +310,14 @@ function OperationDeepReview({
     return (
         <div className="rounded border border-panel-border/50 bg-panel-bg/60 p-2.5 space-y-2">
             <div className="flex items-center justify-between gap-3">
-                <div className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('operationHistory.deepReview')}</div>
-                <div className="text-[10px] text-text-muted tabular-nums">
+                <div className="text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('operationHistory.deepReview')}</div>
+                <div className="text-xs text-text-muted tabular-nums">
                     {op.objectives_targeted.length > 0
                         ? t('operationHistory.objectivesHeldCount', { captured: op.objectives_captured.length, targeted: op.objectives_targeted.length })
                         : t('operationHistory.noObjectiveChain')}
                 </div>
             </div>
-            <div className="grid gap-1 text-[10px] text-text-secondary sm:grid-cols-2">
+            <div className="grid gap-1 text-xs text-text-secondary sm:grid-cols-2">
                 <span>{t('operationHistory.result', { outcome: formatOutcome(op.outcome) })}</span>
                 <span>{t('operationHistory.attacks', { count: op.total_attacks.toLocaleString() })}</span>
                 <span>{t('operationHistory.casualties', { suffered: suffered.toLocaleString(), inflicted: inflicted.toLocaleString() })}</span>
@@ -402,14 +402,14 @@ function CompletedOpCard({
                     <div className="min-w-0">
                         <div className="flex items-center gap-1.5 mb-0.5">
                             <FactionTag faction={op.faction} />
-                            <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
+                            <span className="text-xs text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
                         </div>
                         {op.commander_name && (
-                            <div className="text-[9px] text-text-muted">
+                            <div className="text-xs text-text-muted">
                                 {t('operationHistory.oic', { commander: `${op.commander_rank ? `${op.commander_rank} ` : ''}${op.commander_name}` })}
                             </div>
                         )}
-                        <div className="text-[9px] text-text-muted">
+                        <div className="text-xs text-text-muted">
                             {t('operationHistory.completedMeta', { corps: corpsName, range: dateRange, duration: op.duration_turns, objectives: objRate })}
                         </div>
                     </div>
@@ -417,13 +417,13 @@ function CompletedOpCard({
                         {grade ? (
                             <StarRating stars={grade.stars} verdict={grade.verdict} />
                         ) : (
-                            <span className="text-[9px] text-text-secondary font-mono uppercase">{t('operationHistory.gradeUnreported')}</span>
+                            <span className="text-xs text-text-secondary font-mono uppercase">{t('operationHistory.gradeUnreported')}</span>
                         )}
-                        <span className={`text-[10px] font-mono ${OUTCOME_COLOR[op.outcome] ?? 'text-text-secondary'}`}>
+                        <span className={`text-xs font-mono ${OUTCOME_COLOR[op.outcome] ?? 'text-text-secondary'}`}>
                             {OUTCOME_LABEL[op.outcome] ?? t('operationHistory.outcomeUnreported')}
                         </span>
                         {op.recovery_reason && RECOVERY_REASON_BADGE[op.recovery_reason] && (
-                            <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase ${RECOVERY_REASON_BADGE[op.recovery_reason].className}`}>
+                            <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-semibold uppercase ${RECOVERY_REASON_BADGE[op.recovery_reason].className}`}>
                                 {RECOVERY_REASON_BADGE[op.recovery_reason].label}
                             </span>
                         )}
@@ -432,7 +432,7 @@ function CompletedOpCard({
                             wasForce={op.force_launched ?? false}
                         />
                         {op.force_launched && op.ca_cost_at_launch != null && (
-                            <span className="text-[9px] text-amber-300/70 font-mono tabular-nums">{op.ca_cost_at_launch} CA</span>
+                            <span className="text-xs text-amber-300/70 font-mono tabular-nums">{op.ca_cost_at_launch} CA</span>
                         )}
                     </div>
                 </div>
@@ -455,7 +455,7 @@ function CompletedOpCard({
                     {(op.equipment_lost.tanks + op.equipment_lost.artillery > 0 ||
                       op.equipment_destroyed.tanks + op.equipment_destroyed.artillery > 0 ||
                       op.equipment_captured.tanks + op.equipment_captured.artillery > 0) && (
-                        <div className="text-[10px] text-text-muted space-y-0.5">
+                        <div className="text-xs text-text-muted space-y-0.5">
                             {(op.equipment_lost.tanks > 0 || op.equipment_lost.artillery > 0) && (
                                 <div>{t('operationHistory.equipmentLost', { tanks: op.equipment_lost.tanks, artillery: op.equipment_lost.artillery })}</div>
                             )}
@@ -470,7 +470,7 @@ function CompletedOpCard({
 
                     {/* Grade factors */}
                     {gradeFactors.length > 0 && (
-                        <div className="text-[9px] text-text-muted flex gap-3 flex-wrap">
+                        <div className="text-xs text-text-muted flex gap-3 flex-wrap">
                             {gradeFactors.map(([key, val]) => (
                                 <span key={key}>
                                     {formatGradeFactorLabel(key)}: <span className="text-text-secondary tabular-nums">{formatGradeFactorValue(val)}</span>
@@ -481,7 +481,7 @@ function CompletedOpCard({
 
                     {/* Command Record — expanded provenance sentence */}
                     {(op.commander_assessment_at_launch != null || op.force_launched) && (
-                        <div className="text-[9px] text-text-muted border-t border-panel-border/30 pt-1.5">
+                        <div className="text-xs text-text-muted border-t border-panel-border/30 pt-1.5">
                             <span className="uppercase font-bold text-text-secondary">{t('operationHistory.commandRecord')} </span>
                             {op.force_launched ? (
                                 <>
@@ -509,13 +509,13 @@ function CompletedOpCard({
                     )}
                     {/* Institutional strain note — only for direct interventions */}
                     {op.force_launched && (
-                        <div className="text-[9px] text-amber-500/80 italic">
+                        <div className="text-xs text-amber-500/80 italic">
                             {t('operationHistory.directInterventionStrainNote')}
                         </div>
                     )}
 
                     {captureProvenanceNotice && (
-                        <div className="text-[9px] text-amber-300/80 border-t border-panel-border/30 pt-1.5">
+                        <div className="text-xs text-amber-300/80 border-t border-panel-border/30 pt-1.5">
                             <span className="uppercase font-bold text-amber-300">{t('operationHistory.aarProvenance')} </span>
                             {captureProvenanceNotice}
                         </div>
@@ -524,26 +524,26 @@ function CompletedOpCard({
                     {/* Objectives */}
                     {op.objectives_targeted.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.objectivesHeldAtEnd')}</div>
+                            <div className="text-xs uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.objectivesHeldAtEnd')}</div>
                             <div className="space-y-0.5">
                                 {op.objectives_targeted.map(osid => {
                                     const heldAtEnd = op.objectives_captured.includes(osid);
                                     const loggedDuringOperation = op.objectives_logged_captured?.includes(osid) ?? false;
                                     return (
-                                        <div key={osid} className="text-[10px] flex items-center gap-1.5">
+                                        <div key={osid} className="text-xs flex items-center gap-1.5">
                                             <span className={heldAtEnd ? (loggedDuringOperation ? 'text-green-400' : 'text-amber-300') : 'text-red-400'}>
                                                 {heldAtEnd ? (loggedDuringOperation ? '\u2713' : '\u25cf') : '\u2717'}
                                             </span>
                                             <span className="text-text-primary capitalize">{getOsidDisplayName(osid, osidDisplayNames)}</span>
                                             {heldAtEnd && !loggedDuringOperation && (
-                                                <span className="text-[9px] text-amber-300/80 uppercase tracking-wide">{t('operationHistory.heldAtEnd')}</span>
+                                                <span className="text-xs text-amber-300/80 uppercase tracking-wide">{t('operationHistory.heldAtEnd')}</span>
                                             )}
                                         </div>
                                     );
                                 })}
                             </div>
                             {op.objectives_logged_captured && op.objectives_logged_captured.length > 0 && (
-                                <div className="mt-1 text-[9px] text-text-muted">
+                                <div className="mt-1 text-xs text-text-muted">
                                     {t('operationHistory.loggedDuringOperation', { objectives: op.objectives_logged_captured.map((osid) => getOsidDisplayName(osid, osidDisplayNames)).join(', ') })}
                                 </div>
                             )}
@@ -553,11 +553,11 @@ function CompletedOpCard({
                     {/* Per-axis breakdown */}
                     {op.axis_summaries && op.axis_summaries.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.axes')}</div>
+                            <div className="text-xs uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.axes')}</div>
                             {op.axis_summaries.map((ax, index) => {
                                 const axisCaptured = new Set(ax.objectives_captured);
                                 return (
-                                    <div key={ax.axis_id} className="text-[10px] border-l-2 border-panel-border/50 pl-2 mb-1">
+                                    <div key={ax.axis_id} className="text-xs border-l-2 border-panel-border/50 pl-2 mb-1">
                                         <div className="text-text-primary font-semibold">{formatAxisDisplayName(ax.axis_name, index)}</div>
                                         <div className="text-text-muted">
                                             {ax.objectives_targeted.length > 0
@@ -606,7 +606,7 @@ function CompletedOpCard({
                     {/* Weekly timeline */}
                     {op.weekly_log.length > 0 && (
                         <div>
-                            <div className="text-[9px] uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.weeklyTimeline')}</div>
+                            <div className="text-xs uppercase tracking-wide text-text-secondary mb-0.5">{t('operationHistory.weeklyTimeline')}</div>
                             <div className="space-y-0.5 max-h-32 overflow-auto">
                                 {op.weekly_log.map((entry, i) => {
                                     const casualties = entry.casualties_suffered.killed + entry.casualties_suffered.wounded;
@@ -618,7 +618,7 @@ function CompletedOpCard({
                                     }
                                     const heldObjectiveNames = entry.objectives_captured_this_turn.map(osid => getOsidDisplayName(osid, osidDisplayNames));
                                     return (
-                                        <div key={i} className="text-[9px] flex items-start gap-2">
+                                        <div key={i} className="text-xs flex items-start gap-2">
                                             <span className="text-text-muted tabular-nums shrink-0 w-20">{turnToDateString(entry.turn)}</span>
                                             <span className={`shrink-0 min-w-[5.5rem] ${PHASE_COLOR[entry.phase] ?? 'text-text-muted'}`}>{formatWeeklyPhaseLabel(entry.phase)}</span>
                                             <div className="flex-1 min-w-0 flex flex-wrap gap-x-2 gap-y-0.5">
@@ -661,20 +661,20 @@ function ActiveOpCard({ op, corpsName }: { op: ActiveOp; corpsName: string }) {
                 <div className="min-w-0">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <FactionTag faction={op.faction} />
-                        <span className="text-[11px] text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
+                        <span className="text-xs text-text-primary font-semibold truncate">{getOperationDisplayName(op.operation_name, op.corps_id, op.operation_display_name)}</span>
                     </div>
                     {op.commander_name && (
-                        <div className="text-[9px] text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>
+                        <div className="text-xs text-text-muted">{t('operationHistory.oic', { commander: op.commander_name })}</div>
                     )}
-                    <div className="text-[9px] text-text-muted">
+                    <div className="text-xs text-text-muted">
                         {t('operationHistory.activeMeta', { corps: corpsName, start: turnToDateString(op.started_turn), brigades: op.participating_brigades.length })}
                     </div>
                 </div>
                 <div className="flex flex-col items-end shrink-0 gap-0.5">
-                    <span className={`text-[10px] font-mono uppercase ${PHASE_COLOR[op.phase] ?? 'text-text-secondary'}`}>
+                    <span className={`text-xs font-mono uppercase ${PHASE_COLOR[op.phase] ?? 'text-text-secondary'}`}>
                         {getPlayerSafeOperationPhaseLabel(op.phase)}
                     </span>
-                    <span className="text-[10px] text-text-muted tabular-nums">
+                    <span className="text-xs text-text-muted tabular-nums">
                         {op.objectives_count > 0
                             ? t('operationHistory.activeProgress', { objectives: objRate, attacks: op.attacks })
                             : t('operationHistory.activeProgressNoObjectives', { attacks: op.attacks })}
@@ -699,6 +699,7 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
     const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
     const focusedOperationHistoryId = useGameStore((s) => s.focusedOperationHistoryId);
     const [tab, setTab] = useState<Tab>('active');
+    const operationLifecycle = useMemo(() => projectOperationLifecycle(loadedGameState), [loadedGameState]);
     const corpsNameById = useMemo(
         () =>
             new Map(
@@ -715,12 +716,15 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
 
     if (!isOpen || !loadedGameState) return null;
 
-    const history = filterPlayerFacingOperationHistory(loadedGameState);
-    const active = filterPlayerFacingActiveOperations(loadedGameState);
-    const sortedHistory = [...history].sort((a, b) => b.ended_turn - a.ended_turn);
+    const activeRows = operationLifecycle.activeRows;
+    const playerFaction = resolvePlayerFacingFaction(loadedGameState) ?? t('operationHistory.playerFaction');
+    const sortedHistoryRows = [...operationLifecycle.historyRows].sort((a, b) => (
+        b.operation.ended_turn - a.operation.ended_turn || a.rawIndex - b.rawIndex
+    ));
+    const history = sortedHistoryRows.map((row) => row.operation);
 
     const tabClass = (t: Tab) =>
-        `px-3 py-1 text-[10px] uppercase tracking-wide font-semibold transition-colors border-b-2 ${
+        `px-3 py-1 text-xs uppercase tracking-wide font-semibold transition-colors border-b-2 ${
             tab === t
                 ? 'text-accent-gold border-accent-gold'
                 : 'text-text-secondary border-transparent hover:text-text-primary'
@@ -730,50 +734,93 @@ export function OperationHistoryPanel({ isOpen, onClose, embedded }: OperationHi
         <div>
             <div className="flex border-b border-panel-border mb-3">
                 <button type="button" className={tabClass('active')} onClick={() => setTab('active')}>
-                    {t('operationHistory.tab.active')} {active.length > 0 && <span className="ml-1 text-text-muted">({active.length})</span>}
+                    {t('operationHistory.tab.active')} {activeRows.length > 0 && <span className="ml-1 text-text-muted">({activeRows.length})</span>}
                 </button>
                 <button type="button" className={tabClass('history')} onClick={() => setTab('history')}>
-                    {t('operationHistory.tab.history')} {history.length > 0 && <span className="ml-1 text-text-muted">({history.length})</span>}
+                    {t('operationHistory.tab.history')}{' '}
+                    {operationLifecycle.counts.archived > 0 && (
+                        <span className="ml-1 text-text-muted">
+                            ({operationLifecycle.counts.completed}/{operationLifecycle.counts.archived})
+                        </span>
+                    )}
                 </button>
             </div>
             <div>
                 {tab === 'active' && (
-                    active.length === 0 ? (
-                        <div className="text-text-muted text-center py-8 text-[11px]">{t('operationHistory.noActive')}</div>
+                    activeRows.length === 0 ? (
+                        <div className="text-text-muted text-center py-8 text-[12px]">
+                            {operationLifecycle.counts.proposed > 0
+                                ? t('operationHistory.proposedOnly', { count: operationLifecycle.counts.proposed })
+                                : t('operationHistory.noActive')}
+                        </div>
                     ) : (
-                        active.map((op) => (
+                        activeRows.map((row) => (
                             <ActiveOpCard
-                                key={`${op.corps_id}:${op.operation_name}:${op.started_turn}`}
-                                op={op}
-                                corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                                key={row.id}
+                                op={row.operation}
+                                corpsName={getCorpsDisplayName(corpsNameById, row.operation.corps_id)}
                             />
                         ))
                     )
                 )}
                 {tab === 'history' && (
-                    sortedHistory.length === 0 ? (
-                        <div className="text-text-muted text-center py-8 text-[11px]">{t('operationHistory.noCompleted')}</div>
-                    ) : (
-                        <>
+                    <>
+                        {sortedHistoryRows.length === 0 && operationLifecycle.excludedHistoryRows.length === 0 && (
+                            <div className="text-text-muted text-center py-8 text-[12px]">
+                                {t('operationHistory.noCompleted', { faction: playerFaction })}
+                            </div>
+                        )}
+                        {sortedHistoryRows.length > 0 && (
+                            <>
                             {(() => {
-                                const trend = buildOperationTrendSummary(sortedHistory);
+                                const trend = buildOperationTrendSummary(history);
                                 return trend.trendNotice ? (
-                                    <div className="mb-2 px-2 py-1 rounded bg-amber-500/5 border border-amber-500/20 text-[9px] text-amber-400/80">
+                                    <div className="mb-2 px-2 py-1 rounded bg-amber-500/5 border border-amber-500/20 text-xs text-amber-400/80">
                                         {t('operationHistory.commandRelationship', { notice: trend.trendNotice })}
                                     </div>
                                 ) : null;
                             })()}
-                            {sortedHistory.map((op) => (
+                            {sortedHistoryRows.map((row) => (
                                 <CompletedOpCard
-                                    key={op.operation_id}
-                                    op={op}
-                                    corpsName={getCorpsDisplayName(corpsNameById, op.corps_id)}
+                                    key={row.id}
+                                    op={row.operation}
+                                    corpsName={getCorpsDisplayName(corpsNameById, row.operation.corps_id)}
                                     osidDisplayNames={osidDisplayNames}
-                                    focused={op.operation_id === focusedOperationHistoryId}
+                                    focused={row.operation.operation_id === focusedOperationHistoryId}
                                 />
                             ))}
-                        </>
-                    )
+                            </>
+                        )}
+                        {operationLifecycle.excludedHistoryRows.length > 0 && (
+                            <section className="mt-3 border-t border-panel-border pt-3" aria-label={t('operationHistory.exclusions.title')}>
+                                <div className="mb-2 text-[12px] font-semibold text-text-primary">
+                                    {t('operationHistory.exclusions.summary', {
+                                        count: operationLifecycle.excludedHistoryRows.length,
+                                        faction: playerFaction,
+                                    })}
+                                </div>
+                                <div className="space-y-1">
+                                    {operationLifecycle.excludedHistoryRows.map((row) => (
+                                        <div
+                                            key={row.id}
+                                            data-testid="operation-history-exclusion"
+                                            data-operation-history-id={row.id}
+                                            className="flex items-start justify-between gap-3 border-l-2 border-panel-border px-2 py-1 text-[12px]"
+                                        >
+                                            <span className="text-text-secondary">
+                                                {t('operationHistory.exclusions.record', { index: row.rawIndex + 1 })}
+                                            </span>
+                                            <span className="text-right text-text-muted">
+                                                {row.reason === 'non_player_faction'
+                                                    ? t('operationHistory.exclusions.nonPlayerFaction', { faction: row.sourceFaction ?? t('operationHistory.unknownForce') })
+                                                    : t('operationHistory.exclusions.invalidRecord')}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        )}
+                    </>
                 )}
             </div>
         </div>

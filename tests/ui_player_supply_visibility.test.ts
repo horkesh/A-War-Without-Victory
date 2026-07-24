@@ -196,6 +196,15 @@ describe('buildPlayerSupplyVisibility', () => {
     });
     const view = buildPlayerSupplyVisibility(state)!;
     expect(view.isolatedFormationCount).toBe(1);
+    expect(view.isolatedFormations).toEqual([
+      {
+        id: 'arbih_a',
+        label: 'arbih_a',
+        location: 'Bihac (Bi)',
+      },
+    ]);
+    expect(view.evidence.join('\n')).toContain('arbih_a at Bihac (Bi)');
+    expect(view.evidence.join('\n')).toContain('inspect the formation and relief routes in War Summary');
     expect(view.severity).toBe('critical');
     expect(view.evidence.some((line) => /isolated|formation|brigade/i.test(line))).toBe(true);
   });

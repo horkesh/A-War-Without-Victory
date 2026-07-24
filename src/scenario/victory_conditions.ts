@@ -1,4 +1,5 @@
 import type { GameState } from '../state/game_state.js';
+import { strictCompare } from '../state/validateGameState.js';
 import type { FactionVictoryCondition, ScenarioVictoryConditions } from './scenario_types.js';
 
 export interface FactionVictoryEvaluation {
@@ -48,7 +49,7 @@ function evaluateFactionCondition(
     if (condition.required_settlements_all && condition.required_settlements_all.length > 0) {
         const missing = condition.required_settlements_all
             .filter((sid) => (controllers[sid] ?? null) !== faction)
-            .sort((a, b) => a.localeCompare(b));
+            .sort(strictCompare);
         const ok = missing.length === 0;
         checks.required_settlements_all = { missing, passed: ok };
         passed = passed && ok;
@@ -72,7 +73,7 @@ export function evaluateVictoryConditions(
         (state.factions ?? []).map((f) => [f.id, warExhaustion[f.id] ?? f.profile.exhaustion ?? 0] as const)
     );
     const evaluations = Object.keys(victoryConditions.by_faction)
-        .sort((a, b) => a.localeCompare(b))
+        .sort(strictCompare)
         .map((faction) =>
             evaluateFactionCondition(
                 faction,
@@ -82,7 +83,7 @@ export function evaluateVictoryConditions(
                 controllers
             )
         );
-    const winners = evaluations.filter((e) => e.passed).map((e) => e.faction).sort((a, b) => a.localeCompare(b));
+    const winners = evaluations.filter((e) => e.passed).map((e) => e.faction).sort(strictCompare);
     if (winners.length === 0) {
         return { result: 'no_winner', winner: null, co_winners: [], by_faction: evaluations };
     }

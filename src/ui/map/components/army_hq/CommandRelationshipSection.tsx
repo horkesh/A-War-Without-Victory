@@ -169,7 +169,7 @@ export function CommandRelationshipSection({
             <div className="flex flex-col gap-2">
                 {/* 1. Strain status row — only when strain > 0 */}
                 {hasUnreportedCommandMetrics && (
-                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-[10px] font-mono" data-testid="command-relationship-unreported">
+                    <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs font-mono" data-testid="command-relationship-unreported">
                         {!commandStrainReported && (
                             <>
                                 <span className="text-text-secondary/60 uppercase tracking-wider">{t('commandRelationship.commandStrainMetric')}</span>
@@ -187,10 +187,10 @@ export function CommandRelationshipSection({
 
                 {reportedCommandStrain > 0 && (
                     <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold tracking-wider uppercase ${strainColor}`}>
+                        <span className={`text-xs font-bold tracking-wider uppercase ${strainColor}`}>
                             {t('commandRelationship.strain', { label: labelText })}
                         </span>
-                        <span className={`text-[10px] font-bold tabular-nums font-mono px-1.5 py-0.5 border ${strainBg} ${strainColor}`}>
+                        <span className={`text-xs font-bold tabular-nums font-mono px-1.5 py-0.5 border ${strainBg} ${strainColor}`}>
                             {reportedCommandStrain}
                         </span>
                     </div>
@@ -200,8 +200,8 @@ export function CommandRelationshipSection({
                     Silence = healthy: hidden when all active ops are ordinary compliance. */}
                 {delegationSummaryLabel !== null && (
                     <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-blue-400/70 shrink-0">◆</span>
-                        <span className="text-[10px] text-text-secondary font-mono">
+                        <span className="text-xs text-blue-400/70 shrink-0">◆</span>
+                        <span className="text-xs text-text-secondary font-mono">
                             {t('commandRelationship.activeOperations', { label: delegationSummaryLabel })}
                         </span>
                     </div>
@@ -210,8 +210,8 @@ export function CommandRelationshipSection({
                 {/* 2. Recovery forecast — only when strain > 0 and forecast available */}
                 {reportedCommandStrain > 0 && recoveryForecast && (
                     <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
-                        <span className="text-[10px] text-text-secondary font-mono">
+                        <span className="text-xs text-text-secondary/60 uppercase tracking-wider shrink-0">{t('commandRelationship.recovery')}</span>
+                        <span className="text-xs text-text-secondary font-mono">
                             {recoveryForecastToken ? t(recoveryForecastToken.key, recoveryForecastToken.params) : recoveryForecast}
                         </span>
                     </div>
@@ -220,8 +220,8 @@ export function CommandRelationshipSection({
                 {/* 2b. Exhaustion pressure note — Wave 6: when corps exhaustion contributes to strain */}
                 {reportedCommandStrain > 0 && exhaustionContributing && (
                     <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] text-amber-500/70 shrink-0">▲</span>
-                        <span className="text-[10px] text-text-secondary font-mono">
+                        <span className="text-xs text-amber-500/70 shrink-0">▲</span>
+                        <span className="text-xs text-text-secondary font-mono">
                             {t('commandRelationship.corpsExhaustion', { value: Math.round(reportedCorpsExhaustion) })}
                         </span>
                     </div>
@@ -237,8 +237,8 @@ export function CommandRelationshipSection({
                 */}
                 {factionExhaustionElevated && (
                     <div className="flex items-start gap-1.5" data-testid="faction-campaign-drag">
-                        <span className="text-[9px] text-amber-500/70 mt-0.5 shrink-0">▲</span>
-                        <span className="text-[10px] text-text-secondary font-mono leading-snug">
+                        <span className="text-xs text-amber-500/70 mt-0.5 shrink-0">▲</span>
+                        <span className="text-xs text-text-secondary font-mono leading-snug">
                             {t('commandRelationship.nationalWarStrain', { value: Math.round(factionWarExhaustion!) })}
                         </span>
                     </div>
@@ -247,8 +247,8 @@ export function CommandRelationshipSection({
                 {/* 3. Stance constraint — only when compromised */}
                 {isCompromised && (
                     <div className="flex items-start gap-1.5 px-2 py-1.5 bg-red-900/20 border border-red-500/30">
-                        <span className="text-red-400 text-[9px] mt-0.5 shrink-0">!</span>
-                        <p className="text-[10px] text-red-300 leading-snug">
+                        <span className="text-red-400 text-xs mt-0.5 shrink-0">!</span>
+                        <p className="text-xs text-red-300 leading-snug">
                             {stanceConstraintText}
                         </p>
                     </div>
@@ -257,7 +257,7 @@ export function CommandRelationshipSection({
                 {/* 4. Friction events — each with Acknowledge button */}
                 {unresolvedCount > 0 && (
                     <div className="flex flex-col gap-1 pt-1 border-t border-panel-border/50">
-                        <span className="text-[9px] text-text-secondary/60 uppercase tracking-wider">
+                        <span className="text-xs text-text-secondary/60 uppercase tracking-wider">
                             {t('commandRelationship.unresolvedFriction')}
                         </span>
                         {unresolvedEvents.map(event => (
@@ -266,18 +266,18 @@ export function CommandRelationshipSection({
                                 className="flex items-center justify-between gap-2 py-0.5"
                             >
                                 <div className="flex items-center gap-1.5 min-w-0">
-                                    <span className="text-amber-500 text-[9px]">·</span>
-                                    <span className="text-[10px] text-amber-400 font-mono truncate">
+                                    <span className="text-amber-500 text-xs">·</span>
+                                    <span className="text-xs text-amber-400 font-mono truncate">
                                         {event.typeLabel}
                                     </span>
-                                    <span className="text-[9px] text-text-secondary/60 font-mono shrink-0">
+                                    <span className="text-xs text-text-secondary/60 font-mono shrink-0">
                                         {t('commandRelationship.reportedDate', { date: turnToDateString(event.turn) })}
                                     </span>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={(e) => { e.stopPropagation(); void handleAcknowledgeFriction(event); }}
-                                    className="shrink-0 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
+                                    className="shrink-0 text-xs font-bold uppercase tracking-wider px-2 py-0.5 border border-amber-600/40 text-amber-500 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/60 transition-colors"
                                     title={t('commandRelationship.ackTitle')}
                                 >
                                     {t('commandRelationship.acknowledge')}
@@ -294,7 +294,7 @@ export function CommandRelationshipSection({
                             type="button"
                             disabled={!stabilizationAvailable || hasCooldown}
                             onClick={(e) => { e.stopPropagation(); void handleStabilize(); }}
-                            className={`w-full text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
+                            className={`w-full text-xs font-bold uppercase tracking-wider px-3 py-1.5 border transition-colors text-left ${
                                 stabilizationAvailable && !hasCooldown
                                     ? 'border-amber-600/50 text-amber-400 bg-amber-900/20 hover:bg-amber-900/40 hover:border-amber-500/70 cursor-pointer'
                                     : 'border-panel-border text-text-secondary/40 bg-panel-bg/40 cursor-not-allowed'
@@ -308,7 +308,7 @@ export function CommandRelationshipSection({
                             {t('commandRelationship.stabilize')}{costLabel}
                         </button>
                         {hasCooldown && (
-                            <p className="text-[9px] text-text-secondary/50 italic px-1">
+                            <p className="text-xs text-text-secondary/50 italic px-1">
                                 {t('commandRelationship.cooldown', { date: cooldownDate })}
                             </p>
                         )}

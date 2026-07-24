@@ -11,7 +11,13 @@
 // carry none of these fields, so every projection collapses to null/empty.
 // No state mutation; deterministic (sorted iteration via strictCompare).
 
-import { getPlayerSafeOfficerName } from '../utils/playerSafeText.js';
+import {
+  getPlayerSafeBrigadeName,
+  getPlayerSafeCorpsName,
+  getPlayerSafeDisplayLabel,
+  getPlayerSafeOfficerName,
+  looksLikeRawPlayerFacingToken,
+} from '../utils/playerSafeText.js';
 import { FORCE_LAUNCH_COST, PROACTIVE_FORCE_LAUNCH_COST, AUTHOR_OP_COST } from '../utils/commandAuthority.js';
 import {
   validateOpAtInjection,
@@ -20,6 +26,7 @@ import {
 } from '../../../sim/combat/operation_validation.js';
 import { getMaxOperationSlots } from '../../../sim/combat/corps_operation_helpers.js';
 import type { GameState } from '../../../state/game_state.js';
+import { humanizeOsid } from '../utils/osidDisplayName.js';
 
 type RawRecord = Record<string, unknown>;
 
@@ -157,7 +164,7 @@ function resolveCommander(
 }
 
 function corpsName(corpsId: string, corpsNameById: Map<string, string>): string {
-  return corpsNameById.get(corpsId) ?? corpsId;
+  return corpsNameById.get(corpsId) ?? 'Unreported command';
 }
 
 function buildDonorLineageFromParticipations(
@@ -615,6 +622,22 @@ export interface OpProposalCardView {
   override_ca_cost: number;
   /** One-line officer-voice framing of the proposal + its cost. */
   framing: string;
+  objective?: string;
+  /** Origin settlement retained for display-name lookup; never render this id directly. */
+  objective_origin_osid?: string;
+  targets?: string[];
+  /** Target settlements retained for display-name lookup; never render these ids directly. */
+  target_osids?: string[];
+  forces?: string[];
+  concentration_readiness?: string;
+  intel_assessment?: string;
+  supply_assessment?: string;
+  risk_assessment?: string;
+  recommendation?: string;
+  decision_deadline?: string;
+  force_ratio?: string;
+  opportunity_cost?: string;
+  summary?: string;
 }
 
 /** Parse `APPROVE_OP:<corps>:<plan>` → { corpsId, planId }; null when malformed. */
@@ -625,27 +648,76 @@ function parseApproveOpAction(action: string | undefined): { corpsId: string; pl
   return { corpsId: parts[1], planId: parts.slice(2).join(':') };
 }
 
-/** Find an active operation on a corps by plan id. Stale proposal ids stay unresolved. */
-function findOpForPlan(cc: RawRecord | null, planId: string): RawRecord | null {
-  if (!cc) return null;
-  const activeOps: unknown[] = Array.isArray(cc.active_operations)
-    ? cc.active_operations
-    : asRecord(cc.active_operation)
-      ? [cc.active_operation]
-      : [];
-  const ops = activeOps.map(asRecord).filter((o): o is RawRecord => o != null);
-  if (ops.length === 0) return null;
-  const byPlan = ops.find((o) => str(o.plan_id) === planId || str(o.id) === planId);
-  return byPlan ?? null;
+function findReadyPlan(cc: RawRecord | null, planId: string): { commanderState: RawRecord; plan: RawRecord } | null {
+  const commanderState = asRecord(cc?.commander_state);
+  const plan = asRecord(commanderState?.current_plan);
+  if (!commanderState || !plan) return null;
+  if (str(plan.plan_id) !== planId || str(plan.status) !== 'ready') return null;
+  return { commanderState, plan };
 }
 
-function assessmentOrNull(value: unknown): 'launch' | 'postpone' | 'abort' | null {
-  return value === 'launch' || value === 'postpone' || value === 'abort' ? value : null;
+function percentage(value: unknown, suffix: string): string {
+  return typeof value === 'number' && Number.isFinite(value)
+    ? `${Math.round(Math.max(0, Math.min(1, value)) * 100)}% ${suffix}`
+    : 'Unreported';
 }
 
-/** Read a finite number from a free-form record value, else null. */
-function finiteNumOrNull(value: unknown): number | null {
-  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+function planPressure(value: unknown): string {
+  switch (value) {
+    case 'low': return 'Low';
+    case 'moderate': return 'Moderate';
+    case 'heavy': return 'High';
+    case 'critical': return 'Critical';
+    default: return 'Unreported';
+  }
+}
+
+function zoneAnchorOsid(value: string): string | null {
+  const parts = value.split(':').filter(Boolean);
+  if (parts[0] === 'zone' && parts.length >= 4) {
+    const anchor = parts.slice(2).join(':');
+    return anchor.startsWith('op:') ? anchor : null;
+  }
+  return parts[0] === 'op' && parts.length >= 3 ? parts.join(':') : null;
+}
+
+function playerSafePlanTarget(value: string): string {
+  const osid = zoneAnchorOsid(value);
+  return osid ? humanizeOsid(osid) : getPlayerSafeDisplayLabel(value, 'Unreported');
+}
+
+function playerSafePlanObjective(value: unknown, fallbackAnchor?: unknown): { label: string; originOsid?: string } {
+  const raw = str(value);
+  if (raw) {
+    const opportunityMatch = raw.match(/\boffensive opportunity from\s+((?:zone|op):[a-z0-9_:-]+)/i);
+    if (opportunityMatch?.[1]) {
+      const originOsid = zoneAnchorOsid(opportunityMatch[1]);
+      if (originOsid) {
+        return { label: `Advance from ${humanizeOsid(originOsid)}`, originOsid };
+      }
+    }
+    const osid = zoneAnchorOsid(raw);
+    if (osid) return { label: humanizeOsid(osid) };
+    const label = playerSafeOperationName(raw);
+    if (label !== UNSPECIFIED_OPERATION_LABEL) return { label };
+  }
+  const fallbackOsid = zoneAnchorOsid(str(fallbackAnchor) ?? '');
+  return fallbackOsid
+    ? { label: `Advance from ${humanizeOsid(fallbackOsid)}`, originOsid: fallbackOsid }
+    : { label: UNSPECIFIED_OPERATION_LABEL };
+}
+
+function namedCommanderByCorps(military: RawRecord | null): Map<string, string> {
+  const result = new Map<string, string>();
+  const namedOfficers = asRecord(military?.named_officers);
+  if (!namedOfficers) return result;
+  for (const officerId of Object.keys(namedOfficers).sort(strictCompare)) {
+    const officer = asRecord(namedOfficers[officerId]);
+    if (str(officer?.status) !== 'active') continue;
+    const corpsId = str(officer?.assigned_corps_id);
+    if (corpsId && !result.has(corpsId)) result.set(corpsId, officerId);
+  }
+  return result;
 }
 
 /**
@@ -674,17 +746,20 @@ export function buildOpProposalCards(
   if (formations) {
     for (const key of Object.keys(formations)) {
       const name = str(asRecord(formations[key])?.name);
-      if (name) corpsNameById.set(key, name);
+      if (name) {
+        corpsNameById.set(
+          key,
+          looksLikeRawPlayerFacingToken(name)
+            ? getPlayerSafeCorpsName(key, key, 'Unreported command')
+            : getPlayerSafeCorpsName(name, key, 'Unreported command'),
+        );
+      }
     }
   }
 
   const corpsCommand = asRecord(military?.corps_command);
 
-  // Reuse the TG donor projection so the "what's pulled / cohesion" line matches
-  // the rest of the Back-the-Officer surfaces. Keyed by op_id.
-  const tgViews = buildBackTheOfficerViews(rawState, roster);
-  const tgByOpId = new Map<string, BackTheOfficerView>();
-  for (const v of tgViews) tgByOpId.set(v.op_id, v);
+  const commanderIdByCorps = namedCommanderByCorps(military);
 
   const cards: OpProposalCardView[] = [];
   for (const proposal of proposals) {
@@ -694,36 +769,85 @@ export function buildOpProposalCards(
     const { corpsId, planId } = parsed;
 
     const cc = asRecord(corpsCommand?.[corpsId]);
-    const op = findOpForPlan(cc, planId);
-
-    const opId = str(op?.id) ?? null;
-    const opName = playerSafeOperationName(op?.name, op?.objective_description);
-    const commanderId = str(op?.tg_commander_officer_id) ?? str(op?.commander_officer_id);
-    const commander = resolveCommander(commanderId, rosterById);
-    const forceRatio = finiteNumOrNull(op?.force_ratio_estimate);
-    const assessment = assessmentOrNull(op?.commander_assessment);
-
-    const tg = opId ? tgByOpId.get(opId) : undefined;
-    const donors = tg?.donors ?? [];
-    const totalPersonnelLent = tg?.total_personnel_lent ?? 0;
-
-    const overrideAvailable = assessment === 'postpone' || assessment === 'abort';
+    const ready = findReadyPlan(cc, planId);
+    const plan = ready?.plan ?? null;
+    const commanderState = ready?.commanderState ?? null;
+    const objective = playerSafePlanObjective(plan?.objective_description, plan?.staging_zone);
+    const opName = objective.label;
+    const commander = ready
+      ? resolveCommander(commanderIdByCorps.get(corpsId), rosterById)
+      : null;
+    const targetIds = Array.isArray(plan?.target_osids) ? plan.target_osids : [];
+    const targets = targetIds
+      .filter((value): value is string => typeof value === 'string' && value.length > 0)
+      .map(playerSafePlanTarget);
+    const brigadeIds = Array.isArray(plan?.assigned_brigades) ? plan.assigned_brigades : [];
+    const forces = brigadeIds.map((value) => {
+      if (typeof value !== 'string') return 'Unreported formation';
+      const name = str(asRecord(formations?.[value])?.name);
+      if (!name) return 'Unreported formation';
+      return looksLikeRawPlayerFacingToken(name)
+        ? getPlayerSafeDisplayLabel(name, 'Unreported formation')
+        : getPlayerSafeBrigadeName(name, 'Unreported formation');
+    });
+    const concentration = percentage(plan?.concentration_progress, 'concentrated');
+    const concentrationReadiness = concentration === 'Unreported'
+      ? 'Unreported'
+      : `${concentration}; ready`;
+    const intelPicture = asRecord(commanderState?.intel_picture);
+    const zoneConfidence = asRecord(intelPicture?.zone_confidence);
+    const stagingZone = str(plan?.staging_zone);
+    const intelAssessment = percentage(stagingZone ? zoneConfidence?.[stagingZone] : undefined, 'confidence');
+    const beliefState = asRecord(commanderState?.belief_state);
+    const supplyAssessment = percentage(beliefState?.supply_continuity_confidence, 'continuity confidence');
+    const threat = asRecord(commanderState?.threat_assessment);
+    const pressure = planPressure(threat?.overall_pressure);
+    const viability = percentage(plan?.viability_score, 'plan viability');
+    const riskAssessment = pressure === 'Unreported' && viability === 'Unreported'
+      ? 'Unreported'
+      : `${pressure} pressure; ${viability}`;
+    const rawRecommendation = str(commanderState?.last_plan_reason);
+    const recommendation = rawRecommendation && !looksLikeRawPlayerFacingToken(rawRecommendation)
+      ? rawRecommendation
+      : ready ? 'Authorize launch' : 'Unreported';
+    const decisionDeadline = 'Before the next turn advances';
+    const forceRatio = 'Unreported';
+    const opportunityCost = 'Unreported';
+    const forceSummary = forces.length > 0 ? forces.join(' and ') : 'forces unreported';
+    const commanderSummary = commander?.name ? ` commander ${commander.name}` : '';
+    const summary = ready
+      ? `${corpsName(corpsId, corpsNameById)}${commanderSummary} requests authorization to ${opName.charAt(0).toLowerCase()}${opName.slice(1)} with ${forceSummary}; decision due before the next turn advances.`
+      : `${corpsName(corpsId, corpsNameById)} has an operation approval record, but the ready plan is unreported.`;
 
     cards.push({
       proposal_id: proposal.id,
       corps_id: corpsId,
       corps_name: corpsName(corpsId, corpsNameById),
       plan_id: planId,
-      op_id: opId,
+      op_id: null,
       op_name: opName,
       commander,
-      force_ratio_estimate: forceRatio,
-      commander_assessment: assessment,
-      donors,
-      total_personnel_lent: totalPersonnelLent,
-      override_available: overrideAvailable,
+      force_ratio_estimate: null,
+      commander_assessment: null,
+      donors: [],
+      total_personnel_lent: 0,
+      override_available: false,
       override_ca_cost: FORCE_LAUNCH_COST,
-      framing: buildOpProposalFraming(opName, commander, forceRatio, assessment, donors, totalPersonnelLent),
+      framing: summary,
+      objective: opName,
+      ...(objective.originOsid ? { objective_origin_osid: objective.originOsid } : {}),
+      targets: targets.length > 0 ? targets : ['Unreported'],
+      target_osids: targetIds.filter((value): value is string => typeof value === 'string' && value.length > 0),
+      forces: forces.length > 0 ? forces : ['Unreported'],
+      concentration_readiness: concentrationReadiness,
+      intel_assessment: intelAssessment,
+      supply_assessment: supplyAssessment,
+      risk_assessment: riskAssessment,
+      recommendation,
+      decision_deadline: decisionDeadline,
+      force_ratio: forceRatio,
+      opportunity_cost: opportunityCost,
+      summary,
     });
   }
 
@@ -891,7 +1015,7 @@ export function buildForceableReadyPlans(
       corps_id: corpsId,
       corps_name: corpsName(corpsId, corpsNameById),
       plan_id: planId,
-      op_name: playerSafeOperationName(plan.objective_description),
+      op_name: playerSafePlanObjective(plan.objective_description, plan.staging_zone).label,
       commander,
       commander_assessment: str(cmdState?.last_plan_reason) ?? null,
       force_ca_cost: PROACTIVE_FORCE_LAUNCH_COST,

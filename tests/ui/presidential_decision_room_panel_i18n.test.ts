@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createElement } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import type { TurnSummary } from '../../src/state/turn_summary.js';
@@ -70,6 +70,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
       loadedGameState: null,
       osidDisplayNames: null,
     });
+    Reflect.deleteProperty(window, 'awwv');
     __resetDecisionRoomLensRequestForTest();
   });
 
@@ -145,7 +146,7 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     });
   });
 
-  it('clears a stale command category filter when live cards remain elsewhere', async () => {
+  it('retains an explicitly selected command category when that category becomes quiet', async () => {
     useGameStore.setState({
       loadedGameState: makeState({
         pendingParamilitaryRequests: [
@@ -179,9 +180,25 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     });
     rerender(createElement(PresidentialDecisionRoomPanel));
 
-    expect(await screen.findByTestId('decision-room-priority-card-turn:24:hard-turn')).toBeTruthy();
     await waitFor(() => {
       expect(screen.queryByTestId('decision-room-priority-card-paramilitary:pending')).toBeNull();
+      expect(screen.queryByTestId('decision-room-priority-card-turn:24:hard-turn')).toBeNull();
+      expect(screen.getByTestId('presidential-decision-room').getAttribute('data-command-category-id')).toBe('cat_conscience');
+      expect(screen.getByRole('status').textContent).toContain('Filtered by Conscience & Atrocity');
+      expect(screen.getByRole('button', { name: 'Clear category filter' })).toBeTruthy();
+      expect(screen.getByText('No items in this command category.')).toBeTruthy();
+      expect(screen.queryByText('Priority Dossier')).toBeNull();
+      expect(screen.getByTestId('decision-room-lens-all').getAttribute('aria-pressed')).toBe('false');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear category filter' }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('presidential-decision-room').getAttribute('data-command-category-id')).toBe('');
+      expect(screen.queryByRole('status')).toBeNull();
+      expect(screen.getByTestId('decision-room-lens-all').getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByTestId('decision-room-priority-card-turn:24:hard-turn')).toBeTruthy();
+      expect(screen.getByText('Priority Dossier')).toBeTruthy();
     });
   });
 
@@ -194,7 +211,13 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     const { container } = render(createElement(PresidentialDecisionRoomPanel));
 
     const disabledButtons = [...container.querySelectorAll('button[disabled]')];
-    expect(disabledButtons).toHaveLength(0);
+    expect(disabledButtons.every((button) => (
+      (
+        button.getAttribute('data-testid') === 'decision-room-dossier-review'
+        || button.getAttribute('data-testid')?.startsWith('decision-room-card-action-')
+      )
+      && /Current Dossier/i.test(button.textContent ?? '')
+    ))).toBe(true);
     expect(container.textContent).not.toContain('No current item is available for this action.');
     expect(screen.queryByRole('button', { name: 'View Advanced' })).toBeNull();
   });
@@ -221,5 +244,50 @@ describe('PresidentialDecisionRoomPanel i18n', () => {
     const card = await screen.findByTestId('decision-room-priority-card-paramilitary:pending');
     expect(card.textContent).toContain('Blokira');
     expect(card.textContent).not.toMatch(/\bblocking\b/i);
+  });
+
+  it('groups six opening operation authorizations into one packet without collapsing their choices', () => {
+    const operationNames = ['Drina', 'Prijedor', 'Koridor', 'Vrbas', 'Hercegovina', 'Podrinje'];
+    Object.defineProperty(window, 'awwv', {
+      configurable: true,
+      value: {
+        acceptProposal: async () => ({ ok: true }),
+        rejectProposal: async () => ({ ok: true }),
+      },
+    });
+    useGameStore.setState({
+      loadedGameState: makeState({
+        player_faction: 'RS',
+        turn: 0,
+        pendingProposalReviews: operationNames.map((name, index) => ({
+          id: `opening_operation_${index + 1}`,
+          turn: 0,
+          faction: 'RS',
+          domain: 'ops',
+          description: `Authorize Operation ${name}.`,
+          proposed_action: `HISTORICAL_OP:preplanned:vrs_corps_${index + 1}:Operation ${name}`,
+          current_value: 'awaiting_authorization',
+          proposed_value: 'authorize',
+        })),
+      } as Partial<LoadedGameState>),
+      osidDisplayNames: null,
+    });
+
+    render(createElement(PresidentialDecisionRoomPanel));
+
+    const packet = screen.getByTestId('operations-authorization-packet');
+    expect(within(packet).getByText('Operations authorization packet')).toBeTruthy();
+    expect(within(packet).getByText('6 independent authorizations')).toBeTruthy();
+    const cards = packet.querySelectorAll('[data-testid^="decision-room-priority-card-command:review-proposal:"]');
+    expect(cards).toHaveLength(6);
+    expect(screen.queryByRole('button', { name: /accept all|authorize all/i })).toBeNull();
+
+    for (const card of Array.from(cards)) {
+      fireEvent.click(within(card as HTMLElement).getByRole('button', { name: 'Dossier' }));
+      expect(screen.getByTestId('decision-room-active-dossier').getAttribute('data-card-id'))
+        .toBe(card.getAttribute('data-testid')?.replace('decision-room-priority-card-', ''));
+      expect(screen.getByRole('button', { name: 'Accept' })).toBeTruthy();
+      expect(screen.getByRole('button', { name: 'Withhold' })).toBeTruthy();
+    }
   });
 });

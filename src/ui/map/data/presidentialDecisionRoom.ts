@@ -1,6 +1,6 @@
 import type { ArmyHQRecordsSubTab, ArmyHQTab } from '../../shared/shellHandoff';
 import type { FieldInspectionTarget } from '../utils/fieldInspectionTarget';
-import type { CommandBriefingItemView, LoadedGameState } from './types';
+import type { CommandBriefingItemView, LoadedGameState, OperationOpportunityProposalView } from './types';
 import {
   buildTurnAftermathCampaignCost,
   buildTurnAftermathRecordViews,
@@ -10,7 +10,7 @@ import {
 import { shouldNarrateTerritorySummary } from './territorySummaryGuard';
 import { buildPlayerSupplyVisibility } from './playerSupplyVisibility';
 import { buildPlayerArmyCoPushbackVisibility } from './playerArmyCoPushbackVisibility';
-import { resolveCommandBriefingItemCopy } from './commandBriefingCopy';
+import { isCommandBriefingItemCurrent, resolveCommandBriefingItemCopy } from './commandBriefingCopy';
 import { t, type MessageKey } from '../i18n';
 import { turnToDateString } from '../utils/formatters';
 import { getDecisionSurface } from './decisionSurfaceRegistry';
@@ -27,13 +27,24 @@ import {
 } from '../utils/commandAuthority';
 import { buildForceableReadyPlans } from './backTheOfficer';
 import { sidePickerFactionLabel } from '../utils/sidePickerLabels';
-import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
+import { getPlayerSafeCorpsName, getPlayerSafeRecordDetail } from '../utils/playerSafeText';
 import { countFiledChronicleDecisionRecords } from './filedRecordTruth';
 import { isOperationOpportunityReview } from './operationOpportunityDossiers';
-import { parseHistoricalOperationAuthorizationAction } from './historicalOperationAuthorization';
+import {
+  buildHistoricalOperationAuthorizationDetails,
+  isResolvedProposalReview,
+  parseHistoricalOperationAuthorizationAction,
+} from './historicalOperationAuthorization';
 import { deriveInboxItems } from './inboxItems';
 import { isRequiredPendingEventDecision } from './eventDecisionRouting';
 import { playerFactionMatch } from './playerFactionMatch';
+import { buildReserveRequestPresentation } from './reserveRequestPresentation';
+import { getOsidDisplayName } from '../utils/osidDisplayName';
+
+export {
+  buildReserveRequestPresentation,
+  type ReserveRequestPresentation,
+} from './reserveRequestPresentation';
 
 const RESERVE_REASON_LABEL_KEYS: Record<string, MessageKey> = {
   offensive_support: 'armyReserve.reason.offensiveSupport',
@@ -107,6 +118,10 @@ function opportunityRecommendationCopy(recommendation: string | null | undefined
   const key = (recommendation ?? '').trim();
   const messageKey = OPPORTUNITY_RECOMMENDATION_LABEL_KEYS[key];
   return messageKey ? t(messageKey) : null;
+}
+
+function isReviewableOperationOpportunity(opportunity: OperationOpportunityProposalView): boolean {
+  return Boolean(opportunity.review_id);
 }
 
 /**
@@ -509,7 +524,10 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
   if (!playerFaction) return;
 
   const requests = (state.pendingParamilitaryRequests ?? [])
-    .filter((request) => request.faction === playerFaction);
+    .filter((request) =>
+      request.faction === playerFaction
+      && !isFinalParamilitaryDecision(request.decision),
+    );
   if (requests.length === 0) return;
 
   const totalStrength = requests.reduce((sum, request) => sum + request.strength, 0);
@@ -534,6 +552,10 @@ function addParamilitaryReviewCard(state: LoadedGameState, cards: CandidateCard[
     urgencySort: 0,
     sourceSort: 'paramilitary',
   });
+}
+
+function isFinalParamilitaryDecision(decision: unknown): boolean {
+  return decision === 'allow' || decision === 'deny' || decision === 'regular';
 }
 
 function addManifestDecisionCards(
@@ -660,15 +682,17 @@ function addCounterOfferCards(state: LoadedGameState, cards: CandidateCard[]): v
 }
 
 function addOpportunityCards(state: LoadedGameState, cards: CandidateCard[]): void {
-  const opportunities = [...(state.operationOpportunityProposals ?? [])].sort((a, b) => {
-    const aExpiry = a.expires_turn ?? LARGE_SORT;
-    const bExpiry = b.expires_turn ?? LARGE_SORT;
-    if (aExpiry !== bExpiry) return aExpiry - bExpiry;
-    const aEligibility = a.eligibility_turn ?? LARGE_SORT;
-    const bEligibility = b.eligibility_turn ?? LARGE_SORT;
-    if (aEligibility !== bEligibility) return aEligibility - bEligibility;
-    return strictCompare(a.proposal_id, b.proposal_id);
-  });
+  const opportunities = [...(state.operationOpportunityProposals ?? [])]
+    .filter(isReviewableOperationOpportunity)
+    .sort((a, b) => {
+      const aExpiry = a.expires_turn ?? LARGE_SORT;
+      const bExpiry = b.expires_turn ?? LARGE_SORT;
+      if (aExpiry !== bExpiry) return aExpiry - bExpiry;
+      const aEligibility = a.eligibility_turn ?? LARGE_SORT;
+      const bEligibility = b.eligibility_turn ?? LARGE_SORT;
+      if (aEligibility !== bEligibility) return aEligibility - bEligibility;
+      return strictCompare(a.proposal_id, b.proposal_id);
+    });
 
   for (const opportunity of opportunities) {
     const expires = opportunity.expires_turn ?? LARGE_SORT;
@@ -784,6 +808,62 @@ function addArmyCoPushbackCard(state: LoadedGameState, cards: CandidateCard[]): 
   });
 }
 
+function sitrepAlertTitle(alertId: string): string {
+  const keyByAlertId: Record<string, MessageKey> = {
+    'front-exposed': 'decisionRoom.card.sitrep.title.frontExposed',
+    'brigades-encircled': 'decisionRoom.card.sitrep.title.brigadesEncircled',
+    'collapse-eligible': 'decisionRoom.card.sitrep.title.collapseEligible',
+    'sustainment-collapsed': 'decisionRoom.card.sitrep.title.sustainmentCollapsed',
+    'sustainment-critical': 'decisionRoom.card.sitrep.title.sustainmentCritical',
+    'authority-critical': 'decisionRoom.card.sitrep.title.authorityCritical',
+    'exhaustion-worsening': 'decisionRoom.card.sitrep.title.exhaustionWorsening',
+    'alliance-strained': 'decisionRoom.card.sitrep.title.allianceStrained',
+    'hostile-takeovers': 'decisionRoom.card.sitrep.title.hostileTakeovers',
+    'brigades-packing': 'decisionRoom.card.sitrep.title.brigadesPacking',
+    'active-operations': 'decisionRoom.card.sitrep.title.activeOperations',
+  };
+  const key = keyByAlertId[alertId];
+  return key ? t(key) : t('decisionRoom.card.sitrep.title');
+}
+
+function sitrepAlertEvidence(
+  state: LoadedGameState,
+  alert: NonNullable<LoadedGameState['operationalSitrep']>['alerts'][number],
+): string[] {
+  const alertId = alert.id;
+  const detailEvidence = alert.evidence ?? [];
+  if (alertId === 'front-exposed') {
+    return [
+      t('decisionRoom.card.sitrep.evidence.exposedFronts', { count: state.operationalSitrep?.front.exposedCount ?? 0 }),
+      ...detailEvidence,
+    ];
+  }
+  if (alertId === 'hostile-takeovers') {
+    return [
+      t('decisionRoom.card.sitrep.evidence.hostileTakeovers', { count: state.operationalSitrep?.sustainment.activeHostileTakeoverTimers ?? 0 }),
+      ...detailEvidence,
+    ];
+  }
+  if (alertId === 'sustainment-critical' || alertId === 'sustainment-collapsed') {
+    return [
+      t('decisionRoom.card.sitrep.evidence.criticalSustainment', { count: state.operationalSitrep?.sustainment.criticalCount ?? 0 }),
+      ...detailEvidence,
+    ];
+  }
+  if (alertId === 'active-operations') {
+    return [
+      t('decisionRoom.card.sitrep.evidence.activeOperations', { count: state.operationalSitrep?.operations.activeCount ?? 0 }),
+      ...detailEvidence,
+    ];
+  }
+  if (alertId === 'brigades-encircled' && detailEvidence.length > 0) return detailEvidence;
+  if (detailEvidence.length > 0) return detailEvidence;
+  return [
+    t('decisionRoom.card.sitrep.evidence.exposedFronts', { count: state.operationalSitrep?.front.exposedCount ?? 0 }),
+    t('decisionRoom.card.sitrep.evidence.criticalSustainment', { count: state.operationalSitrep?.sustainment.criticalCount ?? 0 }),
+  ];
+}
+
 function addSitrepCards(state: LoadedGameState, cards: CandidateCard[]): void {
   const alerts = [...(state.operationalSitrep?.alerts ?? [])].sort((a, b) => {
     const severityDelta = SEVERITY_RANK[a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'info']
@@ -799,15 +879,12 @@ function addSitrepCards(state: LoadedGameState, cards: CandidateCard[]): void {
       id: `sitrep:${alert.id}`,
       category: 'operational',
       severity: alert.severity === 'critical' ? 'critical' : alert.severity === 'warning' ? 'warning' : 'info',
-      title: t('decisionRoom.card.sitrep.title'),
+      title: sitrepAlertTitle(alert.id),
       explanation: alert.text,
       sourceOwner: t('decisionRoom.card.sitrep.title'),
       sourceLabel: t('decisionRoom.action.warSummary'),
       actionLabel: t('decisionRoom.action.warSummary'),
-      evidence: [
-        t('decisionRoom.card.sitrep.evidence.exposedFronts', { count: state.operationalSitrep?.front.exposedCount ?? 0 }),
-        t('decisionRoom.card.sitrep.evidence.criticalSustainment', { count: state.operationalSitrep?.sustainment.criticalCount ?? 0 }),
-      ],
+      evidence: sitrepAlertEvidence(state, alert),
       navigationTarget: { kind: 'army-hq-tab', tab: 'summary' },
       urgencySort: 0,
       sourceSort: `${alert.text}:${alert.id}`,
@@ -816,7 +893,9 @@ function addSitrepCards(state: LoadedGameState, cards: CandidateCard[]): void {
 }
 
 function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void {
-  const items = [...(state.commandBriefing?.items ?? [])].sort((a, b) => {
+  const items = (state.commandBriefing?.items ?? [])
+    .filter((item) => isCommandBriefingItemCurrent(item, state.pendingPeacePlan))
+    .sort((a, b) => {
     const aSeverity = a.severity === 'critical' ? 'critical' : a.severity === 'warning' ? 'warning' : 'info';
     const bSeverity = b.severity === 'critical' ? 'critical' : b.severity === 'warning' ? 'warning' : 'info';
     const severityDelta = SEVERITY_RANK[aSeverity] - SEVERITY_RANK[bSeverity];
@@ -824,9 +903,9 @@ function addBriefingCards(state: LoadedGameState, cards: CandidateCard[]): void 
     const titleDelta = strictCompare(a.title, b.title);
     if (titleDelta !== 0) return titleDelta;
     return strictCompare(a.id, b.id);
-  });
+    });
 
-  for (const item of items.slice(0, 4)) {
+  for (const item of items) {
     const copy = resolveCommandBriefingItemCopy(item);
     const action = actionForBriefingItem(item, copy.actionLabel);
     // NOTE: briefing items do NOT carry a stop-op directive. The sim briefing target
@@ -928,56 +1007,142 @@ function addStopOpDirectiveCards(state: LoadedGameState, cards: CandidateCard[])
  * Deterministic: reviews are iterated in a stable strictCompare order by proposal id.
  * No nondeterministic or time-based sources.
  */
-function addProposalReviewDirectiveCards(state: LoadedGameState, cards: CandidateCard[]): void {
+function historicalOperationEvidence(
+  state: LoadedGameState,
+  historicalOp: NonNullable<ReturnType<typeof parseHistoricalOperationAuthorizationAction>>,
+  historicalOperationReviewCount: number,
+  osidNameMap: Record<string, string> | null,
+): string[] {
+  const details = buildHistoricalOperationAuthorizationDetails(state, historicalOp, osidNameMap);
+  return [
+    t('decisionRoom.card.historicalOperation.evidence.kind'),
+    t('decisionRoom.card.historicalOperation.evidence.command', { command: details.command }),
+    t('decisionRoom.card.historicalOperation.evidence.commander', { commander: details.commander }),
+    details.force ? t('decisionRoom.card.historicalOperation.evidence.force', { force: details.force }) : null,
+    t('decisionRoom.card.historicalOperation.evidence.recommended'),
+    details.operationScopedAssist ? t('decisionRoom.card.historicalOperation.evidence.operationScopedAssist') : null,
+    details.timing ? t('decisionRoom.card.historicalOperation.evidence.timing', { timing: details.timing }) : null,
+    details.axes ? t('decisionRoom.card.historicalOperation.evidence.axes', { axes: details.axes }) : null,
+    details.objectiveSummary ? t('decisionRoom.card.historicalOperation.evidence.objectives', { objectives: details.objectiveSummary }) : null,
+    details.staging ? t('decisionRoom.card.historicalOperation.evidence.staging', { staging: details.staging }) : null,
+    details.launchFloor ? t('decisionRoom.card.historicalOperation.evidence.launchFloor', { floor: details.launchFloor }) : null,
+    details.source ? t('decisionRoom.card.historicalOperation.evidence.source', { source: details.source }) : null,
+    t('decisionRoom.card.historicalOperation.evidence.unresolvedCount', { count: historicalOperationReviewCount }),
+  ].filter((entry): entry is string => typeof entry === 'string' && entry.trim().length > 0);
+}
+
+function historicalOperationExplanation(
+  state: LoadedGameState,
+  historicalOp: NonNullable<ReturnType<typeof parseHistoricalOperationAuthorizationAction>>,
+  osidNameMap: Record<string, string> | null,
+): string {
+  const base = t('decisionRoom.card.historicalOperation.explanation');
+  const details = buildHistoricalOperationAuthorizationDetails(state, historicalOp, osidNameMap);
+  return details.planSummary
+    ? `${base} ${t('decisionRoom.card.historicalOperation.planSummary', { summary: details.planSummary })}`
+    : base;
+}
+
+function ordinaryOperationProposalEvidence(
+  proposal: NonNullable<LoadedGameState['opProposalCards']>[number],
+  osidNameMap: Record<string, string> | null,
+): string[] {
+  const unreported = t('corpsFront.unreported');
+  const commander = proposal.commander
+    ? `${proposal.commander.rank
+      ? proposal.commander.rank.split(/[_\s]+/).filter(Boolean).map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`).join(' ')
+      : ''} ${proposal.commander.name}`.trim()
+    : 'Unreported';
+  const objective = proposal.objective_origin_osid
+    ? `Advance from ${getOsidDisplayName(proposal.objective_origin_osid, osidNameMap)}`
+    : proposal.objective ?? unreported;
+  const targets = proposal.target_osids && proposal.target_osids.length > 0
+    ? proposal.target_osids.map((osid) => getOsidDisplayName(osid, osidNameMap))
+    : proposal.targets ?? [];
+  return [
+    `Command: ${proposal.corps_name}`,
+    `Commander: ${commander}`,
+    `Objective: ${objective}`,
+    `Targets: ${targets.join(', ') || unreported}`,
+    `Forces: ${proposal.forces?.join(', ') || unreported}`,
+    `Concentration/readiness: ${proposal.concentration_readiness ?? unreported}`,
+    `Intelligence: ${proposal.intel_assessment ?? unreported}`,
+    `Supply: ${proposal.supply_assessment ?? unreported}`,
+    `Risk: ${proposal.risk_assessment ?? unreported}`,
+    `Recommendation: ${proposal.recommendation ?? unreported}`,
+    `Deadline: ${proposal.decision_deadline ?? unreported}`,
+    `Force ratio: ${proposal.force_ratio ?? unreported}`,
+    `Opportunity cost: ${proposal.opportunity_cost ?? unreported}`,
+  ];
+}
+
+function addProposalReviewDirectiveCards(
+  state: LoadedGameState,
+  cards: CandidateCard[],
+  osidNameMap: Record<string, string> | null,
+): void {
   const playerFaction = state.player_faction ?? null;
   if (!playerFaction) return;
 
   const reviews = [...(state.pendingProposalReviews ?? [])].sort((a, b) =>
     strictCompare(a.id, b.id),
-  ).filter((review) => review.faction === playerFaction && !isOperationOpportunityReview(review));
+  ).filter((review) =>
+    review.faction === playerFaction
+    && !isOperationOpportunityReview(review)
+    && !isResolvedProposalReview(review)
+  );
+  const historicalOperationReviewCount = reviews.filter((review) =>
+    parseHistoricalOperationAuthorizationAction(review.proposed_action),
+  ).length;
 
   for (const review of reviews) {
     const historicalOp = parseHistoricalOperationAuthorizationAction(review.proposed_action);
+    const ordinaryOperation = !historicalOp && review.domain === 'ops'
+      ? state.opProposalCards?.find((proposal) => proposal.proposal_id === review.id)
+      : undefined;
     const domainLabel = proposalDomainLabel(review.domain);
     cards.push({
       id: `command:review-proposal:${review.id}`,
       category: 'command',
-      severity: historicalOp ? 'blocking' : 'warning',
+      severity: 'warning',
       title: historicalOp
         ? historicalOp.operationName
-        : t('decisionRoom.card.reviewProposal.title', {
+        : ordinaryOperation?.op_name ?? t('decisionRoom.card.reviewProposal.title', {
           domain: domainLabel,
         }),
       explanation: historicalOp
-        ? t('decisionRoom.card.historicalOperation.explanation')
-        : review.description,
+        ? historicalOperationExplanation(state, historicalOp, osidNameMap)
+        : ordinaryOperation?.summary ?? getPlayerSafeRecordDetail(
+          review.description,
+          t('decisionRoom.card.reviewProposal.evidence.review'),
+        ),
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
       sourceLabel: historicalOp
         ? t('decisionRoom.card.historicalOperation.sourceLabel')
         : t('decisionRoom.card.reviewProposal.sourceLabel'),
       actionLabel: historicalOp
-        ? t('decisionRoom.action.reviewAuthorization')
+        ? t('decisionRoom.action.reviewRecommendation')
         : t('decisionRoom.action.personnel'),
       evidence: historicalOp
-        ? [
-          t('decisionRoom.card.historicalOperation.evidence.kind'),
-          t('decisionRoom.card.historicalOperation.evidence.authority'),
-          t('decisionRoom.card.reviewProposal.evidence.review'),
-        ]
-        : [
+        ? historicalOperationEvidence(state, historicalOp, historicalOperationReviewCount, osidNameMap)
+        : ordinaryOperation
+          ? ordinaryOperationProposalEvidence(ordinaryOperation, osidNameMap)
+          : [
           t('decisionRoom.card.reviewProposal.evidence.domain', { domain: domainLabel }),
           t('decisionRoom.card.reviewProposal.evidence.review'),
         ],
       navigationTarget: historicalOp
         ? { kind: 'army-hq-corps-briefing', corpsId: historicalOp.corpsId }
-        : { kind: 'army-hq-tab', tab: 'personnel' },
+        : ordinaryOperation
+          ? { kind: 'army-hq-corps-briefing', corpsId: ordinaryOperation.corps_id }
+          : { kind: 'army-hq-tab', tab: 'personnel' },
       directive: {
         lever: 'review_proposal',
         cost: 0,
         payload: { proposalId: review.id },
       },
       ...(historicalOp ? { preserveActionLabel: true } : {}),
-      urgencySort: historicalOp ? 0 : 8,
+      urgencySort: 8,
       sourceSort: `command:review-proposal:${review.id}`,
     });
   }
@@ -1007,7 +1172,11 @@ function addProposalReviewDirectiveCards(state: LoadedGameState, cards: Candidat
  * order; the front-visit card is a fixed singleton. No nondeterministic or
  * time-based sources.
  */
-function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]): void {
+function addCommandPersonnelCards(
+  state: LoadedGameState,
+  cards: CandidateCard[],
+  osidNameMap: Record<string, string> | null,
+): void {
   const playerFaction = state.player_faction ?? null;
   if (!playerFaction) return;
 
@@ -1056,19 +1225,18 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
     .sort((a, b) => {
       if (a.priority !== b.priority) return b.priority - a.priority;
       return strictCompare(a.request_id, b.request_id);
-    });
+  });
   for (const request of reserveRequests) {
     const suggestedBrigadeId = request.suggested_brigade_id;
-    // Decision Room command review is for a concrete release order. Requests
-    // without a staff-named brigade remain in the Army Reserve selection flow.
-    if (!suggestedBrigadeId) continue;
-
-    const directive: PresidentialDecisionRoomDirective = {
-      lever: 'elite_deploy',
-      corpsId: request.corps_id,
-      cost: ELITE_DEPLOY_COST,
-      payload: { requestId: request.request_id, brigadeId: suggestedBrigadeId },
-    };
+    const directive: PresidentialDecisionRoomDirective | undefined = suggestedBrigadeId
+      ? {
+          lever: 'elite_deploy',
+          corpsId: request.corps_id,
+          cost: ELITE_DEPLOY_COST,
+          payload: { requestId: request.request_id, brigadeId: suggestedBrigadeId },
+        }
+      : undefined;
+    const presentation = buildReserveRequestPresentation(state, request, osidNameMap);
     cards.push({
       id: `command:elite-deploy:${request.request_id}`,
       category: 'command',
@@ -1080,16 +1248,26 @@ function addCommandPersonnelCards(state: LoadedGameState, cards: CandidateCard[]
         corps:
           getPlayerSafeCorpsName(state.formations?.find((f) => f.id === request.corps_id)?.name, request.corps_id),
       }),
-      explanation: request.why_needed ?? request.description,
+      explanation: presentation.expectedEffect,
       sourceOwner: t('decisionRoom.card.command.sourceOwner'),
       sourceLabel: t('decisionRoom.card.eliteDeploy.sourceLabel'),
       actionLabel: t('decisionRoom.action.personnel'),
       evidence: [
         t('decisionRoom.card.eliteDeploy.evidence.reason', { reason: reserveReasonLabel(request.reason) }),
-        t('decisionRoom.card.eliteDeploy.evidence.travel', { hops: request.travel_hops }),
+        t('decisionRoom.card.eliteDeploy.evidence.severity', { value: presentation.severity }),
+        t('decisionRoom.card.eliteDeploy.evidence.requestingCommand', { value: presentation.requestingCommand }),
+        t('decisionRoom.card.eliteDeploy.evidence.recipientSector', { value: presentation.recipientSector }),
+        t('decisionRoom.card.eliteDeploy.evidence.candidateForce', { value: presentation.candidateForce }),
+        t('decisionRoom.card.eliteDeploy.evidence.donorCommand', { value: presentation.donorCommand }),
+        t('decisionRoom.card.eliteDeploy.evidence.sourcePosition', { value: presentation.sourcePosition }),
+        t('decisionRoom.card.eliteDeploy.evidence.readiness', { value: presentation.readiness }),
+        t('decisionRoom.card.eliteDeploy.evidence.travelTime', { value: presentation.travelTime }),
+        t('decisionRoom.card.eliteDeploy.evidence.expectedEffect', { value: presentation.expectedEffect }),
+        t('decisionRoom.card.eliteDeploy.evidence.weakenedPosition', { value: presentation.weakenedPosition }),
+        t('decisionRoom.card.eliteDeploy.evidence.opportunityCost', { value: presentation.opportunityCost }),
       ],
       navigationTarget: { kind: 'army-hq-tab', tab: 'personnel' },
-      directive,
+      ...(directive ? { directive } : {}),
       urgencySort: request.severityBand === 'critical' ? 0 : 5,
       sourceSort: `command:elite-deploy:${request.request_id}`,
     });
@@ -1526,6 +1704,11 @@ function finalizeCards(cards: CandidateCard[]): PresidentialDecisionRoomCard[] {
     });
 }
 
+function isHardAdvanceBlockingCard(card: Pick<PresidentialDecisionRoomCard, 'category' | 'severity'>): boolean {
+  return card.severity === 'blocking'
+    && (card.category === 'decision' || card.category === 'counter_offer');
+}
+
 function buildAdvanceReadiness(
   state: LoadedGameState,
   cards: PresidentialDecisionRoomCard[],
@@ -1539,30 +1722,36 @@ function buildAdvanceReadiness(
       || card.category === 'turn')
     && card.severity !== 'info',
   );
-  const items: PresidentialDecisionRoomCard[] = [];
-  const usedIds = new Set<string>();
+  const blockers = eligible.filter(isHardAdvanceBlockingCard);
+  const recommendations = eligible.filter((card) => !isHardAdvanceBlockingCard(card));
+  const items: PresidentialDecisionRoomCard[] = [...blockers];
+  const usedIds = new Set<string>(blockers.map((card) => card.id));
   const usedCategories = new Set<PresidentialDecisionRoomCategory>();
-  for (const card of eligible) {
-    if (items.length >= 4) break;
+  const targetCount = Math.max(4, blockers.length);
+  for (const card of blockers) usedCategories.add(card.category);
+  for (const card of recommendations) {
+    if (items.length >= targetCount) break;
     if (usedCategories.has(card.category)) continue;
     items.push(card);
     usedIds.add(card.id);
     usedCategories.add(card.category);
   }
-  for (const card of eligible) {
-    if (items.length >= 4) break;
+  for (const card of recommendations) {
+    if (items.length >= targetCount) break;
     if (usedIds.has(card.id)) continue;
     items.push(card);
     usedIds.add(card.id);
   }
 
-  const hasBlockingReadinessItem = eligible.some((card) => card.severity === 'blocking');
+  const hasBlockingReadinessItem = blockers.length > 0;
   const blockedByExistingSystems = hasBlockingReadinessItem;
 
   return {
     headline: t(
-      items.length > 0 || blockedByExistingSystems
+      blockedByExistingSystems
         ? 'decisionRoom.advance.reviewBeforeAdvance'
+        : items.length > 0
+          ? 'decisionRoom.advance.recommendedBeforeAdvance'
         : 'decisionRoom.advance.clearToAdvance',
     ),
     blockedByExistingSystems,
@@ -1783,6 +1972,7 @@ function buildActiveDossier(
     .filter((cardId) => cardId !== card.id)
     .slice(0, 4) ?? [];
   const advanceSensitive = advanceReadiness.items.some((item) => item.id === card.id);
+  const hardAdvanceBlocking = isHardAdvanceBlockingCard(card);
 
   return {
     id: `dossier:${card.id}`,
@@ -1802,7 +1992,9 @@ function buildActiveDossier(
     advanceSensitive,
     advanceLabel: t(
       advanceSensitive
-        ? 'decisionRoom.advance.reviewBeforeAdvance'
+        ? hardAdvanceBlocking
+          ? 'decisionRoom.advance.reviewBeforeAdvance'
+          : 'decisionRoom.advance.recommendedBeforeAdvance'
         : 'decisionRoom.advance.notInAdvanceReview',
     ),
   };
@@ -1865,10 +2057,10 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
   addSitrepCards(state, candidates);
   addSupplyVisibilityCard(state, candidates);
   addBriefingCards(state, candidates);
-  addCommandPersonnelCards(state, candidates);
+  addCommandPersonnelCards(state, candidates, osidNameMap);
   addRequestOpDirectiveCards(state, candidates);
   addStopOpDirectiveCards(state, candidates);
-  addProposalReviewDirectiveCards(state, candidates);
+  addProposalReviewDirectiveCards(state, candidates, osidNameMap);
   addForceLaunchDirectiveCards(state, candidates);
   addProactiveForceLaunchDirectiveCards(state, candidates);
   addHardTurnCards(state, osidNameMap, candidates);
@@ -1894,7 +2086,7 @@ export function buildPresidentialDecisionRoomView(input: PresidentialDecisionRoo
     metrics: {
       urgentCount: weightedUrgentCount(cards),
       pendingReviews: weightedCardCount(livePendingReviewCards),
-      opportunities: state.operationOpportunityProposals?.length ?? 0,
+      opportunities: (state.operationOpportunityProposals ?? []).filter(isReviewableOperationOpportunity).length,
       hardTurns: cards.filter((card) => card.category === 'turn').length,
       advanceReviewCount: weightedCardCount(advanceReadiness.items),
     },

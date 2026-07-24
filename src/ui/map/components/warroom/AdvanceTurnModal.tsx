@@ -86,7 +86,7 @@ function severityLabel(severity: PreAdvanceCommandReviewItem['severity']): strin
 function MetricCell({ label, value, urgent = false }: { label: string; value: number; urgent?: boolean }) {
   return (
     <div className="min-w-0 border border-panel-border/60 bg-panel-card/65 px-2 py-1.5">
-      <div className="truncate text-[8px] font-bold uppercase tracking-[0.14em] text-text-muted">{label}</div>
+      <div className="truncate text-xs font-bold uppercase tracking-[0.14em] text-text-muted">{label}</div>
       <div className={`text-base font-bold tabular-nums ${urgent ? 'text-amber-300' : 'text-text-primary'}`}>
         {value}
       </div>
@@ -110,26 +110,26 @@ function ReviewItemRow({
       <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="border border-panel-border/70 bg-panel-bg/70 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-secondary">
+            <span className="border border-panel-border/70 bg-panel-bg/70 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-secondary">
               {categoryLabel(item.category)}
             </span>
-            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
+            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-muted">
               {severityLabel(item.severity)}
             </span>
           </div>
-          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{item.title}</div>
-          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-text-secondary">{item.explanation}</div>
+          <div className="mt-1 truncate text-xs font-bold text-text-primary">{item.title}</div>
+          <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-text-secondary">{item.explanation}</div>
         </div>
         <div className="shrink-0 text-right">
           <button
             type="button"
             onClick={() => onReview(item)}
             disabled={disabled || !canReview}
-            className="border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+            className="border border-amber-400/35 bg-amber-400/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] text-amber-300 transition-colors hover:bg-amber-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
           >
             {item.actionLabel}
           </button>
-          <div className="mt-1 max-w-[8rem] truncate text-[8px] uppercase tracking-[0.1em] text-text-muted">
+          <div className="mt-1 max-w-[8rem] truncate text-xs uppercase tracking-[0.1em] text-text-muted">
             {item.sourceOwner}
           </div>
         </div>
@@ -152,21 +152,21 @@ function BlockerRow({
       <div className="flex min-w-0 items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1">
-            <span className="border border-red-500/45 bg-red-950/45 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-red-300">
+            <span className="border border-red-500/45 bg-red-950/45 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-red-300">
               {t('advanceTurn.required')}
             </span>
-            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-[8px] font-bold uppercase tracking-[0.1em] text-text-muted">
+            <span className="border border-panel-border/55 bg-black/15 px-1 py-0.5 text-xs font-bold uppercase tracking-[0.1em] text-text-muted">
               {blocker.typeLabel}
             </span>
           </div>
-          <div className="mt-1 truncate text-[11px] font-bold text-text-primary">{blocker.title}</div>
-          <div className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-text-secondary">{blocker.summary}</div>
+          <div className="mt-1 truncate text-xs font-bold text-text-primary">{blocker.title}</div>
+          <div className="mt-0.5 line-clamp-2 text-xs leading-snug text-text-secondary">{blocker.summary}</div>
         </div>
         <button
           type="button"
           onClick={() => onResolve(blocker)}
           disabled={disabled}
-          className="shrink-0 border border-red-400/45 bg-red-400/10 px-2 py-1 text-[8px] font-bold uppercase tracking-[0.1em] text-red-200 transition-colors hover:bg-red-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
+          className="shrink-0 border border-red-400/45 bg-red-400/10 px-2 py-1 text-xs font-bold uppercase tracking-[0.1em] text-red-200 transition-colors hover:bg-red-400/20 disabled:cursor-default disabled:border-panel-border/55 disabled:bg-panel-bg/50 disabled:text-text-muted"
         >
           {blocker.actionLabel}
         </button>
@@ -356,28 +356,28 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
         <div className="border-b border-panel-border bg-panel-card/70 px-4 py-3">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
-              <div id="advance-turn-title" className="text-[10px] font-bold uppercase tracking-wider text-accent-gold">
+              <div id="advance-turn-title" className="text-xs font-bold uppercase tracking-wider text-accent-gold">
                 {t('advanceTurn.title')}
               </div>
               <div className="mt-0.5 text-sm font-bold text-text-primary">{t('advanceTurn.confirmQuestion')}</div>
             </div>
-            <div className={`border px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
+            <div className={`border px-2 py-1 text-xs font-bold uppercase tracking-[0.12em] ${statusClass(review.status)}`}>
               {review.headline}
             </div>
           </div>
         </div>
 
         <div className="space-y-3 px-4 py-3">
-          <div className="text-[11px] leading-snug text-text-secondary">
+          <div className="text-xs leading-snug text-text-secondary">
             {t('advanceTurn.warning')}
           </div>
 
           {(review.status === 'blocked' || blockers.length > 0) && (
             <section className="rounded border border-red-500/40 bg-red-950/30 px-3 py-2">
-              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-red-300">
+              <div className="text-xs font-bold uppercase tracking-[0.14em] text-red-300">
                 {t('advanceTurn.blockedTitle')}
               </div>
-              <div className="mt-1 text-[11px] leading-snug text-text-secondary">
+              <div className="mt-1 text-xs leading-snug text-text-secondary">
                 {t('advanceTurn.blockedSummary')}
               </div>
               {review.canReviewPriorities && (
@@ -385,7 +385,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
                   type="button"
                   onClick={handleReviewPriorities}
                   disabled={advancing}
-                  className="mt-2 border border-red-300/35 bg-red-400/10 px-2 py-1 text-[10px] font-bold uppercase text-red-200 transition-colors hover:bg-red-400/20 disabled:opacity-50"
+                  className="mt-2 border border-red-300/35 bg-red-400/10 px-2 py-1 text-xs font-bold uppercase text-red-200 transition-colors hover:bg-red-400/20 disabled:opacity-50"
                 >
                   {t('advanceTurn.openReview')}
                 </button>
@@ -394,7 +394,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
           )}
 
           <section>
-            <div className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.16em] text-text-muted">
+            <div className="mb-1.5 text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
               {t('decisionRoom.reviewBeforeAdvance')}
             </div>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -407,7 +407,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
 
           {blockers.length > 0 && (
             <section className="space-y-1.5">
-              <div className="text-[9px] font-bold uppercase tracking-[0.16em] text-red-300">
+              <div className="text-xs font-bold uppercase tracking-[0.16em] text-red-300">
                 {t('advanceTurn.resolveBeforeAdvancing')}
               </div>
               {blockers.map((blocker) => (
@@ -423,7 +423,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
 
           <section className="space-y-1.5">
             {review.items.length === 0 ? (
-              <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-[11px] text-text-secondary">
+              <div className="border border-panel-border/60 bg-panel-card/65 px-2 py-2 text-xs text-text-secondary">
                 {t('decisionRoom.noBuriedItems')}
               </div>
             ) : review.items.map((item) => (
@@ -453,7 +453,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
             type="button"
             onClick={() => void handleConfirm()}
             disabled={advancing || review.status === 'blocked' || blockers.length > 0}
-            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-[10px] font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+            className="border border-accent-gold/70 bg-accent-gold px-3 py-1.5 text-xs font-bold uppercase text-black transition-colors hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {advancing ? t('advanceTurn.advancing') : t('advanceTurn.advance')}
           </button>
@@ -462,7 +462,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
               type="button"
               onClick={handleReviewPriorities}
               disabled={advancing}
-              className="border border-amber-400/35 bg-amber-400/10 px-3 py-1.5 text-[10px] font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:opacity-50"
+              className="border border-amber-400/35 bg-amber-400/10 px-3 py-1.5 text-xs font-bold uppercase text-amber-300 transition-colors hover:bg-amber-400/20 disabled:opacity-50"
             >
               {t('advanceTurn.reviewPriorities')}
             </button>
@@ -471,7 +471,7 @@ export function AdvanceTurnModal({ onReviewPriorities, onReviewItem, onResolveBl
             type="button"
             onClick={handleCancel}
             disabled={advancing}
-            className="border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-[10px] font-bold uppercase text-text-secondary transition-colors hover:bg-panel-hover hover:text-text-primary disabled:opacity-50"
+            className="border border-panel-border/70 bg-panel-bg/70 px-3 py-1.5 text-xs font-bold uppercase text-text-secondary transition-colors hover:bg-panel-hover hover:text-text-primary disabled:opacity-50"
           >
             {t('armyHq.cancel')}
           </button>

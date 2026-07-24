@@ -216,6 +216,98 @@ function makeCtx(overrides: {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('evaluateSectorMarch — tooth guard', () => {
+    it('does not apply an ordinary sector reassignment to an active operation participant', () => {
+        const loc = 'op:test:staging' as Osid;
+        const target = 'op:test:other_front' as Osid;
+        const state = makeState('brig_test', loc, [], { [loc]: FACTION, [target]: FACTION });
+        state.military.corps_front_sectors![`sector:${CORPS_ID}:1`] = {
+            sector_id: `sector:${CORPS_ID}:1`,
+            corps_id: CORPS_ID as any,
+            faction: FACTION,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: ['e2'],
+            sub_segments: [{
+                sub_segment_id: `subseg:${CORPS_ID}:1`,
+                edge_ids: ['e2'],
+                enemy_osids: ['op:test:enemy'],
+                friendly_osids: [target],
+                primary_brigade_ids: [],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: [target],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            density: 0,
+            threat_ratio: 1,
+            defensive_power: 0,
+            sector_stance: 'defend',
+            stance_source: 'bot',
+        };
+        const ctx = makeCtx({
+            loc,
+            state,
+            subSegments: [],
+            adjacency: new Map([
+                [loc, [target]],
+                [target, [loc]],
+            ]),
+        });
+        ctx.isActiveSectorOperationParticipant = true;
+        ctx.directive = {
+            sector_reassignment_orders: [{ brigade_id: 'brig_test', to_sector_id: `sector:${CORPS_ID}:1` }],
+        } as any;
+
+        expect(evaluateSectorMarch(ctx)).toBe(false);
+        expect(ctx.result.column_march_orders.brig_test).toBeUndefined();
+    });
+
+    it('translates an empty-sector relief reassignment into a column march', () => {
+        const loc = 'op:test:relief_rear' as Osid;
+        const target = 'op:test:empty_front' as Osid;
+        const state = makeState('brig_test', loc, [], { [loc]: FACTION, [target]: FACTION });
+        state.military.corps_front_sectors![`sector:${CORPS_ID}:1`] = {
+            sector_id: `sector:${CORPS_ID}:1`,
+            corps_id: CORPS_ID as any,
+            faction: FACTION,
+            opposing_factions: ['RBiH' as FactionId],
+            edge_ids: ['e2'],
+            sub_segments: [{
+                sub_segment_id: `subseg:${CORPS_ID}:1`,
+                edge_ids: ['e2'],
+                enemy_osids: ['op:test:enemy'],
+                friendly_osids: [target],
+                primary_brigade_ids: [],
+                length_edges: 1,
+            }],
+            length_edges: 1,
+            territory_osids: [target],
+            assigned_brigade_ids: [],
+            reserve_brigade_ids: [],
+            density: 0,
+            threat_ratio: 1,
+            defensive_power: 0,
+            sector_stance: 'defend',
+            stance_source: 'bot',
+        };
+        const ctx = makeCtx({
+            loc,
+            state,
+            subSegments: [],
+            adjacency: new Map([
+                [loc, [target]],
+                [target, [loc]],
+            ]),
+        });
+        ctx.directive = {
+            sector_reassignment_orders: [{ brigade_id: 'brig_test', to_sector_id: `sector:${CORPS_ID}:1` }],
+        } as any;
+
+        expect(evaluateSectorMarch(ctx)).toBe(true);
+        expect(ctx.result.column_march_orders.brig_test).toBe(target);
+        expect(ctx.brigade.location_osid).toBe(loc);
+    });
+
     it('uses cached null sector assignment to skip fallback assigned-sector lookup', () => {
         const loc = 'op:jablanica:jablanica_2' as Osid;
         const front = 'op:kalinovik:sela_2' as Osid;
@@ -600,6 +692,29 @@ describe('evaluateSectorMarch — tooth guard', () => {
 });
 
 describe('evaluatePocketEvacuation', () => {
+    it('does not evacuate an active operation participant from a tiny staging sector', () => {
+        const loc = 'op:test:pocket' as Osid;
+        const home = 'op:test:home' as Osid;
+        const subSegments: CorpsFrontSector['sub_segments'] = [{
+            sub_segment_id: 'subseg:vrs_test_corps:pocket',
+            edge_ids: ['e1'],
+            enemy_osids: ['op:rbih:enemy_1'],
+            friendly_osids: [loc],
+            primary_brigade_ids: [],
+            length_edges: 1,
+        }];
+        const state = makeState('brig_test', loc, subSegments, { [loc]: FACTION, [home]: FACTION });
+        const sector = state.military.corps_front_sectors![`sector:${CORPS_ID}:0`]!;
+        sector.territory_osids = [loc];
+        const ctx = makeCtx({ loc, state, subSegments });
+        ctx.brigade.home_osid = home;
+        ctx.isActiveSectorOperationParticipant = true;
+
+        expect(evaluatePocketEvacuation(ctx)).toBe(false);
+        expect(state.military.brigade_movement_orders?.brig_test).toBeUndefined();
+        expect(ctx.result.posture_orders).toEqual([]);
+    });
+
     it('uses cached sector assignment instead of rescanning sector rosters', () => {
         const loc = 'op:test:pocket' as Osid;
         const home = 'op:test:home' as Osid;

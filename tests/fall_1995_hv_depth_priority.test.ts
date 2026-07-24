@@ -59,6 +59,12 @@ function makeState(turn: number): GameState {
 function makeWashingtonState(washingtonTurn: number, currentTurn: number): GameState {
     const state = makeState(currentTurn);
     ensureRbihHrhbState(state);
+    state.political.political_controllers = {
+        'op:duvno:tomislavgrad_2': 'HRHB',
+        'op:glamoc:glamoc_2': 'RS',
+        'op:kupres:bucovaca': 'RS',
+        'op:livno:livno_2': 'HRHB',
+    };
     state.political.rbih_hrhb_state!.washington_signed = true;
     state.political.rbih_hrhb_state!.washington_turn = washingtonTurn;
     return state;

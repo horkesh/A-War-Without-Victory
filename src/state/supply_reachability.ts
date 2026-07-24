@@ -1,6 +1,7 @@
 import { AdjacencyMap } from '../map/adjacency_map.js';
 import { GameState } from './game_state.js';
 import { getSettlementControlStatus } from './settlement_control.js';
+import { strictCompare } from './validateGameState.js';
 
 
 export interface FactionSupplyReachability {
@@ -94,7 +95,7 @@ export function runSupplyBfs(params: SupplyBfsParams): SupplyBfsResult {
     return {
         reachable: controlled.filter(n => visited.has(n)),
         isolated: controlled.filter(n => !visited.has(n)),
-        edgesUsed: [...edgesUsed].sort((a, b) => a.localeCompare(b)),
+        edgesUsed: [...edgesUsed].sort(strictCompare),
         rightsEdgesUsed,
         rightsNodesUsed,
     };
@@ -129,7 +130,7 @@ export function computeSupplyReachability(
     adjacencyMap: AdjacencyMap
 ): SupplyReachabilityReport {
     const turn = state.meta.turn;
-    const factions = [...(state.factions ?? [])].sort((a, b) => a.id.localeCompare(b.id));
+    const factions = [...(state.factions ?? [])].sort((a, b) => strictCompare(a.id, b.id));
 
     // Phase 12C.3: Build active corridor rights by beneficiary
     const activeCorridorsByBeneficiary = new Map<string, Array<{ scope: { kind: 'region'; region_id: string } | { kind: 'edges'; edge_ids: string[] } | { kind: 'settlements'; sids: string[] }; edgeIds: Set<string>; nodeIds: Set<string> }>>();

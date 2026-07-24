@@ -54,20 +54,20 @@ export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelPro
 
                 {/* Command status. */}
                 <div className="p-2 bg-black/20 rounded border border-panel-border/30 space-y-1">
-                    <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">
+                    <div className="text-xs uppercase text-text-secondary tracking-wider font-semibold">
                         {t('officerDossier.commandStatus')}
                     </div>
-                    <div className="flex items-center gap-2 text-[9px]">
+                    <div className="flex items-center gap-2 text-xs">
                         <span className="text-text-secondary w-[62px] shrink-0">{t('officerDossier.statusLabel')}</span>
                         <span className="font-mono text-text-primary tracking-wide">{officerStatusLabel(officer.status)}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[9px]">
+                    <div className="flex items-center gap-2 text-xs">
                         <span className="text-text-secondary w-[62px] shrink-0">{t('officerDossier.assignedCorps')}</span>
                         <span className="text-text-primary truncate">
                             {assignedCorps || t('officerDossier.unassigned')}
                         </span>
                     </div>
-                    <div className="flex items-center gap-2 text-[9px]">
+                    <div className="flex items-center gap-2 text-xs">
                         <span className="text-text-secondary w-[62px] shrink-0">{t('officerDossier.tenure')}</span>
                         <span className="text-text-primary">{formatTenure(officer.turns_in_command)}</span>
                     </div>
@@ -76,20 +76,20 @@ export function OfficerDossierPanel({ officer, onClose }: OfficerDossierPanelPro
                 {/* Authored bio prose (player-safe; rendered verbatim from stored fields). */}
                 {hasBio && (
                     <div className="p-2 bg-black/20 rounded border border-panel-border/30 space-y-1.5">
-                        <div className="text-[9px] uppercase text-text-secondary tracking-wider font-semibold">
+                        <div className="text-xs uppercase text-text-secondary tracking-wider font-semibold">
                             {t('officerDossier.bio')}
                         </div>
                         {officer.bio_short && (
-                            <p className="text-[10px] text-text-primary leading-snug">{officer.bio_short}</p>
+                            <p className="text-xs text-text-primary leading-snug">{officer.bio_short}</p>
                         )}
                         {officer.command_style && (
-                            <div className="text-[9px]">
+                            <div className="text-xs">
                                 <span className="text-text-secondary font-semibold">{t('officerDossier.commandStyleLabel')}: </span>
                                 <span className="text-text-primary">{officer.command_style}</span>
                             </div>
                         )}
                         {officer.known_for && (
-                            <div className="text-[9px]">
+                            <div className="text-xs">
                                 <span className="text-text-secondary font-semibold">{t('officerDossier.knownForLabel')}: </span>
                                 <span className="text-text-primary">{officer.known_for}</span>
                             </div>

@@ -628,23 +628,6 @@ async function activateVisibleControl(page, selector, timeout = 30000) {
   if (!activated) throw new Error(`Visible control could not be activated: ${selector}`);
 }
 
-async function isVisibleButtonDisabled(page, selector, timeout = 30000) {
-  await waitForVisibleSelector(page, selector, timeout);
-  return page.evaluate((targetSelector) => {
-    const target = Array.from(document.querySelectorAll(targetSelector)).find((el) => {
-      if (!(el instanceof HTMLElement)) return false;
-      const rect = el.getBoundingClientRect();
-      const style = window.getComputedStyle(el);
-      return rect.width > 0
-        && rect.height > 0
-        && style.display !== 'none'
-        && style.visibility !== 'hidden'
-        && Number(style.opacity || '1') > 0;
-    });
-    return target instanceof HTMLButtonElement && target.disabled;
-  }, selector);
-}
-
 async function clickFirstVisibleSelector(page, selector, description = selector) {
   await page.waitForFunction(
     (targetSelector) => {
@@ -1463,25 +1446,8 @@ async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
   await waitForVisibleSelector(page, '#sector-intel-panel-logistics');
   await activateVisibleControl(page, '#sector-intel-tab-ops');
   await waitForVisibleSelector(page, '#sector-intel-panel-ops');
-  const draftDirectiveSelector = `[data-testid="corps-front-draft-directive"][data-origin-sector-id="${quoteCssAttributeValue(sectorId)}"]`;
-  const draftDirectiveDisabled = await isVisibleButtonDisabled(page, draftDirectiveSelector);
-  if (draftDirectiveDisabled) {
-    await page.waitForFunction(
-      () => document.body.textContent?.includes('Desktop command bridge unavailable'),
-      { timeout: 15000 },
-    );
-    await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_bridge_unavailable'));
-  } else {
-    await activateVisibleControl(page, draftDirectiveSelector);
-    await waitForVisibleSelector(page, '[data-testid="ops-planning-modal"][data-origin-sector-id]');
-    await waitForVisibleSelector(page, '[data-testid="ops-planning-phase-panel"][data-phase="commander"]');
-    for (const phase of ['commander', 'plan', 'g2_assessment', 'authorize']) {
-      await waitForVisibleSelector(page, `[data-testid="ops-planning-phase-${phase}"][data-phase="${phase}"]`);
-    }
-    await captureEvidence(page, summary, evidenceId('owner_journey_ops_planning_modal'));
-    await activateVisibleControl(page, '[data-testid="ops-planning-close"]');
-    await page.waitForFunction(() => !document.querySelector('[data-testid="ops-planning-modal"]'), { timeout: 15000 });
-  }
+  await waitForVisibleSelector(page, '[data-testid="corps-front-delegated-command-note"]');
+  await captureEvidence(page, summary, evidenceId('owner_journey_sector_delegated_command'));
   await activateVisibleControl(page, '#sector-intel-tab-forces');
   await waitForVisibleSelector(page, '#sector-intel-panel-forces');
   const formationId = await getVisibleSelectorAttribute(
@@ -1546,8 +1512,8 @@ async function runOwnerJourneyDrilldown(page, summary, faction = 'RBiH') {
   assertNoRawTechnicalTokens(`Owner Journey Drilldown ${faction}`, text);
   summary.evidence.ownerJourneyDrilldown = true;
   summary.evidence.ownerJourneyDrilldownByFaction[faction] = true;
-  summary.evidence.ownerJourneyOpsPlanningModal = true;
-  summary.evidence.ownerJourneyOpsPlanningModalByFaction[faction] = true;
+  summary.evidence.ownerJourneyDelegatedCommand = true;
+  summary.evidence.ownerJourneyDelegatedCommandByFaction[faction] = true;
 }
 
 async function runRecordsAarFormationLinkLiveProof(page, summary) {
@@ -1663,14 +1629,59 @@ async function runBattleMarkerLiveProof(page, summary) {
   summary.evidence.battleMarkerLiveProof = markerEvidence;
 }
 
+let manualSaveFixtureSequence = 0;
+
+async function loadManualSaveFixture(page, fixtureState) {
+  const token = `fixture-${++manualSaveFixtureSequence}`;
+  await page.evaluate(({ state, loadToken }) => {
+    window.__awwvLiveSurfaceFixtureLoads ??= {};
+    window.__awwvLiveSurfaceFixtureLoads[loadToken] = { status: 'pending' };
+    try {
+      if (typeof window.handleManualSaveLoad !== 'function') {
+        throw new Error('window.handleManualSaveLoad is unavailable');
+      }
+      const pending = window.handleManualSaveLoad(state);
+      Promise.resolve(pending).then(
+        () => {
+          window.__awwvLiveSurfaceFixtureLoads[loadToken] = { status: 'fulfilled' };
+        },
+        (error) => {
+          window.__awwvLiveSurfaceFixtureLoads[loadToken] = {
+            status: 'rejected',
+            error: error instanceof Error ? error.message : String(error),
+          };
+        },
+      );
+    } catch (error) {
+      window.__awwvLiveSurfaceFixtureLoads[loadToken] = {
+        status: 'rejected',
+        error: error instanceof Error ? error.message : String(error),
+      };
+    }
+  }, { state: fixtureState, loadToken: token });
+
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    const result = await page.evaluate((loadToken) =>
+      window.__awwvLiveSurfaceFixtureLoads?.[loadToken] ?? null
+    , token);
+    if (result?.status === 'fulfilled') {
+      await page.evaluate((loadToken) => {
+        delete window.__awwvLiveSurfaceFixtureLoads?.[loadToken];
+      }, token);
+      return;
+    }
+    if (result?.status === 'rejected') {
+      throw new Error(`Manual save fixture load failed: ${result.error ?? 'unknown error'}`);
+    }
+    await delay(100);
+  }
+  throw new Error(`Timed out loading manual save fixture ${token}`);
+}
+
 async function loadRecordsAarLiveProofFixture(page, summary) {
   const fixtureState = buildRecordsAarLiveProofFixtureState();
-  await page.evaluate(async (state) => {
-    if (typeof window.handleManualSaveLoad !== 'function') {
-      throw new Error('window.handleManualSaveLoad is unavailable');
-    }
-    await window.handleManualSaveLoad(state);
-  }, fixtureState);
+  await loadManualSaveFixture(page, fixtureState);
   await resetToWarMap(page);
   summary.evidence.recordsAarFixture = {
     source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
@@ -1683,12 +1694,7 @@ async function loadRecordsAarLiveProofFixture(page, summary) {
 
 async function loadTurnZeroSetupProvenanceFixture(page, summary) {
   const fixtureState = buildTurnZeroSetupProvenanceFixtureState();
-  await page.evaluate(async (state) => {
-    if (typeof window.handleManualSaveLoad !== 'function') {
-      throw new Error('window.handleManualSaveLoad is unavailable');
-    }
-    await window.handleManualSaveLoad(state);
-  }, fixtureState);
+  await loadManualSaveFixture(page, fixtureState);
   await resetToWarMap(page);
   summary.evidence.turnZeroSetupProvenanceFixture = {
     source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
@@ -1699,12 +1705,7 @@ async function loadTurnZeroSetupProvenanceFixture(page, summary) {
 
 async function loadPlayerFactionStartupFixture(page, summary, faction) {
   const fixtureState = buildPlayerFactionStartupFixtureState(faction);
-  await page.evaluate(async (state) => {
-    if (typeof window.handleManualSaveLoad !== 'function') {
-      throw new Error('window.handleManualSaveLoad is unavailable');
-    }
-    await window.handleManualSaveLoad(state);
-  }, fixtureState);
+  await loadManualSaveFixture(page, fixtureState);
   await resetToWarMap(page);
   summary.evidence.ownerJourneyStartupFixtureByFaction[faction] = {
     source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
@@ -1740,12 +1741,7 @@ async function runTurnZeroSetupProvenanceLiveProof(page, summary) {
 
 async function loadOperationOpportunityLiveProofFixture(page, summary) {
   const fixtureState = buildOperationOpportunityLiveProofFixtureState();
-  await page.evaluate(async (state) => {
-    if (typeof window.handleManualSaveLoad !== 'function') {
-      throw new Error('window.handleManualSaveLoad is unavailable');
-    }
-    await window.handleManualSaveLoad(state);
-  }, fixtureState);
+  await loadManualSaveFixture(page, fixtureState);
   await resetToWarMap(page);
   summary.evidence.operationOpportunityFixture = {
     source: path.relative(ROOT, STARTUP_SAVE_PATH).replace(/\\/g, '/'),
@@ -1956,8 +1952,8 @@ async function run() {
       mapContextMenuLiveProof: false,
       ownerJourneyDrilldown: false,
       ownerJourneyDrilldownByFaction: {},
-      ownerJourneyOpsPlanningModal: false,
-      ownerJourneyOpsPlanningModalByFaction: {},
+      ownerJourneyDelegatedCommand: false,
+      ownerJourneyDelegatedCommandByFaction: {},
       ownerJourneyStartupFixtureByFaction: {},
       recordsAarFormationLinkLiveProof: false,
       battleMarkerLiveProof: false,

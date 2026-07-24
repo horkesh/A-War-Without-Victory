@@ -1163,7 +1163,8 @@ describe('commander operation axis creation (ZEA fix)', () => {
         expect(op.axes!.length).toBe(1);
         expect(op.axes![0]!.objectives).toEqual(['target_osid']);
         expect(op.axes![0]!.assigned_brigades).toContain('brig_1');
-        expect(op.min_attack_outcome).toBe('stalemate');
+        expect(op.planning_duration).toBe(1);
+        expect(op.min_attack_outcome).toBe('repulsed');
     });
 
     it('buildProbeOperation without objectives falls back to no-axis', () => {

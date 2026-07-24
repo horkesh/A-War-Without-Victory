@@ -17,6 +17,8 @@ const LIGHT_INFANTRY_BRIGADE: RecruitmentCatalogBrigade = {
   default_equipment_class: 'light_infantry',
   available_from: 0,
   mandatory: false,
+  eligible: true,
+  reason_codes: [],
 };
 
 describe('RecruitmentModal player copy', () => {
@@ -47,5 +49,34 @@ describe('RecruitmentModal player copy', () => {
     expect(screen.getByDisplayValue('Light Infantry')).toBeTruthy();
     expect(container.textContent).not.toMatch(/\bcap\b|\bman\b|light_infantry|RBiH/);
     expect(onApply).toHaveBeenCalledWith('rbih_test_light_infantry', 'light_infantry');
+  });
+
+  it('separates eligible and unavailable formations and explains stable reason codes', () => {
+    const onApply = vi.fn();
+    const late: RecruitmentCatalogBrigade = {
+      ...LIGHT_INFANTRY_BRIGADE,
+      id: 'rbih_late',
+      name: 'Late Brigade',
+      available_from: 8,
+      eligible: false,
+      reason_codes: ['not_yet_available'],
+    };
+
+    render(React.createElement(RecruitmentModal, {
+      isOpen: true,
+      loading: false,
+      applying: false,
+      playerFaction: 'RBiH',
+      brigades: [late, LIGHT_INFANTRY_BRIGADE],
+      onClose: vi.fn(),
+      onRefresh: vi.fn(),
+      onApply,
+    }));
+
+    expect(screen.getByText('Eligible now')).toBeTruthy();
+    expect(screen.getByText('Unavailable')).toBeTruthy();
+    expect(screen.getByText('Available from week 8')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Recruit' }));
+    expect(onApply).toHaveBeenCalledWith(LIGHT_INFANTRY_BRIGADE.id, 'light_infantry');
   });
 });

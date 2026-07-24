@@ -18,6 +18,7 @@ const {
   getPendingProposalReviewsForPlayer,
   resolvePendingProposalAccess,
   resolveOpportunityDecisionPayload,
+  isResolvedProposalReviewRecord,
   buildOpProposalCardData,
   buildForceableReadyPlanData,
   FORCE_LAUNCH_COST,
@@ -26,7 +27,7 @@ const {
   ADDRESS_NATION_COST,
   DECORATE_UNIT_COST,
 } = require('./autonomy_ipc_contract.cjs');
-const { stageAuthoredOperation } = require('./author_op_staging.cjs');
+const { stageAuthoredOperation, stageCanonAttackOrder } = require('./author_op_staging.cjs');
 const { stageOpHalt } = require('./op_halt.cjs');
 const { stageOpDirective } = require('./op_directive_staging.cjs');
 const { stageCoReplacement } = require('./co_replacement.cjs');
@@ -49,7 +50,15 @@ const {
 } = require('./decorate_unit_contract.cjs');
 const { stageConvoyDecisionOnState } = require('./convoy_ipc_contract.cjs');
 const { fileOfficerDecisionRecord } = require('./officer_decision_history.cjs');
+const {
+  projectPlayerVisibleReplaySequenceJson,
+  projectPlayerVisibleStateJson,
+} = require('./player_visible_state.cjs');
 const RUNTIME_PROBE_MODE = process.env.AWWV_DESKTOP_RUNTIME_PROBE === '1';
+
+function strictCompare(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
 
 /** Project root (dev) or resources root (packaged). Used for data paths and desktop sim. */
 function getBaseDir() {
@@ -129,12 +138,27 @@ function getDesktopSim() {
   return require(bundlePath);
 }
 
+function getActivePlayerFaction() {
+  if (!currentGameStateJson) return null;
+  try {
+    const faction = JSON.parse(currentGameStateJson)?.meta?.player_faction;
+    return faction === 'RBiH' || faction === 'RS' || faction === 'HRHB' ? faction : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
+function projectCurrentGameStateForRenderer() {
+  return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson) : null;
+}
+
 function sendGameStateToRenderer(stateJson, excludeSender) {
+  const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson);
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
       if (excludeSender && win.webContents === excludeSender) continue;
-      win.webContents.send('game-state-updated', stateJson);
+      win.webContents.send('game-state-updated', playerVisibleStateJson);
     }
   }
 }
@@ -176,11 +200,12 @@ function readReplaySaveManifestSidecar(statePath) {
 /** Forward a replay save sequence (raw JSON string of GameState[]) to renderers. */
 function sendReplaySequenceToRenderer(sequenceJson, excludeSender) {
   if (!sequenceJson) return;
+  const playerVisibleSequenceJson = projectPlayerVisibleReplaySequenceJson(sequenceJson, getActivePlayerFaction());
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
       if (excludeSender && win.webContents === excludeSender) continue;
-      win.webContents.send('replay-sequence-updated', sequenceJson);
+      win.webContents.send('replay-sequence-updated', playerVisibleSequenceJson);
     }
   }
 }
@@ -240,9 +265,18 @@ function readCanonicalCurrentState(sim) {
 }
 
 function writeCanonicalCurrentState(sim, state, excludeSender) {
+  const previousGameStateJson = currentGameStateJson;
   currentGameStateJson = sim.serializeState(state);
-  sendGameStateToRenderer(currentGameStateJson, excludeSender);
-  return currentGameStateJson;
+  try {
+    autoSave();
+  } catch (error) {
+    currentGameStateJson = previousGameStateJson;
+    throw error;
+  }
+  // Mutating IPC calls return only status/report metadata, so the initiating
+  // renderer also needs the projected broadcast or it can retain stale state.
+  void excludeSender;
+  sendGameStateToRenderer(currentGameStateJson);
 }
 
 function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
@@ -783,7 +817,7 @@ function armRendererReactionProbe(win) {
 }
 
 function collectRendererReactionProbe(win, expectedMode, label) {
-  const expectedPayloadLength = currentGameStateJson ? currentGameStateJson.length : null;
+  const expectedPayloadLength = projectCurrentGameStateForRenderer()?.length ?? null;
   return win.webContents.executeJavaScript(
     `
       window.__awwvProbeRendererReaction;
@@ -967,8 +1001,9 @@ function createTacticalMapWindow(options = {}) {
     if (tacticalMapWindow === win) tacticalMapWindow = null;
   });
   win.webContents.on('did-finish-load', () => {
-    if (currentGameStateJson) {
-      win.webContents.send('game-state-updated', currentGameStateJson);
+    const playerVisibleStateJson = projectCurrentGameStateForRenderer();
+    if (playerVisibleStateJson) {
+      win.webContents.send('game-state-updated', playerVisibleStateJson);
     }
   });
   return { win, targetUrl };
@@ -991,7 +1026,7 @@ async function runPackagedRuntimeProbe() {
     key,
     relative_path: path.relative(getBaseDir(), filePath).replace(/\\/g, '/'),
     size_bytes: assertReadableFile(filePath, key),
-  })).sort((a, b) => a.key.localeCompare(b.key));
+  })).sort((a, b) => strictCompare(a.key, b.key));
 
   const sim = getDesktopSim();
   const { state } = await sim.startNewCampaign(getBaseDir(), 'RBiH');
@@ -1506,15 +1541,17 @@ async function resolveMapServerBaseUrl() {
       const res = await new Promise((resolve, reject) => {
         const req = http.get(`${devMapBase}/index.html`, (r) => {
           let body = '';
-          r.on('data', (chunk) => { if (body.length < 500) body += chunk.toString(); });
+          r.on('data', (chunk) => { if (body.length < 4096) body += chunk.toString(); });
           r.on('end', () => resolve({ statusCode: r.statusCode, body }));
           r.on('error', reject);
         });
         req.on('error', reject);
         req.setTimeout(2000, () => { req.destroy(); reject(new Error('timeout')); });
       });
-      // Vite dev serves raw index.html with script src="/main.tsx"; built serves hashed /assets/
-      const isViteDev = res && res.statusCode === 200 && res.body && res.body.includes('main.tsx');
+      // React Refresh may push the source entry past the initial response chunk.
+      // Either Vite marker distinguishes dev HTML from the hashed production build.
+      const isViteDev = res && res.statusCode === 200 && res.body
+        && (res.body.includes('/@vite/client') || res.body.includes('main.tsx'));
       if (isViteDev) {
         if (!RUNTIME_PROBE_MODE) {
           console.log(`[AWWV] Map: using dev server at ${devMapBase}`);
@@ -1529,7 +1566,7 @@ async function resolveMapServerBaseUrl() {
 }
 
 function registerProbeSafeIpcHandlers() {
-  registerIpcHandler('get-current-game-state', async () => currentGameStateJson);
+  registerIpcHandler('get-current-game-state', async () => projectCurrentGameStateForRenderer());
   registerIpcHandler('get-map-server-url', async () => resolveMapServerBaseUrl());
   registerIpcHandler('get-runtime-feature-flags', async () => {
     const sim = getDesktopSim();
@@ -1558,24 +1595,24 @@ function showStateFileDialog(win) {
   });
 }
 
-/** Write currentGameStateJson to a file in the saves/ directory. Returns the file path. */
+function getSavesDir() {
+  const root = app.isPackaged ? app.getPath('userData') : getBaseDir();
+  return path.join(root, 'saves');
+}
+
+/** Write currentGameStateJson to the writable saves directory. Returns the file path. */
 function writeSaveFile(filename) {
   if (!currentGameStateJson) throw new Error('No game loaded');
-  const savesDir = path.join(getBaseDir(), 'saves');
+  const savesDir = getSavesDir();
   fs.mkdirSync(savesDir, { recursive: true });
   const filePath = path.join(savesDir, filename);
   fs.writeFileSync(filePath, currentGameStateJson, 'utf-8');
   return filePath;
 }
 
-/** Auto-save to saves/autosave.json. Swallows errors (non-critical). */
+/** Auto-save to saves/autosave.json. Mutation handlers surface write failures. */
 function autoSave() {
-  try {
-    writeSaveFile('autosave.json');
-  } catch (_e) {
-    // Auto-save failure is non-critical; log but don't propagate
-    console.error('Auto-save failed:', _e.message || String(_e));
-  }
+  return writeSaveFile('autosave.json');
 }
 
 function createWindow() {
@@ -1853,7 +1890,7 @@ app.whenReady().then(() => {
       currentGameStateJson = sim.serializeState(state);
       liveReplayManifestFrames = [];
       sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true, stateJson: currentGameStateJson };
+      return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -1871,10 +1908,9 @@ app.whenReady().then(() => {
     try {
       const sim = getDesktopSim();
       const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
-      currentGameStateJson = sim.serializeState(state);
       liveReplayManifestFrames = [];
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
-      return { ok: true, stateJson: currentGameStateJson };
+      writeCanonicalCurrentState(sim, state, _event.sender);
+      return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -1897,12 +1933,7 @@ app.whenReady().then(() => {
       const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
       if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
       sendGameStateToRenderer(currentGameStateJson);
-      return {
-        ok: true,
-        stateJson: currentGameStateJson,
-        replaySequenceJson: sequenceJson ?? null,
-        replayManifestJson: manifestJson ?? null,
-      };
+      return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -1943,10 +1974,8 @@ app.whenReady().then(() => {
 
       const result = await sim.advanceTurn(state, getBaseDir());
       if (result.error) return { ok: false, error: result.error };
-      currentGameStateJson = sim.serializeState(result.state);
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
+      writeCanonicalCurrentState(sim, result.state, _event.sender);
       if (result.report) sendTurnReportToRenderer(result.report);
-      autoSave();
       // TIER1-REPLAY-LIVE: accumulate sparse replay summary for the live-play
       // manifest so the VerdictScreen Replay tab works for campaigns played in-app.
       // buildReplayFrameSummary is a pure read-only projection (no Math.random /
@@ -1959,7 +1988,7 @@ app.whenReady().then(() => {
           sendReplayManifestToRenderer(JSON.stringify(liveManifest));
         }
       }
-      return { ok: true, stateJson: currentGameStateJson, report: result.report ?? null };
+      return { ok: true, report: result.report ?? null };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -1989,7 +2018,8 @@ app.whenReady().then(() => {
   ipcMain.handle('get-recruitment-catalog', async () => {
     try {
       const sim = getDesktopSim();
-      return await sim.getRecruitmentCatalog(getBaseDir());
+      const state = readCanonicalCurrentState(sim);
+      return await sim.getPlayerRecruitmentCatalog(state, getBaseDir());
     } catch (e) {
       return { brigades: [], error: e.message || String(e) };
     }
@@ -2005,9 +2035,8 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = await sim.applyPlayerRecruitment(state, getBaseDir(), brigadeId, equipmentClass);
       if (!result.ok) return { ok: false, error: result.error };
-      currentGameStateJson = sim.serializeState(result.state);
-      sendGameStateToRenderer(currentGameStateJson, _event.sender);
-      return { ok: true, stateJson: currentGameStateJson, newFormationId: brigadeId };
+      writeCanonicalCurrentState(sim, result.state, _event.sender);
+      return { ok: true, newFormationId: brigadeId };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -2028,8 +2057,7 @@ app.whenReady().then(() => {
       }
       if (!state.brigade_deploy_orders) state.brigade_deploy_orders = {};
       state.brigade_deploy_orders[brigadeId] = action;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2037,18 +2065,16 @@ app.whenReady().then(() => {
   };
 
   ipcMain.handle('stage-attack-order', async (_event, payload) => {
-    const { brigadeId, targetSettlementId } = payload || {};
-    if (!currentGameStateJson || typeof brigadeId !== 'string' || typeof targetSettlementId !== 'string') {
+    if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded or invalid payload' };
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      if (!state.brigade_attack_orders) state.brigade_attack_orders = {};
-      state.brigade_attack_orders[brigadeId] = targetSettlementId;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
-      return { ok: true };
+      const state = readCanonicalCurrentState(sim);
+      const result = stageCanonAttackOrder(state, payload);
+      if (!result.ok) return result;
+      writeCanonicalCurrentState(sim, state, _event.sender);
+      return result;
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
@@ -2071,8 +2097,7 @@ app.whenReady().then(() => {
       } else {
         state.brigade_posture_orders.push(order);
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2089,8 +2114,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       if (!state.brigade_mun_orders) state.brigade_mun_orders = {};
       state.brigade_mun_orders[brigadeId] = [targetMunicipalityId];
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2118,8 +2142,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = sim.assignBrigadeToSector(state, brigadeId, normalizedSectorId);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2146,8 +2169,7 @@ app.whenReady().then(() => {
           o => o.from_brigade !== brigadeId && o.to_brigade !== brigadeId
         );
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2321,8 +2343,7 @@ app.whenReady().then(() => {
       for (const edgeId of sector.edge_ids ?? []) {
         state.military.logistics_priority[faction][edgeId] = priority;
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2357,14 +2378,12 @@ app.whenReady().then(() => {
         auth.spent_this_turn += FORCE_LAUNCH_COST;
         auth.lifetime_spent += FORCE_LAUNCH_COST;
       }
-      const { interpretOperationLaunch } = await import('../sim/combat/order_interpretation.js');
-      const launchResult = interpretOperationLaunch(state, corpsId, op.name);
+      const launchResult = sim.interpretOperationLaunch(state, corpsId, op.name);
       // Event (if any) already pushed to state.military.pending_officer_events by interpretOperationLaunch
       if (launchResult.compliance === 'refused') {
         // Officer aborted the operation — do not force-launch
         // recovery_reason is already set to 'manual_termination' by interpretOperationLaunch
-        currentGameStateJson = sim.serializeState(state);
-        sendGameStateToRenderer(currentGameStateJson);
+        writeCanonicalCurrentState(sim, state);
         return { ok: true };
       }
       // full / modified / partial: apply any modifications then force-launch
@@ -2377,8 +2396,7 @@ app.whenReady().then(() => {
       op.force_launch = true;
       op.was_force_launched = true;
       op.commander_assessment_at_launch = op.commander_assessment;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2416,8 +2434,7 @@ app.whenReady().then(() => {
         return { ok: false, error: 'Friction event not found or already resolved' };
       }
       event.resolved = true;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2489,8 +2506,7 @@ app.whenReady().then(() => {
       }
       state.corps_command[corpsId].stabilization_cooldown_until = currentTurn + 3;
 
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true, resolvedCount: resolved, caCost: auth ? STABILIZE_COST : 0 };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2531,7 +2547,7 @@ app.whenReady().then(() => {
   //      all-cut-off → 'all_cut_off' refusal
   //   4. CA guard + debit FRONT_VISIT_COST (10)
   // Player-IPC-only (desktop) → never headless → byte-identical by construction.
-  ipcMain.handle('initiate-front-visit', async () => {
+  ipcMain.handle('initiate-front-visit', async (_event) => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
@@ -2584,8 +2600,7 @@ app.whenReady().then(() => {
       if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
       state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
 
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return {
         ok: true,
         eventId,
@@ -2626,7 +2641,7 @@ app.whenReady().then(() => {
   // code. Guards: 1. faction→event 2. cooldown/cap (event's OWN recurrence)
   // 3. CA guard + debit ADDRESS_NATION_COST. Player-IPC-only → never headless →
   // byte-identical by construction.
-  ipcMain.handle('initiate-address-nation', async () => {
+  ipcMain.handle('initiate-address-nation', async (_event) => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
@@ -2672,8 +2687,7 @@ app.whenReady().then(() => {
       if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
       state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
 
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return {
         ok: true,
         eventId,
@@ -2713,7 +2727,7 @@ app.whenReady().then(() => {
   // PLAYER picks which unit to honour (we never auto-pick). ZERO new sim/event
   // code. BRIGHT LINE: only regular formations are eligible (enforced in the
   // contract's eligible-kind allowlist). Guards mirror initiate-address-nation.
-  ipcMain.handle('initiate-decorate-unit', async () => {
+  ipcMain.handle('initiate-decorate-unit', async (_event) => {
     if (!currentGameStateJson) {
       return { ok: false, error: 'No game loaded' };
     }
@@ -2757,8 +2771,7 @@ app.whenReady().then(() => {
       if (!state.military.event_last_fired_turn) state.military.event_last_fired_turn = {};
       state.military.event_last_fired_turn[eventId] = state.meta?.turn ?? 0;
 
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return {
         ok: true,
         eventId,
@@ -2808,8 +2821,7 @@ app.whenReady().then(() => {
           };
           break;
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2831,8 +2843,7 @@ app.whenReady().then(() => {
         nextAllocations[enclaveId] = rawValue;
       }
       state.airdrop_allocation = nextAllocations;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2849,8 +2860,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = stageConvoyDecisionOnState(state, convoyId, decision);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2870,8 +2880,7 @@ app.whenReady().then(() => {
         ? Array.from(new Set([...current, sectorId])).sort()
         : current.filter((id) => id !== sectorId).sort();
       state.opsec_sectors = next;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2887,8 +2896,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = stageMunicipalitySupportOrderOnState(state, payload);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2917,8 +2925,7 @@ app.whenReady().then(() => {
       officer.assigned_operation = operationName;
       officer.assigned_corps_id = corpsId;
 
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2958,12 +2965,10 @@ app.whenReady().then(() => {
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const { dismissEventNotification } = await import('../sim/events/dismiss_notifications.js');
-      const result = dismissEventNotification(state, notificationId);
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.dismissEventNotification(state, notificationId);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -2996,11 +3001,9 @@ app.whenReady().then(() => {
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const { resolvePeacePlan } = require('../sim/negotiation/peace_plans.js');
-      const result = resolvePeacePlan(state, planId, response);
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.resolvePeacePlan(state, planId, response);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true, all_accepted: result.all_accepted, rejection_factions: result.rejection_factions };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3024,11 +3027,9 @@ app.whenReady().then(() => {
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const { submitPlayerCounterOffer } = require('../sim/negotiation/counter_offer_generator.js');
-      const offer = submitPlayerCounterOffer(state, payload);
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      const state = readCanonicalCurrentState(sim);
+      const offer = sim.submitPlayerCounterOffer(state, payload);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true, counter_offer_id: offer.id };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3037,6 +3038,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle('resolve-paramilitary-requests', async (_event, payload) => {
     const decisions = Array.isArray(payload?.decisions) ? payload.decisions : null;
+    const policy = parseParamilitaryPolicy(payload?.policy);
+    if (payload?.policy !== undefined && !policy) {
+      return { ok: false, error: 'invalid_policy' };
+    }
     if (!currentGameStateJson || !decisions) {
       return { ok: false, error: 'no_state_or_invalid_payload' };
     }
@@ -3060,12 +3065,14 @@ app.whenReady().then(() => {
         ? state.pending_paramilitary_requests
         : [];
       const playerFaction = state.meta?.player_faction ?? null;
+      if (policy) state.paramilitary_policy = policy;
       let matched = 0;
 
       for (const request of pending) {
         if (!request || typeof request.target_osid !== 'string') continue;
         if (playerFaction && request.faction !== playerFaction) continue;
-        const decision = decisionByTarget.get(request.target_osid);
+        if (isFinalParamilitaryDecision(request.decision)) continue;
+        const decision = decisionByTarget.get(request.target_osid) ?? policyDecision(policy);
         if (!decision) continue;
         request.decision = decision;
         matched += 1;
@@ -3076,18 +3083,32 @@ app.whenReady().then(() => {
       const unresolved = pending.filter((request) =>
         request
         && (!playerFaction || request.faction === playerFaction)
-        && request.decision !== 'allow'
-        && request.decision !== 'deny'
+        && !isFinalParamilitaryDecision(request.decision)
       );
       if (unresolved.length > 0) return { ok: false, error: 'incomplete_decisions' };
 
       const report = sim.resolvePlayerParamilitaryDecisions(state);
-      const stateJson = writeCanonicalCurrentState(sim, state);
-      return { ok: true, stateJson, report };
+      writeCanonicalCurrentState(sim, state);
+      return { ok: true, report };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
     }
   });
+
+  function isFinalParamilitaryDecision(decision) {
+    return decision === 'allow' || decision === 'deny' || decision === 'regular';
+  }
+
+  function parseParamilitaryPolicy(policy) {
+    if (policy === 'ask' || policy === 'always_deny' || policy === 'always_allow') return policy;
+    return null;
+  }
+
+  function policyDecision(policy) {
+    if (policy === 'always_deny') return 'deny';
+    if (policy === 'always_allow') return 'allow';
+    return null;
+  }
 
   ipcMain.handle('resolve-dayton', async (_event, payload) => {
     const { territorial_demands, territorial_concessions, institutional_choices } = payload || {};
@@ -3096,15 +3117,13 @@ app.whenReady().then(() => {
     }
     try {
       const sim = getDesktopSim();
-      const state = sim.deserializeState(currentGameStateJson);
-      const { resolveDaytonNegotiation } = require('../sim/negotiation/dayton_negotiation.js');
-      const result = resolveDaytonNegotiation(state, {
+      const state = readCanonicalCurrentState(sim);
+      const result = sim.resolveDaytonNegotiation(state, {
         territorial_demands: territorial_demands || [],
         territorial_concessions: territorial_concessions || [],
         institutional_choices: institutional_choices || {},
       });
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state);
       return { ok: true, result };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3132,18 +3151,16 @@ app.whenReady().then(() => {
         territorial_concessions: territorial_concessions || [],
         institutional_choices: institutional_choices || {},
       };
-      const { evaluateBotResponse } = require('../sim/negotiation/bot_negotiation.js');
       const playerFaction = (clone.meta && clone.meta.player_faction) || 'RBiH';
       const canonical = ['HRHB', 'RBiH', 'RS'];
       const botResponses = {};
       for (const faction of canonical) {
         if (faction === playerFaction) continue;
-        botResponses[faction] = evaluateBotResponse(clone, faction, proposal);
+        botResponses[faction] = sim.evaluateBotResponse(clone, faction, proposal);
       }
       // Resolve on the clone to surface the authoritative readouts (mutates the
       // clone only — the clone is then garbage-collected; nothing is written back).
-      const { resolveDaytonNegotiation } = require('../sim/negotiation/dayton_negotiation.js');
-      const result = resolveDaytonNegotiation(clone, proposal);
+      const result = sim.resolveDaytonNegotiation(clone, proposal);
       return { ok: true, result, botResponses, playerFaction };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3252,8 +3269,6 @@ app.whenReady().then(() => {
     return { ok: false, error: 'Warroom window not available' };
   });
 
-  registerIpcHandler('get-current-game-state', async () => currentGameStateJson);
-
   ipcMain.handle('open-tactical-map-window', async (_event, payload) => {
     try {
       const mode = payload?.mode === 'sandbox' ? 'sandbox' : 'operational';
@@ -3277,8 +3292,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = await sim.approveReserveRequest(state, requestId, brigadeId, typeof reason === 'string' ? reason : undefined, getBaseDir());
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3295,8 +3309,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = sim.recallEliteBrigade(state, brigadeId, typeof reason === 'string' ? reason : undefined);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3313,8 +3326,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = sim.declineReserveRequest(state, requestId, typeof reason === 'string' ? reason : undefined);
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3331,8 +3343,7 @@ app.whenReady().then(() => {
       const state = sim.deserializeState(currentGameStateJson);
       const result = await sim.redirectReserveLoan(state, brigadeId, newCorpsId, getBaseDir());
       if (!result.ok) return result;
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3357,8 +3368,7 @@ app.whenReady().then(() => {
             // Look up the corps_id from the event (set by interpretStanceOrder / interpretOperationLaunch / interpretOperationHalt)
             const corpsId = evt.corps_id;
             if (corpsId) {
-              const { overrideInterpretation } = await import('../sim/combat/order_interpretation.js');
-              overrideInterpretation(state, corpsId, eventId);
+              sim.overrideInterpretation(state, corpsId, eventId);
               decision = 'override_confirmed';
               // Restore the original ordered stance if this was a stance interpretation event
               const corpsCommand = state.military?.corps_command?.[corpsId];
@@ -3370,8 +3380,7 @@ app.whenReady().then(() => {
           fileOfficerDecisionRecord(state, evt, decision);
         }
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3413,8 +3422,7 @@ app.whenReady().then(() => {
           });
         }
       }
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3435,8 +3443,7 @@ app.whenReady().then(() => {
         ...(typeof anthropic_api_key === 'string' ? { anthropic_api_key } : {}),
         session_cost_estimate: state.meta.ai_commander_config?.session_cost_estimate ?? 0,
       };
-      currentGameStateJson = sim.serializeState(state);
-      sendGameStateToRenderer(currentGameStateJson);
+      writeCanonicalCurrentState(sim, state, _event.sender);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: e.message || String(e) };
@@ -3463,10 +3470,8 @@ app.whenReady().then(() => {
       if (config.mode === 'cadet') return { error: 'AI Commander is in cadet mode. Enable AI Commander in settings to use advisor.' };
       const faction = payload?.faction ?? state.meta?.player_faction ?? 'RBiH';
       const contextType = payload?.context_type ?? 'situation_analysis';
-      const { createAiClient } = await import('../sim/ai_commander/ai_client.js');
-      const { getAdvisorRecommendation } = await import('../sim/ai_commander/player_advisor.js');
-      const client = await createAiClient(config.anthropic_api_key);
-      const result = await getAdvisorRecommendation(state, faction, contextType, client);
+      const client = await sim.createAiClient(config.anthropic_api_key);
+      const result = await sim.getAdvisorRecommendation(state, faction, contextType, client);
       return result ?? { error: 'Advisor returned no recommendation' };
     } catch (e) {
       return { error: e.message || String(e) };
@@ -3550,7 +3555,7 @@ app.whenReady().then(() => {
     if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
     const idx = proposalAccess.index;
     const proposal = proposals[idx];
-    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) return { ok: false, error: 'already_resolved' };
+    if (isResolvedProposalReviewRecord(proposal)) return { ok: false, error: 'already_resolved' };
 
     // Mark accepted
     proposal.accepted = true;
@@ -3595,7 +3600,7 @@ app.whenReady().then(() => {
     if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
     const idx = proposalAccess.index;
     const proposal = proposals[idx];
-    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) return { ok: false, error: 'already_resolved' };
+    if (isResolvedProposalReviewRecord(proposal)) return { ok: false, error: 'already_resolved' };
 
     // Mark rejected
     proposal.accepted = false;
@@ -3646,7 +3651,7 @@ app.whenReady().then(() => {
     const proposalAccess = resolvePendingProposalAccess(proposals, proposalId, playerFaction);
     if (proposalAccess.index === -1) return { ok: false, error: proposalAccess.error };
     const proposal = proposals[proposalAccess.index];
-    if (proposal.accepted !== undefined || proposal.opportunity_decision !== undefined) {
+    if (isResolvedProposalReviewRecord(proposal)) {
       return { ok: false, error: 'already_resolved' };
     }
     if (typeof proposal.proposed_action !== 'string' || !proposal.proposed_action.startsWith('APPROVE_OP:')) {
@@ -3756,7 +3761,7 @@ app.whenReady().then(() => {
     const hasProposal = proposals.some((p) =>
       p && p.proposed_action === approveAction
       && (!playerFaction || p.faction === playerFaction)
-      && p.accepted === undefined && p.opportunity_decision === undefined,
+      && !isResolvedProposalReviewRecord(p),
     );
     if (hasProposal) return { ok: false, error: 'plan_has_pending_proposal' };
 

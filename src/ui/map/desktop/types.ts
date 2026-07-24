@@ -10,7 +10,7 @@ export interface CombatEstimateResult extends DesktopOkError {
 }
 
 export interface AdvanceTurnResult extends DesktopOkError {
-    state?: unknown;
+    report?: unknown;
 }
 
 export interface RecruitmentCatalogBrigade {
@@ -23,14 +23,25 @@ export interface RecruitmentCatalogBrigade {
     default_equipment_class: string;
     available_from: number;
     mandatory: boolean;
+    eligible?: boolean;
+    reason_codes?: RecruitmentEligibilityReason[];
 }
+
+export type RecruitmentEligibilityReason =
+    | 'wrong_faction'
+    | 'not_yet_available'
+    | 'already_recruited'
+    | 'no_control'
+    | 'no_manpower'
+    | 'no_capital'
+    | 'no_equipment';
 
 export interface RecruitmentCatalogResult extends DesktopOkError {
     brigades?: RecruitmentCatalogBrigade[];
 }
 
 export interface ApplyRecruitmentResult extends DesktopOkError {
-    state?: unknown;
+    newFormationId?: string;
 }
 
 export interface StartNewCampaignPayload {
@@ -38,9 +49,7 @@ export interface StartNewCampaignPayload {
     scenarioKey?: string;
 }
 
-export interface StartNewCampaignResult extends DesktopOkError {
-    state?: unknown;
-}
+export type StartNewCampaignResult = DesktopOkError;
 
 export interface RuntimeFeatureFlags {
     srkStranglePostureActive: boolean;

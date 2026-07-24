@@ -1,5 +1,6 @@
 import { FrontEdge } from '../map/front_edges.js';
 import { GameState } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 export type FavoredSide = 'side_a' | 'side_b';
 
@@ -67,7 +68,7 @@ export function computeFrontBreaches(state: GameState, derivedFrontEdges: FrontE
         const absA = Math.abs(a.pressure_value);
         const absB = Math.abs(b.pressure_value);
         if (absA !== absB) return absB - absA;
-        return a.edge_id.localeCompare(b.edge_id);
+        return strictCompare(a.edge_id, b.edge_id);
     });
 
     return breaches;

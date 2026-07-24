@@ -69,7 +69,7 @@
   "max_recruits_per_faction_per_turn": 2,
   "init_alliance_rbih_hrhb": 0.75,
   "enable_rbih_hrhb_dynamics": true,
-  "rbih_hrhb_war_earliest_week": 26,
+  "rbih_hrhb_war_earliest_week": 40,
   "must_hold_osids_by_corps": {
     "vrs_drina": [
       "op:zvornik:zvornik"

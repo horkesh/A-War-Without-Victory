@@ -60,6 +60,7 @@ test('production facilities grant deterministic bonus by controlling faction', (
 
 test('production bonus reduces supply-pressure growth without decreasing current pressure', () => {
     const state = makeState();
+    state.meta.turn = 40;
     state.political.war_supply_pressure = { RBiH: 10, RS: 10, HRHB: 10 };
     // Alliance must be broken so the RBiH–HRHB edge counts as a front edge
     state.political.war_alliance_rbih_hrhb = -1;
@@ -69,7 +70,7 @@ test('production bonus reduces supply-pressure growth without decreasing current
         edges,
         {
             schema: 1,
-            turn: 30,
+            turn: 40,
             factions: [
                 { faction_id: 'RBiH', by_settlement: [{ sid: 'SZ1', state: 'strained' }], adequate_count: 0, strained_count: 1, critical_count: 0 },
                 { faction_id: 'RS', by_settlement: [], adequate_count: 0, strained_count: 0, critical_count: 0 },

@@ -402,7 +402,7 @@ export interface HistoricalAlignmentDiagnostics {
 export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSummary {
     const formations = state.military.formations ?? {};
     const pools = state.military.militia_pools ?? {};
-    const factions = [...(state.factions ?? [])].map((f) => f.id).sort((a, b) => a.localeCompare(b));
+    const factions = [...(state.factions ?? [])].map((f) => f.id).sort(strictCompare);
     const formationByFaction = new Map<string, { militia: number; brigade: number; other: number }>();
     for (const fid of factions) {
         formationByFaction.set(fid, { militia: 0, brigade: 0, other: 0 });
@@ -452,7 +452,7 @@ export function computeArmyStrengthsSummary(state: GameState): ArmyStrengthsSumm
     }
     const front_assignment_counts_by_faction = factions
         .map((faction) => ({ faction, assigned_brigades: assignmentCounts.get(faction) ?? 0 }))
-        .sort((a, b) => a.faction.localeCompare(b.faction));
+        .sort((a, b) => strictCompare(a.faction, b.faction));
 
     return { formations_by_faction, militia_pools_by_faction, front_assignment_counts_by_faction };
 }
@@ -499,9 +499,9 @@ export function evaluateBotBenchmarks(
         })
         .sort((a, b) => {
             if (a.turn !== b.turn) return a.turn - b.turn;
-            const factionCmp = a.faction.localeCompare(b.faction);
+            const factionCmp = strictCompare(a.faction, b.faction);
             if (factionCmp !== 0) return factionCmp;
-            return a.objective.localeCompare(b.objective);
+            return strictCompare(a.objective, b.objective);
         });
 
     let evaluated = 0;
@@ -946,7 +946,7 @@ export function formatEndReportMarkdown(params: FormatEndReportParams): string {
                 totalsByFaction.set(item.faction, entry);
             }
         }
-        const factions = Array.from(totalsByFaction.keys()).sort((a, b) => a.localeCompare(b));
+        const factions = Array.from(totalsByFaction.keys()).sort(strictCompare);
         for (const faction of factions) {
             const total = totalsByFaction.get(faction)!;
             lines.push(

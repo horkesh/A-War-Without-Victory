@@ -122,7 +122,8 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByText("President's Desk")).toBeTruthy();
         expect(screen.getByText('Chronicle')).toBeTruthy();
-        expect(screen.getByText('No orders are waiting on your desk.')).toBeTruthy();
+        expect(screen.getByText('No decisions block advance.')).toBeTruthy();
+        expect(screen.getByText('Staff reports and optional reviews remain available before you end the turn.')).toBeTruthy();
         expect(screen.queryByText('No pending decisions.')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /open desk/i }));
@@ -142,7 +143,7 @@ describe('Presidential Inbox officer event dedupe', () => {
 
         expect(screen.getByText('Predsjednički inbox')).toBeTruthy();
         expect(screen.getByText('Komandno dežurstvo')).toBeTruthy();
-        expect(screen.getByText('Na stolu nema naredbi koje čekaju vašu odluku.')).toBeTruthy();
+        expect(screen.getByText('Nijedna odluka ne blokira nastavak.')).toBeTruthy();
         expect(screen.getByText('Otvori sto')).toBeTruthy();
         expect(screen.queryByText('Presidential Inbox')).toBeNull();
     });
@@ -159,11 +160,11 @@ describe('Presidential Inbox officer event dedupe', () => {
         render(createElement(PresidentialInbox, { onAction }));
 
         expect(screen.getByText('Komandno dežurstvo')).toBeTruthy();
-        expect(screen.getByText('Na stolu nema naredbi koje čekaju vašu odluku.')).toBeTruthy();
+        expect(screen.getByText('Nijedna odluka ne blokira nastavak.')).toBeTruthy();
         expect(screen.getByText('Predsjednički sto')).toBeTruthy();
         expect(screen.getByText('Hronika')).toBeTruthy();
         expect(screen.queryByText('Command Watch')).toBeNull();
-        expect(screen.queryByText('No orders are waiting on your desk.')).toBeNull();
+        expect(screen.queryByText('No decisions block advance.')).toBeNull();
 
         fireEvent.click(screen.getByRole('button', { name: /otvori sto/i }));
         expect(onAction).toHaveBeenCalledWith('decision_room', 'empty:desk');

@@ -58,6 +58,7 @@ function makePlan(overrides: Partial<PeacePlanDefinition> & { id: string }): Pea
     return {
         name: 'Test Plan',
         trigger_week: 10,
+        historical_responses: { RBiH: 'accepted', RS: 'accepted', HRHB: 'accepted' },
         proposed_split: { RS: 49, RBiH: 33, HRHB: 18 },
         institutional_model: 'canton',
         override_change_on_reject: { RS: 5, RBiH: 5, HRHB: 5 },

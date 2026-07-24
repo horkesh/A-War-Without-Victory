@@ -55,7 +55,13 @@ function createTestState(): GameState {
             }
         }
   } as any,
-  political: { political_controllers: {} } as any, displacement: {} as any
+  political: {
+    political_controllers: {
+            'op:20044:center': 'RS',
+            'op:20168:center': 'RBiH',
+            'op:22001:center': 'RBiH'
+        }
+  } as any, displacement: {} as any
 };
 }
 
@@ -104,9 +110,11 @@ test('deterministic formation IDs across municipalities', () => {
 
     assert.strictEqual(rBiHFormations.length, 1);
     assert.strictEqual(rBiHFormations[0].id, 'F_RBiH_0001');
+    assert.strictEqual(rBiHFormations[0].location_osid, 'op:20168:center');
 
     assert.strictEqual(rsFormations.length, 1);
     assert.strictEqual(rsFormations[0].id, 'F_RS_0001');
+    assert.strictEqual(rsFormations[0].location_osid, 'op:20044:center');
 
     // Formation names: deterministic fallback "Faction mun_id Brigade ordinal"
     assert.strictEqual(rBiHFormations[0].name, 'RBiH 20168 Brigade 1');

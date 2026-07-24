@@ -63,6 +63,11 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
   const rawId = itemId ? stripOfficerPrefix(itemId) : null;
   const event = state?.pendingOfficerEvents?.find((entry) => matchesOfficerMatterId(entry, rawId)) ?? null;
   const headerImage = getDecisionHeaderForFamily('officer_event');
+  const acknowledgeLabel = event?.type === 'replacement_suggested'
+    ? t('decisionModal.officer.keepCurrentCommander')
+    : event?.type === 'officer_available'
+      ? t('decisionModal.officer.acknowledgeArrival')
+      : t('decisionModal.officer.acknowledge');
 
   const acknowledge = async () => {
     if (!event) return;
@@ -97,14 +102,14 @@ export function OfficerMatterModal({ itemId, state, onClose, onOpenPersonnel }: 
       {event && (
         <div className="space-y-2 px-5 py-4 text-[12px]">
           <div className="font-bold text-text-primary">{event.officer_name ?? event.current_commander_name ?? t('decisionModal.officer.staffFallback')}</div>
-          <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted">{officerEventTypeLabel(event.type)}</div>
+          <div className="text-xs uppercase tracking-[0.12em] text-text-muted">{officerEventTypeLabel(event.type)}</div>
           {event.reason && <div className="border border-panel-border bg-panel-card px-3 py-3 text-text-secondary">{event.reason}</div>}
         </div>
       )}
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.officer.close')}</button>
-        <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">{t('decisionModal.officer.acknowledge')}</button>
-        <button type="button" onClick={onOpenPersonnel} disabled={!event} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.officer.openPersonnel')}</button>
+        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.officer.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!event} className="border border-panel-border bg-black/20 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-primary disabled:opacity-40">{acknowledgeLabel}</button>
+        <button type="button" onClick={onOpenPersonnel} disabled={!event} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.officer.openPersonnel')}</button>
       </div>
     </Modal>
   );

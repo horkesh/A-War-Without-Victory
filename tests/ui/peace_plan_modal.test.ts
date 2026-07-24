@@ -35,6 +35,14 @@ function installIpc(resolvePeacePlan = vi.fn(async () => ({ ok: true }))) {
     return resolvePeacePlan;
 }
 
+function deferred<T>() {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((resolvePromise) => {
+        resolve = resolvePromise;
+    });
+    return { promise, resolve };
+}
+
 function setPlayerFaction(playerFaction: string | null) {
     useGameStore.setState({
         loadedGameState: {
@@ -88,9 +96,10 @@ describe('PeacePlanModal', () => {
         expect(screen.getByRole('meter', { name: /republic of bosnia and herzegovina territory share/i }).getAttribute('aria-valuenow')).toBe('39');
         expect(screen.getByRole('meter', { name: /republika srpska territory share/i }).getAttribute('aria-valuenow')).toBe('43');
         expect(screen.getByRole('meter', { name: /croatian republic of herzeg-bosnia territory share/i }).getAttribute('aria-valuenow')).toBe('18');
+        expect(screen.getByText('Presidential Decision Required')).toBeTruthy();
     });
 
-    it('does not list the player faction under Other Faction Responses', () => {
+    it('does not disclose precomputed faction responses before the player commits', () => {
         installIpc();
 
         render(createElement(PeacePlanModal, {
@@ -99,9 +108,9 @@ describe('PeacePlanModal', () => {
         }));
 
         const responses = screen.getByTestId('peace-plan-other-responses');
-        expect(responses.textContent).not.toContain('Republika Srpska');
-        expect(responses.textContent).toContain('Republic of Bosnia and Herzegovina');
-        expect(responses.textContent).toContain('Croatian Republic of Herzeg-Bosnia');
+        expect(responses.textContent).toContain('Other delegations have not disclosed their positions.');
+        expect(responses.textContent).not.toContain('Accepted');
+        expect(responses.textContent).not.toContain('Rejected');
     });
 
     it('Review Later dismisses the modal without resolving the plan', () => {
@@ -119,8 +128,9 @@ describe('PeacePlanModal', () => {
         expect(resolvePeacePlan).not.toHaveBeenCalled();
     });
 
-    it('Accept Plan resolves through IPC and dismisses the modal', async () => {
-        const resolvePeacePlan = installIpc();
+    it('Accept Plan remains open until IPC succeeds, then dismisses the modal', async () => {
+        const pending = deferred<{ ok: boolean }>();
+        const resolvePeacePlan = installIpc(vi.fn(() => pending.promise));
         const onDismiss = vi.fn();
 
         render(createElement(PeacePlanModal, {
@@ -130,13 +140,15 @@ describe('PeacePlanModal', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /accept plan/i }));
 
-        expect(onDismiss).toHaveBeenCalledTimes(1);
-        await waitFor(() => {
-            expect(resolvePeacePlan).toHaveBeenCalledWith('vance_owen', 'accepted');
-        });
+        expect(resolvePeacePlan).toHaveBeenCalledWith('vance_owen', 'accepted');
+        expect(onDismiss).not.toHaveBeenCalled();
+
+        pending.resolve({ ok: true });
+
+        await waitFor(() => expect(onDismiss).toHaveBeenCalledTimes(1));
     });
 
-    it('Reject Plan resolves through IPC and dismisses the modal', async () => {
+    it('Reject Plan dismisses only after IPC succeeds', async () => {
         const resolvePeacePlan = installIpc();
         const onDismiss = vi.fn();
 
@@ -147,10 +159,41 @@ describe('PeacePlanModal', () => {
 
         fireEvent.click(screen.getByRole('button', { name: /reject plan/i }));
 
-        expect(onDismiss).toHaveBeenCalledTimes(1);
         await waitFor(() => {
             expect(resolvePeacePlan).toHaveBeenCalledWith('vance_owen', 'rejected');
+            expect(onDismiss).toHaveBeenCalledTimes(1);
         });
+    });
+
+    it('keeps the modal open and shows the IPC error when resolution fails', async () => {
+        installIpc(vi.fn(async () => ({ ok: false, error: 'Peace plan write failed.' })));
+        const onDismiss = vi.fn();
+
+        render(createElement(PeacePlanModal, {
+            plan: makeVanceOwenPlan(),
+            onDismiss,
+        }));
+
+        fireEvent.click(screen.getByRole('button', { name: /accept plan/i }));
+
+        expect((await screen.findByRole('alert')).textContent).toContain('Peace plan write failed.');
+        expect(onDismiss).not.toHaveBeenCalled();
+        expect(screen.getByRole('dialog')).toBeTruthy();
+    });
+
+    it('keeps the modal open and shows a thrown IPC error', async () => {
+        installIpc(vi.fn(async () => { throw new Error('IPC unavailable.'); }));
+        const onDismiss = vi.fn();
+
+        render(createElement(PeacePlanModal, {
+            plan: makeVanceOwenPlan(),
+            onDismiss,
+        }));
+
+        fireEvent.click(screen.getByRole('button', { name: /reject plan/i }));
+
+        expect((await screen.findByRole('alert')).textContent).toContain('IPC unavailable.');
+        expect(onDismiss).not.toHaveBeenCalled();
     });
 
     it('localizes BCS modal chrome and hides unknown ids behind neutral copy', () => {
@@ -173,12 +216,12 @@ describe('PeacePlanModal', () => {
         const modalText = document.body.textContent ?? '';
         expect(modalText).toContain('Predlozeno: 6 apr 1992');
         expect(screen.getByText('Odgovori drugih strana')).toBeTruthy();
-        expect(screen.getByText('Potrebna odluka komandanta')).toBeTruthy();
+        expect(screen.getByText('Potrebna odluka predsjednistva')).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Prihvati plan' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Pregledaj kasnije' })).toBeTruthy();
         expect(screen.getByRole('button', { name: 'Odbij plan' })).toBeTruthy();
         expect(modalText).toContain('Neodreden institucionalni model');
-        expect(modalText).toContain('Odgovor nije naveden');
+        expect(modalText).toContain('Druge delegacije nisu objavile svoje stavove.');
         expect(modalText).not.toContain('federal_union_model');
         expect(modalText).not.toContain('conditional_accept');
         expect(modalText).not.toContain('Other Faction Responses');

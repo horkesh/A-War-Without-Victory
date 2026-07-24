@@ -7,7 +7,7 @@ import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import type { EdgeRecord } from '../map/settlements.js';
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import type { GameState } from '../state/game_state.js';
 import { canonicalizePoliticalSideId, isPoliticalSideId, POLITICAL_SIDES } from '../state/identity.js';
 import { deserializeState, serializeState } from '../state/serialize.js';
@@ -170,7 +170,9 @@ export async function runPhase5CheckInProcess(
     );
 
     // Verify override after expansion step on turn 1 by executing a single turn and inspecting nextState.
-    const { nextState: afterTurn1 } = await runTurn(state2, { seed: state2.meta.seed, settlementEdges });
+    const turn1Result = await runTurn(state2, { seed: state2.meta.seed, settlementEdges });
+    assertTurnSuccess(turn1Result);
+    const { nextState: afterTurn1 } = turn1Result;
     const got = afterTurn1.military.front_posture[options.faction]?.assignments?.[options.edge_id];
     assert.ok(got && typeof got === 'object', 'expected chosen edge to have a posture assignment after turn 1');
     assert.strictEqual(got.posture, 'hold', 'expected explicit per-edge override posture to remain after expansion');

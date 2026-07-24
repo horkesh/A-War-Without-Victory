@@ -82,7 +82,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
           <div className="font-sans text-xs text-accent-gold uppercase tracking-wide font-semibold">
             {t('humanitarianLedger.title')}
           </div>
-          <div className="text-[10px] text-text-secondary italic mt-0.5">{t('humanitarianLedger.subtitle')}</div>
+          <div className="text-xs text-text-secondary italic mt-0.5">{t('humanitarianLedger.subtitle')}</div>
         </div>
         <button
           type="button"
@@ -102,10 +102,10 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
             {/* Killed + fled abroad, by people */}
             {byPeople.rows.length > 0 && (
               <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-secondary font-semibold">
+                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
                   {t('humanitarianLedger.section.byPeople')}
                 </div>
-                <table className="w-full text-[11px]">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="text-text-secondary">
                       <th className="text-left font-medium py-0.5">{t('humanitarianLedger.col.people')}</th>
@@ -134,10 +134,10 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
             {/* Forced displacement, by responsible side x victim */}
             {byPerpetrator.length > 0 && (
               <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-secondary font-semibold">
+                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
                   {t('humanitarianLedger.section.byPerpetrator')}
                 </div>
-                <table className="w-full text-[11px]">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="text-text-secondary">
                       <th className="text-left font-medium py-0.5">{t('humanitarianLedger.col.perpetrator')}</th>
@@ -163,7 +163,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
             {/* Displaced per week sparkline */}
             {overTime.length > 0 && (
               <div className="rounded border border-panel-border bg-panel-card/70 p-3 space-y-2">
-                <div className="text-[10px] uppercase tracking-wide text-text-secondary font-semibold">
+                <div className="text-xs uppercase tracking-wide text-text-secondary font-semibold">
                   {t('humanitarianLedger.section.overTime')}
                 </div>
                 <div className="flex items-end gap-[2px] h-20" role="img" aria-label={t('humanitarianLedger.section.overTime')}>
@@ -182,7 +182,7 @@ export function HumanitarianLedgerPanel({ state, open, onClose }: HumanitarianLe
               </div>
             )}
 
-            <div className="text-[10px] text-text-secondary/80 italic">{t('humanitarianLedger.note.verbatim')}</div>
+            <div className="text-xs text-text-secondary/80 italic">{t('humanitarianLedger.note.verbatim')}</div>
           </>
         )}
       </div>

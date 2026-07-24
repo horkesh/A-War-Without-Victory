@@ -171,7 +171,7 @@ export function PlanPhase({
             <div className="absolute top-16 left-4 w-[340px] pointer-events-auto">
                 <div className="rounded-lg border border-[rgba(180,160,130,0.16)] bg-[rgba(20,18,15,0.9)] backdrop-blur-xl p-3">
                     <div className="flex items-center justify-between mb-2">
-                        <div className="text-[9px] font-bold uppercase tracking-[0.2em] text-accent-gold">
+                        <div className="text-xs font-bold uppercase tracking-[0.2em] text-accent-gold">
                             {t('opsPlanning.phase.planStatus')}
                         </div>
                         <button
@@ -179,7 +179,7 @@ export function PlanPhase({
                             onClick={suggestPlan}
                             disabled={!canSuggestPlan}
                             className="rounded border border-accent-gold/30 bg-accent-gold/12 px-2 py-1
-                                       text-[8px] font-bold uppercase tracking-[0.14em] text-accent-gold
+                                       text-xs font-bold uppercase tracking-[0.14em] text-accent-gold
                                        transition-colors hover:bg-accent-gold/22 disabled:cursor-not-allowed
                                        disabled:border-[rgba(180,160,130,0.14)] disabled:bg-[rgba(180,160,130,0.05)]
                                        disabled:text-text-secondary/35"
@@ -189,28 +189,28 @@ export function PlanPhase({
                         </button>
                     </div>
                     {suggestionMessage && (
-                        <div className="mb-2 rounded border border-accent-gold/20 bg-accent-gold/10 px-2 py-1 text-[10px] text-accent-gold">
+                        <div className="mb-2 rounded border border-accent-gold/20 bg-accent-gold/10 px-2 py-1 text-xs text-accent-gold">
                             {suggestionMessage}
                         </div>
                     )}
                     <div className="grid grid-cols-2 gap-2">
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
-                            <div className="text-[10px] font-bold text-white truncate">{selectedAxisName}</div>
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.axis')}</div>
+                            <div className="text-xs font-bold text-white truncate">{selectedAxisName}</div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.staging')}</div>
-                            <div className="text-[10px] font-bold text-white truncate">
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.staging')}</div>
+                            <div className="text-xs font-bold text-white truncate">
                                 {selectedStagingLabel}
                             </div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
-                            <div className="text-[10px] font-bold text-white">{selectedAxisObjectives}</div>
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.objectives')}</div>
+                            <div className="text-xs font-bold text-white">{selectedAxisObjectives}</div>
                         </div>
                         <div className="rounded border border-[rgba(180,160,130,0.16)] bg-[rgba(180,160,130,0.06)] px-2 py-1.5">
-                            <div className="text-[9px] uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
-                            <div className="text-[10px] font-bold text-white">{selectedAxisBrigades}</div>
+                            <div className="text-xs uppercase tracking-[0.14em] text-text-secondary/70">{t('opsPlanning.phase.brigades')}</div>
+                            <div className="text-xs font-bold text-white">{selectedAxisBrigades}</div>
                         </div>
                     </div>
                 </div>

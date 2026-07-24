@@ -78,6 +78,8 @@ function stateWithOperationalSitrep(): LoadedGameState {
                 strainedCount: 1,
                 criticalCount: 0,
                 collapsedMunicipalities: [],
+                hostileTakeoverMunicipalityCount: 0,
+                hostileTakeoverMunicipalities: [],
                 activeHostileTakeoverTimers: 0,
                 activeCamps: 0,
             },
@@ -89,6 +91,41 @@ function stateWithOperationalSitrep(): LoadedGameState {
                 textToken: { key: 'operationalSitrep.alert.collapseEligible' },
             }],
         },
+    } as LoadedGameState;
+}
+
+function stateWithStrategicObjectives(): LoadedGameState {
+    const state = stateWithOperationalSitrep();
+    return {
+        ...state,
+        formations: [
+            ...state.formations,
+            {
+                id: 'arbih_1st_corps', faction: 'RBiH', name: '1st Corps', kind: 'corps',
+                readiness: 'ready', status: 'active', createdTurn: 0, tags: [],
+            },
+        ],
+        strategicDimensions: {
+            RBiH: {
+                territorial_legitimacy: { base_value: 40, event_modifier: -5, effective_value: 35 },
+                military_credibility: { base_value: 64, event_modifier: 8, effective_value: 72 },
+                internal_cohesion: { base_value: 55, event_modifier: 0, effective_value: 55 },
+            },
+        },
+        operations: [{
+            corps_id: 'arbih_1st_corps', corps_name: '1st Corps', faction: 'RBiH',
+            name: 'operation_sarajevo_relief', display_name: 'Sarajevo Relief', type: 'offensive',
+            phase: 'execution', participating_brigade_count: 3, started_turn: 6,
+        }],
+        pendingReserveRequests: [{
+            request_id: 'reserve_alpha', corps_id: 'arbih_1st_corps', faction: 'RBiH',
+            reason: 'defensive_gap', priority: 82, severityBand: 'critical', travel_hops: 2,
+            description: 'Thin line', suggested_brigade_id: 'arbih_guards', turn_requested: 8,
+        }],
+        allControlEvents: [
+            { turn: 8, settlementId: 'op:test:lost', from: 'RBiH', to: 'RS', mechanism: 'combat' },
+        ],
+        war_alliance_rbih_hrhb: 0.42,
     } as LoadedGameState;
 }
 
@@ -141,6 +178,31 @@ describe('War Summary campaign cost localization', () => {
         expect(text).not.toContain('collapse-eligible');
     });
 
+    it('labels cumulative campaign casualties and renders collapsed sustainment', () => {
+        const state = stateWithOperationalSitrep();
+        storeState.loadedGameState = {
+            ...state,
+            casualtyLedger: {
+                RBiH: { killed: 12_000, wounded: 17_000, missing_captured: 500 },
+            },
+            operationalSitrep: {
+                ...state.operationalSitrep!,
+                sustainment: {
+                    ...state.operationalSitrep!.sustainment,
+                    collapsedMunicipalities: ['op:test:a', 'op:test:b'],
+                },
+            },
+        } as LoadedGameState;
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const campaignCost = screen.getByTestId('war-summary-campaign-cost');
+        expect(campaignCost.textContent).toContain('Campaign cost so far: 12,000 killed / 17,000 wounded / 500 missing or captured');
+        expect(within(campaignCost).getByText('29.5k')).toBeTruthy();
+        const sitrep = screen.getByText('Situation Report').parentElement?.textContent ?? '';
+        expect(sitrep).toContain('0 critical / 1 strained, 2 collapsed');
+    });
+
     it('renders missing casualty and displacement sources as unreported in the overview', () => {
         storeState.loadedGameState = {
             ...makeMockLoadedGameState(),
@@ -176,5 +238,40 @@ describe('War Summary campaign cost localization', () => {
         expect(copy).toMatch(/Theater-wide displaced\s*0/i);
         expect(copy).toMatch(/Own-side displaced\s*0/i);
         expect(copy).not.toMatch(/Killed\s*Unreported/i);
+    });
+
+    it('renders four accessible RBiH strategic objectives with canonical owner links', () => {
+        storeState.loadedGameState = stateWithStrategicObjectives();
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const section = screen.getByRole('region', { name: 'Strategic Objectives' });
+        const objectives = within(section).getAllByRole('article');
+        expect(objectives).toHaveLength(4);
+        expect(objectives.every((objective) => objective.className.includes('text-[12px]'))).toBe(true);
+        expect(objectives[0]?.textContent).toContain('Protect state survival');
+        expect(objectives[0]?.textContent).toContain('StatusCritical');
+        expect(objectives[0]?.textContent).toContain('TrendWorsening');
+        expect(objectives[0]?.textContent).toContain('Responsible command1st Corps');
+        expect(objectives[0]?.textContent).toContain('Current commitment4 front contacts / 2 thinly held');
+        expect(objectives[0]?.textContent).toContain('Last relevant consequenceTurn 8: territorial control was lost.');
+        expect(objectives[2]?.textContent).toContain('StatusUnreported');
+        expect(objectives[2]?.textContent).toContain('Responsible commandUnreported');
+        expect(within(section).getAllByRole('button', { name: /Decision Room: Review/i }).length).toBeGreaterThan(0);
+        expect(within(section).getAllByRole('button', { name: /Army HQ: Review/i }).length).toBeGreaterThan(0);
+    });
+
+    it('renders strategic objective labels and unavailable truth in BCS', () => {
+        setLocale('bcs');
+        storeState.loadedGameState = stateWithStrategicObjectives();
+
+        render(createElement(WarSummaryContent, { focusSection: 'overview' }));
+
+        const section = screen.getByRole('region', { name: 'Strateski ciljevi' });
+        expect(section.textContent).toContain('Zastiti opstanak drzave');
+        expect(section.textContent).toContain('Odgovorna komanda');
+        expect(section.textContent).toContain('Sljedeca dostupna poluga');
+        expect(section.textContent).toContain('Posljednja relevantna posljedica');
+        expect(section.textContent).toContain('Nije prijavljeno');
     });
 });

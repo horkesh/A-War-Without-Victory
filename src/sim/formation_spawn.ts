@@ -122,6 +122,8 @@ export interface SpawnFormationsOptions {
     historicalNameLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent brigades get historical corps for (faction, mun_id, ordinal) from OOB when available. */
     historicalCorpsLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
+    /** When set, emergent brigades retain the canonical OOB identity they already represent. */
+    historicalOobIdLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent brigades get historical HQ settlement ID for (faction, mun_id, ordinal) from OOB when available. */
     historicalHqLookup?: ((faction: string, mun_id: string, ordinal: number) => string | null) | null;
     /** When set, emergent spawn is gated by demographics: skip (mun, faction) where 1991 eligible population < MIN_ELIGIBLE_POPULATION_FOR_BRIGADE. */
@@ -194,6 +196,31 @@ function countMilitiaFormationsInMun(state: GameState, mun_id: string, faction: 
         if (Array.isArray(tags) && tags.includes(tag)) n += 1;
     }
     return n;
+}
+
+function resolveControlledSpawnOsid(
+    state: GameState,
+    munId: string,
+    faction: string,
+    preferredHqSid: string | undefined,
+    canonicalToOperational: CanonicalToOperationalMap | undefined,
+): string | undefined {
+    const controllers = state.political.political_controllers ?? {};
+    const municipalityPrefix = `op:${munId}:`;
+    const preferredHqOsid = preferredHqSid
+        ? resolveLocationOsid(preferredHqSid, canonicalToOperational ?? {})
+        : undefined;
+
+    if (
+        preferredHqOsid?.startsWith(municipalityPrefix)
+        && controllers[preferredHqOsid] === faction
+    ) {
+        return preferredHqOsid;
+    }
+
+    return Object.keys(controllers)
+        .filter(osid => osid.startsWith(municipalityPrefix) && controllers[osid] === faction)
+        .sort(strictCompare)[0];
 }
 
 /** Get mun_id from formation tags (tag "mun:mun_id"). Returns null if not found. */
@@ -568,7 +595,10 @@ export function spawnFormationsFromPools(
             const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
 
             const hq_sid = municipalityHqSettlement?.[mun_id];
-            const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+            const location_osid = resolveControlledSpawnOsid(
+                state, mun_id, faction, hq_sid, canonicalToOperational,
+            );
+            if (!location_osid) continue;
 
             const formation: FormationState = {
                 id: formationId,
@@ -651,9 +681,10 @@ export function spawnFormationsFromPools(
                 const dispAllTags = Array.from(new Set([...dispBaseTags, ...customTags])).sort(strictCompare);
 
                 const dispHqSid = municipalityHqSettlement?.[dispMunId];
-                const dispLocationOsid = canonicalToOperational && dispHqSid
-                    ? resolveLocationOsid(dispHqSid, canonicalToOperational)
-                    : undefined;
+                const dispLocationOsid = resolveControlledSpawnOsid(
+                    state, dispMunId, dispFaction, dispHqSid, canonicalToOperational,
+                );
+                if (!dispLocationOsid) continue;
 
                 const dispFormation: FormationState = {
                     id: dispFormationId,
@@ -734,6 +765,7 @@ export function spawnFormationsFromPools(
         if (maxPerMun !== null && count > maxPerMun) count = maxPerMun;
         if (count === 0) continue;
 
+        let createdInPool = 0;
         for (let k = 1; k <= count; k += 1) {
             const formationId = generateDeterministicFormationId(state, faction);
             const kind = kindRequested;
@@ -743,17 +775,27 @@ export function spawnFormationsFromPools(
             const historicalName = options.historicalNameLookup?.(faction, mun_id, ordinal) ?? null;
             const historicalCorps = options.historicalCorpsLookup?.(faction, mun_id, ordinal) ?? null;
             const historicalHqSid = options.historicalHqLookup?.(faction, mun_id, ordinal) ?? null;
+            const historicalOobId = options.historicalOobIdLookup?.(faction, mun_id, ordinal) ?? null;
 
             const name = historicalName ?? resolveFormationName(faction, mun_id, kind, ordinal);
 
-            const baseTags = [`generated_phase_i0`, `kind:${kind}`, `mun:${mun_id}`];
+            const baseTags = [
+                `generated_phase_i0`,
+                `kind:${kind}`,
+                `mun:${mun_id}`,
+                ...(historicalOobId ? [`oob:${historicalOobId}`] : []),
+            ];
             const allTags = Array.from(new Set([...baseTags, ...customTags])).sort(strictCompare);
 
             const cohesion = computeBaseCohesion(kind, currentTurn, faction);
 
             // Prioritize historical specific HQ, then municipality capital, then nothing
             const hq_sid = historicalHqSid ?? municipalityHqSettlement?.[mun_id];
-            const location_osid = canonicalToOperational && hq_sid ? resolveLocationOsid(hq_sid, canonicalToOperational) : undefined;
+            const preferredHqSid = municipalityHqSettlement?.[mun_id] ?? historicalHqSid ?? undefined;
+            const location_osid = resolveControlledSpawnOsid(
+                state, mun_id, faction, preferredHqSid, canonicalToOperational,
+            );
+            if (!location_osid) continue;
 
             const formation: FormationState = {
                 id: formationId,
@@ -773,12 +815,13 @@ export function spawnFormationsFromPools(
                 officer_quality: getFactionDefaultOfficerQuality(faction, currentTurn),
                 ...(historicalCorps ? { corps_id: historicalCorps } : {}),
                 ...(hq_sid ? { hq_sid } : {}),
-                ...(location_osid != null ? { location_osid } : {})
+                location_osid,
             };
 
             report.created.push({ formation_id: formationId, name, mun_id, faction, kind });
             report.formations_created += 1;
             report.manpower_committed += batchSize;
+            createdInPool += 1;
 
             if (applyChanges) {
                 formations[formationId] = formation;
@@ -788,7 +831,7 @@ export function spawnFormationsFromPools(
             }
         }
 
-        if (count > 0) report.pools_touched += 1;
+        if (createdInPool > 0) report.pools_touched += 1;
     }
 
     report.created.sort((a, b) => strictCompare(a.formation_id, b.formation_id));

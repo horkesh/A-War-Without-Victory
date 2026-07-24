@@ -281,9 +281,7 @@ export function shouldLaunchProbeInstead(
     const doctrinePhase = getActiveDoctrinePhase(faction, turn ?? 0, timeline);
     if (doctrinePhase?.probe_exempt) return false;
 
-    // n1194: Removed forced commitment after MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT.
-    // If intel says enemy is stronger, correct response is "defend," not "attack
-    // because you probed twice." Callers now pass stalest per-sector-pair confidence.
+    if (consecutiveProbes >= MAX_CONSECUTIVE_PROBES_BEFORE_COMMIT) return false;
 
     const threshold = INTEL_GATE_LAUNCH_THRESHOLD[faction as NonNullable<FactionId>] ?? 0.30;
     return sectorIntelConfidence < threshold;

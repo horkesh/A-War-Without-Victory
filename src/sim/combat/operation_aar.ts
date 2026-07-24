@@ -140,6 +140,7 @@ export interface OperationAAR {
     objectives_held_without_logged_capture?: string[];
     /** Provenance summary for final objective control vs operation-time capture logs. */
     capture_provenance?: 'no_objectives_held' | 'logged_capture' | 'held_without_logged_capture' | 'held_without_logged_attack' | 'mixed';
+    /** Objectives with an attack-backed capture receipt in the weekly operation log. */
     objectives_captured: string[];
     duration_turns: number;
     total_attacks: number;
@@ -214,6 +215,7 @@ export interface PendingOperationCasualties {
 export interface GradeInput {
     objectives_targeted: number;
     objectives_captured: number;
+    total_attacks: number;
     casualties_suffered: number;  // total (killed + wounded)
     casualties_inflicted: number; // total (killed + wounded)
     initial_strength: number;
@@ -224,9 +226,9 @@ export interface GradeInput {
 
 const VERDICTS: Record<number, [string, string]> = {
     5: ['Brilliant Victory', 'Decisive Triumph'],
-    4: ['Solid Victory', 'Successful Advance'],
+    4: ['Solid Victory', 'Favorable Stalemate'],
     3: ['Partial Success', 'Indecisive'],
-    2: ['Costly Stalemate', 'Pyrrhic Advance'],
+    2: ['Pyrrhic Advance', 'Costly Stalemate'],
     1: ['Disaster', 'Catastrophic Failure'],
 };
 
@@ -237,10 +239,12 @@ function clamp(v: number, lo: number, hi: number): number {
 export function gradeOperation(input: GradeInput): OperationGrade {
     const {
         objectives_targeted, objectives_captured,
+        total_attacks,
         casualties_suffered, casualties_inflicted,
         initial_strength, final_strength,
         duration_turns, expected_duration,
     } = input;
+    const hasAction = total_attacks > 0;
 
     // Star calculation: start at 3
     let stars = 3;
@@ -260,7 +264,9 @@ export function gradeOperation(input: GradeInput): OperationGrade {
     if (objectives_captured === 0) stars -= 1;
     if (exchangeRatio < 0.5) stars -= 1;
     if (forceLostFraction >= 0.30) stars -= 1;
-    if (expected_duration > 0 && duration_turns <= expected_duration * 1.5) stars += 1;
+    if (hasAction && expected_duration > 0 && duration_turns <= expected_duration * 1.5) stars += 1;
+
+    if (!hasAction) stars = 1;
 
     stars = clamp(stars, 1, 5) as 1 | 2 | 3 | 4 | 5;
 
@@ -271,14 +277,17 @@ export function gradeOperation(input: GradeInput): OperationGrade {
     const exchange_ratio_score = clamp(
         (casualties_inflicted / Math.max(casualties_suffered, 1)) * 33, 0, 100,
     );
-    const tempo = clamp(
-        (1 - (duration_turns / (Math.max(expected_duration, 1) * 2))) * 100, 0, 100,
+    const tempo = hasAction
+        ? clamp((1 - (duration_turns / (Math.max(expected_duration, 1) * 2))) * 100, 0, 100)
+        : 0;
+    const preservation = clamp(
+        (final_strength / Math.max(initial_strength, 1)) * 100, 0, 100,
     );
-    const preservation = (final_strength / Math.max(initial_strength, 1)) * 100;
 
-    // Verdict: first variant if objectives captured, second if not
     const verdictPair = VERDICTS[stars];
-    const verdict = objectives_captured > 0 ? verdictPair[0] : verdictPair[1];
+    const verdict = hasAction
+        ? (objectives_captured > 0 ? verdictPair[0] : verdictPair[1])
+        : 'No Assault Attempted';
 
     return {
         stars: stars as 1 | 2 | 3 | 4 | 5,
@@ -627,31 +636,13 @@ export function finalizeOperationAAR(
         if (fmn) { faction = fmn.faction; break; }
     }
 
-    // 3. Check which objectives are currently held by that faction
-    const capturedObjectives: string[] = [];
+    // 3. Track final control for provenance only.
+    const heldObjectives: string[] = [];
     for (const osid of objectives) {
         const controller = getPoliticalControllerOSID(state, osid);
         if (controller === faction) {
-            capturedObjectives.push(osid);
+            heldObjectives.push(osid);
         }
-    }
-
-    // 4. Derive outcome from objectives held + recovery_reason
-    //    All objectives held at finalization → success, regardless of recovery path.
-    //    (Multi-axis ops can hit max_failures on one axis but still hold all objectives.)
-    let outcome: OperationAAR['outcome'];
-    const reason = op.recovery_reason;
-    const allHeld = capturedObjectives.length === objectives.length && objectives.length > 0;
-    const someHeld = capturedObjectives.length > 0;
-
-    if (reason === 'orphaned_sector') {
-        outcome = 'orphaned';
-    } else if (allHeld) {
-        outcome = 'success';
-    } else if (someHeld) {
-        outcome = 'partial';
-    } else {
-        outcome = 'failure';
     }
 
     // 5. Aggregate totals. Attack attempts belong to the operation lifecycle
@@ -680,15 +671,23 @@ export function finalizeOperationAAR(
     const totalAttacks = canonicalOperationAttackCount(op, weeklyTotalAttacks);
 
     const loggedCaptureSet = new Set<string>();
+    const causalCaptureSet = new Set<string>();
     for (const entry of log) {
         for (const osid of entry.objectives_captured_this_turn ?? []) {
             if (objectives.includes(osid)) {
                 loggedCaptureSet.add(osid);
+                if (entry.attacks_this_turn > 0) {
+                    causalCaptureSet.add(osid);
+                }
             }
+        }
+        for (const osid of entry.objectives_lost_this_turn ?? []) {
+            causalCaptureSet.delete(osid);
         }
     }
     const objectivesLoggedCaptured = objectives.filter((osid) => loggedCaptureSet.has(osid));
-    const objectivesHeldWithoutLoggedCapture = capturedObjectives.filter((osid) => !loggedCaptureSet.has(osid));
+    const causallyCapturedObjectives = objectives.filter((osid) => causalCaptureSet.has(osid));
+    const objectivesHeldWithoutLoggedCapture = heldObjectives.filter((osid) => !loggedCaptureSet.has(osid));
     // 2026-05-22 Wave 3A.1: hoist `totalAttacks === 0` BEFORE the
     // objectivesHeldWithoutLoggedCapture check. The previous classifier only
     // checked totalAttacks in the deepest branch (no logged captures at all),
@@ -702,7 +701,7 @@ export function finalizeOperationAAR(
     // held_without_logged_attack"). Any zero-attack capture is by definition
     // a paper-flip — the OSID was held but never engaged.
     const captureProvenance: NonNullable<OperationAAR['capture_provenance']> =
-        capturedObjectives.length === 0
+        heldObjectives.length === 0
             ? 'no_objectives_held'
             : totalAttacks === 0
                 ? 'held_without_logged_attack'
@@ -712,21 +711,18 @@ export function finalizeOperationAAR(
                         ? 'held_without_logged_capture'
                         : 'mixed';
 
-    // 4b. Paper-flip integrity: demote 'success' to 'failure' when capture provenance
-    //     is `held_without_logged_attack`. An op that "captured" its objectives without
-    //     ever logging an attack is a paper-flip — typically because the objectives were
-    //     already held by the acting faction (per `targets_friendly_overrides` substrate
-    //     or initial-state coincidence). Recording these as `success` contaminates the
-    //     commander_confidence feedback signal: in 188w n1956, Tigar-Sloboda 94 (4/4
-    //     "captured", 0 attacks, 0 KIA) and APWB Pressure 94 (5/5 "captured", 0 attacks)
-    //     produced false-positive successes alongside 6/6 genuine attempts that failed
-    //     with heavy losses (Grmeč 94: 1,253 ARBiH KIA, 0 objectives held).
-    //
-    //     Forensics + decision: `docs/40_reports/audits/20260522_ARC_DELTA_N1955_N1956_WAVE2.md`
-    //     §7 fix candidate #1 ("Fix paper-flip op outcomes"). Reading capture_provenance
-    //     directly avoids duplicating the totalAttacks check and stays in lockstep with
-    //     the existing held_without_logged_attack semantics.
-    if (outcome === 'success' && captureProvenance === 'held_without_logged_attack') {
+    // Final control is provenance only. Outcome and player-facing capture credit
+    // come from weekly capture receipts that also record an attack.
+    let outcome: OperationAAR['outcome'];
+    const reason = op.recovery_reason;
+    const allCausallyCaptured = causallyCapturedObjectives.length === objectives.length && objectives.length > 0;
+    if (reason === 'orphaned_sector') {
+        outcome = 'orphaned';
+    } else if (allCausallyCaptured) {
+        outcome = 'success';
+    } else if (causallyCapturedObjectives.length > 0) {
+        outcome = 'partial';
+    } else {
         outcome = 'failure';
     }
 
@@ -757,7 +753,8 @@ export function finalizeOperationAAR(
 
     const grade = gradeOperation({
         objectives_targeted: objectives.length,
-        objectives_captured: capturedObjectives.length,
+        objectives_captured: causallyCapturedObjectives.length,
+        total_attacks: totalAttacks,
         casualties_suffered: totalSuffered.killed + totalSuffered.wounded,
         casualties_inflicted: totalInflicted.killed + totalInflicted.wounded,
         initial_strength: initialStrength,
@@ -778,7 +775,6 @@ export function finalizeOperationAAR(
             const axEqDestroyed: EquipmentTally = { tanks: 0, artillery: 0 };
             const axEqCaptured: EquipmentTally = { tanks: 0, artillery: 0 };
             let axAttacks = 0;
-            const axObjsCaptured: string[] = [];
 
             for (const entry of log) {
                 const ae = entry.axis_entries?.[axis.axis_id];
@@ -794,18 +790,6 @@ export function finalizeOperationAAR(
                 axEqDestroyed.artillery += ae.equipment_destroyed.artillery;
                 axEqCaptured.tanks += ae.equipment_captured.tanks;
                 axEqCaptured.artillery += ae.equipment_captured.artillery;
-                for (const cap of ae.objectives_captured_this_turn) {
-                    if (!axObjsCaptured.includes(cap)) axObjsCaptured.push(cap);
-                }
-            }
-
-            // Also check which axis objectives are currently held
-            const axisObjsHeld: string[] = [];
-            for (const osid of axis.objectives) {
-                const controller = getPoliticalControllerOSID(state, osid);
-                if (controller === faction && !axisObjsHeld.includes(osid)) {
-                    axisObjsHeld.push(osid);
-                }
             }
 
             const axisSummary: AxisAAR = {
@@ -813,7 +797,7 @@ export function finalizeOperationAAR(
                 axis_name: axis.name,
                 brigades: [...axis.assigned_brigades],
                 objectives_targeted: [...axis.objectives],
-                objectives_captured: axisObjsHeld,
+                objectives_captured: axis.objectives.filter((osid) => causalCaptureSet.has(osid)),
                 total_attacks: canonicalAxisAttackCount(axis, axAttacks),
                 casualties_suffered: axSuffered,
                 casualties_inflicted: axInflicted,
@@ -850,7 +834,7 @@ export function finalizeOperationAAR(
         objectives_logged_captured: objectivesLoggedCaptured,
         objectives_held_without_logged_capture: objectivesHeldWithoutLoggedCapture,
         capture_provenance: captureProvenance,
-        objectives_captured: capturedObjectives,
+        objectives_captured: causallyCapturedObjectives,
         duration_turns: durationTurns,
         total_attacks: totalAttacks,
         casualties_suffered: totalSuffered,

@@ -57,8 +57,8 @@ export function IntelligenceBriefModal({ notificationId, state, onClose }: Intel
         {notification?.body ?? t('decisionModal.intel.bodyFallback')}
       </div>
       <div className="flex justify-end gap-2 border-t border-panel-border bg-black/20 px-5 py-3">
-        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.intel.close')}</button>
-        <button type="button" onClick={acknowledge} disabled={!notification} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.intel.acknowledge')}</button>
+        <button type="button" onClick={onClose} className="border border-panel-border px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-text-secondary">{t('decisionModal.intel.close')}</button>
+        <button type="button" onClick={acknowledge} disabled={!notification} className="border border-accent-gold/45 bg-accent-gold/12 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.12em] text-accent-gold disabled:opacity-40">{t('decisionModal.intel.acknowledge')}</button>
       </div>
     </Modal>
   );

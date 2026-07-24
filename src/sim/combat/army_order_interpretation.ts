@@ -42,6 +42,7 @@
  */
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type {
     NamedOfficer,
     NamedOfficerState,
@@ -386,7 +387,7 @@ export const __c2TelemetryTestHooks = {
             applications: b.applications.slice(),
             factions_with_active_chain: Array.from(b.factionsWithActiveChain).sort(),
             per_faction_role_counts: Array.from(b.perFactionRoleCounts.entries())
-                .sort((a, b2) => a[0].localeCompare(b2[0]))
+                .sort((a, b2) => strictCompare(a[0], b2[0]))
                 .map(([faction, counts]) => ({ faction, ...counts })),
         };
     },
@@ -957,7 +958,7 @@ export function proposeAutonomousArmyLaunch(
     const candidates: OperationOpportunityDef[] = OPERATION_OPPORTUNITY_CATALOG
         .filter(def => def.faction === faction)
         .slice()
-        .sort((a, b) => a.opportunity_id.localeCompare(b.opportunity_id));
+        .sort((a, b) => strictCompare(a.opportunity_id, b.opportunity_id));
 
     let chosen: OperationOpportunityDef | null = null;
     for (const def of candidates) {

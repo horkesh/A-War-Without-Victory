@@ -3,8 +3,7 @@
  *
  * Two sections:
  *  1. Autonomy Slider — 4-button selector for levels 0–3 (Full Control / Assisted /
- *     Delegated / Observer). Levels 2–3 show "(not yet unlocked)" when the backend
- *     returns level_2_plus_not_yet_enabled.
+ *     Delegated / Observer). A selected level takes effect on the next turn.
  *  2. Proposal Review (READ-ONLY) — visible only when autonomy_level === 1 and there
  *     are pending proposals. Renders unresolved PendingProposalReview items for SCAN;
  *     the accept (commit) / withhold approval decision is issued from the Presidential
@@ -18,6 +17,7 @@
  */
 import { useEffect, useState, useCallback } from 'react';
 import { GlassPanel } from './GlassPanel';
+import { Z } from '../../shared/zIndex';
 import { OfficerDossierPanel } from './OfficerDossierPanel';
 import { playerFactionMatch } from '../data/playerFactionMatch';
 import { getPlayerSafeCorpsName } from '../utils/playerSafeText';
@@ -38,6 +38,7 @@ export interface PendingProposalReview {
     proposed_value?: string;
     accepted?: boolean;
     resolved_turn?: number;
+    opportunity_decision?: unknown;
 }
 
 /**
@@ -169,7 +170,7 @@ function ratioClass(ratio: number): string {
 }
 
 function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: ProposalCardProps) {
-    const resolved = proposal.accepted !== undefined;
+    const resolved = isResolvedProposalReview(proposal);
 
     // Parse a readable corps label from proposed_action.
     // Supported formats:
@@ -208,10 +209,10 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
         >
             {/* Corps / domain header */}
             <div className="flex items-center justify-between gap-2">
-                <span className="text-[11px] font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
+                <span className="text-xs font-mono text-[#c4a04a] font-semibold tracking-wide truncate">
                     {isOp ? t('autonomy.proposal.opOrderFor', { corps: corpsLabel }) : corpsLabel}
                 </span>
-                <span className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.15em] shrink-0">
+                <span className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.15em] shrink-0">
                     {formatProposalDomain(proposal.domain)}
                 </span>
             </div>
@@ -219,7 +220,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
             {/* Phase 2 slice 1: named-officer voice for an op proposal. */}
             {isOp && opCard && (
                 <div className="space-y-1">
-                    <div className="flex items-center justify-between gap-2 text-[10px] font-mono">
+                    <div className="flex items-center justify-between gap-2 text-xs font-mono">
                         {opCard.commander && inspectable && onInspectOfficer ? (
                             <button
                                 type="button"
@@ -246,7 +247,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                         )}
                     </div>
                     {opCard.commander_assessment && (
-                        <div className="text-[9px] font-mono uppercase tracking-[0.12em] text-[#8a8578]">
+                        <div className="text-xs font-mono uppercase tracking-[0.12em] text-[#a9a398]">
                             {t(ASSESSMENT_LABEL_KEYS[opCard.commander_assessment])}
                         </div>
                     )}
@@ -255,7 +256,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
 
             {/* Stance change arrow (non-op proposals) */}
             {!isOp && (proposal.current_value || proposal.proposed_value) && (
-                <div className="flex items-center gap-1.5 text-[10px] font-mono">
+                <div className="flex items-center gap-1.5 text-xs font-mono">
                     <span className="text-[#8a8578]">{formatProposalValue(proposal.current_value)}</span>
                     <span className="text-[#c4a04a]/60">→</span>
                     <span className="text-[#d4d0c8]">{formatProposalValue(proposal.proposed_value)}</span>
@@ -263,13 +264,13 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
             )}
 
             {/* Description (truncated) */}
-            <p className="text-[9px] text-[#8a8578] leading-snug line-clamp-2">
+            <p className="text-xs text-[#b8b3a8] leading-snug line-clamp-2">
                 {proposal.description}
             </p>
 
             {/* Action row */}
             {statusIndicator ? (
-                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-[9px] font-mono uppercase tracking-[0.15em] ${statusIndicator.cls}`}>
+                <div className={`inline-flex items-center px-2 py-0.5 rounded border text-xs font-mono uppercase tracking-[0.15em] ${statusIndicator.cls}`}>
                     {statusIndicator.label}
                 </div>
             ) : (
@@ -279,7 +280,7 @@ function ProposalCard({ proposal, opCard, onInspectOfficer, inspectable }: Propo
                 // the pending proposal so the player can READ it, but the approve/deny
                 // decision is issued at the one command desk. (Mirrors how OperationsSection
                 // was reduced to read-only "Review Command Decision".)
-                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-[9px] font-mono uppercase tracking-[0.15em] text-[#c4a04a]/80">
+                <div className="inline-flex items-center px-2 py-0.5 rounded border border-[#c4a04a]/25 bg-[#c4a04a]/[0.06] text-xs font-mono uppercase tracking-[0.15em] text-[#c4a04a]">
                     {t('autonomy.proposal.decideInDecisionRoom')}
                 </div>
             )}
@@ -337,11 +338,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
         try {
             const result = await bridge.setAutonomyLevel(level);
             if (!result.ok && result.error) {
-                if (result.error === 'level_2_plus_not_yet_enabled') {
-                    setLevelError(t('autonomy.levelsLocked'));
-                } else {
-                    setLevelError(result.error);
-                }
+                setLevelError(result.error);
             } else {
                 await refresh();
             }
@@ -363,7 +360,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
     const currentLevel = autonomyState?.autonomy_level ?? 0;
     const pendingLevel = autonomyState?.autonomy_level_pending;
     const proposals = filterPendingProposalsForPlayer(autonomyState?.pending_proposal_reviews, playerFaction);
-    const unresolvedCount = proposals.filter((p) => p.accepted === undefined).length;
+    const unresolvedCount = proposals.filter((p) => !isResolvedProposalReview(p)).length;
     // Index op decision cards by proposal id (Phase 2 slice 1).
     const opCardsById = new Map<string, OpProposalCard>();
     for (const card of autonomyState?.op_proposal_cards ?? []) opCardsById.set(card.proposal_id, card);
@@ -377,7 +374,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
 
     return (
         <>
-        <GlassPanel position="right" title={t('autonomy.title')} width="288px" onClose={onClose}>
+        <GlassPanel position="right" title={t('autonomy.title')} width="288px" onClose={onClose} zIndex={Z.OVERLAY_LIGHT}>
             {loading ? (
                 <div className="flex items-center justify-center py-8">
                     <div className="w-5 h-5 border-2 border-[#c4a04a]/40 border-t-[#c4a04a] rounded-full animate-spin" />
@@ -386,25 +383,27 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                 <div className="space-y-5">
                     {/* IPC unavailable notice */}
                     {!bridge && (
-                        <div className="text-[9px] font-mono text-[#8a8578] bg-black/20 border border-white/5 rounded px-2.5 py-1.5">
+                        <div className="text-xs font-mono text-[#b8b3a8] bg-black/30 border border-white/10 rounded px-2.5 py-1.5">
                             {t('autonomy.electronRequired')}
                         </div>
                     )}
 
                     {/* ── Autonomy Level Selector ── */}
                     <div className="space-y-2">
-                        <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
+                        <div className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.2em]">
                             {t('autonomy.level')}
                         </div>
+                        <p className="text-xs leading-relaxed text-[#b8b3a8]">
+                            {t('autonomy.nextTurnEffect')}
+                        </p>
 
                         {([0, 1, 2, 3] as const).map((level) => {
                             const isActive = currentLevel === level;
                             const isPending = pendingLevel === level && !isActive;
-                            const isLocked = level >= 2;
-
                             return (
                                 <button
                                     key={level}
+                                    data-testid={`autonomy-level-${level}`}
                                     onClick={() => void handleSetLevel(level)}
                                     disabled={busy || !bridge}
                                     className={`w-full text-left px-2.5 py-2 rounded border transition-all disabled:cursor-not-allowed ${
@@ -424,7 +423,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                                 }`}
                                             />
                                             <span
-                                                className={`text-[11px] font-mono font-medium ${
+                                                className={`text-xs font-mono font-medium ${
                                                     isActive ? 'text-[#c4a04a]' : 'text-[#d4d0c8]'
                                                 }`}
                                             >
@@ -433,18 +432,13 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                                         </div>
                                         <div className="flex items-center gap-1.5 shrink-0">
                                             {isPending && (
-                                                <span className="text-[8px] font-mono text-[#c4a04a]/60 uppercase tracking-wide">
+                                                <span className="text-xs font-mono text-[#c4a04a] uppercase tracking-wide">
                                                     {t('autonomy.pending')}
-                                                </span>
-                                            )}
-                                            {isLocked && (
-                                                <span className="text-[8px] font-mono text-[#8a8578]/70 uppercase tracking-wide">
-                                                    {t('autonomy.soon')}
                                                 </span>
                                             )}
                                         </div>
                                     </div>
-                                    <div className="text-[9px] text-[#8a8578] mt-0.5 ml-3.5 leading-snug">
+                                    <div className="text-xs text-[#a9a398] mt-1 ml-3.5 leading-relaxed">
                                         {t(LEVEL_DESC_KEYS[level])}
                                     </div>
                                 </button>
@@ -453,7 +447,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
 
                         {/* Level error */}
                         {levelError && (
-                            <div className="text-[9px] font-mono text-amber-400/80 bg-amber-900/10 border border-amber-500/20 rounded px-2 py-1">
+                            <div className="text-xs font-mono text-amber-300 bg-amber-900/20 border border-amber-500/30 rounded px-2 py-1">
                                 {levelError}
                             </div>
                         )}
@@ -463,11 +457,11 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                     {currentLevel === 1 && proposals.length > 0 && (
                         <div className="space-y-2">
                             <div className="flex items-center justify-between">
-                                <div className="text-[9px] font-mono text-[#8a8578] uppercase tracking-[0.2em]">
+                                <div className="text-xs font-mono text-[#a9a398] uppercase tracking-[0.2em]">
                                     {t('autonomy.pendingProposals')}
                                 </div>
                                 {unresolvedCount > 0 && (
-                                    <span className="text-[9px] font-mono text-[#c4a04a] bg-[#c4a04a]/10 border border-[#c4a04a]/25 rounded px-1.5 py-0.5">
+                                    <span className="text-xs font-mono text-[#c4a04a] bg-[#c4a04a]/10 border border-[#c4a04a]/25 rounded px-1.5 py-0.5">
                                         {unresolvedCount}
                                     </span>
                                 )}
@@ -491,7 +485,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                             </div>
 
                             {unresolvedCount === 0 && (
-                                <div className="text-[9px] font-mono text-[#8a8578] text-center py-1">
+                                <div className="text-xs font-mono text-[#a9a398] text-center py-1">
                                     {t('autonomy.allResolved')}
                                 </div>
                             )}
@@ -507,7 +501,7 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
                         <button
                             onClick={() => void refresh()}
                             disabled={busy}
-                            className="w-full py-1 text-[9px] font-mono uppercase tracking-[0.15em] text-[#8a8578] hover:text-[#d4d0c8] border border-white/5 hover:border-white/10 rounded transition-all disabled:opacity-40"
+                            className="w-full py-1.5 text-xs font-mono uppercase tracking-[0.15em] text-[#a9a398] hover:text-[#d4d0c8] border border-white/10 hover:border-white/20 rounded transition-all disabled:opacity-40"
                         >
                             {t('autonomy.refresh')}
                         </button>
@@ -525,6 +519,12 @@ export function AutonomyPanel({ onClose, playerFaction, namedOfficerData }: Auto
         )}
         </>
     );
+}
+
+function isResolvedProposalReview(proposal: PendingProposalReview): boolean {
+    return proposal.accepted != null
+        || proposal.resolved_turn != null
+        || proposal.opportunity_decision != null;
 }
 
 export default AutonomyPanel;

@@ -65,8 +65,8 @@ function conditionRow(
 ): string {
     return `<div class="fo-stat-row" style="margin:3px 0;">
         <span class="fo-stat-label" style="flex:0 0 auto;margin-right:6px;">${checkIcon(status)}</span>
-        <span class="fo-stat-label" style="flex:1;font-size:11px;">${code}: ${description}</span>
-        <span class="fo-stat-value" style="flex:0 0 auto;font-size:11px;">${detail}</span>
+        <span class="fo-stat-label" style="flex:1;font-size: 12px;">${code}: ${description}</span>
+        <span class="fo-stat-value" style="flex:0 0 auto;font-size: 12px;">${detail}</span>
     </div>`;
 }
 
@@ -175,7 +175,7 @@ export class DiplomacyModal {
 
         // Allied channels note
         const note = document.createElement('div');
-        note.style.cssText = 'text-align:center;font-size:11px;color:#555570;margin-top:16px;font-style:italic;';
+        note.style.cssText = 'text-align:center;font-size: 12px;color:#555570;margin-top:16px;font-style:italic;';
         note.textContent = `No allied channels active \u2014 ${this.factionPoliticalLabels.RS} fights with patron backing`;
         modal.appendChild(note);
 
@@ -261,7 +261,7 @@ export class DiplomacyModal {
 
             // Conditional warning
             if (constraintSev != null && constraintSev > 0.3 && alliance.allianceValue < 0.20) {
-                allianceHtml += '<div style="margin-top:8px;font-size:11px;color:#ffab00;font-style:italic;">Croatian pressure is straining the alliance.</div>';
+                allianceHtml += '<div style="margin-top:8px;font-size: 12px;color:#ffab00;font-style:italic;">Croatian pressure is straining the alliance.</div>';
             }
 
             modal.appendChild(this.createSection('ALLIANCE STATUS', allianceHtml));
@@ -283,7 +283,7 @@ export class DiplomacyModal {
         const currentCroatianSupport = capProfile?.croatian_support ?? 0;
 
         modal.appendChild(this.createSection('CAPABILITY OUTLOOK', `
-            <div style="margin-bottom:6px;font-size:11px;color:#8888a0;font-style:italic;">If Washington Agreement signed:</div>
+            <div style="margin-bottom:6px;font-size: 12px;color:#8888a0;font-style:italic;">If Washington Agreement signed:</div>
             ${statRow('Equipment Access', `${pct(currentEquipAccess)} \u2192 65.0%`)}
             ${statRow('Croatian Support', `${pct(currentCroatianSupport)} \u2192 90.0%`)}
             ${statRow(`Joint pressure bonus vs ${this.factionPoliticalLabels.RS}`, '1.15x')}
@@ -360,7 +360,7 @@ export class DiplomacyModal {
 
         const ceasefireActive = alliance?.ceasefireActive ?? false;
         const statusLabel = ceasefireActive
-            ? '<div style="text-align:center;color:#00e878;font-size:11px;font-weight:600;margin-bottom:8px;">CEASEFIRE ACTIVE</div>'
+            ? '<div style="text-align:center;color:#00e878;font-size: 12px;font-weight:600;margin-bottom:8px;">CEASEFIRE ACTIVE</div>'
             : '';
 
         return this.createSection('CEASEFIRE TRACKER', `
@@ -437,7 +437,7 @@ export class DiplomacyModal {
 
         const washingtonSigned = alliance?.washingtonSigned ?? false;
         const statusLabel = washingtonSigned
-            ? '<div style="text-align:center;color:#00e878;font-size:11px;font-weight:600;margin-bottom:8px;">WASHINGTON AGREEMENT SIGNED</div>'
+            ? '<div style="text-align:center;color:#00e878;font-size: 12px;font-weight:600;margin-bottom:8px;">WASHINGTON AGREEMENT SIGNED</div>'
             : '';
 
         return this.createSection('WASHINGTON TRACKER', `

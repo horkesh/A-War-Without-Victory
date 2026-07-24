@@ -716,7 +716,7 @@ describe('sector-partition instrumentation — env-flag gating', () => {
     it('static contract: final distributor seals current sector truth only after distribution', () => {
         const raw = readFileSync(resolve('src/sim/turn_phases/war_phase_reconciliation_steps.ts'), 'utf8');
         const phaseIdx = raw.indexOf("name: 'final-distribute-brigades-to-front'");
-        const phaseEnd = raw.indexOf("\n    {\n        name: 'assert-final-operation-lifecycle'", phaseIdx);
+        const phaseEnd = raw.indexOf("\n    {\n        name: 'seal-final-sector-truth-after-distribution'", phaseIdx);
         expect(phaseIdx).toBeGreaterThanOrEqual(0);
         expect(phaseEnd).toBeGreaterThan(phaseIdx);
 

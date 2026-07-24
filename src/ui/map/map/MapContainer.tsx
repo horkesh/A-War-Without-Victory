@@ -1,5 +1,13 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import maplibregl from 'maplibre-gl';
+import {
+  additionalCameraPadding,
+  cameraOffsetForPadding,
+  hasUsableMapCanvas,
+  isTacticalMapStateReady,
+  releaseMapWebGlContext,
+  releaseStandaloneDeckWebGlContext,
+} from './mapContextLifecycle';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type {
   AddLayerObject,
@@ -50,13 +58,17 @@ import { RadialMenu } from '../components/RadialMenu';
 import type { RadialMenuItem } from '../components/RadialMenu';
 import { rewritePmtilesUrls } from './rewritePmtilesUrls';
 import { ensurePmtilesProtocol } from './pmtilesProtocol';
-import { useIPC } from '../desktop/useIPC';
-import { stageAssignBrigadeToSectorAction } from '../desktop/orderActions';
 import { collectEmphasizedFormationIds, collectHighlightedFormationIds } from './highlightSelection';
 import styleJson from './awwv_map_style.json';
 import { MapboxOverlay } from '@deck.gl/mapbox';
 import { composeTacticalDeckLayers, DEFAULT_DECK_LAYER_CAPABILITIES } from '../layers/composeTacticalDeckLayers';
 import { setSettlementLabelData, type DeckViewportClip } from '../layers/buildTacticalDeckLayers';
+import {
+  buildFormationCounterDomOverlayItems,
+  installFormationCounterOccluderObserver,
+  renderFormationCounterDomOverlay,
+  type FormationCounterDomOverlayItem,
+} from '../layers/formationCounterDomOverlay';
 import { buildGhostMapData, type GhostMapDatum } from '../layers/buildGhostMapLayer';
 import { buildOsidDamageData, type OsidDamageDatum, type OsidDamageSeed } from '../layers/buildOsidDamageOverlay';
 import { buildForceQualityData, type ForceQualityDatum } from '../layers/buildForceQualityOverlay';
@@ -187,12 +199,12 @@ import {
   toZoomWidthExpression,
 } from './interactionLayerConfig';
 import { getDynamicInteractionLayerSignature, shouldScheduleInteractionRetry } from './dynamicInteractionLayers';
-import { pickNearestFormationAtPoint, resolveDeckFormationClickTarget } from './clickSelectionPriority';
+import { resolveDeckFormationClickTarget } from './clickSelectionPriority';
 import {
   resolveMapFormationInspectionTarget,
   resolveMapSectorInspectionTarget,
 } from './mapSelectionRouting';
-import { getSyntheticEnemyContactOsid } from '../components/tooltipPlayerSafe';
+import { resolveHoveredFormationSectorId } from '../components/tooltipPlayerSafe';
 import {
   deckLayerRenderInputsChanged,
   shouldPreserveDeckFormationCounters,
@@ -246,6 +258,22 @@ function inspectMarkerContactOrFormation(formationId: string, properties?: Recor
     return;
   }
   inspectFormationFromMap(formationId, properties);
+}
+
+function handleFormationCounterSelection(
+  formationId: string,
+  properties: Record<string, unknown>,
+  selectionIntent: 'stack-aware' | 'exact' = 'stack-aware',
+) {
+  const store = useGameStore.getState();
+  const osid = typeof properties.location_osid === 'string' ? properties.location_osid : null;
+  const stackCount = typeof properties.stack_count === 'number' ? properties.stack_count : 1;
+  if (selectionIntent === 'stack-aware' && osid && stackCount > 1) {
+    store.setExpandedStackOsid(osid);
+    return;
+  }
+  inspectMarkerContactOrFormation(formationId, properties);
+  store.setExpandedStackOsid(null);
 }
 
 /** Layer IDs for front lines (visibility driven by store frontsVisible). */
@@ -336,16 +364,18 @@ function buildDeckCounterViewportPadding(canvas: HTMLCanvasElement): DeckViewpor
     const relRight = Math.min(mapRect.width, rect.right - mapRect.left);
     const relTop = Math.max(0, rect.top - mapRect.top);
     const relBottom = Math.min(mapRect.height, rect.bottom - mapRect.top);
+    const occluderWidth = relRight - relLeft;
     const occluderHeight = relBottom - relTop;
+    const spansHorizontalBand = occluderWidth >= Math.min(520, mapRect.width * 0.45);
     const spansTacticalBand = occluderHeight >= Math.min(360, mapRect.height * 0.35)
       && relBottom >= padding.top + 160
       && relTop <= mapRect.height - padding.bottom - 160;
     if (spansTacticalBand) blockedHorizontalIntervals.push([relLeft, relRight]);
 
-    if (rect.top <= mapRect.top + 96) {
+    if (spansHorizontalBand && rect.top <= mapRect.top + 96) {
       padding.top = Math.max(padding.top, Math.ceil(relBottom + margin));
     }
-    if (rect.bottom >= mapRect.bottom - 96) {
+    if (spansHorizontalBand && rect.bottom >= mapRect.bottom - 96) {
       padding.bottom = Math.max(padding.bottom, Math.ceil(mapRect.height - relTop + margin));
     }
   }
@@ -387,6 +417,38 @@ function buildDeckCounterViewportPadding(canvas: HTMLCanvasElement): DeckViewpor
   return padding;
 }
 
+const CAMERA_MIN_VISIBLE_BAND = 220;
+const MIN_CAMERA_BOUNDS_DELTA = 0.0005;
+type CameraBounds = [[number, number], [number, number]];
+
+function clampCameraPaddingAxis(
+  leading: number,
+  trailing: number,
+  extent: number,
+): [number, number] {
+  if (!Number.isFinite(extent) || extent <= 0) return [0, 0];
+  const minimumVisibleBand = Math.min(CAMERA_MIN_VISIBLE_BAND, Math.max(48, Math.floor(extent * 0.5)));
+  const maxPaddingTotal = Math.max(0, Math.floor(extent - minimumVisibleBand));
+  const total = Math.max(0, leading) + Math.max(0, trailing);
+  if (total <= maxPaddingTotal) return [Math.max(0, leading), Math.max(0, trailing)];
+  if (total <= 0 || maxPaddingTotal <= 0) return [0, 0];
+  const scale = maxPaddingTotal / total;
+  const nextLeading = Math.floor(Math.max(0, leading) * scale);
+  return [nextLeading, Math.max(0, maxPaddingTotal - nextLeading)];
+}
+
+function clampCameraPaddingForFit(
+  padding: DeckViewportClip['padding'],
+  canvas: HTMLCanvasElement,
+): DeckViewportClip['padding'] {
+  const rect = canvas.getBoundingClientRect();
+  const width = rect.width || canvas.clientWidth || canvas.width;
+  const height = rect.height || canvas.clientHeight || canvas.height;
+  const [left, right] = clampCameraPaddingAxis(padding.left, padding.right, width);
+  const [top, bottom] = clampCameraPaddingAxis(padding.top, padding.bottom, height);
+  return { top, right, bottom, left };
+}
+
 function buildDeckCounterViewportOccluders(canvas: HTMLCanvasElement): NonNullable<DeckViewportClip['occluders']> {
   const mapRect = canvas.getBoundingClientRect();
   const margin = 6;
@@ -409,12 +471,40 @@ function buildDeckCounterViewportOccluders(canvas: HTMLCanvasElement): NonNullab
 
 function buildCounterAwareCameraPadding(map: maplibregl.Map): DeckViewportClip['padding'] {
   const dynamic = buildDeckCounterViewportPadding(map.getCanvas());
-  return {
+  return clampCameraPaddingForFit({
     top: Math.max(TACTICAL_MAP_EDGE_PADDING.top, dynamic.top),
     right: Math.max(TACTICAL_MAP_EDGE_PADDING.right, dynamic.right),
     bottom: Math.max(TACTICAL_MAP_EDGE_PADDING.bottom, dynamic.bottom),
     left: Math.max(TACTICAL_MAP_EDGE_PADDING.left, dynamic.left),
-  };
+  }, map.getCanvas());
+}
+
+function fitBoundsOrEaseTo(
+  map: maplibregl.Map,
+  bounds: CameraBounds,
+  options: { padding: DeckViewportClip['padding']; maxZoom: number; duration: number },
+): void {
+  if (!hasUsableMapCanvas(map.getCanvas())) return;
+  const [[minLng, minLat], [maxLng, maxLat]] = bounds;
+  const values = [minLng, minLat, maxLng, maxLat];
+  if (!values.every(Number.isFinite)) return;
+
+  const center: [number, number] = [(minLng + maxLng) / 2, (minLat + maxLat) / 2];
+  const fitPadding = additionalCameraPadding(options.padding, map.getPadding());
+  const lngCollapsed = Math.abs(maxLng - minLng) < MIN_CAMERA_BOUNDS_DELTA;
+  const latCollapsed = Math.abs(maxLat - minLat) < MIN_CAMERA_BOUNDS_DELTA;
+  if (lngCollapsed || latCollapsed) {
+    map.easeTo({
+      center,
+      offset: cameraOffsetForPadding(fitPadding),
+      duration: options.duration,
+      essential: true,
+      zoom: Math.min(map.getZoom(), options.maxZoom),
+    });
+    return;
+  }
+
+  map.fitBounds(bounds, { ...options, padding: fitPadding });
 }
 
 function stripPmtilesSourcesForCiFallback(
@@ -586,11 +676,48 @@ function composeDeckLayersForCurrentSelection(args: {
   });
 }
 
+function buildFormationCounterViewportClip(map: maplibregl.Map | null): DeckViewportClip | undefined {
+  const canvas = map?.getCanvas();
+  if (!map || !canvas) return undefined;
+  return {
+    width: canvas.clientWidth,
+    height: canvas.clientHeight,
+    padding: buildDeckCounterViewportPadding(canvas),
+    occluders: buildDeckCounterViewportOccluders(canvas),
+    project: (coordinates) => map.project(coordinates),
+  };
+}
+
+function pickNearestVisibleFormationCounterAtPoint(args: {
+  items: readonly FormationCounterDomOverlayItem[];
+  point: { x: number; y: number };
+}) {
+  const slackPx = 18;
+  let best: { item: FormationCounterDomOverlayItem; score: number } | null = null;
+
+  for (const item of args.items) {
+    const maxDx = item.width / 2 + slackPx;
+    const maxDy = item.height / 2 + slackPx;
+    const dx = Math.abs(args.point.x - item.x);
+    const dy = Math.abs(args.point.y - item.y);
+    if (dx > maxDx || dy > maxDy) continue;
+
+    const score = (dx / maxDx) ** 2 + (dy / maxDy) ** 2;
+    if (!best || score < best.score || (score === best.score && item.id < best.item.id)) {
+      best = { item, score };
+    }
+  }
+
+  return best ? { id: best.item.id, properties: best.item.properties } : null;
+}
+
 export function MapContainer() {
   const [locale] = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
+  const formationCounterDomOverlayRef = useRef<HTMLDivElement | null>(null);
+  const visibleFormationCounterItemsRef = useRef<FormationCounterDomOverlayItem[]>([]);
   const osidBaseRef = useRef<FeatureCollection | null>(null);
   const osidAdjacencyRef = useRef<Map<string, string[]> | null>(null);
   const osidCentroidsRef = useRef<Map<string, [number, number]>>(new Map());
@@ -609,18 +736,18 @@ export function MapContainer() {
   /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
   const appliedStateRef = useRef<LoadedGameState | null>(null);
   const appliedLocaleRef = useRef(locale);
-  /** Idle/timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
-  const deferredOverlayHandleRef = useRef<ReturnType<typeof requestIdleCallback> | ReturnType<typeof setTimeout> | null>(null);
+  /** Timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
+  const deferredOverlayHandleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const interactionLayerSignatureRef = useRef('');
   const [mapReady, setMapReady] = useState(false);
+  const [mapRenderReady, setMapRenderReady] = useState(false);
+  const [mapRenderedTurn, setMapRenderedTurn] = useState<number | null>(null);
+  const [mapRenderedRevision, setMapRenderedRevision] = useState<string | null>(null);
+  const [mapLoadError, setMapLoadError] = useState<string | null>(null);
+  const [mapInitAttempt, setMapInitAttempt] = useState(0);
   const [interactionBindingRevision, setInteractionBindingRevision] = useState(0);
   const setSelectedOsid = useGameStore((s) => s.setSelectedOsid);
   const setSelectedOsidInSector = useGameStore((s) => s.setSelectedOsidInSector);
-  const setPendingAttackConfirmation = useGameStore((s) => s.setPendingAttackConfirmation);
-  const setOrderModeForFormation = useGameStore((s) => s.setOrderModeForFormation);
-  const orderModeForFormation = useGameStore((s) => s.orderModeForFormation);
-  const ipc = useIPC();
-  const setLoadError = useGameStore((s) => s.setLoadError);
   const setOsidDisplayNames = useGameStore((s) => s.setOsidDisplayNames);
   const osidDisplayNames = useGameStore((s) => s.osidDisplayNames);
   const setOsidPropertiesMap = useGameStore((s) => s.setOsidPropertiesMap);
@@ -630,6 +757,20 @@ export function MapContainer() {
   const selectedCorpsId = useGameStore((s) => s.selectedCorpsId);
   const operationTargetOsids = useGameStore((s) => s.operationTargetOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const loadedStateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
+  const currentMapStateReady = isTacticalMapStateReady(
+    mapRenderReady,
+    mapRenderedTurn,
+    loadedGameState?.turn,
+    mapRenderedRevision,
+    loadedStateFingerprint,
+  );
+  const currentMapStateReadyRef = useRef(currentMapStateReady);
+  currentMapStateReadyRef.current = currentMapStateReady;
+  useEffect(() => {
+    if (!formationCounterDomOverlayRef.current) return;
+    formationCounterDomOverlayRef.current.inert = !currentMapStateReady;
+  }, [currentMapStateReady, mapReady]);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
   const appliedStagedOrdersRef = useRef(stagedOrders);
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
@@ -747,13 +888,43 @@ export function MapContainer() {
   }, [loadedGameState?.corpsFrontSectors, loadedGameState?.frontEdgesOsid]);
   const playerFaction = useMemo(() => resolvePlayerFacingFaction(loadedGameState), [loadedGameState]);
 
+  const handleDomCounterHover = (item: FormationCounterDomOverlayItem | null, point?: { x: number; y: number }) => {
+    if (!item) {
+      clearTooltipTarget();
+      setHoveredSectorId(null);
+      return;
+    }
+    const currentState = useGameStore.getState().loadedGameState;
+    const formation = currentState?.formations.find((candidate) => candidate.id === item.id);
+    setTooltipTargetWithPosition({ type: 'formation', id: item.id }, point);
+    setHoveredSectorId(resolveHoveredFormationSectorId({
+      formationId: item.id,
+      contactLocationOsid: item.properties.location_osid,
+      formationSectorId: resolveCurrentSectorForFormation(formation, currentState?.corpsFrontSectors)?.sector_id,
+      osidToSector,
+    }));
+  };
+
+  const renderFormationCounters = (args: Parameters<typeof renderFormationCounterDomOverlay>[0]) => {
+    visibleFormationCounterItemsRef.current = buildFormationCounterDomOverlayItems(args);
+    renderFormationCounterDomOverlay(args);
+  };
+
+  const getVisibleFormationClickFallback = (point: { x: number; y: number }) => {
+    if (!currentMapStateReadyRef.current || !useGameStore.getState().formationsVisible) return null;
+    return pickNearestVisibleFormationCounterAtPoint({
+      items: visibleFormationCounterItemsRef.current,
+      point,
+    });
+  };
+
   const applyDeckLayerSelection = (args: Omit<DeckLayerRenderInputs, 'centroidLookup'> & { centroidLookup?: DeckLayerRenderInputs['centroidLookup'] }) => {
     const overlay = deckOverlayRef.current;
     const centroidLookup = args.centroidLookup ?? osidCentroidsRef.current;
     if (!overlay) return;
     const map = mapRef.current;
     const canvas = map?.getCanvas();
-    const counterViewportPadding = map ? buildCounterAwareCameraPadding(map) : TACTICAL_MAP_EDGE_PADDING;
+    const counterViewportPadding = canvas ? buildDeckCounterViewportPadding(canvas) : TACTICAL_MAP_EDGE_PADDING;
     const counterViewportOccluders = map && canvas ? buildDeckCounterViewportOccluders(canvas) : [];
     const counterOccluderSignature = counterViewportOccluders
       .map((rect) => `${Math.round(rect.left)},${Math.round(rect.top)},${Math.round(rect.right)},${Math.round(rect.bottom)}`)
@@ -778,21 +949,28 @@ export function MapContainer() {
       centroidLookup,
       viewportSignature,
     };
+    const viewportClip = buildFormationCounterViewportClip(map);
+    const renderDomCounters = (visualMode: 'fallback' | 'hit-targets') => renderFormationCounters({
+      container: formationCounterDomOverlayRef.current,
+      formationsGeoJson: nextInputs.formationsGeoJson ?? EMPTY_GEOJSON,
+      formationsVisible: nextInputs.formationsVisible,
+      zoom: nextInputs.zoom,
+      viewportClip,
+      visualMode,
+      stackAriaLabel: (count) => t('stackExpansion.openAria', { count }),
+      onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent),
+      onCounterHover: handleDomCounterHover,
+    });
+    renderDomCounters(lastDeckLayerInputsRef.current ? 'hit-targets' : 'fallback');
+    if (formationCounterDomOverlayRef.current) {
+      formationCounterDomOverlayRef.current.dataset.awwvFormationCounterNeedsUpdate = 'false';
+    }
     if (!deckLayerRenderInputsChanged(lastDeckLayerInputsRef.current, nextInputs)) {
       return;
     }
     if (shouldPreserveDeckFormationCounters(lastDeckLayerInputsRef.current, nextInputs)) {
       return;
     }
-    const viewportClip: DeckViewportClip | undefined = map && canvas
-      ? {
-        width: canvas.clientWidth,
-        height: canvas.clientHeight,
-        padding: counterViewportPadding,
-        occluders: counterViewportOccluders,
-        project: (coordinates) => map.project(coordinates),
-      }
-      : undefined;
 
     overlay.setProps({
       layers: composeDeckLayersForCurrentSelection({
@@ -861,6 +1039,7 @@ export function MapContainer() {
       }),
     });
     lastDeckLayerInputsRef.current = nextInputs;
+    renderDomCounters('hit-targets');
   };
 
   const contextMenuItems: RadialMenuItem[] = useMemo(() => {
@@ -938,6 +1117,7 @@ export function MapContainer() {
 
   useEffect(() => {
     if (!containerRef.current) return;
+    setMapLoadError(null);
 
     const origin = window.location.origin;
     const tilelessCiFallback = shouldUseTilelessCiFallback();
@@ -1038,12 +1218,26 @@ export function MapContainer() {
         // NOTE: front-edges-hover source is NOT pre-registered here — it's created via addSource
         // in runUpdate so that addLayer calls in the same block also execute.
       } catch (e) {
-        console.warn('Failed to pre-load OSID data:', e);
+        console.error('Failed to pre-load OSID data:', e);
+        if (!initCancelled) setMapLoadError(e instanceof Error ? e.message : String(e));
+        return;
       }
 
       if (initCancelled || !containerRef.current) return;
+      const mapContainer = containerRef.current;
+      const counterDomOverlay = document.createElement('div');
+      counterDomOverlay.dataset.awwvDomFormationCounters = 'true';
+      counterDomOverlay.style.position = 'absolute';
+      counterDomOverlay.style.inset = '0';
+      counterDomOverlay.style.pointerEvents = 'none';
+      counterDomOverlay.style.zIndex = '5';
+      counterDomOverlay.style.overflow = 'hidden';
+      counterDomOverlay.inert = true;
+      mapContainer.appendChild(counterDomOverlay);
+      formationCounterDomOverlayRef.current = counterDomOverlay;
+
       const map = new maplibregl.Map({
-        container: containerRef.current,
+        container: mapContainer,
         style,
         center: BOSNIA_CENTER,
         zoom: DEFAULT_ZOOM,
@@ -1069,19 +1263,13 @@ export function MapContainer() {
         interleaved: false,
         layers: [],
         onClick: (info: TacticalDeckPickingInfo) => {
+          if (!currentMapStateReadyRef.current) return;
           const store = useGameStore.getState();
           const mapAtClick = mapRef.current;
           const formationFallback =
-            mapAtClick
-            && lastFormationsGeoJsonRef.current
-            && typeof info?.x === 'number'
+            typeof info?.x === 'number'
             && typeof info?.y === 'number'
-              ? pickNearestFormationAtPoint({
-                formations: lastFormationsGeoJsonRef.current.features,
-                point: { x: info.x, y: info.y },
-                zoom: mapAtClick.getZoom(),
-                project: (coordinates) => mapAtClick.project(coordinates),
-              })
+              ? getVisibleFormationClickFallback({ x: info.x, y: info.y })
               : null;
           const frontFeature =
             mapAtClick && typeof info?.x === 'number' && typeof info?.y === 'number'
@@ -1111,19 +1299,7 @@ export function MapContainer() {
 
           const props = info?.object?.properties ?? formationFallback?.properties;
           if (!props) return;
-          // Use pre-computed stack_count from GeoJSON feature properties
-          const osid = props.location_osid as string | undefined;
-          const stackCount = typeof props.stack_count === 'number' ? props.stack_count : 1;
-          if (osid && stackCount > 1) {
-            store.setExpandedStackOsid(osid);
-            // overlayAnchor is derived by useEffect from expandedStackOsid
-          } else if (isEnemyContactMarker(props) && osid) {
-            inspectSettlementFromMap(osid);
-            store.setExpandedStackOsid(null);
-          } else {
-            inspectFormationFromMap(clickTarget.formationId, props);
-            store.setExpandedStackOsid(null);
-          }
+          handleFormationCounterSelection(clickTarget.formationId, props);
         },
       });
       map.addControl(deckOverlay);
@@ -1172,13 +1348,16 @@ export function MapContainer() {
       // Note: 3D terrain (terrain-dem) is intentionally NOT enabled on the main map.
       // Only the ops planning modal uses 3D terrain for tactical planning context.
 
-      // Deck.gl zoom sync: trigger layer update on zoom to handle dynamic scaling
-      // Throttled to ~20fps (50ms) to avoid rebuilding deck layers every frame during zoom animations
-      let zoomThrottleTimer: ReturnType<typeof setTimeout> | null = null;
-      map.on('zoom', () => {
-        if (zoomThrottleTimer) return;
-        zoomThrottleTimer = setTimeout(() => {
-          zoomThrottleTimer = null;
+      // Keep DOM counters aligned with Deck picking throughout camera motion.
+      // Throttled to ~20fps (50ms) to avoid rebuilding layers every animation frame.
+      let counterViewportSyncTimer: ReturnType<typeof setTimeout> | null = null;
+      const scheduleCounterViewportSync = () => {
+        if (formationCounterDomOverlayRef.current) {
+          formationCounterDomOverlayRef.current.dataset.awwvFormationCounterNeedsUpdate = 'true';
+        }
+        if (counterViewportSyncTimer) return;
+        counterViewportSyncTimer = setTimeout(() => {
+          counterViewportSyncTimer = null;
           if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
             const {
               formationsVisible: fVis,
@@ -1207,18 +1386,23 @@ export function MapContainer() {
             });
           }
         }, 50);
+      };
+      map.on('move', scheduleCounterViewportSync);
+      map.once('remove', () => {
+        if (counterViewportSyncTimer) clearTimeout(counterViewportSyncTimer);
+        counterViewportSyncTimer = null;
       });
 
       // Minimap: register panToCenter callback
       useGameStore.getState().setPanToCenter((center: [number, number]) => {
-        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 400, essential: true });
+        map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 400, essential: true });
       });
 
       // Operations panel: register panToOsid callback
       useGameStore.getState().setPanToOsid((osid: string) => {
         const center = osidCentroidsRef.current.get(osid);
         if (!center) return;
-        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 420, essential: true });
+        map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 420, essential: true });
       });
 
       setMapReady(true);
@@ -1228,15 +1412,23 @@ export function MapContainer() {
 
     return () => {
       initCancelled = true;
-      deckOverlayRef.current?.finalize();
+      const deckOverlay = deckOverlayRef.current;
       deckOverlayRef.current = null;
-      mapRef.current?.remove();
+      if (deckOverlay) releaseStandaloneDeckWebGlContext(deckOverlay);
+      formationCounterDomOverlayRef.current?.remove();
+      formationCounterDomOverlayRef.current = null;
+      visibleFormationCounterItemsRef.current = [];
+      const mapToRelease = mapRef.current;
       mapRef.current = null;
+      if (mapToRelease) releaseMapWebGlContext(mapToRelease);
       useGameStore.getState().setPanToCenter(null);
       useGameStore.getState().setPanToOsid(null);
       setMapReady(false);
+      setMapRenderReady(false);
+      setMapRenderedTurn(null);
+      setMapRenderedRevision(null);
     };
-  }, []);
+  }, [mapInitAttempt]);
 
   useEffect(() => {
     if (!mapReady || !mapRef.current) return;
@@ -1249,51 +1441,22 @@ export function MapContainer() {
       if (!mapRef.current) return;
       cleanup = useMapInteractions(mapRef.current, {
         getFormationClickFallback: (point) => {
-          const map = mapRef.current;
-          const formationsGeoJson = lastFormationsGeoJsonRef.current;
-          if (!map || !formationsGeoJson) return null;
-          return pickNearestFormationAtPoint({
-            formations: formationsGeoJson.features,
-            point,
-            zoom: map.getZoom(),
-            project: (coordinates) => map.project(coordinates),
-          });
+          return getVisibleFormationClickFallback(point);
         },
         onOsidClick: (osid) => {
-          if (orderModeForFormation === 'attack' && selectedFormationId) {
-            if (!osid) {
-              setLoadError(t('map.attack.selectTarget'));
-              setOrderModeForFormation(null);
-              return;
-            }
-            setPendingAttackConfirmation({ attackerFormationId: selectedFormationId, targetOsid: osid });
-            setOrderModeForFormation(null);
-          } else if (orderModeForFormation === 'sector' && selectedFormationId) {
-            const sectorId = osidToSector.get(osid);
-            if (sectorId) {
-              void stageAssignBrigadeToSectorAction(
-                { ipc, addStagedOrder: useGameStore.getState().addStagedOrder, setLoadError },
-                selectedFormationId,
-                sectorId
-              );
-            } else {
-              setLoadError('Selected settlement is not part of a frontline sector.');
-            }
-            setOrderModeForFormation(null);
+          setExpandedStackOsid(null);
+          setOverlayAnchor(null);
+          // If this settlement belongs to a front sector, select that sector so it's visible on the map.
+          const sectorId = osidToSector.get(osid);
+          if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
+            sectorSelectedFromMapRef.current = true;
+            inspectSettlementFromMap(osid, sectorId);
           } else {
-            setExpandedStackOsid(null);
-            setOverlayAnchor(null);
-            // If this settlement belongs to a front sector, select that sector so it's visible on the map.
-            const sectorId = osidToSector.get(osid);
-            if (sectorId && findPlayerFacingSectorById(useGameStore.getState().loadedGameState, sectorId)) {
-              sectorSelectedFromMapRef.current = true;
-              inspectSettlementFromMap(osid, sectorId);
-            } else {
-              inspectSettlementFromMap(osid);
-            }
+            inspectSettlementFromMap(osid);
           }
         },
         onFormationClick: (id, props, point) => {
+          if (!currentMapStateReadyRef.current) return;
           // If clicking a formation, also expand its stack if it's not already expanded
           const osid = props.location_osid as string | undefined;
           if (osid && loadedGameState) {
@@ -1337,18 +1500,12 @@ export function MapContainer() {
           if (id) {
             const formation = loadedGameState?.formations.find((candidate) => candidate.id === id);
             setTooltipTargetWithPosition({ type: 'formation', id }, point ?? undefined);
-            const contactOsid = id.startsWith('enemy_contact:')
-              ? (
-                typeof properties?.location_osid === 'string'
-                  ? properties.location_osid
-                  : getSyntheticEnemyContactOsid(id)
-              )
-              : null;
-            setHoveredSectorId(
-              contactOsid
-                ? (osidToSector.get(contactOsid) ?? null)
-                : (resolveCurrentSectorForFormation(formation, loadedGameState?.corpsFrontSectors)?.sector_id ?? null),
-            );
+            setHoveredSectorId(resolveHoveredFormationSectorId({
+              formationId: id,
+              contactLocationOsid: properties?.location_osid,
+              formationSectorId: resolveCurrentSectorForFormation(formation, loadedGameState?.corpsFrontSectors)?.sector_id,
+              osidToSector,
+            }));
           } else {
             clearTooltipTarget();
             setHoveredSectorId(null);
@@ -1388,8 +1545,7 @@ export function MapContainer() {
           setHoveredSectorId(id);
         },
         onMouseMove: (lngLat) => {
-          if (orderModeForFormation) setGhostLinePoint(lngLat);
-          else if (ghostLinePoint) setGhostLinePoint(null);
+          if (ghostLinePoint) setGhostLinePoint(null);
         },
         onMapMouseLeave: () => {
           clearTooltipTarget();
@@ -1410,7 +1566,7 @@ export function MapContainer() {
       cancelled = true;
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setTooltipTargetWithPosition, clearTooltipTarget, orderModeForFormation, selectedFormationId, setPendingAttackConfirmation, setOrderModeForFormation, ipc, setLoadError, osidToSector, interactionBindingRevision]);
+  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setTooltipTargetWithPosition, clearTooltipTarget, selectedFormationId, osidToSector, interactionBindingRevision]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -1421,6 +1577,59 @@ export function MapContainer() {
     }
 
     let cancelled = false;
+    const stateFingerprint = loadedStateFingerprint;
+    let readinessSourceMap: maplibregl.Map | null = null;
+    let readinessSourceHandler: ((event: maplibregl.MapSourceDataEvent) => void) | null = null;
+    let readinessRenderHandler: (() => void) | null = null;
+    let readinessTimeoutId: number | null = null;
+
+    const clearReadinessListeners = () => {
+      if (readinessSourceMap && readinessSourceHandler) {
+        readinessSourceMap.off('sourcedata', readinessSourceHandler);
+      }
+      if (readinessSourceMap && readinessRenderHandler) {
+        readinessSourceMap.off('render', readinessRenderHandler);
+      }
+      if (readinessTimeoutId != null) window.clearTimeout(readinessTimeoutId);
+      readinessSourceMap = null;
+      readinessSourceHandler = null;
+      readinessRenderHandler = null;
+      readinessTimeoutId = null;
+    };
+
+    const scheduleMapRenderReady = (targetMap: maplibregl.Map, stateTurn: number) => {
+      if (!stateFingerprint) return;
+      clearReadinessListeners();
+      readinessSourceMap = targetMap;
+      const armRenderedFrame = () => {
+        if (cancelled || mapRef.current !== targetMap || !targetMap.isSourceLoaded('osid-control')) return;
+        if (readinessSourceHandler) targetMap.off('sourcedata', readinessSourceHandler);
+        readinessSourceHandler = null;
+        readinessRenderHandler = () => {
+          readinessRenderHandler = null;
+          if (cancelled || mapRef.current !== targetMap) return;
+          if (readinessTimeoutId != null) window.clearTimeout(readinessTimeoutId);
+          readinessTimeoutId = null;
+          setMapRenderedTurn(stateTurn);
+          setMapRenderedRevision(stateFingerprint);
+          setMapRenderReady(true);
+          setMapLoadError(null);
+        };
+        targetMap.once('render', readinessRenderHandler);
+        targetMap.triggerRepaint();
+      };
+      readinessSourceHandler = (event) => {
+        if (event.sourceId === 'osid-control') armRenderedFrame();
+      };
+      targetMap.on('sourcedata', readinessSourceHandler);
+      readinessTimeoutId = window.setTimeout(() => {
+        readinessTimeoutId = null;
+        if (!cancelled && mapRef.current === targetMap) {
+          setMapLoadError('Map source readiness timed out');
+        }
+      }, 15000);
+      armRenderedFrame();
+    };
 
     const runUpdate = () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
@@ -1429,8 +1638,15 @@ export function MapContainer() {
       const frontSource = m.getSource('front-lines') as GeoJSONSource | undefined;
       const formationsSource = m.getSource('formations') as GeoJSONSource | undefined;
       const orderArrowsSource = m.getSource('order-arrows') as GeoJSONSource | undefined;
-      const ghostPathSource = m.getSource(GHOST_PATH_SOURCE_ID) as GeoJSONSource | undefined;
-      if (!osidSource || !frontSource || !formationsSource || !orderArrowsSource || !ghostPathSource) {
+      if (!osidSource || !frontSource || !formationsSource || !orderArrowsSource) {
+        if (formationCounterDomOverlayRef.current) {
+          formationCounterDomOverlayRef.current.dataset.awwvFormationCounterSourceGate = [
+            !osidSource ? 'osid-control' : '',
+            !frontSource ? 'front-lines' : '',
+            !formationsSource ? 'formations' : '',
+            !orderArrowsSource ? 'order-arrows' : '',
+          ].filter(Boolean).join(',');
+        }
         if (!cancelled && !sourceUpdatePollRef.current) {
           sourceUpdatePollRef.current = setInterval(() => {
             if (cancelled) return;
@@ -1443,13 +1659,21 @@ export function MapContainer() {
         clearInterval(sourceUpdatePollRef.current);
         sourceUpdatePollRef.current = null;
       }
+      if (formationCounterDomOverlayRef.current) {
+        formationCounterDomOverlayRef.current.dataset.awwvFormationCounterSourceGate = 'ready';
+      }
       // Only run heavy build once per state; poll must not run build (napkin).
       const needsUpdate = appliedStateRef.current !== loadedGameState ||
         appliedStagedOrdersRef.current !== stagedOrders ||
         appliedExpandedStackOsidRef.current !== expandedStackOsid ||
         appliedLocaleRef.current !== locale ||
+        lastFormationsGeoJsonRef.current === null ||
+        formationCounterDomOverlayRef.current?.dataset.awwvFormationCounterRenderedCount === undefined ||
         // selectedFormationId change should also trigger update for chain-of-command
         appliedSelectedFormationIdRef.current !== selectedFormationId;
+      if (formationCounterDomOverlayRef.current) {
+        formationCounterDomOverlayRef.current.dataset.awwvFormationCounterNeedsUpdate = needsUpdate ? 'true' : 'false';
+      }
       if (!needsUpdate) return;
 
       const state = loadedGameState;
@@ -1458,6 +1682,9 @@ export function MapContainer() {
       const stack = expandedStackOsid;
       requestAnimationFrame(() => {
         if (cancelled || !mapRef.current || !state) return;
+        if (formationCounterDomOverlayRef.current) {
+          formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'control';
+        }
         appliedStateRef.current = state;
         appliedLocaleRef.current = locale;
         appliedStagedOrdersRef.current = currentStagedOrders;
@@ -1553,11 +1780,39 @@ export function MapContainer() {
         } catch (e) {
           console.error('[MapContainer] overlay control failed:', e);
           appliedStateRef.current = null;
+          setMapLoadError(e instanceof Error ? e.message : String(e));
           return;
+        }
+
+        try {
+          const activeOverlayOsid = (stack && overlayAnchor) ? stack : null;
+          const earlyFormationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid, locale);
+          lastFormationsGeoJsonRef.current = earlyFormationsGeoJson;
+          if (formationCounterDomOverlayRef.current) {
+            formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'early-counters';
+            formationCounterDomOverlayRef.current.dataset.awwvFormationCounterBuiltCount = String(earlyFormationsGeoJson.features.length);
+          }
+          renderFormationCounters({
+            container: formationCounterDomOverlayRef.current,
+            formationsGeoJson: earlyFormationsGeoJson,
+            formationsVisible: useGameStore.getState().formationsVisible,
+            zoom: m.getZoom(),
+            viewportClip: buildFormationCounterViewportClip(m),
+            visualMode: 'fallback',
+            stackAriaLabel: (count) => t('stackExpansion.openAria', { count }),
+            onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent),
+            onCounterHover: handleDomCounterHover,
+          });
+          scheduleMapRenderReady(m, state.turn);
+        } catch (e) {
+          console.warn('[MapContainer] early formation counter render failed; deferred overlay will retry:', e);
         }
 
         requestAnimationFrame(() => {
           if (cancelled || !mapRef.current || !state) return;
+          if (formationCounterDomOverlayRef.current) {
+            formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'front';
+          }
           try {
             const frontTimer = createDevTimer('[MapContainer] overlay front', devMode);
             const m2 = mapRef.current;
@@ -1755,10 +2010,16 @@ export function MapContainer() {
 
             requestAnimationFrame(() => {
               if (cancelled || !mapRef.current || !state) return;
+              if (formationCounterDomOverlayRef.current) {
+                formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'formations';
+              }
               try {
                 // Only hide map-level icons if the overlay anchor is ready, ensuring no "flicker/disappearance"
                 const activeOverlayOsid = (expandedStackOsid && overlayAnchor) ? expandedStackOsid : null;
                 const formationsGeoJson = buildFormationsGeoJSON(state, controlledGeoJson, activeOverlayOsid, locale);
+                if (formationCounterDomOverlayRef.current) {
+                  formationCounterDomOverlayRef.current.dataset.awwvFormationCounterBuiltCount = String(formationsGeoJson.features.length);
+                }
                 // Order arrows removed — player is political leader, not military commander.
                 // The source stays empty; layers in awwv_map_style.json are inert.
                 const iconIds = Array.from(new Set(formationsGeoJson.features.flatMap(f => [f.properties.icon_id, f.properties.white_icon_id])));
@@ -1766,6 +2027,9 @@ export function MapContainer() {
                 // Defer icon registration + setData to idle/next tick so this rAF doesn't block the main thread (freeze fix).
                 const runDeferred = () => {
                   if (cancelled || !mapRef.current || !state) return;
+                  if (formationCounterDomOverlayRef.current) {
+                    formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'deferred';
+                  }
                   const initialMap = mapRef.current;
                   const deferredTimer = createDevTimer('[MapContainer] overlay deferred formations', devMode);
                   try {
@@ -2040,27 +2304,30 @@ export function MapContainer() {
                     // Without this, optional overlay sources like enclave-* may never tile,
                     // blocking isStyleLoaded() and leaving the map blank.
                     m.triggerRepaint();
+                    scheduleMapRenderReady(m, state.turn);
                   } catch (deferredErr) {
                     console.error('[MapContainer] deferred overlay failed:', deferredErr);
                     appliedStateRef.current = null;
+                    setMapLoadError(deferredErr instanceof Error ? deferredErr.message : String(deferredErr));
                   } finally {
                     deferredTimer.end();
                   }
                 };
 
-                const schedule = typeof requestIdleCallback !== 'undefined'
-                  ? (fn: () => void) => requestIdleCallback(fn, { timeout: 400 })
-                  : (fn: () => void) => setTimeout(fn, 0);
-                const handle = schedule(runDeferred);
+                // Critical tactical counters must not depend on requestIdleCallback:
+                // Electron iframes can withhold idle work long enough to expose a blank map.
+                const handle = setTimeout(runDeferred, 0);
                 deferredOverlayHandleRef.current = handle;
               } catch (e) {
                 console.error('[MapContainer] overlay formations/orders failed:', e);
                 appliedStateRef.current = null;
+                setMapLoadError(e instanceof Error ? e.message : String(e));
               }
             });
           } catch (e) {
             console.error('[MapContainer] overlay front failed:', e);
             appliedStateRef.current = null;
+            setMapLoadError(e instanceof Error ? e.message : String(e));
           }
         });
       });
@@ -2070,10 +2337,10 @@ export function MapContainer() {
 
     return () => {
       cancelled = true;
+      clearReadinessListeners();
       cancelAnimationFrame(rafId);
       if (deferredOverlayHandleRef.current != null) {
-        if (typeof cancelIdleCallback !== 'undefined') cancelIdleCallback(deferredOverlayHandleRef.current as ReturnType<typeof requestIdleCallback>);
-        clearTimeout(deferredOverlayHandleRef.current as ReturnType<typeof setTimeout>);
+        clearTimeout(deferredOverlayHandleRef.current);
         appliedStateRef.current = null;
         deferredOverlayHandleRef.current = null;
       }
@@ -2082,7 +2349,7 @@ export function MapContainer() {
         sourceUpdatePollRef.current = null;
       }
     };
-  }, [loadedGameState, mapReady, stagedOrders, expandedStackOsid, locale]);
+  }, [loadedGameState, loadedStateFingerprint, mapReady, stagedOrders, expandedStackOsid, locale]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -3352,11 +3619,15 @@ export function MapContainer() {
     });
     timeouts.push(window.setTimeout(reapplyAfterLayout, 120));
     timeouts.push(window.setTimeout(reapplyAfterLayout, 320));
+    const disconnectOccluderObserver = document.body
+      ? installFormationCounterOccluderObserver(document.body, reapplyAfterLayout)
+      : () => {};
     return () => {
       cancelled = true;
       cancelAnimationFrame(firstFrame);
       cancelAnimationFrame(secondFrame);
       for (const timeout of timeouts) window.clearTimeout(timeout);
+      disconnectOccluderObserver();
     };
   }, [
     mapReady,
@@ -3390,7 +3661,7 @@ export function MapContainer() {
       const center = lookup.get(targetOsid);
       if (center && lastPanTargetRef.current !== targetOsid) {
         lastPanTargetRef.current = targetOsid;
-        map.easeTo({ center, padding: buildCounterAwareCameraPadding(map), duration: 450, essential: true });
+        map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 450, essential: true });
       }
       return;
     }
@@ -3417,7 +3688,7 @@ export function MapContainer() {
           lastPanTargetRef.current = corpsPanKey;
           const lngs = coords.map(c => c[0]);
           const lats = coords.map(c => c[1]);
-          map.fitBounds(
+          fitBoundsOrEaseTo(map,
             [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]],
             { padding: buildCounterAwareCameraPadding(map), maxZoom: 9, duration: 450 }
           );
@@ -3451,7 +3722,7 @@ export function MapContainer() {
             const maxLng = Math.max(...lngs);
             const minLat = Math.min(...lats);
             const maxLat = Math.max(...lats);
-            map.fitBounds([[minLng, minLat], [maxLng, maxLat]], {
+            fitBoundsOrEaseTo(map, [[minLng, minLat], [maxLng, maxLat]], {
               padding: buildCounterAwareCameraPadding(map),
               maxZoom: 10,
               duration: 450,
@@ -3733,16 +4004,47 @@ export function MapContainer() {
       role="main"
       id="main-content"
       data-testid="tactical-map"
+      data-map-ready={currentMapStateReady ? 'true' : 'false'}
+      data-map-state-turn={mapRenderedTurn ?? ''}
       data-battle-marker-count={battleMarkerProbe.count}
       data-battle-marker-osids={battleMarkerProbe.osids}
       data-tutorial-step="map-container"
       aria-label={t('map.aria.tacticalMap')}
-      tabIndex={0}
+      aria-busy={!currentMapStateReady}
+      tabIndex={currentMapStateReady ? 0 : -1}
       onContextMenu={handleFallbackContextMenu}
       onKeyDown={handleMapKeyDown}
       className="absolute inset-0 outline-none"
     >
       <div ref={containerRef} className="absolute inset-0" style={{ filter: 'sepia(0.08) saturate(0.95)' }} />
+
+      {mapLoadError ? (
+        <div
+          data-testid="tactical-map-load-error"
+          role="alert"
+          className="absolute inset-0 z-[7] flex flex-col items-center justify-center gap-3 bg-[#ede4cf] text-[#514a3f]"
+        >
+          <span className="text-[12px] font-semibold uppercase tracking-[0.16em]">
+            {t('map.status.loadFailed')}
+          </span>
+          <button
+            type="button"
+            onClick={() => setMapInitAttempt((attempt) => attempt + 1)}
+            className="border border-[#766b58] bg-[#26231f] px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#f2e7cc] hover:bg-[#373128] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d3ad45]"
+          >
+            {t('map.status.retry')}
+          </button>
+        </div>
+      ) : !currentMapStateReady && (
+        <div
+          data-testid="tactical-map-loading"
+          role="status"
+          aria-live="polite"
+          className="absolute inset-0 z-[6] flex items-center justify-center bg-[#ede4cf] text-[12px] font-semibold uppercase tracking-[0.16em] text-[#514a3f]"
+        >
+          {t('map.status.preparing')}
+        </div>
+      )}
 
       {expandedStackOsid && overlayAnchor && loadedGameState && (
         <StackExpansionOverlay

@@ -80,7 +80,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
     return (
         <div className="space-y-2">
             {/* Section header */}
-            <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-secondary/60">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-text-secondary/60">
                 {t('orderInterpretation.header', { count: events.length })}
             </div>
 
@@ -94,14 +94,14 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                     >
                         {/* Type badge + officer name */}
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span className={`text-[9px] font-bold uppercase tracking-widest px-1.5 py-0.5 border ${badge.border} ${badge.text}`}>
+                            <span className={`text-xs font-bold uppercase tracking-widest px-1.5 py-0.5 border ${badge.border} ${badge.text}`}>
                                 {t(badge.labelKey)}
                             </span>
-                            <span className="text-[11px] font-bold text-text-primary font-mono">
+                            <span className="text-xs font-bold text-text-primary font-mono">
                                 {event.officer_name}
                             </span>
                             {event.corps_name && (
-                                <span className="text-[10px] text-text-secondary font-mono">
+                                <span className="text-xs text-text-secondary font-mono">
                                     — {event.corps_name}
                                 </span>
                             )}
@@ -109,7 +109,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
 
                         {/* Reason text */}
                         {event.reason && (
-                            <div className="text-[10px] text-text-secondary italic leading-relaxed">
+                            <div className="text-xs text-text-secondary italic leading-relaxed">
                                 {event.reason}
                             </div>
                         )}
@@ -119,7 +119,7 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                             <button
                                 type="button"
                                 onClick={() => { void handleAcknowledge(event.event_id); }}
-                                className="text-[10px] font-bold uppercase tracking-widest px-3 py-1 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
+                                className="text-xs font-bold uppercase tracking-widest px-3 py-1 border border-panel-border text-text-primary hover:bg-panel-bg transition-all font-mono"
                             >
                                 {t('orderInterpretation.accept')}
                             </button>
@@ -127,19 +127,19 @@ export function OrderInterpretationPanel({ gameState, playerFaction }: OrderInte
                                 <button
                                     type="button"
                                     onClick={() => { setLoadError(t('orderInterpretation.overrideBridgeError')); }}
-                                    className={`text-[10px] font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
+                                    className={`text-xs font-bold uppercase tracking-widest px-3 py-1 border ${badge.border} ${badge.text} hover:opacity-80 transition-all font-mono`}
                                 >
                                     {t('orderInterpretation.override')}
                                 </button>
                             )}
                         </div>
                         {event.overridable && !showOverride && (
-                            <div className="text-[9px] text-amber-300/70 italic">
+                            <div className="text-xs text-amber-300/70 italic">
                                 {t('orderInterpretation.overrideBridgeUnavailable')}
                             </div>
                         )}
                         {event.type === 'order_refused' && event.overridable && (
-                            <div className="text-[9px] text-text-secondary/60 italic">
+                            <div className="text-xs text-text-secondary/60 italic">
                                 {t('orderInterpretation.reliefMoralePenalty', { penalty: RELIEF_MORALE_PENALTY })}
                             </div>
                         )}

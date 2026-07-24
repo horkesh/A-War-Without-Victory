@@ -11,13 +11,34 @@ export interface HistoricalOperationAuthorizationInput {
     operationName: string;
 }
 
+const HISTORICAL_OPERATION_AUTHORIZATION_PREFIX = 'HISTORICAL_OP:';
+
 export function historicalOperationAuthorizationAction(input: HistoricalOperationAuthorizationInput): string {
-    return `HISTORICAL_OP:${input.kind}:${input.corpsId}:${input.operationName}`;
+    return `${HISTORICAL_OPERATION_AUTHORIZATION_PREFIX}${input.kind}:${input.corpsId}:${input.operationName}`;
+}
+
+export function isHistoricalOperationAuthorizationAction(action: unknown): action is string {
+    return typeof action === 'string' && action.startsWith(HISTORICAL_OPERATION_AUTHORIZATION_PREFIX);
+}
+
+export function isHistoricalOperationAuthorizationReview(
+    review: Pick<PendingProposalReview, 'proposed_action'>,
+): boolean {
+    return isHistoricalOperationAuthorizationAction(review.proposed_action);
+}
+
+export function isUnresolvedHistoricalOperationAuthorizationReview(
+    review: Pick<PendingProposalReview, 'proposed_action' | 'accepted' | 'resolved_turn' | 'opportunity_decision'>,
+): boolean {
+    return isHistoricalOperationAuthorizationReview(review)
+        && review.accepted === undefined
+        && review.resolved_turn === undefined
+        && review.opportunity_decision === undefined;
 }
 
 function reviewIdForAction(turn: number, action: string): string {
     return `PROP_${turn}_historical_op_${action
-        .replace(/^HISTORICAL_OP:/, '')
+        .replace(new RegExp(`^${HISTORICAL_OPERATION_AUTHORIZATION_PREFIX}`), '')
         .replace(/[^A-Za-z0-9]+/g, '_')
         .replace(/^_+|_+$/g, '')
         .toLowerCase()}`;
@@ -61,6 +82,23 @@ export function ensureHistoricalOperationAuthorizationReview(
     });
     state.meta.pending_proposal_reviews.sort((a, b) => strictCompare(a.id, b.id));
     return 'pending';
+}
+
+/**
+ * Return the deterministic turn on which the player authorized an operation.
+ * Migrated accepted rows may lack resolved_turn, so their recorded review turn
+ * is the stable compatibility fallback.
+ */
+export function getAcceptedHistoricalOperationAuthorizationTurn(
+    state: GameState,
+    input: HistoricalOperationAuthorizationInput,
+): number | null {
+    const action = historicalOperationAuthorizationAction(input);
+    const review = existingReview(state, action, input.faction);
+    if (review?.accepted !== true) return null;
+    return Number.isInteger(review.resolved_turn)
+        ? review.resolved_turn!
+        : review.turn;
 }
 
 function isPlayableFaction(value: unknown): value is FactionId {

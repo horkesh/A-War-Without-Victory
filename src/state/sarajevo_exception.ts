@@ -7,6 +7,7 @@ import type { GameState, SarajevoState, SiegeLifelineState } from './game_state.
 import type { SupplyStateByOsidReport, SupplyStateLevel } from './supply_state_derivation.js';
 import { isSarajevoLifelineEnabled } from '../sim/combat/sarajevo_siege_params.js';
 import { deriveSarajevoLifeline } from './sarajevo_lifeline.js';
+import { strictCompare } from './validateGameState.js';
 
 const BASE_IMPORTANCE = 1.0;
 
@@ -32,7 +33,7 @@ function getSarajevoOsids(state: GameState): string[] {
         const mun = getMunFromOsid(osid);
         if (mun && sarajevoMunSet.has(mun)) osids.push(osid);
     }
-    osids.sort((a, b) => a.localeCompare(b));
+    osids.sort(strictCompare);
     return osids;
 }
 

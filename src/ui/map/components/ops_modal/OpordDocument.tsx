@@ -75,23 +75,23 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
             {/* Header */}
             <div className="text-center mb-6 space-y-1">
                 <div className="text-3xl mb-2">{headers.crest}</div>
-                <div className="text-[8px] uppercase tracking-[0.3em] text-[#5a4e3e]">{headers.republic}</div>
-                <div className="text-[8px] uppercase tracking-[0.3em] text-[#5a4e3e]">{headers.army}</div>
-                <div className="text-[10px] font-bold text-[#3a3228] mt-3">{corpsName}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-[#5a4e3e]">{headers.republic}</div>
+                <div className="text-xs uppercase tracking-[0.3em] text-[#5a4e3e]">{headers.army}</div>
+                <div className="text-xs font-bold text-[#3a3228] mt-3">{corpsName}</div>
                 <div className="text-[12px] font-bold text-[#3a3228] mt-2 border-b border-t border-[#c0b090] py-2">
                     {t('opsPlanning.opord.orderTitle', { date: date.replace(/-/g, '') })}
                 </div>
-                <div className="text-[9px] text-[#6a5e4e]">{date}</div>
+                <div className="text-xs text-[#6a5e4e]">{date}</div>
             </div>
 
             {/* Sections */}
             <div className="space-y-4">
                 {/* 1. ZADAĆA (Mission) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.mission')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {t('opsPlanning.opord.missionLine', {
                             opName: plan.opName,
                             opType: t(OP_TYPE_KEYS[plan.opType]),
@@ -104,10 +104,10 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
 
                 {/* 2. SNAGE (Forces) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.forces')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {t('opsPlanning.opord.forcesLine', {
                             brigades: allBrigades.length,
                             brigadeWord: pluralWord(allBrigades.length, 'opsPlanning.word.brigade.one', 'opsPlanning.word.brigade.many'),
@@ -122,20 +122,20 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
 
                 {/* 3. ZAPOVJEDNIK (Commander) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.commander')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {t('opsPlanning.opord.commanderLine')} <span className="font-bold">{commanderName}</span>
                     </div>
                 </div>
 
                 {/* 4. PROVEDBA (Execution) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.execution')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {display.axes.map((axis, idx) => (
                             <div key={axis.id} className="mb-1">
                                 <span className="font-bold">
@@ -156,10 +156,10 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
 
                 {/* 5. CILJEVI (Objectives) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.objectives')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {t('opsPlanning.opord.objectiveLine', {
                             count: allObjectives.length,
                             objectiveWord: pluralWord(allObjectives.length, 'opsPlanning.word.objective.one', 'opsPlanning.word.objective.many'),
@@ -172,10 +172,10 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
 
                 {/* 6. LOGISTIKA (Logistics) */}
                 <div>
-                    <div className="text-[10px] font-bold text-[#3a3228] uppercase tracking-wider mb-1">
+                    <div className="text-xs font-bold text-[#3a3228] uppercase tracking-wider mb-1">
                         {t('opsPlanning.opord.section.logistics')}
                     </div>
-                    <div className="text-[10px] text-[#4a4238] leading-relaxed">
+                    <div className="text-xs text-[#4a4238] leading-relaxed">
                         {prediction && prediction.overall.estimatedCasualties != null
                             ? t('opsPlanning.opord.casualties', { count: prediction.overall.estimatedCasualties.toLocaleString() })
                             : t('opsPlanning.opord.casualtiesPending')
@@ -187,11 +187,11 @@ export function OpordDocument({ plan, prediction, commanderName, corpsName, fact
             {/* Signature */}
             <div className="border-t border-[#c0b090] mt-6 pt-4 flex justify-between items-end">
                 <div>
-                    <div className="text-[9px] text-[#6a5e4e]">{t('opsPlanning.opord.signature')}</div>
-                    <div className="text-[10px] font-bold text-[#3a3228] mt-1">{commanderName}</div>
+                    <div className="text-xs text-[#6a5e4e]">{t('opsPlanning.opord.signature')}</div>
+                    <div className="text-xs font-bold text-[#3a3228] mt-1">{commanderName}</div>
                 </div>
                 {isStamped && (
-                    <div className="text-[9px] text-[#6a5e4e]">
+                    <div className="text-xs text-[#6a5e4e]">
                         {t('opsPlanning.opord.approvalDate', { date })}
                     </div>
                 )}

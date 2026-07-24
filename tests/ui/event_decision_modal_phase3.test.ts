@@ -262,6 +262,31 @@ describe('EventDecisionModal presidential dossier', () => {
     expect(screen.queryByText('Rationale')).toBeNull();
   });
 
+  it('puts presidential response controls before the scroll-heavy dossier detail', () => {
+    const { container } = render(React.createElement(EventDecisionModal, {
+      decision: {
+        event_id: 'rs_strategic_goals',
+        event_title: 'The Assembly Speaks',
+        narrative: 'Long political situation copy should not hide the response controls below the fold.',
+        staff_assessment: 'Staff assessment text can be lengthy.',
+        turn_fired: 0,
+        faction: 'RS',
+        historical_default_response_id: 'all_six',
+        response_options: [
+          { id: 'all_six', label: 'Adopt all six goals', effects: [] },
+          { id: 'delay', label: 'Delay the vote', effects: [] },
+        ],
+      },
+      onRespond: () => undefined,
+    }));
+
+    const responseRail = screen.getByTestId('event-decision-response-rail');
+    const text = container.textContent ?? '';
+    expect(text.indexOf(responseRail.textContent ?? '')).toBeLessThan(text.indexOf('Situation'));
+    expect(screen.getByRole('button', { name: 'Choose response: Adopt all six goals' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Choose response: Delay the vote' })).toBeTruthy();
+  });
+
   it('hides engine and audit-only effect kinds from player-facing response previews', () => {
     const { container } = render(React.createElement(EventDecisionModal, {
       decision: {

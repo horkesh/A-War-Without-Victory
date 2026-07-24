@@ -61,14 +61,14 @@ function ReserveGauge({ label, value, color }: { label: string; value: number | 
         'bg-red-500';
     return (
         <div className="flex items-center gap-1.5 min-w-0">
-            <span className={`w-[42px] shrink-0 text-[10px] ${color}`}>{label}</span>
+            <span className={`w-[42px] shrink-0 text-xs ${color}`}>{label}</span>
             <div className="relative flex-1 h-1.5 bg-panel-border/40 rounded-full overflow-hidden">
                 <div
                     className={`absolute left-0 top-0 h-full rounded-full transition-all ${barColor}`}
                     style={{ width: reported ? `${pct}%` : '0%' }}
                 />
             </div>
-            <span className={`shrink-0 text-right text-[10px] tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
+            <span className={`shrink-0 text-right text-xs tabular-nums text-text-secondary ${reported ? 'w-6' : 'w-16 italic'}`}>
                 {reported ? Math.round(pct) : t('corpsFront.unreported')}
             </span>
         </div>
@@ -104,10 +104,10 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
     return (
         <GlassPanel position="right" title={t('economy.title')} onClose={onClose} width="340px">
             <section className="space-y-2 mb-4 rounded border border-panel-border bg-panel-card/60 p-2">
-                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
                     {t('economy.summaryTitle')}
                 </h3>
-                <div className="grid grid-cols-3 gap-2 text-[10px]">
+                <div className="grid grid-cols-3 gap-2 text-xs">
                     <div>
                         <div className="text-text-secondary">{t('economy.summaryStrainedReserves')}</div>
                         <div className="font-mono text-amber-300">{strainedReserveCount}</div>
@@ -124,7 +124,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
             </section>
             {/* Supply Reserves */}
             <section className="space-y-2 mb-4">
-                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
                     {t('economy.supplyReserves')}
                 </h3>
                 {reserves ? (
@@ -134,7 +134,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                             const color = FACTION_COLORS[faction] ?? 'text-text-primary';
                             return (
                                 <div key={faction} className="space-y-0.5">
-                                    <span className={`text-[10px] font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
+                                    <span className={`text-xs font-semibold ${color}`}>{getPlayerSafeMilitaryFactionName(faction)}</span>
                                     <ReserveGauge label={t('economy.supply')} value={r?.generalSupply} color="text-text-secondary" />
                                     <ReserveGauge label={t('economy.ammo')} value={r?.heavyMunitions} color="text-text-secondary" />
                                 </div>
@@ -142,24 +142,24 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                         })}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">{t('economy.reservesDisabled')}</div>
+                    <div className="text-text-secondary text-xs italic">{t('economy.reservesDisabled')}</div>
                 )}
             </section>
 
             {/* Production Facilities */}
             <section className="space-y-2 mb-4">
-                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
                     {t('economy.productionFacilities')}
                 </h3>
                 {facilities.length > 0 ? (
                     <div className="space-y-1.5">
                         {facilities.map((f) => (
-                            <div key={f.id} className="flex items-center gap-2 text-[10px]">
+                            <div key={f.id} className="flex items-center gap-2 text-xs">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1">
                                         <span className="text-text-primary truncate">{f.name}</span>
                                         {f.controller && (
-                                            <span className={`text-[8px] ${FACTION_COLORS[f.controller] ?? 'text-text-secondary'}`}>
+                                            <span className={`text-xs ${FACTION_COLORS[f.controller] ?? 'text-text-secondary'}`}>
                                                 [{getPlayerSafePoliticalFactionName(f.controller)}]
                                             </span>
                                         )}
@@ -176,7 +176,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">
+                    <div className="text-text-secondary text-xs italic">
                         {isPlayerFaction ? t('economy.noFriendlyFacilities') : t('economy.noFacilities')}
                     </div>
                 )}
@@ -184,21 +184,21 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
 
             {/* Smuggling Routes */}
             <section className="space-y-2 mb-4">
-                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
                     {t('economy.smugglingRoutes')}
                 </h3>
                 {routes.length > 0 ? (
                     <div className="space-y-1.5">
                         {routes.map((r) => (
-                            <div key={r.id} className="flex items-center gap-2 text-[10px]">
+                            <div key={r.id} className="flex items-center gap-2 text-xs">
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1">
                                         <span className="text-text-primary truncate">{r.name}</span>
-                                        <span className={`text-[8px] ${FACTION_COLORS[r.faction] ?? 'text-text-secondary'}`}>
+                                        <span className={`text-xs ${FACTION_COLORS[r.faction] ?? 'text-text-secondary'}`}>
                                             [{getPlayerSafeMilitaryFactionName(r.faction)}]
                                         </span>
                                         {r.disrupted && (
-                                            <span className="text-red-400 text-[8px] uppercase tracking-wider">{t('economy.disrupted')}</span>
+                                            <span className="text-red-400 text-xs uppercase tracking-wider">{t('economy.disrupted')}</span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-1 mt-0.5">
@@ -213,7 +213,7 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-text-secondary text-[10px] italic">
+                    <div className="text-text-secondary text-xs italic">
                         {isPlayerFaction ? t('economy.noFriendlyRoutes') : t('economy.noRoutes')}
                     </div>
                 )}
@@ -221,10 +221,10 @@ export function EconomyPanel({ state, onClose }: EconomyPanelProps) {
 
             {/* Embargo Status */}
             <section className="space-y-1">
-                <h3 className="text-[10px] uppercase tracking-wide text-accent-gold font-semibold">
+                <h3 className="text-xs uppercase tracking-wide text-accent-gold font-semibold">
                     {t('economy.embargoStatus')}
                 </h3>
-                <div className="text-[10px] text-text-secondary space-y-0.5">
+                <div className="text-xs text-text-secondary space-y-0.5">
                     {embargoEntries.length > 0 ? (
                         embargoEntries.sort(([a], [b]) => strictCompare(a, b)).map(([faction, status]) => (
                             <div key={faction} className="flex items-center gap-1">

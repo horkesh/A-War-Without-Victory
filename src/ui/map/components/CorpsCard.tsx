@@ -196,7 +196,7 @@ export function CorpsCard({
   const headerContent = (
     <>
       <span className={`font-sans text-xs font-semibold uppercase tracking-wide ${factionClass}`}>{displayName}</span>
-      <span className="flex items-center gap-1.5 text-[10px] tabular-nums whitespace-nowrap">
+      <span className="flex items-center gap-1.5 text-xs tabular-nums whitespace-nowrap">
         <span className="flex items-center gap-0.5">
           <span data-testid="corps-card-personnel-icon" data-color={personnelTone.colorState}>
             <Icon name="personnel" size={11} color={personnelTone.iconColor} />
@@ -256,31 +256,31 @@ export function CorpsCard({
         className="cursor-pointer hover:bg-panel-hover/40 transition-colors"
       >
         {(commanderName || commanderSourceUnreported) && (
-          <div className="px-3 py-1 text-[10px] bg-panel-bg border-b border-panel-border/50 text-text-secondary">
+          <div className="px-3 py-1 text-xs bg-panel-bg border-b border-panel-border/50 text-text-secondary">
             <div>{commanderLabel ? `${commanderLabel}:` : t('corpsCard.commanderColon')}</div>
             <div className={`${commanderSourceUnreported ? 'text-text-secondary italic' : 'text-text-primary font-semibold'}`}>
               {commanderSourceUnreported ? t('corpsCard.commanderUnreported') : <>{commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}</>}
             </div>
             {commanderDetail && (
-              <div className="mt-0.5 text-[9px] uppercase tracking-[0.08em] text-amber-400/80">{commanderDetail}</div>
+              <div className="mt-0.5 text-xs uppercase tracking-[0.08em] text-amber-400/80">{commanderDetail}</div>
             )}
           </div>
         )}
 
         {/* R4: Labeled equipment summary row */}
         {(equip.tanks.total > 0 || equip.arty.total > 0) && (
-          <div className="px-3 py-1.5 flex items-center gap-4 text-[11px] tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
+          <div className="px-3 py-1.5 flex items-center gap-4 text-xs tabular-nums bg-panel-bg/50 border-b border-panel-border/50 text-text-secondary">
             {equip.tanks.total > 0 && (
               <span className="flex items-center gap-1" title={formatEquipmentTitle('tanks', equip.tanks)}>
                 <Icon name="tanks" size={13} />
-                <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.tanks')}</span>
+                <span className="text-text-secondary text-xs uppercase tracking-wide">{t('corpsCard.tanks')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.tanks)}</span>
               </span>
             )}
             {equip.arty.total > 0 && (
               <span className="flex items-center gap-1" title={formatEquipmentTitle('artillery', equip.arty)}>
                 <Icon name="artillery" size={13} />
-                <span className="text-text-secondary/60 text-[9px] uppercase tracking-wide">{t('corpsCard.arty')}</span>
+                <span className="text-text-secondary text-xs uppercase tracking-wide">{t('corpsCard.arty')}</span>
                 <span className="text-text-primary font-semibold">{formatEquipmentSummary(equip.arty)}</span>
               </span>
             )}
@@ -290,7 +290,7 @@ export function CorpsCard({
 
       <div className="px-3 py-1.5 flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <span className="text-[10px] uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
+          <span className="text-xs uppercase text-accent-gold font-sans tracking-wide font-semibold flex items-center gap-1" title={t('corpsCard.stanceTitle')}>
             <Icon name={STANCE_ICON[stanceKey] ?? 'balanced'} size={11} />
             {t('corpsCard.stance')}
           </span>
@@ -300,7 +300,7 @@ export function CorpsCard({
               onChange={(event) => onStanceChange(event.target.value)}
               onClick={(e) => e.stopPropagation()}
               aria-label={t('corpsCard.stanceAria')}
-              className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-[10px] font-mono text-text-primary focus:outline-none"
+              className="bg-panel-bg border border-panel-border rounded px-1.5 py-0.5 text-xs font-mono text-text-primary focus:outline-none"
             >
               {stanceKey === 'unreported' && (
                 <option value="unreported" disabled>{t('corpsCard.stance.unreported')}</option>
@@ -311,7 +311,7 @@ export function CorpsCard({
               <option value="reorganize" title={t('corpsCard.stance.reorganizeTitle')}>{t('corpsCard.stance.reorganize')}</option>
             </select>
           ) : (
-            <span className="rounded border border-panel-border bg-panel-bg px-1.5 py-0.5 text-[10px] font-mono uppercase text-text-primary">
+            <span className="rounded border border-panel-border bg-panel-bg px-1.5 py-0.5 text-xs font-mono uppercase text-text-primary">
               {stanceLabel}
             </span>
           )}
@@ -323,7 +323,7 @@ export function CorpsCard({
             aria-label={openOrbatLabel}
             title={openOrbatLabel}
             onClick={(e) => { e.stopPropagation(); onOrbatClick(); }}
-            className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-[10px] text-accent-gold font-bold uppercase tracking-wider transition-colors"
+            className="px-2 py-0.5 bg-accent-gold/10 hover:bg-accent-gold/20 border border-accent-gold/50 rounded text-xs text-accent-gold font-bold uppercase tracking-wider transition-colors"
           >
             {t('corpsCard.orbat')}
           </button>
@@ -344,7 +344,7 @@ export function CorpsCard({
           onClick={() => setIsFlipped(false)}
           aria-label={flipToSummaryLabel}
           title={flipToSummaryLabel}
-          className="text-[10px] text-text-secondary hover:text-text-primary transition-colors font-mono"
+          className="text-xs text-text-secondary hover:text-text-primary transition-colors font-mono"
         >
           {t('corpsCard.back')}
         </button>
@@ -353,27 +353,27 @@ export function CorpsCard({
       <div className="px-3 py-2 space-y-2">
         {/* Commander profile */}
         <div>
-          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">{commanderLabel ?? t('corpsCard.commander')}</div>
+          <div className="text-xs uppercase tracking-wider text-text-secondary font-bold mb-1">{commanderLabel ?? t('corpsCard.commander')}</div>
           {commanderName ? (
             <>
-              <div className="text-[11px] text-text-primary font-semibold">
+              <div className="text-xs text-text-primary font-semibold">
                 {commanderName}{commanderActing ? t('corpsCard.actingSuffix') : ''}
               </div>
               {commanderDetail && (
-                <div className="mt-0.5 text-[10px] text-amber-400/80">{commanderDetail}</div>
+                <div className="mt-0.5 text-xs text-amber-400/80">{commanderDetail}</div>
               )}
             </>
           ) : commanderSourceUnreported ? (
-            <div className="text-[11px] text-text-secondary italic">{t('corpsCard.commanderUnreported')}</div>
+            <div className="text-xs text-text-secondary italic">{t('corpsCard.commanderUnreported')}</div>
           ) : (
-            <div className="text-[11px] text-amber-500/60 italic">{t('corpsCard.unassigned')}</div>
+            <div className="text-xs text-amber-500/60 italic">{t('corpsCard.unassigned')}</div>
           )}
         </div>
 
         {/* Sector overview */}
         <div>
-          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.frontSectors')}</div>
-          <div className="text-[11px] text-text-primary tabular-nums">
+          <div className="text-xs uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.frontSectors')}</div>
+          <div className="text-xs text-text-primary tabular-nums">
             {sectorCount != null && sectorCount > 0
               ? t(sectorCount === 1 ? 'corpsCard.sectorCount.one' : 'corpsCard.sectorCount.many', { count: sectorCount })
               : <span className="text-text-secondary italic">{t('corpsCard.noActiveSectors')}</span>
@@ -383,11 +383,11 @@ export function CorpsCard({
 
         {/* Operation status */}
         <div>
-          <div className="text-[9px] uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.operations')}</div>
+          <div className="text-xs uppercase tracking-wider text-text-secondary font-bold mb-1">{t('corpsCard.operations')}</div>
           {activeOperationName ? (
             <div className="flex items-center gap-2">
               <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-              <div className="text-[11px]">
+              <div className="text-xs">
                 <span className="text-red-400 font-bold uppercase">{activeOperationName}</span>
                 {activeOperationPhase && (
                   <span className="text-text-secondary ml-1.5">({activeOperationPhaseLabel(activeOperationPhase, activeOperationPhaseUnreported)})</span>
@@ -395,13 +395,13 @@ export function CorpsCard({
               </div>
             </div>
           ) : (
-            <div className="text-[11px] text-text-secondary italic">{t('corpsCard.noActiveOperations')}</div>
+            <div className="text-xs text-text-secondary italic">{t('corpsCard.noActiveOperations')}</div>
           )}
         </div>
 
         {/* Quick stats */}
         <div className="pt-1 border-t border-panel-border/30">
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-[10px]">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
             <span className="text-text-secondary">{t('corpsCard.personnel')}</span>
             <span className="text-text-primary tabular-nums font-semibold">{totalPersonnelLabel}</span>
             <span className="text-text-secondary">{t('corpsCard.fieldedBrigadesLabel')}</span>

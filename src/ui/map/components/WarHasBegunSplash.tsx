@@ -27,8 +27,8 @@ interface WarHasBegunSplashProps {
     /** Called exactly once when the splash is dismissed (auto, click, or key). */
     onDismiss: () => void;
     /**
-     * Total visible lifetime before auto-advance, in milliseconds. The fade-in
-     * occupies the first FADE_MS, the fade-out the last FADE_MS.
+     * Total visible lifetime before auto-advance, in milliseconds. The fade-out
+     * occupies the last FADE_MS.
      */
     holdMs?: number;
 }
@@ -37,9 +37,8 @@ const FADE_MS = 800;
 const DEFAULT_HOLD_MS = 4200;
 
 export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHasBegunSplashProps) {
-    // visible drives the opacity transition: false → mount (faded out),
-    // true → faded in, then false again → faded out before dismissal.
-    const [visible, setVisible] = useState(false);
+    // Mount readable immediately; visible only drives the fade-out dismissal.
+    const [visible, setVisible] = useState(true);
     const dismissedRef = useRef(false);
     const timersRef = useRef<number[]>([]);
 
@@ -60,13 +59,11 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
     }, [finish]);
 
     useEffect(() => {
-        // Fade in on the next frame so the opacity transition actually plays.
-        const fadeInId = window.setTimeout(() => setVisible(true), 16);
         // Begin fade-out so it completes right as the hold elapses.
         const fadeOutId = window.setTimeout(() => setVisible(false), Math.max(holdMs - FADE_MS, FADE_MS));
         // Auto-advance once the full hold has elapsed.
         const autoId = window.setTimeout(finish, holdMs);
-        timersRef.current.push(fadeInId, fadeOutId, autoId);
+        timersRef.current.push(fadeOutId, autoId);
         return () => {
             for (const id of timersRef.current) window.clearTimeout(id);
             timersRef.current = [];
@@ -89,9 +86,9 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             className="fixed inset-0 flex flex-col items-center justify-center"
             style={{
                 zIndex: Z.TURN_AFTERMATH,
-                backgroundColor: 'rgba(100, 0, 0, 0.78)',
-                backdropFilter: 'blur(8px)',
-                WebkitBackdropFilter: 'blur(8px)',
+                backgroundColor: 'rgba(24, 4, 4, 0.94)',
+                backdropFilter: 'blur(10px)',
+                WebkitBackdropFilter: 'blur(10px)',
                 opacity: visible ? 1 : 0,
                 transition: `opacity ${FADE_MS}ms ease-in-out`,
                 cursor: 'pointer',
@@ -100,7 +97,6 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
             <div
                 className="text-center"
                 style={{ maxWidth: '560px', padding: '40px' }}
-                onClick={(e) => e.stopPropagation()}
             >
                 <div
                     style={{
@@ -110,8 +106,8 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                         letterSpacing: '8px',
                         textTransform: 'uppercase',
                         marginBottom: '12px',
-                        color: '#ff3d00',
-                        textShadow: '0 2px 20px rgba(0, 0, 0, 0.8)',
+                        color: '#fff4de',
+                        textShadow: '0 2px 18px rgba(0, 0, 0, 0.9), 0 0 22px rgba(255, 61, 0, 0.55)',
                     }}
                 >
                     {t('intro.warHasStarted')}
@@ -123,7 +119,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                         fontWeight: 400,
                         letterSpacing: '4px',
                         textTransform: 'uppercase',
-                        color: 'rgba(255, 255, 255, 0.85)',
+                        color: 'rgba(255, 244, 222, 0.88)',
                         marginBottom: '28px',
                     }}
                 >
@@ -132,7 +128,7 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                 <hr
                     style={{
                         border: 'none',
-                        borderTop: '1px solid #ff3d00',
+                        borderTop: '1px solid rgba(255, 244, 222, 0.65)',
                         width: '180px',
                         margin: '0 auto 28px',
                         opacity: 0.4,
@@ -144,15 +140,15 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                     style={{
                         padding: '12px 40px',
                         fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
-                        fontSize: '11px',
+                        fontSize: '12px',
                         fontWeight: 600,
                         letterSpacing: '3px',
                         textTransform: 'uppercase',
                         cursor: 'pointer',
-                        background: 'transparent',
-                        border: '1px solid #ff3d00',
+                        background: '#fff4de',
+                        border: '1px solid rgba(255, 244, 222, 0.85)',
                         borderRadius: '3px',
-                        color: '#ff3d00',
+                        color: '#210909',
                     }}
                 >
                     {t('intro.warHasStartedAcknowledge')}
@@ -161,10 +157,10 @@ export function WarHasBegunSplash({ onDismiss, holdMs = DEFAULT_HOLD_MS }: WarHa
                     style={{
                         marginTop: '20px',
                         fontFamily: "'IBM Plex Mono', 'Consolas', monospace",
-                        fontSize: '10px',
+                        fontSize: '12px',
                         letterSpacing: '2px',
                         textTransform: 'uppercase',
-                        color: 'rgba(255, 255, 255, 0.45)',
+                        color: 'rgba(255, 244, 222, 0.58)',
                     }}
                 >
                     {t('intro.warHasStartedSkip')}

@@ -15,7 +15,7 @@ import { join } from 'node:path';
 import { createHash } from 'node:crypto';
 
 import { runScenario } from '../../src/scenario/scenario_runner.js';
-import { runTurn } from '../../src/sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../../src/sim/turn_pipeline.js';
 import { deserializeState, serializeState } from '../../src/state/serialize.js';
 import { loadSettlementGraph } from '../../src/map/settlements.js';
 import { loadEventDefinitions } from '../../src/sim/events/event_loader.js';
@@ -408,6 +408,7 @@ async function main(): Promise<void> {
                 municipalityHqSettlement: municipalityHqSettlement && Object.keys(municipalityHqSettlement).length > 0 ? municipalityHqSettlement : undefined,
                 eventDefinitions,
             });
+            assertTurnSuccess(result);
             state = result.nextState;
 
             // Extract and print summary

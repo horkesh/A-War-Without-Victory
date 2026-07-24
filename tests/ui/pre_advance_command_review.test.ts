@@ -166,8 +166,8 @@ describe('buildPreAdvanceCommandReviewView', () => {
 
     const view = buildPreAdvanceCommandReviewView({ state });
 
-    expect(view.status).toBe('blocked');
-    expect(view.headline).toBe('Review before advance');
+    expect(view.status).toBe('review');
+    expect(view.headline).toBe('Recommended before advance');
     expect(view.canReviewPriorities).toBe(true);
     expect(view.metrics).toMatchObject({
       urgentCount: 4,
@@ -256,10 +256,54 @@ describe('buildPreAdvanceCommandReviewView', () => {
       id: 'paramilitary:pending',
       severity: 'blocking',
       category: 'decision',
-      actionLabel: 'Review deployment',
+      actionLabel: 'Review paramilitary',
       navigationTarget: { kind: 'inbox' },
     });
   });
+
+  it('does not block advance for already-decided paramilitary request rows', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        pendingParamilitaryRequests: [
+          { faction: 'RBiH', strength: 150, target_osid: 'op:bijeljina:bijeljina_2', estimated_civilian_risk: 11, decision: 'allow' },
+          { faction: 'RBiH', strength: 90, target_osid: 'op:brcko:brcko_2', estimated_civilian_risk: 8, decision: 'deny' },
+          { faction: 'RBiH', strength: 80, target_osid: 'op:doboj:doboj_2', estimated_civilian_risk: 6, decision: 'regular' },
+        ],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('clear');
+    expect(view.items.find((item) => item.id === 'paramilitary:pending')).toBeUndefined();
+  });
+
+  it.each(['always_allow', 'always_deny'] as const)(
+    'does not block advance for pending paramilitary rows governed by %s standing policy',
+    (paramilitaryPolicy) => {
+      const view = buildPreAdvanceCommandReviewView({
+        state: makeState({
+          player_faction: 'RBiH',
+          paramilitaryPolicy,
+          pendingParamilitaryRequests: [
+            {
+              faction: 'RBiH',
+              strength: 150,
+              target_osid: 'op:bijeljina:bijeljina_2',
+              estimated_civilian_risk: 11,
+            },
+          ],
+          latestTurnSummary: null,
+          turnSummaries: [],
+        } as Partial<LoadedGameState>),
+      });
+
+      expect(view.blockingDecisionCount).toBe(0);
+      expect(view.status).toBe('clear');
+      expect(view.items.find((item) => item.id === 'paramilitary:pending')).toBeUndefined();
+    },
+  );
 
   it('does not count foreign pending event decisions in legacy fallback blocking counts', () => {
     const view = buildPreAdvanceCommandReviewView({
@@ -415,6 +459,38 @@ describe('buildPreAdvanceCommandReviewView', () => {
     expect(view.blockingDecisionCount).toBe(0);
   });
 
+  it('keeps unresolved operation authorizations reviewable without hard-blocking advance', () => {
+    const view = buildPreAdvanceCommandReviewView({
+      state: makeState({
+        player_faction: 'RS',
+        pendingProposalReviews: [
+          {
+            id: 'historical_op_drina',
+            turn: 0,
+            faction: 'RS',
+            domain: 'ops',
+            description: 'Authorize Operation Drina.',
+            proposed_action: 'HISTORICAL_OP:preplanned:vrs_drina:Operation Drina',
+          },
+        ],
+        pendingEventDecisions: [],
+        latestTurnSummary: null,
+        turnSummaries: [],
+      } as Partial<LoadedGameState>),
+    });
+
+    expect(view.blockingDecisionCount).toBe(0);
+    expect(view.status).toBe('review');
+    expect(view.headline).toBe('Recommended before advance');
+    expect(view.items).toHaveLength(1);
+    expect(view.items[0]).toMatchObject({
+      id: 'command:review-proposal:historical_op_drina',
+      severity: 'warning',
+      title: 'Operation Drina',
+      actionLabel: 'Review recommendation',
+    });
+  });
+
   it('does not count counter-offers addressed to another faction as pre-advance blockers', () => {
     const view = buildPreAdvanceCommandReviewView({
       state: makeState({
@@ -519,7 +595,7 @@ describe('buildPreAdvanceCommandReviewView', () => {
     const unavailableView = buildPreAdvanceCommandReviewView({ state: null });
 
     expect(clearView.headline).toBe('Spremno za napredovanje');
-    expect(reviewView.headline).toBe('Pregled prije napredovanja');
+    expect(reviewView.headline).toBe('Preporuceno prije napredovanja');
     expect(unavailableView.headline).toBe('Nema učitanog stanja');
   });
 });

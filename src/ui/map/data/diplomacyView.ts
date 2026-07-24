@@ -38,7 +38,6 @@ const PATRON_LABEL_KEYS: Record<string, string> = {
 const FACTION_PATRON: Record<string, string> = {
     RS: 'serbia',
     HRHB: 'croatia',
-    RBiH: 'international_community',
 };
 
 const PRESSURE_REASON_LABEL_KEYS: Record<string, string> = {
@@ -470,7 +469,10 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const s = asRecord(state) ?? {};
     const externalActors = buildExternalActors(s);
     const actorFaction = playerFaction ?? (typeof s.meta?.player_faction === 'string' ? s.meta.player_faction : null);
-    const patronStance = actorFaction
+    // RBiH is exposed to international pressure and mediation, but the
+    // International Community is not a controlling patron equivalent to Serbia
+    // for RS or Croatia for HRHB.
+    const patronStance = actorFaction && actorFaction !== 'RBiH'
         ? externalActors.find((actor) => actor.faction === actorFaction)
         : undefined;
     // The player's own patron is surfaced separately as `patronStance`; it must not
@@ -482,8 +484,8 @@ export function buildDiplomacyView(state: unknown, playerFaction?: string | null
     const activeProposals = buildActiveProposals(s);
     const pressureReasons = buildPressureReasons(s);
     const activeConsequences = buildConsequences(s);
-    const patronConfidence = buildPatronConfidence(s, actorFaction);
-    const patronDefianceCuts = buildPatronDefianceCuts(s, actorFaction);
+    const patronConfidence = patronStance ? buildPatronConfidence(s, actorFaction) : undefined;
+    const patronDefianceCuts = patronStance ? buildPatronDefianceCuts(s, actorFaction) : undefined;
     const negotiationTimeline = buildNegotiationTimeline(activeProposals, externalActors, activeConsequences, patronDefianceCuts, actorFaction);
     const needleHints = buildNeedleHints(patronStance, pressureReasons, activeProposals);
 

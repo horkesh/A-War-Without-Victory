@@ -26,7 +26,7 @@ export function ThreatAssessment({ items, onCorpsClick }: ThreatAssessmentProps)
 
     return (
         <div className="bg-panel-card border border-panel-border rounded p-4 mb-4">
-            <div className="text-[10px] uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
+            <div className="text-xs uppercase tracking-[0.25em] font-bold text-text-secondary mb-3 pb-2 border-b border-panel-border">
                 {t('threatAssessment.title')}
             </div>
             <div className="space-y-3">
@@ -50,7 +50,7 @@ function ThreatSection({
     const styles = SEVERITY_STYLES[severity];
     return (
         <div>
-            <div className={`text-[10px] uppercase tracking-[0.25em] font-bold ${styles.labelColor} mb-1.5`}>
+            <div className={`text-xs uppercase tracking-[0.25em] font-bold ${styles.labelColor} mb-1.5`}>
                 {t(styles.labelKey)}
             </div>
             <div className="space-y-1">
@@ -58,7 +58,7 @@ function ThreatSection({
                     <div key={item.id} className={`flex items-start justify-between gap-3 border-l-2 ${styles.border} pl-2 py-1`}>
                         <div className="min-w-0 flex-1">
                             <div className="text-[12px] text-text-primary leading-snug font-bold">{item.title}</div>
-                            <div className="text-[11px] text-text-secondary leading-snug">{item.detail}</div>
+                            <div className="text-xs text-text-secondary leading-snug">{item.detail}</div>
                         </div>
                         {(() => {
                             const friendlyCorpsId = item.friendlyCorpsId;
@@ -67,7 +67,7 @@ function ThreatSection({
                             <button
                                 type="button"
                                 onClick={() => onCorpsClick(friendlyCorpsId)}
-                                className="text-amber-400 hover:underline cursor-pointer text-[11px] whitespace-nowrap shrink-0"
+                                className="text-amber-400 hover:underline cursor-pointer text-xs whitespace-nowrap shrink-0"
                             >
                                 {t('threatAssessment.openFront')}
                             </button>

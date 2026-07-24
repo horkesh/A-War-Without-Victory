@@ -77,6 +77,14 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
         expect(menu).not.toContain('v0.5.0');
     });
 
+    it('does not expose stale pre-alpha copy on the legacy warroom launch surface', () => {
+        const warroom = read('src/ui/warroom/index.html');
+        const packageVersion = JSON.parse(read('package.json')).version as string;
+
+        expect(warroom).not.toContain('Pre-Alpha');
+        expect(warroom).toContain(`v${packageVersion}`);
+    });
+
     it('enters the game only after a campaign side successfully starts', () => {
         const startIdx = app.indexOf('const handleSelectFaction = async');
         const okIdx = app.indexOf('if (ok) {', startIdx);
@@ -122,7 +130,7 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
     it('defers auto-pop gameplay modals while booted to the Main Menu', () => {
         const menuGuards = app.split("if (appScreen === 'mainMenu') return;").length - 1;
         expect(menuGuards).toBeGreaterThanOrEqual(2);
-        expect(app).toContain("{appScreen !== 'mainMenu' && showPeacePlanModal && pendingPeacePlan && (");
+        expect(app).toContain("{appScreen !== 'mainMenu' && !turnAftermathOpen && showPeacePlanModal && pendingPeacePlan && (");
         expect(app).toContain("{appScreen !== 'mainMenu' && loadedGameState?.pendingDayton && !loadedGameState?.gameOver && (");
     });
 });

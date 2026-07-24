@@ -99,6 +99,32 @@ describe('ELITE-DEPLOY — command-authority guard + debit (player IPC path)', (
         expect(state.military.formations!.arbih_guards.elite_loan_state!.on_loan).toBe(true);
     });
 
+    it('invalidates other pending suggestions that depend on the committed brigade', async () => {
+        const state = makeState({ current: 80, max: 100, spent_this_turn: 0, lifetime_spent: 0 });
+        state.military.pending_reserve_requests!.push({
+            request_id: 'req-beta',
+            corps_id: 'arbih_2nd_corps',
+            faction: 'RBiH',
+            reason: 'offensive_support',
+            priority: 70,
+            raw_priority: 70,
+            description: 'Support another corps',
+            turn_requested: 10,
+            travel_hops: 2,
+            suggested_brigade_id: 'arbih_guards',
+        });
+
+        const result = await approveReserveRequest(state, 'req-alpha', 'arbih_guards', undefined, process.cwd());
+
+        expect(result.ok).toBe(true);
+        expect(state.military.pending_reserve_requests).toEqual([
+            expect.objectContaining({
+                request_id: 'req-beta',
+                suggested_brigade_id: null,
+            }),
+        ]);
+    });
+
     it('rejects with insufficient_command_authority and debits/deploys NOTHING', async () => {
         const state = makeState({ current: ELITE_DEPLOY_COST - 1, max: 100, spent_this_turn: 0, lifetime_spent: 0 });
         const result = await approveReserveRequest(state, 'req-alpha', 'arbih_guards', undefined, process.cwd());

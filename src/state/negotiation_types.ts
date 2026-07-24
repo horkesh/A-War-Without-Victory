@@ -72,6 +72,8 @@ export interface PeacePlanDefinition {
     name: string;
     /** Week (from April 1992) when the plan is offered. */
     trigger_week: number;
+    /** Documented final response used by historical headless calibration. */
+    historical_responses: Record<string, 'accepted' | 'rejected'>;
     /** Proposed territorial split (% per faction). */
     proposed_split: Record<string, number>;
     /** Institutional model description. */

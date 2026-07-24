@@ -231,7 +231,9 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
   // then renders text-only exactly as before (graceful fallback, never a broken
   // image). Read-model/UI only; calibration-inert.
   const convoyArt = resolveWarroomActivityArt('convoy', playerFaction);
-  const patronArt = resolveWarroomActivityArt('patron', playerFaction);
+  const patronArt = playerFaction === 'RBiH'
+    ? null
+    : resolveWarroomActivityArt('patron', playerFaction);
 
   // Sarajevo-siege legibility (D2 task #41): while the SRK strangles the urban
   // core (encirclement + bombardment, the city NOT stormed; Galić §389), surface a
@@ -267,7 +269,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
     <div className="p-3 space-y-3 text-xs">
       {!focusedMode && (
       <section data-summary-section="overview" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.section.territory')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('warSummary.section.territory')}</div>
         {playerFaction ? (
           <div className="flex items-center justify-between">
             <span className={FACTION_COLORS[playerFaction]}>{playerMilitaryLabel}</span>
@@ -283,7 +285,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {!focusedMode && sitrep && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalSitrep')}</div>
         <div className="text-text-secondary">{localizedOperationalSitrepCopy(sitrep.headlineToken, sitrep.headline)}</div>
         <div className="text-text-secondary">
           {t('situation.frontsLine', {
@@ -302,7 +304,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           })}
         </div>
         {sitrep.front.edges.length > 0 && (
-          <div className="text-text-secondary text-[10px]">
+          <div className="text-text-secondary text-xs">
             {t('situation.priorityFronts', {
               items: sitrep.front.edges
                 .slice(0, 2)
@@ -312,7 +314,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
           </div>
         )}
         {sitrep.readiness.weakestBrigades.length > 0 && (
-          <div className="text-text-secondary text-[10px]">
+          <div className="text-text-secondary text-xs">
             {t('situation.weakestBrigades', { items: sitrep.readiness.weakestBrigades.slice(0, 2).map((brigade) => brigade.label).join('; ') })}
           </div>
         )}
@@ -321,7 +323,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('casualties') && (
       <section data-summary-section="casualties" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.casualties')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.casualties')}</div>
         {playerFaction ? (() => {
           const row = state.casualtyLedger?.[playerFaction];
           const military = row
@@ -345,7 +347,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {!focusedMode && (
       <section data-summary-section="alliance" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.allianceGauge')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.allianceGauge')}</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-interactive" style={{ width: `${alliancePct}%` }} />
         </div>
@@ -355,12 +357,12 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('ivp') && (
       <section data-summary-section="ivp" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.ivp')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.ivp')}</div>
         <div className="h-2 rounded bg-panel-bg overflow-hidden">
           <div className="h-full bg-accent-gold/80" style={{ width: `${ivpScore}%` }} />
         </div>
         <div className="text-text-secondary">{t('situation.pressureCurrent', { band: pressureBand(ivpScore), score: ivpScore.toFixed(0) })}</div>
-        <div className="text-text-secondary text-[10px] space-y-0.5">
+        <div className="text-text-secondary text-xs space-y-0.5">
           {getIvpComponentContributions(state.internationalVisibilityPressure).map((row) => (
             <div key={row.key} className="flex justify-between gap-2">
               <span>{ivpComponentLabel(row.key)}</span>
@@ -368,7 +370,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             </div>
           ))}
         </div>
-        <div className="text-text-secondary text-[10px]">{t('situation.pressureThresholds')}</div>
+        <div className="text-text-secondary text-xs">{t('situation.pressureThresholds')}</div>
         <div className="text-text-secondary">
           {t('situation.consequences')}{' '}
           {state.ivpConsequencesActive?.length
@@ -383,7 +385,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
             data-testid="sarajevo-siege-indicator"
             className="mt-1 rounded border border-panel-border bg-panel-bg/60 p-2 space-y-1"
           >
-            <div className="text-[10px] uppercase tracking-wide text-accent-gold">
+            <div className="text-xs uppercase tracking-wide text-accent-gold">
               {sarajevoSiegeTitle()}
             </div>
             <div className="text-text-secondary">{sarajevoSiegeGloss(siegePlayerFaction)}</div>
@@ -394,7 +396,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('convoys') && (
         <section data-summary-section="convoys" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.humanitarianConvoys')}</div>
+          <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.humanitarianConvoys')}</div>
           {convoyArt && (
             <figure className="m-0">
               <img
@@ -421,21 +423,21 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'allow')}
-                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                    className="px-2 py-1 text-xs border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
                     {t('situation.allow')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'block')}
-                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                    className="px-2 py-1 text-xs border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
                     {t('situation.block')}
                   </button>
                   <button
                     type="button"
                     onClick={() => void handleConvoyDecision(convoy.id, 'divert')}
-                    className="px-2 py-1 text-[10px] border border-panel-border rounded text-text-primary hover:bg-panel-hover"
+                    className="px-2 py-1 text-xs border border-panel-border rounded text-text-primary hover:bg-panel-hover"
                   >
                     {t('situation.divert')}
                   </button>
@@ -451,7 +453,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('support') && (
         <section data-summary-section="support" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.localSupport')}</div>
+          <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.localSupport')}</div>
           {activeMunicipalitySupport && activeMunicipalitySupport.staged_turn === state.turn ? (
             <>
               <div className="text-text-secondary">
@@ -469,14 +471,14 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {showSection('opsec') && (
       <section data-summary-section="opsec" className="rounded border border-panel-border bg-panel-card p-2 space-y-2">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalPosture')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.operationalPosture')}</div>
         {activeOpsecSectors.length > 0 ? (
           <div className="space-y-1.5">
             {activeOpsecSectors.map((sector) => (
               <div key={sector.sector_id} className="rounded border border-panel-border bg-panel-bg/60 p-2">
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-text-primary">{getPlayerFacingSectorName(sector.sector_id, [sector])}</span>
-                  <span className="text-[10px] uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
+                  <span className="text-xs uppercase tracking-wide text-accent-gold">{t('situation.opsecActive')}</span>
                 </div>
                 <div className="text-text-secondary">
                   Pressure {typeof sector.threat_ratio === 'number' && Number.isFinite(sector.threat_ratio) ? getPlayerSafeThreatPresentation(sector.threat_ratio).summary : t('corpsFront.unreported')} · Intel {typeof sector.intel_confidence === 'number' && Number.isFinite(sector.intel_confidence) ? `${(sector.intel_confidence * 100).toFixed(0)}%` : t('corpsFront.unreported')}
@@ -490,7 +492,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
         )}
         {fragileOperations.length > 0 && (
           <div className="space-y-1.5 pt-1 border-t border-panel-border">
-            <div className="text-[10px] uppercase tracking-wide text-text-secondary">
+            <div className="text-xs uppercase tracking-wide text-text-secondary">
               {t('situation.flaggedHealth', { flagged: fragileOperations.length, total: playerOperations.length })}
             </div>
             {fragileOperations.map((operation) => (
@@ -514,7 +516,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
       {/* Negotiation Capital & Patron Pressure (v0.5.0) */}
       {showSection('capital') && (
         <section data-summary-section="capital" className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-          <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.diplomacy')}</div>
+          <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.diplomacy')}</div>
           {patronArt && (
             <figure className="m-0">
               <img
@@ -542,7 +544,7 @@ export function SituationTab({ state, focusSection }: { state: LoadedGameState; 
 
       {!focusedMode && (
       <section className="rounded border border-panel-border bg-panel-card p-2 space-y-1.5">
-        <div className="font-sans text-[10px] uppercase tracking-wide text-accent-gold font-semibold">{t('situation.alerts')}</div>
+        <div className="font-sans text-xs uppercase tracking-wide text-accent-gold font-semibold">{t('situation.alerts')}</div>
         {((sitrep?.alerts.length ?? 0) === 0) && alerts.length === 0 ? (
           <div className="text-text-secondary">{t('situation.noAlerts')}</div>
         ) : (

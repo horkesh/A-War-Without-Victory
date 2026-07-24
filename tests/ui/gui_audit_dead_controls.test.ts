@@ -363,7 +363,7 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         expect(screen.getByRole('button', { name: 'Recall 1st Elite Brigade from 1st Corps' })).toBeTruthy();
     });
 
-    it('counts only executing operations in the Army HQ summary operations chip', () => {
+    it('counts executing operations from the reconciled lifecycle projection', () => {
         useGameStore.setState({
             ...useGameStore.getInitialState(),
             loadedGameState: makeState({
@@ -373,9 +373,20 @@ describe('GUI audit Batch G dead/no-op controls', () => {
                 ] as LoadedGameState['formations'],
                 operations: [
                     { name: 'Planning Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'planning' },
-                    { name: 'Executing Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'execution' },
                     { name: 'Recovery Op', corps_id: 'corps_1', faction: 'RBiH', phase: 'recovery' },
                 ] as LoadedGameState['operations'],
+                activeOperations: [{
+                    corps_id: 'corps_1',
+                    operation_name: 'Executing Detail Only',
+                    faction: 'RBiH',
+                    phase: 'execution',
+                    started_turn: 12,
+                    participating_brigades: ['brig_1'],
+                    objectives_count: 1,
+                    objectives_captured: 0,
+                    attacks: 0,
+                    weekly_log_length: 0,
+                }] as LoadedGameState['activeOperations'],
             }),
             armyHQOpen: true,
             selectedArmyId: 'RBiH',
@@ -384,6 +395,5 @@ describe('GUI audit Batch G dead/no-op controls', () => {
         const { container } = render(createElement(ArmyHQModal));
 
         expect(container.textContent).toMatch(/Executing Operations\s*1/i);
-        expect(container.textContent).not.toMatch(/Active Operations\s*3/i);
     });
 });

@@ -47,6 +47,27 @@ export function getFormationIconScreenSize(zoom: number): { width: number; heigh
   return { width: height * 2, height };
 }
 
+export function getFormationStackPixelOffset(
+  feature: Pick<FormationFeatureLike, 'properties'>,
+  iconHeight: number,
+): [number, number] {
+  const stackIndex = typeof feature.properties?.stack_index === 'number'
+    ? Math.max(0, Math.floor(feature.properties.stack_index))
+    : 0;
+  const stackCount = typeof feature.properties?.stack_count === 'number'
+    ? Math.max(1, Math.floor(feature.properties.stack_count))
+    : 1;
+  if (stackIndex === 0 || stackCount <= 1) return [0, 0];
+
+  const slot = stackIndex - 1;
+  const columns = Math.min(4, Math.max(1, Math.ceil(Math.sqrt(stackCount - 1))));
+  const column = slot % columns;
+  const row = Math.floor(slot / columns);
+  const horizontalStep = Math.max(8, Math.round(iconHeight * 0.35));
+  const verticalStep = Math.max(6, Math.round(iconHeight * 0.2));
+  return [Math.round((column - (columns - 1) / 2) * horizontalStep), -(row + 1) * verticalStep];
+}
+
 export function pickNearestFormationAtPoint(
   args: PickNearestFormationAtPointArgs,
 ): FormationClickFallback | null {
@@ -83,8 +104,13 @@ export function pickNearestFormationAtPoint(
     const id = typeof properties.id === 'string' ? properties.id : null;
     if (!id) continue;
 
-    const screen = project([coordinates[0], coordinates[1]]);
-    if (!screen) continue;
+    const projected = project([coordinates[0], coordinates[1]]);
+    if (!projected) continue;
+    const pixelOffset = getFormationStackPixelOffset(feature, iconSize.height);
+    const screen = {
+      x: projected.x + pixelOffset[0],
+      y: projected.y + pixelOffset[1],
+    };
 
     const dx = Math.abs(point.x - screen.x);
     const dy = Math.abs(point.y - screen.y);

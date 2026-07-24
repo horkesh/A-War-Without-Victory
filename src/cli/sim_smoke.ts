@@ -14,7 +14,7 @@ import { buildAdjacencyMap } from '../map/adjacency_map.js';
 import { computeFrontEdges } from '../map/front_edges.js';
 import { computeFrontRegions } from '../map/front_regions.js';
 import { loadSettlementGraph } from '../map/settlements.js';
-import { runTurn } from '../sim/turn_pipeline.js';
+import { assertTurnSuccess, runTurn } from '../sim/turn_pipeline.js';
 import type { GameState } from '../state/game_state.js';
 import { deserializeState } from '../state/serialize.js';
 import { computeSupplyReachability } from '../state/supply_reachability.js';
@@ -174,11 +174,13 @@ async function main(): Promise<void> {
     // Step 3: Run N turns
     let currentState = state;
     for (let i = 1; i <= turns; i++) {
-        const { nextState } = await runTurn(currentState, {
+        const result = await runTurn(currentState, {
             seed: currentState.meta.seed,
             settlementEdges: graph.edges,
             applyNegotiation: false // Smoke test doesn't apply negotiation
         });
+        assertTurnSuccess(result);
+        const { nextState } = result;
         currentState = nextState;
 
         // Check for end state (early termination)

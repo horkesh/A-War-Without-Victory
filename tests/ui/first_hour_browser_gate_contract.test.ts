@@ -174,6 +174,9 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain("rs_1st_birac");
     expect(tool).toContain('loadRecordsAarLiveProofFixture');
     expect(tool).toContain('handleManualSaveLoad');
+    expect(tool).toContain('async function loadManualSaveFixture');
+    expect(tool).toContain('__awwvLiveSurfaceFixtureLoads');
+    expect(tool).not.toContain('page.evaluate(async (state) =>');
     expect(tool).toContain('fixtureBattleSelector');
     expect(tool).toContain('fixtureAttackerLinkSelector');
     expect(tool).toContain('clickedFormationId');
@@ -249,12 +252,10 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('owner_journey_decision_room');
     expect(tool).toContain('owner_journey_sector_overview');
     expect(tool).toContain('owner_journey_formation_detail');
-    expect(tool).toContain('owner_journey_ops_planning_modal');
     expect(tool).toContain('owner_journey_formation_location_context');
     expect(tool).toContain("visibleDetailPanels.length === 1");
     expect(tool).toContain('owner_journey_records_tabs');
     expect(tool).toContain('ownerJourneyDrilldownByFaction');
-    expect(tool).toContain('ownerJourneyOpsPlanningModalByFaction');
     expect(tool).toContain("await loadPlayerFactionStartupFixture(page, summary, 'RS');");
     expect(tool).toContain("await runOwnerJourneyDrilldown(page, summary, 'RS');");
     expect(tool).toContain("const evidenceId = (id) => (journeyKey === 'rbih' ? id : `${journeyKey}_${id}`);");
@@ -277,9 +278,6 @@ describe('live surface browser sweep contract', () => {
     expect(tool).toContain('data-current-brigade-count');
     expect(tool).toContain('data-command-directed-brigade-count');
     expect(tool).toContain('data-testid="corps-front-brigade-row"');
-    expect(tool).toContain('data-testid="corps-front-draft-directive"');
-    expect(tool).toContain('data-testid="ops-planning-modal"');
-    expect(tool).toContain('data-testid="ops-planning-phase-panel"');
     expect(tool).toContain('data-location-osid');
     expect(tool).toContain('data-testid="formation-detail-panel"');
     expect(tool).toContain('data-testid="formation-location-link"');
@@ -317,9 +315,11 @@ describe('live surface browser sweep contract', () => {
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('data-current-brigade-count={sectorAssignment.allCurrentIds.length}');
     expect(read('src/ui/map/components/CorpsDetail.tsx')).toContain('data-testid="corps-detail-sector-row"');
     expect(read('src/ui/map/components/CorpsDetail.tsx')).toContain('data-coverage-tier={coverageTier}');
-    expect(read('src/ui/map/components/CorpsFrontPanel.tsx')).toContain('data-testid="corps-front-draft-directive"');
-    expect(read('src/ui/map/components/ops_modal/OpsPlanningModal.tsx')).toContain('data-testid="ops-planning-modal"');
-    expect(read('src/ui/map/components/ops_modal/OpsPlanningModal.tsx')).toContain('data-testid="ops-planning-phase-panel"');
+    expect(read('src/ui/map/App.tsx')).not.toContain("import { OpsPlanningModal }");
+    expect(read('src/ui/map/App.tsx')).not.toContain('<OpsPlanningModal />');
+    expect(read('src/ui/map/components/CorpsFrontPanel.tsx')).not.toContain('corps-front-draft-directive');
+    expect(read('tools/ui/live_surface_browser_sweep.cjs')).not.toContain('corps-front-draft-directive');
+    expect(read('tools/ui/live_surface_browser_sweep.cjs')).toContain('corps-front-delegated-command-note');
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('data-testid="oob-sector-row"');
     expect(read('src/ui/map/components/OOBSidebar.tsx')).toContain('data-selected={selectedCorpsFrontSectorId === sector.sector_id');
     expect(read('src/ui/map/components/CorpsFrontPanel.tsx')).toContain('data-testid="corps-front-brigade-row"');

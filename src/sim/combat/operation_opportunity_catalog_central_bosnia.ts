@@ -94,7 +94,7 @@ const DONJI_VAKUF_AXIS_COORDINATION_FLOOR = 0.35;
 const DONJI_VAKUF_SUPPLY_PRESSURE_CEILING = 90;
 
 const KUPRES_CINCAR_STAGING_LIVNO = 'op:livno:livno_2';
-const KUPRES_CINCAR_STAGING_TOMISLAVGRAD = 'op:tomislavgrad:tomislavgrad_2';
+const KUPRES_CINCAR_STAGING_TOMISLAVGRAD = 'op:duvno:tomislavgrad_2';
 // Retained as identifiers (referenced by axis `staging_osid` fields below) but
 // deliberately NOT in the precondition anchors list — see comment on
 // KUPRES_CINCAR_STAGING_ANCHORS.
@@ -469,14 +469,11 @@ const allianceContextKupresCincar: AxisPredicate = (state) => {
 };
 
 const stagingAccessKupresCincar: AxisPredicate = (state) => {
-    // 2026-05-22 Wave 3B-A.1: use `!= null` (catches both null and undefined)
-    // so unpainted OSIDs are treated as pass-through. Previously `!== null`
-    // missed undefined — tomislavgrad_2 has no entry in political_controllers
-    // (undefined, not null), bricking this predicate. Forensics memo
-    // 20260522_FORENSICS_5_BLOCKED_ARBIH_OPS.md cross-cutting paint-gap finding.
+    // Required rear-area anchors must be explicitly HRHB-held. Missing
+    // controller data cannot satisfy a historical staging precondition.
     for (const osid of KUPRES_CINCAR_STAGING_ANCHORS) {
         const ctrl = getPoliticalControllerOSID(state, osid, undefined);
-        if (ctrl != null && ctrl !== 'HRHB') {
+        if (ctrl !== 'HRHB') {
             return { green: false, reason: 'Livno-Tomislavgrad staging anchors are not Federation-held' };
         }
     }

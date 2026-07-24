@@ -219,7 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     # REQUIRED (promoted from advisory 2026-06-13, owner-authorized): a hard
-    # engine-health regression at 188w (matched_osids < 609, stranded/dead-op/ghost
+    # engine-health regression at 188w (matched_osids < 622, stranded/dead-op/ghost
     # ceilings, K:W band) fails this job RED and blocks merge. The 3-5-clean-cycle
     # criterion was met (#424/#426/#427/#428/#429 all green). Path-gated: non-sim PRs
     # report success via the always-report shim, so only sim-touching PRs pay the run.
@@ -270,7 +270,7 @@ jobs:
         if: steps.changes.outputs.relevant == 'true'
         run: npm run desktop:startup-snapshot:build
 
-      - name: Fresh 188w run + engine-health gate (advisory)
+      - name: Fresh 188w run + required engine-health gate
         if: steps.changes.outputs.relevant == 'true'
         run: |
           set -euo pipefail

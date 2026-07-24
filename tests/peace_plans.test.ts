@@ -12,6 +12,7 @@ function makeState(overrides: {
     turn?: number;
     war_start_turn?: number;
     player_faction?: FactionId;
+    no_player?: boolean;
     controllers?: Record<string, string>;
     negotiation?: any;
 } = {}): GameState {
@@ -25,7 +26,7 @@ function makeState(overrides: {
             seed: 1,
             date: '1992-06-15',
             war_start_turn: warStart,
-            player_faction: overrides.player_faction ?? 'RBiH',
+            ...(overrides.no_player ? {} : { player_faction: overrides.player_faction ?? 'RBiH' }),
         },
         factions: [
             { id: 'RBiH' },
@@ -76,6 +77,51 @@ function makeNegotiationState(overrides: {
         peace_plan_history: [],
         strategic_dimensions: initializeStrategicDimensions(),
     };
+}
+
+function attachVanceOwenEventDecision(state: GameState): void {
+    state.military.pending_event_decisions = [
+        {
+            event_id: 'ic_pressure_vopp_engagement',
+            event_title: 'Vance-Owen engagement pressure',
+            turn_fired: 39,
+            faction: 'RBiH',
+            response_options: [
+                { id: 'acknowledge_pressure', label: 'Acknowledge', description: 'Acknowledge pressure.', effects: [] },
+            ],
+        },
+        {
+            event_id: 'vance_owen_plan_1993',
+            event_title: 'Vance-Owen Peace Plan Presented',
+            turn_fired: 39,
+            faction: 'RBiH',
+            response_options: [
+                {
+                    id: 'accept',
+                    label: 'Accept',
+                    description: 'Accept the plan.',
+                    effects: [],
+                    sets_flags: { vance_owen_accepted: true },
+                },
+                {
+                    id: 'reject',
+                    label: 'Reject',
+                    description: 'Reject the plan.',
+                    effects: [],
+                },
+            ],
+            notifications_to_other_factions: {
+                accept: {
+                    RS: { headline: 'Sarajevo accepts', body: 'RBiH accepts Vance-Owen.' },
+                    HRHB: { headline: 'Sarajevo accepts', body: 'RBiH accepts Vance-Owen.' },
+                },
+                reject: {
+                    RS: { headline: 'Sarajevo rejects', body: 'RBiH rejects Vance-Owen.' },
+                    HRHB: { headline: 'Sarajevo rejects', body: 'RBiH rejects Vance-Owen.' },
+                },
+            },
+        },
+    ];
 }
 
 describe('Peace Plan Data', () => {
@@ -198,6 +244,103 @@ describe('evaluatePeacePlans', () => {
         expect(pending!.bot_responses.RBiH).toBeDefined();
         expect(pending!.bot_responses.HRHB).toBeDefined();
     });
+
+    it('historical headless evaluation records the documented Cutileiro outcome', () => {
+        const neg = makeNegotiationState({ override_authority: { RBiH: 10, RS: 10, HRHB: 10 } });
+        const state = makeState({
+            turn: 0,
+            war_start_turn: 0,
+            no_player: true,
+            controllers: makeControllers({ RBiH: 20, RS: 60, HRHB: 20 }),
+            negotiation: neg,
+        });
+
+        evaluatePeacePlans(state);
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toHaveLength(1);
+        expect(neg.peace_plan_history[0]).toMatchObject({
+            plan_id: 'cutileiro',
+            turn_offered: 0,
+            resolved: true,
+        });
+        expect(neg.peace_plan_history[0].responses).toEqual({
+            RBiH: 'rejected',
+            RS: 'accepted',
+            HRHB: 'accepted',
+        });
+        expect(state.meta.game_over).not.toBe(true);
+    });
+
+    it('historical headless evaluation resolves every pre-Dayton plan without ending the war early', () => {
+        const neg = makeNegotiationState({ override_authority: { RBiH: 10, RS: 10, HRHB: 10 } });
+        const state = makeState({
+            turn: 0,
+            war_start_turn: 0,
+            no_player: true,
+            controllers: makeControllers({ RBiH: 20, RS: 60, HRHB: 20 }),
+            negotiation: neg,
+        });
+
+        evaluatePeacePlans(state);
+        state.meta.turn = 40;
+        evaluatePeacePlans(state);
+        state.meta.turn = 70;
+        evaluatePeacePlans(state);
+        state.meta.turn = 118;
+        evaluatePeacePlans(state);
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history.map(entry => ({
+            plan_id: entry.plan_id,
+            turn_offered: entry.turn_offered,
+            responses: entry.responses,
+            resolved: entry.resolved,
+        }))).toEqual([
+            {
+                plan_id: 'cutileiro',
+                turn_offered: 0,
+                responses: { RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'vance_owen',
+                turn_offered: 40,
+                responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'owen_stoltenberg',
+                turn_offered: 70,
+                responses: { RBiH: 'rejected', RS: 'accepted', HRHB: 'accepted' },
+                resolved: true,
+            },
+            {
+                plan_id: 'contact_group',
+                turn_offered: 118,
+                responses: { RBiH: 'accepted', RS: 'rejected', HRHB: 'accepted' },
+                resolved: true,
+            },
+        ]);
+        expect(state.meta.game_over).not.toBe(true);
+        expect(state.military.event_flags?.war_ended_early).toBeUndefined();
+    });
+
+    it('leaves the Dayton trigger to the dedicated negotiation system', () => {
+        const neg = makeNegotiationState();
+        const state = makeState({
+            turn: 185,
+            war_start_turn: 0,
+            no_player: true,
+            negotiation: neg,
+        });
+
+        evaluatePeacePlans(state);
+
+        expect(neg.pending_peace_plan).toBeUndefined();
+        expect(neg.peace_plan_history).toEqual([]);
+        expect(state.meta.game_over).not.toBe(true);
+    });
 });
 
 describe('Bot response logic', () => {
@@ -276,7 +419,7 @@ describe('resolvePeacePlan', () => {
         expect(result.all_accepted).toBe(true);
         expect(result.rejection_factions).toHaveLength(0);
         expect(state.meta.game_over).toBe(true);
-        expect(state.meta.outcome).toBe('peace_plan:cutileiro');
+        expect(state.meta.outcome).toBe('negotiated_peace:cutileiro');
     });
 
     it('player rejection prevents game over', () => {
@@ -436,6 +579,56 @@ describe('resolvePeacePlan', () => {
 
         expect(() => resolvePeacePlan(state, 'vance_owen', 'accepted')).toThrow('No pending peace plan');
     });
+
+    it.each([
+        ['accepted', 'accept', true],
+        ['rejected', 'reject', false],
+    ] as const)(
+        'Vance-Owen %s consumes its duplicate event blocker with one durable event receipt',
+        (peaceResponse, eventResponse, accepted) => {
+            const previousNotificationFlag = process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+            process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = 'true';
+            try {
+                const neg = makeNegotiationState();
+                neg.pending_peace_plan = {
+                    plan_id: 'vance_owen',
+                    turn_offered: 40,
+                    bot_responses: { RS: 'rejected', HRHB: 'accepted' },
+                };
+                const state = makeState({ turn: 40, war_start_turn: 0, negotiation: neg });
+                attachVanceOwenEventDecision(state);
+
+                resolvePeacePlan(state, 'vance_owen', peaceResponse);
+
+                expect(neg.peace_plan_history).toHaveLength(1);
+                expect(neg.peace_plan_history[0].responses.RBiH).toBe(peaceResponse);
+                expect(state.military.pending_event_decisions?.map(decision => decision.event_id)).toEqual([
+                    'ic_pressure_vopp_engagement',
+                ]);
+                expect(state.military.event_decision_log?.filter(
+                    decision => decision.event_id === 'vance_owen_plan_1993',
+                )).toEqual([expect.objectContaining({
+                    response_id: eventResponse,
+                    decision_source: 'player',
+                    faction: 'RBiH',
+                    turn: 40,
+                })]);
+                expect(state.military.event_flags?.vance_owen_accepted).toBe(accepted ? true : undefined);
+                expect(state.military.pending_event_notifications?.map(
+                    notification => notification.notification_id,
+                )).toEqual([
+                    'vance_owen_plan_1993:RBiH:HRHB',
+                    'vance_owen_plan_1993:RBiH:RS',
+                ]);
+            } finally {
+                if (previousNotificationFlag === undefined) {
+                    delete process.env.AWWV_TWO_LEVEL_NOTIFICATIONS;
+                } else {
+                    process.env.AWWV_TWO_LEVEL_NOTIFICATIONS = previousNotificationFlag;
+                }
+            }
+        },
+    );
 });
 
 describe('Determinism', () => {

@@ -295,7 +295,7 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
         name: 'Operation Cerska-Kamenica',
         faction: 'RS',
         primary_corps: 'vrs_drina',
-        staging_osid: 'op:srebrenica:brezovice_2',
+        staging_osid: 'op:vlasenica:grabovica',
         planning_duration: 2,
         trigger: (_state, turn) => turn >= 40,
         axes: [
@@ -307,11 +307,8 @@ const TRIGGERED_OPS_RAW: TriggeredOpDef[] = [
                     'rs_1st_birac' as FormationId,
                     'rs_1st_milii' as FormationId,
                 ],
-                objectives: [
-                    'op:srebrenica:brezovice_2',
-                    'op:srebrenica:mala_daljegosta_2',
-                ],
-                staging_osid: 'op:srebrenica:brezovice_2',
+                objectives: ['op:vlasenica:cerska_2'],
+                staging_osid: 'op:vlasenica:grabovica',
             },
             {
                 axis_id: 'kamenica',
@@ -1383,3 +1380,13 @@ export function injectArmyHqOperations(state: GameState): string[] {
 
 /** Exported for testing. */
 export const _TRIGGERED_OPS = TRIGGERED_OPS;
+
+export function isTriggeredHistoricalOperationForFaction(
+    operationName: string,
+    faction: FactionId,
+): boolean {
+    return TRIGGERED_OPS.some((def) =>
+        def.name === operationName
+        && def.faction === faction,
+    );
+}

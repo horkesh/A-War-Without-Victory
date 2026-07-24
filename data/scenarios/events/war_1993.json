@@ -642,7 +642,12 @@
     "trigger": {
       "turn_min": 44,
       "turn_max": 52,
-      "phase": "war"
+      "phase": "war",
+      "condition": {
+        "type": "territory_control",
+        "osid": "op:vlasenica:cerska_2",
+        "faction": "RS"
+      }
     },
     "once": true,
     "effects": [

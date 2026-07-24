@@ -144,8 +144,8 @@ function updateFactionCapital(state: GameState, faction: FactionId, cap: Negotia
     const milData = computeMilitaryData(state, faction);
     cap.military_casualties_inflicted = milData.casualties_inflicted;
     cap.military_casualties_taken = milData.casualties_taken;
-    cap.operations_launched = milData.ops_launched;
-    cap.operations_successful = milData.ops_successful;
+    cap.operations_launched = milData.operations_launched;
+    cap.operations_successful = milData.operations_successful;
 
     // 3. Humanitarian data (raw)
     const humanData = computeHumanitarianData(state, faction);
@@ -193,14 +193,12 @@ function computeTerritoryData(state: GameState, faction: FactionId): { pct: numb
 function computeMilitaryData(state: GameState, faction: FactionId): {
     casualties_inflicted: number;
     casualties_taken: number;
-    ops_launched: number;
-    ops_successful: number;
+    operations_launched: number;
+    operations_successful: number;
 } {
     const formations = state.military.formations ?? {};
     let casualties_inflicted = 0;
     let casualties_taken = 0;
-    let ops_launched = 0;
-    let ops_successful = 0;
 
     for (const fid of Object.keys(formations).sort(strictCompare)) {
         const f = formations[fid];
@@ -210,13 +208,14 @@ function computeMilitaryData(state: GameState, faction: FactionId): {
         if (bh) {
             casualties_inflicted += bh.total_casualties_inflicted ?? 0;
             casualties_taken += bh.total_casualties_taken ?? 0;
-            // Operations tracked at corps level — count battles as proxy
-            ops_launched += bh.battles_as_attacker ?? 0;
-            ops_successful += bh.victories ?? 0;
         }
     }
 
-    return { casualties_inflicted, casualties_taken, ops_launched, ops_successful };
+    const factionOperations = (state.operation_history ?? []).filter((aar) => aar.faction === faction);
+    const operations_launched = factionOperations.length;
+    const operations_successful = factionOperations.filter((aar) => aar.outcome === 'success').length;
+
+    return { casualties_inflicted, casualties_taken, operations_launched, operations_successful };
 }
 
 function computeHumanitarianData(state: GameState, faction: FactionId): {

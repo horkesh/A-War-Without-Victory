@@ -33,6 +33,10 @@ function essay(overrides: Partial<EssayEntry> = {}): EssayEntry {
     };
 }
 
+function campaignEssay(overrides: Partial<EssayEntry> = {}): EssayEntry {
+    return essay({ tier: CodexTier.AHISTORICAL, ...overrides });
+}
+
 // ─── A1a: tier derivation + effective tier ───────────────────────────────
 
 describe('codex tier system (A1a)', () => {
@@ -81,8 +85,8 @@ describe('codex tier system (A1a)', () => {
 // ─── A1b: event-dependency-graph unlock ──────────────────────────────────
 
 describe('codex dependency-graph unlock (A1b)', () => {
-    it('requires_events keeps an event-fired essay locked until upstream events fire', () => {
-        const e = essay({ requires_events: ['upstream_a', 'upstream_b'] });
+    it('requires_events keeps a Tier 3 campaign entry locked until upstream events fire', () => {
+        const e = campaignEssay({ requires_events: ['upstream_a', 'upstream_b'] });
 
         // Base event fired but upstream not yet → still locked, with hint.
         const locked = resolveCodexEssay(e, context({ firedEventIds: new Set(['test_event']) }));
@@ -105,14 +109,14 @@ describe('codex dependency-graph unlock (A1b)', () => {
 
     it('the graph gate can never force-open an essay whose base unlock has not fired', () => {
         // requires_events fully satisfied, but the essay's own event has NOT fired.
-        const e = essay({ requires_events: ['upstream_a'] });
+        const e = campaignEssay({ requires_events: ['upstream_a'] });
         const resolved = resolveCodexEssay(e, context({ firedEventIds: new Set(['upstream_a']) }));
         expect(resolved.isUnlocked).toBe(false);
         expect(resolved.lockReason).toEqual({ kind: 'event_fire' });
     });
 
     it('unlock_turn_min gates on currentTurn (and is satisfied when turn is unknown)', () => {
-        const e = essay({ unlock_turn_min: 50 });
+        const e = campaignEssay({ unlock_turn_min: 50 });
         const before = resolveCodexEssay(e, context({ firedEventIds: new Set(['test_event']), currentTurn: 30 }));
         expect(before.isUnlocked).toBe(false);
         expect(before.lockReason).toEqual({ kind: 'turn', turn: 50 });
@@ -126,16 +130,16 @@ describe('codex dependency-graph unlock (A1b)', () => {
     });
 
     it('gate precedence is event → essay → turn (first unmet wins)', () => {
-        const e = essay({ requires_events: ['ev'], unlock_turn_min: 50 });
+        const e = campaignEssay({ requires_events: ['ev'], unlock_turn_min: 50 });
         // Both event AND turn unmet → event reported first.
         const r = resolveCodexEssay(e, context({ firedEventIds: new Set(['test_event']), currentTurn: 10 }));
         expect(r.lockReason).toEqual({ kind: 'event', detail: 'ev' });
     });
 
     it('transitive requires_essays unlocks a chain A → B → C deterministically', () => {
-        const a = essay({ id: 'essay_a', event_id: 'ev_a' });
-        const b = essay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
-        const c = essay({ id: 'essay_c', event_id: 'ev_c', requires_essays: ['essay_b'] });
+        const a = campaignEssay({ id: 'essay_a', event_id: 'ev_a' });
+        const b = campaignEssay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
+        const c = campaignEssay({ id: 'essay_c', event_id: 'ev_c', requires_essays: ['essay_b'] });
 
         // All three base events fired, but the essay graph chains them.
         const ctx = context({ firedEventIds: new Set(['ev_a', 'ev_b', 'ev_c']) });
@@ -146,9 +150,9 @@ describe('codex dependency-graph unlock (A1b)', () => {
     });
 
     it('a broken chain leaves downstream essays locked (B locked → C stays locked)', () => {
-        const a = essay({ id: 'essay_a', event_id: 'ev_a' });
-        const b = essay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
-        const c = essay({ id: 'essay_c', event_id: 'ev_c', requires_essays: ['essay_b'] });
+        const a = campaignEssay({ id: 'essay_a', event_id: 'ev_a' });
+        const b = campaignEssay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
+        const c = campaignEssay({ id: 'essay_c', event_id: 'ev_c', requires_essays: ['essay_b'] });
 
         // ev_a NOT fired → A locked → B locked → C locked.
         const ctx = context({ firedEventIds: new Set(['ev_b', 'ev_c']) });
@@ -161,8 +165,8 @@ describe('codex dependency-graph unlock (A1b)', () => {
     });
 
     it('a requires_essays cycle terminates and leaves both nodes locked (no infinite loop)', () => {
-        const a = essay({ id: 'essay_a', event_id: 'ev_a', requires_essays: ['essay_b'] });
-        const b = essay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
+        const a = campaignEssay({ id: 'essay_a', event_id: 'ev_a', requires_essays: ['essay_b'] });
+        const b = campaignEssay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
         const ctx = context({ firedEventIds: new Set(['ev_a', 'ev_b']) });
         const resolved = resolveCodexEssayIndex([a, b], ctx);
         // Mutual dependency never satisfies → both stay locked (deterministic, no throw/hang).
@@ -171,14 +175,14 @@ describe('codex dependency-graph unlock (A1b)', () => {
     });
 
     it('a self-referential requires_essays edge is ignored (does not deadlock its own node)', () => {
-        const a = essay({ id: 'essay_a', event_id: 'ev_a', requires_essays: ['essay_a'] });
+        const a = campaignEssay({ id: 'essay_a', event_id: 'ev_a', requires_essays: ['essay_a'] });
         const resolved = resolveCodexEssayIndex([a], context({ firedEventIds: new Set(['ev_a']) }));
         expect(resolved.get('essay_a')!.isUnlocked).toBe(true);
     });
 
     it('resolveCodexEssayIndex is order-independent (same output for any input order)', () => {
-        const a = essay({ id: 'essay_a', event_id: 'ev_a' });
-        const b = essay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
+        const a = campaignEssay({ id: 'essay_a', event_id: 'ev_a' });
+        const b = campaignEssay({ id: 'essay_b', event_id: 'ev_b', requires_essays: ['essay_a'] });
         const ctx = context({ firedEventIds: new Set(['ev_a', 'ev_b']) });
         const r1 = resolveCodexEssayIndex([a, b], ctx);
         const r2 = resolveCodexEssayIndex([b, a], ctx);
@@ -189,22 +193,28 @@ describe('codex dependency-graph unlock (A1b)', () => {
 
 // ─── No-regression: existing event-fire / ghost unlock still works ────────
 
-describe('codex tier/graph layering does NOT regress existing unlock (A1a/A1b)', () => {
-    it('plain event-fire unlock is unchanged when no graph fields are present', () => {
-        const locked = resolveCodexEssay(essay(), context());
+describe('codex historical visibility and campaign gating layering', () => {
+    it('plain Tier 3 event-fire unlock remains campaign-gated', () => {
+        const entry = campaignEssay();
+        const locked = resolveCodexEssay(entry, context());
         expect(locked.isUnlocked).toBe(false);
         expect(locked.lockReason).toEqual({ kind: 'event_fire' });
 
-        const unlocked = resolveCodexEssay(essay(), context({ firedEventIds: new Set(['test_event']) }));
+        const unlocked = resolveCodexEssay(entry, context({ firedEventIds: new Set(['test_event']) }));
         expect(unlocked.isUnlocked).toBe(true);
         expect(unlocked.paragraphs.map((p) => p.text)).toEqual(['Paragraph one.', 'Paragraph two.']);
     });
 
-    it('ghost_when unlock is unchanged and reports CONDITIONAL tier', () => {
+    it('Tier 1 canonical prose is visible before ghost_when and gains ghost prose only after it fires', () => {
         const e = essay({
             ghost_when: 'GAME_OVER AND NOT RUPTURE:srebrenica_genocide_1995',
             ghost_summary: 'History took a path your war never reached.',
         });
+        const before = resolveCodexEssay(e, context());
+        expect(before.isUnlocked).toBe(true);
+        expect(before.isGhost).toBe(false);
+        expect(before.paragraphs.every((p) => p.kind === 'canonical')).toBe(true);
+
         const resolved = resolveCodexEssay(e, context({
             gameOver: true,
             historicalComparison: {
@@ -220,6 +230,19 @@ describe('codex tier/graph layering does NOT regress existing unlock (A1a/A1b)',
         expect(resolved.isGhost).toBe(true);
         expect(resolved.tier).toBe(CodexTier.CONDITIONAL);
     });
+
+    it.each([CodexTier.FIXED, CodexTier.CONDITIONAL, CodexTier.SHAPEABLE])(
+        'does not let graph fields hide Tier %s canonical history',
+        (tier) => {
+            const resolved = resolveCodexEssay(
+                essay({ tier, requires_events: ['future_event'], unlock_turn_min: 50 }),
+                context({ currentTurn: 1 }),
+            );
+            expect(resolved.isUnlocked).toBe(true);
+            expect(resolved.lockReason).toBeNull();
+            expect(resolved.paragraphs.map((p) => p.text)).toEqual(['Paragraph one.', 'Paragraph two.']);
+        },
+    );
 
     it('resolveCodexEssayIndex matches per-essay resolveCodexEssay for non-graph essays', () => {
         const e = essay();

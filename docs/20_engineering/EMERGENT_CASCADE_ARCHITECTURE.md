@@ -113,8 +113,10 @@ DAYTON ENDGAME
 | Producer | State Field | Consumers |
 |----------|-------------|-----------|
 | paramilitary_sweep.ts | `political_controllers[osid]` | Front lines, sectors, territory %, Codex, Chronicle |
+| paramilitary_sweep.ts | `control_events[]` (`mechanism: 'paramilitary'`) | Scenario control-change attribution; explicitly excluded from combat counts |
 | paramilitary_sweep.ts | `displacement_event_log[]` + displacement aggregates | Displacement tracking, IVP, Chronicle, Wrapped, cosmetic war dispatches |
 | paramilitary_sweep.ts | `civilian_casualties[faction]` | IVP composite, dimension base values, Dayton scoring |
+| paramilitary_sweep.ts | `displacement_state[mun].lost_population` | Recruitment availability, supply capacity, enclave integrity, civilians under protection |
 | paramilitary_sweep.ts | `war_crimes_events` (FIX NEEDED) | `international_standing` dimension, patron pressure, Dayton scoring, event conditions (`war_crimes_above`) |
 | Event system | `event_flags{}` | All condition evaluators, consequence chain, Codex dynamic sections, political bot |
 | Event system | `strategic_dimensions{}` | `computeNegotiatingCapital()`, Dayton scoring, political bot decisions |

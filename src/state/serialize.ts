@@ -186,6 +186,7 @@ function migrateState(raw: unknown): GameState {
         deleteLegacyTopLevelFields(candidate, phaseFCapacityKeys);
     }
 
+    recoverParamilitaryDeploymentCounts(candidate, mil);
     applyMigrations(candidate);
     canonicalizeCurrentFields(candidate, {
         allowDisplacementOperationalDefaults: allowLegacyDisplacementOperationalTopLevel,
@@ -253,6 +254,27 @@ function strictCompare(a: string, b: string): number {
 
 function sortedKeys(record: Record<string, unknown>): string[] {
     return Object.keys(record).sort(strictCompare);
+}
+
+function recoverParamilitaryDeploymentCounts(
+    candidate: Record<string, any>,
+    military: Record<string, any> | undefined,
+): void {
+    const deploymentCounts = candidate.paramilitary_deployment_count;
+    if (deploymentCounts && typeof deploymentCounts === 'object' && !Array.isArray(deploymentCounts)) return;
+
+    const recovered: Record<string, number> = {};
+    const formations = military?.formations;
+    if (formations && typeof formations === 'object' && !Array.isArray(formations)) {
+        for (const formationId of sortedKeys(formations)) {
+            const formation = formations[formationId];
+            if (!formation || typeof formation !== 'object' || formation.kind !== 'paramilitary') continue;
+            const faction = formation.faction;
+            if (faction !== 'HRHB' && faction !== 'RBiH' && faction !== 'RS') continue;
+            recovered[faction] = (recovered[faction] ?? 0) + 1;
+        }
+    }
+    candidate.paramilitary_deployment_count = recovered;
 }
 
 function canonicalizeCurrentFields(

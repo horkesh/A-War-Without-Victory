@@ -18,6 +18,7 @@ import { appendDisplacementEvent } from './displacement_event_log.js';
 import { recordCivilianDisplacementCasualties } from './displacement_state_utils.js';
 import { computeFrontBreaches, type FrontBreach } from './front_breaches.js';
 import { LARGE_URBAN_MUN_IDS } from './large_urban_mun_data.js';
+import { strictCompare } from './validateGameState.js';
 import {
     getFactionAlignedPopulationShare,
     type MunicipalityPopulation1991Map
@@ -322,7 +323,7 @@ function routeDisplacedPopulation(
 
     const urbanMunSet = new Set<MunicipalityId>(LARGE_URBAN_MUN_IDS as readonly MunicipalityId[]);
 
-    candidateMuns.sort((a, b) => a.localeCompare(b));
+    candidateMuns.sort(strictCompare);
 
     const virtualDisplacedIn: Partial<Record<MunicipalityId, number>> = {};
 
@@ -391,7 +392,7 @@ function pushDisplacementEventLogFromMun(
                 : 1;
             return { osid: sid, pop };
         })
-        .sort((a, b) => a.osid.localeCompare(b.osid));
+        .sort((a, b) => strictCompare(a.osid, b.osid));
     if (entries.length === 0) return;
 
     const totalPop = entries.reduce((s, e) => s + e.pop, 0) || 1;
@@ -488,7 +489,7 @@ export function applyDisplacementFromFlips(
         flipByMun.set(f.mun_id, f);
     }
     const munsInitiatedThisTurn = hooksByMun.filter((m) => m.initiated_turn === turn).map((m) => m.mun_id);
-    munsInitiatedThisTurn.sort((a, b) => a.localeCompare(b));
+    munsInitiatedThisTurn.sort(strictCompare);
     const mc = buildMunControlFromOsids(state);
 
     for (const munId of munsInitiatedThisTurn) {
@@ -650,11 +651,11 @@ export function applyDisplacementFromFlips(
         });
     }
 
-    records.sort((a, b) => a.mun_id.localeCompare(b.mun_id));
+    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
     routingRecords.sort((a, b) => {
-        const fromCmp = a.from_mun.localeCompare(b.from_mun);
+        const fromCmp = strictCompare(a.from_mun, b.from_mun);
         if (fromCmp !== 0) return fromCmp;
-        return a.to_mun.localeCompare(b.to_mun);
+        return strictCompare(a.to_mun, b.to_mun);
     });
     return { by_municipality: records, routing: routingRecords };
 }
@@ -951,11 +952,11 @@ export function updateDisplacement(
     }
 
     // Sort records deterministically
-    records.sort((a, b) => a.mun_id.localeCompare(b.mun_id));
+    records.sort((a, b) => strictCompare(a.mun_id, b.mun_id));
     routingRecords.sort((a, b) => {
-        const fromCmp = a.from_mun.localeCompare(b.from_mun);
+        const fromCmp = strictCompare(a.from_mun, b.from_mun);
         if (fromCmp !== 0) return fromCmp;
-        return a.to_mun.localeCompare(b.to_mun);
+        return strictCompare(a.to_mun, b.to_mun);
     });
 
     // Enforce recruitment ceilings after all displacement updates

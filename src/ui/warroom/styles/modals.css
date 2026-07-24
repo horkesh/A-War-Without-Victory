@@ -111,7 +111,7 @@
     border: 1px solid #252540;
     border-radius: 3px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     pointer-events: none;
     z-index: 2000; /* canonical: Z.WARROOM_OVERLAY = 2000 (src/ui/shared/zIndex.ts) */
     white-space: nowrap;
@@ -167,7 +167,7 @@
 .wr-dialog-info {
     margin: 6px 0;
     text-align: center;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .wr-dialog-info.wr-info-green { color: #00e878; }
@@ -193,7 +193,7 @@
 .wr-btn {
     padding: 8px 18px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
     letter-spacing: 0.5px;
     text-transform: uppercase;
@@ -273,7 +273,7 @@
 
 /* Faction badge — appears above panel header */
 .fo-faction-badge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -308,7 +308,7 @@
 }
 
 .faction-overview-header .meta {
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 1px;
     color: #8888a0;
 }
@@ -324,7 +324,7 @@
 
 .faction-overview-section h3 {
     margin: 0 0 8px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -368,7 +368,7 @@
 
 .quadrant h3 {
     margin: 0 0 10px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -382,7 +382,7 @@
 }
 
 .quadrant .stat-label {
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: #8888a0;
@@ -405,7 +405,7 @@
 
 .faction-overview-formations h3 {
     margin: 0 0 8px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -432,7 +432,7 @@
 
 .formations-by-faction li {
     margin: 2px 0;
-    font-size: 11px;
+    font-size: 12px;
     color: #8888a0;
 }
 
@@ -452,7 +452,7 @@
 
 .faction-overview-warnings h3 {
     margin: 0 0 8px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -467,7 +467,7 @@
 
 .faction-overview-warnings li {
     margin: 4px 0;
-    font-size: 11px;
+    font-size: 12px;
     color: #d8d8e0;
 }
 
@@ -502,7 +502,7 @@
 
 .newspaper-date {
     text-align: right;
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 1px;
     margin-bottom: 16px;
     color: #555570;
@@ -539,13 +539,13 @@
     justify-content: center;
     border: 1px solid #252540;
     color: #555570;
-    font-size: 11px;
+    font-size: 12px;
     letter-spacing: 1px;
 }
 
 .newspaper-caption {
     font-style: italic;
-    font-size: 10px;
+    font-size: 12px;
     color: #555570;
     margin-bottom: 16px;
     max-width: 500px;
@@ -558,7 +558,7 @@
     columns: 2;
     column-gap: 18px;
     column-rule: 1px solid #252540;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.65;
     text-align: justify;
     color: #8888a0;
@@ -577,7 +577,7 @@
 }
 
 .newspaper-world-briefs-header {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -586,7 +586,7 @@
 }
 
 .newspaper-world-brief-item {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.5;
     color: #666680;
     padding: 4px 0;
@@ -633,7 +633,7 @@
 }
 
 .magazine-month-year .magazine-no-issue-badge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 400;
     opacity: 0.5;
     margin-left: 8px;
@@ -651,7 +651,7 @@
     align-items: center;
     justify-content: center;
     color: #555570;
-    font-size: 11px;
+    font-size: 12px;
 }
 
 .magazine-stats {
@@ -677,7 +677,7 @@
 }
 
 .magazine-stat-label {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -701,7 +701,7 @@
 
 .magazine-toc h3 {
     margin: 0 0 10px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -728,13 +728,13 @@
 
 /* Magazine progress bar overrides */
 .magazine-bar-label {
-    font-size: 11px;
+    font-size: 12px;
     margin-bottom: 4px;
     color: #8888a0;
 }
 
 .magazine-bar-value {
-    font-size: 11px;
+    font-size: 12px;
     text-align: right;
     margin-top: 4px;
     color: #8888a0;
@@ -743,7 +743,7 @@
 /* Capital section header in magazine */
 .magazine-section-header {
     margin: 0 0 8px 0;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1.5px;
     text-transform: uppercase;
@@ -764,7 +764,7 @@
 
 .report-classification-top,
 .report-classification-bottom {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -803,7 +803,7 @@
 }
 
 .report-body {
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.58;
     margin-bottom: 18px;
     white-space: pre-wrap;
@@ -813,7 +813,7 @@
 .report-signature {
     text-align: right;
     margin-top: 22px;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1px;
     color: #d8d8e0;
@@ -885,7 +885,7 @@
 .decl-btn {
     padding: 12px 40px;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -1019,14 +1019,14 @@
 }
 .sp-scenario-option-title {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: #e0e6ef;
 }
 .sp-scenario-option-desc {
-    font-size: 10px;
+    font-size: 12px;
     line-height: 1.45;
     color: #8899aa;
 }
@@ -1061,13 +1061,13 @@
     align-items: center;
     gap: 6px;
     padding: 14px 16px 12px;
-    width: 170px;
+    width: 180px;
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid #2a3a4e;
     border-radius: 6px;
     cursor: pointer;
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     letter-spacing: 1px;
     color: #e0e6ef;
@@ -1095,7 +1095,24 @@
 }
 .sp-faction-label {
     text-transform: uppercase;
-    font-size: 11px;
+    font-size: 12px;
+    line-height: 1.3;
+    min-height: 31px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.sp-player-role {
+    color: #d7dee8;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+.sp-armed-force {
+    color: #8899aa;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
 }
 
 /* Difficulty badges */
@@ -1103,7 +1120,7 @@
     display: inline-block;
     padding: 2px 8px;
     border-radius: 10px;
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 700;
     letter-spacing: 1.2px;
     text-transform: uppercase;
@@ -1128,7 +1145,7 @@
 /* Faction description */
 .sp-faction-desc {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 400;
     font-style: italic;
     letter-spacing: 0.3px;
@@ -1235,10 +1252,10 @@
 
 .mm-subtitle {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: calc(11px * var(--mm-scale));
+    font-size: calc(12px * var(--mm-scale));
     letter-spacing: 0;
     text-transform: uppercase;
-    color: #6a7a8e;
+    color: #8ea0b5;
     margin-bottom: 16px;
 }
 
@@ -1280,7 +1297,7 @@
 
 .mm-version {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 9px;
+    font-size: 12px;
     letter-spacing: 0;
     text-transform: uppercase;
     color: #3a4a5e;
@@ -1394,7 +1411,7 @@
 
 .scn-desc {
     font-family: 'IBM Plex Mono', 'Consolas', monospace;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1.5;
     color: #8899aa;
     font-style: italic;
@@ -1433,7 +1450,7 @@
 }
 
 .settlement-tag {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     padding: 2px 6px;
@@ -1464,7 +1481,7 @@
     border: none;
     border-bottom: 2px solid transparent;
     color: #555570;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     cursor: pointer;
@@ -1491,7 +1508,7 @@
 }
 
 .settlement-info-section-header {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     color: #555570;
@@ -1506,7 +1523,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 6px;
-    font-size: 11px;
+    font-size: 12px;
 }
 .settlement-info-field-row .label {
     color: #8888a0;
@@ -1529,7 +1546,7 @@
 }
 
 .settlement-info-provenance {
-    font-size: 9px;
+    font-size: 12px;
     color: #444460;
     font-style: italic;
     margin-top: 8px;

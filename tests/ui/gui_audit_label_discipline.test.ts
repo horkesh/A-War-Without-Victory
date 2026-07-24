@@ -1754,9 +1754,9 @@ describe('GUI audit label discipline', () => {
     expect(bcsMessages['operationHistory.equipmentCaptured']).not.toMatch(/\{tanks\}T|\{artillery\}A/);
     expect(presidentialCategoriesSource).not.toMatch(/front sitrep/i);
     expect(liveSurfaceBrowserSweepSource).toMatch(/label:\s*'PAX'/);
-    expect(enMessages['recordsContent.tab.aar']).toMatch(/LATEST AFTER-ACTION REPORT/i);
+    expect(enMessages['recordsContent.tab.aar']).toMatch(/LATEST WEEKLY REPORT/i);
     expect(enMessages['recordsContent.archiveSummary.operationAars']).toMatch(/Completed Operation AARs/i);
-    expect(bcsMessages['recordsContent.tab.aar']).toMatch(/NAJNOVIJI/);
+    expect(bcsMessages['recordsContent.tab.aar']).toMatch(/NAJNOVIJI SEDMIČNI IZVJEŠTAJ/i);
     expect(bcsMessages['recordsContent.archiveSummary.operationAars']).not.toMatch(/\bAAR\b/);
     expect(oobSource).not.toMatch(/\} assigned|Density:/);
     expect(corpsDetailSource).not.toMatch(/\} front|Density:|toTitleCase\(s\.sector_stance\)|\} men|~'\}\{s\.length_edges\} km|~.*km/);

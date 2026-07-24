@@ -62,7 +62,7 @@ export function computePressureExposureByEntity(
             const v = (fp as Record<string, { value?: unknown }>)[k];
             return v && typeof v === 'object' && typeof (v as { value: number }).value === 'number';
         })
-        .sort((a, b) => a.localeCompare(b));
+        .sort(strictCompare);
 
     for (const edgeId of edgeIds) {
         const rec = (fp as Record<string, { value: number }>)[edgeId];

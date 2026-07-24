@@ -85,6 +85,10 @@ MORALE_OVERRIDE_RESET     = 20   // streak resets when morale exceeds this (hyst
 
 Pioneer attacks seed with threshold `repulsed`; subsequent brigades join via `estimateConcentratedOutcome()`.
 
+**COHA ceasefire ownership:** An active cessation-of-hostilities agreement suppresses operation attack/posture orders without erasing legal movement intent. While suppression is active, the affected operation's execution/recovery clock is paused and the operation records `operation_lifecycle_paused_reason: 'coha_ceasefire'`; it cannot age into failure or completion for attacks that the political layer prohibited. Attack resolution emits explicit suppression receipts rather than inferring a missing attempt.
+
+**Operation capture causality:** A battle receipt records the exact attacker brigade ids and contributing operation ids. Scenario diagnostics and AAR attribution may credit an operation only from those exact contributor receipts or an explicit operation pause/suppression receipt. Sharing a target OSID is not evidence that an operation caused a battle or capture.
+
 ### 6.4 Cold Front Invariant
 
 RS-HRHB fronts under the Graz Accords are exempt from:
@@ -96,6 +100,8 @@ RS-HRHB fronts under the Graz Accords are exempt from:
 ### 6.5 Unified Sector Defense
 
 Defense at any OSID = `totalPower * (1/sector_edges) * densityMod`. No brigade-at-OSID vs sector-coverage distinction -- the front is a continuous locked line. Casualty distribution: distance-weighted proportional (decay `0.60^hops`, max 5 hops) with home-municipality motivation bonus (1.3x).
+
+**Roster eligibility:** A formation with `lifecycle_status: 'forming'` is not a line holder, reserve, security formation, loan rescue, operation participant, or historical-opportunity commitment. Every sector-roster and operation-admission path must apply the shared live-formation eligibility contract before assigning it.
 
 ### 6.10 Siege Defender Morale Drain
 
@@ -242,6 +248,10 @@ The following competences must be allocated together:
 
 These are gating-only assertions (prevent invalid treaties).
 
+### 10.5 Vance-Owen decision ownership
+
+Resolving the Vance-Owen peace-plan decision has one player-decision owner. The resolution must produce one durable event-decision receipt and one peace-plan-history chronology row; a duplicate pending event for the same choice must be consumed, not resolved as a second player decision.
+
 ## 11. Determinism Invariants
 
 ### 11.1 No Randomness
@@ -259,6 +269,10 @@ All iteration over collections that affect outputs must use stable ordering via 
 ### 11.4 Reproducibility
 
 All state variables must be serializable. Save/load must fully reconstruct world, faction, municipality, formation, and front states. Identical inputs must produce identical outputs across runs.
+
+### 11.5 Desktop mutation durability
+
+A successful canonical desktop mutation is complete only after the new state has been serialized, autosaved, and broadcast to every live renderer. Autosave failure must fail the mutation and restore the prior in-memory serialized state; a renderer-local success without durable persistence is invalid.
 
 ## 12. Exceptional Space Invariants
 
@@ -328,6 +342,8 @@ Formation cohesion must remain in [0, 100] after all updates.
 
 **Every brigade has a valid location_osid.** Control changes only via attack resolution or corps/frontline operations (no passive pressure flip).
 
+`location_osid` is the physical placement truth used by combat, movement, validation, and map rendering. `hq_osid`, `corps_id`, parent assignment, and other command metadata are command/navigation context and must never substitute for physical placement. Non-spatial army-HQ or corps-asset records may omit `location_osid`; every active combat brigade may not. Newly recruited or spawned brigades must be placed on a valid faction-controlled OSID in their home municipality, using deterministic fallback ordering, or not be created.
+
 ### 14.5 Retreat determinism
 
 When a defender retreats, valid destinations are chosen deterministically. **Tie-break:** enemy adjacency count ascending (prefer rear), then OSID string sort (stable ordering).
@@ -364,19 +380,39 @@ Brigade operations pipeline steps run only when `meta.phase === "war"`.
 Paramilitary formations (`kind: 'paramilitary'`) are autonomous short-lived units for rear pocket cleanup. Invariants:
 1. Excluded from reinforcement, bot AI targeting, and formation spawn
 2. Do not contribute to defended OSID checks
-3. Spawning gated by PARAMILITARY_FADE_WEEK (week 20)
-4. All iteration deterministic (sorted by formation ID via `strictCompare`; spawn probability via deterministic hash)
+3. Spawning and activity are gated by `PARAMILITARY_FADE_WEEK` (final active week 20); an active paramilitary formation encountered after week 20 dissolves before ETA, casualties, or control effects resolve
+4. All iteration deterministic: the attacking faction must meet the local organizational-penetration floor and exceed the controller's local paramilitary penetration; eligible targets rank by attacker paramilitary penetration, party penetration, adjacent friendly support, dominance margin, municipality, and OSID; explicit per-faction and per-municipality turn caps truncate the result without a pseudo-random gate
 5. Casualties use standard KIA/WIA/MIA fractions (0.30/0.55/0.15)
-6. Control changes emit `control_events` with `mechanism: 'combat'`
+6. Control changes emit `control_events` with `mechanism: 'paramilitary'` and are reported separately from battle combat
 7. `paramilitary_deployment_count` per faction tracks cumulative deployments
+8. A paramilitary request or automatic deployment may target only an undefended OSID. Exact organized defense and organized defense adjacent to the target for its current controller are hard eligibility exclusions; there is no light-defense exception.
+9. Rear-pocket graph analysis rejects a connected pocket when organized defense makes it an active military position rather than abandoned rear territory.
+10. If organized defense occupies the target after dispatch but before arrival, the paramilitary formation takes retreat casualties, dissolves, and does not change control or inflict defender casualties. Every dissolution sets `status: 'inactive'`, `lifecycle_status: 'disbanded'`, `readiness: 'degraded'`, and personnel to zero.
+11. Civilian killings from a paramilitary capture are recorded once in `civilian_casualties`, `displacement_event_log`, and the target municipality's `displacement_state.lost_population`; `last_updated_turn` advances with the population write.
+
+### 14.8b Post-paramilitary rear-pocket consolidation
+
+After the paramilitary lifecycle ends, the War pipeline runs deterministic rear-pocket consolidation immediately after `paramilitary-advance`. A candidate is a connected cluster of one to six same-controller operational OSIDs whose external neighbors are all controlled by one surrounding faction or its permitted co-belligerent. The cluster must have no active brigade, must pass enclave-protection guards, and must pass the same centralized RBiH-HRHB combat-permission gate used by regular combat and paramilitary capture. Consolidation can never transfer territory between RBiH and HRHB before the scenario's bilateral-war floor, during mobilization or ceasefire, or after Washington. Active definitive April 1992 scenarios and metadata-free runtime fallbacks use turn 40 as that earliest floor. Larger clusters, defended positions, mixed-surrounding control, protected enclaves, and politically blocked territory require military action and do not auto-flip. Each legal flip emits a control event with `mechanism: 'consolidation'` and seeds the normal hostile-takeover displacement timer. Candidate discovery, cluster ordering, and flip ordering are deterministic.
 
 ### 14.9 War movement pipeline order
 
 **osid-column-movement** must run **before** **apply-brigade-movement**. Column movement consumes orders with stance 'column' and must process them first. Violation causes column march orders to be dropped.
 
+An empty, reachable, same-corps front sector is resolved through movement authority rather than a direct location rewrite. T1 may emit one deterministic `sector_reassignment_order` for a legal donor; T2 translates that intent into a column order; T3 moves the brigade along the friendly path on later turns. Donors in an operation, dig-in cycle, elite loan, or active transit are ineligible, line sectors retain a minimum staffing floor, and enclave movement restrictions remain binding. When no legal donor can reach the sector, the derived sector must carry `unstaffed_front: true`; legal isolation is advisory truth, not a teleport exception.
+
 ### 14.10 Bottom-up recruitment in War context
 
 When `state.meta.recruitment_mode === 'bottom_up'`, the turn pipeline **must** run militia emergence, pool population, formation spawn, activate corps, and promote formations steps after the main War steps, regardless of `state.meta.phase`.
+
+### 14.10a Shared recruitment eligibility and autonomy
+
+Recruitment catalog visibility and recruitment application must evaluate the same faction, turn, scenario catalog, control, manpower, capital, equipment, availability, and already-recruited context. A brigade shown as eligible must be accepted under that unchanged context; an ineligible brigade must carry an explicit reason. In player campaigns, automatic recruitment excludes the selected player faction at autonomy levels 0 and 1 and includes it at autonomy level 2 or above. Headless auto-control has no selected-player exclusion.
+
+### 14.11 Operation lifecycle and AAR causality
+
+Operation truth is projected from active operations and raw operation history into labeled `proposed`, `planning`, `executing`, `recovery`, `completed`, and `archived` counts. Active and history rows require stable IDs; every raw history row must be visible or have an explicit exclusion reason. Player-generated operations follow the same projection.
+
+An operation AAR may credit an objective as captured only when an attack-backed weekly receipt causally records that capture. Holding an objective at operation close is not capture evidence. A zero-attempt AAR is always graded one star as `No Assault Attempted`; elapsed duration grants neither a star bonus nor a duration-efficiency score without action. An advance verdict requires at least one causally captured objective. The ending-force-versus-start factor is bounded to `[0, 100]`, so reinforcement growth cannot produce an impossible preservation score above 100. The operational ledger owns complete lifecycle and archive truth; narrative chronology may derive exactly one entry for each visible completed operation but may not become a second ledger or invent a second completion receipt.
 
 ## 15. Officer System Invariants
 

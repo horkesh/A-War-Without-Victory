@@ -1,7 +1,7 @@
 /**
  * Rear pocket consolidation: auto-flip enemy OSID clusters completely surrounded by faction territory.
  *
- * A cluster of 1-3 connected same-controller OSIDs where ALL external neighbors are controlled
+ * A cluster of 1-6 connected same-controller OSIDs where ALL external neighbors are controlled
  * by a single faction has no military access — the surrounding force controls all roads, supply
  * lines, and communication. Without a defending brigade, this territory is under de facto control
  * and should flip automatically.
@@ -20,22 +20,14 @@ import type { EdgeRecord } from '../../map/settlements.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { seedDisplacementTimerOnFlip } from '../../state/displacement_takeover.js';
 import { osidBelongsToEnclave, ENCLAVE_DEFINITIONS } from './enclave_resilience.js';
+import { isRbihHrhbCombatBlocked } from '../early_war/alliance_update.js';
 
-/** Max cluster size for auto-flip. Clusters > 3 are too large to flip without military action. */
+/** Max cluster size for auto-flip. Clusters > 6 are too large to flip without military action. */
 const MAX_POCKET_CLUSTER = 6;
 
-/**
- * Week threshold for Croat-Bosniak war onset (~April 1993, week 52 from Apr 1992 start).
- * Before this, RBiH and HRHB are co-belligerent and treat each other's territory as friendly
- * for consolidation purposes. After this, they are adversaries.
- */
-const CROAT_BOSNIAK_WAR_WEEK = 52;
-
 /** Check if two factions are co-belligerent (allied) at the given turn. */
-function areCobelligerent(factionA: string, factionB: string, turn: number): boolean {
-    if (turn >= CROAT_BOSNIAK_WAR_WEEK) return false;
-    return (factionA === 'RBiH' && factionB === 'HRHB') ||
-           (factionA === 'HRHB' && factionB === 'RBiH');
+function areCobelligerent(state: GameState, factionA: string, factionB: string): boolean {
+    return isRbihHrhbCombatBlocked(state, factionA, factionB);
 }
 
 /**
@@ -65,7 +57,7 @@ export interface RearPocketConsolidationReport {
 }
 
 /**
- * Scan all OSIDs and auto-flip clusters of 1-3 connected enemy OSIDs completely surrounded
+ * Scan all OSIDs and auto-flip clusters of 1-6 connected enemy OSIDs completely surrounded
  * by a single faction. Only flips OSIDs with NO defending brigade present.
  */
 export function consolidateRearPockets(
@@ -127,7 +119,6 @@ export function consolidateRearPockets(
 
         // Check: ALL external neighbors must be controlled by the same faction (or co-belligerent ally),
         // different from the pocket controller.
-        const currentTurn = state.meta?.turn ?? 0;
         let surroundingFaction: string | null = null;
         let allSurrounded = true;
         for (const c of cluster) {
@@ -139,7 +130,7 @@ export function consolidateRearPockets(
                     surroundingFaction = nCtrl;
                 } else if (nCtrl !== surroundingFaction) {
                     // Allow co-belligerents (RBiH+HRHB pre-1993) to count as same side
-                    if (!areCobelligerent(nCtrl, surroundingFaction, currentTurn)) {
+                    if (!areCobelligerent(state, nCtrl, surroundingFaction)) {
                         allSurrounded = false; break;
                     }
                     // When co-belligerents surround a pocket, assign to the faction with
@@ -151,6 +142,7 @@ export function consolidateRearPockets(
         }
 
         if (!allSurrounded || !surroundingFaction || surroundingFaction === controller) continue;
+        if (isRbihHrhbCombatBlocked(state, surroundingFaction, controller)) continue;
 
         // Enclave guard: siege geometry produces topologically surrounded clusters.
         // Interior enclave OSIDs (e.g. Sarajevo city fragments, Srebrenica pocket) may

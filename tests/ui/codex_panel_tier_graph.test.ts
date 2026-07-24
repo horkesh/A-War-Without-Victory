@@ -32,8 +32,12 @@ vi.mock('../../data/scenarios/essays/essay_index.json', () => ({
             },
             {
                 id: 'essay_gated_1995', event_id: 'ev_gated', title: 'Gated Downstream Essay',
-                year: 1995, category: 'political', tier: 2, content: 'Body.',
+                year: 1995, category: 'political', tier: 3, content: 'Body.',
                 requires_events: ['ev_not_fired'],
+            },
+            {
+                id: 'essay_hidden_1995', event_id: 'ev_hidden', title: 'Unfired Tier Three Title',
+                year: 1995, category: 'political', tier: 3, content: 'Body.',
             },
         ],
     },
@@ -54,11 +58,11 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
     beforeEach(() => { storeState = { loadedGameState: null }; setLocale('en'); });
     afterEach(() => { cleanup(); setLocale('en'); });
 
-    it('groups unlocked essays under localized tier headers and shows tier badges', () => {
+    it('groups Tier 0-2 essays from scenario start under localized tier headers', () => {
         storeState = {
             loadedGameState: {
                 turn: 100,
-                firedEvents: [firedEvent('ev_fixed'), firedEvent('ev_shapeable')],
+                firedEvents: [],
                 gameOver: false,
             },
         };
@@ -66,10 +70,8 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         renderPanel();
         fireEvent.click(screen.getByText('1995'));
 
-        // Both unlocked essays appear...
         expect(screen.getByText('Fixed Scaffold Essay')).toBeTruthy();
         expect(screen.getByText('Shapeable War Essay')).toBeTruthy();
-        // ...under their tier headers/badges.
         expect(screen.getAllByText('Fixed History').length).toBeGreaterThan(0);
         expect(screen.getAllByText('Shaped by Your War').length).toBeGreaterThan(0);
     });
@@ -87,13 +89,24 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         renderPanel();
         fireEvent.click(screen.getByText('1995'));
 
-        expect(screen.getByText('Locked historical entry')).toBeTruthy();
-        expect(screen.getByText('Unlocks after another campaign event')).toBeTruthy();
+        expect(screen.getByText('Locked campaign entry')).toBeTruthy();
+        expect(screen.getByText('Campaign entry appears after another campaign event')).toBeTruthy();
+        expect(screen.queryByText('Gated Downstream Essay')).toBeNull();
 
         // The hint row is rendered as a disabled button (locked-hint state).
-        const hintRow = screen.getByText('Locked historical entry').closest('button');
+        const hintRow = screen.getByText('Locked campaign entry').closest('button');
         expect(hintRow).toBeTruthy();
         expect((hintRow as HTMLButtonElement).disabled).toBe(true);
+    });
+
+    it('hides an unfired Tier 3 entry and does not leak its title', () => {
+        storeState = {
+            loadedGameState: { turn: 0, firedEvents: [], gameOver: false },
+        };
+
+        renderPanel();
+        fireEvent.click(screen.getByText('1995'));
+        expect(screen.queryByText('Unfired Tier Three Title')).toBeNull();
     });
 
     it('localizes tier headers in BCS', () => {
@@ -101,7 +114,7 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         storeState = {
             loadedGameState: {
                 turn: 100,
-                firedEvents: [firedEvent('ev_fixed')],
+                firedEvents: [],
                 gameOver: false,
             },
         };
@@ -110,5 +123,22 @@ describe('CodexPanel tier + dependency-graph (A1a/A1b)', () => {
         fireEvent.click(screen.getByText('1995'));
         expect(screen.getAllByText('Nepromjenjiva historija').length).toBeGreaterThan(0);
         expect(screen.queryByText('Fixed History')).toBeNull();
+    });
+
+    it('localizes locked Tier 3 chrome as a campaign entry in BCS', () => {
+        setLocale('bcs');
+        storeState = {
+            loadedGameState: {
+                turn: 100,
+                firedEvents: [firedEvent('ev_gated')],
+                gameOver: false,
+            },
+        };
+
+        renderPanel();
+        fireEvent.click(screen.getByText('1995'));
+        expect(screen.getByText('Zaključan zapis kampanje')).toBeTruthy();
+        expect(screen.getByText('Zapis kampanje pojavljuje se nakon drugog događaja kampanje')).toBeTruthy();
+        expect(screen.queryByText('Gated Downstream Essay')).toBeNull();
     });
 });

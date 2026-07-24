@@ -4,6 +4,7 @@ import type { FrontRegionsFile } from '../map/front_regions.js';
 import type { FormationFatigueStepReport } from './formation_fatigue.js';
 import { computeLocalSupplyForEdges, isFormationSupplied } from './formation_fatigue.js';
 import type { FactionId, FormationAssignment, GameState } from './game_state.js';
+import { strictCompare } from './validateGameState.js';
 
 /**
  * Effective posture weight after commitment and friction.
@@ -112,7 +113,7 @@ export function applyFormationCommitment(
 
     // Sort edges deterministically in each set
     for (const [key, edges] of activeEdgesByFactionSidePair.entries()) {
-        edges.sort((a, b) => a.localeCompare(b));
+        edges.sort(strictCompare);
     }
 
     // Build region lookup
@@ -232,7 +233,7 @@ export function applyFormationCommitment(
                 const activeEdges = activeEdgesByFactionSidePair.get(key) ?? [];
 
                 // Filter to edges that are in the region
-                const regionEdges = activeEdges.filter((eid) => region.edge_ids.includes(eid)).sort((a, b) => a.localeCompare(b));
+                const regionEdges = activeEdges.filter((eid) => region.edge_ids.includes(eid)).sort(strictCompare);
 
                 if (regionEdges.length === 0) continue;
 
@@ -375,7 +376,7 @@ export function applyFormationCommitment(
     }
 
     // Sort audits deterministically
-    edgeAudits.sort((a, b) => a.edge_id.localeCompare(b.edge_id));
+    edgeAudits.sort((a, b) => strictCompare(a.edge_id, b.edge_id));
 
     // Global capacity summary (if any faction applied capacity)
     const globalCapacity = factionTotals.some((f) => f.capacity_applied)

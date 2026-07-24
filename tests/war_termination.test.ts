@@ -248,6 +248,43 @@ describe('War Termination', () => {
             const result = checkWarTermination(state);
             expect(result.trigger).toBe('negotiated_peace');
         });
+
+        it('negotiated peace takes priority over faction collapse and turn limit', () => {
+            const state = minimalWarState({ turn: 208, max_turns: 208 });
+            state.military.formations = {};
+            state.military.event_flags = {
+                war_ended_early: true,
+                early_peace_implemented: 'vance_owen',
+            };
+
+            const result = checkWarTermination(state);
+
+            expect(result).toEqual({
+                game_over: true,
+                outcome: 'negotiated_peace:vance_owen',
+                winner: null,
+                trigger: 'negotiated_peace',
+            });
+        });
+
+        it('scenario victory retains priority over negotiated peace', () => {
+            const state = minimalWarState({ turn: 30 });
+            state.meta.victory_conditions = {
+                by_faction: {
+                    RS: { min_controlled_settlements: 1 },
+                },
+            };
+            state.political.political_controllers = { S1: 'RS' };
+            state.military.event_flags = {
+                war_ended_early: true,
+                early_peace_implemented: 'vance_owen',
+            };
+
+            const result = checkWarTermination(state);
+
+            expect(result.trigger).toBe('victory_condition');
+            expect(result.outcome).toBe('victory:RS');
+        });
     });
 
     describe('game_over gate', () => {

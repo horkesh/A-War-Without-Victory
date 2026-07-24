@@ -54,6 +54,25 @@ function makeState(overrides?: {
 }
 
 describe('brigade stacking respects canonical sector truth', () => {
+    it('does not count active-but-forming brigades as fielded stacks', () => {
+        const osid = 'op:olovo:olovo_2';
+        const formingA = makeBrigade({ id: 'arbih_161st_slavna_olovo_mountain', location_osid: osid });
+        const formingB = makeBrigade({ id: 'arbih_162nd_olovo_light', location_osid: osid });
+        formingA.readiness = 'forming';
+        formingB.readiness = 'forming';
+        const state = makeState({
+            formations: {
+                [formingA.id]: formingA,
+                [formingB.id]: formingB,
+            },
+            sectors: {},
+        });
+
+        const anomalies = runAnomalyDetection(state);
+
+        expect(anomalies.some((report) => report.type === 'brigade_stacking')).toBe(false);
+    });
+
     it('suppresses same-sector frontline co-location at a canonically covered OSID', () => {
         const osid = 'op:bihac:bihac_2';
         const sectorId = 'sector:arbih_5th_corps:0';

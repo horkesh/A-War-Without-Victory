@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { test } from 'vitest';
 
 import {
@@ -6,6 +8,12 @@ import {
     generateAllBotOrdersOsid
 } from '../src/sim/combat/bot_brigade_ai_osid.js';
 import type { CorpsDirective, CorpsOperation, GameState } from '../src/state/game_state.js';
+
+test('execution concentration treats one adjacent axis-mate as one additional attacker', () => {
+    const source = readFileSync(resolve('src/sim/combat/bot_brigade_eval_attack.ts'), 'utf8');
+    assert.match(source, /const additionalAttackers = Math\.max\(alreadyAssigned, adjacentOperationParticipants\)/);
+    assert.doesNotMatch(source, /adjacentOperationParticipants > 1/);
+});
 
 test('execution-phase sector offensive narrows brigade directive to current objective', () => {
     const directive: CorpsDirective = {
@@ -127,6 +135,259 @@ test('execution-phase operation attacks current objective even without a corps d
     });
 
     assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:bratunac_2');
+});
+
+test('COHA suppresses bot attack orders and attack posture costs while preserving non-combat orders', () => {
+    const state = {
+  meta: { turn: 150, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    event_flags: { coha_active: true },
+    formations: {
+            rs_1st_bratunac: {
+                id: 'rs_1st_bratunac',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_drina',
+                home_defense_active: true,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:bratunac:slapasnica',
+            },
+        },
+    corps_command: {
+            vrs_drina: {
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'Operation Drina',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 145,
+                    phase_started_turn: 148,
+                    participating_brigades: ['rs_1st_bratunac'],
+                    objectives: ['op:bratunac:bratunac_2'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                }],
+            },
+        },
+    brigade_posture_orders: [],
+    brigade_attack_orders: {
+            rs_1st_bratunac: 'op:bratunac:stale_target',
+        },
+  } as any,
+  political: {
+    political_controllers: {
+            'op:bratunac:slapasnica': 'RS',
+            'op:bratunac:bratunac_2': 'RBiH',
+            'op:bratunac:stale_target': 'RBiH',
+            'op:bratunac:polom': 'RS',
+        }
+  } as any,
+} as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:bratunac_2' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:polom' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.deepEqual(state.military.brigade_attack_orders, {});
+    assert.equal(
+        state.military.brigade_posture_orders?.some((order) =>
+            order.brigade_id === 'rs_1st_bratunac'
+            && (order.posture === 'attack' || order.posture === 'assault')
+        ),
+        false,
+    );
+});
+
+test('merge mode preserves existing manual player orders for the same brigade', () => {
+    const state = {
+  meta: { turn: 2, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
+            rs_1st_bratunac: {
+                id: 'rs_1st_bratunac',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_drina',
+                home_defense_active: true,
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:bratunac:slapasnica',
+            },
+        },
+    corps_command: {
+            vrs_drina: {
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'Operation Drina',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 0,
+                    phase_started_turn: 1,
+                    participating_brigades: ['rs_1st_bratunac'],
+                    objectives: ['op:bratunac:bratunac_2'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                }],
+            },
+        },
+    brigade_posture_orders: [
+            { brigade_id: 'rs_1st_bratunac', posture: 'hold' },
+        ],
+    brigade_attack_orders: {
+            rs_1st_bratunac: 'op:bratunac:manual_target',
+        },
+    brigade_movement_orders: {
+            rs_1st_bratunac: { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+        },
+  } as any,
+  political: {
+    political_controllers: {
+            'op:bratunac:slapasnica': 'RS',
+            'op:bratunac:bratunac_2': 'RBiH',
+            'op:bratunac:manual_target': 'RBiH',
+            'op:bratunac:manual_move': 'RS',
+            'op:bratunac:polom': 'RS',
+        }
+  } as any,
+} as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['RS'], {
+        edges: [
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:bratunac_2' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_target' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_move' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:polom' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    }, { mergeWithExistingOrders: true });
+
+    assert.equal(state.military.brigade_attack_orders?.rs_1st_bratunac, 'op:bratunac:manual_target');
+    assert.deepEqual(
+        state.military.brigade_movement_orders?.rs_1st_bratunac,
+        { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+    );
+    assert.deepEqual(
+        state.military.brigade_posture_orders?.filter((order: any) => order.brigade_id === 'rs_1st_bratunac'),
+        [{ brigade_id: 'rs_1st_bratunac', posture: 'hold' }],
+    );
+});
+
+test('replacement mode preserves existing orders for factions not being processed', () => {
+    const state = {
+  meta: { turn: 2, phase: 'war', seed: 'test-seed' },
+  corps_front_directives: {},
+  military: {
+    formations: {
+            rs_player_brigade: {
+                id: 'rs_player_brigade',
+                kind: 'brigade',
+                faction: 'RS',
+                status: 'active',
+                corps_id: 'vrs_drina',
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:bratunac:slapasnica',
+            },
+            hvo_staff_brigade: {
+                id: 'hvo_staff_brigade',
+                kind: 'brigade',
+                faction: 'HRHB',
+                status: 'active',
+                corps_id: 'hvo_test_corps',
+                posture: 'defend',
+                cohesion: 70,
+                morale: 70,
+                personnel: 1000,
+                equipment: { infantry: 1000, tanks: 0, artillery: 0, air_defense: 0 },
+                location_osid: 'op:test:hvo_start',
+            },
+        },
+    corps_command: {
+            hvo_test_corps: {
+                stance: 'offensive',
+                active_operations: [{
+                    name: 'HVO Test Operation',
+                    type: 'sector_attack',
+                    phase: 'execution',
+                    started_turn: 0,
+                    phase_started_turn: 1,
+                    participating_brigades: ['hvo_staff_brigade'],
+                    objectives: ['op:test:hvo_objective'],
+                    current_objective_index: 0,
+                    momentum: 0,
+                    failure_count: 0,
+                    consecutive_failures_on_current: 0,
+                }],
+            },
+        },
+    brigade_posture_orders: [
+            { brigade_id: 'rs_player_brigade', posture: 'hold' },
+        ],
+    brigade_attack_orders: {
+            rs_player_brigade: 'op:bratunac:manual_target',
+        },
+    brigade_movement_orders: {
+            rs_player_brigade: { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+        },
+  } as any,
+  political: {
+    political_controllers: {
+            'op:bratunac:slapasnica': 'RS',
+            'op:bratunac:manual_target': 'RBiH',
+            'op:bratunac:manual_move': 'RS',
+            'op:test:hvo_start': 'HRHB',
+            'op:test:hvo_objective': 'RS',
+        }
+  } as any,
+} as unknown as GameState;
+
+    generateAllBotOrdersOsid(state, ['HRHB'], {
+        edges: [
+            { a: 'op:test:hvo_start', b: 'op:test:hvo_objective' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_target' },
+            { a: 'op:bratunac:slapasnica', b: 'op:bratunac:manual_move' },
+        ] as any,
+        reverseMap: new Map(),
+        supplyStateByOsid: {} as any,
+        osidPopulationMap: new Map(),
+    });
+
+    assert.equal(state.military.brigade_attack_orders?.rs_player_brigade, 'op:bratunac:manual_target');
+    assert.equal(state.military.brigade_attack_orders?.hvo_staff_brigade, 'op:test:hvo_objective');
+    assert.deepEqual(
+        state.military.brigade_movement_orders?.rs_player_brigade,
+        { destination_sids: ['op:bratunac:manual_move'], stance: 'column' },
+    );
+    assert.deepEqual(
+        state.military.brigade_posture_orders?.filter((order: any) => order.brigade_id === 'rs_player_brigade'),
+        [{ brigade_id: 'rs_player_brigade', posture: 'hold' }],
+    );
 });
 
 test('execution-phase operation moves brigade toward an approach OSID for the current objective', () => {
@@ -269,7 +530,7 @@ test('execution-phase operation falls back to maneuver toward a later reachable 
     assert.equal(state.military.brigade_attack_orders?.rs_1st_posavina_infantry, undefined);
 });
 
-test('execution-phase operation concentrates adjacent brigades on the current objective', () => {
+test('execution-phase operation counts one adjacent supporter for a two-brigade concentrated attack', () => {
     const state = {
   meta: { turn: 13, phase: 'war', seed: 'test-seed' },
   corps_front_directives: {},
@@ -312,8 +573,8 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                 posture: 'defend',
                 cohesion: 70,
                 morale: 70,
-                personnel: 600,
-                equipment: { infantry: 600, tanks: 0, artillery: 0, air_defense: 0 },
+                personnel: 2000,
+                equipment: { infantry: 2000, tanks: 0, artillery: 0, air_defense: 0 },
                 location_osid: 'op:test:objective',
             },
         },
@@ -342,7 +603,35 @@ test('execution-phase operation concentrates adjacent brigades on the current ob
                     momentum: 0,
                     failure_count: 0,
                     consecutive_failures_on_current: 0,
+                    min_attack_outcome: 'stalemate',
                 }],
+            },
+        },
+    corps_front_sectors: {
+            'sector:arbih_test:0': {
+                sector_id: 'sector:arbih_test:0',
+                corps_id: 'arbih_test',
+                faction: 'RBiH',
+                opposing_factions: ['RS'],
+                edge_ids: ['op:test:approach__op:test:objective'],
+                sub_segments: [{
+                    sub_segment_id: 'subseg:arbih_test:0',
+                    edge_ids: ['op:test:approach__op:test:objective'],
+                    friendly_osids: ['op:test:objective'],
+                    enemy_osids: ['op:test:approach'],
+                    length_edges: 1,
+                    primary_brigade_ids: ['arbih_defender'],
+                }],
+                territory_osids: ['op:test:objective'],
+                assigned_brigade_ids: ['arbih_defender'],
+                reserve_brigade_ids: [],
+                rear_brigade_ids: [],
+                length_edges: 1,
+                density: 1,
+                threat_ratio: 1,
+                defensive_power: 2000,
+                sector_stance: 'defend',
+                stance_source: 'bot',
             },
         },
     brigade_posture_orders: []

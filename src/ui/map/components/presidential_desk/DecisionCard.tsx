@@ -92,22 +92,22 @@ export function DecisionCard({ item, onAction }: DecisionCardProps) {
         )}
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className={`border px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[severity]}`}>
+            <span className={`border px-1.5 py-0.5 text-xs font-bold uppercase tracking-[0.16em] ${BADGE_CLASS[severity]}`}>
               {severityLabel(severity)}
             </span>
-            <span className="text-[8px] font-bold uppercase tracking-[0.16em] text-text-muted">
+            <span className="text-xs font-bold uppercase tracking-[0.16em] text-text-muted">
               {family}
             </span>
           </div>
           <h3 className="mt-2 text-[13px] font-bold leading-tight text-text-primary">{item.title}</h3>
-          <p className="mt-1 line-clamp-3 text-[11px] leading-snug text-text-secondary">{item.subtitle}</p>
+          <p className="mt-1 break-words text-xs leading-snug text-text-secondary">{item.subtitle}</p>
         </div>
         <button
           type="button"
           onClick={() => actionable && onAction(item.action, item.id)}
           disabled={!actionable}
           data-testid="desk-card-action"
-          className="ml-auto shrink-0 border border-accent-gold/45 bg-accent-gold/12 px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[0.13em] text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-default disabled:border-panel-border disabled:bg-transparent disabled:text-text-muted"
+          className="ml-auto shrink-0 border border-accent-gold/45 bg-accent-gold/12 px-2.5 py-1.5 text-xs font-bold uppercase tracking-[0.13em] text-accent-gold transition-colors hover:bg-accent-gold/20 disabled:cursor-default disabled:border-panel-border disabled:bg-transparent disabled:text-text-muted"
         >
           {actionLabel(item)}
         </button>

@@ -24,8 +24,8 @@ export function ReadinessBar({ label, value, qualitativeLabel }: ReadinessBarPro
   return (
     <div className="space-y-1">
       <div className="flex justify-between items-baseline">
-        <span className="text-[9px] font-bold text-text-secondary uppercase tracking-widest">{label}</span>
-        <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color }}>
+        <span className="text-xs font-bold text-text-secondary uppercase tracking-widest">{label}</span>
+        <span className="text-xs font-bold uppercase tracking-wider" style={{ color }}>
           {qualitativeLabel}
         </span>
       </div>

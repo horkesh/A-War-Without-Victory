@@ -69,9 +69,11 @@ import type {
     OperationAxis,
     PendingProposalReview,
 } from '../../state/game_state.js';
+import { isEligibleOperationFormation, MIN_ATTACK_PERSONNEL } from '../../state/formation_constants.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import { buildCorpsOperation } from './corps_operation_helpers.js';
+import { getFormationCorpsId } from './corps_sector_partition.js';
 import {
     computeCorpsOperationReadiness,
     type CorpsOperationReadinessTraits,
@@ -1117,7 +1119,7 @@ function spawnCorpsOperationFromOpportunity(
     const builtAxes: OperationAxis[] = [];
     const allParticipating: FormationId[] = [];
     for (const axis of axesIn) {
-        const brigadesForAxis = applyCommitmentProfile(axis.brigades, commitment);
+        const brigadesForAxis = selectEligibleOpportunityParticipants(state, axis, commitment);
         if (brigadesForAxis.length === 0) continue;
 
         // Friendly-controller filter — mirrors triggered_operations.ts:buildOperation
@@ -1175,19 +1177,36 @@ function spawnCorpsOperationFromOpportunity(
     return op.name;
 }
 
-/** "minimum" trims the brigade pool to the floor of half the authored set. */
-function applyCommitmentProfile(
-    brigades: readonly FormationId[],
+/**
+ * Apply the triggered-operation formation gates while retaining the catalog's
+ * authored priority. For minimum commitments, later eligible entries substitute
+ * for ineligible leading entries until the authored commitment size is filled.
+ */
+function selectEligibleOpportunityParticipants(
+    state: GameState,
+    axis: OpportunityAxisDef,
     commitment: 'minimum' | 'standard' | 'reinforced',
 ): FormationId[] {
-    if (commitment === 'minimum') {
-        const cut = Math.max(1, Math.floor(brigades.length / 2));
-        return [...brigades].sort(strictCompare).slice(0, cut);
+    const formations = state.military.formations ?? {};
+    const movementState = state.military.brigade_movement_state ?? {};
+    const targetCount = commitment === 'minimum'
+        ? Math.max(1, Math.floor(axis.brigades.length / 2))
+        : Number.POSITIVE_INFINITY;
+    const selected: FormationId[] = [];
+
+    for (const brigadeId of axis.brigades) {
+        const formation = formations[brigadeId];
+        if (!formation || getFormationCorpsId(formation) !== axis.corps) continue;
+        if (!isEligibleOperationFormation(formation)) continue;
+        if ((formation.personnel ?? 0) < MIN_ATTACK_PERSONNEL) continue;
+        if ((formation.disrupted_turns ?? 0) > 0) continue;
+        if (movementState[brigadeId]?.status === 'in_transit') continue;
+
+        selected.push(brigadeId);
+        if (selected.length >= targetCount) break;
     }
-    // standard + reinforced both ship the authored pool. "reinforced" is reserved
-    // for a future reserve-loan integration (army HQ pulls extra brigades into
-    // the op). Phase 1 keeps reinforced == standard at the catalog boundary.
-    return [...brigades].sort(strictCompare);
+
+    return selected;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1329,7 +1348,7 @@ export function autoResolveOpportunityProposalReviews(
     let marked = 0;
     for (const review of reviews) {
         if (!review.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)) continue;
-        if (review.accepted !== undefined || normalizeOpportunityDecision(review.opportunity_decision) !== null) continue;
+        if (review.accepted != null || review.resolved_turn != null || normalizeOpportunityDecision(review.opportunity_decision) !== null) continue;
         if (playerFaction !== null && review.faction !== playerFaction) continue;
 
         const decision = normalizeOpportunityDecision(review.proposed_value);
@@ -1365,7 +1384,7 @@ export function applyResolvedOpportunityDecisions(
     const targets = reviews
         .filter(r =>
             r.proposed_action.startsWith(OPPORTUNITY_PROPOSAL_ACTION_PREFIX)
-            && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted !== undefined))
+            && (normalizeOpportunityDecision(r.opportunity_decision) !== null || r.accepted != null))
         .sort((a, b) => strictCompare(a.id, b.id));
     for (const r of targets) {
         const proposalId = r.proposed_action.slice(OPPORTUNITY_PROPOSAL_ACTION_PREFIX.length);

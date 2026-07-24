@@ -51,7 +51,7 @@ export async function generateArmyDecision(
             model_used: response.model,
             prompt_tokens: response.prompt_tokens,
             completion_tokens: response.completion_tokens,
-            latency_ms: response.latency_ms,
+            ...(response.latency_ms != null ? { latency_ms: response.latency_ms } : {}),
         });
 
         return parsed;

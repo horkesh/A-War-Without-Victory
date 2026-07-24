@@ -400,7 +400,7 @@ export function updateFormationLifecycle(
 
     // Build faction summary
     const byFaction = Array.from(factionStats.entries())
-        .sort((a, b) => a[0].localeCompare(b[0]))
+        .sort((a, b) => strictCompare(a[0], b[0]))
         .map(([faction_id, stats]) => ({
             faction_id,
             formations_total: stats.total,

@@ -59,6 +59,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import type { GameState, FactionId } from '../../state/game_state.js';
+import { strictCompare } from '../../state/validateGameState.js';
 import type {
     PoliticalLeaderProfile,
     PoliticalLeaderState,
@@ -224,7 +225,7 @@ export function applyPoliticalLeaderData(
     // for deterministic iteration order.
     const validProfiles = data.leaders
         .filter(isValidLeaderProfile)
-        .sort((a, b) => a.leader_id.localeCompare(b.leader_id));
+        .sort((a, b) => strictCompare(a.leader_id, b.leader_id));
 
     if (validProfiles.length === 0) return;
 

@@ -5,7 +5,14 @@ import { findAdjacentFrontGap, computeHopsToFront, COLUMN_MARCH_MIN_HOPS, findNe
 import { countFactionBrigadesAtOsid, countCorpsBrigadesAtOsid, MAX_CORPS_BRIGADES_PER_OSID } from './bot_brigade_context.js';
 import { issueInteriorMovement } from './bot_brigade_movement_ai.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
-import { isEnclaveBrigade, isOsidInSameEnclave, ENCLAVE_DEFINITIONS, osidBelongsToEnclave } from './enclave_resilience.js';
+import {
+    ENCLAVE_DEFINITIONS,
+    getFormationEnclaveForMovement,
+    isEnclaveBrigade,
+    isEnclaveMovementDestinationAllowed,
+    isOsidInSameEnclave,
+    osidBelongsToEnclave,
+} from './enclave_resilience.js';
 import type { Osid } from './osid_adjacency.js';
 import type { CorpsFrontSector, FormationState, GameState, SettlementId } from '../../state/game_state.js';
 import { botOrdersPerfTime } from './_perf_profile_bot_orders.js';
@@ -24,6 +31,24 @@ function pocketEvacuationProfileTime<T>(labelSuffix: string, fn: () => T): T {
 
 function returnToCorpsProfileTime<T>(labelSuffix: string, fn: () => T): T {
     return botOrdersPerfTime(`${RETURN_TO_CORPS_PROFILE_PREFIX}${labelSuffix}`, fn);
+}
+
+export function isEnclaveSectorMarchDestinationAllowed(
+    brigade: FormationState,
+    loc: string,
+    destination: string,
+): boolean {
+    return isEnclaveMovementDestinationAllowed(brigade, loc, destination);
+}
+
+function restrictSectorMarchDestinations(
+    brigade: FormationState,
+    loc: string,
+    candidates: ReadonlySet<string>,
+): Set<string> {
+    return new Set([...candidates].filter(osid => (
+        isEnclaveSectorMarchDestinationAllowed(brigade, loc, osid)
+    )));
 }
 
 /**
@@ -102,7 +127,7 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
     // Must be checked BEFORE "stay on sector" logic, otherwise a brigade already
     // on its current sector's front returns true and evaluateFrontCoverage (which
     // also processes sector_reassignment_orders) never runs.
-    if (sectorMarchProfileTime('.sectorReassignment', () => {
+    if (!isActiveSectorOperationParticipant && sectorMarchProfileTime('.sectorReassignment', () => {
         if (directive?.sector_reassignment_orders && state.military.corps_front_sectors) {
             const reassign = directive.sector_reassignment_orders.find(r => r.brigade_id === brigade.id);
             if (reassign) {
@@ -112,8 +137,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                     for (const ss of targetSec.sub_segments) {
                         for (const o of ss.friendly_osids) targetOsids.add(o);
                     }
-                    if (targetOsids.size > 0 && !targetOsids.has(loc)) {
-                        const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, targetOsids);
+                    const allowedTargetOsids = restrictSectorMarchDestinations(brigade, loc, targetOsids);
+                    if (allowedTargetOsids.size > 0 && !allowedTargetOsids.has(loc)) {
+                        const dest = findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, allowedTargetOsids);
                         if (dest) {
                             result.column_march_orders[brigade.id] = dest;
                             result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
@@ -201,10 +227,20 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         const hasEnclaveTarget = sectorMarchProfileTime('.enclaveGuard', () =>
                             [...frontSet].some(f => isOsidInSameEnclave(loc, f))
                         );
-                        if (!hasEnclaveTarget) return false; // Skip march — no enclave-local sector front
+                        if (!hasEnclaveTarget) {
+                            result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                            return true;
+                        }
+                    }
+                    const allowedFrontSet = sectorMarchProfileTime('.enclaveDestinationGuard', () =>
+                        restrictSectorMarchDestinations(brigade, loc, frontSet)
+                    );
+                    if (allowedFrontSet.size === 0) {
+                        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+                        return true;
                     }
                     const dest = sectorMarchProfileTime('.destination', () =>
-                        findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, frontSet)
+                        findNearestFriendlyOsidDestination(state, faction, loc, adjacency, reverseMap, allowedFrontSet)
                     );
                     if (dest) {
                         // "Do not garrison the tooth" guard:
@@ -249,9 +285,12 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                     }
                                 }
                             }
-                            if (reachableCorpsFront.size > 0) {
+                            const allowedCorpsFront = restrictSectorMarchDestinations(
+                                brigade, loc, reachableCorpsFront,
+                            );
+                            if (allowedCorpsFront.size > 0) {
                                 const rerouteDest = findNearestFriendlyOsidDestination(
-                                    state, faction, loc, adjacency, reverseMap, reachableCorpsFront
+                                    state, faction, loc, adjacency, reverseMap, allowedCorpsFront
                                 );
                                 if (rerouteDest) {
                                     result.column_march_orders[brigade.id] = rerouteDest;
@@ -318,9 +357,12 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                                         }
                                     }
                                 }
-                                if (safeFront.size > 0) {
+                                const allowedSafeFront = restrictSectorMarchDestinations(
+                                    brigade, loc, safeFront,
+                                );
+                                if (allowedSafeFront.size > 0) {
                                     const evictDest = findNearestFriendlyOsidDestination(
-                                        state, faction, loc, adjacency, reverseMap, safeFront
+                                        state, faction, loc, adjacency, reverseMap, allowedSafeFront
                                     );
                                     if (evictDest) {
                                         result.column_march_orders[brigade.id] = evictDest;
@@ -358,11 +400,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
                         // ENCLAVE GUARD: enclave brigades must not redistribute to front OSIDs outside their
                         // enclave. Without this guard, Goražde brigades (tagged 'enclave') end up at Foča
                         // front OSIDs in the same sector when those OSIDs have fewer brigades.
-                        const enclave = isEnclaveBrigade(brigade);
+                        const allowedFronts = restrictSectorMarchDestinations(brigade, loc, frontSet);
                         const otherFronts = sectorMarchProfileTime('.overstackRedistribution.rankCandidates', () =>
-                            [...frontSet]
+                            [...allowedFronts]
                                 .filter(o => o !== loc)
-                                .filter(o => !enclave || isOsidInSameEnclave(loc as string, o))
                                 .sort((a, b) => {
                                     const ca = countCorpsAt(a as Osid)
                                         + (columnAssignments.get(a as Osid) ?? 0);
@@ -407,6 +448,10 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
             }
         }
     }
+    if (!isActiveSectorOperationParticipant && getFormationEnclaveForMovement(brigade, loc)) {
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+        return true;
+    }
     return false;
 }
 
@@ -420,7 +465,9 @@ export function evaluateSectorMarch(ctx: BrigadeEvaluationContext): boolean {
  * assigned to a sector through the normal pipeline.
  */
 export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps } = ctx;
+    const { brigade, state, loc, adjacency, result, sectorAssignment, corpsTerritoryOsidsByCorps, isActiveSectorOperationParticipant } = ctx;
+
+    if (isActiveSectorOperationParticipant) return false;
 
     // Only fires for brigades NOT in any sector
     if (!state.military.corps_front_sectors) return false;
@@ -471,6 +518,11 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
         return targets;
     });
     if (corpsTerritory.size === 0) return false;
+    const allowedCorpsTerritory = restrictSectorMarchDestinations(brigade, loc, corpsTerritory);
+    if (allowedCorpsTerritory.size === 0) {
+        result.posture_orders.push({ brigade_id: brigade.id, posture: 'defend' });
+        return true;
+    }
 
     // BFS from current location toward nearest corps territory OSID
     const { targetFound, parent } = returnToCorpsProfileTime('.returnToCorps.bfs', () => {
@@ -487,7 +539,7 @@ export function evaluateReturnToCorps(ctx: BrigadeEvaluationContext): boolean {
                 if (pc[n] !== brigade.faction) continue;
                 visited.add(n);
                 parent.set(n, curr);
-                if (corpsTerritory.has(n)) { targetFound = n; break; }
+                if (allowedCorpsTerritory.has(n)) { targetFound = n; break; }
                 queue.push(n);
             }
         }
@@ -522,7 +574,9 @@ const POCKET_EVACUATION_MAX_TERRITORY = 2;
  * Placed after evaluateReturnToCorps and before hold/defense evaluations.
  */
 export function evaluatePocketEvacuation(ctx: BrigadeEvaluationContext): boolean {
-    const { brigade, state, loc, result, sectorAssignment } = ctx;
+    const { brigade, state, loc, result, sectorAssignment, isActiveSectorOperationParticipant } = ctx;
+
+    if (isActiveSectorOperationParticipant) return false;
 
     if (!state.military.corps_front_sectors) return false;
 
