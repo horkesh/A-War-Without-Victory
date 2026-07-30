@@ -36,6 +36,10 @@ describe('map context lifecycle', () => {
       { top: 140, right: 440, bottom: 184, left: 400 },
       { top: 124, right: 420, bottom: 200, left: 380 },
     )).toEqual({ top: 16, right: 20, bottom: 0, left: 20 });
+    expect(additionalCameraPadding(
+      { top: 140, right: 440, bottom: 184, left: 400 },
+      { left: 380 },
+    )).toEqual({ top: 140, right: 440, bottom: 184, left: 20 });
   });
 
   it('detaches live map refs before finalizing WebGL owners', () => {

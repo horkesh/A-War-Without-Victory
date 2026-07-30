@@ -24419,3 +24419,19 @@ Residual non-gating balance/deployment advisories are recorded in `docs/40_repor
 Documentation synchronized: Engine Invariants, Systems Manual, War Termination Spec, Determinism Test Matrix, C3 freeze manifest, calibration and game-state masters, report indexes, Command Board, Master Roadmap, release-review plans, reusable knowledge ledger, napkin, implementation report, and this append-only ledger. `docs/10_canon/FORAWWV.md` was not edited.
 
 Scope: this packet changes deterministic simulation outputs, scenario defaults, generated startup/baseline/calibration artifacts, and the required 188-week CI health floor. It does not create a package, installer, tag, or release publication.
+
+## 2026-07-30 - Level 1 assisted-execution verification, RS20 rerun, and camera-padding type guard
+
+**Type:** Player-mode autonomy verification / deterministic comparison evidence / tactical-map build repair.
+
+**Change:** Reverified the already-landed broader assisted-execution contract on current `origin/main`: Level 0 excludes the selected player faction from routine staff control, Level 1+ includes it, headless auto-control includes all factions, and the player-faction order pass preserves existing attack, movement, and posture orders. Reran the scenario-bound RS 20-turn closest-policy comparison twice from startup snapshot SHA-256 `fcb9afd6ca6c5e8ac4b5ddb635b5f103624efde053f323deb5b1c1bcf1ea93f0`; both artifacts were byte-identical at SHA-256 `dedd6753daa7b075c6f7c2d904e106cd7b11cc10b69a0168e2ea025903cb397b`. Headless ended HRHB/RBiH/RS `87/255/370`; Level 1 player ended `87/259/366`, narrowing the RS gap from the 2026-07-11 closest-policy `-8` to `-4` and the total absolute faction-count distance from 24 to 8. The comparison remains `player_choice_vs_headless`, not state equivalence, and intervening mainline changes prevent attributing the entire numerical move to assisted execution.
+
+The verification run also exposed a current-main TypeScript mismatch: MapLibre returns partial camera padding while `additionalCameraPadding` required all four sides. The helper now accepts partial applied padding and treats missing sides as zero, preventing `NaN` camera offsets and restoring the typecheck. A focused regression failed with `NaN` before the fix and passed afterward.
+
+**Files:** `src/ui/map/map/mapContextLifecycle.ts`, `tests/ui/map_context_lifecycle.test.ts`, `docs/40_reports/playtests/20260710_rs20_calibration_comparison.md`, `docs/PROJECT_LEDGER.md`.
+
+**Artifacts:** `tmp-paradox-qa-20260729/desktop-rs-20turn-level1-current-main-v1.json` and `tmp-paradox-qa-20260729/desktop-rs-20turn-level1-current-main-v2.json` (local evidence roots; untracked).
+
+**Verification:** Assisted-execution plus camera-lifecycle pack passed 5 files / 125 tests after the camera test's required red failure. `npm.cmd run typecheck` passed. `npm.cmd run ci:structural-fingerprint:check` passed at `4fcdb21ab4bcff14` with final state hash `b4411ca087401148`. `npm.cmd run qa:player-journeys` passed 44 files / 756 tests. `npm.cmd run desktop:release:check` passed after installing the committed nested tactical-map dependencies. The serial fast-suite wrapper exceeded a 20-minute command cap, and a direct scenario-inclusive `npm.cmd run test:vitest -- --pool=forks --reporter=dot` retry exceeded a 40-minute cap; neither emitted a summary, neither left orphaned workers, and neither is claimed as passing.
+
+**Determinism and scope:** No simulation, scenario, startup snapshot, baseline, serialization, faction-selection, or order-merge code changed in this pass. The two comparison artifacts are byte-identical, and the structural fingerprint remains on the accepted floor. The only runtime change is a tactical-map camera-padding guard for omitted MapLibre padding sides. `docs/10_canon/FORAWWV.md` was not edited; no package, installer, tag, publication, commit, push, or PR was created.
