@@ -2,11 +2,37 @@
 
 Local-only QA and repair report. No staging, commits, pushes, PRs, installer work, or release tagging.
 
+## Current-Main Rerun - 2026-07-29
+
+The closest-policy comparison was rerun twice from `origin/main` commit `eac7ee5236c3ddc6852fefc7a5f9e6c264381b13` with Level 1 Assisted, historical-default events, accepted historical operations, and standing paramilitary authority. Both runs produced byte-identical JSON artifacts with SHA-256 `dedd6753daa7b075c6f7c2d904e106cd7b11cc10b69a0168e2ea025903cb397b`.
+
+| Field | Value |
+| --- | --- |
+| Comparison kind | `player_choice_vs_headless` |
+| Scenario source | `data/scenarios/apr1992_definitive_52w.json` |
+| Startup snapshot | `data/derived/startup/apr_1992_initial_save.json` |
+| Startup SHA-256 | `fcb9afd6ca6c5e8ac4b5ddb635b5f103624efde053f323deb5b1c1bcf1ea93f0` |
+| Player autonomy | Level 1 Assisted |
+| Historical operations | Accept as they appear |
+| Event decisions | Historical default, including non-player historical mode |
+| Paramilitary requests | Standing allow from turn 0; same-turn resolution |
+| Decision transcript | 16 ordered rows |
+| Artifacts | `tmp-paradox-qa-20260729/desktop-rs-20turn-level1-current-main-v1.json`, `tmp-paradox-qa-20260729/desktop-rs-20turn-level1-current-main-v2.json` |
+
+Fresh turn-20 result:
+
+| Branch | HRHB | RBiH | RS | RS delta |
+| --- | ---: | ---: | ---: | ---: |
+| Current-main headless | 87 | 255 | 370 | 0 |
+| Current-main Level 1 player | 87 | 259 | 366 | -4 |
+
+Numerically, the player path is materially closer to the same-snapshot headless corridor than the 2026-07-11 closest-policy result: the RS gap narrowed from `-8` to `-4`, and the total absolute faction-count distance fell from 24 (`|-4| + |+12| + |-8|`) to 8 (`|0| + |+4| + |-4|`). This does not prove state equivalence: the final state hashes remain different and the artifact is still correctly labeled `player_choice_vs_headless`. It also does not attribute the improvement solely to assisted execution, because both comparisons already used Level 1 and intervening mainline simulation/startup changes moved the headless corridor itself.
+
 ## Correction - 2026-07-11
 
 The original `RS -3` conclusion in this report is superseded and must not be used as calibration-equivalence evidence. The player branch started from `apr1992_definitive_52w`, while the cited headless comparator was an older `apr1992_definitive_40w` run with different startup control and scenario configuration. The probe also hardcoded final faction totals and did not record the player/headless decision transcript.
 
-The corrected scenario-bound harness is `tools/ai_play/desktop_calibration_compare.ts`, exposed as `npm.cmd run qa:desktop-calibration`. The current closest-policy artifact after the defended-target correction is `tmp-paradox-qa-20260710/desktop-rs-20turn-defended-target-guard-v4.json`.
+The corrected scenario-bound harness is `tools/ai_play/desktop_calibration_compare.ts`, exposed as `npm.cmd run qa:desktop-calibration`. The 2026-07-11 closest-policy artifact after the defended-target correction is `tmp-paradox-qa-20260710/desktop-rs-20turn-defended-target-guard-v4.json`; the current-main rerun above supersedes it as the latest numerical comparison.
 
 Corrected provenance and policy:
 

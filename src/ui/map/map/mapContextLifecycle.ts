@@ -13,13 +13,13 @@ interface CameraPadding {
 
 export function additionalCameraPadding(
   requested: CameraPadding,
-  alreadyApplied: CameraPadding,
+  alreadyApplied: Partial<CameraPadding>,
 ): CameraPadding {
   return {
-    top: Math.max(0, requested.top - alreadyApplied.top),
-    right: Math.max(0, requested.right - alreadyApplied.right),
-    bottom: Math.max(0, requested.bottom - alreadyApplied.bottom),
-    left: Math.max(0, requested.left - alreadyApplied.left),
+    top: Math.max(0, requested.top - (alreadyApplied.top ?? 0)),
+    right: Math.max(0, requested.right - (alreadyApplied.right ?? 0)),
+    bottom: Math.max(0, requested.bottom - (alreadyApplied.bottom ?? 0)),
+    left: Math.max(0, requested.left - (alreadyApplied.left ?? 0)),
   };
 }
 
