@@ -2,6 +2,7 @@
 
 const crypto = require('node:crypto');
 const fs = require('node:fs');
+const os = require('node:os');
 const path = require('node:path');
 const { performance } = require('node:perf_hooks');
 const { _electron: electron } = require('playwright');
@@ -106,6 +107,69 @@ function percentile(values, requestedPercentile) {
   return Math.round((low + (high - low) * (rank - lowIndex)) * 1000) / 1000;
 }
 
+function classifyProcessorCount(value) {
+  if (!Number.isInteger(value) || value < 1) throw new Error('Logical processor count must be positive');
+  if (value <= 4) return '1-4';
+  if (value <= 8) return '5-8';
+  if (value <= 16) return '9-16';
+  if (value <= 32) return '17-32';
+  return '33-plus';
+}
+
+function classifyMemoryBytes(value) {
+  if (!Number.isFinite(value) || value <= 0) throw new Error('Total memory must be positive');
+  const gibibytes = Math.ceil(value / (1024 ** 3));
+  if (gibibytes <= 8) return '1-8';
+  if (gibibytes <= 16) return '9-16';
+  if (gibibytes <= 32) return '17-32';
+  if (gibibytes <= 64) return '33-64';
+  return '65-plus';
+}
+
+function classifyCpu(cpuModel, architecture) {
+  const normalized = String(cpuModel ?? '').toLowerCase();
+  if (normalized.includes('apple')) return 'apple-silicon';
+  if (normalized.includes('intel')) return `intel-${architecture}`;
+  if (normalized.includes('amd')) return `amd-${architecture}`;
+  if (String(architecture).includes('arm')) return 'other-arm';
+  return `other-${architecture}`;
+}
+
+function buildMachineManifest(input) {
+  if (!input.viewport) return null;
+  const width = Number(input.viewport.width);
+  const height = Number(input.viewport.height);
+  const deviceScaleFactor = Number(input.viewport.deviceScaleFactor);
+  if (!Number.isInteger(width) || width < 320 || width > 16384) {
+    throw new Error('Viewport width must be an integer from 320 through 16384');
+  }
+  if (!Number.isInteger(height) || height < 240 || height > 16384) {
+    throw new Error('Viewport height must be an integer from 240 through 16384');
+  }
+  if (!Number.isFinite(deviceScaleFactor) || deviceScaleFactor < 0.5 || deviceScaleFactor > 8) {
+    throw new Error('Viewport device scale factor must be from 0.5 through 8');
+  }
+  return {
+    platform: String(input.platform),
+    architecture: String(input.architecture),
+    cpu_class: classifyCpu(input.cpuModel, input.architecture),
+    logical_processor_class: classifyProcessorCount(input.logicalProcessors),
+    memory_gib_class: classifyMemoryBytes(input.totalMemoryBytes),
+    viewport: {
+      width,
+      height,
+      device_scale_factor: Math.round(deviceScaleFactor * 1000) / 1000,
+    },
+  };
+}
+
+function redactInspectorEndpoints(value) {
+  return String(value ?? '').replace(
+    /\bws:\/\/(?:127\.0\.0\.1|localhost|\[::1\]):\d+\/[0-9a-z-]+\b/gi,
+    '<inspector-endpoint>',
+  );
+}
+
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -129,7 +193,37 @@ function sanitizeDiagnosticLine(value, outputDirectory) {
   ]) {
     if (needle) line = line.split(String(needle)).join(replacement);
   }
+  line = redactInspectorEndpoints(line);
   return line.slice(0, 1600);
+}
+
+function classifyMainProcessStderr(lines) {
+  const counts = {
+    inspector_help: 0,
+    inspector_shutdown: 0,
+    inspector_startup: 0,
+  };
+  const unexpectedLines = [];
+  for (const rawLine of lines) {
+    const line = String(rawLine ?? '').trim();
+    if (/^Debugger ending on (?:ws:\/\/|<inspector-endpoint>)/i.test(line)) {
+      counts.inspector_shutdown += 1;
+    } else if (/^Debugger listening on (?:ws:\/\/|<inspector-endpoint>)/i.test(line)) {
+      counts.inspector_startup += 1;
+    } else if (line === 'For help, see: https://nodejs.org/en/docs/inspector') {
+      counts.inspector_help += 1;
+    } else {
+      unexpectedLines.push(redactInspectorEndpoints(line));
+    }
+  }
+  const expectedCategories = {};
+  for (const key of ['inspector_help', 'inspector_shutdown', 'inspector_startup']) {
+    if (counts[key] > 0) expectedCategories[key] = counts[key];
+  }
+  return {
+    expected_categories: expectedCategories,
+    unexpected_lines: unexpectedLines,
+  };
 }
 
 function attachPageDiagnostics(page, diagnostics) {
@@ -294,6 +388,16 @@ function counterDelta(after, before) {
   };
 }
 
+function hasOrderedTransitionDurations(durations) {
+  let previous = Number.NEGATIVE_INFINITY;
+  for (const mark of requiredTransitionMarks) {
+    const value = Number(durations?.[mark]);
+    if (!Number.isFinite(value) || value < previous) return false;
+    previous = value;
+  }
+  return true;
+}
+
 async function profileOneCycle(frame, kind, expectedTurn) {
   const before = await profileSnapshot(frame);
   await frame.evaluate((selectedKind) => {
@@ -322,6 +426,9 @@ async function profileOneCycle(frame, kind, expectedTurn) {
   if (missingMarks.length > 0) {
     throw new Error(`Incomplete map transition sample; missing: ${missingMarks.join(', ')}`);
   }
+  if (!hasOrderedTransitionDurations(sample.durations_ms)) {
+    throw new Error('Out-of-order map transition sample');
+  }
   if (sample.loaded_turn !== expectedTurn || mapTurn !== String(expectedTurn)) {
     throw new Error(`Exact-turn readiness failed: expected ${expectedTurn}, sample ${sample.loaded_turn}, map ${mapTurn}`);
   }
@@ -338,11 +445,6 @@ async function profileOneCycle(frame, kind, expectedTurn) {
     counters: counterDelta(after.lifetime_counters, before.lifetime_counters),
     lifetime_counters: after.lifetime_counters,
   };
-}
-
-function expectedInspectorLine(line) {
-  return /^Debugger ending on ws:\/\/127\.0\.0\.1:\d+\/[0-9a-f-]+$/i.test(line)
-    || line === 'For help, see: https://nodejs.org/en/docs/inspector';
 }
 
 async function runLaunch(launchIndex, options, outputDirectory) {
@@ -392,11 +494,17 @@ async function runLaunch(launchIndex, options, outputDirectory) {
 
   let lifetimeCounters = null;
   let cold = null;
+  let viewport = null;
   const warmups = [];
   const measured = [];
   try {
     const page = await waitForGamePage(application);
     attach(page);
+    viewport = await page.evaluate(() => ({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      deviceScaleFactor: window.devicePixelRatio,
+    }));
     const frame = await startCleanCampaign(page);
     const expectedTurn = await readCurrentTurn(frame);
     cold = await profileOneCycle(frame, 'cold', expectedTurn);
@@ -413,11 +521,11 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     await application.close().catch(() => {});
   }
 
-  const expectedMainProcessStderr = diagnostics.main_process_stderr.filter(expectedInspectorLine);
-  const unexpectedMainProcessStderr = diagnostics.main_process_stderr.filter((line) => !expectedInspectorLine(line));
+  const stderrClassification = classifyMainProcessStderr(diagnostics.main_process_stderr);
   return {
     launch_index: launchIndex,
     runtime,
+    viewport,
     cold,
     warmups,
     measured,
@@ -427,15 +535,23 @@ async function runLaunch(launchIndex, options, outputDirectory) {
       page_errors: diagnostics.page_errors,
       request_failures: diagnostics.request_failures,
       http_errors: diagnostics.http_errors,
-      expected_main_process_stderr: expectedMainProcessStderr,
-      main_process_stderr: unexpectedMainProcessStderr,
+      expected_main_process_stderr: stderrClassification.expected_categories,
+      main_process_stderr: stderrClassification.unexpected_lines,
       main_process_stdout: diagnostics.main_process_stdout,
     },
   };
 }
 
 function buildSummary(launches) {
-  const cold = launches.map((launch) => launch.cold?.durations_ms?.interactive).filter(Number.isFinite);
+  const allSamples = launches.flatMap((launch) => [
+    ...(launch.cold ? [launch.cold] : []),
+    ...(launch.warmups ?? []),
+    ...(launch.measured ?? []),
+  ]);
+  const completeOrdered = allSamples.filter(
+    (sample) => hasOrderedTransitionDurations(sample.durations_ms),
+  ).length;
+  const cold = launches.map((launch) => launch.cold?.durations_ms?.['current-state-rendered']).filter(Number.isFinite);
   const warm = launches.flatMap((launch) => launch.measured)
     .map((sample) => sample.durations_ms?.interactive)
     .filter(Number.isFinite);
@@ -450,6 +566,11 @@ function buildSummary(launches) {
       samples: warm.length,
       p50: percentile(warm, 50),
       p95: percentile(warm, 95),
+    },
+    sample_integrity: {
+      samples: allSamples.length,
+      complete_ordered: completeOrdered,
+      invalid: allSamples.length - completeOrdered,
     },
     runtime_diagnostics: {
       console_errors_and_warnings: allDiagnostics.reduce((sum, row) => sum + row.console_errors_and_warnings.length, 0),
@@ -477,8 +598,9 @@ async function main() {
     failure = error;
   }
   const repository_saves = assertRepositorySavesUnchanged(repositorySavesBefore);
+  const processors = os.cpus();
   const evidence = {
-    schema_version: 1,
+    schema_version: 2,
     label: options.label,
     options: { cycles: options.cycles, warmups: options.warmups, cold_launches: 3 },
     runtime: {
@@ -489,6 +611,14 @@ async function main() {
       electron: launches[0]?.runtime?.electron ?? null,
       chromium: launches[0]?.runtime?.chromium ?? null,
     },
+    machine: buildMachineManifest({
+      platform: process.platform,
+      architecture: process.arch,
+      cpuModel: processors[0]?.model ?? '',
+      logicalProcessors: processors.length,
+      totalMemoryBytes: os.totalmem(),
+      viewport: launches[0]?.viewport ?? null,
+    }),
     repository_saves,
     launches,
     summary: buildSummary(launches),
@@ -510,7 +640,10 @@ if (require.main === module) {
 
 module.exports = {
   assertRepositorySavesUnchanged,
+  buildMachineManifest,
   buildSummary,
+  classifyMainProcessStderr,
+  hasOrderedTransitionDurations,
   parseOptions,
   percentile,
   snapshotRepositorySaves,

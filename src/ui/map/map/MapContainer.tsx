@@ -1271,7 +1271,7 @@ export function MapContainer() {
       });
       countMapTransitionConstruction();
       markMapTransition('map-created');
-      map.once('load', () => markMapTransition('style-loaded'));
+      map.once('style.load', () => markMapTransition('style-loaded'));
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
         if (e.error?.message?.includes('Unimplemented type')) return;

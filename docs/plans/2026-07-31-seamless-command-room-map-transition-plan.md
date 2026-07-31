@@ -700,7 +700,7 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 
 | Phase | Status | Commit | Verification | Evidence |
 |---|---|---|---|---|
-| 0 Baseline | Complete | this phase commit | 19 focused + 20 Electron-contract Vitest tests; typecheck; tactical-map and warroom builds; 3 cold launches + 3 warmups + 20 measured warm cycles per launch | `tmp-map-transition-perf/baseline-complete-marks/baseline.json` |
+| 0 Baseline | Complete | Phase 0 commit + review-fix follow-up | 25 focused + 20 Electron-contract Vitest tests; typecheck; tactical-map and warroom builds; 3 cold launches + 3 warmups + 20 measured warm cycles per launch | `tmp-map-transition-perf/baseline-ordered-current-state/baseline.json` |
 | 1 Persistent viewport | Not started | — | — | — |
 | 2 Stable shell | Not started | — | — | — |
 | 3 Resource/cache | Not started | — | — | — |
@@ -708,7 +708,9 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 | 5 Acceptance | Not started | — | — | — |
 | 6 Closeout | Not started | — | — | — |
 
-Phase 0 recorded cold current-state p50/p95 of 5526.5/5658.26 ms and warm-switch p50/p95 of 4009.95/4265.585 ms on app 0.9.9-beta.1, Electron 41.0.3, and Chromium 146.0.7680.80. All 72 recorded transitions contained every required milestone and current-state proof; unexpected diagnostics, stale samples, and lifecycle imbalances were zero. Every one of the 60 measured warm cycles reconstructed and released one map and repeated static resource requests, establishing the Phase 1 lifecycle target without changing player behavior.
+The authoritative Phase 0 baseline records cold current-state-rendered p50/p95 of 5329.2/5616.48 ms and warm interactive-switch p50/p95 of 4098.25/4380.36 ms on app 0.9.9-beta.1, Electron 41.0.3, and Chromium 146.0.7680.80. Its bounded machine manifest is Windows x64, AMD x64 CPU class, 9–16 logical processors, 17–32 GiB memory, and a 1386×837 viewport at 1.5 device scale. All 72 transitions follow the locked milestone order and contain current-state proof; unexpected diagnostics, stale samples, lifecycle imbalances, raw inspector URLs, and raw inspector UUIDs are zero. Expected inspector shutdown/help output is retained only as stable counts. Every one of the 60 measured warm cycles reconstructed and released one map and repeated static resource requests, establishing the Phase 1 lifecycle target without changing player behavior.
+
+`tmp-map-transition-perf/baseline-ordered-current-state/baseline.json` supersedes the retained `baseline-complete-marks` artifact. The superseded artifact is not valid acceptance evidence because all 72 samples placed full MapLibre `load` after current-state render, and its field labeled `cold_current_state_ms` incorrectly summarized `interactive` instead of `current-state-rendered`.
 
 ---
 
