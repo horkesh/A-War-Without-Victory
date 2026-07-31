@@ -90,4 +90,53 @@ describe('save migration round-trip fixture contract', () => {
             reloaded.military.formations![formationId]!.brigade_history!.tg_participations![0],
         ).toEqual(record);
     });
+
+    it('round-trips absent and present TG exhaustion/AHQ recovery markers without a schema bump', () => {
+        const raw = JSON.parse(readFileSync(
+            resolve(process.cwd(), 'data', 'derived', 'startup', 'apr_1992_initial_save.json'),
+            'utf8',
+        )) as GameState;
+        const oldShape = structuredClone(raw);
+        expect(serializeState(deserializeState(JSON.stringify(oldShape)))).not.toContain('last_exhaustion_tick_turn');
+        expect(serializeState(deserializeState(JSON.stringify(oldShape)))).not.toContain('recovery_started_turn');
+
+        const formationId = Object.keys(raw.military.formations ?? {}).sort()[0]!;
+        const formation = raw.military.formations![formationId]!;
+        formation.corps_id ??= formationId;
+        formation.location_osid ??= 'op:test:marker';
+        raw.military.tactical_groups = {
+            'tg:marker:op:anchor': {
+                id: 'tg:marker:op:anchor',
+                corps_id: formation.corps_id,
+                op_id: 'Marker Op',
+                anchor_brigade_id: formationId,
+                donor_contributions: [],
+                location_osid: formation.location_osid,
+                status: 'engaged',
+                formed_on_turn: 4,
+                cohesion: 88,
+                last_exhaustion_tick_turn: 9,
+            },
+        };
+        raw.military.army_hq_operations = {
+            'ahq:RBiH:marker': {
+                id: 'ahq:RBiH:marker',
+                faction_id: 'RBiH',
+                name: 'Marker Op',
+                anchor_corps_id: formation.corps_id,
+                donor_corps_ids: [],
+                status: 'completed',
+                formed_on_turn: 4,
+                scenario_year: 0,
+                recovery_started_turn: 9,
+            },
+        };
+
+        const serialized = serializeState(deserializeState(JSON.stringify(raw)));
+        const reloaded = deserializeState(serialized);
+        expect(reloaded.schema_version).toBe(CURRENT_SCHEMA_VERSION);
+        expect(reloaded.military.tactical_groups?.['tg:marker:op:anchor']?.last_exhaustion_tick_turn).toBe(9);
+        expect(reloaded.military.army_hq_operations?.['ahq:RBiH:marker']?.recovery_started_turn).toBe(9);
+        expect(serializeState(reloaded)).toBe(serialized);
+    });
 });

@@ -115,13 +115,19 @@ describe('Army-HQ operation lifecycle', () => {
         enterOperationRecovery(state, 'corps_a', opA, 104, 'completed');
 
         expect(state).toEqual(afterFirstRecovery);
-        expect(state.military.army_hq_operations?.[AHQ_A]).toMatchObject({ status: 'recovering' });
+        expect(state.military.army_hq_operations?.[AHQ_A]).toMatchObject({
+            status: 'recovering',
+            recovery_started_turn: 104,
+        });
         expect(state.military.army_hq_operations?.[AHQ_A]?.tg_id).toBeUndefined();
         expect(opA).not.toHaveProperty('force_launch');
 
         completeOperationLifecycle(state, 'corps_a', opA);
         completeOperationLifecycle(state, 'corps_a', opA);
-        expect(state.military.army_hq_operations?.[AHQ_A]).toMatchObject({ status: 'completed' });
+        expect(state.military.army_hq_operations?.[AHQ_A]).toMatchObject({
+            status: 'completed',
+            recovery_started_turn: 104,
+        });
         expect(state.military.army_hq_operations?.[AHQ_A]?.tg_id).toBeUndefined();
         expect(state.military.army_hq_operations?.[AHQ_B]?.status).toBe('planning');
     });
@@ -195,7 +201,7 @@ describe('Army-HQ operation lifecycle', () => {
         expect(donor.personnel_lent_by_tg).toBeUndefined();
         expect(donor.equipment_lent_by_tg).toBeUndefined();
         expect(donor.tg_cooldown_until_turn).toBe(110);
-        expect(receiptA).toMatchObject({ status: 'recovering' });
+        expect(receiptA).toMatchObject({ status: 'recovering', recovery_started_turn: 104 });
         expect(receiptA.tg_id).toBeUndefined();
 
         state.military.formations!.candidate_anchor = makeFormation({
@@ -230,7 +236,15 @@ describe('Army-HQ operation lifecycle', () => {
 
         expect(receiptA).toMatchObject({ status: 'completed' });
         expect(receiptA.tg_id).toBeUndefined();
-        expect(formTacticalGroup(state, candidate).tg_id).not.toBeNull();
+        expect(formTacticalGroup(state, candidate)).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+        expect(formTacticalGroup(state, { ...candidate, current_turn: 107 })).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+        expect(formTacticalGroup(state, { ...candidate, current_turn: 108 }).tg_id).not.toBeNull();
         expect(conflictingTg.status).toBe('forming');
         expect(otherCorpsTg.status).toBe('forming');
     });
@@ -331,9 +345,10 @@ describe('Army-HQ operation lifecycle', () => {
         expect(completed.tg_id).toBeUndefined();
     });
 
-    it('keeps recovering Army-HQ operations cap-active until the four-turn tail lands', () => {
+    it('keeps the Army-HQ cap tail active over the half-open R..R+4 interval', () => {
         const state = makeState();
         state.military.army_hq_operations![AHQ_A]!.status = 'recovering';
+        state.military.army_hq_operations![AHQ_A]!.recovery_started_turn = 103;
         state.military.army_hq_operations![AHQ_B]!.status = 'completed';
         state.military.tactical_groups = {
             existing_a: tgFor(operation('corps_a'), 'corps_a', 'anchor_corps_a'),
@@ -361,5 +376,144 @@ describe('Army-HQ operation lifecycle', () => {
         });
 
         expect(result).toEqual({ tg_id: null, rejection_reason: 'faction_tg_cap_reached' });
+
+        expect(formTacticalGroup(state, {
+            op_id: 'Cap Candidate', anchor_brigade_id: 'candidate_anchor', donors: [donor], current_turn: 106,
+        })).toEqual({ tg_id: null, rejection_reason: 'faction_tg_cap_reached' });
+
+        state.military.event_flags = { coha_active: true } as any;
+        expect(formTacticalGroup(state, {
+            op_id: 'Cap Candidate', anchor_brigade_id: 'candidate_anchor', donors: [donor], current_turn: 107,
+        }).tg_id).not.toBeNull();
+    });
+
+    it('counts overlapping Army-HQ tails as one faction boolean and ignores completed expired tails', () => {
+        const state = makeState();
+        const receiptA = state.military.army_hq_operations![AHQ_A]!;
+        const receiptB = state.military.army_hq_operations![AHQ_B]!;
+        receiptA.status = 'completed';
+        receiptA.recovery_started_turn = 100;
+        receiptB.status = 'completed';
+        receiptB.recovery_started_turn = 102;
+        state.military.tactical_groups = {
+            existing_a: tgFor(operation('corps_a'), 'corps_a', 'anchor_corps_a'),
+            existing_b: tgFor(operation('corps_b'), 'corps_b', 'anchor_corps_b'),
+        };
+        state.military.formations!.candidate_anchor = makeFormation({
+            id: 'candidate_anchor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        state.military.formations!.candidate_donor = makeFormation({
+            id: 'candidate_donor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+            location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+        });
+        const donor: TgDonorContribution = {
+            brigade_id: 'candidate_donor', source_corps_id: 'corps_c', distance_hops: 0,
+            personnel_lent: 300,
+            heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+            casualties_so_far: 0,
+            equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },
+            cohesion_bleed_applied: 0,
+        };
+        const candidate = { op_id: 'Overlap', anchor_brigade_id: 'candidate_anchor', donors: [donor] } as const;
+
+        expect(formTacticalGroup(state, { ...candidate, current_turn: 105 })).toEqual({
+            tg_id: null,
+            rejection_reason: 'faction_tg_cap_reached',
+        });
+        expect(formTacticalGroup(state, { ...candidate, current_turn: 106 }).tg_id).not.toBeNull();
+    });
+
+    it('reconciles legacy recovery markers only from an exactly matching live recovery operation', () => {
+        const state = makeState();
+        const receiptA = state.military.army_hq_operations![AHQ_A]!;
+        const receiptB = state.military.army_hq_operations![AHQ_B]!;
+        const opA = state.military.corps_command!.corps_a!.active_operations[0]!;
+        const opB = state.military.corps_command!.corps_b!.active_operations[0]!;
+        receiptA.status = 'recovering';
+        opA.phase = 'recovery';
+        opA.phase_started_turn = 101;
+        receiptB.status = 'recovering';
+        opB.phase = 'execution';
+        opB.phase_started_turn = 102;
+
+        reconcileLoadedArmyHqOperationLifecycle(state);
+
+        expect(receiptA.recovery_started_turn).toBe(101);
+        expect(receiptB.recovery_started_turn).toBeUndefined();
+    });
+
+    it.each(['planning', 'executing'] as const)(
+        'normalizes an exactly matched legacy %s receipt to the live CorpsOperation recovery clock',
+        (legacyStatus) => {
+            const state = makeState();
+            const receiptA = state.military.army_hq_operations![AHQ_A]!;
+            const receiptB = state.military.army_hq_operations![AHQ_B]!;
+            const opA = state.military.corps_command!.corps_a!.active_operations[0]!;
+            receiptA.status = legacyStatus;
+            receiptB.status = 'completed';
+            opA.phase = 'recovery';
+            opA.phase_started_turn = 101;
+            state.military.tactical_groups = {
+                existing_a: tgFor(operation('corps_a'), 'corps_a', 'anchor_corps_a'),
+                existing_b: tgFor(operation('corps_b'), 'corps_b', 'anchor_corps_b'),
+            };
+            state.military.formations!.candidate_anchor = makeFormation({
+                id: 'candidate_anchor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+                location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+            });
+            state.military.formations!.candidate_donor = makeFormation({
+                id: 'candidate_donor', faction: 'RBiH', corps_id: 'corps_c', hq_sid: 'S3',
+                location_osid: 'op:friendly:corps_c', personnel: 1500, cohesion: 70,
+            });
+            const donor: TgDonorContribution = {
+                brigade_id: 'candidate_donor', source_corps_id: 'corps_c', distance_hops: 0,
+                personnel_lent: 300,
+                heavy_equipment_lent: { tanks: 0, artillery: 0, aa_systems: 0 },
+                casualties_so_far: 0,
+                equipment_losses_so_far: { tanks: 0, artillery: 0, aa_systems: 0 },
+                cohesion_bleed_applied: 0,
+            };
+
+            reconcileLoadedArmyHqOperationLifecycle(state);
+
+            expect(receiptA).toMatchObject({ status: 'recovering', recovery_started_turn: 101 });
+            expect(formTacticalGroup(state, {
+                op_id: 'Legacy Cap', anchor_brigade_id: 'candidate_anchor', donors: [donor], current_turn: 104,
+            })).toEqual({ tg_id: null, rejection_reason: 'faction_tg_cap_reached' });
+            expect(formTacticalGroup(state, {
+                op_id: 'Legacy Cap', anchor_brigade_id: 'candidate_anchor', donors: [donor], current_turn: 105,
+            }).tg_id).not.toBeNull();
+        },
+    );
+
+    it('completes stale legacy statuses without inventing a recovery tail and preserves old completed absence', () => {
+        const state = makeState();
+        const stale = state.military.army_hq_operations![AHQ_A]!;
+        const oldCompleted = state.military.army_hq_operations![AHQ_B]!;
+        stale.status = 'recovering';
+        oldCompleted.status = 'completed';
+        state.military.corps_command!.corps_a!.active_operations = [];
+        delete state.military.tactical_groups![stale.tg_id!];
+
+        reconcileLoadedArmyHqOperationLifecycle(state);
+
+        expect(stale).toMatchObject({ status: 'completed' });
+        expect(stale.recovery_started_turn).toBeUndefined();
+        expect(oldCompleted.recovery_started_turn).toBeUndefined();
+    });
+
+    it('completes a stale executing legacy receipt without inventing a recovery tail', () => {
+        const state = makeState();
+        const stale = state.military.army_hq_operations![AHQ_A]!;
+        stale.status = 'executing';
+        state.military.corps_command!.corps_a!.active_operations = [];
+        delete state.military.tactical_groups![stale.tg_id!];
+
+        reconcileLoadedArmyHqOperationLifecycle(state);
+
+        expect(stale).toMatchObject({ status: 'completed' });
+        expect(stale.tg_id).toBeUndefined();
+        expect(stale.recovery_started_turn).toBeUndefined();
     });
 });

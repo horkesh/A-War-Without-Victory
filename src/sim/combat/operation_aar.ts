@@ -173,7 +173,7 @@ export interface OperationAAR {
     force_quality_max_axes_at_launch?: number;
     /** Why the operation entered recovery — diagnostic carryover from
      *  `CorpsOperation.recovery_reason`. Preserved on AAR so post-mortem tools
-     *  can distinguish completed vs max_failures vs orphaned vs no_logged_attempt
+     *  can distinguish completion, failure, and typed TG exhaustion reasons
      *  without source spelunking through the lifecycle. */
     recovery_reason?: CorpsOperation['recovery_reason'];
     /** Commander's estimated force ratio at finalize — diagnostic carryover from

@@ -76,6 +76,7 @@ import { tickPreparation, hasUnresolvedProbe, autoResolveProbe, formTgsAtReadyTr
 import {
     completeOperationLifecycle,
     enterOperationRecovery,
+    evaluateOperationTacticalGroupExhaustion,
     markOperationExecuting,
 } from './tactical_group_lifecycle.js';
 import {
@@ -902,6 +903,8 @@ function getRecoveryDuration(op: CorpsOperation): number {
         case 'participants_below_attack_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
+        case 'tg_cohesion_exhausted':
+        case 'tg_max_lifecycle':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(objectiveCount / 2));
@@ -961,6 +964,8 @@ function getMultiAxisRecoveryDuration(op: CorpsOperation): number {
         case 'participants_below_attack_floor':
         case 'no_approach_osid':
         case 'zero_eligible_axis':
+        case 'tg_cohesion_exhausted':
+        case 'tg_max_lifecycle':
             return 1;
         case 'completed':
             return Math.max(1, Math.ceil(maxLen / 2));
@@ -1441,6 +1446,11 @@ export function advanceSectorOffensives(
                 applyArtilleryPreparation(state, faction, op);
             }
         } else if (op.phase === 'execution') {
+            const tgExhaustionReason = evaluateOperationTacticalGroupExhaustion(state, corpsId, op, turn);
+            if (tgExhaustionReason != null) {
+                beginRecovery(op, turn, tgExhaustionReason, state, corpsId);
+                continue;
+            }
             if (hasOnlyPoliticallyBlockedCurrentObjectives(state, corpsId, faction, op)) {
                 beginRecovery(op, turn, 'political_blocked', state);
                 continue;
@@ -2555,6 +2565,11 @@ export function evaluateOperationProgress(
                     markOperationExecuting(state, corps.id, op);
                 }
             } else if (op.phase === 'execution') {
+                const tgExhaustionReason = evaluateOperationTacticalGroupExhaustion(state, corps.id, op, turn);
+                if (tgExhaustionReason != null) {
+                    beginRecovery(op, turn, tgExhaustionReason, state, corps.id);
+                    continue;
+                }
                 // Check progress
                 const targets = op.target_settlements ?? [];
                 if (targets.length > 0) {

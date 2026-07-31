@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
     completeOperationLifecycle,
     enterOperationRecovery,
+    evaluateOperationTacticalGroupExhaustion,
     markOperationExecuting,
 } from '../src/sim/combat/tactical_group_lifecycle.js';
 import {
@@ -106,7 +107,9 @@ describe('Tactical Group operation lifecycle', () => {
         expect(state.military.tactical_groups?.tg_a).toMatchObject({
             status: 'engaged',
             location_osid: 'op:friendly:anchor_a',
+            cohesion: 100,
         });
+        expect(state.military.tactical_groups?.tg_a?.last_exhaustion_tick_turn).toBeUndefined();
         expect(state.military.tactical_groups?.tg_b).toMatchObject({
             status: 'forming',
             location_osid: 'op:stale:location',
@@ -162,7 +165,9 @@ describe('Tactical Group operation lifecycle', () => {
         expect(state.military.tactical_groups?.tg_a).toMatchObject({
             status: 'engaged',
             location_osid: 'op:friendly:anchor_a',
+            cohesion: 100,
         });
+        expect(state.military.tactical_groups?.tg_a?.last_exhaustion_tick_turn).toBeUndefined();
     });
 
     it('the general-operation execution site engages a pre-existing forming TG', () => {
@@ -197,6 +202,46 @@ describe('Tactical Group operation lifecycle', () => {
         evaluateOperationProgress(state, 'RBiH');
 
         expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'completed' });
+    });
+
+    it('routes sector-owner cohesion exhaustion through canonical recovery before other execution work', () => {
+        const op = makeOperation('Sector TG Exhaustion');
+        op.phase = 'execution';
+        op.phase_started_turn = 11;
+        const state = makeLifecycleState(op);
+        delete state.military.corps_command?.corps_b;
+        delete state.military.formations?.corps_b;
+        delete state.military.formations?.anchor_b;
+        delete state.military.tactical_groups?.tg_b;
+        const tg = state.military.tactical_groups!.tg_a!;
+        tg.op_id = op.name;
+        tg.status = 'engaged';
+        tg.cohesion = 15;
+
+        advanceSectorOffensives(state);
+
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'tg_cohesion_exhausted' });
+        expect(state.military.tactical_groups?.tg_a).toBeUndefined();
+    });
+
+    it('routes general-owner lifecycle exhaustion through canonical recovery before progress checks', () => {
+        const op = makeOperation('General TG Duration', 'strategic_defense');
+        op.phase = 'execution';
+        op.phase_started_turn = 0;
+        op.target_settlements = ['op:enemy:objective'];
+        const state = makeLifecycleState(op);
+        delete state.military.corps_command?.corps_b;
+        delete state.military.formations?.corps_b;
+        delete state.military.formations?.anchor_b;
+        delete state.military.tactical_groups?.tg_b;
+        const tg = state.military.tactical_groups!.tg_a!;
+        tg.op_id = op.name;
+        tg.status = 'engaged';
+
+        evaluateOperationProgress(state, 'RBiH');
+
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'tg_max_lifecycle' });
+        expect(state.military.tactical_groups?.tg_a).toBeUndefined();
     });
 
     it('classifies a partial general-operation execution timeout as max failures', () => {
@@ -264,6 +309,211 @@ describe('Tactical Group operation lifecycle', () => {
         expect(state.military.tactical_groups?.tg_a).toBeUndefined();
     });
 
+    it('does not drain forming groups and drains an engaged group once per future unsuppressed turn', () => {
+        const op = makeOperation('Exhaustion Clock');
+        op.phase = 'execution';
+        op.phase_started_turn = 12;
+        const state = makeLifecycleState(op);
+        delete state.military.tactical_groups?.tg_b;
+        const tg = state.military.tactical_groups!.tg_a!;
+        tg.op_id = op.name;
+
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 13)).toBeNull();
+        expect(tg).toMatchObject({ status: 'forming', cohesion: 100 });
+        expect(tg.last_exhaustion_tick_turn).toBeUndefined();
+
+        markOperationExecuting(state, 'corps_a', op);
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 13)).toBeNull();
+        expect(tg).toMatchObject({ cohesion: 96, last_exhaustion_tick_turn: 13 });
+
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 13)).toBeNull();
+        expect(tg).toMatchObject({ cohesion: 96, last_exhaustion_tick_turn: 13 });
+
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 14)).toBeNull();
+        expect(tg).toMatchObject({ cohesion: 92, last_exhaustion_tick_turn: 14 });
+
+        tg.cohesion = 104;
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 15)).toBeNull();
+        expect(tg).toMatchObject({ cohesion: 100, last_exhaustion_tick_turn: 15 });
+    });
+
+    it('uses strict cohesion threshold, checks preloaded exhaustion before age, and ages from execution start', () => {
+        const op = makeOperation('Strict Thresholds');
+        op.phase = 'execution';
+        op.phase_started_turn = 20;
+        const state = makeLifecycleState(op);
+        delete state.military.tactical_groups?.tg_b;
+        const tg = state.military.tactical_groups!.tg_a!;
+        tg.op_id = op.name;
+        tg.status = 'engaged';
+
+        tg.cohesion = 19;
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 21)).toBeNull();
+        expect(tg.cohesion).toBe(15);
+
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 22)).toBe('tg_cohesion_exhausted');
+        expect(tg.cohesion).toBe(11);
+
+        tg.cohesion = 14;
+        delete tg.last_exhaustion_tick_turn;
+        op.phase_started_turn = 8;
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 22)).toBe('tg_cohesion_exhausted');
+        expect(tg.cohesion).toBe(14);
+        expect(tg.last_exhaustion_tick_turn).toBeUndefined();
+
+        tg.cohesion = 100;
+        expect(evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 20)).toBe('tg_max_lifecycle');
+        expect(tg.cohesion).toBe(100);
+        expect(tg.last_exhaustion_tick_turn).toBeUndefined();
+    });
+
+    it('pauses exhaustion under COHA and resumes on the first unsuppressed War turn', () => {
+        const op = makeOperation('COHA Pause');
+        op.phase = 'execution';
+        op.phase_started_turn = 12;
+        const state = makeLifecycleState(op);
+        delete state.military.tactical_groups?.tg_b;
+        delete state.military.corps_command?.corps_b;
+        delete state.military.formations?.corps_b;
+        delete state.military.formations?.anchor_b;
+        const tg = state.military.tactical_groups!.tg_a!;
+        tg.op_id = op.name;
+        tg.status = 'engaged';
+        state.military.event_flags = { coha_active: true } as any;
+        state.meta.turn = 13;
+
+        advanceSectorOffensives(state);
+        expect(tg).toMatchObject({ cohesion: 100 });
+        expect(tg.last_exhaustion_tick_turn).toBeUndefined();
+        expect(op.phase_started_turn).toBe(13);
+
+        state.military.event_flags!.coha_active = false;
+        state.meta.turn = 14;
+        advanceSectorOffensives(state);
+        expect(tg).toMatchObject({ cohesion: 96, last_exhaustion_tick_turn: 14 });
+    });
+
+    it('returns the first sorted multi-group result and recovery atomically dissolves every sibling once', () => {
+        const op = makeOperation('Multi TG');
+        op.phase = 'execution';
+        op.phase_started_turn = 20;
+        op.army_hq_op_id = 'ahq:RBiH:multi';
+        const state = makeLifecycleState(op);
+        delete state.military.tactical_groups?.tg_b;
+        const first = makeTg('tg:a', 'corps_a', op.name, 'anchor_a');
+        const second = makeTg('tg:z', 'corps_a', op.name, 'anchor_a');
+        first.army_hq_op_id = op.army_hq_op_id;
+        second.army_hq_op_id = op.army_hq_op_id;
+        first.status = 'engaged';
+        second.status = 'engaged';
+        first.cohesion = 15;
+        second.cohesion = 14;
+        state.military.tactical_groups = { [second.id]: second, [first.id]: first };
+        state.military.army_hq_operations = {
+            [op.army_hq_op_id]: {
+                id: op.army_hq_op_id,
+                faction_id: 'RBiH',
+                name: op.name,
+                anchor_corps_id: 'corps_a',
+                donor_corps_ids: [],
+                tg_id: second.id,
+                status: 'executing',
+                formed_on_turn: 20,
+                scenario_year: 0,
+            },
+        };
+
+        const reason = evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 21);
+        expect(reason).toBe('tg_cohesion_exhausted');
+        expect(first.cohesion).toBe(15);
+        expect(second.cohesion).toBe(14);
+
+        enterOperationRecovery(state, 'corps_a', op, 21, reason!);
+        const afterFirst = structuredClone(state);
+        enterOperationRecovery(state, 'corps_a', op, 21, reason!);
+
+        expect(state).toEqual(afterFirst);
+        expect(state.military.tactical_groups).toEqual({});
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'tg_cohesion_exhausted' });
+        expect(op.army_hq_telemetry_snapshot).toEqual({
+            army_hq_op_id: op.army_hq_op_id,
+            anchor_corps_id: 'corps_a',
+            donor_corps_lineage: [],
+            cross_corps_donor_count: 0,
+            total_cohesion_bled: 0,
+        });
+        expect(state.military.army_hq_operations[op.army_hq_op_id]).toMatchObject({
+            status: 'recovering',
+            recovery_started_turn: 21,
+        });
+    });
+
+    it('drains every eligible sibling before one recovery and is invariant to record insertion order', () => {
+        function run(insertionOrder: readonly ('tg:a' | 'tg:z')[]) {
+            const op = makeOperation('Atomic Multi TG');
+            op.phase = 'execution';
+            op.phase_started_turn = 20;
+            op.army_hq_op_id = 'ahq:RBiH:atomic';
+            const state = makeLifecycleState(op);
+            const groups = {
+                'tg:a': makeTg('tg:a', 'corps_a', op.name, 'anchor_a'),
+                'tg:z': makeTg('tg:z', 'corps_a', op.name, 'anchor_a'),
+            };
+            groups['tg:a'].army_hq_op_id = op.army_hq_op_id;
+            groups['tg:z'].army_hq_op_id = op.army_hq_op_id;
+            groups['tg:a'].status = 'engaged';
+            groups['tg:z'].status = 'engaged';
+            groups['tg:a'].cohesion = 15;
+            groups['tg:z'].cohesion = 100;
+            state.military.tactical_groups = Object.fromEntries(
+                insertionOrder.map((id) => [id, groups[id]]),
+            );
+            state.military.army_hq_operations = {
+                [op.army_hq_op_id]: {
+                    id: op.army_hq_op_id,
+                    faction_id: 'RBiH',
+                    name: op.name,
+                    anchor_corps_id: 'corps_a',
+                    donor_corps_ids: [],
+                    status: 'executing',
+                    formed_on_turn: 20,
+                    scenario_year: 0,
+                },
+            };
+
+            const reason = evaluateOperationTacticalGroupExhaustion(state, 'corps_a', op, 21);
+            const beforeRecovery = {
+                'tg:a': structuredClone(state.military.tactical_groups!['tg:a']),
+                'tg:z': structuredClone(state.military.tactical_groups!['tg:z']),
+            };
+            enterOperationRecovery(state, 'corps_a', op, 21, reason!);
+            return {
+                reason,
+                beforeRecovery,
+                liveTacticalGroups: state.military.tactical_groups,
+                operation: op,
+                armyHq: state.military.army_hq_operations[op.army_hq_op_id],
+            };
+        }
+
+        const forward = run(['tg:a', 'tg:z']);
+        const reverse = run(['tg:z', 'tg:a']);
+
+        expect(reverse).toEqual(forward);
+        expect(forward.reason).toBe('tg_cohesion_exhausted');
+        expect(forward.beforeRecovery['tg:a']).toMatchObject({
+            cohesion: 11,
+            last_exhaustion_tick_turn: 21,
+        });
+        expect(forward.beforeRecovery['tg:z']).toMatchObject({
+            cohesion: 96,
+            last_exhaustion_tick_turn: 21,
+        });
+        expect(forward.liveTacticalGroups).toEqual({});
+        expect(forward.operation.recovery_reason).toBe('tg_cohesion_exhausted');
+        expect(forward.armyHq).toMatchObject({ status: 'recovering', recovery_started_turn: 21 });
+    });
+
     it('routes every production phase writer through the canonical lifecycle hooks', () => {
         const sectorSource = readFileSync(resolve('src/sim/combat/sector_offensive.ts'), 'utf8');
         const weakenedSource = sectorSource.slice(
@@ -275,6 +525,9 @@ describe('Tactical Group operation lifecycle', () => {
         const corpsSource = readFileSync(resolve('src/sim/combat/corps_command.ts'), 'utf8');
 
         expect(sectorSource.match(/markOperationExecuting\(state, corps(?:Id|\.id), op\)/g)).toHaveLength(2);
+        expect(sectorSource.match(/evaluateOperationTacticalGroupExhaustion\(state, corps(?:Id|\.id), op, turn\)/g)).toHaveLength(2);
+        expect(sectorSource.match(/case 'tg_cohesion_exhausted':/g)).toHaveLength(2);
+        expect(sectorSource.match(/case 'tg_max_lifecycle':/g)).toHaveLength(2);
         expect(weakenedSource).not.toMatch(/op\.phase\s*=\s*'recovery'/);
         expect(progressSource).not.toMatch(/op\.phase\s*=\s*'recovery'/);
         expect(finalSource).not.toMatch(/operation\.phase\s*=\s*'recovery'/);

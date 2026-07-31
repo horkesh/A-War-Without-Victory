@@ -47,6 +47,8 @@ const RECOVERY_REASON_BADGE: Record<string, { label: string; className: string }
     orphaned_sector: { label: 'ENDED \u2014 SECTOR LOST', className: 'bg-amber-700/60 text-amber-200' },
     no_logged_attempt: { label: 'ENDED \u2014 NO CONTACT', className: 'bg-neutral-600/60 text-neutral-300' },
     manual_termination: { label: 'HALTED BY COMMAND', className: 'bg-blue-700/60 text-blue-200' },
+    tg_cohesion_exhausted: { label: 'Tactical group exhausted', className: 'bg-red-700/60 text-red-200' },
+    tg_max_lifecycle: { label: 'Operational duration reached', className: 'bg-amber-700/60 text-amber-200' },
 };
 
 const PHASE_COLOR: Record<string, string> = {

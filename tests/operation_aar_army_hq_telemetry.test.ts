@@ -182,6 +182,19 @@ describe('Army HQ AAR telemetry (flag ON)', () => {
         expect(aar.army_hq_telemetry!.total_cohesion_bled).toBe(8);
     });
 
+    it.each(['tg_cohesion_exhausted', 'tg_max_lifecycle'] as const)(
+        'preserves typed Tactical Group recovery reason %s in the AAR',
+        async (reason) => {
+            const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');
+            const { state, op } = fixture();
+            op.recovery_reason = reason;
+
+            const aar = finalizeOperationAAR(state, 'corp_a', op);
+
+            expect(aar.recovery_reason).toBe(reason);
+        },
+    );
+
     it('omits army_hq_telemetry for an op NOT carried by an Army-HQ TG (even after dissolution)', async () => {
         const { advanceSectorOffensives } = await import('../src/sim/combat/sector_offensive.js');
         const { finalizeOperationAAR } = await import('../src/sim/combat/operation_aar.js');

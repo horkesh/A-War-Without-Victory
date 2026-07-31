@@ -111,6 +111,8 @@ const RECOVERY_REASON_LABELS: Record<string, string> = {
     orphaned_sector: 'Objective sector lost',
     manual_termination: 'Stood down by order',
     no_logged_attempt: 'No assault attempted',
+    tg_cohesion_exhausted: 'Tactical group exhausted',
+    tg_max_lifecycle: 'Operational duration reached',
 };
 
 /** Player-facing title-case labels for axis status (raw enum). */

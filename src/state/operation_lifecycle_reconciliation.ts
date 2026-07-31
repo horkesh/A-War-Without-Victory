@@ -61,19 +61,19 @@ export function resolveTacticalGroupIdsForOperation(
     return result;
 }
 
-function hasMatchingLiveCorpsOperation(
+function findMatchingLiveCorpsOperation(
     state: GameState,
     armyHqOperationId: string,
     armyHqOperation: ArmyHqOperation,
-): boolean {
+): CorpsOperation | undefined {
     const command = state.military.corps_command?.[armyHqOperation.anchor_corps_id];
     for (const operation of command?.active_operations ?? []) {
         if (operation.name !== armyHqOperation.name) continue;
         if (operation.army_hq_op_id == null || operation.army_hq_op_id === armyHqOperationId) {
-            return true;
+            return operation;
         }
     }
-    return false;
+    return undefined;
 }
 
 function tacticalGroupMatchesArmyHqOperation(
@@ -121,6 +121,7 @@ export function reconcileLoadedArmyHqOperationLifecycle(state: GameState): void 
             continue;
         }
         const matchingTgIds = matchingLiveTacticalGroupIds(state, id, operation);
+        const matchingCorpsOperation = findMatchingLiveCorpsOperation(state, id, operation);
         const linkedTg = operation.tg_id != null ? tacticalGroups[operation.tg_id] : undefined;
         const linkedTgMatches = linkedTg != null
             && tacticalGroupMatchesArmyHqOperation(linkedTg, id, operation);
@@ -131,12 +132,26 @@ export function reconcileLoadedArmyHqOperationLifecycle(state: GameState): void 
         }
 
         if (
+            matchingCorpsOperation?.phase === 'recovery'
+            && (
+                operation.status === 'planning'
+                || operation.status === 'executing'
+                || operation.status === 'recovering'
+            )
+        ) {
+            operation.status = 'recovering';
+            if (operation.recovery_started_turn == null) {
+                operation.recovery_started_turn = matchingCorpsOperation.phase_started_turn;
+            }
+        }
+
+        if (
             (
                 operation.status === 'planning'
                 || operation.status === 'executing'
                 || operation.status === 'recovering'
             )
-            && !hasMatchingLiveCorpsOperation(state, id, operation)
+            && matchingCorpsOperation == null
             && !linkedTgMatches
             && matchingTgIds.length === 0
         ) {
