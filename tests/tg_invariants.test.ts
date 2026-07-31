@@ -22,6 +22,12 @@ import type {
 } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 import { applyMigrations } from '../src/state/save_migration.js';
+import {
+    ARMY_HQ_TG_CAP_RECOVERY_TURNS,
+    TG_COHESION_DRAIN_PER_ENGAGED_TURN,
+    TG_DISSOLVE_COHESION,
+    TG_MAX_LIFECYCLE_TURNS,
+} from '../src/sim/combat/tactical_group_config.js';
 
 // === Invariant helper ===
 // Mirrors the runtime checks that v2.2 selectDonors/formation logic
@@ -161,6 +167,13 @@ function makeDonor(brigade_id: string): TgDonorContribution {
 // === Tests ===
 
 describe('TG invariants (ADR-0005 v2.0 baseline)', () => {
+    it('locks the operational exhaustion and Army-HQ recovery-tail constants', () => {
+        expect(TG_MAX_LIFECYCLE_TURNS).toBe(12);
+        expect(TG_COHESION_DRAIN_PER_ENGAGED_TURN).toBe(4);
+        expect(TG_DISSOLVE_COHESION).toBe(15);
+        expect(ARMY_HQ_TG_CAP_RECOVERY_TURNS).toBe(4);
+    });
+
     it('passes on empty v19 state (default v2.0)', () => {
         const state = emptyV19Fixture();
         expect(validateTgInvariants(state)).toEqual([]);

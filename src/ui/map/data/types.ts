@@ -981,7 +981,7 @@ export interface OperationView {
     artillery_preparation?: boolean;
     force_launch?: boolean;
     was_force_launched?: boolean;
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
     axes?: Array<{
         axis_id: string;
         name: string;
@@ -1322,7 +1322,7 @@ export interface LoadedGameState {
             casualties_suffered: { killed: number; wounded: number };
             casualties_inflicted: { killed: number; wounded: number };
         }>;
-        recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination';
+        recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
         /** True when the player force-launched this operation against command recommendation. */
         force_launched?: boolean;
         /** CA cost paid at time of force-launch (always 15 when force_launched is true). */

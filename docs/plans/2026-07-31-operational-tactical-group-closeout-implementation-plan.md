@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–1 complete; execute Phases 2–6 sequentially
+**Status:** IN PROGRESS — Phases 0–3 complete; execute Phases 4–6 sequentially
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Review/integrate Phase 1, then execute Phase 2 in the isolated R3 worktree
+**Current next action:** Execute Phase 4 in the isolated R3 worktree after integrating Phase 3
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -342,7 +342,7 @@ npm.cmd run typecheck
 
 **Assigned to:** Gameplay Programmer + Systems Programmer
 **Reviewer:** Game Designer, Determinism Auditor, QA Engineer
-**Status:** READY — execute with the locked constants below
+**Status:** COMPLETE — locked 12/4/15/4 lifecycle and deterministic scenario proof landed locally
 **Estimated scope:** 3–5 source files, focused tests, 40/188-week scenario proof
 
 ### Locked constants
@@ -364,12 +364,12 @@ These values are the implementation contract. A failing characterization may cor
 - Modify `tests/tg_op_lifecycle.test.ts`
 - Modify `tests/tg_invariants.test.ts`
 
-- [ ] Test no drain while `forming`.
-- [ ] Test one drain per engaged war turn.
-- [ ] Test dissolution below cohesion 15.
-- [ ] Test dissolution at age 12.
-- [ ] Test no duplicate drain when unrelated helpers run.
-- [ ] Test an exhaustion-triggered TG termination transitions the owning CorpsOperation into recovery rather than letting an unbacked Army-HQ shell continue.
+- [x] Test no drain while `forming`.
+- [x] Test one drain per engaged war turn.
+- [x] Test dissolution below cohesion 15.
+- [x] Test dissolution at age 12.
+- [x] Test no duplicate drain when unrelated helpers run.
+- [x] Test an exhaustion-triggered TG termination transitions the owning CorpsOperation into recovery rather than letting an unbacked Army-HQ shell continue.
 
 ### Task 3.2 — Implement at the operation lifecycle chokepoint
 
@@ -378,10 +378,10 @@ These values are the implementation contract. A failing characterization may cor
 - Modify `src/sim/combat/tactical_group_lifecycle.ts`
 - Modify `src/sim/combat/sector_offensive.ts`
 
-- [ ] Advance TG cohesion exactly once inside the operation lifecycle pass.
-- [ ] Return a typed deterministic termination reason to the CorpsOperation owner.
-- [ ] Route cohesion/age termination through the same `beginRecovery`/telemetry/dissolution path as ordinary completion.
-- [ ] Do not create a second war-phase scheduler.
+- [x] Advance TG cohesion exactly once inside the operation lifecycle pass.
+- [x] Return a typed deterministic termination reason to the CorpsOperation owner.
+- [x] Route cohesion/age termination through the same `beginRecovery`/telemetry/dissolution path as ordinary completion.
+- [x] Do not create a second war-phase scheduler.
 
 ### Task 3.3 — Implement the four-turn Army-HQ cap tail
 
@@ -393,11 +393,11 @@ These values are the implementation contract. A failing characterization may cor
 - Modify `tests/army_hq_op_lifecycle.test.ts`
 - Modify save migration/validation tests
 
-- [ ] Add optional recovery/completion turn metadata only if required.
-- [ ] Count the cap reduction for planning/executing and the first four turns after recovery begins.
-- [ ] Replace the Phase 1 temporary all-`recovering` cap count atomically with the bounded four-turn tail; add a regression proving there is no intermediate early-release state.
-- [ ] Ensure legacy stale planning records without a live operation become completed, not a fresh four-turn penalty.
-- [ ] Pin old-save defaults and round-trip behavior.
+- [x] Add optional recovery/completion turn metadata only if required.
+- [x] Count the cap reduction for planning/executing and the first four turns after recovery begins.
+- [x] Replace the Phase 1 temporary all-`recovering` cap count atomically with the bounded four-turn tail; add a regression proving there is no intermediate early-release state.
+- [x] Ensure legacy stale planning records without a live operation become completed, not a fresh four-turn penalty.
+- [x] Pin old-save defaults and round-trip behavior.
 
 ### Behavior verification
 
@@ -651,6 +651,7 @@ The report must include:
 | 2026-07-31 | 2 | this phase commit | RED: terminal telemetry slice collected 3 files / 50 tests with 1 expected failure because the archived donor row lacked `dissolved_turn`, `casualties`, and `personnel_returned`. GREEN: Phase 2 focused pack passed 7 files / 109 tests; characterization barrier passed 20 files / 200 tests; `npm.cmd run typecheck` and `git diff --check` passed. The required strict baseline command ran and reported the deliberate persisted-output mismatch described at right; the manifest was not refreshed. | `baseline_ops_4w` and `noop_4w` matched all 8/8 approved artifacts. `apr1992_52w` matched 6/8; `final_save.json` moved `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0` → `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141`, and the dependent `run_summary.json` moved `f3a37865738df9fbe0903da778d62fb201c23bcebbb5d20a22f1e2dce6ce6545` → `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Removing exactly four new anchor `dissolved_turn` fields restored the former final-save hash; replacing only the dependent `final_state_hash` restored the former run-summary hash. | Schema 36 accepts both old and terminal optional participation shapes; no migration/version bump. Dissolution marks the TG terminal, then scans formation ids with `strictCompare` and preserves live/archive row order before clearing loans/deleting the TG. Donors record exact contribution casualties and `max(0, lent - casualties)` returns; anchors receive only terminal turn. Second dissolve is state-idempotent, and AAR snapshot survival remains green. No baseline refresh. |
 | 2026-07-31 | 2 conservation correction | this follow-up commit | RED: direct distribution plus terminalization collected 2 files / 16 tests with 2 expected failures: a second battle allocated against each donor's original loan, and the accrued terminal case failed to move unavailable donor casualties to the anchor. GREEN: direct proof passed 16/16; the Phase 2 pack passed 7 files / 110 tests; expanded TG/combat characterization passed 24 files / 262 tests; `npm.cmd run typecheck` and `git diff --check` passed. | Strict baselines retained exactly the pre-existing Phase 2 telemetry drift: both 4-week scenarios matched 8/8, while `apr1992_52w` matched 6/8 with `final_save.json` at `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141` and `run_summary.json` at `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Removing the same four anchor-only `dissolved_turn` fields restored `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`; restoring only the dependent summary hash restored `f3a37865738df9fbe0903da778d62fb201c23bcebbb5d20a22f1e2dce6ce6545`. No new artifact drift and no manifest refresh. | The battle allocator now caps each donor at `max(0, personnel_lent - casualties_so_far)` before deterministic overflow reassignment to the anchor. Repeated battles preserve cumulative `casualties <= lent` and total-casualty conservation; terminalization records exact returns and remains idempotent. No ordering, schema, migration, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 2 controlled baseline refresh | this data-only follow-up commit | Independent specification and code-quality reviews approved the Phase 2 implementation and its isolated telemetry movement. The strict no-update `npm.cmd run test:baselines` gate then exited 0 with all scenarios matching the refreshed manifest. | Only `apr1992_52w/final_save.json` was re-blessed to `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141` and its dependent `run_summary.json` to `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Every other manifest entry is unchanged. | The approval rests on the recorded 6/8 artifact match and normalization proof: four optional anchor terminal-turn values fully explain the final-save movement, and the run-summary movement is only its reported final-state hash. No source, test, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
+| 2026-07-31 | 3 | this phase commit | RED: the first six-file slice collected 91 tests with 12 expected failures. Independent review correction RED: 2 files / 35 tests with 3 expected failures for sibling atomic drain/permutation and exact-live legacy receipt normalization. GREEN after correction/simplify: correction slice 35/35; plan's exact Phase 3 pack 8 files / 116 tests; supplemental lifecycle/schema pack 8 files / 126 tests; broader migration/schema/UI proof 4 files / 220 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, strict 188w engine health, and `git diff --check` passed. Baselines matched without update or re-bless. | Fresh 40w run `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n3` ended at state/SHA-256 `f72a459e7548d70b` / `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`; audit: 0 live TGs, 4 cumulative formations, 0 Army-HQ receipts, 0 legacy OGs. Paired 188w runs `...__w188_n4` and `...__w188_n5` both ended at state hash `af83cbc6ca8d12d1`; all eight common artifacts were byte-identical, including final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`. Audit: 12 formations, two live Sana siblings at age 11/cohesion 56, one completed Farz-95 receipt with `recovery_started_turn=167` and no stale link, 20 live plus 4 archived participation rows, and no legacy OGs or duplicate promotions. | `CorpsOperation` remains sole clock/recovery owner. One sorted evaluator at the two execution chokepoints drains all eligible engaged siblings atomically by 4 once per unsuppressed future War turn, checks preloaded strict `<15` before age, and enforces age 12 before another drain using typed recovery reasons. Army-HQ cap cost covers planning/executing and `[R,R+4)`, including completed receipts and COHA calendar time; an exact live recovery normalizes legacy planning/executing receipts and supplies the marker, while stale/orphan receipts gain no invented tail. Optional fields round-trip under schema 36. The generated latest-save pointer and three health dashboards were restored to HEAD and excluded. No baseline, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 
 ---
 

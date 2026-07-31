@@ -134,6 +134,18 @@ export const ARMY_HQ_OP_COOLDOWN_TURNS = 52;
  */
 export const ARMY_HQ_TG_CAP_REDUCTION = 2;
 
+/** Maximum active execution age before an operation-owned TG is retired. */
+export const TG_MAX_LIFECYCLE_TURNS = 12;
+
+/** Cohesion spent by each engaged TG on one unsuppressed War turn. */
+export const TG_COHESION_DRAIN_PER_ENGAGED_TURN = 4;
+
+/** Strict dissolution threshold: 15 survives; values below 15 do not. */
+export const TG_DISSOLVE_COHESION = 15;
+
+/** Calendar-turn tail for the Army-HQ faction TG-cap reduction. */
+export const ARMY_HQ_TG_CAP_RECOVERY_TURNS = 4;
+
 /**
  * Phase 1 donor-model fidelity constants (ADR-0005 §Distance falloff, §Constants
  * reference, §Cross-corps donor permission, §Army HQ Operations). These bound the

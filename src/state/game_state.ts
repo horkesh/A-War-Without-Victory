@@ -365,7 +365,7 @@ export interface CorpsOperation {
     /** Dig in participating brigades when manually halted. */
     dig_in_on_halt?: boolean;
     /** Reason the operation entered recovery. */
-    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed';
+    recovery_reason?: 'completed' | 'max_failures' | 'orphaned_sector' | 'no_logged_attempt' | 'manual_termination' | 'probe_complete' | 'brigade_attrition' | 'political_blocked' | 'planning_invalidated' | 'no_launch_readiness' | 'defender_power_too_high' | 'participants_below_attack_floor' | 'no_approach_osid' | 'zero_eligible_axis' | 'insufficient_donation' | 'offensive_ops_suppressed' | 'tg_cohesion_exhausted' | 'tg_max_lifecycle';
     /** Named officer commanding this operation (if any). */
     commander_officer_id?: string;
     /** Named tactical_commander leading this op's Tactical Group anchor assault (ADR-0006 Phase 3A).
@@ -554,6 +554,8 @@ export interface TacticalGroup {
     dissolved_on_turn?: number;
     /** OG cohesion per canon §6.3; drains per-turn. */
     cohesion: number;
+    /** Idempotency marker for the last operation-owned exhaustion tick. */
+    last_exhaustion_tick_turn?: number;
 }
 
 /**
@@ -598,6 +600,8 @@ export interface ArmyHqOperation {
     tg_id?: TgId;
     status: 'queued' | 'planning' | 'executing' | 'recovering' | 'completed';
     formed_on_turn: number;
+    /** First real CorpsOperation execution-to-recovery transition; retained after completion. */
+    recovery_started_turn?: number;
     /** floor((started_turn - 1) / 52); for the once-per-year gate. */
     scenario_year: number;
 }
