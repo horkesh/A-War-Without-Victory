@@ -9,7 +9,7 @@ ADR-0005 (Tactical Groups as the Primary Ops Path) introduced **temporary** TGs 
 
 A four-specialist Pyrrhic investigation (2026-05-28 PM) returned a 3-1 verdict against full sector removal, but with a single load-bearing synthesis insight that resolves the apparent conflict:
 
-- **Historian**: Primary-source pattern across BB1/BB2 is unambiguous. Corps AORs were subdivided by named Operational Groups, NEVER by geometric "sectors." The word "sector" in BiH-war primary sources is either (a) a named command coextensive with an OG (HV "Zadar Sector"), or (b) journalistic shorthand for "an area." It is never an internal geometric primitive below the OG. Examples documented in BB: VRS Doboj OG 9, Drina Corps TG Kalinovik; ARBiH 5th Corps OG North + OG South, "Una-Sanska" OG (→ 5th Corps), OG 6-East, OG 7-South; HVO OZ Central Bosnia with subordinate brigades by name.
+- **Historian**: BB1/BB2 repeatedly describe corps AOR subdivisions through named Operational Groups, Tactical Groups, and Operational Zones rather than an engine-like geometric sector primitive. In those sources, "sector" can denote a named command (for example, HV "Zadar Sector") or an area description; it is not evidence for the engine entity on its own. Examples documented in BB include VRS Doboj OG 9 and Drina Corps TG Kalinovik; ARBiH 5th Corps OG North and OG South, "Una-Sanska" OG (later 5th Corps), OG 6-East, and OG 7-South; and HVO OZ Central Bosnia with subordinate brigades by name.
 - **Tech Architect**: 197 files / 4,885 sector references. ~13 files are load-bearing front geometry (Voronoi-BFS partitioning, sub-segment handling, threat/density classification). Honest scope estimate for full removal: 9-15 months on top of ADR-0005, with a calibration cliff that may not stabilize. Critical insight: *"You'd churn 197 files to rename `CorpsFrontSector` to `StandingOperationalGroup` and end up with the same fields, the same pipeline steps, the same UI components."*
 - **Ops Expert**: Multi-OG coverage gap catastrophic. With ADR-0005's `MAX_CONCURRENT_TGS_PER_FACTION = 4`, OGs cover ~20-50 OSIDs. Real friendly front is ~250-300 OSIDs touching enemy. Under OG-only, ~85% of friendly territory becomes ownerless. Expected calibration shift +30-60%, 95% confidence of regression beyond ±2pp sign-off gate.
 - **Game Designer**: Sectors are the primary defensive interaction surface for the player (Front map mode IS sectors; stance dropdown IS sectors; Army HQ COS briefing IS structured by sectors). *"Sectors are how the map says 'this is yours to lose.' TGs say 'this is what I sent someone to take.' Those are different games."*
@@ -19,6 +19,14 @@ A four-specialist Pyrrhic investigation (2026-05-28 PM) returned a 3-1 verdict a
 ## Decision
 
 Treat the engine's existing sector mechanism as the implementation of canon's "standing Operational Groups." Do not refactor the engine. Reconcile the vocabulary through a display-naming layer and one canonical clarification.
+
+### Live doctrine contract (2026-07-31)
+
+A corps sector is the **standing-OG spatial assignment entity**. It groups a corps front, sub-segments, and formation assignments for command and defensive calculations; it has **no political-control meaning** and does not itself own territory. Political control remains OSID state.
+
+Live reserve commitment is the bounded ADR-0007 Phase B path. It commits **at most one eligible reserve or rear formation per threatened-sector distribution pass**. An **active-operation** participant, a **disrupted** formation, a formation **in transit**, or a formation with an **existing movement order** is ineligible.
+
+Standing-OG **membership alone does not make a formation a reactive defender**. Only **actual combat-resolver contributors** receive the immediate combat effects already assigned by that path: **defender casualties are weighted across those contributors**, while any **contributor-specific immediate fatigue remains on its named recipient**. The separate **post-battle defender-fatigue write and downstream aftermath remain primarily on the primary defender**. A future change to that ownership would require a new behavior decision; it cannot be inferred from sector membership.
 
 Three concrete actions:
 
@@ -98,8 +106,8 @@ Additional names populated incrementally as calibration sessions surface other h
 
 ## Canon References
 
-- `docs/10_canon/Rulebook_v0_9_0.md` §5.7 "Operational Groups" — needs a clarifying paragraph noting the engine's `corps_front_sectors` ARE the standing-OG implementation. (Manual edit; ADR does not auto-edit canon.)
-- `docs/10_canon/Systems_Manual_v0_9_0.md` §6.3 "Operational Groups (OSID model)" — same clarification.
+- `docs/10_canon/Rulebook_v0_9_0.md` §5.7 "Operational Groups" — now records `corps_front_sectors` as the standing-OG spatial implementation and distinguishes temporary offensive TGs.
+- `docs/10_canon/Systems_Manual_v0_9_0.md` §6.3 "Operational Groups (OSID model)" — records the same entity and behavior boundary.
 - `docs/10_canon/Game_Bible_v0_9_0.md` §3.3 — unchanged.
 
 ## Historical & Source References
@@ -113,9 +121,9 @@ Additional names populated incrementally as calibration sessions surface other h
 
 - ADR-0005: Tactical Groups as the Primary Ops Path — handles **temporary** OGs / TGs for offensive operations. ADR-0006 (this doc) handles the **standing** OGs that own defensive AORs (today implemented as `corps_front_sectors`).
 
-## Ledger Entry
+## Recorded ledger entry
 
-Add to `docs/PROJECT_LEDGER.md`:
+The 2026-05-28 decision was recorded in `docs/PROJECT_LEDGER.md` as:
 ```
 ## [2026-05-28] ADR-0006: Sectors as Standing Operational Groups — Accepted
 Reconciles ADR-0005 (temporary OGs/TGs for ops) with canon (OG as the universal C2 echelon) without refactoring the engine. Engine `corps_front_sectors` ARE the standing-OG implementation; add `display_name?: string` for historically-attested labels (Doboj OG 9, TG Drina, OG North/South, OZ Central Bosnia). Zero structural code change. Future deeper rename (CorpsFrontSector → StandingOperationalGroup) deferred to v0.10 if calibration data warrants. See ADR-0006.

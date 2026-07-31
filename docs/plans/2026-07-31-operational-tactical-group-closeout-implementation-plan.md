@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–4 complete; execute Phases 5–6 sequentially
+**Status:** IN PROGRESS — Phases 0–5 complete; execute Phase 6 integration/closeout
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Integrate Phase 4, then execute Phase 5 doctrine convergence
+**Current next action:** Integrate Phase 5, then execute Phase 6 full proof and closeout
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -488,8 +488,8 @@ If Task 4.2 changes scenario output, rerun the Phase 3 40/188-week deterministic
 
 **Assigned to:** Technical Architect + Documentation Specialist
 **Reviewers:** Game Designer, Historian, Canon Compliance Reviewer
-**Status:** READY — documentation and contract tests only; no combat-behavior change
-**Estimated scope:** three governing documents, two ADRs, one contract test
+**Status:** COMPLETE — documentation and contract tests only; no combat-behavior change
+**Estimated scope:** two canon manuals, two ADRs, one contract test
 
 ### Task 5.1 — Encode the decided ownership model
 
@@ -502,18 +502,18 @@ If Task 4.2 changes scenario output, rerun the Phase 3 40/188-week deterministic
 - Create `tests/standing_og_doctrine_contract.test.ts`
 - Do not edit `docs/10_canon/FORAWWV.md`
 
-- [ ] State that a corps sector is the standing operational-group spatial entity.
-- [ ] State that reserve/rear commitment is bounded by the live Phase B eligibility rules.
-- [ ] State that brigades that actually contribute share the immediate casualties/fatigue already assigned by the combat path.
-- [ ] State that downstream aftermath remains primarily owned by the primary defender unless a future roadmap revision explicitly changes the behavior contract.
-- [ ] Mark ADR-0007 Phase C as retired and prohibit its widened roster/predictor split from being inferred as live behavior.
-- [ ] Add a contract test that fails if the ADR, Systems Manual, and Rulebook again claim the retired broader model.
-- [ ] Make no runtime change in this phase.
+- [x] State that a corps sector is the standing operational-group spatial entity.
+- [x] State that reserve/rear commitment is bounded by the live Phase B eligibility rules.
+- [x] State that brigades that actually contribute share the immediate casualties/fatigue already assigned by the combat path.
+- [x] State that downstream aftermath remains primarily owned by the primary defender unless a future roadmap revision explicitly changes the behavior contract.
+- [x] Mark ADR-0007 Phase C as retired and prohibit its widened roster/predictor split from being inferred as live behavior.
+- [x] Add a contract test that fails if the ADR, Systems Manual, and Rulebook again claim the retired broader model.
+- [x] Make no runtime change in this phase.
 
 ### Task 5.2 — Verify doctrine and runtime remain aligned
 
 ```powershell
-npm.cmd run test:vitest -- tests/standing_og_defense.test.ts tests/standing_og_doctrine_contract.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/standing_og_defense.test.ts tests/standing_og_doctrine_contract.test.ts tests/brigade_front_distribution.test.ts tests/distance_weighted_defense.test.ts tests/attack_casualty_distribution.test.ts tests/attack_post_battle_effects.test.ts --pool=forks --reporter=dot
 npm.cmd run canon:check
 npm.cmd run test:baselines
 npm.cmd run typecheck
@@ -604,7 +604,7 @@ The report must include:
 - [ ] No cross-faction donation.
 - [ ] No new historical operation or unsupported Division identity.
 - [ ] Promotion requires an explicit historical mapping; ambiguous existing records are reported, not invented away.
-- [ ] Standing-OG combat behavior remains the decided narrower live model; Phase 5 changes documentation/contracts only.
+- [x] Standing-OG combat behavior remains the decided narrower live model; Phase 5 changes documentation/contracts only.
 - [ ] Section 6 sensitive-history control receipts remain event-owned and unchanged.
 - [ ] No GUI work is required for Phases 0–4; do not add a player-facing field in R3, and route any presentation finding to R4 or R7.
 
@@ -635,7 +635,7 @@ The report must include:
 - [ ] Donor-backed/zero-donor semantics are explicit and tested.
 - [ ] Fresh TG-enabled campaigns create no legacy `kind: 'og'` formations.
 - [ ] New promotion identities cannot duplicate through the default ordinal fallback.
-- [ ] Standing-OG doctrine consistently encodes the decided narrower live model and retired Phase C.
+- [x] Standing-OG doctrine consistently encodes the decided narrower live model and retired Phase C.
 - [ ] TypeScript, focused/full tests, baselines, determinism, and required scenario proof are green.
 
 ---
@@ -654,6 +654,7 @@ The report must include:
 | 2026-07-31 | 2 controlled baseline refresh | this data-only follow-up commit | Independent specification and code-quality reviews approved the Phase 2 implementation and its isolated telemetry movement. The strict no-update `npm.cmd run test:baselines` gate then exited 0 with all scenarios matching the refreshed manifest. | Only `apr1992_52w/final_save.json` was re-blessed to `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141` and its dependent `run_summary.json` to `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Every other manifest entry is unchanged. | The approval rests on the recorded 6/8 artifact match and normalization proof: four optional anchor terminal-turn values fully explain the final-save movement, and the run-summary movement is only its reported final-state hash. No source, test, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 3 | this phase commit | RED: the first six-file slice collected 91 tests with 12 expected failures. Independent review correction RED: 2 files / 35 tests with 3 expected failures for sibling atomic drain/permutation and exact-live legacy receipt normalization. GREEN after correction/simplify: correction slice 35/35; plan's exact Phase 3 pack 8 files / 116 tests; supplemental lifecycle/schema pack 8 files / 126 tests; broader migration/schema/UI proof 4 files / 220 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, strict 188w engine health, and `git diff --check` passed. Baselines matched without update or re-bless. | Fresh 40w run `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n3` ended at state/SHA-256 `f72a459e7548d70b` / `f72a459e7548d70b4e823c35dd8f1c4b3d61bd21441ed5d40f68e545017a9746`; audit: 0 live TGs, 4 cumulative formations, 0 Army-HQ receipts, 0 legacy OGs. Paired 188w runs `...__w188_n4` and `...__w188_n5` both ended at state hash `af83cbc6ca8d12d1`; all eight common artifacts were byte-identical, including final-save SHA-256 `af83cbc6ca8d12d1c9755b3bd30fdf06c78eca06d459582554e15dcac7607270`. Audit: 12 formations, two live Sana siblings at age 11/cohesion 56, one completed Farz-95 receipt with `recovery_started_turn=167` and no stale link, 20 live plus 4 archived participation rows, and no legacy OGs or duplicate promotions. | `CorpsOperation` remains sole clock/recovery owner. One sorted evaluator at the two execution chokepoints drains all eligible engaged siblings atomically by 4 once per unsuppressed future War turn, checks preloaded strict `<15` before age, and enforces age 12 before another drain using typed recovery reasons. Army-HQ cap cost covers planning/executing and `[R,R+4)`, including completed receipts and COHA calendar time; an exact live recovery normalizes legacy planning/executing receipts and supplies the marker, while stale/orphan receipts gain no invented tail. Optional fields round-trip under schema 36. The generated latest-save pointer and three health dashboards were restored to HEAD and excluded. No baseline, scenario, canon/FORAWWV, package, push, merge, tag, or release-state change. |
 | 2026-07-31 | 4 | this phase commit | RED: 3 files / 22 tests produced 8 expected failures for live producer enqueue, stale-order activation mutation, incomplete legacy index cleanup, ordinal+20 fallback, unmapped threshold promotions, occupied number/name collisions, and the old audit shape. GREEN before simplify: new pack 22/22; exact Phase 4 plus audit pack 6 files / 68 tests; expanded characterization 22 files / 216 tests. After simplify and the old-record load characterization, final exact proof passed 6 files / 69 tests, expanded characterization passed 22 files / 217 tests, and typecheck passed. Strict baselines matched without refresh. | Fresh 40w `runs/apr1992_definitive_40w__1aa96054bcc8af09__w40_n6` remained `f72a459e7548d70b`. Fresh 188w `...__w188_n7` and `...__w188_n8` both ended `e400d232ba5da37e`; 14/15 artifacts matched byte-for-byte, with only `run_meta.json.out_dir` differing by the expected `n7`/`n8` suffix. Against Phase 3 n4, 12/15 artifacts were identical; the final-save delta is exactly removal of the unsupported `arbih_5th_corps` ordinal-1 fallback promotion (`21. Division`, turn 178), plus its dependent summary hash and run-directory metadata. Strict health stayed green and unchanged: 0 eligible/dead operations, 2 ghost-destroyed, 9 stranded brigades, 628 matched OSIDs, 0 consistency failures, K:W 3.779. | TG-enabled production now preserves an empty serialized `og_orders` shape and enqueues nothing; activation defensively discards persisted queues without formation/personnel/corps mutation. Already-active legacy OGs retain a sorted, bounded compatibility drain with personnel conservation and stale/duplicate `active_ogs` reconciliation. Promotion has no fallback: only `arbih_2nd_corps:1 → 21` and `:5 → 25` remain, sourced to *Balkan Battlegrounds* II p. 401, I p. 509, and local OOB lines 90/98; ordinal 5 remains unreachable. Existing records are loaded unchanged and the audit reports unmapped/mismatch/number/name collisions plus same-corps overlap candidates by record identity. The generated latest-save pointer was restored; no migration, schema, baseline, canon/FORAWWV, package, push, merge, tag, or release-state change. |
+| 2026-07-31 | 5 | this phase commit | RED: the new doctrine contract collected 14 tests with 13 expected failures across missing spatial/eligibility/contributor anchors and the absent retired-history boundary; the production identifier scan already passed. GREEN: the expanded standing-OG/combat pack passed 6 files / 165 tests; `npm.cmd run typecheck`, `npm.cmd run canon:check`, standalone strict no-refresh `npm.cmd run test:baselines`, and `git diff --check` passed. | All approved baseline scenarios matched without update or re-bless. No new scenario/hash evidence was required because the phase changes governing wording, one production comment, and contract tests only; runtime, schema, scenarios, manifests, and `FORAWWV.md` are unchanged. | ADR-0006, ADR-0007, Systems Manual §6.3/§6.7, and Rulebook §5.7/§6.3 now separate standing-OG spatial membership, bounded Phase-B movement eligibility, actual resolver contribution, and primary-defender aftermath. Retired Phase-C identifiers/claims exist only below ADR-0007's explicit historical-record heading and remain absent from production. |
 
 ---
 

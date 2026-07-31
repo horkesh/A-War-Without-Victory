@@ -176,9 +176,9 @@ Brigades are never outright destroyed in combat. When a brigade is forced to ret
 
 ### 5.7 Operational Groups
 
-Operational Groups are temporary coordination constructs authorized at Corps level. They do not own OSIDs. They occupy an OSID and participate in combat; they coordinate timing and provide bonuses (e.g. og_mult) to adjacent friendly attacks during operations. *(ZoC removed 2026-03-02 — OGs no longer project ZoC.)*
+The game represents two related operational-group forms. A corps sector is the **standing-OG spatial assignment entity** for a defensive front. It has **no political-control meaning** and does not own territory; OSID political control remains separate. A temporary donor-backed Tactical Group is the offensive specialization authorized for a corps operation. *(ZoC removed 2026-03-02 — neither form projects ZoC.)*
 
-With Corps authorization, an OG may temporarily pull battalion-equivalent manpower from brigades. Donor brigades retain their location_osid but suffer reduced strength. Detached manpower operates within the OG's OSID and operation scope; OGs dissolve per lifecycle rules and personnel return to donors.
+With Corps authorization, a temporary TG may pull battalion-equivalent manpower from eligible brigades. Donor brigades retain their location but contribute personnel for the operation; the TG follows the owning operation's lifecycle, then returns survivors and closes its participation receipts. Standing sectors persist as spatial assignments and do not become temporary combat formations.
 
 ### 5.8 Named officers and command
 
@@ -252,19 +252,19 @@ Combat occurs when a brigade **attacks** an adjacent OSID (enemy-controlled or o
 
 ### 6.3 Reactive sector defense
 
-When a sector is attacked, the defense is not limited to brigades physically present at the targeted OSID. Reserve brigades throughout the sector contribute to the defense based on their distance and readiness — representing lateral fire support, reserve mobilization, and rapid reinforcement along interior lines.
+When a sector is attacked, defense is not necessarily limited to a brigade physically present at the targeted OSID. Eligible assigned brigades that the resolver can legally reach may contribute based on distance and readiness, representing lateral fire support and rapid reinforcement along interior lines. Sector membership alone is never enough.
 
-**Distance-weighted contributions:** Each reserve brigade's contribution decays exponentially with BFS hop distance from the attacked OSID (base 0.60 per hop, maximum 5 hops). A brigade 1 hop away contributes 60% of its power; at 2 hops, 36%; at 3 hops, 21.6%. Beyond 5 hops, contribution is zero.
+**Distance-weighted contributions:** Each eligible resolver contributor's defensive power decays exponentially with friendly BFS hop distance from the attacked OSID (base 0.60 per hop, maximum 5 hops). A brigade 1 hop away contributes 60% of its power; at 2 hops, 36%; at 3 hops, 21.6%. Beyond 5 hops, contribution is zero.
 
 **Home-municipality motivation:** Brigades defending OSIDs within their home municipality receive a 1.3x motivation bonus to their reactive contribution. This reflects the historical pattern of Bosnian War units fighting hardest when defending their own communities.
 
-**Reactive defense ratio:** The defender mobilizes up to 1.5 brigade-equivalents of reserves per attacking brigade (capped at available reserve power). This prevents massed attacks from automatically overwhelming defenders — the defense reacts proportionally to the threat.
+**Reactive defense ratio:** The resolver can draw up to 1.5 brigade-equivalents of eligible reactive power per attacking brigade (capped at available eligible power). This prevents massed attacks from automatically overwhelming defenders while retaining the reachability and participation gates.
 
 **Minimum defense floor:** Even if no brigade is physically present, local militia defense remains in force. Sector coverage cannot reduce an attacked OSID below the militia-only fallback. If a sector roster is empty but an active same-corps defender is one friendly hop from the target, that unit can react; otherwise isolated pockets without a legal nearby formation are militia-only defenses.
 
-**Casualty distribution:** When reserves contribute to defense, casualties are distributed proportionally to each brigade's contribution weight. Brigades closer to the fight and with home-municipality motivation absorb more casualties. A casualty engagement cap (1.5x attacker personnel) prevents defenders from taking disproportionate losses when they have overwhelming local superiority.
+**Casualty distribution:** For **actual combat-resolver contributors**, **defender casualties are weighted across those contributors** according to their resolver contribution. Brigades closer to the fight and with home-municipality motivation can therefore absorb more casualties. A casualty engagement cap (1.5x attacker personnel) prevents defenders from taking disproportionate losses when they have overwhelming local superiority.
 
-**Standing-OG defensive doctrine (accepted 2026-06-07, ADR-0007).** A standing Operational Group defends as a single body, not as a string of lone outposts. When one of its sectors comes under attack, the threatened front edge is not left to bleed alone: the OG draws on a **depletable second echelon** — same-OG sectormates that reinforce the contested point and **share the defensive cost (fatigue as well as casualties)** rather than dumping all the exhaustion onto the lone brigade holding the line. The reserve is real but finite: it commits forward under pressure and is used up, so a sector can still break once the depth behind it is spent. This is the defensive twin of the offensive task-organization doctrine: the sector remains the defensive entity (§5.7; ADR-0006), and the doctrine governs how a sector's brigades bear the grind together, not which brigade owns which ground.
+**Standing-OG defensive doctrine (ADR-0006/0007):** Standing-OG **membership alone does not make a formation a reactive defender**. Live Phase B commits **at most one eligible reserve or rear formation per threatened-sector distribution pass**; an **active-operation** participant, a **disrupted** formation, a formation **in transit**, or one with an **existing movement order** is ineligible. Actual contributors receive only effects assigned to them by the combat path: casualties follow the weights above, while any **contributor-specific immediate fatigue remains on its named recipient**. The separate **post-battle defender-fatigue write and downstream aftermath remain primarily on the primary defender**. The reserve remains real and finite, but neither sector membership nor a reserve label widens a battle's contributor or aftermath roster by itself.
 
 **Sector stances (Layer B):** Each sector can adopt one of five independent defensive stances that modify reactive defense effectiveness and entrenchment growth:
 

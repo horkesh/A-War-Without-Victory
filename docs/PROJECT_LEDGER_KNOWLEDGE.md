@@ -3972,3 +3972,9 @@ Applied in `[2026-07-31] Seamless Command Room to Tactical Map transition opened
 **Activation phrases should carry exact authority:** separate reversible local implementation from externally visible publication. In this program, `Execute the master roadmap` permits local work and transient validation builds; `Publish 1.0` separately permits signing, upload, tag/push, and public release after readiness is proven.
 
 Applied in `[2026-07-31] Planning control plane consolidated for autonomous execution`, `docs/plans/MASTER_ROADMAP.md`, and the R1-R9 plans indexed by `docs/plans/README.md`.
+
+## 2026-07-31 - Formation membership and battle-effect ownership
+
+**Assignment membership, movement eligibility, combat participation, and aftermath ownership are separate contracts:** sharing a sector, Operational Group, or other roster does not automatically make a formation a contributor to a specific battle. Durable rule: first identify the spatial-assignment owner, then the bounded movement/commitment gate, then the exact resolver contributor set, and finally the recipient named by each immediate or downstream effect. Documentation must not widen a runtime recipient set by using collective language such as “the formation shares the cost.” Pin this boundary with semantic doctrine anchors and a production scan for identifiers from retired experiments.
+
+Applied in `[2026-07-31] Standing Operational Group doctrine converged with live behavior`, ADR-0006/0007, Systems Manual §6.3/§6.7, Rulebook §5.7/§6.3, and `tests/standing_og_doctrine_contract.test.ts`.
