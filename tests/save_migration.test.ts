@@ -140,4 +140,25 @@ describe('save_migration', () => {
 
         expect(state.paramilitary_deployment_count).toEqual({ HRHB: 9, RBiH: 7, RS: 44 });
     });
+
+    it('reconciles orphaned current-version Army-HQ receipts on every load without a schema bump', () => {
+        const state = {
+            schema_version: getLatestSchemaVersion(),
+            military: {
+                corps_command: { corps_a: { active_operations: [] } },
+                tactical_groups: {},
+                army_hq_operations: {
+                    ahq_a: {
+                        id: 'ahq_a', faction_id: 'RBiH', name: 'Orphaned Operation',
+                        anchor_corps_id: 'corps_a', donor_corps_ids: [],
+                        tg_id: 'tg:missing', status: 'planning', formed_on_turn: 10, scenario_year: 0,
+                    },
+                },
+            },
+        } as any;
+
+        expect(applyMigrations(state)).toBe(0);
+        expect(state.military.army_hq_operations.ahq_a).toMatchObject({ status: 'completed' });
+        expect(state.military.army_hq_operations.ahq_a.tg_id).toBeUndefined();
+    });
 });

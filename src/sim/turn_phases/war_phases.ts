@@ -170,6 +170,7 @@ import { validateOpAtInjection, hasBlockingOpInjectionWarnings } from '../combat
 import { createSingleAxis } from '../combat/sector_offensive_axis_helpers.js';
 import { getCorpsSubordinates } from '../combat/bot_corps_helpers.js';
 import { assignOperationCommander, releaseOperationCommander, releaseTacticalCommander } from '../combat/officer_system.js';
+import { completeOperationLifecycle, enterOperationRecovery } from '../combat/tactical_group_lifecycle.js';
 import { isEligibleOperationFormation } from '../../state/formation_constants.js';
 import { getPoliticalControllerOSID } from '../../state/settlement_control.js';
 import {
@@ -467,6 +468,8 @@ function applyOpHalts(state: GameState): void {
             // too or the TG officer is left active/assigned to a removed op and unavailable
             // for future TG assignments. releaseTacticalCommander is a no-op when unset.
             if (op.tg_commander_officer_id) releaseTacticalCommander(state, op);
+            enterOperationRecovery(state, corpsId, op, turn, 'manual_termination');
+            completeOperationLifecycle(state, corpsId, op);
             removeOperation(cmd, op);
 
             // Append the halt record (op_name + turn) for the UI / follow-up consequence.

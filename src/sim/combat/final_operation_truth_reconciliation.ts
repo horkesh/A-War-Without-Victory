@@ -1,6 +1,7 @@
 import type { CorpsOperation, FormationId, GameState } from '../../state/game_state.js';
 import { strictCompare } from '../../state/validateGameState.js';
 import { derivePrimarySectorForBrigades } from './corps_operation_helpers.js';
+import { enterOperationRecovery } from './tactical_group_lifecycle.js';
 
 function buildSectorClaimsByBrigade(state: GameState): Map<FormationId, string[]> {
     const claims = new Map<FormationId, Set<string>>();
@@ -78,9 +79,7 @@ function reconcileOperationRoster(state: GameState, corpsId: string, operation: 
     }
 
     if (operation.phase === 'execution' && activeParticipants.length === 0) {
-        operation.phase = 'recovery';
-        operation.phase_started_turn = state.meta.turn;
-        operation.recovery_reason = 'brigade_attrition';
+        enterOperationRecovery(state, corpsId, operation, state.meta.turn, 'brigade_attrition');
     }
 }
 

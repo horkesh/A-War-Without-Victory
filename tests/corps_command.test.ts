@@ -128,14 +128,14 @@ describe('corps command - applyCorpsEffects', () => {
 });
 
 describe('corps command - advanceOperations', () => {
-    it('transitions non-sector operations planning -> execution -> recovery -> complete', () => {
+    it('transitions reorganization operations planning -> execution -> recovery -> complete', () => {
         const state = makeCorpsState();
         initializeCorpsCommand(state);
 
         // Start an operation in planning phase at turn 20
         state.military.corps_command!['rs-corps-1'].active_operations = [{
             name: 'Test Op',
-            type: 'general_offensive',
+            type: 'reorganization',
             phase: 'planning',
             started_turn: 20,
             phase_started_turn: 20,
@@ -158,6 +158,27 @@ describe('corps command - advanceOperations', () => {
         state.meta.turn = 30;
         advanceOperations(state);
         expect(state.military.corps_command!['rs-corps-1'].active_operations).toHaveLength(0);
+    });
+
+    it('leaves combat-operation lifecycle ownership to sector_offensive', () => {
+        const state = makeCorpsState();
+        initializeCorpsCommand(state);
+        state.military.corps_command!['rs-corps-1'].active_operations = [{
+            name: 'Combat Op',
+            type: 'general_offensive',
+            phase: 'planning',
+            started_turn: 20,
+            phase_started_turn: 20,
+            participating_brigades: ['rs-brig-1', 'rs-brig-2'],
+        }];
+
+        state.meta.turn = 40;
+        advanceOperations(state);
+
+        expect(state.military.corps_command!['rs-corps-1'].active_operations[0]).toMatchObject({
+            phase: 'planning',
+            phase_started_turn: 20,
+        });
     });
 
     it('does not auto-advance sector_attack operations', () => {

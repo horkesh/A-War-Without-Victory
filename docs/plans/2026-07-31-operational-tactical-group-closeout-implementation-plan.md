@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phase 0 complete; execute Phases 1–6 sequentially
+**Status:** IN PROGRESS — Phases 0–1 complete; execute Phases 2–6 sequentially
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Execute Phase 1 in the existing isolated R3 worktree after Phase 0 review/integration
+**Current next action:** Review/integrate Phase 1, then execute Phase 2 in the isolated R3 worktree
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -216,10 +216,10 @@ npm.cmd exec -- tsx tools/diagnostics/audit_operational_tactical_groups.ts runs/
 - Modify stale comments in `src/sim/combat/sector_offensive.ts`
 - Modify stale comments in `src/sim/combat/operation_preparation.ts`
 
-- [ ] Add/retain tests proving `none` policy produces no TG.
-- [ ] Add/retain tests proving a `full`/`limited` operation with zero eligible donors proceeds without an empty TG.
-- [ ] Replace “every offensive forms a TG” comments with “every donor-eligible offensive attempts TG formation; zero-donor fallback remains an ordinary operation.”
-- [ ] Do not change runtime behavior in this task.
+- [x] Add/retain tests proving `none` policy produces no TG.
+- [x] Add/retain tests proving a `full`/`limited` operation with zero eligible donors proceeds without an empty TG.
+- [x] Replace “every offensive forms a TG” comments with “every donor-eligible offensive attempts TG formation; zero-donor fallback remains an ordinary operation.”
+- [x] Do not change runtime behavior in this task.
 
 ### Task 1.2 — Make `forming → engaged` observable
 
@@ -229,10 +229,10 @@ npm.cmd exec -- tsx tools/diagnostics/audit_operational_tactical_groups.ts runs/
 - Modify `src/sim/combat/tactical_group_lifecycle.ts`
 - Modify `src/sim/combat/sector_offensive.ts`
 
-- [ ] Write failing tests for both planning-to-execution transition sites.
-- [ ] Add one lifecycle helper that finds TGs for an operation in sorted id order, sets live status to `engaged`, and refreshes `location_osid` from the anchor.
-- [ ] Call the helper immediately after TG formation at both operation transition sites.
-- [ ] Keep formation idempotent and keep zero-donor fallback untouched.
+- [x] Write failing tests for both planning-to-execution transition sites.
+- [x] Add one lifecycle helper that finds TGs for an operation in sorted id order, sets live status to `engaged`, and refreshes `location_osid` from the anchor.
+- [x] Call the helper immediately after TG formation at both operation transition sites.
+- [x] Keep formation idempotent and keep zero-donor fallback untouched.
 
 ### Task 1.3 — Synchronize Army-HQ status and clear stale cap reducers
 
@@ -246,14 +246,14 @@ npm.cmd exec -- tsx tools/diagnostics/audit_operational_tactical_groups.ts runs/
 - Modify `src/state/save_migration.ts` only if load-time normalization is needed
 - Modify `tests/save_migration.test.ts` and/or `tests/save_migration_versioned_steps.test.ts` if migration code changes
 
-- [ ] Write failing tests for `planning → executing → recovering → completed`.
-- [ ] At TG/operation execution, set the associated Army-HQ record to `executing`.
-- [ ] At operation recovery entry, set it to `recovering`, finalize/dissolve the TG, and clear `tg_id`.
-- [ ] At CorpsOperation removal after recovery, set the durable Army-HQ record to `completed`.
-- [ ] Add a deterministic reconciliation helper for loaded state: if a planning/executing Army-HQ record has no matching live CorpsOperation and no live TG, mark it completed and clear `tg_id`.
-- [ ] Audit every production recovery entry, including direct `op.phase = 'recovery'` assignments and `beginRecovery` calls that do not currently receive state; add source-contract and runtime tests proving each path synchronizes TG/Army-HQ state exactly once.
-- [ ] Keep `recovering` Army-HQ records cap-active as a temporary safety rule until Task 3.3 lands; never merge a state where the new `recovering` transition releases the cap immediately.
-- [ ] Treat this temporary cap rule and Task 3.3 as one atomic integration contract: either land the four-turn recovery-tail metadata/counting in the same integration or retain the temporary `recovering` count until it does.
+- [x] Write failing tests for `planning → executing → recovering → completed`.
+- [x] At TG/operation execution, set the associated Army-HQ record to `executing`.
+- [x] At operation recovery entry, set it to `recovering`, finalize/dissolve the TG, and clear `tg_id`.
+- [x] At CorpsOperation removal after recovery, set the durable Army-HQ record to `completed`.
+- [x] Add a deterministic reconciliation helper for loaded state: if a planning/executing Army-HQ record has no matching live CorpsOperation and no live TG, mark it completed and clear `tg_id`.
+- [x] Audit every production recovery entry, including direct `op.phase = 'recovery'` assignments and `beginRecovery` calls that do not currently receive state; add source-contract and runtime tests proving each path synchronizes TG/Army-HQ state exactly once.
+- [x] Keep `recovering` Army-HQ records cap-active as a temporary safety rule until Task 3.3 lands; never merge a state where the new `recovering` transition releases the cap immediately.
+- [x] Treat this temporary cap rule and Task 3.3 as one atomic integration contract: either land the four-turn recovery-tail metadata/counting in the same integration or retain the temporary `recovering` count until it does.
 
 **Red command:**
 
@@ -645,6 +645,7 @@ The report must include:
 |---|---|---|---|---|---|
 | 2026-07-31 | Planning | uncommitted | Existing focused TG/Standing/Army-HQ pack: 20 files / 195 tests passed during audit | Existing turn-188 save characterized; no new run | Plan authored; runtime untouched |
 | 2026-07-31 | 0 | this phase commit | RED: `npm.cmd run test:vitest -- tests/operational_tactical_group_audit.test.ts --pool=forks --reporter=dot` failed on the missing audit module; subsequent composite-identity and cumulative-count contracts also failed before their fixes. GREEN: the focused audit file passed 4/4; the initial 20-file characterization barrier passed 195/195; `npm.cmd run typecheck` and `git diff --check` passed. Two CLI invocations exited 0 with empty stderr and byte-identical 1,743-byte stdout (`SHA-256 37974400a5de5db36f070b44e05f83fcb2d8bffb10f1acbb1b9ec808f74c1635`) containing no timestamp field. | Read-only audit of `runs/apr1992_definitive_188w__acb538b04d79af3c__w188_n39/final_save.json`: input SHA-256 remained `edc08a7e12d9377a0d744edd45a7cd70d29afe246ffaabf0a914e2b0f5d8c1d9` and mtime was unchanged. Turn 188: 1 live TG (`forming`, age 8, cohesion 100); 9 cumulative formations (3 each 3rd/5th Corps, 1 each HVO southeast Herzegovina/VRS Herzegovina/VRS Sarajevo-Romanija); 1 Army-HQ record (`planning`) with 1 stale TG link and 1 missing live CorpsOperation; 19 live + 1 archived participation; 0 active legacy OGs; 0 queued OG orders; duplicate `21. Division` across 3rd/5th Corps. | CLI deserializes through canonical migration/validation, audits normalized in-memory state, sorts emitted ids with `strictCompare`, writes only JSON to stdout, and creates no `runs/` artifact. Army-HQ live-operation matching is composite: anchor corps + operation name, with `army_hq_op_id` checked when present. |
+| 2026-07-31 | 1 | this phase commit | RED: the first lifecycle slice collected 51 tests with 7 expected failures (missing reconciliation/hooks, both execution sites leaving TGs `forming`, and stale donor wording); follow-up red cases isolated recovering/load orphans, explicit live links, completed stale links, idempotent omit-empty recovery, and legacy sector `force_launch` ownership. GREEN: expanded Phase 1 pack passed 12 files / 172 tests; the original characterization barrier passed 20 files / 197 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` passed. | Approved 52-week baseline remained byte-identical after simplify: `final_save.json` SHA-256 `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`; all eight artifacts matched. An intermediate one-path drift (`military.corps_command.jna_herzegovina_command.last_completed_operation.force_launch`, omitted → `false`) was traced to generic-hook serialization noise and removed before commit; no baseline manifest was refreshed. | One exact Army-HQ-id/deterministic `(hostCorpsId, op.name)` resolver now owns live lookup. Both execution transitions engage/relocate TGs; every live recovery/completion writer routes through idempotent hooks; loaded state repairs stale/orphan receipts without penalties; recovering remains cap-active until Task 3.3. `corps_command.advanceOperations` is explicitly narrowed to reorganization operations. |
 
 ---
 
