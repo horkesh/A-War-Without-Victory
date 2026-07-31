@@ -64,8 +64,14 @@ export interface TgParticipationRecord {
     role: 'anchor' | 'donor';
     /** Turn the TG formed (= when this record was written). */
     formed_turn: number;
+    /** Turn the TG dissolved (all participants; omitted while the TG is live). */
+    dissolved_turn?: number;
     /** Personnel this brigade lent at formation (donors only; 0/omitted for anchor). */
     personnel_lent?: number;
+    /** Surviving lent personnel returned at dissolution (donors only). */
+    personnel_returned?: number;
+    /** Casualties charged to this donor contribution (donors only). */
+    casualties?: number;
     /** Donor brigade's source corps (donors only; anchor uses its own corps). */
     donor_corps_id?: FormationId;
     /** Set when the TG is part of an Army HQ (faction-scope) op. */
