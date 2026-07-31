@@ -245,6 +245,21 @@ function sanitizeDiagnosticPayload(value, outputDirectory) {
   return value;
 }
 
+function sanitizeFailure(failure, outputDirectory) {
+  return sanitizeDiagnosticPayload(String(failure?.stack ?? failure), outputDirectory);
+}
+
+function buildEvidenceOutcome(failure, outputDirectory) {
+  return {
+    ok: failure == null,
+    error: failure == null ? null : sanitizeFailure(failure, outputDirectory),
+  };
+}
+
+function formatFatalError(failure) {
+  return `${sanitizeFailure(failure)}\n`;
+}
+
 function classifyMainProcessStdout(lines) {
   const counts = {
     built_map_server_selected: 0,
@@ -828,8 +843,7 @@ async function main() {
     repository_saves,
     launches,
     summary,
-    ok: failure == null,
-    error: failure == null ? null : sanitizeDiagnosticLine(failure?.stack ?? failure, outputDirectory),
+    ...buildEvidenceOutcome(failure, outputDirectory),
   };
   const evidencePath = path.join(outputDirectory, failure == null ? 'baseline.json' : 'baseline-failed.json');
   writeJsonExclusive(evidencePath, evidence);
@@ -839,19 +853,21 @@ async function main() {
 
 if (require.main === module) {
   main().catch((error) => {
-    process.stderr.write(`${String(error?.stack ?? error)}\n`);
+    process.stderr.write(formatFatalError(error));
     process.exitCode = 1;
   });
 }
 
 module.exports = {
   assertRepositorySavesUnchanged,
+  buildEvidenceOutcome,
   buildMachineManifest,
   buildPersistedProcessDiagnostics,
   buildSummary,
   classifyMainProcessStdout,
   classifyMainProcessStderr,
   closeElectronApplication,
+  formatFatalError,
   hasOrderedTransitionDurations,
   parseOptions,
   percentile,

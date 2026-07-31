@@ -239,6 +239,61 @@ describe('map transition Electron profile harness contract', () => {
     expect(source).toMatch(/failure\s*\?\?=\s*unexpectedDiagnosticsFailure\(summary\)/);
   });
 
+  it('builds and serializes failed evidence without leaking a malicious stack', () => {
+    const {
+      buildEvidenceOutcome,
+      formatFatalError,
+    } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof buildEvidenceOutcome).toBe('function');
+    expect(typeof formatFatalError).toBe('function');
+    if (typeof buildEvidenceOutcome !== 'function' || typeof formatFatalError !== 'function') return;
+    const outputDirectory = String.raw`F:\AWWV-worktrees\r1-map-transition\tmp-map-transition-perf\failure-test`;
+    const failure = new Error('malicious failure');
+    failure.stack = [
+      'Error: failed at https://example.test/private',
+      String.raw`    at D:\private\failure.cjs:42:7`,
+      '    at /home/test/private.mjs:9:2',
+      'token 5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818 on port 53728',
+    ].join('\n');
+    const expectedError = [
+      'Error: failed at <url>',
+      '    at <absolute-path>:42:7',
+      '    at <absolute-path>',
+      'token <uuid> on port <ephemeral-port>',
+    ].join('\n');
+    const evidence = {
+      schema_version: 4,
+      summary: {
+        runtime_diagnostics: { page_errors: 1 },
+        expected_main_process_stdout: { tactical_map_server_started: 3 },
+      },
+      ...buildEvidenceOutcome(failure, outputDirectory),
+    };
+
+    expect(buildEvidenceOutcome(null, outputDirectory)).toEqual({ ok: true, error: null });
+    expect(evidence).toEqual({
+      schema_version: 4,
+      summary: {
+        runtime_diagnostics: { page_errors: 1 },
+        expected_main_process_stdout: { tactical_map_server_started: 3 },
+      },
+      ok: false,
+      error: expectedError,
+    });
+    expect(formatFatalError(failure)).toBe(`${expectedError}\n`);
+    const serialized = JSON.stringify(evidence);
+    expect(serialized).toContain('<url>');
+    expect(serialized).toContain('<absolute-path>');
+    expect(serialized).toContain('<uuid>');
+    expect(serialized).toContain('<ephemeral-port>');
+    expect(serialized).toContain('tactical_map_server_started');
+    expect(serialized).not.toMatch(/(?:https?|wss?|file):\/\//i);
+    expect(serialized).not.toMatch(/[A-Za-z]:[\\/]|\/home\/|5a65bc3b|53728/);
+    const source = readFileSync(harnessPath, 'utf8');
+    expect(source).toMatch(/\.\.\.buildEvidenceOutcome\(failure, outputDirectory\)/);
+    expect(source).toMatch(/process\.stderr\.write\(formatFatalError\(error\)\)/);
+  });
+
   it('starts protected cleanup before application setup and verifies a forced exit', async () => {
     const { closeElectronApplication } = require('../tools/ui/map_transition_profile.cjs');
     expect(typeof closeElectronApplication).toBe('function');
