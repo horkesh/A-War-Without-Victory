@@ -75,7 +75,11 @@ describe('RootErrorBoundary panel isolation', () => {
     expect(appSource).toMatch(
       /<RootErrorBoundary zone="right panel">[\s\S]*railState\.panel[\s\S]*<\/RootErrorBoundary>/,
     );
-    expect(appSource).toMatch(/<RootErrorBoundary zone="map">[\s\S]*<MapContainer \/>[\s\S]*<\/RootErrorBoundary>/);
+    expect(appSource).toContain('<CampaignTacticalViewportOwner');
+    expect(readFileSync('src/ui/map/components/CampaignTacticalViewportOwner.tsx', 'utf8'))
+      .toMatch(/<RootErrorBoundary[\s\S]*key=\{campaignViewportEpoch\}[\s\S]*zone="map">[\s\S]*<TacticalMapViewport[\s\S]*<\/RootErrorBoundary>/);
+    expect(readFileSync('src/ui/map/components/TacticalMapViewport.tsx', 'utf8'))
+      .toMatch(/<RootErrorBoundary zone="minimap">[\s\S]*<Minimap/);
     expect(appSource).toMatch(/<RootErrorBoundary zone="toolbar">[\s\S]*<PresidentialToolbar/);
     expect(appSource).toMatch(/<RootErrorBoundary zone="sidebar">[\s\S]*<OOBSidebar \/>[\s\S]*<\/RootErrorBoundary>/);
   });

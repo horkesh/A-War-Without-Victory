@@ -33,6 +33,86 @@ interface ReleasableDeckOverlay {
   finalize(): void;
 }
 
+/** Imperative graphics-only surface used by the retained tactical viewport. */
+export interface TacticalMapGraphicsController {
+  resize(): void;
+  triggerRepaint(): void;
+  onceRender(listener: () => void): () => void;
+  stop(): void;
+}
+
+export interface TacticalMapRenderedRevision {
+  turn: number;
+  fingerprint: string;
+}
+
+export interface RetainedMapStyleReadiness {
+  readonly loaded: boolean;
+  markLoaded(): void;
+  invalidateForReplacement(): void;
+}
+
+/** Tracks the one-time style lifecycle independently from transient source loading. */
+export function createRetainedMapStyleReadiness(): RetainedMapStyleReadiness {
+  let loaded = false;
+  return {
+    get loaded() {
+      return loaded;
+    },
+    markLoaded() {
+      loaded = true;
+    },
+    invalidateForReplacement() {
+      loaded = false;
+    },
+  };
+}
+
+export interface RetainedRevisionCommitTracker<Revision> {
+  shouldApply(revision: Revision): boolean;
+  begin(revision: Revision): number;
+  isInFlight(token: number): boolean;
+  commit(token: number): boolean;
+  cancel(token: number): void;
+  reset(): void;
+}
+
+/** Commits a retained map revision only after its final rendered frame. */
+export function createRetainedRevisionCommitTracker<Revision>(
+  isSameRevision: (left: Revision, right: Revision) => boolean = Object.is,
+): RetainedRevisionCommitTracker<Revision> {
+  let committed: Revision | null = null;
+  let inFlight: { token: number; revision: Revision } | null = null;
+  let nextToken = 1;
+  return {
+    shouldApply(revision) {
+      return committed == null || !isSameRevision(committed, revision);
+    },
+    begin(revision) {
+      const token = nextToken;
+      nextToken += 1;
+      inFlight = { token, revision };
+      return token;
+    },
+    isInFlight(token) {
+      return inFlight?.token === token;
+    },
+    commit(token) {
+      if (inFlight?.token !== token) return false;
+      committed = inFlight.revision;
+      inFlight = null;
+      return true;
+    },
+    cancel(token) {
+      if (inFlight?.token === token) inFlight = null;
+    },
+    reset() {
+      committed = null;
+      inFlight = null;
+    },
+  };
+}
+
 export function safeScalarMapPadding(canvas: CanvasSize, requestedPadding: number): number | null {
   const rect = canvas.getBoundingClientRect?.();
   const width = rect?.width ?? canvas.clientWidth;

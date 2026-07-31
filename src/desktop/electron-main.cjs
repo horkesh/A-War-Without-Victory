@@ -107,6 +107,7 @@ function getAppIconPath() {
 let currentGameStateJson = null;
 let mainWindow = null;
 let tacticalMapWindow = null;
+const CAMPAIGN_REPLACEMENT_UPDATE = Object.freeze({ campaignReplacement: true });
 
 // TIER1-REPLAY-LIVE: sparse manifest accumulator for live-play sessions.
 // Reset on campaign start or state load; appended per advance-turn.
@@ -165,13 +166,13 @@ function projectCurrentGameStateForRenderer() {
   return currentGameStateJson ? projectPlayerVisibleStateJson(currentGameStateJson) : null;
 }
 
-function sendGameStateToRenderer(stateJson, excludeSender) {
+function sendGameStateToRenderer(stateJson, excludeSender, metadata) {
   const playerVisibleStateJson = projectPlayerVisibleStateJson(stateJson);
   const targets = [mainWindow, tacticalMapWindow];
   for (const win of targets) {
     if (win && !win.isDestroyed()) {
       if (excludeSender && win.webContents === excludeSender) continue;
-      win.webContents.send('game-state-updated', playerVisibleStateJson);
+      win.webContents.send('game-state-updated', playerVisibleStateJson, metadata);
     }
   }
 }
@@ -277,7 +278,7 @@ function readCanonicalCurrentState(sim) {
   return sim.deserializeState(currentGameStateJson);
 }
 
-function writeCanonicalCurrentState(sim, state, excludeSender) {
+function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {}) {
   const previousGameStateJson = currentGameStateJson;
   currentGameStateJson = sim.serializeState(state);
   try {
@@ -286,10 +287,12 @@ function writeCanonicalCurrentState(sim, state, excludeSender) {
     currentGameStateJson = previousGameStateJson;
     throw error;
   }
-  // Mutating IPC calls return only status/report metadata, so the initiating
-  // renderer also needs the projected broadcast or it can retain stale state.
-  void excludeSender;
-  sendGameStateToRenderer(currentGameStateJson);
+  if (metadata) {
+    const broadcastExclude = options.excludeSenderFromBroadcast ? excludeSender : undefined;
+    sendGameStateToRenderer(currentGameStateJson, broadcastExclude, metadata);
+  } else {
+    sendGameStateToRenderer(currentGameStateJson);
+  }
 }
 
 function ensureCorpsCommandEntry(state, corpsId, stance = 'balanced') {
@@ -957,7 +960,7 @@ function createMainWindow(options = {}) {
               const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
               currentGameStateJson = sim.serializeState(state);
               liveReplayManifestFrames = [];
-              sendGameStateToRenderer(currentGameStateJson);
+              sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
             } catch (e) { console.error('Load scenario failed:', e); }
           }
         },
@@ -975,7 +978,7 @@ function createMainWindow(options = {}) {
               if (manifestJson) sendReplayManifestToRenderer(manifestJson);
               const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
               if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-              sendGameStateToRenderer(currentGameStateJson);
+              sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
             } catch (e) { console.error('Load state failed:', e); }
           }
         },
@@ -1917,7 +1920,7 @@ app.whenReady().then(() => {
       const { state } = await sim.loadScenarioFromPath(result.filePaths[0], getBaseDir());
       currentGameStateJson = sim.serializeState(state);
       liveReplayManifestFrames = [];
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
@@ -1937,8 +1940,14 @@ app.whenReady().then(() => {
       const sim = getDesktopSim();
       const { state } = await sim.startNewCampaign(getBaseDir(), playerFaction, scenarioKey ?? 'apr_1992');
       liveReplayManifestFrames = [];
-      writeCanonicalCurrentState(sim, state, _event.sender);
-      return { ok: true };
+      writeCanonicalCurrentState(
+        sim,
+        state,
+        _event.sender,
+        CAMPAIGN_REPLACEMENT_UPDATE,
+        { excludeSenderFromBroadcast: true },
+      );
+      return { ok: true, stateJson: projectCurrentGameStateForRenderer() };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };
     }
@@ -1960,7 +1969,7 @@ app.whenReady().then(() => {
       if (manifestJson) sendReplayManifestToRenderer(manifestJson);
       const sequenceJson = manifestJson ? null : readReplaySaveSequenceSidecar(result.filePaths[0]);
       if (sequenceJson) sendReplaySequenceToRenderer(sequenceJson);
-      sendGameStateToRenderer(currentGameStateJson);
+      sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);
       return { ok: true };
     } catch (e) {
       return { ok: false, error: classifyLoadError(e) };

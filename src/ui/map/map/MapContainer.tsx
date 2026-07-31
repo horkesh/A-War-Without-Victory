@@ -3,10 +3,14 @@ import maplibregl from 'maplibre-gl';
 import {
   additionalCameraPadding,
   cameraOffsetForPadding,
+  createRetainedMapStyleReadiness,
+  createRetainedRevisionCommitTracker,
   hasUsableMapCanvas,
   isTacticalMapStateReady,
   releaseMapWebGlContext,
   releaseStandaloneDeckWebGlContext,
+  type TacticalMapGraphicsController,
+  type TacticalMapRenderedRevision,
 } from './mapContextLifecycle';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type {
@@ -84,6 +88,8 @@ import { createDevTimer } from './overlayTiming';
 import {
   completeMapTransition,
   countMapTransitionConstruction,
+  countMapTransitionDeckConstruction,
+  countMapTransitionDeckRelease,
   countMapTransitionRelease,
   markMapTransition,
 } from '../perf/mapTransitionTiming';
@@ -107,6 +113,42 @@ import {
  * Flip back to false only if a regression is detected on the live map.
  */
 const MAP_SCARS_FEATURE_FLAG = true;
+const SOURCE_UPDATE_POLL_MAX_ATTEMPTS = 30;
+
+function scheduleMapApplicationFrame(active: boolean, callback: FrameRequestCallback): number {
+  if (!active) {
+    callback(0);
+    return -1;
+  }
+  return requestAnimationFrame(callback);
+}
+
+interface MapContainerProps {
+  active: boolean;
+  inputActive: boolean;
+  revealPainted: boolean;
+  onRenderedRevisionChange?: (revision: TacticalMapRenderedRevision | null) => void;
+  onGraphicsController?: (controller: TacticalMapGraphicsController | null) => void;
+}
+
+interface TacticalMapApplicationRevision {
+  state: LoadedGameState;
+  stagedOrders: unknown;
+  expandedStackOsid: string | null;
+  locale: string;
+  selectedFormationId: string | null;
+}
+
+function isSameTacticalMapApplicationRevision(
+  left: TacticalMapApplicationRevision,
+  right: TacticalMapApplicationRevision,
+): boolean {
+  return left.state === right.state
+    && left.stagedOrders === right.stagedOrders
+    && left.expandedStackOsid === right.expandedStackOsid
+    && left.locale === right.locale
+    && left.selectedFormationId === right.selectedFormationId;
+}
 
 /**
  * Feature flag: Force-Quality Glow per-OSID per-faction officer-quality overlay.
@@ -717,10 +759,21 @@ function pickNearestVisibleFormationCounterAtPoint(args: {
   return best ? { id: best.item.id, properties: best.item.properties } : null;
 }
 
-export function MapContainer() {
+export function MapContainer({
+  active,
+  inputActive,
+  revealPainted,
+  onRenderedRevisionChange,
+  onGraphicsController,
+}: MapContainerProps) {
   const [locale] = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const styleReadinessRef = useRef(createRetainedMapStyleReadiness());
+  const activeRef = useRef(active);
+  activeRef.current = active;
+  const inputActiveRef = useRef(inputActive);
+  inputActiveRef.current = inputActive;
   const deckOverlayRef = useRef<MapboxOverlay | null>(null);
   const formationCounterDomOverlayRef = useRef<HTMLDivElement | null>(null);
   const visibleFormationCounterItemsRef = useRef<FormationCounterDomOverlayItem[]>([]);
@@ -739,13 +792,15 @@ export function MapContainer() {
   /** Guard: Deck.gl onClick sets this when it handles a formation click, so MapLibre's handleMapClick skips front-edge fallthrough. */
   const deckHandledFormationClickRef = useRef(false);
   const sourceUpdatePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  /** Guard: only run heavy overlay build once per loadedGameState; poll must not run build (napkin). */
-  const appliedStateRef = useRef<LoadedGameState | null>(null);
-  const appliedLocaleRef = useRef(locale);
+  /** Committed only after the complete revision reaches a rendered frame. */
+  const revisionCommitTrackerRef = useRef(
+    createRetainedRevisionCommitTracker<TacticalMapApplicationRevision>(isSameTacticalMapApplicationRevision),
+  );
   /** Timeout handle for deferred formation icons + setData; cleared on effect cleanup. */
   const deferredOverlayHandleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const interactionLayerSignatureRef = useRef('');
   const [mapReady, setMapReady] = useState(false);
+  const [styleReady, setStyleReady] = useState(false);
   const [mapRenderReady, setMapRenderReady] = useState(false);
   const [mapRenderedTurn, setMapRenderedTurn] = useState<number | null>(null);
   const [mapRenderedRevision, setMapRenderedRevision] = useState<string | null>(null);
@@ -764,36 +819,46 @@ export function MapContainer() {
   const operationTargetOsids = useGameStore((s) => s.operationTargetOsids);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
   const loadedStateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
-  const currentMapStateReady = isTacticalMapStateReady(
+  const currentRevisionReady = isTacticalMapStateReady(
     mapRenderReady,
     mapRenderedTurn,
     loadedGameState?.turn,
     mapRenderedRevision,
     loadedStateFingerprint,
   );
+  const currentMapStateReady = active && revealPainted && styleReady && currentRevisionReady;
   const currentMapStateReadyRef = useRef(currentMapStateReady);
   currentMapStateReadyRef.current = currentMapStateReady;
   useEffect(() => {
+    if (!active) return;
     markMapTransition('viewport-visible');
-  }, []);
+    if (!mapReady) return;
+    // Retained owners satisfy these prerequisites without reconstructing them.
+    if (osidBaseRef.current) markMapTransition('core-data-ready');
+    const map = mapRef.current;
+    if (!map) return;
+    markMapTransition('map-created');
+    if (styleReadinessRef.current.loaded) markMapTransition('style-loaded');
+  }, [active, mapReady, styleReady]);
   useEffect(() => {
-    if (!currentMapStateReady || loadedGameState == null) return;
+    if (!active || !currentRevisionReady) return;
+    markMapTransition('current-state-rendered');
+  }, [active, currentRevisionReady]);
+  useEffect(() => {
+    if (!active || !currentMapStateReady || loadedGameState == null) return;
     markMapTransition('interactive');
     completeMapTransition({
       loadedTurn: loadedGameState.turn,
       fingerprintMatches: mapRenderedRevision === loadedStateFingerprint,
       currentStateReady: true,
     });
-  }, [currentMapStateReady, loadedGameState, loadedStateFingerprint, mapRenderedRevision]);
+  }, [active, currentMapStateReady, loadedGameState, loadedStateFingerprint, mapRenderedRevision]);
   useEffect(() => {
     if (!formationCounterDomOverlayRef.current) return;
     formationCounterDomOverlayRef.current.inert = !currentMapStateReady;
   }, [currentMapStateReady, mapReady]);
   const stagedOrders = useGameStore((s) => s.stagedOrders);
-  const appliedStagedOrdersRef = useRef(stagedOrders);
   const expandedStackOsid = useGameStore((s) => s.expandedStackOsid);
-  const appliedExpandedStackOsidRef = useRef(expandedStackOsid);
-  const appliedSelectedFormationIdRef = useRef(selectedFormationId);
   const [overlayAnchor, setOverlayAnchor] = useState<{ x: number; y: number } | null>(null);
   const [contextMenu, setContextMenu] = useState<{
     type: 'formation' | 'front' | 'osid' | 'empty';
@@ -808,6 +873,7 @@ export function MapContainer() {
       __awwvLiveSurfaceOpenMapContextMenu?: (position?: { x: number; y: number }) => void;
     };
     win.__awwvLiveSurfaceOpenMapContextMenu = (position) => {
+      if (!inputActiveRef.current) return;
       setContextMenu({
         type: 'empty',
         properties: null,
@@ -820,7 +886,9 @@ export function MapContainer() {
   }, []);
 
   useEffect(() => {
+    if (!inputActive) return undefined;
     const handleDocumentContextMenu = (event: MouseEvent) => {
+      if (!inputActiveRef.current) return;
       if (event.defaultPrevented) return;
       const mapEl = document.querySelector('[data-testid="tactical-map"]');
       if (!(mapEl instanceof HTMLElement)) return;
@@ -843,7 +911,14 @@ export function MapContainer() {
     return () => {
       document.removeEventListener('contextmenu', handleDocumentContextMenu);
     };
-  }, []);
+  }, [inputActive]);
+
+  useEffect(() => {
+    if (active) return;
+    mapRef.current?.stop();
+    setContextMenu(null);
+    setOverlayAnchor(null);
+  }, [active]);
 
   // Robust anchor synchronization: if expandedStackOsid is set but we have no anchor (e.g. from sidebar),
   // calculate it from the OSID centroid.
@@ -899,6 +974,7 @@ export function MapContainer() {
     }),
     [mapReady, stagedOrders.length, ghostLinePoint, battlesVisible, recentCombatEventCount, currentTurnBattleCount],
   );
+  const shouldRunActiveMapPulse = shouldAnimateMapPulse && active;
 
   const osidToSector = useMemo(() => {
     if (!loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return new Map<string, string>();
@@ -1157,7 +1233,7 @@ export function MapContainer() {
           loadTerrainScalars(),
           loadCensusSettlements().catch(() => null),
         ]);
-        markMapTransition('core-data-ready');
+        if (activeRef.current) markMapTransition('core-data-ready');
 
         // Pre-compute ghost map data from census (never changes)
         if (censusGeoJson) {
@@ -1255,6 +1331,8 @@ export function MapContainer() {
       mapContainer.appendChild(counterDomOverlay);
       formationCounterDomOverlayRef.current = counterDomOverlay;
 
+      styleReadinessRef.current.invalidateForReplacement();
+      setStyleReady(false);
       const map = new maplibregl.Map({
         container: mapContainer,
         style,
@@ -1270,14 +1348,28 @@ export function MapContainer() {
         attributionControl: false,
       });
       countMapTransitionConstruction();
-      markMapTransition('map-created');
-      map.once('style.load', () => markMapTransition('style-loaded'));
+      if (activeRef.current) markMapTransition('map-created');
+      map.once('style.load', () => {
+        if (initCancelled) return;
+        styleReadinessRef.current.markLoaded();
+        setStyleReady(true);
+        if (activeRef.current) markMapTransition('style-loaded');
+      });
       map.on('error', (e) => {
         // Suppress noisy PMTiles "Unimplemented type: 4" errors (MVT geometry type unsupported by MapLibre)
         if (e.error?.message?.includes('Unimplemented type')) return;
         console.error('[MapLibre] map error:', e.error);
       });
       mapRef.current = map;
+      onGraphicsController?.({
+        resize: () => map.resize(),
+        triggerRepaint: () => map.triggerRepaint(),
+        onceRender: (listener) => {
+          map.once('render', listener);
+          return () => map.off('render', listener);
+        },
+        stop: () => map.stop(),
+      });
       map.setPadding(buildCounterAwareCameraPadding(map));
       ensureTacticalIcons(map);
 
@@ -1324,8 +1416,17 @@ export function MapContainer() {
           handleFormationCounterSelection(clickTarget.formationId, props);
         },
       });
-      map.addControl(deckOverlay);
+      countMapTransitionDeckConstruction();
       deckOverlayRef.current = deckOverlay;
+      try {
+        map.addControl(deckOverlay);
+      } catch (error) {
+        deckOverlayRef.current = null;
+        releaseStandaloneDeckWebGlContext(deckOverlay);
+        countMapTransitionDeckRelease();
+        if (!initCancelled) setMapLoadError(error instanceof Error ? error.message : String(error));
+        return;
+      }
 
       map.addControl(new maplibregl.NavigationControl(), 'top-right');
       // Minimap sync: report viewport bounds on move
@@ -1374,12 +1475,14 @@ export function MapContainer() {
       // Throttled to ~20fps (50ms) to avoid rebuilding layers every animation frame.
       let counterViewportSyncTimer: ReturnType<typeof setTimeout> | null = null;
       const scheduleCounterViewportSync = () => {
+        if (!inputActiveRef.current) return;
         if (formationCounterDomOverlayRef.current) {
           formationCounterDomOverlayRef.current.dataset.awwvFormationCounterNeedsUpdate = 'true';
         }
         if (counterViewportSyncTimer) return;
         counterViewportSyncTimer = setTimeout(() => {
           counterViewportSyncTimer = null;
+          if (!inputActiveRef.current) return;
           if (deckOverlayRef.current && lastFormationsGeoJsonRef.current) {
             const {
               formationsVisible: fVis,
@@ -1417,11 +1520,13 @@ export function MapContainer() {
 
       // Minimap: register panToCenter callback
       useGameStore.getState().setPanToCenter((center: [number, number]) => {
+        if (!inputActiveRef.current) return;
         map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 400, essential: true });
       });
 
       // Operations panel: register panToOsid callback
       useGameStore.getState().setPanToOsid((osid: string) => {
+        if (!inputActiveRef.current) return;
         const center = osidCentroidsRef.current.get(osid);
         if (!center) return;
         map.easeTo({ center, offset: cameraOffsetForPadding(buildCounterAwareCameraPadding(map)), duration: 420, essential: true });
@@ -1434,9 +1539,14 @@ export function MapContainer() {
 
     return () => {
       initCancelled = true;
+      onGraphicsController?.(null);
+      onRenderedRevisionChange?.(null);
       const deckOverlay = deckOverlayRef.current;
       deckOverlayRef.current = null;
-      if (deckOverlay) releaseStandaloneDeckWebGlContext(deckOverlay);
+      if (deckOverlay) {
+        releaseStandaloneDeckWebGlContext(deckOverlay);
+        countMapTransitionDeckRelease();
+      }
       formationCounterDomOverlayRef.current?.remove();
       formationCounterDomOverlayRef.current = null;
       visibleFormationCounterItemsRef.current = [];
@@ -1453,10 +1563,10 @@ export function MapContainer() {
       setMapRenderedTurn(null);
       setMapRenderedRevision(null);
     };
-  }, [mapInitAttempt]);
+  }, [mapInitAttempt, onGraphicsController, onRenderedRevisionChange]);
 
   useEffect(() => {
-    if (!mapReady || !mapRef.current) return;
+    if (!inputActive || !mapReady || !mapRef.current) return;
     let cleanup: (() => void) | undefined;
     let attempts = 0;
     let cancelled = false;
@@ -1580,7 +1690,7 @@ export function MapContainer() {
           setContextMenu({ type, properties, position });
         },
         deckHandledFormationClick: deckHandledFormationClickRef,
-      });
+      }, () => inputActiveRef.current);
       if (mapRef.current && shouldScheduleInteractionRetry(mapRef.current, attempts)) {
         attempts += 1;
         window.setTimeout(registerInteractions, 100);
@@ -1591,22 +1701,41 @@ export function MapContainer() {
       cancelled = true;
       if (cleanup) cleanup();
     };
-  }, [mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setTooltipTargetWithPosition, clearTooltipTarget, selectedFormationId, osidToSector, interactionBindingRevision]);
+  }, [inputActive, mapReady, loadedGameState, setSelectedOsid, setSelectedOsidInSector, setTooltipTargetWithPosition, clearTooltipTarget, selectedFormationId, osidToSector, interactionBindingRevision]);
 
   useEffect(() => {
     const map = mapRef.current;
     const baseGeoJson = osidBaseRef.current;
     if (!mapReady || !map || !baseGeoJson || !loadedGameState) {
-      appliedStateRef.current = null;
+      revisionCommitTrackerRef.current.reset();
       return;
     }
 
     let cancelled = false;
+    let inFlightRevisionToken: number | null = null;
     const stateFingerprint = loadedStateFingerprint;
+    const requestedRevision: TacticalMapApplicationRevision = {
+      state: loadedGameState,
+      stagedOrders,
+      expandedStackOsid,
+      locale,
+      selectedFormationId,
+    };
     let readinessSourceMap: maplibregl.Map | null = null;
     let readinessSourceHandler: ((event: maplibregl.MapSourceDataEvent) => void) | null = null;
     let readinessRenderHandler: (() => void) | null = null;
     let readinessTimeoutId: number | null = null;
+    let sourceUpdatePollAttempts = 0;
+    const applicationFrameIds = new Set<number>();
+    const scheduleUpdateFrame = (callback: FrameRequestCallback): number => {
+      let frameId = -1;
+      frameId = scheduleMapApplicationFrame(active, (timestamp) => {
+        applicationFrameIds.delete(frameId);
+        callback(timestamp);
+      });
+      if (frameId >= 0) applicationFrameIds.add(frameId);
+      return frameId;
+    };
 
     const clearReadinessListeners = () => {
       if (readinessSourceMap && readinessSourceHandler) {
@@ -1622,6 +1751,18 @@ export function MapContainer() {
       readinessTimeoutId = null;
     };
 
+    const cancelInFlightRevision = () => {
+      if (inFlightRevisionToken == null) return;
+      revisionCommitTrackerRef.current.cancel(inFlightRevisionToken);
+      inFlightRevisionToken = null;
+    };
+    const commitInFlightRevision = (): boolean => {
+      if (inFlightRevisionToken == null) return false;
+      const committed = revisionCommitTrackerRef.current.commit(inFlightRevisionToken);
+      if (committed) inFlightRevisionToken = null;
+      return committed;
+    };
+
     const scheduleMapRenderReady = (targetMap: maplibregl.Map, stateTurn: number) => {
       if (!stateFingerprint) return;
       clearReadinessListeners();
@@ -1633,13 +1774,15 @@ export function MapContainer() {
         readinessRenderHandler = () => {
           readinessRenderHandler = null;
           if (cancelled || mapRef.current !== targetMap) return;
+          if (!commitInFlightRevision()) return;
           if (readinessTimeoutId != null) window.clearTimeout(readinessTimeoutId);
           readinessTimeoutId = null;
           setMapRenderedTurn(stateTurn);
           setMapRenderedRevision(stateFingerprint);
+          onRenderedRevisionChange?.({ turn: stateTurn, fingerprint: stateFingerprint });
           setMapRenderReady(true);
           setMapLoadError(null);
-          markMapTransition('current-state-rendered');
+          if (activeRef.current) markMapTransition('current-state-rendered');
         };
         targetMap.once('render', readinessRenderHandler);
         targetMap.triggerRepaint();
@@ -1673,6 +1816,14 @@ export function MapContainer() {
             !orderArrowsSource ? 'order-arrows' : '',
           ].filter(Boolean).join(',');
         }
+        if (!active) return;
+        sourceUpdatePollAttempts += 1;
+        if (sourceUpdatePollAttempts >= SOURCE_UPDATE_POLL_MAX_ATTEMPTS) {
+          if (sourceUpdatePollRef.current) clearInterval(sourceUpdatePollRef.current);
+          sourceUpdatePollRef.current = null;
+          setMapLoadError('Map source readiness timed out');
+          return;
+        }
         if (!cancelled && !sourceUpdatePollRef.current) {
           sourceUpdatePollRef.current = setInterval(() => {
             if (cancelled) return;
@@ -1688,35 +1839,25 @@ export function MapContainer() {
       if (formationCounterDomOverlayRef.current) {
         formationCounterDomOverlayRef.current.dataset.awwvFormationCounterSourceGate = 'ready';
       }
-      // Only run heavy build once per state; poll must not run build (napkin).
-      const needsUpdate = appliedStateRef.current !== loadedGameState ||
-        appliedStagedOrdersRef.current !== stagedOrders ||
-        appliedExpandedStackOsidRef.current !== expandedStackOsid ||
-        appliedLocaleRef.current !== locale ||
+      // Only a fully rendered revision is committed; cancelled work must resume.
+      const needsUpdate = revisionCommitTrackerRef.current.shouldApply(requestedRevision) ||
         lastFormationsGeoJsonRef.current === null ||
-        formationCounterDomOverlayRef.current?.dataset.awwvFormationCounterRenderedCount === undefined ||
-        // selectedFormationId change should also trigger update for chain-of-command
-        appliedSelectedFormationIdRef.current !== selectedFormationId;
+        formationCounterDomOverlayRef.current?.dataset.awwvFormationCounterRenderedCount === undefined;
       if (formationCounterDomOverlayRef.current) {
         formationCounterDomOverlayRef.current.dataset.awwvFormationCounterNeedsUpdate = needsUpdate ? 'true' : 'false';
       }
       if (!needsUpdate) return;
+      inFlightRevisionToken = revisionCommitTrackerRef.current.begin(requestedRevision);
 
       const state = loadedGameState;
       const currentStagedOrders = stagedOrders;
       const base = baseGeoJson;
       const stack = expandedStackOsid;
-      requestAnimationFrame(() => {
+      scheduleUpdateFrame(() => {
         if (cancelled || !mapRef.current || !state) return;
         if (formationCounterDomOverlayRef.current) {
           formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'control';
         }
-        appliedStateRef.current = state;
-        appliedLocaleRef.current = locale;
-        appliedStagedOrdersRef.current = currentStagedOrders;
-        appliedExpandedStackOsidRef.current = stack;
-        appliedSelectedFormationIdRef.current = selectedFormationId;
-
         let controlledGeoJson: FeatureCollection;
         try {
           const controlTimer = createDevTimer('[MapContainer] overlay control', devMode);
@@ -1805,7 +1946,7 @@ export function MapContainer() {
           }
         } catch (e) {
           console.error('[MapContainer] overlay control failed:', e);
-          appliedStateRef.current = null;
+          cancelInFlightRevision();
           setMapLoadError(e instanceof Error ? e.message : String(e));
           return;
         }
@@ -1829,12 +1970,11 @@ export function MapContainer() {
             onCounterSelect: (item, intent) => handleFormationCounterSelection(item.id, item.properties, intent),
             onCounterHover: handleDomCounterHover,
           });
-          scheduleMapRenderReady(m, state.turn);
         } catch (e) {
           console.warn('[MapContainer] early formation counter render failed; deferred overlay will retry:', e);
         }
 
-        requestAnimationFrame(() => {
+        scheduleUpdateFrame(() => {
           if (cancelled || !mapRef.current || !state) return;
           if (formationCounterDomOverlayRef.current) {
             formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'front';
@@ -2034,7 +2174,7 @@ export function MapContainer() {
               frontTimer.end();
             }
 
-            requestAnimationFrame(() => {
+            scheduleUpdateFrame(() => {
               if (cancelled || !mapRef.current || !state) return;
               if (formationCounterDomOverlayRef.current) {
                 formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'formations';
@@ -2052,6 +2192,7 @@ export function MapContainer() {
 
                 // Defer icon registration + setData to idle/next tick so this rAF doesn't block the main thread (freeze fix).
                 const runDeferred = () => {
+                  deferredOverlayHandleRef.current = null;
                   if (cancelled || !mapRef.current || !state) return;
                   if (formationCounterDomOverlayRef.current) {
                     formationCounterDomOverlayRef.current.dataset.awwvFormationCounterStage = 'deferred';
@@ -2333,7 +2474,7 @@ export function MapContainer() {
                     scheduleMapRenderReady(m, state.turn);
                   } catch (deferredErr) {
                     console.error('[MapContainer] deferred overlay failed:', deferredErr);
-                    appliedStateRef.current = null;
+                    cancelInFlightRevision();
                     setMapLoadError(deferredErr instanceof Error ? deferredErr.message : String(deferredErr));
                   } finally {
                     deferredTimer.end();
@@ -2346,40 +2487,41 @@ export function MapContainer() {
                 deferredOverlayHandleRef.current = handle;
               } catch (e) {
                 console.error('[MapContainer] overlay formations/orders failed:', e);
-                appliedStateRef.current = null;
+                cancelInFlightRevision();
                 setMapLoadError(e instanceof Error ? e.message : String(e));
               }
             });
           } catch (e) {
             console.error('[MapContainer] overlay front failed:', e);
-            appliedStateRef.current = null;
+            cancelInFlightRevision();
             setMapLoadError(e instanceof Error ? e.message : String(e));
           }
         });
       });
     };
 
-    const rafId = requestAnimationFrame(() => runUpdate());
+    scheduleUpdateFrame(() => runUpdate());
 
     return () => {
       cancelled = true;
       clearReadinessListeners();
-      cancelAnimationFrame(rafId);
+      for (const frameId of applicationFrameIds) cancelAnimationFrame(frameId);
+      applicationFrameIds.clear();
       if (deferredOverlayHandleRef.current != null) {
         clearTimeout(deferredOverlayHandleRef.current);
-        appliedStateRef.current = null;
         deferredOverlayHandleRef.current = null;
       }
+      cancelInFlightRevision();
       if (sourceUpdatePollRef.current) {
         clearInterval(sourceUpdatePollRef.current);
         sourceUpdatePollRef.current = null;
       }
     };
-  }, [loadedGameState, loadedStateFingerprint, mapReady, stagedOrders, expandedStackOsid, locale]);
+  }, [active, loadedGameState, loadedStateFingerprint, mapReady, onRenderedRevisionChange, stagedOrders, expandedStackOsid, locale, selectedFormationId]);
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!mapReady || !map) return;
+    if (!active || !mapReady || !map) return;
 
     const applyHoverFilter = () => {
       if (!map.getSource('osid-control')) return false;
@@ -2428,14 +2570,14 @@ export function MapContainer() {
       if (applyHoverFilter()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [hoveredOsids, selectedCorpsId, loadedGameState, mapReady]);
+  }, [active, hoveredOsids, selectedCorpsId, loadedGameState, mapReady]);
 
   // Operation target visualization: crosshair + ring + dot + fill on objective OSIDs
   useEffect(() => {
     const map = mapRef.current;
     const centroidLookup = osidCentroidsRef.current;
     const baseGeoJson = osidBaseRef.current;
-    if (!mapReady || !map || !baseGeoJson) return;
+    if (!active || !mapReady || !map || !baseGeoJson) return;
 
     const emptyGeoJson: FeatureCollection = { type: 'FeatureCollection', features: [] };
     const targetSet = new Set(operationTargetOsids.filter((osid) => osid.length > 0));
@@ -2561,12 +2703,12 @@ export function MapContainer() {
       if (applyOperationTargets()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [mapReady, operationTargetOsids]);
+  }, [active, mapReady, operationTargetOsids]);
 
   // Phase B: Sector visualization — fill territory + glow edges when a sector is selected.
   useEffect(() => {
     const map = mapRef.current;
-    if (!mapReady || !map) return;
+    if (!active || !mapReady || !map) return;
 
     const ensureSectorLayers = () => {
       if (!map.getSource('osid-control') || !safeHasLayer(map, 'osid-control-fill')) return false;
@@ -2916,7 +3058,7 @@ export function MapContainer() {
       if (applySectorHighlight()) clearInterval(poll);
     }, 250);
     return () => clearInterval(poll);
-  }, [mapReady, selectedCorpsFrontSectorId, selectedCorpsId, selectedFormationId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
+  }, [active, mapReady, selectedCorpsFrontSectorId, selectedCorpsId, selectedFormationId, sectorsVisible, loadedGameState, hoveredSectorId, hoveredCorpsId]);
 
   // Brigade AoR highlight: white icon + sub-segment front line.
   // Uses DEDICATED layers (brigade-aor-pos/neg) that never touch sector highlight layers.
@@ -3021,7 +3163,7 @@ export function MapContainer() {
     const departedByOsid = loadedGameState?.departedByOsid ?? undefined;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current) return;
       const ethnicGeoJson = buildEthnicGeoJSON(baseGeoJson, osidPropertiesMap, displacementByMun, departedByOsid);
       if (cancelled || !mapRef.current) return;
@@ -3103,7 +3245,7 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const metric = mapMode === 'legitimacy' ? 'legitimacy' : 'authority';
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
@@ -3155,7 +3297,7 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
       const moraleGeoJson = buildMoraleGeoJSON(controlGeoJson, loadedGameState.corpsFrontSectors!, loadedGameState.frontEdgesOsid!);
@@ -3207,7 +3349,7 @@ export function MapContainer() {
       || !loadedGameState?.formations) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
       const defenseGeoJson = buildDefenseStrengthGeoJSON(
@@ -3262,7 +3404,7 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !loadedGameState?.corpsFrontSectors || !loadedGameState?.frontEdgesOsid) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
       const operationsGeoJson = buildOperationalWeightGeoJSON(
@@ -3313,7 +3455,7 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !loadedGameState?.formations) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
       const casualtiesGeoJson = buildCasualtiesGeoJSON(controlGeoJson, loadedGameState.formations, loadedGameState.turn ?? 0);
@@ -3357,7 +3499,7 @@ export function MapContainer() {
     if (!mapReady || !map || !baseGeoJson || !loadedGameState) return;
 
     let cancelled = false;
-    const rafId = requestAnimationFrame(() => {
+    const rafId = scheduleMapApplicationFrame(activeRef.current, () => {
       if (cancelled || !mapRef.current || !loadedGameState) return;
       const controlGeoJson = buildControlGeoJSON(baseGeoJson, loadedGameState.controlBySettlement);
       const supplyGeoJson = buildSupplyGeoJSON(
@@ -3616,6 +3758,7 @@ export function MapContainer() {
   // panels/minimap so counter clipping uses current occluder rectangles.
   const ghostMapVisible = useGameStore((s) => s.ghostMapVisible);
   useEffect(() => {
+    if (!active) return undefined;
     let cancelled = false;
     let firstFrame = 0;
     let secondFrame = 0;
@@ -3640,8 +3783,8 @@ export function MapContainer() {
         hoveredCorpsId,
       });
     };
-    firstFrame = requestAnimationFrame(() => {
-      secondFrame = requestAnimationFrame(reapplyAfterLayout);
+    firstFrame = scheduleMapApplicationFrame(active, () => {
+      secondFrame = scheduleMapApplicationFrame(active, reapplyAfterLayout);
     });
     timeouts.push(window.setTimeout(reapplyAfterLayout, 120));
     timeouts.push(window.setTimeout(reapplyAfterLayout, 320));
@@ -3656,6 +3799,7 @@ export function MapContainer() {
       disconnectOccluderObserver();
     };
   }, [
+    active,
     mapReady,
     ghostMapVisible,
     minimapVisible,
@@ -3671,7 +3815,7 @@ export function MapContainer() {
   useEffect(() => {
     const map = mapRef.current;
     const lookup = osidCentroidsRef.current;
-    if (!mapReady || !map || lookup.size === 0) return;
+    if (!active || !mapReady || !map || lookup.size === 0) return;
 
     // Prefer pan to a selected formation/navigation anchor or settlement before broad command bounds.
     let targetOsid: string | null = null;
@@ -3760,7 +3904,7 @@ export function MapContainer() {
     }
 
     lastPanTargetRef.current = null;
-  }, [loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
+  }, [active, loadedGameState, mapReady, selectedFormationId, selectedOsid, selectedCorpsFrontSectorId, selectedCorpsId]);
 
   // OSID selection: dark fill on picked settlement, faint fill on same-mun siblings, adm3 outline, bright rim
   useEffect(() => {
@@ -3899,7 +4043,7 @@ export function MapContainer() {
 
   // Pulse animation for staged orders and battle markers
   useEffect(() => {
-    if (!shouldAnimateMapPulse || !mapRef.current) return;
+    if (!shouldRunActiveMapPulse || !mapRef.current) return;
     const map = mapRef.current;
     let frameId: number;
     let lastTime = 0;
@@ -3946,11 +4090,11 @@ export function MapContainer() {
           // ignore if style not loaded yet
         }
       }
-      frameId = requestAnimationFrame(animate);
+      frameId = scheduleMapApplicationFrame(active, animate);
     };
-    frameId = requestAnimationFrame(animate);
+    frameId = scheduleMapApplicationFrame(active, animate);
     return () => cancelAnimationFrame(frameId);
-  }, [shouldAnimateMapPulse]);
+  }, [active, shouldRunActiveMapPulse]);
 
   // LANE-NIGHTSHIFT-V093-A11Y-LANE-B: keyboard pan/zoom handler for the
   // tactical map canvas. Arrow keys pan, +/- zoom, Home/End reset to the
@@ -3959,10 +4103,11 @@ export function MapContainer() {
   //
   // Pan amount is a fixed-pixel offset (deterministic; no per-frame timing).
   // MapLibre's panBy / zoomIn / zoomOut / jumpTo are deterministic for given
-  // inputs. Keyboard events only fire when the <main> wrapper has focus
-  // (tabIndex={0}), so they do not collide with global shortcuts when
-  // focus is elsewhere (Army HQ tabs, modals, sidebar).
+  // inputs. Keyboard events only fire when the active/current <main> wrapper
+  // has focus, so they do not collide with global shortcuts when focus is
+  // elsewhere (Army HQ tabs, modals, sidebar).
   const handleFallbackContextMenu = (e: React.MouseEvent<HTMLElement>) => {
+    if (!inputActive) return;
     if (e.defaultPrevented) return;
     const target = e.target instanceof Element ? e.target : null;
     if (target?.closest('button, a, input, textarea, select, [role="button"], [role="dialog"]')) return;
@@ -3975,6 +4120,7 @@ export function MapContainer() {
   };
 
   const handleMapKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if (!inputActive) return;
     const map = mapRef.current;
     if (!map) return;
     const PAN_PX = 100;
@@ -4023,8 +4169,8 @@ export function MapContainer() {
   return (
     // LANE-NIGHTSHIFT-V093-A11Y-LANE-B: <main> landmark + tutorial spotlight
     // anchor on the same outer wrapper. The element receives keyboard focus
-    // (tabIndex={0}) and routes pan/zoom keys to the MapLibre instance via
-    // handleMapKeyDown above. id="main-content" reserves the skip-link target
+    // only after active/current readiness and routes pan/zoom keys to the
+    // MapLibre instance via handleMapKeyDown above. id="main-content" reserves the skip-link target
     // for the sibling A11y skip-link lane. Faction-agnostic; UI-only.
     <main
       role="main"
@@ -4032,12 +4178,16 @@ export function MapContainer() {
       data-testid="tactical-map"
       data-map-ready={currentMapStateReady ? 'true' : 'false'}
       data-map-state-turn={mapRenderedTurn ?? ''}
+      data-map-render-ready={mapRenderReady ? 'true' : 'false'}
+      data-map-revision-ready={currentRevisionReady ? 'true' : 'false'}
+      data-map-style-ready={styleReady ? 'true' : 'false'}
+      data-map-reveal-painted={revealPainted ? 'true' : 'false'}
       data-battle-marker-count={battleMarkerProbe.count}
       data-battle-marker-osids={battleMarkerProbe.osids}
       data-tutorial-step="map-container"
       aria-label={t('map.aria.tacticalMap')}
       aria-busy={!currentMapStateReady}
-      tabIndex={currentMapStateReady ? 0 : -1}
+      tabIndex={inputActive && currentMapStateReady ? 0 : -1}
       onContextMenu={handleFallbackContextMenu}
       onKeyDown={handleMapKeyDown}
       className="absolute inset-0 outline-none"

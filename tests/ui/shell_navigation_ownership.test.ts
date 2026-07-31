@@ -191,15 +191,14 @@ describe('field toolbar navigation ownership', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 
     expect(appSource).toContain('if (activeEventDecisionIdRef.current !== null) return;');
-    expect(appSource).toMatch(/window\.addEventListener\('keydown', handler\)[\s\S]*activeEventDecisionId/);
-    expect(appSource).toMatch(/}, \[appScreen, activeEventDecisionId\]\);/);
+    expect(appSource).toMatch(/<TacticalInputOwners[\s\S]*active=\{tacticalMapInteractionReady\}[\s\S]*onShellKeyDown=\{handleTacticalShellKeyDown\}/);
   });
 
-  it('mounts tactical map chrome only while the game shell owns the screen', () => {
+  it('retains the tactical viewport while mounting tactical chrome only for the game shell', () => {
     const appSource = readFileSync('src/ui/map/App.tsx', 'utf8');
 
     expect(appSource).toContain("{appScreen === 'game' && (");
-    expect(appSource).toMatch(/appScreen === 'game'[\s\S]*<MapContainer \/>/);
+    expect(appSource).toMatch(/<CampaignTacticalViewportOwner[\s\S]*loaded=\{loadedGameState !== null && appScreen !== 'mainMenu'\}[\s\S]*active=\{appScreen === 'game'\}/);
     expect(appSource).toMatch(/appScreen === 'game'[\s\S]*<PresidentialToolbar/);
     expect(appSource).toMatch(/appScreen === 'game'[\s\S]*<OOBSidebar \/>/);
     expect(appSource).toMatch(/appScreen === 'game'[\s\S]*<PresidentialInbox/);

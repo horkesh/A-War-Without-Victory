@@ -48,14 +48,14 @@ describe('Map overlay dev timing', () => {
     expect(source).toContain('createDevTimer(');
   });
 
-  it('marks overlay state stale when cleanup cancels deferred overlay work', () => {
+  it('cancels the in-flight revision when cleanup cancels deferred overlay work', () => {
     const source = readFileSync('src/ui/map/map/MapContainer.tsx', 'utf8');
     const cleanupStart = source.indexOf('if (deferredOverlayHandleRef.current != null)');
     const cleanupEnd = source.indexOf('if (sourceUpdatePollRef.current)', cleanupStart);
 
     expect(cleanupStart).toBeGreaterThan(0);
     expect(cleanupEnd).toBeGreaterThan(cleanupStart);
-    expect(source.slice(cleanupStart, cleanupEnd)).toContain('appliedStateRef.current = null');
+    expect(source.slice(cleanupStart, cleanupEnd)).toContain('cancelInFlightRevision();');
   });
 
   it('marks the complete transition lifecycle without replacing the readiness gate', () => {
@@ -76,7 +76,7 @@ describe('Map overlay dev timing', () => {
     expect(loaderSource).toMatch(/countMapTransitionResource/);
     expect(mapSource).toMatch(/countMapTransitionConstruction/);
     expect(mapSource).toMatch(/countMapTransitionRelease/);
-    expect(mapSource).toMatch(/map\.once\('style\.load',\s*\(\) => markMapTransition\('style-loaded'\)\)/);
+    expect(mapSource).toMatch(/map\.once\('style\.load',[\s\S]{0,240}styleReadinessRef\.current\.markLoaded\(\)[\s\S]{0,120}if \(activeRef\.current\) markMapTransition\('style-loaded'\)/);
     expect(mapSource).not.toMatch(/map\.once\('load',\s*\(\) => markMapTransition\('style-loaded'\)\)/);
     expect(mapSource).toMatch(/isTacticalMapStateReady/);
     expect(mapSource).not.toMatch(/console\.time\(/);

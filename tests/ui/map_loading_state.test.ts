@@ -14,9 +14,14 @@ describe('tactical map loading state', () => {
     expect(source).toMatch(/const \[mapRenderedRevision, setMapRenderedRevision\] = useState<string \| null>\(null\)/);
     expect(source).toMatch(/const \[mapLoadError, setMapLoadError\] = useState<string \| null>\(null\)/);
     expect(source).toMatch(/const \[mapInitAttempt, setMapInitAttempt\] = useState\(0\)/);
-    expect(source).toMatch(/const currentMapStateReady = isTacticalMapStateReady\(/);
+    expect(source).toMatch(/const currentRevisionReady = isTacticalMapStateReady\(/);
+    expect(source).toContain('const currentMapStateReady = active && revealPainted && styleReady && currentRevisionReady;');
     expect(source).toMatch(/data-map-ready=\{currentMapStateReady \? 'true' : 'false'\}/);
     expect(source).toMatch(/data-map-state-turn=\{mapRenderedTurn \?\? ''\}/);
+    expect(source).toMatch(/data-map-render-ready=\{mapRenderReady \? 'true' : 'false'\}/);
+    expect(source).toMatch(/data-map-revision-ready=\{currentRevisionReady \? 'true' : 'false'\}/);
+    expect(source).toMatch(/data-map-style-ready=\{styleReady \? 'true' : 'false'\}/);
+    expect(source).toMatch(/data-map-reveal-painted=\{revealPainted \? 'true' : 'false'\}/);
     expect(source).toMatch(/completeMapTransition\(\{/);
     expect(source).toMatch(/fingerprintMatches:\s*mapRenderedRevision === loadedStateFingerprint/);
     expect(source).toMatch(/!currentMapStateReady && \(/);
@@ -34,7 +39,7 @@ describe('tactical map loading state', () => {
     expect(source).toMatch(/data-testid="tactical-map-load-error"/);
     expect(source).toMatch(/setMapInitAttempt\(\(attempt\) => attempt \+ 1\)/);
     expect(source).toMatch(/aria-busy=\{!currentMapStateReady\}/);
-    expect(source).toMatch(/tabIndex=\{currentMapStateReady \? 0 : -1\}/);
+    expect(source).toMatch(/tabIndex=\{inputActive && currentMapStateReady \? 0 : -1\}/);
     expect(source).toMatch(/data-testid="tactical-map-loading"/);
     expect(source).not.toMatch(/data-testid="tactical-map-loading"[\s\S]{0,220}pointer-events-none/);
     expect(source).toMatch(/t\('map\.status\.preparing'\)/);

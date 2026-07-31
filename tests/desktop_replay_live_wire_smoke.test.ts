@@ -61,7 +61,7 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         const handlerEnd = electronMain.indexOf('});', handlerStart);
         const handlerBody = electronMain.slice(handlerStart, handlerEnd);
 
-        expect(handlerBody).toContain('sendGameStateToRenderer(currentGameStateJson);');
+        expect(handlerBody).toContain('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);');
         expect(handlerBody).not.toContain('sendGameStateToRenderer(currentGameStateJson, _event.sender);');
     });
 
@@ -107,10 +107,10 @@ describe('desktop_replay_live_wire_smoke — electron-main.cjs', () => {
         expect(menuBody).toContain('sendReplayManifestToRenderer(manifestJson);');
         expect(menuBody).toContain('sendReplaySequenceToRenderer(sequenceJson);');
         expect(menuBody.indexOf('sendReplayManifestToRenderer(manifestJson);')).toBeLessThan(
-            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson);'),
+            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);'),
         );
         expect(menuBody.indexOf('sendReplaySequenceToRenderer(sequenceJson);')).toBeLessThan(
-            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson);'),
+            menuBody.indexOf('sendGameStateToRenderer(currentGameStateJson, undefined, CAMPAIGN_REPLACEMENT_UPDATE);'),
         );
     });
 

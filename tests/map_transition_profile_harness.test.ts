@@ -77,6 +77,12 @@ describe('map transition Electron profile harness contract', () => {
     expect(source).toMatch(/data-map-ready/);
     expect(source).toMatch(/data-map-state-turn/);
     expect(source).toMatch(/waitForProfileSample/);
+    expect(source).toMatch(/profile\.debugState\(\)/);
+    expect(source).toMatch(/marks=\$\{debug\.marks\.join\(','\)\}/);
+    expect(source).toMatch(/Timed out waiting for current tactical map/);
+    expect(source).toMatch(/map_style_ready=\$\{dom\.map_style_ready\}/);
+    expect(source).toMatch(/map_reveal_painted=\$\{dom\.map_reveal_painted\}/);
+    expect(source).toMatch(/map_revision_ready=\$\{dom\.map_revision_ready\}/);
     expect(source).toMatch(/requiredTransitionMarks/);
     expect(source).toMatch(/Incomplete map transition sample/);
     expect(source).toMatch(/fingerprint_matches/);
@@ -90,6 +96,125 @@ describe('map transition Electron profile harness contract', () => {
     expect(source).toMatch(/process\.versions\.chrome/);
     expect(source).toMatch(/cold_current_state_ms/);
     expect(source).toMatch(/warm_switch_ms/);
+  });
+
+  it('selects only the enabled topmost startup control when a visible match is occluded', () => {
+    const { pickTopmostStartupControlIndex } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof pickTopmostStartupControlIndex).toBe('function');
+    if (typeof pickTopmostStartupControlIndex !== 'function') return;
+
+    expect(pickTopmostStartupControlIndex([
+      { visible: true, enabled: true, hitTestable: false },
+      { visible: true, enabled: true, hitTestable: true },
+    ])).toBe(1);
+    expect(pickTopmostStartupControlIndex([
+      { visible: true, enabled: false, hitTestable: true },
+      { visible: false, enabled: true, hitTestable: true },
+    ])).toBe(-1);
+  });
+
+  it('retains bounded startup diagnostics and a screenshot when setup exhausts', () => {
+    const source = readFileSync(harnessPath, 'utf8');
+
+    expect(source).toMatch(/function clickTopmostVisibleButton/);
+    expect(source).toMatch(/document\.elementFromPoint/);
+    expect(source).toMatch(/button === topmost \|\| button\.contains\(topmost\)/);
+    expect(source).toMatch(/button\.getAttribute\('aria-disabled'\) !== 'true'/);
+    expect(source).not.toMatch(/getByRole\('button', \{ name: \/Acknowledge\/i \}\)\.first\(\)/);
+    expect(source).toMatch(/describeStartupSurface/);
+    expect(source).toMatch(/launch-\$\{launchIndex\}-failed\.png/);
+  });
+
+  it('reports Deck owner construction and release deltas separately from MapLibre', () => {
+    const { counterDelta } = require('../tools/ui/map_transition_profile.cjs');
+
+    expect(counterDelta(
+      {
+        map_constructions: 2,
+        webgl_releases: 0,
+        deck_constructions: 1,
+        deck_releases: 0,
+        static_resource_requests: {},
+      },
+      {
+        map_constructions: 2,
+        webgl_releases: 0,
+        deck_constructions: 1,
+        deck_releases: 0,
+        static_resource_requests: {},
+      },
+    )).toEqual({
+      map_constructions: 0,
+      webgl_releases: 0,
+      deck_constructions: 0,
+      deck_releases: 0,
+      static_resource_requests: {},
+    });
+  });
+
+  it('allowlists startup diagnostic categories without persisting player-facing copy', () => {
+    const { buildStartupSurfaceDiagnostic } = require('../tools/ui/map_transition_profile.cjs');
+    const diagnostic = buildStartupSurfaceDiagnostic({
+      dialog_count: 2,
+      button_count: 7,
+      visible_button_count: 3,
+      role_counts: { dialog: 2, alert: 1, malicious_role: 99 },
+      test_ids: ['tactical-map-loading', 'private-player-secret'],
+      title: 'Ana Player secret campaign',
+      text: 'The private choice and local path must not persist',
+    });
+
+    expect(diagnostic).toEqual({
+      dialog_count: 2,
+      button_count: 7,
+      visible_button_count: 3,
+      role_counts: { alert: 1, dialog: 2 },
+      known_test_ids: ['tactical-map-loading'],
+    });
+    expect(JSON.stringify(diagnostic)).not.toMatch(/Ana|secret|private|campaign|path/i);
+  });
+
+  it('retains screenshot/diagnostic state and cleanup proof for an injected post-launch failure', async () => {
+    const { settlePostLaunchEvidence } = require('../tools/ui/map_transition_profile.cjs');
+    const cleanup = {
+      graceful_close: true,
+      forced_kill: false,
+      process_exit_verified: true,
+    };
+    const outcome = await settlePostLaunchEvidence(
+      async () => { throw new Error('post-launch failure'); },
+      async () => ({
+        capture_status: 'captured',
+        screenshot: { attempted: true, captured: true, file: 'launch-2-failed.png' },
+        readiness: { debug: { marks: ['command', 'viewport-visible'] } },
+        startup_surface: { dialog_count: 1, button_count: 2 },
+      }),
+      async () => cleanup,
+    );
+
+    expect(outcome.failure).toBeInstanceOf(Error);
+    expect(outcome.failedEvidence).toMatchObject({
+      capture_status: 'captured',
+      screenshot: { captured: true },
+      readiness: { debug: { marks: ['command', 'viewport-visible'] } },
+    });
+    expect(outcome.cleanup).toEqual(cleanup);
+  });
+
+  it('normalizes rejected failure capture with screenshot status and a safe error category', async () => {
+    const { settlePostLaunchEvidence } = require('../tools/ui/map_transition_profile.cjs');
+    const outcome = await settlePostLaunchEvidence(
+      async () => { throw new Error('launch failed'); },
+      async () => { throw new Error('Ana secret campaign screenshot path'); },
+      async () => ({ process_exit_verified: true }),
+    );
+
+    expect(outcome.failedEvidence).toEqual({
+      capture_status: 'unavailable',
+      screenshot: { attempted: true, captured: false, file: null },
+      capture_error_category: 'capture_error',
+    });
+    expect(JSON.stringify(outcome.failedEvidence)).not.toMatch(/Ana|secret|campaign|path/i);
   });
 
   it('summarizes cold current-state render separately from final interactivity', () => {
@@ -328,10 +453,10 @@ describe('map transition Electron profile harness contract', () => {
     });
     const source = readFileSync(harnessPath, 'utf8');
     const launch = source.indexOf('const application = await electron.launch(');
-    const guarded = source.indexOf('try {', launch);
+    const guarded = source.indexOf('const settled = await settlePostLaunchEvidence(', launch);
     const evaluate = source.indexOf('application.evaluate(', launch);
     const listener = source.indexOf("application.on('window'", launch);
-    const cleanup = source.indexOf('closeElectronApplication(', guarded);
+    const cleanup = source.indexOf('() => closeElectronApplication(application)', guarded);
     expect(guarded).toBeGreaterThan(launch);
     expect(guarded).toBeLessThan(evaluate);
     expect(guarded).toBeLessThan(listener);

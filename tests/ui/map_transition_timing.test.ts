@@ -69,6 +69,8 @@ describe('map transition timing contract', () => {
       counters: {
         map_constructions: 1,
         webgl_releases: 0,
+        deck_constructions: 0,
+        deck_releases: 0,
         static_resource_requests: {
           'operational-settlements': 2,
           'terrain-scalars': 1,
@@ -137,6 +139,21 @@ describe('map transition timing contract', () => {
     }));
   });
 
+  it('exposes bounded active-mark diagnostics without timestamps or state payloads', async () => {
+    if (!existsSync(sourcePath)) return;
+    const { createMapTransitionProfiler } = await import(modulePath);
+    const profile = createMapTransitionProfiler(true, () => 42);
+    profile.begin();
+    profile.mark('viewport-visible');
+
+    expect(profile.debugState()).toEqual({
+      active: true,
+      marks: ['command', 'viewport-visible'],
+      pending_metadata: false,
+    });
+    expect(JSON.stringify(profile.debugState())).not.toMatch(/timestamp|duration|path|state_json|raw_state/i);
+  });
+
   it('rejects a complete sample whose marks violate the locked vocabulary order', async () => {
     if (!existsSync(sourcePath)) return;
     const { MAP_TRANSITION_MARKS, createMapTransitionSample } = await import(modulePath);
@@ -175,6 +192,8 @@ describe('map transition timing contract', () => {
     profile.countConstruction();
     profile.countRelease();
     profile.countRelease();
+    profile.countDeckConstruction();
+    profile.countDeckRelease();
     for (const mark of MAP_TRANSITION_MARKS.slice(1)) {
       now += 1;
       profile.mark(mark);
@@ -189,11 +208,15 @@ describe('map transition timing contract', () => {
       lifetime_counters: expect.objectContaining({
         map_constructions: 2,
         webgl_releases: 2,
+        deck_constructions: 1,
+        deck_releases: 1,
       }),
       samples: [expect.objectContaining({
         counters: expect.objectContaining({
           map_constructions: 2,
           webgl_releases: 2,
+          deck_constructions: 1,
+          deck_releases: 1,
         }),
       })],
     }));

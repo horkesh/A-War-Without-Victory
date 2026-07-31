@@ -488,25 +488,134 @@ async function clickVisible(locator) {
   await sleep(100);
 }
 
+function pickTopmostStartupControlIndex(candidates) {
+  return candidates.findIndex((candidate) => (
+    candidate.visible === true
+    && candidate.enabled === true
+    && candidate.hitTestable === true
+  ));
+}
+
+async function inspectStartupButtons(locator) {
+  return locator.evaluateAll((buttons) => buttons.map((button) => {
+    const rect = button.getBoundingClientRect();
+    const style = window.getComputedStyle(button);
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const topmost = document.elementFromPoint(centerX, centerY);
+    return {
+      visible: rect.width > 0
+        && rect.height > 0
+        && style.visibility !== 'hidden'
+        && style.display !== 'none',
+        enabled:
+          button.getAttribute('aria-disabled') !== 'true' &&
+          (!(button instanceof HTMLButtonElement) || !button.disabled),
+      hitTestable: topmost != null && (button === topmost || button.contains(topmost)),
+    };
+  }));
+}
+
+const STARTUP_DIAGNOSTIC_ROLES = ['alert', 'dialog', 'status'];
+const STARTUP_DIAGNOSTIC_TEST_IDS = new Set([
+  'root-error-boundary-map',
+  'tactical-map',
+  'tactical-map-load-error',
+  'tactical-map-loading',
+  'tactical-map-viewport',
+  'warroom-shell',
+]);
+
+function boundedDiagnosticCount(value) {
+  const numeric = Number(value);
+  if (!Number.isInteger(numeric) || numeric < 0) return 0;
+  return Math.min(numeric, 999);
+}
+
+function buildStartupSurfaceDiagnostic(snapshot = {}) {
+  const roleCounts = {};
+  for (const role of STARTUP_DIAGNOSTIC_ROLES) {
+    const count = boundedDiagnosticCount(snapshot.role_counts?.[role]);
+    if (count > 0) roleCounts[role] = count;
+  }
+  const knownTestIds = [...new Set(
+    (Array.isArray(snapshot.test_ids) ? snapshot.test_ids : [])
+      .filter((testId) => STARTUP_DIAGNOSTIC_TEST_IDS.has(testId)),
+  )].sort(strictCompare);
+  return {
+    dialog_count: boundedDiagnosticCount(snapshot.dialog_count),
+    button_count: boundedDiagnosticCount(snapshot.button_count),
+    visible_button_count: boundedDiagnosticCount(snapshot.visible_button_count),
+    role_counts: roleCounts,
+    known_test_ids: knownTestIds,
+  };
+}
+
+async function describeStartupSurface(frame) {
+  const snapshot = await frame.evaluate((roles) => {
+    const buttons = [...document.querySelectorAll('button')];
+    const isVisible = (element) => {
+      const rect = element.getBoundingClientRect();
+      const style = window.getComputedStyle(element);
+      return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+    };
+    return {
+      dialog_count: document.querySelectorAll('[role="dialog"]').length,
+      button_count: buttons.length,
+      visible_button_count: buttons.filter(isVisible).length,
+      role_counts: Object.fromEntries(roles.map((role) => [
+        role,
+        document.querySelectorAll(`[role="${role}"]`).length,
+      ])),
+      test_ids: [...document.querySelectorAll('[data-testid]')]
+        .map((element) => element.getAttribute('data-testid'))
+        .filter(Boolean),
+    };
+  }, STARTUP_DIAGNOSTIC_ROLES);
+  return buildStartupSurfaceDiagnostic(snapshot);
+}
+
+async function clickTopmostVisibleButton(frame, name) {
+  const locator = frame.getByRole('button', { name });
+  let lastError = null;
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const states = await inspectStartupButtons(locator);
+    const index = pickTopmostStartupControlIndex(states);
+    if (index < 0) return false;
+    try {
+      await locator.nth(index).click({ timeout: 5000 });
+      return true;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  const diagnostic = await describeStartupSurface(frame);
+  throw new Error(`Topmost startup control remained unclickable; startup=${JSON.stringify(diagnostic)}`, {
+    cause: lastError,
+  });
+}
+
 async function startCleanCampaign(page) {
   await clickVisible(page.locator('#mm-new-campaign'));
   await clickVisible(page.locator('#sp-faction-RBiH'));
   let frame = await waitForEmbeddedFrame(page, false);
   await frame.waitForLoadState('networkidle', { timeout: 120000 }).catch(() => {});
+  let startupControlsExhausted = true;
   for (let attempt = 0; attempt < 10; attempt += 1) {
-    const acknowledge = frame.getByRole('button', { name: /Acknowledge/i }).first();
-    if (await acknowledge.isVisible().catch(() => false)) {
-      await acknowledge.click();
+    if (await clickTopmostVisibleButton(frame, /Acknowledge/i)) {
       await sleep(250);
       continue;
     }
-    const begin = frame.getByRole('button', { name: /^Begin$/i }).first();
-    if (await begin.isVisible().catch(() => false)) {
-      await begin.click();
+    if (await clickTopmostVisibleButton(frame, /^Begin$/i)) {
       await sleep(250);
       continue;
     }
+    startupControlsExhausted = false;
     break;
+  }
+  if (startupControlsExhausted) {
+    const diagnostic = await describeStartupSurface(frame);
+    throw new Error(`Startup control loop exhausted; startup=${JSON.stringify(diagnostic)}`);
   }
 
   await page.evaluate(() => {
@@ -543,11 +652,46 @@ async function profileSnapshot(frame) {
   });
 }
 
+async function readMapReadinessDiagnostic(frame) {
+  return frame.evaluate(() => {
+    const profile = window.__AWWV_MAP_TRANSITION_PROFILE__;
+    if (!profile) throw new Error('map transition profile bridge unavailable');
+    const map = document.querySelector('[data-testid="tactical-map"]');
+    const viewport = document.querySelector('[data-testid="tactical-map-viewport"]');
+    return {
+      debug: profile.debugState(),
+      dom: {
+        map_ready: map?.getAttribute('data-map-ready') ?? 'missing',
+        map_turn: map?.getAttribute('data-map-state-turn') ?? 'missing',
+        map_render_ready: map?.getAttribute('data-map-render-ready') ?? 'missing',
+        map_revision_ready: map?.getAttribute('data-map-revision-ready') ?? 'missing',
+        map_style_ready: map?.getAttribute('data-map-style-ready') ?? 'missing',
+        map_reveal_painted: map?.getAttribute('data-map-reveal-painted') ?? 'missing',
+        viewport_aria_hidden: viewport?.getAttribute('aria-hidden') ?? 'missing',
+        viewport_inert: viewport instanceof HTMLElement ? viewport.inert : null,
+        viewport_visibility: viewport instanceof HTMLElement ? viewport.style.visibility : 'missing',
+      },
+    };
+  });
+}
+
+function formatMapReadinessDiagnostic(prefix, debug, dom) {
+  return `${prefix}; active=${debug.active}; pending_metadata=${debug.pending_metadata}; marks=${debug.marks.join(',')}; map_ready=${dom.map_ready}; map_turn=${dom.map_turn}; map_render_ready=${dom.map_render_ready}; map_revision_ready=${dom.map_revision_ready}; map_style_ready=${dom.map_style_ready}; map_reveal_painted=${dom.map_reveal_painted}; viewport_aria_hidden=${dom.viewport_aria_hidden}; viewport_inert=${dom.viewport_inert}; viewport_visibility=${dom.viewport_visibility}`;
+}
+
 async function waitForProfileSample(frame, priorSampleCount) {
-  return waitUntil('complete map transition sample', async () => {
-    const snapshot = await profileSnapshot(frame);
-    return snapshot.samples.length > priorSampleCount ? snapshot : null;
-  }, 120000);
+  try {
+    return await waitUntil('complete map transition sample', async () => {
+      const snapshot = await profileSnapshot(frame);
+      return snapshot.samples.length > priorSampleCount ? snapshot : null;
+    }, 120000);
+  } catch (error) {
+    const { debug, dom } = await readMapReadinessDiagnostic(frame);
+    throw new Error(
+      formatMapReadinessDiagnostic('Timed out waiting for complete map transition sample', debug, dom),
+      { cause: error },
+    );
+  }
 }
 
 function subtractResourceCounts(after, before) {
@@ -564,6 +708,8 @@ function counterDelta(after, before) {
   return {
     map_constructions: after.map_constructions - before.map_constructions,
     webgl_releases: after.webgl_releases - before.webgl_releases,
+    deck_constructions: Number(after.deck_constructions ?? 0) - Number(before.deck_constructions ?? 0),
+    deck_releases: Number(after.deck_releases ?? 0) - Number(before.deck_releases ?? 0),
     static_resource_requests: subtractResourceCounts(
       after.static_resource_requests,
       before.static_resource_requests,
@@ -587,11 +733,19 @@ async function profileOneCycle(frame, kind, expectedTurn) {
     window.__AWWV_MAP_TRANSITION_PROFILE__?.setKind(selectedKind);
   }, kind);
   await clickVisible(frame.locator('[data-testid="warroom-toolbar-war-map"]'));
-  await frame.waitForFunction((turn) => {
-    const map = document.querySelector('[data-testid="tactical-map"]');
-    return map?.getAttribute('data-map-ready') === 'true'
-      && map?.getAttribute('data-map-state-turn') === String(turn);
-  }, expectedTurn, { timeout: 120000 });
+  try {
+    await frame.waitForFunction((turn) => {
+      const map = document.querySelector('[data-testid="tactical-map"]');
+      return map?.getAttribute('data-map-ready') === 'true'
+        && map?.getAttribute('data-map-state-turn') === String(turn);
+    }, expectedTurn, { timeout: 120000 });
+  } catch (error) {
+    const { debug, dom } = await readMapReadinessDiagnostic(frame);
+    throw new Error(
+      formatMapReadinessDiagnostic('Timed out waiting for current tactical map', debug, dom),
+      { cause: error },
+    );
+  }
   const mapReady = await frame.locator('[data-testid="tactical-map"]')
     .getAttribute('data-map-ready');
   const mapTurn = await frame.locator('[data-testid="tactical-map"]')
@@ -630,6 +784,36 @@ async function profileOneCycle(frame, kind, expectedTurn) {
   };
 }
 
+async function settlePostLaunchEvidence(run, captureFailure, cleanupApplication) {
+  let failure = null;
+  let failedEvidence = null;
+  let cleanup = null;
+  try {
+    await run();
+  } catch (error) {
+    failure = error;
+    try {
+      failedEvidence = await captureFailure();
+    } catch (captureError) {
+      const isTimeout = captureError instanceof Error
+        && (captureError.name === 'TimeoutError' || /timed?\s*out/i.test(captureError.message));
+      failedEvidence = {
+        capture_status: 'unavailable',
+        screenshot: { attempted: true, captured: false, file: null },
+        capture_error_category: isTimeout ? 'capture_timeout' : 'capture_error',
+      };
+    }
+  }
+  try {
+    cleanup = await cleanupApplication();
+  } catch (cleanupError) {
+    failure = failure
+      ? new AggregateError([failure, cleanupError], 'Electron launch failed and cleanup could not verify process exit')
+      : cleanupError;
+  }
+  return { failure, failedEvidence, cleanup };
+}
+
 async function runLaunch(launchIndex, options, outputDirectory) {
   const launchRoot = path.join(outputDirectory, 'runtime', `launch-${launchIndex}`);
   const userDataDirectory = path.join(launchRoot, 'user-data');
@@ -663,15 +847,18 @@ async function runLaunch(launchIndex, options, outputDirectory) {
   let cold = null;
   let viewport = null;
   let cleanup = null;
+  let page = null;
+  let frame = null;
+  let stage = 'application-launched';
   const warmups = [];
   const measured = [];
-  let primaryError = null;
-  try {
+  const settled = await settlePostLaunchEvidence(async () => {
     runtime = await application.evaluate(({ app }) => ({
       application: app.getVersion(),
       electron: process.versions.electron ?? null,
       chromium: process.versions.chrome ?? null,
     }));
+    stage = 'runtime-read';
     const collectProcessOutput = (target) => (chunk) => {
       for (const line of String(chunk ?? '').split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)) {
         target.push(sanitizeDiagnosticLine(line, outputDirectory));
@@ -684,40 +871,71 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     application.on('window', attach);
     for (const page of application.windows()) attach(page);
 
-    const page = await waitForGamePage(application);
+    page = await waitForGamePage(application);
     attach(page);
+    stage = 'game-page-ready';
     viewport = await page.evaluate(() => ({
       width: window.innerWidth,
       height: window.innerHeight,
       deviceScaleFactor: window.devicePixelRatio,
     }));
-    const frame = await startCleanCampaign(page);
+    frame = await startCleanCampaign(page);
+    stage = 'campaign-ready';
     const expectedTurn = await readCurrentTurn(frame);
+    stage = 'cold-transition';
     cold = await profileOneCycle(frame, 'cold', expectedTurn);
     await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-cold.png`) });
     for (let index = 0; index < options.warmups; index += 1) {
+      stage = `warmup-${index + 1}`;
       warmups.push(await profileOneCycle(frame, 'warm', expectedTurn));
     }
     for (let index = 0; index < options.cycles; index += 1) {
+      stage = `measured-${index + 1}`;
       measured.push(await profileOneCycle(frame, 'warm', expectedTurn));
     }
+    stage = 'final-snapshot';
     lifetimeCounters = (await profileSnapshot(frame)).lifetime_counters;
     await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-warm.png`) });
-  } catch (error) {
-    primaryError = error;
-    throw error;
-  } finally {
-    try {
-      cleanup = await closeElectronApplication(application);
-    } catch (cleanupError) {
-      if (primaryError) {
-        throw new AggregateError(
-          [primaryError, cleanupError],
-          'Electron launch failed and cleanup could not verify process exit',
-        );
-      }
-      throw cleanupError;
+    stage = 'complete';
+  }, async () => {
+    const screenshotFile = `launch-${launchIndex}-failed.png`;
+    let screenshotCaptured = false;
+    if (page) {
+      screenshotCaptured = await page.screenshot({ path: path.join(outputDirectory, screenshotFile) })
+        .then(() => true, () => false);
     }
+    let readiness = null;
+    let startupSurface = null;
+    if (frame) {
+      readiness = await readMapReadinessDiagnostic(frame).catch(() => null);
+      startupSurface = await describeStartupSurface(frame).catch(() => null);
+      lifetimeCounters = await profileSnapshot(frame)
+        .then((snapshot) => snapshot.lifetime_counters, () => lifetimeCounters);
+    }
+    return {
+      capture_status: 'captured',
+      stage,
+      screenshot: {
+        attempted: page != null,
+        captured: screenshotCaptured,
+        file: screenshotCaptured ? screenshotFile : null,
+      },
+      readiness,
+      startup_surface: startupSurface,
+    };
+  }, () => closeElectronApplication(application));
+  cleanup = settled.cleanup;
+
+  if (settled.failure && settled.failedEvidence == null) {
+    settled.failedEvidence = {
+      capture_status: 'unavailable',
+      stage,
+      screenshot: {
+        attempted: false,
+        captured: false,
+        file: null,
+      }
+    };
   }
 
   const processDiagnostics = buildPersistedProcessDiagnostics({
@@ -726,7 +944,10 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     outputDirectory,
   });
   return {
+    failure: settled.failure,
+    launch: {
     launch_index: launchIndex,
+    status: settled.failure == null ? 'complete' : 'failed',
     runtime,
     viewport,
     cold,
@@ -734,12 +955,14 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     measured,
     lifetime_counters: lifetimeCounters,
     cleanup,
+    failure_evidence: settled.failedEvidence,
     diagnostics: {
       console_errors_and_warnings: diagnostics.console,
       page_errors: diagnostics.page_errors,
       request_failures: diagnostics.request_failures,
       http_errors: diagnostics.http_errors,
       ...processDiagnostics,
+    },
     },
   };
 }
@@ -814,7 +1037,12 @@ async function main() {
   let failure = null;
   try {
     for (let launchIndex = 1; launchIndex <= 3; launchIndex += 1) {
-      launches.push(await runLaunch(launchIndex, options, outputDirectory));
+      const outcome = await runLaunch(launchIndex, options, outputDirectory);
+      launches.push(outcome.launch);
+      if (outcome.failure) {
+        failure = outcome.failure;
+        break;
+      }
     }
   } catch (error) {
     failure = error;
@@ -866,15 +1094,19 @@ module.exports = {
   buildEvidenceOutcome,
   buildMachineManifest,
   buildPersistedProcessDiagnostics,
+  buildStartupSurfaceDiagnostic,
   buildSummary,
   classifyMainProcessStdout,
   classifyMainProcessStderr,
+  counterDelta,
   closeElectronApplication,
   formatFatalError,
   hasOrderedTransitionDurations,
   parseOptions,
+  pickTopmostStartupControlIndex,
   percentile,
   sanitizeDiagnosticPayload,
+  settlePostLaunchEvidence,
   snapshotRepositorySaves,
   unexpectedDiagnosticsFailure,
 };

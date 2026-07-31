@@ -13,14 +13,25 @@ import flagRsUrl from './assets/flag_RS.webp?url';
 import gameStartBgUrl from './assets/game start.webp?url';
 import { encodeShellHandoffCommand, type ShellHandoffCommand } from '../shared/shellHandoff.js';
 import { getPlayerFacingFaction } from '../shared/playerFacingLabels.js';
+import {
+    coalesceGameStateUpdateMetadata,
+    createLatestGameStateApplicationGate,
+    type GameStateUpdateMetadata,
+    type GameStateApplicationReservation,
+} from '../shared/gameStateUpdateMetadata.js';
 import { parsePlayerVisibleWarroomState } from './data/player_visible_state_adapter.js';
 
 type CampaignScenarioKey = 'apr_1992';
 const BROWSER_STARTUP_SNAPSHOT_PATH = '/data/derived/startup/apr_1992_initial_save.json';
+const CAMPAIGN_REPLACEMENT_UPDATE: GameStateUpdateMetadata = Object.freeze({ campaignReplacement: true });
 
 interface DesktopBridge {
-    startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{ ok: boolean; error?: string }>;
-    subscribeGameStateUpdated?: (cb: (stateJson: string) => void) => (() => void);
+    startNewCampaign?: (payload: { playerFaction: FactionId; scenarioKey: CampaignScenarioKey }) => Promise<{
+        ok: boolean;
+        error?: string;
+        stateJson?: string;
+    }>;
+    subscribeGameStateUpdated?: (cb: (stateJson: string, metadata?: GameStateUpdateMetadata) => void) => (() => void);
     subscribeTurnReportUpdated?: (cb: (report: unknown) => void) => (() => void);
     getCurrentGameState?: () => Promise<string | null>;
     loadStateDialog?: () => Promise<{ ok: boolean; error?: string }>;
@@ -46,11 +57,13 @@ class WarroomApp {
     private embeddedBridgeSubscribers = new Map<WindowProxy, { origin: string; events: Set<string> }>();
     private embeddedBridgeInvokeDepth = 0;
     private pendingEmbeddedGameStateJson: string | null = null;
+    private pendingEmbeddedGameStateMetadata: GameStateUpdateMetadata | undefined;
     private unsubscribeDesktopGameState: (() => void) | null = null;
     private unsubscribeDesktopTurnReport: (() => void) | null = null;
     private pendingShellHandoff: ShellHandoffCommand | null = null;
     private freshCampaignIntroPending = false;
     private freshCampaignResetPending = false;
+    private readonly desktopStateGate = createLatestGameStateApplicationGate();
     /** True once the user has navigated away from the initial main menu (prevents init race). */
     private userNavigatedFromMenu = false;
 
@@ -116,8 +129,11 @@ class WarroomApp {
             } catch (_) { /* not available — fallback to awwv:// */ }
         }
         if (this.desktopBridge?.subscribeGameStateUpdated) {
-            this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((stateJson: string) => {
-                this.handleDesktopGameStateUpdated(stateJson);
+            this.unsubscribeDesktopGameState = this.desktopBridge.subscribeGameStateUpdated((
+                stateJson: string,
+                metadata?: GameStateUpdateMetadata,
+            ) => {
+                this.handleDesktopGameStateUpdated(stateJson, metadata);
             });
         }
         if (this.desktopBridge?.subscribeTurnReportUpdated) {
@@ -126,20 +142,27 @@ class WarroomApp {
             });
         }
 
-        const existingStateJson = this.desktopBridge?.getCurrentGameState
-            ? await this.desktopBridge.getCurrentGameState()
-            : null;
+        let existingStateJson: string | null = null;
+        let existingStateReservation: GameStateApplicationReservation | null = null;
+        if (this.desktopBridge?.getCurrentGameState) {
+            existingStateReservation = this.desktopStateGate.captureCurrent();
+            existingStateJson = await this.desktopBridge.getCurrentGameState();
+        }
 
-        if (existingStateJson) {
-            this.applyGameStateFromJson(existingStateJson);
-        } else if (!this.desktopBridge?.startNewCampaign) {
+        if (
+            existingStateJson
+            && existingStateReservation
+            && this.desktopStateGate.admitReserved(existingStateJson, existingStateReservation)
+        ) {
+            this.applyGameStateFromJson(existingStateJson, { showShell: !this.userNavigatedFromMenu });
+        } else if (!this.gameState && !this.desktopBridge?.startNewCampaign) {
             // Browser/dev mode fallback: prefer the same baked startup artifact as desktop.
             const loadedSnapshot = await this.loadStartupSnapshotFallback();
             if (!loadedSnapshot) {
                 await this.loadMockState();
             }
             this.showMainMenu();
-        } else if (!this.userNavigatedFromMenu) {
+        } else if (!this.gameState && !this.userNavigatedFromMenu) {
             // Only show main menu if the user hasn't already navigated away
             // during the async init (e.g. clicked "New Campaign" while assets loaded).
             this.showMainMenu();
@@ -476,18 +499,33 @@ class WarroomApp {
 
                 try {
                     this.freshCampaignIntroPending = true;
+                    const campaignReservation = this.desktopStateGate.reserveReplacement();
                     const result = await this.desktopBridge.startNewCampaign({
                         playerFaction: faction,
                         scenarioKey: 'apr_1992',
                     });
                     if (!result?.ok) {
                         this.freshCampaignIntroPending = false;
+                        await this.pullLatestGameState({ showShell: false });
                         showError(result?.error ?? 'Failed to start campaign.');
                         return;
+                    }
+                    if (!result.stateJson) {
+                        this.freshCampaignIntroPending = false;
+                        await this.pullLatestGameState({ showShell: false });
+                        showError('Campaign started, but the player-visible state was unavailable.');
+                        return;
+                    }
+                    if (this.desktopStateGate.admitReserved(result.stateJson, campaignReservation)) {
+                        this.applyAdmittedDesktopGameStateUpdate(
+                            result.stateJson,
+                            CAMPAIGN_REPLACEMENT_UPDATE,
+                        );
                     }
                     this.showScreen('none');
                 } catch (error) {
                     this.freshCampaignIntroPending = false;
+                    await this.pullLatestGameState({ showShell: false });
                     showError(error instanceof Error ? error.message : String(error));
                 } finally {
                     for (const b of factionButtons) b.disabled = false;
@@ -605,12 +643,13 @@ class WarroomApp {
     }
 
     /** Pull the latest game state from Electron main process (e.g. after returning from tactical map). */
-    private async pullLatestGameState(): Promise<void> {
+    private async pullLatestGameState(options?: { showShell?: boolean }): Promise<void> {
         if (!this.desktopBridge?.getCurrentGameState) return;
+        const reservation = this.desktopStateGate.captureCurrent();
         try {
             const stateJson = await this.desktopBridge.getCurrentGameState();
-            if (stateJson) {
-                this.applyGameStateFromJson(stateJson);
+            if (stateJson && this.desktopStateGate.admitReserved(stateJson, reservation)) {
+                this.applyGameStateFromJson(stateJson, options);
             }
         } catch (e) {
             console.warn('[warroom] Failed to pull latest game state:', e);
@@ -837,12 +876,31 @@ class WarroomApp {
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: `Bridge method not found: ${data.method}` }, origin);
             return;
         }
+        const campaignReservation = data.method === 'startNewCampaign'
+            ? this.desktopStateGate.reserveReplacement()
+            : null;
         this.embeddedBridgeInvokeDepth += 1;
         try {
             const args = Array.isArray(data.args) ? data.args : [];
             const result = await (method as (...fnArgs: unknown[]) => unknown)(...args);
+            if (
+                data.method === 'startNewCampaign'
+                && campaignReservation
+                && result != null
+                && typeof result === 'object'
+                && (result as { ok?: unknown }).ok === true
+                && typeof (result as { stateJson?: unknown }).stateJson === 'string'
+            ) {
+                const stateJson = (result as { stateJson: string }).stateJson;
+                if (this.desktopStateGate.admitReserved(stateJson, campaignReservation)) {
+                    this.applyGameStateFromJson(stateJson, { showShell: false });
+                }
+            } else if (campaignReservation) {
+                await this.pullLatestGameState({ showShell: false });
+            }
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: true, result }, origin);
         } catch (err) {
+            if (campaignReservation) await this.pullLatestGameState({ showShell: false });
             const message = err instanceof Error ? err.message : String(err);
             target.postMessage({ type: 'awwv-bridge:response', id: data.id, ok: false, error: message }, origin);
         } finally {
@@ -853,29 +911,47 @@ class WarroomApp {
         }
     }
 
-    private handleDesktopGameStateUpdated(stateJson: string): void {
+    private handleDesktopGameStateUpdated(stateJson: string, metadata?: GameStateUpdateMetadata): void {
+        if (!this.desktopStateGate.admitIncoming(stateJson, metadata)) return;
+        this.applyAdmittedDesktopGameStateUpdate(stateJson, metadata);
+    }
+
+    private applyAdmittedDesktopGameStateUpdate(
+        stateJson: string,
+        metadata?: GameStateUpdateMetadata,
+    ): void {
         if (this.embeddedBridgeInvokeDepth > 0) {
             this.pendingEmbeddedGameStateJson = stateJson;
+            this.pendingEmbeddedGameStateMetadata = coalesceGameStateUpdateMetadata(
+                this.pendingEmbeddedGameStateMetadata,
+                metadata,
+            );
             return;
         }
         this.applyGameStateFromJson(stateJson, { showShell: false });
-        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson, metadata);
     }
 
     private flushPendingEmbeddedGameState(): void {
         const stateJson = this.pendingEmbeddedGameStateJson;
         if (!stateJson) return;
+        const metadata = this.pendingEmbeddedGameStateMetadata;
         this.pendingEmbeddedGameStateJson = null;
+        this.pendingEmbeddedGameStateMetadata = undefined;
         this.applyGameStateFromJson(stateJson, { showShell: false });
-        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson);
+        this.broadcastEmbeddedBridgeEvent('game-state-updated', stateJson, metadata);
     }
 
-    private broadcastEmbeddedBridgeEvent(eventName: string, payload: unknown): void {
+    private broadcastEmbeddedBridgeEvent(
+        eventName: string,
+        payload: unknown,
+        metadata?: GameStateUpdateMetadata,
+    ): void {
         for (const [target, subscription] of this.embeddedBridgeSubscribers.entries()) {
             if (!subscription.events.has(eventName)) continue;
             try {
                 target.postMessage(
-                    { type: 'awwv-bridge:event', eventName, payload },
+                    { type: 'awwv-bridge:event', eventName, payload, metadata },
                     subscription.origin === 'null' ? '*' : subscription.origin,
                 );
             } catch {

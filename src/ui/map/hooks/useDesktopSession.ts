@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 import { useGameStore, type LastTurnReport } from '../store/gameStore';
 import { useIPC } from '../desktop/useIPC';
+import type { GameStateUpdateMetadata } from '../desktop/types';
+import type { CampaignReplacementCoordinator } from '../utils/campaignViewportLifecycle';
 
 type ProbeReactionWindow = Window & {
     __AWWV_RUNTIME_PROBE_ACTIVE?: boolean;
@@ -31,7 +33,11 @@ function recordDesktopProbeReaction(kind: ProbeReactionKind, payload: Record<str
  * Replaces the inline useEffect in the Phase 3 App.tsx.
  * No-op when window.awwv is not available (browser dev mode).
  */
-export function useDesktopSession(): void {
+export function useDesktopSession({
+    campaignReplacementOwner,
+}: {
+    campaignReplacementOwner: CampaignReplacementCoordinator;
+}): void {
     const ipc = useIPC();
     const loadSave = useGameStore((s) => s.loadSave);
     const setLoadError = useGameStore((s) => s.setLoadError);
@@ -48,6 +54,20 @@ export function useDesktopSession(): void {
         if (!ipc.isAvailable) return;
 
         let active = true;
+        let latestUpdateRevision = 0;
+        let updateQueue: Promise<void> = Promise.resolve();
+
+        interface ReservedDesktopUpdate {
+            revision: number;
+            replacementReservation: number;
+        }
+
+        const reserveDesktopUpdate = (campaignReplacement: boolean): ReservedDesktopUpdate => ({
+            revision: ++latestUpdateRevision,
+            replacementReservation: campaignReplacement
+                ? campaignReplacementOwner.reserveReplacement()
+                : campaignReplacementOwner.currentReservation(),
+        });
 
         const refreshRuntimeFeatureFlags = async () => {
             try {
@@ -58,25 +78,65 @@ export function useDesktopSession(): void {
             }
         };
 
-        const applyStateJson = async (stateJson: string | null) => {
-            if (!active || !stateJson) return;
-            try {
-                await refreshRuntimeFeatureFlags();
-                await loadSave(stateJson);
-                const storeState = useGameStore.getState();
-                const nextState = storeState.loadedGameState;
-                recordDesktopProbeReaction('game_state_updated', {
-                    fingerprint_matches_payload: storeState.lastLoadedStateFingerprint === stateJson,
-                    location_path: window.location.pathname,
-                    payload_length: stateJson.length,
-                    player_faction: nextState?.player_faction ?? null,
-                    route_mode: window.location.search.includes('desktop_window=sandbox') ? 'sandbox' : 'operational',
-                    turn: nextState?.turn ?? null,
-                });
-            } catch (err) {
-                const message = err instanceof Error ? err.message : String(err);
-                setLoadError(message);
-            }
+        const enqueueStateJson = (
+            stateJson: string | null,
+            update: ReservedDesktopUpdate,
+        ): Promise<void> => {
+            const execute = async (): Promise<void> => {
+                if (
+                    !active
+                    || !stateJson
+                    || update.revision !== latestUpdateRevision
+                    || update.replacementReservation !== campaignReplacementOwner.currentReservation()
+                ) return;
+                const apply = async (): Promise<void> => {
+                    await refreshRuntimeFeatureFlags();
+                    if (
+                        !active
+                        || update.revision !== latestUpdateRevision
+                        || update.replacementReservation !== campaignReplacementOwner.currentReservation()
+                    ) return;
+                    await loadSave(stateJson);
+                    if (
+                        !active
+                        || update.revision !== latestUpdateRevision
+                        || update.replacementReservation !== campaignReplacementOwner.currentReservation()
+                    ) return;
+                    const storeState = useGameStore.getState();
+                    const nextState = storeState.loadedGameState;
+                    recordDesktopProbeReaction('game_state_updated', {
+                        fingerprint_matches_payload: storeState.lastLoadedStateFingerprint === stateJson,
+                        location_path: window.location.pathname,
+                        payload_length: stateJson.length,
+                        player_faction: nextState?.player_faction ?? null,
+                        route_mode: window.location.search.includes('desktop_window=sandbox') ? 'sandbox' : 'operational',
+                        turn: nextState?.turn ?? null,
+                    });
+                };
+                try {
+                    if (update.replacementReservation > campaignReplacementOwner.appliedReservation()) {
+                        await campaignReplacementOwner.runReplacement(
+                            apply,
+                            () => active && update.revision === latestUpdateRevision,
+                            update.replacementReservation,
+                        );
+                    } else {
+                        await apply();
+                    }
+                } catch (err) {
+                    if (
+                        active
+                        && update.revision === latestUpdateRevision
+                        && update.replacementReservation === campaignReplacementOwner.currentReservation()
+                    ) {
+                        const message = err instanceof Error ? err.message : String(err);
+                        setLoadError(message);
+                    }
+                }
+            };
+            const result = updateQueue.then(execute, execute);
+            updateQueue = result.then(() => undefined, () => undefined);
+            return result;
         };
 
         // LANE-NIGHTSHIFT-REPLAY-SAVE-SEQUENCE-PRODUCER: subscribe to sidecar
@@ -112,8 +172,12 @@ export function useDesktopSession(): void {
             }
         });
 
-        const unsubscribeGameState = ipc.subscribeGameStateUpdated((stateJson: string) => {
-            void applyStateJson(stateJson);
+        const unsubscribeGameState = ipc.subscribeGameStateUpdated((
+            stateJson: string,
+            metadata?: GameStateUpdateMetadata,
+        ) => {
+            const update = reserveDesktopUpdate(metadata?.campaignReplacement === true);
+            void enqueueStateJson(stateJson, update);
         });
 
         const unsubscribeTurnReport = ipc.subscribeTurnReportUpdated((report: unknown) => {
@@ -135,9 +199,15 @@ export function useDesktopSession(): void {
             }
         });
 
+        const initialUpdate = reserveDesktopUpdate(true);
         ipc.getCurrentGameState()
-            .then((stateJson) => applyStateJson(stateJson))
+            .then((stateJson) => enqueueStateJson(stateJson, initialUpdate))
             .catch((err: unknown) => {
+                if (
+                    !active
+                    || initialUpdate.revision !== latestUpdateRevision
+                    || initialUpdate.replacementReservation !== campaignReplacementOwner.currentReservation()
+                ) return;
                 const message = err instanceof Error ? err.message : String(err);
                 setLoadError(message);
             });
@@ -153,5 +223,5 @@ export function useDesktopSession(): void {
             }
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []); // stable: ipc never changes, store slices are stable setters
+    }, []); // stable: ipc, owner coordinator, and store slices are stable for App lifetime
 }

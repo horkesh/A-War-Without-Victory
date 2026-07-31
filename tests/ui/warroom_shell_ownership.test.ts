@@ -14,7 +14,8 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         const app = read('src/ui/map/App.tsx');
 
         expect(app).toContain("{appScreen === 'game' && <MapModeLegend />}");
-        expect(app).toContain("{appScreen === 'game' && <Minimap />}");
+        expect(app).toMatch(/<CampaignTacticalViewportOwner[\s\S]*active=\{appScreen === 'game'\}[\s\S]*onInteractionReadyChange=\{setTacticalMapReadiness\}/);
+        expect(app).toMatch(/loadedGameState !== null && appScreen !== 'mainMenu'/);
         expect(app).toContain("{appScreen === 'game' && (");
         expect(app).toContain('<BottomStatusStrip eventCatalog={eventCatalogFull} />');
     });
@@ -262,7 +263,7 @@ describe('GUI audit Batch F Warroom shell ownership', () => {
         expect(app).not.toContain('DecisionHistoryOverlay');
         expect(app).toMatch(/e\.key === 'e'[\s\S]*openArmyHQRecordsSubTab\(useGameStore\.getState\(\), 'decisions'\)/);
         expect(app).toMatch(/e\.key === 'd'[\s\S]*openArmyHQRecordsSubTab\(useGameStore\.getState\(\), 'decisions'\)/);
-        expect(app).toContain('}, [appScreen, activeEventDecisionId]);');
+        expect(app).toMatch(/<TacticalInputOwners[\s\S]*active=\{tacticalMapInteractionReady\}[\s\S]*onShellKeyDown=\{handleTacticalShellKeyDown\}/);
     });
 
     it('returns presidential inbox handoffs to the Desk owner instead of the map inbox rail', () => {
