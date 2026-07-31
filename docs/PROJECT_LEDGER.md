@@ -25026,3 +25026,13 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Preserved publication boundary:** The expanded integration authority does not authorize signing, store upload, public release creation, or a public `1.0` tag. Those remain behind the separate `Publish 1.0` instruction. Transient local/directory Electron builds and release-candidate evidence remain permitted where R8/R9 require them.
 
 **Verification and scope:** Planning truth tests passed 2 files / 12 tests and `git diff --check` passed. This entry changes governance/status documentation only; no gameplay, scenario, history, canon/FORAWWV, save schema, deterministic baseline, package, version, tag, signing, upload, or public release state changed.
+
+## 2026-07-31 - R2 activation preflight removed stale implementation assumptions
+
+**Type:** Read-only Product/UX/Historian preflight / executable-plan correction.
+
+**Corrections:** The RS friction packet now records its post-R1 collision order and exact integration constraints. Priority bands use a shared pure classifier without creating the existing Inbox/Decision Room import cycle; the Warroom docket consumes band counts; enclave consolidation retains stable source ids and omits an unsupported delta. The dossier/map round trip is explicitly App-owned after R1, focus remains UI-only and reveal-gated, and touched historical selections use `strictCompare`. The obsolete bottom-strip horizontal-scroll test must be inverted.
+
+**Historical and player-truth disposition:** Cadence work audits all factions before adding content and retains a sourced positive hold when no legitimate presidential lever exists. The existing Lukavac 93 narrative cannot support a cadence row until its 15,000 figure is reconciled with *Balkan Battlegrounds* II p.410's approximately 10,000 and the July–August chronology. The packet still adds no sixth lever, tactical control, or fictional decision.
+
+**Scope:** Plan and ledger only. No source, test, gameplay, scenario, canon/FORAWWV, save, baseline, package, version, tag, signing, upload, or public release state changed.

@@ -5,7 +5,7 @@
 **Source diary:** `docs/40_reports/playtests/20260731_rs_104week_player_diary.md`
 **Scope:** The five confirmed friction findings from the RS 104-week owner-player Electron run
 **Order:** Correctness bugs first (completed locally in the originating repair pass), then information hierarchy, map handoff, cadence, and presentation
-**Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, and local commits for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
+**Activation boundary:** Full roadmap execution is active. The owner separately authorized commits, remote pushes, final merge, documentation propagation, and repository cleanup. Signing, store upload, public release creation, and a public `1.0` tag remain unauthorized.
 
 ## 1. Outcome
 
@@ -391,16 +391,31 @@ Every authored row requires Historian verification and a citation to the relevan
 - No horizontal scrollbar or clipped half-chip appears in the late RS state.
 - All active paths remain discoverable and keyboard accessible.
 
+## 4.7 Activation Preflight Corrections
+
+The mandatory Product/UX/Historian preflight passed this packet for execution after R1 with these binding corrections:
+
+- Freeze `tests/fixtures/ui/rs_turn104_priority_projection.json` from the cited final autosave; include stable source ids and player-visible projection truth, never the 197 MiB evidence tree at test time.
+- FR-01 and FR-02 are one adjacent integration unit. Put shared band semantics in `presidentialPriority.ts`, attach the band to Inbox and Decision Room projections, and avoid the existing `presidentialDecisionRoom -> deriveInboxItems` dependency cycle. `warroomPriorityDocket.ts` must consume band counts rather than `urgentCount`.
+- Consolidated cards retain non-rendered stable `sourceIds`. A this-week delta is optional and omitted when no prior player-visible briefing exists; this packet adds no persistence merely to manufacture a delta.
+- FR-03 rebases on R1 and includes `App.tsx`, `field-operation-plan` in `fieldInspectionTarget.ts`, an App-owned return receipt, and UI-only focus cleared on hide/campaign replacement. It must preserve the retained viewport, apply focus only after current-revision reveal paint, perform no hidden camera work, create no renderer, serialize no focus, and never authorize from the map. `shellNavigation.ts` and `GameStateAdapter.ts` change only if the post-R1 API proves it necessary.
+- Replace `localeCompare` in touched historical-operation selection with `strictCompare`. Sort and deduplicate objective/staging/formation references, omit guessed data, and show only player-visible friendly formations.
+- FR-04A audits every faction before any content is written. A row requires the locked citation/lever/cost/once-or-cooldown schema; a gap may remain longer than ten turns only as an explicitly evidenced positive hold. `operation_lukavac_93` cannot support cadence work until its 15,000-troop prose is reconciled with *Balkan Battlegrounds* II p.410's approximately 10,000 and its July–August chronology.
+- FR-05 and FR-06 may develop independently, but one integration owner controls EN/BCS catalogs. R7, not this packet, owns the later `bcs -> bs` migration.
+- Invert the stale `bottom_status_strip_overflow.test.ts` contract that currently requires horizontal scrolling; the accepted strip has at most two visible paths plus an accessible deterministic overflow popover and no horizontal scroll.
+
+R1's post-integration lifetime remains two MapLibre owners (main plus minimap) and one Deck owner per campaign epoch, with zero additional warm construction/release. R2 verification must rerun that ownership, hidden-input/focus, and current-revision gate after its shared-file changes.
+
 ## 5. Execution Order
 
 1. Freeze the turn-104 UI fixture and add RED cross-surface priority tests.
 2. Implement FR-01 and make all priority consumers green.
-3. Implement FR-02 so duplicate monitor volume cannot distort the new counts.
-4. Implement FR-03 and prove the Cerska-Kamenica round trip in Electron.
+3. Implement FR-02 immediately adjacent to FR-01 so duplicate monitor volume cannot distort the new counts.
+4. Rebase on the integrated R1 shared-file result, then implement FR-03 and prove the Cerska-Kamenica round trip in Electron.
 5. Complete the all-faction cadence/source audit before writing any FR-04 content.
-6. Implement only Historian-approved FR-04 initiative rows and replay determinism.
-7. Implement FR-05 and FR-06 presentation packets.
-8. Run the integrated verification matrix and a fresh RS 104-week owner diary.
+6. Implement only Historian-approved FR-04 initiative rows; otherwise close each gap as a positive hold, then prove replay determinism.
+7. Implement FR-05 and FR-06 presentation packets with one catalog owner.
+8. Run the integrated verification matrix and a fresh, clean RS 104-week owner diary.
 
 FR-01 and FR-02 must land together or in immediately adjacent changes: exposing a correct priority vocabulary while leaving nine duplicate monitor cards would still fail the player outcome.
 
