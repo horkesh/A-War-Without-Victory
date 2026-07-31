@@ -1,4 +1,11 @@
-import type { ArmyHqOperation, CorpsOperation, FormationId, GameState, TgId } from './game_state.js';
+import type {
+    ArmyHqOperation,
+    CorpsOperation,
+    FormationId,
+    GameState,
+    TacticalGroup,
+    TgId,
+} from './game_state.js';
 import { strictCompare } from './validateGameState.js';
 
 export interface ResolvedArmyHqOperation {
@@ -65,12 +72,31 @@ function hasMatchingLiveCorpsOperation(
     return false;
 }
 
-function matchingLiveTacticalGroupIds(state: GameState, armyHqOperationId: string): string[] {
+function tacticalGroupMatchesArmyHqOperation(
+    tacticalGroup: TacticalGroup,
+    armyHqOperationId: string,
+    armyHqOperation: ArmyHqOperation,
+): boolean {
+    if (tacticalGroup.army_hq_op_id != null) {
+        return tacticalGroup.army_hq_op_id === armyHqOperationId;
+    }
+    return tacticalGroup.corps_id === armyHqOperation.anchor_corps_id
+        && tacticalGroup.op_id === armyHqOperation.name;
+}
+
+function matchingLiveTacticalGroupIds(
+    state: GameState,
+    armyHqOperationId: string,
+    armyHqOperation: ArmyHqOperation,
+): string[] {
     const result: string[] = [];
     for (const id of Object.keys(state.military.tactical_groups ?? {}).sort(strictCompare)) {
-        if (state.military.tactical_groups?.[id]?.army_hq_op_id === armyHqOperationId) {
-            result.push(id);
-        }
+        const tacticalGroup = state.military.tactical_groups?.[id];
+        if (tacticalGroup && tacticalGroupMatchesArmyHqOperation(
+            tacticalGroup,
+            armyHqOperationId,
+            armyHqOperation,
+        )) result.push(id);
     }
     return result;
 }
@@ -90,10 +116,12 @@ export function reconcileLoadedArmyHqOperationLifecycle(state: GameState): void 
             delete operation.tg_id;
             continue;
         }
-        const matchingTgIds = matchingLiveTacticalGroupIds(state, id);
-        const linkedTgIsLive = operation.tg_id != null && tacticalGroups[operation.tg_id] != null;
+        const matchingTgIds = matchingLiveTacticalGroupIds(state, id, operation);
+        const linkedTg = operation.tg_id != null ? tacticalGroups[operation.tg_id] : undefined;
+        const linkedTgMatches = linkedTg != null
+            && tacticalGroupMatchesArmyHqOperation(linkedTg, id, operation);
 
-        if (!linkedTgIsLive) {
+        if (!linkedTgMatches) {
             if (matchingTgIds.length > 0) operation.tg_id = matchingTgIds[0];
             else delete operation.tg_id;
         }
@@ -105,7 +133,7 @@ export function reconcileLoadedArmyHqOperationLifecycle(state: GameState): void 
                 || operation.status === 'recovering'
             )
             && !hasMatchingLiveCorpsOperation(state, id, operation)
-            && !linkedTgIsLive
+            && !linkedTgMatches
             && matchingTgIds.length === 0
         ) {
             operation.status = 'completed';

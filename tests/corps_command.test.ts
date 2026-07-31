@@ -16,6 +16,7 @@ import {
     updateOGLifecycle,
     validateOGOrder
 } from '../src/sim/combat/operational_groups.js';
+import { evaluateOperationProgress } from '../src/sim/combat/sector_offensive.js';
 import type { FactionId, FormationState, GameState, OGActivationOrder } from '../src/state/game_state.js';
 import { CURRENT_SCHEMA_VERSION } from '../src/state/game_state.js';
 
@@ -158,6 +159,39 @@ describe('corps command - advanceOperations', () => {
         state.meta.turn = 30;
         advanceOperations(state);
         expect(state.military.corps_command!['rs-corps-1'].active_operations).toHaveLength(0);
+    });
+
+    it('keeps reorganization on one 3/4/3 owner with at most one transition per turn', () => {
+        const state = makeCorpsState();
+        initializeCorpsCommand(state);
+        const op = {
+            name: 'Single Owner Reorganization',
+            type: 'reorganization' as const,
+            phase: 'planning' as const,
+            started_turn: 20,
+            phase_started_turn: 20,
+            participating_brigades: ['rs-brig-1', 'rs-brig-2'],
+        };
+        state.military.corps_command!['rs-corps-1'].active_operations = [op];
+
+        state.meta.turn = 22;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'planning', phase_started_turn: 20 });
+
+        state.meta.turn = 23;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'execution', phase_started_turn: 23 });
+
+        state.meta.turn = 27;
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        evaluateOperationProgress(state, 'RS');
+        advanceOperations(state);
+        expect(op).toMatchObject({ phase: 'recovery', phase_started_turn: 27 });
     });
 
     it('leaves combat-operation lifecycle ownership to sector_offensive', () => {

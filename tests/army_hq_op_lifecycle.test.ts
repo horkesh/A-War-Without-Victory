@@ -180,6 +180,24 @@ describe('Army-HQ operation lifecycle', () => {
         expect(receipt.tg_id).toBe(tgFor(operation('corps_a'), 'corps_a', 'anchor_corps_a').id);
     });
 
+    it('rejects an unrelated live TG link and reconciles the orphan to a fixed point', () => {
+        const state = makeState();
+        const orphan = state.military.army_hq_operations![AHQ_A]!;
+        const unrelatedTgId = state.military.army_hq_operations![AHQ_B]!.tg_id!;
+        state.military.corps_command!.corps_a!.active_operations = [];
+        delete state.military.tactical_groups![orphan.tg_id!];
+        orphan.tg_id = unrelatedTgId;
+
+        reconcileLoadedArmyHqOperationLifecycle(state);
+        const once = structuredClone(state);
+        reconcileLoadedArmyHqOperationLifecycle(state);
+
+        expect(state).toEqual(once);
+        expect(orphan.status).toBe('completed');
+        expect(orphan.tg_id).toBeUndefined();
+        expect(state.military.army_hq_operations![AHQ_B]!.tg_id).toBe(unrelatedTgId);
+    });
+
     it('completes a loaded recovering orphan so the temporary cap cannot become permanent', () => {
         const state = makeState();
         const orphan = state.military.army_hq_operations![AHQ_A]!;

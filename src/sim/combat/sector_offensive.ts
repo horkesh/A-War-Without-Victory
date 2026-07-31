@@ -2530,10 +2530,14 @@ export function evaluateOperationProgress(
         if (!hasActiveOperation(cmd)) continue;
 
         for (const op of [...cmd.active_operations]) {
-            // sector_attack, probe, and feint ops have their own lifecycle in
-            // advanceSectorOffensives(). Processing them here would cause double
-            // phase transitions and double exhaustion costs.
-            if (op.type === 'sector_attack' || op.type === 'probe' || op.type === 'feint') continue;
+            // Sector ops are owned by advanceSectorOffensives; reorganization is
+            // owned by corps_command.advanceOperations on its canonical 3/4/3 clock.
+            if (
+                op.type === 'sector_attack'
+                || op.type === 'probe'
+                || op.type === 'feint'
+                || op.type === 'reorganization'
+            ) continue;
 
             const turnsInPhase = turn - op.phase_started_turn;
 
@@ -2557,15 +2561,18 @@ export function evaluateOperationProgress(
                     const captured = targets.filter(sid => pc[sid] === faction).length;
                     const captureRate = captured / targets.length;
 
-                    // Abort if failing after 2 turns
-                    if (turnsInPhase >= 2 && captureRate < PROGRESS_FAILURE_THRESHOLD) {
-                        beginRecovery(op, turn, 'brigade_attrition', state, corps.id);
+                    // Only captured objectives constitute success. Early failure and
+                    // execution timeout retain the existing attempt-history diagnostic.
+                    if (captureRate >= PROGRESS_SUCCESS_THRESHOLD) {
+                        beginRecovery(op, turn, 'completed', state, corps.id);
                         continue;
                     }
 
-                    // Success or max duration reached
-                    if (captureRate >= PROGRESS_SUCCESS_THRESHOLD || turnsInPhase >= EXECUTION_MAX_DURATION) {
-                        beginRecovery(op, turn, 'completed', state, corps.id);
+                    if (
+                        (turnsInPhase >= 2 && captureRate < PROGRESS_FAILURE_THRESHOLD)
+                        || turnsInPhase >= EXECUTION_MAX_DURATION
+                    ) {
+                        beginRecovery(op, turn, getNoAttemptRecoveryReason(op), state, corps.id);
                         continue;
                     }
                 } else if (turnsInPhase >= EXECUTION_MAX_DURATION) {

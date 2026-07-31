@@ -184,6 +184,52 @@ describe('Tactical Group operation lifecycle', () => {
         });
     });
 
+    it('classifies a general-operation success threshold as completed', () => {
+        const op = makeOperation('General Success', 'general_offensive');
+        op.phase = 'execution';
+        op.phase_started_turn = 10;
+        op.target_settlements = ['op:target:captured', 'op:target:open'];
+        op.attack_attempt_count = 1;
+        const state = makeLifecycleState(op);
+        state.political.political_controllers!['op:target:captured'] = 'RBiH';
+        state.political.political_controllers!['op:target:open'] = 'RS';
+
+        evaluateOperationProgress(state, 'RBiH');
+
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'completed' });
+    });
+
+    it('classifies a partial general-operation execution timeout as max failures', () => {
+        const op = makeOperation('General Partial Timeout', 'general_offensive');
+        op.phase = 'execution';
+        op.phase_started_turn = 6;
+        op.target_settlements = ['op:target:captured', 'op:target:open-a', 'op:target:open-b'];
+        op.attack_attempt_count = 2;
+        const state = makeLifecycleState(op);
+        state.political.political_controllers!['op:target:captured'] = 'RBiH';
+        state.political.political_controllers!['op:target:open-a'] = 'RS';
+        state.political.political_controllers!['op:target:open-b'] = 'RS';
+
+        evaluateOperationProgress(state, 'RBiH');
+
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'max_failures' });
+    });
+
+    it('classifies a no-attempt general-operation execution timeout as no logged attempt', () => {
+        const op = makeOperation('General No-Attempt Timeout', 'general_offensive');
+        op.phase = 'execution';
+        op.phase_started_turn = 6;
+        op.target_settlements = ['op:target:open-a', 'op:target:open-b'];
+        op.attack_attempt_count = 0;
+        const state = makeLifecycleState(op);
+        state.political.political_controllers!['op:target:open-a'] = 'RS';
+        state.political.political_controllers!['op:target:open-b'] = 'RS';
+
+        evaluateOperationProgress(state, 'RBiH');
+
+        expect(op).toMatchObject({ phase: 'recovery', recovery_reason: 'no_logged_attempt' });
+    });
+
     it('routes weakened-operation attrition recovery through TG closeout', () => {
         const op = makeOperation('Weakened Recovery');
         op.phase = 'execution';
