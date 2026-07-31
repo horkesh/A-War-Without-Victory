@@ -8,7 +8,7 @@ import { useKeyboardShortcuts } from '../../src/ui/map/hooks/useKeyboardShortcut
 import { useGameStore } from '../../src/ui/map/store/gameStore';
 
 function KeyboardShortcutProbe() {
-    useKeyboardShortcuts();
+    useKeyboardShortcuts(true);
     return createElement('div');
 }
 

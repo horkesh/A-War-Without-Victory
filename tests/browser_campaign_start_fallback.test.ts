@@ -31,6 +31,27 @@ describe('browser new-campaign fallback', () => {
     vi.restoreAllMocks();
   });
 
+  it('applies the packaged start response once without pulling the same campaign again', async () => {
+    const loadSave = vi.fn(async () => undefined);
+    const getCurrentGameState = vi.fn(async () => 'duplicate-state');
+    const ipc = {
+      isAvailable: true,
+      startNewCampaign: vi.fn(async () => ({ ok: true, stateJson: 'response-state' })),
+      getCurrentGameState,
+    } as unknown as IPC;
+
+    const ok = await startCampaignFromSidePicker({
+      ipc,
+      loadSave,
+      setLoadError: vi.fn(),
+    }, 'RBiH', 'apr_1992');
+
+    expect(ok).toBe(true);
+    expect(loadSave).toHaveBeenCalledOnce();
+    expect(loadSave).toHaveBeenCalledWith('response-state');
+    expect(getCurrentGameState).not.toHaveBeenCalled();
+  });
+
   it('queues the selected faction foundational decision when Electron IPC is unavailable', async () => {
     const expected = [
       { faction: 'RBiH' as const, eventId: 'rbih_state_identity' },

@@ -58,7 +58,7 @@
             const listeners = eventListeners.get(data.eventName);
             if (listeners instanceof Set) {
               for (const listener of Array.from(listeners)) {
-                listener(data.payload);
+                listener(data.payload, data.metadata);
               }
             }
           }

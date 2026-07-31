@@ -32,10 +32,21 @@ describe('warroom new campaign flow truth', () => {
     const introArm = warroomSource.lastIndexOf('this.freshCampaignIntroPending = true;', start);
     expect(introArm).toBeGreaterThanOrEqual(0);
     expect(introArm).toBeLessThan(start);
-    expect(desktopStartBlock).not.toContain('result.stateJson');
-    expect(desktopStartBlock).not.toContain('applyGameStateFromJson');
+    expect(desktopStartBlock).toContain('result.stateJson');
+    expect(desktopStartBlock).toContain('this.desktopStateGate.admitReserved(');
+    expect(desktopStartBlock).toContain('CAMPAIGN_REPLACEMENT_UPDATE');
+    expect(desktopStartBlock).toContain('await this.pullLatestGameState({ showShell: false });');
     expect(desktopStartBlock).toContain("this.showScreen('none');");
     expect(desktopStartBlock).not.toContain("void this.showTacticalMapScene('warroom');");
+  });
+
+  it('keeps startup state acquisition alive through early side-picker navigation', () => {
+    const warroomSource = readRepoFile('src', 'ui', 'warroom', 'warroom.ts');
+
+    expect(warroomSource).toContain('if (this.desktopBridge?.getCurrentGameState) {');
+    expect(warroomSource).not.toContain('if (!this.userNavigatedFromMenu && this.desktopBridge?.getCurrentGameState) {');
+    expect(warroomSource).toContain('{ showShell: !this.userNavigatedFromMenu }');
+    expect(warroomSource).toContain("private async pullLatestGameState(options?: { showShell?: boolean })");
   });
 
   it('posts a fresh-campaign reset message into the embedded tactical map after iframe load or reuse', () => {

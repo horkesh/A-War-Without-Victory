@@ -8,7 +8,7 @@ import { useKeyboardShortcuts } from '../../src/ui/map/hooks/useKeyboardShortcut
 import { useGameStore } from '../../src/ui/map/store/gameStore.js';
 
 function KeyboardShortcutProbe() {
-    useKeyboardShortcuts();
+    useKeyboardShortcuts(true);
     return createElement('div', { 'data-testid': 'keyboard-shortcut-probe' });
 }
 
@@ -17,7 +17,7 @@ function mountKeyboardShortcuts() {
 }
 
 function CodexWithKeyboardShortcuts() {
-    useKeyboardShortcuts();
+    useKeyboardShortcuts(true);
     return createElement(CodexPanel, {
         isOpen: true,
         onClose: () => useGameStore.getState().setCodexOpen(false),

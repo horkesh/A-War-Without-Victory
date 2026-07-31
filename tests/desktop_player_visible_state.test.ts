@@ -475,11 +475,10 @@ describe('desktop player-visible state projection', () => {
     expect(tacticalLoadBlock).not.toContain("send('game-state-updated', currentGameStateJson)");
   });
 
-  it('keeps canonical state out of every mutating IPC response', async () => {
+  it('keeps canonical state out of mutating IPC responses and returns only projected start state', async () => {
     const source = await readFile(join(process.cwd(), 'src', 'desktop', 'electron-main.cjs'), 'utf8');
     const mutationHandlers = [
       ['load-scenario-dialog', 'start-new-campaign'],
-      ['start-new-campaign', 'load-state-dialog'],
       ['load-state-dialog', 'advance-turn'],
       ['advance-turn', 'save-game'],
       ['apply-recruitment', 'stage-attack-order'],
@@ -493,6 +492,12 @@ describe('desktop player-visible state projection', () => {
       expect(end, name).toBeGreaterThan(start);
       expect(source.slice(start, end), name).not.toMatch(/return\s+\{[\s\S]*?stateJson\s*:/);
     }
+
+    const start = source.indexOf("ipcMain.handle('start-new-campaign'");
+    const end = source.indexOf("ipcMain.handle('load-state-dialog'", start);
+    const startHandler = source.slice(start, end);
+    expect(startHandler).toContain('stateJson: projectCurrentGameStateForRenderer()');
+    expect(startHandler).not.toContain('stateJson: currentGameStateJson');
   });
 
   it('uses the explicit projected-state adapter for every desktop Warroom ingestion path', async () => {
@@ -504,7 +509,8 @@ describe('desktop player-visible state projection', () => {
     expect(source).toContain("import { parsePlayerVisibleWarroomState } from './data/player_visible_state_adapter.js';");
     expect(applyBlock).toContain('this.gameState = parsePlayerVisibleWarroomState(stateJson);');
     expect(applyBlock).not.toContain('deserializeState(stateJson)');
-    expect(source).not.toContain('result.stateJson');
+    expect(source).toContain('this.desktopStateGate.admitReserved(result.stateJson, campaignReservation)');
+    expect(source).toContain('this.applyAdmittedDesktopGameStateUpdate(');
   });
 
   it('keeps projected state subscriptions data-only so mutation handlers own navigation', async () => {
@@ -514,7 +520,7 @@ describe('desktop player-visible state projection', () => {
     const subscriptionBlock = source.slice(subscriptionStart, subscriptionEnd);
 
     expect(subscriptionStart).toBeGreaterThanOrEqual(0);
-    expect(subscriptionBlock).toContain('this.handleDesktopGameStateUpdated(stateJson);');
+    expect(subscriptionBlock).toContain('this.handleDesktopGameStateUpdated(stateJson, metadata);');
     expect(subscriptionBlock).not.toContain('this.showScreen(');
     expect(subscriptionBlock).not.toContain('this.showLoadedGameShellScene(');
   });
@@ -526,7 +532,7 @@ describe('desktop player-visible state projection', () => {
     const invokeBlock = source.slice(invokeStart, invokeEnd);
 
     expect(source).toContain('private pendingEmbeddedGameStateJson: string | null = null;');
-    expect(source).toContain('this.handleDesktopGameStateUpdated(stateJson);');
+    expect(source).toContain('this.handleDesktopGameStateUpdated(stateJson, metadata);');
     expect(invokeBlock).toContain('this.flushPendingEmbeddedGameState();');
     expect(invokeBlock.indexOf("type: 'awwv-bridge:response'"))
       .toBeLessThan(invokeBlock.indexOf('this.flushPendingEmbeddedGameState();'));

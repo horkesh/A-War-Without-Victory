@@ -14,15 +14,19 @@ import { isFocusInInteractiveControl } from '../utils/interactiveFocus';
 
 const MAP_MODES_BY_KEY = MAP_MODES.map((mode) => mode.id);
 
-export function useKeyboardShortcuts(): void {
+export function useKeyboardShortcuts(active: boolean): void {
   const ipc = useIPC();
   const loadSave = useGameStore((s) => s.loadSave);
   const clearStagedOrders = useGameStore((s) => s.clearStagedOrders);
   const setLoadError = useGameStore((s) => s.setLoadError);
   const advancingRef = useRef(false);
+  const activeRef = useRef(active);
+  activeRef.current = active;
 
   useEffect(() => {
+    if (!active) return undefined;
     const onKeyDown = (event: KeyboardEvent) => {
+      if (!activeRef.current) return;
       if (isFocusInInteractiveControl()) return;
 
       // Ctrl+S → quick-save
@@ -154,5 +158,5 @@ export function useKeyboardShortcuts(): void {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [ipc, loadSave, clearStagedOrders, setLoadError]);
+  }, [active, ipc, loadSave, clearStagedOrders, setLoadError]);
 }

@@ -22,6 +22,8 @@ export interface MapTransitionSampleMetadata {
 export interface MapTransitionCountersInput {
   mapConstructions: number;
   webglReleases: number;
+  deckConstructions?: number;
+  deckReleases?: number;
   staticResourceRequests: ReadonlyMap<string, number>;
 }
 
@@ -35,6 +37,8 @@ export interface MapTransitionSample {
   counters: {
     map_constructions: number;
     webgl_releases: number;
+    deck_constructions: number;
+    deck_releases: number;
     static_resource_requests: Record<string, number>;
   };
 }
@@ -45,8 +49,16 @@ export interface MapTransitionProfileSnapshot {
   lifetime_counters: {
     map_constructions: number;
     webgl_releases: number;
+    deck_constructions: number;
+    deck_releases: number;
     static_resource_requests: Record<string, number>;
   };
+}
+
+export interface MapTransitionDebugState {
+  active: boolean;
+  marks: MapTransitionMark[];
+  pending_metadata: boolean;
 }
 
 const SAFE_METADATA_KEYS = new Set([
@@ -127,6 +139,8 @@ export function createMapTransitionSample(
   }
   assertFiniteNonNegative(counters.mapConstructions, 'Map construction count');
   assertFiniteNonNegative(counters.webglReleases, 'WebGL release count');
+  assertFiniteNonNegative(counters.deckConstructions ?? 0, 'Deck construction count');
+  assertFiniteNonNegative(counters.deckReleases ?? 0, 'Deck release count');
 
   const commandAt = marks.get('command');
   if (commandAt == null || !Number.isFinite(commandAt)) {
@@ -159,6 +173,8 @@ export function createMapTransitionSample(
     counters: {
       map_constructions: counters.mapConstructions,
       webgl_releases: counters.webglReleases,
+      deck_constructions: counters.deckConstructions ?? 0,
+      deck_releases: counters.deckReleases ?? 0,
       static_resource_requests: sortedResourceCounts(counters.staticResourceRequests),
     },
   };
@@ -176,8 +192,12 @@ class MapTransitionProfiler {
   private active = false;
   private mapConstructions = 0;
   private webglReleases = 0;
+  private deckConstructions = 0;
+  private deckReleases = 0;
   private lifetimeMapConstructions = 0;
   private lifetimeWebglReleases = 0;
+  private lifetimeDeckConstructions = 0;
+  private lifetimeDeckReleases = 0;
   private pendingMetadata: Omit<MapTransitionSampleMetadata, 'kind' | 'cycleIndex'> | null = null;
 
   constructor(enabled: boolean, now: () => number) {
@@ -198,6 +218,8 @@ class MapTransitionProfiler {
     this.resourceCounts.clear();
     this.mapConstructions = 0;
     this.webglReleases = 0;
+    this.deckConstructions = 0;
+    this.deckReleases = 0;
     this.pendingMetadata = null;
     this.mark('command');
   }
@@ -218,6 +240,18 @@ class MapTransitionProfiler {
     if (!this.enabled) return;
     this.lifetimeWebglReleases += 1;
     if (this.active) this.webglReleases += 1;
+  }
+
+  countDeckConstruction(): void {
+    if (!this.enabled) return;
+    this.lifetimeDeckConstructions += 1;
+    if (this.active) this.deckConstructions += 1;
+  }
+
+  countDeckRelease(): void {
+    if (!this.enabled) return;
+    this.lifetimeDeckReleases += 1;
+    if (this.active) this.deckReleases += 1;
   }
 
   countResource(resourceKey: string): void {
@@ -245,6 +279,8 @@ class MapTransitionProfiler {
       {
         mapConstructions: this.mapConstructions,
         webglReleases: this.webglReleases,
+        deckConstructions: this.deckConstructions,
+        deckReleases: this.deckReleases,
         staticResourceRequests: this.resourceCounts,
       },
     );
@@ -268,8 +304,18 @@ class MapTransitionProfiler {
       lifetime_counters: {
         map_constructions: this.lifetimeMapConstructions,
         webgl_releases: this.lifetimeWebglReleases,
+        deck_constructions: this.lifetimeDeckConstructions,
+        deck_releases: this.lifetimeDeckReleases,
         static_resource_requests: sortedResourceCounts(this.lifetimeResourceCounts),
       },
+    };
+  }
+
+  debugState(): MapTransitionDebugState {
+    return {
+      active: this.active,
+      marks: MAP_TRANSITION_MARKS.filter((mark) => this.marks.has(mark)),
+      pending_metadata: this.pendingMetadata != null,
     };
   }
 }
@@ -306,6 +352,14 @@ export function countMapTransitionRelease(): void {
   profiler.countRelease();
 }
 
+export function countMapTransitionDeckConstruction(): void {
+  profiler.countDeckConstruction();
+}
+
+export function countMapTransitionDeckRelease(): void {
+  profiler.countDeckRelease();
+}
+
 export function countMapTransitionResource(resourceKey: string): void {
   profiler.countResource(resourceKey);
 }
@@ -320,11 +374,16 @@ export function getMapTransitionProfileSnapshot(): MapTransitionProfileSnapshot 
   return profiler.snapshot();
 }
 
+export function getMapTransitionDebugState(): MapTransitionDebugState {
+  return profiler.debugState();
+}
+
 declare global {
   interface Window {
     __AWWV_MAP_TRANSITION_PROFILE__?: {
       setKind: typeof setMapTransitionKind;
       snapshot: typeof getMapTransitionProfileSnapshot;
+      debugState: typeof getMapTransitionDebugState;
     };
   }
 }
@@ -333,5 +392,6 @@ if (typeof window !== 'undefined' && profiler.enabled) {
   window.__AWWV_MAP_TRANSITION_PROFILE__ = {
     setKind: setMapTransitionKind,
     snapshot: getMapTransitionProfileSnapshot,
+    debugState: getMapTransitionDebugState,
   };
 }

@@ -3,14 +3,14 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phase 0 baseline complete; Phase 1 is next
+**Status:** IN PROGRESS — Phases 0–1 complete; Phase 2 is next
 **Overseer:** Orchestrator
 **Owner lane:** Performance Engineer + UI/UX Developer
 **Independent reviewers:** Technical Architect, QA Engineer, Platform Specialist, Process QA
 **Roadmap workstream:** R1
 **Roadmap slot:** first autonomous execution packet / player-facing map performance
 **Phase/workstream covered:** Electron shell navigation, tactical-map React lifetime, MapLibre/Deck lifetime, static map-data loading, packaged local HTTP caching, cold-entry bundle/network cleanup
-**Current next action:** Execute Phase 1 persistent campaign-scoped map viewport against the retained Phase 0 baseline
+**Current next action:** Execute Phase 2 stable iframe and shell navigation against the retained Phase 1 viewport
 **Collision rule:** Do not execute source-changing phases while the RS 104-week friction plan's FR-03 map-focus packet owns `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, or `gameStore.ts`. Rebase or sequence this packet first; never merge two independent edits to those files by guesswork.
 **Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, local commits, and transient local directory builds for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
 
@@ -314,18 +314,18 @@ npm.cmd run qa:map-transition -- --label=baseline --cycles=20 --warmups=3
 
 **Files:**
 
-- Create `tests/ui/map_shell_persistence.test.tsx`
+- Create `tests/ui/map_shell_persistence.test.ts`
 - Modify `tests/ui/warroom_shell_ownership.test.ts`
 - Modify `tests/ui/shell_navigation_ownership.test.ts`
 - Modify `tests/ui/map_context_lifecycle.test.ts`
 - Modify `tests/ui/error_boundary_isolation.test.ts`
 
-- [ ] Assert a loaded campaign mounts one primary map owner across `game -> warroom -> game` rerenders.
-- [ ] Assert the warm screen toggle does not call MapLibre remove, Deck finalize, or WebGL lose-context.
-- [ ] Assert leaving the campaign/unmounting the app still releases both graphics owners exactly once.
-- [ ] Assert the hidden viewport is `aria-hidden`, inert, and cannot receive pointer or keyboard input.
-- [ ] Assert the visible viewport calls resize/repaint before accepting interaction.
-- [ ] Assert the persistent viewport remains inside the canonical `RootErrorBoundary zone="map"` isolation boundary.
+- [x] Assert a loaded campaign mounts one primary map owner across `game -> warroom -> game` rerenders.
+- [x] Assert the warm screen toggle does not call MapLibre remove, Deck finalize, or WebGL lose-context.
+- [x] Assert leaving the campaign/unmounting the app still releases both graphics owners exactly once.
+- [x] Assert the hidden viewport is `aria-hidden`, inert, and cannot receive pointer or keyboard input.
+- [x] Assert the visible viewport calls resize/repaint before accepting interaction.
+- [x] Assert the persistent viewport remains inside the canonical `RootErrorBoundary zone="map"` isolation boundary.
 
 ### Task 1.2 — Introduce one persistent viewport owner
 
@@ -337,28 +337,28 @@ npm.cmd run qa:map-transition -- --label=baseline --cycles=20 --warmups=3
 - Modify `src/ui/map/components/Minimap.tsx`
 - Modify `src/ui/map/styles/globals.css` only if a dedicated visibility class is needed
 
-- [ ] Mount `TacticalMapViewport` once whenever a campaign is loaded and the app is past `mainMenu`.
-- [ ] Pass `active={appScreen === 'game'}`; do not conditionally remove the map for `warroom`.
-- [ ] Keep the viewport full-sized while hidden. Use `visibility`, `inert`, `aria-hidden`, and pointer/focus ownership; do not use a zero-sized container.
-- [ ] On reveal, run the existing double-frame resize pattern, then `triggerRepaint()`.
-- [ ] Preserve the opaque Warroom layer above the hidden map.
-- [ ] Keep map state subscriptions live so a turn advanced in the Command Room can render before reveal.
-- [ ] Keep the loading cover active if the retained canvas has not rendered the current revision.
-- [ ] Preserve real cleanup only at campaign/app unmount.
+- [x] Mount `TacticalMapViewport` once whenever a campaign is loaded and the app is past `mainMenu`.
+- [x] Pass `active={appScreen === 'game'}`; do not conditionally remove the map for `warroom`.
+- [x] Keep the viewport full-sized while hidden. Use `visibility`, `inert`, `aria-hidden`, and pointer/focus ownership; do not use a zero-sized container.
+- [x] On reveal, run the existing double-frame resize pattern, then `triggerRepaint()`.
+- [x] Preserve the opaque Warroom layer above the hidden map.
+- [x] Keep map state subscriptions live so a turn advanced in the Command Room can render before reveal.
+- [x] Keep the loading cover active if the retained canvas has not rendered the current revision.
+- [x] Preserve real cleanup only at campaign/app unmount.
 
 ### Task 1.3 — Reprofile before any other optimization
 
 **Verification:**
 
 ```powershell
-npm.cmd run test:vitest -- tests/ui/map_shell_persistence.test.tsx tests/ui/warroom_shell_ownership.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/map_context_lifecycle.test.ts tests/ui/map_loading_state.test.ts tests/ui/error_boundary_isolation.test.ts tests/v093_a11y_lane_b_map_landmarks.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/ui/map_shell_persistence.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui/map_context_lifecycle.test.ts tests/ui/map_loading_state.test.ts tests/ui/error_boundary_isolation.test.ts tests/v093_a11y_lane_b_map_landmarks.test.ts --pool=forks --reporter=dot
 npm.cmd run typecheck
 npm.cmd run desktop:map:build
 npm.cmd run warroom:build
 npm.cmd run qa:map-transition -- --label=persistent-viewport --cycles=20 --warmups=3
 ```
 
-**Gate:** Warm cycles have one lifetime MapLibre construction and no warm release/reconstruction. If P95 is already <= 150 ms and repeat resource counts are zero, continue through Phase 2 correctness and then reassess whether Phases 3–4 are required for cold start.
+**Gate:** Evidence reports 2 MapLibre constructions per campaign epoch (main + minimap), 0 warm MapLibre constructions/releases, and 1 Deck owner. A real campaign/application teardown releases the main MapLibre map, minimap MapLibre map, and Deck owner exactly once. If P95 is already <= 150 ms and repeat resource counts are zero, continue through Phase 2 correctness and then reassess whether Phases 3–4 are required for cold start.
 
 -> `/simplify` -> verify -> commit `perf(map): preserve tactical viewport across room switches`
 
@@ -491,7 +491,7 @@ npm.cmd run qa:map-transition -- --label=resource-cache --cycles=20 --warmups=3
 
 - Modify `src/ui/map/components/TacticalMapViewport.tsx`
 - Modify `src/ui/map/components/Minimap.tsx`
-- Modify `tests/ui/map_shell_persistence.test.tsx`
+- Modify `tests/ui/map_shell_persistence.test.ts`
 - Modify `tests/ui_map_build_warning_contract.test.ts`
 
 - [ ] Mount the minimap only after the primary map reports the first current-state frame.
@@ -536,7 +536,7 @@ npm.cmd run qa:map-transition -- --label=resource-cache --cycles=20 --warmups=3
 **Verification:**
 
 ```powershell
-npm.cmd run test:vitest -- tests/ui/map_shell_persistence.test.tsx tests/ui_map_build_warning_contract.test.ts tests/ui/packaged_font_network_contract.test.ts tests/ui_map_entry_budget_contract.test.ts tests/ui_map_browser_safe_imports.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/ui/map_shell_persistence.test.ts tests/ui_map_build_warning_contract.test.ts tests/ui/packaged_font_network_contract.test.ts tests/ui_map_entry_budget_contract.test.ts tests/ui_map_browser_safe_imports.test.ts --pool=forks --reporter=dot
 npm.cmd run typecheck
 npm.cmd run desktop:map:build
 npm.cmd run qa:map-entry-budget
@@ -559,7 +559,7 @@ npm.cmd run qa:map-transition -- --label=cold-entry --cycles=20 --warmups=3
 
 ```powershell
 npm.cmd run typecheck
-npm.cmd run test:vitest -- tests/ui/map_transition_timing.test.ts tests/map_transition_profile_harness.test.ts tests/ui/map_shell_persistence.test.tsx tests/ui/warroom_tactical_map_lifecycle.test.ts tests/ui/map_data_loader_cache.test.ts tests/ui/map_critical_first_init.test.ts tests/ui/map_context_lifecycle.test.ts tests/ui/map_loading_state.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui_map_render_smoke.test.ts tests/ui_map_build_warning_contract.test.ts tests/desktop_pmtiles_protocol_route.test.ts tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot
+npm.cmd run test:vitest -- tests/ui/map_transition_timing.test.ts tests/map_transition_profile_harness.test.ts tests/ui/map_shell_persistence.test.ts tests/ui/warroom_tactical_map_lifecycle.test.ts tests/ui/map_data_loader_cache.test.ts tests/ui/map_critical_first_init.test.ts tests/ui/map_context_lifecycle.test.ts tests/ui/map_loading_state.test.ts tests/ui/warroom_shell_ownership.test.ts tests/ui/shell_navigation_ownership.test.ts tests/ui_map_render_smoke.test.ts tests/ui_map_build_warning_contract.test.ts tests/desktop_pmtiles_protocol_route.test.ts tests/desktop_packaged_runtime_probe.test.ts --pool=forks --reporter=dot
 npm.cmd run qa:player-journeys
 npm.cmd run qa:first-hour:browser
 npm.cmd run qa:live-surface:browser
@@ -701,12 +701,24 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 | Phase | Status | Commit | Verification | Evidence |
 |---|---|---|---|---|
 | 0 Baseline | Complete | Phase 0 commit + five review-fix follow-ups | Exact current commands and counts below; typecheck; tactical-map and warroom builds; harness syntax; EOL and diff checks; 3 cold launches + 3 warmups + 20 measured warm cycles per launch; diagnostics-failure, cleanup, and whole-evidence volatility proof | `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` |
-| 1 Persistent viewport | Not started | — | — | — |
+| 1 Persistent viewport | Complete; independently approved | Phase 1 integration commit | 24 focused/adjacent files / 226 tests; typecheck; tactical-map and Warroom builds; harness syntax; EOL and diff checks; independent repair review: 4 files / 38 tests | `tmp-map-transition-perf/phase1-retained-viewport-authoritative-v7-final/baseline.json` |
 | 2 Stable shell | Not started | — | — | — |
 | 3 Resource/cache | Not started | — | — | — |
 | 4 Cold-entry residual | Not started | — | — | — |
 | 5 Acceptance | Not started | — | — | — |
 | 6 Closeout | Not started | — | — | — |
+
+Phase 1 replaces screen-scoped map mounting with one App-owned campaign epoch above `CampaignTacticalViewportOwner`, so an initial load can succeed before any tactical viewport exists. Successful browser auto/manual/continue/main-menu and Toolbar development loads use the same success-aware replacement runner. Packaged new-campaign, scenario-load, and state-load broadcasts carry replacement metadata through Electron main, preload, Warroom, and the embedded iframe bridge; initial packaged state is classified as a replacement at session attachment. Failed replacements and ordinary turn/mutation updates do not advance the epoch. Normal `game <-> warroom` navigation changes only visibility, focus, and input ownership. The full-size retained layer stays opaque-covered, `aria-hidden`, inert, pointer-disabled, and keyboard-disabled while inactive or while its committed turn/fingerprint is stale. Reveal uses two animation frames, resizes the main map and minimap, listens for one rendered frame, repaints, and only then admits current-revision input. Hidden application updates use no application animation frame, and warm navigation does not create or release a graphics owner.
+
+The ownership and failure-path tests exercise the production `MapContainer` and `Minimap` cleanup surfaces: one campaign epoch owns exactly two MapLibre maps and one Deck overlay; warm toggles release none; campaign/app teardown calls both MapLibre `remove` paths, both WebGL lose-context paths, Deck `finalize`, and Deck WebGL lose-context exactly once. A partially constructed Deck owner is registered before `addControl`; if `addControl` throws, it is finalized, loses context, increments the release counter once, and is not released again at unmount. Installed window, document, MapLibre, and canvas listeners consult render-current activation refs, with layout-effect regressions proving the commit-to-passive-cleanup interval fails closed.
+
+The final ownership repair also makes Minimap's initialization, settlement-data, and viewport `load` callbacks explicitly removable and current-map/current-state/current-fingerprint guarded. Deferred settlement data from a superseded campaign and callbacks captured before teardown are behaviorally proven unable to write to released sources. A post-repair profile then exposed a separate first-attachment race: desktop `loadSave` published the initial session state before its replacement promise resolved, so the first viewport mounted at epoch 0 and was immediately remounted at epoch 1. The coordinator now samples whether a campaign was already loaded immediately before each serialized replacement executes. It always records the newest successful reservation as applied, but advances the graphics epoch only when a prior campaign actually existed. The regression proves first attachment mounts once, a later real replacement remounts once, and failure/stale semantics remain intact.
+
+`tmp-map-transition-perf/phase1-retained-viewport-authoritative-v6-postrepair/baseline.json` (110,118 bytes; SHA-256 `7a0ccda78d2138fcba7e622fb3b47322c367c7804437c0fb0ddf7bdbc003f732`) is retained as rejected failure evidence, not acceptance evidence. Although its top-level harness result was `ok: true`, each launch reported three MapLibre constructions, one premature WebGL release, one Deck construction, and duplicated one-time static-resource requests. Its second launch also stalled at 3863.4 ms current-state-rendered / 3878.5 ms interactive, producing a 3490.82 ms cold p95. Those ownership counters exposed the first-attachment remount and required the regression and repair above.
+
+Authoritative schema-4 evidence is `tmp-map-transition-perf/phase1-retained-viewport-authoritative-v7-final/baseline.json` (110,105 bytes; SHA-256 `c9dd1dbec72c438ad1c2a5fea687c7916d1869f6b2ae6546d442a4cf91416d65`). All three launches completed one cold sample, three warmups, and twenty measured warm cycles: 72/72 samples are complete, ordered, current-turn/current-fingerprint safe, and current-state ready. Cold current-state-rendered p50/p95 is 81.5/81.68 ms and cold interactive spans 555.3-639.9 ms, inside the 1000/1500 ms cold target. Warm interactive p50/p95 is 253/289.16 ms and remains above the 150 ms target. Every launch reports lifetime ownership of exactly two MapLibre maps, zero pre-cleanup WebGL releases, one Deck overlay, and zero pre-cleanup Deck releases; all 60 measured warm cycles report zero MapLibre/Deck construction and zero MapLibre/Deck release. One-time static resources load once per renderer session, while each warm cycle still requests `operational-settlements` once, so Phase 3 cache work remains required after Phase 2 stabilizes shell navigation.
+
+Unexpected console warnings/errors, page errors, request failures, HTTP errors, stdout, and stderr are all zero. Repository saves are unchanged with zero files in scope. Each launch closed gracefully, required no forced kill, and verified process exit; no Electron process remained afterward. A full JSON scan found zero URL schemes, loopback endpoints, UUIDs, Windows/POSIX user paths, user-root values, or ephemeral ports. Six nonempty screenshots were retained and visually inspected. The Phase 1 harness captures them after each profiled cycle has returned to the Command Room, so they prove a stable visible Desk surface but are not represented as the Phase 5 cold-map/warm-map screenshot matrix.
 
 Phase 0 read-first and process evidence is complete: the implementer read `.claude/napkin.md` and `docs/10_canon/context.md` before this follow-up, rechecked the owning plan and relevant engineering/determinism constraints, worked only in the isolated R1 worktree, used failing tests before implementation, preserved append-only ledger handling, left `docs/10_canon/FORAWWV.md` untouched, and performed no packaging, version, tag, push, publication, or release-state mutation. The process checklist was: diagnose the concrete evidence gaps; record RED; implement the smallest profiling-only correction; run focused and adjacent GREEN gates; rebuild both UI bundles; capture under a new fixed label; audit the full serialized artifact, screenshots, save hashes, process exit, and profile cleanup; then update this log, ledger, and reusable knowledge.
 

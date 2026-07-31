@@ -7,7 +7,10 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
-import { releaseMapWebGlContext } from '../map/mapContextLifecycle';
+import {
+  releaseMapWebGlContext,
+  type TacticalMapGraphicsController,
+} from '../map/mapContextLifecycle';
 import {
   countMapTransitionConstruction,
   countMapTransitionRelease,
@@ -23,6 +26,11 @@ import { Z } from '../../shared/zIndex';
 const MINIMAP_WIDTH = 250;
 const MINIMAP_HEIGHT = 180;
 const BOSNIA_CENTER: [number, number] = [17.7, 43.87];
+
+interface MinimapProps {
+  active: boolean;
+  onGraphicsController?: (controller: TacticalMapGraphicsController | null) => void;
+}
 
 /**
  * Build a GeoJSON rectangle feature from main map bounds for the viewport overlay.
@@ -118,16 +126,20 @@ function buildMinimapStyle(): maplibregl.StyleSpecification {
   };
 }
 
-export const Minimap = React.memo(function Minimap() {
+export const Minimap = React.memo(function Minimap({ active, onGraphicsController }: MinimapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
+  const activeRef = useRef(active);
+  activeRef.current = active;
   const minimapVisible = useGameStore((s) => s.minimapVisible);
   const mapViewport = useGameStore((s) => s.mapViewport);
   const loadedGameState = useGameStore((s) => s.loadedGameState);
+  const loadedStateFingerprint = useGameStore((s) => s.lastLoadedStateFingerprint);
 
   // Initialize minimap — also populates data on first load.
   // We track an epoch counter so data/viewport effects re-fire on remount.
   const epochRef = useRef(0);
+  const lifecycleEpochRef = useRef(0);
   const [mapEpoch, setMapEpoch] = useState(0);
 
   // Create the MapLibre instance ONCE and keep it alive.
@@ -146,63 +158,87 @@ export const Minimap = React.memo(function Minimap() {
       attributionControl: false,
     });
     countMapTransitionConstruction();
+    const lifecycleEpoch = ++lifecycleEpochRef.current;
+    let released = false;
+    const isCurrentMap = () => !released
+      && lifecycleEpochRef.current === lifecycleEpoch
+      && mapRef.current === map;
     mapRef.current = map;
+    onGraphicsController?.({
+      resize: () => map.resize(),
+      triggerRepaint: () => map.triggerRepaint(),
+      onceRender: (listener) => {
+        map.once('render', listener);
+        return () => map.off('render', listener);
+      },
+      stop: () => map.stop(),
+    });
 
     // Click to pan main map
-    map.on('click', (e) => {
+    const handleClick = (e: maplibregl.MapMouseEvent) => {
+      if (!isCurrentMap()) return;
+      if (!activeRef.current) return;
       const fn = useGameStore.getState().panToCenter;
       if (fn) fn([e.lngLat.lng, e.lngLat.lat]);
-    });
+    };
+    map.on('click', handleClick);
 
     // Make minimap clickable (cursor)
     map.getCanvas().style.cursor = 'pointer';
 
     // Bump epoch so data/viewport effects re-fire
-    map.once('load', () => {
+    const handleLoad = () => {
+      if (!isCurrentMap()) return;
       epochRef.current += 1;
       setMapEpoch(epochRef.current);
-    });
+    };
+    map.once('load', handleLoad);
 
     return () => {
+      released = true;
+      if (lifecycleEpochRef.current === lifecycleEpoch) lifecycleEpochRef.current += 1;
+      map.off('click', handleClick);
+      map.off('load', handleLoad);
+      mapRef.current = null;
+      onGraphicsController?.(null);
       releaseMapWebGlContext(map);
       countMapTransitionRelease();
-      mapRef.current = null;
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [onGraphicsController]);
 
   // Resize when visibility toggles (MapLibre needs layout + paint after hidden→visible; see audit M1 / napkin).
-  useEffect(() => {
-    if (!minimapVisible || !mapRef.current) return;
-    const map = mapRef.current;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        map.resize();
-        map.triggerRepaint();
-      });
-    });
-  }, [minimapVisible]);
-
   // Update control + front data when game state changes or map remounts
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !loadedGameState) return;
+    let cancelled = false;
+    const isCurrentRevision = () => {
+      if (cancelled || mapRef.current !== map) return false;
+      const current = useGameStore.getState();
+      return current.loadedGameState === loadedGameState
+        && current.lastLoadedStateFingerprint === loadedStateFingerprint;
+    };
 
     const updateData = () => {
-      // Update control source from main map's data
-      const controlSource = map.getSource('minimap-control') as GeoJSONSource | undefined;
-      const frontSource = map.getSource('minimap-fronts') as GeoJSONSource | undefined;
-      if (!controlSource || !frontSource) return;
+      if (!isCurrentRevision()) return;
 
       void (async () => {
         try {
           const geojson = await loadOperationalSettlements();
+          if (!isCurrentRevision()) return;
+          // Sources are acquired only after the await and revision guard: an
+          // earlier campaign or released Map must never retain a source owner.
+          const controlSource = map.getSource('minimap-control') as GeoJSONSource | undefined;
+          const frontSource = map.getSource('minimap-fronts') as GeoJSONSource | undefined;
+          if (!controlSource || !frontSource) return;
           const controlGeo = buildControlGeoJSON(geojson, loadedGameState.controlBySettlement);
           controlSource.setData(controlGeo);
 
+          if (!isCurrentRevision()) return;
           const frontGeo = buildFrontLinesGeoJSON(controlGeo, loadedGameState.war_alliance_rbih_hrhb);
           frontSource.setData(frontGeo);
         } catch (e) {
-          console.warn('[Minimap] Failed to update data:', e);
+          if (isCurrentRevision()) console.warn('[Minimap] Failed to update data:', e);
         }
       })();
     };
@@ -212,14 +248,23 @@ export const Minimap = React.memo(function Minimap() {
     } else {
       map.on('load', updateData);
     }
-  }, [loadedGameState, mapEpoch]);
+    return () => {
+      cancelled = true;
+      map.off('load', updateData);
+    };
+  }, [loadedGameState, loadedStateFingerprint, mapEpoch]);
 
   // Update viewport rectangle when main map moves or map remounts
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapViewport) return;
+    let cancelled = false;
+    const isCurrentViewport = () => !cancelled
+      && mapRef.current === map
+      && useGameStore.getState().mapViewport === mapViewport;
 
     const updateViewport = () => {
+      if (!isCurrentViewport()) return;
       const viewportSource = map.getSource('minimap-viewport') as GeoJSONSource | undefined;
       if (!viewportSource) return;
       viewportSource.setData(buildViewportRectangle(mapViewport.bounds));
@@ -230,6 +275,10 @@ export const Minimap = React.memo(function Minimap() {
     } else {
       map.on('load', updateViewport);
     }
+    return () => {
+      cancelled = true;
+      map.off('load', updateViewport);
+    };
   }, [mapViewport, mapEpoch]);
 
   return (
@@ -246,9 +295,9 @@ export const Minimap = React.memo(function Minimap() {
         overflow: 'hidden',
         border: '1px solid rgba(180, 160, 130, 0.25)',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-        opacity: minimapVisible ? 1 : 0,
-        visibility: minimapVisible ? 'visible' : 'hidden',
-        pointerEvents: minimapVisible ? 'auto' : 'none',
+        opacity: active && minimapVisible ? 1 : 0,
+        visibility: active && minimapVisible ? 'visible' : 'hidden',
+        pointerEvents: active && minimapVisible ? 'auto' : 'none',
         transition: 'opacity 0.2s ease-in-out, visibility 0.2s',
       }}
     >

@@ -83,7 +83,9 @@ describe('desktop persistence contract', () => {
     const handlerEnd = source.indexOf("ipcMain.handle('load-state-dialog'", handlerStart);
     const handler = source.slice(handlerStart, handlerEnd);
 
-    expect(handler).toContain('writeCanonicalCurrentState(sim, state, _event.sender);');
+    expect(handler).toContain('CAMPAIGN_REPLACEMENT_UPDATE');
+    expect(handler).toContain('{ excludeSenderFromBroadcast: true }');
+    expect(handler).toContain('stateJson: projectCurrentGameStateForRenderer()');
     expect(handler).not.toContain('currentGameStateJson = sim.serializeState(state);');
   });
 
@@ -108,7 +110,7 @@ describe('desktop persistence contract', () => {
     );
 
     expect(source).toContain('function readCanonicalCurrentState(sim)');
-    expect(source).toContain('function writeCanonicalCurrentState(sim, state, excludeSender)');
+    expect(source).toContain('function writeCanonicalCurrentState(sim, state, excludeSender, metadata, options = {})');
     expect(source).not.toContain('currentGameStateJson = JSON.stringify(state)');
     expect(source).toContain('writeCanonicalCurrentState(sim, state);');
     expect(source).toContain('writeCanonicalCurrentState(sim, state, event.sender);');
