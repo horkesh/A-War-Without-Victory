@@ -3,14 +3,14 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** IN PROGRESS — Phases 0–1 complete; Phase 2 is next
+**Status:** IN PROGRESS — Phases 0–2 complete; Phase 3 is next
 **Overseer:** Orchestrator
 **Owner lane:** Performance Engineer + UI/UX Developer
 **Independent reviewers:** Technical Architect, QA Engineer, Platform Specialist, Process QA
 **Roadmap workstream:** R1
 **Roadmap slot:** first autonomous execution packet / player-facing map performance
 **Phase/workstream covered:** Electron shell navigation, tactical-map React lifetime, MapLibre/Deck lifetime, static map-data loading, packaged local HTTP caching, cold-entry bundle/network cleanup
-**Current next action:** Execute Phase 2 stable iframe and shell navigation against the retained Phase 1 viewport
+**Current next action:** Execute Phase 3 static-resource promise caches and critical-first initialization against the retained Phase 2 shell
 **Collision rule:** Do not execute source-changing phases while the RS 104-week friction plan's FR-03 map-focus packet owns `App.tsx`, `MapContainer.tsx`, `shellNavigation.ts`, or `gameStore.ts`. Rebase or sequence this packet first; never merge two independent edits to those files by guesswork.
 **Activation boundary:** `Execute the master roadmap` authorizes source implementation, tests, evidence, local commits, and transient local directory builds for this packet. It does not authorize push, tag, signing, upload, installer publication, or release-state change.
 
@@ -377,11 +377,11 @@ npm.cmd run qa:map-transition -- --label=persistent-viewport --cycles=20 --warmu
 - Create `tests/ui/warroom_tactical_map_lifecycle.test.ts`
 - Modify `tests/warroom_new_campaign_flow_truth.test.ts`
 
-- [ ] Assert interactive warroom and operational routes use one stable `index.html?embedded=1&view=warroom` shell URL.
-- [ ] Assert room/map transitions use `awwv-shell:show-warroom` and `awwv-shell:handoff` messages.
-- [ ] Assert production navigation code contains no `Date.now()`/random cachebuster.
-- [ ] Assert `iframe.src` is not reassigned on a warm room/map transition.
-- [ ] Keep sandbox as an explicitly separate navigation case.
+- [x] Assert interactive warroom and operational routes use one stable `index.html?embedded=1&view=warroom` shell URL.
+- [x] Assert room/map transitions use `awwv-shell:show-warroom` and `awwv-shell:handoff` messages.
+- [x] Assert production navigation code contains no `Date.now()`/random cachebuster.
+- [x] Assert `iframe.src` is not reassigned on a warm room/map transition.
+- [x] Keep sandbox as an explicitly separate navigation case.
 
 ### Task 2.2 — Make the existing handoff path universal
 
@@ -390,11 +390,11 @@ npm.cmd run qa:map-transition -- --label=persistent-viewport --cycles=20 --warmu
 - Modify `src/ui/warroom/warroom.ts`
 - Modify `src/ui/map/App.tsx` only if message handling needs a bounded correction
 
-- [ ] Create the shell-capable iframe once.
-- [ ] Convert operational requests into a pending/direct shell handoff rather than a new iframe URL.
-- [ ] Convert return-to-HQ into the existing show-warroom message.
-- [ ] Send fresh-campaign intro/reset state through the existing message contract, not URL identity.
-- [ ] Preserve cross-origin bridge safety and do not restore direct iframe DOM access.
+- [x] Create the shell-capable iframe once.
+- [x] Convert operational requests into a pending/direct shell handoff rather than a new iframe URL.
+- [x] Convert return-to-HQ into the existing show-warroom message.
+- [x] Send fresh-campaign intro/reset state through the existing message contract, not URL identity.
+- [x] Preserve cross-origin bridge safety and do not restore direct iframe DOM access.
 
 **Verification:**
 
@@ -702,7 +702,7 @@ This packet does not touch historical claims, event timing, scenarios, OOB, Code
 |---|---|---|---|---|
 | 0 Baseline | Complete | Phase 0 commit + five review-fix follow-ups | Exact current commands and counts below; typecheck; tactical-map and warroom builds; harness syntax; EOL and diff checks; 3 cold launches + 3 warmups + 20 measured warm cycles per launch; diagnostics-failure, cleanup, and whole-evidence volatility proof | `tmp-map-transition-perf/baseline-all-contexts-diagnostics-cleanup-v4b/baseline.json` |
 | 1 Persistent viewport | Complete; independently approved | Phase 1 integration commit | 24 focused/adjacent files / 226 tests; typecheck; tactical-map and Warroom builds; harness syntax; EOL and diff checks; independent repair review: 4 files / 38 tests | `tmp-map-transition-perf/phase1-retained-viewport-authoritative-v7-final/baseline.json` |
-| 2 Stable shell | Not started | — | — | — |
+| 2 Stable shell | Complete; independently approved | Phase 2 integration commit | 11 focused/adjacent files / 162 tests; typecheck; desktop release build; harness syntax; EOL and diff checks; independent initial and repair review | `tmp-map-transition-perf/phase2-stable-shell-authoritative-v1/baseline.json` |
 | 3 Resource/cache | Not started | — | — | — |
 | 4 Cold-entry residual | Not started | — | — | — |
 | 5 Acceptance | Not started | — | — | — |
@@ -719,6 +719,12 @@ The final ownership repair also makes Minimap's initialization, settlement-data,
 Authoritative schema-4 evidence is `tmp-map-transition-perf/phase1-retained-viewport-authoritative-v7-final/baseline.json` (110,105 bytes; SHA-256 `c9dd1dbec72c438ad1c2a5fea687c7916d1869f6b2ae6546d442a4cf91416d65`). All three launches completed one cold sample, three warmups, and twenty measured warm cycles: 72/72 samples are complete, ordered, current-turn/current-fingerprint safe, and current-state ready. Cold current-state-rendered p50/p95 is 81.5/81.68 ms and cold interactive spans 555.3-639.9 ms, inside the 1000/1500 ms cold target. Warm interactive p50/p95 is 253/289.16 ms and remains above the 150 ms target. Every launch reports lifetime ownership of exactly two MapLibre maps, zero pre-cleanup WebGL releases, one Deck overlay, and zero pre-cleanup Deck releases; all 60 measured warm cycles report zero MapLibre/Deck construction and zero MapLibre/Deck release. One-time static resources load once per renderer session, while each warm cycle still requests `operational-settlements` once, so Phase 3 cache work remains required after Phase 2 stabilizes shell navigation.
 
 Unexpected console warnings/errors, page errors, request failures, HTTP errors, stdout, and stderr are all zero. Repository saves are unchanged with zero files in scope. Each launch closed gracefully, required no forced kill, and verified process exit; no Electron process remained afterward. A full JSON scan found zero URL schemes, loopback endpoints, UUIDs, Windows/POSIX user paths, user-root values, or ephemeral ports. Six nonempty screenshots were retained and visually inspected. The Phase 1 harness captures them after each profiled cycle has returned to the Command Room, so they prove a stable visible Desk surface but are not represented as the Phase 5 cold-map/warm-map screenshot matrix.
+
+Phase 2 removes the timestamped operational iframe route and creates one stable `index.html?embedded=1&view=warroom` document for the renderer session. Command Room-to-map requests are shared `war-map` handoffs; other destinations use the same pending/direct `awwv-shell:handoff` path, and return-to-HQ uses `awwv-shell:show-warroom`. Fresh-campaign reset/intro state is delivered before any queued handoff through `awwv-shell:fresh-campaign-started`, not URL identity. The separate sandbox iframe uses the established `desktop_window=sandbox` deep-link so its `index.html` fallback enters the game shell. The parent and child both validate frame identity; the Warroom also requires the exact HTTP origin or exact opaque `null` origin and never reaches through iframe DOM.
+
+Authoritative schema-4 evidence is `tmp-map-transition-perf/phase2-stable-shell-authoritative-v1/baseline.json` (110,107 bytes; SHA-256 `d288e130a662025cf466304d844020dad642a5cab022dea8a9008b74424f1220`). All three launches completed one cold sample, three warmups, and twenty measured warm cycles: 72/72 samples are complete, ordered, current-turn/current-fingerprint safe, and current-state ready. Cold current-state-rendered p50/p95 is 75.2/127.85 ms; cold interactive spans 477.8–615.6 ms. Warm interactive p50/p95 is 212.85/241.47 ms, improved from Phase 1's 253/289.16 ms but still above the 150 ms final target. Every launch reports exactly two MapLibre constructions, zero pre-cleanup WebGL releases, one Deck construction, and zero pre-cleanup Deck releases. All 60 measured warm cycles report zero MapLibre/Deck construction and release. Each measured warm cycle still requests `operational-settlements` once, so Phase 3 remains required.
+
+Unexpected console warnings/errors, page errors, request failures, HTTP errors, stdout, and stderr are all zero. Repository saves are unchanged with zero files in scope. All three launches closed gracefully, required no forced kill, verified process exit, and left no Electron/profile process. A whole-artifact scan found zero URL schemes, loopback endpoints, UUIDs, Windows/POSIX user paths, or ephemeral-port tokens. Six nonempty cold/warm screenshots were visually inspected; all show the stable visible Command Room Desk after the harness returned from its measured map transition, with no blank, error, or leaked tactical surface. They remain Desk-return evidence rather than the Phase 5 screenshot matrix.
 
 Phase 0 read-first and process evidence is complete: the implementer read `.claude/napkin.md` and `docs/10_canon/context.md` before this follow-up, rechecked the owning plan and relevant engineering/determinism constraints, worked only in the isolated R1 worktree, used failing tests before implementation, preserved append-only ledger handling, left `docs/10_canon/FORAWWV.md` untouched, and performed no packaging, version, tag, push, publication, or release-state mutation. The process checklist was: diagnose the concrete evidence gaps; record RED; implement the smallest profiling-only correction; run focused and adjacent GREEN gates; rebuild both UI bundles; capture under a new fixed label; audit the full serialized artifact, screenshots, save hashes, process exit, and profile cleanup; then update this log, ledger, and reusable knowledge.
 

@@ -108,12 +108,12 @@ describe('App boot - Main Menu first, faction choice menu-only (#80)', () => {
     });
 
     it('honors ?view=game and ?view=warroom deep-link overrides for dev/automation', () => {
-        expect(app).toContain("if (view === 'warroom') {");
-        expect(app).toContain("} else if (view === 'game') {");
+        expect(app).toContain('resolveInitialShellScreen(window.location.search)');
     });
 
     it('treats ?desktop_window=... as a game deep-link for packaged tactical windows', () => {
-        expect(app).toContain("} else if (params.has('desktop_window')) {");
+        expect(app).toContain('const initialShellScreen = resolveInitialShellScreen(window.location.search);');
+        expect(app).toContain('if (initialShellScreen) setAppScreen(initialShellScreen);');
     });
 
     it('routes a ?shellHandoff=... deep-link to the game shell after applying it', () => {

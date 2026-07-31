@@ -67,15 +67,12 @@ describe('regionToShellHandoff', () => {
     expect(regionToShellHandoff('desk_map')).toEqual({ kind: 'war-map' });
   });
 
-  it('desk_map war-map command causes game-view transition without applying a shell command', () => {
+  it('desk_map applies the shared war-map handoff before the game-view transition', () => {
     const applySpy = vi.fn();
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) {
-        if (command.kind === 'war-map') setAppScreen('game');
-        return;
-      }
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -83,7 +80,7 @@ describe('regionToShellHandoff', () => {
     const command = regionToShellHandoff('desk_map');
     onNavigate(command);
 
-    expect(applySpy).not.toHaveBeenCalled();
+    expect(applySpy).toHaveBeenCalledWith({ kind: 'war-map' });
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
@@ -181,15 +178,12 @@ describe('WarroomShellLayer onNavigate contract', () => {
     expect(setAppScreen).not.toHaveBeenCalled();
   });
 
-  it('legacy wall_cork_board hotspot transitions to game/map view through explicit war-map command', () => {
+  it('legacy wall_cork_board applies the shared war-map handoff before leaving the room', () => {
     const applySpy = vi.fn().mockReturnValue(true);
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) {
-        if (command.kind === 'war-map') setAppScreen('game');
-        return;
-      }
+      if (isWarroomLocalCommand(command)) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
     };
@@ -197,7 +191,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     const command = regionToShellHandoff('wall_cork_board'); // legacy alias, same transition as desk_map
     onNavigate(command);
 
-    expect(applySpy).not.toHaveBeenCalled();
+    expect(applySpy).toHaveBeenCalledWith({ kind: 'war-map' });
     expect(setAppScreen).toHaveBeenCalledWith('game');
   });
 
@@ -206,10 +200,7 @@ describe('WarroomShellLayer onNavigate contract', () => {
     const setAppScreen = vi.fn();
 
     const onNavigate = (command?: ReturnType<typeof regionToShellHandoff>) => {
-      if (isWarroomLocalCommand(command)) {
-        if (command.kind === 'war-map') setAppScreen('game');
-        return;
-      }
+      if (isWarroomLocalCommand(command)) return;
       if (!command) return;
       if (command) applySpy(command);
       if (!warroomCommandStaysInRoom(command)) setAppScreen('game');
@@ -376,6 +367,14 @@ describe('advance-turn ShellHandoffCommand', () => {
     expect(cmd).toBeDefined();
     expect(isShellHandoffCommand(cmd)).toBe(true);
     expect(cmd?.kind).toBe('advance-turn');
+  });
+});
+
+describe('war-map ShellHandoffCommand', () => {
+  it('{ kind: war-map } is a valid cross-shell command', () => {
+    const cmd: ShellHandoffCommand = { kind: 'war-map' };
+    expect(isShellHandoffCommand(cmd)).toBe(true);
+    expect(warroomCommandStaysInRoom(cmd)).toBe(false);
   });
 });
 

@@ -3,6 +3,10 @@ export type ArmyHQRecordsSubTab = 'aftermath' | 'aar' | 'ops' | 'decisions' | 'o
 
 export type ShellHandoffCommand =
   | {
+      /** Show the retained tactical map without opening an additional panel. */
+      kind: 'war-map';
+    }
+  | {
       kind: 'army-hq';
       tab: ArmyHQTab;
       recordsSubTab?: ArmyHQRecordsSubTab;
@@ -23,7 +27,12 @@ export type ShellHandoffCommand =
 export function isShellHandoffCommand(value: unknown): value is ShellHandoffCommand {
   if (!value || typeof value !== 'object') return false;
   const command = value as Partial<ShellHandoffCommand>;
-  if (command.kind === 'codex' || command.kind === 'chronicle' || command.kind === 'advance-turn') return true;
+  if (
+    command.kind === 'war-map'
+    || command.kind === 'codex'
+    || command.kind === 'chronicle'
+    || command.kind === 'advance-turn'
+  ) return true;
   if (command.kind !== 'army-hq') return false;
   if (
     command.tab !== 'briefing' &&
