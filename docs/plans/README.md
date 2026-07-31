@@ -19,7 +19,7 @@ The former owner-decision and post-D2 residual lists are historical inputs, not 
 |---|---|---|
 | R1 | [Seamless Command Room ↔ Tactical Map](2026-07-31-seamless-command-room-map-transition-plan.md) | In progress; Phase 0 green |
 | R2 | [RS Desk → Decision → Advance friction](2026-07-31-rs-104week-friction-remediation-plan.md) | R1 shared-file handoff |
-| R3 | [Operational/Tactical Group convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | In progress; Phases 0–2 green |
+| R3 | [Operational/Tactical Group convergence](2026-07-31-operational-tactical-group-closeout-implementation-plan.md) | Implemented; closeout awaits parent `test:vitest:fast` rerun |
 | R4 | [Command, event, and Dynamic Codex convergence](2026-07-31-command-event-codex-convergence-plan.md) | R2 priority/cadence contract |
 | R5 | [Engine quality, performance, and stability](2026-07-31-engine-quality-performance-stability-plan.md) | R1–R3 source/state floor |
 | R6 | [Historical gameplay depth and final calibration](2026-07-31-historical-gameplay-depth-calibration-plan.md) | R3/R5 deterministic floor |

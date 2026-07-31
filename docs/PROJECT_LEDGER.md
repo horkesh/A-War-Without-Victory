@@ -25075,3 +25075,15 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **TDD and verification:** The new `standing_og_doctrine_contract.test.ts` initially collected 14 tests with 13 expected failures for the missing spatial/eligibility/contributor anchors and retired-history boundary; its production-identifier scan already passed. The final expanded standing-OG/combat pack passed 6 files / 165 tests. `npm.cmd run typecheck`, `npm.cmd run canon:check`, standalone strict no-refresh `npm.cmd run test:baselines`, and `git diff --check` passed. All approved baseline scenarios matched without update or re-bless.
 
 **Scope:** Governing documentation, one comment in `standing_og_defense.ts`, the semantic contract test, the R3 plan status/execution log, this ledger, and one reusable knowledge entry. No runtime behavior, schema, migration, scenario, baseline manifest, `FORAWWV.md`, package, version, push, merge, tag, installer, or release-state change.
+
+## 2026-07-31 - Operational/Tactical Group implementation closeout drafted with one pending integration gate
+
+**Type:** R3 Phase 6 conditional closeout / implementation report and status propagation.
+
+**Outcome:** Created `docs/40_reports/implemented/20260731_OPERATIONAL_TACTICAL_GROUP_CLOSEOUT_IMPLEMENTATION_REPORT.md` and updated the R3 plan, plan index, report index, and consolidated implemented-work index. The report records preserved live behavior, the lifecycle/telemetry/convergence implementation, Standing-OG doctrine result, explicit promotion mappings and blocked mappings, exact files, save/schema decision, before/after audits, scenario/hash drift, and no-force-inflation/personnel-conservation evidence.
+
+**Integrated verification:** Phase 5's exact Standing-OG/combat pack passed 6 files / 165 tests. Parent integrated focused proof passed 26 files / 330 tests; parent `npm.cmd run typecheck`, `npm.cmd run canon:check`, and standalone strict no-refresh `npm.cmd run test:baselines` passed. Phase 3 fresh evidence remains 40w `f72a459e7548d70b` and paired 188w `af83cbc6ca8d12d1`; Phase 4 remains 40w `f72a459e7548d70b` and paired 188w `e400d232ba5da37e`. Phase 4 health remains zero eligible/dead operations, 2 ghost-destroyed, 9 stranded brigades, 628 matched OSIDs, zero consistency failures, and K:W 3.779.
+
+**Pending gate:** The first parent `npm.cmd run test:vitest:fast` attempt hit the 604-second command timeout with no failure output. This is recorded as neither a pass nor a test failure. A fresh parent rerun is the sole remaining R3 closeout gate; the master roadmap and command board remain parent-owned and intentionally unchanged on this branch until it passes.
+
+**Scope:** Documentation and append-only ledger only. No runtime behavior, schema, migration, scenario, baseline manifest, `FORAWWV.md`, reusable knowledge rule, napkin rule, package, version, push, merge, tag, installer, or release-state change.
