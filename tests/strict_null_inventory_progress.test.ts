@@ -665,15 +665,22 @@ describe('strict null inventory progress', () => {
             // RS 52-week operation telemetry adds deterministic per-objective battle
             // counters to OperationAxis and CorpsOperation. +2 optional sim fields;
             // legacy saves remain absent-safe and no type escapes are required.
-            optional_fields_game_state: 527,
+            // R3 canonical TG exhaustion adds two optional, omit-empty sim fields:
+            // `TacticalGroup.last_exhaustion_tick_turn` prevents a duplicate tick at the
+            // two canonical execution chokepoints, and
+            // `ArmyHqOperation.recovery_started_turn` owns the exact four-turn cap tail.
+            // Schema 36 keeps legacy saves absent-safe; both fields are deterministic and
+            // add no type escape. The inventory classifies TacticalGroup as sim and
+            // ArmyHqOperation as state: 527->529 / sim 336->337 / state 181->182.
+            optional_fields_game_state: 529,
         });
-        expect(current.optional_field_domains.total).toBe(527);
+        expect(current.optional_field_domains.total).toBe(529);
         expect(current.optional_field_domains.domain_counts).toMatchObject({
             derived: 10,
             ipc: 0,
             scenario: 0,
-            sim: 336,
-            state: 181,
+            sim: 337,
+            state: 182,
             ui_adapter: 0,
             unknown: 0,
         });
