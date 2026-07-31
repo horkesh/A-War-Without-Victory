@@ -288,13 +288,13 @@ npm.cmd run typecheck
 - Modify `tests/tg_telemetry.test.ts`
 - Modify `tests/tg_schema_freeze.test.ts`
 
-- [ ] Add optional `dissolved_turn`, `personnel_returned`, and `casualties` fields to `TgParticipationRecord`.
-- [ ] Keep them omit-empty compatible.
-- [ ] Define exact semantics:
+- [x] Add optional `dissolved_turn`, `personnel_returned`, and `casualties` fields to `TgParticipationRecord`.
+- [x] Keep them omit-empty compatible.
+- [x] Define exact semantics:
   - donor `casualties = contribution.casualties_so_far`;
   - donor `personnel_returned = max(0, personnel_lent - casualties)`;
   - anchor gets `dissolved_turn`; do not invent anchor casualties or returned personnel.
-- [ ] Confirm whether this additive optional shape can remain on the current schema. If validation or migration cannot safely accept both shapes, stop and require a schema-step decision.
+- [x] Confirm whether this additive optional shape can remain on the current schema. If validation or migration cannot safely accept both shapes, stop and require a schema-step decision.
 
 ### Task 2.2 — Finalize both live and archived records before deletion
 
@@ -305,12 +305,12 @@ npm.cmd run typecheck
 - Modify `tests/tg_lifecycle.test.ts`
 - Modify `tests/tg_casualty_distribution.test.ts`
 
-- [ ] Write a failing test in which donor casualties accrue before dissolution.
-- [ ] In `dissolveTacticalGroup`, mark the TG terminal in memory, then update matching participation rows by `tg_id` in both `tg_participations` and `archived_tg_participations`.
-- [ ] Iterate brigade ids and history lists deterministically.
-- [ ] Finalize telemetry before clearing loans and deleting the live TG.
-- [ ] Prove idempotency: a second dissolve call changes nothing.
-- [ ] Prove personnel conservation and `casualties <= personnel_lent`.
+- [x] Write a failing test in which donor casualties accrue before dissolution.
+- [x] In `dissolveTacticalGroup`, mark the TG terminal in memory, then update matching participation rows by `tg_id` in both `tg_participations` and `archived_tg_participations`.
+- [x] Iterate brigade ids and history lists deterministically.
+- [x] Finalize telemetry before clearing loans and deleting the live TG.
+- [x] Prove idempotency: a second dissolve call changes nothing.
+- [x] Prove personnel conservation and `casualties <= personnel_lent`.
 
 ### Task 2.3 — Preserve AAR telemetry and save compatibility
 
@@ -321,9 +321,9 @@ npm.cmd run typecheck
   - `tests/tg_migration_recon.test.ts`
   - `tests/save_migration_round_trip_contract.test.ts`
 
-- [ ] Prove Army-HQ AAR snapshots remain available after TG deletion.
-- [ ] Prove an old record without terminal fields loads and round-trips.
-- [ ] Prove a completed record with terminal fields round-trips without zero invention.
+- [x] Prove Army-HQ AAR snapshots remain available after TG deletion.
+- [x] Prove an old record without terminal fields loads and round-trips.
+- [x] Prove a completed record with terminal fields round-trips without zero invention.
 
 **Green commands:**
 
@@ -648,6 +648,7 @@ The report must include:
 | 2026-07-31 | 1 | this phase commit | RED: the first lifecycle slice collected 51 tests with 7 expected failures (missing reconciliation/hooks, both execution sites leaving TGs `forming`, and stale donor wording); follow-up red cases isolated recovering/load orphans, explicit live links, completed stale links, idempotent omit-empty recovery, and legacy sector `force_launch` ownership. GREEN: expanded Phase 1 pack passed 12 files / 172 tests; the original characterization barrier passed 20 files / 197 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` passed. | Approved 52-week baseline remained byte-identical after simplify: `final_save.json` SHA-256 `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`; all eight artifacts matched. An intermediate one-path drift (`military.corps_command.jna_herzegovina_command.last_completed_operation.force_launch`, omitted → `false`) was traced to generic-hook serialization noise and removed before commit; no baseline manifest was refreshed. | One exact Army-HQ-id/deterministic `(hostCorpsId, op.name)` resolver now owns live lookup. Both execution transitions engage/relocate TGs; every live recovery/completion writer routes through idempotent hooks; loaded state repairs stale/orphan receipts without penalties; recovering remains cap-active until Task 3.3. `corps_command.advanceOperations` is explicitly narrowed to reorganization operations. |
 | 2026-07-31 | 1 review correction | this follow-up commit | Independent Operations review RED: 3 files / 34 tests produced 4 expected failures—partial timeout was `completed`, no-attempt timeout was `brigade_attrition`, an unrelated live TG preserved an orphan receipt, and reorganization advanced at turn 2 on the competing evaluator clock. GREEN: expanded/adjacent pack passed 14 files / 182 tests; characterization barrier passed 20 files / 198 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` passed. | All approved baseline artifacts remained byte-identical; 52-week `final_save.json` stayed at SHA-256 `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`. No manifest refresh. | Only the success threshold now yields `completed`; other general-operation exits use attempt-history diagnostics. Loaded `tg_id` links must match exact Army-HQ id or legacy anchor-corps/name. `evaluateOperationProgress` excludes reorganization, leaving the 3/4/3 clock solely in `corps_command.advanceOperations`. |
 | 2026-07-31 | 1 mixed-legacy correction | this follow-up commit | Code-quality review RED: the new mixed load-to-completion lifecycle case failed because a CorpsOperation with `army_hq_op_id` could not resolve its linked ID-less legacy TG. GREEN: focused identity/AAR proof passed 2 files / 16 tests; expanded lifecycle/adjacent proof passed 14 files / 141 tests; characterization barrier passed 20 files / 198 tests; `npm.cmd run typecheck`, `npm.cmd run test:baselines`, and `git diff --check` passed. | All approved baseline artifacts remained byte-identical; 52-week `final_save.json` stayed at SHA-256 `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0`. No manifest refresh. | An explicit TG Army-HQ id remains authoritative and must match exactly. Composite host-corps/name fallback is available only when the TG id is absent, including when the owning CorpsOperation already has an id. The validated owning op supplies the AAR snapshot id. One end-to-end regression proves engagement, recovery telemetry/dissolution, receipt-link clearing, donor-lock cleanup, recovering cap retention, completion cap release, and same-name/different-corps plus conflicting-id isolation. |
+| 2026-07-31 | 2 | this phase commit | RED: terminal telemetry slice collected 3 files / 50 tests with 1 expected failure because the archived donor row lacked `dissolved_turn`, `casualties`, and `personnel_returned`. GREEN: Phase 2 focused pack passed 7 files / 109 tests; characterization barrier passed 20 files / 200 tests; `npm.cmd run typecheck` and `git diff --check` passed. The required strict baseline command ran and reported the deliberate persisted-output mismatch described at right; the manifest was not refreshed. | `baseline_ops_4w` and `noop_4w` matched all 8/8 approved artifacts. `apr1992_52w` matched 6/8; `final_save.json` moved `591e1f41efd7f51f486b8bf303a0fefa959867d49d2db54dec1584507df909d0` → `ef30222cd8b6eb99ad3d3e3b5688b414dc0d82e0a07a7a20465e43296351a141`, and the dependent `run_summary.json` moved `f3a37865738df9fbe0903da778d62fb201c23bcebbb5d20a22f1e2dce6ce6545` → `3f91bd76383ae9538e8556ccdb5e7116a3f29dfe42a0d20d95bb432a368bee14`. Removing exactly four new anchor `dissolved_turn` fields restored the former final-save hash; replacing only the dependent `final_state_hash` restored the former run-summary hash. | Schema 36 accepts both old and terminal optional participation shapes; no migration/version bump. Dissolution marks the TG terminal, then scans formation ids with `strictCompare` and preserves live/archive row order before clearing loans/deleting the TG. Donors record exact contribution casualties and `max(0, lent - casualties)` returns; anchors receive only terminal turn. Second dissolve is state-idempotent, and AAR snapshot survival remains green. No baseline refresh. |
 
 ---
 

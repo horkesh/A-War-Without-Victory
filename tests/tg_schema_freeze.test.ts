@@ -20,6 +20,7 @@ import { getLatestSchemaVersion } from '../src/state/save_migration.js';
 import { serializeState, deserializeState } from '../src/state/serialize.js';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import type { TgParticipationRecord } from '../src/state/brigade_history.js';
 
 describe('C3 schema freeze guard (v36)', () => {
     it('CURRENT_SCHEMA_VERSION is pinned at 36', () => {
@@ -70,6 +71,31 @@ describe('C3 schema freeze guard (v36)', () => {
         expect(brig.tg_cooldown_until_turn).toBeUndefined();
         expect(brig.tg_donations_this_scenario).toBeUndefined();
         expect(brig.tg_recovery_suppressed_until_turn).toBeUndefined();
+    });
+
+    it('TG participation terminal fields remain optional and omit-empty on active records', () => {
+        const active: TgParticipationRecord = {
+            tg_id: 'tg:corp:op:anchor',
+            op_id: 'op',
+            role: 'donor',
+            formed_turn: 4,
+            personnel_lent: 300,
+        };
+        expect(active.dissolved_turn).toBeUndefined();
+        expect(active.personnel_returned).toBeUndefined();
+        expect(active.casualties).toBeUndefined();
+
+        const terminal: TgParticipationRecord = {
+            ...active,
+            dissolved_turn: 12,
+            personnel_returned: 250,
+            casualties: 50,
+        };
+        expect(terminal).toMatchObject({
+            dissolved_turn: 12,
+            personnel_returned: 250,
+            casualties: 50,
+        });
     });
 
     it('a current state round-trips with schema_version preserved at 35', () => {

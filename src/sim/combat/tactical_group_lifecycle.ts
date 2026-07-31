@@ -300,6 +300,10 @@ export function dissolveTacticalGroup(
     const formations = mil.formations ?? {};
     const cooldownUntil = current_turn + TG_DONOR_COOLDOWN_TURNS;
 
+    // Terminal truth must exist before any loan is cleared or the live TG is deleted.
+    tg.status = 'dissolved';
+    finalizeTgParticipations(formations, tg, current_turn);
+
     // Clear donor lent fields + set cooldown.
     for (const d of tg.donor_contributions) {
         const donor = formations[d.brigade_id];
@@ -338,6 +342,42 @@ export function dissolveTacticalGroup(
     delete mil.tactical_groups[tgId];
 
     return { dissolved: true, tg_id: tgId };
+}
+
+/**
+ * Finalize every participation row carrying this TG id. Formation ids use the
+ * canonical strict order; each history list retains its persisted row order.
+ */
+function finalizeTgParticipations(
+    formations: Record<FormationId, FormationState>,
+    tg: TacticalGroup,
+    dissolvedTurn: number,
+): void {
+    const donorByBrigadeId = new Map(
+        tg.donor_contributions.map((contribution) => [contribution.brigade_id, contribution] as const),
+    );
+    const historyLists = ['tg_participations', 'archived_tg_participations'] as const;
+
+    for (const brigadeId of Object.keys(formations).sort(strictCompare)) {
+        const history = formations[brigadeId]?.brigade_history;
+        if (!history) continue;
+        for (const historyList of historyLists) {
+            const records = history[historyList];
+            if (!records) continue;
+            for (const record of records) {
+                if (record.tg_id !== tg.id) continue;
+                record.dissolved_turn = dissolvedTurn;
+                if (record.role !== 'donor') continue;
+                const contribution = donorByBrigadeId.get(brigadeId);
+                if (!contribution) continue;
+                record.casualties = contribution.casualties_so_far;
+                record.personnel_returned = Math.max(
+                    0,
+                    contribution.personnel_lent - contribution.casualties_so_far,
+                );
+            }
+        }
+    }
 }
 
 /** Synchronize live TG and Army-HQ receipts after a CorpsOperation enters execution. */
