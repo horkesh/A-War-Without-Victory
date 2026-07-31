@@ -170,6 +170,23 @@ function redactInspectorEndpoints(value) {
   );
 }
 
+function redactEphemeralDiagnostics(value) {
+  return String(value ?? '')
+    .replace(
+      /\bhttps?:\/\/(?:127\.0\.0\.1|localhost|\[::1\]):\d+(?:\/[^\s]*)?/gi,
+      '<loopback-http-endpoint>',
+    )
+    .replace(
+      /\b(?:127\.0\.0\.1|localhost):\d+(?:\/[^\s]*)?/gi,
+      '<loopback-endpoint>',
+    )
+    .replace(
+      /\b[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\b/gi,
+      '<uuid>',
+    )
+    .replace(/\bport\s*(?::|=)?\s*\d{2,5}\b/gi, 'port <ephemeral-port>');
+}
+
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
@@ -187,14 +204,54 @@ async function waitUntil(label, predicate, timeoutMs = 90000, intervalMs = 100) 
 function sanitizeDiagnosticLine(value, outputDirectory) {
   let line = String(value ?? '').trim();
   for (const [needle, replacement] of [
-    [repo, '<repo>'],
     [outputDirectory, '<evidence>'],
+    [repo, '<repo>'],
     [process.env.USERPROFILE, '<user>'],
   ]) {
     if (needle) line = line.split(String(needle)).join(replacement);
   }
-  line = redactInspectorEndpoints(line);
+  line = redactEphemeralDiagnostics(redactInspectorEndpoints(line));
   return line.slice(0, 1600);
+}
+
+function sanitizeUnexpectedProcessLine(value) {
+  return String(value ?? '')
+    .replace(/\b(?:https?|wss?|file):\/\/[^\s]+/gi, '<url>')
+    .replace(
+      /\b[A-Za-z]:[\\/](?:[^\\/\s:*?"<>|]+[\\/])*[^\\/\s:*?"<>|]+/g,
+      '<absolute-path>',
+    )
+    .replace(/(^|\s)\/(?:[^/\s]+\/)*[^/\s]+/g, '$1<absolute-path>')
+    .replace(/\b\d{5}\b/g, (digits) => {
+      const numeric = Number(digits);
+      return numeric >= 49152 && numeric <= 65535 ? '<ephemeral-port>' : digits;
+    });
+}
+
+function classifyMainProcessStdout(lines) {
+  const counts = {
+    built_map_server_selected: 0,
+    tactical_map_server_started: 0,
+  };
+  const unexpectedLines = [];
+  for (const rawLine of lines) {
+    const line = String(rawLine ?? '').trim();
+    if (line === '[AWWV] Map: using built server at <loopback-http-endpoint>') {
+      counts.built_map_server_selected += 1;
+    } else if (line === 'Tactical map server: <loopback-http-endpoint>') {
+      counts.tactical_map_server_started += 1;
+    } else {
+      unexpectedLines.push(sanitizeUnexpectedProcessLine(line));
+    }
+  }
+  const expectedCategories = {};
+  for (const key of ['built_map_server_selected', 'tactical_map_server_started']) {
+    if (counts[key] > 0) expectedCategories[key] = counts[key];
+  }
+  return {
+    expected_categories: expectedCategories,
+    unexpected_lines: unexpectedLines,
+  };
 }
 
 function classifyMainProcessStderr(lines) {
@@ -213,7 +270,7 @@ function classifyMainProcessStderr(lines) {
     } else if (line === 'For help, see: https://nodejs.org/en/docs/inspector') {
       counts.inspector_help += 1;
     } else {
-      unexpectedLines.push(redactInspectorEndpoints(line));
+      unexpectedLines.push(sanitizeUnexpectedProcessLine(redactInspectorEndpoints(line)));
     }
   }
   const expectedCategories = {};
@@ -223,6 +280,19 @@ function classifyMainProcessStderr(lines) {
   return {
     expected_categories: expectedCategories,
     unexpected_lines: unexpectedLines,
+  };
+}
+
+function buildPersistedProcessDiagnostics({ stdout = [], stderr = [], outputDirectory } = {}) {
+  const sanitizedStdout = stdout.map((line) => sanitizeDiagnosticLine(line, outputDirectory));
+  const sanitizedStderr = stderr.map((line) => sanitizeDiagnosticLine(line, outputDirectory));
+  const stdoutClassification = classifyMainProcessStdout(sanitizedStdout);
+  const stderrClassification = classifyMainProcessStderr(sanitizedStderr);
+  return {
+    expected_main_process_stdout: stdoutClassification.expected_categories,
+    main_process_stdout: stdoutClassification.unexpected_lines,
+    expected_main_process_stderr: stderrClassification.expected_categories,
+    main_process_stderr: stderrClassification.unexpected_lines,
   };
 }
 
@@ -521,7 +591,11 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     await application.close().catch(() => {});
   }
 
-  const stderrClassification = classifyMainProcessStderr(diagnostics.main_process_stderr);
+  const processDiagnostics = buildPersistedProcessDiagnostics({
+    stdout: diagnostics.main_process_stdout,
+    stderr: diagnostics.main_process_stderr,
+    outputDirectory,
+  });
   return {
     launch_index: launchIndex,
     runtime,
@@ -535,9 +609,7 @@ async function runLaunch(launchIndex, options, outputDirectory) {
       page_errors: diagnostics.page_errors,
       request_failures: diagnostics.request_failures,
       http_errors: diagnostics.http_errors,
-      expected_main_process_stderr: stderrClassification.expected_categories,
-      main_process_stderr: stderrClassification.unexpected_lines,
-      main_process_stdout: diagnostics.main_process_stdout,
+      ...processDiagnostics,
     },
   };
 }
@@ -577,6 +649,7 @@ function buildSummary(launches) {
       page_errors: allDiagnostics.reduce((sum, row) => sum + row.page_errors.length, 0),
       request_failures: allDiagnostics.reduce((sum, row) => sum + row.request_failures.length, 0),
       http_errors: allDiagnostics.reduce((sum, row) => sum + row.http_errors.length, 0),
+      main_process_stdout: allDiagnostics.reduce((sum, row) => sum + row.main_process_stdout.length, 0),
       main_process_stderr: allDiagnostics.reduce((sum, row) => sum + row.main_process_stderr.length, 0),
     },
   };
@@ -600,7 +673,7 @@ async function main() {
   const repository_saves = assertRepositorySavesUnchanged(repositorySavesBefore);
   const processors = os.cpus();
   const evidence = {
-    schema_version: 2,
+    schema_version: 3,
     label: options.label,
     options: { cycles: options.cycles, warmups: options.warmups, cold_launches: 3 },
     runtime: {
@@ -641,7 +714,9 @@ if (require.main === module) {
 module.exports = {
   assertRepositorySavesUnchanged,
   buildMachineManifest,
+  buildPersistedProcessDiagnostics,
   buildSummary,
+  classifyMainProcessStdout,
   classifyMainProcessStderr,
   hasOrderedTransitionDurations,
   parseOptions,
