@@ -3,13 +3,13 @@
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Date:** 2026-07-31
-**Status:** READY — execute Phases 0–6 sequentially; all product and canon choices are resolved below
+**Status:** IN PROGRESS — Phase 0 complete; execute Phases 1–6 sequentially
 **Overseer:** Orchestrator
 **Owner lane:** Systems Programmer + Gameplay Programmer
 **Independent reviewers:** QA Engineer, Determinism Auditor, Historian, Canon Compliance Reviewer where named
 **Related command-board row:** `Operational/Tactical Group lifecycle and convergence closeout`
 **Phase/workstream covered:** ADR-0005 temporary offensive Tactical Groups, Army-HQ operation lifecycle, legacy `kind: 'og'` convergence, ADR-0006/0007 standing-OG truth
-**Current next action:** Create an isolated `codex/op-tg-closeout` worktree and execute Phase 0
+**Current next action:** Execute Phase 1 in the existing isolated R3 worktree after Phase 0 review/integration
 **Collision rule:** Do not edit or clean the user's current dirty workspace. If another active branch owns a Phase 1–4 source file, sequence this packet after it and rebase on its completed work.
 
 **Goal:** Close the lifecycle, telemetry, and duplicate-path gaps in the operational/tactical-group system while preserving the already-live donor selection, combat synthesis, casualty distribution, cooldown, recovery-suppression, and promotion substrate.
@@ -169,17 +169,17 @@ If this barrier fails for a reason unrelated to the lane, record the exact prere
 - Create `tests/operational_tactical_group_audit.test.ts`
 - Create `tools/diagnostics/audit_operational_tactical_groups.ts`
 
-- [ ] Add a synthetic-state test that requires stable, sorted output for:
+- [x] Add a synthetic-state test that requires stable, sorted output for:
   - TG count/status/age/cohesion;
   - Army-HQ count/status and stale `tg_id`;
   - planning/executing records with no matching live CorpsOperation;
   - live and archived participation counts;
   - legacy active `kind: 'og'` formations and queued `og_orders`;
   - duplicate promotion display names.
-- [ ] Run the test before implementation and record the expected missing-module failure.
-- [ ] Implement a read-only analyzer plus CLI. It must accept a save path argument, emit JSON to stdout, use no timestamp, and sort all ids with `strictCompare`.
-- [ ] Run the tool against the turn-188 save named in §1.3 and record the observed counts in the Execution Log.
-- [ ] Do not write into `runs/`.
+- [x] Run the test before implementation and record the expected missing-module failure.
+- [x] Implement a read-only analyzer plus CLI. It must accept a save path argument, emit JSON to stdout, use no timestamp, and sort all ids with `strictCompare`.
+- [x] Run the tool against the turn-188 save named in §1.3 and record the observed counts in the Execution Log.
+- [x] Do not write into `runs/`.
 
 **Red command:**
 
@@ -251,8 +251,9 @@ npm.cmd exec -- tsx tools/diagnostics/audit_operational_tactical_groups.ts runs/
 - [ ] At operation recovery entry, set it to `recovering`, finalize/dissolve the TG, and clear `tg_id`.
 - [ ] At CorpsOperation removal after recovery, set the durable Army-HQ record to `completed`.
 - [ ] Add a deterministic reconciliation helper for loaded state: if a planning/executing Army-HQ record has no matching live CorpsOperation and no live TG, mark it completed and clear `tg_id`.
-- [ ] Ensure the concurrency-cap helper counts only genuinely active planning/executing records.
-- [ ] Keep the ADR's locked four-turn post-recovery cap tail in Phase 3, where the optional recovery-turn field and migration/default tests are implemented together.
+- [ ] Audit every production recovery entry, including direct `op.phase = 'recovery'` assignments and `beginRecovery` calls that do not currently receive state; add source-contract and runtime tests proving each path synchronizes TG/Army-HQ state exactly once.
+- [ ] Keep `recovering` Army-HQ records cap-active as a temporary safety rule until Task 3.3 lands; never merge a state where the new `recovering` transition releases the cap immediately.
+- [ ] Treat this temporary cap rule and Task 3.3 as one atomic integration contract: either land the four-turn recovery-tail metadata/counting in the same integration or retain the temporary `recovering` count until it does.
 
 **Red command:**
 
@@ -394,6 +395,7 @@ These values are the implementation contract. A failing characterization may cor
 
 - [ ] Add optional recovery/completion turn metadata only if required.
 - [ ] Count the cap reduction for planning/executing and the first four turns after recovery begins.
+- [ ] Replace the Phase 1 temporary all-`recovering` cap count atomically with the bounded four-turn tail; add a regression proving there is no intermediate early-release state.
 - [ ] Ensure legacy stale planning records without a live operation become completed, not a fresh four-turn penalty.
 - [ ] Pin old-save defaults and round-trip behavior.
 
@@ -642,6 +644,7 @@ The report must include:
 | Date | Phase | Commit | Verification | Scenario/hash evidence | Notes |
 |---|---|---|---|---|---|
 | 2026-07-31 | Planning | uncommitted | Existing focused TG/Standing/Army-HQ pack: 20 files / 195 tests passed during audit | Existing turn-188 save characterized; no new run | Plan authored; runtime untouched |
+| 2026-07-31 | 0 | this phase commit | RED: `npm.cmd run test:vitest -- tests/operational_tactical_group_audit.test.ts --pool=forks --reporter=dot` failed on the missing audit module; subsequent composite-identity and cumulative-count contracts also failed before their fixes. GREEN: the focused audit file passed 4/4; the initial 20-file characterization barrier passed 195/195; `npm.cmd run typecheck` and `git diff --check` passed. Two CLI invocations exited 0 with empty stderr and byte-identical 1,743-byte stdout (`SHA-256 37974400a5de5db36f070b44e05f83fcb2d8bffb10f1acbb1b9ec808f74c1635`) containing no timestamp field. | Read-only audit of `runs/apr1992_definitive_188w__acb538b04d79af3c__w188_n39/final_save.json`: input SHA-256 remained `edc08a7e12d9377a0d744edd45a7cd70d29afe246ffaabf0a914e2b0f5d8c1d9` and mtime was unchanged. Turn 188: 1 live TG (`forming`, age 8, cohesion 100); 9 cumulative formations (3 each 3rd/5th Corps, 1 each HVO southeast Herzegovina/VRS Herzegovina/VRS Sarajevo-Romanija); 1 Army-HQ record (`planning`) with 1 stale TG link and 1 missing live CorpsOperation; 19 live + 1 archived participation; 0 active legacy OGs; 0 queued OG orders; duplicate `21. Division` across 3rd/5th Corps. | CLI deserializes through canonical migration/validation, audits normalized in-memory state, sorts emitted ids with `strictCompare`, writes only JSON to stdout, and creates no `runs/` artifact. Army-HQ live-operation matching is composite: anchor corps + operation name, with `army_hq_op_id` checked when present. |
 
 ---
 

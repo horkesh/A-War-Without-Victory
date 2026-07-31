@@ -24858,3 +24858,15 @@ The final documentation-only publication commit follows this ledger entry. Requi
 **Docs/test propagation:** Replaced the large historical roadmap accumulator and duplicate board; updated the plans index and documentation index; added six missing R4-R9 task-level plans; resolved inherited R2/R3 pauses; and replaced stale prose-snapshot roadmap assertions with current control-plane contract tests. No runtime, scenario, save, baseline, derived map artifact, or `docs/10_canon/FORAWWV.md` file was changed.
 
 **Authority boundary:** This entry records preparation only. No implementation workstream, branch/worktree creation, commit, push, package, signing, upload, tag, installer, or release-state change was performed or authorized.
+
+## 2026-07-31 - Operational/Tactical Group deterministic lifecycle audit implemented
+
+**Type:** R3 Phase 0 diagnostic implementation / deterministic characterization output.
+
+**Change:** Added `tools/diagnostics/audit_operational_tactical_groups.ts` and its TDD contract. The positional-path CLI loads saves through the canonical migration/validation path, then reports live Tactical Group status/age/cohesion, cumulative per-corps TG formation counts, Army-HQ status/stale TG links/orphan active records, live/archive participation counts, compatibility OG formations/orders, and duplicate promotion display names. Live Army-HQ-to-CorpsOperation matching uses anchor corps plus operation name and verifies `army_hq_op_id` when the live operation carries one; name-only or globally seen-id matches are rejected.
+
+**Determinism and scope:** The analyzer is read-only, performs every emitted id traversal/order with `strictCompare`, emits timestamp-free canonical JSON to stdout, and imports no filesystem write API. It changes no simulation behavior, save/schema, migration, scenario, baseline, generated run artifact, canon, `FORAWWV.md`, package, or release state.
+
+**TDD and verification:** The initial focused test failed on the missing module, and later composite-match and cumulative-count assertions failed before their respective implementation. Final focused proof passed 1 file / 4 tests; the pre-change TG characterization barrier passed 20 files / 195 tests; typecheck and diff checks passed. Two CLI invocations against the retained 188-week save produced byte-identical 1,743-byte stdout with SHA-256 `37974400a5de5db36f070b44e05f83fcb2d8bffb10f1acbb1b9ec808f74c1635`, empty stderr, and no timestamp token. The input SHA-256 remained `edc08a7e12d9377a0d744edd45a7cd70d29afe246ffaabf0a914e2b0f5d8c1d9`, and its mtime was unchanged.
+
+**Observed turn-188 findings:** One live Sana TG remained `forming` at age 8 with cohesion 100; per-corps counters summed to nine formations; one Farz Army-HQ record remained `planning` with a stale TG link and no matching live CorpsOperation; participation totals were 19 live and 1 archived; no active legacy `kind: 'og'` formations or queued `og_orders` remained; and `21. Division` was duplicated across ARBiH 3rd and 5th Corps.
