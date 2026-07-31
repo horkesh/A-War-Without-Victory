@@ -221,7 +221,10 @@ function sanitizeUnexpectedProcessLine(value) {
       /\b[A-Za-z]:[\\/](?:[^\\/\s:*?"<>|]+[\\/])*[^\\/\s:*?"<>|]+/g,
       '<absolute-path>',
     )
-    .replace(/(^|\s)\/(?:[^/\s]+\/)*[^/\s]+/g, '$1<absolute-path>')
+    .replace(
+      /(^|[\s(\[{"'=,:;])\/(?:[^/\s)\]}"'>,;]+\/)*[^/\s)\]}"'>,;]+/g,
+      '$1<absolute-path>',
+    )
     .replace(/\b\d{5}\b/g, (digits) => {
       const numeric = Number(digits);
       return numeric >= 49152 && numeric <= 65535 ? '<ephemeral-port>' : digits;
