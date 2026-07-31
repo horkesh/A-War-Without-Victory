@@ -81,4 +81,19 @@ describe('Map overlay dev timing', () => {
     expect(mapSource).toMatch(/isTacticalMapStateReady/);
     expect(mapSource).not.toMatch(/console\.time\(/);
   });
+
+  it('counts the minimap MapLibre context in the same transition lifecycle', () => {
+    const source = readFileSync('src/ui/map/components/Minimap.tsx', 'utf8');
+    const construction = source.indexOf('const map = new maplibregl.Map(');
+    const constructionCount = source.indexOf('countMapTransitionConstruction()', construction);
+    const release = source.indexOf('releaseMapWebGlContext(map)', construction);
+    const releaseCount = source.indexOf('countMapTransitionRelease()', release);
+
+    expect(source).toMatch(/countMapTransitionConstruction/);
+    expect(source).toMatch(/countMapTransitionRelease/);
+    expect(construction).toBeGreaterThan(0);
+    expect(constructionCount).toBeGreaterThan(construction);
+    expect(release).toBeGreaterThan(constructionCount);
+    expect(releaseCount).toBeGreaterThan(release);
+  });
 });

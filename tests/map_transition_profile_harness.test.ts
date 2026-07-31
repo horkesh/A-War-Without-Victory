@@ -1,5 +1,6 @@
 import { createRequire } from 'node:module';
 import { existsSync, readFileSync } from 'node:fs';
+import { EventEmitter } from 'node:events';
 import { describe, expect, it } from 'vitest';
 
 const harnessPath = 'tools/ui/map_transition_profile.cjs';
@@ -174,6 +175,127 @@ describe('map transition Electron profile harness contract', () => {
     expect(serialized).not.toMatch(/https:\/\/example\.test|D:\\\\private|\/home\/test/);
     expect(serialized).not.toMatch(/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818|49321|53728|58250/);
     expect(serialized).not.toContain(outputDirectory);
+  });
+
+  it('sanitizes every persisted page, request, and HTTP diagnostic field', () => {
+    const { sanitizeDiagnosticPayload } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof sanitizeDiagnosticPayload).toBe('function');
+    if (typeof sanitizeDiagnosticPayload !== 'function') return;
+    const outputDirectory = String.raw`F:\AWWV-worktrees\r1-map-transition\tmp-map-transition-perf\diagnostics-test`;
+    const userRoot = process.env.USERPROFILE;
+    const result = sanitizeDiagnosticPayload({
+      type: 'warning from https://example.test/type',
+      message: `http://localhost:53728/private/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818 ${outputDirectory} ${userRoot} D:\\private\\run.log /home/test/run.log`,
+      method: 'GET https://example.test/method',
+      resource_type: String.raw`script D:\private\resource.js`,
+      resource_key: 'https://example.test/private/5a65bc3b-f23d-4fab-a12b-0c2e8ae8a818?port=53728',
+      error: 'failed at /home/test/error.log on port 53728',
+      nested: ['ws://127.0.0.1:58250/private'],
+      status: 503,
+    }, outputDirectory);
+
+    expect(result).toEqual({
+      type: 'warning from <url>',
+      message: '<loopback-http-endpoint> <evidence> <user> <absolute-path> <absolute-path>',
+      method: 'GET <url>',
+      resource_type: 'script <absolute-path>',
+      resource_key: '<url> <ephemeral-port>',
+      error: 'failed at <absolute-path> on port <ephemeral-port>',
+      nested: ['<inspector-endpoint>'],
+      status: 503,
+    });
+    const serialized = JSON.stringify(result);
+    expect(serialized).not.toMatch(/(?:https?|wss?|file):\/\//i);
+    expect(serialized).not.toMatch(/[A-Za-z]:[\\/]|\/home\/|5a65bc3b|53728|58250/);
+    if (userRoot) expect(serialized).not.toContain(userRoot);
+  });
+
+  it('fails the evidence outcome for every unexpected diagnostic but permits startup categories', () => {
+    const { unexpectedDiagnosticsFailure } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof unexpectedDiagnosticsFailure).toBe('function');
+    if (typeof unexpectedDiagnosticsFailure !== 'function') return;
+    const clean = {
+      runtime_diagnostics: {
+        console_errors_and_warnings: 0,
+        page_errors: 0,
+        request_failures: 0,
+        http_errors: 0,
+        main_process_stdout: 0,
+        main_process_stderr: 0,
+      },
+      expected_main_process_stdout: { tactical_map_server_started: 3 },
+      expected_main_process_stderr: { inspector_shutdown: 3 },
+    };
+
+    expect(unexpectedDiagnosticsFailure(clean)).toBeNull();
+    for (const key of Object.keys(clean.runtime_diagnostics)) {
+      const failing = {
+        ...clean,
+        runtime_diagnostics: { ...clean.runtime_diagnostics, [key]: 1 },
+      };
+      expect(unexpectedDiagnosticsFailure(failing)).toContain(`${key}=1`);
+    }
+    const source = readFileSync(harnessPath, 'utf8');
+    expect(source).toMatch(/failure\s*\?\?=\s*unexpectedDiagnosticsFailure\(summary\)/);
+  });
+
+  it('starts protected cleanup before application setup and verifies a forced exit', async () => {
+    const { closeElectronApplication } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof closeElectronApplication).toBe('function');
+    if (typeof closeElectronApplication !== 'function') return;
+    const processHandle = new EventEmitter() as EventEmitter & {
+      exitCode: number | null;
+      signalCode: string | null;
+      kill: () => boolean;
+    };
+    processHandle.exitCode = null;
+    processHandle.signalCode = null;
+    processHandle.kill = () => {
+      processHandle.signalCode = 'SIGKILL';
+      queueMicrotask(() => processHandle.emit('exit', null, 'SIGKILL'));
+      return true;
+    };
+    const application = {
+      process: () => processHandle,
+      close: async () => { throw new Error('close failed'); },
+    };
+
+    await expect(closeElectronApplication(application, { timeoutMs: 20 })).resolves.toEqual({
+      graceful_close: false,
+      forced_kill: true,
+      process_exit_verified: true,
+    });
+    const source = readFileSync(harnessPath, 'utf8');
+    const launch = source.indexOf('const application = await electron.launch(');
+    const guarded = source.indexOf('try {', launch);
+    const evaluate = source.indexOf('application.evaluate(', launch);
+    const listener = source.indexOf("application.on('window'", launch);
+    const cleanup = source.indexOf('closeElectronApplication(', guarded);
+    expect(guarded).toBeGreaterThan(launch);
+    expect(guarded).toBeLessThan(evaluate);
+    expect(guarded).toBeLessThan(listener);
+    expect(cleanup).toBeGreaterThan(listener);
+  });
+
+  it('rejects cleanup when a killed process does not confirm exit within the bound', async () => {
+    const { closeElectronApplication } = require('../tools/ui/map_transition_profile.cjs');
+    expect(typeof closeElectronApplication).toBe('function');
+    if (typeof closeElectronApplication !== 'function') return;
+    const processHandle = new EventEmitter() as EventEmitter & {
+      exitCode: number | null;
+      signalCode: string | null;
+      kill: () => boolean;
+    };
+    processHandle.exitCode = null;
+    processHandle.signalCode = null;
+    processHandle.kill = () => true;
+    const application = {
+      process: () => processHandle,
+      close: () => new Promise<void>(() => undefined),
+    };
+
+    await expect(closeElectronApplication(application, { timeoutMs: 5 }))
+      .rejects.toThrow(/did not exit after forced kill/i);
   });
 
   it('builds a bounded machine manifest without retaining the raw CPU model', () => {
