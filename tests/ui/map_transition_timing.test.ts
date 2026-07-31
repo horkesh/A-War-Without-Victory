@@ -164,4 +164,38 @@ describe('map transition timing contract', () => {
     expect(() => createMapTransitionSample(metadata, invalidMarks, counters))
       .toThrow(/locked vocabulary order/i);
   });
+
+  it('counts both main-map and minimap context churn in one transition', async () => {
+    if (!existsSync(sourcePath)) return;
+    const { MAP_TRANSITION_MARKS, createMapTransitionProfiler } = await import(modulePath);
+    let now = 0;
+    const profile = createMapTransitionProfiler(true, () => now);
+    profile.begin();
+    profile.countConstruction();
+    profile.countConstruction();
+    profile.countRelease();
+    profile.countRelease();
+    for (const mark of MAP_TRANSITION_MARKS.slice(1)) {
+      now += 1;
+      profile.mark(mark);
+    }
+    profile.complete({
+      loadedTurn: 0,
+      fingerprintMatches: true,
+      currentStateReady: true,
+    });
+
+    expect(profile.snapshot()).toEqual(expect.objectContaining({
+      lifetime_counters: expect.objectContaining({
+        map_constructions: 2,
+        webgl_releases: 2,
+      }),
+      samples: [expect.objectContaining({
+        counters: expect.objectContaining({
+          map_constructions: 2,
+          webgl_releases: 2,
+        }),
+      })],
+    }));
+  });
 });

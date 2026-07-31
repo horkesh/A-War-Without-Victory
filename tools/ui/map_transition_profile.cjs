@@ -228,6 +228,23 @@ function sanitizeUnexpectedProcessLine(value) {
     });
 }
 
+function sanitizeDiagnosticPayload(value, outputDirectory) {
+  if (typeof value === 'string') {
+    return sanitizeUnexpectedProcessLine(sanitizeDiagnosticLine(value, outputDirectory));
+  }
+  if (Array.isArray(value)) {
+    return value.map((entry) => sanitizeDiagnosticPayload(entry, outputDirectory));
+  }
+  if (value != null && typeof value === 'object') {
+    const sanitized = {};
+    for (const [key, entry] of Object.entries(value)) {
+      sanitized[key] = sanitizeDiagnosticPayload(entry, outputDirectory);
+    }
+    return sanitized;
+  }
+  return value;
+}
+
 function classifyMainProcessStdout(lines) {
   const counts = {
     built_map_server_selected: 0,
@@ -301,16 +318,16 @@ function attachPageDiagnostics(page, diagnostics) {
   diagnostics.attached.add(page);
   page.on('console', (message) => {
     if (message.type() !== 'error' && message.type() !== 'warning') return;
-    diagnostics.console.push({
+    diagnostics.console.push(sanitizeDiagnosticPayload({
       type: message.type(),
-      message: sanitizeDiagnosticLine(message.text(), diagnostics.outputDirectory),
-    });
+      message: message.text(),
+    }, diagnostics.outputDirectory));
   });
   page.on('pageerror', (error) => {
-    diagnostics.page_errors.push({
+    diagnostics.page_errors.push(sanitizeDiagnosticPayload({
       kind: 'pageerror',
-      message: sanitizeDiagnosticLine(error?.message ?? error, diagnostics.outputDirectory),
-    });
+      message: error?.message ?? error,
+    }, diagnostics.outputDirectory));
   });
   page.on('requestfailed', (request) => {
     let resourceKey = 'unparseable-resource';
@@ -318,13 +335,13 @@ function attachPageDiagnostics(page, diagnostics) {
       const url = new URL(request.url());
       resourceKey = `${url.protocol}//${url.host}${url.pathname}`;
     } catch (_error) { /* retain stable fallback */ }
-    diagnostics.request_failures.push({
+    diagnostics.request_failures.push(sanitizeDiagnosticPayload({
       kind: 'requestfailed',
       method: request.method(),
       resource_type: request.resourceType(),
       resource_key: resourceKey,
       error: request.failure()?.errorText ?? 'unknown',
-    });
+    }, diagnostics.outputDirectory));
   });
   page.on('response', (response) => {
     if (response.status() < 400) return;
@@ -333,13 +350,91 @@ function attachPageDiagnostics(page, diagnostics) {
       const url = new URL(response.url());
       resourceKey = `${url.protocol}//${url.host}${url.pathname}`;
     } catch (_error) { /* retain stable fallback */ }
-    diagnostics.http_errors.push({
+    diagnostics.http_errors.push(sanitizeDiagnosticPayload({
       method: response.request().method(),
       status: response.status(),
       resource_type: response.request().resourceType(),
       resource_key: resourceKey,
-    });
+    }, diagnostics.outputDirectory));
   });
+}
+
+function processHasExited(processHandle) {
+  return processHandle.exitCode != null || processHandle.signalCode != null;
+}
+
+function waitForProcessExit(processHandle, timeoutMs) {
+  if (processHasExited(processHandle)) return Promise.resolve(true);
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (exited) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      processHandle.off?.('exit', onExit);
+      resolve(exited);
+    };
+    const onExit = () => finish(true);
+    const timeout = setTimeout(() => finish(processHasExited(processHandle)), timeoutMs);
+    processHandle.once('exit', onExit);
+    if (processHasExited(processHandle)) finish(true);
+  });
+}
+
+function settleWithin(operation, timeoutMs) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      resolve(result);
+    };
+    const timeout = setTimeout(() => finish({ completed: false, error: null }), timeoutMs);
+    Promise.resolve()
+      .then(operation)
+      .then(
+        () => finish({ completed: true, error: null }),
+        (error) => finish({ completed: true, error }),
+      );
+  });
+}
+
+async function closeElectronApplication(application, { timeoutMs = 5000 } = {}) {
+  if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30000) {
+    throw new Error('Electron cleanup timeout must be between 1 and 30000 milliseconds');
+  }
+  const processHandle = application.process();
+  const closeResult = await settleWithin(() => application.close(), timeoutMs);
+  if (closeResult.completed && closeResult.error == null && await waitForProcessExit(processHandle, timeoutMs)) {
+    return {
+      graceful_close: true,
+      forced_kill: false,
+      process_exit_verified: true,
+    };
+  }
+
+  let forcedKill = false;
+  if (!processHasExited(processHandle)) {
+    let signalSent = false;
+    try {
+      signalSent = processHandle.kill();
+      forcedKill = signalSent;
+    } catch (error) {
+      throw new Error(`Electron forced kill failed: ${String(error?.message ?? error)}`);
+    }
+    if (!signalSent && !processHasExited(processHandle)) {
+      throw new Error('Electron forced kill did not send a signal');
+    }
+  }
+  if (!await waitForProcessExit(processHandle, timeoutMs)) {
+    throw new Error('Electron process did not exit after forced kill within cleanup timeout');
+  }
+  return {
+    graceful_close: false,
+    forced_kill: forcedKill,
+    process_exit_verified: true,
+  };
 }
 
 async function waitForGamePage(application) {
@@ -545,29 +640,32 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     },
     timeout: 90000,
   });
-  const runtime = await application.evaluate(({ app }) => ({
-    application: app.getVersion(),
-    electron: process.versions.electron ?? null,
-    chromium: process.versions.chrome ?? null,
-  }));
-  const collectProcessOutput = (target) => (chunk) => {
-    for (const line of String(chunk ?? '').split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)) {
-      target.push(sanitizeDiagnosticLine(line, outputDirectory));
-    }
-  };
-  const processHandle = application.process();
-  processHandle.stdout?.on('data', collectProcessOutput(diagnostics.main_process_stdout));
-  processHandle.stderr?.on('data', collectProcessOutput(diagnostics.main_process_stderr));
-  const attach = (page) => attachPageDiagnostics(page, diagnostics);
-  application.on('window', attach);
-  for (const page of application.windows()) attach(page);
-
+  let runtime = null;
   let lifetimeCounters = null;
   let cold = null;
   let viewport = null;
+  let cleanup = null;
   const warmups = [];
   const measured = [];
+  let primaryError = null;
   try {
+    runtime = await application.evaluate(({ app }) => ({
+      application: app.getVersion(),
+      electron: process.versions.electron ?? null,
+      chromium: process.versions.chrome ?? null,
+    }));
+    const collectProcessOutput = (target) => (chunk) => {
+      for (const line of String(chunk ?? '').split(/\r?\n/).map((entry) => entry.trim()).filter(Boolean)) {
+        target.push(sanitizeDiagnosticLine(line, outputDirectory));
+      }
+    };
+    const processHandle = application.process();
+    processHandle.stdout?.on('data', collectProcessOutput(diagnostics.main_process_stdout));
+    processHandle.stderr?.on('data', collectProcessOutput(diagnostics.main_process_stderr));
+    const attach = (page) => attachPageDiagnostics(page, diagnostics);
+    application.on('window', attach);
+    for (const page of application.windows()) attach(page);
+
     const page = await waitForGamePage(application);
     attach(page);
     viewport = await page.evaluate(() => ({
@@ -587,8 +685,21 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     }
     lifetimeCounters = (await profileSnapshot(frame)).lifetime_counters;
     await page.screenshot({ path: path.join(outputDirectory, `launch-${launchIndex}-warm.png`) });
+  } catch (error) {
+    primaryError = error;
+    throw error;
   } finally {
-    await application.close().catch(() => {});
+    try {
+      cleanup = await closeElectronApplication(application);
+    } catch (cleanupError) {
+      if (primaryError) {
+        throw new AggregateError(
+          [primaryError, cleanupError],
+          'Electron launch failed and cleanup could not verify process exit',
+        );
+      }
+      throw cleanupError;
+    }
   }
 
   const processDiagnostics = buildPersistedProcessDiagnostics({
@@ -604,6 +715,7 @@ async function runLaunch(launchIndex, options, outputDirectory) {
     warmups,
     measured,
     lifetime_counters: lifetimeCounters,
+    cleanup,
     diagnostics: {
       console_errors_and_warnings: diagnostics.console,
       page_errors: diagnostics.page_errors,
@@ -655,6 +767,25 @@ function buildSummary(launches) {
   };
 }
 
+const unexpectedDiagnosticKeys = [
+  'console_errors_and_warnings',
+  'page_errors',
+  'request_failures',
+  'http_errors',
+  'main_process_stdout',
+  'main_process_stderr',
+];
+
+function unexpectedDiagnosticsFailure(summary) {
+  const failures = unexpectedDiagnosticKeys
+    .map((key) => [key, summary?.runtime_diagnostics?.[key] ?? 0])
+    .filter(([, count]) => count !== 0)
+    .map(([key, count]) => `${key}=${count}`);
+  return failures.length === 0
+    ? null
+    : `Unexpected runtime diagnostics: ${failures.join(', ')}`;
+}
+
 async function main() {
   const options = parseOptions(process.argv.slice(2));
   fs.mkdirSync(evidenceRoot, { recursive: true });
@@ -672,8 +803,10 @@ async function main() {
   }
   const repository_saves = assertRepositorySavesUnchanged(repositorySavesBefore);
   const processors = os.cpus();
+  const summary = buildSummary(launches);
+  failure ??= unexpectedDiagnosticsFailure(summary);
   const evidence = {
-    schema_version: 3,
+    schema_version: 4,
     label: options.label,
     options: { cycles: options.cycles, warmups: options.warmups, cold_launches: 3 },
     runtime: {
@@ -694,7 +827,7 @@ async function main() {
     }),
     repository_saves,
     launches,
-    summary: buildSummary(launches),
+    summary,
     ok: failure == null,
     error: failure == null ? null : sanitizeDiagnosticLine(failure?.stack ?? failure, outputDirectory),
   };
@@ -718,8 +851,11 @@ module.exports = {
   buildSummary,
   classifyMainProcessStdout,
   classifyMainProcessStderr,
+  closeElectronApplication,
   hasOrderedTransitionDurations,
   parseOptions,
   percentile,
+  sanitizeDiagnosticPayload,
   snapshotRepositorySaves,
+  unexpectedDiagnosticsFailure,
 };
